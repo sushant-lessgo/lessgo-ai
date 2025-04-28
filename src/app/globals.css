@@ -1,0 +1,27 @@
+/* 1. Import your Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Montserrat:wght@700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Sora:wght@100..800&display=swap');
+
+/* 2. Import Tailwind layers */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* 3. Light mode defaults using Tailwind color tokens */
+body {
+  @apply font-body text-brand-text bg-white antialiased;
+}
+
+
+/* Optional: Global heading style 
+h1, h2, h3, h4, h5 {
+  @apply font-heading text-brand-dark;
+}
+*/
+
+/* Optional: Dark mode (if you want it) */
+@media (prefers-color-scheme: dark) {
+  body {
+    @apply bg-white;
+  }
+}
