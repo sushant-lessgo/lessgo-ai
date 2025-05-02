@@ -39,23 +39,45 @@ export default function PromptForm({ onSuccess }: PromptFormProps) {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      <label className="block text-lg font-semibold">What's your product idea?</label>
-      <textarea
-        value={input}
-        onChange={(e) => setInput(e.target.value)}
-        placeholder="My app converts YouTube videos into tweet threads..."
-        rows={4}
-        className="w-full p-3 border border-gray-300 rounded"
-      />
-      <button
-        type="submit"
-        className="px-4 py-2 bg-black text-white rounded disabled:opacity-50"
-        disabled={loading}
-      >
-        {loading ? "Generating..." : "Generate Landing Page"}
-      </button>
+    <form onSubmit={handleSubmit} className="space-y-4 p-6 bg-white rounded-lg shadow-md border border-gray-200">
+
+
+    <label htmlFor="idea" className="block text-lg font-semibold">
+      Step 1 of 2: what's your idea?
+    </label>
+
+  
+    <textarea
+  id="idea"
+  value={input}
+  onChange={(e) => setInput(e.target.value)}
+  placeholder="e.g., AI tool for lawyers that reduces contract review time by 75%"
+  rows={4}
+  className="w-full px-0 py-1.5 min-h-[96px] min-height: 44px bg-transparent text-black caret-black focus:outline-none focus:ring-2 "
+  style={
+    input.length === 0
+      ? {
+          animation: 'pulseBorder 2s infinite',
+          boxShadow: 'none',
+        }
+      : {}
+  }
+/>
+
+
+  
+<button
+  type="submit"
+  className="mt-4 w-full md:w-auto px-6 py-3 bg-brand-accentPrimary text-white rounded-md hover:bg-orange-500 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-accentPrimary disabled:opacity-50"
+  disabled={loading}
+>
+  {loading ? 'Generating...' : 'Build My Page Now!'}
+</button>
+
+
+  
       {error && <p className="text-red-600">{error}</p>}
     </form>
   )
+  
 }

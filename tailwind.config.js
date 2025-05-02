@@ -7,6 +7,15 @@ module.exports = {
   ],
   theme: {
     extend: {
+      animation: {
+        'pulse-border': 'pulseBorder 2s infinite',
+      },
+      keyframes: {
+        pulseBorder: {
+          '0%, 100%': { boxShadow: '0 0 0 0 rgba(59, 130, 246, 0.4)' },
+          '50%': { boxShadow: '0 0 0 6px rgba(59, 130, 246, 0)' },
+        },
+      },
       fontFamily: {
         heading: ['Sora', 'sans-serif'],
         body: ['Sora', 'sans-serif'],
