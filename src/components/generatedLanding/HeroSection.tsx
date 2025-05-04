@@ -52,13 +52,14 @@ export default function HeroSection({
             />
           )}
 
-          <EditableText
-            value={cta_text}
-            onChange={(val) =>
-              dispatch({ type: "UPDATE_FIELD", payload: { path: "hero.cta_text", value: val } })
-            }
-            className="bg-black text-white px-5 py-2 rounded text-sm font-medium inline-block w-max"
-          />
+            <EditableText
+              value={cta_text}
+              onChange={(val) =>
+                dispatch({ type: "UPDATE_FIELD", payload: { path: "hero.cta_text", value: val } })
+              }
+              className="bg-emerald-600 text-white font-bold px-6 py-3 rounded-lg text-base hover:bg-emerald-700 transition inline-block w-max"
+            />
+
 
           {urgency_text && (
             <EditableText

@@ -31,7 +31,7 @@ type TargetPersona = {
     copywritingStrategy,
   }: Props) {
     return (
-      <div className="bg-white border border-gray-200 rounded p-4 text-sm text-gray-800 space-y-4">
+      <div className="bg-white border border-gray-200 rounded-md p-5 text-sm shadow-sm text-gray-800 space-y-2">
         <h3 className="text-heading4 text-brand-logo">AI Thought Process</h3>
   
         <div>

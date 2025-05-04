@@ -1,7 +1,7 @@
 export default function InstructionNote() {
     return (
-      <div className="bg-brand-highlightBG text-brand-mutedText border-l-4 border-brand-accentPrimary p-4 text-sm rounded">
-        <p className="mb-2 font-semibold text-brand-text">How this works</p>
+      <div className="bg-white rounded-md border text-gray-800 border-gray-200 p-5 shadow-sm space-y-2 text-sm">
+        <p className="text-heading4 text-brand-logo">How this works</p>
         <ul className="list-disc list-inside space-y-1">
           <li>
             This landing page was generated from a single line of input. Every word is chosen to drive conversion.

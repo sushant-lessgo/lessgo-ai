@@ -1,11 +1,13 @@
 export default function Footer() {
   return (
-    <footer className="w-full border-t bg-white px-4 py-6 text-sm text-gray-600">
-      <div className="max-w-5xl mx-auto flex flex-col md:flex-row md:justify-between md:items-center gap-4 text-center md:text-left">
+    <footer className="w-full bg-slate-50 border-t border-gray-200 px-6 py-6 text-sm text-gray-600 shadow-inner">
+
+      <div className="max-w-5xl mx-auto flex flex-col md:flex-row md:justify-between md:items-start gap-6 text-center md:text-left">
+        
         {/* Left: Beta message + feedback CTA */}
-        <div className="space-y-1">
+        <div className="space-y-2 max-w-md">
           <p>
-            This is a beta version. Outputs may vary. Please review your copy before publishing.
+            This is a beta version. Outputs may vary. Always review your landing page before using it publicly.
           </p>
           <p>
             Questions or feedback?{" "}
@@ -31,9 +33,9 @@ export default function Footer() {
           </p>
         </div>
 
-        {/* Right: Copyright + links */}
-        <div className="text-gray-500 text-sm flex flex-col md:items-end gap-1">
-          <p>© 2025 Lessgo.ai</p>
+        {/* Right: Legal and Copyright */}
+        <div className="text-gray-500 text-sm flex flex-col md:items-end gap-2">
+          <p>© 2025 Lessgo.ai. All rights reserved.</p>
           <div className="flex gap-4">
             <a href="#" className="hover:underline">
               Terms

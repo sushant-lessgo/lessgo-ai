@@ -35,19 +35,21 @@ export default function ActionButtons() {
   }
 
   return (
-    <div className="w-full flex justify-end gap-4 mt-6 sticky top-0 z-10 bg-[#FFFCF8] py-4">
-      <button
-        onClick={handlePreview}
-        className="bg-white border border-gray-400 text-gray-800 px-5 py-2 rounded text-sm font-medium hover:bg-gray-50"
-      >
-        Preview
-      </button>
-      <button
-        onClick={handleDownload}
-        className="bg-black text-white px-5 py-2 rounded text-sm font-medium hover:bg-gray-900"
-      >
-        Generate HTML
-      </button>
-    </div>
+    <div className="w-full max-w-[800px] sticky bottom-0 z-10 bg-slate-50 border-gray-200 py-4 px-4 flex justify-end gap-4">
+
+  <button
+    onClick={handlePreview}
+    className="bg-white border border-gray-300 text-gray-800 px-4 py-2 rounded-md text-sm font-semibold hover:bg-gray-100"
+  >
+    Preview
+  </button>
+  <button
+    onClick={handleDownload}
+    className="bg-blue-600 text-white px-4 py-2 rounded-md text-sm font-semibold hover:bg-blue-700"
+  >
+    Generate HTML
+  </button>
+</div>
+
   )
 }

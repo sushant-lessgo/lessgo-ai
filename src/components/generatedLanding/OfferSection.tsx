@@ -52,7 +52,7 @@ export default function OfferSection({
               payload: { path: "offer.cta_text", value: val },
             })
           }
-          className="bg-white text-[#0057FF] font-semibold px-6 py-3 rounded-md text-sm inline-block"
+           className="bg-emerald-600 text-white font-bold px-6 py-3 rounded-lg text-base hover:bg-emerald-700 transition inline-block w-max"
         />
 
         {/* Bullets */}

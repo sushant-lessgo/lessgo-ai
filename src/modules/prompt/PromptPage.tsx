@@ -9,6 +9,8 @@ import PageIntro from "@/components/shared/PageIntro"
 
 export default function PromptPage() {
   const [gptOutput, setGptOutput] = useState<GPTOutput | null>(null)
+  const [userInput, setUserInput] = useState<string>("")
+
 
   return (
     <main className="min-h-screen w-full bg-[#F5F6FA] flex flex-col items-center justify-start md:justify-center px-4 md:px-8 pb-12 pt-6">
@@ -23,7 +25,10 @@ export default function PromptPage() {
             
           />
          <section className="w-full bg-[#F5F5F5] p-6 md:p-8">
-          <PromptForm onSuccess={setGptOutput} />
+          <PromptForm onSuccess={(gptResult, input) => {
+            setGptOutput(gptResult)
+            setUserInput(input)
+          }} />
           <p className="text-sm  text-gray-600 mt-2 pb-4 inline md:hidden">Engineered with high-conversion principles.</p>
           <p className="text-sm  text-gray-600 mt-2 pb-4 hidden md:inline">Engineered with high-conversion principles from 100+ successful landing pages.</p>
         </section>
@@ -32,7 +37,8 @@ export default function PromptPage() {
 
         </div>
       ) : (
-        <GeneratedLanding data={gptOutput} />
+        <GeneratedLanding data={gptOutput} input={userInput} />
+
       )}
     </main>
   )

@@ -1,12 +1,17 @@
-// import { OpenAIStream, StreamingTextResponse } from "ai" // optional for streaming later
 import { NextResponse } from "next/server"
 import { buildPrompt } from "@/modules/gpt/gptPromptBuilder"
 import { gptProcessor } from "@/modules/gpt/gptProcessor"
+import { mockGPTOutput } from "@/modules/prompt/mockData"
 
 export const runtime = "edge"
 
 export async function POST(req: Request) {
   const { productIdea } = await req.json()
+
+  // ✅ Inject mock bypass
+  if (process.env.NEXT_PUBLIC_USE_MOCK_GPT === "true") {
+    return NextResponse.json(mockGPTOutput)
+  }
 
   const body = {
     model: "gpt-4",

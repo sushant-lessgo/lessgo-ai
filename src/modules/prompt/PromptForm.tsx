@@ -4,7 +4,7 @@ import { useState } from "react"
 import type { GPTOutput } from "@/modules/prompt/types"
 
 type PromptFormProps = {
-  onSuccess: (data: GPTOutput) => void
+  onSuccess: (data: GPTOutput, input: string) => void
 }
 
 export default function PromptForm({ onSuccess }: PromptFormProps) {
@@ -25,11 +25,12 @@ export default function PromptForm({ onSuccess }: PromptFormProps) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ productIdea: input }),
       })
-
+    
       if (!res.ok) throw new Error("API call failed")
-
+    
       const data = await res.json()
-      onSuccess(data as GPTOutput)
+    
+      onSuccess(data as GPTOutput, input) // <-- pass both GPT output and raw user input
     } catch (err) {
       setError("Something went wrong. Try again.")
       console.error(err)
