@@ -17,26 +17,29 @@ export default function TestimonialsSection({ testimonials, dispatch }: Props) {
   const first = testimonials[0]
 
   return (
-    <section className="w-full py-20 bg-white">
+    <section className="w-full py-24 bg-gray-50">
       <div className="max-w-4xl mx-auto px-4 md:px-8 text-center">
+        
         {/* Section Header */}
-        <p className="text-sm font-semibold text-blue-600 uppercase tracking-wide">
+        <p className="text-sm font-semibold text-landing-primary uppercase tracking-wider">
           Customer Testimonials
         </p>
-        <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mt-2 mb-12">
+        <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mt-3 mb-12 leading-tight">
           Don&apos;t just take our word for it
         </h2>
 
         {/* First Testimonial */}
         {first && (
-          <div className="flex flex-col items-center text-left gap-4 max-w-xl mx-auto">
+          <div className="flex flex-col items-center gap-6 max-w-2xl mx-auto text-center">
+            
             {first.avatar && (
               <img
                 src={first.avatar}
                 alt={first.name}
-                className="w-14 h-14 rounded-full object-cover"
+                className="w-16 h-16 rounded-full object-cover shadow-sm"
               />
             )}
+
             <EditableText
               value={first.quote}
               onChange={(val) =>
@@ -45,9 +48,10 @@ export default function TestimonialsSection({ testimonials, dispatch }: Props) {
                   payload: { path: "testimonials[0].quote", value: val },
                 })
               }
-              className="text-lg text-gray-800 italic text-center"
+              className="text-lg text-landing-textMuted italic leading-relaxed"
             />
-            <div className="text-center">
+
+            <div>
               <EditableText
                 value={first.name}
                 onChange={(val) =>
@@ -56,10 +60,10 @@ export default function TestimonialsSection({ testimonials, dispatch }: Props) {
                     payload: { path: "testimonials[0].name", value: val },
                   })
                 }
-                className="font-semibold text-gray-900"
+                className="font-semibold text-landing-textPrimary"
               />
               {first.role && (
-                <p className="text-sm text-gray-500">{first.role}</p>
+                <p className="text-sm text-landing-textMuted">{first.role}</p>
               )}
             </div>
           </div>

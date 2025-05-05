@@ -35,21 +35,21 @@ export default function ActionButtons() {
   }
 
   return (
-    <div className="w-full max-w-[800px] sticky bottom-0 z-10 bg-slate-50 border-gray-200 py-4 px-4 flex justify-end gap-4">
-
+    <div className="w-full max-w-[800px] sticky bottom-0 z-10 bg-slate-50 border-brand-border py-4 px-4 flex justify-end gap-4">
   <button
     onClick={handlePreview}
-    className="bg-white border border-gray-300 text-gray-800 px-4 py-2 rounded-md text-sm font-semibold hover:bg-gray-100"
+    className="bg-white border border-gray-300 text-gray-800 px-4 py-2 rounded-md text-sm font-semibold hover:bg-gray-100 transition"
   >
     Preview
   </button>
   <button
     onClick={handleDownload}
-    className="bg-blue-600 text-white px-4 py-2 rounded-md text-sm font-semibold hover:bg-blue-700"
+    className="bg-brand-accentPrimary text-white px-4 py-2 rounded-md text-sm font-semibold hover:bg-brand-logo transition"
   >
     Generate HTML
   </button>
 </div>
+
 
   )
 }

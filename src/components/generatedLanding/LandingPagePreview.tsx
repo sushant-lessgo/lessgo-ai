@@ -7,18 +7,14 @@ import OfferSection from "./OfferSection"
 import FAQSection from "./FAQSection"
 import type { Action } from "@/modules/generatedLanding/landingPageReducer"
 
-
-
 type Props = {
   data: GPTOutput
   dispatch: React.Dispatch<Action>
 }
 
-
 export default function LandingPagePreview({ data, dispatch }: Props) {
-
   return (
-    <div className="flex flex-col gap-24">
+    <div className="flex flex-col gap-24 max-w-full overflow-hidden">
       <HeroSection
         headline={data.hero.headline}
         subheadline={data.hero.subheadline}
@@ -28,7 +24,6 @@ export default function LandingPagePreview({ data, dispatch }: Props) {
         hero_image={data.hero.hero_image}
         dispatch={dispatch}
       />
-
 
       <BeforeAfterSection
         section_headline={data.before_after.section_headline}
@@ -45,12 +40,10 @@ export default function LandingPagePreview({ data, dispatch }: Props) {
         dispatch={dispatch}
       />
 
-
       <TestimonialsSection
         testimonials={data.testimonials}
         dispatch={dispatch}
       />
-
 
       <OfferSection
         headline={data.offer.headline}
@@ -60,9 +53,7 @@ export default function LandingPagePreview({ data, dispatch }: Props) {
         dispatch={dispatch}
       />
 
-
       <FAQSection faq={data.faq} dispatch={dispatch} />
-
     </div>
   )
 }

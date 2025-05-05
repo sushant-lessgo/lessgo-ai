@@ -30,18 +30,19 @@ module.exports = {
           highlightText: '#FFE8DC',
           highlightBG: '#FFF5EF',
         },
+
+        landing: {
+          primary: '#14B8A6',        // blue-600
+          primaryHover: '#0D9488',   // blue-800
+          accent: '#34D399',         // emerald-400
+          mutedBg: '#F9FAFB',        // gray-50
+          border: '#E5E7EB',         // gray-200
+          textPrimary: '#111827',    // gray-900
+          textSecondary: '#374151',  // gray-700
+          textMuted: '#6B7280',      // gray-500
+        }
       },
       
-// colors: {
-//         brand: {
-          
-//           text: '	#FF3E00',
-//           accentPrimary: '#00C9A7',
-//           logo: '#FF5E5B',
-//           highlightText: '#E0F7F4',
-//           highlightBG: '#F1FFFC',
-//         },
-//       },
 
       
     },

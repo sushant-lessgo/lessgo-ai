@@ -19,8 +19,9 @@ export default function BeforeAfterSection({
   dispatch,
 }: Props) {
   return (
-    <section className="w-full py-16 bg-[#F4F7FF]">
-      <div className="max-w-7xl mx-auto px-4 md:px-8 flex flex-col gap-12">
+    <section className="w-full py-20 bg-gray-50">
+      <div className="max-w-6xl mx-auto px-4 md:px-8 flex flex-col gap-12">
+        
         {/* Section Headline */}
         <EditableText
           value={section_headline}
@@ -30,14 +31,15 @@ export default function BeforeAfterSection({
               payload: { path: "before_after.section_headline", value: val },
             })
           }
-          className="text-3xl md:text-4xl font-bold text-center text-gray-900"
+          className="text-3xl md:text-4xl font-bold text-center text-landing-textPrimary"
         />
 
-        {/* Before / After Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* Before / After Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          
           {/* Before Card */}
-          <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-            <p className="text-sm text-gray-500 font-medium mb-2">↶ Before</p>
+          <div className="bg-white rounded-xl p-6 shadow border border-landing-border flex flex-col gap-4">
+            <p className="text-sm text-landing-textSecondary font-medium">Before</p>
 
             <EditableText
               value={before_title}
@@ -47,13 +49,13 @@ export default function BeforeAfterSection({
                   payload: { path: "before_after.before_title", value: val },
                 })
               }
-              className="text-xl font-semibold text-gray-900 mb-4"
+              className="text-xl font-semibold text-landing-textPrimary"
             />
 
-            <ul className="space-y-3 list-none">
+            <ul className="space-y-3">
               {before_points.map((point, i) => (
-                <li key={i} className="flex items-start gap-2 text-gray-700 text-sm">
-                  <span className="w-2 h-2 mt-2 rounded-full bg-red-400"></span>
+                <li key={i} className="flex items-start gap-3 text-sm text-landing-textMuted">
+                  <span className="w-2 h-2 mt-2 rounded-full bg-landing-accent shrink-0"></span>
                   <EditableText
                     value={point}
                     onChange={(val) =>
@@ -73,8 +75,8 @@ export default function BeforeAfterSection({
           </div>
 
           {/* After Card */}
-          <div className="bg-[#0057FF] rounded-xl p-6 shadow-sm text-white">
-            <p className="text-sm text-white/80 font-medium mb-2">↷ After</p>
+          <div className="	bg-landing-primary rounded-xl p-6 shadow text-white flex flex-col gap-4">
+            <p className="text-sm text-white/80 font-medium">After</p>
 
             <EditableText
               value={after_title}
@@ -84,13 +86,13 @@ export default function BeforeAfterSection({
                   payload: { path: "before_after.after_title", value: val },
                 })
               }
-              className="text-xl font-semibold text-white mb-4"
+              className="text-xl font-semibold text-white"
             />
 
-            <ul className="space-y-3 list-none">
+            <ul className="space-y-3">
               {after_points.map((point, i) => (
-                <li key={i} className="flex items-start gap-2 text-white text-sm">
-                  <span className="mt-1">✓</span>
+                <li key={i} className="flex items-start gap-3 text-sm text-white">
+                  <span className="mt-1 text-landing-accent text-lg leading-none">✓</span>
                   <EditableText
                     value={point}
                     onChange={(val) =>

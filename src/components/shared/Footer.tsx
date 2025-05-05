@@ -22,7 +22,7 @@ export default function Footer() {
           <p>
             Want to shape the future of Lessgo?{" "}
             <a
-              href="https://calendly.com/your-link"
+              href="https://t.co/kx0zFbtbri"
               target="_blank"
               rel="noopener noreferrer"
               className="text-blue-600 underline hover:text-blue-800"

@@ -13,17 +13,17 @@ export default function LeftPanel({ data, input }: Props) {
     <div className="space-y-8">
       {/* Zone 1: User Input */}
       <section>
-        <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">
+        {/* <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">
           Lessgo Controls
-        </div>
+        </div> */}
         <UserInputCard input={input} />
       </section>
 
       {/* Zone 2: AI Thought Process */}
       <section>
-        <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">
+        {/* <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">
           AI Breakdown
-        </div>
+        </div> */}
         <AIExplanation
           criticalAssumptions={data.explanation.critical_assumptions}
           targetPersona={data.explanation.target_persona}
@@ -33,12 +33,11 @@ export default function LeftPanel({ data, input }: Props) {
       </section>
 
       {/* Zone 3: Instruction */}
-      <section>
-        <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">
-          Instructions
-        </div>
-        <InstructionNote />
-      </section>
+     {/* Zone 3: Instruction */}
+<section>
+  <InstructionNote />
+</section>
+
     </div>
   )
 }

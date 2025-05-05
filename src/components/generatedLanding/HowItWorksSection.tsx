@@ -1,4 +1,3 @@
-
 import EditableText from "@/modules/generatedLanding/EditableText"
 import type { Action } from "@/modules/generatedLanding/landingPageReducer"
 
@@ -20,7 +19,8 @@ export default function HowItWorksSection({
 }: Props) {
   return (
     <section className="w-full py-20 bg-white">
-      <div className="max-w-5xl mx-auto px-4 md:px-8 flex flex-col items-center text-center gap-12">
+      <div className="max-w-6xl mx-auto px-4 md:px-8 flex flex-col items-center gap-16 text-center">
+        
         {/* Section Headline */}
         <EditableText
           value={section_headline}
@@ -30,15 +30,16 @@ export default function HowItWorksSection({
               payload: { path: "how_it_works.section_headline", value: val },
             })
           }
-          className="text-3xl md:text-4xl font-bold text-gray-900 max-w-3xl leading-snug"
+          className="text-3xl md:text-4xl font-bold text-landing-textPrimary leading-snug max-w-2xl"
         />
 
-        {/* Steps */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 w-full">
+        {/* Steps Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-10 w-full">
           {steps.map((step, index) => (
-            <div key={index} className="flex flex-col items-center gap-4 px-2">
-              {/* Step Number Box */}
-              <div className="w-10 h-10 flex items-center justify-center bg-blue-600 text-white font-semibold rounded-md text-sm">
+            <div key={index} className="flex flex-col items-center text-center gap-4 px-4">
+              
+              {/* Step Number */}
+              <div className="w-12 h-12 flex items-center justify-center bg-landing-primary text-white font-semibold rounded-full text-base shadow">
                 {index + 1}
               </div>
 
@@ -54,7 +55,7 @@ export default function HowItWorksSection({
                     },
                   })
                 }
-                className="text-base font-semibold text-gray-900"
+                className="text-lg font-semibold text-landing-textPrimary"
               />
 
               {/* Step Description */}
@@ -69,7 +70,7 @@ export default function HowItWorksSection({
                     },
                   })
                 }
-                className="text-sm text-gray-600"
+                className="text-sm text-landing-textSecondary max-w-xs"
               />
             </div>
           ))}

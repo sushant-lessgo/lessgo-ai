@@ -20,27 +20,21 @@ export default function FAQSection({ faq, dispatch }: Props) {
   }
 
   return (
-    <section className="w-full py-20 bg-white">
+    <section className="w-full py-24 bg-white">
       <div className="max-w-5xl mx-auto px-4 md:px-8">
+        
         {/* Heading */}
-        <h2 className="text-3xl md:text-4xl font-bold text-center mb-4">
+        <h2 className="text-3xl md:text-4xl font-bold text-center mb-4 text-landing-textPrimary">
           FAQs
         </h2>
-        <p className="text-center text-gray-600 mb-12 text-sm">
-          Have a different question and can't find the answer you're looking for? Reach out to our support team by{" "}
-          <a href="mailto:support@lessgo.ai" className="text-blue-600 underline">
-            sending us an email
-          </a>{" "}
-          and we’ll get back to you as soon as we can.
-        </p>
-
+        
         {/* FAQ List */}
-        <div className="divide-y divide-gray-200">
+        <div className="divide-y divide-gray-200 border-t border-b">
           {faq.map((item, index) => (
-            <div key={index} className="py-4">
+            <div key={index} className="py-6">
               <button
                 onClick={() => toggle(index)}
-                className="w-full flex justify-between items-center text-left font-medium text-gray-900 text-base"
+                className="w-full flex justify-between items-center text-left font-semibold text-landing-textPrimary text-base"
               >
                 <EditableText
                   value={item.question}
@@ -53,8 +47,9 @@ export default function FAQSection({ faq, dispatch }: Props) {
                       },
                     })
                   }
+                  className="flex-1 text-left"
                 />
-                <span className="text-xl">
+                <span className="ml-4 text-xl leading-none text-landing-textSecondary">
                   {openIndex === index ? "−" : "+"}
                 </span>
               </button>
@@ -71,7 +66,7 @@ export default function FAQSection({ faq, dispatch }: Props) {
                       },
                     })
                   }
-                  className="mt-3 text-sm text-gray-600"
+                  className="mt-3 text-sm text-landing-textSecondary"
                 />
               )}
             </div>
