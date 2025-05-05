@@ -1,3 +1,22 @@
+export type TargetPersona = {
+  role: string
+  pain_points: string
+  aspirations: string
+  sophistication_level: string
+}
+
+export type MarketPositioning = {
+  category: string
+  primary_competitors: string[]
+  key_differentiation: string
+}
+
+export type CopywritingStrategy = {
+  tone: string
+  structure_choice: string
+  persuasion_focus: string
+}
+
 export type GPTOutput = {
   hero: {
     headline: string
@@ -28,21 +47,8 @@ export type GPTOutput = {
   faq: { question: string; answer: string }[]
   explanation: {
     critical_assumptions: string[]
-    target_persona: {
-      role: string
-      pain_points: string
-      aspirations: string
-      sophistication_level: string
-    }
-    market_positioning: {
-      category: string
-      primary_competitors: string[]
-      key_differentiation: string
-    }
-    copywriting_strategy: {
-      tone: string
-      structure_choice: string
-      persuasion_focus: string
-    }
+    target_persona: TargetPersona
+    market_positioning: MarketPositioning
+    copywriting_strategy: CopywritingStrategy
   }
 }
