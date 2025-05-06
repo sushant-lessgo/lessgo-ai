@@ -1,4 +1,5 @@
 import EditableText from "@/modules/generatedLanding/EditableText"
+import EditableWrapper from "@/modules/generatedLanding/EditableWrapper"
 import type { Action } from "@/modules/generatedLanding/landingPageReducer"
 
 type Step = {
@@ -22,16 +23,18 @@ export default function HowItWorksSection({
       <div className="max-w-6xl mx-auto px-4 md:px-8 flex flex-col items-center gap-16 text-center">
         
         {/* Section Headline */}
-        <EditableText
-          value={section_headline}
-          onChange={(val) =>
-            dispatch({
-              type: "UPDATE_FIELD",
-              payload: { path: "how_it_works.section_headline", value: val },
-            })
-          }
-          className="text-3xl md:text-4xl font-bold text-landing-textPrimary leading-snug max-w-2xl"
-        />
+        <EditableWrapper>
+          <EditableText
+            value={section_headline}
+            onChange={(val) =>
+              dispatch({
+                type: "UPDATE_FIELD",
+                payload: { path: "how_it_works.section_headline", value: val },
+              })
+            }
+            className="text-3xl md:text-4xl font-bold text-landing-textPrimary leading-snug"
+          />
+        </EditableWrapper>
 
         {/* Steps Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-10 w-full">
@@ -44,34 +47,38 @@ export default function HowItWorksSection({
               </div>
 
               {/* Step Title */}
-              <EditableText
-                value={step.title}
-                onChange={(val) =>
-                  dispatch({
-                    type: "UPDATE_FIELD",
-                    payload: {
-                      path: `how_it_works.steps[${index}].title`,
-                      value: val,
-                    },
-                  })
-                }
-                className="text-lg font-semibold text-landing-textPrimary"
-              />
+              <EditableWrapper>
+                <EditableText
+                  value={step.title}
+                  onChange={(val) =>
+                    dispatch({
+                      type: "UPDATE_FIELD",
+                      payload: {
+                        path: `how_it_works.steps[${index}].title`,
+                        value: val,
+                      },
+                    })
+                  }
+                  className="text-lg font-semibold text-landing-textPrimary"
+                />
+              </EditableWrapper>
 
               {/* Step Description */}
-              <EditableText
-                value={step.description}
-                onChange={(val) =>
-                  dispatch({
-                    type: "UPDATE_FIELD",
-                    payload: {
-                      path: `how_it_works.steps[${index}].description`,
-                      value: val,
-                    },
-                  })
-                }
-                className="text-sm text-landing-textSecondary max-w-xs"
-              />
+              <EditableWrapper>
+                <EditableText
+                  value={step.description}
+                  onChange={(val) =>
+                    dispatch({
+                      type: "UPDATE_FIELD",
+                      payload: {
+                        path: `how_it_works.steps[${index}].description`,
+                        value: val,
+                      },
+                    })
+                  }
+                  className="text-sm text-landing-textSecondary max-w-xs"
+                />
+              </EditableWrapper>
             </div>
           ))}
         </div>

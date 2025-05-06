@@ -1,5 +1,6 @@
 import { useState } from "react"
 import EditableText from "@/modules/generatedLanding/EditableText"
+import EditableWrapper from "@/modules/generatedLanding/EditableWrapper"
 import type { Action } from "@/modules/generatedLanding/landingPageReducer"
 
 type FAQItem = {
@@ -55,38 +56,42 @@ export default function FAQSection({ faq, dispatch, isStaticExport }: Props) {
           onClick={() => toggle(index)}
           className="w-full flex justify-between items-center text-left font-semibold text-landing-textPrimary text-base"
         >
-          <EditableText
-            value={item.question}
-            onChange={(val) =>
-              dispatch({
-                type: "UPDATE_FIELD",
-                payload: {
-                  path: `faq[${index}].question`,
-                  value: val,
-                },
-              })
-            }
-            className="flex-1 text-left"
-          />
+          <EditableWrapper>
+            <EditableText
+              value={item.question}
+              onChange={(val) =>
+                dispatch({
+                  type: "UPDATE_FIELD",
+                  payload: {
+                    path: `faq[${index}].question`,
+                    value: val,
+                  },
+                })
+              }
+              className="flex-1 text-left"
+            />
+          </EditableWrapper>
           <span className="ml-4 text-xl leading-none text-landing-textSecondary">
             {openIndex === index ? "−" : "+"}
           </span>
         </button>
 
         {openIndex === index && (
-          <EditableText
-            value={item.answer}
-            onChange={(val) =>
-              dispatch({
-                type: "UPDATE_FIELD",
-                payload: {
-                  path: `faq[${index}].answer`,
-                  value: val,
-                },
-              })
-            }
-            className="mt-3 text-sm text-landing-textSecondary"
-          />
+          <EditableWrapper>
+            <EditableText
+              value={item.answer}
+              onChange={(val) =>
+                dispatch({
+                  type: "UPDATE_FIELD",
+                  payload: {
+                    path: `faq[${index}].answer`,
+                    value: val,
+                  },
+                })
+              }
+              className="mt-3 text-sm text-landing-textSecondary"
+            />
+          </EditableWrapper>
         )}
       </div>
     )

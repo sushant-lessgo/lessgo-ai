@@ -1,4 +1,5 @@
 import EditableText from "@/modules/generatedLanding/EditableText"
+import EditableWrapper from "@/modules/generatedLanding/EditableWrapper"
 import type { Action } from "@/modules/generatedLanding/landingPageReducer"
 
 type Testimonial = {
@@ -40,28 +41,32 @@ export default function TestimonialsSection({ testimonials, dispatch }: Props) {
               />
             )}
 
-            <EditableText
-              value={first.quote}
-              onChange={(val) =>
-                dispatch({
-                  type: "UPDATE_FIELD",
-                  payload: { path: "testimonials[0].quote", value: val },
-                })
-              }
-              className="text-lg text-landing-textMuted italic leading-relaxed"
-            />
-
-            <div>
+              <EditableWrapper>
               <EditableText
-                value={first.name}
+                value={first.quote}
                 onChange={(val) =>
                   dispatch({
                     type: "UPDATE_FIELD",
-                    payload: { path: "testimonials[0].name", value: val },
+                    payload: { path: "testimonials[0].quote", value: val },
                   })
                 }
-                className="font-semibold text-landing-textPrimary"
+                className="text-lg text-landing-textMuted italic leading-relaxed"
               />
+            </EditableWrapper>
+
+            <div>
+              <EditableWrapper>
+                <EditableText
+                  value={first.name}
+                  onChange={(val) =>
+                    dispatch({
+                      type: "UPDATE_FIELD",
+                      payload: { path: "testimonials[0].name", value: val },
+                    })
+                  }
+                  className="font-semibold text-landing-textPrimary"
+                />
+              </EditableWrapper>
               {first.role && (
                 <p className="text-sm text-landing-textMuted">{first.role}</p>
               )}

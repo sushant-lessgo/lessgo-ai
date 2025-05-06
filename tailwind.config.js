@@ -5,6 +5,23 @@ module.exports = {
     "./src/components/**/*.{js,ts,jsx,tsx,mdx}",
     "./src/app/**/*.{js,ts,jsx,tsx,mdx}",
   ],
+  safelist: [
+    'hover:bg-editable-bg',
+    'hover:outline-editable',
+    'hover:outline-dashed',
+    'hover:outline-1',
+    'text-editable-icon',
+    'w-editable-icon',
+    'h-editable-icon',
+    'top-1',
+    'right-1',
+    'group-hover:opacity-100',
+  'group-focus-within:opacity-100',
+  'opacity-0',
+  'transition-opacity',
+  'duration-200',
+  'ease-in-out',
+  ],
   theme: {
     extend: {
       animation: {
@@ -40,10 +57,19 @@ module.exports = {
           textPrimary: '#111827',    // gray-900
           textSecondary: '#374151',  // gray-700
           textMuted: '#6B7280',      // gray-500
+        },
+        editable: {
+          bg: "#FEF9C3",         // yellow-100
+          border: "#D1D5DB",     // gray-300
+          icon: "#9CA3AF",       // gray-400
         }
       },
-      
-
+      spacing: {
+        "editable-icon": "1.25rem", // 20px
+      },
+      outlineWidth: {
+        editable: "1px",
+      },
       
     },
   },

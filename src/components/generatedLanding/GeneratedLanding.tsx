@@ -1,6 +1,7 @@
 "use client"
 
 import { useReducer } from "react"
+
 import type { GPTOutput } from "@/modules/prompt/types"
 import Header from "@/components/shared/Header"
 import LeftPanel from "@/components/generatedLanding/LeftPanel"
