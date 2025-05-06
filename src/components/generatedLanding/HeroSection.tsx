@@ -22,7 +22,8 @@ export default function HeroSection({
 }: Props) {
   return (
     <section className="w-full py-20 bg-landing-mutedBg">
-      <div className="max-w-6xl mx-auto px-4 md:px-8 grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+      <div className="w-full max-w-full md:max-w-4xl lg:max-w-6xl xl:max-w-7xl mx-auto px-4 md:px-8 grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+
         
         {/* Left Column */}
         <div className="flex flex-col gap-6">
@@ -73,7 +74,8 @@ export default function HeroSection({
         </div>
 
         {/* Right Column */}
-        <div className="w-full aspect-[4/3] md:aspect-[16/9] bg-landing-mutedBg border-2 border-dashed border-landing-border rounded-lg flex items-center justify-center text-landing-textMuted text-sm shadow-sm">
+        <div className="min-w-0 w-full aspect-[4/3] md:aspect-[16/9] bg-landing-mutedBg border-2 border-dashed border-landing-border rounded-lg flex items-center justify-center text-landing-textMuted text-sm shadow-sm">
+
         Image placeholder — uploading will be available soon. For now, you can replace the image after downloading the landing page.
 </div>
 

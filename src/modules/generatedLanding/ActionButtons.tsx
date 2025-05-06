@@ -1,55 +1,78 @@
-"use client"
+import React from "react";
 
-import { useRef } from "react"
+import type { GPTOutput } from "@/modules/prompt/types";
 
-export default function ActionButtons() {
-  const previewRef = useRef<HTMLDivElement | null>(null)
+import { cleanAndDownloadHTML } from "@/modules/generatedLanding/htmlDownloadUtil"
 
-  const handleDownload = () => {
-    const content = document.getElementById("landing-page-preview")
-    if (!content) return
 
-    const html = `<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Landing Page</title><link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet"></head><body>${content.innerHTML}</body></html>`
+type Props = {
+  data: GPTOutput;
+};
 
-    const blob = new Blob([html], { type: "text/html" })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement("a")
-    a.href = url
-    a.download = "landing-page.html"
-    a.click()
-    URL.revokeObjectURL(url)
-  }
-
+export default function ActionButtons({ data }: Props) {
   const handlePreview = () => {
-    const content = document.getElementById("landing-page-preview")
-    if (!content) return
-
-    const html = `<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Preview</title><link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet"></head><body>${content.innerHTML}</body></html>`
-
-    const previewWindow = window.open("", "_blank")
-    if (previewWindow) {
-      previewWindow.document.open()
-      previewWindow.document.write(html)
-      previewWindow.document.close()
+    try {
+      // Ensure data is properly serializable
+      if (!data) {
+        console.error("Preview data is undefined or null");
+        alert("Preview data is missing. Cannot generate preview.");
+        return;
+      }
+      
+      // Test if localStorage is working
+      try {
+        localStorage.setItem("test_storage", "test");
+        localStorage.removeItem("test_storage");
+      } catch (storageError) {
+        console.error("LocalStorage is not available:", storageError);
+        alert("Your browser does not support or is blocking localStorage. Please check your privacy settings.");
+        return;
+      }
+      
+      // Store the data with explicit error handling
+      const json = JSON.stringify(data);
+      localStorage.setItem("lessgo_preview_data", json);
+      
+      // Add a console log to verify the data is being stored
+      console.log("Preview data stored:", json.substring(0, 100) + "...");
+      
+      // Check if the data was actually stored
+      const verifyStored = localStorage.getItem("lessgo_preview_data");
+      if (!verifyStored) {
+        console.error("Failed to store data in localStorage");
+        alert("Failed to store preview data. Please check browser storage settings.");
+        return;
+      }
+      
+      // Use a small timeout to ensure storage completes before opening window
+      setTimeout(() => {
+        const previewWindow = window.open("/preview", "_blank");
+        if (!previewWindow) {
+          alert("Your browser blocked opening the preview window. Please allow popups for this site.");
+        }
+      }, 100);
+    } catch (e) {
+      console.error("Failed to handle preview:", e);
+      alert("Failed to create preview: " + (e instanceof Error ? e.message : String(e)));
     }
-  }
+  };
+
+
 
   return (
-    <div className="w-full max-w-[800px] sticky bottom-0 z-10 bg-slate-50 border-brand-border py-4 px-4 flex justify-end gap-4">
-  <button
-    onClick={handlePreview}
-    className="bg-white border border-gray-300 text-gray-800 px-4 py-2 rounded-md text-sm font-semibold hover:bg-gray-100 transition"
-  >
-    Preview
-  </button>
-  <button
-    onClick={handleDownload}
-    className="bg-brand-accentPrimary text-white px-4 py-2 rounded-md text-sm font-semibold hover:bg-brand-logo transition"
-  >
-    Generate HTML
-  </button>
-</div>
-
-
-  )
+    <div className="w-full max-w-[800px] bg-slate-50 border-t border-brand-border py-4 px-4 flex justify-end gap-4">
+      <button
+        onClick={handlePreview}
+        className="bg-white border border-gray-300 text-gray-800 px-4 py-2 rounded-md text-sm font-semibold hover:bg-gray-100 transition"
+      >
+        Preview
+      </button>
+      <button
+        onClick={() => cleanAndDownloadHTML(data)}
+        className="bg-brand-accentPrimary text-white px-4 py-2 rounded-md text-sm font-semibold hover:bg-brand-logo transition"
+      >
+        Generate HTML
+      </button>
+    </div>
+  );
 }
