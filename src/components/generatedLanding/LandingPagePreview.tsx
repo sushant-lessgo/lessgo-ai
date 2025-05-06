@@ -10,9 +10,11 @@ import type { Action } from "@/modules/generatedLanding/landingPageReducer"
 type Props = {
   data: GPTOutput
   dispatch: React.Dispatch<Action>
+  isStaticExport?: boolean
 }
 
-export default function LandingPagePreview({ data, dispatch }: Props) {
+export default function LandingPagePreview({ data, dispatch, isStaticExport }: Props) {
+
   return (
     <div className="flex flex-col gap-24 max-w-full overflow-hidden">
       <HeroSection
@@ -53,7 +55,8 @@ export default function LandingPagePreview({ data, dispatch }: Props) {
         dispatch={dispatch}
       />
 
-      <FAQSection faq={data.faq} dispatch={dispatch} />
+<FAQSection faq={data.faq} dispatch={dispatch} isStaticExport={isStaticExport} />
+
     </div>
   )
 }

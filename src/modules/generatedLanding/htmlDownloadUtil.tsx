@@ -5,15 +5,11 @@ import { compiledTailwindCSS } from "@/utils/compiledTailwind";
 
 
 export function cleanAndDownloadHTML(data: any) {
-  // Define the desired fixed desktop width (e.g., Tailwind's 'xl' breakpoint)
   
-
-  // Step 1: Render app preview to raw markup
   const rawMarkup = renderToStaticMarkup(
-    // Pass a prop to indicate rendering for static export if needed
-    // e.g., <LandingPagePreview data={data} dispatch={() => {}} isStaticExport={true} />
-    // This allows LandingPagePreview or its children to omit editor-specific wrappers/styles
-    <LandingPagePreview data={data} dispatch={() => {}} />
+    // Step 1: Render the component to a string
+    <LandingPagePreview data={data} dispatch={() => {}} isStaticExport={true} />
+
   );
 
   // Step 2: Clean contentEditable + editing classes (if still needed after potential isStaticExport prop)
@@ -49,20 +45,35 @@ export function cleanAndDownloadHTML(data: any) {
   <title>Your Landing Page</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
-  ${compiledTailwindCSS}
-  
-</style>
-
+    ${compiledTailwindCSS}
+  </style>
   <style>
     body { margin: 0; }
     body > div { width: 100%; }
+    .faq-answer { display: none; }
+    .faq-item.open .faq-answer { display: block; }
+    .faq-question { cursor: pointer; }
   </style>
 </head>
 <body>
   ${cleanedMarkup}
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      document.querySelectorAll(".faq-item").forEach(item => {
+        item.addEventListener("click", () => {
+          const isOpen = item.classList.toggle("open");
+          const indicator = item.querySelector(".faq-toggle-indicator");
+          if (indicator) {
+            indicator.textContent = isOpen ? "−" : "+";
+          }
+        });
+      });
+    });
+  </script>
 </body>
 </html>
 `.trim();
+
 
 
   // Step 5: Trigger download (remains the same)

@@ -14,8 +14,8 @@ export default function RightPanel({ data, dispatch }: Props) {
       {/* Preview Block */}
       <div className="w-full max-w-5xl bg-white border border-gray-200 rounded-xl shadow-md mb-8 overflow-hidden">
         <div className="px-6 pt-6 pb-2 border-b border-gray-100">
-          <h2 className="text-sm font-semibold text-gray-600 uppercase tracking-wide">
-            Live Preview – Your Landing Page
+          <h2 className="text-sm font-semibold text-gray-600 tracking-wide">
+          Click any text to edit. This is your live landing page preview.
           </h2>
         </div>
 
