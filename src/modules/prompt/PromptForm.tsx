@@ -53,8 +53,8 @@ export default function PromptForm({ onSuccess }: PromptFormProps) {
   value={input}
   onChange={(e) => setInput(e.target.value)}
   placeholder="e.g., AI tool for lawyers that reduces contract review time by 75%"
-  rows={4}
-  className="w-full px-0 py-1.5 min-h-[96px] min-height: 44px bg-transparent text-black caret-black focus:outline-none focus:ring-2 "
+  rows={3}
+  className="w-full px-4 py-2 min-h-[96px] min-height: 44px bg-transparent text-black caret-black focus:outline-none focus:ring-2 "
   style={
     input.length === 0
       ? {

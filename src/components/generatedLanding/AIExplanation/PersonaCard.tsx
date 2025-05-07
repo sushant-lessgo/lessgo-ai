@@ -38,7 +38,7 @@ export default function PersonaCard({ persona, open, onToggle }: Props) {
               <strong className="font-medium text-gray-600">Aspiration:</strong> {persona.aspirations}
             </li>
             <li>
-              <strong className="font-medium text-gray-600">Skill Level:</strong> {persona.sophistication_level}/5
+              <strong className="font-medium text-gray-600">Sophistication level:</strong> {persona.sophistication_level}/5
             </li>
           </ul>
         </div>
