@@ -7,6 +7,8 @@ module.exports = {
   ],
   safelist: [
     'hover:bg-editable-bg',
+    'hover:bg-editable-primaryBg',
+    'hover:text-black',
     'hover:outline-editable',
     'hover:outline-dashed',
     'hover:outline-1',
@@ -59,9 +61,11 @@ module.exports = {
           textMuted: '#6B7280',      // gray-500
         },
         editable: {
-          bg: "#FEF9C3",         // yellow-100
+          bg: "#FEF9C3",
+          primaryBg:'#E0F7F5',         // yellow-100
           border: "#D1D5DB",     // gray-300
-          icon: "#9CA3AF",       // gray-400
+          icon: "#9CA3AF", 
+          primaryIcon: "#1F2937",       // gray-400
         }
       },
       spacing: {

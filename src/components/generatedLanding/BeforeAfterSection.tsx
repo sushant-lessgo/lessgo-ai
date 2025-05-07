@@ -88,7 +88,7 @@ export default function BeforeAfterSection({
           <div className="	bg-landing-primary rounded-xl p-6 shadow text-white flex flex-col gap-4">
             <p className="text-sm text-white/80 font-medium">After</p>
 
-            <EditableWrapper>
+            <EditableWrapper useAltHover={true} >
               <EditableText
                 value={after_title}
                 onChange={(val) =>
@@ -97,7 +97,7 @@ export default function BeforeAfterSection({
                     payload: { path: "before_after.after_title", value: val },
                   })
                 }
-                className="text-xl font-semibold text-white"
+                className="text-xl font-semibold"
               />
             </EditableWrapper>
 
@@ -105,7 +105,7 @@ export default function BeforeAfterSection({
               {after_points.map((point, i) => (
                 <li key={i} className="flex items-start gap-3 text-sm text-white">
                   <span className="mt-1 text-landing-accent text-lg leading-none">✓</span>
-                  <EditableWrapper>
+                  <EditableWrapper useAltHover={true}>
                     <EditableText
                       value={point}
                       onChange={(val) =>

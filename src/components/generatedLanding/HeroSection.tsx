@@ -69,10 +69,10 @@ export default function HeroSection({
 
           <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-4">
         
-          <EditableWrapper>
+          <EditableWrapper useAltHover={true}>
 
             <EditableText
-              value={cta_text}
+              value={cta_text} 
               onChange={(val) =>
                 dispatch({ type: "UPDATE_FIELD", payload: { path: "hero.cta_text", value: val } })
               }

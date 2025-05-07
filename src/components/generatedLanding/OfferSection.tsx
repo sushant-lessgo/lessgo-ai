@@ -22,7 +22,7 @@ export default function OfferSection({
       <div className="max-w-5xl mx-auto flex flex-col items-center text-center gap-10">
         
         {/* Headline */}
-        <EditableWrapper>
+        <EditableWrapper useAltHover={true}>
           <EditableText
             value={headline}
             onChange={(val) =>
@@ -36,7 +36,7 @@ export default function OfferSection({
         </EditableWrapper>
 
         {/* Urgency Text */}
-        <EditableWrapper>
+        <EditableWrapper useAltHover={true}>
           <EditableText
             value={urgency_text}
             onChange={(val) =>
@@ -45,12 +45,12 @@ export default function OfferSection({
                 payload: { path: "offer.urgency_text", value: val },
               })
             }
-            className="text-white/90 text-base"
+            className="text-base"
           />
         </EditableWrapper>
 
         {/* CTA */}
-        <EditableWrapper>
+        <EditableWrapper useAltHover={true}>
           <EditableText
             value={cta_text}
             onChange={(val) =>
@@ -68,7 +68,7 @@ export default function OfferSection({
           {bullets.map((point, i) => (
             <div key={i} className="flex items-center gap-2">
               <span className="text-landing-accent text-base leading-none">✔</span>
-              <EditableWrapper>
+              <EditableWrapper useAltHover={true}>
                 <EditableText
                   value={point}
                   onChange={(val) =>
