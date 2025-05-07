@@ -3,7 +3,7 @@ import { buildPrompt } from "@/modules/gpt/gptPromptBuilder"
 import { gptProcessor } from "@/modules/gpt/gptProcessor"
 import { mockGPTOutput } from "@/modules/prompt/mockData"
 
-export const runtime = "edge"
+// export const runtime = "edge"
 
 export async function POST(req: Request) {
   const { productIdea } = await req.json()
