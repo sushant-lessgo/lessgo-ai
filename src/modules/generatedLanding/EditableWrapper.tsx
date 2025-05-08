@@ -16,7 +16,7 @@ export default function EditableWrapper({
   return (
     <div className="group inline-block align-top w-full">
       <div
-        className={`relative cursor-text px-1 py-1 transition-colors hover:outline-editable hover:outline-dashed hover:outline-1 ${
+        className={`relative cursor-text px-1 py-1 transition-colors hover:outline-editable hover:outline-dashed  ${
           useAltHover ? 'hover:bg-editable-primaryBg hover:text-black' : 'hover:bg-editable-bg'
         }`}
       >
