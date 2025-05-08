@@ -11,6 +11,7 @@ type Props = {
   body_text?: string
   hero_image?: string
   dispatch: React.Dispatch<Action>
+  isEditable: boolean
 }
 
 export default function HeroSection({
@@ -21,6 +22,7 @@ export default function HeroSection({
   body_text,
   hero_image = "/placeholder.png",
   dispatch,
+  isEditable,
 }: Props) {
   return (
 <>
@@ -32,27 +34,29 @@ export default function HeroSection({
         {/* Left Column */}
         <div className="flex flex-col gap-6">
           
-        <EditableWrapper>
+        <EditableWrapper isEditable={isEditable}>
           <EditableText
             value={headline}
             onChange={(val) =>
               dispatch({ type: "UPDATE_FIELD", payload: { path: "hero.headline", value: val } })
             }
             className="text-4xl leading-tight md:text-5xl font-extrabold text-landing-textPrimary max-w-xl"
+            isEditable={isEditable}
           />
         </EditableWrapper>
 
-        <EditableWrapper>
+        <EditableWrapper isEditable={isEditable}>
           <EditableText
             value={subheadline}
             onChange={(val) =>
               dispatch({ type: "UPDATE_FIELD", payload: { path: "hero.subheadline", value: val } })
             }
             className="text-lg text-landing-textSecondary max-w-xl"
+            isEditable={isEditable}
           />
         </EditableWrapper>
           
-        <EditableWrapper>
+        <EditableWrapper isEditable={isEditable}>
           {body_text && (
 
             
@@ -62,6 +66,7 @@ export default function HeroSection({
                 dispatch({ type: "UPDATE_FIELD", payload: { path: "hero.body_text", value: val } })
               }
               className="text-base text-landing-textMuted max-w-xl"
+              isEditable={isEditable}
             />
           )}
         </EditableWrapper>
@@ -69,7 +74,7 @@ export default function HeroSection({
 
           <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-4">
         
-          <EditableWrapper useAltHover={true}>
+          <EditableWrapper useAltHover={true} isEditable={isEditable}>
 
             <EditableText
               value={cta_text} 
@@ -77,11 +82,12 @@ export default function HeroSection({
                 dispatch({ type: "UPDATE_FIELD", payload: { path: "hero.cta_text", value: val } })
               }
               className="bg-landing-primary text-white font-semibold px-6 py-3 rounded-lg text-base hover:bg-landing-primaryHover transition w-full sm:w-auto text-center"
+              isEditable={isEditable}
             />
             
             </EditableWrapper>
             
-            <EditableWrapper>
+            <EditableWrapper isEditable={isEditable}>
 
             {urgency_text && (
              
@@ -91,6 +97,7 @@ export default function HeroSection({
                   dispatch({ type: "UPDATE_FIELD", payload: { path: "hero.urgency_text", value: val } })
                 }
                 className="text-sm text-red-600 sm:mt-0"
+                isEditable={isEditable}
               />
             )}
 

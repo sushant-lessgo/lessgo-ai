@@ -2,6 +2,7 @@ type Props = {
     value: string
     onChange: (value: string) => void
     className?: string
+    isEditable: boolean
   }
   
   // export default function EditableText({ value, onChange, className = "" }: Props) {
@@ -18,7 +19,11 @@ type Props = {
   // }
   
 
-  export default function EditableText({ value, onChange, className = "" }: Props) {
+  export default function EditableText({ value, onChange, className = "", isEditable}: Props) {
+    if (!isEditable) {
+      return <div className={className}>{value}</div>;
+    }
+  
     return (
       <div
         contentEditable
@@ -31,4 +36,5 @@ type Props = {
       </div>
     );
   }
+  
   

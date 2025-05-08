@@ -94,7 +94,8 @@ export default function PreviewPage() {
 
   return (
     <div className="min-h-screen bg-white">
-      <LandingPagePreview data={data} dispatch={() => {}} />
+      <LandingPagePreview data={data} dispatch={() => {}} isStaticExport={true} />
+
       <div className="sticky bottom-0 w-full bg-white border-t border-gray-200 px-6 py-4 flex justify-end">
         <button
           onClick={() => cleanAndDownloadHTML(data)}

@@ -8,6 +8,7 @@ type Props = {
   cta_text: string
   urgency_text: string
   dispatch: React.Dispatch<Action>
+  isEditable: boolean
 }
 
 export default function OfferSection({
@@ -16,13 +17,14 @@ export default function OfferSection({
   cta_text,
   urgency_text,
   dispatch,
+  isEditable,
 }: Props) {
   return (
     <section className="w-full bg-landing-primary text-white py-24 px-4">
       <div className="max-w-5xl mx-auto flex flex-col items-center text-center gap-10">
         
         {/* Headline */}
-        <EditableWrapper useAltHover={true}>
+        <EditableWrapper useAltHover={true} isEditable={isEditable}>
           <EditableText
             value={headline}
             onChange={(val) =>
@@ -32,11 +34,12 @@ export default function OfferSection({
               })
             }
             className="text-3xl md:text-4xl font-bold leading-snug "
+            isEditable={isEditable}
           />
         </EditableWrapper>
 
         {/* Urgency Text */}
-        <EditableWrapper useAltHover={true}>
+        <EditableWrapper useAltHover={true} isEditable={isEditable}>
           <EditableText
             value={urgency_text}
             onChange={(val) =>
@@ -46,11 +49,12 @@ export default function OfferSection({
               })
             }
             className="text-base"
+            isEditable={isEditable}
           />
         </EditableWrapper>
 
         {/* CTA */}
-        <EditableWrapper useAltHover={true}>
+        <EditableWrapper useAltHover={true} isEditable={isEditable}>
           <EditableText
             value={cta_text}
             onChange={(val) =>
@@ -60,6 +64,7 @@ export default function OfferSection({
               })
             }
             className="bg-white text-landing-primary font-semibold px-6 py-3 rounded-lg text-base hover:bg-gray-100 transition w-full sm:w-auto text-center"
+            isEditable={isEditable}
           />
         </EditableWrapper>
 
@@ -68,7 +73,7 @@ export default function OfferSection({
           {bullets.map((point, i) => (
             <div key={i} className="flex items-center gap-2">
               <span className="text-landing-accent text-base leading-none">✔</span>
-              <EditableWrapper useAltHover={true}>
+              <EditableWrapper useAltHover={true} isEditable={isEditable}>
                 <EditableText
                   value={point}
                   onChange={(val) =>
@@ -77,6 +82,7 @@ export default function OfferSection({
                       payload: { path: `offer.bullets[${i}]`, value: val },
                     })
                   }
+                  isEditable={isEditable}
                 />
               </EditableWrapper>
             </div>

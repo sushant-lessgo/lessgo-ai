@@ -12,9 +12,10 @@ type Testimonial = {
 type Props = {
   testimonials: Testimonial[]
   dispatch: React.Dispatch<Action>
+  isEditable: boolean
 }
 
-export default function TestimonialsSection({ testimonials, dispatch }: Props) {
+export default function TestimonialsSection({ testimonials, dispatch, isEditable, }: Props) {
   const first = testimonials[0]
 
   return (
@@ -41,7 +42,7 @@ export default function TestimonialsSection({ testimonials, dispatch }: Props) {
               />
             )}
 
-              <EditableWrapper>
+              <EditableWrapper isEditable={isEditable}>
               <EditableText
                 value={first.quote}
                 onChange={(val) =>
@@ -51,11 +52,12 @@ export default function TestimonialsSection({ testimonials, dispatch }: Props) {
                   })
                 }
                 className="text-lg text-landing-textMuted italic leading-relaxed"
+                isEditable={isEditable}
               />
             </EditableWrapper>
 
             <div>
-              <EditableWrapper>
+              <EditableWrapper isEditable={isEditable}>
                 <EditableText
                   value={first.name}
                   onChange={(val) =>
@@ -65,6 +67,7 @@ export default function TestimonialsSection({ testimonials, dispatch }: Props) {
                     })
                   }
                   className="font-semibold text-landing-textPrimary"
+                  isEditable={isEditable}
                 />
               </EditableWrapper>
               {first.role && (

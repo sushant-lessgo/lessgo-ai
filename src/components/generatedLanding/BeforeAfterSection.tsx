@@ -10,6 +10,7 @@ type Props = {
   after_title: string
   after_points: string[]
   dispatch: React.Dispatch<Action>
+  isEditable: boolean
 }
 
 export default function BeforeAfterSection({
@@ -19,6 +20,7 @@ export default function BeforeAfterSection({
   after_title,
   after_points,
   dispatch,
+  isEditable,
 }: Props) {
   return (
     <section className="w-full py-20 bg-gray-50">
@@ -27,7 +29,7 @@ export default function BeforeAfterSection({
         {/* Section Headline */}
 
 
-        <EditableWrapper>
+        <EditableWrapper isEditable={isEditable}>
           <EditableText
             value={section_headline}
             onChange={(val) =>
@@ -37,6 +39,7 @@ export default function BeforeAfterSection({
               })
             }
             className="text-3xl md:text-4xl font-bold text-center text-landing-textPrimary"
+            isEditable={isEditable}
           />
         </EditableWrapper>
 
@@ -47,7 +50,7 @@ export default function BeforeAfterSection({
           <div className="bg-white rounded-xl p-6 shadow border border-landing-border flex flex-col gap-4">
             <p className="text-sm text-landing-textSecondary font-medium">Before</p>
 
-            <EditableWrapper>
+            <EditableWrapper isEditable={isEditable}>
               <EditableText
                 value={before_title}
                 onChange={(val) =>
@@ -57,6 +60,7 @@ export default function BeforeAfterSection({
                   })
                 }
                 className="text-xl font-semibold text-landing-textPrimary"
+                isEditable={isEditable}
               />
             </EditableWrapper>
 
@@ -64,7 +68,7 @@ export default function BeforeAfterSection({
               {before_points.map((point, i) => (
                 <li key={i} className="flex items-start gap-3 text-sm text-landing-textMuted">
                   <span className="w-2 h-2 mt-2 rounded-full bg-landing-accent shrink-0"></span>
-                  <EditableWrapper>
+                  <EditableWrapper isEditable={isEditable}>
                     <EditableText
                       value={point}
                       onChange={(val) =>
@@ -77,6 +81,7 @@ export default function BeforeAfterSection({
                         })
                       }
                       className="flex-1"
+                      isEditable={isEditable}
                     />
                   </EditableWrapper>
                 </li>
@@ -88,7 +93,7 @@ export default function BeforeAfterSection({
           <div className="	bg-landing-primary rounded-xl p-6 shadow text-white flex flex-col gap-4">
             <p className="text-sm text-white/80 font-medium">After</p>
 
-            <EditableWrapper useAltHover={true} >
+            <EditableWrapper useAltHover={true} isEditable={isEditable} >
               <EditableText
                 value={after_title}
                 onChange={(val) =>
@@ -98,6 +103,7 @@ export default function BeforeAfterSection({
                   })
                 }
                 className="text-xl font-semibold"
+                isEditable={isEditable}
               />
             </EditableWrapper>
 
@@ -105,7 +111,7 @@ export default function BeforeAfterSection({
               {after_points.map((point, i) => (
                 <li key={i} className="flex items-start gap-3 text-sm text-white">
                   <span className="mt-1 text-landing-accent text-lg leading-none">✓</span>
-                  <EditableWrapper useAltHover={true}>
+                  <EditableWrapper useAltHover={true} isEditable={isEditable}>
                     <EditableText
                       value={point}
                       onChange={(val) =>
@@ -118,6 +124,7 @@ export default function BeforeAfterSection({
                         })
                       }
                       className="flex-1"
+                      isEditable={isEditable}
                     />
                   </EditableWrapper>
                 </li>

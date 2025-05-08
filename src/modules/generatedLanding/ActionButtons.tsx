@@ -71,7 +71,7 @@ export default function ActionButtons({ data }: Props) {
         onClick={() => cleanAndDownloadHTML(data)}
         className="bg-brand-accentPrimary text-white px-4 py-2 rounded-md text-sm font-semibold hover:bg-brand-logo transition"
       >
-        Generate HTML
+        Download HTML
       </button>
     </div>
   );

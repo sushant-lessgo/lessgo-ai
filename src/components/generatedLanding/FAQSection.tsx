@@ -12,10 +12,11 @@ type Props = {
   faq: FAQItem[]
   dispatch: React.Dispatch<Action>
   isStaticExport?: boolean
+  isEditable: boolean
 }
 
 
-export default function FAQSection({ faq, dispatch, isStaticExport }: Props) {
+export default function FAQSection({ faq, dispatch, isStaticExport,isEditable, }: Props) {
 
   const [openIndex, setOpenIndex] = useState<number | null>(null)
 
@@ -56,7 +57,7 @@ export default function FAQSection({ faq, dispatch, isStaticExport }: Props) {
           onClick={() => toggle(index)}
           className="w-full flex justify-between items-center text-left font-semibold text-landing-textPrimary text-base"
         >
-          <EditableWrapper>
+          <EditableWrapper isEditable={isEditable}>
             <EditableText
               value={item.question}
               onChange={(val) =>
@@ -69,6 +70,7 @@ export default function FAQSection({ faq, dispatch, isStaticExport }: Props) {
                 })
               }
               className="flex-1 text-left"
+              isEditable={isEditable}
             />
           </EditableWrapper>
           <span className="ml-4 text-xl leading-none text-landing-textSecondary">
@@ -77,7 +79,7 @@ export default function FAQSection({ faq, dispatch, isStaticExport }: Props) {
         </button>
 
         {openIndex === index && (
-          <EditableWrapper>
+          <EditableWrapper isEditable={isEditable}>
             <EditableText
               value={item.answer}
               onChange={(val) =>
@@ -90,6 +92,7 @@ export default function FAQSection({ faq, dispatch, isStaticExport }: Props) {
                 })
               }
               className="mt-3 text-sm text-landing-textSecondary"
+              isEditable={isEditable}
             />
           </EditableWrapper>
         )}

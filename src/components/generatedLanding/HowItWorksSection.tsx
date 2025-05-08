@@ -11,19 +11,21 @@ type Props = {
   section_headline: string
   steps: Step[]
   dispatch: React.Dispatch<Action>
+  isEditable: boolean
 }
 
 export default function HowItWorksSection({
   section_headline,
   steps,
   dispatch,
+  isEditable,
 }: Props) {
   return (
     <section className="w-full py-20 bg-white">
       <div className="max-w-6xl mx-auto px-4 md:px-8 flex flex-col items-center gap-16 text-center">
         
         {/* Section Headline */}
-        <EditableWrapper>
+        <EditableWrapper isEditable={isEditable}>
           <EditableText
             value={section_headline}
             onChange={(val) =>
@@ -33,6 +35,7 @@ export default function HowItWorksSection({
               })
             }
             className="text-3xl md:text-4xl font-bold text-landing-textPrimary leading-snug"
+            isEditable={isEditable}
           />
         </EditableWrapper>
 
@@ -47,7 +50,7 @@ export default function HowItWorksSection({
               </div>
 
               {/* Step Title */}
-              <EditableWrapper>
+              <EditableWrapper isEditable={isEditable}>
                 <EditableText
                   value={step.title}
                   onChange={(val) =>
@@ -60,11 +63,12 @@ export default function HowItWorksSection({
                     })
                   }
                   className="text-lg font-semibold text-landing-textPrimary"
+                  isEditable={isEditable}
                 />
               </EditableWrapper>
 
               {/* Step Description */}
-              <EditableWrapper>
+              <EditableWrapper isEditable={isEditable}>
                 <EditableText
                   value={step.description}
                   onChange={(val) =>
@@ -77,6 +81,7 @@ export default function HowItWorksSection({
                     })
                   }
                   className="text-sm text-landing-textSecondary max-w-xs"
+                  isEditable={isEditable}
                 />
               </EditableWrapper>
             </div>

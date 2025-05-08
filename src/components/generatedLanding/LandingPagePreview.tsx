@@ -25,6 +25,7 @@ export default function LandingPagePreview({ data, dispatch, isStaticExport }: P
         body_text={data.hero.body_text}
         hero_image={data.hero.hero_image}
         dispatch={dispatch}
+        isEditable={!isStaticExport}
       />
 
       <BeforeAfterSection
@@ -34,17 +35,20 @@ export default function LandingPagePreview({ data, dispatch, isStaticExport }: P
         after_title={data.before_after.after_title}
         after_points={data.before_after.after_points}
         dispatch={dispatch}
+        isEditable={!isStaticExport}
       />
 
       <HowItWorksSection
         section_headline={data.how_it_works.section_headline}
         steps={data.how_it_works.steps}
         dispatch={dispatch}
+        isEditable={!isStaticExport}
       />
 
       <TestimonialsSection
         testimonials={data.testimonials}
         dispatch={dispatch}
+        isEditable={!isStaticExport}
       />
 
       <OfferSection
@@ -53,9 +57,10 @@ export default function LandingPagePreview({ data, dispatch, isStaticExport }: P
         cta_text={data.offer.cta_text}
         urgency_text={data.offer.urgency_text}
         dispatch={dispatch}
+        isEditable={!isStaticExport}
       />
 
-<FAQSection faq={data.faq} dispatch={dispatch} isStaticExport={isStaticExport} />
+<FAQSection faq={data.faq} dispatch={dispatch} isStaticExport={isStaticExport} isEditable={!isStaticExport} />
 
     </div>
   )
