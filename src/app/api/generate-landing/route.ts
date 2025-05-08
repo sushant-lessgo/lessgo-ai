@@ -8,8 +8,11 @@ import { mockGPTOutput } from "@/modules/prompt/mockData"
 export async function POST(req: Request) {
   const { productIdea } = await req.json()
 
-  // ✅ Inject mock bypass
-  if (process.env.NEXT_PUBLIC_USE_MOCK_GPT === "true") {
+  const DEMO_TOKEN = "lessgodemomockdata"
+  const authHeader = req.headers.get("Authorization") || ""
+  const token = authHeader.replace("Bearer ", "").trim()
+
+  if (process.env.NEXT_PUBLIC_USE_MOCK_GPT === "true" && token === DEMO_TOKEN) {
     return NextResponse.json(mockGPTOutput)
   }
 

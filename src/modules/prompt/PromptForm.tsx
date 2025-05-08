@@ -20,11 +20,17 @@ export default function PromptForm({ onSuccess }: PromptFormProps) {
     setError(null)
 
     try {
+      const token = localStorage.getItem("lessgo_token") || ""
+
       const res = await fetch("/api/generate-landing", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`,
+        },
         body: JSON.stringify({ productIdea: input }),
       })
+
     
       if (!res.ok) throw new Error("API call failed")
     
