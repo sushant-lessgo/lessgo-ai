@@ -96,7 +96,7 @@ export default function RootLayout({
               function gtag(){dataLayer.push(arguments);}
               window.gtag = gtag;
               gtag('js', new Date());
-              gtag('config', 'G-DM2YZB9VYG'), { debug_mode: true });
+              gtag('config', 'G-DM2YZB9VYG', { "debug_mode": true });
             `,
           }}
         />
