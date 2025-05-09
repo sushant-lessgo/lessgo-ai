@@ -69,7 +69,7 @@ export default function Home() {
       
       
         <p className="text-sm md:text-lg font-body italic text-brand-text max-w-[60rem] mt-8 md:mt-4 mb-20 md:mb-2 text-center">
-      [<span className= "font-bold">Only 10 Spots Left</span> - <span className=" font-semibold text-brand-accentPrimary"> 1 Year Free </span> Pro - Launching May 7]  <span className="underline text-brand-accentPrimary"></span>
+      [<span className= "font-bold">Only 10 Spots Left</span> - <span className=" font-semibold text-brand-accentPrimary"> 1 Year Free </span> Pro - No credit card]  <span className="underline text-brand-accentPrimary"></span>
       </p>
 
 
@@ -366,7 +366,7 @@ export default function Home() {
           <WaitlistForm />
       
           <p className="text-sm md:text-lg font-body italic text-brand-text max-w-[60rem] mt-8 md:mt-6 mb-20 text-center">
-      [<span className= "font-bold">Only 10 Spots Left</span> - <span className=" font-semibold text-brand-accentPrimary"> 1 Year Free </span> Pro - Launching May 7]  <span className="underline text-brand-accentPrimary"></span>
+      [<span className= "font-bold">Only 10 Spots Left</span> - <span className=" font-semibold text-brand-accentPrimary"> 1 Year Free </span> Pro - No credit card]  <span className="underline text-brand-accentPrimary"></span>
       </p>
   
       </div>
