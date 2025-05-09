@@ -94,8 +94,9 @@ export default function RootLayout({
             __html: `
               window.dataLayer = window.dataLayer || [];
               function gtag(){dataLayer.push(arguments);}
+              window.gtag = gtag;
               gtag('js', new Date());
-              gtag('config', 'G-DM2YZB9VYG');
+              gtag('config', 'G-DM2YZB9VYG'), { debug_mode: true });
             `,
           }}
         />
