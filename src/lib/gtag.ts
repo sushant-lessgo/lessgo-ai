@@ -1,6 +1,3 @@
-export const GA_TRACKING_ID = 'G-DM2YZB9VYG';
-
-// Call this to track a specific event
 export const event = ({
   action,
   category,
@@ -12,9 +9,13 @@ export const event = ({
   label: string;
   value?: string | number;
 }) => {
-  window.gtag('event', action, {
-    event_category: category,
-    event_label: label,
-    value: value,
-  });
+  if (typeof window !== 'undefined' && typeof window.gtag === 'function') {
+    window.gtag('event', action, {
+      event_category: category,
+      event_label: label,
+      value: value,
+    });
+  } else {
+    console.warn('gtag not ready:', action);
+  }
 };
