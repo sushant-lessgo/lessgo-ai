@@ -38,7 +38,7 @@ export default function Home() {
       Describe your idea <span className=" text-brand-accentPrimary"> → </span> Chat with AI <span className=" text-brand-accentPrimary"> → </span> Get a ready-to-launch landing page (both <span className=" text-brand-accentPrimary">copy and design</span>)
       </p>
 
-      {!showForm && (
+      {/* {!showForm && (
         <CTAButton
           gaLabel="01 hero-section"
           onClick={(e) => {
@@ -48,7 +48,7 @@ export default function Home() {
         />
       )}
 
-      {showForm && <WaitlistForm />}
+      {showForm && <WaitlistForm />} */}
 
       <p className="text-lg md:text-base font-body italic text-brand-text max-w-[60rem] mt-8 md:mt-6 mb-20 text-center">
       [Launching May 7 — <span className= "font-bold"> Only 20 Spots </span> — <span className=" text-brand-accentPrimary"> 1 Year Free </span> Pro] <span className="underline text-brand-accentPrimary"></span>
@@ -304,7 +304,7 @@ export default function Home() {
 
 
             <div className="mb-20">
-          {!showForm && (
+          {/* {!showForm && (
         <CTAButton
           gaLabel="02 problem-section"
           text = 'Get Early Beta Access!'
@@ -315,7 +315,7 @@ export default function Home() {
         />
       )}
 
-      {showForm && <WaitlistForm />}
+      {showForm && <WaitlistForm />} */}
       
       <p className="text-lg md:text-base text-center font-body italic text-brand-text max-w-[60rem] mt-8 md:mt-6 mb-16">
       [Launching May 7 — <span className= "font-bold"> Only 20 Spots </span> — <span className=" text-brand-accentPrimary"> 1 Year Free </span> Pro] <span className="underline text-brand-accentPrimary"></span>
@@ -494,7 +494,7 @@ export default function Home() {
 
 
 <div className="mb-24">
-          {!showForm && (
+          {/* {!showForm && (
         <CTAButton
           gaLabel="03 Solution-section"
           text="Get Early Access Now!"
@@ -505,7 +505,7 @@ export default function Home() {
         />
       )}
 
-      {showForm && <WaitlistForm />}
+      {showForm && <WaitlistForm />} */}
       
       <p className="text-lg md:text-base text-center font-body italic text-brand-text max-w-[60rem] mt-8 md:mt-6 mb-16">
       [Launching May 7 — <span className= "font-bold"> Only 20 Spots </span> — <span className=" text-brand-accentPrimary"> 1 Year Free </span> Pro] <span className="underline text-brand-accentPrimary"></span>
@@ -661,7 +661,7 @@ export default function Home() {
 </div>
 
 
-      <div className="mb-20">
+      {/* <div className="mb-20">
           {!showForm && (
         <CTAButton
           gaLabel="04 Founder-section"
@@ -679,7 +679,7 @@ export default function Home() {
       [Launching May 7 — <span className= "font-bold"> Only 20 Spots </span> — <span className=" text-brand-accentPrimary"> 1 Year Free </span> Pro] <span className="underline text-brand-accentPrimary"></span>
       </p>
 
-          </div>
+          </div> */}
 
           
 
@@ -742,7 +742,7 @@ export default function Home() {
 
 
           <div className="mb-20">
-          {!showForm && (
+          {/* {!showForm && (
         <CTAButton
           gaLabel="05 CTA-section"
           text="Lock My Early Bird Spot!"
@@ -753,7 +753,7 @@ export default function Home() {
         />
       )}
 
-      {showForm && <WaitlistForm />}
+      {showForm && <WaitlistForm />} */}
       
       <p className="text-lg md:text-base text-center font-body italic text-brand-text max-w-[60rem] mt-8 md:mt-6 mb-16">
       [Launching May 7 — <span className= "font-bold"> Only 20 Spots </span> — <span className=" text-brand-accentPrimary"> 1 Year Free </span> Pro] <span className="underline text-brand-accentPrimary"></span>
