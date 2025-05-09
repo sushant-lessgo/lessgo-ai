@@ -84,12 +84,12 @@ export default function RootLayout({
         
 {/* Google Analytics */}
 <Script
-          strategy="afterInteractive"
+          strategy="beforeInteractive"
           src="https://www.googletagmanager.com/gtag/js?id=G-DM2YZB9VYG"
         />
         <Script
           id="ga-init"
-          strategy="afterInteractive"
+          strategy="beforeInteractive"
           dangerouslySetInnerHTML={{
             __html: `
               window.dataLayer = window.dataLayer || [];
