@@ -1,6 +1,10 @@
 import { useState } from "react";
+import { event } from '@/lib/gtag';
+interface WaitlistFormProps {
+  formPosition: 'top' | 'bottom';
+}
 
-export default function WaitlistForm() {
+export default function WaitlistForm({ formPosition }: WaitlistFormProps) {
   const [email, setEmail] = useState("");
   const [status, setStatus] = useState("idle");
 
@@ -14,6 +18,13 @@ export default function WaitlistForm() {
     });
 
     if (res.ok) {
+
+      event({
+          action: 'email_submitted',
+          category: 'engagement',
+          label: `waitlist_form_${formPosition}`,
+        });
+
       setStatus("success");
       setEmail("");
     } else {

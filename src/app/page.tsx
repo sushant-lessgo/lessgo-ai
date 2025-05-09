@@ -65,7 +65,7 @@ export default function Home() {
       Lessgo.ai uses its <span className =""> Conversion Intelligence Engine </span> to create your landing page <span className ="font-medium"> in under 5 minutes </span> with <span className ="font-bold text-brand-accentPrimary">copy so sharp </span>it sells itself.
       </p>
        */}
-        <WaitlistForm />
+        <WaitlistForm formPosition="top" />
       
       
         <p className="text-sm md:text-lg font-body italic text-brand-text max-w-[60rem] mt-8 md:mt-4 mb-20 md:mb-2 text-center">
@@ -363,7 +363,7 @@ export default function Home() {
 
 
 
-          <WaitlistForm />
+          <WaitlistForm formPosition="bottom" />
       
           <p className="text-sm md:text-lg font-body italic text-brand-text max-w-[60rem] mt-8 md:mt-6 mb-20 text-center">
       [<span className= "font-bold">Only 10 Spots Left</span> - <span className=" font-semibold text-brand-accentPrimary"> 1 Year Free </span> Pro - No credit card]  <span className="underline text-brand-accentPrimary"></span>
