@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import Script from 'next/script'
 import { GeistSans, GeistMono } from 'geist/font';
 import "./globals.css";
+import GoogleAnalytics from '@/components/GoogleAnalytics';
+
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://lessgo.ai'),
@@ -82,25 +84,8 @@ export default function RootLayout({
   }}
 />
         
-{/* Google Analytics */}
-<Script
-          strategy="beforeInteractive"
-          src="https://www.googletagmanager.com/gtag/js?id=G-DM2YZB9VYG"
-        />
-        <Script
-          id="ga-init"
-          strategy="beforeInteractive"
-          dangerouslySetInnerHTML={{
-            __html: `
-              window.dataLayer = window.dataLayer || [];
-              function gtag(){dataLayer.push(arguments);}
-              window.gtag = gtag;
-              gtag('js', new Date());
-              gtag('config', 'G-DM2YZB9VYG', { "debug_mode": true });
-            `,
-          }}
-        />
-
+   {/* Google Analytics */}
+        <GoogleAnalytics />
       </head>
       <body className={`${GeistSans.className} antialiased`}>
         {children}
