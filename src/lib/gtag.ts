@@ -1,30 +1,31 @@
-// app/lib/gtag.ts
+export const GA_MEASUREMENT_ID = 'G-DM2YZB9VYG';
 
-export const GA_MEASUREMENT_ID = 'G-DM2YZB9VYG'; // Replace with your actual GA4 ID
-
-// Global declarations for TypeScript
 declare global {
   interface Window {
-    gtag: (
-      command: string,
-      action: string,
-      params?: Record<string, any>
-    ) => void;
-    dataLayer: Record<string, any>[];
+    gtag: (...args: any[]) => void;
+    dataLayer: any[];
   }
 }
 
-// Track a pageview
-export const pageview = (url: string) => {
+// Helper function to safely call gtag
+export const safeGtag = (...args: any[]) => {
   if (typeof window !== 'undefined' && typeof window.gtag === 'function') {
-    window.gtag('config', GA_MEASUREMENT_ID, {
-      page_path: url,
-      debug_mode: true,
-    });
+    window.gtag(...args);
+    return true;
   }
+  console.warn('⚠️ gtag not available for call:', args);
+  return false;
 };
 
-// Track a custom event
+// Track pageview
+export const pageview = (url: string) => {
+  return safeGtag('config', GA_MEASUREMENT_ID, {
+    page_path: url,
+    debug_mode: true
+  });
+};
+
+// Track event
 export const event = ({
   action,
   category,
@@ -36,11 +37,10 @@ export const event = ({
   label?: string;
   value?: number;
 }) => {
-  if (typeof window !== 'undefined' && typeof window.gtag === 'function') {
-    window.gtag('event', action, {
-      event_category: category,
-      event_label: label,
-      value: value,
-    });
-  }
+  return safeGtag('event', action, {
+    event_category: category,
+    event_label: label,
+    value: value,
+    debug_mode: true,
+  });
 };
