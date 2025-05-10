@@ -3,7 +3,7 @@ import Script from 'next/script'
 import { GeistSans, GeistMono } from 'geist/font';
 import "./globals.css";
 import GoogleAnalytics from '@/components/GoogleAnalytics';
-
+import { Suspense } from 'react';
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://lessgo.ai'),
@@ -85,7 +85,9 @@ export default function RootLayout({
 />
         
    {/* Google Analytics */}
-        <GoogleAnalytics />
+        <Suspense>
+          <GoogleAnalytics />
+        </Suspense>
       </head>
       <body className={`${GeistSans.className} antialiased`}>
         {children}
