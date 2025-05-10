@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import CTAButton from "./components/CTAButton";
+// import CTAButton from "./components/CTAButton";
 import WaitlistForm from "./components/WaitlistForm";
 import Image from 'next/image';
 import founderImage from '@/assets/images/founder.jpg';
