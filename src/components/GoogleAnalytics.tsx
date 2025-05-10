@@ -31,7 +31,7 @@ export default function GoogleAnalytics() {
       };
       
       // Initialize gtag
-      window.gtag('js', new Date());
+      window.gtag('js', new Date().toISOString());
       
       // Configure tracking
       window.gtag('config', GA_MEASUREMENT_ID, {
