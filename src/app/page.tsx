@@ -297,7 +297,7 @@ export default function Home() {
         Copywriting was the missing link between technical founders... and real success.
         </p>
 
-        <p>Now, my only mission is to use AI to give marketing superpwoer to technical founders like me </p>
+        <p>Now, my only mission is to use AI to give marketing superpower to technical founders like me </p>
 
       </div>
     </div>
