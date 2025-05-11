@@ -8,7 +8,7 @@ export default function WaitlistForm({ formPosition }: WaitlistFormProps) {
   const [email, setEmail] = useState("");
   const [status, setStatus] = useState("idle");
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setStatus("loading");
 
@@ -20,10 +20,18 @@ export default function WaitlistForm({ formPosition }: WaitlistFormProps) {
     if (res.ok) {
 
       event({
-          action: 'email_submitted',
-          category: 'engagement',
-          label: `waitlist_form_${formPosition}`,
-        });
+      action: 'email_submitted', // This is your GA4 Event Name
+      params: {
+        // Use descriptive parameters. These will appear in GA4.
+        // You can register them as custom dimensions in GA4 UI for easier reporting.
+        form_id: `waitlist_form_${formPosition}`, // e.g., 'waitlist_form_footer'
+        form_name: 'Waitlist Subscription',      // A general name for the type of form
+        // 'event_category': 'engagement', // You can still send this if you have a use for it,
+        // 'event_label': `waitlist_form_${formPosition}`, // but custom params are often more flexible in GA4.
+        // 'value': 10 // Only include 'value' if it represents a monetary amount.
+                      // If so, also consider sending 'currency': 'USD' (or your currency).
+      },
+    });
 
       setStatus("success");
       setEmail("");

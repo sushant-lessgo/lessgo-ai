@@ -84,13 +84,18 @@ export default function RootLayout({
   }}
 />
         
-   {/* Google Analytics */}
-        <Suspense>
-          <GoogleAnalytics />
-        </Suspense>
+
       </head>
       <body className={`${GeistSans.className} antialiased`}>
         {children}
+
+        <Suspense>
+          <GoogleAnalytics />
+        </Suspense>
+        {/* Moved here: End of the body is a common and good practice */}
+        <Suspense fallback={null}> {/* Suspense is good for client components that might have async operations */}
+          <GoogleAnalytics />
+        </Suspense>
       </body>
     </html>
   );

@@ -1,116 +1,76 @@
-// app/components/GoogleAnalytics.tsx
-'use client';
+// components/GoogleAnalytics.tsx (or your preferred path)
+'use client'; // This component uses client-side hooks
 
-import { useEffect, useState } from 'react';
-import Script from 'next/script';
+import { useEffect } from 'react';
 import { usePathname, useSearchParams } from 'next/navigation';
-import { GA_MEASUREMENT_ID} from '@/lib/gtag';
+import Script from 'next/script';
+import { GA_MEASUREMENT_ID, pageview as trackPageview } from '@/lib/gtag'; // Adjust path to your gtag.ts
 
 export default function GoogleAnalytics() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const [isGtagLoaded, setIsGtagLoaded] = useState(false);
 
-  // Create a custom debug log function
-  const debug = (message: string, data?: any) => {
-    console.log(`📊 GA4 Debug: ${message}`, data || '');
-  };
-
-  // Define gtag function to window explicitly once scripts have loaded
-  const setupGtag = () => {
-    try {
-      debug('Setting up gtag function on window object');
-      
-      // Make sure dataLayer exists
-      window.dataLayer = window.dataLayer || [];
-      
-      // Define and assign gtag function
-      window.gtag = function() {
-        window.dataLayer.push(arguments);
-        debug('gtag call:', [...arguments]);
-      };
-      
-      // Initialize gtag
-      window.gtag('js', new Date().toISOString());
-      
-      // Configure tracking
-      window.gtag('config', GA_MEASUREMENT_ID, {
-        debug_mode: true,
-        send_page_view: true,
-        page_path: pathname
-      });
-      
-      // Set flag that gtag is ready
-      setIsGtagLoaded(true);
-      
-      debug(`gtag setup complete. Window.gtag type: ${typeof window.gtag}`);
-      
-      // Verify window.gtag exists
-      if (typeof window.gtag === 'function') {
-        debug('window.gtag is properly defined as a function');
-      } else {
-        console.error('❌ window.gtag is not a function after setup!', window.gtag);
-      }
-    } catch (error) {
-      console.error('❌ Error setting up gtag:', error);
-    }
-  };
-
-  // Handle external script load
-  const handleGtagScriptLoad = () => {
-    debug('External GA script loaded');
-    setupGtag();
-  };
-
-  // Track page views when route changes and gtag is loaded
+  // Effect for initial GA4 setup and first pageview
   useEffect(() => {
-    if (!isGtagLoaded) return;
-    
-    try {
-      const url = searchParams?.toString()
-        ? `${pathname}?${searchParams.toString()}`
-        : pathname;
-        
-      debug(`Tracking pageview: ${url}`);
-      
-      // Use the direct window.gtag reference
-      window.gtag('config', GA_MEASUREMENT_ID, {
-        page_path: url,
-        debug_mode: true
-      });
-    } catch (error) {
-      console.error('❌ Error tracking pageview:', error);
+    if (!GA_MEASUREMENT_ID || typeof window === 'undefined') {
+      console.warn("GA_MEASUREMENT_ID is missing or window is undefined. Analytics not initialized.");
+      return;
     }
-  }, [pathname, searchParams, isGtagLoaded]);
 
-  // Check if gtag is properly set after a delay
+    // The Script component below handles loading gtag.js.
+    // We need to ensure the initial config is sent once gtag is available.
+    // gtag.js itself will create window.gtag and window.dataLayer.
+    // The 'js' command initializes dataLayer with the current timestamp.
+    // The 'config' command configures the measurement ID and by default sends an initial page_view.
+    // However, to have more control for SPAs, we'll set send_page_view: false and call our trackPageview.
+
+    // Define gtag if not already defined by the Script component by the time this effect runs
+    // (though Next.js Script strategy should handle this)
+    window.dataLayer = window.dataLayer || [];
+    window.gtag = window.gtag || function(...args: any[]) { (window.dataLayer as any[]).push(args); };
+
+    window.gtag('js', new Date()); // Initialize dataLayer with current time
+    window.gtag('config', GA_MEASUREMENT_ID, {
+      send_page_view: false, // We will manually trigger pageviews for better control in SPAs
+      // debug_mode: process.env.NODE_ENV === 'development', // Enable for development builds
+    });
+
+    // Send the initial pageview explicitly after config
+    const initialUrl = pathname + (searchParams.toString() ? `?${searchParams.toString()}` : '');
+    console.log(`GA: Initializing and sending first pageview for ${initialUrl}`);
+    trackPageview(initialUrl);
+
+  }, []); // Run only once on component mount for initialization
+
+  // Effect to track pageviews on subsequent route changes
   useEffect(() => {
-    const timer = setTimeout(() => {
-      if (typeof window !== 'undefined') {
-        if (typeof window.gtag === 'function') {
-          debug('window.gtag verified after delay');
-        } else {
-          console.warn('⚠️ window.gtag still not available after delay');
-          // Try to set it up again
-          setupGtag();
-        }
-      }
-    }, 2000);
-    
-    return () => clearTimeout(timer);
-  }, []);
+    if (!GA_MEASUREMENT_ID) return;
+
+    // The initial pageview is handled by the setup effect.
+    // This effect handles client-side navigations.
+    const currentUrl = pathname + (searchParams.toString() ? `?${searchParams.toString()}` : '');
+    console.log(`GA: Route changed. Sending pageview for ${currentUrl}`);
+    trackPageview(currentUrl);
+
+  }, [pathname, searchParams]); // Re-run when path or search params change
+
+  if (!GA_MEASUREMENT_ID) {
+    return null; // Don't render script if ID is missing
+  }
 
   return (
     <>
-      {/* Load the external GA script first */}
       <Script
+        strategy="afterInteractive" // Load script after page becomes interactive
+        id="ga-gtag"
         src={`https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`}
-        strategy="afterInteractive"
-        onLoad={handleGtagScriptLoad}
-        onError={(e) => console.error('❌ Failed to load GA script:', e)}
+        onLoad={() => {
+          console.log('GA: gtag.js script loaded successfully.');
+        }}
+        onError={(e) => {
+          console.error('GA: Failed to load gtag.js script:', e);
+        }}
       />
-      
-      {/* This is now handled via the setupGtag function instead of inline script */}
     </>
   );
 }
