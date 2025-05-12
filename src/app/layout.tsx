@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Script from 'next/script'
 import { GeistSans, GeistMono } from 'geist/font';
 import "./globals.css";
-import GoogleAnalytics from '@/components/GoogleAnalytics';
+// import GoogleAnalytics from '@/components/GoogleAnalytics';
 import { Suspense } from 'react';
 
 export const metadata: Metadata = {
@@ -64,39 +64,61 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
-
-      {/* Hotjar */}
-      <Script
-  id="hotjar-script"
-  strategy="afterInteractive"
-  dangerouslySetInnerHTML={{
-    __html: `
-      (function (c, s, q, u, a, r, e) {
-        c.hj = c.hj || function () { (c.hj.q = c.hj.q || []).push(arguments) };
-        c._hjSettings = { hjid: 6371891 };
-        r = s.getElementsByTagName('head')[0];
-        e = s.createElement('script');
-        e.async = true;
-        e.src = q + c._hjSettings.hjid + u;
-        r.appendChild(e);
-      })(window, document, 'https://static.hj.contentsquare.net/c/csq-', '.js', 6371891);
-    `,
-  }}
-/>
-        
-
+        {/* Head content here if needed */}
       </head>
       <body className={`${GeistSans.className} antialiased`}>
         {children}
-
-        <Suspense>
-          <GoogleAnalytics />
-        </Suspense>
-        {/* Moved here: End of the body is a common and good practice */}
-        <Suspense fallback={null}> {/* Suspense is good for client components that might have async operations */}
-          <GoogleAnalytics />
-        </Suspense>
       </body>
     </html>
   );
 }
+
+
+
+
+// Google analytica and hotjar not required for now
+
+// export default function RootLayout({
+//   children,
+// }: Readonly<{
+//   children: React.ReactNode;
+// }>) {
+//   return (
+//     <html lang="en">
+//       <head>
+
+//       {/* Hotjar */}
+//       <Script
+//   id="hotjar-script"
+//   strategy="afterInteractive"
+//   dangerouslySetInnerHTML={{
+//     __html: `
+//       (function (c, s, q, u, a, r, e) {
+//         c.hj = c.hj || function () { (c.hj.q = c.hj.q || []).push(arguments) };
+//         c._hjSettings = { hjid: 6371891 };
+//         r = s.getElementsByTagName('head')[0];
+//         e = s.createElement('script');
+//         e.async = true;
+//         e.src = q + c._hjSettings.hjid + u;
+//         r.appendChild(e);
+//       })(window, document, 'https://static.hj.contentsquare.net/c/csq-', '.js', 6371891);
+//     `,
+//   }}
+// />
+        
+
+//       </head>
+//       <body className={`${GeistSans.className} antialiased`}>
+//         {children}
+
+//         <Suspense>
+//           <GoogleAnalytics />
+//         </Suspense>
+//         {/* Moved here: End of the body is a common and good practice */}
+//         <Suspense fallback={null}> {/* Suspense is good for client components that might have async operations */}
+//           <GoogleAnalytics />
+//         </Suspense>
+//       </body>
+//     </html>
+//   );
+// }
