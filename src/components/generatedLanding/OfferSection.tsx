@@ -1,6 +1,7 @@
 import EditableText from "@/modules/generatedLanding/EditableText"
 import EditableWrapper from "@/modules/generatedLanding/EditableWrapper"
 import type { Action } from "@/modules/generatedLanding/landingPageReducer"
+import { trackEdit } from '@/utils/trackEdit';
 
 type Props = {
   headline: string
@@ -27,12 +28,13 @@ export default function OfferSection({
         <EditableWrapper useAltHover={true} isEditable={isEditable}>
           <EditableText
             value={headline}
-            onChange={(val) =>
+            onChange={(val) => {
+              trackEdit('Offer', 'headline', val);
               dispatch({
                 type: "UPDATE_FIELD",
                 payload: { path: "offer.headline", value: val },
               })
-            }
+            }}
             className="text-3xl md:text-4xl font-bold leading-snug "
             isEditable={isEditable}
           />
@@ -42,12 +44,13 @@ export default function OfferSection({
         <EditableWrapper useAltHover={true} isEditable={isEditable}>
           <EditableText
             value={urgency_text}
-            onChange={(val) =>
+            onChange={(val) => {
+              trackEdit('offer', 'urgency_text', val);
               dispatch({
                 type: "UPDATE_FIELD",
                 payload: { path: "offer.urgency_text", value: val },
               })
-            }
+            }}
             className="text-base"
             isEditable={isEditable}
           />
@@ -57,12 +60,13 @@ export default function OfferSection({
         <EditableWrapper useAltHover={true} isEditable={isEditable}>
           <EditableText
             value={cta_text}
-            onChange={(val) =>
+            onChange={(val) => {
+              trackEdit('offer', 'cta_text', val);
               dispatch({
                 type: "UPDATE_FIELD",
                 payload: { path: "offer.cta_text", value: val },
               })
-            }
+            }}
             className="bg-white text-landing-primary font-semibold px-6 py-3 rounded-lg text-base hover:bg-gray-100 transition w-full sm:w-auto text-center"
             isEditable={isEditable}
           />
@@ -76,12 +80,13 @@ export default function OfferSection({
               <EditableWrapper useAltHover={true} isEditable={isEditable}>
                 <EditableText
                   value={point}
-                  onChange={(val) =>
+                  onChange={(val) => {
+              trackEdit('offer', 'offer_bullets', val);
                     dispatch({
                       type: "UPDATE_FIELD",
                       payload: { path: `offer.bullets[${i}]`, value: val },
                     })
-                  }
+                  }}
                   isEditable={isEditable}
                 />
               </EditableWrapper>

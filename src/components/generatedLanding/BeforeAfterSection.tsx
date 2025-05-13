@@ -1,6 +1,6 @@
 import EditableText from "@/modules/generatedLanding/EditableText"
 import EditableWrapper from "@/modules/generatedLanding/EditableWrapper"
-
+import { trackEdit } from '@/utils/trackEdit';
 import type { Action } from "@/modules/generatedLanding/landingPageReducer"
 
 type Props = {
@@ -32,12 +32,15 @@ export default function BeforeAfterSection({
         <EditableWrapper isEditable={isEditable}>
           <EditableText
             value={section_headline}
-            onChange={(val) =>
+            onChange={(val) => {
+              
+              trackEdit('before_after', 'section_headline', val);
+              
               dispatch({
                 type: "UPDATE_FIELD",
                 payload: { path: "before_after.section_headline", value: val },
               })
-            }
+            }}
             className="text-3xl md:text-4xl font-bold text-center text-landing-textPrimary"
             isEditable={isEditable}
           />
@@ -53,12 +56,13 @@ export default function BeforeAfterSection({
             <EditableWrapper isEditable={isEditable}>
               <EditableText
                 value={before_title}
-                onChange={(val) =>
+                onChange={(val) => {
+                  trackEdit('before_after', 'before_title', val);
                   dispatch({
                     type: "UPDATE_FIELD",
                     payload: { path: "before_after.before_title", value: val },
                   })
-                }
+                }}
                 className="text-xl font-semibold text-landing-textPrimary"
                 isEditable={isEditable}
               />
@@ -71,7 +75,8 @@ export default function BeforeAfterSection({
                   <EditableWrapper isEditable={isEditable}>
                     <EditableText
                       value={point}
-                      onChange={(val) =>
+                      onChange={(val) => {
+                        trackEdit('before_after', 'before_points', val);
                         dispatch({
                           type: "UPDATE_FIELD",
                           payload: {
@@ -79,7 +84,7 @@ export default function BeforeAfterSection({
                             value: val,
                           },
                         })
-                      }
+                      }}
                       className="flex-1"
                       isEditable={isEditable}
                     />
@@ -96,12 +101,13 @@ export default function BeforeAfterSection({
             <EditableWrapper useAltHover={true} isEditable={isEditable} >
               <EditableText
                 value={after_title}
-                onChange={(val) =>
+                onChange={(val) => {
+                    trackEdit('before_after', 'after_title', val);
                   dispatch({
                     type: "UPDATE_FIELD",
                     payload: { path: "before_after.after_title", value: val },
                   })
-                }
+                }}
                 className="text-xl font-semibold"
                 isEditable={isEditable}
               />
@@ -114,7 +120,8 @@ export default function BeforeAfterSection({
                   <EditableWrapper useAltHover={true} isEditable={isEditable}>
                     <EditableText
                       value={point}
-                      onChange={(val) =>
+                      onChange={(val) => {
+                        trackEdit('before_after', 'after_points', val);
                         dispatch({
                           type: "UPDATE_FIELD",
                           payload: {
@@ -122,7 +129,7 @@ export default function BeforeAfterSection({
                             value: val,
                           },
                         })
-                      }
+                      }}
                       className="flex-1"
                       isEditable={isEditable}
                     />

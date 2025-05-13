@@ -1,7 +1,7 @@
 import { renderToStaticMarkup } from "react-dom/server";
 import LandingPagePreview from "@/components/generatedLanding/LandingPagePreview";
 import { compiledTailwindCSS } from "@/utils/compiledTailwind";
-
+import posthog from 'posthog-js';
 
 
 export function cleanAndDownloadHTML(data: any) {
@@ -74,7 +74,7 @@ export function cleanAndDownloadHTML(data: any) {
 </html>
 `.trim();
 
-
+posthog.capture('html_downloaded');
 
   // Step 5: Trigger download (remains the same)
   const blob = new Blob([fullHTML], { type: "text/html" });

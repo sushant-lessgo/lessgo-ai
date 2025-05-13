@@ -1,5 +1,5 @@
 import React from "react";
-
+import posthog from 'posthog-js';
 import type { GPTOutput } from "@/modules/prompt/types";
 
 import { cleanAndDownloadHTML } from "@/modules/generatedLanding/htmlDownloadUtil"
@@ -44,6 +44,9 @@ export default function ActionButtons({ data }: Props) {
         return;
       }
       
+      posthog.capture('preview_triggered');
+
+
       // Use a small timeout to ensure storage completes before opening window
       setTimeout(() => {
         const previewWindow = window.open("/preview", "_blank");

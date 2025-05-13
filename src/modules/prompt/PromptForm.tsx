@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import type { GPTOutput } from "@/modules/prompt/types"
+import posthog from 'posthog-js';
 
 type PromptFormProps = {
   onSuccess: (data: GPTOutput, input: string) => void
@@ -36,6 +37,10 @@ export default function PromptForm({ onSuccess }: PromptFormProps) {
     
       const data = await res.json()
     
+      posthog.capture('input_submitted', {
+        input_length: input.length,
+      });
+
       onSuccess(data as GPTOutput, input) // <-- pass both GPT output and raw user input
     } catch (err) {
       setError("Something went wrong. Try again.")

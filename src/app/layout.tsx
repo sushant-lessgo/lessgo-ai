@@ -1,10 +1,16 @@
 import type { Metadata } from "next";
 // import Script from 'next/script'
+
+import { useEffect } from "react";
+import posthog from "posthog-js";
 import { PostHogProvider } from '@/providers/ph-provider'
 import { GeistSans, GeistMono } from 'geist/font';
 import "./globals.css";
 // import GoogleAnalytics from '@/components/GoogleAnalytics';
 import { Suspense } from 'react';
+
+
+
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://lessgo.ai'),
@@ -62,12 +68,12 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+
+
   return (
     <html lang="en">
-      <head>
-        {/* Head content here if needed */}
-      </head>
-      <body className={`${GeistSans.className} antialiased`}>
+      <head />
+      <body className="antialiased">
         <PostHogProvider>
           {children}
         </PostHogProvider>

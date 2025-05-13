@@ -1,6 +1,6 @@
 import EditableText from "@/modules/generatedLanding/EditableText"
 import EditableWrapper from "@/modules/generatedLanding/EditableWrapper"
-
+import { trackEdit } from '@/utils/trackEdit';
 import type { Action } from "@/modules/generatedLanding/landingPageReducer"
 
 type Props = {
@@ -37,9 +37,10 @@ export default function HeroSection({
         <EditableWrapper isEditable={isEditable}>
           <EditableText
             value={headline}
-            onChange={(val) =>
+            onChange={(val) => {
+              trackEdit('hero', 'headline', val);
               dispatch({ type: "UPDATE_FIELD", payload: { path: "hero.headline", value: val } })
-            }
+            }}
             className="text-4xl leading-tight md:text-5xl font-extrabold text-landing-textPrimary max-w-xl"
             isEditable={isEditable}
           />
@@ -48,9 +49,10 @@ export default function HeroSection({
         <EditableWrapper isEditable={isEditable}>
           <EditableText
             value={subheadline}
-            onChange={(val) =>
+            onChange={(val) => {
+              trackEdit('hero', 'subheadline', val);
               dispatch({ type: "UPDATE_FIELD", payload: { path: "hero.subheadline", value: val } })
-            }
+            }}
             className="text-lg text-landing-textSecondary max-w-xl"
             isEditable={isEditable}
           />
@@ -62,9 +64,10 @@ export default function HeroSection({
             
             <EditableText
               value={body_text}
-              onChange={(val) =>
+              onChange={(val) => {
+              trackEdit('hero', 'body', val);
                 dispatch({ type: "UPDATE_FIELD", payload: { path: "hero.body_text", value: val } })
-              }
+              }}
               className="text-base text-landing-textMuted max-w-xl"
               isEditable={isEditable}
             />
@@ -78,9 +81,10 @@ export default function HeroSection({
 
             <EditableText
               value={cta_text} 
-              onChange={(val) =>
+              onChange={(val) => {
+              trackEdit('hero', 'cta_text', val);
                 dispatch({ type: "UPDATE_FIELD", payload: { path: "hero.cta_text", value: val } })
-              }
+              }}
               className="bg-landing-primary text-white font-semibold px-6 py-3 rounded-lg text-base hover:bg-landing-primaryHover transition w-full sm:w-auto text-center"
               isEditable={isEditable}
             />
@@ -93,9 +97,10 @@ export default function HeroSection({
              
              <EditableText
                 value={urgency_text}
-                onChange={(val) =>
+                onChange={(val) => {
+              trackEdit('hero', 'urgency_text', val);
                   dispatch({ type: "UPDATE_FIELD", payload: { path: "hero.urgency_text", value: val } })
-                }
+                }}
                 className="text-sm text-red-600 sm:mt-0"
                 isEditable={isEditable}
               />

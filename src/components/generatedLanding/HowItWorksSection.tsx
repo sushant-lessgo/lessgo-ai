@@ -1,6 +1,7 @@
 import EditableText from "@/modules/generatedLanding/EditableText"
 import EditableWrapper from "@/modules/generatedLanding/EditableWrapper"
 import type { Action } from "@/modules/generatedLanding/landingPageReducer"
+import { trackEdit } from '@/utils/trackEdit';
 
 type Step = {
   title: string
@@ -28,12 +29,13 @@ export default function HowItWorksSection({
         <EditableWrapper isEditable={isEditable}>
           <EditableText
             value={section_headline}
-            onChange={(val) =>
+            onChange={(val) => {
+              trackEdit('HowItWorks', 'headline', val);
               dispatch({
                 type: "UPDATE_FIELD",
                 payload: { path: "how_it_works.section_headline", value: val },
               })
-            }
+            }}
             className="text-3xl md:text-4xl font-bold text-landing-textPrimary leading-snug"
             isEditable={isEditable}
           />
@@ -53,7 +55,8 @@ export default function HowItWorksSection({
               <EditableWrapper isEditable={isEditable}>
                 <EditableText
                   value={step.title}
-                  onChange={(val) =>
+                  onChange={(val) => {
+              trackEdit('HowItWorks', 'Step_title', val);
                     dispatch({
                       type: "UPDATE_FIELD",
                       payload: {
@@ -61,7 +64,7 @@ export default function HowItWorksSection({
                         value: val,
                       },
                     })
-                  }
+                  }}
                   className="text-lg font-semibold text-landing-textPrimary"
                   isEditable={isEditable}
                 />
@@ -71,7 +74,8 @@ export default function HowItWorksSection({
               <EditableWrapper isEditable={isEditable}>
                 <EditableText
                   value={step.description}
-                  onChange={(val) =>
+                  onChange={(val) => {
+              trackEdit('HowItWorks', 'step_description', val);
                     dispatch({
                       type: "UPDATE_FIELD",
                       payload: {
@@ -79,7 +83,7 @@ export default function HowItWorksSection({
                         value: val,
                       },
                     })
-                  }
+                  }}
                   className="text-sm text-landing-textSecondary max-w-xs"
                   isEditable={isEditable}
                 />

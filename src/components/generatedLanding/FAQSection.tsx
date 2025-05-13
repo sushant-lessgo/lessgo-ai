@@ -2,6 +2,7 @@ import { useState } from "react"
 import EditableText from "@/modules/generatedLanding/EditableText"
 import EditableWrapper from "@/modules/generatedLanding/EditableWrapper"
 import type { Action } from "@/modules/generatedLanding/landingPageReducer"
+import { trackEdit } from '@/utils/trackEdit';
 
 type FAQItem = {
   question: string
@@ -60,7 +61,8 @@ export default function FAQSection({ faq, dispatch, isStaticExport,isEditable, }
           <EditableWrapper isEditable={isEditable}>
             <EditableText
               value={item.question}
-              onChange={(val) =>
+              onChange={(val) => {
+                trackEdit('faq', 'item_question', val);
                 dispatch({
                   type: "UPDATE_FIELD",
                   payload: {
@@ -68,7 +70,7 @@ export default function FAQSection({ faq, dispatch, isStaticExport,isEditable, }
                     value: val,
                   },
                 })
-              }
+              }}
               className="flex-1 text-left"
               isEditable={isEditable}
             />
@@ -82,7 +84,8 @@ export default function FAQSection({ faq, dispatch, isStaticExport,isEditable, }
           <EditableWrapper isEditable={isEditable}>
             <EditableText
               value={item.answer}
-              onChange={(val) =>
+              onChange={(val) => {
+                trackEdit('faq', 'item_answer', val);
                 dispatch({
                   type: "UPDATE_FIELD",
                   payload: {
@@ -90,7 +93,7 @@ export default function FAQSection({ faq, dispatch, isStaticExport,isEditable, }
                     value: val,
                   },
                 })
-              }
+              }}
               className="mt-3 text-sm text-landing-textSecondary"
               isEditable={isEditable}
             />

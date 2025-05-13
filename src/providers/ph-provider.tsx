@@ -15,6 +15,16 @@ export function PostHogProvider({ children }: { children: React.ReactNode }) {
       person_profiles: 'identified_only', // or 'always' to create profiles for anonymous users as well
       capture_pageview: false // Disable automatic pageview capture, as we capture manually
     })
+
+// ✅ Identify internal user early
+    const isInternal = localStorage.getItem("ph_is_internal") === "true"
+    if (isInternal) {
+      posthog.identify("internal_" + Date.now(), {
+        is_internal: true,
+      })
+    }
+
+
   }, [])
 
   return (

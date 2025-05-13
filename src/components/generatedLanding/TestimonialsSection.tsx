@@ -1,6 +1,8 @@
 import EditableText from "@/modules/generatedLanding/EditableText"
 import EditableWrapper from "@/modules/generatedLanding/EditableWrapper"
 import type { Action } from "@/modules/generatedLanding/landingPageReducer"
+import { trackEdit } from '@/utils/trackEdit';
+
 
 type Testimonial = {
   quote: string
@@ -45,12 +47,13 @@ export default function TestimonialsSection({ testimonials, dispatch, isEditable
               <EditableWrapper isEditable={isEditable}>
               <EditableText
                 value={first.quote}
-                onChange={(val) =>
+                onChange={(val) => {
+              trackEdit('testimonial', 'quote', val);
                   dispatch({
                     type: "UPDATE_FIELD",
                     payload: { path: "testimonials[0].quote", value: val },
                   })
-                }
+                }}
                 className="text-lg text-landing-textMuted italic leading-relaxed"
                 isEditable={isEditable}
               />
@@ -60,12 +63,13 @@ export default function TestimonialsSection({ testimonials, dispatch, isEditable
               <EditableWrapper isEditable={isEditable}>
                 <EditableText
                   value={first.name}
-                  onChange={(val) =>
+                  onChange={(val) => {
+              trackEdit('testimonial', 'name', val);
                     dispatch({
                       type: "UPDATE_FIELD",
                       payload: { path: "testimonials[0].name", value: val },
                     })
-                  }
+                  }}
                   className="font-semibold text-landing-textPrimary"
                   isEditable={isEditable}
                 />
