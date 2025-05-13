@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
-import Script from 'next/script'
+// import Script from 'next/script'
+import { PostHogProvider } from '@/providers/ph-provider'
 import { GeistSans, GeistMono } from 'geist/font';
 import "./globals.css";
 // import GoogleAnalytics from '@/components/GoogleAnalytics';
@@ -67,7 +68,9 @@ export default function RootLayout({
         {/* Head content here if needed */}
       </head>
       <body className={`${GeistSans.className} antialiased`}>
-        {children}
+        <PostHogProvider>
+          {children}
+        </PostHogProvider>
       </body>
     </html>
   );

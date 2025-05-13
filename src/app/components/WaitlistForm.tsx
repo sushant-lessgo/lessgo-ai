@@ -1,4 +1,7 @@
 import { useState } from "react";
+import posthog from 'posthog-js';
+
+
 
 interface WaitlistFormProps {
   formPosition: 'top' | 'bottom';
@@ -19,6 +22,11 @@ export default function WaitlistForm({ formPosition }: WaitlistFormProps) {
 
     if (res.ok) {
 
+
+    posthog.capture('user_signed_up', {
+    form_position: formPosition, // 'top' or 'bottom'
+    form_name: 'Waitlist Subscription'
+  });
     //   event({
     //   action: 'email_submitted', // This is your GA4 Event Name
     //   params: {
