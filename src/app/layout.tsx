@@ -8,7 +8,14 @@ import { GeistSans, GeistMono } from 'geist/font';
 import "./globals.css";
 // import GoogleAnalytics from '@/components/GoogleAnalytics';
 import { Suspense } from 'react';
-
+import {
+  ClerkProvider,
+  SignInButton,
+  SignUpButton,
+  SignedIn,
+  SignedOut,
+  UserButton,
+} from '@clerk/nextjs'
 
 
 
@@ -68,17 +75,18 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-
-
   return (
-    <html lang="en">
-      <head />
-      <body className="antialiased">
-        <PostHogProvider>
-          {children}
-        </PostHogProvider>
-      </body>
-    </html>
+    <ClerkProvider>
+      <html lang="en">
+        <head />
+        <body className="antialiased">
+          
+          <PostHogProvider>
+            {children}
+          </PostHogProvider>
+        </body>
+      </html>
+    </ClerkProvider>
   );
 }
 
