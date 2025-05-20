@@ -2,6 +2,7 @@ import type { GPTOutput } from "@/modules/prompt/types";
 import LandingPagePreview from "@/components/generatedLanding/LandingPagePreview";
 import ActionButtons from "@/modules/generatedLanding/ActionButtons";
 import type { Action } from "@/modules/generatedLanding/landingPageReducer";
+import RightPanelHeader from "@/modules/generatedLanding/RightPanelHeader";
 
 type Props = {
   data: GPTOutput;
@@ -14,9 +15,11 @@ export default function RightPanel({ data, dispatch }: Props) {
       {/* Preview Block */}
       <div className="w-full max-w-5xl bg-white border border-gray-200 rounded-xl shadow-md mb-8 overflow-hidden">
         <div className="px-6 pt-6 pb-2 border-b border-gray-100">
-          <h2 className="text-sm font-semibold text-gray-600 tracking-wide">
-          Click any text to edit. This is your live landing page preview.
-          </h2>
+          
+    
+
+          <RightPanelHeader data={data} dispatch={dispatch} />
+          
         </div>
 
         <div className="bg-white p-8">
@@ -25,9 +28,9 @@ export default function RightPanel({ data, dispatch }: Props) {
       </div>
 
       {/* Sticky Action Buttons */}
-      <div className="w-full max-w-5xl sticky bottom-0 z-10 bg-slate-50 border-t border-gray-200 py-4 px-4 flex justify-end gap-4 shadow-sm">
+      {/* <div className="w-full max-w-5xl sticky bottom-0 z-10 bg-slate-50 border-t border-gray-200 py-4 px-4 flex justify-end gap-4 shadow-sm">
         <ActionButtons data={data} />
-      </div>
+      </div> */}
     </div>
   );
 }

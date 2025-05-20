@@ -7,9 +7,13 @@ import { cleanAndDownloadHTML } from "@/modules/generatedLanding/htmlDownloadUti
 
 type Props = {
   data: GPTOutput;
+  showPublish?: boolean;
+  onPublish?: () => void;
 };
 
-export default function ActionButtons({ data }: Props) {
+
+export default function ActionButtons({ data, showPublish, onPublish }: Props) {
+
   const handlePreview = () => {
     try {
       // Ensure data is properly serializable
@@ -63,7 +67,7 @@ export default function ActionButtons({ data }: Props) {
 
 
   return (
-    <div className="w-full max-w-[800px] bg-slate-50 border-t border-brand-border py-4 px-4 flex justify-end gap-4">
+    <div className="w-full max-w-[800px] py-4 px-4 flex justify-end gap-4">
       <button
         onClick={handlePreview}
         className="bg-white border border-gray-300 text-gray-800 px-4 py-2 rounded-md text-sm font-semibold hover:bg-gray-100 transition"
@@ -76,6 +80,18 @@ export default function ActionButtons({ data }: Props) {
       >
         Download HTML
       </button>
+
+      {showPublish && (
+        <button
+          onClick={onPublish}
+          className="bg-brand-accentPrimary text-white px-4 py-2 rounded-md text-sm font-semibold hover:bg-brand-logo transition"
+        >
+          Publish
+        </button>
+      )}
+
+
+
     </div>
   );
 }

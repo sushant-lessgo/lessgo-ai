@@ -1,3 +1,6 @@
+'use client';
+import React, { useState } from "react"
+
 import EditableText from "@/modules/generatedLanding/EditableText"
 import EditableWrapper from "@/modules/generatedLanding/EditableWrapper"
 import { trackEdit } from '@/utils/trackEdit';
@@ -24,6 +27,11 @@ export default function HeroSection({
   dispatch,
   isEditable,
 }: Props) {
+
+
+  const [image, setImage] = useState<string | null>(null);
+const [error, setError] = useState<string | null>(null);
+
   return (
 <>
 
@@ -111,9 +119,58 @@ export default function HeroSection({
         </div>
 
         {/* Right Column */}
-        <div className="w-full aspect-[4/3] md:aspect-[16/9] bg-landing-mutedBg border-2 border-dashed border-landing-border rounded-lg flex items-center justify-center text-landing-textMuted text-sm shadow-sm">
-        Image placeholder — uploading will be available soon. For now, you can replace the image after downloading the landing page.
-</div>
+        {!image ? (
+          <div
+            className="w-full aspect-[4/3] md:aspect-[16/9] bg-landing-mutedBg border-2 border-dashed border-landing-border rounded-lg flex flex-col items-center justify-center text-landing-textMuted text-sm shadow-sm p-4 relative"
+          >
+            <label htmlFor="imageUpload" className="cursor-pointer text-center">
+              <p className="font-medium">Upload Image</p>
+              <p>JPG or PNG — Max size 2MB</p>
+            </label>
+            <input
+              type="file"
+              id="imageUpload"
+              accept="image/png, image/jpeg"
+              className="hidden"
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (file) {
+                  if (!["image/jpeg", "image/png"].includes(file.type)) {
+                    setError("Only JPG or PNG images are allowed.");
+                    return;
+                  }
+                  if (file.size > 2 * 1024 * 1024) {
+                    setError("File is too large. Max size is 2MB.");
+                    return;
+                  }
+                  const reader = new FileReader();
+                  reader.onloadend = () => {
+                    setImage(reader.result as string);
+                    setError(null);
+                  };
+                  reader.readAsDataURL(file);
+                }
+              }}
+            />
+            {error && <p className="text-red-500 text-xs mt-2">{error}</p>}
+          </div>
+        ) : (
+          <div className="w-full aspect-[4/3] md:aspect-[16/9] relative">
+            <img
+              src={image}
+              alt="Uploaded preview"
+              className="w-full h-full object-cover rounded-lg shadow-sm"
+            />
+            <button
+              onClick={() => setImage(null)}
+              className="absolute top-2 right-2 bg-white bg-opacity-75 hover:bg-opacity-100 rounded-full p-1 shadow"
+              title="Remove Image"
+            >
+              ✖️
+            </button>
+          </div>
+        )}
+
 
       </div>
     </section>
