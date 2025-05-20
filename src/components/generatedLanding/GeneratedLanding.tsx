@@ -3,7 +3,7 @@
 import { useReducer } from "react"
 
 import type { GPTOutput } from "@/modules/prompt/types"
-import Header from "@/components/shared/Header"
+import Header from "@/components/dashboard/Header"
 import LeftPanel from "@/components/generatedLanding/LeftPanel"
 import RightPanel from "@/modules/generatedLanding/RightPanel"
 import Footer from "@/components/shared/Footer"
@@ -29,7 +29,19 @@ export default function GeneratedLanding({ data, input }: Props) {
       <main className="flex flex-1 overflow-hidden">
         {/* Left Panel */}
         <aside className="w-[30%] min-w-[280px] max-w-sm bg-slate-50 border-r border-gray-200 p-4 overflow-y-auto">
-          <LeftPanel data={state} input={input} />
+          <LeftPanel
+            data={state}
+            input={input}
+            onUserInputRegenerate={(newInput) => {
+              // TODO: Trigger GPT request here using newInput
+              console.log("Regenerating from new input:", newInput)
+            }}
+            onMarketDetailsRegenerate={(updated) => {
+              // TODO: Trigger GPT request here using updated values
+              console.log("Regenerating from updated market details:", updated)
+            }}
+          />
+
         </aside>
 
         {/* Right Panel */}

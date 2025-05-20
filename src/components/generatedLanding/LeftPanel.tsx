@@ -1,43 +1,57 @@
 import type { GPTOutput } from "@/modules/prompt/types"
 import UserInputCard from "@/components/generatedLanding/UserInputCard"
-import AIExplanation from "@/components/generatedLanding/AIExplanation"
+import MarketDetailsCard from "@/components/generatedLanding/MarketDetailsCard"
 import InstructionNote from "@/components/generatedLanding/InstructionNote"
+import AIStepsCard from "@/components/generatedLanding/AIStepsCard"
 
 type Props = {
   data: GPTOutput
   input: string
+  onUserInputRegenerate: (newInput: string) => void
+  onMarketDetailsRegenerate: (updated: {
+    marketCategory: string
+    marketSubcategory: string
+    targetAudience: string
+    problem: string
+  }) => void
 }
 
-export default function LeftPanel({ data, input }: Props) {
+export default function LeftPanel({
+  data,
+  input,
+  onUserInputRegenerate,
+  onMarketDetailsRegenerate,
+}: Props) {
   return (
-    <div className="space-y-8">
-      {/* Zone 1: User Input */}
+    <div className="space-y-8 max-h-screen overflow-y-auto pr-2">
+      {/* Section 1: User Input */}
       <section>
-        {/* <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">
-          Lessgo Controls
-        </div> */}
-        <UserInputCard input={input} />
+        <UserInputCard input={input} onRegenerate={onUserInputRegenerate} />
       </section>
 
-      {/* Zone 2: AI Thought Process */}
+      {/* Section 2: Market Details */}
       <section>
-        {/* <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">
-          AI Breakdown
-        </div> */}
-        <AIExplanation
-          criticalAssumptions={data.explanation.critical_assumptions}
-          targetPersona={data.explanation.target_persona}
-          marketPositioning={data.explanation.market_positioning}
-          copywritingStrategy={data.explanation.copywriting_strategy}
+        <MarketDetailsCard
+          marketCategory={data.explanation.market_positioning.category}
+          // marketSubcategory={data.explanation.market_positioning.subcategory || ""}
+          // targetAudience={data.explanation.target_persona.target_user}
+          // problem={data.explanation.target_persona.pain_point}
+          marketSubcategory="Test"
+          targetAudience="Test"
+          problem="Test"
+          onRegenerate={onMarketDetailsRegenerate}
         />
       </section>
 
-      {/* Zone 3: Instruction */}
-     {/* Zone 3: Instruction */}
-<section>
-  <InstructionNote />
-</section>
+      {/* Section 3: AI Steps */}
+      <section>
+        <AIStepsCard />
+      </section>
 
+      {/* Section 4: Instructions */}
+      <section>
+        <InstructionNote />
+      </section>
     </div>
   )
 }

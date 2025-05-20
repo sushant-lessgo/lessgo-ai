@@ -1,59 +1,63 @@
-import { InfoIcon, Sparkles, Edit3, Download, Rocket, Handshake } from "lucide-react"
-import { ReactNode } from "react"
+"use client"
 
+import { useEffect, useRef } from "react"
+import { InfoIcon, Sparkles, Edit3, Download, Rocket, Wand2 } from "lucide-react"
+import posthog from "posthog-js"
 
 export default function InstructionNote() {
-  const steps: {
-    icon: JSX.Element
-    title: string
-    description: ReactNode
-  }[] = [
+  const ref = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          posthog.capture("how_it_works_viewed")
+          observer.disconnect()
+        }
+      },
+      { threshold: 0.3 }
+    )
+
+    if (ref.current) observer.observe(ref.current)
+    return () => observer.disconnect()
+  }, [])
+
+  const steps = [
     {
       icon: <Sparkles className="w-4 h-4 text-gray-500" />,
-      title: "One-Line Input",
-      description: "You write one sentence. AI builds a high-conversion landing page.",
+      title: "Write One Sentence",
+      description: "Describe your product idea in a single line — that’s all we need.",
+    },
+    {
+      icon: <Wand2 className="w-4 h-4 text-gray-500" />,
+      title: "Lessgo AI Thinks for You",
+      description: "It analyzes your product, market, and competitors to write conversion-optimized copy.",
     },
     {
       icon: <Edit3 className="w-4 h-4 text-gray-500" />,
-      title: "Live Editing",
-      description: "Double-click any text to change it directly. No coding needed.",
+      title: "Click and Edit",
+      description: "Click on any part of your landing page to instantly edit it — no coding required.",
     },
     {
       icon: <Download className="w-4 h-4 text-gray-500" />,
-      title: "Full Export",
-      description: "Download HTML and customize further—images, layout, anything.",
+      title: "Export HTML",
+      description: "Download clean, editable code to host, modify, or publish anywhere.",
     },
     {
       icon: <Rocket className="w-4 h-4 text-gray-500" />,
-      title: "What’s Coming",
-      description: "One-click publish, dashboard, custom themes, and more.",
+      title: "More Power Coming",
+      description: "Coming soon: one-click publish, custom themes, analytics, and integrations.",
     },
-    {
-      icon: <Handshake className="w-4 h-4 text-gray-500" />,
-      title: "Shape the Roadmap",
-      description: (
-        <>
-          Book a 15-minute call with the founder.{" "}
-          <a
-            href="https://t.co/kx0zFbtbri"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-indigo-600 underline"
-          >
-            Pick a time
-          </a>
-          .
-        </>
-      ),
-    }
   ]
 
   return (
-    <div className="bg-white border border-gray-200 rounded-md shadow-sm px-5 py-4 space-y-6">
+    <div ref={ref} className="bg-white border border-gray-200 rounded-md shadow-sm px-5 py-4 space-y-6">
       <div className="flex items-center gap-2">
-  <InfoIcon className="w-4 h-4 text-gray-500" />
-  <h3 className="text-sm font-semibold text-gray-700 tracking-tight">How This Works</h3>
-</div>
+        <InfoIcon className="w-4 h-4 text-gray-500" />
+        <h3 className="text-sm font-semibold text-gray-700 tracking-tight">
+          How This Works
+        </h3>
+      </div>
 
       <ol className="space-y-6">
         {steps.map((step, i) => (
