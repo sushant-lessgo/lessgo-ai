@@ -8,6 +8,7 @@ import Footer from '@/components/shared/Footer'
 import DashboardHeader from '@/components/dashboard/DashboardHeader'
 import ProjectCard from '@/components/dashboard/ProjectCard'
 import EmptyState from '@/components/dashboard/EmptyState'
+import type { Project } from '@/components/dashboard/ProjectCard'
 
 // Replace this with real backend/API integration
 const mockProjects: Project[] = [

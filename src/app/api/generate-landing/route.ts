@@ -11,13 +11,14 @@ export async function POST(req: Request) {
   const DEMO_TOKEN = "lessgodemomockdata"
   const authHeader = req.headers.get("Authorization") || ""
   const token = authHeader.replace("Bearer ", "").trim()
+  // console.log("Token:", token)
 
   if (process.env.NEXT_PUBLIC_USE_MOCK_GPT === "true" && token === DEMO_TOKEN) {
     return NextResponse.json(mockGPTOutput)
   }
 
   const body = {
-    model: "gpt-4",
+    model: "gpt-3.5-turbo",
     messages: buildPrompt(productIdea),
     temperature: 0.7,
   }
@@ -36,3 +37,4 @@ export async function POST(req: Request) {
   const parsed = gptProcessor(result)
   return NextResponse.json(parsed)
 }
+
