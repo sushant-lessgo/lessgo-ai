@@ -1,23 +1,15 @@
-export type TargetPersona = {
-  role: string
-  pain_points: string
-  aspirations: string
-  sophistication_level: string
-}
-
-export type MarketPositioning = {
-  category: string
-  primary_competitors: string[]
-  key_differentiation: string
-}
-
-export type CopywritingStrategy = {
-  tone: string
-  structure_choice: string
-  persuasion_focus: string
-}
+import type { CtaConfigType } from "@/types"
 
 export type GPTOutput = {
+  meta: {
+    marketCategory: string
+    marketSubcategory: string
+    targetAudience: string
+    problemBeingSolved: string
+  }
+  
+    theme: string
+  
   hero: {
     headline: string
     subheadline: string
@@ -25,6 +17,7 @@ export type GPTOutput = {
     urgency_text: string
     body_text?: string
     hero_image?: string
+    ctaConfig: CtaConfigType | null
   }
   before_after: {
     section_headline: string
@@ -43,12 +36,15 @@ export type GPTOutput = {
     bullets: string[]
     cta_text: string
     urgency_text: string
+    ctaConfig: CtaConfigType | null
   }
   faq: { question: string; answer: string }[]
-  explanation: {
-    critical_assumptions: string[]
-    target_persona: TargetPersona
-    market_positioning: MarketPositioning
-    copywriting_strategy: CopywritingStrategy
+  visibleSections: {
+    hero: true
+    before_after: true
+    how_it_works: true
+    testimonials: true
+    offer: true
+    faq: true
   }
 }

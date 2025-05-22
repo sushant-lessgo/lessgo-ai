@@ -1,6 +1,8 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+
 
 import LandingPagePreview from "@/components/generatedLanding/LandingPagePreview";
 import PreviewDebugHelper from "./PreviewDebugHelper"; // Import the debug component
@@ -11,6 +13,13 @@ import { cleanAndDownloadHTML } from "@/modules/generatedLanding/htmlDownloadUti
 export default function PreviewPage() {
   const [data, setData] = useState<GPTOutput | null>(null);
   const [error, setError] = useState<string | null>(null);
+
+const router = useRouter();
+const [publishing, setPublishing] = useState(false);
+const [publishSuccess, setPublishSuccess] = useState(false);
+const [publishedUrl, setPublishedUrl] = useState("");
+const [publishError, setPublishError] = useState("");
+
 
   useEffect(() => {
     const checkForData = () => {
@@ -52,6 +61,44 @@ export default function PreviewPage() {
     };
   }, []);
 
+async function handlePublish() {
+  if (!data) return;
+
+  setPublishing(true);
+  setPublishError("");
+
+  try {
+    const generatedSlug = data.hero?.headline
+      ?.toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "")
+      .slice(0, 40) || `page-${Date.now()}`;
+
+    const res = await fetch("/api/publish", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        slug: generatedSlug,
+        htmlContent: document.documentElement.innerHTML, // optional: replace with cleaned HTML if needed
+        title: data.hero?.headline || "Untitled Page",
+      }),
+    });
+
+    const result = await res.json();
+
+    if (!res.ok) {
+      throw new Error(result.error || "Failed to publish");
+    }
+
+    setPublishedUrl(result.url);
+    setPublishSuccess(true);
+  } catch (err: any) {
+    console.error("Publish failed:", err);
+    setPublishError(err.message || "Unexpected error");
+  } finally {
+    setPublishing(false);
+  }
+}
 
 
   if (error) {
@@ -97,12 +144,54 @@ export default function PreviewPage() {
       <LandingPagePreview data={data} dispatch={() => {}} isStaticExport={true} />
 
       <div className="sticky bottom-0 w-full bg-white border-t border-gray-200 px-6 py-4 flex justify-end">
+        <div className="sticky bottom-0 w-full bg-white border-t border-gray-200 px-6 py-4 flex justify-between items-center">
+  <button
+    onClick={() => window.close()}
+    className="text-sm text-gray-500 hover:text-gray-800 underline"
+  >
+    Close Preview
+  </button>
+
+  <button
+    onClick={handlePublish}
+    className="bg-brand-accentPrimary text-white px-5 py-2 rounded-md font-semibold text-sm hover:bg-brand-logo transition"
+  >
+    Publish
+  </button>
+
+  {publishSuccess && (
+  <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div className="bg-white p-6 rounded-lg shadow-lg text-center max-w-sm w-full">
+      <h2 className="text-xl font-bold mb-3">🎉 Page Published!</h2>
+      <p className="text-sm text-gray-600 break-all mb-4">{publishedUrl}</p>
+      <div className="flex justify-center gap-3 mt-4">
         <button
-          onClick={() => cleanAndDownloadHTML(data)}
-          className="bg-brand-accentPrimary text-white px-5 py-2 rounded-md font-semibold text-sm hover:bg-brand-logo transition"
+          onClick={() => navigator.clipboard.writeText(publishedUrl)}
+          className="text-sm bg-gray-200 hover:bg-gray-300 px-3 py-1 rounded"
         >
-          Download HTML
+          Copy Link
         </button>
+        <a
+          href={publishedUrl}
+          target="_blank"
+          className="text-sm bg-brand-accentPrimary text-white hover:bg-brand-logo px-3 py-1 rounded"
+          rel="noreferrer"
+        >
+          View Live
+        </a>
+      </div>
+      <button
+        onClick={() => setPublishSuccess(false)}
+        className="mt-4 text-xs text-gray-500 hover:text-gray-800 underline"
+      >
+        Close
+      </button>
+    </div>
+  </div>
+)}
+
+</div>
+
       </div>
       {/* Include the debug helper on successful preview */}
       {/* <PreviewDebugHelper /> */}

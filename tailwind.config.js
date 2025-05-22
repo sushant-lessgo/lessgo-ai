@@ -60,15 +60,15 @@ module.exports = {
   				highlightBG: '#FFF5EF'
   			},
   			landing: {
-  				primary: '#14B8A6',
-  				primaryHover: '#0D9488',
-  				accent: '#34D399',
-  				mutedBg: '#F9FAFB',
-  				border: '#E5E7EB',
-  				textPrimary: '#111827',
-  				textSecondary: '#374151',
-  				textMuted: '#6B7280'
-  			},
+				primary: 'var(--landing-primary)',
+				primaryHover: 'var(--landing-primary-hover)',
+				accent: 'var(--landing-accent)',
+				mutedBg: 'var(--landing-muted-bg)',
+				border: 'var(--landing-border)',
+				textPrimary: 'var(--landing-text-primary)',
+				textSecondary: 'var(--landing-text-secondary)',
+				textMuted: 'var(--landing-text-muted)'
+				},
   			editable: {
   				bg: '#FEF9C3',
   				primaryBg: '#E0F7F5',

@@ -7,15 +7,16 @@ export function gptProcessor(raw: any): GPTOutput {
 
     const parsed = JSON.parse(text)
 
-    // Optional: Light validation of top-level structure
+    // Basic validation of top-level keys
     if (
+      !parsed.meta ||
+      !parsed.theme ||
       !parsed.hero ||
       !parsed.before_after ||
       !parsed.how_it_works ||
       !parsed.testimonials ||
       !parsed.offer ||
-      !parsed.faq ||
-      !parsed.explanation
+      !parsed.faq
     ) {
       throw new Error("Incomplete GPT output")
     }

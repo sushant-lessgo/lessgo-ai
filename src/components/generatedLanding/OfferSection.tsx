@@ -1,16 +1,23 @@
-import EditableText from "@/modules/generatedLanding/EditableText"
-import EditableWrapper from "@/modules/generatedLanding/EditableWrapper"
-import type { Action } from "@/modules/generatedLanding/landingPageReducer"
+'use client';
+
+import EditableText from "@/modules/generatedLanding/EditableText";
+import EditableWrapper from "@/modules/generatedLanding/EditableWrapper";
+import type { Action } from "@/modules/generatedLanding/landingPageReducer";
 import { trackEdit } from '@/utils/trackEdit';
+import { EmailFormEmbed } from "@/components/generatedLanding/EmailFormEmbed";
+import type { CtaConfigType } from "@/types"; // adjust path as needed
+import type { GPTOutput } from "@/modules/prompt/types"
 
 type Props = {
-  headline: string
-  bullets: string[]
-  cta_text: string
-  urgency_text: string
-  dispatch: React.Dispatch<Action>
-  isEditable: boolean
-}
+  headline: string;
+  bullets: string[];
+  cta_text: string;
+  urgency_text: string;
+  dispatch: React.Dispatch<Action>;
+  isEditable: boolean;
+  ctaConfig: CtaConfigType | null;
+  sectionId: keyof GPTOutput["visibleSections"];
+};
 
 export default function OfferSection({
   headline,
@@ -19,9 +26,27 @@ export default function OfferSection({
   urgency_text,
   dispatch,
   isEditable,
+  ctaConfig,
+  sectionId,
 }: Props) {
   return (
-    <section className="w-full bg-landing-primary text-white py-24 px-4">
+    <section className="w-full bg-landing-primary text-white py-24 px-4" id="email-form">
+{isEditable && (
+        <div className="flex justify-end">
+          <button
+            onClick={() =>
+              dispatch({
+                type: "SET_SECTION_VISIBILITY",
+                payload: { section: sectionId, visible: false },
+              })
+            }
+            className="text-sm text-red-500 hover:underline"
+          >
+            Hide Section
+          </button>
+        </div>
+      )}
+
       <div className="max-w-5xl mx-auto flex flex-col items-center text-center gap-10">
         
         {/* Headline */}
@@ -29,13 +54,13 @@ export default function OfferSection({
           <EditableText
             value={headline}
             onChange={(val) => {
-              trackEdit('Offer', 'headline', val);
+              trackEdit('offer', 'headline', val);
               dispatch({
                 type: "UPDATE_FIELD",
                 payload: { path: "offer.headline", value: val },
-              })
+              });
             }}
-            className="text-3xl md:text-4xl font-bold leading-snug "
+            className="text-3xl md:text-4xl font-bold leading-snug"
             isEditable={isEditable}
           />
         </EditableWrapper>
@@ -49,14 +74,14 @@ export default function OfferSection({
               dispatch({
                 type: "UPDATE_FIELD",
                 payload: { path: "offer.urgency_text", value: val },
-              })
+              });
             }}
             className="text-base"
             isEditable={isEditable}
           />
         </EditableWrapper>
 
-        {/* CTA */}
+        {/* CTA Button */}
         <EditableWrapper useAltHover={true} isEditable={isEditable}>
           <EditableText
             value={cta_text}
@@ -65,7 +90,7 @@ export default function OfferSection({
               dispatch({
                 type: "UPDATE_FIELD",
                 payload: { path: "offer.cta_text", value: val },
-              })
+              });
             }}
             className="bg-white text-landing-primary font-semibold px-6 py-3 rounded-lg text-base hover:bg-gray-100 transition w-full sm:w-auto text-center"
             isEditable={isEditable}
@@ -81,11 +106,11 @@ export default function OfferSection({
                 <EditableText
                   value={point}
                   onChange={(val) => {
-              trackEdit('offer', 'offer_bullets', val);
+                    trackEdit('offer', 'offer_bullets', val);
                     dispatch({
                       type: "UPDATE_FIELD",
                       payload: { path: `offer.bullets[${i}]`, value: val },
-                    })
+                    });
                   }}
                   isEditable={isEditable}
                 />
@@ -93,7 +118,14 @@ export default function OfferSection({
             </div>
           ))}
         </div>
+
+        {/* ✅ Email Form Embed for separate-section */}
+        {ctaConfig?.type === "email-form" && ctaConfig.placement === "separate-section" && (
+          <div className="w-full max-w-xl mt-10">
+            <EmailFormEmbed embedCode={ctaConfig.embed_code!} />
+          </div>
+        )}
       </div>
     </section>
-  )
+  );
 }

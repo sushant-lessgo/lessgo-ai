@@ -32,13 +32,13 @@ export default function LeftPanel({
       {/* Section 2: Market Details */}
       <section>
         <MarketDetailsCard
-          marketCategory={data.explanation.market_positioning.category}
+          marketCategory={data.meta.marketCategory}
           // marketSubcategory={data.explanation.market_positioning.subcategory || ""}
           // targetAudience={data.explanation.target_persona.target_user}
           // problem={data.explanation.target_persona.pain_point}
-          marketSubcategory="Test"
-          targetAudience="Test"
-          problem="Test"
+          marketSubcategory={data.meta.marketSubcategory}
+          targetAudience={data.meta.targetAudience}
+          problem={data.meta.problemBeingSolved}
           onRegenerate={onMarketDetailsRegenerate}
         />
       </section>

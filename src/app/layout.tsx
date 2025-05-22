@@ -1,13 +1,13 @@
 import type { Metadata } from "next";
 // import Script from 'next/script'
 
-import { useEffect } from "react";
 import posthog from "posthog-js";
 import { PostHogProvider } from '@/providers/ph-provider'
 import { GeistSans, GeistMono } from 'geist/font';
 import "./globals.css";
 // import GoogleAnalytics from '@/components/GoogleAnalytics';
 import { Suspense } from 'react';
+import { InjectLandingTheme } from '@/components/theme/InjectLandingTheme';
 import {
   ClerkProvider,
   SignInButton,
@@ -16,6 +16,7 @@ import {
   SignedOut,
   UserButton,
 } from '@clerk/nextjs'
+
 
 
 
@@ -75,12 +76,16 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+
+
+
+
   return (
     <ClerkProvider>
       <html lang="en">
         <head />
         <body className="antialiased">
-          
+          <InjectLandingTheme />
           <PostHogProvider>
             {children}
           </PostHogProvider>

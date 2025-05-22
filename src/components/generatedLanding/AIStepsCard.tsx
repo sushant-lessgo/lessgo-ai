@@ -13,10 +13,7 @@ const steps = [
     title: "Analyzed Similar Products",
     description: (
       <>
-        Reviewed landing pages of top competitors like{" "}
-        <a href="https://example.com" target="_blank" className="text-blue-600 underline">FitCoach</a>,{" "}
-        <a href="https://example.com" target="_blank" className="text-blue-600 underline">QuickBurn</a>, and{" "}
-        <a href="https://example.com" target="_blank" className="text-blue-600 underline">StrongAI</a>.
+        Reviewed landing pages of top competitors and similar products to understand their messaging, positioning, and user engagement strategies.
       </>
     ),
   },

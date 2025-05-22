@@ -2,6 +2,7 @@ import EditableText from "@/modules/generatedLanding/EditableText"
 import EditableWrapper from "@/modules/generatedLanding/EditableWrapper"
 import type { Action } from "@/modules/generatedLanding/landingPageReducer"
 import { trackEdit } from '@/utils/trackEdit';
+import type { GPTOutput } from "@/modules/prompt/types"
 
 
 type Testimonial = {
@@ -15,15 +16,30 @@ type Props = {
   testimonials: Testimonial[]
   dispatch: React.Dispatch<Action>
   isEditable: boolean
+  sectionId: keyof GPTOutput["visibleSections"];
 }
 
-export default function TestimonialsSection({ testimonials, dispatch, isEditable, }: Props) {
+export default function TestimonialsSection({ testimonials, dispatch, isEditable, sectionId, }: Props) {
   const first = testimonials[0]
 
   return (
-    <section className="w-full py-24 bg-gray-50">
+    <section className="w-full py-24 bg-landing-mutedBg">
       <div className="max-w-4xl mx-auto px-4 md:px-8 text-center">
-        
+        {isEditable && (
+        <div className="flex justify-end">
+          <button
+            onClick={() =>
+              dispatch({
+                type: "SET_SECTION_VISIBILITY",
+                payload: { section: sectionId, visible: false },
+              })
+            }
+            className="text-sm text-red-500 hover:underline"
+          >
+            Hide Section
+          </button>
+        </div>
+      )}
         {/* Section Header */}
         <p className="text-sm font-semibold text-landing-primary uppercase tracking-wider">
           Customer Testimonials

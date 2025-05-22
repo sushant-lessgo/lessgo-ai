@@ -2,6 +2,8 @@ import EditableText from "@/modules/generatedLanding/EditableText"
 import EditableWrapper from "@/modules/generatedLanding/EditableWrapper"
 import { trackEdit } from '@/utils/trackEdit';
 import type { Action } from "@/modules/generatedLanding/landingPageReducer"
+import type { GPTOutput } from "@/modules/prompt/types"
+import { useEffect } from "react";
 
 type Props = {
   section_headline: string
@@ -11,6 +13,7 @@ type Props = {
   after_points: string[]
   dispatch: React.Dispatch<Action>
   isEditable: boolean
+  sectionId: keyof GPTOutput["visibleSections"];
 }
 
 export default function BeforeAfterSection({
@@ -21,13 +24,33 @@ export default function BeforeAfterSection({
   after_points,
   dispatch,
   isEditable,
+  sectionId,
 }: Props) {
+
+
+
+
+
   return (
-    <section className="w-full py-20 bg-gray-50">
+    <section className="w-full py-20 	bg-landing-mutedBg">
       <div className="max-w-6xl mx-auto px-4 md:px-8 flex flex-col gap-12">
         
         {/* Section Headline */}
-
+      {isEditable && (
+        <div className="flex justify-end">
+          <button
+            onClick={() =>
+              dispatch({
+                type: "SET_SECTION_VISIBILITY",
+                payload: { section: sectionId, visible: false },
+              })
+            }
+            className="text-sm text-red-500 hover:underline"
+          >
+            Hide Section
+          </button>
+        </div>
+      )}
 
         <EditableWrapper isEditable={isEditable}>
           <EditableText

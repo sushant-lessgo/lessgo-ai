@@ -2,6 +2,7 @@ import EditableText from "@/modules/generatedLanding/EditableText"
 import EditableWrapper from "@/modules/generatedLanding/EditableWrapper"
 import type { Action } from "@/modules/generatedLanding/landingPageReducer"
 import { trackEdit } from '@/utils/trackEdit';
+import type { GPTOutput } from "@/modules/prompt/types"
 
 type Step = {
   title: string
@@ -13,6 +14,7 @@ type Props = {
   steps: Step[]
   dispatch: React.Dispatch<Action>
   isEditable: boolean
+  sectionId: keyof GPTOutput["visibleSections"];
 }
 
 export default function HowItWorksSection({
@@ -20,9 +22,27 @@ export default function HowItWorksSection({
   steps,
   dispatch,
   isEditable,
+  sectionId,
 }: Props) {
   return (
     <section className="w-full py-20 bg-white">
+
+
+      {isEditable && (
+        <div className="flex justify-end">
+          <button
+            onClick={() =>
+              dispatch({
+                type: "SET_SECTION_VISIBILITY",
+                payload: { section: sectionId, visible: false },
+              })
+            }
+            className="text-sm text-red-500 hover:underline"
+          >
+            Hide Section
+          </button>
+        </div>
+      )}
       <div className="max-w-6xl mx-auto px-4 md:px-8 flex flex-col items-center gap-16 text-center">
         
         {/* Section Headline */}

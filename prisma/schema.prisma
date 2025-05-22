@@ -35,3 +35,22 @@ model Token {
   project   Project?
   createdAt DateTime  @default(now())
 }
+
+
+model PublishedPage {
+  id          String   @id @default(cuid())
+  userId      String   // Clerk User ID (external, not a foreign key)
+  slug        String   @unique
+  title       String?
+  htmlContent String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  isPublished Boolean  @default(true)
+
+  // Optional fields for future use
+  previewImage String?
+  views        Int      @default(0)
+
+  @@index([userId])
+}
+

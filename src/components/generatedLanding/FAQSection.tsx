@@ -3,6 +3,7 @@ import EditableText from "@/modules/generatedLanding/EditableText"
 import EditableWrapper from "@/modules/generatedLanding/EditableWrapper"
 import type { Action } from "@/modules/generatedLanding/landingPageReducer"
 import { trackEdit } from '@/utils/trackEdit';
+import type { GPTOutput } from "@/modules/prompt/types"
 
 type FAQItem = {
   question: string
@@ -14,10 +15,11 @@ type Props = {
   dispatch: React.Dispatch<Action>
   isStaticExport?: boolean
   isEditable: boolean
+  sectionId: keyof GPTOutput["visibleSections"];
 }
 
 
-export default function FAQSection({ faq, dispatch, isStaticExport,isEditable, }: Props) {
+export default function FAQSection({ faq, dispatch, isStaticExport,isEditable, sectionId, }: Props) {
 
   const [openIndex, setOpenIndex] = useState<number | null>(null)
 
@@ -26,9 +28,23 @@ export default function FAQSection({ faq, dispatch, isStaticExport,isEditable, }
   }
 
   return (
-    <section className="w-full py-24 bg-white">
+    <section className="w-full py-24 bg-landing-mutedBg">
       <div className="max-w-5xl mx-auto px-4 md:px-8">
-        
+        {isEditable && (
+        <div className="flex justify-end">
+          <button
+            onClick={() =>
+              dispatch({
+                type: "SET_SECTION_VISIBILITY",
+                payload: { section: sectionId, visible: false },
+              })
+            }
+            className="text-sm text-red-500 hover:underline"
+          >
+            Hide Section
+          </button>
+        </div>
+      )}
         {/* Heading */}
         <h2 className="text-3xl md:text-4xl font-bold text-center mb-4 text-landing-textPrimary">
           FAQs

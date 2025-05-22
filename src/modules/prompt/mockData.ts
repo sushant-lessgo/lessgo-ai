@@ -7,7 +7,11 @@ export const mockGPTOutput: GPTOutput = {
     cta_text: "Start Your Transformation",
     urgency_text: "Limited spots available this month",
     body_text: "Our proven system helps busy professionals get fit on their own schedule",
-    hero_image: "/placeholder-hero.png"
+    hero_image: "/placeholder-hero.png",
+    ctaConfig: {
+      
+      
+    }
   },
   before_after: {
     section_headline: "Experience the Change",
@@ -27,9 +31,18 @@ export const mockGPTOutput: GPTOutput = {
   how_it_works: {
     section_headline: "How FitNow Works",
     steps: [
-      { title: "Sign Up", description: "Complete a quick onboarding process to personalize your journey" },
-      { title: "Follow the Plan", description: "Daily micro-habits and guided steps tailored to you" },
-      { title: "See the Results", description: "Watch your body transform over the weeks without burnout" }
+      {
+        title: "Sign Up",
+        description: "Complete a quick onboarding process to personalize your journey"
+      },
+      {
+        title: "Follow the Plan",
+        description: "Daily micro-habits and guided steps tailored to you"
+      },
+      {
+        title: "See the Results",
+        description: "Watch your body transform over the weeks without burnout"
+      }
     ]
   },
   testimonials: [
@@ -51,7 +64,10 @@ export const mockGPTOutput: GPTOutput = {
       "Cancel anytime, no contracts"
     ],
     cta_text: "Claim Your Free Trial",
-    urgency_text: "Offer ends in 48 hours"
+    urgency_text: "Offer ends in 48 hours",
+    ctaConfig: {
+      
+    }
   },
   faq: [
     {
@@ -60,7 +76,7 @@ export const mockGPTOutput: GPTOutput = {
     },
     {
       question: "How much time does it take daily?",
-      answer: "You’ll need 15-20 minutes per day, fully guided."
+      answer: "You’ll need 15–20 minutes per day, fully guided."
     }
   ],
   explanation: {
@@ -85,5 +101,13 @@ export const mockGPTOutput: GPTOutput = {
       structure_choice: "Before/After followed by step-by-step clarity",
       persuasion_focus: "Ease, time efficiency, transformation without burnout"
     }
+  },
+  visibleSections: {
+    hero: true,
+    before_after: true,
+    how_it_works: true,
+    testimonials: true,
+    offer: true,
+    faq: true
   }
 }
