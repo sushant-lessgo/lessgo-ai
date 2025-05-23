@@ -5,8 +5,10 @@ import EditableWrapper from "@/modules/generatedLanding/EditableWrapper";
 import type { Action } from "@/modules/generatedLanding/landingPageReducer";
 import { trackEdit } from '@/utils/trackEdit';
 import { EmailFormEmbed } from "@/components/generatedLanding/EmailFormEmbed";
-import type { CtaConfigType } from "@/types"; // adjust path as needed
-import type { GPTOutput } from "@/modules/prompt/types"
+import type { CtaConfigType } from "@/types";
+import type { GPTOutput } from "@/modules/prompt/types";
+import { Button } from "@/components/ui/button";
+
 
 type Props = {
   headline: string;
@@ -31,7 +33,7 @@ export default function OfferSection({
 }: Props) {
   return (
     <section className="w-full bg-landing-primary text-white py-24 px-4" id="email-form">
-{isEditable && (
+      {isEditable && (
         <div className="flex justify-end">
           <button
             onClick={() =>
@@ -48,7 +50,6 @@ export default function OfferSection({
       )}
 
       <div className="max-w-5xl mx-auto flex flex-col items-center text-center gap-10">
-        
         {/* Headline */}
         <EditableWrapper useAltHover={true} isEditable={isEditable}>
           <EditableText
@@ -81,22 +82,6 @@ export default function OfferSection({
           />
         </EditableWrapper>
 
-        {/* CTA Button */}
-        <EditableWrapper useAltHover={true} isEditable={isEditable}>
-          <EditableText
-            value={cta_text}
-            onChange={(val) => {
-              trackEdit('offer', 'cta_text', val);
-              dispatch({
-                type: "UPDATE_FIELD",
-                payload: { path: "offer.cta_text", value: val },
-              });
-            }}
-            className="bg-white text-landing-primary font-semibold px-6 py-3 rounded-lg text-base hover:bg-gray-100 transition w-full sm:w-auto text-center"
-            isEditable={isEditable}
-          />
-        </EditableWrapper>
-
         {/* Bullet Points */}
         <div className="flex flex-wrap justify-center gap-x-8 gap-y-3 text-sm text-white/90 mt-6 max-w-3xl">
           {bullets.map((point, i) => (
@@ -119,12 +104,44 @@ export default function OfferSection({
           ))}
         </div>
 
-        {/* ✅ Email Form Embed for separate-section */}
-        {ctaConfig?.type === "email-form" && ctaConfig.placement === "separate-section" && (
-          <div className="w-full max-w-xl mt-10">
-            <EmailFormEmbed embedCode={ctaConfig.embed_code!} />
-          </div>
-        )}
+        {/* Embed form if email-form with placement=separate-section */}
+        {ctaConfig?.type === "email-form" && (
+  (ctaConfig.placement === "separate-section" || ctaConfig.placement === "hero") && (
+    <div className="w-full max-w-xl mt-10">
+      <EmailFormEmbed embedCode={ctaConfig.embed_code!} />
+    </div>
+  )
+)}
+
+        {/* CTA Button logic */}
+        {ctaConfig?.type === "link" ? (
+        <a
+  href={ctaConfig.url}
+  target="_blank"
+  rel="noopener noreferrer"
+  className="mt-6"
+>
+  <Button className="bg-white text-landing-primary font-semibold px-6 py-3 rounded-lg text-base hover:bg-gray-100 transition w-full sm:w-auto text-center">
+    {ctaConfig.cta_text}
+  </Button>
+</a>
+
+        ) : ctaConfig?.type !== "email-form" ? (
+          <EditableWrapper useAltHover={true} isEditable={isEditable}>
+            <EditableText
+              value={cta_text}
+              onChange={(val) => {
+                trackEdit('offer', 'cta_text', val);
+                dispatch({
+                  type: "UPDATE_FIELD",
+                  payload: { path: "offer.cta_text", value: val },
+                });
+              }}
+              className="bg-white text-landing-primary font-semibold px-6 py-3 rounded-lg text-base hover:bg-gray-100 transition w-full sm:w-auto text-center"
+              isEditable={isEditable}
+            />
+          </EditableWrapper>
+        ) : null}
       </div>
     </section>
   );

@@ -1,6 +1,13 @@
 import type { GPTOutput } from "@/modules/prompt/types"
 
 export const mockGPTOutput: GPTOutput = {
+  meta: {
+    marketCategory: "Digital Fitness",
+    marketSubcategory: "Home Workout Apps",
+    targetAudience: "Busy professionals aged 25–40",
+    problemBeingSolved: "Lack of time and motivation to maintain fitness"
+  },
+  theme: "Sunset Glow",
   hero: {
     headline: "Effortlessly Shed Pounds Without The Gym",
     subheadline: "Transform your body and stay fit without breaking a sweat",
@@ -8,10 +15,7 @@ export const mockGPTOutput: GPTOutput = {
     urgency_text: "Limited spots available this month",
     body_text: "Our proven system helps busy professionals get fit on their own schedule",
     hero_image: "/placeholder-hero.png",
-    ctaConfig: {
-      
-      
-    }
+    ctaConfig: null
   },
   before_after: {
     section_headline: "Experience the Change",
@@ -65,9 +69,7 @@ export const mockGPTOutput: GPTOutput = {
     ],
     cta_text: "Claim Your Free Trial",
     urgency_text: "Offer ends in 48 hours",
-    ctaConfig: {
-      
-    }
+    ctaConfig: null
   },
   faq: [
     {
@@ -79,29 +81,6 @@ export const mockGPTOutput: GPTOutput = {
       answer: "You’ll need 15–20 minutes per day, fully guided."
     }
   ],
-  explanation: {
-    critical_assumptions: [
-      "Target user lacks time and motivation for traditional workouts",
-      "Digital guidance is as effective as in-person training",
-      "Behavioral consistency matters more than intensity"
-    ],
-    target_persona: {
-      role: "Busy urban professional, aged 28–40",
-      pain_points: "No time for gym, low energy, frustration with yo-yo diets",
-      aspirations: "Feel fit, energized, and in control without overhauling lifestyle",
-      sophistication_level: "Familiar with fitness basics but needs guidance and structure"
-    },
-    market_positioning: {
-      category: "Digital Fitness & Wellness",
-      primary_competitors: ["Noom", "Freeletics", "MyFitnessPal"],
-      key_differentiation: "Micro-habit based system with zero gym time required"
-    },
-    copywriting_strategy: {
-      tone: "Empathetic, motivating, and direct",
-      structure_choice: "Before/After followed by step-by-step clarity",
-      persuasion_focus: "Ease, time efficiency, transformation without burnout"
-    }
-  },
   visibleSections: {
     hero: true,
     before_after: true,

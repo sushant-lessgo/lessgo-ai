@@ -13,6 +13,7 @@ type CTAConfiguratorPopoverProps = {
   ctaConfig: CtaConfigType | null;
   dispatch: React.Dispatch<Action>;
   closePopover: () => void;
+  gptCtaText: string;
 };
 
 
@@ -21,6 +22,7 @@ export function CTAConfiguratorPopover({
   ctaConfig,
   dispatch,
   closePopover,
+  gptCtaText
 }: CTAConfiguratorPopoverProps) {
   const posthog = usePostHog();
 
@@ -31,17 +33,20 @@ export function CTAConfiguratorPopover({
   const [placement, setPlacement] = useState<'hero' | 'separate-section'>('hero');
 
   useEffect(() => {
-    if (ctaConfig) {
-      setCtaType(ctaConfig.type);
-      setCtaText(ctaConfig.cta_text || '');
-      if (ctaConfig.type === 'link') {
-        setUrl(ctaConfig.url || '');
-      } else {
-        setEmbedCode(ctaConfig.embed_code || '');
-        setPlacement(ctaConfig.placement || 'hero');
-      }
+  if (ctaConfig) {
+    setCtaType(ctaConfig.type);
+    setCtaText(ctaConfig.cta_text || "");
+    if (ctaConfig.type === "link") {
+      setUrl(ctaConfig.url || "");
+    } else {
+      setEmbedCode(ctaConfig.embed_code || "");
+      setPlacement(ctaConfig.placement || "hero");
     }
-  }, [ctaConfig]);
+  } else {
+    // Prefill from GPT CTA text if available
+    setCtaText(gptCtaText); // <-- you'll pass this as a prop
+  }
+}, [ctaConfig, gptCtaText]);
 
   const handleSave = () => {
     if (!ctaType) return;
@@ -119,11 +124,14 @@ export function CTAConfiguratorPopover({
         <>
           <Label>Embed Code</Label>
           <Input
-            type="text"
-            placeholder="<form>...</form>"
-            value={embedCode}
-            onChange={(e) => setEmbedCode(e.target.value)}
-          />
+      type="text"
+      placeholder="Paste full HTML form embed (no scripts)"
+      value={embedCode}
+      onChange={(e) => setEmbedCode(e.target.value)}
+    />
+    <p className="text-xs text-muted-foreground mt-1">
+      Only pure HTML embeds are supported. Script-based forms (e.g. Mailchimp JS) are not supported.
+    </p>
           <Label>Placement</Label>
           <RadioGroup
             value={placement}
@@ -135,7 +143,7 @@ export function CTAConfiguratorPopover({
             </div>
             <div className="flex items-center space-x-2">
               <RadioGroupItem value="separate-section" id="place-section" />
-              <Label htmlFor="place-section">Separate Section</Label>
+              <Label htmlFor="place-section">Offer Section</Label>
             </div>
           </RadioGroup>
         </>
