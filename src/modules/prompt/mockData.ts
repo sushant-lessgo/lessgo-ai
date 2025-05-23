@@ -14,7 +14,7 @@ export const mockGPTOutput: GPTOutput = {
     cta_text: "Start Your Transformation",
     urgency_text: "Limited spots available this month",
     body_text: "Our proven system helps busy professionals get fit on their own schedule",
-    hero_image: "/placeholder-hero.png",
+    hero_image: null,
     ctaConfig: null
   },
   before_after: {

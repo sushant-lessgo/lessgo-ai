@@ -16,7 +16,8 @@ export type GPTOutput = {
     cta_text: string
     urgency_text: string
     body_text?: string
-    hero_image?: string
+    hero_image?: string | null;
+
     ctaConfig: CtaConfigType | null
   }
   before_after: {
