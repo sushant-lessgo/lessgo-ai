@@ -9,6 +9,8 @@ import type { GPTOutput } from "@/modules/prompt/types";
 import type { Action } from "./landingPageReducer";
 import { Switch } from "@/components/ui/switch";
 import ThemeCustomizer from '@/components/theme/ThemeCustomizer';
+import PreviewButton from "@/modules/generatedLanding/PreviewButton";
+import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from "@/components/ui/tooltip";
 
 type Props = {
   data: GPTOutput;
@@ -69,10 +71,26 @@ export default function RightPanelHeader({ data, dispatch }: Props) {
               ))}
             </DropdownMenuContent>
           </DropdownMenu>
+
+
+
         </div>
+              
 
         {/* Right: No buttons for now */}
         <div />
+        <TooltipProvider>
+        <Tooltip>
+  <TooltipTrigger asChild>
+    <div>
+      <PreviewButton pageData={data} />
+    </div>
+  </TooltipTrigger>
+  <TooltipContent side="top">
+    Preview your page... you’ll publish from there.
+  </TooltipContent>
+</Tooltip>
+</TooltipProvider>
       </div>
 
       <ThemeCustomizer isOpen={open} onClose={() => setOpen(false)} />

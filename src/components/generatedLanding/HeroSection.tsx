@@ -8,7 +8,7 @@ import { EditableCTA } from "@/components/generatedLanding/EditableCTA";
 import type { Action } from "@/modules/generatedLanding/landingPageReducer";
 import type { CtaConfigType } from "@/types";
 import type { GPTOutput } from "@/modules/prompt/types"
-
+import { Button } from "@/components/ui/button";
 type Props = {
   headline: string;
   subheadline: string;
@@ -99,11 +99,32 @@ export default function HeroSection({
           {/* Conditional CTA Button */}
           <div className="relative w-full mt-6">
           <EditableCTA
-  ctaConfig={ctaConfig}
-  isEditable={isEditable}
-  dispatch={dispatch}
-  ctaText={cta_text}
-/>
+            ctaConfig={ctaConfig}
+            isEditable={isEditable}
+            dispatch={dispatch}
+            ctaText={cta_text}
+          />
+
+          {ctaConfig?.type === "link" && (
+            <a
+              href={ctaConfig.url}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <Button className="bg-landing-primary text-white hover:bg-landing-primaryHover transition w-full sm:w-auto text-center">
+                {ctaConfig.cta_text}
+              </Button>
+            </a>
+          )}
+
+          {ctaConfig?.type === "email-form" && ctaConfig.placement === "separate-section" ? (
+            <a href="#email-form">
+              <Button className="bg-landing-primary text-white hover:bg-landing-primaryHover transition w-full sm:w-auto text-center">
+                {ctaConfig.cta_text}
+              </Button>
+            </a>
+          ) : null}
+
 
           {/* Inline Embed Form for hero placement */}
           {ctaConfig?.type === "email-form" && ctaConfig.placement === "hero" && (

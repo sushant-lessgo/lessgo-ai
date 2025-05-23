@@ -29,7 +29,7 @@ export function EditableCTA({ ctaConfig, isEditable, dispatch, ctaText }: Editab
   };
 
   // Special case: email-form placed in hero → show gear only
-  if (ctaConfig?.type === "email-form" && ctaConfig.placement === "hero") {
+  if (ctaConfig?.type != null) {
     return (
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
