@@ -17,9 +17,11 @@ type Props = {
   urgency_text: string;
   dispatch: React.Dispatch<Action>;
   isEditable: boolean;
+  
   ctaConfig: CtaConfigType | null;
   sectionId: keyof GPTOutput["visibleSections"];
 };
+
 
 export default function OfferSection({
   headline,
@@ -126,7 +128,7 @@ export default function OfferSection({
   </Button>
 </a>
 
-        ) : ctaConfig?.type !== "email-form" ? (
+        ) : ctaConfig && ctaConfig.type !== "email-form" ? (
           <EditableWrapper useAltHover={true} isEditable={isEditable}>
             <EditableText
               value={cta_text}
@@ -142,6 +144,14 @@ export default function OfferSection({
             />
           </EditableWrapper>
         ) : null}
+
+        {!ctaConfig && (
+  <div className="text-sm text-yellow-200 bg-yellow-700 bg-opacity-20 border border-yellow-400 px-4 py-3 rounded-md text-center mt-6">
+    {isEditable
+      ? "⚠️ CTA not configured. Please configure it in the Hero section."
+      : "⚠️ No CTA configured. Your visitors will have nothing to click here."}
+  </div>
+)}
       </div>
     </section>
   );

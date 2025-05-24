@@ -2,13 +2,15 @@
 
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useThemeStore } from "@/stores/useThemeStore";
+
 
 
 import LandingPagePreview from "@/components/generatedLanding/LandingPagePreview";
 import PreviewDebugHelper from "./PreviewDebugHelper"; // Import the debug component
 import type { GPTOutput } from "@/modules/prompt/types";
 
-import { cleanAndDownloadHTML } from "@/modules/generatedLanding/htmlDownloadUtil"
+
 
 export default function PreviewPage() {
   const [data, setData] = useState<GPTOutput | null>(null);
@@ -19,6 +21,7 @@ const [publishing, setPublishing] = useState(false);
 const [publishSuccess, setPublishSuccess] = useState(false);
 const [publishedUrl, setPublishedUrl] = useState("");
 const [publishError, setPublishError] = useState("");
+
 
 
   useEffect(() => {
@@ -60,6 +63,32 @@ const [publishError, setPublishError] = useState("");
       clearTimeout(timeout);
     };
   }, []);
+
+useEffect(() => {
+  if (!data) return;
+
+  // Parse data.theme which is a string (you said `theme: string` in GPTOutput)
+  let parsedTheme: { primary?: string; background?: string; muted?: string } = {};
+
+  try {
+    parsedTheme = JSON.parse(data.theme || '{}');
+  } catch (err) {
+    console.warn("Failed to parse theme from data.theme:", err);
+  }
+
+  useThemeStore.setState({
+    primary: parsedTheme.primary || '#14B8A6',
+    background: parsedTheme.background || '#F9FAFB',
+    muted: parsedTheme.muted || '#6B7280',
+  });
+
+  const fullTheme = useThemeStore.getState().getFullTheme();
+  Object.entries(fullTheme).forEach(([key, val]) => {
+    document.documentElement.style.setProperty(key, val);
+  });
+}, [data]);
+
+
 
 async function handlePublish() {
   if (!data) return;

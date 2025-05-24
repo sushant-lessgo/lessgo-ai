@@ -73,7 +73,10 @@ export default function HeroSection({
                 trackEdit('hero', 'headline', val);
                 dispatch({ type: "UPDATE_FIELD", payload: { path: "hero.headline", value: val } });
               }}
-              className="text-4xl leading-tight md:text-5xl font-extrabold text-landing-textPrimary max-w-xl"
+              className={`text-4xl leading-tight md:text-5xl font-extrabold text-landing-textPrimary ${
+                isTwoColumn ? "max-w-xl text-left" : "max-w-[70rem] text-center mx-auto"
+              }`}
+
               isEditable={isEditable}
             />
           </EditableWrapper>
@@ -85,7 +88,10 @@ export default function HeroSection({
                 trackEdit('hero', 'subheadline', val);
                 dispatch({ type: "UPDATE_FIELD", payload: { path: "hero.subheadline", value: val } });
               }}
-              className="text-lg text-landing-textSecondary max-w-xl"
+              className={`text-lg text-landing-textSecondary ${
+                isTwoColumn ? "max-w-xl text-left" : "max-w-[50rem] text-center mx-auto"
+              }`}
+
               isEditable={isEditable}
             />
           </EditableWrapper>
@@ -98,7 +104,10 @@ export default function HeroSection({
                   trackEdit('hero', 'body', val);
                   dispatch({ type: "UPDATE_FIELD", payload: { path: "hero.body_text", value: val } });
                 }}
-                className="text-base text-landing-textMuted max-w-xl"
+                className={`text-base text-landing-textSecondary ${
+                  isTwoColumn ? "max-w-xl text-left" : "max-w-[40rem] text-center mx-auto"
+                }`}
+
                 isEditable={isEditable}
               />
             )}
@@ -113,6 +122,15 @@ export default function HeroSection({
                 dispatch={dispatch}
                 ctaText={cta_text}
               />
+            )}
+
+
+            {!isEditable && !ctaConfig?.cta_text && (
+              <div className="max-w-xl mx-auto">
+              <div className="text-sm text-yellow-200 bg-yellow-700 bg-opacity-60 border border-yellow-400 px-4 py-3 rounded-md text-center mt-6">
+                ⚠️ No CTA configured. Your visitors will have nothing to click here.
+              </div>
+              </div>
             )}
 
             {ctaConfig?.cta_text && (
