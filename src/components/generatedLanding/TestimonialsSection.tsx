@@ -14,7 +14,7 @@ type Testimonial = {
 
 type Props = {
   testimonials: Testimonial[]
-  dispatch: React.Dispatch<Action>
+  dispatch?: React.Dispatch<Action>
   isEditable: boolean
   sectionId: keyof GPTOutput["visibleSections"];
 }
@@ -29,7 +29,7 @@ export default function TestimonialsSection({ testimonials, dispatch, isEditable
         <div className="flex justify-end">
           <button
             onClick={() =>
-              dispatch({
+              dispatch?.({
                 type: "SET_SECTION_VISIBILITY",
                 payload: { section: sectionId, visible: false },
               })
@@ -65,7 +65,7 @@ export default function TestimonialsSection({ testimonials, dispatch, isEditable
                 value={first.quote}
                 onChange={(val) => {
               trackEdit('testimonial', 'quote', val);
-                  dispatch({
+                  dispatch?.({
                     type: "UPDATE_FIELD",
                     payload: { path: "testimonials[0].quote", value: val },
                   })
@@ -81,7 +81,7 @@ export default function TestimonialsSection({ testimonials, dispatch, isEditable
                   value={first.name}
                   onChange={(val) => {
               trackEdit('testimonial', 'name', val);
-                    dispatch({
+                    dispatch?.({
                       type: "UPDATE_FIELD",
                       payload: { path: "testimonials[0].name", value: val },
                     })

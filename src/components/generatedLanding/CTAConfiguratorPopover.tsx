@@ -6,23 +6,21 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { usePostHog } from 'posthog-js/react';
-import type { CtaConfigType } from "@/types"; // adjust path if needed
+import type { CtaConfigType } from "@/types";
 import type { Action } from "@/modules/generatedLanding/landingPageReducer";
 
 type CTAConfiguratorPopoverProps = {
   ctaConfig: CtaConfigType | null;
-  dispatch: React.Dispatch<Action>;
+  dispatch?: React.Dispatch<Action>;
   closePopover: () => void;
   gptCtaText: string;
 };
-
-
 
 export function CTAConfiguratorPopover({
   ctaConfig,
   dispatch,
   closePopover,
-  gptCtaText
+  gptCtaText,
 }: CTAConfiguratorPopoverProps) {
   const posthog = usePostHog();
 
@@ -31,38 +29,51 @@ export function CTAConfiguratorPopover({
   const [url, setUrl] = useState('');
   const [embedCode, setEmbedCode] = useState('');
   const [placement, setPlacement] = useState<'hero' | 'separate-section'>('hero');
+  const [errors, setErrors] = useState<{ ctaText?: string; url?: string; embedCode?: string }>({});
 
   useEffect(() => {
-  if (ctaConfig) {
-    setCtaType(ctaConfig.type);
-    setCtaText(ctaConfig.cta_text || "");
-    if (ctaConfig.type === "link") {
-      setUrl(ctaConfig.url || "");
+    if (ctaConfig) {
+      setCtaType(ctaConfig.type);
+      setCtaText(ctaConfig.cta_text || '');
+      if (ctaConfig.type === 'link') {
+        setUrl(ctaConfig.url || '');
+      } else {
+        setEmbedCode(ctaConfig.embed_code || '');
+        setPlacement(ctaConfig.placement || 'hero');
+      }
     } else {
-      setEmbedCode(ctaConfig.embed_code || "");
-      setPlacement(ctaConfig.placement || "hero");
+      setCtaText(gptCtaText);
     }
-  } else {
-    // Prefill from GPT CTA text if available
-    setCtaText(gptCtaText); // <-- you'll pass this as a prop
-  }
-}, [ctaConfig, gptCtaText]);
+  }, [ctaConfig, gptCtaText]);
 
   const handleSave = () => {
-    if (!ctaType) return;
+    const newErrors: typeof errors = {};
+
+    if (!ctaText.trim()) {
+      newErrors.ctaText = 'CTA button text is required.';
+    }
+
+    if (ctaType === 'link' && !url.trim()) {
+      newErrors.url = 'URL is required for external link.';
+    }
+
+    if (ctaType === 'email-form' && !embedCode.trim()) {
+      newErrors.embedCode = 'Embed code is required for email form.';
+    }
+
+    setErrors(newErrors);
+
+    if (Object.keys(newErrors).length > 0) return;
 
     const newConfig = {
-      type: ctaType,
-      cta_text: ctaText,
+      type: ctaType!,
+      cta_text: ctaText.trim(),
       ...(ctaType === 'link'
-        ? { url }
-        : {
-            embed_code: embedCode,
-            placement,
-          }),
+        ? { url: url.trim() }
+        : { embed_code: embedCode.trim(), placement }),
     };
 
-    dispatch({
+    dispatch?.({
       type: 'UPDATE_FIELD',
       payload: {
         path: 'hero.ctaConfig',
@@ -105,33 +116,37 @@ export function CTAConfiguratorPopover({
         </div>
       </RadioGroup>
 
-      <Label>CTA Button Text</Label>
+      <Label>CTA Button Text*</Label>
       <Input value={ctaText} onChange={(e) => setCtaText(e.target.value)} />
+      {errors.ctaText && <p className="text-sm text-red-500 mt-1">{errors.ctaText}</p>}
 
       {ctaType === 'link' && (
         <>
-          <Label>URL</Label>
+          <Label>URL*</Label>
           <Input
             type="url"
             placeholder="https://example.com"
             value={url}
             onChange={(e) => setUrl(e.target.value)}
           />
+          {errors.url && <p className="text-sm text-red-500 mt-1">{errors.url}</p>}
         </>
       )}
 
       {ctaType === 'email-form' && (
         <>
-          <Label>Embed Code</Label>
+          <Label>Embed Code*</Label>
           <Input
-      type="text"
-      placeholder="Paste full HTML form embed (no scripts)"
-      value={embedCode}
-      onChange={(e) => setEmbedCode(e.target.value)}
-    />
-    <p className="text-xs text-muted-foreground mt-1">
-      Only pure HTML embeds are supported. Script-based forms (e.g. Mailchimp JS) are not supported.
-    </p>
+            type="text"
+            placeholder="Paste full HTML form embed (no scripts)"
+            value={embedCode}
+            onChange={(e) => setEmbedCode(e.target.value)}
+          />
+          {errors.embedCode && <p className="text-sm text-red-500 mt-1">{errors.embedCode}</p>}
+          <p className="text-xs text-muted-foreground mt-1">
+            Only pure HTML embeds are supported. Script-based forms (e.g. Mailchimp JS) are not supported.
+          </p>
+
           <Label>Placement</Label>
           <RadioGroup
             value={placement}

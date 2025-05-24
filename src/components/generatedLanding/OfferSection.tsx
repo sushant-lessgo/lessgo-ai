@@ -15,7 +15,7 @@ type Props = {
   bullets: string[];
   cta_text: string;
   urgency_text: string;
-  dispatch: React.Dispatch<Action>;
+  dispatch?: React.Dispatch<Action>;
   isEditable: boolean;
   
   ctaConfig: CtaConfigType | null;
@@ -39,7 +39,7 @@ export default function OfferSection({
         <div className="flex justify-end">
           <button
             onClick={() =>
-              dispatch({
+              dispatch?.({
                 type: "SET_SECTION_VISIBILITY",
                 payload: { section: sectionId, visible: false },
               })
@@ -58,7 +58,7 @@ export default function OfferSection({
             value={headline}
             onChange={(val) => {
               trackEdit('offer', 'headline', val);
-              dispatch({
+              dispatch?.({
                 type: "UPDATE_FIELD",
                 payload: { path: "offer.headline", value: val },
               });
@@ -74,7 +74,7 @@ export default function OfferSection({
             value={urgency_text}
             onChange={(val) => {
               trackEdit('offer', 'urgency_text', val);
-              dispatch({
+              dispatch?.({
                 type: "UPDATE_FIELD",
                 payload: { path: "offer.urgency_text", value: val },
               });
@@ -94,7 +94,7 @@ export default function OfferSection({
                   value={point}
                   onChange={(val) => {
                     trackEdit('offer', 'offer_bullets', val);
-                    dispatch({
+                    dispatch?.({
                       type: "UPDATE_FIELD",
                       payload: { path: `offer.bullets[${i}]`, value: val },
                     });
@@ -134,7 +134,7 @@ export default function OfferSection({
               value={cta_text}
               onChange={(val) => {
                 trackEdit('offer', 'cta_text', val);
-                dispatch({
+                dispatch?.({
                   type: "UPDATE_FIELD",
                   payload: { path: "offer.cta_text", value: val },
                 });

@@ -1,10 +1,15 @@
 // app/api/publish/route.ts
 import { NextResponse } from 'next/server'
 import { auth } from '@clerk/nextjs/server'
-
+import type { NextRequest } from 'next/server';
 import { prisma } from '@/lib/prisma' // Update path if different
 
-export async function POST(req: Request) {
+
+
+export async function POST(req: NextRequest) {
+  const protocol = process.env.NODE_ENV === 'production' ? 'https' : 'http';
+const host = req.headers.get("host") || "localhost:3000";
+const baseUrl = `${protocol}://${host}`;
   try {
     const { userId } = await auth()
 
@@ -13,7 +18,8 @@ export async function POST(req: Request) {
     }
 
     const body = await req.json()
-    const { slug, htmlContent, title } = body
+    const { slug, htmlContent, title, content } = body
+
 
     if (!slug || !htmlContent) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
@@ -29,19 +35,20 @@ export async function POST(req: Request) {
     }
 
     // Create published page
-    const published = await prisma.publishedPage.create({
+    await prisma.publishedPage.create({
       data: {
         userId,
         slug,
         htmlContent,
-        title
+        title,
+        content,
       }
     })
 
     return NextResponse.json({
-      message: 'Page published successfully',
-      url: `https://lessgo.ai/p/${slug}`
-    })
+  message: 'Page published successfully',
+  url: `${baseUrl}/p/${slug}`,
+});
   } catch (err) {
     console.error('[PUBLISH_ERROR]', err)
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 })

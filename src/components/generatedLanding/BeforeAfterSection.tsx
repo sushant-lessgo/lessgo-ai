@@ -11,7 +11,7 @@ type Props = {
   before_points: string[]
   after_title: string
   after_points: string[]
-  dispatch: React.Dispatch<Action>
+  dispatch?: React.Dispatch<Action>
   isEditable: boolean
   sectionId: keyof GPTOutput["visibleSections"];
 }
@@ -40,7 +40,7 @@ export default function BeforeAfterSection({
         <div className="flex justify-end">
           <button
             onClick={() =>
-              dispatch({
+              dispatch?.({
                 type: "SET_SECTION_VISIBILITY",
                 payload: { section: sectionId, visible: false },
               })
@@ -59,7 +59,7 @@ export default function BeforeAfterSection({
               
               trackEdit('before_after', 'section_headline', val);
               
-              dispatch({
+              dispatch?.({
                 type: "UPDATE_FIELD",
                 payload: { path: "before_after.section_headline", value: val },
               })
@@ -81,7 +81,7 @@ export default function BeforeAfterSection({
                 value={before_title}
                 onChange={(val) => {
                   trackEdit('before_after', 'before_title', val);
-                  dispatch({
+                  dispatch?.({
                     type: "UPDATE_FIELD",
                     payload: { path: "before_after.before_title", value: val },
                   })
@@ -100,7 +100,7 @@ export default function BeforeAfterSection({
                       value={point}
                       onChange={(val) => {
                         trackEdit('before_after', 'before_points', val);
-                        dispatch({
+                        dispatch?.({
                           type: "UPDATE_FIELD",
                           payload: {
                             path: `before_after.before_points[${i}]`,
@@ -126,7 +126,7 @@ export default function BeforeAfterSection({
                 value={after_title}
                 onChange={(val) => {
                     trackEdit('before_after', 'after_title', val);
-                  dispatch({
+                  dispatch?.({
                     type: "UPDATE_FIELD",
                     payload: { path: "before_after.after_title", value: val },
                   })
@@ -145,7 +145,7 @@ export default function BeforeAfterSection({
                       value={point}
                       onChange={(val) => {
                         trackEdit('before_after', 'after_points', val);
-                        dispatch({
+                        dispatch?.({
                           type: "UPDATE_FIELD",
                           payload: {
                             path: `before_after.after_points[${i}]`,

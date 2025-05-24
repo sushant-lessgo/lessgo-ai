@@ -17,7 +17,7 @@ type Props = {
   urgency_text?: string;
   body_text?: string;
   hero_image?: string | null;
-  dispatch: React.Dispatch<Action>;
+  dispatch?: React.Dispatch<Action>;
   isEditable: boolean;
   ctaConfig: CtaConfigType | null;
   sectionId: keyof GPTOutput["visibleSections"];
@@ -47,7 +47,7 @@ export default function HeroSection({
         <div className="flex justify-end">
           <button
             onClick={() =>
-              dispatch({
+              dispatch?.({
                 type: "SET_SECTION_VISIBILITY",
                 payload: { section: sectionId, visible: false },
               })
@@ -71,7 +71,7 @@ export default function HeroSection({
               value={headline}
               onChange={(val) => {
                 trackEdit('hero', 'headline', val);
-                dispatch({ type: "UPDATE_FIELD", payload: { path: "hero.headline", value: val } });
+                dispatch?.({ type: "UPDATE_FIELD", payload: { path: "hero.headline", value: val } });
               }}
               className={`text-4xl leading-tight md:text-5xl font-extrabold text-landing-textPrimary ${
                 isTwoColumn ? "max-w-xl text-left" : "max-w-[70rem] text-center mx-auto"
@@ -86,7 +86,7 @@ export default function HeroSection({
               value={subheadline}
               onChange={(val) => {
                 trackEdit('hero', 'subheadline', val);
-                dispatch({ type: "UPDATE_FIELD", payload: { path: "hero.subheadline", value: val } });
+                dispatch?.({ type: "UPDATE_FIELD", payload: { path: "hero.subheadline", value: val } });
               }}
               className={`text-lg text-landing-textSecondary ${
                 isTwoColumn ? "max-w-xl text-left" : "max-w-[50rem] text-center mx-auto"
@@ -102,7 +102,7 @@ export default function HeroSection({
                 value={body_text}
                 onChange={(val) => {
                   trackEdit('hero', 'body', val);
-                  dispatch({ type: "UPDATE_FIELD", payload: { path: "hero.body_text", value: val } });
+                  dispatch?.({ type: "UPDATE_FIELD", payload: { path: "hero.body_text", value: val } });
                 }}
                 className={`text-base text-landing-textSecondary ${
                   isTwoColumn ? "max-w-xl text-left" : "max-w-[40rem] text-center mx-auto"
@@ -164,7 +164,7 @@ export default function HeroSection({
                 value={urgency_text}
                 onChange={(val) => {
                   trackEdit('hero', 'urgency_text', val);
-                  dispatch({ type: "UPDATE_FIELD", payload: { path: "hero.urgency_text", value: val } });
+                  dispatch?.({ type: "UPDATE_FIELD", payload: { path: "hero.urgency_text", value: val } });
                 }}
                 className="text-sm text-red-600 sm:mt-0"
                 isEditable={isEditable}
@@ -202,7 +202,7 @@ export default function HeroSection({
                     reader.onloadend = () => {
                       setImage(reader.result as string);
                       setError(null);
-                      dispatch({
+                      dispatch?.({
                           type: "UPDATE_FIELD",
                           payload: { path: "hero.hero_image", value: reader.result },
                         });
@@ -224,7 +224,7 @@ export default function HeroSection({
               <button
                 onClick={() => {
                   setImage(null);
-                  dispatch({
+                  dispatch?.({
                     type: "UPDATE_FIELD",
                     payload: { path: "hero.hero_image", value: null },
                   });

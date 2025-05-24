@@ -1,3 +1,5 @@
+
+'use client'
 import type { GPTOutput } from "@/modules/prompt/types"
 import HeroSection from "./HeroSection"
 import BeforeAfterSection from "./BeforeAfterSection"
@@ -10,7 +12,7 @@ import type { Action } from "@/modules/generatedLanding/landingPageReducer"
 
 type Props = {
   data: GPTOutput
-  dispatch: React.Dispatch<Action>
+  dispatch?: React.Dispatch<Action>
   isStaticExport?: boolean
 }
 
@@ -23,7 +25,7 @@ export default function LandingPagePreview({ data, dispatch, isStaticExport }: P
   offer: true,
   faq: true,
 };
-
+if (!data) return null;
 const visible = {
   ...defaultVisibleSections,
   ...(data.visibleSections || {}),

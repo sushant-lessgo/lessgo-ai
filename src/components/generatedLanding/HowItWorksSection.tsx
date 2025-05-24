@@ -12,7 +12,7 @@ type Step = {
 type Props = {
   section_headline: string
   steps: Step[]
-  dispatch: React.Dispatch<Action>
+  dispatch?: React.Dispatch<Action>
   isEditable: boolean
   sectionId: keyof GPTOutput["visibleSections"];
 }
@@ -32,7 +32,7 @@ export default function HowItWorksSection({
         <div className="flex justify-end">
           <button
             onClick={() =>
-              dispatch({
+              dispatch?.({
                 type: "SET_SECTION_VISIBILITY",
                 payload: { section: sectionId, visible: false },
               })
@@ -51,7 +51,7 @@ export default function HowItWorksSection({
             value={section_headline}
             onChange={(val) => {
               trackEdit('HowItWorks', 'headline', val);
-              dispatch({
+              dispatch?.({
                 type: "UPDATE_FIELD",
                 payload: { path: "how_it_works.section_headline", value: val },
               })
@@ -77,7 +77,7 @@ export default function HowItWorksSection({
                   value={step.title}
                   onChange={(val) => {
               trackEdit('HowItWorks', 'Step_title', val);
-                    dispatch({
+                    dispatch?.({
                       type: "UPDATE_FIELD",
                       payload: {
                         path: `how_it_works.steps[${index}].title`,
@@ -96,7 +96,7 @@ export default function HowItWorksSection({
                   value={step.description}
                   onChange={(val) => {
               trackEdit('HowItWorks', 'step_description', val);
-                    dispatch({
+                    dispatch?.({
                       type: "UPDATE_FIELD",
                       payload: {
                         path: `how_it_works.steps[${index}].description`,

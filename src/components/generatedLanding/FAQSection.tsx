@@ -1,3 +1,5 @@
+'use client'
+
 import { useState } from "react";
 import EditableText from "@/modules/generatedLanding/EditableText";
 import EditableWrapper from "@/modules/generatedLanding/EditableWrapper";
@@ -12,7 +14,7 @@ type FAQItem = {
 
 type Props = {
   faq: FAQItem[];
-  dispatch: React.Dispatch<Action>;
+  dispatch?: React.Dispatch<Action>;
   isStaticExport?: boolean;
   isEditable: boolean;
   sectionId: keyof GPTOutput["visibleSections"];
@@ -40,7 +42,7 @@ export default function FAQSection({
           <div className="flex justify-end">
             <button
               onClick={() =>
-                dispatch({
+                dispatch?.({
                   type: "SET_SECTION_VISIBILITY",
                   payload: { section: sectionId, visible: false },
                 })
@@ -70,7 +72,7 @@ export default function FAQSection({
                     value={item.question}
                     onChange={(val) => {
                       trackEdit("faq", "item_question", val);
-                      dispatch({
+                      dispatch?.({
                         type: "UPDATE_FIELD",
                         payload: {
                           path: `faq[${index}].question`,
@@ -93,7 +95,7 @@ export default function FAQSection({
                     value={item.answer}
                     onChange={(val) => {
                       trackEdit("faq", "item_answer", val);
-                      dispatch({
+                      dispatch?.({
                         type: "UPDATE_FIELD",
                         payload: {
                           path: `faq[${index}].answer`,

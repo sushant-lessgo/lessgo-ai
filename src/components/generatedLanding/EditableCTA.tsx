@@ -12,7 +12,7 @@ import type { Action } from '@/modules/generatedLanding/landingPageReducer';
 interface EditableCTAProps {
   ctaConfig: CtaConfigType | null;
   isEditable: boolean;
-  dispatch: React.Dispatch<Action>;
+  dispatch?: React.Dispatch<Action>;
   ctaText: string;
 }
 

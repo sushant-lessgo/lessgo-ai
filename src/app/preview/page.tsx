@@ -3,13 +3,15 @@
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useThemeStore } from "@/stores/useThemeStore";
+import posthog from "posthog-js";
 
 
 
 import LandingPagePreview from "@/components/generatedLanding/LandingPagePreview";
 import PreviewDebugHelper from "./PreviewDebugHelper"; // Import the debug component
 import type { GPTOutput } from "@/modules/prompt/types";
-
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { SlugModal } from '@/components/SlugModal';
 
 
 export default function PreviewPage() {
@@ -22,6 +24,14 @@ const [publishSuccess, setPublishSuccess] = useState(false);
 const [publishedUrl, setPublishedUrl] = useState("");
 const [publishError, setPublishError] = useState("");
 
+const [showSlugModal, setShowSlugModal] = useState(false);
+const [customSlug, setCustomSlug] = useState('');
+
+
+
+const cta = data?.hero?.ctaConfig;
+const isPublishDisabled =
+  !cta?.cta_text || !(cta?.url || cta?.embed_code);
 
 
   useEffect(() => {
@@ -91,43 +101,66 @@ useEffect(() => {
 
 
 async function handlePublish() {
-  if (!data) return;
+
+  const previewElement = document.getElementById('landing-preview');
+if (!previewElement) {
+  setPublishError('Failed to find preview content.');
+  return;
+}
+
+const htmlContent = previewElement.innerHTML;
+
+  if (!data || !customSlug) return;
 
   setPublishing(true);
-  setPublishError("");
+  setPublishError('');
 
   try {
-    const generatedSlug = data.hero?.headline
-      ?.toLowerCase()
-      .replace(/[^a-z0-9]+/g, "-")
-      .replace(/^-+|-+$/g, "")
-      .slice(0, 40) || `page-${Date.now()}`;
+    // Step 1: Check if slug is available
+    const checkRes = await fetch(`/api/checkSlug?slug=${customSlug}`);
+    const checkData = await checkRes.json();
 
-    const res = await fetch("/api/publish", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
+    if (!checkRes.ok || !checkData.available) {
+      setPublishError('This slug is already taken. Please choose a different one.');
+      return;
+    }
+
+    // Step 2: Publish the page
+    const res = await fetch('/api/publish', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        slug: generatedSlug,
-        htmlContent: document.documentElement.innerHTML, // optional: replace with cleaned HTML if needed
-        title: data.hero?.headline || "Untitled Page",
+        slug: customSlug,
+        htmlContent, // can sanitize if needed
+        title: data.hero?.headline || 'Untitled Page',
+        content: data,
       }),
     });
 
     const result = await res.json();
 
     if (!res.ok) {
-      throw new Error(result.error || "Failed to publish");
+      throw new Error(result.error || 'Failed to publish');
     }
 
     setPublishedUrl(result.url);
     setPublishSuccess(true);
+
+    posthog?.capture("publish_clicked", {
+      slug: customSlug,
+      title: data.hero?.headline || "",
+      hasCTA: !!(data.hero?.ctaConfig?.cta_text && data.hero?.ctaConfig?.url),
+    });
+
+    setShowSlugModal(false);
   } catch (err: any) {
-    console.error("Publish failed:", err);
-    setPublishError(err.message || "Unexpected error");
+    console.error('Publish error:', err);
+    setPublishError(err.message || 'Unexpected error');
   } finally {
     setPublishing(false);
   }
 }
+
 
 
   if (error) {
@@ -170,7 +203,10 @@ async function handlePublish() {
 
   return (
     <div className="min-h-screen bg-white">
-      <LandingPagePreview data={data} dispatch={() => {}} isStaticExport={true} />
+      <div id="landing-preview">
+  <LandingPagePreview data={data} dispatch={() => {}} isStaticExport={true} />
+</div>
+
 
       <div className="sticky bottom-0 w-full bg-white border-t border-gray-200 px-6 py-4 flex justify-end">
         <div className="sticky bottom-0 w-full bg-white border-t border-gray-200 px-6 py-4 flex justify-between items-center">
@@ -181,12 +217,50 @@ async function handlePublish() {
     Close Preview
   </button>
 
-  <button
-    onClick={handlePublish}
-    className="bg-brand-accentPrimary text-white px-5 py-2 rounded-md font-semibold text-sm hover:bg-brand-logo transition"
-  >
-    Publish
-  </button>
+ <TooltipProvider>
+  <Tooltip>
+    <TooltipTrigger asChild>
+      <div>
+        <button
+          onClick={() => {
+            const defaultSlug = (data?.hero?.headline || `page-${Date.now()}`)
+              .toLowerCase()
+              .replace(/[^a-z0-9]+/g, "-")
+              .replace(/^-+|-+$/g, "")
+              .slice(0, 40);
+
+            setCustomSlug(defaultSlug);
+            setShowSlugModal(true);
+          }}
+          disabled={isPublishDisabled || publishing}
+          className={`px-5 py-2 rounded-md font-semibold text-base transition ${
+            isPublishDisabled || publishing
+              ? 'bg-gray-300 cursor-not-allowed'
+              : 'bg-brand-accentPrimary text-white hover:bg-brand-logo'
+          }`}
+        >
+          {publishing ? "Publishing..." : "Publish"}
+        </button>
+      </div>
+    </TooltipTrigger>
+    {isPublishDisabled && (
+      <TooltipContent side="top">
+        Configure CTA before publishing.
+      </TooltipContent>
+    )}
+  </Tooltip>
+</TooltipProvider>
+
+{showSlugModal && (
+  <SlugModal
+    slug={customSlug}
+    onChange={setCustomSlug}
+    onCancel={() => setShowSlugModal(false)}
+    onConfirm={handlePublish} // This function will use customSlug
+    loading={publishing}
+    error={publishError}
+  />
+)}
 
   {publishSuccess && (
   <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
@@ -225,5 +299,8 @@ async function handlePublish() {
       {/* Include the debug helper on successful preview */}
       {/* <PreviewDebugHelper /> */}
     </div>
+
+
+
   );
 }
