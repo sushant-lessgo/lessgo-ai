@@ -11,7 +11,7 @@ import { Switch } from "@/components/ui/switch";
 import ThemeCustomizer from '@/components/theme/ThemeCustomizer';
 import PreviewButton from "@/modules/generatedLanding/PreviewButton";
 import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from "@/components/ui/tooltip";
-
+import { useTokenId } from '@/context/TokenContext';
 type Props = {
   data: GPTOutput;
   dispatch: React.Dispatch<Action>;
@@ -23,7 +23,44 @@ export default function RightPanelHeader({ data, dispatch }: Props) {
   const handleLayoutClick = () => {
     posthog.capture("layout_modal_opened", { from: "right_panel_header" });
   };
+const tokenId = useTokenId();
+console.log('[TokenContext] tokenId in RightPanelHeader:', tokenId);
+const handleSaveDraft = async () => {
+  try {
 
+    console.log('[SAVE_DRAFT_PAYLOAD]', {
+  tokenId,
+  title: data.hero?.headline || 'Untitled Project',
+  content: data,
+});
+    const res = await fetch('/api/saveDraft', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        tokenId, // must be passed in from the page or parent
+        title: data.hero?.headline || 'Untitled Project',
+        content: data,
+      }),
+    });
+
+    const result = await res.json();
+    
+    if (!res.ok) {
+      console.error('[SAVE_DRAFT_ERROR]', result.error);
+      alert(result.error || 'Failed to save draft');
+      return;
+    }
+
+    console.log('[DRAFT_SAVED]', result.message);
+    alert('Draft saved successfully!');
+  } catch (err) {
+    console.error('[SAVE_DRAFT_FAILED]', err);
+    alert('Something went wrong while saving the draft.');
+  }
+};
+
+
+  
   const handleCustomizeTheme = () => {
     posthog.capture("customize_theme_clicked", { from: "right_panel_header" });
     setOpen(true);
@@ -79,6 +116,16 @@ export default function RightPanelHeader({ data, dispatch }: Props) {
 
         {/* Right: No buttons for now */}
         <div />
+        <div className="flex gap-3">
+       <button
+  onClick={handleSaveDraft}
+  className="border border-brand-mutedText text-brand-mutedText hover:bg-gray-100 hover:text-brand-text font-semibold text-sm px-4 py-2 rounded-md transition"
+>
+  Save Draft
+</button>
+
+        
+
         <TooltipProvider>
         <Tooltip>
   <TooltipTrigger asChild>
@@ -91,6 +138,7 @@ export default function RightPanelHeader({ data, dispatch }: Props) {
   </TooltipContent>
 </Tooltip>
 </TooltipProvider>
+</div>
       </div>
 
       <ThemeCustomizer isOpen={open} onClose={() => setOpen(false)} />

@@ -1,44 +1,33 @@
-'use client'
+import { auth } from '@clerk/nextjs/server';
+import { prisma } from '@/lib/prisma';
+import Header from '@/components/dashboard/Header';
+import Footer from '@/components/shared/Footer';
+import DashboardHeader from '@/components/dashboard/DashboardHeader';
+import ProjectCard from '@/components/dashboard/ProjectCard';
+import EmptyState from '@/components/dashboard/EmptyState';
 
-import { useEffect } from 'react'
-import posthog from 'posthog-js'
-import { currentUser } from '@clerk/nextjs/server'
-import Header from '@/components/dashboard/Header'
-import Footer from '@/components/shared/Footer'
-import DashboardHeader from '@/components/dashboard/DashboardHeader'
-import ProjectCard from '@/components/dashboard/ProjectCard'
-import EmptyState from '@/components/dashboard/EmptyState'
-import type { Project } from '@/components/dashboard/ProjectCard'
+export default async function DashboardPage() {
+  const { userId } = await auth();
 
-// Replace this with real backend/API integration
-const mockProjects: Project[] = [
-  {
-    id: '1',
-    name: 'CryptoX Landing Page',
-    status: 'Draft',
-    updatedAt: '2025-05-10T12:00:00Z',
+  if (!userId) return null;
+
+  const user = await prisma.user.findUnique({
+    where: { clerkId: userId },
+    include: {
+      projects: {
+        include: {
+    token: true,
   },
-  {
-    id: '2',
-    name: 'AI SaaS Launch',
-    status: 'Published',
-    updatedAt: '2025-05-17T18:45:00Z',
-  },
-]
+        orderBy: { updatedAt: 'desc' },
+      },
+    },
+  });
 
-export default function DashboardPage() {
-  useEffect(() => {
-    posthog.capture('dashboard_viewed')
-  }, [])
-
-  const projects = mockProjects // Replace with data from backend/store
+  const projects = user?.projects ?? [];
 
   return (
     <div className="flex flex-col min-h-screen bg-white text-brand-text font-body">
-      {/* Top Nav */}
       <Header />
-
-      {/* Main content */}
       <main className="flex-grow w-full max-w-5xl mx-auto px-4 py-8">
         <DashboardHeader />
 
@@ -48,16 +37,23 @@ export default function DashboardPage() {
               Recent Projects
             </h2>
             {projects.map((project) => (
-              <ProjectCard key={project.id} project={project} />
+              <ProjectCard
+                key={project.id}
+                project={{
+                  id: project.id,
+                  name: project.title || 'Untitled Project',
+                  status: project.status === 'published' ? 'Published' : 'Draft',
+                  updatedAt: project.updatedAt.toISOString(),
+                   tokenId: project.token.value,
+                }}
+              />
             ))}
           </section>
         ) : (
           <EmptyState />
         )}
       </main>
-
-      {/* Footer */}
       <Footer />
     </div>
-  )
+  );
 }

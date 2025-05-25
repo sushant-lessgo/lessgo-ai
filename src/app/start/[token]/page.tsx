@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation'
 import { prisma } from '@/lib/prisma'
 import PromptPageClient from './PromptPageClient'
-
+import { TokenProvider } from '@/context/TokenContext';
 type Params = {
   params: {
     token: string
@@ -30,5 +30,9 @@ export default async function StartTokenPage({ params }: Params) {
     notFound()
   }
 
-  return <PromptPageClient token={token} />
+  return (
+  <TokenProvider tokenId={token}>
+    <PromptPageClient token={token} />
+  </TokenProvider>
+);
 }

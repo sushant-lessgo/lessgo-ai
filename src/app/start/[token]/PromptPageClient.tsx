@@ -3,6 +3,7 @@
 import { useEffect } from 'react';
 import PromptPage from '@/modules/prompt/PromptPage';
 import posthog from 'posthog-js';
+import { TokenProvider } from '@/context/TokenContext';
 
 export default function PromptPageClient({ token }: { token: string }) {
   useEffect(() => {
@@ -31,5 +32,9 @@ export default function PromptPageClient({ token }: { token: string }) {
     };
   }, [token]);
 
-  return <PromptPage />;
+  return (
+    <TokenProvider tokenId={token}>
+      <PromptPage />
+    </TokenProvider>
+  );
 }

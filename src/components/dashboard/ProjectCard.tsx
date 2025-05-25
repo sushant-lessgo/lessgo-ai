@@ -1,12 +1,14 @@
 'use client'
 
 import posthog from 'posthog-js'
+import { useRouter } from 'next/navigation';
 
 export type Project = {
   id: string
   name: string
   status: 'Draft' | 'Published'
   updatedAt: string
+  tokenId: string;
 }
 
 
@@ -17,13 +19,17 @@ type Props = {
 }
 
 export default function ProjectCard({ project, onEdit, onPreview }: Props) {
+  
+  const router = useRouter();
+  
   const handleEdit = () => {
-    posthog.capture('project_edit_clicked', {
-      project_id: project.id,
-      project_name: project.name,
-    })
-    onEdit?.()
-  }
+  posthog.capture('project_edit_clicked', {
+    project_id: project.id,
+    project_name: project.name,
+  });
+
+  router.push(`/start/${project.tokenId}`); // ✅ navigate to editor
+};
 
   const handlePreview = () => {
     posthog.capture('project_preview_clicked', {
