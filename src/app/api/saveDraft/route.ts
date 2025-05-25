@@ -6,7 +6,7 @@ const DEMO_TOKEN = 'lessgodemomockdata';
 
 export async function POST(req: Request) {
   const { userId } = await auth();
-  const { tokenId, title, content } = await req.json();
+  const { tokenId, title, content, inputText } = await req.json();
 
   console.log('[SAVE_DRAFT_API] userId:', userId);
   console.log('[SAVE_DRAFT_API] tokenId:', tokenId);
@@ -33,11 +33,13 @@ export async function POST(req: Request) {
         ...(isDemo ? {} : { userId }),
         title,
         content,
+        inputText,
         status: 'draft',
       },
       update: {
         title,
         content,
+        inputText,
         updatedAt: new Date(),
       },
     });

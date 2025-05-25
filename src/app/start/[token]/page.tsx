@@ -33,10 +33,12 @@ export default async function StartTokenPage({ params }: Params) {
   // ✅ If draft exists → load edit UI
   if (dbToken.project?.content) {
   return (
+     <TokenProvider tokenId={token}> 
     <GeneratedLanding
       data={dbToken.project.content as any}
-      input={''}
+      input={dbToken.project.inputText || ''}
     />
+    </TokenProvider>
   );
 }
 

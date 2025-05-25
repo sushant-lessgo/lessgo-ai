@@ -1,6 +1,7 @@
 "use client"
 
-import { useReducer } from "react"
+import { useReducer, useState } from "react";
+
 
 import type { GPTOutput } from "@/modules/prompt/types"
 import Header from "@/components/dashboard/Header"
@@ -21,6 +22,7 @@ type Props = {
 
 export default function GeneratedLanding({ data, input }: Props) {
   const [state, dispatch] = useReducer(landingPageReducer, data)
+  const [inputText, setInputText] = useState<string>(input);
 
   return (
     <div className="min-h-screen flex flex-col bg-slate-100 text-brand-text">
@@ -31,7 +33,7 @@ export default function GeneratedLanding({ data, input }: Props) {
         <aside className="w-[30%] min-w-[280px] max-w-sm bg-slate-50 border-r border-gray-200 p-4 overflow-y-auto">
           <LeftPanel
             data={state}
-            input={input}
+            input={inputText}
             onUserInputRegenerate={(newInput) => {
               // TODO: Trigger GPT request here using newInput
               console.log("Regenerating from new input:", newInput)
@@ -47,7 +49,7 @@ export default function GeneratedLanding({ data, input }: Props) {
         {/* Right Panel */}
         <section className="w-[70%] flex-1 overflow-y-auto p-6 bg-white ring-1 border-l-2 border-gray-200 ring-slate-100">
           <div id="landing-page-preview">
-            <RightPanel data={state} dispatch={dispatch} />
+            <RightPanel data={state} dispatch={dispatch} inputText={input} />
           </div>
         </section>
       </main>

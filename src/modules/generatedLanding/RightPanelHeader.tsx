@@ -15,9 +15,10 @@ import { useTokenId } from '@/context/TokenContext';
 type Props = {
   data: GPTOutput;
   dispatch: React.Dispatch<Action>;
+  inputText: string; 
 };
 
-export default function RightPanelHeader({ data, dispatch }: Props) {
+export default function RightPanelHeader({ data, dispatch, inputText }: Props) {
   const [open, setOpen] = useState(false);
 
   const handleLayoutClick = () => {
@@ -32,6 +33,7 @@ const handleSaveDraft = async () => {
   tokenId,
   title: data.hero?.headline || 'Untitled Project',
   content: data,
+  
 });
     const res = await fetch('/api/saveDraft', {
       method: 'POST',
@@ -40,6 +42,7 @@ const handleSaveDraft = async () => {
         tokenId, // must be passed in from the page or parent
         title: data.hero?.headline || 'Untitled Project',
         content: data,
+        inputText,
       }),
     });
 

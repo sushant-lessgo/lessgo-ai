@@ -25,6 +25,7 @@ model Project {
   title     String    @default("Untitled Project")
   status    String    @default("draft")
   content   Json?
+  inputText String?
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
 }

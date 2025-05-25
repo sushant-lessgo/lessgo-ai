@@ -7,9 +7,10 @@ import RightPanelHeader from "@/modules/generatedLanding/RightPanelHeader";
 type Props = {
   data: GPTOutput;
   dispatch: React.Dispatch<Action>;
+  inputText: string; 
 };
 
-export default function RightPanel({ data, dispatch }: Props) {
+export default function RightPanel({ data, dispatch, inputText }: Props) {
   return (
     <div className="flex flex-col items-center px-6 py-10 bg-slate-100 min-h-screen">
       {/* Preview Block */}
@@ -18,7 +19,7 @@ export default function RightPanel({ data, dispatch }: Props) {
           
     
 
-          <RightPanelHeader data={data} dispatch={dispatch} />
+          <RightPanelHeader data={data} dispatch={dispatch} inputText={inputText}/>
           
         </div>
 
