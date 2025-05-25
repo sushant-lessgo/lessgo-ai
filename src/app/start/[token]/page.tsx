@@ -1,38 +1,50 @@
-import { notFound } from 'next/navigation'
-import { prisma } from '@/lib/prisma'
-import PromptPageClient from './PromptPageClient'
+import { notFound } from 'next/navigation';
+import { prisma } from '@/lib/prisma';
+import GeneratedLanding from '@/components/generatedLanding/GeneratedLanding';
+import PromptPageClient from './PromptPageClient';
 import { TokenProvider } from '@/context/TokenContext';
+
 type Params = {
   params: {
-    token: string
-  }
-}
+    token: string;
+  };
+};
 
-const DEMO_TOKEN = 'lessgodemomockdata'
+const DEMO_TOKEN = 'lessgodemomockdata';
 
 export default async function StartTokenPage({ params }: Params) {
-  const { token } = params
-  // console.log('Token:', token)
-  // ✅ Handle special-case demo token
+  const { token } = params;
+
+  // ✅ Handle demo token separately
   if (token === DEMO_TOKEN) {
-    return <PromptPageClient token={token} />
+    return <PromptPageClient token={token} />;
   }
 
-  // 🔍 Normal DB flow
+  // 🔍 Lookup token + project
   const dbToken = await prisma.token.findUnique({
     where: { value: token },
-    include: {
-      project: true,
-    },
-  })
+    include: { project: true },
+  });
 
-  if (!dbToken || !dbToken.project) {
-    notFound()
+  if (!dbToken) {
+    return notFound(); // invalid token
   }
 
+  // ✅ If draft exists → load edit UI
+  if (dbToken.project?.content) {
   return (
-  <TokenProvider tokenId={token}>
-    <PromptPageClient token={token} />
-  </TokenProvider>
-);
+    <GeneratedLanding
+      data={dbToken.project.content as any}
+      input={''}
+    />
+  );
+}
+
+
+  // ✅ If no draft yet → show prompt input flow
+  return (
+    <TokenProvider tokenId={token}>
+      <PromptPageClient token={token} />
+    </TokenProvider>
+  );
 }
