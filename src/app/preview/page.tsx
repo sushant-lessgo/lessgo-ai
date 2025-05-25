@@ -124,7 +124,7 @@ const htmlContent = previewElement.innerHTML;
       setPublishError('This slug is already taken. Please choose a different one.');
       return;
     }
-
+    const { primary, background, muted } = useThemeStore.getState();
     // Step 2: Publish the page
     const res = await fetch('/api/publish', {
       method: 'POST',
@@ -134,6 +134,11 @@ const htmlContent = previewElement.innerHTML;
         htmlContent, // can sanitize if needed
         title: data.hero?.headline || 'Untitled Page',
         content: data,
+        themeValues: {
+          primary,
+          background,
+          muted,
+        },
       }),
     });
 

@@ -18,7 +18,7 @@ const baseUrl = `${protocol}://${host}`;
     }
 
     const body = await req.json()
-    const { slug, htmlContent, title, content } = body
+    const { slug, htmlContent, title, content, themeValues } = body
 
 
     if (!slug || !htmlContent) {
@@ -42,6 +42,7 @@ const baseUrl = `${protocol}://${host}`;
         htmlContent,
         title,
         content,
+        themeValues,
       }
     })
 

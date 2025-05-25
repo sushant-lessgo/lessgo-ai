@@ -47,6 +47,7 @@ model PublishedPage {
   title       String?
   htmlContent String
   content     Json?
+  themeValues Json?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   isPublished Boolean  @default(true)
