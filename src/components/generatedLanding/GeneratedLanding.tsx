@@ -8,6 +8,8 @@ import Header from "@/components/dashboard/Header"
 import LeftPanel from "@/components/generatedLanding/LeftPanel"
 import RightPanel from "@/modules/generatedLanding/RightPanel"
 import Footer from "@/components/shared/Footer"
+import { useEffect } from "react";
+import { useThemeStore } from "@/stores/useThemeStore";
 
 import {
   landingPageReducer,
@@ -18,11 +20,41 @@ import {
 type Props = {
   data: GPTOutput
   input: string
+  themeValues: {
+    primary: string;
+    background: string;
+    muted: string;
+  }
 }
 
-export default function GeneratedLanding({ data, input }: Props) {
+export default function GeneratedLanding({ data, input, themeValues }: Props) {
+
+
   const [state, dispatch] = useReducer(landingPageReducer, data)
   const [inputText, setInputText] = useState<string>(input);
+
+  
+  const { setTheme, getFullTheme } = useThemeStore();
+
+  useEffect(() => {
+  if (!themeValues) return;
+
+  const { primary, background, muted } = themeValues;
+
+  // 1. Set in Zustand
+  setTheme({ primary, background, muted });
+
+  // 2. Inject CSS variables
+  const fullTheme = getFullTheme();
+  Object.entries(fullTheme).forEach(([key, val]) => {
+    document.documentElement.style.setProperty(key, val);
+  });
+}, [themeValues]);
+
+
+
+
+
 
   return (
     <div className="min-h-screen flex flex-col bg-slate-100 text-brand-text">

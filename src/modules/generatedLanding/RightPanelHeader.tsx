@@ -12,6 +12,7 @@ import ThemeCustomizer from '@/components/theme/ThemeCustomizer';
 import PreviewButton from "@/modules/generatedLanding/PreviewButton";
 import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from "@/components/ui/tooltip";
 import { useTokenId } from '@/context/TokenContext';
+import { useThemeStore } from '@/stores/useThemeStore';
 type Props = {
   data: GPTOutput;
   dispatch: React.Dispatch<Action>;
@@ -27,6 +28,8 @@ export default function RightPanelHeader({ data, dispatch, inputText }: Props) {
 const tokenId = useTokenId();
 console.log('[TokenContext] tokenId in RightPanelHeader:', tokenId);
 const handleSaveDraft = async () => {
+  
+  const { primary, background, muted } = useThemeStore.getState();
   try {
 
     console.log('[SAVE_DRAFT_PAYLOAD]', {
@@ -42,9 +45,15 @@ const handleSaveDraft = async () => {
         tokenId, // must be passed in from the page or parent
         title: data.hero?.headline || 'Untitled Project',
         content: data,
-        inputText,
-      }),
-    });
+        inputText,       
+        themeValues: {
+          primary,
+          background,
+          muted,
+        }, // ✅ correct closing bracket here
+  }),
+});
+
 
     const result = await res.json();
     

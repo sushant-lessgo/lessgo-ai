@@ -30,13 +30,31 @@ export default async function StartTokenPage({ params }: Params) {
     return notFound(); // invalid token
   }
 
+  const gptOutput = dbToken.project?.content as any;
+  const inputText = dbToken.project?.inputText || '';
+  const rawThemeValues = dbToken.project?.themeValues;
+
+const themeValues =
+  rawThemeValues &&
+  typeof rawThemeValues === 'object' &&
+  'primary' in rawThemeValues &&
+  'background' in rawThemeValues &&
+  'muted' in rawThemeValues
+    ? (rawThemeValues as { primary: string; background: string; muted: string })
+    : {
+        primary: '#14B8A6',
+        background: '#F9FAFB',
+        muted: '#6B7280',
+      };
+
   // ✅ If draft exists → load edit UI
   if (dbToken.project?.content) {
   return (
      <TokenProvider tokenId={token}> 
     <GeneratedLanding
-      data={dbToken.project.content as any}
-      input={dbToken.project.inputText || ''}
+      data={gptOutput}
+          input={inputText}
+          themeValues={themeValues}
     />
     </TokenProvider>
   );

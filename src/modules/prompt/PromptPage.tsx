@@ -6,11 +6,37 @@ import GeneratedLanding from "@/components/generatedLanding/GeneratedLanding"
 import type { GPTOutput } from "@/modules/prompt/types"
 import Logo from "@/components/shared/Logo"
 import PageIntro from "@/components/shared/PageIntro"
+import { predefinedThemes } from "@/components/theme/predefinedThemes"
+
 
 export default function PromptPage() {
   const [gptOutput, setGptOutput] = useState<GPTOutput | null>(null)
   const [userInput, setUserInput] = useState<string>("")
 
+const [themeValues, setThemeValues] = useState<{
+    primary: string;
+    background: string;
+    muted: string;
+  } | null>(null)
+
+  const handleSuccess = (gptResult: GPTOutput, input: string) => {
+    setGptOutput(gptResult)
+    setUserInput(input)
+
+    // 🔍 Extract theme name
+    const themeName = gptResult.theme
+
+    // 🎨 Convert themeName to themeValues
+    const matched = predefinedThemes.find(t => t.name === themeName)
+
+    const derivedTheme = matched || {
+      primary: '#14B8A6',
+      background: '#F9FAFB',
+      muted: '#6B7280',
+    }
+
+    setThemeValues(derivedTheme)
+  }
 
   return (
     <main className="min-h-screen w-full bg-[#F5F6FA] flex flex-col items-center justify-start md:justify-center px-4 md:px-8 pb-12 pt-6">
@@ -37,7 +63,7 @@ export default function PromptPage() {
 
         </div>
       ) : (
-        <GeneratedLanding data={gptOutput} input={userInput} />
+        <GeneratedLanding data={gptOutput} input={userInput} themeValues={themeValues!} />
 
       )}
     </main>

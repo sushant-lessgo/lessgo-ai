@@ -49,7 +49,7 @@ export function buildPrompt(productIdea: string) {
     "cta_text": "...",
     "urgency_text": "...",
     "body_text": "...",
-    "hero_image": "..."
+    
   },
   "before_after": {
     "section_headline": "...",

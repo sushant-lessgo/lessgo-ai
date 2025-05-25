@@ -39,6 +39,9 @@ export default function HeroSection({
   const [error, setError] = useState<string | null>(null);
 
   const showImage = isEditable ? image : hero_image;
+
+console.log("showImage:", showImage);
+
   const isTwoColumn = isEditable || (showImage !== null && showImage !== undefined);
 
   return (
