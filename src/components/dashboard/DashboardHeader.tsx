@@ -41,7 +41,7 @@ export default function DashboardHeader() {
       </h1>
 
       <button
-        className="bg-landing-primary hover:bg-landing-primaryHover text-white text-sm font-medium px-4 py-2 rounded-md transition shadow-sm"
+        className="bg-brand-accentPrimary hover:bg-brand-logo text-white text-lg font-medium px-4 py-2 rounded-md transition shadow-sm"
         onClick={handleCreatePage}
       >
         + Create New Page

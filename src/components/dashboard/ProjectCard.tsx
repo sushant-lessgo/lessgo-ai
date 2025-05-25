@@ -1,16 +1,17 @@
 'use client'
 
 import posthog from 'posthog-js'
-import { useRouter } from 'next/navigation';
+import { useRouter } from 'next/navigation'
 
 export type Project = {
   id: string
   name: string
   status: 'Draft' | 'Published'
   updatedAt: string
-  tokenId: string;
+  tokenId: string | null
+  slug: string | null
+  type: 'draft' | 'published'
 }
-
 
 type Props = {
   project: Project
@@ -19,23 +20,31 @@ type Props = {
 }
 
 export default function ProjectCard({ project, onEdit, onPreview }: Props) {
-  
-  const router = useRouter();
-  
-  const handleEdit = () => {
-  posthog.capture('project_edit_clicked', {
-    project_id: project.id,
-    project_name: project.name,
-  });
+  const router = useRouter()
 
-  router.push(`/start/${project.tokenId}`); // ✅ navigate to editor
-};
+  const handleEdit = () => {
+    posthog.capture('project_edit_clicked', {
+      project_id: project.id,
+      project_name: project.name,
+    })
+
+    if (project.tokenId) {
+      router.push(`/start/${project.tokenId}`)
+    }
+
+    onEdit?.()
+  }
 
   const handlePreview = () => {
     posthog.capture('project_preview_clicked', {
       project_id: project.id,
       project_name: project.name,
     })
+
+    if (project.slug) {
+      window.open(`/p/${project.slug}`, '_blank')
+    }
+
     onPreview?.()
   }
 
@@ -49,18 +58,23 @@ export default function ProjectCard({ project, onEdit, onPreview }: Props) {
       </div>
 
       <div className="flex gap-2">
-        <button
-          onClick={handleEdit}
-          className="border border-brand-accentPrimary text-brand-accentPrimary text-sm px-3 py-1 rounded-md hover:bg-brand-highlightBG transition"
-        >
-          Edit
-        </button>
-        <button
-          onClick={handlePreview}
-          className="border text-sm px-3 py-1 rounded-md hover:bg-gray-50 transition"
-        >
-          Preview
-        </button>
+        {project.status === 'Draft' && project.tokenId && (
+          <button
+            onClick={handleEdit}
+            className="border border-brand-accentPrimary text-brand-accentPrimary text-sm px-3 py-1 rounded-md hover:bg-brand-highlightBG transition"
+          >
+            Edit
+          </button>
+        )}
+
+        {project.status === 'Published' && project.slug && (
+          <button
+            onClick={handlePreview}
+            className="border text-sm px-3 py-1 rounded-md hover:bg-gray-50 transition"
+          >
+            Preview
+          </button>
+        )}
       </div>
     </div>
   )
