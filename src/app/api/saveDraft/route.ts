@@ -5,32 +5,46 @@ import { NextResponse } from 'next/server';
 const DEMO_TOKEN = 'lessgodemomockdata';
 
 export async function POST(req: Request) {
-  const { userId } = await auth();
-  const { tokenId, title, content, inputText, themeValues} = await req.json();
-
-  
-  
-
-  if (!tokenId || !content) {
-    return NextResponse.json({ error: 'Missing tokenId or content' }, { status: 400 });
-  }
-
-  const isDemo = tokenId === DEMO_TOKEN;
-
   try {
-    // Step 1: Ensure token exists (lookup by value)
+    const { userId: clerkId } = await auth();
+
+
+    if (!clerkId) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const { tokenId, title, content, inputText, themeValues } = await req.json();
+
+    if (!tokenId || !content) {
+      return NextResponse.json({ error: 'Missing tokenId or content' }, { status: 400 });
+    }
+
+    const isDemo = tokenId === DEMO_TOKEN;
+
+    let userRecord = null;
+
+    if (!isDemo) {
+      // 🔒 Ensure user exists in DB
+      userRecord = await prisma.user.findUnique({ where: { clerkId } });
+
+      if (!userRecord) {
+        return NextResponse.json({ error: 'User not found in database' }, { status: 404 });
+      }
+    }
+
+    // ✅ Ensure token exists
     const tokenRecord = await prisma.token.upsert({
       where: { value: tokenId },
       create: { value: tokenId },
       update: {},
     });
 
-    // Step 2: Save project linked to token.id
+    // ✅ Save project (safe FK use)
     await prisma.project.upsert({
       where: { tokenId: tokenRecord.id },
       create: {
         tokenId: tokenRecord.id,
-        ...(isDemo ? {} : { userId }),
+        userId: userRecord?.id ?? null, // Set only if not demo
         title,
         content,
         inputText,
