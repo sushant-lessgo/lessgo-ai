@@ -43,7 +43,7 @@ export async function POST(req: Request) {
     await prisma.project.upsert({
       where: { tokenId: tokenRecord.id },
       create: {
-        tokenId: tokenRecord.id,
+        tokenId: tokenRecord.value,
         userId: userRecord?.id ?? null, // Set only if not demo
         title,
         content,
