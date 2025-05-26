@@ -28,6 +28,9 @@ const [showSlugModal, setShowSlugModal] = useState(false);
 const [customSlug, setCustomSlug] = useState('');
 
 
+const [tokenId, setTokenId] = useState<string | null>(null);      // 🆕
+const [inputText, setInputText] = useState<string>('');           // 🆕
+
 
 const cta = data?.hero?.ctaConfig;
 const isPublishDisabled =
@@ -45,6 +48,9 @@ const isPublishDisabled =
             const parsed = JSON.parse(stored);
             console.log("Successfully parsed preview data");
             setData(parsed);
+
+            setTokenId(parsed.tokenId || null);
+             setInputText(parsed.inputText || "");
           } catch (e) {
             console.error("Failed to parse preview data:", e);
             setError("Failed to parse preview data. The data might be corrupted.");
@@ -100,6 +106,9 @@ useEffect(() => {
 
 
 
+
+
+
 async function handlePublish() {
 
   const previewElement = document.getElementById('landing-preview');
@@ -117,13 +126,13 @@ const htmlContent = previewElement.innerHTML;
 
   try {
     // Step 1: Check if slug is available
-    const checkRes = await fetch(`/api/checkSlug?slug=${customSlug}`);
-    const checkData = await checkRes.json();
+    // const checkRes = await fetch(`/api/checkSlug?slug=${customSlug}`);
+    // const checkData = await checkRes.json();
 
-    if (!checkRes.ok || !checkData.available) {
-      setPublishError('This slug is already taken. Please choose a different one.');
-      return;
-    }
+    // if (!checkRes.ok || !checkData.available) {
+    //   setPublishError('This slug is already taken. Please choose a different one.');
+    //   return;
+    // }
     const { primary, background, muted } = useThemeStore.getState();
     // Step 2: Publish the page
     const res = await fetch('/api/publish', {
@@ -139,6 +148,8 @@ const htmlContent = previewElement.innerHTML;
           background,
           muted,
         },
+        tokenId,
+        inputText,
       }),
     });
 

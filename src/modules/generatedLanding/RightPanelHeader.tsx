@@ -142,7 +142,9 @@ const handleSaveDraft = async () => {
         <Tooltip>
   <TooltipTrigger asChild>
     <div>
-      <PreviewButton pageData={data} />
+      {tokenId && inputText !== undefined && (
+      <PreviewButton pageData={data} tokenId={tokenId} inputText={inputText} />
+      )}
     </div>
   </TooltipTrigger>
   <TooltipContent side="top">

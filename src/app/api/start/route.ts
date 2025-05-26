@@ -33,14 +33,14 @@ export async function GET() {
   // Create project linked to token and (optionally) user
   await prisma.project.create({
     data: {
-      tokenId: token.id,
+      tokenId: token.value,
       userId: dbUser?.id,
     },
   })
 
   // Redirect to the /start/[token] route
-  return NextResponse.redirect(
-  new URL(`/start/${tokenValue}`, process.env.NEXT_PUBLIC_SITE_URL)
-)
+  return NextResponse.json({
+  url: `${process.env.NEXT_PUBLIC_SITE_URL}/start/${tokenValue}`,
+});
 
 }

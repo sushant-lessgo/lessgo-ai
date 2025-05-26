@@ -26,13 +26,16 @@ export default function DashboardHeader() {
   }, [isLoaded, user])
 
   const handleCreatePage = async () => {
-    posthog.capture('create_page_clicked', {
-      location: 'dashboard_header',
-      user_id: user?.id ?? 'anonymous',
-    })
+  posthog.capture('create_page_clicked', {
+    location: 'dashboard_header',
+    user_id: user?.id ?? 'anonymous',
+  });
 
-    router.push('/api/start') // server will handle token + redirect
-  }
+  const res = await fetch('/api/start');
+  const { url } = await res.json(); // Your API should return JSON with the new URL
+  window.open(url, '_blank');
+};
+
 
   return (
     <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-8 gap-4">

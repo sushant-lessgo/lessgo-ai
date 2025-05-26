@@ -6,12 +6,19 @@ import { useThemeStore } from "@/stores/useThemeStore";
 
 type Props = {
   pageData: any; // Ideally type this as GPTOutput
+  tokenId: string | null;
+  inputText: string;
 };
 
-export default function PreviewButton({ pageData }: Props) {
+export default function PreviewButton({ pageData, tokenId, inputText }: Props) {
   const { primary, background, muted } = useThemeStore();
+  
+console.log("🔧 PreviewButton mounted with props:", { tokenId, inputText });
 
   const handlePreview = () => {
+
+    console.log("🚀 handlePreview called with:", { tokenId, inputText, pageData });
+
     if (!pageData) {
       alert("Preview data is missing.");
       return;
@@ -26,7 +33,15 @@ export default function PreviewButton({ pageData }: Props) {
           background,
           muted,
         }),
+        tokenId,
+        inputText,
       };
+
+      console.log("🔍 Updated Data before publish:", {
+        tokenId,
+        inputText,
+        theme: updatedData.theme,
+      });
 
       localStorage.setItem("lessgo_preview_data", JSON.stringify(updatedData));
       posthog.capture("preview_triggered");
