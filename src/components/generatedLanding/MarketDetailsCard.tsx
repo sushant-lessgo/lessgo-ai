@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
-
+import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip"
 type Props = {
   marketCategory: string
   marketSubcategory: string
@@ -89,12 +89,23 @@ export default function MarketDetailsCard({
 
         <div className="pt-2">
           <Dialog open={open} onOpenChange={setOpen}>
-            <DialogTrigger asChild>
-              <Button variant="outline" className="gap-1">
+            {/* <DialogTrigger asChild> */}
+
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <span>
+              <Button variant="outline" className="gap-1" disabled>
                 <RefreshCcw className="w-4 h-4" />
                 Update & Regenerate
               </Button>
-            </DialogTrigger>
+
+              </span>
+                </TooltipTrigger>
+                <TooltipContent>
+                  Functionality coming soon!
+                </TooltipContent>
+              </Tooltip>
+            {/* </DialogTrigger> */}
 
             <DialogContent>
               <DialogHeader>

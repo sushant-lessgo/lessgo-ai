@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useRef } from "react"
-import { InfoIcon, Sparkles, Edit3, Download, Rocket, Wand2 } from "lucide-react"
+import { InfoIcon, Sparkles, Edit3, Zap, Rocket, Wand2 } from "lucide-react"
 import posthog from "posthog-js"
 
 export default function InstructionNote() {
@@ -26,7 +26,7 @@ export default function InstructionNote() {
     {
       icon: <Sparkles className="w-4 h-4 text-gray-500" />,
       title: "Write One Sentence",
-      description: "Describe your product idea in a single line — that’s all we need.",
+      description: "Describe your product idea in a single line... that’s all we need.",
     },
     {
       icon: <Wand2 className="w-4 h-4 text-gray-500" />,
@@ -36,17 +36,17 @@ export default function InstructionNote() {
     {
       icon: <Edit3 className="w-4 h-4 text-gray-500" />,
       title: "Click and Edit",
-      description: "Click on any part of your landing page to instantly edit it — no coding required.",
-    },
-    {
-      icon: <Download className="w-4 h-4 text-gray-500" />,
-      title: "Export HTML",
-      description: "Download clean, editable code to host, modify, or publish anywhere.",
+      description: "Click on any part of your landing page to instantly edit it... no coding required.",
     },
     {
       icon: <Rocket className="w-4 h-4 text-gray-500" />,
+      title: "Instant publish",
+      description: "Publish your landing page with one click. No hosting or setup needed.",
+    },
+    {
+      icon: <Zap className="w-4 h-4 text-gray-500" />,
       title: "More Power Coming",
-      description: "Coming soon: one-click publish, custom themes, analytics, and integrations.",
+      description: "Multiple layouts, analytics and more features on the way. Stay tuned!",
     },
   ]
 

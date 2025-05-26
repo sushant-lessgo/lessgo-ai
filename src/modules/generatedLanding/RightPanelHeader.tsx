@@ -54,14 +54,7 @@ const handleSaveDraft = async () => {
   }),
 });
 
-const visibleSections = data.visibleSections ?? {
-  hero: true,
-  before_after: true,
-  how_it_works: true,
-  testimonials: true,
-  offer: true,
-  faq: true,
-};
+
     const result = await res.json();
     
     if (!res.ok) {

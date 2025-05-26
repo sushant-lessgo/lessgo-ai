@@ -17,7 +17,7 @@ import {
   UserButton,
 } from '@clerk/nextjs'
 
-
+import { TooltipProvider } from "@/components/ui/tooltip"
 
 
 export const metadata: Metadata = {
@@ -86,9 +86,11 @@ export default function RootLayout({
         <head />
         <body className="antialiased">
           <InjectLandingTheme />
+          <TooltipProvider>
           <PostHogProvider>
             {children}
           </PostHogProvider>
+          </TooltipProvider>
         </body>
       </html>
     </ClerkProvider>

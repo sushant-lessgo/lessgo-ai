@@ -8,6 +8,8 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { usePostHog } from 'posthog-js/react';
 import type { CtaConfigType } from "@/types";
 import type { Action } from "@/modules/generatedLanding/landingPageReducer";
+import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
+
 
 type CTAConfiguratorPopoverProps = {
   ctaConfig: CtaConfigType | null;
@@ -98,23 +100,42 @@ export function CTAConfiguratorPopover({
 
   return (
     <div className="flex flex-col gap-4">
-      <Label>CTA Type</Label>
-      <RadioGroup
-        value={ctaType}
-        onValueChange={(val) => {
-          setCtaType(val as any);
-          posthog.capture('cta_type_selected', { type: val });
-        }}
-      >
-        <div className="flex items-center space-x-2">
-          <RadioGroupItem value="link" id="link" />
-          <Label htmlFor="link">External Link</Label>
-        </div>
-        <div className="flex items-center space-x-2">
-          <RadioGroupItem value="email-form" id="email-form" />
-          <Label htmlFor="email-form">Email Form</Label>
-        </div>
-      </RadioGroup>
+      <Label>CTA Type*</Label>
+<RadioGroup
+  value={ctaType}
+  onValueChange={(val) => {
+    setCtaType(val as any);
+    posthog.capture("cta_type_selected", { type: val });
+  }}
+>
+  <div className="flex items-center space-x-2">
+    <RadioGroupItem value="link" id="link" />
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <Label htmlFor="link" className="cursor-help">
+          External Link
+        </Label>
+      </TooltipTrigger>
+      <TooltipContent>
+        Redirects users to another page or site
+      </TooltipContent>
+    </Tooltip>
+  </div>
+
+  <div className="flex items-center space-x-2">
+    <RadioGroupItem value="email-form" id="email-form" />
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <Label htmlFor="email-form" className="cursor-help">
+          Email Form
+        </Label>
+      </TooltipTrigger>
+      <TooltipContent>
+        Collects user emails for your mailing list from here itself
+      </TooltipContent>
+    </Tooltip>
+  </div>
+</RadioGroup>
 
       <Label>CTA Button Text*</Label>
       <Input value={ctaText} onChange={(e) => setCtaText(e.target.value)} />
@@ -154,11 +175,30 @@ export function CTAConfiguratorPopover({
           >
             <div className="flex items-center space-x-2">
               <RadioGroupItem value="hero" id="place-hero" />
-              <Label htmlFor="place-hero">Hero</Label>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Label htmlFor="place-hero" className="cursor-help">
+                    Hero
+                  </Label>
+                </TooltipTrigger>
+                <TooltipContent side="right">
+                  Best for single input fields. Appears prominently at the top and is repeated in the offer section.
+                </TooltipContent>
+              </Tooltip>
             </div>
+
             <div className="flex items-center space-x-2">
               <RadioGroupItem value="separate-section" id="place-section" />
-              <Label htmlFor="place-section">Offer Section</Label>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Label htmlFor="place-section" className="cursor-help">
+                    Offer Section
+                  </Label>
+                </TooltipTrigger>
+                <TooltipContent side="right">
+                  Ideal for multiple input fields. Hero button scrolls to this section.
+                </TooltipContent>
+              </Tooltip>
             </div>
           </RadioGroup>
         </>

@@ -20,12 +20,12 @@ export default function EmptyState() {
         You haven’t created any landing pages yet. Start fresh and launch your first page in minutes.
       </p>
 
-      <button
+      {/* <button
         onClick={handleStart}
         className="bg-brand-accentPrimary text-white text-sm font-medium px-4 py-2 rounded-md hover:bg-orange-500 transition shadow-sm"
       >
         Start with a new landing page
-      </button>
+      </button> */}
     </div>
   )
 }

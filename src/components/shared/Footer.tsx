@@ -12,7 +12,7 @@ export default function Footer() {
           <p>
             Questions or feedback?{" "}
             <a
-              href="mailto:support@lessgo.ai"
+              href="mailto:hello@lessgo.ai"
               className="text-blue-600 underline hover:text-blue-800"
             >
               Email us
@@ -37,10 +37,10 @@ export default function Footer() {
         <div className="text-gray-500 text-sm flex flex-col md:items-end gap-2">
           <p>© 2025 Lessgo.ai. All rights reserved.</p>
           <div className="flex gap-4">
-            <a href="#" className="hover:underline">
+            <a href="/terms" target="_blank" rel="noopener noreferrer" className="hover:underline">
               Terms
             </a>
-            <a href="#" className="hover:underline">
+            <a href="/privacy" target="_blank" rel="noopener noreferrer" className="hover:underline">
               Privacy
             </a>
           </div>

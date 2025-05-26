@@ -184,6 +184,7 @@ console.log("showImage:", showImage);
               <label htmlFor="imageUpload" className="cursor-pointer text-center">
                 <p className="font-medium text-2xl pb-2">Upload Image</p>
                 <p>JPG or PNG — Max size 2MB</p>
+                <p className="pt-2 text-sm">Leave blank if no image. The layout will auto-adjust to full width.</p>
               </label>
               <input
                 type="file"

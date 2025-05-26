@@ -7,6 +7,8 @@ import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip"
+
 
 type Props = {
   input: string
@@ -34,12 +36,23 @@ export default function UserInputCard({ input, onRegenerate }: Props) {
         </h3>
 
         <Dialog open={open} onOpenChange={setOpen}>
-          <DialogTrigger asChild>
-            <Button variant="outline" size="sm" className="text-xs px-2 py-1 gap-1">
+          {/* <DialogTrigger asChild> */}
+
+            <Tooltip>
+  <TooltipTrigger asChild>
+    <span>
+            <Button variant="outline" size="sm" className="text-xs px-2 py-1 gap-1" disabled>
               <Pencil className="w-3 h-3" />
               Edit & Regenerate
             </Button>
-          </DialogTrigger>
+
+            </span>
+  </TooltipTrigger>
+  <TooltipContent>
+    Functionality coming soon!
+  </TooltipContent>
+</Tooltip>
+          {/* </DialogTrigger> */}
 
           <DialogContent>
             <DialogHeader>
