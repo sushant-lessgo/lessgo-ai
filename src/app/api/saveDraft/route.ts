@@ -8,7 +8,6 @@ export async function POST(req: Request) {
   try {
     const { userId: clerkId } = await auth();
 
-
     if (!clerkId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
@@ -33,18 +32,18 @@ export async function POST(req: Request) {
     }
 
     // ✅ Ensure token exists
-    const tokenRecord = await prisma.token.upsert({
+    await prisma.token.upsert({
       where: { value: tokenId },
       create: { value: tokenId },
       update: {},
     });
 
-    // ✅ Save project (safe FK use)
+    // ✅ Upsert project using the same `tokenId` in both where & create
     await prisma.project.upsert({
-      where: { tokenId: tokenRecord.id },
+      where: { tokenId }, // must match the unique field
       create: {
-        tokenId: tokenRecord.value,
-        userId: userRecord?.id ?? null, // Set only if not demo
+        tokenId,
+        userId: userRecord?.id ?? null,
         title,
         content,
         inputText,
