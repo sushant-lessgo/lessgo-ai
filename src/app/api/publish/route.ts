@@ -4,7 +4,7 @@ import { auth } from '@clerk/nextjs/server'
 import type { NextRequest } from 'next/server';
 import { prisma } from '@/lib/prisma' // Update path if different
 
-console.log("📩 /api/publish hit");
+
 
 
 export async function POST(req: NextRequest) {
@@ -20,7 +20,7 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json();
-    console.log("📦 Body received:", body);
+    
     const { slug, htmlContent, title, content, themeValues, tokenId, inputText } = body;
 
     if (!slug || !htmlContent || !tokenId) {

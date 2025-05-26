@@ -8,7 +8,7 @@ import posthog from "posthog-js";
 
 
 import LandingPagePreview from "@/components/generatedLanding/LandingPagePreview";
-import PreviewDebugHelper from "./PreviewDebugHelper"; // Import the debug component
+
 import type { GPTOutput } from "@/modules/prompt/types";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { SlugModal } from '@/components/SlugModal';
@@ -41,12 +41,12 @@ const isPublishDisabled =
     const checkForData = () => {
       try {
         const stored = localStorage.getItem("lessgo_preview_data");
-        console.log("Retrieved from localStorage:", stored ? `data found (${stored.length} chars)` : "no data");
+        
         
         if (stored) {
           try {
             const parsed = JSON.parse(stored);
-            console.log("Successfully parsed preview data");
+            
             setData(parsed);
 
             setTokenId(parsed.tokenId || null);
@@ -198,8 +198,7 @@ const htmlContent = previewElement.innerHTML;
             Close Preview
           </button>
         </div>
-        {/* Include the debug helper even on error screens */}
-        <PreviewDebugHelper />
+        
       </div>
     );
   }

@@ -13,11 +13,11 @@ type Props = {
 export default function PreviewButton({ pageData, tokenId, inputText }: Props) {
   const { primary, background, muted } = useThemeStore();
   
-console.log("🔧 PreviewButton mounted with props:", { tokenId, inputText });
+
 
   const handlePreview = () => {
 
-    console.log("🚀 handlePreview called with:", { tokenId, inputText, pageData });
+    
 
     if (!pageData) {
       alert("Preview data is missing.");

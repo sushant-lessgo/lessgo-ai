@@ -40,7 +40,7 @@ export default function HeroSection({
 
   const showImage = isEditable ? image : hero_image;
 
-console.log("showImage:", showImage);
+
 
   const isTwoColumn = isEditable || (showImage !== null && showImage !== undefined);
 

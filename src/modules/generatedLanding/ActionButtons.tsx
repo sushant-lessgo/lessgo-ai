@@ -38,7 +38,7 @@ export default function ActionButtons({ data, showPublish, onPublish }: Props) {
       localStorage.setItem("lessgo_preview_data", json);
       
       // Add a console log to verify the data is being stored
-      console.log("Preview data stored:", json.substring(0, 100) + "...");
+      
       
       // Check if the data was actually stored
       const verifyStored = localStorage.getItem("lessgo_preview_data");

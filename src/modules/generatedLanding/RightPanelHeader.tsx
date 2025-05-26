@@ -26,7 +26,7 @@ export default function RightPanelHeader({ data, dispatch, inputText }: Props) {
     posthog.capture("layout_modal_opened", { from: "right_panel_header" });
   };
 const tokenId = useTokenId();
-console.log('[TokenContext] tokenId in RightPanelHeader:', tokenId);
+
 const handleSaveDraft = async () => {
   
   const { primary, background, muted } = useThemeStore.getState();
@@ -63,7 +63,7 @@ const handleSaveDraft = async () => {
       return;
     }
 
-    console.log('[DRAFT_SAVED]', result.message);
+    
     alert('Draft saved successfully!');
   } catch (err) {
     console.error('[SAVE_DRAFT_FAILED]', err);
@@ -77,7 +77,7 @@ const handleSaveDraft = async () => {
     posthog.capture("customize_theme_clicked", { from: "right_panel_header" });
     setOpen(true);
   };
-  console.log("🧩 visibleSections in data:", data.visibleSections);
+  
   return (
     <>
       <div className="sticky top-0 z-30 bg-white border-b border-gray-200 px-6 py-4 flex justify-between items-center shadow-sm rounded-t-xl">

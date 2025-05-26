@@ -8,8 +8,8 @@ export async function POST(req: Request) {
   const { userId } = await auth();
   const { tokenId, title, content, inputText, themeValues} = await req.json();
 
-  console.log('[SAVE_DRAFT_API] userId:', userId);
-  console.log('[SAVE_DRAFT_API] tokenId:', tokenId);
+  
+  
 
   if (!tokenId || !content) {
     return NextResponse.json({ error: 'Missing tokenId or content' }, { status: 400 });
