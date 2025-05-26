@@ -29,6 +29,7 @@ type Props = {
 
 export default function GeneratedLanding({ data, input, themeValues }: Props) {
 
+console.log("🧩 visibleSections in generatedLanding data:", data.visibleSections);
 
   const [state, dispatch] = useReducer(landingPageReducer, data)
   const [inputText, setInputText] = useState<string>(input);

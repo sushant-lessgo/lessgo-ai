@@ -54,7 +54,14 @@ const handleSaveDraft = async () => {
   }),
 });
 
-
+const visibleSections = data.visibleSections ?? {
+  hero: true,
+  before_after: true,
+  how_it_works: true,
+  testimonials: true,
+  offer: true,
+  faq: true,
+};
     const result = await res.json();
     
     if (!res.ok) {
@@ -77,13 +84,13 @@ const handleSaveDraft = async () => {
     posthog.capture("customize_theme_clicked", { from: "right_panel_header" });
     setOpen(true);
   };
-
+  console.log("🧩 visibleSections in data:", data.visibleSections);
   return (
     <>
       <div className="sticky top-0 z-30 bg-white border-b border-gray-200 px-6 py-4 flex justify-between items-center shadow-sm rounded-t-xl">
         {/* Left: Style controls */}
         <div className="flex items-center gap-4">
-
+        
           {/* Customize Theme Button */}
           <Button
             variant="outline"
@@ -93,7 +100,7 @@ const handleSaveDraft = async () => {
             <Paintbrush size={16} />
             Customize Theme
           </Button>
-
+          
           {/* Layout Toggler */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -101,6 +108,7 @@ const handleSaveDraft = async () => {
                 <LayoutGrid size={16} /> Layout
               </Button>
             </DropdownMenuTrigger>
+          
 
             <DropdownMenuContent className="p-2 w-56">
               <div className="text-sm font-medium px-2 pb-2 text-gray-500">Toggle Sections</div>

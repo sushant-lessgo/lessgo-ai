@@ -40,6 +40,7 @@ export type GPTOutput = {
     ctaConfig: CtaConfigType | null
   }
   faq: { question: string; answer: string }[]
+  
   visibleSections: {
     hero: true
     before_after: true
