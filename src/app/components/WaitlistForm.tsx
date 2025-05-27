@@ -52,14 +52,22 @@ export default function WaitlistForm({ formPosition }: WaitlistFormProps) {
     <div className="w-full max-w-2xl mx-auto mt-10 px-4">
 
       {status === "success" ? (
-        <div className="bg-green-50 text-green-700 p-4 rounded-md text-center shadow-md">
-        <p className="text-lg font-bold">
-          You're In! Your Early Access Spot is Reserved.
-        </p>
-        <p className="text-sm mt-2">
-          You'll get exclusive updates, early previews, and first access to Lessgo.ai 🤝
-        </p>
+          <div className="bg-green-50 border border-green-200 text-green-900 p-4 rounded-xl shadow-sm">
+          <p className="font-semibold text-lg mb-6">✅ You're In! One Last Step…</p>
+          <p className="mb-2">Check your inbox and <strong>confirm your email</strong> to activate early access.<br/>
+          <span className="text-sm text-gray-600">(Look for: “Confirm your spot at Lessgo.ai” – it might be in Promotions)</span></p>
+
+          <a href="https://lessgo.ai/dashboard" className="inline-block mt-4 px-5 py-2 bg-brand-logo text-white font-semibold rounded-lg hover:bg-brand-accentPrimary transition">
+          Try Lessgo.ai Now
+          </a>
+
+          <ul className="text-sm text-gray-700 mt-6 list-disc list-inside">
+            <li>First access to our AI landing page builder</li>
+            <li>Founder-only perks & sneak peeks</li>
+            <li>A front-row seat as we build in public</li>
+          </ul>
       </div>
+
       
       
       
