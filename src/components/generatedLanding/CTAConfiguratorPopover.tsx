@@ -108,101 +108,109 @@ export function CTAConfiguratorPopover({
     posthog.capture("cta_type_selected", { type: val });
   }}
 >
-  <div className="flex items-center space-x-2">
+  <div className="flex items-start space-x-2">
     <RadioGroupItem value="link" id="link" />
-    <Tooltip>
-      <TooltipTrigger asChild>
-        <Label htmlFor="link" className="cursor-help">
-          External Link
-        </Label>
-      </TooltipTrigger>
-      <TooltipContent>
-        Redirects users to another page or site
-      </TooltipContent>
-    </Tooltip>
+    <div>
+      <Label htmlFor="link">External Link</Label>
+      <p className="text-sm text-muted-foreground">
+        Redirect visitors to a tool like Typeform, Calendly, Notion, or your own site.
+      </p>
+    </div>
   </div>
 
-  <div className="flex items-center space-x-2">
+  <div className="flex items-start space-x-2 mt-2">
     <RadioGroupItem value="email-form" id="email-form" />
-    <Tooltip>
-      <TooltipTrigger asChild>
-        <Label htmlFor="email-form" className="cursor-help">
-          Email Form
-        </Label>
-      </TooltipTrigger>
-      <TooltipContent>
-        Collects user emails for your mailing list from here itself
-      </TooltipContent>
-    </Tooltip>
+    <div>
+      <Label htmlFor="email-form">Email Form Embed</Label>
+      <p className="text-sm text-muted-foreground">
+        Paste raw HTML from Mailchimp, ConvertKit, Brevo, etc. to collect emails here directly.
+      </p>
+    </div>
   </div>
 </RadioGroup>
 
-      <Label>CTA Button Text*</Label>
-      <Input value={ctaText} onChange={(e) => setCtaText(e.target.value)} />
-      {errors.ctaText && <p className="text-sm text-red-500 mt-1">{errors.ctaText}</p>}
+<Label className="mt-4 block">CTA Button Text*</Label>
+<Input value={ctaText} onChange={(e) => setCtaText(e.target.value)} />
+{errors.ctaText && <p className="text-sm text-red-500 mt-1">{errors.ctaText}</p>}
 
-      {ctaType === 'link' && (
-        <>
-          <Label>URL*</Label>
-          <Input
-            type="url"
-            placeholder="https://example.com"
-            value={url}
-            onChange={(e) => setUrl(e.target.value)}
-          />
-          {errors.url && <p className="text-sm text-red-500 mt-1">{errors.url}</p>}
-        </>
-      )}
+{ctaType === 'link' && (
+  <>
+    <div className="p-2 bg-muted border text-sm rounded-md text-muted-foreground my-2">
+      Paste a URL from tools like Typeform, Calendly, Notion, or any external landing page.
+    </div>
+    <Label>URL*</Label>
+    <Input
+      type="url"
+      placeholder="https://your-form-link.com"
+      value={url}
+      onChange={(e) => setUrl(e.target.value)}
+    />
+    {errors.url && <p className="text-sm text-red-500 mt-1">{errors.url}</p>}
+  </>
+)}
 
-      {ctaType === 'email-form' && (
-        <>
-          <Label>Embed Code*</Label>
-          <Input
-            type="text"
-            placeholder="Paste full HTML form embed (no scripts)"
-            value={embedCode}
-            onChange={(e) => setEmbedCode(e.target.value)}
-          />
-          {errors.embedCode && <p className="text-sm text-red-500 mt-1">{errors.embedCode}</p>}
-          <p className="text-xs text-muted-foreground mt-1">
-            Only pure HTML embeds are supported. Script-based forms (e.g. Mailchimp JS) are not supported.
-          </p>
+{ctaType === 'email-form' && (
+  <>
+    <div className="p-2 bg-muted border text-sm rounded-md text-muted-foreground my-2">
+      Paste full HTML embed code (without scripts) from tools like Mailchimp, ConvertKit, or Brevo.
+      <br />
+      <span className="italic text-xs">Example:</span>
+      <pre className="bg-gray-100 mt-1 p-2 rounded text-xs overflow-auto">
+{`<form action="https://yourmailchimp.com">
+  <input type="email" name="EMAIL" />
+  <button type="submit">Subscribe</button>
+</form>`}
+      </pre>
+    </div>
 
-          <Label>Placement</Label>
-          <RadioGroup
-            value={placement}
-            onValueChange={(val) => setPlacement(val as any)}
-          >
-            <div className="flex items-center space-x-2">
-              <RadioGroupItem value="hero" id="place-hero" />
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Label htmlFor="place-hero" className="cursor-help">
-                    Hero
-                  </Label>
-                </TooltipTrigger>
-                <TooltipContent side="right">
-                  Best for single input fields. Appears prominently at the top and is repeated in the offer section.
-                </TooltipContent>
-              </Tooltip>
-            </div>
+    <Label>Embed Code*</Label>
+    <Input
+      type="text"
+      placeholder="Paste HTML form code here"
+      value={embedCode}
+      onChange={(e) => setEmbedCode(e.target.value)}
+    />
+    {errors.embedCode && <p className="text-sm text-red-500 mt-1">{errors.embedCode}</p>}
+    <p className="text-xs text-muted-foreground mt-1">
+      Only pure HTML embeds are supported. Script-based forms (e.g. Mailchimp JS) are not supported.
+    </p>
 
-            <div className="flex items-center space-x-2">
-              <RadioGroupItem value="separate-section" id="place-section" />
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Label htmlFor="place-section" className="cursor-help">
-                    Offer Section
-                  </Label>
-                </TooltipTrigger>
-                <TooltipContent side="right">
-                  Ideal for multiple input fields. Hero button scrolls to this section.
-                </TooltipContent>
-              </Tooltip>
-            </div>
-          </RadioGroup>
-        </>
-      )}
+    <Label className="mt-4 block">Placement</Label>
+    <RadioGroup
+      value={placement}
+      onValueChange={(val) => setPlacement(val as any)}
+    >
+      <div className="flex items-center space-x-2">
+        <RadioGroupItem value="hero" id="place-hero" />
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Label htmlFor="place-hero" className="cursor-help">
+              Hero
+            </Label>
+          </TooltipTrigger>
+          <TooltipContent side="right">
+            Best for single input fields. Appears at the top and also in the offer section.
+          </TooltipContent>
+        </Tooltip>
+      </div>
+
+      <div className="flex items-center space-x-2">
+        <RadioGroupItem value="separate-section" id="place-section" />
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Label htmlFor="place-section" className="cursor-help">
+              Offer Section
+            </Label>
+          </TooltipTrigger>
+          <TooltipContent side="right">
+            Ideal for multi-field forms. Hero button scrolls to this section.
+          </TooltipContent>
+        </Tooltip>
+      </div>
+    </RadioGroup>
+  </>
+)}
+
 
       <div className="flex justify-end gap-2 pt-2">
         <Button variant="ghost" onClick={handleCancel}>
