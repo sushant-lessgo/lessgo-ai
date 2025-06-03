@@ -28,7 +28,8 @@ module.exports = {
   theme: {
   	extend: {
   		animation: {
-  			'pulse-border': 'pulseBorder 2s infinite'
+  			'pulse-border': 'pulseBorder 2s infinite',
+			'loading-fill': 'loadingFill linear forwards',
   		},
   		keyframes: {
   			pulseBorder: {
@@ -37,7 +38,11 @@ module.exports = {
   				},
   				'50%': {
   					boxShadow: '0 0 0 6px rgba(59, 130, 246, 0)'
-  				}
+  				},
+			},
+				loadingFill: {
+					'0%': { width: '0%' },
+					'100%': { width: '100%' },
   			}
   		},
   		fontFamily: {

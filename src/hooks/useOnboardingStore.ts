@@ -1,17 +1,26 @@
 import { create } from "zustand";
 
+type FeatureItem = {
+  feature: string;
+  benefit: string;
+};
+
 type OnboardingStore = {
   oneLiner: string;
   confirmedFields: Record<string, string>; // From OpenAI + taxonomy
   validatedFields: Record<string, string>; // Confirmed by user
   stepIndex: number;
-
+  featuresFromAI: FeatureItem[];
+  
   setOneLiner: (input: string) => void;
   setConfirmedFields: (fields: Record<string, string>) => void;
   confirmField: (field: string, value: string) => void;
   setValidatedFields: (fields: Record<string, string>) => void;
   setStepIndex: (index: number) => void;
+  setFeaturesFromAI: (features: FeatureItem[]) => void;
   reset: () => void;
+
+  
 };
 
 export const useOnboardingStore = create<OnboardingStore>((set) => ({
@@ -33,6 +42,9 @@ export const useOnboardingStore = create<OnboardingStore>((set) => ({
     })),
 
   setStepIndex: (index) => set({ stepIndex: index }),
+
+    featuresFromAI: [],
+    setFeaturesFromAI: (features) => set({ featuresFromAI: features }),
 
   reset: () =>
     set({
