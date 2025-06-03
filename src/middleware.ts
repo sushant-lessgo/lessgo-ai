@@ -10,6 +10,8 @@ const isPublicRoute = createRouteMatcher([
   '/api/start',
   '/api/publish',
   '/api/saveDraft',
+  '/api/loadDraft',
+  '/api/infer-fields',
   '/p/:slug',
   '/thanks',
   '/privacy',

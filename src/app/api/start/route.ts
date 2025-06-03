@@ -40,7 +40,7 @@ export async function GET() {
 
   // Redirect to the /start/[token] route
   return NextResponse.json({
-  url: `${process.env.NEXT_PUBLIC_SITE_URL}/start/${tokenValue}`,
+  url: `${process.env.NEXT_PUBLIC_SITE_URL}/create/${tokenValue}`,
 });
 
 }

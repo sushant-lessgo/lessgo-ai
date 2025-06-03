@@ -1,14 +1,21 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useUser } from '@clerk/nextjs'
 import posthog from 'posthog-js'
 import { useRouter } from 'next/navigation'
+
+
 
 export default function DashboardHeader() {
   const { user, isLoaded } = useUser()
   const router = useRouter()
   const firstName = isLoaded ? user?.firstName ?? 'there' : ''
+
+  const [userInput, setUserInput] = useState("");
+const [confirmedFields, setConfirmedFields] = useState({});
+const [stepIndex, setStepIndex] = useState(0);
+
 
   useEffect(() => {
     if (isLoaded && user?.id) {
@@ -34,6 +41,11 @@ export default function DashboardHeader() {
   const res = await fetch('/api/start');
   const { url } = await res.json(); // Your API should return JSON with the new URL
   window.open(url, '_blank');
+
+  setUserInput("");
+  setConfirmedFields({});
+  setStepIndex(0);
+ 
 };
 
 
