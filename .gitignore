@@ -43,3 +43,6 @@ next-env.d.ts
 _Archived
 # clerk configuration (can include secrets)
 /.clerk/
+
+# test background
+src/app/TestBackground/

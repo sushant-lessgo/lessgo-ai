@@ -132,7 +132,41 @@ module.exports = {
   			lg: 'var(--radius)',
   			md: 'calc(var(--radius) - 2px)',
   			sm: 'calc(var(--radius) - 4px)'
-  		}
+  		},
+		
+		fontSize: {
+        display: 'clamp(3rem, 8vw, 5rem)',       // 48–80px
+        hero: 'clamp(2.5rem, 6vw, 4rem)',         // 40–64px
+        h1: 'clamp(2rem, 5vw, 3rem)',             // 32–48px
+        h2: 'clamp(1.5rem, 3.5vw, 2rem)',         // 24–32px
+        h3: 'clamp(1.25rem, 2.5vw, 1.5rem)',      // 20–24px
+        'body-lg': 'clamp(1.125rem, 2vw, 1.25rem)', // 18–20px
+        body: 'clamp(1rem, 1.5vw, 1.125rem)',     // 16–18px
+        'body-sm': 'clamp(0.875rem, 1vw, 1rem)',  // 14–16px
+        caption: 'clamp(0.75rem, 0.8vw, 0.875rem)' // 12–14px
+      },
+      lineHeight: {
+        tight: '1.1',     // for display/hero
+        snug: '1.3',      // for h1–h3
+        relaxed: '1.625', // for body
+        normal: '1.5',    // for captions
+      },
+      letterSpacing: {
+        tightest: '-0.03em',
+        tighter: '-0.02em',
+        tight: '-0.01em',
+        normal: '0',
+        wide: '0.01em',
+        wider: '0.02em',
+      },
+      fontWeight: {
+        light: '300',
+        normal: '400',
+        medium: '500',
+        semibold: '600',
+        bold: '700',
+      },
+
   	}
   },
   plugins: [

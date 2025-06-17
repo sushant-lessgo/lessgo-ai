@@ -1,0 +1,22 @@
+export const archetypes = [
+  { id: "soft-gradient-blur", label: "Soft Gradient Blur" },
+  { id: "frosted-glass-light", label: "Frosted Glass Light" },
+  { id: "code-matrix-mesh", label: "Code Matrix Mesh" },
+  { id: "editorial-split", label: "Editorial Split" },
+  { id: "luxury-blur", label: "Luxury Blur" },
+  { id: "energetic-diagonals", label: "Energetic Diagonals" },
+  { id: "paper-texture-light", label: "Paper Texture Light" },
+  { id: "noise-fade-dark", label: "Noise Fade Dark" },
+  { id: "startup-skybox", label: "Startup Skybox" },
+  { id: "high-friction-grid", label: "High-Friction Grid" },
+  { id: "comic-burst", label: "Comic Burst" },
+  { id: "zen-calm-wave", label: "Zen Calm Wave" },
+  { id: "deep-night-space", label: "Deep Night Space" },
+  { id: "trusty-brick-tone", label: "Trusty Brick Tone" },
+  { id: "wireframe-blueprint", label: "Wireframe Blueprint" },
+  { id: "glass-morph-with-pop", label: "Glass Morph with Pop" },
+  { id: "retro-pixel-noise", label: "Retro Pixel Noise" },
+  { id: "vibrant-rings", label: "Vibrant Rings" },
+  { id: "monochrome-hero-zone", label: "Monochrome Hero Zone" },
+  { id: "blurred-spotlight", label: "Blurred Spotlight" }
+];
