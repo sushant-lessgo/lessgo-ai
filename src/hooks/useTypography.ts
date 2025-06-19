@@ -1,6 +1,8 @@
 // useTypography.ts
 
 import { usePageStore } from '@/hooks/usePageStore';
+import { landingTypography } from '@/modules/Design/fontSystem/landingTypography';
+
 export function useTypography() {
   const { layout: { theme } } = usePageStore();
   
@@ -10,8 +12,8 @@ export function useTypography() {
     return {
       ...baseStyle,
       fontFamily: variant.startsWith('h') || variant === 'display' || variant === 'hero' 
-        ? theme.typography.headingFont 
-        : theme.typography.bodyFont
+        ? `${theme.typography.headingFont}, 'Inter', sans-serif`
+        : `${theme.typography.bodyFont}, 'Inter', sans-serif`
     };
   };
   

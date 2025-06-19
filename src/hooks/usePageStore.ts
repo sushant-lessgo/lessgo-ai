@@ -130,6 +130,7 @@ type PageStore = {
   // Layout Actions
   setSection: (sectionId: string, data: Partial<SectionData>) => void;
   setLayout: (sectionId: string, layout: string) => void;
+  setSectionLayouts: (layouts: Record<string, string>) => void; 
   addSection: (sectionType: string, position?: number) => string;
   removeSection: (sectionId: string) => void;
   reorderSections: (newOrder: string[]) => void;
@@ -289,6 +290,21 @@ export const usePageStore = create<PageStore>()(
           }
           state.ui.unsavedChanges = true;
         }),
+      
+        setSectionLayouts: (layouts) =>
+        set((state) => {
+          // Bulk update all section layouts
+          Object.assign(state.layout.sectionLayouts, layouts);
+          
+          // Also update the layout property in each section's content
+          Object.entries(layouts).forEach(([sectionId, layout]) => {
+            if (state.content[sectionId]) {
+              state.content[sectionId]!.layout = layout;
+            }
+          });
+          
+          state.ui.unsavedChanges = true;
+        }),
 
       addSection: (sectionType, position) => {
         const sectionId = `${sectionType}-${Date.now()}`;
@@ -309,7 +325,7 @@ export const usePageStore = create<PageStore>()(
 
       removeSection: (sectionId) =>
         set((state) => {
-          state.layout.sections = state.layout.sections.filter(id => id !== sectionId);
+          state.layout.sections = state.layout.sections.filter((id: string) => id !== sectionId);
           delete state.layout.sectionLayouts[sectionId];
           delete state.content[sectionId];
           delete state.ui.completionStatus[sectionId];
@@ -332,7 +348,7 @@ export const usePageStore = create<PageStore>()(
         set((state) => {
           const originalSection = state.content[sectionId];
           if (originalSection) {
-            const index = state.layout.sections.findIndex(id => id === sectionId);
+            const index = state.layout.sections.findIndex((id: string) => id === sectionId);
             state.layout.sections.splice(index + 1, 0, newId);
             state.layout.sectionLayouts[newId] = state.layout.sectionLayouts[sectionId];
             state.content[newId] = {
@@ -537,7 +553,10 @@ export const usePageStore = create<PageStore>()(
         // Add your validation logic here - this should be configurable per layout type
         const requiredElements = ['headline']; // This should come from your layout schema
         return requiredElements.every(element => 
-          section.elements[element] && section.elements[element].trim().length > 0
+          section.elements[element] && 
+          (typeof section.elements[element] === 'string' 
+            ? section.elements[element].trim().length > 0 
+            : Array.isArray(section.elements[element]) && section.elements[element].length > 0)
         );
       },
 
@@ -549,8 +568,11 @@ export const usePageStore = create<PageStore>()(
         // This should come from your layout schema
         const requiredElements = ['headline']; // Define per section type
         return requiredElements.filter(element => 
-          !section.elements[element] || section.elements[element].trim().length === 0
-        );
+          !section.elements[element] || 
+          (typeof section.elements[element] === 'string' 
+            ? section.elements[element].trim().length === 0 
+            : Array.isArray(section.elements[element]) && section.elements[element].length === 0)
+                  );
       },
 
       canPublish: () => {
