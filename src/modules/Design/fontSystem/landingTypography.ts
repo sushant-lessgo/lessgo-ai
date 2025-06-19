@@ -1,4 +1,4 @@
-const landingTypography = {
+export const landingTypography = {
   display: {
     fontSize: 'clamp(3rem, 8vw, 5rem)',
     fontWeight: '700',
@@ -54,3 +54,5 @@ const landingTypography = {
     letterSpacing: '0.01em',
   },
 };
+
+export type TypographyVariant = keyof typeof landingTypography;
