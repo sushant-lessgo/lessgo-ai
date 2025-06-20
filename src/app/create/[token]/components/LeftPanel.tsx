@@ -7,7 +7,7 @@ import ConfirmedFieldTile from "./ConfirmedFieldTile";
 export default function LeftPanel() {
   const oneLiner = useOnboardingStore((s) => s.oneLiner);
   const validatedFields = useOnboardingStore((s) => s.validatedFields);
-
+console.log("validatedFields:", validatedFields);
 
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);

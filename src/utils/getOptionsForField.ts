@@ -13,7 +13,7 @@ const fieldNameMap: Record<string, string> = {
   "Pricing Category and Model": "pricingModel",
 };
 
-export function getOptionsForField(displayFieldName: string): string[] {
+export function getOptionsForField(displayFieldName: string): readonly string[] {
   const internalFieldName = fieldNameMap[displayFieldName];
 
   if (!internalFieldName) {
@@ -21,20 +21,15 @@ export function getOptionsForField(displayFieldName: string): string[] {
     return [];
   }
 
-  const validatedFieldsRaw = useOnboardingStore.getState().validatedFields;
-
-
-  const validatedFields: Record<string, string> = {};
-  for (const [displayKey, value] of Object.entries(validatedFieldsRaw)) {
-    const internalKey = fieldNameMap[displayKey];
-    if (internalKey) validatedFields[internalKey] = value;
-  }
+  // Get validated fields (already stored with internal names)
+  const validatedFields = useOnboardingStore.getState().validatedFields;
 
   switch (internalFieldName) {
     case "marketCategory":
       return taxonomy.marketCategories;
 
     case "marketSubcategory": {
+      // Look for the category using internal name (since that's how it's stored)
       const category = validatedFields.marketCategory;
       if (category && category in marketSubcategories) {
         return marketSubcategories[category as ValidCategory];
@@ -43,16 +38,22 @@ export function getOptionsForField(displayFieldName: string): string[] {
     }
 
     case "targetAudience":
-      return taxonomy.targetAudiences;
+      // Flatten all audiences from all groups
+      return taxonomy.targetAudienceGroups.flatMap(group => 
+        group.audiences.map(audience => audience.label)
+      );
 
     case "startupStage":
-      return taxonomy.startupStages;
+      // Flatten all stages from all groups
+      return taxonomy.startupStageGroups.flatMap(group => 
+        group.stages.map(stage => stage.label)
+      );
 
     case "pricingModel":
-      return taxonomy.pricingModels;
+      return taxonomy.pricingModels.map(model => model.label);
 
     case "landingGoal":
-      return taxonomy.landingGoals;
+      return taxonomy.landingGoalTypes.map(goal => goal.label);
 
     default:
       return [];

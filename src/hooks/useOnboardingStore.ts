@@ -31,6 +31,16 @@ type OnboardingStore = {
   reset: () => void;
 };
 
+// Field name mapping (display name -> internal name)
+const fieldNameMap: Record<string, string> = {
+  "Market Category": "marketCategory",
+  "Market Subcategory": "marketSubcategory",
+  "Target Audience": "targetAudience",
+  "Startup Stage": "startupStage",
+  "Landing Page Goals": "landingGoal",
+  "Pricing Category and Model": "pricingModel",
+};
+
 export const useOnboardingStore = create<OnboardingStore>((set) => ({
   oneLiner: "",
   confirmedFields: {},
@@ -44,13 +54,17 @@ export const useOnboardingStore = create<OnboardingStore>((set) => ({
   setValidatedFields: (fields) => set({ validatedFields: fields }),
   setHiddenInferredFields: (fields) => set({ hiddenInferredFields: fields }),
 
-  confirmField: (field, value) =>
+ confirmField: (displayField, value) => {
+    // Convert display name to internal name before storing
+    const internalField = fieldNameMap[displayField] || displayField;
+    
     set((state) => ({
       validatedFields: {
         ...state.validatedFields,
-        [field]: value,
+        [internalField]: value, // Store using internal name
       },
-    })),
+    }));
+  },
 
   setStepIndex: (index) => set({ stepIndex: index }),
   setFeaturesFromAI: (features) => set({ featuresFromAI: features }),
