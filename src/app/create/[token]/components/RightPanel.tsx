@@ -17,12 +17,18 @@ import GenerationAnimation from './GenerationAnimation';
 const FIELD_ORDER = [
   "Market Category",
   "Market Subcategory",
-  "Target Audience",
+  "Target Audience", 
   "Key Problem Getting Solved",
   "Startup Stage",
   "Landing Page Goals",
   "Pricing Category and Model",
 ];
+
+interface ConfirmedFieldData {
+  value: string;
+  confidence: number;
+  alternatives?: string[];
+}
 
 type FeatureItem = {
   feature: string;
@@ -33,8 +39,8 @@ export default function RightPanel() {
   const {
     oneLiner,
     setOneLiner,
-    confirmedFields,
-    validatedFields,
+    confirmedFields, // AI guesses with confidence
+    validatedFields, // User-confirmed values
     setConfirmedFields,
     setValidatedFields,
     confirmField,
@@ -47,37 +53,93 @@ export default function RightPanel() {
   const params = useParams();
   const tokenId = params?.token as string;
 
-  // Page generation hook - called at component level
+  // Page generation hook
   const { generationState, handleGeneratePage: generatePage, isGenerating } = usePageGeneration(tokenId);
 
   const isStep1 = !oneLiner;
   const isFinalStep = stepIndex >= FIELD_ORDER.length;
   const currentField = FIELD_ORDER[stepIndex];
-  const aiGuess = validatedFields[currentField] ?? confirmedFields[currentField] ?? "";
+  
+  // ✅ CORRECT: Get current field data from confirmedFields (AI guesses)
+  const internalFieldName = getInternalFieldName(currentField);
+  const currentFieldData = confirmedFields[internalFieldName];
+  const aiGuess = currentFieldData?.value || "";
+  const confidence = currentFieldData?.confidence || 0;
+  const alternatives = currentFieldData?.alternatives || [];
   
   const [showFeatureEditor, setShowFeatureEditor] = useState(false);
 
+  // Helper function to convert display field name to internal field name
+  function getInternalFieldName(displayField: string): string {
+    const fieldNameMap: Record<string, string> = {
+      "Market Category": "marketCategory",
+      "Market Subcategory": "marketSubcategory",
+      "Target Audience": "targetAudience",
+      "Key Problem Getting Solved": "keyProblem",
+      "Startup Stage": "startupStage",
+      "Landing Page Goals": "landingGoal",
+      "Pricing Category and Model": "pricingModel",
+    };
+    return fieldNameMap[displayField] || displayField;
+  }
+
+  // ✅ CORRECT: Auto-advance logic for high confidence fields
+  useEffect(() => {
+    if (!currentField || isFinalStep || !currentFieldData) return;
+
+    // Auto-confirm and advance if confidence >= 0.85 and not already validated
+    if (currentFieldData.confidence >= 0.85 && !validatedFields[internalFieldName]) {
+      console.log(`Auto-confirming ${currentField} with confidence ${currentFieldData.confidence}`);
+      
+      // Move from confirmedFields → validatedFields
+      confirmField(currentField, currentFieldData.value);
+      
+      // Auto-advance to next field after a brief delay
+      setTimeout(() => {
+        setStepIndex(stepIndex + 1);
+      }, 1500); // Slightly longer delay so user can see what was auto-confirmed
+    }
+  }, [stepIndex, currentField, currentFieldData, confirmField, setStepIndex, isFinalStep, validatedFields, internalFieldName]);
+
+  // ✅ CORRECT: Handle user confirmation
   const handleConfirm = async (value: string) => {
+    // Move from confirmedFields → validatedFields  
     confirmField(currentField, value);
-    const updated = { ...validatedFields, [currentField]: value };
-    setValidatedFields(updated);
+    
+    // Auto-advance to next field
     setStepIndex(stepIndex + 1);
+    
+    // Update auto-save with current validated fields
+    const updatedValidatedFields = { ...validatedFields, [internalFieldName]: value };
     await autoSaveDraft({
       tokenId,
       inputText: oneLiner,
-      confirmedFields: updated, // Saving validated fields
+      confirmedFields: updatedValidatedFields,
+    });
+  };
+
+  // ✅ CORRECT: Handle initial input success - populate confirmedFields only
+  const handleInputSuccess = async (input: string, confirmedFieldsData: Record<string, ConfirmedFieldData>) => {
+    setOneLiner(input);
+    setConfirmedFields(confirmedFieldsData); // Store AI guesses
+    setStepIndex(0); // Start field confirmation process
+    
+    await autoSaveDraft({
+      tokenId,
+      inputText: input,
+      confirmedFields: {}, // Start with empty validated fields
     });
   };
 
   useEffect(() => {
     const {
-      "Market Category": category,
-      "Market Subcategory": subcategory,
-      "Key Problem Getting Solved": problem,
-      "Target Audience": audience,
-      "Startup Stage": startupStage,
-      "Pricing Category and Model": pricing,
-      "Landing Page Goals": goal,
+      "marketCategory": category,
+      "marketSubcategory": subcategory,
+      "keyProblem": problem,
+      "targetAudience": audience,
+      "startupStage": startupStage,
+      "pricingModel": pricing,
+      "landingGoal": goal,
     } = validatedFields;
 
     if (isFinalStep && featuresFromAI.length === 0) {
@@ -107,7 +169,6 @@ export default function RightPanel() {
           setTimeout(() => setShowFeatureEditor(true), 2000);
         } catch (error) {
           console.error('Error fetching features:', error);
-          // Fallback: show feature editor anyway
           setTimeout(() => setShowFeatureEditor(true), 500);
         }
       };
@@ -115,6 +176,14 @@ export default function RightPanel() {
       fetchFeatures();
     }
   }, [isFinalStep, featuresFromAI.length, validatedFields, setFeaturesFromAI]);
+
+  // Calculate progress including auto-confirmed fields
+  const totalFields = FIELD_ORDER.length;
+  const completedFields = Object.keys(validatedFields).length;
+  const progressPercentage = Math.min((completedFields / totalFields) * 100, 100);
+
+console.log('Looking for field:', currentField);
+console.log('Available in store:', Object.keys(confirmedFields));
 
   return (
     <div className="flex flex-col h-full justify-start md:justify-center items-center text-brand-text px-4 md:px-8 pt-6 pb-12 bg-white">
@@ -129,19 +198,7 @@ export default function RightPanel() {
             <PageIntro />
 
             <section className="w-full bg-[#F5F5F5] p-6 md:p-8 rounded-lg shadow-sm mt-4">
-              <InputStep
-                onSuccess={async (input, inferred) => {
-                  setOneLiner(input);
-                  setStepIndex(0);
-                  setValidatedFields({});
-                  setConfirmedFields(inferred);
-                  await autoSaveDraft({
-                    tokenId,
-                    inputText: input,
-                    confirmedFields: {},
-                  });
-                }}
-              />
+              <InputStep onSuccess={handleInputSuccess} />
             </section>
           </>
         ) : (
@@ -165,16 +222,16 @@ export default function RightPanel() {
                     Step 2: Review Lessgo.ai Suggestions
                   </h2>
                   <p className="text-sm text-gray-500 mt-1">
-                    We've inferred your input. Confirm or edit each field to continue.
+                    We've inferred your input. High-confidence fields are auto-confirmed, review the rest.
                   </p>
                   <div className="mt-4 w-full h-2 bg-gray-200 rounded-full">
                     <div
                       className="h-full bg-blue-500 rounded-full transition-all duration-300"
-                      style={{ width: `${(stepIndex / FIELD_ORDER.length) * 100}%` }}
+                      style={{ width: `${progressPercentage}%` }}
                     />
                   </div>
                   <div className="text-xs text-gray-400 text-right mt-1">
-                    Step {Math.min(stepIndex + 2, FIELD_ORDER.length + 2)} of {FIELD_ORDER.length + 2}
+                    Step {Math.min(stepIndex + 2, totalFields + 2)} of {totalFields + 2}
                   </div>
                 </>
               )}
@@ -272,12 +329,42 @@ export default function RightPanel() {
                   </div>
                 )
               ) : (
-                <FieldConfirmationCard
-                  fieldName={currentField}
-                  aiGuess={aiGuess}
-                  options={getOptionsForField(currentField)}
-                  onConfirm={handleConfirm}
-                />
+                // Current field confirmation with confidence-based logic
+                currentField && (
+                  <>
+                    {/* Show auto-confirmation message for high confidence */}
+                    {confidence >= 0.85 && (
+                      <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-4">
+                        <div className="flex items-center">
+                          <div className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center mr-3">
+                            <span className="text-white text-sm">🤖</span>
+                          </div>
+                          <div>
+                            <p className="text-blue-800 font-medium">
+                              Auto-confirming {currentField}: "{aiGuess}"
+                            </p>
+                            <p className="text-blue-600 text-sm">
+                              High confidence ({(confidence * 100).toFixed(0)}%) - advancing automatically
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Show field confirmation card for medium/low confidence */}
+                    {confidence < 0.85 && (
+                      <FieldConfirmationCard
+                      key={stepIndex}  
+                        fieldName={currentField}
+                        aiGuess={aiGuess}
+                        confidence={confidence}
+                        alternatives={alternatives}
+                        options={getOptionsForField(currentField)}
+                        onConfirm={handleConfirm}
+                      />
+                    )}
+                  </>
+                )
               )}
             </section>
           </div>

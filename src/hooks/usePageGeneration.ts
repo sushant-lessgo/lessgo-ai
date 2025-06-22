@@ -64,9 +64,17 @@ export function usePageGeneration(tokenId: string) {
     try {
       const { validatedFields, hiddenInferredFields, featuresFromAI } = onboardingStore;
       
+      // Fix: Filter out undefined values from hiddenInferredFields with proper typing
+      const cleanHiddenFields: Record<string, string> = {};
+      Object.entries(hiddenInferredFields).forEach(([key, value]) => {
+        if (value !== undefined && typeof value === 'string') {
+          cleanHiddenFields[key] = value;
+        }
+      });
+      
       const sections = getSectionsFromRules({
         validatedFields,
-        hiddenInferredFields,
+        hiddenInferredFields: cleanHiddenFields,
         featuresFromAI
       });
 
@@ -212,16 +220,16 @@ export function usePageGeneration(tokenId: string) {
     }
   };
 
-  // Step 4: Transfer data to page store
+  // Step 4: Transfer data to page store - FIXED VERSION
   const transferDataToPageStore = async (result: GenerationResult) => {
     try {
-      // Set sections and layouts
-      pageStore.layout.sections = result.sections;
-      Object.entries(result.sectionLayouts).forEach(([sectionId, layout]) => {
-        pageStore.setLayout(sectionId, layout);
-      });
+      console.log('Transferring data to store:', result);
 
-      // Transfer onboarding data to meta
+      // CRITICAL FIX: Use store actions instead of direct mutation
+      pageStore.reorderSections(result.sections);
+      pageStore.setSectionLayouts(result.sectionLayouts);
+
+      // Update meta data - Create proper meta object
       const metaData = {
         id: tokenId,
         title: `${onboardingStore.validatedFields.businessName || 'Landing'} Page`,
@@ -233,12 +241,12 @@ export function usePageGeneration(tokenId: string) {
           oneLiner: onboardingStore.oneLiner,
           validatedFields: onboardingStore.validatedFields,
           featuresFromAI: onboardingStore.featuresFromAI,
-          targetAudience: onboardingStore.validatedFields.targetAudience,
-          businessType: onboardingStore.validatedFields.marketCategory
+          targetAudience: onboardingStore.validatedFields.targetAudience || '',
+          businessType: onboardingStore.validatedFields.marketCategory || ''
         }
       };
 
-      // Update meta
+      // Update meta using proper assignment
       Object.assign(pageStore.meta, metaData);
 
       // Set AI generation status
@@ -252,8 +260,9 @@ export function usePageGeneration(tokenId: string) {
         lastGenerated: Date.now()
       });
 
-      // Update content if available
+      // CRITICAL: Update content using the store's updateFromAIResponse method
       if (result.generatedContent) {
+        console.log('Updating store with AI content:', result.generatedContent);
         pageStore.updateFromAIResponse({
           success: result.success,
           content: result.generatedContent,
@@ -263,12 +272,20 @@ export function usePageGeneration(tokenId: string) {
         });
       }
 
-      // Auto-save the draft
+      // Debug: Verify store state after updates
+      const storeAfterUpdate = pageStore.export();
+      console.log('Store state after transfer:', {
+        sections: pageStore.layout.sections.length,
+        content: Object.keys(pageStore.content).length,
+        hasData: pageStore.layout.sections.length > 0,
+        fullStore: storeAfterUpdate
+      });
+
+      // Auto-save the draft (Fixed: removed pageData parameter)
       await autoSaveDraft({
         tokenId,
         inputText: onboardingStore.oneLiner,
         confirmedFields: onboardingStore.validatedFields,
-        pageData: pageStore.export() // Include the complete page data
       });
 
     } catch (error) {
@@ -279,6 +296,8 @@ export function usePageGeneration(tokenId: string) {
 
   // Main generation function with animation
   const handleGeneratePage = async () => {
+    console.log('Starting page generation for token:', tokenId);
+    
     setGenerationState(prev => ({
       ...prev,
       isGenerating: true,
@@ -305,6 +324,7 @@ export function usePageGeneration(tokenId: string) {
       
       const { sections, errors: sectionErrors } = await generateSections();
       allErrors.push(...sectionErrors);
+      console.log('Generated sections:', sections);
       
       // Show sections appearing in wireframe
       setGenerationState(prev => ({
@@ -323,6 +343,7 @@ export function usePageGeneration(tokenId: string) {
       
       const { layouts, errors: layoutErrors } = await generateLayouts(sections);
       allErrors.push(...layoutErrors);
+      console.log('Generated layouts:', layouts);
       
       // Show layouts appearing
       setGenerationState(prev => ({
@@ -348,6 +369,7 @@ export function usePageGeneration(tokenId: string) {
       const { content, errors: copyErrors, warnings: copyWarnings, isPartial } = await generateCopy(sections, layouts);
       allErrors.push(...copyErrors);
       allWarnings.push(...copyWarnings);
+      console.log('Generated content:', content);
       
       // Step 7: Finalize
       setGenerationState(prev => ({
@@ -379,6 +401,13 @@ export function usePageGeneration(tokenId: string) {
         currentStep: 0,
         warnings: allWarnings
       }));
+      
+      // Add debug log right before navigation
+      console.log('About to navigate to preview. Final store state:', {
+        sections: pageStore.layout.sections.length,
+        content: Object.keys(pageStore.content).length,
+        hasContent: Object.keys(pageStore.content).length > 0
+      });
       
       // Navigate to preview
       router.push(`/preview/${tokenId}`);

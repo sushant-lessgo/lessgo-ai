@@ -13,6 +13,7 @@ const isPublicRoute = createRouteMatcher([
   '/api/loadDraft',
   '/api/infer-fields',
   '/api/market-insights',
+  '/api/validate-fields',
   '/p/:slug',
   '/thanks',
   '/privacy',

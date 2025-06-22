@@ -3,10 +3,11 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { usePageStore } from '@/hooks/usePageStore';
-import LandingPageRenderer from '@/components/LandingPageRenderer';
+import LandingPageRenderer from '@/modules/generatedLanding/LandingPageRenderer';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { SlugModal } from '@/components/SlugModal';
 import posthog from "posthog-js";
+import { StoreDebugPanel } from '@/app/create/[token]/components/StoreDebugPanel';
 
 export default function PreviewPage() {
   const params = useParams();
@@ -94,7 +95,7 @@ export default function PreviewPage() {
           
           // You would need to implement updateFromLoadedData in your store
           // For now, redirect to edit mode to regenerate
-          router.push(`/edit/${tokenId}`);
+          // router.push(`/edit/${tokenId}`);
           return;
           
         } catch (err) {
@@ -111,6 +112,14 @@ export default function PreviewPage() {
     }
   }, [sections.length, tokenId, mode, setMode, router]);
 
+useEffect(() => {
+  console.log('Preview mounted with store:', {
+    sections: sections.length,
+    content: Object.keys(content).length,
+    storeState: usePageStore.getState()
+  });
+}, []);
+
   // Handle edit navigation
   const handleEdit = () => {
     if (fromEdit) {
@@ -118,7 +127,7 @@ export default function PreviewPage() {
       window.close();
     } else {
       // Navigate to edit page
-      router.push(`/edit/${tokenId}`);
+      // router.push(`/edit/${tokenId}`);
     }
   };
 
@@ -303,7 +312,7 @@ export default function PreviewPage() {
           </div>
         </div>
       </div>
-
+{process.env.NODE_ENV === 'development' && <StoreDebugPanel />}
       {/* Slug Modal */}
       {showSlugModal && (
         <SlugModal

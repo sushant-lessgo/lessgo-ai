@@ -1,3 +1,4 @@
+// getOptionsForField.ts
 import { taxonomy, marketSubcategories } from "@/modules/inference/taxonomy";
 import { useOnboardingStore } from "@/hooks/useOnboardingStore";
 
@@ -45,6 +46,40 @@ export function getOptionsForField(displayFieldName: string): readonly string[] 
 
     case "startupStage":
       // Flatten all stages from all groups
+      return taxonomy.startupStageGroups.flatMap(group => 
+        group.stages.map(stage => stage.label)
+      );
+
+    case "pricingModel":
+      return taxonomy.pricingModels.map(model => model.label);
+
+    case "landingGoal":
+      return taxonomy.landingGoalTypes.map(goal => goal.label);
+
+    default:
+      console.warn(`No options defined for field: ${internalFieldName}`);
+      return [];
+  }
+}
+
+// Helper function to get field options by internal name (useful for validation)
+export function getOptionsByInternalName(internalFieldName: string, parentCategory?: string): readonly string[] {
+  switch (internalFieldName) {
+    case "marketCategory":
+      return taxonomy.marketCategories;
+
+    case "marketSubcategory":
+      if (parentCategory && parentCategory in marketSubcategories) {
+        return marketSubcategories[parentCategory as ValidCategory];
+      }
+      return [];
+
+    case "targetAudience":
+      return taxonomy.targetAudienceGroups.flatMap(group => 
+        group.audiences.map(audience => audience.label)
+      );
+
+    case "startupStage":
       return taxonomy.startupStageGroups.flatMap(group => 
         group.stages.map(stage => stage.label)
       );

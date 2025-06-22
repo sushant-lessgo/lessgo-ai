@@ -1,25 +1,93 @@
 // validateOutput.ts
-
 import { InferredFields } from './inferFields';
-import { taxonomy, marketSubcategories, MarketCategory, marketCategories } from './taxonomy';
-import stringSimilarity from 'string-similarity';
+import { getBestSemanticMatch, findSemanticMatches, SemanticMatch } from '@/lib/embeddings';
+import { taxonomy, marketSubcategories, MarketCategory } from './taxonomy';
 
-function findClosestMatch(value: string, options: string[], threshold = 0.6): string | null {
-  const { bestMatch } = stringSimilarity.findBestMatch(
-    value.toLowerCase(),
-    options.map((o) => o.toLowerCase())
-  );
-
-  return bestMatch.rating >= threshold
-    ? options.find((o) => o.toLowerCase() === bestMatch.target) || null
-    : null;
+export interface ValidationResult {
+  field: string;
+  value: string | null;
+  confidence: number;
+  alternatives?: string[];
 }
+
+interface ValidatedFields {
+  [key: string]: ValidationResult;
+}
+
+// Confidence thresholds
+const CONFIDENCE_THRESHOLDS = {
+  HIGH: 0.85,    // Auto-confirm
+  MEDIUM: 0.7,   // Show as suggestion
+  LOW: 0.0       // Manual selection with alternatives
+};
 
 function isValidMarketCategory(category: string): category is MarketCategory {
-  return (marketCategories as readonly string[]).includes(category);
+  return (taxonomy.marketCategories as readonly string[]).includes(category);
 }
 
-export function validateInferredFields(raw: InferredFields): Record<string, string> {
+async function validateField(
+  fieldType: string,
+  value: string,
+  displayName: string,
+  parentCategory?: string
+): Promise<ValidationResult> {
+  try {
+    // Special handling for subcategories - filter by parent category
+    if (fieldType === 'marketSubcategory' && parentCategory) {
+      // Get allowed subcategories for the parent category
+      const allowedSubcategories = isValidMarketCategory(parentCategory) 
+        ? marketSubcategories[parentCategory] 
+        : [];
+      
+      if (allowedSubcategories.length === 0) {
+        return {
+          field: displayName,
+          value: null,
+          confidence: 0,
+          alternatives: []
+        };
+      }
+      
+      // Find semantic matches within allowed subcategories
+      const allMatches = await findSemanticMatches(value, fieldType, 10);
+      const filteredMatches = allMatches.filter(match => 
+        allowedSubcategories.includes(match.value)
+      );
+      
+      const bestMatch = filteredMatches[0];
+      const alternatives = filteredMatches.slice(1, 4).map(m => m.value);
+      
+      return {
+        field: displayName,
+        value: bestMatch?.value || null,
+        confidence: bestMatch?.confidence || 0,
+        alternatives: alternatives.length > 0 ? alternatives : allowedSubcategories.slice(0, 3)
+      };
+    }
+    
+    // Standard semantic matching for other fields
+    const bestMatch = await getBestSemanticMatch(value, fieldType, 0.0); // Get best match regardless of threshold
+    const alternatives = await findSemanticMatches(value, fieldType, 4);
+    
+    return {
+      field: displayName,
+      value: bestMatch?.value || null,
+      confidence: bestMatch?.confidence || 0,
+      alternatives: alternatives.slice(1, 4).map(m => m.value) // Skip the best match
+    };
+    
+  } catch (error) {
+    console.error(`Error validating field ${fieldType}:`, error);
+    return {
+      field: displayName,
+      value: null,
+      confidence: 0,
+      alternatives: []
+    };
+  }
+}
+
+export async function validateInferredFields(raw: InferredFields): Promise<Record<string, ValidationResult>> {
   const {
     marketCategory,
     marketSubcategory,
@@ -30,56 +98,71 @@ export function validateInferredFields(raw: InferredFields): Record<string, stri
     landingGoal,
   } = raw;
 
+  console.log('🔍 Starting semantic validation...');
 
-  console.log('🔍 marketCategory', marketCategory, taxonomy.marketCategories);
-
-  const cleanedCategory = findClosestMatch(marketCategory, taxonomy.marketCategories);
-  let allowedSubcategories: string[] = [];
-
-  if (cleanedCategory && isValidMarketCategory(cleanedCategory)) {
-    allowedSubcategories = marketSubcategories[cleanedCategory] ?? [];
-
-  }
-console.log('🔍 marketSubcategory', marketSubcategory, allowedSubcategories);
-  const cleanedSubcategory =
-  allowedSubcategories.length > 0
-    ? findClosestMatch(marketSubcategory, allowedSubcategories)
-    : null;
-
-
-  console.log('🔍 targetAudience', targetAudience, taxonomy.targetAudiences);
-  const cleanedAudience = findClosestMatch(targetAudience, taxonomy.targetAudiences);
-
-
-  console.log('🔍 startupStage', startupStage, taxonomy.startupStages);
-  const cleanedStage = findClosestMatch(startupStage, taxonomy.startupStages);
-
-
-  console.log('🔍 pricingModel', pricingModel, taxonomy.pricingModels);
-  const cleanedPricing = findClosestMatch(pricingModel, taxonomy.pricingModels);
-
-
-  console.log('🔍 landingGoal', landingGoal, taxonomy.landingGoals);
-  const cleanedGoal = findClosestMatch(landingGoal, taxonomy.landingGoals);
-
-  console.log("Category", cleanedCategory);
-  console.log("SubCategory", cleanedSubcategory);
-  console.log("Target Audience", cleanedAudience);
-  console.log("Key Problem Getting Solved", keyProblem);
-  console.log("Startup Stage", cleanedStage);
-  console.log("Landing Page Goals", cleanedGoal);
-  console.log("Pricing Category and Model", cleanedPricing);
-
+  // Validate market category first (needed for subcategory filtering)
+  const categoryResult = await validateField('marketCategory', marketCategory, 'Market Category');
   
+  // Validate other fields in parallel
+  const [
+    subcategoryResult,
+    audienceResult,
+    stageResult,
+    pricingResult,
+    goalResult
+  ] = await Promise.all([
+    validateField('marketSubcategory', marketSubcategory, 'Market Subcategory', categoryResult.value || undefined),
+    validateField('targetAudience', targetAudience, 'Target Audience'),
+    validateField('startupStage', startupStage, 'Startup Stage'),
+    validateField('pricingModel', pricingModel, 'Pricing Category and Model'),
+    validateField('landingGoal', landingGoal, 'Landing Page Goals'),
+  ]);
 
-
-  return {
-    "Market Category": cleanedCategory || '',
-    "Market Subcategory": cleanedSubcategory || '',
-    "Target Audience": cleanedAudience || '',
-    "Key Problem Getting Solved": keyProblem.trim(),
-    "Startup Stage": cleanedStage || '',
-    "Landing Page Goals": cleanedGoal || '',
-    "Pricing Category and Model": cleanedPricing || '',
+  // Key problem doesn't need semantic matching - it's free text
+  const problemResult: ValidationResult = {
+    field: 'Key Problem Getting Solved',
+    value: keyProblem.trim(),
+    confidence: 1.0, // Always high confidence for free text
   };
+
+  const results = {
+    'Market Category': categoryResult,
+    'Market Subcategory': subcategoryResult,
+    'Target Audience': audienceResult,
+    'Key Problem Getting Solved': problemResult,
+    'Startup Stage': stageResult,
+    'Landing Page Goals': goalResult,
+    'Pricing Category and Model': pricingResult,
+  };
+
+  // Log results for debugging
+  Object.entries(results).forEach(([field, result]) => {
+    const confidenceLevel = 
+      result.confidence >= CONFIDENCE_THRESHOLDS.HIGH ? 'HIGH' :
+      result.confidence >= CONFIDENCE_THRESHOLDS.MEDIUM ? 'MEDIUM' : 'LOW';
+    
+    console.log(`🔍 ${field}: "${result.value}" (${confidenceLevel} - ${(result.confidence * 100).toFixed(1)}%)`);
+  });
+
+  return results;
 }
+
+// Helper function to convert ValidationResult to the old format for backward compatibility
+export function extractValidatedValues(results: Record<string, ValidationResult>): Record<string, string> {
+  const extracted: Record<string, string> = {};
+  
+  Object.entries(results).forEach(([field, result]) => {
+    extracted[field] = result.value || '';
+  });
+  
+  return extracted;
+}
+
+// Helper function to get confidence level
+export function getConfidenceLevel(confidence: number): 'HIGH' | 'MEDIUM' | 'LOW' {
+  if (confidence >= CONFIDENCE_THRESHOLDS.HIGH) return 'HIGH';
+  if (confidence >= CONFIDENCE_THRESHOLDS.MEDIUM) return 'MEDIUM';
+  return 'LOW';
+}
+
+export { CONFIDENCE_THRESHOLDS };
