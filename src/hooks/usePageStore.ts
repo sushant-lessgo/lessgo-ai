@@ -4,6 +4,9 @@ import { devtools } from "zustand/middleware";
 import { landingTypography } from '@/modules/Design/fontSystem/landingTypography';
 import { generateColorTokens, SectionBackgroundInput } from '@/modules/Design/ColorSystem/colorTokens';
 import { pickFontFromOnboarding } from '@/modules/Design/fontSystem/pickFont';
+import { getSectionBackgroundType, getSectionBackgroundCSS } from '@/modules/Design/background/backgroundIntegration';
+
+
 
 // Add typography scales
 const typographyScales = {
@@ -682,63 +685,83 @@ export const usePageStore = create<PageStore>()(
         console.log("Redo not implemented yet");
       },
 updateFromAIResponse: (aiResponse: any) => {
-    set((state) => {
-      // Update AI generation status
-      state.ui.aiGeneration.isGenerating = false;
-      state.ui.aiGeneration.success = aiResponse.success || false;
-      state.ui.aiGeneration.isPartial = aiResponse.isPartial || false;
-      state.ui.aiGeneration.warnings = aiResponse.warnings || [];
-      state.ui.aiGeneration.errors = aiResponse.errors || [];
-      state.ui.aiGeneration.lastGenerated = Date.now();
-      state.ui.aiGeneration.sectionsGenerated = [];
-      state.ui.aiGeneration.sectionsSkipped = [];
+  set((state) => {
+    // Update AI generation status
+    state.ui.aiGeneration.isGenerating = false;
+    state.ui.aiGeneration.success = aiResponse.success || false;
+    state.ui.aiGeneration.isPartial = aiResponse.isPartial || false;
+    state.ui.aiGeneration.warnings = aiResponse.warnings || [];
+    state.ui.aiGeneration.errors = aiResponse.errors || [];
+    state.ui.aiGeneration.lastGenerated = Date.now();
+    state.ui.aiGeneration.sectionsGenerated = [];
+    state.ui.aiGeneration.sectionsSkipped = [];
 
-      // Process the content
-      if (aiResponse.content && typeof aiResponse.content === 'object') {
-        Object.entries(aiResponse.content).forEach(([sectionId, sectionData]: [string, any]) => {
-          if (sectionData && typeof sectionData === 'object') {
-            // Add section to layout if not exists
-            if (!state.layout.sections.includes(sectionId)) {
-              state.layout.sections.push(sectionId);
-            }
+    // Get current background system from theme
+    const backgroundSystem = {
+      primary: state.layout.theme.colors.sectionBackgrounds.primary || 'bg-white',
+      secondary: state.layout.theme.colors.sectionBackgrounds.secondary || 'bg-gray-50',
+      neutral: state.layout.theme.colors.sectionBackgrounds.neutral || 'bg-white',
+      divider: state.layout.theme.colors.sectionBackgrounds.divider || 'bg-gray-100',
+    };
 
-            // Create or update section content
-            if (!state.content[sectionId]) {
-              state.content[sectionId] = {
-                id: sectionId,
-                layout: 'default', // This should come from your layout logic
-                elements: {},
-                lastGenerated: Date.now(),
-                aiGeneratedElements: [],
-              };
-            }
-
-            // Update elements
-            const section = state.content[sectionId]!;
-            const generatedElements: string[] = [];
-
-            Object.entries(sectionData).forEach(([elementKey, elementValue]: [string, any]) => {
-              if (elementValue !== undefined && elementValue !== null) {
-                section.elements[elementKey] = elementValue;
-                generatedElements.push(elementKey);
-              }
-            });
-
-            // Update metadata
-            section.lastGenerated = Date.now();
-            section.isCustomized = false;
-            section.aiGeneratedElements = generatedElements;
-
-            state.ui.aiGeneration.sectionsGenerated.push(sectionId);
-          } else {
-            state.ui.aiGeneration.sectionsSkipped.push(sectionId);
+    // Process the content
+    if (aiResponse.content && typeof aiResponse.content === 'object') {
+      Object.entries(aiResponse.content).forEach(([sectionId, sectionData]: [string, any]) => {
+        if (sectionData && typeof sectionData === 'object') {
+          // Add section to layout if not exists
+          if (!state.layout.sections.includes(sectionId)) {
+            state.layout.sections.push(sectionId);
           }
-        });
-      }
 
-      state.ui.unsavedChanges = true;
-    });
-  },
+          // Determine background type and CSS for this section
+          const backgroundType = getSectionBackgroundType(sectionId);
+          const backgroundCSS = backgroundSystem[backgroundType];
+
+          // Create or update section content
+          if (!state.content[sectionId]) {
+            state.content[sectionId] = {
+              id: sectionId,
+              layout: 'default',
+              elements: {},
+              backgroundType: backgroundType,
+              lastGenerated: Date.now(),
+              aiGeneratedElements: [],
+            };
+          }
+
+          // Update elements
+          const section = state.content[sectionId]!;
+          const generatedElements: string[] = [];
+
+          Object.entries(sectionData).forEach(([elementKey, elementValue]: [string, any]) => {
+            if (elementValue !== undefined && elementValue !== null) {
+              section.elements[elementKey] = elementValue;
+              generatedElements.push(elementKey);
+            }
+          });
+
+          // Update metadata with proper background assignment
+          section.lastGenerated = Date.now();
+          section.isCustomized = false;
+          section.aiGeneratedElements = generatedElements;
+          section.backgroundType = backgroundType;
+
+          // Log for debugging
+          console.log(`Section ${sectionId} assigned background:`, {
+            type: backgroundType,
+            css: backgroundCSS
+          });
+
+          state.ui.aiGeneration.sectionsGenerated.push(sectionId);
+        } else {
+          state.ui.aiGeneration.sectionsSkipped.push(sectionId);
+        }
+      });
+    }
+
+    state.ui.unsavedChanges = true;
+  });
+},
 
   setAIGenerationStatus: (status: Partial<AIGenerationStatus>) => {
     set((state) => {

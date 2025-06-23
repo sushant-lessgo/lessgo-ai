@@ -174,7 +174,9 @@ export default function InputStep({ onSuccess }: InputStepProps) {
         await autoSaveDraft({
           tokenId,
           inputText: input.trim(),
-          confirmedFields: {}, // Start with empty validated fields - user will confirm them next
+          stepIndex: 0,
+          confirmedFields, // Pass the AI-inferred fields
+          validatedFields: {}, // Start with empty validated fields
         });
         console.log('✅ Auto-save completed');
       } catch (saveError) {

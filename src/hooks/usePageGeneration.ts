@@ -8,7 +8,7 @@ import { getCompleteElementsMap } from '@/modules/sections/elementDetermination'
 import { buildFullPrompt } from '@/modules/prompt/buildPrompt';
 import { parseAiResponse } from '@/modules/prompt/parseAiResponse';
 import { autoSaveDraft } from '@/utils/autoSaveDraft';
-
+import { generateCompleteBackgroundSystem } from '@/modules/Design/background/backgroundIntegration';
 // Progress steps for UX
 const PROGRESS_STEPS = [
   { id: 1, label: "Analyzing your business...", duration: 800 },
@@ -100,6 +100,49 @@ export function usePageGeneration(tokenId: string) {
       };
     }
   };
+
+  const generateThemeAndBackgrounds = async (sections: string[]): Promise<{ 
+  backgroundSystem: any, 
+  errors: string[] 
+}> => {
+  try {
+    // Prepare onboarding data for background generation
+    const onboardingData = {
+      marketCategory: onboardingStore.validatedFields.marketCategory || '',
+      targetAudience: onboardingStore.validatedFields.targetAudience || '',
+      goal: onboardingStore.validatedFields.goal || '',
+      stage: onboardingStore.validatedFields.stage || '',
+      pricing: onboardingStore.validatedFields.pricing || '',
+      tone: onboardingStore.validatedFields.tone || '',
+    };
+
+    // Generate complete background system
+    const backgroundSystem = generateCompleteBackgroundSystem(onboardingData);
+    
+    console.log('Generated background system:', backgroundSystem);
+
+pageStore.setTheme({
+      colors: {
+        baseColor: backgroundSystem.baseColor,
+        accentColor: backgroundSystem.accentColor,
+        sectionBackgrounds: {
+          primary: backgroundSystem.primary,
+          secondary: backgroundSystem.secondary,
+          neutral: backgroundSystem.neutral,
+          divider: backgroundSystem.divider,
+        }
+      }
+    });
+
+    return { backgroundSystem, errors: [] };
+  } catch (error) {
+    console.error('Theme generation failed:', error);
+    return { 
+      backgroundSystem: null, 
+      errors: [`Theme generation failed: ${error instanceof Error ? error.message : 'Unknown error'}`]
+    };
+  }
+};
 
   // Step 2: Generate layouts for each section
   const generateLayouts = async (sections: string[]): Promise<{ layouts: Record<string, string>, errors: string[] }> => {
@@ -282,10 +325,14 @@ export function usePageGeneration(tokenId: string) {
       });
 
       // Auto-save the draft (Fixed: removed pageData parameter)
+      // Auto-save the draft with complete onboarding data
       await autoSaveDraft({
         tokenId,
         inputText: onboardingStore.oneLiner,
-        confirmedFields: onboardingStore.validatedFields,
+        stepIndex: 999, // Special value indicating generation complete
+        validatedFields: onboardingStore.validatedFields,
+        featuresFromAI: onboardingStore.featuresFromAI,
+        hiddenInferredFields: onboardingStore.hiddenInferredFields,
       });
 
     } catch (error) {
@@ -365,6 +412,14 @@ export function usePageGeneration(tokenId: string) {
         await new Promise(resolve => setTimeout(resolve, PROGRESS_STEPS[i].duration));
       }
       
+      
+    
+    const { backgroundSystem, errors: themeErrors } = await generateThemeAndBackgrounds(sections);
+    allErrors.push(...themeErrors);
+    console.log('Generated theme system:', backgroundSystem);
+    
+    await new Promise(resolve => setTimeout(resolve, 800)); // Short step
+
       // Generate all copy at once (but user sees progressive steps)
       const { content, errors: copyErrors, warnings: copyWarnings, isPartial } = await generateCopy(sections, layouts);
       allErrors.push(...copyErrors);

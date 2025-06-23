@@ -30,11 +30,14 @@ export function generateSectionLayouts(sectionIds: string[]) {
   const layouts: Record<string, string> = {};
 
   sectionIds.forEach((sectionId) => {
-    const picker = layoutPickers[sectionId];
-    if (picker) {
-      layouts[sectionId] = picker(input);
-    } else {
-      // Section-specific fallback defaults (copy-friendly layouts)
+    // const picker = layoutPickers[sectionId];
+    // if (picker) {
+    //   layouts[sectionId] = picker(input);
+    // } else {
+      
+    //Uncomment above after creating all the sections
+    
+    // Section-specific fallback defaults (copy-friendly layouts)
       const fallbackLayouts: Record<string, string> = {
         beforeAfter: "SideBySideBlocks",
         closeSection: "MockupWithCTA",
@@ -58,7 +61,7 @@ export function generateSectionLayouts(sectionIds: string[]) {
       };
       
       layouts[sectionId] = fallbackLayouts[sectionId];
-    }
+    // }
   });
 
   setSectionLayouts(layouts);

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useOnboardingStore } from "@/hooks/useOnboardingStore";
-import { getOptionsForField } from "@/utils/getOptionsForField";
+import { getOptionsForField, getGroupedOptionsForField } from "@/utils/getOptionsForField";
 
 type FieldConfirmationCardProps = {
   fieldName: string;
@@ -11,29 +11,6 @@ type FieldConfirmationCardProps = {
   alternatives?: string[]; // Top 3 alternatives for low confidence
   options?: readonly string[]; // Full options fallback
   onConfirm: (value: string) => void;
-};
-
-
-
-// Pricing model grouping with proper typing
-const pricingModelGroups: Record<string, string[]> = {
-  'Free & Trial Options': [
-    'Free Forever', 
-    'Freemium (limited features)', 
-    'Free Trial', 
-    'Paid Trial ($1 or more)'
-  ],
-  'Standard Subscription': [
-    'Flat Monthly Fee', 
-    'Tiered Plans (Basic / Pro / Enterprise)'
-  ],
-  'Usage & Scale Based': [
-    'Per Seat Pricing', 
-    'Usage-Based Pricing'
-  ],
-  'Enterprise Sales': [
-    'Custom Quote / Talk to Sales'
-  ]
 };
 
 export default function FieldConfirmationCard({
@@ -51,21 +28,20 @@ export default function FieldConfirmationCard({
   const stepIndex = onboardingStore.stepIndex;
   const setStepIndex = onboardingStore.setStepIndex;
 
-
-  
-useEffect(() => {
-  if (!aiGuess || confidence < 0.7) {
-    // Low confidence - check if we have alternatives
-    if (alternatives.length > 0) {
-      setMode("edit"); // Show alternatives
+  useEffect(() => {
+    // Reset mode and selection when aiGuess or stepIndex changes
+    if (!aiGuess || confidence < 0.7) {
+      // Low confidence - check if we have alternatives
+      if (alternatives.length > 0) {
+        setMode("edit"); // Show alternatives
+      } else {
+        setMode("show-all"); // No alternatives, show all options
+      }
     } else {
-      setMode("show-all"); // No alternatives, show all options
+      setMode("confirm"); // High confidence, show confirm flow
     }
-  } else {
-    setMode("confirm"); // High confidence, show confirm flow
-  }
-  setSelected(aiGuess || "");
-}, [aiGuess, stepIndex, confidence, alternatives.length]);
+    setSelected(aiGuess || "");
+  }, [aiGuess, stepIndex, confidence, alternatives.length]);
 
   const handleConfirmAIGuess = () => {
     onConfirm(aiGuess);
@@ -84,28 +60,19 @@ useEffect(() => {
     }
   };
 
-  // Get fallback options if not passed
+  // ✅ Use taxonomy-based options
   const fallbackOptions = getOptionsForField(fieldName);
   const availableOptions = options ?? fallbackOptions ?? [];
 
-  // Group options for pricing model
-  const isGroupedField = fieldName === "Pricing Category and Model";
-  const groupedOptions: Record<string, string[]> = isGroupedField ? pricingModelGroups : {};
+  // ✅ Get grouped options from taxonomy (single source of truth)
+  const groupedOptions = getGroupedOptionsForField(fieldName);
+  const isGroupedField = groupedOptions !== null;
 
   // Confidence-based rendering logic
   const isHighConfidence = confidence >= 0.85;
   const isMediumConfidence = confidence >= 0.7 && confidence < 0.85;
   const isLowConfidence = confidence < 0.7;
-console.log(mode, isLowConfidence, alternatives.length);
-console.log('FieldConfirmationCard render:', {
-  fieldName,
-  aiGuess,
-  confidence,
-  alternatives: alternatives?.length || 0,
-  mode,
-  isLowConfidence,
-  stepIndex
-});
+
   return (
     <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-6 space-y-4">
       <div className="flex items-center justify-between">
@@ -152,8 +119,6 @@ console.log('FieldConfirmationCard render:', {
           </div>
         </>
       )}
-      
-
 
       {/* LOW CONFIDENCE: Show alternatives first */}
       {mode === "edit" && isLowConfidence && alternatives.length > 0 && (
@@ -199,21 +164,29 @@ console.log('FieldConfirmationCard render:', {
         <>
           <p className="text-sm text-gray-500">Choose the most accurate option:</p>
           
-          {isGroupedField ? (
-            // Grouped options for pricing model
-            <div className="space-y-4">
+          {isGroupedField && groupedOptions ? (
+            // Enhanced grouped options with better visual hierarchy
+            <div className="space-y-6">
               {Object.entries(groupedOptions).map(([groupName, items]) => (
-                <div key={groupName}>
-                  <h4 className="text-sm font-medium text-gray-600 mb-2">{groupName}</h4>
+                <div key={groupName} className="bg-gradient-to-r from-gray-50 to-gray-100 border border-gray-200 rounded-lg p-4">
+                  <div className="flex items-center mb-3 pb-2 border-b border-gray-300">
+                    <div className="w-2 h-2 bg-brand-accentPrimary rounded-full mr-3"></div>
+                    <h4 className="text-base font-semibold text-gray-800">
+                      {groupName}
+                    </h4>
+                    <span className="ml-2 text-xs text-gray-500 bg-white px-2 py-1 rounded-full font-medium">
+                      {items.length} option{items.length !== 1 ? 's' : ''}
+                    </span>
+                  </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                    {(items as string[]).map((option) => (
+                    {items.map((option) => (
                       <button
                         key={option}
                         onClick={() => setSelected(option)}
-                        className={`p-3 border rounded-md text-sm transition text-left ${
+                        className={`p-3 border rounded-lg text-sm transition-all duration-200 text-left hover:shadow-md ${
                           selected === option
-                            ? "border-brand-accentPrimary bg-brand-highlightBG font-semibold"
-                            : "border-gray-300 hover:border-brand-accentPrimary"
+                            ? "border-brand-accentPrimary bg-white shadow-md ring-2 ring-brand-accentPrimary ring-opacity-20 font-semibold"
+                            : "border-gray-300 bg-white hover:border-brand-accentPrimary hover:bg-gray-50"
                         }`}
                       >
                         {option}
@@ -224,7 +197,7 @@ console.log('FieldConfirmationCard render:', {
               ))}
             </div>
           ) : (
-            // Regular grid for other fields
+            // Regular grid for ungrouped fields
             <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
               {availableOptions.map((option) => (
                 <button
@@ -265,21 +238,29 @@ console.log('FieldConfirmationCard render:', {
             </button>
           </div>
 
-          {isGroupedField ? (
-            // Grouped options for pricing model
-            <div className="space-y-4">
+          {isGroupedField && groupedOptions ? (
+            // Enhanced grouped options with better visual hierarchy
+            <div className="space-y-6">
               {Object.entries(groupedOptions).map(([groupName, items]) => (
-                <div key={groupName}>
-                  <h4 className="text-sm font-medium text-gray-600 mb-2">{groupName}</h4>
+                <div key={groupName} className="bg-gradient-to-r from-gray-50 to-gray-100 border border-gray-200 rounded-lg p-4">
+                  <div className="flex items-center mb-3 pb-2 border-b border-gray-300">
+                    <div className="w-2 h-2 bg-brand-accentPrimary rounded-full mr-3"></div>
+                    <h4 className="text-base font-semibold text-gray-800">
+                      {groupName}
+                    </h4>
+                    <span className="ml-2 text-xs text-gray-500 bg-white px-2 py-1 rounded-full font-medium">
+                      {items.length} option{items.length !== 1 ? 's' : ''}
+                    </span>
+                  </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                    {(items as string[]).map((option) => (
+                    {items.map((option) => (
                       <button
                         key={option}
                         onClick={() => setSelected(option)}
-                        className={`p-3 border rounded-md text-sm transition text-left ${
+                        className={`p-3 border rounded-lg text-sm transition-all duration-200 text-left hover:shadow-md ${
                           selected === option
-                            ? "border-brand-accentPrimary bg-brand-highlightBG font-semibold"
-                            : "border-gray-300 hover:border-brand-accentPrimary"
+                            ? "border-brand-accentPrimary bg-white shadow-md ring-2 ring-brand-accentPrimary ring-opacity-20 font-semibold"
+                            : "border-gray-300 bg-white hover:border-brand-accentPrimary hover:bg-gray-50"
                         }`}
                       >
                         {option}
@@ -290,7 +271,7 @@ console.log('FieldConfirmationCard render:', {
               ))}
             </div>
           ) : (
-            // Regular grid for other fields
+            // Regular grid for ungrouped fields
             <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
               {availableOptions.map((option) => (
                 <button

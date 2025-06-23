@@ -3,18 +3,18 @@
 import { useEffect } from "react";
 import { useParams } from "next/navigation";
 import { useOnboardingStore } from "@/hooks/useOnboardingStore";
-import { autoSaveDraft } from "@/utils/autoSaveDraft";
-import { getOptionsForField } from "@/utils/getOptionsForField";
 
+// ✅ UPDATED: Use internal field names to match new API structure
 const FIELD_ORDER = [
-  "Market Category",
-  "Market Subcategory",
-  "Target Audience",
-  "Key Problem Getting Solved",
-  "Startup Stage",
-  "Landing Page Goals",
-  "Pricing Category and Model",
+  "marketCategory",
+  "marketSubcategory",
+  "targetAudience",
+  "keyProblem",
+  "startupStage",
+  "landingGoal",
+  "pricingModel",
 ];
+
 console.log("outside startpage working");
 
 export default function StartPage() {
@@ -26,6 +26,8 @@ export default function StartPage() {
     setConfirmedFields,
     setValidatedFields,
     setStepIndex,
+    setFeaturesFromAI,
+    setHiddenInferredFields,
     reset,
   } = useOnboardingStore();
   
@@ -33,38 +35,54 @@ export default function StartPage() {
   console.log("params:", params);
   console.log("tokenId:", tokenId);
 
-
   useEffect(() => {
-  if (!tokenId) return; // ✅ Guard moved back
+    if (!tokenId) return;
 
-  const loadDraft = async () => {
-    try {
-      console.log("Calling loadDraft for token:", tokenId); // ✅ Debug
-      const res = await fetch(`/api/loadDraft?tokenId=${tokenId}`);
-      if (!res.ok) return;
-      const data = await res.json();
+    const loadDraft = async () => {
+      try {
+        console.log("Calling loadDraft for token:", tokenId);
+        const res = await fetch(`/api/loadDraft?tokenId=${tokenId}`);
+        
+        if (!res.ok) {
+          console.log("No existing draft found, starting fresh");
+          return;
+        }
+        
+        const data = await res.json();
+        console.log("Loaded draft data:", data);
 
-      setOneLiner(data.inputText || "");
+        // ✅ FIXED: Use new API response structure
+        setOneLiner(data.inputText || "");
+        
+        // ✅ FIXED: Set confirmedFields (AI guesses with confidence)
+        setConfirmedFields(data.confirmedFields || {});
+        
+        // ✅ FIXED: Set validatedFields (user-confirmed values)  
+        setValidatedFields(data.validatedFields || {});
+        
+        // ✅ FIXED: Set stepIndex directly from API
+        setStepIndex(data.stepIndex || 0);
+        
+        // ✅ NEW: Set additional onboarding data
+        setFeaturesFromAI(data.featuresFromAI || []);
+        setHiddenInferredFields(data.hiddenInferredFields || {});
 
-      const filteredContent = Object.fromEntries(
-        FIELD_ORDER
-          .filter((field) => data.content?.[field])
-          .map((field) => [field, data.content[field]])
-      );
+        console.log("✅ Store populated from draft:", {
+          inputText: data.inputText,
+          stepIndex: data.stepIndex,
+          confirmedFieldsCount: Object.keys(data.confirmedFields || {}).length,
+          validatedFieldsCount: Object.keys(data.validatedFields || {}).length,
+          featuresCount: (data.featuresFromAI || []).length,
+        });
 
-      setValidatedFields(filteredContent);
+      } catch (err) {
+        console.error("❌ Draft load failed:", err);
+        // Don't reset on error - let user start fresh
+      }
+    };
 
-      const filledSteps = FIELD_ORDER.findIndex((field) => !(field in filteredContent));
-      setStepIndex(filledSteps === -1 ? FIELD_ORDER.length : filledSteps);
-    } catch (err) {
-      console.error("Draft load failed", err);
-    }
-  };
-
-  loadDraft();
-}, [tokenId]); // ✅ Depend on tokenId
-
-
+    loadDraft();
+  }, [tokenId, setOneLiner, setConfirmedFields, setValidatedFields, setStepIndex, setFeaturesFromAI, setHiddenInferredFields]);
 
   return <></>; // No UI here — it's handled in RightPanel
 }

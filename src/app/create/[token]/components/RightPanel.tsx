@@ -14,16 +14,30 @@ import { Button } from "@/components/ui/button";
 import { usePageGeneration } from '@/hooks/usePageGeneration';
 import GenerationAnimation from './GenerationAnimation';
 
+// ===== FIELD CONFIGURATION =====
+// Internal field names for consistent data structure
 const FIELD_ORDER = [
-  "Market Category",
-  "Market Subcategory",
-  "Target Audience", 
-  "Key Problem Getting Solved",
-  "Startup Stage",
-  "Landing Page Goals",
-  "Pricing Category and Model",
-];
+  "marketCategory",
+  "marketSubcategory",
+  "targetAudience", 
+  "keyProblem",
+  "startupStage",
+  "landingGoal",
+  "pricingModel",
+] as const;
 
+// Display names for UI
+const FIELD_DISPLAY_NAMES: Record<string, string> = {
+  marketCategory: "Market Category",
+  marketSubcategory: "Market Subcategory",
+  targetAudience: "Target Audience",
+  keyProblem: "Key Problem Getting Solved",
+  startupStage: "Startup Stage", 
+  landingGoal: "Landing Page Goals",
+  pricingModel: "Pricing Category and Model",
+};
+
+// ===== TYPE DEFINITIONS =====
 interface ConfirmedFieldData {
   value: string;
   confidence: number;
@@ -35,12 +49,15 @@ type FeatureItem = {
   benefit: string;
 };
 
+type InternalFieldName = typeof FIELD_ORDER[number];
+
+// ===== COMPONENT =====
 export default function RightPanel() {
   const {
     oneLiner,
     setOneLiner,
-    confirmedFields, // AI guesses with confidence
-    validatedFields, // User-confirmed values
+    confirmedFields, // AI guesses with confidence (internal names as keys)
+    validatedFields, // User-confirmed values (internal names as keys)
     setConfirmedFields,
     setValidatedFields,
     confirmField,
@@ -58,88 +75,81 @@ export default function RightPanel() {
 
   const isStep1 = !oneLiner;
   const isFinalStep = stepIndex >= FIELD_ORDER.length;
-  const currentField = FIELD_ORDER[stepIndex];
   
-  // ✅ CORRECT: Get current field data from confirmedFields (AI guesses)
-  const internalFieldName = getInternalFieldName(currentField);
-  const currentFieldData = confirmedFields[internalFieldName];
+  // ✅ UPDATED: Use internal field names consistently
+  const currentInternalField: InternalFieldName | undefined = FIELD_ORDER[stepIndex];
+  const currentDisplayField = currentInternalField ? FIELD_DISPLAY_NAMES[currentInternalField] : undefined;
+  const currentFieldData = currentInternalField ? confirmedFields[currentInternalField] : undefined;
+  
   const aiGuess = currentFieldData?.value || "";
   const confidence = currentFieldData?.confidence || 0;
   const alternatives = currentFieldData?.alternatives || [];
   
   const [showFeatureEditor, setShowFeatureEditor] = useState(false);
 
-  // Helper function to convert display field name to internal field name
-  function getInternalFieldName(displayField: string): string {
-    const fieldNameMap: Record<string, string> = {
-      "Market Category": "marketCategory",
-      "Market Subcategory": "marketSubcategory",
-      "Target Audience": "targetAudience",
-      "Key Problem Getting Solved": "keyProblem",
-      "Startup Stage": "startupStage",
-      "Landing Page Goals": "landingGoal",
-      "Pricing Category and Model": "pricingModel",
-    };
-    return fieldNameMap[displayField] || displayField;
-  }
-
-  // ✅ CORRECT: Auto-advance logic for high confidence fields
+  // ✅ UPDATED: Auto-advance logic for high confidence fields
   useEffect(() => {
-    if (!currentField || isFinalStep || !currentFieldData) return;
+    if (!currentInternalField || isFinalStep || !currentFieldData) return;
 
     // Auto-confirm and advance if confidence >= 0.85 and not already validated
-    if (currentFieldData.confidence >= 0.85 && !validatedFields[internalFieldName]) {
-      console.log(`Auto-confirming ${currentField} with confidence ${currentFieldData.confidence}`);
+    if (currentFieldData.confidence >= 0.85 && !validatedFields[currentInternalField]) {
+      console.log(`Auto-confirming ${currentDisplayField} with confidence ${currentFieldData.confidence}`);
       
       // Move from confirmedFields → validatedFields
-      confirmField(currentField, currentFieldData.value);
+      confirmField(currentDisplayField!, currentFieldData.value);
       
       // Auto-advance to next field after a brief delay
       setTimeout(() => {
         setStepIndex(stepIndex + 1);
       }, 1500); // Slightly longer delay so user can see what was auto-confirmed
     }
-  }, [stepIndex, currentField, currentFieldData, confirmField, setStepIndex, isFinalStep, validatedFields, internalFieldName]);
+  }, [stepIndex, currentInternalField, currentDisplayField, currentFieldData, confirmField, setStepIndex, isFinalStep, validatedFields]);
 
-  // ✅ CORRECT: Handle user confirmation
+  // ✅ UPDATED: Handle user confirmation
   const handleConfirm = async (value: string) => {
+    if (!currentInternalField || !currentDisplayField) return;
+    
     // Move from confirmedFields → validatedFields  
-    confirmField(currentField, value);
+    confirmField(currentDisplayField, value);
     
     // Auto-advance to next field
     setStepIndex(stepIndex + 1);
     
     // Update auto-save with current validated fields
-    const updatedValidatedFields = { ...validatedFields, [internalFieldName]: value };
-    await autoSaveDraft({
-      tokenId,
-      inputText: oneLiner,
-      confirmedFields: updatedValidatedFields,
-    });
+    const updatedValidatedFields = { ...validatedFields, [currentInternalField]: value };
+      await autoSaveDraft({
+        tokenId,
+        inputText: oneLiner,
+        stepIndex: stepIndex + 1, // Save new step index
+        validatedFields: updatedValidatedFields, // Use validatedFields, not confirmedFields
+      });
   };
 
-  // ✅ CORRECT: Handle initial input success - populate confirmedFields only
+  // ✅ UNCHANGED: Handle initial input success - populate confirmedFields only
   const handleInputSuccess = async (input: string, confirmedFieldsData: Record<string, ConfirmedFieldData>) => {
     setOneLiner(input);
-    setConfirmedFields(confirmedFieldsData); // Store AI guesses
+    setConfirmedFields(confirmedFieldsData); // Store AI guesses (with internal names as keys)
     setStepIndex(0); // Start field confirmation process
     
     await autoSaveDraft({
       tokenId,
       inputText: input,
-      confirmedFields: {}, // Start with empty validated fields
+      stepIndex: 0,
+      confirmedFields: confirmedFieldsData, // Store AI guesses
+      validatedFields: {}, // Start with empty validated fields
     });
-  };
+      };
 
+  // ✅ UPDATED: Market insights API call (using internal field names)
   useEffect(() => {
     const {
-      "marketCategory": category,
-      "marketSubcategory": subcategory,
-      "keyProblem": problem,
-      "targetAudience": audience,
-      "startupStage": startupStage,
-      "pricingModel": pricing,
-      "landingGoal": goal,
+      marketCategory: category,
+      marketSubcategory: subcategory,
+      keyProblem: problem,
+      targetAudience: audience,
+      startupStage: startupStage,
+      pricingModel: pricing,
+      landingGoal: goal,
     } = validatedFields;
 
     if (isFinalStep && featuresFromAI.length === 0) {
@@ -182,8 +192,16 @@ export default function RightPanel() {
   const completedFields = Object.keys(validatedFields).length;
   const progressPercentage = Math.min((completedFields / totalFields) * 100, 100);
 
-console.log('Looking for field:', currentField);
-console.log('Available in store:', Object.keys(confirmedFields));
+  // Debug logging (remove in production)
+  if (process.env.NODE_ENV === 'development') {
+    console.log('RightPanel Debug:', {
+      currentInternalField,
+      currentDisplayField,
+      hasFieldData: !!currentFieldData,
+      confirmedFieldsKeys: Object.keys(confirmedFields),
+      validatedFieldsKeys: Object.keys(validatedFields),
+    });
+  }
 
   return (
     <div className="flex flex-col h-full justify-start md:justify-center items-center text-brand-text px-4 md:px-8 pt-6 pb-12 bg-white">
@@ -329,8 +347,8 @@ console.log('Available in store:', Object.keys(confirmedFields));
                   </div>
                 )
               ) : (
-                // Current field confirmation with confidence-based logic
-                currentField && (
+                // ✅ UPDATED: Current field confirmation with confidence-based logic
+                currentInternalField && currentDisplayField && (
                   <>
                     {/* Show auto-confirmation message for high confidence */}
                     {confidence >= 0.85 && (
@@ -341,7 +359,7 @@ console.log('Available in store:', Object.keys(confirmedFields));
                           </div>
                           <div>
                             <p className="text-blue-800 font-medium">
-                              Auto-confirming {currentField}: "{aiGuess}"
+                              Auto-confirming {currentDisplayField}: "{aiGuess}"
                             </p>
                             <p className="text-blue-600 text-sm">
                               High confidence ({(confidence * 100).toFixed(0)}%) - advancing automatically
@@ -354,12 +372,12 @@ console.log('Available in store:', Object.keys(confirmedFields));
                     {/* Show field confirmation card for medium/low confidence */}
                     {confidence < 0.85 && (
                       <FieldConfirmationCard
-                      key={stepIndex}  
-                        fieldName={currentField}
+                        key={stepIndex}  
+                        fieldName={currentDisplayField}
                         aiGuess={aiGuess}
                         confidence={confidence}
                         alternatives={alternatives}
-                        options={getOptionsForField(currentField)}
+                        options={getOptionsForField(currentDisplayField)}
                         onConfirm={handleConfirm}
                       />
                     )}
