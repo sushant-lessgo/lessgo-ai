@@ -10,6 +10,7 @@ import { generateColorTokens, generateColorTokensFromBackgroundSystem } from "@/
 import { buildFullPrompt, buildSectionPrompt, buildElementPrompt } from "@/modules/prompt/buildPrompt";
 import { parseAiResponse } from "@/modules/prompt/parseAiResponse";
 import { autoSaveMiddleware, createChangeTracker, type AutoSaveMiddlewareState } from '@/middleware/autoSaveMiddleware';
+import { initDevTools } from '@/utils/devTools';
 
 import type {
   InputVariables,
@@ -2554,7 +2555,10 @@ export const useEditStore = create<EditStore>()(
  * ===== DEBUG UTILITIES (Development Only) =====
  */
 if (process.env.NODE_ENV === 'development') {
-  // Global store access for debugging
+  // Initialize dev tools integration
+  let devToolsInitialized = false;
+  
+  // Enhanced global store access for debugging
   (window as any).__editStoreDebug = {
     getState: () => useEditStore.getState(),
     setState: (newState: Partial<EditStore>) => useEditStore.setState(newState),
@@ -2596,7 +2600,111 @@ if (process.env.NODE_ENV === 'development') {
         incompleteElements: state.getIncompleteElements(sectionId),
       }));
     },
+    
+    // Enhanced store analysis
+    analyzeStore: () => {
+      const state = useEditStore.getState();
+      
+      return {
+        timestamp: Date.now(),
+        sections: {
+          total: state.sections.length,
+          withContent: Object.keys(state.content).length,
+          missing: state.sections.filter(id => !state.content[id]),
+        },
+        content: {
+          totalSections: Object.keys(state.content).length,
+          withElements: Object.values(state.content).filter(
+            section => Object.keys(section.elements || {}).length > 0
+          ).length,
+          aiGenerated: Object.values(state.content).filter(
+            section => section.aiMetadata?.aiGenerated
+          ).length,
+          customized: Object.values(state.content).filter(
+            section => section.aiMetadata?.isCustomized
+          ).length,
+        },
+        ui: {
+          mode: state.mode,
+          editMode: state.editMode,
+          selectedSection: state.selectedSection,
+          selectedElement: state.selectedElement,
+          hasErrors: Object.keys(state.errors).length > 0,
+          isLoading: state.isLoading,
+        },
+        autoSave: {
+          isDirty: state.isDirty,
+          isSaving: state.isSaving,
+          lastSaved: state.lastSaved,
+          hasError: !!state.saveError,
+          queuedChanges: state.queuedChanges?.length || 0,
+        },
+      };
+    },
+    
+    // Store validation
+    validateStore: () => {
+      const state = useEditStore.getState();
+      const issues: string[] = [];
+      
+      // Check sections consistency
+      state.sections.forEach((sectionId: string) => {
+        if (!state.sectionLayouts[sectionId]) {
+          issues.push(`Section ${sectionId} missing layout`);
+        }
+        if (!state.content?.[sectionId]) {
+          issues.push(`Section ${sectionId} missing content`);
+        }
+      });
+      
+      // Check content consistency
+      Object.keys(state.content).forEach(sectionId => {
+        if (!state.sections?.includes(sectionId)) {
+          issues.push(`Content for ${sectionId} exists but section not in sections array`);
+        }
+      });
+      
+      // Check selected element consistency
+      if (state.selectedElement) {
+        const { sectionId, elementKey } = state.selectedElement;
+        if (!state.content?.[sectionId]?.elements?.[elementKey]) {
+          issues.push(`Selected element ${sectionId}.${elementKey} does not exist`);
+        }
+      }
+      
+      return issues;
+    },
+    
+    // Initialize dev tools integration
+    initDevTools: () => {
+      if (!devToolsInitialized) {
+        try {
+          const devTools = initDevTools(useEditStore);
+          devToolsInitialized = true;
+          
+          // Extend debug object with dev tools methods
+          Object.assign((window as any).__editStoreDebug, {
+            devTools,
+            getDevToolsState: () => (devTools as any).state,
+            clearLogs: () => {
+              (window as any).__editStoreDebug.actionHistory = [];
+              (window as any).__editStoreDebug.slowRenders = [];
+              (window as any).__editStoreDebug.renderCount = 0;
+            },
+          });
+          
+          console.log('🔧 Dev Tools integrated with Edit Store');
+        } catch (error) {
+          console.warn('⚠️ Dev Tools integration failed:', error);
+        }
+      }
+    },
   };
+  
+  // Auto-initialize dev tools
+  setTimeout(() => {
+    (window as any).__editStoreDebug.initDevTools();
+  }, 100);
   
   console.log('🔧 Edit Store Debug utilities available at window.__editStoreDebug');
 }
