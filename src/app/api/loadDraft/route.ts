@@ -19,7 +19,7 @@ interface FeatureItem {
 interface HiddenInferredFields {
   awarenessLevel?: string;
   copyIntent?: string;
-  brandTone?: string;
+  toneProfile?: string;
   layoutPersona?: string;
   [key: string]: string | undefined;
 }

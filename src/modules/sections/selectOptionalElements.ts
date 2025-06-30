@@ -1,19 +1,7 @@
 import { layoutElementSchema } from './layoutElementSchema';
+import type { InputVariables, HiddenInferredFields } from '@/types/core/index';
 
-interface Variables {
-  marketSubcategory: string;
-  landingGoal: string;
-  startupStage: string;
-  targetAudience: string;
-  pricingModel: string;
-  pricingCommitment?: string;
-  pricingModifier?: string;
-  awarenessLevel: string;
-  marketSophistication: string;
-  toneProfile: string;
-  copyIntent: string;
-  problemType: string;
-}
+type Variables = Partial<InputVariables> & Partial<HiddenInferredFields>;
 
 interface ElementRule {
   element: string;
@@ -37,7 +25,7 @@ const elementRules: SectionLayoutRules = {
       conditions: [
         { variable: "awarenessLevel", values: ["unaware", "problem-aware"], weight: 4 },
         { variable: "copyIntent", values: ["pain-led"], weight: 3 },
-        { variable: "marketSophistication", values: ["level-1", "level-2"], weight: 2 }
+        { variable: "marketSophisticationLevel", values: ["level-1", "level-2"], weight: 2 }
       ],
       minScore: 6
     },
@@ -77,7 +65,7 @@ const elementRules: SectionLayoutRules = {
       element: "slider_instruction",
       conditions: [
         { variable: "awarenessLevel", values: ["solution-aware", "product-aware"], weight: 4 },
-        { variable: "marketSophistication", values: ["level-3", "level-4", "level-5"], weight: 3 },
+        { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 3 },
         { variable: "targetAudience", values: ["developers", "product-managers", "no-code-builders"], weight: 2 }
       ],
       minScore: 6
@@ -129,7 +117,7 @@ const elementRules: SectionLayoutRules = {
       element: "conclusion_text",
       conditions: [
         { variable: "copyIntent", values: ["desire-led"], weight: 4 },
-        { variable: "landingGoal", values: ["free-trial", "demo", "signup"], weight: 3 },
+        { variable: "landingPageGoals", values: ["free-trial", "demo", "signup"], weight: 3 },
         { variable: "toneProfile", values: ["confident-playful", "bold-persuasive"], weight: 2 }
       ],
       minScore: 6
@@ -141,7 +129,7 @@ const elementRules: SectionLayoutRules = {
       element: "improvement_percentages",
       conditions: [
         { variable: "startupStage", values: ["targeting-pmf", "users-250-500", "users-500-1k", "users-1k-5k", "mrr-growth"], weight: 4 },
-        { variable: "marketSophistication", values: ["level-3", "level-4", "level-5"], weight: 3 },
+        { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 3 },
         { variable: "copyIntent", values: ["desire-led"], weight: 2 }
       ],
       minScore: 6
@@ -161,7 +149,7 @@ const elementRules: SectionLayoutRules = {
       element: "journey_steps",
       conditions: [
         { variable: "awarenessLevel", values: ["solution-aware", "product-aware"], weight: 4 },
-        { variable: "marketSophistication", values: ["level-3", "level-4", "level-5"], weight: 3 },
+        { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 3 },
         { variable: "targetAudience", values: ["enterprise-tech-teams", "mid-market-companies"], weight: 2 }
       ],
       minScore: 6
@@ -190,17 +178,17 @@ const elementRules: SectionLayoutRules = {
     {
       element: "urgency_text",
       conditions: [
-        { variable: "landingGoal", values: ["buy-now", "free-trial", "early-access"], weight: 4 },
+        { variable: "landingPageGoals", values: ["buy-now", "free-trial", "early-access"], weight: 4 },
         { variable: "toneProfile", values: ["bold-persuasive", "confident-playful"], weight: 3 },
-        { variable: "pricingModifier", values: ["discount"], weight: 2 }
+       // { variable: "pricingModifier", values: ["discount"], weight: 2 }
       ],
       minScore: 6
     },
     {
       element: "guarantee_text",
       conditions: [
-        { variable: "landingGoal", values: ["buy-now", "free-trial"], weight: 4 },
-        { variable: "pricingModifier", values: ["money-back"], weight: 3 },
+        { variable: "landingPageGoals", values: ["buy-now", "free-trial"], weight: 4 },
+       // { variable: "pricingModifier", values: ["money-back"], weight: 3 },
         { variable: "targetAudience", values: ["smbs", "early-stage-startups", "solopreneurs"], weight: 2 }
       ],
       minScore: 6
@@ -211,7 +199,7 @@ const elementRules: SectionLayoutRules = {
     {
       element: "total_value_text",
       conditions: [
-        { variable: "landingGoal", values: ["buy-now", "subscribe"], weight: 5 },
+        { variable: "landingPageGoals", values: ["buy-now", "subscribe"], weight: 5 },
         { variable: "toneProfile", values: ["bold-persuasive"], weight: 3 },
         { variable: "pricingModel", values: ["tiered", "flat-monthly"], weight: 2 }
       ],
@@ -220,8 +208,8 @@ const elementRules: SectionLayoutRules = {
     {
       element: "urgency_text",
       conditions: [
-        { variable: "landingGoal", values: ["buy-now", "early-access"], weight: 4 },
-        { variable: "pricingModifier", values: ["discount"], weight: 3 },
+        { variable: "landingPageGoals", values: ["buy-now", "early-access"], weight: 4 },
+       // { variable: "pricingModifier", values: ["discount"], weight: 3 },
         { variable: "startupStage", values: ["problem-exploration", "pre-mvp", "mvp-development"], weight: 2 }
       ],
       minScore: 6
@@ -232,9 +220,9 @@ const elementRules: SectionLayoutRules = {
     {
       element: "form_labels",
       conditions: [
-        { variable: "landingGoal", values: ["download", "waitlist", "signup"], weight: 4 },
+        { variable: "landingPageGoals", values: ["download", "waitlist", "signup"], weight: 4 },
         { variable: "targetAudience", values: ["enterprise-tech-teams", "enterprise-marketing-teams"], weight: 3 },
-        { variable: "marketSophistication", values: ["level-3", "level-4", "level-5"], weight: 2 }
+        { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 2 }
       ],
       minScore: 6
     },
@@ -243,7 +231,7 @@ const elementRules: SectionLayoutRules = {
       conditions: [
         { variable: "targetAudience", values: ["enterprise-tech-teams", "enterprise-marketing-teams", "it-decision-makers"], weight: 4 },
         { variable: "marketSubcategory", values: ["Healthcare & MedTech SaaS", "LegalTech SaaS"], weight: 3 },
-        { variable: "landingGoal", values: ["download", "signup"], weight: 2 }
+        { variable: "landingPageGoals", values: ["download", "signup"], weight: 2 }
       ],
       minScore: 6
     }
@@ -254,8 +242,8 @@ const elementRules: SectionLayoutRules = {
       element: "features_list",
       conditions: [
         { variable: "targetAudience", values: ["enterprise-tech-teams", "enterprise-marketing-teams", "it-decision-makers"], weight: 5 },
-        { variable: "landingGoal", values: ["contact-sales", "demo", "book-call"], weight: 3 },
-        { variable: "marketSophistication", values: ["level-4", "level-5"], weight: 2 }
+        { variable: "landingPageGoals", values: ["contact-sales", "demo", "book-call"], weight: 3 },
+        { variable: "marketSophisticationLevel", values: ["level-4", "level-5"], weight: 2 }
       ],
       minScore: 7
     },
@@ -263,7 +251,7 @@ const elementRules: SectionLayoutRules = {
       element: "contact_methods",
       conditions: [
         { variable: "targetAudience", values: ["enterprise-tech-teams", "enterprise-marketing-teams", "mid-market-companies"], weight: 4 },
-        { variable: "landingGoal", values: ["contact-sales", "book-call"], weight: 3 }
+        { variable: "landingPageGoals", values: ["contact-sales", "book-call"], weight: 3 }
       ],
       minScore: 5
     }
@@ -275,7 +263,7 @@ const elementRules: SectionLayoutRules = {
       conditions: [
         { variable: "awarenessLevel", values: ["unaware", "problem-aware"], weight: 4 },
         { variable: "copyIntent", values: ["pain-led"], weight: 3 },
-        { variable: "marketSophistication", values: ["level-1", "level-2"], weight: 2 }
+        { variable: "marketSophisticationLevel", values: ["level-1", "level-2"], weight: 2 }
       ],
       minScore: 6
     },
@@ -284,7 +272,7 @@ const elementRules: SectionLayoutRules = {
       conditions: [
         { variable: "copyIntent", values: ["desire-led"], weight: 4 },
         { variable: "toneProfile", values: ["confident-playful", "bold-persuasive"], weight: 3 },
-        { variable: "landingGoal", values: ["free-trial", "signup", "demo"], weight: 2 }
+        { variable: "landingPageGoals", values: ["free-trial", "signup", "demo"], weight: 2 }
       ],
       minScore: 6
     }
@@ -296,7 +284,7 @@ const elementRules: SectionLayoutRules = {
       conditions: [
         { variable: "awarenessLevel", values: ["solution-aware", "product-aware"], weight: 4 },
         { variable: "targetAudience", values: ["developers", "product-managers", "no-code-builders"], weight: 3 },
-        { variable: "landingGoal", values: ["free-trial", "demo"], weight: 2 }
+        { variable: "landingPageGoals", values: ["free-trial", "demo"], weight: 2 }
       ],
       minScore: 6
     }
@@ -306,7 +294,7 @@ const elementRules: SectionLayoutRules = {
     {
       element: "comparison_points",
       conditions: [
-        { variable: "marketSophistication", values: ["level-3", "level-4", "level-5"], weight: 4 },
+        { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 4 },
         { variable: "awarenessLevel", values: ["solution-aware", "product-aware"], weight: 3 },
         { variable: "pricingModel", values: ["tiered", "freemium"], weight: 2 }
       ],
@@ -319,8 +307,8 @@ const elementRules: SectionLayoutRules = {
       element: "progress_labels",
       conditions: [
         { variable: "awarenessLevel", values: ["solution-aware", "product-aware"], weight: 4 },
-        { variable: "landingGoal", values: ["signup", "free-trial", "demo"], weight: 3 },
-        { variable: "marketSophistication", values: ["level-3", "level-4"], weight: 2 }
+        { variable: "landingPageGoals", values: ["signup", "free-trial", "demo"], weight: 3 },
+        { variable: "marketSophisticationLevel", values: ["level-3", "level-4"], weight: 2 }
       ],
       minScore: 6
     }
@@ -331,7 +319,7 @@ const elementRules: SectionLayoutRules = {
     {
       element: "subheadline",
       conditions: [
-        { variable: "marketSophistication", values: ["level-3", "level-4", "level-5"], weight: 4 },
+        { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 4 },
         { variable: "awarenessLevel", values: ["solution-aware", "product-aware"], weight: 3 }
       ],
       minScore: 5
@@ -342,7 +330,7 @@ const elementRules: SectionLayoutRules = {
     {
       element: "comparison_summary",
       conditions: [
-        { variable: "marketSophistication", values: ["level-4", "level-5"], weight: 4 },
+        { variable: "marketSophisticationLevel", values: ["level-4", "level-5"], weight: 4 },
         { variable: "awarenessLevel", values: ["solution-aware", "product-aware"], weight: 3 },
         { variable: "copyIntent", values: ["desire-led"], weight: 2 }
       ],
@@ -354,7 +342,7 @@ const elementRules: SectionLayoutRules = {
     {
       element: "conclusion_text",
       conditions: [
-        { variable: "marketSophistication", values: ["level-3", "level-4", "level-5"], weight: 4 },
+        { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 4 },
         { variable: "copyIntent", values: ["desire-led"], weight: 3 },
         { variable: "toneProfile", values: ["confident-playful", "bold-persuasive"], weight: 2 }
       ],
@@ -367,7 +355,7 @@ const elementRules: SectionLayoutRules = {
       element: "subheadline",
       conditions: [
         { variable: "awarenessLevel", values: ["solution-aware", "product-aware"], weight: 4 },
-        { variable: "marketSophistication", values: ["level-3", "level-4", "level-5"], weight: 3 },
+        { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 3 },
         { variable: "targetAudience", values: ["developers", "product-managers", "enterprise-tech-teams"], weight: 2 }
       ],
       minScore: 6
@@ -378,7 +366,7 @@ const elementRules: SectionLayoutRules = {
     {
       element: "your_advantage_text",
       conditions: [
-        { variable: "marketSophistication", values: ["level-4", "level-5"], weight: 5 },
+        { variable: "marketSophisticationLevel", values: ["level-4", "level-5"], weight: 5 },
         { variable: "copyIntent", values: ["desire-led"], weight: 3 },
         { variable: "toneProfile", values: ["confident-playful", "bold-persuasive"], weight: 2 }
       ],
@@ -402,7 +390,7 @@ const elementRules: SectionLayoutRules = {
     {
       element: "outcome_comparisons",
       conditions: [
-        { variable: "marketSophistication", values: ["level-3", "level-4", "level-5"], weight: 4 },
+        { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 4 },
         { variable: "targetAudience", values: ["enterprise-tech-teams", "enterprise-marketing-teams", "mid-market-companies"], weight: 3 },
         { variable: "copyIntent", values: ["desire-led"], weight: 2 }
       ],
@@ -416,7 +404,7 @@ const elementRules: SectionLayoutRules = {
       conditions: [
         { variable: "pricingModel", values: ["tiered", "per-seat"], weight: 4 },
         { variable: "targetAudience", values: ["enterprise-tech-teams", "enterprise-marketing-teams", "mid-market-companies"], weight: 3 },
-        { variable: "marketSophistication", values: ["level-3", "level-4", "level-5"], weight: 2 }
+        { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 2 }
       ],
       minScore: 6
     }
@@ -429,7 +417,7 @@ const elementRules: SectionLayoutRules = {
     element: "subheadline",
     conditions: [
       { variable: "awarenessLevel", values: ["solution-aware", "product-aware"], weight: 4 },
-      { variable: "marketSophistication", values: ["level-3", "level-4", "level-5"], weight: 3 }
+      { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 3 }
     ],
     minScore: 5
   }
@@ -439,7 +427,7 @@ const elementRules: SectionLayoutRules = {
   {
     element: "column_titles",
     conditions: [
-      { variable: "marketSophistication", values: ["level-3", "level-4", "level-5"], weight: 4 },
+      { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 4 },
       { variable: "targetAudience", values: ["enterprise-tech-teams", "enterprise-marketing-teams", "developers"], weight: 3 },
       { variable: "awarenessLevel", values: ["solution-aware", "product-aware"], weight: 2 }
     ],
@@ -452,7 +440,7 @@ const elementRules: SectionLayoutRules = {
     element: "introduction_text",
     conditions: [
       { variable: "awarenessLevel", values: ["unaware", "problem-aware"], weight: 4 },
-      { variable: "marketSophistication", values: ["level-1", "level-2"], weight: 3 },
+      { variable: "marketSophisticationLevel", values: ["level-1", "level-2"], weight: 3 },
       { variable: "copyIntent", values: ["pain-led"], weight: 2 }
     ],
     minScore: 6
@@ -463,7 +451,7 @@ const elementRules: SectionLayoutRules = {
   {
     element: "tab_descriptions",
     conditions: [
-      { variable: "marketSophistication", values: ["level-4", "level-5"], weight: 4 },
+      { variable: "marketSophisticationLevel", values: ["level-4", "level-5"], weight: 4 },
       { variable: "targetAudience", values: ["enterprise-tech-teams", "enterprise-marketing-teams", "developers", "product-managers"], weight: 3 },
       { variable: "awarenessLevel", values: ["solution-aware", "product-aware"], weight: 2 }
     ],
@@ -488,7 +476,7 @@ const elementRules: SectionLayoutRules = {
     element: "icon_labels",
     conditions: [
       { variable: "awarenessLevel", values: ["unaware", "problem-aware"], weight: 4 },
-      { variable: "marketSophistication", values: ["level-1", "level-2", "level-3"], weight: 3 },
+      { variable: "marketSophisticationLevel", values: ["level-1", "level-2", "level-3"], weight: 3 },
       { variable: "toneProfile", values: ["friendly-helpful", "confident-playful"], weight: 2 }
     ],
     minScore: 6
@@ -501,7 +489,7 @@ const elementRules: SectionLayoutRules = {
     conditions: [
       { variable: "startupStage", values: ["targeting-pmf", "users-250-500", "users-500-1k", "users-1k-5k", "mrr-growth"], weight: 4 },
       { variable: "targetAudience", values: ["enterprise-tech-teams", "enterprise-marketing-teams", "mid-market-companies"], weight: 3 },
-      { variable: "marketSophistication", values: ["level-3", "level-4", "level-5"], weight: 2 }
+      { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 2 }
     ],
     minScore: 6
   }
@@ -526,7 +514,7 @@ const elementRules: SectionLayoutRules = {
     element: "subheadline",
     conditions: [
       { variable: "awarenessLevel", values: ["unaware", "problem-aware"], weight: 4 },
-      { variable: "marketSophistication", values: ["level-1", "level-2"], weight: 3 },
+      { variable: "marketSophisticationLevel", values: ["level-1", "level-2"], weight: 3 },
       { variable: "copyIntent", values: ["pain-led"], weight: 2 }
     ],
     minScore: 5
@@ -550,7 +538,7 @@ const elementRules: SectionLayoutRules = {
     element: "subheadline",
     conditions: [
       { variable: "awarenessLevel", values: ["unaware", "problem-aware"], weight: 4 },
-      { variable: "marketSophistication", values: ["level-1", "level-2"], weight: 3 }
+      { variable: "marketSophisticationLevel", values: ["level-1", "level-2"], weight: 3 }
     ],
     minScore: 5
   }
@@ -560,7 +548,7 @@ const elementRules: SectionLayoutRules = {
   {
     element: "timeline_dates",
     conditions: [
-      { variable: "marketSophistication", values: ["level-3", "level-4", "level-5"], weight: 4 },
+      { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 4 },
       { variable: "targetAudience", values: ["developers", "product-managers", "enterprise-tech-teams"], weight: 3 },
       { variable: "awarenessLevel", values: ["solution-aware", "product-aware"], weight: 2 }
     ],
@@ -592,7 +580,7 @@ const elementRules: SectionLayoutRules = {
     element: "metric_descriptions",
     conditions: [
       { variable: "awarenessLevel", values: ["unaware", "problem-aware"], weight: 4 },
-      { variable: "marketSophistication", values: ["level-1", "level-2"], weight: 3 },
+      { variable: "marketSophisticationLevel", values: ["level-1", "level-2"], weight: 3 },
       { variable: "copyIntent", values: ["pain-led"], weight: 2 }
     ],
     minScore: 6
@@ -611,7 +599,7 @@ const elementRules: SectionLayoutRules = {
   {
     element: "card_tags",
     conditions: [
-      { variable: "marketSophistication", values: ["level-3", "level-4", "level-5"], weight: 4 },
+      { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 4 },
       { variable: "targetAudience", values: ["developers", "product-managers", "no-code-builders"], weight: 3 },
       { variable: "awarenessLevel", values: ["solution-aware", "product-aware"], weight: 2 }
     ],
@@ -623,7 +611,7 @@ const elementRules: SectionLayoutRules = {
   {
     element: "navigation_labels",
     conditions: [
-      { variable: "marketSophistication", values: ["level-1", "level-2", "level-3"], weight: 4 },
+      { variable: "marketSophisticationLevel", values: ["level-1", "level-2", "level-3"], weight: 4 },
       { variable: "awarenessLevel", values: ["unaware", "problem-aware"], weight: 3 }
     ],
     minScore: 5
@@ -631,7 +619,7 @@ const elementRules: SectionLayoutRules = {
   {
     element: "slide_numbers",
     conditions: [
-      { variable: "marketSophistication", values: ["level-3", "level-4", "level-5"], weight: 4 },
+      { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 4 },
       { variable: "targetAudience", values: ["developers", "product-managers", "enterprise-tech-teams"], weight: 3 }
     ],
     minScore: 5
@@ -678,7 +666,7 @@ const elementRules: SectionLayoutRules = {
     element: "video_duration",
     conditions: [
       { variable: "awarenessLevel", values: ["solution-aware", "product-aware"], weight: 4 },
-      { variable: "marketSophistication", values: ["level-3", "level-4", "level-5"], weight: 3 },
+      { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 3 },
       { variable: "targetAudience", values: ["enterprise-tech-teams", "mid-market-companies"], weight: 2 }
     ],
     minScore: 6
@@ -702,7 +690,7 @@ const elementRules: SectionLayoutRules = {
     element: "event_dates",
     conditions: [
       { variable: "startupStage", values: ["targeting-pmf", "users-250-500", "users-500-1k", "users-1k-5k", "mrr-growth"], weight: 4 },
-      { variable: "marketSophistication", values: ["level-3", "level-4", "level-5"], weight: 3 },
+      { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 3 },
       { variable: "copyIntent", values: ["desire-led"], weight: 2 }
     ],
     minScore: 6
@@ -723,7 +711,7 @@ const elementRules: SectionLayoutRules = {
     element: "story_conclusion",
     conditions: [
       { variable: "copyIntent", values: ["desire-led"], weight: 4 },
-      { variable: "landingGoal", values: ["signup", "join-community", "waitlist"], weight: 3 },
+      { variable: "landingPageGoals", values: ["signup", "join-community", "waitlist"], weight: 3 },
       { variable: "toneProfile", values: ["friendly-helpful", "confident-playful"], weight: 2 }
     ],
     minScore: 6
@@ -747,7 +735,7 @@ const elementRules: SectionLayoutRules = {
     element: "belief_explanations",
     conditions: [
       { variable: "awarenessLevel", values: ["unaware", "problem-aware"], weight: 4 },
-      { variable: "marketSophistication", values: ["level-1", "level-2"], weight: 3 },
+      { variable: "marketSophisticationLevel", values: ["level-1", "level-2"], weight: 3 },
       { variable: "copyIntent", values: ["pain-led"], weight: 2 }
     ],
     minScore: 6
@@ -772,7 +760,7 @@ const elementRules: SectionLayoutRules = {
     conditions: [
       { variable: "awarenessLevel", values: ["unaware", "problem-aware"], weight: 3 },
       { variable: "copyIntent", values: ["pain-led"], weight: 2 },
-      { variable: "marketSophistication", values: ["level-1", "level-2"], weight: 2 }
+      { variable: "marketSophisticationLevel", values: ["level-1", "level-2"], weight: 2 }
     ],
     minScore: 4
   },
@@ -781,7 +769,7 @@ const elementRules: SectionLayoutRules = {
     conditions: [
       { variable: "targetAudience", values: ["enterprise-tech-teams", "enterprise-marketing-teams"], weight: 4 },
       { variable: "awarenessLevel", values: ["unaware", "problem-aware"], weight: 3 },
-      { variable: "landingGoal", values: ["demo", "contact-sales"], weight: 2 }
+      { variable: "landingPageGoals", values: ["demo", "contact-sales"], weight: 2 }
     ],
     minScore: 5
   },
@@ -789,7 +777,7 @@ const elementRules: SectionLayoutRules = {
     element: "badge_text",
     conditions: [
       { variable: "startupStage", values: ["targeting-pmf", "users-250-500", "users-500-1k", "users-1k-5k", "mrr-growth", "seed-funded"], weight: 4 },
-      { variable: "marketSophistication", values: ["level-3", "level-4", "level-5"], weight: 3 },
+      { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 3 },
       { variable: "toneProfile", values: ["confident-playful", "bold-persuasive"], weight: 2 }
     ],
     minScore: 6
@@ -802,7 +790,7 @@ const elementRules: SectionLayoutRules = {
     conditions: [
       { variable: "awarenessLevel", values: ["unaware", "problem-aware"], weight: 4 },
       { variable: "copyIntent", values: ["pain-led"], weight: 3 },
-      { variable: "landingGoal", values: ["waitlist", "early-access", "signup"], weight: 2 }
+      { variable: "landingPageGoals", values: ["waitlist", "early-access", "signup"], weight: 2 }
     ],
     minScore: 5
   },
@@ -810,14 +798,14 @@ const elementRules: SectionLayoutRules = {
     element: "supporting_text",
     conditions: [
       { variable: "targetAudience", values: ["enterprise-tech-teams", "enterprise-marketing-teams", "it-decision-makers"], weight: 4 },
-      { variable: "marketSophistication", values: ["level-1", "level-2"], weight: 3 }
+      { variable: "marketSophisticationLevel", values: ["level-1", "level-2"], weight: 3 }
     ],
     minScore: 5
   },
   {
     element: "secondary_cta_text",
     conditions: [
-      { variable: "landingGoal", values: ["free-trial", "demo", "book-call"], weight: 4 },
+      { variable: "landingPageGoals", values: ["free-trial", "demo", "book-call"], weight: 4 },
       { variable: "startupStage", values: ["targeting-pmf", "users-250-500", "users-500-1k", "users-1k-5k"], weight: 3 }
     ],
     minScore: 5
@@ -830,7 +818,7 @@ const elementRules: SectionLayoutRules = {
     conditions: [
       { variable: "awarenessLevel", values: ["unaware", "problem-aware"], weight: 4 },
       { variable: "copyIntent", values: ["pain-led"], weight: 3 },
-      { variable: "marketSophistication", values: ["level-1", "level-2"], weight: 2 }
+      { variable: "marketSophisticationLevel", values: ["level-1", "level-2"], weight: 2 }
     ],
     minScore: 6
   },
@@ -839,7 +827,7 @@ const elementRules: SectionLayoutRules = {
     conditions: [
       { variable: "awarenessLevel", values: ["solution-aware", "product-aware"], weight: 4 },
       { variable: "copyIntent", values: ["desire-led"], weight: 3 },
-      { variable: "marketSophistication", values: ["level-3", "level-4", "level-5"], weight: 2 }
+      { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 2 }
     ],
     minScore: 6
   }
@@ -860,7 +848,7 @@ const elementRules: SectionLayoutRules = {
     conditions: [
       { variable: "awarenessLevel", values: ["solution-aware", "product-aware"], weight: 4 },
       { variable: "targetAudience", values: ["developers", "product-managers", "no-code-builders"], weight: 3 },
-      { variable: "landingGoal", values: ["demo", "free-trial"], weight: 2 }
+      { variable: "landingPageGoals", values: ["demo", "free-trial"], weight: 2 }
     ],
     minScore: 6
   }
@@ -873,7 +861,7 @@ const elementRules: SectionLayoutRules = {
     element: "step_numbers",
     conditions: [
       { variable: "awarenessLevel", values: ["unaware", "problem-aware", "solution-aware"], weight: 4 },
-      { variable: "marketSophistication", values: ["level-1", "level-2", "level-3"], weight: 3 }
+      { variable: "marketSophisticationLevel", values: ["level-1", "level-2", "level-3"], weight: 3 }
     ],
     minScore: 5
   },
@@ -881,7 +869,7 @@ const elementRules: SectionLayoutRules = {
     element: "conclusion_text",
     conditions: [
       { variable: "copyIntent", values: ["desire-led"], weight: 4 },
-      { variable: "landingGoal", values: ["free-trial", "signup", "demo"], weight: 3 }
+      { variable: "landingPageGoals", values: ["free-trial", "signup", "demo"], weight: 3 }
     ],
     minScore: 5
   }
@@ -904,7 +892,7 @@ const elementRules: SectionLayoutRules = {
     element: "step_labels",
     conditions: [
       { variable: "awarenessLevel", values: ["unaware", "problem-aware"], weight: 4 },
-      { variable: "marketSophistication", values: ["level-1", "level-2"], weight: 3 },
+      { variable: "marketSophisticationLevel", values: ["level-1", "level-2"], weight: 3 },
       { variable: "toneProfile", values: ["friendly-helpful", "confident-playful"], weight: 2 }
     ],
     minScore: 6
@@ -915,7 +903,7 @@ const elementRules: SectionLayoutRules = {
   {
     element: "step_details",
     conditions: [
-      { variable: "marketSophistication", values: ["level-3", "level-4", "level-5"], weight: 4 },
+      { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 4 },
       { variable: "awarenessLevel", values: ["solution-aware", "product-aware"], weight: 3 },
       { variable: "targetAudience", values: ["developers", "product-managers", "enterprise-tech-teams"], weight: 2 }
     ],
@@ -928,7 +916,7 @@ const elementRules: SectionLayoutRules = {
     element: "step_details",
     conditions: [
       { variable: "awarenessLevel", values: ["solution-aware", "product-aware"], weight: 4 },
-      { variable: "marketSophistication", values: ["level-3", "level-4", "level-5"], weight: 3 },
+      { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 3 },
       { variable: "targetAudience", values: ["developers", "product-managers", "no-code-builders"], weight: 2 }
     ],
     minScore: 6
@@ -936,7 +924,7 @@ const elementRules: SectionLayoutRules = {
   {
     element: "flip_instruction",
     conditions: [
-      { variable: "marketSophistication", values: ["level-1", "level-2", "level-3"], weight: 4 },
+      { variable: "marketSophisticationLevel", values: ["level-1", "level-2", "level-3"], weight: 4 },
       { variable: "toneProfile", values: ["friendly-helpful", "confident-playful"], weight: 3 }
     ],
     minScore: 5
@@ -948,7 +936,7 @@ const elementRules: SectionLayoutRules = {
     element: "chapter_titles",
     conditions: [
       { variable: "awarenessLevel", values: ["solution-aware", "product-aware"], weight: 4 },
-      { variable: "marketSophistication", values: ["level-3", "level-4", "level-5"], weight: 3 },
+      { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 3 },
       { variable: "targetAudience", values: ["developers", "product-managers", "enterprise-tech-teams"], weight: 2 }
     ],
     minScore: 6
@@ -957,7 +945,7 @@ const elementRules: SectionLayoutRules = {
     element: "video_duration",
     conditions: [
       { variable: "awarenessLevel", values: ["solution-aware", "product-aware"], weight: 4 },
-      { variable: "marketSophistication", values: ["level-3", "level-4", "level-5"], weight: 3 }
+      { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 3 }
     ],
     minScore: 5
   }
@@ -968,7 +956,7 @@ const elementRules: SectionLayoutRules = {
     element: "image_captions",
     conditions: [
       { variable: "awarenessLevel", values: ["unaware", "problem-aware"], weight: 4 },
-      { variable: "marketSophistication", values: ["level-1", "level-2"], weight: 3 },
+      { variable: "marketSophisticationLevel", values: ["level-1", "level-2"], weight: 3 },
       { variable: "toneProfile", values: ["friendly-helpful", "confident-playful"], weight: 2 }
     ],
     minScore: 6
@@ -979,7 +967,7 @@ const elementRules: SectionLayoutRules = {
   {
     element: "animation_labels",
     conditions: [
-      { variable: "marketSophistication", values: ["level-1", "level-2", "level-3"], weight: 4 },
+      { variable: "marketSophisticationLevel", values: ["level-1", "level-2", "level-3"], weight: 4 },
       { variable: "awarenessLevel", values: ["unaware", "problem-aware"], weight: 3 },
       { variable: "toneProfile", values: ["friendly-helpful", "confident-playful"], weight: 2 }
     ],
@@ -1001,7 +989,7 @@ const elementRules: SectionLayoutRules = {
   {
     element: "category_labels",
     conditions: [
-      { variable: "marketSophistication", values: ["level-4", "level-5"], weight: 4 },
+      { variable: "marketSophisticationLevel", values: ["level-4", "level-5"], weight: 4 },
       { variable: "targetAudience", values: ["enterprise-tech-teams", "developers"], weight: 3 }
     ],
     minScore: 5
@@ -1013,7 +1001,7 @@ const elementRules: SectionLayoutRules = {
     element: "category_descriptions",
     conditions: [
       { variable: "awarenessLevel", values: ["unaware", "problem-aware"], weight: 4 },
-      { variable: "marketSophistication", values: ["level-1", "level-2"], weight: 3 },
+      { variable: "marketSophisticationLevel", values: ["level-1", "level-2"], weight: 3 },
       { variable: "targetAudience", values: ["smbs", "early-stage-startups", "solopreneurs"], weight: 2 }
     ],
     minScore: 6
@@ -1024,7 +1012,7 @@ const elementRules: SectionLayoutRules = {
   {
     element: "interaction_labels",
     conditions: [
-      { variable: "marketSophistication", values: ["level-3", "level-4", "level-5"], weight: 4 },
+      { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 4 },
       { variable: "targetAudience", values: ["developers", "product-managers", "enterprise-tech-teams"], weight: 3 },
       { variable: "awarenessLevel", values: ["solution-aware", "product-aware"], weight: 2 }
     ],
@@ -1036,7 +1024,7 @@ const elementRules: SectionLayoutRules = {
   {
     element: "integration_lists",
     conditions: [
-      { variable: "marketSophistication", values: ["level-3", "level-4", "level-5"], weight: 4 },
+      { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 4 },
       { variable: "awarenessLevel", values: ["solution-aware", "product-aware"], weight: 3 },
       { variable: "targetAudience", values: ["enterprise-tech-teams", "mid-market-companies"], weight: 2 }
     ],
@@ -1048,7 +1036,7 @@ const elementRules: SectionLayoutRules = {
   {
     element: "carousel_navigation",
     conditions: [
-      { variable: "marketSophistication", values: ["level-1", "level-2", "level-3"], weight: 4 },
+      { variable: "marketSophisticationLevel", values: ["level-1", "level-2", "level-3"], weight: 4 },
       { variable: "awarenessLevel", values: ["unaware", "problem-aware"], weight: 3 }
     ],
     minScore: 5
@@ -1061,7 +1049,7 @@ const elementRules: SectionLayoutRules = {
     conditions: [
       { variable: "targetAudience", values: ["developers", "product-managers", "no-code-builders"], weight: 4 },
       { variable: "awarenessLevel", values: ["solution-aware", "product-aware"], weight: 3 },
-      { variable: "marketSophistication", values: ["level-3", "level-4", "level-5"], weight: 2 }
+      { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 2 }
     ],
     minScore: 6
   }
@@ -1073,7 +1061,7 @@ const elementRules: SectionLayoutRules = {
     conditions: [
       { variable: "targetAudience", values: ["no-code-builders", "product-managers", "solopreneurs"], weight: 4 },
       { variable: "awarenessLevel", values: ["solution-aware", "product-aware"], weight: 3 },
-      { variable: "marketSophistication", values: ["level-2", "level-3", "level-4"], weight: 2 }
+      { variable: "marketSophisticationLevel", values: ["level-2", "level-3", "level-4"], weight: 2 }
     ],
     minScore: 6
   }
@@ -1085,7 +1073,7 @@ const elementRules: SectionLayoutRules = {
     conditions: [
       { variable: "startupStage", values: ["targeting-pmf", "users-250-500", "users-500-1k", "users-1k-5k", "mrr-growth"], weight: 4 },
       { variable: "targetAudience", values: ["enterprise-tech-teams", "enterprise-marketing-teams", "mid-market-companies"], weight: 3 },
-      { variable: "marketSophistication", values: ["level-3", "level-4", "level-5"], weight: 2 }
+      { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 2 }
     ],
     minScore: 6
   }
@@ -1099,7 +1087,7 @@ const elementRules: SectionLayoutRules = {
     element: "subheadline",
     conditions: [
       { variable: "awarenessLevel", values: ["solution-aware", "product-aware"], weight: 4 },
-      { variable: "marketSophistication", values: ["level-3", "level-4", "level-5"], weight: 3 },
+      { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 3 },
       { variable: "copyIntent", values: ["desire-led"], weight: 2 }
     ],
     minScore: 6
@@ -1114,7 +1102,7 @@ const elementRules: SectionLayoutRules = {
   {
     element: "source_credentials",
     conditions: [
-      { variable: "marketSophistication", values: ["level-4", "level-5"], weight: 4 },
+      { variable: "marketSophisticationLevel", values: ["level-4", "level-5"], weight: 4 },
       { variable: "targetAudience", values: ["enterprise-tech-teams", "enterprise-marketing-teams", "it-decision-makers"], weight: 3 },
       { variable: "startupStage", values: ["targeting-pmf", "users-250-500", "users-500-1k", "users-1k-5k"], weight: 2 }
     ],
@@ -1127,7 +1115,7 @@ const elementRules: SectionLayoutRules = {
     element: "tile_labels",
     conditions: [
       { variable: "awarenessLevel", values: ["unaware", "problem-aware"], weight: 4 },
-      { variable: "marketSophistication", values: ["level-1", "level-2"], weight: 3 },
+      { variable: "marketSophisticationLevel", values: ["level-1", "level-2"], weight: 3 },
       { variable: "toneProfile", values: ["friendly-helpful", "confident-playful"], weight: 2 }
     ],
     minScore: 6
@@ -1150,7 +1138,7 @@ const elementRules: SectionLayoutRules = {
   {
     element: "step_explanations",
     conditions: [
-      { variable: "marketSophistication", values: ["level-3", "level-4", "level-5"], weight: 4 },
+      { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 4 },
       { variable: "awarenessLevel", values: ["solution-aware", "product-aware"], weight: 3 },
       { variable: "copyIntent", values: ["desire-led"], weight: 2 }
     ],
@@ -1162,8 +1150,8 @@ const elementRules: SectionLayoutRules = {
   {
     element: "risk_reversal_text",
     conditions: [
-      { variable: "landingGoal", values: ["buy-now", "free-trial", "subscribe"], weight: 4 },
-      { variable: "pricingModifier", values: ["money-back"], weight: 3 },
+      { variable: "landingPageGoals", values: ["buy-now", "free-trial", "subscribe"], weight: 4 },
+    //  { variable: "pricingModifier", values: ["money-back"], weight: 3 },
       { variable: "toneProfile", values: ["bold-persuasive", "confident-playful"], weight: 2 }
     ],
     minScore: 6
@@ -1174,7 +1162,7 @@ const elementRules: SectionLayoutRules = {
   {
     element: "carousel_navigation",
     conditions: [
-      { variable: "marketSophistication", values: ["level-1", "level-2", "level-3"], weight: 4 },
+      { variable: "marketSophisticationLevel", values: ["level-1", "level-2", "level-3"], weight: 4 },
       { variable: "awarenessLevel", values: ["unaware", "problem-aware"], weight: 3 }
     ],
     minScore: 5
@@ -1188,7 +1176,7 @@ const elementRules: SectionLayoutRules = {
     element: "feature_lists",
     conditions: [
       { variable: "awarenessLevel", values: ["solution-aware", "product-aware"], weight: 4 },
-      { variable: "marketSophistication", values: ["level-3", "level-4", "level-5"], weight: 3 },
+      { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 3 },
       { variable: "pricingModel", values: ["tiered", "per-seat"], weight: 2 }
     ],
     minScore: 6
@@ -1208,7 +1196,7 @@ const elementRules: SectionLayoutRules = {
     element: "savings_labels",
     conditions: [
       { variable: "pricingModel", values: ["tiered", "flat-monthly"], weight: 4 },
-      { variable: "landingGoal", values: ["buy-now", "subscribe", "free-trial"], weight: 3 },
+      { variable: "landingPageGoals", values: ["buy-now", "subscribe", "free-trial"], weight: 3 },
       { variable: "toneProfile", values: ["bold-persuasive", "confident-playful"], weight: 2 }
     ],
     minScore: 6
@@ -1225,7 +1213,7 @@ const elementRules: SectionLayoutRules = {
     conditions: [
       { variable: "awarenessLevel", values: ["solution-aware", "product-aware"], weight: 4 },
       { variable: "targetAudience", values: ["enterprise-tech-teams", "enterprise-marketing-teams", "mid-market-companies"], weight: 3 },
-      { variable: "marketSophistication", values: ["level-3", "level-4", "level-5"], weight: 2 }
+      { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 2 }
     ],
     minScore: 6
   }
@@ -1237,7 +1225,7 @@ const elementRules: SectionLayoutRules = {
     conditions: [
       { variable: "pricingModel", values: ["usage-based", "per-seat"], weight: 4 },
       { variable: "awarenessLevel", values: ["solution-aware", "product-aware"], weight: 3 },
-      { variable: "marketSophistication", values: ["level-3", "level-4", "level-5"], weight: 2 }
+      { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 2 }
     ],
     minScore: 6
   }
@@ -1248,8 +1236,8 @@ const elementRules: SectionLayoutRules = {
     element: "feature_highlights",
     conditions: [
       { variable: "targetAudience", values: ["enterprise-tech-teams", "enterprise-marketing-teams", "it-decision-makers"], weight: 4 },
-      { variable: "landingGoal", values: ["contact-sales", "book-call"], weight: 3 },
-      { variable: "marketSophistication", values: ["level-4", "level-5"], weight: 2 }
+      { variable: "landingPageGoals", values: ["contact-sales", "book-call"], weight: 3 },
+      { variable: "marketSophisticationLevel", values: ["level-4", "level-5"], weight: 2 }
     ],
     minScore: 6
   },
@@ -1257,7 +1245,7 @@ const elementRules: SectionLayoutRules = {
     element: "contact_information",
     conditions: [
       { variable: "targetAudience", values: ["enterprise-tech-teams", "enterprise-marketing-teams", "mid-market-companies"], weight: 4 },
-      { variable: "landingGoal", values: ["contact-sales", "book-call"], weight: 3 }
+      { variable: "landingPageGoals", values: ["contact-sales", "book-call"], weight: 3 }
     ],
     minScore: 5
   }
@@ -1269,7 +1257,7 @@ const elementRules: SectionLayoutRules = {
     conditions: [
       { variable: "startupStage", values: ["targeting-pmf", "users-250-500", "users-500-1k", "users-1k-5k", "mrr-growth"], weight: 4 },
       { variable: "targetAudience", values: ["enterprise-tech-teams", "enterprise-marketing-teams", "mid-market-companies"], weight: 3 },
-      { variable: "marketSophistication", values: ["level-3", "level-4", "level-5"], weight: 2 }
+      { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 2 }
     ],
     minScore: 6
   }
@@ -1281,7 +1269,7 @@ const elementRules: SectionLayoutRules = {
     conditions: [
       { variable: "pricingModel", values: ["tiered", "freemium"], weight: 4 },
       { variable: "toneProfile", values: ["confident-playful", "bold-persuasive"], weight: 3 },
-      { variable: "landingGoal", values: ["buy-now", "free-trial", "subscribe"], weight: 2 }
+      { variable: "landingPageGoals", values: ["buy-now", "free-trial", "subscribe"], weight: 2 }
     ],
     minScore: 6
   }
@@ -1295,16 +1283,16 @@ const elementRules: SectionLayoutRules = {
     conditions: [
       { variable: "awarenessLevel", values: ["unaware", "problem-aware"], weight: 4 },
       { variable: "copyIntent", values: ["pain-led"], weight: 3 },
-      { variable: "marketSophistication", values: ["level-1", "level-2"], weight: 2 }
+      { variable: "marketSophisticationLevel", values: ["level-1", "level-2"], weight: 2 }
     ],
     minScore: 6
   },
   {
     element: "urgency_text",
     conditions: [
-      { variable: "landingGoal", values: ["buy-now", "free-trial", "early-access"], weight: 4 },
+      { variable: "landingPageGoals", values: ["buy-now", "free-trial", "early-access"], weight: 4 },
       { variable: "toneProfile", values: ["bold-persuasive"], weight: 3 },
-      { variable: "pricingModifier", values: ["discount"], weight: 2 }
+    // { variable: "pricingModifier", values: ["discount"], weight: 2 }
     ],
     minScore: 6
   }
@@ -1327,7 +1315,7 @@ const elementRules: SectionLayoutRules = {
     conditions: [
       { variable: "awarenessLevel", values: ["solution-aware", "product-aware"], weight: 4 },
       { variable: "targetAudience", values: ["developers", "product-managers", "no-code-builders"], weight: 3 },
-      { variable: "landingGoal", values: ["demo", "free-trial"], weight: 2 }
+      { variable: "landingPageGoals", values: ["demo", "free-trial"], weight: 2 }
     ],
     minScore: 6
   },
@@ -1347,7 +1335,7 @@ const elementRules: SectionLayoutRules = {
     conditions: [
       { variable: "awarenessLevel", values: ["solution-aware", "product-aware"], weight: 4 },
       { variable: "copyIntent", values: ["desire-led"], weight: 3 },
-      { variable: "marketSophistication", values: ["level-3", "level-4", "level-5"], weight: 2 }
+      { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 2 }
     ],
     minScore: 6
   }
@@ -1357,9 +1345,9 @@ const elementRules: SectionLayoutRules = {
   {
     element: "urgency_text",
     conditions: [
-      { variable: "landingGoal", values: ["buy-now", "early-access"], weight: 5 },
+      { variable: "landingPageGoals", values: ["buy-now", "early-access"], weight: 5 },
       { variable: "toneProfile", values: ["bold-persuasive"], weight: 3 },
-      { variable: "pricingModifier", values: ["discount"], weight: 2 }
+     // { variable: "pricingModifier", values: ["discount"], weight: 2 }
     ],
     minScore: 7
   }
@@ -1371,7 +1359,7 @@ const elementRules: SectionLayoutRules = {
     conditions: [
       { variable: "targetAudience", values: ["enterprise-tech-teams", "enterprise-marketing-teams", "it-decision-makers"], weight: 4 },
       { variable: "marketSubcategory", values: ["Healthcare & MedTech SaaS", "LegalTech SaaS"], weight: 3 },
-      { variable: "landingGoal", values: ["download", "signup", "waitlist"], weight: 2 }
+      { variable: "landingPageGoals", values: ["download", "signup", "waitlist"], weight: 2 }
     ],
     minScore: 6
   }
@@ -1381,7 +1369,7 @@ const elementRules: SectionLayoutRules = {
   {
     element: "total_value_text",
     conditions: [
-      { variable: "landingGoal", values: ["buy-now", "subscribe"], weight: 4 },
+      { variable: "landingPageGoals", values: ["buy-now", "subscribe"], weight: 4 },
       { variable: "toneProfile", values: ["bold-persuasive"], weight: 3 },
       { variable: "pricingModel", values: ["tiered", "flat-monthly"], weight: 2 }
     ],
@@ -1395,7 +1383,7 @@ const elementRules: SectionLayoutRules = {
     conditions: [
       { variable: "startupStage", values: ["targeting-pmf", "users-250-500", "users-500-1k", "users-1k-5k", "mrr-growth"], weight: 4 },
       { variable: "targetAudience", values: ["enterprise-tech-teams", "enterprise-marketing-teams", "mid-market-companies"], weight: 3 },
-      { variable: "marketSophistication", values: ["level-3", "level-4", "level-5"], weight: 2 }
+      { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 2 }
     ],
     minScore: 6
   }
@@ -1409,7 +1397,7 @@ const elementRules: SectionLayoutRules = {
     conditions: [
       { variable: "copyIntent", values: ["pain-led"], weight: 5 },
       { variable: "awarenessLevel", values: ["unaware", "problem-aware"], weight: 3 },
-      { variable: "marketSophistication", values: ["level-1", "level-2"], weight: 2 }
+      { variable: "marketSophisticationLevel", values: ["level-1", "level-2"], weight: 2 }
     ],
     minScore: 6
   },
@@ -1441,7 +1429,7 @@ const elementRules: SectionLayoutRules = {
     conditions: [
       { variable: "awarenessLevel", values: ["solution-aware", "product-aware"], weight: 4 },
       { variable: "copyIntent", values: ["desire-led"], weight: 3 },
-      { variable: "marketSophistication", values: ["level-3", "level-4", "level-5"], weight: 2 }
+      { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 2 }
     ],
     minScore: 6
   }
@@ -1463,7 +1451,7 @@ const elementRules: SectionLayoutRules = {
   {
     element: "expand_labels",
     conditions: [
-      { variable: "marketSophistication", values: ["level-3", "level-4", "level-5"], weight: 4 },
+      { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 4 },
       { variable: "awarenessLevel", values: ["solution-aware", "product-aware"], weight: 3 },
       { variable: "copyIntent", values: ["desire-led"], weight: 2 }
     ],
@@ -1475,7 +1463,7 @@ const elementRules: SectionLayoutRules = {
   {
     element: "chart_labels",
     conditions: [
-      { variable: "marketSophistication", values: ["level-1", "level-2", "level-3"], weight: 4 },
+      { variable: "marketSophisticationLevel", values: ["level-1", "level-2", "level-3"], weight: 4 },
       { variable: "awarenessLevel", values: ["unaware", "problem-aware"], weight: 3 },
       { variable: "toneProfile", values: ["friendly-helpful"], weight: 2 }
     ],
@@ -1488,7 +1476,7 @@ const elementRules: SectionLayoutRules = {
     element: "persona_descriptions",
     conditions: [
       { variable: "awarenessLevel", values: ["unaware", "problem-aware"], weight: 4 },
-      { variable: "marketSophistication", values: ["level-1", "level-2"], weight: 3 },
+      { variable: "marketSophisticationLevel", values: ["level-1", "level-2"], weight: 3 },
       { variable: "copyIntent", values: ["pain-led"], weight: 2 }
     ],
     minScore: 6
@@ -1501,7 +1489,7 @@ const elementRules: SectionLayoutRules = {
     conditions: [
       { variable: "copyIntent", values: ["desire-led"], weight: 4 },
       { variable: "awarenessLevel", values: ["solution-aware", "product-aware"], weight: 3 },
-      { variable: "landingGoal", values: ["free-trial", "demo", "signup"], weight: 2 }
+      { variable: "landingPageGoals", values: ["free-trial", "demo", "signup"], weight: 2 }
     ],
     minScore: 6
   }
@@ -1514,7 +1502,7 @@ const elementRules: SectionLayoutRules = {
     element: "stat_descriptions",
     conditions: [
       { variable: "awarenessLevel", values: ["unaware", "problem-aware"], weight: 4 },
-      { variable: "marketSophistication", values: ["level-1", "level-2"], weight: 3 },
+      { variable: "marketSophisticationLevel", values: ["level-1", "level-2"], weight: 3 },
       { variable: "copyIntent", values: ["pain-led"], weight: 2 }
     ],
     minScore: 6
@@ -1547,7 +1535,7 @@ const elementRules: SectionLayoutRules = {
     conditions: [
       { variable: "startupStage", values: ["targeting-pmf", "users-250-500", "users-500-1k", "users-1k-5k", "mrr-growth"], weight: 4 },
       { variable: "targetAudience", values: ["enterprise-tech-teams", "enterprise-marketing-teams", "mid-market-companies"], weight: 3 },
-      { variable: "marketSophistication", values: ["level-3", "level-4", "level-5"], weight: 2 }
+      { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 2 }
     ],
     minScore: 6
   }
@@ -1570,7 +1558,7 @@ const elementRules: SectionLayoutRules = {
     element: "milestone_markers",
     conditions: [
       { variable: "copyIntent", values: ["desire-led"], weight: 4 },
-      { variable: "marketSophistication", values: ["level-3", "level-4", "level-5"], weight: 3 },
+      { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 3 },
       { variable: "startupStage", values: ["targeting-pmf", "users-250-500", "users-500-1k", "users-1k-5k"], weight: 2 }
     ],
     minScore: 6
@@ -1582,7 +1570,7 @@ const elementRules: SectionLayoutRules = {
     element: "icon_labels",
     conditions: [
       { variable: "awarenessLevel", values: ["unaware", "problem-aware"], weight: 4 },
-      { variable: "marketSophistication", values: ["level-1", "level-2"], weight: 3 },
+      { variable: "marketSophisticationLevel", values: ["level-1", "level-2"], weight: 3 },
       { variable: "toneProfile", values: ["friendly-helpful", "confident-playful"], weight: 2 }
     ],
     minScore: 6
@@ -1595,14 +1583,14 @@ const elementRules: SectionLayoutRules = {
     conditions: [
       { variable: "awarenessLevel", values: ["unaware", "problem-aware"], weight: 4 },
       { variable: "copyIntent", values: ["pain-led"], weight: 3 },
-      { variable: "marketSophistication", values: ["level-1", "level-2"], weight: 2 }
+      { variable: "marketSophisticationLevel", values: ["level-1", "level-2"], weight: 2 }
     ],
     minScore: 6
   },
   {
     element: "category_labels",
     conditions: [
-      { variable: "marketSophistication", values: ["level-3", "level-4", "level-5"], weight: 4 },
+      { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 4 },
       { variable: "awarenessLevel", values: ["solution-aware", "product-aware"], weight: 3 }
     ],
     minScore: 5
@@ -1614,7 +1602,7 @@ const elementRules: SectionLayoutRules = {
     element: "success_metrics",
     conditions: [
       { variable: "startupStage", values: ["targeting-pmf", "users-250-500", "users-500-1k", "users-1k-5k", "mrr-growth"], weight: 4 },
-      { variable: "marketSophistication", values: ["level-3", "level-4", "level-5"], weight: 3 },
+      { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 3 },
       { variable: "copyIntent", values: ["desire-led"], weight: 2 }
     ],
     minScore: 6
@@ -1648,7 +1636,7 @@ const elementRules: SectionLayoutRules = {
     conditions: [
       { variable: "awarenessLevel", values: ["solution-aware", "product-aware"], weight: 4 },
       { variable: "targetAudience", values: ["enterprise-tech-teams", "it-decision-makers", "developers"], weight: 3 },
-      { variable: "marketSophistication", values: ["level-3", "level-4", "level-5"], weight: 2 }
+      { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 2 }
     ],
     minScore: 6
   },
@@ -1667,7 +1655,7 @@ const elementRules: SectionLayoutRules = {
     element: "audit_dates",
     conditions: [
       { variable: "targetAudience", values: ["enterprise-tech-teams", "it-decision-makers"], weight: 4 },
-      { variable: "marketSophistication", values: ["level-4", "level-5"], weight: 3 },
+      { variable: "marketSophisticationLevel", values: ["level-4", "level-5"], weight: 3 },
       { variable: "startupStage", values: ["targeting-pmf", "users-250-500", "users-500-1k", "users-1k-5k"], weight: 2 }
     ],
     minScore: 6
@@ -1679,7 +1667,7 @@ const elementRules: SectionLayoutRules = {
     element: "technical_details",
     conditions: [
       { variable: "targetAudience", values: ["developers", "enterprise-tech-teams", "startup-ctos"], weight: 4 },
-      { variable: "marketSophistication", values: ["level-4", "level-5"], weight: 3 },
+      { variable: "marketSophisticationLevel", values: ["level-4", "level-5"], weight: 3 },
       { variable: "awarenessLevel", values: ["solution-aware", "product-aware"], weight: 2 }
     ],
     minScore: 6
@@ -1691,7 +1679,7 @@ const elementRules: SectionLayoutRules = {
     element: "stat_descriptions",
     conditions: [
       { variable: "awarenessLevel", values: ["unaware", "problem-aware"], weight: 4 },
-      { variable: "marketSophistication", values: ["level-1", "level-2"], weight: 3 },
+      { variable: "marketSophisticationLevel", values: ["level-1", "level-2"], weight: 3 },
       { variable: "targetAudience", values: ["smbs", "early-stage-startups"], weight: 2 }
     ],
     minScore: 6
@@ -1703,7 +1691,7 @@ const elementRules: SectionLayoutRules = {
     element: "partnership_types",
     conditions: [
       { variable: "targetAudience", values: ["enterprise-tech-teams", "enterprise-marketing-teams", "it-decision-makers"], weight: 4 },
-      { variable: "marketSophistication", values: ["level-3", "level-4", "level-5"], weight: 3 },
+      { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 3 },
       { variable: "startupStage", values: ["targeting-pmf", "users-250-500", "users-500-1k", "users-1k-5k"], weight: 2 }
     ],
     minScore: 6
@@ -1715,7 +1703,7 @@ const elementRules: SectionLayoutRules = {
     element: "diagram_labels",
     conditions: [
       { variable: "targetAudience", values: ["developers", "enterprise-tech-teams", "startup-ctos"], weight: 4 },
-      { variable: "marketSophistication", values: ["level-3", "level-4", "level-5"], weight: 3 },
+      { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 3 },
       { variable: "awarenessLevel", values: ["solution-aware", "product-aware"], weight: 2 }
     ],
     minScore: 6
@@ -1727,7 +1715,7 @@ const elementRules: SectionLayoutRules = {
     element: "policy_details",
     conditions: [
       { variable: "targetAudience", values: ["enterprise-tech-teams", "it-decision-makers"], weight: 4 },
-      { variable: "marketSophistication", values: ["level-4", "level-5"], weight: 3 },
+      { variable: "marketSophisticationLevel", values: ["level-4", "level-5"], weight: 3 },
       { variable: "awarenessLevel", values: ["solution-aware", "product-aware"], weight: 2 }
     ],
     minScore: 6
@@ -1735,7 +1723,7 @@ const elementRules: SectionLayoutRules = {
   {
     element: "expand_labels",
     conditions: [
-      { variable: "marketSophistication", values: ["level-1", "level-2", "level-3"], weight: 4 },
+      { variable: "marketSophisticationLevel", values: ["level-1", "level-2", "level-3"], weight: 4 },
       { variable: "toneProfile", values: ["friendly-helpful"], weight: 3 }
     ],
     minScore: 5
@@ -1757,7 +1745,7 @@ const elementRules: SectionLayoutRules = {
     element: "category_labels",
     conditions: [
       { variable: "targetAudience", values: ["enterprise-tech-teams", "enterprise-marketing-teams"], weight: 4 },
-      { variable: "marketSophistication", values: ["level-3", "level-4", "level-5"], weight: 3 }
+      { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 3 }
     ],
     minScore: 5
   }
@@ -1767,7 +1755,7 @@ const elementRules: SectionLayoutRules = {
   {
     element: "mention_dates",
     conditions: [
-      { variable: "marketSophistication", values: ["level-3", "level-4", "level-5"], weight: 4 },
+      { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 4 },
       { variable: "startupStage", values: ["targeting-pmf", "users-250-500", "users-500-1k", "users-1k-5k", "mrr-growth"], weight: 3 },
       { variable: "toneProfile", values: ["luxury-expert", "confident-playful"], weight: 2 }
     ],
@@ -1792,7 +1780,7 @@ const elementRules: SectionLayoutRules = {
     element: "badge_descriptions",
     conditions: [
       { variable: "awarenessLevel", values: ["unaware", "problem-aware"], weight: 4 },
-      { variable: "marketSophistication", values: ["level-1", "level-2"], weight: 3 },
+      { variable: "marketSophisticationLevel", values: ["level-1", "level-2"], weight: 3 },
       { variable: "targetAudience", values: ["smbs", "early-stage-startups"], weight: 2 }
     ],
     minScore: 6
@@ -1800,7 +1788,7 @@ const elementRules: SectionLayoutRules = {
   {
     element: "industry_context",
     conditions: [
-      { variable: "marketSophistication", values: ["level-3", "level-4", "level-5"], weight: 4 },
+      { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 4 },
       { variable: "targetAudience", values: ["enterprise-tech-teams", "mid-market-companies"], weight: 3 }
     ],
     minScore: 5
@@ -1811,7 +1799,7 @@ const elementRules: SectionLayoutRules = {
   {
     element: "map_legend",
     conditions: [
-      { variable: "marketSophistication", values: ["level-1", "level-2", "level-3"], weight: 4 },
+      { variable: "marketSophisticationLevel", values: ["level-1", "level-2", "level-3"], weight: 4 },
       { variable: "awarenessLevel", values: ["unaware", "problem-aware"], weight: 3 },
       { variable: "toneProfile", values: ["friendly-helpful"], weight: 2 }
     ],
@@ -1824,7 +1812,7 @@ const elementRules: SectionLayoutRules = {
     element: "stat_contexts",
     conditions: [
       { variable: "awarenessLevel", values: ["unaware", "problem-aware"], weight: 4 },
-      { variable: "marketSophistication", values: ["level-1", "level-2"], weight: 3 },
+      { variable: "marketSophisticationLevel", values: ["level-1", "level-2"], weight: 3 },
       { variable: "copyIntent", values: ["pain-led"], weight: 2 }
     ],
     minScore: 6
@@ -1836,7 +1824,7 @@ const elementRules: SectionLayoutRules = {
     element: "rating_scores",
     conditions: [
       { variable: "startupStage", values: ["targeting-pmf", "users-250-500", "users-500-1k", "users-1k-5k", "mrr-growth"], weight: 4 },
-      { variable: "marketSophistication", values: ["level-3", "level-4", "level-5"], weight: 3 },
+      { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 3 },
       { variable: "copyIntent", values: ["desire-led"], weight: 2 }
     ],
     minScore: 6
@@ -1847,7 +1835,7 @@ const elementRules: SectionLayoutRules = {
   {
     element: "credibility_markers",
     conditions: [
-      { variable: "marketSophistication", values: ["level-3", "level-4", "level-5"], weight: 4 },
+      { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 4 },
       { variable: "startupStage", values: ["targeting-pmf", "users-250-500", "users-500-1k", "users-1k-5k"], weight: 3 },
       { variable: "targetAudience", values: ["enterprise-tech-teams", "enterprise-marketing-teams"], weight: 2 }
     ],
@@ -1870,7 +1858,7 @@ const elementRules: SectionLayoutRules = {
     element: "customer_companies",
     conditions: [
       { variable: "targetAudience", values: ["enterprise-tech-teams", "enterprise-marketing-teams", "it-decision-makers"], weight: 4 },
-      { variable: "marketSophistication", values: ["level-3", "level-4", "level-5"], weight: 3 }
+      { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 3 }
     ],
     minScore: 5
   }
@@ -1882,7 +1870,7 @@ const elementRules: SectionLayoutRules = {
     conditions: [
       { variable: "startupStage", values: ["targeting-pmf", "users-250-500", "users-500-1k", "users-1k-5k", "mrr-growth"], weight: 4 },
       { variable: "targetAudience", values: ["enterprise-tech-teams", "enterprise-marketing-teams", "mid-market-companies"], weight: 3 },
-      { variable: "marketSophistication", values: ["level-3", "level-4", "level-5"], weight: 2 }
+      { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 2 }
     ],
     minScore: 6
   }
@@ -1900,7 +1888,7 @@ const elementRules: SectionLayoutRules = {
   {
     element: "carousel_navigation",
     conditions: [
-      { variable: "marketSophistication", values: ["level-1", "level-2", "level-3"], weight: 4 },
+      { variable: "marketSophisticationLevel", values: ["level-1", "level-2", "level-3"], weight: 4 },
       { variable: "awarenessLevel", values: ["unaware", "problem-aware"], weight: 3 }
     ],
     minScore: 5
@@ -1924,7 +1912,7 @@ const elementRules: SectionLayoutRules = {
     element: "customer_titles",
     conditions: [
       { variable: "targetAudience", values: ["enterprise-tech-teams", "enterprise-marketing-teams", "mid-market-companies"], weight: 4 },
-      { variable: "marketSophistication", values: ["level-3", "level-4", "level-5"], weight: 3 },
+      { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 3 },
       { variable: "startupStage", values: ["targeting-pmf", "users-250-500", "users-500-1k", "users-1k-5k"], weight: 2 }
     ],
     minScore: 6
@@ -1935,7 +1923,7 @@ const elementRules: SectionLayoutRules = {
   {
     element: "review_dates",
     conditions: [
-      { variable: "marketSophistication", values: ["level-3", "level-4", "level-5"], weight: 4 },
+      { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 4 },
       { variable: "startupStage", values: ["targeting-pmf", "users-250-500", "users-500-1k", "users-1k-5k"], weight: 3 },
       { variable: "copyIntent", values: ["desire-led"], weight: 2 }
     ],
@@ -1949,7 +1937,7 @@ const elementRules: SectionLayoutRules = {
     conditions: [
       { variable: "awarenessLevel", values: ["unaware", "problem-aware"], weight: 4 },
       { variable: "copyIntent", values: ["pain-led"], weight: 3 },
-      { variable: "marketSophistication", values: ["level-1", "level-2"], weight: 2 }
+      { variable: "marketSophisticationLevel", values: ["level-1", "level-2"], weight: 2 }
     ],
     minScore: 6
   }
@@ -1959,7 +1947,7 @@ const elementRules: SectionLayoutRules = {
   {
     element: "location_labels",
     conditions: [
-      { variable: "marketSophistication", values: ["level-1", "level-2", "level-3"], weight: 4 },
+      { variable: "marketSophisticationLevel", values: ["level-1", "level-2", "level-3"], weight: 4 },
       { variable: "awarenessLevel", values: ["unaware", "problem-aware"], weight: 3 },
       { variable: "toneProfile", values: ["friendly-helpful", "confident-playful"], weight: 2 }
     ],
@@ -1973,7 +1961,7 @@ const elementRules: SectionLayoutRules = {
   {
     element: "mechanism_name",
     conditions: [
-      { variable: "marketSophistication", values: ["level-4", "level-5"], weight: 4 },
+      { variable: "marketSophisticationLevel", values: ["level-4", "level-5"], weight: 4 },
       { variable: "copyIntent", values: ["desire-led"], weight: 3 },
       { variable: "toneProfile", values: ["confident-playful", "bold-persuasive"], weight: 2 }
     ],
@@ -1986,7 +1974,7 @@ const elementRules: SectionLayoutRules = {
     element: "connection_labels",
     conditions: [
       { variable: "awarenessLevel", values: ["solution-aware", "product-aware"], weight: 4 },
-      { variable: "marketSophistication", values: ["level-3", "level-4", "level-5"], weight: 3 },
+      { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 3 },
       { variable: "targetAudience", values: ["developers", "product-managers", "enterprise-tech-teams"], weight: 2 }
     ],
     minScore: 6
@@ -1999,7 +1987,7 @@ const elementRules: SectionLayoutRules = {
     conditions: [
       { variable: "awarenessLevel", values: ["solution-aware", "product-aware"], weight: 4 },
       { variable: "copyIntent", values: ["desire-led"], weight: 3 },
-      { variable: "marketSophistication", values: ["level-3", "level-4", "level-5"], weight: 2 }
+      { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 2 }
     ],
     minScore: 6
   }
@@ -2010,7 +1998,7 @@ const elementRules: SectionLayoutRules = {
     element: "illustration_caption",
     conditions: [
       { variable: "awarenessLevel", values: ["unaware", "problem-aware"], weight: 4 },
-      { variable: "marketSophistication", values: ["level-1", "level-2"], weight: 3 },
+      { variable: "marketSophisticationLevel", values: ["level-1", "level-2"], weight: 3 },
       { variable: "toneProfile", values: ["friendly-helpful"], weight: 2 }
     ],
     minScore: 6
@@ -2022,7 +2010,7 @@ const elementRules: SectionLayoutRules = {
     element: "tag_descriptions",
     conditions: [
       { variable: "awarenessLevel", values: ["solution-aware", "product-aware"], weight: 4 },
-      { variable: "marketSophistication", values: ["level-3", "level-4", "level-5"], weight: 3 },
+      { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 3 },
       { variable: "targetAudience", values: ["developers", "product-managers", "enterprise-tech-teams"], weight: 2 }
     ],
     minScore: 6
@@ -2033,7 +2021,7 @@ const elementRules: SectionLayoutRules = {
   {
     element: "table_headers",
     conditions: [
-      { variable: "marketSophistication", values: ["level-4", "level-5"], weight: 4 },
+      { variable: "marketSophisticationLevel", values: ["level-4", "level-5"], weight: 4 },
       { variable: "awarenessLevel", values: ["solution-aware", "product-aware"], weight: 3 },
       { variable: "targetAudience", values: ["enterprise-tech-teams", "developers", "product-managers"], weight: 2 }
     ],
@@ -2045,7 +2033,7 @@ const elementRules: SectionLayoutRules = {
   {
     element: "patent_numbers",
     conditions: [
-      { variable: "marketSophistication", values: ["level-4", "level-5"], weight: 4 },
+      { variable: "marketSophisticationLevel", values: ["level-4", "level-5"], weight: 4 },
       { variable: "targetAudience", values: ["enterprise-tech-teams", "developers", "startup-ctos"], weight: 3 },
       { variable: "toneProfile", values: ["luxury-expert", "confident-playful"], weight: 2 }
     ],
@@ -2057,7 +2045,7 @@ const elementRules: SectionLayoutRules = {
   {
     element: "supporting_evidence",
     conditions: [
-      { variable: "marketSophistication", values: ["level-3", "level-4", "level-5"], weight: 4 },
+      { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 4 },
       { variable: "awarenessLevel", values: ["solution-aware", "product-aware"], weight: 3 },
       { variable: "copyIntent", values: ["desire-led"], weight: 2 }
     ],
@@ -2072,7 +2060,7 @@ const elementRules: SectionLayoutRules = {
     element: "use_case_examples",
     conditions: [
       { variable: "awarenessLevel", values: ["solution-aware", "product-aware"], weight: 4 },
-      { variable: "marketSophistication", values: ["level-3", "level-4", "level-5"], weight: 3 },
+      { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 3 },
       { variable: "copyIntent", values: ["desire-led"], weight: 2 }
     ],
     minScore: 6
@@ -2084,7 +2072,7 @@ const elementRules: SectionLayoutRules = {
     element: "tab_descriptions",
     conditions: [
       { variable: "awarenessLevel", values: ["unaware", "problem-aware"], weight: 4 },
-      { variable: "marketSophistication", values: ["level-1", "level-2"], weight: 3 },
+      { variable: "marketSophisticationLevel", values: ["level-1", "level-2"], weight: 3 },
       { variable: "targetAudience", values: ["smbs", "early-stage-startups", "solopreneurs"], weight: 2 }
     ],
     minScore: 6
@@ -2097,7 +2085,7 @@ const elementRules: SectionLayoutRules = {
     conditions: [
       { variable: "awarenessLevel", values: ["solution-aware", "product-aware"], weight: 4 },
       { variable: "targetAudience", values: ["enterprise-tech-teams", "enterprise-marketing-teams", "mid-market-companies"], weight: 3 },
-      { variable: "marketSophistication", values: ["level-3", "level-4", "level-5"], weight: 2 }
+      { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 2 }
     ],
     minScore: 6
   }
@@ -2109,7 +2097,7 @@ const elementRules: SectionLayoutRules = {
     conditions: [
       { variable: "copyIntent", values: ["desire-led"], weight: 4 },
       { variable: "awarenessLevel", values: ["solution-aware", "product-aware"], weight: 3 },
-      { variable: "marketSophistication", values: ["level-3", "level-4", "level-5"], weight: 2 }
+      { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 2 }
     ],
     minScore: 6
   }
@@ -2120,7 +2108,7 @@ const elementRules: SectionLayoutRules = {
     element: "solution_approaches",
     conditions: [
       { variable: "awarenessLevel", values: ["solution-aware", "product-aware"], weight: 4 },
-      { variable: "marketSophistication", values: ["level-3", "level-4", "level-5"], weight: 3 },
+      { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 3 },
       { variable: "targetAudience", values: ["product-managers", "enterprise-tech-teams", "developers"], weight: 2 }
     ],
     minScore: 6
@@ -2144,7 +2132,7 @@ const elementRules: SectionLayoutRules = {
     element: "use_case_examples",
     conditions: [
       { variable: "awarenessLevel", values: ["solution-aware", "product-aware"], weight: 4 },
-      { variable: "marketSophistication", values: ["level-3", "level-4", "level-5"], weight: 3 },
+      { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 3 },
       { variable: "copyIntent", values: ["desire-led"], weight: 2 }
     ],
     minScore: 6
@@ -2152,7 +2140,7 @@ const elementRules: SectionLayoutRules = {
   {
     element: "carousel_navigation",
     conditions: [
-      { variable: "marketSophistication", values: ["level-1", "level-2", "level-3"], weight: 4 },
+      { variable: "marketSophisticationLevel", values: ["level-1", "level-2", "level-3"], weight: 4 },
       { variable: "awarenessLevel", values: ["unaware", "problem-aware"], weight: 3 }
     ],
     minScore: 5
@@ -2163,7 +2151,7 @@ const elementRules: SectionLayoutRules = {
   {
     element: "matrix_labels",
     conditions: [
-      { variable: "marketSophistication", values: ["level-3", "level-4", "level-5"], weight: 4 },
+      { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 4 },
       { variable: "targetAudience", values: ["enterprise-tech-teams", "enterprise-marketing-teams", "product-managers"], weight: 3 },
       { variable: "awarenessLevel", values: ["solution-aware", "product-aware"], weight: 2 }
     ],

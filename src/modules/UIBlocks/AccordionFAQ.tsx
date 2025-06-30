@@ -1,90 +1,74 @@
-import React, { useEffect, useState } from 'react';
-import { generateColorTokens } from '../Design/ColorSystem/colorTokens';
-import { useTypography } from '@/hooks/useTypography';
-import { usePageStore } from '@/hooks/usePageStore';
-import { useOnboardingStore } from '@/hooks/useOnboardingStore';
-import { 
-  LayoutComponentProps, 
-  extractLayoutContent,
-  StoreElementTypes 
-} from '@/types/storeTypes';
+// components/layout/AccordionFAQ.tsx
+// Production-ready FAQ accordion component using abstraction system
 
-interface AccordionFAQProps extends LayoutComponentProps {}
+import React, { useState } from 'react';
+import { useLayoutComponent } from '@/hooks/useLayoutComponent';
+import { LayoutSection } from '@/components/layout/LayoutSection';
+import { 
+  EditableHeadline, 
+  EditableText 
+} from '@/components/layout/EditableContent';
+import { EditableList } from '@/components/layout/EditableList';
+import { LayoutComponentProps } from '@/types/storeTypes';
+import { parsePipeData, updateListData } from '@/utils/dataParsingUtils';
+
+// Content interface for type safety
+interface AccordionFAQContent {
+  headline: string;
+  subheadline?: string;
+  questions: string;
+  answers: string;
+}
 
 // FAQ item structure
 interface FAQItem {
+  id: string;
+  index: number;
   question: string;
   answer: string;
-  id: string;
 }
 
-// Content interface for AccordionFAQ layout
-interface AccordionFAQContent {
-  headline: string;
-  questions: string;
-  answers: string;
-  subheadline?: string;
-}
-
-// Content schema for AccordionFAQ layout
+// Content schema - defines structure and defaults
 const CONTENT_SCHEMA = {
-  headline: { type: 'string' as const, default: 'Frequently Asked Questions' },
-  questions: { type: 'string' as const, default: 'How does the free trial work?|What payment methods do you accept?|Can I cancel anytime?|Do you offer customer support?|Is my data secure?' },
-  answers: { type: 'string' as const, default: 'Our free trial gives you full access to all features for 14 days. No credit card required to start.|We accept all major credit cards, PayPal, and bank transfers for annual plans. All payments are processed securely.|Yes, you can cancel your subscription at any time. No long-term contracts or cancellation fees.|We offer 24/7 customer support via chat, email, and phone. Our average response time is under 2 hours.|Absolutely. We use enterprise-grade encryption and are SOC 2 compliant. Your data is stored securely and never shared with third parties.' },
-  subheadline: { type: 'string' as const, default: '' }
+  headline: { 
+    type: 'string' as const, 
+    default: 'Frequently Asked Questions' 
+  },
+  subheadline: { 
+    type: 'string' as const, 
+    default: 'Find answers to common questions about our platform and services.' 
+  },
+  questions: { 
+    type: 'string' as const, 
+    default: 'How does the free trial work?|What payment methods do you accept?|Can I cancel anytime?|Do you offer customer support?|Is my data secure?' 
+  },
+  answers: { 
+    type: 'string' as const, 
+    default: 'Our free trial gives you full access to all features for 14 days. No credit card required to start.|We accept all major credit cards, PayPal, and bank transfers for annual plans. All payments are processed securely.|Yes, you can cancel your subscription at any time. No long-term contracts or cancellation fees.|We offer 24/7 customer support via chat, email, and phone. Our average response time is under 2 hours.|Absolutely. We use enterprise-grade encryption and are SOC 2 compliant. Your data is stored securely and never shared with third parties.' 
+  }
 };
 
 // Parse FAQ data from pipe-separated strings
 const parseFAQData = (questions: string, answers: string): FAQItem[] => {
-  const questionList = questions.split('|').map(q => q.trim()).filter(q => q);
-  const answerList = answers.split('|').map(a => a.trim()).filter(a => a);
+  const questionList = parsePipeData(questions);
+  const answerList = parsePipeData(answers);
   
   return questionList.map((question, index) => ({
     id: `faq-${index}`,
+    index,
     question,
     answer: answerList[index] || 'Answer not provided.'
   }));
 };
 
-// ModeWrapper component for handling edit/preview modes
-const ModeWrapper = ({ 
-  mode, 
-  children, 
-  sectionId, 
-  elementKey,
-  onEdit 
-}: {
-  mode: 'edit' | 'preview';
-  children: React.ReactNode;
-  sectionId: string;
-  elementKey: string;
-  onEdit?: (value: string) => void;
-}) => {
-  if (mode === 'edit' && onEdit) {
-    return (
-      <div 
-        contentEditable
-        suppressContentEditableWarning
-        onBlur={(e) => onEdit(e.currentTarget.textContent || '')}
-        className="outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-1 min-h-[24px] cursor-text hover:bg-gray-50"
-        data-placeholder={`Edit ${elementKey.replace('_', ' ')}`}
-      >
-        {children}
-      </div>
-    );
-  }
-  
-  return <>{children}</>;
-};
-
-// Individual FAQ Accordion Item
-const FAQAccordionItem = ({ 
+// Individual FAQ Accordion Item Component
+const FAQAccordionItem = React.memo(({ 
   item, 
   isOpen, 
   onToggle, 
   mode, 
-  sectionId, 
-  index,
+  colorTokens,
+  getTextStyle,
   onQuestionEdit,
   onAnswerEdit 
 }: {
@@ -92,19 +76,18 @@ const FAQAccordionItem = ({
   isOpen: boolean;
   onToggle: () => void;
   mode: 'edit' | 'preview';
-  sectionId: string;
-  index: number;
+  colorTokens: any;
+  getTextStyle: (variant: 'display' | 'hero' | 'h1' | 'h2' | 'h3' | 'h4' | 'body-lg' | 'body' | 'body-sm' | 'caption') => React.CSSProperties;
   onQuestionEdit: (index: number, value: string) => void;
   onAnswerEdit: (index: number, value: string) => void;
 }) => {
-  const { getTextStyle } = useTypography();
   
   return (
-    <div className="border border-gray-200 rounded-lg overflow-hidden">
+    <div className="border border-gray-200 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-200">
       {/* Question Header */}
       <button
         onClick={onToggle}
-        className="w-full px-6 py-4 text-left bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-inset transition-colors duration-200"
+        className={`w-full px-6 py-4 text-left bg-white hover:${colorTokens.surfaceElevated} focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-inset transition-colors duration-200`}
         aria-expanded={isOpen}
       >
         <div className="flex items-center justify-between">
@@ -113,7 +96,7 @@ const FAQAccordionItem = ({
               <div 
                 contentEditable
                 suppressContentEditableWarning
-                onBlur={(e) => onQuestionEdit(index, e.currentTarget.textContent || '')}
+                onBlur={(e) => onQuestionEdit(item.index, e.currentTarget.textContent || '')}
                 className="outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-1 min-h-[24px] cursor-text hover:bg-gray-50"
                 style={getTextStyle('h4')}
               >
@@ -121,7 +104,7 @@ const FAQAccordionItem = ({
               </div>
             ) : (
               <h3 
-                className="font-semibold text-gray-900"
+                className={`font-semibold ${colorTokens.textOnLight || colorTokens.textPrimary} hover:${colorTokens.link} transition-colors duration-200`}
                 style={getTextStyle('h4')}
               >
                 {item.question}
@@ -149,20 +132,20 @@ const FAQAccordionItem = ({
           isOpen ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
         }`}
       >
-        <div className="px-6 py-4 bg-gray-50 border-t border-gray-200">
+        <div className={`px-6 py-4 ${colorTokens.surfaceElevated} border-t border-gray-200`}>
           {mode === 'edit' ? (
             <div 
               contentEditable
               suppressContentEditableWarning
-              onBlur={(e) => onAnswerEdit(index, e.currentTarget.textContent || '')}
-              className="outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-1 min-h-[24px] cursor-text hover:bg-gray-100 text-gray-700 leading-relaxed"
+              onBlur={(e) => onAnswerEdit(item.index, e.currentTarget.textContent || '')}
+              className="outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-1 min-h-[24px] cursor-text hover:bg-gray-100 leading-relaxed"
               style={getTextStyle('body')}
             >
               {item.answer}
             </div>
           ) : (
             <p 
-              className="text-gray-700 leading-relaxed"
+              className={`${colorTokens.textSecondary} leading-relaxed`}
               style={getTextStyle('body')}
             >
               {item.answer}
@@ -172,51 +155,39 @@ const FAQAccordionItem = ({
       </div>
     </div>
   );
-};
+});
+FAQAccordionItem.displayName = 'FAQAccordionItem';
 
-export default function AccordionFAQ({ 
-  sectionId, 
-  className = '',
-  backgroundType = 'neutral' 
-}: AccordionFAQProps) {
-
-  const { getTextStyle } = useTypography();
-  const { 
-    content, 
-    ui: { mode }, 
-    layout: { theme },
-    updateElementContent 
-  } = usePageStore();
+export default function AccordionFAQ(props: LayoutComponentProps) {
+  // Use the abstraction hook for all common functionality
+  const {
+    sectionId,
+    mode,
+    blockContent,
+    colorTokens,
+    getTextStyle,
+    sectionBackground,
+    handleContentUpdate
+  } = useLayoutComponent<AccordionFAQContent>({
+    ...props,
+    contentSchema: CONTENT_SCHEMA
+  });
 
   // State for accordion open/closed items
-  const [openItems, setOpenItems] = useState<Set<string>>(new Set());
-
-  // Get content for this section with type safety
-  const sectionContent = content[sectionId];
-  const elements = sectionContent?.elements || {} as Partial<StoreElementTypes>;
-
-  // Helper to handle content updates
-  const handleContentUpdate = (elementKey: string, value: string) => {
-    updateElementContent(sectionId, elementKey, value);
-  };
-
-  // Extract content with type safety and defaults using the new system
-  const blockContent: AccordionFAQContent = extractLayoutContent(elements, CONTENT_SCHEMA);
+  const [openItems, setOpenItems] = useState<Set<string>>(new Set(['faq-0'])); // First item open by default
 
   // Parse FAQ data
   const faqItems = parseFAQData(blockContent.questions, blockContent.answers);
 
   // Handle individual question/answer editing
   const handleQuestionEdit = (index: number, value: string) => {
-    const questions = blockContent.questions.split('|');
-    questions[index] = value;
-    handleContentUpdate('questions', questions.join('|'));
+    const updatedQuestions = updateListData(blockContent.questions, index, value);
+    handleContentUpdate('questions', updatedQuestions);
   };
 
   const handleAnswerEdit = (index: number, value: string) => {
-    const answers = blockContent.answers.split('|');
-    answers[index] = value;
-    handleContentUpdate('answers', answers.join('|'));
+    const updatedAnswers = updateListData(blockContent.answers, index, value);
+    handleContentUpdate('answers', updatedAnswers);
   };
 
   // Toggle accordion item
@@ -230,142 +201,125 @@ export default function AccordionFAQ({
     setOpenItems(newOpenItems);
   };
 
-  // Generate color tokens from theme with correct nested structure
-  const colorTokens = generateColorTokens({
-    baseColor: theme?.colors?.baseColor || '#3B82F6',
-    accentColor: theme?.colors?.accentColor || '#10B981',
-    sectionBackgrounds: theme?.colors?.sectionBackgrounds || {
-      primary: '#F8FAFC',
-      secondary: '#F1F5F9', 
-      neutral: '#FFFFFF',
-      divider: '#E2E8F0'
-    }
-  });
-
-  // Get section background based on type
-  const getSectionBackground = () => {
-    switch(backgroundType) {
-      case 'primary': return colorTokens.bgPrimary;
-      case 'secondary': return colorTokens.bgSecondary;
-      case 'divider': return colorTokens.bgDivider;
-      default: return colorTokens.bgNeutral;
-    }
-  };
-
-  // Initialize fonts on component mount
-  useEffect(() => {
-    const { updateFontsFromTone } = usePageStore.getState();
-    updateFontsFromTone(); // Set fonts based on current tone
-  }, []);
-
   return (
-    <section 
-      className={`py-16 px-4 ${getSectionBackground()} ${className}`}
-      data-section-id={sectionId}
-      data-section-type="AccordionFAQ"
+    <LayoutSection
+      sectionId={sectionId}
+      sectionType="AccordionFAQ"
+      backgroundType={props.backgroundType || 'neutral'}
+      sectionBackground={sectionBackground}
+      mode={mode}
+      className={props.className}
+      editModeInfo={{
+        componentName: 'AccordionFAQ',
+        description: 'Interactive FAQ section with expandable questions and answers',
+        tips: [
+          'Questions and answers are paired by position',
+          'Click on individual questions/answers to edit them directly',
+          'Questions and answers should be separated by | character'
+        ]
+      }}
     >
       <div className="max-w-4xl mx-auto">
         {/* Header Section */}
         <div className="text-center mb-12">
-          <ModeWrapper
+          <EditableHeadline
             mode={mode}
-            sectionId={sectionId}
-            elementKey="headline"
+            value={blockContent.headline}
             onEdit={(value) => handleContentUpdate('headline', value)}
-          >
-            <h2 
-              className={`mb-4 ${colorTokens.textPrimary}`}
-              style={getTextStyle('h1')}
-            >
-              {blockContent.headline}
-            </h2>
-          </ModeWrapper>
+            level="h2"
+            colorClass={colorTokens.textOnLight || colorTokens.textPrimary}
+            textStyle={getTextStyle('h1')}
+            className="mb-4"
+          />
 
-          {/* Optional Subheadline */}
+          {/* Subheadline */}
           {(blockContent.subheadline || mode === 'edit') && (
-            <ModeWrapper
+            <EditableText
               mode={mode}
-              sectionId={sectionId}
-              elementKey="subheadline"
+              value={blockContent.subheadline || ''}
               onEdit={(value) => handleContentUpdate('subheadline', value)}
-            >
-              <p 
-                className={`mb-6 max-w-2xl mx-auto ${colorTokens.textSecondary} ${!blockContent.subheadline && mode === 'edit' ? 'opacity-50' : ''}`}
-                style={getTextStyle('body-lg')}
-              >
-                {blockContent.subheadline || (mode === 'edit' ? 'Add optional subheadline...' : '')}
-              </p>
-            </ModeWrapper>
+              colorClass={colorTokens.textSecondary}
+              textStyle={getTextStyle('body-lg')}
+              className="max-w-2xl mx-auto"
+              placeholder="Add optional subheadline to provide context for your FAQ section..."
+            />
           )}
         </div>
 
         {/* FAQ Accordion */}
         <div className="space-y-4">
-          {faqItems.map((item, index) => (
+          {faqItems.map((item) => (
             <FAQAccordionItem
               key={item.id}
               item={item}
               isOpen={openItems.has(item.id)}
               onToggle={() => toggleItem(item.id)}
               mode={mode}
-              sectionId={sectionId}
-              index={index}
+              colorTokens={colorTokens}
+              getTextStyle={getTextStyle}
               onQuestionEdit={handleQuestionEdit}
               onAnswerEdit={handleAnswerEdit}
             />
           ))}
         </div>
 
-        {/* Edit Mode Data Editing */}
-        {mode === 'edit' && (
-          <div className="mt-12 space-y-4">
-            <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
-              <div className="flex items-center text-blue-700 mb-3">
-                <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
-                </svg>
-                <span className="text-sm font-medium">
-                  AccordionFAQ - Edit FAQ content or click individual questions/answers above
-                </span>
-              </div>
-              
-              <div className="space-y-4 text-sm">
-                <div>
-                  <label className="block text-blue-700 font-medium mb-1">Questions (separated by |):</label>
-                  <ModeWrapper
-                    mode={mode}
-                    sectionId={sectionId}
-                    elementKey="questions"
-                    onEdit={(value) => handleContentUpdate('questions', value)}
-                  >
-                    <div className="bg-white p-3 rounded border text-gray-800 text-xs leading-relaxed max-h-32 overflow-y-auto">
-                      {blockContent.questions}
-                    </div>
-                  </ModeWrapper>
-                </div>
-                
-                <div>
-                  <label className="block text-blue-700 font-medium mb-1">Answers (separated by |):</label>
-                  <ModeWrapper
-                    mode={mode}
-                    sectionId={sectionId}
-                    elementKey="answers"
-                    onEdit={(value) => handleContentUpdate('answers', value)}
-                  >
-                    <div className="bg-white p-3 rounded border text-gray-800 text-xs leading-relaxed max-h-40 overflow-y-auto">
-                      {blockContent.answers}
-                    </div>
-                  </ModeWrapper>
-                </div>
-                
-                <div className="text-xs text-blue-600 bg-blue-100 p-2 rounded">
-                  💡 Tip: You can edit individual questions and answers by clicking directly on them in the accordion above, or edit the bulk data here.
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
+        {/* Bulk Edit Interface */}
+        <EditableList
+          mode={mode}
+          items={faqItems}
+          onUpdateItem={(field, index, value) => {
+            if (field === 'question') handleQuestionEdit(index, value);
+            if (field === 'answer') handleAnswerEdit(index, value);
+          }}
+          renderItem={() => null} // Items already rendered above
+          bulkEditFields={[
+            {
+              key: 'questions',
+              label: 'Questions',
+              currentValue: blockContent.questions,
+              onUpdate: (value) => handleContentUpdate('questions', value)
+            },
+            {
+              key: 'answers',
+              label: 'Answers',
+              currentValue: blockContent.answers,
+              onUpdate: (value) => handleContentUpdate('answers', value)
+            }
+          ]}
+          listName="FAQ Items"
+          tips={[
+            'Questions and answers are paired by position - make sure you have the same number of each',
+            'You can edit individual items by clicking directly on them above'
+          ]}
+        />
       </div>
-    </section>
+    </LayoutSection>
   );
 }
+
+// Export additional metadata for the component registry
+export const componentMeta = {
+  name: 'AccordionFAQ',
+  category: 'Content Sections',
+  description: 'Interactive FAQ section with expandable accordion items',
+  tags: ['faq', 'accordion', 'questions', 'support'],
+  defaultBackgroundType: 'neutral' as const,
+  complexity: 'medium',
+  estimatedBuildTime: '20 minutes',
+  
+  // Schema for component generation tools
+  contentFields: [
+    { key: 'headline', label: 'Section Headline', type: 'text', required: true },
+    { key: 'subheadline', label: 'Subheadline', type: 'textarea', required: false },
+    { key: 'questions', label: 'Questions (pipe separated)', type: 'textarea', required: true },
+    { key: 'answers', label: 'Answers (pipe separated)', type: 'textarea', required: true }
+  ],
+  
+  // Usage examples
+  useCases: [
+    'Product FAQ section',
+    'Support documentation',
+    'Onboarding help',
+    'Pricing questions'
+  ]
+};

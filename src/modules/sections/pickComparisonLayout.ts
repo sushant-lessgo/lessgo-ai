@@ -16,34 +16,34 @@ export type ComparisonLayout =
  */
 export function pickComparisonLayout(input: LayoutPickerInput): ComparisonLayout {
   const {
-    awarenessLevel,
-    toneProfile,
-    startupStageGroup,
-    marketCategory,
-    landingGoalType,
-    targetAudienceGroup,
-    pricingModel,
-    pricingModifier,
-    pricingCommitmentOption,
-    marketSophisticationLevel,
-    copyIntent,
-    problemType,
-  } = input;
+  awarenessLevel,
+  toneProfile,
+  startupStage,             // ✅ FIXED
+  marketCategory,
+  landingPageGoals,         // ✅ FIXED  
+  targetAudience,           // ✅ FIXED
+  pricingModel,
+  pricingModifier,
+  pricingCommitmentOption,
+  marketSophisticationLevel,
+  copyIntent,
+  problemType,
+} = input;
 
   // High-Priority Rules (Return immediately if matched)
   
   // 1. Internal tiered product comparison (not vs competitors)
   if (
     pricingModel === "tiered" &&
-    (targetAudienceGroup === "enterprise" || targetAudienceGroup === "businesses") &&
-    (landingGoalType === "contact-sales" || landingGoalType === "demo" || landingGoalType === "buy-now")
+    (targetAudience === "enterprise" || targetAudience === "businesses") &&
+    (landingPageGoals === "contact-sales" || landingPageGoals === "demo" || landingPageGoals === "buy-now")
   ) {
     return "LiteVsProVsEnterprise";
   }
 
   // 2. Complex technical products need interactive comparison
   if (
-    (targetAudienceGroup === "builders" || targetAudienceGroup === "enterprise") &&
+    (targetAudience === "builders" || targetAudience === "enterprise") &&
     marketSophisticationLevel >= "level-4" &&
     (marketCategory === "Engineering & Development Tools" || marketCategory === "AI Tools")
   ) {
@@ -61,7 +61,7 @@ export function pickComparisonLayout(input: LayoutPickerInput): ComparisonLayout
 
   // 4. Enterprise audiences with complex use cases
   if (
-    targetAudienceGroup === "enterprise" &&
+    targetAudience === "enterprise" &&
     marketSophisticationLevel >= "level-4" &&
     (problemType === "compliance-or-risk" || problemType === "lost-revenue-or-inefficiency")
   ) {
@@ -70,9 +70,9 @@ export function pickComparisonLayout(input: LayoutPickerInput): ComparisonLayout
 
   // 5. Early stage companies showing evolution/growth path
   if (
-    (startupStageGroup === "idea" || startupStageGroup === "mvp") &&
+    (startupStage === "idea" || startupStage === "mvp") &&
     copyIntent === "desire-led" &&
-    (landingGoalType === "waitlist" || landingGoalType === "early-access")
+    (landingPageGoals === "waitlist" || landingPageGoals === "early-access")
   ) {
     return "AnimatedUpgradePath";
   }
@@ -125,23 +125,23 @@ export function pickComparisonLayout(input: LayoutPickerInput): ComparisonLayout
   }
 
   // Target Audience Scoring (High Weight: 3-4 points)
-  if (targetAudienceGroup === "enterprise") {
+  if (targetAudience === "enterprise") {
     scores.PersonaUseCaseCompare += 4;
     scores.LiteVsProVsEnterprise += 4;
     scores.ToggleableComparison += 3;
-  } else if (targetAudienceGroup === "builders") {
+  } else if (targetAudience === "builders") {
     scores.ToggleableComparison += 4;
     scores.CompetitorCallouts += 3;
     scores.CheckmarkComparison += 2;
-  } else if (targetAudienceGroup === "businesses") {
+  } else if (targetAudience === "businesses") {
     scores.LiteVsProVsEnterprise += 4;
     scores.YouVsThemHighlight += 3;
     scores.PersonaUseCaseCompare += 2;
-  } else if (targetAudienceGroup === "founders" || targetAudienceGroup === "creators") {
+  } else if (targetAudience === "founders" || targetAudience === "creators") {
     scores.AnimatedUpgradePath += 4;
     scores.BasicFeatureGrid += 3;
     scores.CheckmarkComparison += 2;
-  } else if (targetAudienceGroup === "marketers") {
+  } else if (targetAudience === "marketers") {
     scores.YouVsThemHighlight += 4;
     scores.CompetitorCallouts += 3;
     scores.CheckmarkComparison += 2;
@@ -197,37 +197,37 @@ export function pickComparisonLayout(input: LayoutPickerInput): ComparisonLayout
   }
 
   // Landing Goal Scoring (Medium Weight: 2-3 points)
-  if (landingGoalType === "buy-now" || landingGoalType === "subscribe") {
+  if (landingPageGoals === "buy-now" || landingPageGoals === "subscribe") {
     scores.LiteVsProVsEnterprise += 3;
     scores.CompetitorCallouts += 2;
-  } else if (landingGoalType === "free-trial" || landingGoalType === "demo") {
+  } else if (landingPageGoals === "free-trial" || landingPageGoals === "demo") {
     scores.ToggleableComparison += 3;
     scores.YouVsThemHighlight += 2;
-  } else if (landingGoalType === "contact-sales") {
+  } else if (landingPageGoals === "contact-sales") {
     scores.PersonaUseCaseCompare += 3;
     scores.LiteVsProVsEnterprise += 2;
-  } else if (landingGoalType === "signup") {
+  } else if (landingPageGoals === "signup") {
     scores.CheckmarkComparison += 3;
     scores.BasicFeatureGrid += 2;
-  } else if (landingGoalType === "waitlist" || landingGoalType === "early-access") {
+  } else if (landingPageGoals === "waitlist" || landingPageGoals === "early-access") {
     scores.AnimatedUpgradePath += 3;
     scores.YouVsThemHighlight += 2;
   }
 
   // Startup Stage Scoring (Low Weight: 1-2 points)
-  if (startupStageGroup === "idea" || startupStageGroup === "mvp") {
+  if (startupStage === "idea" || startupStage === "mvp") {
     scores.AnimatedUpgradePath += 2;
     scores.BasicFeatureGrid += 2;
     scores.YouVsThemHighlight += 1;
-  } else if (startupStageGroup === "traction") {
+  } else if (startupStage === "traction") {
     scores.CheckmarkComparison += 2;
     scores.YouVsThemHighlight += 2;
     scores.ToggleableComparison += 1;
-  } else if (startupStageGroup === "growth") {
+  } else if (startupStage === "growth") {
     scores.CompetitorCallouts += 2;
     scores.LiteVsProVsEnterprise += 2;
     scores.PersonaUseCaseCompare += 1;
-  } else if (startupStageGroup === "scale") {
+  } else if (startupStage === "scale") {
     scores.PersonaUseCaseCompare += 2;
     scores.LiteVsProVsEnterprise += 2;
     scores.CompetitorCallouts += 1;

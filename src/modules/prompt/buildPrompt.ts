@@ -1,41 +1,20 @@
+// modules/prompt/buildPrompt.ts - ✅ PHASE 4: API Layer Migration Complete
 import { getCompleteElementsMap, getSectionElementRequirements, mapStoreToVariables } from '../sections/elementDetermination'
 
-// Type definitions for stores (should match your actual store types)
-type OnboardingStore = {
-  oneLiner: string;
-  validatedFields: Record<string, string>;
-  hiddenInferredFields: {
-    awarenessLevel?: string;
-    copyIntent?: string;
-    brandTone?: string;
-    layoutPersona?: string;
-    [key: string]: string | undefined;
-  };
-  featuresFromAI: Array<{
-    feature: string;
-    benefit: string;
-  }>;
-};
+import type {
+  InputVariables,
+  HiddenInferredFields,
+  FeatureItem
+} from '@/types/core/index';
 
-type PageStore = {
-  layout: {
-    sections: string[];
-    sectionLayouts: Record<string, string>;
-  };
-  meta: {
-    onboardingData: {
-      oneLiner: string;
-      validatedFields: Record<string, string>;
-      featuresFromAI: Array<{
-        feature: string;
-        benefit: string;
-      }>;
-      targetAudience?: string;
-      businessType?: string;
-    };
-  };
-  content: Record<string, any>;
-};
+// ✅ PERMANENT FIX: Use the actual store state interfaces
+// Import the store state getter function to access current types
+import { useOnboardingStore } from '@/hooks/useOnboardingStore';
+import { usePageStore } from '@/hooks/usePageStore';
+
+// ✅ FIXED: Extract actual store types from Zustand stores
+type OnboardingStore = ReturnType<typeof useOnboardingStore.getState>;
+type PageStore = ReturnType<typeof usePageStore.getState>;
 
 /**
  * Builds business context section for all prompt types
@@ -49,26 +28,26 @@ function buildBusinessContext(onboardingStore: OnboardingStore, pageStore: PageS
   return `BUSINESS CONTEXT:
 Product/Service: ${oneLiner}
 Target Audience: ${targetAudience || validatedFields.targetAudience || 'Not specified'}
-Business Type: ${businessType || validatedFields.businessType || 'Not specified'}
+Business Type: ${businessType || validatedFields.marketCategory || 'Not specified'}
 Market Category: ${validatedFields.marketSubcategory || 'Not specified'}
 Startup Stage: ${validatedFields.startupStage || 'Not specified'}
-Landing Goal: ${validatedFields.landingGoal || 'Not specified'}
+Landing Goal: ${validatedFields.landingPageGoals || 'Not specified'}
 
 KEY FEATURES & BENEFITS:
 ${features || 'Features not available'}`;
 }
 
 /**
- * Builds brand and tone context section for all prompt types
+ * ✅ FIXED: Builds brand and tone context section using canonical field names
  */
 function buildBrandContext(onboardingStore: OnboardingStore): string {
   const { validatedFields, hiddenInferredFields } = onboardingStore;
   
-  const awarenessLevel = hiddenInferredFields.awarenessLevel || validatedFields.awarenessLevel || 'Not specified';
-  const copyIntent = hiddenInferredFields.copyIntent || validatedFields.copyIntent || 'Not specified';
-  const toneProfile = hiddenInferredFields.brandTone || validatedFields.toneProfile || 'Not specified';
-  const marketSophistication = hiddenInferredFields.marketSophistication || validatedFields.marketSophistication || 'Not specified';
-  const problemType = validatedFields.problemType || 'Not specified';
+  const awarenessLevel = hiddenInferredFields.awarenessLevel || 'Not specified';
+  const copyIntent = hiddenInferredFields.copyIntent || 'Not specified';
+  const toneProfile = hiddenInferredFields.toneProfile || 'Not specified'; // ✅ FIXED: Use toneProfile
+  const marketSophistication = hiddenInferredFields.marketSophisticationLevel || 'Not specified';
+  const problemType = hiddenInferredFields.problemType || 'Not specified';
   
   return `BRAND & MESSAGING STRATEGY:
 Audience Awareness Level: ${awarenessLevel}

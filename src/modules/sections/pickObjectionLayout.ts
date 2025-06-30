@@ -16,35 +16,35 @@ export type ObjectionLayout =
  */
 export function pickObjectionLayout(input: LayoutPickerInput): ObjectionLayout {
   const {
-    awarenessLevel,
-    toneProfile,
-    startupStageGroup,
-    marketCategory,
-    landingGoalType,
-    targetAudienceGroup,
-    pricingModel,
-    pricingModifier,
-    pricingCommitmentOption,
-    marketSophisticationLevel,
-    copyIntent,
-    problemType,
-  } = input;
+  awarenessLevel,
+  toneProfile,
+  startupStage,             // ✅ FIXED
+  marketCategory,
+  landingPageGoals,         // ✅ FIXED  
+  targetAudience,           // ✅ FIXED
+  pricingModel,
+  pricingModifier,
+  pricingCommitmentOption,
+  marketSophisticationLevel,
+  copyIntent,
+  problemType,
+} = input;
 
   // High-Priority Rules (Return immediately if matched)
   
   // 1. High-stakes enterprise decisions need authoritative proof
   if (
-    targetAudienceGroup === "enterprise" &&
+    targetAudience === "enterprise" &&
     marketSophisticationLevel >= "level-4" &&
     (problemType === "compliance-or-risk" || problemType === "lost-revenue-or-inefficiency") &&
-    (startupStageGroup === "growth" || startupStageGroup === "scale")
+    (startupStage === "growth" || startupStage === "scale")
   ) {
     return "QuoteBackedAnswers";
   }
 
   // 2. Purchase-focused with guarantees and risk reversal
   if (
-    (landingGoalType === "buy-now" || landingGoalType === "subscribe") &&
+    (landingPageGoals === "buy-now" || landingPageGoals === "subscribe") &&
     (pricingModifier === "money-back" || pricingCommitmentOption === "upfront-payment") &&
     toneProfile === "bold-persuasive"
   ) {
@@ -65,14 +65,14 @@ export function pickObjectionLayout(input: LayoutPickerInput): ObjectionLayout {
     (awarenessLevel === "solution-aware" || awarenessLevel === "product-aware") &&
     marketSophisticationLevel >= "level-3" &&
     copyIntent === "desire-led" &&
-    (targetAudienceGroup === "businesses" || targetAudienceGroup === "enterprise")
+    (targetAudience === "businesses" || targetAudience === "enterprise")
   ) {
     return "SkepticToBelieverSteps";
   }
 
   // 5. Early stage or simple products with basic concerns
   if (
-    (startupStageGroup === "idea" || startupStageGroup === "mvp") &&
+    (startupStage === "idea" || startupStage === "mvp") &&
     marketSophisticationLevel <= "level-2" &&
     (awarenessLevel === "unaware" || awarenessLevel === "problem-aware")
   ) {
@@ -129,26 +129,26 @@ export function pickObjectionLayout(input: LayoutPickerInput): ObjectionLayout {
   }
 
   // Target Audience Scoring (High Weight: 3-4 points)
-  if (targetAudienceGroup === "enterprise") {
+  if (targetAudience === "enterprise") {
     scores.QuoteBackedAnswers += 4;
     scores.SkepticToBelieverSteps += 4;
     scores.MythVsRealityGrid += 3;
     scores.ObjectionAccordion += 2;
-  } else if (targetAudienceGroup === "builders") {
+  } else if (targetAudience === "builders") {
     scores.MythVsRealityGrid += 4;
     scores.ObjectionAccordion += 3;
     scores.QuoteBackedAnswers += 2;
-  } else if (targetAudienceGroup === "businesses") {
+  } else if (targetAudience === "businesses") {
     scores.SkepticToBelieverSteps += 4;
     scores.BoldGuaranteePanel += 3;
     scores.QuoteBackedAnswers += 3;
     scores.ObjectionAccordion += 2;
-  } else if (targetAudienceGroup === "founders" || targetAudienceGroup === "creators") {
+  } else if (targetAudience === "founders" || targetAudience === "creators") {
     scores.VisualObjectionTiles += 4;
     scores.ObjectionCarousel += 3;
     scores.ProblemToReframeBlocks += 3;
     scores.ObjectionAccordion += 2;
-  } else if (targetAudienceGroup === "marketers") {
+  } else if (targetAudience === "marketers") {
     scores.ProblemToReframeBlocks += 4;
     scores.SkepticToBelieverSteps += 3;
     scores.ObjectionAccordion += 2;
@@ -191,22 +191,22 @@ export function pickObjectionLayout(input: LayoutPickerInput): ObjectionLayout {
   }
 
   // Landing Goal Scoring (Medium Weight: 2-3 points)
-  if (landingGoalType === "buy-now" || landingGoalType === "subscribe") {
+  if (landingPageGoals === "buy-now" || landingPageGoals === "subscribe") {
     scores.BoldGuaranteePanel += 3;
     scores.SkepticToBelieverSteps += 2;
     scores.QuoteBackedAnswers += 2;
-  } else if (landingGoalType === "contact-sales" || landingGoalType === "demo") {
+  } else if (landingPageGoals === "contact-sales" || landingPageGoals === "demo") {
     scores.QuoteBackedAnswers += 3;
     scores.SkepticToBelieverSteps += 2;
     scores.ObjectionAccordion += 2;
-  } else if (landingGoalType === "free-trial") {
+  } else if (landingPageGoals === "free-trial") {
     scores.MythVsRealityGrid += 3;
     scores.ObjectionAccordion += 2;
     scores.BoldGuaranteePanel += 1;
-  } else if (landingGoalType === "signup") {
+  } else if (landingPageGoals === "signup") {
     scores.ObjectionAccordion += 3;
     scores.VisualObjectionTiles += 2;
-  } else if (landingGoalType === "waitlist" || landingGoalType === "early-access") {
+  } else if (landingPageGoals === "waitlist" || landingPageGoals === "early-access") {
     scores.ProblemToReframeBlocks += 3;
     scores.VisualObjectionTiles += 2;
   }
@@ -232,19 +232,19 @@ export function pickObjectionLayout(input: LayoutPickerInput): ObjectionLayout {
   }
 
   // Startup Stage Scoring (Medium Weight: 2-3 points)
-  if (startupStageGroup === "idea" || startupStageGroup === "mvp") {
+  if (startupStage === "idea" || startupStage === "mvp") {
     scores.VisualObjectionTiles += 3;
     scores.ObjectionCarousel += 2;
     scores.ProblemToReframeBlocks += 2;
-  } else if (startupStageGroup === "traction") {
+  } else if (startupStage === "traction") {
     scores.ObjectionAccordion += 3;
     scores.ProblemToReframeBlocks += 2;
     scores.SkepticToBelieverSteps += 1;
-  } else if (startupStageGroup === "growth") {
+  } else if (startupStage === "growth") {
     scores.QuoteBackedAnswers += 3;
     scores.SkepticToBelieverSteps += 2;
     scores.MythVsRealityGrid += 2;
-  } else if (startupStageGroup === "scale") {
+  } else if (startupStage === "scale") {
     scores.QuoteBackedAnswers += 3;
     scores.MythVsRealityGrid += 2;
     scores.BoldGuaranteePanel += 2;

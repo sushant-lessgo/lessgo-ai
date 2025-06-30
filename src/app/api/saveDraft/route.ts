@@ -38,6 +38,8 @@ interface ProjectContent {
   [key: string]: any; // Allow for future extensions
 }
 
+// In your api/saveDraft/route.ts file, replace your existing POST function with this:
+
 export async function POST(req: Request) {
   try {
     // 🔒 Authentication required
@@ -56,7 +58,8 @@ export async function POST(req: Request) {
       featuresFromAI = [],
       hiddenInferredFields = {},
       title,
-      themeValues 
+      themeValues,
+      finalContent  // ✅ NEW: Accept the complete page data
     } = body;
 
     // Validation
@@ -109,10 +112,26 @@ export async function POST(req: Request) {
       }
     };
 
+    // ✅ NEW: Handle finalContent (complete page data)
     const updatedContent: ProjectContent = {
       ...existingContent,
-      onboarding: updatedOnboarding
+      onboarding: updatedOnboarding,
     };
+
+    // ✅ CRITICAL FIX: Save the actual page data if provided
+    if (finalContent) {
+      updatedContent.finalContent = {
+        ...existingContent.finalContent,
+        ...finalContent,
+        lastSaved: new Date().toISOString(),
+      };
+      
+      console.log('💾 Saving complete page data to finalContent:', {
+        hasSections: finalContent.layout?.sections?.length > 0,
+        hasContent: finalContent.content && Object.keys(finalContent.content).length > 0,
+        hasTheme: !!finalContent.layout?.theme,
+      });
+    }
 
     // 💾 Upsert project with merged content
     const updatedProject = await prisma.project.upsert({
@@ -135,7 +154,7 @@ export async function POST(req: Request) {
       },
     });
 
-    // 📊 Log save success for debugging
+    // 📊 Enhanced logging
     console.log(`✅ Draft saved for token: ${tokenId}`, {
       stepIndex: updatedOnboarding.stepIndex,
       confirmedFieldsCount: Object.keys(updatedOnboarding.confirmedFields).length,
@@ -143,12 +162,15 @@ export async function POST(req: Request) {
       featuresCount: updatedOnboarding.featuresFromAI.length,
       hiddenFieldsCount: Object.keys(updatedOnboarding.hiddenInferredFields).length,
       hasInputText: !!inputText,
+      hasFinalContent: !!updatedContent.finalContent,
+      finalContentKeys: updatedContent.finalContent ? Object.keys(updatedContent.finalContent) : [],
     });
 
     return NextResponse.json({ 
       message: 'Draft saved successfully',
       stepIndex: updatedOnboarding.stepIndex,
-      timestamp: updatedProject.updatedAt
+      timestamp: updatedProject.updatedAt,
+      hasFinalContent: !!updatedContent.finalContent,
     });
 
   } catch (err) {

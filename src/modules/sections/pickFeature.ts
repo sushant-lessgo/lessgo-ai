@@ -16,25 +16,25 @@ export type FeatureLayout =
  */
 export function pickFeatureLayout(input: LayoutPickerInput): FeatureLayout {
   const {
-    awarenessLevel,
-    toneProfile,
-    startupStageGroup,
-    marketCategory,
-    landingGoalType,
-    targetAudienceGroup,
-    pricingModel,
-    pricingModifier,
-    pricingCommitmentOption,
-    marketSophisticationLevel,
-    copyIntent,
-    problemType,
-  } = input;
+  awarenessLevel,
+  toneProfile,
+  startupStage,             // ✅ FIXED
+  marketCategory,
+  landingPageGoals,         // ✅ FIXED  
+  targetAudience,           // ✅ FIXED
+  pricingModel,
+  pricingModifier,
+  pricingCommitmentOption,
+  marketSophisticationLevel,
+  copyIntent,
+  problemType,
+} = input;
 
   // High-Priority Rules (Return immediately if matched)
   
   // 1. Complex technical products need detailed explanations
   if (
-    (targetAudienceGroup === "builders" || targetAudienceGroup === "enterprise") &&
+    (targetAudience === "builders" || targetAudience === "enterprise") &&
     marketSophisticationLevel >= "level-4" &&
     (marketCategory === "Engineering & Development Tools" || marketCategory === "AI Tools" || marketCategory === "Data & Analytics Tools")
   ) {
@@ -52,9 +52,9 @@ export function pickFeatureLayout(input: LayoutPickerInput): FeatureLayout {
 
   // 3. Trust-building for established companies
   if (
-    (startupStageGroup === "growth" || startupStageGroup === "scale") &&
-    (landingGoalType === "buy-now" || landingGoalType === "contact-sales") &&
-    targetAudienceGroup === "enterprise"
+    (startupStage === "growth" || startupStage === "scale") &&
+    (landingPageGoals === "buy-now" || landingPageGoals === "contact-sales") &&
+    targetAudience === "enterprise"
   ) {
     return "FeatureTestimonial";
   }
@@ -62,7 +62,7 @@ export function pickFeatureLayout(input: LayoutPickerInput): FeatureLayout {
   // 4. Data-driven products showing quantifiable benefits
   if (
     (problemType === "lost-revenue-or-inefficiency" || problemType === "compliance-or-risk") &&
-    (targetAudienceGroup === "businesses" || targetAudienceGroup === "enterprise") &&
+    (targetAudience === "businesses" || targetAudience === "enterprise") &&
     copyIntent === "desire-led"
   ) {
     return "MetricTiles";
@@ -70,7 +70,7 @@ export function pickFeatureLayout(input: LayoutPickerInput): FeatureLayout {
 
   // 5. Simple, early-stage products with clear value props
   if (
-    (startupStageGroup === "idea" || startupStageGroup === "mvp") &&
+    (startupStage === "idea" || startupStage === "mvp") &&
     (awarenessLevel === "unaware" || awarenessLevel === "problem-aware") &&
     marketSophisticationLevel <= "level-2"
   ) {
@@ -127,27 +127,27 @@ export function pickFeatureLayout(input: LayoutPickerInput): FeatureLayout {
   }
 
   // Target Audience Scoring (High Weight: 3-4 points)
-  if (targetAudienceGroup === "enterprise") {
+  if (targetAudience === "enterprise") {
     scores.SplitAlternating += 4;
     scores.FeatureTestimonial += 4;
     scores.Timeline += 3;
     scores.MetricTiles += 2;
-  } else if (targetAudienceGroup === "builders") {
+  } else if (targetAudience === "builders") {
     scores.SplitAlternating += 4;
     scores.MiniCards += 3;
     scores.Timeline += 3;
     scores.Tabbed += 2;
-  } else if (targetAudienceGroup === "businesses") {
+  } else if (targetAudience === "businesses") {
     scores.MetricTiles += 4;
     scores.FeatureTestimonial += 3;
     scores.Tabbed += 3;
     scores.IconGrid += 2;
-  } else if (targetAudienceGroup === "founders" || targetAudienceGroup === "creators") {
+  } else if (targetAudience === "founders" || targetAudience === "creators") {
     scores.IconGrid += 4;
     scores.Carousel += 3;
     scores.MiniCards += 3;
     scores.MetricTiles += 2;
-  } else if (targetAudienceGroup === "marketers") {
+  } else if (targetAudience === "marketers") {
     scores.Tabbed += 4;
     scores.MetricTiles += 3;
     scores.FeatureTestimonial += 2;
@@ -211,19 +211,19 @@ export function pickFeatureLayout(input: LayoutPickerInput): FeatureLayout {
   }
 
   // Startup Stage Scoring (Medium Weight: 2-3 points)
-  if (startupStageGroup === "idea" || startupStageGroup === "mvp") {
+  if (startupStage === "idea" || startupStage === "mvp") {
     scores.IconGrid += 3;
     scores.Carousel += 2;
     scores.MiniCards += 2;
-  } else if (startupStageGroup === "traction") {
+  } else if (startupStage === "traction") {
     scores.Tabbed += 3;
     scores.SplitAlternating += 2;
     scores.MetricTiles += 2;
-  } else if (startupStageGroup === "growth") {
+  } else if (startupStage === "growth") {
     scores.FeatureTestimonial += 3;
     scores.Timeline += 2;
     scores.SplitAlternating += 2;
-  } else if (startupStageGroup === "scale") {
+  } else if (startupStage === "scale") {
     scores.SplitAlternating += 3;
     scores.FeatureTestimonial += 2;
     scores.Timeline += 2;
@@ -255,20 +255,20 @@ export function pickFeatureLayout(input: LayoutPickerInput): FeatureLayout {
   }
 
   // Landing Goal Scoring (Low Weight: 1-2 points)
-  if (landingGoalType === "buy-now" || landingGoalType === "subscribe") {
+  if (landingPageGoals === "buy-now" || landingPageGoals === "subscribe") {
     scores.FeatureTestimonial += 2;
     scores.MetricTiles += 2;
     scores.SplitAlternating += 1;
-  } else if (landingGoalType === "free-trial" || landingGoalType === "demo") {
+  } else if (landingPageGoals === "free-trial" || landingPageGoals === "demo") {
     scores.SplitAlternating += 2;
     scores.Timeline += 1;
-  } else if (landingGoalType === "contact-sales") {
+  } else if (landingPageGoals === "contact-sales") {
     scores.FeatureTestimonial += 2;
     scores.SplitAlternating += 1;
-  } else if (landingGoalType === "signup") {
+  } else if (landingPageGoals === "signup") {
     scores.IconGrid += 2;
     scores.Tabbed += 1;
-  } else if (landingGoalType === "download" || landingGoalType === "waitlist") {
+  } else if (landingPageGoals === "download" || landingPageGoals === "waitlist") {
     scores.Carousel += 2;
     scores.MiniCards += 1;
   }

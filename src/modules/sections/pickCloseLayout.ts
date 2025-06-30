@@ -16,26 +16,26 @@ export type CloseLayout =
  */
 export function pickCloseLayout(input: LayoutPickerInput): CloseLayout {
   const {
-    awarenessLevel,
-    toneProfile,
-    startupStageGroup,
-    marketCategory,
-    landingGoalType,
-    targetAudienceGroup,
-    pricingModel,
-    pricingModifier,
-    pricingCommitmentOption,
-    marketSophisticationLevel,
-    copyIntent,
-    problemType,
-  } = input;
+  awarenessLevel,
+  toneProfile,
+  startupStage,             // ✅ FIXED
+  marketCategory,
+  landingPageGoals,         // ✅ FIXED  
+  targetAudience,           // ✅ FIXED
+  pricingModel,
+  pricingModifier,
+  pricingCommitmentOption,
+  marketSophisticationLevel,
+  copyIntent,
+  problemType,
+} = input;
 
   // High-Priority Rules (Return immediately if matched)
   
   // 1. Enterprise sales process - needs professional contact flow
   if (
-    targetAudienceGroup === "enterprise" &&
-    (landingGoalType === "contact-sales" || landingGoalType === "demo" || landingGoalType === "book-call") &&
+    targetAudience === "enterprise" &&
+    (landingPageGoals === "contact-sales" || landingPageGoals === "demo" || landingPageGoals === "book-call") &&
     marketSophisticationLevel >= "level-4"
   ) {
     return "EnterpriseContactBox";
@@ -43,8 +43,8 @@ export function pickCloseLayout(input: LayoutPickerInput): CloseLayout {
 
   // 2. Technical product demos - show actual product in action
   if (
-    (targetAudienceGroup === "builders" || targetAudienceGroup === "enterprise") &&
-    (landingGoalType === "demo" || landingGoalType === "free-trial") &&
+    (targetAudience === "builders" || targetAudience === "enterprise") &&
+    (landingPageGoals === "demo" || landingPageGoals === "free-trial") &&
     (marketCategory === "Engineering & Development Tools" || marketCategory === "AI Tools" || marketCategory === "No-Code & Low-Code Platforms")
   ) {
     return "LivePreviewEmbed";
@@ -52,15 +52,15 @@ export function pickCloseLayout(input: LayoutPickerInput): CloseLayout {
 
   // 3. Lead magnets for content/educational goals
   if (
-    (landingGoalType === "download" || landingGoalType === "waitlist" || landingGoalType === "join-community") &&
-    (targetAudienceGroup === "creators" || targetAudienceGroup === "founders" || targetAudienceGroup === "marketers")
+    (landingPageGoals === "download" || landingPageGoals === "waitlist" || landingPageGoals === "join-community") &&
+    (targetAudience === "creators" || targetAudience === "founders" || targetAudience === "marketers")
   ) {
     return "LeadMagnetCard";
   }
 
   // 4. High-value offers with bonuses for purchase intent
   if (
-    (landingGoalType === "buy-now" || landingGoalType === "subscribe") &&
+    (landingPageGoals === "buy-now" || landingPageGoals === "subscribe") &&
     (pricingModifier === "discount" || pricingModifier === "money-back") &&
     toneProfile === "bold-persuasive"
   ) {
@@ -69,7 +69,7 @@ export function pickCloseLayout(input: LayoutPickerInput): CloseLayout {
 
   // 5. Complex signup processes - break down the steps
   if (
-    (landingGoalType === "signup" || landingGoalType === "free-trial") &&
+    (landingPageGoals === "signup" || landingPageGoals === "free-trial") &&
     marketSophisticationLevel >= "level-3" &&
     (pricingCommitmentOption === "card-required" || pricingCommitmentOption === "paid-trial")
   ) {
@@ -90,52 +90,52 @@ export function pickCloseLayout(input: LayoutPickerInput): CloseLayout {
   };
 
   // Landing Goal Scoring (Highest Weight: 4-5 points)
-  if (landingGoalType === "buy-now" || landingGoalType === "subscribe") {
+  if (landingPageGoals === "buy-now" || landingPageGoals === "subscribe") {
     scores.BonusStackCTA += 5;
     scores.SideBySideOfferCards += 3;
     scores.MockupWithCTA += 2;
-  } else if (landingGoalType === "free-trial") {
+  } else if (landingPageGoals === "free-trial") {
     scores.MockupWithCTA += 4;
     scores.LivePreviewEmbed += 4;
     scores.MultistepCTAStack += 3;
-  } else if (landingGoalType === "demo") {
+  } else if (landingPageGoals === "demo") {
     scores.LivePreviewEmbed += 5;
     scores.EnterpriseContactBox += 3;
     scores.MockupWithCTA += 2;
-  } else if (landingGoalType === "contact-sales" || landingGoalType === "book-call") {
+  } else if (landingPageGoals === "contact-sales" || landingPageGoals === "book-call") {
     scores.EnterpriseContactBox += 5;
     scores.MultistepCTAStack += 2;
-  } else if (landingGoalType === "signup") {
+  } else if (landingPageGoals === "signup") {
     scores.MultistepCTAStack += 4;
     scores.LeadMagnetCard += 3;
     scores.MockupWithCTA += 3;
-  } else if (landingGoalType === "download" || landingGoalType === "waitlist") {
+  } else if (landingPageGoals === "download" || landingPageGoals === "waitlist") {
     scores.LeadMagnetCard += 5;
     scores.ValueReinforcementBlock += 2;
-  } else if (landingGoalType === "early-access") {
+  } else if (landingPageGoals === "early-access") {
     scores.BonusStackCTA += 4;
     scores.LeadMagnetCard += 3;
     scores.ValueReinforcementBlock += 2;
   }
 
   // Target Audience Scoring (High Weight: 3-4 points)
-  if (targetAudienceGroup === "enterprise") {
+  if (targetAudience === "enterprise") {
     scores.EnterpriseContactBox += 4;
     scores.MultistepCTAStack += 3;
     scores.SideBySideOfferCards += 2;
-  } else if (targetAudienceGroup === "builders") {
+  } else if (targetAudience === "builders") {
     scores.LivePreviewEmbed += 4;
     scores.MockupWithCTA += 3;
     scores.MultistepCTAStack += 2;
-  } else if (targetAudienceGroup === "businesses") {
+  } else if (targetAudience === "businesses") {
     scores.SideBySideOfferCards += 4;
     scores.EnterpriseContactBox += 3;
     scores.BonusStackCTA += 2;
-  } else if (targetAudienceGroup === "founders" || targetAudienceGroup === "creators") {
+  } else if (targetAudience === "founders" || targetAudience === "creators") {
     scores.LeadMagnetCard += 4;
     scores.ValueReinforcementBlock += 3;
     scores.MockupWithCTA += 2;
-  } else if (targetAudienceGroup === "marketers") {
+  } else if (targetAudience === "marketers") {
     scores.BonusStackCTA += 3;
     scores.SideBySideOfferCards += 3;
     scores.LeadMagnetCard += 2;
@@ -225,16 +225,16 @@ export function pickCloseLayout(input: LayoutPickerInput): CloseLayout {
   }
 
   // Startup Stage Scoring (Low Weight: 1-2 points)
-  if (startupStageGroup === "idea" || startupStageGroup === "mvp") {
+  if (startupStage === "idea" || startupStage === "mvp") {
     scores.LeadMagnetCard += 2;
     scores.ValueReinforcementBlock += 1;
-  } else if (startupStageGroup === "traction") {
+  } else if (startupStage === "traction") {
     scores.MockupWithCTA += 2;
     scores.LivePreviewEmbed += 1;
-  } else if (startupStageGroup === "growth") {
+  } else if (startupStage === "growth") {
     scores.SideBySideOfferCards += 2;
     scores.BonusStackCTA += 1;
-  } else if (startupStageGroup === "scale") {
+  } else if (startupStage === "scale") {
     scores.EnterpriseContactBox += 2;
     scores.MultistepCTAStack += 1;
   }

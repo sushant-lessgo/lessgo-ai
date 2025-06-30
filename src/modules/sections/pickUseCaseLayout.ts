@@ -16,25 +16,25 @@ export type UseCaseLayout =
  */
 export function pickUseCaseLayout(input: LayoutPickerInput): UseCaseLayout {
   const {
-    awarenessLevel,
-    toneProfile,
-    startupStageGroup,
-    marketCategory,
-    landingGoalType,
-    targetAudienceGroup,
-    pricingModel,
-    pricingModifier,
-    pricingCommitmentOption,
-    marketSophisticationLevel,
-    copyIntent,
-    problemType,
-  } = input;
+  awarenessLevel,
+  toneProfile,
+  startupStage,             // ✅ FIXED
+  marketCategory,
+  landingPageGoals,         // ✅ FIXED  
+  targetAudience,           // ✅ FIXED
+  pricingModel,
+  pricingModifier,
+  pricingCommitmentOption,
+  marketSophisticationLevel,
+  copyIntent,
+  problemType,
+} = input;
 
   // High-Priority Rules (Return immediately if matched)
   
   // 1. Enterprise with complex role-based applications
   if (
-    targetAudienceGroup === "enterprise" &&
+    targetAudience === "enterprise" &&
     marketSophisticationLevel >= "level-4" &&
     (marketCategory === "Work & Productivity Tools" || marketCategory === "Data & Analytics Tools" || marketCategory === "HR & People Operations Tools")
   ) {
@@ -44,7 +44,7 @@ export function pickUseCaseLayout(input: LayoutPickerInput): UseCaseLayout {
   // 2. Industry-specific products with vertical applications
   if (
     (marketCategory === "HR & People Operations Tools" || marketCategory === "Finance & Accounting Tools" || marketCategory === "Customer Support & Service Tools") &&
-    (targetAudienceGroup === "enterprise" || targetAudienceGroup === "businesses") &&
+    (targetAudience === "enterprise" || targetAudience === "businesses") &&
     marketSophisticationLevel >= "level-3"
   ) {
     return "IndustryTiles";
@@ -52,7 +52,7 @@ export function pickUseCaseLayout(input: LayoutPickerInput): UseCaseLayout {
 
   // 3. Technical products with specific job functions
   if (
-    (targetAudienceGroup === "builders" || targetAudienceGroup === "enterprise") &&
+    (targetAudience === "builders" || targetAudience === "enterprise") &&
     (marketCategory === "Engineering & Development Tools" || marketCategory === "AI Tools" || marketCategory === "Data & Analytics Tools") &&
     (awarenessLevel === "solution-aware" || awarenessLevel === "product-aware")
   ) {
@@ -62,7 +62,7 @@ export function pickUseCaseLayout(input: LayoutPickerInput): UseCaseLayout {
   // 4. Multiple distinct audience segments
   if (
     marketSophisticationLevel >= "level-3" &&
-    (targetAudienceGroup === "businesses" || targetAudienceGroup === "marketers") &&
+    (targetAudience === "businesses" || targetAudience === "marketers") &&
     (awarenessLevel === "solution-aware" || awarenessLevel === "product-aware")
   ) {
     return "SegmentSplitBlocks";
@@ -70,7 +70,7 @@ export function pickUseCaseLayout(input: LayoutPickerInput): UseCaseLayout {
 
   // 5. Simple, visual approach for creators and founders
   if (
-    (targetAudienceGroup === "founders" || targetAudienceGroup === "creators") &&
+    (targetAudience === "founders" || targetAudience === "creators") &&
     marketSophisticationLevel <= "level-2" &&
     (toneProfile === "friendly-helpful" || toneProfile === "confident-playful")
   ) {
@@ -91,27 +91,27 @@ export function pickUseCaseLayout(input: LayoutPickerInput): UseCaseLayout {
   };
 
   // Target Audience Scoring (Highest Weight: 4-5 points)
-  if (targetAudienceGroup === "enterprise") {
+  if (targetAudience === "enterprise") {
     scores.RoleBenefitMatrix += 5;
     scores.IndustryTiles += 4;
     scores.SegmentSplitBlocks += 4;
     scores.JobToBeDoneList += 3;
-  } else if (targetAudienceGroup === "builders") {
+  } else if (targetAudience === "builders") {
     scores.JobToBeDoneList += 4;
     scores.ScenarioCards += 4;
     scores.TabbedUseCases += 3;
     scores.PersonaGrid += 2;
-  } else if (targetAudienceGroup === "businesses") {
+  } else if (targetAudience === "businesses") {
     scores.IndustryTiles += 4;
     scores.SegmentSplitBlocks += 4;
     scores.PersonaGrid += 3;
     scores.RoleBenefitMatrix += 2;
-  } else if (targetAudienceGroup === "founders" || targetAudienceGroup === "creators") {
+  } else if (targetAudience === "founders" || targetAudience === "creators") {
     scores.CarouselAvatars += 4;
     scores.PersonaGrid += 4;
     scores.TabbedUseCases += 3;
     scores.ScenarioCards += 2;
-  } else if (targetAudienceGroup === "marketers") {
+  } else if (targetAudience === "marketers") {
     scores.SegmentSplitBlocks += 4;
     scores.ScenarioCards += 4;
     scores.PersonaGrid += 3;
@@ -195,19 +195,19 @@ export function pickUseCaseLayout(input: LayoutPickerInput): UseCaseLayout {
   }
 
   // Startup Stage Scoring (Medium Weight: 2-3 points)
-  if (startupStageGroup === "idea" || startupStageGroup === "mvp") {
+  if (startupStage === "idea" || startupStage === "mvp") {
     scores.TabbedUseCases += 3;
     scores.CarouselAvatars += 2;
     scores.PersonaGrid += 2;
-  } else if (startupStageGroup === "traction") {
+  } else if (startupStage === "traction") {
     scores.PersonaGrid += 3;
     scores.ScenarioCards += 2;
     scores.SegmentSplitBlocks += 2;
-  } else if (startupStageGroup === "growth") {
+  } else if (startupStage === "growth") {
     scores.SegmentSplitBlocks += 3;
     scores.IndustryTiles += 2;
     scores.RoleBenefitMatrix += 2;
-  } else if (startupStageGroup === "scale") {
+  } else if (startupStage === "scale") {
     scores.RoleBenefitMatrix += 3;
     scores.IndustryTiles += 2;
     scores.JobToBeDoneList += 2;
@@ -259,20 +259,20 @@ export function pickUseCaseLayout(input: LayoutPickerInput): UseCaseLayout {
   }
 
   // Landing Goal Scoring (Low Weight: 1-2 points)
-  if (landingGoalType === "contact-sales" || landingGoalType === "demo") {
+  if (landingPageGoals === "contact-sales" || landingPageGoals === "demo") {
     scores.RoleBenefitMatrix += 2;
     scores.IndustryTiles += 2;
     scores.JobToBeDoneList += 1;
-  } else if (landingGoalType === "buy-now" || landingGoalType === "subscribe") {
+  } else if (landingPageGoals === "buy-now" || landingPageGoals === "subscribe") {
     scores.SegmentSplitBlocks += 2;
     scores.PersonaGrid += 1;
-  } else if (landingGoalType === "free-trial") {
+  } else if (landingPageGoals === "free-trial") {
     scores.ScenarioCards += 2;
     scores.JobToBeDoneList += 1;
-  } else if (landingGoalType === "signup") {
+  } else if (landingPageGoals === "signup") {
     scores.TabbedUseCases += 2;
     scores.PersonaGrid += 1;
-  } else if (landingGoalType === "join-community" || landingGoalType === "waitlist") {
+  } else if (landingPageGoals === "join-community" || landingPageGoals === "waitlist") {
     scores.CarouselAvatars += 2;
     scores.PersonaGrid += 1;
   }

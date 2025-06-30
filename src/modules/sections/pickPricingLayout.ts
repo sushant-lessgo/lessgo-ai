@@ -16,27 +16,27 @@ export type PricingLayout =
  */
 export function pickPricingLayout(input: LayoutPickerInput): PricingLayout {
   const {
-    awarenessLevel,
-    toneProfile,
-    startupStageGroup,
-    marketCategory,
-    landingGoalType,
-    targetAudienceGroup,
-    pricingModel,
-    pricingModifier,
-    pricingCommitmentOption,
-    marketSophisticationLevel,
-    copyIntent,
-    problemType,
-  } = input;
+  awarenessLevel,
+  toneProfile,
+  startupStage,             // ✅ FIXED
+  marketCategory,
+  landingPageGoals,         // ✅ FIXED  
+  targetAudience,           // ✅ FIXED
+  pricingModel,
+  pricingModifier,
+  pricingCommitmentOption,
+  marketSophisticationLevel,
+  copyIntent,
+  problemType,
+} = input;
 
   // High-Priority Rules (Return immediately if matched)
   
   // 1. Enterprise custom pricing always needs sales contact
   if (
     (pricingModel === "custom-quote" || pricingCommitmentOption === "talk-to-sales") &&
-    (targetAudienceGroup === "enterprise" || targetAudienceGroup === "businesses") &&
-    (landingGoalType === "contact-sales" || landingGoalType === "book-call")
+    (targetAudience === "enterprise" || targetAudience === "businesses") &&
+    (landingPageGoals === "contact-sales" || landingPageGoals === "book-call")
   ) {
     return "CallToQuotePlan";
   }
@@ -53,7 +53,7 @@ export function pickPricingLayout(input: LayoutPickerInput): PricingLayout {
   // 3. Complex feature comparison for sophisticated buyers
   if (
     pricingModel === "tiered" &&
-    targetAudienceGroup === "enterprise" &&
+    targetAudience === "enterprise" &&
     marketSophisticationLevel >= "level-4" &&
     (awarenessLevel === "product-aware" || awarenessLevel === "most-aware")
   ) {
@@ -63,7 +63,7 @@ export function pickPricingLayout(input: LayoutPickerInput): PricingLayout {
   // 4. Segment-specific pricing for diverse audiences
   if (
     marketSophisticationLevel >= "level-3" &&
-    (targetAudienceGroup === "businesses" || targetAudienceGroup === "enterprise") &&
+    (targetAudience === "businesses" || targetAudience === "enterprise") &&
     (marketCategory === "Marketing & Sales Tools" || marketCategory === "Work & Productivity Tools" || marketCategory === "HR & People Operations Tools")
   ) {
     return "SegmentBasedPricing";
@@ -71,8 +71,8 @@ export function pickPricingLayout(input: LayoutPickerInput): PricingLayout {
 
   // 5. Trust-building with social proof for established companies
   if (
-    (startupStageGroup === "growth" || startupStageGroup === "scale") &&
-    (landingGoalType === "buy-now" || landingGoalType === "subscribe") &&
+    (startupStage === "growth" || startupStage === "scale") &&
+    (landingPageGoals === "buy-now" || landingPageGoals === "subscribe") &&
     marketSophisticationLevel >= "level-3"
   ) {
     return "CardWithTestimonial";
@@ -122,49 +122,49 @@ export function pickPricingLayout(input: LayoutPickerInput): PricingLayout {
   }
 
   // Target Audience Scoring (High Weight: 3-4 points)
-  if (targetAudienceGroup === "enterprise") {
+  if (targetAudience === "enterprise") {
     scores.FeatureMatrix += 4;
     scores.CallToQuotePlan += 4;
     scores.SegmentBasedPricing += 4;
     scores.CardWithTestimonial += 3;
-  } else if (targetAudienceGroup === "builders") {
+  } else if (targetAudience === "builders") {
     scores.TierCards += 4;
     scores.SliderPricing += 3;
     scores.MiniStackedCards += 2;
-  } else if (targetAudienceGroup === "businesses") {
+  } else if (targetAudience === "businesses") {
     scores.SegmentBasedPricing += 4;
     scores.TierCards += 4;
     scores.CallToQuotePlan += 3;
     scores.CardWithTestimonial += 2;
-  } else if (targetAudienceGroup === "founders" || targetAudienceGroup === "creators") {
+  } else if (targetAudience === "founders" || targetAudience === "creators") {
     scores.MiniStackedCards += 4;
     scores.TierCards += 3;
     scores.ToggleableMonthlyYearly += 2;
-  } else if (targetAudienceGroup === "marketers") {
+  } else if (targetAudience === "marketers") {
     scores.SegmentBasedPricing += 4;
     scores.TierCards += 3;
     scores.SliderPricing += 2;
   }
 
   // Landing Goal Scoring (High Weight: 3-4 points)
-  if (landingGoalType === "buy-now" || landingGoalType === "subscribe") {
+  if (landingPageGoals === "buy-now" || landingPageGoals === "subscribe") {
     scores.CardWithTestimonial += 4;
     scores.ToggleableMonthlyYearly += 4;
     scores.TierCards += 3;
     scores.MiniStackedCards += 2;
-  } else if (landingGoalType === "contact-sales" || landingGoalType === "book-call") {
+  } else if (landingPageGoals === "contact-sales" || landingPageGoals === "book-call") {
     scores.CallToQuotePlan += 4;
     scores.SegmentBasedPricing += 3;
     scores.FeatureMatrix += 2;
-  } else if (landingGoalType === "free-trial") {
+  } else if (landingPageGoals === "free-trial") {
     scores.TierCards += 4;
     scores.ToggleableMonthlyYearly += 3;
     scores.SliderPricing += 2;
-  } else if (landingGoalType === "demo") {
+  } else if (landingPageGoals === "demo") {
     scores.FeatureMatrix += 4;
     scores.SliderPricing += 3;
     scores.CallToQuotePlan += 2;
-  } else if (landingGoalType === "signup") {
+  } else if (landingPageGoals === "signup") {
     scores.MiniStackedCards += 4;
     scores.TierCards += 3;
   }
@@ -213,19 +213,19 @@ export function pickPricingLayout(input: LayoutPickerInput): PricingLayout {
   }
 
   // Startup Stage Scoring (Medium Weight: 2-3 points)
-  if (startupStageGroup === "idea" || startupStageGroup === "mvp") {
+  if (startupStage === "idea" || startupStage === "mvp") {
     scores.MiniStackedCards += 3;
     scores.TierCards += 2;
     scores.ToggleableMonthlyYearly += 1;
-  } else if (startupStageGroup === "traction") {
+  } else if (startupStage === "traction") {
     scores.TierCards += 3;
     scores.SegmentBasedPricing += 2;
     scores.ToggleableMonthlyYearly += 2;
-  } else if (startupStageGroup === "growth") {
+  } else if (startupStage === "growth") {
     scores.CardWithTestimonial += 3;
     scores.FeatureMatrix += 2;
     scores.SegmentBasedPricing += 2;
-  } else if (startupStageGroup === "scale") {
+  } else if (startupStage === "scale") {
     scores.CallToQuotePlan += 3;
     scores.FeatureMatrix += 2;
     scores.CardWithTestimonial += 2;

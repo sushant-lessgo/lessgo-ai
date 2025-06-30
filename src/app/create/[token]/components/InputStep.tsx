@@ -6,6 +6,7 @@ import posthog from "posthog-js";
 import { useOnboardingStore } from "@/hooks/useOnboardingStore";
 import { autoSaveDraft } from "@/utils/autoSaveDraft";
 import { useParams } from "next/navigation";
+import { DISPLAY_TO_CANONICAL, type CanonicalFieldName } from "@/types/core/index";
 
 // ===== TYPE DEFINITIONS =====
 interface ValidationResult {
@@ -35,19 +36,8 @@ interface InputStepProps {
 }
 
 // ===== FIELD MAPPING =====
-// Maps API display names to internal field names for consistent data structure
-const DISPLAY_TO_INTERNAL_MAPPING: Record<string, string> = {
-  "Market Category": "marketCategory",
-  "Market Subcategory": "marketSubcategory",
-  "Target Audience": "targetAudience",
-  "Key Problem Getting Solved": "keyProblem", 
-  "Startup Stage": "startupStage",
-  "Landing Page Goals": "landingGoal",
-  "Pricing Category and Model": "pricingModel",
-} as const;
-
-// Validate that we have all expected fields
-const EXPECTED_FIELDS = Object.keys(DISPLAY_TO_INTERNAL_MAPPING);
+// ✅ FIXED: Use canonical mappings from types/core/index.ts
+const EXPECTED_DISPLAY_FIELDS = Object.keys(DISPLAY_TO_CANONICAL);
 
 // ===== COMPONENT =====
 export default function InputStep({ onSuccess }: InputStepProps) {
@@ -121,13 +111,13 @@ export default function InputStep({ onSuccess }: InputStepProps) {
       });
 
       // ===== DATA PROCESSING =====
-      const confirmedFields: Record<string, ConfirmedFieldData> = {};
+      const confirmedFields: Record<CanonicalFieldName, ConfirmedFieldData> = {} as Record<CanonicalFieldName, ConfirmedFieldData>;
       
       if (apiResult.data.validated) {
         // Validate API response structure
         const receivedFields = Object.keys(apiResult.data.validated);
-        const missingFields = EXPECTED_FIELDS.filter(field => !receivedFields.includes(field));
-        const unexpectedFields = receivedFields.filter(field => !EXPECTED_FIELDS.includes(field));
+        const missingFields = EXPECTED_DISPLAY_FIELDS.filter(field => !receivedFields.includes(field));
+        const unexpectedFields = receivedFields.filter(field => !EXPECTED_DISPLAY_FIELDS.includes(field));
         
         if (missingFields.length > 0) {
           console.warn('⚠️ Missing expected fields from API:', missingFields);
@@ -137,24 +127,24 @@ export default function InputStep({ onSuccess }: InputStepProps) {
           console.warn('⚠️ Unexpected fields from API:', unexpectedFields);
         }
 
-        // Convert display names to internal names and store data
+        // ✅ FIXED: Convert display names to canonical names using type-safe mapping
         Object.entries(apiResult.data.validated).forEach(([displayFieldName, validationResult]) => {
-          const internalFieldName = DISPLAY_TO_INTERNAL_MAPPING[displayFieldName];
+          const canonicalFieldName = DISPLAY_TO_CANONICAL[displayFieldName as keyof typeof DISPLAY_TO_CANONICAL];
           
-          if (!internalFieldName) {
+          if (!canonicalFieldName) {
             console.warn(`⚠️ Unknown field from API: "${displayFieldName}"`);
             return;
           }
 
           // Only store fields that have values
           if (validationResult.value && validationResult.value.trim()) {
-            confirmedFields[internalFieldName] = {
+            confirmedFields[canonicalFieldName] = {
               value: validationResult.value.trim(),
               confidence: Math.max(0, Math.min(1, validationResult.confidence || 0)), // Clamp 0-1
               alternatives: validationResult.alternatives?.filter(alt => alt && alt.trim()) || [],
             };
 
-            console.log(`📝 Stored ${internalFieldName}: "${validationResult.value}" (confidence: ${validationResult.confidence})`);
+            console.log(`📝 Stored ${canonicalFieldName}: "${validationResult.value}" (confidence: ${validationResult.confidence})`);
           } else {
             console.warn(`⚠️ Skipping empty field: ${displayFieldName}`);
           }
@@ -175,7 +165,7 @@ export default function InputStep({ onSuccess }: InputStepProps) {
           tokenId,
           inputText: input.trim(),
           stepIndex: 0,
-          confirmedFields, // Pass the AI-inferred fields
+          confirmedFields, // Pass the AI-inferred fields with canonical names
           validatedFields: {}, // Start with empty validated fields
         });
         console.log('✅ Auto-save completed');
@@ -319,7 +309,8 @@ export default function InputStep({ onSuccess }: InputStepProps) {
             {JSON.stringify({
               inputLength: input.length,
               hasToken: !!tokenId,
-              expectedFields: EXPECTED_FIELDS,
+              expectedFields: EXPECTED_DISPLAY_FIELDS,
+              canonicalMappings: DISPLAY_TO_CANONICAL,
             }, null, 2)}
           </pre>
         </details>

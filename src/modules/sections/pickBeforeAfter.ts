@@ -16,26 +16,26 @@ export type BeforeAfterLayout =
  */
 export function pickBeforeAfterLayout(input: LayoutPickerInput): BeforeAfterLayout {
   const {
-    awarenessLevel,
-    toneProfile,
-    startupStageGroup,
-    marketCategory,
-    landingGoalType,
-    targetAudienceGroup,
-    pricingModel,
-    pricingModifier,
-    pricingCommitmentOption,
-    marketSophisticationLevel,
-    copyIntent,
-    problemType,
-  } = input;
+  awarenessLevel,
+  toneProfile,
+  startupStage,             // ✅ FIXED
+  marketCategory,
+  landingPageGoals,         // ✅ FIXED  
+  targetAudience,           // ✅ FIXED
+  pricingModel,
+  pricingModifier,
+  pricingCommitmentOption,
+  marketSophisticationLevel,
+  copyIntent,
+  problemType,
+} = input;
 
   // High-Priority Rules (Return immediately if matched)
   
   // 1. Visual/Interactive layouts for product-aware technical audiences
   if (
     awarenessLevel === "product-aware" &&
-    (targetAudienceGroup === "builders" || targetAudienceGroup === "enterprise") &&
+    (targetAudience === "builders" || targetAudience === "enterprise") &&
     (marketCategory === "Engineering & Development Tools" || marketCategory === "AI Tools")
   ) {
     // Technical users appreciate interactive demonstrations
@@ -45,7 +45,7 @@ export function pickBeforeAfterLayout(input: LayoutPickerInput): BeforeAfterLayo
   // 2. Stats-driven layouts for data-focused contexts
   if (
     (problemType === "lost-revenue-or-inefficiency" || problemType === "compliance-or-risk") &&
-    (targetAudienceGroup === "enterprise" || targetAudienceGroup === "businesses") &&
+    (targetAudience === "enterprise" || targetAudience === "businesses") &&
     marketSophisticationLevel >= "level-3"
   ) {
     // Business audiences need quantifiable results
@@ -54,8 +54,8 @@ export function pickBeforeAfterLayout(input: LayoutPickerInput): BeforeAfterLayo
 
   // 3. Journey-based layouts for complex enterprise sales
   if (
-    targetAudienceGroup === "enterprise" &&
-    (landingGoalType === "demo" || landingGoalType === "contact-sales") &&
+    targetAudience === "enterprise" &&
+    (landingPageGoals === "demo" || landingPageGoals === "contact-sales") &&
     marketSophisticationLevel >= "level-4"
   ) {
     // Enterprise needs to see the complete transformation journey
@@ -117,19 +117,19 @@ export function pickBeforeAfterLayout(input: LayoutPickerInput): BeforeAfterLayo
   }
 
   // Target Audience Scoring (Medium Weight: 2-3 points)
-  if (targetAudienceGroup === "enterprise") {
+  if (targetAudience === "enterprise") {
     scores.PersonaJourney += 3;
     scores.StatComparison += 3;
     scores.SplitCard += 2;
-  } else if (targetAudienceGroup === "builders") {
+  } else if (targetAudience === "builders") {
     scores.BeforeAfterSlider += 3;
     scores.VisualStoryline += 2;
     scores.StatComparison += 2;
-  } else if (targetAudienceGroup === "founders" || targetAudienceGroup === "creators") {
+  } else if (targetAudience === "founders" || targetAudience === "creators") {
     scores.StackedTextVisual += 3;
     scores.TextListTransformation += 2;
     scores.SideBySideBlocks += 2;
-  } else if (targetAudienceGroup === "businesses") {
+  } else if (targetAudience === "businesses") {
     scores.StatComparison += 3;
     scores.SplitCard += 2;
     scores.PersonaJourney += 2;
@@ -204,22 +204,22 @@ export function pickBeforeAfterLayout(input: LayoutPickerInput): BeforeAfterLayo
   }
 
   // Startup Stage Scoring (Low Weight: 1-2 points)
-  if (startupStageGroup === "idea" || startupStageGroup === "mvp") {
+  if (startupStage === "idea" || startupStage === "mvp") {
     scores.StackedTextVisual += 2;
     scores.SideBySideBlocks += 1;
-  } else if (startupStageGroup === "traction" || startupStageGroup === "growth") {
+  } else if (startupStage === "traction" || startupStage === "growth") {
     scores.StatComparison += 2;
     scores.PersonaJourney += 1;
-  } else if (startupStageGroup === "scale") {
+  } else if (startupStage === "scale") {
     scores.PersonaJourney += 2;
     scores.StatComparison += 1;
   }
 
   // Landing Goal Scoring (Low Weight: 1 point)
-  if (landingGoalType === "demo" || landingGoalType === "free-trial") {
+  if (landingPageGoals === "demo" || landingPageGoals === "free-trial") {
     scores.BeforeAfterSlider += 1;
     scores.VisualStoryline += 1;
-  } else if (landingGoalType === "buy-now" || landingGoalType === "subscribe") {
+  } else if (landingPageGoals === "buy-now" || landingPageGoals === "subscribe") {
     scores.StatComparison += 1;
     scores.PersonaJourney += 1;
   }

@@ -1,41 +1,36 @@
 import React, { useEffect, useMemo } from 'react';
 import { usePageStore } from '@/hooks/usePageStore';
+import { useOnboardingStore } from '@/hooks/useOnboardingStore';
 import { sectionList } from '@/modules/sections/sectionList';
 import { getComponent } from '@/modules/generatedLanding/componentRegistry';
+import { 
+  generateCompleteBackgroundSystem, 
+  getSectionBackgroundTypeWithContext,
+  assignEnhancedBackgroundsToAllSections
+} from '@/modules/Design/background/backgroundIntegration';
 
-// Font preloading utility
-
-
-// Font preloading utility
+// ... (font loading utility remains the same)
 const loadGoogleFonts = () => {
-  // Check if fonts are already loaded
   if (document.querySelector('#google-fonts-preload')) {
     return;
   }
 
-  // Create font preload link
   const link = document.createElement('link');
   link.id = 'google-fonts-preload';
   link.rel = 'stylesheet';
   link.href = 'https://fonts.googleapis.com/css2?' +
-    // Inter (fallback font)
     'family=Inter:wght@400;500;600;700&' +
-    // Confident Playful fonts
     'family=Bricolage+Grotesque:wght@400;500;600;700&' +
     'family=Poppins:wght@400;500;600;700&' +
     'family=Rubik:wght@400;500;600;700&' +
-    // Minimal Technical fonts  
     'family=Manrope:wght@400;500;600;700&' +
     'family=Sora:wght@400;500;600;700&' +
-    // Bold Persuasive fonts
     'family=Space+Grotesk:wght@400;500;600;700&' +
     'family=Plus+Jakarta+Sans:wght@400;500;600;700&' +
     'family=Outfit:wght@400;500;600;700&' +
     'family=DM+Sans:wght@400;500;600;700&' +
-    // Friendly Helpful fonts
     'family=Open+Sans:wght@400;500;600;700&' +
     'family=Nunito:wght@400;500;600;700&' +
-    // Luxury Expert fonts
     'family=Playfair+Display:wght@400;500;600;700&' +
     'family=DM+Serif+Display:wght@400;500;600;700&' +
     'family=Raleway:wght@400;500;600;700&' +
@@ -44,7 +39,7 @@ const loadGoogleFonts = () => {
   document.head.appendChild(link);
 };
 
-// Types for better type safety
+// ... (types remain the same)
 type SectionBackground = 'neutral' | 'primary-highlight' | 'secondary-highlight' | 'divider-zone';
 
 type OrderedSection = {
@@ -53,9 +48,16 @@ type OrderedSection = {
   background: SectionBackground;
   layout: string;
   data: any;
+  // ✅ NEW: Add alternating info for debugging
+  alternatingInfo?: {
+    intrinsicType: string;
+    previousSection?: string;
+    previousType?: string;
+    wasAlternated: boolean;
+  };
 };
 
-// Fallback component for missing layouts
+// ... (MissingLayoutComponent and backgroundTypeMapping remain the same)
 const MissingLayoutComponent: React.FC<{ sectionId: string; layout: string }> = ({ 
   sectionId, 
   layout 
@@ -85,13 +87,14 @@ const MissingLayoutComponent: React.FC<{ sectionId: string; layout: string }> = 
   );
 };
 
-// Background type mapping from sectionList to component props
 const backgroundTypeMapping: Record<SectionBackground, 'primary' | 'secondary' | 'neutral' | 'divider'> = {
   'primary-highlight': 'primary',
   'secondary-highlight': 'secondary',
   'neutral': 'neutral',
   'divider-zone': 'divider',
 };
+
+
 
 interface LandingPageRendererProps {
   className?: string;
@@ -103,50 +106,168 @@ export default function LandingPageRenderer({ className = '' }: LandingPageRende
     content,
     ui: { mode, errors },
     updateFontsFromTone,
-    getColorTokens 
+    getColorTokens,
+    updateFromBackgroundSystem
   } = usePageStore();
 
-  // Generate color tokens based on current theme
-  const colorTokens = useMemo(() => getColorTokens(), [getColorTokens]);
+  // Get onboarding data for dynamic backgrounds
+  const { validatedFields, hiddenInferredFields } = useOnboardingStore();
+
+  // ✅ Generate dynamic background system (unchanged)
+ const dynamicBackgroundSystem = useMemo(() => {
+  console.log('=== BACKGROUND SYSTEM DEBUG ===');
+  console.log('Raw validatedFields:', validatedFields);
+  console.log('Raw hiddenInferredFields:', hiddenInferredFields);
+  
+  const hasOnboardingData = validatedFields && Object.keys(validatedFields).length > 0;
+  console.log('Has onboarding data:', hasOnboardingData);
+  
+  if (!hasOnboardingData) {
+    console.log('No onboarding data available, using static fallbacks');
+    return null;
+  }
+
+  try {
+    console.log('Step 1: Using data directly with centralized types...');
+    console.log('Step 2: Calling generateCompleteBackgroundSystem...');
+    const backgroundSystem = generateCompleteBackgroundSystem({
+  // Required InputVariables fields with defaults
+  marketCategory: validatedFields.marketCategory || 'Work & Productivity Tools',
+  marketSubcategory: validatedFields.marketSubcategory || 'Project & Task Management',
+  targetAudience: validatedFields.targetAudience || 'early-stage-founders',
+  keyProblem: validatedFields.keyProblem || '',
+  startupStage: validatedFields.startupStage || 'mvp-development',
+  landingPageGoals: validatedFields.landingPageGoals || 'signup',
+  pricingModel: validatedFields.pricingModel || 'freemium',
+  
+  // Optional HiddenInferredFields
+  ...hiddenInferredFields
+});
+    console.log('Step 2 Complete - Generated background system:', backgroundSystem);
+    
+    return backgroundSystem;
+  } catch (error) {
+    console.error('=== BACKGROUND SYSTEM ERROR ===');
+    console.error('Error details:', error);
+    if (error instanceof Error) {
+      console.error('Error stack:', error.stack);
+    }
+    return null;
+  }
+}, [validatedFields, hiddenInferredFields]);
+  // ✅ Sync background system with store theme
+  useEffect(() => {
+    if (dynamicBackgroundSystem) {
+      console.log('🔄 Syncing background system with store theme...');
+      updateFromBackgroundSystem(dynamicBackgroundSystem);
+      console.log('✅ Background system synced with store theme');
+    }
+  }, [dynamicBackgroundSystem, updateFromBackgroundSystem]);
+
+  // ✅ Generate color tokens
+  const colorTokens = useMemo(() => {
+    console.log('🎨 Generating color tokens...');
+    const tokens = getColorTokens();
+    console.log('✅ Color tokens generated:', {
+      accent: tokens.accent,
+      bgSecondary: tokens.bgSecondary,
+      hasSophisticatedSecondary: tokens.bgSecondary?.includes('gradient')
+    });
+    return tokens;
+  }, [getColorTokens]);
 
   // Initialize fonts and load Google Fonts on mount
   useEffect(() => {
-    // Load Google Fonts
     loadGoogleFonts();
-    
-    // Update fonts from tone
     updateFontsFromTone();
   }, [updateFontsFromTone]);
 
-  // Get ordered sections based on sectionList priority
+  // ✅ ENHANCED: Get ordered sections with ALTERNATING background assignment
+  
+  console.log('🔍 LandingPageRenderer Debug:', {
+  sectionsFromStore: sections,
+  sectionsCount: sections?.length,
+  sectionLayoutsFromStore: sectionLayouts,
+  layoutsCount: Object.keys(sectionLayouts || {}).length,
+  sectionLayouts: sectionLayouts
+});
+  
   const orderedSections = useMemo(() => {
     if (!sections || sections.length === 0) {
       return [];
     }
 
-    return sections
-      .map(sectionId => {
-        const sectionMeta = sectionList.find(s => s.id === sectionId);
-        const sectionData = content[sectionId];
-        const layout = sectionLayouts[sectionId] || sectionData?.layout;
-        
-        return {
-          id: sectionId,
-          order: sectionMeta?.order ?? 999,
-          background: (sectionMeta?.background ?? 'neutral') as SectionBackground,
-          layout,
-          data: sectionData
-        };
-      })
-      .filter((section): section is OrderedSection => 
-        section.layout !== undefined && typeof section.layout === 'string'
-      )
-      .sort((a, b) => a.order - b.order);
-  }, [sections, sectionLayouts, content]);
+    console.log('🔄 Processing section backgrounds with ALTERNATING LOGIC:', {
+      hasDynamicSystem: !!dynamicBackgroundSystem,
+      totalSections: sections.length,
+      sectionOrder: sections
+    });
 
-  // Render individual section
+  const processedSections = sections
+  .map(sectionId => {
+    const sectionMeta = sectionList.find(s => s.id === sectionId);
+    const sectionData = content[sectionId];
+    const layout = sectionLayouts[sectionId] || sectionData?.layout;
+    
+    return {
+      id: sectionId,
+      order: sectionMeta?.order ?? 999,
+      layout,
+      data: sectionData,
+      sectionMeta
+    };
+  })
+  .filter((section): section is typeof section & { layout: string } => {
+    return section.layout !== undefined && typeof section.layout === 'string';
+  })
+  .sort((a, b) => a.order - b.order);
+
+    // ✅ NOW APPLY ALTERNATING LOGIC to the sorted sections
+    // ✅ Use batch assignment instead of individual calls
+const allSectionIds = processedSections.map(s => s.id);
+const backgroundAssignments = assignEnhancedBackgroundsToAllSections(allSectionIds, {
+  // Required InputVariables fields with defaults
+  marketCategory: validatedFields.marketCategory || 'Work & Productivity Tools',
+  marketSubcategory: validatedFields.marketSubcategory || 'Project & Task Management',
+  targetAudience: validatedFields.targetAudience || 'early-stage-founders',
+  keyProblem: validatedFields.keyProblem || '',
+  startupStage: validatedFields.startupStage || 'mvp-development',
+  landingPageGoals: validatedFields.landingPageGoals || 'signup',
+  pricingModel: validatedFields.pricingModel || 'freemium',
+  
+  // Optional HiddenInferredFields
+  ...hiddenInferredFields
+});
+
+const finalSections: OrderedSection[] = processedSections
+.filter(section => section.layout !== undefined && typeof section.layout === 'string')
+.map((section, index) => {
+  const { id: sectionId, order, layout, data } = section;
+  
+  const dynamicBackgroundType = backgroundAssignments[sectionId];
+  
+  // Map to SectionBackground format
+  let background: SectionBackground;
+  switch(dynamicBackgroundType) {
+    case 'primary': background = 'primary-highlight'; break;
+    case 'secondary': background = 'secondary-highlight'; break;
+    case 'divider': background = 'divider-zone'; break;
+    default: background = 'neutral';
+  }
+  
+  return { id: sectionId, order, background, layout, data };
+});
+    // ✅ Log the final alternating pattern
+    console.log('🎨 Final alternating background pattern:', 
+      finalSections.map(s => `${s.id}: ${s.background}${s.alternatingInfo?.wasAlternated ? ' (alternated)' : ''}`).join(' → ')
+    );
+
+    return finalSections;
+  }, [sections, sectionLayouts, content, dynamicBackgroundSystem, theme.colors.sectionBackgrounds.secondary]);
+
+  // ✅ Enhanced render section with alternating debug info
   const renderSection = (section: OrderedSection) => {
-    const { id: sectionId, background, layout, data } = section;
+    const { id: sectionId, background, layout, data, alternatingInfo } = section;
     
     // Get the appropriate component from registry
     const LayoutComponent = getComponent(sectionId, layout);
@@ -165,6 +286,27 @@ export default function LandingPageRenderer({ className = '' }: LandingPageRende
 
     // Map background type
     const backgroundType = backgroundTypeMapping[background] || 'neutral';
+
+    // Enhanced background logging
+    if (backgroundType === 'secondary') {
+      console.log(`🎨 Rendering secondary section ${sectionId}:`, {
+        backgroundCSS: theme.colors.sectionBackgrounds.secondary,
+        isFromAccentOptions: theme.colors.sectionBackgrounds.secondary?.includes('gradient'),
+        accentColor: theme.colors.accentColor,
+        baseColor: theme.colors.baseColor,
+        alternatingInfo
+      });
+    }
+
+    // Enhanced logging for alternated sections
+    if (alternatingInfo?.wasAlternated) {
+      console.log(`🔄 Rendering alternated section ${sectionId}:`, {
+        originallyWouldBe: 'secondary',
+        actuallyIs: backgroundType,
+        previousSection: alternatingInfo.previousSection,
+        reason: 'Previous section was secondary, so this became neutral for visual break'
+      });
+    }
 
     // Handle section-specific errors
     const sectionError = errors[sectionId];
@@ -222,7 +364,7 @@ export default function LandingPageRenderer({ className = '' }: LandingPageRende
         );
       }
       
-      return null; // Hide broken sections in preview mode
+      return null;
     }
   };
 
@@ -275,7 +417,7 @@ export default function LandingPageRenderer({ className = '' }: LandingPageRende
         '--font-body': `${theme.typography.bodyFont}, 'Inter', sans-serif`,
       } as React.CSSProperties}
     >
-      {/* Global CSS Variables for Color Tokens */}
+      {/* Enhanced Global CSS Variables for Color Tokens */}
       <style jsx>{`
         .landing-page-renderer {
           --color-accent: ${colorTokens.accent};
@@ -310,23 +452,43 @@ export default function LandingPageRenderer({ className = '' }: LandingPageRende
         }
       `}</style>
 
-      {/* Render all sections in order */}
+      {/* Render all sections with ALTERNATING backgrounds */}
       {orderedSections.map(renderSection)}
 
-      {/* Edit Mode Indicators */}
+      {/* ✅ Enhanced Edit Mode Indicators with Alternating Info */}
       {mode === 'edit' && (
-        <div className="fixed bottom-4 right-4 z-50">
+        <div className="fixed bottom-4 right-4 z-50 space-y-2">
           <div className="bg-blue-600 text-white px-3 py-2 rounded-lg shadow-lg text-sm font-medium">
             ✏️ Edit Mode Active
+          </div>
+          {/* Background System Status */}
+          <div className={`px-3 py-2 rounded-lg shadow-lg text-sm font-medium ${
+            dynamicBackgroundSystem 
+              ? 'bg-green-600 text-white' 
+              : 'bg-yellow-600 text-white'
+          }`}>
+            {dynamicBackgroundSystem ? '🎨 Dynamic Backgrounds' : '🔧 Static Fallback'}
+          </div>
+          {/* Accent System Status */}
+          <div className={`px-3 py-2 rounded-lg shadow-lg text-sm font-medium ${
+            theme.colors.sectionBackgrounds.secondary?.includes('gradient')
+              ? 'bg-purple-600 text-white' 
+              : 'bg-orange-600 text-white'
+          }`}>
+            {theme.colors.sectionBackgrounds.secondary?.includes('gradient') ? '🎯 Accent Integrated' : '⚠️ Basic Secondary'}
+          </div>
+          {/* ✅ NEW: Alternating Logic Status */}
+          <div className="bg-indigo-600 text-white px-3 py-2 rounded-lg shadow-lg text-sm font-medium">
+            🔄 Alternating Logic Active
           </div>
         </div>
       )}
 
-      {/* Development Info (only in edit mode) */}
+      {/* ✅ Enhanced Development Info with Alternating Pattern */}
       {mode === 'edit' && process.env.NODE_ENV === 'development' && (
         <div className="bg-gray-900 text-white p-4 text-xs font-mono">
           <div className="max-w-6xl mx-auto">
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-6 gap-4">
               <div>
                 <div className="text-gray-400">Sections:</div>
                 <div>{sections.length}</div>
@@ -342,6 +504,48 @@ export default function LandingPageRenderer({ className = '' }: LandingPageRende
               <div>
                 <div className="text-gray-400">Mode:</div>
                 <div className="capitalize">{mode}</div>
+              </div>
+              <div>
+                <div className="text-gray-400">Backgrounds:</div>
+                <div className={dynamicBackgroundSystem ? 'text-green-400' : 'text-yellow-400'}>
+                  {dynamicBackgroundSystem ? 'Dynamic' : 'Static'}
+                </div>
+              </div>
+              <div>
+                <div className="text-gray-400">Alternating:</div>
+                <div className="text-indigo-400">Active</div>
+              </div>
+            </div>
+            
+            {/* ✅ NEW: Show alternating pattern */}
+            <div className="mt-2 pt-2 border-t border-gray-700 text-xs">
+              <div className="text-gray-400">Background Pattern:</div>
+              <div className="grid grid-cols-1 gap-1 mt-1">
+                {orderedSections.map((section, index) => (
+                  <div key={section.id} className="flex justify-between">
+                    <span>{section.id}</span>
+                    <span className={`${
+                      section.background === 'secondary-highlight' ? 'text-purple-400' :
+                      section.background === 'primary-highlight' ? 'text-blue-400' :
+                      section.background === 'divider-zone' ? 'text-orange-400' :
+                      'text-gray-400'
+                    }`}>
+                      {section.background}
+                      {section.alternatingInfo?.wasAlternated && (
+                        <span className="text-yellow-400"> (alternated)</span>
+                      )}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+            
+            {/* Show actual color values */}
+            <div className="mt-2 pt-2 border-t border-gray-700 text-xs">
+              <div className="text-gray-400">Color Tokens:</div>
+              <div className="grid grid-cols-2 gap-2 mt-1">
+                <div>CTA: <span className="text-green-400">{colorTokens.ctaBg}</span></div>
+                <div>Secondary BG: <span className="text-purple-400">{colorTokens.bgSecondary}</span></div>
               </div>
             </div>
           </div>

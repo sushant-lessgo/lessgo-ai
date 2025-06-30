@@ -16,25 +16,25 @@ export type PrimaryCTALayout =
  */
 export function pickPrimaryCTALayout(input: LayoutPickerInput): PrimaryCTALayout {
   const {
-    awarenessLevel,
-    toneProfile,
-    startupStageGroup,
-    marketCategory,
-    landingGoalType,
-    targetAudienceGroup,
-    pricingModel,
-    pricingModifier,
-    pricingCommitmentOption,
-    marketSophisticationLevel,
-    copyIntent,
-    problemType,
-  } = input;
+  awarenessLevel,
+  toneProfile,
+  startupStage,             // ✅ FIXED
+  marketCategory,
+  landingPageGoals,         // ✅ FIXED  
+  targetAudience,           // ✅ FIXED
+  pricingModel,
+  pricingModifier,
+  pricingCommitmentOption,
+  marketSophisticationLevel,
+  copyIntent,
+  problemType,
+} = input;
 
   // High-Priority Rules (Return immediately if matched)
   
   // 1. Urgent sales with time-sensitive offers
   if (
-    (landingGoalType === "buy-now" || landingGoalType === "early-access") &&
+    (landingPageGoals === "buy-now" || landingPageGoals === "early-access") &&
     (pricingModifier === "discount" || pricingCommitmentOption === "upfront-payment") &&
     toneProfile === "bold-persuasive"
   ) {
@@ -43,7 +43,7 @@ export function pickPrimaryCTALayout(input: LayoutPickerInput): PrimaryCTALayout
 
   // 2. High-value offers with stacked benefits
   if (
-    (landingGoalType === "buy-now" || landingGoalType === "subscribe") &&
+    (landingPageGoals === "buy-now" || landingPageGoals === "subscribe") &&
     toneProfile === "bold-persuasive" &&
     (pricingModel === "tiered" || pricingModel === "flat-monthly")
   ) {
@@ -53,7 +53,7 @@ export function pickPrimaryCTALayout(input: LayoutPickerInput): PrimaryCTALayout
   // 3. Product demonstration with visual proof
   if (
     (marketCategory === "Design & Creative Tools" || marketCategory === "AI Tools" || marketCategory === "No-Code & Low-Code Platforms") &&
-    (landingGoalType === "demo" || landingGoalType === "free-trial") &&
+    (landingPageGoals === "demo" || landingPageGoals === "free-trial") &&
     (awarenessLevel === "solution-aware" || awarenessLevel === "product-aware")
   ) {
     return "VisualCTAWithMockup";
@@ -61,8 +61,8 @@ export function pickPrimaryCTALayout(input: LayoutPickerInput): PrimaryCTALayout
 
   // 4. Lead generation with form integration
   if (
-    (landingGoalType === "download" || landingGoalType === "waitlist" || landingGoalType === "signup") &&
-    (targetAudienceGroup === "enterprise" || pricingCommitmentOption === "no-card") &&
+    (landingPageGoals === "download" || landingPageGoals === "waitlist" || landingPageGoals === "signup") &&
+    (targetAudience === "enterprise" || pricingCommitmentOption === "no-card") &&
     marketSophisticationLevel >= "level-3"
   ) {
     return "CTAWithFormField";
@@ -70,8 +70,8 @@ export function pickPrimaryCTALayout(input: LayoutPickerInput): PrimaryCTALayout
 
   // 5. Trust-building for established companies
   if (
-    (startupStageGroup === "growth" || startupStageGroup === "scale") &&
-    (landingGoalType === "contact-sales" || landingGoalType === "buy-now") &&
+    (startupStage === "growth" || startupStage === "scale") &&
+    (landingPageGoals === "contact-sales" || landingPageGoals === "buy-now") &&
     marketSophisticationLevel >= "level-3"
   ) {
     return "TestimonialCTACombo";
@@ -91,40 +91,40 @@ export function pickPrimaryCTALayout(input: LayoutPickerInput): PrimaryCTALayout
   };
 
   // Landing Goal Scoring (Highest Weight: 4-5 points)
-  if (landingGoalType === "buy-now") {
+  if (landingPageGoals === "buy-now") {
     scores.ValueStackCTA += 5;
     scores.CountdownLimitedCTA += 4;
     scores.TestimonialCTACombo += 3;
     scores.SideBySideCTA += 2;
-  } else if (landingGoalType === "subscribe") {
+  } else if (landingPageGoals === "subscribe") {
     scores.ValueStackCTA += 5;
     scores.SideBySideCTA += 4;
     scores.TestimonialCTACombo += 3;
-  } else if (landingGoalType === "free-trial") {
+  } else if (landingPageGoals === "free-trial") {
     scores.VisualCTAWithMockup += 5;
     scores.SideBySideCTA += 4;
     scores.CenteredHeadlineCTA += 3;
-  } else if (landingGoalType === "demo") {
+  } else if (landingPageGoals === "demo") {
     scores.VisualCTAWithMockup += 5;
     scores.TestimonialCTACombo += 3;
     scores.SideBySideCTA += 2;
-  } else if (landingGoalType === "contact-sales" || landingGoalType === "book-call") {
+  } else if (landingPageGoals === "contact-sales" || landingPageGoals === "book-call") {
     scores.TestimonialCTACombo += 4;
     scores.CTAWithFormField += 4;
     scores.SideBySideCTA += 3;
-  } else if (landingGoalType === "signup") {
+  } else if (landingPageGoals === "signup") {
     scores.CenteredHeadlineCTA += 4;
     scores.CTAWithFormField += 4;
     scores.CTAWithBadgeRow += 3;
-  } else if (landingGoalType === "download" || landingGoalType === "waitlist") {
+  } else if (landingPageGoals === "download" || landingPageGoals === "waitlist") {
     scores.CTAWithFormField += 5;
     scores.CenteredHeadlineCTA += 3;
     scores.CTAWithBadgeRow += 2;
-  } else if (landingGoalType === "early-access") {
+  } else if (landingPageGoals === "early-access") {
     scores.CountdownLimitedCTA += 5;
     scores.ValueStackCTA += 3;
     scores.CTAWithFormField += 2;
-  } else if (landingGoalType === "join-community") {
+  } else if (landingPageGoals === "join-community") {
     scores.CTAWithBadgeRow += 4;
     scores.CenteredHeadlineCTA += 3;
   }
@@ -156,23 +156,23 @@ export function pickPrimaryCTALayout(input: LayoutPickerInput): PrimaryCTALayout
   }
 
   // Target Audience Scoring (High Weight: 3-4 points)
-  if (targetAudienceGroup === "enterprise") {
+  if (targetAudience === "enterprise") {
     scores.TestimonialCTACombo += 4;
     scores.CTAWithFormField += 4;
     scores.SideBySideCTA += 3;
-  } else if (targetAudienceGroup === "builders") {
+  } else if (targetAudience === "builders") {
     scores.VisualCTAWithMockup += 4;
     scores.SideBySideCTA += 3;
     scores.CenteredHeadlineCTA += 2;
-  } else if (targetAudienceGroup === "businesses") {
+  } else if (targetAudience === "businesses") {
     scores.ValueStackCTA += 4;
     scores.TestimonialCTACombo += 3;
     scores.SideBySideCTA += 2;
-  } else if (targetAudienceGroup === "founders" || targetAudienceGroup === "creators") {
+  } else if (targetAudience === "founders" || targetAudience === "creators") {
     scores.CTAWithBadgeRow += 4;
     scores.CenteredHeadlineCTA += 3;
     scores.VisualCTAWithMockup += 2;
-  } else if (targetAudienceGroup === "marketers") {
+  } else if (targetAudience === "marketers") {
     scores.ValueStackCTA += 4;
     scores.CountdownLimitedCTA += 3;
     scores.SideBySideCTA += 2;
@@ -228,19 +228,19 @@ export function pickPrimaryCTALayout(input: LayoutPickerInput): PrimaryCTALayout
   }
 
   // Startup Stage Scoring (Medium Weight: 2-3 points)
-  if (startupStageGroup === "idea" || startupStageGroup === "mvp") {
+  if (startupStage === "idea" || startupStage === "mvp") {
     scores.CenteredHeadlineCTA += 3;
     scores.CTAWithBadgeRow += 2;
     scores.CTAWithFormField += 2;
-  } else if (startupStageGroup === "traction") {
+  } else if (startupStage === "traction") {
     scores.SideBySideCTA += 3;
     scores.VisualCTAWithMockup += 2;
     scores.CenteredHeadlineCTA += 1;
-  } else if (startupStageGroup === "growth") {
+  } else if (startupStage === "growth") {
     scores.TestimonialCTACombo += 3;
     scores.ValueStackCTA += 2;
     scores.CountdownLimitedCTA += 2;
-  } else if (startupStageGroup === "scale") {
+  } else if (startupStage === "scale") {
     scores.TestimonialCTACombo += 3;
     scores.CTAWithFormField += 2;
     scores.ValueStackCTA += 2;

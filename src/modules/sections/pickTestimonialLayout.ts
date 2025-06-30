@@ -16,27 +16,26 @@ export type TestimonialLayout =
  */
 export function pickTestimonialLayout(input: LayoutPickerInput): TestimonialLayout {
   const {
-    awarenessLevel,
-    toneProfile,
-    startupStageGroup,
-    marketCategory,
-    landingGoalType,
-    targetAudienceGroup,
-    pricingModel,
-    pricingModifier,
-    pricingCommitmentOption,
-    marketSophisticationLevel,
-    copyIntent,
-    problemType,
-  } = input;
-
+  awarenessLevel,
+  toneProfile,
+  startupStage,             // ✅ FIXED
+  marketCategory,
+  landingPageGoals,         // ✅ FIXED  
+  targetAudience,           // ✅ FIXED
+  pricingModel,
+  pricingModifier,
+  pricingCommitmentOption,
+  marketSophisticationLevel,
+  copyIntent,
+  problemType,
+} = input;
   // High-Priority Rules (Return immediately if matched)
   
   // 1. High-touch enterprise sales need video testimonials
   if (
-    targetAudienceGroup === "enterprise" &&
-    (landingGoalType === "contact-sales" || landingGoalType === "demo") &&
-    (startupStageGroup === "growth" || startupStageGroup === "scale") &&
+    targetAudience === "enterprise" &&
+    (landingPageGoals === "contact-sales" || landingPageGoals === "demo") &&
+    (startupStage === "growth" || startupStage === "scale") &&
     marketSophisticationLevel >= "level-4"
   ) {
     return "VideoTestimonials";
@@ -46,7 +45,7 @@ export function pickTestimonialLayout(input: LayoutPickerInput): TestimonialLayo
   if (
     (problemType === "lost-revenue-or-inefficiency" || problemType === "manual-repetition" || problemType === "burnout-or-overload") &&
     copyIntent === "desire-led" &&
-    (startupStageGroup === "traction" || startupStageGroup === "growth")
+    (startupStage === "traction" || startupStage === "growth")
   ) {
     return "BeforeAfterQuote";
   }
@@ -54,7 +53,7 @@ export function pickTestimonialLayout(input: LayoutPickerInput): TestimonialLayo
   // 3. Diverse audience segments need segmented testimonials
   if (
     marketSophisticationLevel >= "level-3" &&
-    (targetAudienceGroup === "businesses" || targetAudienceGroup === "marketers") &&
+    (targetAudience === "businesses" || targetAudience === "marketers") &&
     (awarenessLevel === "solution-aware" || awarenessLevel === "product-aware")
   ) {
     return "SegmentedTestimonials";
@@ -63,7 +62,7 @@ export function pickTestimonialLayout(input: LayoutPickerInput): TestimonialLayo
   // 4. Review-heavy products with rating focus
   if (
     (marketCategory === "Marketing & Sales Tools" || marketCategory === "Design & Creative Tools" || marketCategory === "Work & Productivity Tools") &&
-    (startupStageGroup === "traction" || startupStageGroup === "growth") &&
+    (startupStage === "traction" || startupStage === "growth") &&
     marketSophisticationLevel >= "level-3"
   ) {
     return "RatingCards";
@@ -71,7 +70,7 @@ export function pickTestimonialLayout(input: LayoutPickerInput): TestimonialLayo
 
   // 5. Global/visual appeal for creators and founders
   if (
-    (targetAudienceGroup === "founders" || targetAudienceGroup === "creators") &&
+    (targetAudience === "founders" || targetAudience === "creators") &&
     marketSophisticationLevel <= "level-2" &&
     (toneProfile === "friendly-helpful" || toneProfile === "confident-playful")
   ) {
@@ -92,22 +91,22 @@ export function pickTestimonialLayout(input: LayoutPickerInput): TestimonialLayo
   };
 
   // Startup Stage Scoring (Highest Weight: 4-5 points)
-  if (startupStageGroup === "idea" || startupStageGroup === "mvp") {
+  if (startupStage === "idea" || startupStage === "mvp") {
     scores.PullQuoteStack += 4;
     scores.InteractiveTestimonialMap += 3;
     scores.AvatarCarousel += 3;
     scores.QuoteGrid += 2;
-  } else if (startupStageGroup === "traction") {
+  } else if (startupStage === "traction") {
     scores.QuoteGrid += 4;
     scores.BeforeAfterQuote += 4;
     scores.RatingCards += 3;
     scores.AvatarCarousel += 2;
-  } else if (startupStageGroup === "growth") {
+  } else if (startupStage === "growth") {
     scores.VideoTestimonials += 5;
     scores.SegmentedTestimonials += 4;
     scores.RatingCards += 4;
     scores.BeforeAfterQuote += 3;
-  } else if (startupStageGroup === "scale") {
+  } else if (startupStage === "scale") {
     scores.VideoTestimonials += 5;
     scores.SegmentedTestimonials += 4;
     scores.QuoteGrid += 3;
@@ -115,26 +114,26 @@ export function pickTestimonialLayout(input: LayoutPickerInput): TestimonialLayo
   }
 
   // Target Audience Scoring (High Weight: 3-4 points)
-  if (targetAudienceGroup === "enterprise") {
+  if (targetAudience === "enterprise") {
     scores.VideoTestimonials += 4;
     scores.SegmentedTestimonials += 4;
     scores.QuoteGrid += 3;
     scores.RatingCards += 2;
-  } else if (targetAudienceGroup === "builders") {
+  } else if (targetAudience === "builders") {
     scores.QuoteGrid += 4;
     scores.VideoTestimonials += 3;
     scores.BeforeAfterQuote += 2;
-  } else if (targetAudienceGroup === "businesses") {
+  } else if (targetAudience === "businesses") {
     scores.SegmentedTestimonials += 4;
     scores.RatingCards += 4;
     scores.BeforeAfterQuote += 3;
     scores.VideoTestimonials += 2;
-  } else if (targetAudienceGroup === "founders" || targetAudienceGroup === "creators") {
+  } else if (targetAudience === "founders" || targetAudience === "creators") {
     scores.InteractiveTestimonialMap += 4;
     scores.AvatarCarousel += 4;
     scores.PullQuoteStack += 3;
     scores.BeforeAfterQuote += 2;
-  } else if (targetAudienceGroup === "marketers") {
+  } else if (targetAudience === "marketers") {
     scores.RatingCards += 4;
     scores.SegmentedTestimonials += 3;
     scores.BeforeAfterQuote += 3;
@@ -242,21 +241,21 @@ export function pickTestimonialLayout(input: LayoutPickerInput): TestimonialLayo
   }
 
   // Landing Goal Scoring (Low Weight: 1-2 points)
-  if (landingGoalType === "contact-sales" || landingGoalType === "demo") {
+  if (landingPageGoals === "contact-sales" || landingPageGoals === "demo") {
     scores.VideoTestimonials += 2;
     scores.SegmentedTestimonials += 2;
     scores.QuoteGrid += 1;
-  } else if (landingGoalType === "buy-now" || landingGoalType === "subscribe") {
+  } else if (landingPageGoals === "buy-now" || landingPageGoals === "subscribe") {
     scores.RatingCards += 2;
     scores.BeforeAfterQuote += 2;
     scores.VideoTestimonials += 1;
-  } else if (landingGoalType === "free-trial") {
+  } else if (landingPageGoals === "free-trial") {
     scores.BeforeAfterQuote += 2;
     scores.RatingCards += 1;
-  } else if (landingGoalType === "signup") {
+  } else if (landingPageGoals === "signup") {
     scores.QuoteGrid += 2;
     scores.AvatarCarousel += 1;
-  } else if (landingGoalType === "join-community" || landingGoalType === "waitlist") {
+  } else if (landingPageGoals === "join-community" || landingPageGoals === "waitlist") {
     scores.InteractiveTestimonialMap += 2;
     scores.AvatarCarousel += 1;
   }

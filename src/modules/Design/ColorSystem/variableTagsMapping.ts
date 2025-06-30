@@ -25,7 +25,7 @@ export const variableTagsMapping = {
     "community": ["warm", "friendly", "playful", "medium-contrast", "gradient", "moderate"],
   },
 
-  landingGoalTypes: {
+  landingPageGoals: {
     "waitlist": ["warm", "friendly", "innovative", "medium-contrast", "gradient", "moderate"],
     "early-access": ["split-complementary", "bold", "innovative", "high-contrast", "gradient", "strong"],
     "signup": ["complementary", "trustworthy", "professional", "medium-contrast", "solid", "moderate"],

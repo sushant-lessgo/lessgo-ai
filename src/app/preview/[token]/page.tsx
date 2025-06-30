@@ -8,6 +8,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { SlugModal } from '@/components/SlugModal';
 import posthog from "posthog-js";
 import { StoreDebugPanel } from '@/app/create/[token]/components/StoreDebugPanel';
+import { OnboardingDebugPanel } from '@/app/create/[token]/components/OnboardingDebugPanel';
 
 export default function PreviewPage() {
   const params = useParams();
@@ -65,52 +66,63 @@ export default function PreviewPage() {
   }), [fromEdit, isPublishReady]);
 
   // Initialize preview mode and validate data
-  useEffect(() => {
-    // Set preview mode
-    if (mode !== 'preview') {
-      setMode('preview');
-    }
+  // In your app/preview/[token]/page.tsx file, find the useEffect that contains this comment:
+// "// Initialize preview mode and validate data"
+// Replace that ENTIRE useEffect with this new one:
 
-    // Check if store has data
-    if (sections.length === 0) {
-      // Try to load from API as fallback
-      const loadData = async () => {
-        try {
-          setIsLoading(true);
-          const response = await fetch(`/api/loadDraft?tokenId=${tokenId}`);
-          
-          if (!response.ok) {
-            throw new Error('Failed to load page data');
-          }
+useEffect(() => {
+  // Set preview mode
+  if (mode !== 'preview') {
+    setMode('preview');
+  }
 
-          const data = await response.json();
-          
-          if (!data.content) {
-            throw new Error('No page content found');
-          }
-
-          // If we get here, we need to populate the store with loaded data
-          // This is a fallback case - normally store should already have data
-          console.warn('Store was empty, loaded from API as fallback');
-          
-          // You would need to implement updateFromLoadedData in your store
-          // For now, redirect to edit mode to regenerate
-          // router.push(`/edit/${tokenId}`);
-          return;
-          
-        } catch (err) {
-          console.error('Failed to load page data:', err);
-          setError('Failed to load page data. Please return to the main page and try again.');
-        } finally {
-          setIsLoading(false);
+  // Check if store has data
+  if (sections.length === 0) {
+    // Try to load from API as fallback
+    const loadData = async () => {
+      try {
+        setIsLoading(true);
+        setError(null);
+        
+        console.log('📥 Loading draft data for token:', tokenId);
+        
+        const response = await fetch(`/api/loadDraft?tokenId=${tokenId}`);
+        
+        if (!response.ok) {
+          throw new Error('Failed to load page data');
         }
-      };
 
-      loadData();
-    } else {
-      setIsLoading(false);
-    }
-  }, [sections.length, tokenId, mode, setMode, router]);
+        const data = await response.json();
+        console.log('📦 Received API response:', data);
+        
+        // ✅ NEW: Use the loadFromDraft method
+        const pageStore = usePageStore.getState();
+        await pageStore.loadFromDraft(data);
+        
+        console.log('✅ Successfully loaded draft data into stores');
+        
+      } catch (err) {
+        console.error('Failed to load page data:', err);
+        
+        if (err instanceof Error && err.message.includes('regeneration required')) {
+          // We have onboarding data but no generated page - redirect to edit for regeneration
+          setError('Page needs to be regenerated. Redirecting to edit mode...');
+          setTimeout(() => {
+            router.push(`/edit/${tokenId}`);
+          }, 2000);
+        } else {
+          setError('Failed to load page data. Please return to the main page and try again.');
+        }
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadData();
+  } else {
+    setIsLoading(false);
+  }
+}, [sections.length, tokenId, mode, setMode, router]);
 
 useEffect(() => {
   console.log('Preview mounted with store:', {
@@ -313,6 +325,7 @@ useEffect(() => {
         </div>
       </div>
 {process.env.NODE_ENV === 'development' && <StoreDebugPanel />}
+{process.env.NODE_ENV === 'development' && <OnboardingDebugPanel />}
       {/* Slug Modal */}
       {showSlugModal && (
         <SlugModal

@@ -1,0 +1,349 @@
+// types/content.ts - Core content structure types with taxonomy constraints
+import type { ImageAsset, VideoData, IconData } from './images';
+import type {
+  MarketCategory,
+  MarketSubcategory,
+  TargetAudience,
+  StartupStage,
+  LandingGoalType,
+  PricingModel,
+  AwarenessLevel,
+  CopyIntent,
+  ToneProfile,
+  MarketSophisticationLevel,
+  ProblemType
+} from '@/modules/inference/taxonomy';
+
+/**
+ * ===== CANONICAL INPUT VARIABLES =====
+ */
+
+export interface InputVariables {
+  marketCategory: MarketCategory;
+  marketSubcategory: MarketSubcategory;
+  targetAudience: TargetAudience;
+  keyProblem: string;
+  startupStage: StartupStage;
+  landingPageGoals: LandingGoalType;
+  pricingModel: PricingModel;
+}
+
+export interface HiddenInferredFields {
+  awarenessLevel?: AwarenessLevel;
+  copyIntent?: CopyIntent;
+  toneProfile?: ToneProfile;
+  marketSophisticationLevel?: MarketSophisticationLevel;
+  problemType?: ProblemType;
+}
+
+export interface FeatureItem {
+  feature: string;
+  benefit: string;
+}
+
+/**
+ * ===== CONTENT HIERARCHY =====
+ */
+
+export interface LandingPageContent {
+  id: string;
+  token: string;
+  sections: string[];
+  sectionLayouts: Record<string, string>;
+  content: Record<string, SectionData>;
+  theme: Theme;
+  metadata: PageMetadata;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export type SectionType = 
+  | 'hero' 
+  | 'features' 
+  | 'testimonials' 
+  | 'pricing' 
+  | 'faq' 
+  | 'cta' 
+  | 'problem'
+  | 'results'
+  | 'logos'
+  | 'custom';
+
+export interface SectionData {
+  id: string;
+  layout: string;
+  elements: Record<string, EditableElement>;
+  backgroundType?: BackgroundType;
+  media?: SectionMedia;
+  cta?: SectionCTA;
+  aiMetadata: AiGenerationMetadata;
+  editMetadata: EditMetadata;
+}
+
+export interface EditableElement {
+  content: string | string[] | number | boolean;
+  type: ElementType;
+  isEditable: boolean;
+  editMode: ElementEditMode;
+  validation?: ElementValidation;
+  aiContext?: ElementAiContext;
+  defaultValue?: string | string[];
+  uiProps?: ElementUIProps;
+}
+
+export type ElementType = 
+  | 'text'
+  | 'richtext'
+  | 'headline'
+  | 'subheadline'
+  | 'list'
+  | 'button'
+  | 'image'
+  | 'video'
+  | 'form'
+  | 'icon'
+  | 'number'
+  | 'url'
+  | 'email'
+  | 'phone'
+  | 'custom';
+
+export type ElementEditMode = 
+  | 'inline'
+  | 'modal'
+  | 'sidebar'
+  | 'toolbar'
+  | 'dropdown'
+  | 'readonly';
+
+export type BackgroundType = 'primary' | 'secondary' | 'neutral' | 'divider';
+
+export interface SectionMedia {
+  image?: ImageAsset;
+  video?: VideoData;
+  icon?: IconData;
+  backgroundImage?: ImageAsset;
+}
+
+export interface SectionCTA {
+  label: string;
+  url?: string;
+  variant: 'primary' | 'secondary' | 'outline' | 'ghost';
+  size: 'small' | 'medium' | 'large';
+  trackingId?: string;
+  testVariant?: string;
+}
+
+export interface AiGenerationMetadata {
+  aiGenerated: boolean;
+  lastGenerated?: number;
+  isCustomized: boolean;
+  aiGeneratedElements: string[];
+  originalPrompt?: string;
+  generationContext?: AiGenerationContext;
+  qualityScore?: number;
+  alternatives?: AlternativeContent[];
+}
+
+export interface EditMetadata {
+  isSelected: boolean;
+  isEditing: boolean;
+  lastModified?: number;
+  lastModifiedBy?: string;
+  isDeletable: boolean;
+  isMovable: boolean;
+  isDuplicable: boolean;
+  validationStatus: ValidationStatus;
+  completionPercentage: number;
+}
+
+export interface ElementValidation {
+  required: boolean;
+  minLength?: number;
+  maxLength?: number;
+  pattern?: string;
+  customValidator?: string;
+  errorMessage?: string;
+}
+
+export interface ElementAiContext {
+  generationType: 'creative' | 'factual' | 'persuasive' | 'technical';
+  contextElements: string[];
+  instructions?: string;
+  tone?: string;
+  maxLength?: number;
+  generateVariations: boolean;
+}
+
+export interface ElementUIProps {
+  className?: string;
+  style?: Record<string, string>;
+  placeholder?: string;
+  helpText?: string;
+  icon?: string;
+  showCharacterCount?: boolean;
+  autoFocus?: boolean;
+}
+
+export interface AlternativeContent {
+  content: string | string[];
+  score: number;
+  reasoning: string;
+  generatedAt: number;
+}
+
+export interface ValidationStatus {
+  isValid: boolean;
+  errors: ValidationError[];
+  warnings: ValidationWarning[];
+  missingRequired: string[];
+  lastValidated: number;
+}
+
+export interface ValidationError {
+  elementKey: string;
+  code: string;
+  message: string;
+  severity: 'error' | 'warning' | 'info';
+  suggestion?: string;
+}
+
+export interface ValidationWarning {
+  elementKey: string;
+  code: string;
+  message: string;
+  autoFixable: boolean;
+  suggestion?: string;
+}
+
+export interface AiGenerationContext {
+  inputVariables: InputVariables;
+  hiddenFields: HiddenInferredFields;
+  features: FeatureItem[];
+  sectionType: SectionType;
+  layoutType: string;
+  surroundingContent?: Record<string, any>;
+  userPreferences?: UserPreferences;
+  testVariant?: string;
+}
+
+export interface UserPreferences {
+  tone: string;
+  length: 'short' | 'medium' | 'long';
+  industryPreferences?: Record<string, any>;
+  brandVoice?: string;
+  restrictions?: string[];
+}
+
+export interface PageMetadata {
+  title: string;
+  description?: string;
+  keywords?: string[];
+  ogImage?: string;
+  language: string;
+  isPublished: boolean;
+  publishedAt?: Date;
+  slug: string;
+  canonicalUrl?: string;
+  customMeta?: Record<string, string>;
+}
+
+/**
+ * ===== THEME SYSTEM =====
+ */
+
+export interface Theme {
+  typography: TypographySettings;
+  colors: ColorSystem;
+  spacing: SpacingSystem;
+  corners: CornerSettings;
+  animations: AnimationSettings;
+}
+
+export interface TypographySettings {
+  headingFont: string;
+  bodyFont: string;
+  scale: 'compact' | 'comfortable' | 'spacious';
+  lineHeight: number;
+  letterSpacing?: number;
+  fontWeights: FontWeights;
+}
+
+export interface FontWeights {
+  light: number;
+  normal: number;
+  medium: number;
+  semibold: number;
+  bold: number;
+}
+
+export interface ColorSystem {
+  baseColor: string;
+  accentColor: string;
+  accentCSS?: string;
+  sectionBackgrounds: SectionBackgrounds;
+  semantic: SemanticColors;
+  states: StateColors;
+}
+
+export interface SectionBackgrounds {
+  primary?: string;
+  secondary?: string;
+  neutral?: string;
+  divider?: string;
+}
+
+export interface SemanticColors {
+  success: string;
+  warning: string;
+  error: string;
+  info: string;
+  neutral: string;
+}
+
+export interface StateColors {
+  hover: Record<string, string>;
+  focus: Record<string, string>;
+  active: Record<string, string>;
+  disabled: Record<string, string>;
+}
+
+export interface SpacingSystem {
+  unit: number;
+  scale: number[];
+  presets: SpacingPresets;
+}
+
+export interface SpacingPresets {
+  xs: string;
+  sm: string;
+  md: string;
+  lg: string;
+  xl: string;
+  xxl: string;
+}
+
+export interface CornerSettings {
+  radius: number;
+  scale: {
+    small: number;
+    medium: number;
+    large: number;
+    full: number;
+  };
+}
+
+export interface AnimationSettings {
+  enabled: boolean;
+  duration: {
+    fast: number;
+    medium: number;
+    slow: number;
+  };
+  easing: {
+    easeIn: string;
+    easeOut: string;
+    easeInOut: string;
+  };
+  reducedMotion: boolean;
+}

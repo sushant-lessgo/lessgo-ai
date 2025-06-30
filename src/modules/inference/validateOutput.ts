@@ -1,7 +1,9 @@
-// validateOutput.ts
-import { InferredFields } from './inferFields';
+// modules/inference/validateOutput.ts - ✅ PHASE 4: API Layer Migration Complete
 import { getBestSemanticMatch, findSemanticMatches, SemanticMatch } from '@/lib/embeddings';
 import { taxonomy, marketSubcategories, MarketCategory } from './taxonomy';
+
+// ✅ FIXED: Import canonical types
+import type { InputVariables } from '@/types/core/index';
 
 export interface ValidationResult {
   field: string;
@@ -87,7 +89,8 @@ async function validateField(
   }
 }
 
-export async function validateInferredFields(raw: InferredFields): Promise<Record<string, ValidationResult>> {
+// ✅ FIXED: Accept InputVariables instead of InferredFields and use canonical field names
+export async function validateInferredFields(raw: InputVariables): Promise<Record<string, ValidationResult>> {
   const {
     marketCategory,
     marketSubcategory,
@@ -95,7 +98,7 @@ export async function validateInferredFields(raw: InferredFields): Promise<Recor
     targetAudience,
     startupStage,
     pricingModel,
-    landingGoal,
+    landingPageGoals, // ✅ FIXED: Use canonical field name
   } = raw;
 
   console.log('🔍 Starting semantic validation...');
@@ -115,7 +118,7 @@ export async function validateInferredFields(raw: InferredFields): Promise<Recor
     validateField('targetAudience', targetAudience, 'Target Audience'),
     validateField('startupStage', startupStage, 'Startup Stage'),
     validateField('pricingModel', pricingModel, 'Pricing Category and Model'),
-    validateField('landingGoal', landingGoal, 'Landing Page Goals'),
+    validateField('landingPageGoals', landingPageGoals, 'Landing Page Goals'), // ✅ FIXED: Use canonical field name for semantic matching
   ]);
 
   // Key problem doesn't need semantic matching - it's free text
@@ -131,7 +134,7 @@ export async function validateInferredFields(raw: InferredFields): Promise<Recor
     'Target Audience': audienceResult,
     'Key Problem Getting Solved': problemResult,
     'Startup Stage': stageResult,
-    'Landing Page Goals': goalResult,
+    'Landing Page Goals': goalResult, // ✅ FIXED: Use correct display name
     'Pricing Category and Model': pricingResult,
   };
 

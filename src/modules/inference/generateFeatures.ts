@@ -1,21 +1,10 @@
-// modules/inference/generateFeatures.ts
+// modules/inference/generateFeatures.ts - ✅ PHASE 4: API Layer Migration Complete
 
-type FeatureItem = {
-  feature: string;
-  benefit: string;
-};
+// ✅ FIXED: Import canonical types
+import type { InputVariables, FeatureItem } from '@/types/core/index';
 
-interface InputData {
-  marketCategory: string;
-  marketSubcategory: string;
-  keyProblem: string;
-  targetAudience: string;
-  startupStage: string;
-  pricingModel: string;
-  landingGoal: string;
-}
-
-export async function generateFeatures(inputData: InputData): Promise<FeatureItem[]> {
+// ✅ FIXED: Use InputVariables interface directly (has canonical field names)
+export async function generateFeatures(inputData: InputVariables): Promise<FeatureItem[]> {
   const {
     marketCategory,
     marketSubcategory,
@@ -23,7 +12,7 @@ export async function generateFeatures(inputData: InputData): Promise<FeatureIte
     targetAudience,
     startupStage,
     pricingModel,
-    landingGoal,
+    landingPageGoals, // ✅ FIXED: Use canonical field name
   } = inputData;
 
   // Create the prompt for AI feature generation
@@ -37,7 +26,7 @@ Product Information:
 - Target Audience: ${targetAudience}
 - Startup Stage: ${startupStage}
 - Pricing Model: ${pricingModel}
-- Landing Goal: ${landingGoal}
+- Landing Goal: ${landingPageGoals} 
 
 Please respond with a JSON array in this exact format:
 [
@@ -85,8 +74,8 @@ Generate between 4-6 features that would be most compelling for this specific us
       throw new Error("AI response is not an array");
     }
 
-    // Validate each feature object
-    const validatedFeatures = features.filter(f => 
+    // Validate each feature object against FeatureItem interface
+    const validatedFeatures: FeatureItem[] = features.filter((f: any): f is FeatureItem => 
       f && 
       typeof f.feature === 'string' && 
       typeof f.benefit === 'string' &&

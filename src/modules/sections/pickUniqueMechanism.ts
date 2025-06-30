@@ -16,27 +16,27 @@ export type UniqueMechanismLayout =
  */
 export function pickUniqueMechanismLayout(input: LayoutPickerInput): UniqueMechanismLayout {
   const {
-    awarenessLevel,
-    toneProfile,
-    startupStageGroup,
-    marketCategory,
-    landingGoalType,
-    targetAudienceGroup,
-    pricingModel,
-    pricingModifier,
-    pricingCommitmentOption,
-    marketSophisticationLevel,
-    copyIntent,
-    problemType,
-  } = input;
+  awarenessLevel,
+  toneProfile,
+  startupStage,             // ✅ FIXED
+  marketCategory,
+  landingPageGoals,         // ✅ FIXED  
+  targetAudience,           // ✅ FIXED
+  pricingModel,
+  pricingModifier,
+  pricingCommitmentOption,
+  marketSophisticationLevel,
+  copyIntent,
+  problemType,
+} = input;
 
   // High-Priority Rules (Return immediately if matched)
   
   // 1. Technical products with patent/IP protection
   if (
     (marketCategory === "AI Tools" || marketCategory === "Engineering & Development Tools" || marketCategory === "Data & Analytics Tools") &&
-    (startupStageGroup === "growth" || startupStageGroup === "scale") &&
-    (targetAudienceGroup === "builders" || targetAudienceGroup === "enterprise") &&
+    (startupStage === "growth" || startupStage === "scale") &&
+    (targetAudience === "builders" || targetAudience === "enterprise") &&
     marketSophisticationLevel >= "level-4"
   ) {
     return "PatentStrip";
@@ -45,7 +45,7 @@ export function pickUniqueMechanismLayout(input: LayoutPickerInput): UniqueMecha
   // 2. Complex system/platform products with interconnected components
   if (
     (marketCategory === "Engineering & Development Tools" || marketCategory === "Work & Productivity Tools" || marketCategory === "Data & Analytics Tools") &&
-    (targetAudienceGroup === "builders" || targetAudienceGroup === "enterprise") &&
+    (targetAudience === "builders" || targetAudience === "enterprise") &&
     (awarenessLevel === "solution-aware" || awarenessLevel === "product-aware") &&
     marketSophisticationLevel >= "level-3"
   ) {
@@ -56,7 +56,7 @@ export function pickUniqueMechanismLayout(input: LayoutPickerInput): UniqueMecha
   if (
     marketSophisticationLevel >= "level-4" &&
     (awarenessLevel === "solution-aware" || awarenessLevel === "product-aware") &&
-    (targetAudienceGroup === "enterprise" || targetAudienceGroup === "businesses") &&
+    (targetAudience === "enterprise" || targetAudience === "businesses") &&
     (marketCategory === "Marketing & Sales Tools" || marketCategory === "Work & Productivity Tools")
   ) {
     return "ComparisonTable";
@@ -64,7 +64,7 @@ export function pickUniqueMechanismLayout(input: LayoutPickerInput): UniqueMecha
 
   // 4. Simple, focused products with one clear differentiator
   if (
-    (startupStageGroup === "idea" || startupStageGroup === "mvp") &&
+    (startupStage === "idea" || startupStage === "mvp") &&
     marketSophisticationLevel <= "level-2" &&
     (awarenessLevel === "unaware" || awarenessLevel === "problem-aware")
   ) {
@@ -73,7 +73,7 @@ export function pickUniqueMechanismLayout(input: LayoutPickerInput): UniqueMecha
 
   // 5. Technical products needing detailed explanation
   if (
-    (targetAudienceGroup === "builders" || targetAudienceGroup === "enterprise") &&
+    (targetAudience === "builders" || targetAudience === "enterprise") &&
     (marketCategory === "AI Tools" || marketCategory === "Engineering & Development Tools") &&
     marketSophisticationLevel >= "level-3" &&
     (awarenessLevel === "solution-aware" || awarenessLevel === "product-aware")
@@ -131,27 +131,27 @@ export function pickUniqueMechanismLayout(input: LayoutPickerInput): UniqueMecha
   }
 
   // Target Audience Scoring (High Weight: 3-4 points)
-  if (targetAudienceGroup === "enterprise") {
+  if (targetAudience === "enterprise") {
     scores.ComparisonTable += 4;
     scores.PatentStrip += 4;
     scores.VisualFlywheel += 3;
     scores.ExplainerWithTags += 2;
-  } else if (targetAudienceGroup === "builders") {
+  } else if (targetAudience === "builders") {
     scores.ExplainerWithTags += 4;
     scores.PatentStrip += 3;
     scores.VisualFlywheel += 3;
     scores.ComparisonTable += 2;
-  } else if (targetAudienceGroup === "businesses") {
+  } else if (targetAudience === "businesses") {
     scores.StackedHighlights += 4;
     scores.ComparisonTable += 3;
     scores.PillarIcons += 3;
     scores.VisualFlywheel += 2;
-  } else if (targetAudienceGroup === "founders" || targetAudienceGroup === "creators") {
+  } else if (targetAudience === "founders" || targetAudience === "creators") {
     scores.SingleBigIdea += 4;
     scores.IllustratedModel += 4;
     scores.PillarIcons += 3;
     scores.StackedHighlights += 2;
-  } else if (targetAudienceGroup === "marketers") {
+  } else if (targetAudience === "marketers") {
     scores.StackedHighlights += 4;
     scores.PillarIcons += 3;
     scores.ComparisonTable += 2;
@@ -198,19 +198,19 @@ export function pickUniqueMechanismLayout(input: LayoutPickerInput): UniqueMecha
   }
 
   // Startup Stage Scoring (Medium Weight: 2-3 points)
-  if (startupStageGroup === "idea" || startupStageGroup === "mvp") {
+  if (startupStage === "idea" || startupStage === "mvp") {
     scores.SingleBigIdea += 3;
     scores.IllustratedModel += 3;
     scores.PillarIcons += 2;
-  } else if (startupStageGroup === "traction") {
+  } else if (startupStage === "traction") {
     scores.StackedHighlights += 3;
     scores.PillarIcons += 2;
     scores.VisualFlywheel += 2;
-  } else if (startupStageGroup === "growth") {
+  } else if (startupStage === "growth") {
     scores.ComparisonTable += 3;
     scores.ExplainerWithTags += 2;
     scores.VisualFlywheel += 2;
-  } else if (startupStageGroup === "scale") {
+  } else if (startupStage === "scale") {
     scores.PatentStrip += 3;
     scores.ComparisonTable += 2;
     scores.ExplainerWithTags += 2;
@@ -262,17 +262,17 @@ export function pickUniqueMechanismLayout(input: LayoutPickerInput): UniqueMecha
   }
 
   // Landing Goal Scoring (Low Weight: 1-2 points)
-  if (landingGoalType === "contact-sales" || landingGoalType === "demo") {
+  if (landingPageGoals === "contact-sales" || landingPageGoals === "demo") {
     scores.ComparisonTable += 2;
     scores.PatentStrip += 2;
     scores.ExplainerWithTags += 1;
-  } else if (landingGoalType === "buy-now" || landingGoalType === "subscribe") {
+  } else if (landingPageGoals === "buy-now" || landingPageGoals === "subscribe") {
     scores.StackedHighlights += 2;
     scores.ComparisonTable += 1;
-  } else if (landingGoalType === "free-trial") {
+  } else if (landingPageGoals === "free-trial") {
     scores.VisualFlywheel += 2;
     scores.ExplainerWithTags += 1;
-  } else if (landingGoalType === "signup") {
+  } else if (landingPageGoals === "signup") {
     scores.SingleBigIdea += 2;
     scores.PillarIcons += 1;
   }

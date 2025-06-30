@@ -16,25 +16,25 @@ export type FAQLayout =
  */
 export function pickFAQLayout(input: LayoutPickerInput): FAQLayout {
   const {
-    awarenessLevel,
-    toneProfile,
-    startupStageGroup,
-    marketCategory,
-    landingGoalType,
-    targetAudienceGroup,
-    pricingModel,
-    pricingModifier,
-    pricingCommitmentOption,
-    marketSophisticationLevel,
-    copyIntent,
-    problemType,
-  } = input;
+  awarenessLevel,
+  toneProfile,
+  startupStage,             // ✅ FIXED
+  marketCategory,
+  landingPageGoals,         // ✅ FIXED  
+  targetAudience,           // ✅ FIXED
+  pricingModel,
+  pricingModifier,
+  pricingCommitmentOption,
+  marketSophisticationLevel,
+  copyIntent,
+  problemType,
+} = input;
 
   // High-Priority Rules (Return immediately if matched)
   
   // 1. Enterprise audiences with complex, segmented questions
   if (
-    targetAudienceGroup === "enterprise" &&
+    targetAudience === "enterprise" &&
     marketSophisticationLevel >= "level-4" &&
     (marketCategory === "Engineering & Development Tools" || marketCategory === "Data & Analytics Tools" || marketCategory === "HR & People Operations Tools")
   ) {
@@ -43,7 +43,7 @@ export function pickFAQLayout(input: LayoutPickerInput): FAQLayout {
 
   // 2. Technical audiences needing organized, searchable information
   if (
-    (targetAudienceGroup === "builders" || targetAudienceGroup === "enterprise") &&
+    (targetAudience === "builders" || targetAudience === "enterprise") &&
     marketSophisticationLevel >= "level-3" &&
     (awarenessLevel === "product-aware" || awarenessLevel === "most-aware")
   ) {
@@ -52,8 +52,8 @@ export function pickFAQLayout(input: LayoutPickerInput): FAQLayout {
 
   // 3. Trust-building for established companies with customer proof
   if (
-    (startupStageGroup === "growth" || startupStageGroup === "scale") &&
-    (landingGoalType === "buy-now" || landingGoalType === "subscribe" || landingGoalType === "contact-sales") &&
+    (startupStage === "growth" || startupStage === "scale") &&
+    (landingPageGoals === "buy-now" || landingPageGoals === "subscribe" || landingPageGoals === "contact-sales") &&
     marketSophisticationLevel >= "level-3"
   ) {
     return "TestimonialFAQs";
@@ -61,7 +61,7 @@ export function pickFAQLayout(input: LayoutPickerInput): FAQLayout {
 
   // 4. Casual, approachable tone for creators and founders
   if (
-    (targetAudienceGroup === "creators" || targetAudienceGroup === "founders") &&
+    (targetAudience === "creators" || targetAudience === "founders") &&
     (toneProfile === "friendly-helpful" || toneProfile === "confident-playful") &&
     (awarenessLevel === "unaware" || awarenessLevel === "problem-aware")
   ) {
@@ -71,8 +71,8 @@ export function pickFAQLayout(input: LayoutPickerInput): FAQLayout {
   // 5. Expert positioning with authoritative answers
   if (
     toneProfile === "luxury-expert" &&
-    (startupStageGroup === "growth" || startupStageGroup === "scale") &&
-    (targetAudienceGroup === "enterprise" || targetAudienceGroup === "businesses")
+    (startupStage === "growth" || startupStage === "scale") &&
+    (targetAudience === "enterprise" || targetAudience === "businesses")
   ) {
     return "QuoteStyleAnswers";
   }
@@ -124,24 +124,24 @@ export function pickFAQLayout(input: LayoutPickerInput): FAQLayout {
   }
 
   // Target Audience Scoring (High Weight: 3-4 points)
-  if (targetAudienceGroup === "enterprise") {
+  if (targetAudience === "enterprise") {
     scores.SegmentedFAQTabs += 4;
     scores.TwoColumnFAQ += 4;
     scores.TestimonialFAQs += 3;
     scores.QuoteStyleAnswers += 2;
-  } else if (targetAudienceGroup === "builders") {
+  } else if (targetAudience === "builders") {
     scores.TwoColumnFAQ += 4;
     scores.AccordionFAQ += 3;
     scores.SegmentedFAQTabs += 2;
-  } else if (targetAudienceGroup === "businesses") {
+  } else if (targetAudience === "businesses") {
     scores.TestimonialFAQs += 4;
     scores.AccordionFAQ += 3;
     scores.TwoColumnFAQ += 2;
-  } else if (targetAudienceGroup === "founders" || targetAudienceGroup === "creators") {
+  } else if (targetAudience === "founders" || targetAudience === "creators") {
     scores.ChatBubbleFAQ += 4;
     scores.IconWithAnswers += 3;
     scores.InlineQnAList += 3;
-  } else if (targetAudienceGroup === "marketers") {
+  } else if (targetAudience === "marketers") {
     scores.AccordionFAQ += 4;
     scores.TestimonialFAQs += 3;
     scores.SegmentedFAQTabs += 2;
@@ -183,37 +183,37 @@ export function pickFAQLayout(input: LayoutPickerInput): FAQLayout {
   }
 
   // Startup Stage Scoring (Medium Weight: 2-3 points)
-  if (startupStageGroup === "idea" || startupStageGroup === "mvp") {
+  if (startupStage === "idea" || startupStage === "mvp") {
     scores.InlineQnAList += 3;
     scores.IconWithAnswers += 2;
     scores.ChatBubbleFAQ += 2;
-  } else if (startupStageGroup === "traction") {
+  } else if (startupStage === "traction") {
     scores.AccordionFAQ += 3;
     scores.TwoColumnFAQ += 2;
-  } else if (startupStageGroup === "growth") {
+  } else if (startupStage === "growth") {
     scores.TestimonialFAQs += 3;
     scores.SegmentedFAQTabs += 2;
     scores.QuoteStyleAnswers += 2;
-  } else if (startupStageGroup === "scale") {
+  } else if (startupStage === "scale") {
     scores.SegmentedFAQTabs += 3;
     scores.TestimonialFAQs += 2;
     scores.QuoteStyleAnswers += 2;
   }
 
   // Landing Goal Scoring (Medium Weight: 2-3 points)
-  if (landingGoalType === "buy-now" || landingGoalType === "subscribe") {
+  if (landingPageGoals === "buy-now" || landingPageGoals === "subscribe") {
     scores.TestimonialFAQs += 3;
     scores.QuoteStyleAnswers += 2;
-  } else if (landingGoalType === "free-trial" || landingGoalType === "demo") {
+  } else if (landingPageGoals === "free-trial" || landingPageGoals === "demo") {
     scores.AccordionFAQ += 3;
     scores.TwoColumnFAQ += 2;
-  } else if (landingGoalType === "contact-sales") {
+  } else if (landingPageGoals === "contact-sales") {
     scores.SegmentedFAQTabs += 3;
     scores.TestimonialFAQs += 2;
-  } else if (landingGoalType === "signup" || landingGoalType === "download") {
+  } else if (landingPageGoals === "signup" || landingPageGoals === "download") {
     scores.InlineQnAList += 3;
     scores.IconWithAnswers += 2;
-  } else if (landingGoalType === "waitlist" || landingGoalType === "join-community") {
+  } else if (landingPageGoals === "waitlist" || landingPageGoals === "join-community") {
     scores.ChatBubbleFAQ += 3;
     scores.InlineQnAList += 2;
   }

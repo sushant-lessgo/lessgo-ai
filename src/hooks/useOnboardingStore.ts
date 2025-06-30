@@ -1,69 +1,65 @@
 import { create } from "zustand";
+import type { 
+  InputVariables,
+  HiddenInferredFields,
+  FeatureItem,
+  CanonicalFieldName
+} from "@/types/core/index";
 
-type FeatureItem = {
-  feature: string;
-  benefit: string;
-};
+// ✅ Import as values (not types) for runtime usage
+import { 
+  FIELD_DISPLAY_NAMES,
+  DISPLAY_TO_CANONICAL
+} from "@/types/core/index";
 
+// ✅ PHASE 2A: Type-safe interfaces using canonical types
 interface ConfirmedFieldData {
   value: string;
   confidence: number;
   alternatives?: string[];
 }
 
-type HiddenInferredFields = {
-  awarenessLevel?: string;
-  copyIntent?: string;
-  brandTone?: string;
-  layoutPersona?: string;
-  [key: string]: string | undefined;
-};
-
 type OnboardingStore = {
   oneLiner: string;
-  confirmedFields: Record<string, ConfirmedFieldData>; // AI guesses with confidence
-  validatedFields: Record<string, string>; // User-confirmed final values
-  hiddenInferredFields: HiddenInferredFields;
+  confirmedFields: Partial<Record<CanonicalFieldName, ConfirmedFieldData>>; // ✅ Type-safe with canonical names
+  validatedFields: Partial<InputVariables>; // ✅ Type-safe instead of Record<string, string>
+  hiddenInferredFields: HiddenInferredFields; // ✅ Already properly typed
   stepIndex: number;
-  featuresFromAI: FeatureItem[];
+  featuresFromAI: FeatureItem[]; // ✅ Already properly typed
 
   setOneLiner: (input: string) => void;
-  setConfirmedFields: (fields: Record<string, ConfirmedFieldData>) => void;
-  setValidatedFields: (fields: Record<string, string>) => void;
-  confirmField: (field: string, value: string) => void; // Move from confirmed → validated
+  setConfirmedFields: (fields: Partial<Record<CanonicalFieldName, ConfirmedFieldData>>) => void; // ✅ Type-safe
+  setValidatedFields: (fields: Partial<InputVariables>) => void; // ✅ Type-safe
+  confirmField: (displayField: string, value: string) => void; // Accepts display name, converts internally
   setHiddenInferredFields: (fields: HiddenInferredFields) => void;
   setStepIndex: (index: number) => void;
   setFeaturesFromAI: (features: FeatureItem[]) => void;
-  reopenFieldForEditing: (field: string) => void;
+  reopenFieldForEditing: (canonicalField: CanonicalFieldName) => void; // ✅ Type-safe parameter
   reset: () => void;
 };
 
-// Field name mapping (display name -> internal name)
-const fieldNameMap: Record<string, string> = {
-  "Market Category": "marketCategory",
-  "Market Subcategory": "marketSubcategory", 
-  "Target Audience": "targetAudience",
-  "Key Problem Getting Solved": "keyProblem",
-  "Startup Stage": "startupStage",
-  "Landing Page Goals": "landingGoal",
-  "Pricing Category and Model": "pricingModel",
-};
-
-// Reverse mapping (internal name -> display name)
-const displayNameMap: Record<string, string> = Object.fromEntries(
-  Object.entries(fieldNameMap).map(([display, internal]) => [internal, display])
-);
+// ✅ FIELD ORDER: Using canonical names (matches types/index.ts)
+const CANONICAL_FIELD_ORDER: readonly CanonicalFieldName[] = [
+  'marketCategory',
+  'marketSubcategory',
+  'targetAudience',
+  'keyProblem',
+  'startupStage',
+  'landingPageGoals', // ✅ FIXED: Canonical name (not landingGoal)
+  'pricingModel'
+] as const;
 
 export const useOnboardingStore = create<OnboardingStore>((set, get) => ({
   oneLiner: "",
-  confirmedFields: {}, // AI guesses with confidence
-  validatedFields: {}, // User-confirmed values only
+  confirmedFields: {}, // ✅ Type-safe: Partial<Record<CanonicalFieldName, ConfirmedFieldData>>
+  validatedFields: {}, // ✅ Type-safe: Partial<InputVariables>
   hiddenInferredFields: {},
   stepIndex: 0,
   featuresFromAI: [],
 
   setOneLiner: (input) => set({ oneLiner: input }),
   
+  // ✅ Type-safe setters
   setConfirmedFields: (fields) => {
     console.log('Setting confirmed fields:', fields);
     set({ confirmedFields: fields });
@@ -76,46 +72,49 @@ export const useOnboardingStore = create<OnboardingStore>((set, get) => ({
   
   setHiddenInferredFields: (fields) => set({ hiddenInferredFields: fields }),
 
-  // ✅ CORRECT: Move value from confirmedFields → validatedFields
+  // ✅ FIXED: Move value from confirmedFields → validatedFields using canonical names
   confirmField: (displayField, value) => {
-    const internalField = fieldNameMap[displayField] || displayField;
+    // Convert display name to canonical name using types/index.ts mapping
+    const canonicalField = DISPLAY_TO_CANONICAL[displayField as keyof typeof DISPLAY_TO_CANONICAL];
     
-    console.log(`Confirming field: ${displayField} → ${internalField} = "${value}"`);
+    if (!canonicalField) {
+      console.error(`Unknown display field: "${displayField}". Available fields:`, Object.keys(DISPLAY_TO_CANONICAL));
+      return;
+    }
+    
+    console.log(`Confirming field: ${displayField} → ${canonicalField} = "${value}"`);
     
     set((state) => ({
       validatedFields: {
         ...state.validatedFields,
-        [internalField]: value, // Add to validated fields
+        [canonicalField]: value, // ✅ Add to validated fields with canonical name
       },
     }));
   },
 
-  // ✅ Reopen field for editing
-  reopenFieldForEditing: (internalField) => {
-    const displayField = displayNameMap[internalField];
-    if (displayField) {
-      const fieldOrder = [
-        "Market Category",
-        "Market Subcategory", 
-        "Target Audience",
-        "Key Problem Getting Solved",
-        "Startup Stage",
-        "Landing Page Goals",
-        "Pricing Category and Model",
-      ];
+  // ✅ FIXED: Reopen field for editing using canonical names
+  reopenFieldForEditing: (canonicalField) => {
+    const displayField = FIELD_DISPLAY_NAMES[canonicalField];
+    if (!displayField) {
+      console.error(`Unknown canonical field: "${canonicalField}". Available fields:`, Object.keys(FIELD_DISPLAY_NAMES));
+      return;
+    }
+    
+    const fieldIndex = CANONICAL_FIELD_ORDER.indexOf(canonicalField);
+    if (fieldIndex !== -1) {
+      // Remove from validated fields so user can re-confirm
+      set((state) => {
+        const newValidatedFields = { ...state.validatedFields };
+        delete newValidatedFields[canonicalField];
+        return {
+          validatedFields: newValidatedFields,
+          stepIndex: fieldIndex,
+        };
+      });
       
-      const fieldIndex = fieldOrder.indexOf(displayField);
-      if (fieldIndex !== -1) {
-        // Remove from validated fields so user can re-confirm
-        set((state) => {
-          const newValidatedFields = { ...state.validatedFields };
-          delete newValidatedFields[internalField];
-          return {
-            validatedFields: newValidatedFields,
-            stepIndex: fieldIndex,
-          };
-        });
-      }
+      console.log(`Reopened field "${canonicalField}" for editing at step ${fieldIndex}`);
+    } else {
+      console.error(`Field "${canonicalField}" not found in field order`);
     }
   },
 
@@ -132,3 +131,51 @@ export const useOnboardingStore = create<OnboardingStore>((set, get) => ({
       featuresFromAI: [],
     }),
 }));
+
+// ✅ EXPORT: Helper functions for type-safe field operations
+export const getCanonicalFieldOrder = (): readonly CanonicalFieldName[] => CANONICAL_FIELD_ORDER;
+
+export const getDisplayNameForCanonicalField = (canonicalField: CanonicalFieldName): string => {
+  return FIELD_DISPLAY_NAMES[canonicalField];
+};
+
+export const getCanonicalFieldForDisplayName = (displayField: string): CanonicalFieldName | null => {
+  return DISPLAY_TO_CANONICAL[displayField as keyof typeof DISPLAY_TO_CANONICAL] || null;
+};
+
+// ✅ TYPE GUARD: Validate confirmed fields structure
+export const isValidConfirmedFields = (
+  fields: any
+): fields is Partial<Record<CanonicalFieldName, ConfirmedFieldData>> => {
+  if (typeof fields !== 'object' || fields === null) return false;
+  
+  return Object.entries(fields).every(([key, value]) => {
+    // Check if key is a valid canonical field name
+    if (!CANONICAL_FIELD_ORDER.includes(key as CanonicalFieldName)) return false;
+    
+    // Check if value has correct ConfirmedFieldData structure
+    if (typeof value !== 'object' || value === null) return false;
+    
+    const fieldData = value as any;
+    return (
+      typeof fieldData.value === 'string' &&
+      typeof fieldData.confidence === 'number' &&
+      fieldData.confidence >= 0 &&
+      fieldData.confidence <= 1 &&
+      (fieldData.alternatives === undefined || Array.isArray(fieldData.alternatives))
+    );
+  });
+};
+
+// ✅ DEBUG: Development helper (remove in production)
+if (process.env.NODE_ENV === 'development') {
+  // @ts-ignore - Development debugging
+  window.__onboardingStoreDebug = {
+    getState: () => useOnboardingStore.getState(),
+    getCanonicalFieldOrder,
+    getDisplayNameForCanonicalField,
+    getCanonicalFieldForDisplayName,
+    isValidConfirmedFields,
+    CANONICAL_FIELD_ORDER,
+  };
+}

@@ -24,7 +24,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 3,
       "early-access": 3,
       "signup": 0,
@@ -38,14 +38,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 3,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 3,
       "mvp": 1,
       "traction": 2,
       "growth": 0,
       "scale": 2,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 3,
       "freemium": 2,
       "trial-free": 0,
@@ -56,7 +56,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 0,
       "minimal-technical": 0,
       "bold-persuasive": 0,
@@ -89,7 +89,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 3,
       "early-access": 3,
       "signup": 0,
@@ -103,14 +103,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 3,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 3,
       "mvp": 1,
       "traction": 2,
       "growth": 0,
       "scale": 2,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 3,
       "freemium": 2,
       "trial-free": 0,
@@ -121,7 +121,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 0,
       "minimal-technical": 0,
       "bold-persuasive": 0,
@@ -154,7 +154,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 3,
       "early-access": 3,
       "signup": 0,
@@ -168,14 +168,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 3,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 3,
       "mvp": 1,
       "traction": 2,
       "growth": 0,
       "scale": 2,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 3,
       "freemium": 2,
       "trial-free": 0,
@@ -186,7 +186,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 0,
       "minimal-technical": 0,
       "bold-persuasive": 0,
@@ -219,7 +219,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 3,
       "early-access": 3,
       "signup": 0,
@@ -233,14 +233,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 3,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 3,
       "mvp": 1,
       "traction": 2,
       "growth": 0,
       "scale": 2,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 3,
       "freemium": 2,
       "trial-free": 0,
@@ -251,7 +251,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 0,
       "minimal-technical": 0,
       "bold-persuasive": 0,
@@ -284,7 +284,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 3,
       "early-access": 3,
       "signup": 0,
@@ -298,14 +298,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 3,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 3,
       "mvp": 1,
       "traction": 2,
       "growth": 0,
       "scale": 2,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 3,
       "freemium": 2,
       "trial-free": 0,
@@ -316,7 +316,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 0,
       "minimal-technical": 0,
       "bold-persuasive": 0,
@@ -349,7 +349,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 3,
       "early-access": 3,
       "signup": 0,
@@ -363,14 +363,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 3,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 3,
       "mvp": 1,
       "traction": 2,
       "growth": 0,
       "scale": 2,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 3,
       "freemium": 2,
       "trial-free": 0,
@@ -381,7 +381,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 0,
       "minimal-technical": 0,
       "bold-persuasive": 0,
@@ -414,7 +414,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 3,
       "early-access": 3,
       "signup": 0,
@@ -428,14 +428,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 3,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 3,
       "mvp": 1,
       "traction": 2,
       "growth": 0,
       "scale": 2,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 3,
       "freemium": 2,
       "trial-free": 0,
@@ -446,7 +446,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 0,
       "minimal-technical": 0,
       "bold-persuasive": 0,
@@ -479,7 +479,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 3,
       "early-access": 3,
       "signup": 0,
@@ -493,14 +493,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 3,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 3,
       "mvp": 1,
       "traction": 2,
       "growth": 0,
       "scale": 2,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 3,
       "freemium": 2,
       "trial-free": 0,
@@ -511,7 +511,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 0,
       "minimal-technical": 0,
       "bold-persuasive": 0,
@@ -544,7 +544,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 3,
       "early-access": 3,
       "signup": 0,
@@ -558,14 +558,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 3,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 3,
       "mvp": 1,
       "traction": 2,
       "growth": 0,
       "scale": 2,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 3,
       "freemium": 2,
       "trial-free": 0,
@@ -576,7 +576,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 0,
       "minimal-technical": 0,
       "bold-persuasive": 0,
@@ -609,7 +609,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 3,
       "early-access": 3,
       "signup": 0,
@@ -623,14 +623,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 3,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 3,
       "mvp": 1,
       "traction": 2,
       "growth": 0,
       "scale": 2,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 3,
       "freemium": 2,
       "trial-free": 0,
@@ -641,7 +641,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 0,
       "minimal-technical": 0,
       "bold-persuasive": 0,
@@ -674,7 +674,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 3,
       "early-access": 3,
       "signup": 0,
@@ -688,14 +688,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 3,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 3,
       "mvp": 1,
       "traction": 2,
       "growth": 0,
       "scale": 2,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 3,
       "freemium": 2,
       "trial-free": 0,
@@ -706,7 +706,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 0,
       "minimal-technical": 0,
       "bold-persuasive": 0,
@@ -739,7 +739,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 3,
       "early-access": 3,
       "signup": 0,
@@ -753,14 +753,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 3,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 3,
       "mvp": 1,
       "traction": 2,
       "growth": 0,
       "scale": 2,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 3,
       "freemium": 2,
       "trial-free": 0,
@@ -771,7 +771,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 0,
       "minimal-technical": 0,
       "bold-persuasive": 0,
@@ -804,7 +804,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 3,
       "early-access": 3,
       "signup": 0,
@@ -818,14 +818,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 3,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 3,
       "mvp": 1,
       "traction": 2,
       "growth": 0,
       "scale": 2,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 3,
       "freemium": 2,
       "trial-free": 0,
@@ -836,7 +836,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 0,
       "minimal-technical": 0,
       "bold-persuasive": 0,
@@ -869,7 +869,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 3,
       "early-access": 3,
       "signup": 0,
@@ -883,14 +883,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 3,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 3,
       "mvp": 1,
       "traction": 2,
       "growth": 0,
       "scale": 2,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 3,
       "freemium": 2,
       "trial-free": 0,
@@ -901,7 +901,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 0,
       "minimal-technical": 0,
       "bold-persuasive": 0,
@@ -934,7 +934,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 3,
       "early-access": 3,
       "signup": 0,
@@ -948,14 +948,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 3,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 3,
       "mvp": 1,
       "traction": 2,
       "growth": 0,
       "scale": 2,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 3,
       "freemium": 2,
       "trial-free": 0,
@@ -966,7 +966,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 0,
       "minimal-technical": 0,
       "bold-persuasive": 0,
@@ -999,7 +999,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 3,
       "early-access": 3,
       "signup": 0,
@@ -1013,14 +1013,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 3,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 3,
       "mvp": 1,
       "traction": 2,
       "growth": 0,
       "scale": 2,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 3,
       "freemium": 2,
       "trial-free": 0,
@@ -1031,7 +1031,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 0,
       "minimal-technical": 0,
       "bold-persuasive": 0,
@@ -1064,7 +1064,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 3,
       "early-access": 3,
       "signup": 0,
@@ -1078,14 +1078,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 3,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 3,
       "mvp": 1,
       "traction": 2,
       "growth": 0,
       "scale": 2,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 3,
       "freemium": 2,
       "trial-free": 0,
@@ -1096,7 +1096,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 0,
       "minimal-technical": 0,
       "bold-persuasive": 0,
@@ -1129,7 +1129,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 3,
       "early-access": 3,
       "signup": 0,
@@ -1143,14 +1143,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 3,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 3,
       "mvp": 1,
       "traction": 2,
       "growth": 0,
       "scale": 2,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 3,
       "freemium": 2,
       "trial-free": 0,
@@ -1161,7 +1161,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 0,
       "minimal-technical": 0,
       "bold-persuasive": 0,
@@ -1194,7 +1194,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 3,
       "early-access": 3,
       "signup": 0,
@@ -1208,14 +1208,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 3,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 3,
       "mvp": 1,
       "traction": 2,
       "growth": 0,
       "scale": 2,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 3,
       "freemium": 2,
       "trial-free": 0,
@@ -1226,7 +1226,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 0,
       "minimal-technical": 0,
       "bold-persuasive": 0,
@@ -1259,7 +1259,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 3,
       "early-access": 3,
       "signup": 0,
@@ -1273,14 +1273,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 3,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 3,
       "mvp": 1,
       "traction": 2,
       "growth": 0,
       "scale": 2,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 3,
       "freemium": 2,
       "trial-free": 0,
@@ -1291,7 +1291,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 0,
       "minimal-technical": 0,
       "bold-persuasive": 0,
@@ -1324,7 +1324,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 3,
       "early-access": 3,
       "signup": 0,
@@ -1338,14 +1338,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 3,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 3,
       "mvp": 1,
       "traction": 2,
       "growth": 0,
       "scale": 2,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 3,
       "freemium": 2,
       "trial-free": 0,
@@ -1356,7 +1356,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 0,
       "minimal-technical": 0,
       "bold-persuasive": 0,
@@ -1389,7 +1389,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 3,
       "early-access": 3,
       "signup": 0,
@@ -1403,14 +1403,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 3,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 3,
       "mvp": 1,
       "traction": 2,
       "growth": 0,
       "scale": 2,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 3,
       "freemium": 2,
       "trial-free": 0,
@@ -1421,7 +1421,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 0,
       "minimal-technical": 0,
       "bold-persuasive": 0,
@@ -1454,7 +1454,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 3,
       "early-access": 3,
       "signup": 0,
@@ -1468,14 +1468,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 3,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 3,
       "mvp": 1,
       "traction": 2,
       "growth": 0,
       "scale": 2,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 3,
       "freemium": 2,
       "trial-free": 0,
@@ -1486,7 +1486,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 0,
       "minimal-technical": 0,
       "bold-persuasive": 0,
@@ -1519,7 +1519,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 3,
       "early-access": 3,
       "signup": 0,
@@ -1533,14 +1533,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 3,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 3,
       "mvp": 1,
       "traction": 2,
       "growth": 0,
       "scale": 2,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 3,
       "freemium": 2,
       "trial-free": 0,
@@ -1551,7 +1551,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 0,
       "minimal-technical": 0,
       "bold-persuasive": 0,
@@ -1584,7 +1584,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 3,
       "early-access": 3,
       "signup": 0,
@@ -1598,14 +1598,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 3,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 3,
       "mvp": 1,
       "traction": 2,
       "growth": 0,
       "scale": 2,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 3,
       "freemium": 2,
       "trial-free": 0,
@@ -1616,7 +1616,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 0,
       "minimal-technical": 0,
       "bold-persuasive": 0,
@@ -1649,7 +1649,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 3,
       "early-access": 3,
       "signup": 0,
@@ -1663,14 +1663,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 3,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 3,
       "mvp": 1,
       "traction": 2,
       "growth": 0,
       "scale": 2,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 3,
       "freemium": 2,
       "trial-free": 0,
@@ -1681,7 +1681,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 0,
       "minimal-technical": 0,
       "bold-persuasive": 0,
@@ -1714,7 +1714,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 3,
       "early-access": 3,
       "signup": 0,
@@ -1728,14 +1728,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 3,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 3,
       "mvp": 1,
       "traction": 2,
       "growth": 0,
       "scale": 2,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 3,
       "freemium": 2,
       "trial-free": 0,
@@ -1746,7 +1746,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 0,
       "minimal-technical": 0,
       "bold-persuasive": 0,
@@ -1779,7 +1779,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 3,
       "early-access": 3,
       "signup": 0,
@@ -1793,14 +1793,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 3,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 3,
       "mvp": 1,
       "traction": 2,
       "growth": 0,
       "scale": 2,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 3,
       "freemium": 2,
       "trial-free": 0,
@@ -1811,7 +1811,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 0,
       "minimal-technical": 0,
       "bold-persuasive": 0,
@@ -1844,7 +1844,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 3,
       "early-access": 3,
       "signup": 0,
@@ -1858,14 +1858,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 3,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 3,
       "mvp": 1,
       "traction": 2,
       "growth": 0,
       "scale": 2,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 3,
       "freemium": 2,
       "trial-free": 0,
@@ -1876,7 +1876,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 0,
       "minimal-technical": 0,
       "bold-persuasive": 0,
@@ -1909,7 +1909,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 3,
       "early-access": 3,
       "signup": 0,
@@ -1923,14 +1923,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 3,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 3,
       "mvp": 1,
       "traction": 2,
       "growth": 0,
       "scale": 2,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 3,
       "freemium": 2,
       "trial-free": 0,
@@ -1941,7 +1941,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 0,
       "minimal-technical": 0,
       "bold-persuasive": 0,
@@ -1974,7 +1974,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 3,
       "early-access": 3,
       "signup": 0,
@@ -1988,14 +1988,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 3,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 3,
       "mvp": 1,
       "traction": 2,
       "growth": 0,
       "scale": 2,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 3,
       "freemium": 2,
       "trial-free": 0,
@@ -2006,7 +2006,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 0,
       "minimal-technical": 0,
       "bold-persuasive": 0,
@@ -2039,7 +2039,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 3,
       "early-access": 3,
       "signup": 0,
@@ -2053,14 +2053,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 3,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 3,
       "mvp": 1,
       "traction": 2,
       "growth": 0,
       "scale": 2,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 3,
       "freemium": 2,
       "trial-free": 0,
@@ -2071,7 +2071,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 0,
       "minimal-technical": 0,
       "bold-persuasive": 0,
@@ -2104,7 +2104,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 3,
       "early-access": 3,
       "signup": 0,
@@ -2118,14 +2118,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 3,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 3,
       "mvp": 1,
       "traction": 2,
       "growth": 0,
       "scale": 2,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 3,
       "freemium": 2,
       "trial-free": 0,
@@ -2136,7 +2136,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 0,
       "minimal-technical": 0,
       "bold-persuasive": 0,
@@ -2169,7 +2169,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 3,
       "early-access": 3,
       "signup": 0,
@@ -2183,14 +2183,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 3,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 3,
       "mvp": 1,
       "traction": 2,
       "growth": 0,
       "scale": 2,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 3,
       "freemium": 2,
       "trial-free": 0,
@@ -2201,7 +2201,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 0,
       "minimal-technical": 0,
       "bold-persuasive": 0,
@@ -2234,7 +2234,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 3,
       "early-access": 3,
       "signup": 0,
@@ -2248,14 +2248,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 3,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 3,
       "mvp": 1,
       "traction": 2,
       "growth": 0,
       "scale": 2,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 3,
       "freemium": 2,
       "trial-free": 0,
@@ -2266,7 +2266,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 0,
       "minimal-technical": 0,
       "bold-persuasive": 0,
@@ -2299,7 +2299,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 3,
       "early-access": 3,
       "signup": 0,
@@ -2313,14 +2313,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 3,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 3,
       "mvp": 1,
       "traction": 2,
       "growth": 0,
       "scale": 2,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 3,
       "freemium": 2,
       "trial-free": 0,
@@ -2331,7 +2331,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 0,
       "minimal-technical": 0,
       "bold-persuasive": 0,
@@ -2364,7 +2364,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 3,
       "early-access": 3,
       "signup": 0,
@@ -2378,14 +2378,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 3,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 3,
       "mvp": 1,
       "traction": 2,
       "growth": 0,
       "scale": 2,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 3,
       "freemium": 2,
       "trial-free": 0,
@@ -2396,7 +2396,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 0,
       "minimal-technical": 0,
       "bold-persuasive": 0,
@@ -2429,7 +2429,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 3,
       "early-access": 3,
       "signup": 0,
@@ -2443,14 +2443,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 3,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 3,
       "mvp": 1,
       "traction": 2,
       "growth": 0,
       "scale": 2,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 3,
       "freemium": 2,
       "trial-free": 0,
@@ -2461,7 +2461,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 0,
       "minimal-technical": 0,
       "bold-persuasive": 0,
@@ -2494,7 +2494,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 3,
       "early-access": 3,
       "signup": 0,
@@ -2508,14 +2508,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 3,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 3,
       "mvp": 1,
       "traction": 2,
       "growth": 0,
       "scale": 2,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 3,
       "freemium": 2,
       "trial-free": 0,
@@ -2526,7 +2526,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 0,
       "minimal-technical": 0,
       "bold-persuasive": 0,
@@ -2559,7 +2559,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 3,
       "early-access": 3,
       "signup": 0,
@@ -2573,14 +2573,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 3,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 3,
       "mvp": 1,
       "traction": 2,
       "growth": 0,
       "scale": 2,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 3,
       "freemium": 2,
       "trial-free": 0,
@@ -2591,7 +2591,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 0,
       "minimal-technical": 0,
       "bold-persuasive": 0,
@@ -2624,7 +2624,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 3,
       "early-access": 3,
       "signup": 0,
@@ -2638,14 +2638,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 3,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 3,
       "mvp": 1,
       "traction": 2,
       "growth": 0,
       "scale": 2,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 3,
       "freemium": 2,
       "trial-free": 0,
@@ -2656,7 +2656,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 0,
       "minimal-technical": 0,
       "bold-persuasive": 0,
@@ -2689,7 +2689,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 3,
       "early-access": 3,
       "signup": 0,
@@ -2703,14 +2703,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 3,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 3,
       "mvp": 1,
       "traction": 2,
       "growth": 0,
       "scale": 2,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 3,
       "freemium": 2,
       "trial-free": 0,
@@ -2721,7 +2721,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 0,
       "minimal-technical": 0,
       "bold-persuasive": 0,
@@ -2754,7 +2754,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 3,
       "early-access": 3,
       "signup": 0,
@@ -2768,14 +2768,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 3,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 3,
       "mvp": 1,
       "traction": 2,
       "growth": 0,
       "scale": 2,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 3,
       "freemium": 2,
       "trial-free": 0,
@@ -2786,7 +2786,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 0,
       "minimal-technical": 0,
       "bold-persuasive": 0,
@@ -2819,7 +2819,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 3,
       "early-access": 3,
       "signup": 0,
@@ -2833,14 +2833,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 3,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 3,
       "mvp": 1,
       "traction": 2,
       "growth": 0,
       "scale": 2,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 3,
       "freemium": 2,
       "trial-free": 0,
@@ -2851,7 +2851,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 0,
       "minimal-technical": 0,
       "bold-persuasive": 0,
@@ -2884,7 +2884,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 3,
       "early-access": 3,
       "signup": 0,
@@ -2898,14 +2898,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 3,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 3,
       "mvp": 1,
       "traction": 2,
       "growth": 0,
       "scale": 2,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 3,
       "freemium": 2,
       "trial-free": 0,
@@ -2916,7 +2916,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 0,
       "minimal-technical": 0,
       "bold-persuasive": 0,
@@ -2949,7 +2949,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 3,
       "early-access": 3,
       "signup": 0,
@@ -2963,14 +2963,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 3,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 3,
       "mvp": 1,
       "traction": 2,
       "growth": 0,
       "scale": 2,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 3,
       "freemium": 2,
       "trial-free": 0,
@@ -2981,7 +2981,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 0,
       "minimal-technical": 0,
       "bold-persuasive": 0,
@@ -3014,7 +3014,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 3,
       "early-access": 3,
       "signup": 0,
@@ -3028,14 +3028,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 3,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 3,
       "mvp": 1,
       "traction": 2,
       "growth": 0,
       "scale": 2,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 3,
       "freemium": 2,
       "trial-free": 0,
@@ -3046,7 +3046,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 0,
       "minimal-technical": 0,
       "bold-persuasive": 0,
@@ -3079,7 +3079,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 3,
       "early-access": 3,
       "signup": 0,
@@ -3093,14 +3093,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 3,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 3,
       "mvp": 1,
       "traction": 2,
       "growth": 0,
       "scale": 2,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 3,
       "freemium": 2,
       "trial-free": 0,
@@ -3111,7 +3111,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 0,
       "minimal-technical": 0,
       "bold-persuasive": 0,
@@ -3144,7 +3144,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 3,
       "early-access": 3,
       "signup": 0,
@@ -3158,14 +3158,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 3,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 3,
       "mvp": 1,
       "traction": 2,
       "growth": 0,
       "scale": 2,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 3,
       "freemium": 2,
       "trial-free": 0,
@@ -3176,7 +3176,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 0,
       "minimal-technical": 0,
       "bold-persuasive": 0,
@@ -3209,7 +3209,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 3,
       "early-access": 3,
       "signup": 0,
@@ -3223,14 +3223,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 3,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 3,
       "mvp": 1,
       "traction": 2,
       "growth": 0,
       "scale": 2,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 3,
       "freemium": 2,
       "trial-free": 0,
@@ -3241,7 +3241,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 0,
       "minimal-technical": 0,
       "bold-persuasive": 0,
@@ -3274,7 +3274,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 3,
       "early-access": 3,
       "signup": 0,
@@ -3288,14 +3288,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 3,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 3,
       "mvp": 1,
       "traction": 2,
       "growth": 0,
       "scale": 2,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 3,
       "freemium": 2,
       "trial-free": 0,
@@ -3306,7 +3306,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 0,
       "minimal-technical": 0,
       "bold-persuasive": 0,
@@ -3339,7 +3339,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 1,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 3,
       "early-access": 3,
       "signup": 0,
@@ -3353,14 +3353,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 3,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 3,
       "mvp": 2,
       "traction": 0,
       "growth": 1,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 2,
       "freemium": 3,
       "trial-free": 0,
@@ -3371,7 +3371,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 0,
       "minimal-technical": 1,
       "bold-persuasive": 2,
@@ -3404,7 +3404,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 1,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 3,
       "early-access": 3,
       "signup": 0,
@@ -3418,14 +3418,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 3,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 3,
       "mvp": 2,
       "traction": 0,
       "growth": 1,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 2,
       "freemium": 3,
       "trial-free": 0,
@@ -3436,7 +3436,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 0,
       "minimal-technical": 1,
       "bold-persuasive": 2,
@@ -3469,7 +3469,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 1,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 3,
       "early-access": 3,
       "signup": 0,
@@ -3483,14 +3483,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 3,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 3,
       "mvp": 2,
       "traction": 0,
       "growth": 1,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 2,
       "freemium": 3,
       "trial-free": 0,
@@ -3501,7 +3501,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 0,
       "minimal-technical": 1,
       "bold-persuasive": 2,
@@ -3534,7 +3534,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 1,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 3,
       "early-access": 3,
       "signup": 0,
@@ -3548,14 +3548,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 3,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 3,
       "mvp": 2,
       "traction": 0,
       "growth": 1,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 2,
       "freemium": 3,
       "trial-free": 0,
@@ -3566,7 +3566,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 0,
       "minimal-technical": 1,
       "bold-persuasive": 2,
@@ -3599,7 +3599,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 1,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 3,
       "early-access": 3,
       "signup": 0,
@@ -3613,14 +3613,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 3,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 3,
       "mvp": 2,
       "traction": 0,
       "growth": 1,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 2,
       "freemium": 3,
       "trial-free": 0,
@@ -3631,7 +3631,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 0,
       "minimal-technical": 1,
       "bold-persuasive": 2,
@@ -3664,7 +3664,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 1,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 3,
       "early-access": 3,
       "signup": 0,
@@ -3678,14 +3678,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 3,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 3,
       "mvp": 2,
       "traction": 0,
       "growth": 1,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 2,
       "freemium": 3,
       "trial-free": 0,
@@ -3696,7 +3696,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 0,
       "minimal-technical": 1,
       "bold-persuasive": 2,
@@ -3729,7 +3729,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 1,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 3,
       "early-access": 3,
       "signup": 0,
@@ -3743,14 +3743,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 3,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 3,
       "mvp": 2,
       "traction": 0,
       "growth": 1,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 2,
       "freemium": 3,
       "trial-free": 0,
@@ -3761,7 +3761,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 0,
       "minimal-technical": 1,
       "bold-persuasive": 2,
@@ -3794,7 +3794,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 1,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 3,
       "early-access": 3,
       "signup": 0,
@@ -3808,14 +3808,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 3,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 3,
       "mvp": 2,
       "traction": 0,
       "growth": 1,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 2,
       "freemium": 3,
       "trial-free": 0,
@@ -3826,7 +3826,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 0,
       "minimal-technical": 1,
       "bold-persuasive": 2,
@@ -3859,7 +3859,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 1,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 3,
       "early-access": 3,
       "signup": 0,
@@ -3873,14 +3873,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 3,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 3,
       "mvp": 2,
       "traction": 0,
       "growth": 1,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 2,
       "freemium": 3,
       "trial-free": 0,
@@ -3891,7 +3891,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 0,
       "minimal-technical": 1,
       "bold-persuasive": 2,
@@ -3924,7 +3924,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 1,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 3,
       "early-access": 3,
       "signup": 0,
@@ -3938,14 +3938,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 3,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 3,
       "mvp": 2,
       "traction": 0,
       "growth": 1,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 2,
       "freemium": 3,
       "trial-free": 0,
@@ -3956,7 +3956,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 0,
       "minimal-technical": 1,
       "bold-persuasive": 2,
@@ -3989,7 +3989,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 1,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 3,
       "early-access": 3,
       "signup": 0,
@@ -4003,14 +4003,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 3,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 3,
       "mvp": 2,
       "traction": 0,
       "growth": 1,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 2,
       "freemium": 3,
       "trial-free": 0,
@@ -4021,7 +4021,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 0,
       "minimal-technical": 1,
       "bold-persuasive": 2,
@@ -4054,7 +4054,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 1,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 3,
       "early-access": 3,
       "signup": 0,
@@ -4068,14 +4068,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 3,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 3,
       "mvp": 2,
       "traction": 0,
       "growth": 1,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 2,
       "freemium": 3,
       "trial-free": 0,
@@ -4086,7 +4086,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 0,
       "minimal-technical": 1,
       "bold-persuasive": 2,
@@ -4119,7 +4119,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 1,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 3,
       "early-access": 3,
       "signup": 0,
@@ -4133,14 +4133,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 3,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 3,
       "mvp": 2,
       "traction": 0,
       "growth": 1,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 2,
       "freemium": 3,
       "trial-free": 0,
@@ -4151,7 +4151,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 0,
       "minimal-technical": 1,
       "bold-persuasive": 2,
@@ -4184,7 +4184,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 1,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 3,
       "early-access": 3,
       "signup": 0,
@@ -4198,14 +4198,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 3,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 3,
       "mvp": 2,
       "traction": 0,
       "growth": 1,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 2,
       "freemium": 3,
       "trial-free": 0,
@@ -4216,7 +4216,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 0,
       "minimal-technical": 1,
       "bold-persuasive": 2,
@@ -4249,7 +4249,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 1,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 3,
       "early-access": 3,
       "signup": 0,
@@ -4263,14 +4263,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 3,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 3,
       "mvp": 2,
       "traction": 0,
       "growth": 1,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 2,
       "freemium": 3,
       "trial-free": 0,
@@ -4281,7 +4281,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 0,
       "minimal-technical": 1,
       "bold-persuasive": 2,
@@ -4314,7 +4314,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 1,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 3,
       "early-access": 3,
       "signup": 0,
@@ -4328,14 +4328,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 3,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 3,
       "mvp": 2,
       "traction": 0,
       "growth": 1,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 2,
       "freemium": 3,
       "trial-free": 0,
@@ -4346,7 +4346,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 0,
       "minimal-technical": 1,
       "bold-persuasive": 2,
@@ -4379,7 +4379,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 1,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 3,
       "early-access": 3,
       "signup": 0,
@@ -4393,14 +4393,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 3,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 3,
       "mvp": 2,
       "traction": 0,
       "growth": 1,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 2,
       "freemium": 3,
       "trial-free": 0,
@@ -4411,7 +4411,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 0,
       "minimal-technical": 1,
       "bold-persuasive": 2,
@@ -4444,7 +4444,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 1,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 3,
       "early-access": 3,
       "signup": 0,
@@ -4458,14 +4458,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 3,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 3,
       "mvp": 2,
       "traction": 0,
       "growth": 1,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 2,
       "freemium": 3,
       "trial-free": 0,
@@ -4476,7 +4476,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 0,
       "minimal-technical": 1,
       "bold-persuasive": 2,
@@ -4509,7 +4509,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 1,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 3,
       "early-access": 3,
       "signup": 0,
@@ -4523,14 +4523,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 3,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 3,
       "mvp": 2,
       "traction": 0,
       "growth": 1,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 2,
       "freemium": 3,
       "trial-free": 0,
@@ -4541,7 +4541,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 0,
       "minimal-technical": 1,
       "bold-persuasive": 2,
@@ -4574,7 +4574,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 1,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 3,
       "early-access": 3,
       "signup": 0,
@@ -4588,14 +4588,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 3,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 3,
       "mvp": 2,
       "traction": 0,
       "growth": 1,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 2,
       "freemium": 3,
       "trial-free": 0,
@@ -4606,7 +4606,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 0,
       "minimal-technical": 1,
       "bold-persuasive": 2,
@@ -4639,7 +4639,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 1,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 3,
       "early-access": 3,
       "signup": 0,
@@ -4653,14 +4653,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 3,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 3,
       "mvp": 2,
       "traction": 0,
       "growth": 1,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 2,
       "freemium": 3,
       "trial-free": 0,
@@ -4671,7 +4671,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 0,
       "minimal-technical": 1,
       "bold-persuasive": 2,
@@ -4704,7 +4704,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 1,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 3,
       "early-access": 3,
       "signup": 0,
@@ -4718,14 +4718,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 3,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 3,
       "mvp": 2,
       "traction": 0,
       "growth": 1,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 2,
       "freemium": 3,
       "trial-free": 0,
@@ -4736,7 +4736,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 0,
       "minimal-technical": 1,
       "bold-persuasive": 2,
@@ -4769,7 +4769,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 1,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 3,
       "early-access": 3,
       "signup": 0,
@@ -4783,14 +4783,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 3,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 3,
       "mvp": 2,
       "traction": 0,
       "growth": 1,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 2,
       "freemium": 3,
       "trial-free": 0,
@@ -4801,7 +4801,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 0,
       "minimal-technical": 1,
       "bold-persuasive": 2,
@@ -4834,7 +4834,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 1,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 3,
       "early-access": 3,
       "signup": 0,
@@ -4848,14 +4848,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 3,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 3,
       "mvp": 2,
       "traction": 0,
       "growth": 1,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 2,
       "freemium": 3,
       "trial-free": 0,
@@ -4866,7 +4866,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 0,
       "minimal-technical": 1,
       "bold-persuasive": 2,
@@ -4899,7 +4899,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 1,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 3,
       "early-access": 3,
       "signup": 0,
@@ -4913,14 +4913,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 3,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 3,
       "mvp": 2,
       "traction": 0,
       "growth": 1,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 2,
       "freemium": 3,
       "trial-free": 0,
@@ -4931,7 +4931,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 0,
       "minimal-technical": 1,
       "bold-persuasive": 2,
@@ -4964,7 +4964,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 1,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 3,
       "early-access": 3,
       "signup": 0,
@@ -4978,14 +4978,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 3,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 3,
       "mvp": 2,
       "traction": 0,
       "growth": 1,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 2,
       "freemium": 3,
       "trial-free": 0,
@@ -4996,7 +4996,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 0,
       "minimal-technical": 1,
       "bold-persuasive": 2,
@@ -5029,7 +5029,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 2,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 2,
       "signup": 3,
@@ -5043,14 +5043,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 3,
       "traction": 0,
       "growth": 1,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 0,
       "trial-free": 3,
@@ -5061,7 +5061,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 3,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 1,
       "minimal-technical": 3,
       "bold-persuasive": 0,
@@ -5094,7 +5094,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 2,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 2,
       "signup": 3,
@@ -5108,14 +5108,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 3,
       "traction": 0,
       "growth": 1,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 0,
       "trial-free": 3,
@@ -5126,7 +5126,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 3,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 1,
       "minimal-technical": 3,
       "bold-persuasive": 0,
@@ -5159,7 +5159,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 2,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 2,
       "signup": 3,
@@ -5173,14 +5173,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 3,
       "traction": 0,
       "growth": 1,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 0,
       "trial-free": 3,
@@ -5191,7 +5191,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 3,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 1,
       "minimal-technical": 3,
       "bold-persuasive": 0,
@@ -5224,7 +5224,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 2,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 2,
       "signup": 3,
@@ -5238,14 +5238,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 3,
       "traction": 0,
       "growth": 1,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 0,
       "trial-free": 3,
@@ -5256,7 +5256,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 3,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 1,
       "minimal-technical": 3,
       "bold-persuasive": 0,
@@ -5289,7 +5289,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 2,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 2,
       "signup": 3,
@@ -5303,14 +5303,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 3,
       "traction": 0,
       "growth": 1,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 0,
       "trial-free": 3,
@@ -5321,7 +5321,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 3,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 1,
       "minimal-technical": 3,
       "bold-persuasive": 0,
@@ -5354,7 +5354,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 2,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 2,
       "signup": 3,
@@ -5368,14 +5368,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 3,
       "traction": 0,
       "growth": 1,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 0,
       "trial-free": 3,
@@ -5386,7 +5386,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 3,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 1,
       "minimal-technical": 3,
       "bold-persuasive": 0,
@@ -5419,7 +5419,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 2,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 2,
       "signup": 3,
@@ -5433,14 +5433,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 3,
       "traction": 0,
       "growth": 1,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 0,
       "trial-free": 3,
@@ -5451,7 +5451,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 3,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 1,
       "minimal-technical": 3,
       "bold-persuasive": 0,
@@ -5484,7 +5484,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 2,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 2,
       "signup": 3,
@@ -5498,14 +5498,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 3,
       "traction": 0,
       "growth": 1,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 0,
       "trial-free": 3,
@@ -5516,7 +5516,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 3,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 1,
       "minimal-technical": 3,
       "bold-persuasive": 0,
@@ -5549,7 +5549,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 2,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 2,
       "signup": 3,
@@ -5563,14 +5563,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 3,
       "traction": 0,
       "growth": 1,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 0,
       "trial-free": 3,
@@ -5581,7 +5581,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 3,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 1,
       "minimal-technical": 3,
       "bold-persuasive": 0,
@@ -5614,7 +5614,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 2,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 2,
       "signup": 3,
@@ -5628,14 +5628,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 3,
       "traction": 0,
       "growth": 1,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 0,
       "trial-free": 3,
@@ -5646,7 +5646,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 3,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 1,
       "minimal-technical": 3,
       "bold-persuasive": 0,
@@ -5679,7 +5679,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 2,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 2,
       "signup": 3,
@@ -5693,14 +5693,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 3,
       "traction": 0,
       "growth": 1,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 0,
       "trial-free": 3,
@@ -5711,7 +5711,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 3,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 1,
       "minimal-technical": 3,
       "bold-persuasive": 0,
@@ -5744,7 +5744,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 2,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 2,
       "signup": 3,
@@ -5758,14 +5758,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 3,
       "traction": 0,
       "growth": 1,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 0,
       "trial-free": 3,
@@ -5776,7 +5776,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 3,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 1,
       "minimal-technical": 3,
       "bold-persuasive": 0,
@@ -5809,7 +5809,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 2,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 2,
       "signup": 3,
@@ -5823,14 +5823,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 3,
       "traction": 0,
       "growth": 1,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 0,
       "trial-free": 3,
@@ -5841,7 +5841,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 3,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 1,
       "minimal-technical": 3,
       "bold-persuasive": 0,
@@ -5874,7 +5874,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 2,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 2,
       "signup": 3,
@@ -5888,14 +5888,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 3,
       "traction": 0,
       "growth": 1,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 0,
       "trial-free": 3,
@@ -5906,7 +5906,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 3,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 1,
       "minimal-technical": 3,
       "bold-persuasive": 0,
@@ -5939,7 +5939,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 2,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 2,
       "signup": 3,
@@ -5953,14 +5953,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 3,
       "traction": 0,
       "growth": 1,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 0,
       "trial-free": 3,
@@ -5971,7 +5971,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 3,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 1,
       "minimal-technical": 3,
       "bold-persuasive": 0,
@@ -6004,7 +6004,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 2,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 2,
       "signup": 3,
@@ -6018,14 +6018,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 3,
       "traction": 0,
       "growth": 1,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 0,
       "trial-free": 3,
@@ -6036,7 +6036,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 3,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 1,
       "minimal-technical": 3,
       "bold-persuasive": 0,
@@ -6069,7 +6069,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 2,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 2,
       "signup": 3,
@@ -6083,14 +6083,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 3,
       "traction": 0,
       "growth": 1,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 0,
       "trial-free": 3,
@@ -6101,7 +6101,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 3,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 1,
       "minimal-technical": 3,
       "bold-persuasive": 0,
@@ -6134,7 +6134,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 2,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 2,
       "signup": 3,
@@ -6148,14 +6148,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 3,
       "traction": 0,
       "growth": 1,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 0,
       "trial-free": 3,
@@ -6166,7 +6166,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 3,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 1,
       "minimal-technical": 3,
       "bold-persuasive": 0,
@@ -6199,7 +6199,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 2,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 2,
       "signup": 3,
@@ -6213,14 +6213,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 3,
       "traction": 0,
       "growth": 1,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 0,
       "trial-free": 3,
@@ -6231,7 +6231,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 3,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 1,
       "minimal-technical": 3,
       "bold-persuasive": 0,
@@ -6264,7 +6264,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 2,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 2,
       "signup": 3,
@@ -6278,14 +6278,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 3,
       "traction": 0,
       "growth": 1,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 0,
       "trial-free": 3,
@@ -6296,7 +6296,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 3,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 1,
       "minimal-technical": 3,
       "bold-persuasive": 0,
@@ -6329,7 +6329,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 2,
       "signup": 3,
@@ -6343,14 +6343,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 2,
     },
-    "stage": {
+    "startupStage": {
       "idea": 2,
       "mvp": 3,
       "traction": 2,
       "growth": 1,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 0,
       "trial-free": 3,
@@ -6361,7 +6361,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 0,
       "minimal-technical": 0,
       "bold-persuasive": 3,
@@ -6394,7 +6394,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 2,
       "signup": 3,
@@ -6408,14 +6408,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 2,
     },
-    "stage": {
+    "startupStage": {
       "idea": 2,
       "mvp": 3,
       "traction": 2,
       "growth": 1,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 0,
       "trial-free": 3,
@@ -6426,7 +6426,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 0,
       "minimal-technical": 0,
       "bold-persuasive": 3,
@@ -6459,7 +6459,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 2,
       "signup": 3,
@@ -6473,14 +6473,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 2,
     },
-    "stage": {
+    "startupStage": {
       "idea": 2,
       "mvp": 3,
       "traction": 2,
       "growth": 1,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 0,
       "trial-free": 3,
@@ -6491,7 +6491,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 0,
       "minimal-technical": 0,
       "bold-persuasive": 3,
@@ -6524,7 +6524,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 2,
       "signup": 3,
@@ -6538,14 +6538,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 2,
     },
-    "stage": {
+    "startupStage": {
       "idea": 2,
       "mvp": 3,
       "traction": 2,
       "growth": 1,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 0,
       "trial-free": 3,
@@ -6556,7 +6556,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 0,
       "minimal-technical": 0,
       "bold-persuasive": 3,
@@ -6589,7 +6589,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 2,
       "signup": 3,
@@ -6603,14 +6603,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 2,
     },
-    "stage": {
+    "startupStage": {
       "idea": 2,
       "mvp": 3,
       "traction": 2,
       "growth": 1,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 0,
       "trial-free": 3,
@@ -6621,7 +6621,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 0,
       "minimal-technical": 0,
       "bold-persuasive": 3,
@@ -6654,7 +6654,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 2,
       "signup": 3,
@@ -6668,14 +6668,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 2,
     },
-    "stage": {
+    "startupStage": {
       "idea": 2,
       "mvp": 3,
       "traction": 2,
       "growth": 1,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 0,
       "trial-free": 3,
@@ -6686,7 +6686,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 0,
       "minimal-technical": 0,
       "bold-persuasive": 3,
@@ -6719,7 +6719,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 2,
       "signup": 3,
@@ -6733,14 +6733,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 2,
     },
-    "stage": {
+    "startupStage": {
       "idea": 2,
       "mvp": 3,
       "traction": 2,
       "growth": 1,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 0,
       "trial-free": 3,
@@ -6751,7 +6751,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 0,
       "minimal-technical": 0,
       "bold-persuasive": 3,
@@ -6784,7 +6784,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 2,
       "signup": 3,
@@ -6798,14 +6798,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 2,
     },
-    "stage": {
+    "startupStage": {
       "idea": 2,
       "mvp": 3,
       "traction": 2,
       "growth": 1,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 0,
       "trial-free": 3,
@@ -6816,7 +6816,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 0,
       "minimal-technical": 0,
       "bold-persuasive": 3,
@@ -6849,7 +6849,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 2,
       "signup": 3,
@@ -6863,14 +6863,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 2,
     },
-    "stage": {
+    "startupStage": {
       "idea": 2,
       "mvp": 3,
       "traction": 2,
       "growth": 1,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 0,
       "trial-free": 3,
@@ -6881,7 +6881,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 0,
       "minimal-technical": 0,
       "bold-persuasive": 3,
@@ -6914,7 +6914,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 2,
       "signup": 3,
@@ -6928,14 +6928,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 2,
     },
-    "stage": {
+    "startupStage": {
       "idea": 2,
       "mvp": 3,
       "traction": 2,
       "growth": 1,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 0,
       "trial-free": 3,
@@ -6946,7 +6946,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 0,
       "minimal-technical": 0,
       "bold-persuasive": 3,
@@ -6979,7 +6979,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 2,
       "signup": 3,
@@ -6993,14 +6993,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 2,
     },
-    "stage": {
+    "startupStage": {
       "idea": 2,
       "mvp": 3,
       "traction": 2,
       "growth": 1,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 0,
       "trial-free": 3,
@@ -7011,7 +7011,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 0,
       "minimal-technical": 0,
       "bold-persuasive": 3,
@@ -7044,7 +7044,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 2,
       "signup": 3,
@@ -7058,14 +7058,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 2,
     },
-    "stage": {
+    "startupStage": {
       "idea": 2,
       "mvp": 3,
       "traction": 2,
       "growth": 1,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 0,
       "trial-free": 3,
@@ -7076,7 +7076,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 0,
       "minimal-technical": 0,
       "bold-persuasive": 3,
@@ -7109,7 +7109,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 2,
       "signup": 3,
@@ -7123,14 +7123,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 2,
     },
-    "stage": {
+    "startupStage": {
       "idea": 2,
       "mvp": 3,
       "traction": 2,
       "growth": 1,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 0,
       "trial-free": 3,
@@ -7141,7 +7141,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 0,
       "minimal-technical": 0,
       "bold-persuasive": 3,
@@ -7174,7 +7174,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 2,
       "signup": 3,
@@ -7188,14 +7188,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 2,
     },
-    "stage": {
+    "startupStage": {
       "idea": 2,
       "mvp": 3,
       "traction": 2,
       "growth": 1,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 0,
       "trial-free": 3,
@@ -7206,7 +7206,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 0,
       "minimal-technical": 0,
       "bold-persuasive": 3,
@@ -7239,7 +7239,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 2,
       "signup": 3,
@@ -7253,14 +7253,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 2,
     },
-    "stage": {
+    "startupStage": {
       "idea": 2,
       "mvp": 3,
       "traction": 2,
       "growth": 1,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 0,
       "trial-free": 3,
@@ -7271,7 +7271,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 0,
       "minimal-technical": 0,
       "bold-persuasive": 3,
@@ -7304,7 +7304,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 3,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 0,
       "signup": 2,
@@ -7318,14 +7318,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 3,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 2,
       "traction": 0,
       "growth": 3,
       "scale": 3,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 0,
       "trial-free": 2,
@@ -7336,7 +7336,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 2,
       "custom-quote": 3,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 2,
       "minimal-technical": 0,
       "bold-persuasive": 2,
@@ -7369,7 +7369,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 3,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 0,
       "signup": 2,
@@ -7383,14 +7383,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 3,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 2,
       "traction": 0,
       "growth": 3,
       "scale": 3,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 0,
       "trial-free": 2,
@@ -7401,7 +7401,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 2,
       "custom-quote": 3,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 2,
       "minimal-technical": 0,
       "bold-persuasive": 2,
@@ -7434,7 +7434,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 3,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 0,
       "signup": 2,
@@ -7448,14 +7448,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 3,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 2,
       "traction": 0,
       "growth": 3,
       "scale": 3,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 0,
       "trial-free": 2,
@@ -7466,7 +7466,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 2,
       "custom-quote": 3,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 2,
       "minimal-technical": 0,
       "bold-persuasive": 2,
@@ -7499,7 +7499,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 3,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 0,
       "signup": 2,
@@ -7513,14 +7513,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 3,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 2,
       "traction": 0,
       "growth": 3,
       "scale": 3,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 0,
       "trial-free": 2,
@@ -7531,7 +7531,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 2,
       "custom-quote": 3,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 2,
       "minimal-technical": 0,
       "bold-persuasive": 2,
@@ -7564,7 +7564,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 3,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 0,
       "signup": 2,
@@ -7578,14 +7578,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 3,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 2,
       "traction": 0,
       "growth": 3,
       "scale": 3,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 0,
       "trial-free": 2,
@@ -7596,7 +7596,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 2,
       "custom-quote": 3,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 2,
       "minimal-technical": 0,
       "bold-persuasive": 2,
@@ -7629,7 +7629,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 3,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 0,
       "signup": 2,
@@ -7643,14 +7643,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 3,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 2,
       "traction": 0,
       "growth": 3,
       "scale": 3,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 0,
       "trial-free": 2,
@@ -7661,7 +7661,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 2,
       "custom-quote": 3,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 2,
       "minimal-technical": 0,
       "bold-persuasive": 2,
@@ -7694,7 +7694,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 3,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 0,
       "signup": 2,
@@ -7708,14 +7708,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 3,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 2,
       "traction": 0,
       "growth": 3,
       "scale": 3,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 0,
       "trial-free": 2,
@@ -7726,7 +7726,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 2,
       "custom-quote": 3,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 2,
       "minimal-technical": 0,
       "bold-persuasive": 2,
@@ -7759,7 +7759,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 3,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 0,
       "signup": 2,
@@ -7773,14 +7773,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 3,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 2,
       "traction": 0,
       "growth": 3,
       "scale": 3,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 0,
       "trial-free": 2,
@@ -7791,7 +7791,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 2,
       "custom-quote": 3,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 2,
       "minimal-technical": 0,
       "bold-persuasive": 2,
@@ -7824,7 +7824,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 3,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 0,
       "signup": 2,
@@ -7838,14 +7838,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 3,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 2,
       "traction": 0,
       "growth": 3,
       "scale": 3,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 0,
       "trial-free": 2,
@@ -7856,7 +7856,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 2,
       "custom-quote": 3,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 2,
       "minimal-technical": 0,
       "bold-persuasive": 2,
@@ -7889,7 +7889,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 3,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 0,
       "signup": 2,
@@ -7903,14 +7903,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 3,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 2,
       "traction": 0,
       "growth": 3,
       "scale": 3,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 0,
       "trial-free": 2,
@@ -7921,7 +7921,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 2,
       "custom-quote": 3,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 2,
       "minimal-technical": 0,
       "bold-persuasive": 2,
@@ -7954,7 +7954,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 3,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 0,
       "signup": 2,
@@ -7968,14 +7968,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 3,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 2,
       "traction": 0,
       "growth": 3,
       "scale": 3,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 0,
       "trial-free": 2,
@@ -7986,7 +7986,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 2,
       "custom-quote": 3,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 2,
       "minimal-technical": 0,
       "bold-persuasive": 2,
@@ -8019,7 +8019,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 3,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 0,
       "signup": 2,
@@ -8033,14 +8033,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 3,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 2,
       "traction": 0,
       "growth": 3,
       "scale": 3,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 0,
       "trial-free": 2,
@@ -8051,7 +8051,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 2,
       "custom-quote": 3,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 2,
       "minimal-technical": 0,
       "bold-persuasive": 2,
@@ -8084,7 +8084,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 3,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 0,
       "signup": 2,
@@ -8098,14 +8098,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 3,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 2,
       "traction": 0,
       "growth": 3,
       "scale": 3,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 0,
       "trial-free": 2,
@@ -8116,7 +8116,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 2,
       "custom-quote": 3,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 2,
       "minimal-technical": 0,
       "bold-persuasive": 2,
@@ -8149,7 +8149,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 3,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 0,
       "signup": 2,
@@ -8163,14 +8163,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 3,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 2,
       "traction": 0,
       "growth": 3,
       "scale": 3,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 0,
       "trial-free": 2,
@@ -8181,7 +8181,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 2,
       "custom-quote": 3,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 2,
       "minimal-technical": 0,
       "bold-persuasive": 2,
@@ -8214,7 +8214,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 3,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 0,
       "signup": 2,
@@ -8228,14 +8228,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 3,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 2,
       "traction": 0,
       "growth": 3,
       "scale": 3,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 0,
       "trial-free": 2,
@@ -8246,7 +8246,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 2,
       "custom-quote": 3,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 2,
       "minimal-technical": 0,
       "bold-persuasive": 2,
@@ -8279,7 +8279,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 2,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 0,
       "signup": 1,
@@ -8293,14 +8293,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 2,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 1,
       "traction": 1,
       "growth": 2,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 2,
       "freemium": 1,
       "trial-free": 0,
@@ -8311,7 +8311,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 2,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 0,
       "minimal-technical": 0,
       "bold-persuasive": 0,
@@ -8344,7 +8344,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 2,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 0,
       "signup": 1,
@@ -8358,14 +8358,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 2,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 1,
       "traction": 1,
       "growth": 2,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 2,
       "freemium": 1,
       "trial-free": 0,
@@ -8376,7 +8376,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 2,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 0,
       "minimal-technical": 0,
       "bold-persuasive": 0,
@@ -8409,7 +8409,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 2,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 0,
       "signup": 1,
@@ -8423,14 +8423,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 2,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 1,
       "traction": 1,
       "growth": 2,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 2,
       "freemium": 1,
       "trial-free": 0,
@@ -8441,7 +8441,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 2,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 0,
       "minimal-technical": 0,
       "bold-persuasive": 0,
@@ -8474,7 +8474,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 2,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 0,
       "signup": 1,
@@ -8488,14 +8488,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 2,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 1,
       "traction": 1,
       "growth": 2,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 2,
       "freemium": 1,
       "trial-free": 0,
@@ -8506,7 +8506,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 2,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 0,
       "minimal-technical": 0,
       "bold-persuasive": 0,
@@ -8539,7 +8539,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 2,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 0,
       "signup": 1,
@@ -8553,14 +8553,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 2,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 1,
       "traction": 1,
       "growth": 2,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 2,
       "freemium": 1,
       "trial-free": 0,
@@ -8571,7 +8571,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 2,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 0,
       "minimal-technical": 0,
       "bold-persuasive": 0,
@@ -8604,7 +8604,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 2,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 0,
       "signup": 1,
@@ -8618,14 +8618,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 2,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 1,
       "traction": 1,
       "growth": 2,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 2,
       "freemium": 1,
       "trial-free": 0,
@@ -8636,7 +8636,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 2,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 0,
       "minimal-technical": 0,
       "bold-persuasive": 0,
@@ -8669,7 +8669,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 2,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 0,
       "signup": 1,
@@ -8683,14 +8683,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 2,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 1,
       "traction": 1,
       "growth": 2,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 2,
       "freemium": 1,
       "trial-free": 0,
@@ -8701,7 +8701,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 2,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 0,
       "minimal-technical": 0,
       "bold-persuasive": 0,
@@ -8734,7 +8734,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 2,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 0,
       "signup": 1,
@@ -8748,14 +8748,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 2,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 1,
       "traction": 1,
       "growth": 2,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 2,
       "freemium": 1,
       "trial-free": 0,
@@ -8766,7 +8766,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 2,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 0,
       "minimal-technical": 0,
       "bold-persuasive": 0,
@@ -8799,7 +8799,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 2,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 0,
       "signup": 1,
@@ -8813,14 +8813,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 2,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 1,
       "traction": 1,
       "growth": 2,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 2,
       "freemium": 1,
       "trial-free": 0,
@@ -8831,7 +8831,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 2,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 0,
       "minimal-technical": 0,
       "bold-persuasive": 0,
@@ -8864,7 +8864,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 2,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 0,
       "signup": 1,
@@ -8878,14 +8878,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 2,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 1,
       "traction": 1,
       "growth": 2,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 2,
       "freemium": 1,
       "trial-free": 0,
@@ -8896,7 +8896,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 2,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 0,
       "minimal-technical": 0,
       "bold-persuasive": 0,
@@ -8929,7 +8929,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 2,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 0,
       "signup": 1,
@@ -8943,14 +8943,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 2,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 1,
       "traction": 1,
       "growth": 2,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 2,
       "freemium": 1,
       "trial-free": 0,
@@ -8961,7 +8961,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 2,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 0,
       "minimal-technical": 0,
       "bold-persuasive": 0,
@@ -8994,7 +8994,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 2,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 0,
       "signup": 1,
@@ -9008,14 +9008,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 2,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 1,
       "traction": 1,
       "growth": 2,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 2,
       "freemium": 1,
       "trial-free": 0,
@@ -9026,7 +9026,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 2,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 0,
       "minimal-technical": 0,
       "bold-persuasive": 0,
@@ -9059,7 +9059,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 2,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 0,
       "signup": 1,
@@ -9073,14 +9073,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 2,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 1,
       "traction": 1,
       "growth": 2,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 2,
       "freemium": 1,
       "trial-free": 0,
@@ -9091,7 +9091,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 2,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 0,
       "minimal-technical": 0,
       "bold-persuasive": 0,
@@ -9124,7 +9124,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 2,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 0,
       "signup": 1,
@@ -9138,14 +9138,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 2,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 1,
       "traction": 1,
       "growth": 2,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 2,
       "freemium": 1,
       "trial-free": 0,
@@ -9156,7 +9156,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 2,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 0,
       "minimal-technical": 0,
       "bold-persuasive": 0,
@@ -9189,7 +9189,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 2,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 0,
       "signup": 1,
@@ -9203,14 +9203,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 2,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 1,
       "traction": 1,
       "growth": 2,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 2,
       "freemium": 1,
       "trial-free": 0,
@@ -9221,7 +9221,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 2,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 0,
       "minimal-technical": 0,
       "bold-persuasive": 0,
@@ -9254,7 +9254,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 2,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 0,
       "signup": 1,
@@ -9268,14 +9268,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 2,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 1,
       "traction": 1,
       "growth": 2,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 2,
       "freemium": 1,
       "trial-free": 0,
@@ -9286,7 +9286,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 2,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 0,
       "minimal-technical": 0,
       "bold-persuasive": 0,
@@ -9319,7 +9319,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 2,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 0,
       "signup": 1,
@@ -9333,14 +9333,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 2,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 1,
       "traction": 1,
       "growth": 2,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 2,
       "freemium": 1,
       "trial-free": 0,
@@ -9351,7 +9351,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 2,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 0,
       "minimal-technical": 0,
       "bold-persuasive": 0,
@@ -9384,7 +9384,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 2,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 0,
       "signup": 1,
@@ -9398,14 +9398,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 2,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 1,
       "traction": 1,
       "growth": 2,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 2,
       "freemium": 1,
       "trial-free": 0,
@@ -9416,7 +9416,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 2,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 0,
       "minimal-technical": 0,
       "bold-persuasive": 0,
@@ -9449,7 +9449,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 2,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 0,
       "signup": 1,
@@ -9463,14 +9463,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 2,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 1,
       "traction": 1,
       "growth": 2,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 2,
       "freemium": 1,
       "trial-free": 0,
@@ -9481,7 +9481,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 2,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 0,
       "minimal-technical": 0,
       "bold-persuasive": 0,
@@ -9514,7 +9514,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 2,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 0,
       "signup": 1,
@@ -9528,14 +9528,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 2,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 1,
       "traction": 1,
       "growth": 2,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 2,
       "freemium": 1,
       "trial-free": 0,
@@ -9546,7 +9546,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 2,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 0,
       "minimal-technical": 0,
       "bold-persuasive": 0,
@@ -9579,7 +9579,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 3,
       "early-access": 3,
       "signup": 0,
@@ -9593,14 +9593,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 3,
       "contact-sales": 1,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 0,
       "traction": 0,
       "growth": 0,
       "scale": 1,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 3,
       "freemium": 0,
       "trial-free": 0,
@@ -9611,7 +9611,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 1,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 2,
       "minimal-technical": 1,
       "bold-persuasive": 0,
@@ -9644,7 +9644,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 3,
       "early-access": 3,
       "signup": 0,
@@ -9658,14 +9658,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 3,
       "contact-sales": 1,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 0,
       "traction": 0,
       "growth": 0,
       "scale": 1,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 3,
       "freemium": 0,
       "trial-free": 0,
@@ -9676,7 +9676,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 1,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 2,
       "minimal-technical": 1,
       "bold-persuasive": 0,
@@ -9709,7 +9709,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 3,
       "early-access": 3,
       "signup": 0,
@@ -9723,14 +9723,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 3,
       "contact-sales": 1,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 0,
       "traction": 0,
       "growth": 0,
       "scale": 1,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 3,
       "freemium": 0,
       "trial-free": 0,
@@ -9741,7 +9741,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 1,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 2,
       "minimal-technical": 1,
       "bold-persuasive": 0,
@@ -9774,7 +9774,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 3,
       "early-access": 3,
       "signup": 0,
@@ -9788,14 +9788,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 3,
       "contact-sales": 1,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 0,
       "traction": 0,
       "growth": 0,
       "scale": 1,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 3,
       "freemium": 0,
       "trial-free": 0,
@@ -9806,7 +9806,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 1,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 2,
       "minimal-technical": 1,
       "bold-persuasive": 0,
@@ -9839,7 +9839,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 3,
       "early-access": 3,
       "signup": 0,
@@ -9853,14 +9853,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 3,
       "contact-sales": 1,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 0,
       "traction": 0,
       "growth": 0,
       "scale": 1,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 3,
       "freemium": 0,
       "trial-free": 0,
@@ -9871,7 +9871,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 1,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 2,
       "minimal-technical": 1,
       "bold-persuasive": 0,
@@ -9904,7 +9904,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 3,
       "early-access": 3,
       "signup": 0,
@@ -9918,14 +9918,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 3,
       "contact-sales": 1,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 0,
       "traction": 0,
       "growth": 0,
       "scale": 1,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 3,
       "freemium": 0,
       "trial-free": 0,
@@ -9936,7 +9936,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 1,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 2,
       "minimal-technical": 1,
       "bold-persuasive": 0,
@@ -9969,7 +9969,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 3,
       "early-access": 3,
       "signup": 0,
@@ -9983,14 +9983,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 3,
       "contact-sales": 1,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 0,
       "traction": 0,
       "growth": 0,
       "scale": 1,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 3,
       "freemium": 0,
       "trial-free": 0,
@@ -10001,7 +10001,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 1,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 2,
       "minimal-technical": 1,
       "bold-persuasive": 0,
@@ -10034,7 +10034,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 3,
       "early-access": 3,
       "signup": 0,
@@ -10048,14 +10048,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 3,
       "contact-sales": 1,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 0,
       "traction": 0,
       "growth": 0,
       "scale": 1,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 3,
       "freemium": 0,
       "trial-free": 0,
@@ -10066,7 +10066,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 1,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 2,
       "minimal-technical": 1,
       "bold-persuasive": 0,
@@ -10099,7 +10099,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 3,
       "early-access": 3,
       "signup": 0,
@@ -10113,14 +10113,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 3,
       "contact-sales": 1,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 0,
       "traction": 0,
       "growth": 0,
       "scale": 1,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 3,
       "freemium": 0,
       "trial-free": 0,
@@ -10131,7 +10131,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 1,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 2,
       "minimal-technical": 1,
       "bold-persuasive": 0,
@@ -10164,7 +10164,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 3,
       "early-access": 3,
       "signup": 0,
@@ -10178,14 +10178,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 3,
       "contact-sales": 1,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 0,
       "traction": 0,
       "growth": 0,
       "scale": 1,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 3,
       "freemium": 0,
       "trial-free": 0,
@@ -10196,7 +10196,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 1,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 2,
       "minimal-technical": 1,
       "bold-persuasive": 0,
@@ -10229,7 +10229,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 3,
       "early-access": 3,
       "signup": 0,
@@ -10243,14 +10243,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 3,
       "contact-sales": 1,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 0,
       "traction": 0,
       "growth": 0,
       "scale": 1,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 3,
       "freemium": 0,
       "trial-free": 0,
@@ -10261,7 +10261,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 1,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 2,
       "minimal-technical": 1,
       "bold-persuasive": 0,
@@ -10294,7 +10294,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 3,
       "early-access": 3,
       "signup": 0,
@@ -10308,14 +10308,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 3,
       "contact-sales": 1,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 0,
       "traction": 0,
       "growth": 0,
       "scale": 1,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 3,
       "freemium": 0,
       "trial-free": 0,
@@ -10326,7 +10326,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 1,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 2,
       "minimal-technical": 1,
       "bold-persuasive": 0,
@@ -10359,7 +10359,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 3,
       "early-access": 3,
       "signup": 0,
@@ -10373,14 +10373,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 3,
       "contact-sales": 1,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 0,
       "traction": 0,
       "growth": 0,
       "scale": 1,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 3,
       "freemium": 0,
       "trial-free": 0,
@@ -10391,7 +10391,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 1,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 2,
       "minimal-technical": 1,
       "bold-persuasive": 0,
@@ -10424,7 +10424,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 3,
       "early-access": 3,
       "signup": 0,
@@ -10438,14 +10438,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 3,
       "contact-sales": 1,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 0,
       "traction": 0,
       "growth": 0,
       "scale": 1,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 3,
       "freemium": 0,
       "trial-free": 0,
@@ -10456,7 +10456,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 1,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 2,
       "minimal-technical": 1,
       "bold-persuasive": 0,
@@ -10489,7 +10489,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 3,
       "early-access": 3,
       "signup": 0,
@@ -10503,14 +10503,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 3,
       "contact-sales": 1,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 0,
       "traction": 0,
       "growth": 0,
       "scale": 1,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 3,
       "freemium": 0,
       "trial-free": 0,
@@ -10521,7 +10521,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 1,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 2,
       "minimal-technical": 1,
       "bold-persuasive": 0,
@@ -10554,7 +10554,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 3,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 0,
       "signup": 1,
@@ -10568,14 +10568,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 1,
       "contact-sales": 3,
     },
-    "stage": {
+    "startupStage": {
       "idea": 1,
       "mvp": 0,
       "traction": 0,
       "growth": 0,
       "scale": 3,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 1,
       "trial-free": 1,
@@ -10586,7 +10586,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 3,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 2,
       "minimal-technical": 0,
       "bold-persuasive": 0,
@@ -10619,7 +10619,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 3,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 0,
       "signup": 1,
@@ -10633,14 +10633,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 1,
       "contact-sales": 3,
     },
-    "stage": {
+    "startupStage": {
       "idea": 1,
       "mvp": 0,
       "traction": 0,
       "growth": 0,
       "scale": 3,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 1,
       "trial-free": 1,
@@ -10651,7 +10651,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 3,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 2,
       "minimal-technical": 0,
       "bold-persuasive": 0,
@@ -10684,7 +10684,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 3,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 0,
       "signup": 1,
@@ -10698,14 +10698,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 1,
       "contact-sales": 3,
     },
-    "stage": {
+    "startupStage": {
       "idea": 1,
       "mvp": 0,
       "traction": 0,
       "growth": 0,
       "scale": 3,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 1,
       "trial-free": 1,
@@ -10716,7 +10716,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 3,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 2,
       "minimal-technical": 0,
       "bold-persuasive": 0,
@@ -10749,7 +10749,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 3,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 0,
       "signup": 1,
@@ -10763,14 +10763,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 1,
       "contact-sales": 3,
     },
-    "stage": {
+    "startupStage": {
       "idea": 1,
       "mvp": 0,
       "traction": 0,
       "growth": 0,
       "scale": 3,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 1,
       "trial-free": 1,
@@ -10781,7 +10781,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 3,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 2,
       "minimal-technical": 0,
       "bold-persuasive": 0,
@@ -10814,7 +10814,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 3,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 0,
       "signup": 1,
@@ -10828,14 +10828,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 1,
       "contact-sales": 3,
     },
-    "stage": {
+    "startupStage": {
       "idea": 1,
       "mvp": 0,
       "traction": 0,
       "growth": 0,
       "scale": 3,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 1,
       "trial-free": 1,
@@ -10846,7 +10846,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 3,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 2,
       "minimal-technical": 0,
       "bold-persuasive": 0,
@@ -10879,7 +10879,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 3,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 0,
       "signup": 1,
@@ -10893,14 +10893,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 1,
       "contact-sales": 3,
     },
-    "stage": {
+    "startupStage": {
       "idea": 1,
       "mvp": 0,
       "traction": 0,
       "growth": 0,
       "scale": 3,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 1,
       "trial-free": 1,
@@ -10911,7 +10911,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 3,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 2,
       "minimal-technical": 0,
       "bold-persuasive": 0,
@@ -10944,7 +10944,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 3,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 0,
       "signup": 1,
@@ -10958,14 +10958,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 1,
       "contact-sales": 3,
     },
-    "stage": {
+    "startupStage": {
       "idea": 1,
       "mvp": 0,
       "traction": 0,
       "growth": 0,
       "scale": 3,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 1,
       "trial-free": 1,
@@ -10976,7 +10976,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 3,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 2,
       "minimal-technical": 0,
       "bold-persuasive": 0,
@@ -11009,7 +11009,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 3,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 0,
       "signup": 1,
@@ -11023,14 +11023,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 1,
       "contact-sales": 3,
     },
-    "stage": {
+    "startupStage": {
       "idea": 1,
       "mvp": 0,
       "traction": 0,
       "growth": 0,
       "scale": 3,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 1,
       "trial-free": 1,
@@ -11041,7 +11041,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 3,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 2,
       "minimal-technical": 0,
       "bold-persuasive": 0,
@@ -11074,7 +11074,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 3,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 0,
       "signup": 1,
@@ -11088,14 +11088,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 1,
       "contact-sales": 3,
     },
-    "stage": {
+    "startupStage": {
       "idea": 1,
       "mvp": 0,
       "traction": 0,
       "growth": 0,
       "scale": 3,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 1,
       "trial-free": 1,
@@ -11106,7 +11106,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 3,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 2,
       "minimal-technical": 0,
       "bold-persuasive": 0,
@@ -11139,7 +11139,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 3,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 0,
       "signup": 1,
@@ -11153,14 +11153,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 1,
       "contact-sales": 3,
     },
-    "stage": {
+    "startupStage": {
       "idea": 1,
       "mvp": 0,
       "traction": 0,
       "growth": 0,
       "scale": 3,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 1,
       "trial-free": 1,
@@ -11171,7 +11171,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 3,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 2,
       "minimal-technical": 0,
       "bold-persuasive": 0,
@@ -11204,7 +11204,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 3,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 0,
       "signup": 1,
@@ -11218,14 +11218,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 1,
       "contact-sales": 3,
     },
-    "stage": {
+    "startupStage": {
       "idea": 1,
       "mvp": 0,
       "traction": 0,
       "growth": 0,
       "scale": 3,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 1,
       "trial-free": 1,
@@ -11236,7 +11236,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 3,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 2,
       "minimal-technical": 0,
       "bold-persuasive": 0,
@@ -11269,7 +11269,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 3,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 0,
       "signup": 1,
@@ -11283,14 +11283,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 1,
       "contact-sales": 3,
     },
-    "stage": {
+    "startupStage": {
       "idea": 1,
       "mvp": 0,
       "traction": 0,
       "growth": 0,
       "scale": 3,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 1,
       "trial-free": 1,
@@ -11301,7 +11301,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 3,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 2,
       "minimal-technical": 0,
       "bold-persuasive": 0,
@@ -11334,7 +11334,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 3,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 0,
       "signup": 1,
@@ -11348,14 +11348,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 1,
       "contact-sales": 3,
     },
-    "stage": {
+    "startupStage": {
       "idea": 1,
       "mvp": 0,
       "traction": 0,
       "growth": 0,
       "scale": 3,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 1,
       "trial-free": 1,
@@ -11366,7 +11366,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 3,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 2,
       "minimal-technical": 0,
       "bold-persuasive": 0,
@@ -11399,7 +11399,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 3,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 0,
       "signup": 1,
@@ -11413,14 +11413,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 1,
       "contact-sales": 3,
     },
-    "stage": {
+    "startupStage": {
       "idea": 1,
       "mvp": 0,
       "traction": 0,
       "growth": 0,
       "scale": 3,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 1,
       "trial-free": 1,
@@ -11431,7 +11431,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 3,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 2,
       "minimal-technical": 0,
       "bold-persuasive": 0,
@@ -11464,7 +11464,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 3,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 0,
       "signup": 1,
@@ -11478,14 +11478,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 1,
       "contact-sales": 3,
     },
-    "stage": {
+    "startupStage": {
       "idea": 1,
       "mvp": 0,
       "traction": 0,
       "growth": 0,
       "scale": 3,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 1,
       "trial-free": 1,
@@ -11496,7 +11496,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 3,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 2,
       "minimal-technical": 0,
       "bold-persuasive": 0,
@@ -11529,7 +11529,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 3,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 0,
       "signup": 1,
@@ -11543,14 +11543,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 1,
       "contact-sales": 3,
     },
-    "stage": {
+    "startupStage": {
       "idea": 1,
       "mvp": 0,
       "traction": 0,
       "growth": 0,
       "scale": 3,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 1,
       "trial-free": 1,
@@ -11561,7 +11561,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 3,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 2,
       "minimal-technical": 0,
       "bold-persuasive": 0,
@@ -11594,7 +11594,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 1,
       "community": 3,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 3,
       "early-access": 3,
       "signup": 0,
@@ -11608,14 +11608,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 3,
       "contact-sales": 1,
     },
-    "stage": {
+    "startupStage": {
       "idea": 3,
       "mvp": 0,
       "traction": 0,
       "growth": 0,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 3,
       "trial-free": 0,
@@ -11626,7 +11626,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 1,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 3,
       "minimal-technical": 2,
       "bold-persuasive": 0,
@@ -11659,7 +11659,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 1,
       "community": 3,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 3,
       "early-access": 3,
       "signup": 0,
@@ -11673,14 +11673,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 3,
       "contact-sales": 1,
     },
-    "stage": {
+    "startupStage": {
       "idea": 3,
       "mvp": 0,
       "traction": 0,
       "growth": 0,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 3,
       "trial-free": 0,
@@ -11691,7 +11691,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 1,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 3,
       "minimal-technical": 2,
       "bold-persuasive": 0,
@@ -11724,7 +11724,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 1,
       "community": 3,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 3,
       "early-access": 3,
       "signup": 0,
@@ -11738,14 +11738,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 3,
       "contact-sales": 1,
     },
-    "stage": {
+    "startupStage": {
       "idea": 3,
       "mvp": 0,
       "traction": 0,
       "growth": 0,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 3,
       "trial-free": 0,
@@ -11756,7 +11756,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 1,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 3,
       "minimal-technical": 2,
       "bold-persuasive": 0,
@@ -11789,7 +11789,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 1,
       "community": 3,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 3,
       "early-access": 3,
       "signup": 0,
@@ -11803,14 +11803,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 3,
       "contact-sales": 1,
     },
-    "stage": {
+    "startupStage": {
       "idea": 3,
       "mvp": 0,
       "traction": 0,
       "growth": 0,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 3,
       "trial-free": 0,
@@ -11821,7 +11821,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 1,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 3,
       "minimal-technical": 2,
       "bold-persuasive": 0,
@@ -11854,7 +11854,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 1,
       "community": 3,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 3,
       "early-access": 3,
       "signup": 0,
@@ -11868,14 +11868,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 3,
       "contact-sales": 1,
     },
-    "stage": {
+    "startupStage": {
       "idea": 3,
       "mvp": 0,
       "traction": 0,
       "growth": 0,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 3,
       "trial-free": 0,
@@ -11886,7 +11886,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 1,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 3,
       "minimal-technical": 2,
       "bold-persuasive": 0,
@@ -11919,7 +11919,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 1,
       "community": 3,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 3,
       "early-access": 3,
       "signup": 0,
@@ -11933,14 +11933,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 3,
       "contact-sales": 1,
     },
-    "stage": {
+    "startupStage": {
       "idea": 3,
       "mvp": 0,
       "traction": 0,
       "growth": 0,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 3,
       "trial-free": 0,
@@ -11951,7 +11951,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 1,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 3,
       "minimal-technical": 2,
       "bold-persuasive": 0,
@@ -11984,7 +11984,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 1,
       "community": 3,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 3,
       "early-access": 3,
       "signup": 0,
@@ -11998,14 +11998,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 3,
       "contact-sales": 1,
     },
-    "stage": {
+    "startupStage": {
       "idea": 3,
       "mvp": 0,
       "traction": 0,
       "growth": 0,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 3,
       "trial-free": 0,
@@ -12016,7 +12016,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 1,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 3,
       "minimal-technical": 2,
       "bold-persuasive": 0,
@@ -12049,7 +12049,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 1,
       "community": 3,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 3,
       "early-access": 3,
       "signup": 0,
@@ -12063,14 +12063,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 3,
       "contact-sales": 1,
     },
-    "stage": {
+    "startupStage": {
       "idea": 3,
       "mvp": 0,
       "traction": 0,
       "growth": 0,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 3,
       "trial-free": 0,
@@ -12081,7 +12081,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 1,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 3,
       "minimal-technical": 2,
       "bold-persuasive": 0,
@@ -12114,7 +12114,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 1,
       "community": 3,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 3,
       "early-access": 3,
       "signup": 0,
@@ -12128,14 +12128,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 3,
       "contact-sales": 1,
     },
-    "stage": {
+    "startupStage": {
       "idea": 3,
       "mvp": 0,
       "traction": 0,
       "growth": 0,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 3,
       "trial-free": 0,
@@ -12146,7 +12146,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 1,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 3,
       "minimal-technical": 2,
       "bold-persuasive": 0,
@@ -12179,7 +12179,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 1,
       "community": 3,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 3,
       "early-access": 3,
       "signup": 0,
@@ -12193,14 +12193,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 3,
       "contact-sales": 1,
     },
-    "stage": {
+    "startupStage": {
       "idea": 3,
       "mvp": 0,
       "traction": 0,
       "growth": 0,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 3,
       "trial-free": 0,
@@ -12211,7 +12211,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 1,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 3,
       "minimal-technical": 2,
       "bold-persuasive": 0,
@@ -12244,7 +12244,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 1,
       "community": 3,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 3,
       "early-access": 3,
       "signup": 0,
@@ -12258,14 +12258,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 3,
       "contact-sales": 1,
     },
-    "stage": {
+    "startupStage": {
       "idea": 3,
       "mvp": 0,
       "traction": 0,
       "growth": 0,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 3,
       "trial-free": 0,
@@ -12276,7 +12276,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 1,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 3,
       "minimal-technical": 2,
       "bold-persuasive": 0,
@@ -12309,7 +12309,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 1,
       "community": 3,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 3,
       "early-access": 3,
       "signup": 0,
@@ -12323,14 +12323,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 3,
       "contact-sales": 1,
     },
-    "stage": {
+    "startupStage": {
       "idea": 3,
       "mvp": 0,
       "traction": 0,
       "growth": 0,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 3,
       "trial-free": 0,
@@ -12341,7 +12341,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 1,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 3,
       "minimal-technical": 2,
       "bold-persuasive": 0,
@@ -12374,7 +12374,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 1,
       "community": 3,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 3,
       "early-access": 3,
       "signup": 0,
@@ -12388,14 +12388,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 3,
       "contact-sales": 1,
     },
-    "stage": {
+    "startupStage": {
       "idea": 3,
       "mvp": 0,
       "traction": 0,
       "growth": 0,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 3,
       "trial-free": 0,
@@ -12406,7 +12406,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 1,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 3,
       "minimal-technical": 2,
       "bold-persuasive": 0,
@@ -12439,7 +12439,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 1,
       "community": 3,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 3,
       "early-access": 3,
       "signup": 0,
@@ -12453,14 +12453,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 3,
       "contact-sales": 1,
     },
-    "stage": {
+    "startupStage": {
       "idea": 3,
       "mvp": 0,
       "traction": 0,
       "growth": 0,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 3,
       "trial-free": 0,
@@ -12471,7 +12471,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 1,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 3,
       "minimal-technical": 2,
       "bold-persuasive": 0,
@@ -12504,7 +12504,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 1,
       "community": 3,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 3,
       "early-access": 3,
       "signup": 0,
@@ -12518,14 +12518,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 3,
       "contact-sales": 1,
     },
-    "stage": {
+    "startupStage": {
       "idea": 3,
       "mvp": 0,
       "traction": 0,
       "growth": 0,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 3,
       "trial-free": 0,
@@ -12536,7 +12536,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 1,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 3,
       "minimal-technical": 2,
       "bold-persuasive": 0,
@@ -12569,7 +12569,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 1,
       "community": 3,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 3,
       "early-access": 3,
       "signup": 0,
@@ -12583,14 +12583,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 3,
       "contact-sales": 1,
     },
-    "stage": {
+    "startupStage": {
       "idea": 3,
       "mvp": 0,
       "traction": 0,
       "growth": 0,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 3,
       "trial-free": 0,
@@ -12601,7 +12601,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 1,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 3,
       "minimal-technical": 2,
       "bold-persuasive": 0,
@@ -12634,7 +12634,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 1,
       "community": 3,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 3,
       "early-access": 3,
       "signup": 0,
@@ -12648,14 +12648,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 3,
       "contact-sales": 1,
     },
-    "stage": {
+    "startupStage": {
       "idea": 3,
       "mvp": 0,
       "traction": 0,
       "growth": 0,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 3,
       "trial-free": 0,
@@ -12666,7 +12666,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 1,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 3,
       "minimal-technical": 2,
       "bold-persuasive": 0,
@@ -12699,7 +12699,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 1,
       "community": 3,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 3,
       "early-access": 3,
       "signup": 0,
@@ -12713,14 +12713,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 3,
       "contact-sales": 1,
     },
-    "stage": {
+    "startupStage": {
       "idea": 3,
       "mvp": 0,
       "traction": 0,
       "growth": 0,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 3,
       "trial-free": 0,
@@ -12731,7 +12731,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 1,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 3,
       "minimal-technical": 2,
       "bold-persuasive": 0,
@@ -12764,7 +12764,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 1,
       "community": 3,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 3,
       "early-access": 3,
       "signup": 0,
@@ -12778,14 +12778,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 3,
       "contact-sales": 1,
     },
-    "stage": {
+    "startupStage": {
       "idea": 3,
       "mvp": 0,
       "traction": 0,
       "growth": 0,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 3,
       "trial-free": 0,
@@ -12796,7 +12796,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 1,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 3,
       "minimal-technical": 2,
       "bold-persuasive": 0,
@@ -12829,7 +12829,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 1,
       "community": 3,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 3,
       "early-access": 3,
       "signup": 0,
@@ -12843,14 +12843,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 3,
       "contact-sales": 1,
     },
-    "stage": {
+    "startupStage": {
       "idea": 3,
       "mvp": 0,
       "traction": 0,
       "growth": 0,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 3,
       "trial-free": 0,
@@ -12861,7 +12861,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 1,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 3,
       "minimal-technical": 2,
       "bold-persuasive": 0,
@@ -12894,7 +12894,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 1,
       "community": 3,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 3,
       "early-access": 3,
       "signup": 0,
@@ -12908,14 +12908,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 3,
       "contact-sales": 1,
     },
-    "stage": {
+    "startupStage": {
       "idea": 3,
       "mvp": 0,
       "traction": 0,
       "growth": 0,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 3,
       "trial-free": 0,
@@ -12926,7 +12926,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 1,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 3,
       "minimal-technical": 2,
       "bold-persuasive": 0,
@@ -12959,7 +12959,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 1,
       "community": 3,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 3,
       "early-access": 3,
       "signup": 0,
@@ -12973,14 +12973,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 3,
       "contact-sales": 1,
     },
-    "stage": {
+    "startupStage": {
       "idea": 3,
       "mvp": 0,
       "traction": 0,
       "growth": 0,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 3,
       "trial-free": 0,
@@ -12991,7 +12991,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 1,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 3,
       "minimal-technical": 2,
       "bold-persuasive": 0,
@@ -13024,7 +13024,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 1,
       "community": 3,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 3,
       "early-access": 3,
       "signup": 0,
@@ -13038,14 +13038,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 3,
       "contact-sales": 1,
     },
-    "stage": {
+    "startupStage": {
       "idea": 3,
       "mvp": 0,
       "traction": 0,
       "growth": 0,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 3,
       "trial-free": 0,
@@ -13056,7 +13056,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 1,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 3,
       "minimal-technical": 2,
       "bold-persuasive": 0,
@@ -13089,7 +13089,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 1,
       "community": 3,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 3,
       "early-access": 3,
       "signup": 0,
@@ -13103,14 +13103,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 3,
       "contact-sales": 1,
     },
-    "stage": {
+    "startupStage": {
       "idea": 3,
       "mvp": 0,
       "traction": 0,
       "growth": 0,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 3,
       "trial-free": 0,
@@ -13121,7 +13121,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 1,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 3,
       "minimal-technical": 2,
       "bold-persuasive": 0,
@@ -13154,7 +13154,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 1,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 2,
       "signup": 2,
@@ -13168,14 +13168,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 1,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 0,
       "traction": 3,
       "growth": 0,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 1,
       "trial-free": 2,
@@ -13186,7 +13186,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 1,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 0,
       "minimal-technical": 0,
       "bold-persuasive": 3,
@@ -13219,7 +13219,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 1,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 2,
       "signup": 2,
@@ -13233,14 +13233,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 1,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 0,
       "traction": 3,
       "growth": 0,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 1,
       "trial-free": 2,
@@ -13251,7 +13251,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 1,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 0,
       "minimal-technical": 0,
       "bold-persuasive": 3,
@@ -13284,7 +13284,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 1,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 2,
       "signup": 2,
@@ -13298,14 +13298,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 1,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 0,
       "traction": 3,
       "growth": 0,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 1,
       "trial-free": 2,
@@ -13316,7 +13316,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 1,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 0,
       "minimal-technical": 0,
       "bold-persuasive": 3,
@@ -13349,7 +13349,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 1,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 2,
       "signup": 2,
@@ -13363,14 +13363,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 1,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 0,
       "traction": 3,
       "growth": 0,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 1,
       "trial-free": 2,
@@ -13381,7 +13381,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 1,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 0,
       "minimal-technical": 0,
       "bold-persuasive": 3,
@@ -13414,7 +13414,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 1,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 2,
       "signup": 2,
@@ -13428,14 +13428,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 1,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 0,
       "traction": 3,
       "growth": 0,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 1,
       "trial-free": 2,
@@ -13446,7 +13446,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 1,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 0,
       "minimal-technical": 0,
       "bold-persuasive": 3,
@@ -13479,7 +13479,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 1,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 2,
       "signup": 2,
@@ -13493,14 +13493,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 1,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 0,
       "traction": 3,
       "growth": 0,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 1,
       "trial-free": 2,
@@ -13511,7 +13511,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 1,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 0,
       "minimal-technical": 0,
       "bold-persuasive": 3,
@@ -13544,7 +13544,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 1,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 2,
       "signup": 2,
@@ -13558,14 +13558,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 1,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 0,
       "traction": 3,
       "growth": 0,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 1,
       "trial-free": 2,
@@ -13576,7 +13576,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 1,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 0,
       "minimal-technical": 0,
       "bold-persuasive": 3,
@@ -13609,7 +13609,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 1,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 2,
       "signup": 2,
@@ -13623,14 +13623,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 1,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 0,
       "traction": 3,
       "growth": 0,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 1,
       "trial-free": 2,
@@ -13641,7 +13641,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 1,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 0,
       "minimal-technical": 0,
       "bold-persuasive": 3,
@@ -13674,7 +13674,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 1,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 2,
       "signup": 2,
@@ -13688,14 +13688,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 1,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 0,
       "traction": 3,
       "growth": 0,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 1,
       "trial-free": 2,
@@ -13706,7 +13706,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 1,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 0,
       "minimal-technical": 0,
       "bold-persuasive": 3,
@@ -13739,7 +13739,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 1,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 2,
       "signup": 2,
@@ -13753,14 +13753,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 1,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 0,
       "traction": 3,
       "growth": 0,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 1,
       "trial-free": 2,
@@ -13771,7 +13771,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 1,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 0,
       "minimal-technical": 0,
       "bold-persuasive": 3,
@@ -13804,7 +13804,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 1,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 2,
       "signup": 2,
@@ -13818,14 +13818,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 1,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 0,
       "traction": 3,
       "growth": 0,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 1,
       "trial-free": 2,
@@ -13836,7 +13836,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 1,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 0,
       "minimal-technical": 0,
       "bold-persuasive": 3,
@@ -13869,7 +13869,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 1,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 2,
       "signup": 2,
@@ -13883,14 +13883,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 1,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 0,
       "traction": 3,
       "growth": 0,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 1,
       "trial-free": 2,
@@ -13901,7 +13901,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 1,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 0,
       "minimal-technical": 0,
       "bold-persuasive": 3,
@@ -13934,7 +13934,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 1,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 2,
       "signup": 2,
@@ -13948,14 +13948,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 1,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 0,
       "traction": 3,
       "growth": 0,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 1,
       "trial-free": 2,
@@ -13966,7 +13966,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 1,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 0,
       "minimal-technical": 0,
       "bold-persuasive": 3,
@@ -13999,7 +13999,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 1,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 2,
       "signup": 2,
@@ -14013,14 +14013,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 1,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 0,
       "traction": 3,
       "growth": 0,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 1,
       "trial-free": 2,
@@ -14031,7 +14031,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 1,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 0,
       "minimal-technical": 0,
       "bold-persuasive": 3,
@@ -14064,7 +14064,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 1,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 2,
       "signup": 2,
@@ -14078,14 +14078,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 1,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 0,
       "traction": 3,
       "growth": 0,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 1,
       "trial-free": 2,
@@ -14096,7 +14096,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 1,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 0,
       "minimal-technical": 0,
       "bold-persuasive": 3,
@@ -14129,7 +14129,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 1,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 2,
       "signup": 2,
@@ -14143,14 +14143,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 1,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 0,
       "traction": 3,
       "growth": 0,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 1,
       "trial-free": 2,
@@ -14161,7 +14161,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 1,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 0,
       "minimal-technical": 0,
       "bold-persuasive": 3,
@@ -14194,7 +14194,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 1,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 2,
       "signup": 2,
@@ -14208,14 +14208,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 1,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 0,
       "traction": 3,
       "growth": 0,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 1,
       "trial-free": 2,
@@ -14226,7 +14226,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 1,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 0,
       "minimal-technical": 0,
       "bold-persuasive": 3,
@@ -14259,7 +14259,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 1,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 2,
       "signup": 2,
@@ -14273,14 +14273,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 1,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 0,
       "traction": 3,
       "growth": 0,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 1,
       "trial-free": 2,
@@ -14291,7 +14291,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 1,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 0,
       "minimal-technical": 0,
       "bold-persuasive": 3,
@@ -14324,7 +14324,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 2,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 2,
       "signup": 0,
@@ -14338,14 +14338,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 2,
       "mvp": 0,
       "traction": 3,
       "growth": 0,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 0,
       "trial-free": 0,
@@ -14356,7 +14356,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 2,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 3,
       "minimal-technical": 0,
       "bold-persuasive": 2,
@@ -14389,7 +14389,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 2,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 2,
       "signup": 0,
@@ -14403,14 +14403,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 2,
       "mvp": 0,
       "traction": 3,
       "growth": 0,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 0,
       "trial-free": 0,
@@ -14421,7 +14421,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 2,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 3,
       "minimal-technical": 0,
       "bold-persuasive": 2,
@@ -14454,7 +14454,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 2,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 2,
       "signup": 0,
@@ -14468,14 +14468,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 2,
       "mvp": 0,
       "traction": 3,
       "growth": 0,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 0,
       "trial-free": 0,
@@ -14486,7 +14486,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 2,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 3,
       "minimal-technical": 0,
       "bold-persuasive": 2,
@@ -14519,7 +14519,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 2,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 2,
       "signup": 0,
@@ -14533,14 +14533,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 2,
       "mvp": 0,
       "traction": 3,
       "growth": 0,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 0,
       "trial-free": 0,
@@ -14551,7 +14551,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 2,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 3,
       "minimal-technical": 0,
       "bold-persuasive": 2,
@@ -14584,7 +14584,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 2,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 2,
       "signup": 0,
@@ -14598,14 +14598,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 2,
       "mvp": 0,
       "traction": 3,
       "growth": 0,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 0,
       "trial-free": 0,
@@ -14616,7 +14616,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 2,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 3,
       "minimal-technical": 0,
       "bold-persuasive": 2,
@@ -14649,7 +14649,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 2,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 2,
       "signup": 0,
@@ -14663,14 +14663,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 2,
       "mvp": 0,
       "traction": 3,
       "growth": 0,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 0,
       "trial-free": 0,
@@ -14681,7 +14681,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 2,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 3,
       "minimal-technical": 0,
       "bold-persuasive": 2,
@@ -14714,7 +14714,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 2,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 2,
       "signup": 0,
@@ -14728,14 +14728,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 2,
       "mvp": 0,
       "traction": 3,
       "growth": 0,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 0,
       "trial-free": 0,
@@ -14746,7 +14746,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 2,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 3,
       "minimal-technical": 0,
       "bold-persuasive": 2,
@@ -14779,7 +14779,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 2,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 2,
       "signup": 0,
@@ -14793,14 +14793,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 2,
       "mvp": 0,
       "traction": 3,
       "growth": 0,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 0,
       "trial-free": 0,
@@ -14811,7 +14811,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 2,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 3,
       "minimal-technical": 0,
       "bold-persuasive": 2,
@@ -14844,7 +14844,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 2,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 2,
       "signup": 0,
@@ -14858,14 +14858,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 2,
       "mvp": 0,
       "traction": 3,
       "growth": 0,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 0,
       "trial-free": 0,
@@ -14876,7 +14876,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 2,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 3,
       "minimal-technical": 0,
       "bold-persuasive": 2,
@@ -14909,7 +14909,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 2,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 2,
       "signup": 0,
@@ -14923,14 +14923,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 2,
       "mvp": 0,
       "traction": 3,
       "growth": 0,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 0,
       "trial-free": 0,
@@ -14941,7 +14941,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 2,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 3,
       "minimal-technical": 0,
       "bold-persuasive": 2,
@@ -14974,7 +14974,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 2,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 2,
       "signup": 0,
@@ -14988,14 +14988,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 2,
       "mvp": 0,
       "traction": 3,
       "growth": 0,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 0,
       "trial-free": 0,
@@ -15006,7 +15006,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 2,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 3,
       "minimal-technical": 0,
       "bold-persuasive": 2,
@@ -15039,7 +15039,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 2,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 2,
       "signup": 0,
@@ -15053,14 +15053,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 2,
       "mvp": 0,
       "traction": 3,
       "growth": 0,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 0,
       "trial-free": 0,
@@ -15071,7 +15071,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 2,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 3,
       "minimal-technical": 0,
       "bold-persuasive": 2,
@@ -15104,7 +15104,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 2,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 2,
       "signup": 0,
@@ -15118,14 +15118,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 2,
       "mvp": 0,
       "traction": 3,
       "growth": 0,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 0,
       "trial-free": 0,
@@ -15136,7 +15136,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 2,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 3,
       "minimal-technical": 0,
       "bold-persuasive": 2,
@@ -15169,7 +15169,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 2,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 2,
       "signup": 0,
@@ -15183,14 +15183,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 2,
       "mvp": 0,
       "traction": 3,
       "growth": 0,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 0,
       "trial-free": 0,
@@ -15201,7 +15201,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 2,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 3,
       "minimal-technical": 0,
       "bold-persuasive": 2,
@@ -15234,7 +15234,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 2,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 2,
       "signup": 0,
@@ -15248,14 +15248,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 2,
       "mvp": 0,
       "traction": 3,
       "growth": 0,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 0,
       "trial-free": 0,
@@ -15266,7 +15266,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 2,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 3,
       "minimal-technical": 0,
       "bold-persuasive": 2,
@@ -15299,7 +15299,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 2,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 2,
       "signup": 0,
@@ -15313,14 +15313,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 2,
       "mvp": 0,
       "traction": 3,
       "growth": 0,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 0,
       "trial-free": 0,
@@ -15331,7 +15331,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 2,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 3,
       "minimal-technical": 0,
       "bold-persuasive": 2,
@@ -15364,7 +15364,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 2,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 2,
       "signup": 0,
@@ -15378,14 +15378,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 2,
       "mvp": 0,
       "traction": 3,
       "growth": 0,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 0,
       "trial-free": 0,
@@ -15396,7 +15396,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 2,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 3,
       "minimal-technical": 0,
       "bold-persuasive": 2,
@@ -15429,7 +15429,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 2,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 2,
       "signup": 0,
@@ -15443,14 +15443,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 2,
       "mvp": 0,
       "traction": 3,
       "growth": 0,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 0,
       "trial-free": 0,
@@ -15461,7 +15461,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 2,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 3,
       "minimal-technical": 0,
       "bold-persuasive": 2,
@@ -15494,7 +15494,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 2,
       "community": 3,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 3,
       "early-access": 3,
       "signup": 1,
@@ -15508,14 +15508,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 3,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 3,
       "mvp": 0,
       "traction": 0,
       "growth": 1,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 3,
       "freemium": 0,
       "trial-free": 2,
@@ -15526,7 +15526,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 0,
       "minimal-technical": 0,
       "bold-persuasive": 0,
@@ -15559,7 +15559,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 2,
       "community": 3,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 3,
       "early-access": 3,
       "signup": 1,
@@ -15573,14 +15573,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 3,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 3,
       "mvp": 0,
       "traction": 0,
       "growth": 1,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 3,
       "freemium": 0,
       "trial-free": 2,
@@ -15591,7 +15591,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 0,
       "minimal-technical": 0,
       "bold-persuasive": 0,
@@ -15624,7 +15624,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 2,
       "community": 3,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 3,
       "early-access": 3,
       "signup": 1,
@@ -15638,14 +15638,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 3,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 3,
       "mvp": 0,
       "traction": 0,
       "growth": 1,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 3,
       "freemium": 0,
       "trial-free": 2,
@@ -15656,7 +15656,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 0,
       "minimal-technical": 0,
       "bold-persuasive": 0,
@@ -15689,7 +15689,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 2,
       "community": 3,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 3,
       "early-access": 3,
       "signup": 1,
@@ -15703,14 +15703,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 3,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 3,
       "mvp": 0,
       "traction": 0,
       "growth": 1,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 3,
       "freemium": 0,
       "trial-free": 2,
@@ -15721,7 +15721,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 0,
       "minimal-technical": 0,
       "bold-persuasive": 0,
@@ -15754,7 +15754,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 2,
       "community": 3,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 3,
       "early-access": 3,
       "signup": 1,
@@ -15768,14 +15768,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 3,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 3,
       "mvp": 0,
       "traction": 0,
       "growth": 1,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 3,
       "freemium": 0,
       "trial-free": 2,
@@ -15786,7 +15786,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 0,
       "minimal-technical": 0,
       "bold-persuasive": 0,
@@ -15819,7 +15819,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 2,
       "community": 3,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 3,
       "early-access": 3,
       "signup": 1,
@@ -15833,14 +15833,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 3,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 3,
       "mvp": 0,
       "traction": 0,
       "growth": 1,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 3,
       "freemium": 0,
       "trial-free": 2,
@@ -15851,7 +15851,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 0,
       "minimal-technical": 0,
       "bold-persuasive": 0,
@@ -15884,7 +15884,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 2,
       "community": 3,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 3,
       "early-access": 3,
       "signup": 1,
@@ -15898,14 +15898,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 3,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 3,
       "mvp": 0,
       "traction": 0,
       "growth": 1,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 3,
       "freemium": 0,
       "trial-free": 2,
@@ -15916,7 +15916,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 0,
       "minimal-technical": 0,
       "bold-persuasive": 0,
@@ -15949,7 +15949,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 2,
       "community": 3,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 3,
       "early-access": 3,
       "signup": 1,
@@ -15963,14 +15963,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 3,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 3,
       "mvp": 0,
       "traction": 0,
       "growth": 1,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 3,
       "freemium": 0,
       "trial-free": 2,
@@ -15981,7 +15981,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 0,
       "minimal-technical": 0,
       "bold-persuasive": 0,
@@ -16014,7 +16014,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 2,
       "community": 3,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 3,
       "early-access": 3,
       "signup": 1,
@@ -16028,14 +16028,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 3,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 3,
       "mvp": 0,
       "traction": 0,
       "growth": 1,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 3,
       "freemium": 0,
       "trial-free": 2,
@@ -16046,7 +16046,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 0,
       "minimal-technical": 0,
       "bold-persuasive": 0,
@@ -16079,7 +16079,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 2,
       "community": 3,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 3,
       "early-access": 3,
       "signup": 1,
@@ -16093,14 +16093,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 3,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 3,
       "mvp": 0,
       "traction": 0,
       "growth": 1,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 3,
       "freemium": 0,
       "trial-free": 2,
@@ -16111,7 +16111,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 0,
       "minimal-technical": 0,
       "bold-persuasive": 0,
@@ -16144,7 +16144,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 2,
       "community": 3,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 3,
       "early-access": 3,
       "signup": 1,
@@ -16158,14 +16158,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 3,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 3,
       "mvp": 0,
       "traction": 0,
       "growth": 1,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 3,
       "freemium": 0,
       "trial-free": 2,
@@ -16176,7 +16176,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 0,
       "minimal-technical": 0,
       "bold-persuasive": 0,
@@ -16209,7 +16209,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 2,
       "community": 3,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 3,
       "early-access": 3,
       "signup": 1,
@@ -16223,14 +16223,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 3,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 3,
       "mvp": 0,
       "traction": 0,
       "growth": 1,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 3,
       "freemium": 0,
       "trial-free": 2,
@@ -16241,7 +16241,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 0,
       "minimal-technical": 0,
       "bold-persuasive": 0,
@@ -16274,7 +16274,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 2,
       "community": 3,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 3,
       "early-access": 3,
       "signup": 1,
@@ -16288,14 +16288,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 3,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 3,
       "mvp": 0,
       "traction": 0,
       "growth": 1,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 3,
       "freemium": 0,
       "trial-free": 2,
@@ -16306,7 +16306,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 0,
       "minimal-technical": 0,
       "bold-persuasive": 0,
@@ -16339,7 +16339,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 2,
       "community": 3,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 3,
       "early-access": 3,
       "signup": 1,
@@ -16353,14 +16353,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 3,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 3,
       "mvp": 0,
       "traction": 0,
       "growth": 1,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 3,
       "freemium": 0,
       "trial-free": 2,
@@ -16371,7 +16371,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 0,
       "minimal-technical": 0,
       "bold-persuasive": 0,
@@ -16404,7 +16404,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 2,
       "community": 3,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 3,
       "early-access": 3,
       "signup": 1,
@@ -16418,14 +16418,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 3,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 3,
       "mvp": 0,
       "traction": 0,
       "growth": 1,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 3,
       "freemium": 0,
       "trial-free": 2,
@@ -16436,7 +16436,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 0,
       "minimal-technical": 0,
       "bold-persuasive": 0,
@@ -16469,7 +16469,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 2,
       "community": 3,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 3,
       "early-access": 3,
       "signup": 1,
@@ -16483,14 +16483,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 3,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 3,
       "mvp": 0,
       "traction": 0,
       "growth": 1,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 3,
       "freemium": 0,
       "trial-free": 2,
@@ -16501,7 +16501,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 0,
       "minimal-technical": 0,
       "bold-persuasive": 0,
@@ -16534,7 +16534,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 2,
       "community": 3,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 3,
       "early-access": 3,
       "signup": 1,
@@ -16548,14 +16548,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 3,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 3,
       "mvp": 0,
       "traction": 0,
       "growth": 1,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 3,
       "freemium": 0,
       "trial-free": 2,
@@ -16566,7 +16566,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 0,
       "minimal-technical": 0,
       "bold-persuasive": 0,
@@ -16599,7 +16599,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 2,
       "community": 3,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 3,
       "early-access": 3,
       "signup": 1,
@@ -16613,14 +16613,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 3,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 3,
       "mvp": 0,
       "traction": 0,
       "growth": 1,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 3,
       "freemium": 0,
       "trial-free": 2,
@@ -16631,7 +16631,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 0,
       "minimal-technical": 0,
       "bold-persuasive": 0,
@@ -16664,7 +16664,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 3,
       "community": 2,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 0,
       "signup": 0,
@@ -16678,14 +16678,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 2,
       "contact-sales": 3,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 0,
       "traction": 3,
       "growth": 0,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 0,
       "trial-free": 0,
@@ -16696,7 +16696,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 3,
       "custom-quote": 2,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 0,
       "minimal-technical": 1,
       "bold-persuasive": 3,
@@ -16729,7 +16729,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 3,
       "community": 2,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 0,
       "signup": 0,
@@ -16743,14 +16743,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 2,
       "contact-sales": 3,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 0,
       "traction": 3,
       "growth": 0,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 0,
       "trial-free": 0,
@@ -16761,7 +16761,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 3,
       "custom-quote": 2,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 0,
       "minimal-technical": 1,
       "bold-persuasive": 3,
@@ -16794,7 +16794,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 3,
       "community": 2,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 0,
       "signup": 0,
@@ -16808,14 +16808,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 2,
       "contact-sales": 3,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 0,
       "traction": 3,
       "growth": 0,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 0,
       "trial-free": 0,
@@ -16826,7 +16826,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 3,
       "custom-quote": 2,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 0,
       "minimal-technical": 1,
       "bold-persuasive": 3,
@@ -16859,7 +16859,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 3,
       "community": 2,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 0,
       "signup": 0,
@@ -16873,14 +16873,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 2,
       "contact-sales": 3,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 0,
       "traction": 3,
       "growth": 0,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 0,
       "trial-free": 0,
@@ -16891,7 +16891,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 3,
       "custom-quote": 2,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 0,
       "minimal-technical": 1,
       "bold-persuasive": 3,
@@ -16924,7 +16924,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 3,
       "community": 2,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 0,
       "signup": 0,
@@ -16938,14 +16938,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 2,
       "contact-sales": 3,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 0,
       "traction": 3,
       "growth": 0,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 0,
       "trial-free": 0,
@@ -16956,7 +16956,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 3,
       "custom-quote": 2,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 0,
       "minimal-technical": 1,
       "bold-persuasive": 3,
@@ -16989,7 +16989,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 3,
       "community": 2,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 0,
       "signup": 0,
@@ -17003,14 +17003,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 2,
       "contact-sales": 3,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 0,
       "traction": 3,
       "growth": 0,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 0,
       "trial-free": 0,
@@ -17021,7 +17021,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 3,
       "custom-quote": 2,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 0,
       "minimal-technical": 1,
       "bold-persuasive": 3,
@@ -17054,7 +17054,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 3,
       "community": 2,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 0,
       "signup": 0,
@@ -17068,14 +17068,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 2,
       "contact-sales": 3,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 0,
       "traction": 3,
       "growth": 0,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 0,
       "trial-free": 0,
@@ -17086,7 +17086,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 3,
       "custom-quote": 2,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 0,
       "minimal-technical": 1,
       "bold-persuasive": 3,
@@ -17119,7 +17119,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 3,
       "community": 2,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 0,
       "signup": 0,
@@ -17133,14 +17133,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 2,
       "contact-sales": 3,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 0,
       "traction": 3,
       "growth": 0,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 0,
       "trial-free": 0,
@@ -17151,7 +17151,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 3,
       "custom-quote": 2,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 0,
       "minimal-technical": 1,
       "bold-persuasive": 3,
@@ -17184,7 +17184,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 3,
       "community": 2,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 0,
       "signup": 0,
@@ -17198,14 +17198,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 2,
       "contact-sales": 3,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 0,
       "traction": 3,
       "growth": 0,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 0,
       "trial-free": 0,
@@ -17216,7 +17216,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 3,
       "custom-quote": 2,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 0,
       "minimal-technical": 1,
       "bold-persuasive": 3,
@@ -17249,7 +17249,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 3,
       "community": 2,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 0,
       "signup": 0,
@@ -17263,14 +17263,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 2,
       "contact-sales": 3,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 0,
       "traction": 3,
       "growth": 0,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 0,
       "trial-free": 0,
@@ -17281,7 +17281,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 3,
       "custom-quote": 2,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 0,
       "minimal-technical": 1,
       "bold-persuasive": 3,
@@ -17314,7 +17314,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 3,
       "community": 2,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 0,
       "signup": 0,
@@ -17328,14 +17328,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 2,
       "contact-sales": 3,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 0,
       "traction": 3,
       "growth": 0,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 0,
       "trial-free": 0,
@@ -17346,7 +17346,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 3,
       "custom-quote": 2,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 0,
       "minimal-technical": 1,
       "bold-persuasive": 3,
@@ -17379,7 +17379,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 3,
       "community": 2,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 0,
       "signup": 0,
@@ -17393,14 +17393,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 2,
       "contact-sales": 3,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 0,
       "traction": 3,
       "growth": 0,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 0,
       "trial-free": 0,
@@ -17411,7 +17411,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 3,
       "custom-quote": 2,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 0,
       "minimal-technical": 1,
       "bold-persuasive": 3,
@@ -17444,7 +17444,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 3,
       "community": 2,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 0,
       "signup": 0,
@@ -17458,14 +17458,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 2,
       "contact-sales": 3,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 0,
       "traction": 3,
       "growth": 0,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 0,
       "trial-free": 0,
@@ -17476,7 +17476,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 3,
       "custom-quote": 2,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 0,
       "minimal-technical": 1,
       "bold-persuasive": 3,
@@ -17509,7 +17509,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 3,
       "community": 2,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 0,
       "signup": 0,
@@ -17523,14 +17523,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 2,
       "contact-sales": 3,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 0,
       "traction": 3,
       "growth": 0,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 0,
       "trial-free": 0,
@@ -17541,7 +17541,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 3,
       "custom-quote": 2,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 0,
       "minimal-technical": 1,
       "bold-persuasive": 3,
@@ -17574,7 +17574,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 3,
       "community": 2,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 0,
       "signup": 0,
@@ -17588,14 +17588,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 2,
       "contact-sales": 3,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 0,
       "traction": 3,
       "growth": 0,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 0,
       "trial-free": 0,
@@ -17606,7 +17606,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 3,
       "custom-quote": 2,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 0,
       "minimal-technical": 1,
       "bold-persuasive": 3,
@@ -17639,7 +17639,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 3,
       "community": 2,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 0,
       "signup": 0,
@@ -17653,14 +17653,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 2,
       "contact-sales": 3,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 0,
       "traction": 3,
       "growth": 0,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 0,
       "trial-free": 0,
@@ -17671,7 +17671,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 3,
       "custom-quote": 2,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 0,
       "minimal-technical": 1,
       "bold-persuasive": 3,
@@ -17704,7 +17704,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 3,
       "community": 2,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 0,
       "signup": 0,
@@ -17718,14 +17718,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 2,
       "contact-sales": 3,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 0,
       "traction": 3,
       "growth": 0,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 0,
       "trial-free": 0,
@@ -17736,7 +17736,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 3,
       "custom-quote": 2,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 0,
       "minimal-technical": 1,
       "bold-persuasive": 3,
@@ -17769,7 +17769,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 3,
       "community": 2,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 0,
       "signup": 0,
@@ -17783,14 +17783,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 2,
       "contact-sales": 3,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 0,
       "traction": 3,
       "growth": 0,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 0,
       "trial-free": 0,
@@ -17801,7 +17801,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 3,
       "custom-quote": 2,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 0,
       "minimal-technical": 1,
       "bold-persuasive": 3,
@@ -17809,7 +17809,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "luxury-expert": 1,
     },
   },
-  "trusty-brick-tone::steel-gray::steel-gray-solid-slate-800": {
+  "trusty-brick-toneProfile::steel-gray::steel-gray-solid-slate-800": {
     "market": {
       "Work & Productivity Tools": 3,
       "Marketing & Sales Tools": 0,
@@ -17834,7 +17834,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 1,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 0,
       "signup": 1,
@@ -17848,14 +17848,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 3,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 0,
       "traction": 0,
       "growth": 3,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 0,
       "trial-free": 2,
@@ -17866,7 +17866,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 1,
       "minimal-technical": 1,
       "bold-persuasive": 2,
@@ -17874,7 +17874,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "luxury-expert": 3,
     },
   },
-  "trusty-brick-tone::steel-gray::steel-gray-gradient-tr-slate": {
+  "trusty-brick-toneProfile::steel-gray::steel-gray-gradient-tr-slate": {
     "market": {
       "Work & Productivity Tools": 3,
       "Marketing & Sales Tools": 0,
@@ -17899,7 +17899,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 1,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 0,
       "signup": 1,
@@ -17913,14 +17913,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 3,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 0,
       "traction": 0,
       "growth": 3,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 0,
       "trial-free": 2,
@@ -17931,7 +17931,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 1,
       "minimal-technical": 1,
       "bold-persuasive": 2,
@@ -17939,7 +17939,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "luxury-expert": 3,
     },
   },
-  "trusty-brick-tone::steel-gray::steel-gray-gradient-bl-slate-blue": {
+  "trusty-brick-toneProfile::steel-gray::steel-gray-gradient-bl-slate-blue": {
     "market": {
       "Work & Productivity Tools": 3,
       "Marketing & Sales Tools": 0,
@@ -17964,7 +17964,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 1,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 0,
       "signup": 1,
@@ -17978,14 +17978,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 3,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 0,
       "traction": 0,
       "growth": 3,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 0,
       "trial-free": 2,
@@ -17996,7 +17996,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 1,
       "minimal-technical": 1,
       "bold-persuasive": 2,
@@ -18004,7 +18004,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "luxury-expert": 3,
     },
   },
-  "trusty-brick-tone::steel-gray::steel-gray-soft-blur-center": {
+  "trusty-brick-toneProfile::steel-gray::steel-gray-soft-blur-center": {
     "market": {
       "Work & Productivity Tools": 3,
       "Marketing & Sales Tools": 0,
@@ -18029,7 +18029,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 1,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 0,
       "signup": 1,
@@ -18043,14 +18043,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 3,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 0,
       "traction": 0,
       "growth": 3,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 0,
       "trial-free": 2,
@@ -18061,7 +18061,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 1,
       "minimal-technical": 1,
       "bold-persuasive": 2,
@@ -18069,7 +18069,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "luxury-expert": 3,
     },
   },
-  "trusty-brick-tone::steel-gray::steel-gray-angled-light-strip": {
+  "trusty-brick-toneProfile::steel-gray::steel-gray-angled-light-strip": {
     "market": {
       "Work & Productivity Tools": 3,
       "Marketing & Sales Tools": 0,
@@ -18094,7 +18094,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 1,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 0,
       "signup": 1,
@@ -18108,14 +18108,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 3,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 0,
       "traction": 0,
       "growth": 3,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 0,
       "trial-free": 2,
@@ -18126,7 +18126,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 1,
       "minimal-technical": 1,
       "bold-persuasive": 2,
@@ -18134,7 +18134,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "luxury-expert": 3,
     },
   },
-  "trusty-brick-tone::steel-gray::steel-gray-bottom-glow": {
+  "trusty-brick-toneProfile::steel-gray::steel-gray-bottom-glow": {
     "market": {
       "Work & Productivity Tools": 3,
       "Marketing & Sales Tools": 0,
@@ -18159,7 +18159,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 1,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 0,
       "signup": 1,
@@ -18173,14 +18173,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 3,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 0,
       "traction": 0,
       "growth": 3,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 0,
       "trial-free": 2,
@@ -18191,7 +18191,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 1,
       "minimal-technical": 1,
       "bold-persuasive": 2,
@@ -18199,7 +18199,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "luxury-expert": 3,
     },
   },
-  "trusty-brick-tone::trust-blue-white::trust-blue-white-solid-sky-50": {
+  "trusty-brick-toneProfile::trust-blue-white::trust-blue-white-solid-sky-50": {
     "market": {
       "Work & Productivity Tools": 3,
       "Marketing & Sales Tools": 0,
@@ -18224,7 +18224,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 1,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 0,
       "signup": 1,
@@ -18238,14 +18238,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 3,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 0,
       "traction": 0,
       "growth": 3,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 0,
       "trial-free": 2,
@@ -18256,7 +18256,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 1,
       "minimal-technical": 1,
       "bold-persuasive": 2,
@@ -18264,7 +18264,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "luxury-expert": 3,
     },
   },
-  "trusty-brick-tone::trust-blue-white::trust-blue-white-gradient-tr": {
+  "trusty-brick-toneProfile::trust-blue-white::trust-blue-white-gradient-tr": {
     "market": {
       "Work & Productivity Tools": 3,
       "Marketing & Sales Tools": 0,
@@ -18289,7 +18289,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 1,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 0,
       "signup": 1,
@@ -18303,14 +18303,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 3,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 0,
       "traction": 0,
       "growth": 3,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 0,
       "trial-free": 2,
@@ -18321,7 +18321,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 1,
       "minimal-technical": 1,
       "bold-persuasive": 2,
@@ -18329,7 +18329,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "luxury-expert": 3,
     },
   },
-  "trusty-brick-tone::trust-blue-white::trust-blue-white-gradient-b": {
+  "trusty-brick-toneProfile::trust-blue-white::trust-blue-white-gradient-b": {
     "market": {
       "Work & Productivity Tools": 3,
       "Marketing & Sales Tools": 0,
@@ -18354,7 +18354,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 1,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 0,
       "signup": 1,
@@ -18368,14 +18368,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 3,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 0,
       "traction": 0,
       "growth": 3,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 0,
       "trial-free": 2,
@@ -18386,7 +18386,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 1,
       "minimal-technical": 1,
       "bold-persuasive": 2,
@@ -18394,7 +18394,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "luxury-expert": 3,
     },
   },
-  "trusty-brick-tone::trust-blue-white::trust-blue-white-subtle-radial-center": {
+  "trusty-brick-toneProfile::trust-blue-white::trust-blue-white-subtle-radial-center": {
     "market": {
       "Work & Productivity Tools": 3,
       "Marketing & Sales Tools": 0,
@@ -18419,7 +18419,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 1,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 0,
       "signup": 1,
@@ -18433,14 +18433,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 3,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 0,
       "traction": 0,
       "growth": 3,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 0,
       "trial-free": 2,
@@ -18451,7 +18451,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 1,
       "minimal-technical": 1,
       "bold-persuasive": 2,
@@ -18459,7 +18459,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "luxury-expert": 3,
     },
   },
-  "trusty-brick-tone::trust-blue-white::trust-blue-white-soft-halo": {
+  "trusty-brick-toneProfile::trust-blue-white::trust-blue-white-soft-halo": {
     "market": {
       "Work & Productivity Tools": 3,
       "Marketing & Sales Tools": 0,
@@ -18484,7 +18484,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 1,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 0,
       "signup": 1,
@@ -18498,14 +18498,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 3,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 0,
       "traction": 0,
       "growth": 3,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 0,
       "trial-free": 2,
@@ -18516,7 +18516,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 1,
       "minimal-technical": 1,
       "bold-persuasive": 2,
@@ -18524,7 +18524,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "luxury-expert": 3,
     },
   },
-  "trusty-brick-tone::trust-blue-white::trust-blue-white-horizontal-light-fade": {
+  "trusty-brick-toneProfile::trust-blue-white::trust-blue-white-horizontal-light-fade": {
     "market": {
       "Work & Productivity Tools": 3,
       "Marketing & Sales Tools": 0,
@@ -18549,7 +18549,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 1,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 0,
       "signup": 1,
@@ -18563,14 +18563,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 3,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 0,
       "traction": 0,
       "growth": 3,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 0,
       "trial-free": 2,
@@ -18581,7 +18581,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 1,
       "minimal-technical": 1,
       "bold-persuasive": 2,
@@ -18614,7 +18614,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 0,
       "signup": 3,
@@ -18628,14 +18628,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 2,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 3,
       "traction": 0,
       "growth": 1,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 2,
       "freemium": 2,
       "trial-free": 0,
@@ -18646,7 +18646,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 3,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 1,
       "minimal-technical": 3,
       "bold-persuasive": 0,
@@ -18679,7 +18679,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 0,
       "signup": 3,
@@ -18693,14 +18693,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 2,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 3,
       "traction": 0,
       "growth": 1,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 2,
       "freemium": 2,
       "trial-free": 0,
@@ -18711,7 +18711,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 3,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 1,
       "minimal-technical": 3,
       "bold-persuasive": 0,
@@ -18744,7 +18744,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 0,
       "signup": 3,
@@ -18758,14 +18758,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 2,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 3,
       "traction": 0,
       "growth": 1,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 2,
       "freemium": 2,
       "trial-free": 0,
@@ -18776,7 +18776,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 3,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 1,
       "minimal-technical": 3,
       "bold-persuasive": 0,
@@ -18809,7 +18809,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 0,
       "signup": 3,
@@ -18823,14 +18823,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 2,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 3,
       "traction": 0,
       "growth": 1,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 2,
       "freemium": 2,
       "trial-free": 0,
@@ -18841,7 +18841,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 3,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 1,
       "minimal-technical": 3,
       "bold-persuasive": 0,
@@ -18874,7 +18874,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 0,
       "signup": 3,
@@ -18888,14 +18888,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 2,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 3,
       "traction": 0,
       "growth": 1,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 2,
       "freemium": 2,
       "trial-free": 0,
@@ -18906,7 +18906,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 3,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 1,
       "minimal-technical": 3,
       "bold-persuasive": 0,
@@ -18939,7 +18939,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 0,
       "signup": 3,
@@ -18953,14 +18953,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 2,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 3,
       "traction": 0,
       "growth": 1,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 2,
       "freemium": 2,
       "trial-free": 0,
@@ -18971,7 +18971,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 3,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 1,
       "minimal-technical": 3,
       "bold-persuasive": 0,
@@ -19004,7 +19004,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 0,
       "signup": 3,
@@ -19018,14 +19018,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 2,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 3,
       "traction": 0,
       "growth": 1,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 2,
       "freemium": 2,
       "trial-free": 0,
@@ -19036,7 +19036,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 3,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 1,
       "minimal-technical": 3,
       "bold-persuasive": 0,
@@ -19069,7 +19069,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 0,
       "signup": 3,
@@ -19083,14 +19083,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 2,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 3,
       "traction": 0,
       "growth": 1,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 2,
       "freemium": 2,
       "trial-free": 0,
@@ -19101,7 +19101,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 3,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 1,
       "minimal-technical": 3,
       "bold-persuasive": 0,
@@ -19134,7 +19134,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 0,
       "signup": 3,
@@ -19148,14 +19148,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 2,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 3,
       "traction": 0,
       "growth": 1,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 2,
       "freemium": 2,
       "trial-free": 0,
@@ -19166,7 +19166,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 3,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 1,
       "minimal-technical": 3,
       "bold-persuasive": 0,
@@ -19199,7 +19199,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 0,
       "signup": 3,
@@ -19213,14 +19213,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 2,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 3,
       "traction": 0,
       "growth": 1,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 2,
       "freemium": 2,
       "trial-free": 0,
@@ -19231,7 +19231,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 3,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 1,
       "minimal-technical": 3,
       "bold-persuasive": 0,
@@ -19264,7 +19264,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 0,
       "signup": 3,
@@ -19278,14 +19278,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 2,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 3,
       "traction": 0,
       "growth": 1,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 2,
       "freemium": 2,
       "trial-free": 0,
@@ -19296,7 +19296,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 3,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 1,
       "minimal-technical": 3,
       "bold-persuasive": 0,
@@ -19329,7 +19329,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 0,
       "signup": 3,
@@ -19343,14 +19343,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 2,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 3,
       "traction": 0,
       "growth": 1,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 2,
       "freemium": 2,
       "trial-free": 0,
@@ -19361,7 +19361,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 3,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 1,
       "minimal-technical": 3,
       "bold-persuasive": 0,
@@ -19394,7 +19394,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 0,
       "signup": 3,
@@ -19408,14 +19408,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 2,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 3,
       "traction": 0,
       "growth": 1,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 2,
       "freemium": 2,
       "trial-free": 0,
@@ -19426,7 +19426,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 3,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 1,
       "minimal-technical": 3,
       "bold-persuasive": 0,
@@ -19459,7 +19459,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 0,
       "signup": 3,
@@ -19473,14 +19473,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 2,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 3,
       "traction": 0,
       "growth": 1,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 2,
       "freemium": 2,
       "trial-free": 0,
@@ -19491,7 +19491,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 3,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 1,
       "minimal-technical": 3,
       "bold-persuasive": 0,
@@ -19524,7 +19524,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 0,
       "signup": 3,
@@ -19538,14 +19538,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 2,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 3,
       "traction": 0,
       "growth": 1,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 2,
       "freemium": 2,
       "trial-free": 0,
@@ -19556,7 +19556,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 3,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 1,
       "minimal-technical": 3,
       "bold-persuasive": 0,
@@ -19589,7 +19589,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 0,
       "signup": 3,
@@ -19603,14 +19603,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 2,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 3,
       "traction": 0,
       "growth": 1,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 2,
       "freemium": 2,
       "trial-free": 0,
@@ -19621,7 +19621,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 3,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 1,
       "minimal-technical": 3,
       "bold-persuasive": 0,
@@ -19654,7 +19654,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 0,
       "signup": 3,
@@ -19668,14 +19668,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 2,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 3,
       "traction": 0,
       "growth": 1,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 2,
       "freemium": 2,
       "trial-free": 0,
@@ -19686,7 +19686,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 3,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 1,
       "minimal-technical": 3,
       "bold-persuasive": 0,
@@ -19719,7 +19719,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 0,
       "signup": 3,
@@ -19733,14 +19733,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 2,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 3,
       "traction": 0,
       "growth": 1,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 2,
       "freemium": 2,
       "trial-free": 0,
@@ -19751,7 +19751,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 3,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 1,
       "minimal-technical": 3,
       "bold-persuasive": 0,
@@ -19784,7 +19784,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 0,
       "signup": 3,
@@ -19798,14 +19798,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 2,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 3,
       "traction": 0,
       "growth": 1,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 2,
       "freemium": 2,
       "trial-free": 0,
@@ -19816,7 +19816,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 3,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 1,
       "minimal-technical": 3,
       "bold-persuasive": 0,
@@ -19849,7 +19849,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 0,
       "signup": 3,
@@ -19863,14 +19863,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 2,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 3,
       "traction": 0,
       "growth": 1,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 2,
       "freemium": 2,
       "trial-free": 0,
@@ -19881,7 +19881,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 3,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 1,
       "minimal-technical": 3,
       "bold-persuasive": 0,
@@ -19914,7 +19914,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 0,
       "signup": 3,
@@ -19928,14 +19928,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 2,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 3,
       "traction": 0,
       "growth": 1,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 2,
       "freemium": 2,
       "trial-free": 0,
@@ -19946,7 +19946,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 3,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 1,
       "minimal-technical": 3,
       "bold-persuasive": 0,
@@ -19979,7 +19979,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 1,
       "early-access": 2,
       "signup": 3,
@@ -19993,14 +19993,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 3,
       "traction": 0,
       "growth": 0,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 3,
       "trial-free": 0,
@@ -20011,7 +20011,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 3,
       "minimal-technical": 0,
       "bold-persuasive": 0,
@@ -20044,7 +20044,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 1,
       "early-access": 2,
       "signup": 3,
@@ -20058,14 +20058,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 3,
       "traction": 0,
       "growth": 0,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 3,
       "trial-free": 0,
@@ -20076,7 +20076,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 3,
       "minimal-technical": 0,
       "bold-persuasive": 0,
@@ -20109,7 +20109,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 1,
       "early-access": 2,
       "signup": 3,
@@ -20123,14 +20123,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 3,
       "traction": 0,
       "growth": 0,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 3,
       "trial-free": 0,
@@ -20141,7 +20141,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 3,
       "minimal-technical": 0,
       "bold-persuasive": 0,
@@ -20174,7 +20174,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 1,
       "early-access": 2,
       "signup": 3,
@@ -20188,14 +20188,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 3,
       "traction": 0,
       "growth": 0,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 3,
       "trial-free": 0,
@@ -20206,7 +20206,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 3,
       "minimal-technical": 0,
       "bold-persuasive": 0,
@@ -20239,7 +20239,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 1,
       "early-access": 2,
       "signup": 3,
@@ -20253,14 +20253,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 3,
       "traction": 0,
       "growth": 0,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 3,
       "trial-free": 0,
@@ -20271,7 +20271,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 3,
       "minimal-technical": 0,
       "bold-persuasive": 0,
@@ -20304,7 +20304,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 1,
       "early-access": 2,
       "signup": 3,
@@ -20318,14 +20318,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 3,
       "traction": 0,
       "growth": 0,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 3,
       "trial-free": 0,
@@ -20336,7 +20336,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 3,
       "minimal-technical": 0,
       "bold-persuasive": 0,
@@ -20369,7 +20369,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 1,
       "early-access": 2,
       "signup": 3,
@@ -20383,14 +20383,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 3,
       "traction": 0,
       "growth": 0,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 3,
       "trial-free": 0,
@@ -20401,7 +20401,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 3,
       "minimal-technical": 0,
       "bold-persuasive": 0,
@@ -20434,7 +20434,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 1,
       "early-access": 2,
       "signup": 3,
@@ -20448,14 +20448,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 3,
       "traction": 0,
       "growth": 0,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 3,
       "trial-free": 0,
@@ -20466,7 +20466,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 3,
       "minimal-technical": 0,
       "bold-persuasive": 0,
@@ -20499,7 +20499,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 1,
       "early-access": 2,
       "signup": 3,
@@ -20513,14 +20513,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 3,
       "traction": 0,
       "growth": 0,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 3,
       "trial-free": 0,
@@ -20531,7 +20531,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 3,
       "minimal-technical": 0,
       "bold-persuasive": 0,
@@ -20564,7 +20564,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 1,
       "early-access": 2,
       "signup": 3,
@@ -20578,14 +20578,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 3,
       "traction": 0,
       "growth": 0,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 3,
       "trial-free": 0,
@@ -20596,7 +20596,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 3,
       "minimal-technical": 0,
       "bold-persuasive": 0,
@@ -20629,7 +20629,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 1,
       "early-access": 2,
       "signup": 3,
@@ -20643,14 +20643,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 3,
       "traction": 0,
       "growth": 0,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 3,
       "trial-free": 0,
@@ -20661,7 +20661,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 3,
       "minimal-technical": 0,
       "bold-persuasive": 0,
@@ -20694,7 +20694,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 1,
       "early-access": 2,
       "signup": 3,
@@ -20708,14 +20708,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 3,
       "traction": 0,
       "growth": 0,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 3,
       "trial-free": 0,
@@ -20726,7 +20726,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 3,
       "minimal-technical": 0,
       "bold-persuasive": 0,
@@ -20759,7 +20759,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 1,
       "early-access": 2,
       "signup": 3,
@@ -20773,14 +20773,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 3,
       "traction": 0,
       "growth": 0,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 3,
       "trial-free": 0,
@@ -20791,7 +20791,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 3,
       "minimal-technical": 0,
       "bold-persuasive": 0,
@@ -20824,7 +20824,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 1,
       "early-access": 2,
       "signup": 3,
@@ -20838,14 +20838,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 3,
       "traction": 0,
       "growth": 0,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 3,
       "trial-free": 0,
@@ -20856,7 +20856,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 3,
       "minimal-technical": 0,
       "bold-persuasive": 0,
@@ -20889,7 +20889,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 1,
       "early-access": 2,
       "signup": 3,
@@ -20903,14 +20903,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 3,
       "traction": 0,
       "growth": 0,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 3,
       "trial-free": 0,
@@ -20921,7 +20921,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 3,
       "minimal-technical": 0,
       "bold-persuasive": 0,
@@ -20954,7 +20954,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 1,
       "early-access": 2,
       "signup": 3,
@@ -20968,14 +20968,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 3,
       "traction": 0,
       "growth": 0,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 3,
       "trial-free": 0,
@@ -20986,7 +20986,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 3,
       "minimal-technical": 0,
       "bold-persuasive": 0,
@@ -21019,7 +21019,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 1,
       "early-access": 2,
       "signup": 3,
@@ -21033,14 +21033,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 3,
       "traction": 0,
       "growth": 0,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 3,
       "trial-free": 0,
@@ -21051,7 +21051,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 3,
       "minimal-technical": 0,
       "bold-persuasive": 0,
@@ -21084,7 +21084,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 1,
       "early-access": 2,
       "signup": 3,
@@ -21098,14 +21098,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 3,
       "traction": 0,
       "growth": 0,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 3,
       "trial-free": 0,
@@ -21116,7 +21116,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 3,
       "minimal-technical": 0,
       "bold-persuasive": 0,
@@ -21149,7 +21149,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 1,
       "early-access": 2,
       "signup": 3,
@@ -21163,14 +21163,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 3,
       "traction": 0,
       "growth": 0,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 3,
       "trial-free": 0,
@@ -21181,7 +21181,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 3,
       "minimal-technical": 0,
       "bold-persuasive": 0,
@@ -21214,7 +21214,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 1,
       "early-access": 2,
       "signup": 3,
@@ -21228,14 +21228,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 3,
       "traction": 0,
       "growth": 0,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 3,
       "trial-free": 0,
@@ -21246,7 +21246,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 3,
       "minimal-technical": 0,
       "bold-persuasive": 0,
@@ -21279,7 +21279,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 1,
       "early-access": 2,
       "signup": 3,
@@ -21293,14 +21293,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 3,
       "traction": 0,
       "growth": 0,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 3,
       "trial-free": 0,
@@ -21311,7 +21311,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 3,
       "minimal-technical": 0,
       "bold-persuasive": 0,
@@ -21344,7 +21344,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 1,
       "early-access": 2,
       "signup": 3,
@@ -21358,14 +21358,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 3,
       "traction": 0,
       "growth": 0,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 3,
       "trial-free": 0,
@@ -21376,7 +21376,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 3,
       "minimal-technical": 0,
       "bold-persuasive": 0,
@@ -21409,7 +21409,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 1,
       "early-access": 2,
       "signup": 3,
@@ -21423,14 +21423,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 3,
       "traction": 0,
       "growth": 0,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 3,
       "trial-free": 0,
@@ -21441,7 +21441,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 3,
       "minimal-technical": 0,
       "bold-persuasive": 0,
@@ -21474,7 +21474,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 1,
       "early-access": 2,
       "signup": 3,
@@ -21488,14 +21488,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 3,
       "traction": 0,
       "growth": 0,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 3,
       "trial-free": 0,
@@ -21506,7 +21506,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 3,
       "minimal-technical": 0,
       "bold-persuasive": 0,
@@ -21539,7 +21539,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 1,
       "early-access": 2,
       "signup": 3,
@@ -21553,14 +21553,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 3,
       "traction": 0,
       "growth": 0,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 3,
       "trial-free": 0,
@@ -21571,7 +21571,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 3,
       "minimal-technical": 0,
       "bold-persuasive": 0,
@@ -21604,7 +21604,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 1,
       "early-access": 2,
       "signup": 3,
@@ -21618,14 +21618,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 3,
       "traction": 0,
       "growth": 0,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 3,
       "trial-free": 0,
@@ -21636,7 +21636,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 3,
       "minimal-technical": 0,
       "bold-persuasive": 0,
@@ -21669,7 +21669,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 1,
       "early-access": 2,
       "signup": 3,
@@ -21683,14 +21683,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 3,
       "traction": 0,
       "growth": 0,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 3,
       "trial-free": 0,
@@ -21701,7 +21701,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 3,
       "minimal-technical": 0,
       "bold-persuasive": 0,
@@ -21734,7 +21734,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 1,
       "early-access": 2,
       "signup": 3,
@@ -21748,14 +21748,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 3,
       "traction": 0,
       "growth": 0,
       "scale": 0,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 3,
       "trial-free": 0,
@@ -21766,7 +21766,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 3,
       "minimal-technical": 0,
       "bold-persuasive": 0,
@@ -21799,7 +21799,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 2,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 2,
       "early-access": 0,
       "signup": 0,
@@ -21813,14 +21813,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 0,
       "traction": 0,
       "growth": 0,
       "scale": 3,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 2,
       "trial-free": 0,
@@ -21831,7 +21831,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 2,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 0,
       "minimal-technical": 0,
       "bold-persuasive": 3,
@@ -21864,7 +21864,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 2,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 2,
       "early-access": 0,
       "signup": 0,
@@ -21878,14 +21878,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 0,
       "traction": 0,
       "growth": 0,
       "scale": 3,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 2,
       "trial-free": 0,
@@ -21896,7 +21896,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 2,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 0,
       "minimal-technical": 0,
       "bold-persuasive": 3,
@@ -21929,7 +21929,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 2,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 2,
       "early-access": 0,
       "signup": 0,
@@ -21943,14 +21943,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 0,
       "traction": 0,
       "growth": 0,
       "scale": 3,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 2,
       "trial-free": 0,
@@ -21961,7 +21961,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 2,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 0,
       "minimal-technical": 0,
       "bold-persuasive": 3,
@@ -21994,7 +21994,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 2,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 2,
       "early-access": 0,
       "signup": 0,
@@ -22008,14 +22008,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 0,
       "traction": 0,
       "growth": 0,
       "scale": 3,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 2,
       "trial-free": 0,
@@ -22026,7 +22026,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 2,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 0,
       "minimal-technical": 0,
       "bold-persuasive": 3,
@@ -22059,7 +22059,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 2,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 2,
       "early-access": 0,
       "signup": 0,
@@ -22073,14 +22073,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 0,
       "traction": 0,
       "growth": 0,
       "scale": 3,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 2,
       "trial-free": 0,
@@ -22091,7 +22091,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 2,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 0,
       "minimal-technical": 0,
       "bold-persuasive": 3,
@@ -22124,7 +22124,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 2,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 2,
       "early-access": 0,
       "signup": 0,
@@ -22138,14 +22138,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 0,
       "traction": 0,
       "growth": 0,
       "scale": 3,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 2,
       "trial-free": 0,
@@ -22156,7 +22156,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 2,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 0,
       "minimal-technical": 0,
       "bold-persuasive": 3,
@@ -22189,7 +22189,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 2,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 2,
       "early-access": 0,
       "signup": 0,
@@ -22203,14 +22203,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 0,
       "traction": 0,
       "growth": 0,
       "scale": 3,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 2,
       "trial-free": 0,
@@ -22221,7 +22221,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 2,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 0,
       "minimal-technical": 0,
       "bold-persuasive": 3,
@@ -22254,7 +22254,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 2,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 2,
       "early-access": 0,
       "signup": 0,
@@ -22268,14 +22268,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 0,
       "traction": 0,
       "growth": 0,
       "scale": 3,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 2,
       "trial-free": 0,
@@ -22286,7 +22286,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 2,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 0,
       "minimal-technical": 0,
       "bold-persuasive": 3,
@@ -22319,7 +22319,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 2,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 2,
       "early-access": 0,
       "signup": 0,
@@ -22333,14 +22333,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 0,
       "traction": 0,
       "growth": 0,
       "scale": 3,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 2,
       "trial-free": 0,
@@ -22351,7 +22351,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 2,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 0,
       "minimal-technical": 0,
       "bold-persuasive": 3,
@@ -22384,7 +22384,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 2,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 2,
       "early-access": 0,
       "signup": 0,
@@ -22398,14 +22398,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 0,
       "traction": 0,
       "growth": 0,
       "scale": 3,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 2,
       "trial-free": 0,
@@ -22416,7 +22416,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 2,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 0,
       "minimal-technical": 0,
       "bold-persuasive": 3,
@@ -22449,7 +22449,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 2,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 2,
       "early-access": 0,
       "signup": 0,
@@ -22463,14 +22463,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 0,
       "traction": 0,
       "growth": 0,
       "scale": 3,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 2,
       "trial-free": 0,
@@ -22481,7 +22481,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 2,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 0,
       "minimal-technical": 0,
       "bold-persuasive": 3,
@@ -22514,7 +22514,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 2,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 2,
       "early-access": 0,
       "signup": 0,
@@ -22528,14 +22528,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 0,
       "traction": 0,
       "growth": 0,
       "scale": 3,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 2,
       "trial-free": 0,
@@ -22546,7 +22546,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 2,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 0,
       "minimal-technical": 0,
       "bold-persuasive": 3,
@@ -22579,7 +22579,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 2,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 2,
       "early-access": 0,
       "signup": 0,
@@ -22593,14 +22593,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 0,
       "traction": 0,
       "growth": 0,
       "scale": 3,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 2,
       "trial-free": 0,
@@ -22611,7 +22611,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 2,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 0,
       "minimal-technical": 0,
       "bold-persuasive": 3,
@@ -22644,7 +22644,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 2,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 2,
       "early-access": 0,
       "signup": 0,
@@ -22658,14 +22658,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 0,
       "traction": 0,
       "growth": 0,
       "scale": 3,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 2,
       "trial-free": 0,
@@ -22676,7 +22676,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 2,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 0,
       "minimal-technical": 0,
       "bold-persuasive": 3,
@@ -22709,7 +22709,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 2,
       "early-access": 0,
       "signup": 0,
@@ -22723,14 +22723,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 0,
       "traction": 3,
       "growth": 2,
       "scale": 2,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 2,
       "trial-free": 1,
@@ -22741,7 +22741,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 3,
       "minimal-technical": 2,
       "bold-persuasive": 0,
@@ -22774,7 +22774,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 2,
       "early-access": 0,
       "signup": 0,
@@ -22788,14 +22788,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 0,
       "traction": 3,
       "growth": 2,
       "scale": 2,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 2,
       "trial-free": 1,
@@ -22806,7 +22806,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 3,
       "minimal-technical": 2,
       "bold-persuasive": 0,
@@ -22839,7 +22839,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 2,
       "early-access": 0,
       "signup": 0,
@@ -22853,14 +22853,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 0,
       "traction": 3,
       "growth": 2,
       "scale": 2,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 2,
       "trial-free": 1,
@@ -22871,7 +22871,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 3,
       "minimal-technical": 2,
       "bold-persuasive": 0,
@@ -22904,7 +22904,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 2,
       "early-access": 0,
       "signup": 0,
@@ -22918,14 +22918,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 0,
       "traction": 3,
       "growth": 2,
       "scale": 2,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 2,
       "trial-free": 1,
@@ -22936,7 +22936,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 3,
       "minimal-technical": 2,
       "bold-persuasive": 0,
@@ -22969,7 +22969,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 2,
       "early-access": 0,
       "signup": 0,
@@ -22983,14 +22983,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 0,
       "traction": 3,
       "growth": 2,
       "scale": 2,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 2,
       "trial-free": 1,
@@ -23001,7 +23001,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 3,
       "minimal-technical": 2,
       "bold-persuasive": 0,
@@ -23034,7 +23034,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 2,
       "early-access": 0,
       "signup": 0,
@@ -23048,14 +23048,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 0,
       "traction": 3,
       "growth": 2,
       "scale": 2,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 2,
       "trial-free": 1,
@@ -23066,7 +23066,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 3,
       "minimal-technical": 2,
       "bold-persuasive": 0,
@@ -23099,7 +23099,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 2,
       "early-access": 0,
       "signup": 0,
@@ -23113,14 +23113,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 0,
       "traction": 3,
       "growth": 2,
       "scale": 2,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 2,
       "trial-free": 1,
@@ -23131,7 +23131,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 3,
       "minimal-technical": 2,
       "bold-persuasive": 0,
@@ -23164,7 +23164,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 2,
       "early-access": 0,
       "signup": 0,
@@ -23178,14 +23178,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 0,
       "traction": 3,
       "growth": 2,
       "scale": 2,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 2,
       "trial-free": 1,
@@ -23196,7 +23196,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 3,
       "minimal-technical": 2,
       "bold-persuasive": 0,
@@ -23229,7 +23229,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 2,
       "early-access": 0,
       "signup": 0,
@@ -23243,14 +23243,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 0,
       "traction": 3,
       "growth": 2,
       "scale": 2,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 2,
       "trial-free": 1,
@@ -23261,7 +23261,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 3,
       "minimal-technical": 2,
       "bold-persuasive": 0,
@@ -23294,7 +23294,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 2,
       "early-access": 0,
       "signup": 0,
@@ -23308,14 +23308,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 0,
       "traction": 3,
       "growth": 2,
       "scale": 2,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 2,
       "trial-free": 1,
@@ -23326,7 +23326,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 3,
       "minimal-technical": 2,
       "bold-persuasive": 0,
@@ -23359,7 +23359,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 2,
       "early-access": 0,
       "signup": 0,
@@ -23373,14 +23373,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 0,
       "traction": 3,
       "growth": 2,
       "scale": 2,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 2,
       "trial-free": 1,
@@ -23391,7 +23391,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 3,
       "minimal-technical": 2,
       "bold-persuasive": 0,
@@ -23424,7 +23424,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 2,
       "early-access": 0,
       "signup": 0,
@@ -23438,14 +23438,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 0,
       "traction": 3,
       "growth": 2,
       "scale": 2,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 2,
       "trial-free": 1,
@@ -23456,7 +23456,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 3,
       "minimal-technical": 2,
       "bold-persuasive": 0,
@@ -23489,7 +23489,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 2,
       "early-access": 0,
       "signup": 0,
@@ -23503,14 +23503,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 0,
       "traction": 3,
       "growth": 2,
       "scale": 2,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 2,
       "trial-free": 1,
@@ -23521,7 +23521,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 3,
       "minimal-technical": 2,
       "bold-persuasive": 0,
@@ -23554,7 +23554,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 2,
       "early-access": 0,
       "signup": 0,
@@ -23568,14 +23568,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 0,
       "traction": 3,
       "growth": 2,
       "scale": 2,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 2,
       "trial-free": 1,
@@ -23586,7 +23586,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 3,
       "minimal-technical": 2,
       "bold-persuasive": 0,
@@ -23619,7 +23619,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 2,
       "early-access": 0,
       "signup": 0,
@@ -23633,14 +23633,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 0,
       "traction": 3,
       "growth": 2,
       "scale": 2,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 2,
       "trial-free": 1,
@@ -23651,7 +23651,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 3,
       "minimal-technical": 2,
       "bold-persuasive": 0,
@@ -23684,7 +23684,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 2,
       "early-access": 0,
       "signup": 0,
@@ -23698,14 +23698,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 0,
       "traction": 3,
       "growth": 2,
       "scale": 2,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 2,
       "trial-free": 1,
@@ -23716,7 +23716,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 3,
       "minimal-technical": 2,
       "bold-persuasive": 0,
@@ -23749,7 +23749,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 2,
       "early-access": 0,
       "signup": 0,
@@ -23763,14 +23763,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 0,
       "traction": 3,
       "growth": 2,
       "scale": 2,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 2,
       "trial-free": 1,
@@ -23781,7 +23781,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 3,
       "minimal-technical": 2,
       "bold-persuasive": 0,
@@ -23814,7 +23814,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 2,
       "early-access": 0,
       "signup": 0,
@@ -23828,14 +23828,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 0,
       "traction": 3,
       "growth": 2,
       "scale": 2,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 2,
       "trial-free": 1,
@@ -23846,7 +23846,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 3,
       "minimal-technical": 2,
       "bold-persuasive": 0,
@@ -23879,7 +23879,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 2,
       "early-access": 0,
       "signup": 0,
@@ -23893,14 +23893,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 0,
       "traction": 3,
       "growth": 2,
       "scale": 2,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 2,
       "trial-free": 1,
@@ -23911,7 +23911,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 3,
       "minimal-technical": 2,
       "bold-persuasive": 0,
@@ -23944,7 +23944,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 2,
       "early-access": 0,
       "signup": 0,
@@ -23958,14 +23958,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 0,
       "traction": 3,
       "growth": 2,
       "scale": 2,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 2,
       "trial-free": 1,
@@ -23976,7 +23976,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 3,
       "minimal-technical": 2,
       "bold-persuasive": 0,
@@ -24009,7 +24009,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 2,
       "early-access": 0,
       "signup": 0,
@@ -24023,14 +24023,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 0,
       "traction": 3,
       "growth": 2,
       "scale": 2,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 2,
       "trial-free": 1,
@@ -24041,7 +24041,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 3,
       "minimal-technical": 2,
       "bold-persuasive": 0,
@@ -24074,7 +24074,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 3,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 0,
       "signup": 0,
@@ -24088,14 +24088,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 3,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 0,
       "traction": 1,
       "growth": 3,
       "scale": 3,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 0,
       "trial-free": 1,
@@ -24106,7 +24106,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 3,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 0,
       "minimal-technical": 3,
       "bold-persuasive": 0,
@@ -24139,7 +24139,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 3,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 0,
       "signup": 0,
@@ -24153,14 +24153,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 3,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 0,
       "traction": 1,
       "growth": 3,
       "scale": 3,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 0,
       "trial-free": 1,
@@ -24171,7 +24171,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 3,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 0,
       "minimal-technical": 3,
       "bold-persuasive": 0,
@@ -24204,7 +24204,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 3,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 0,
       "signup": 0,
@@ -24218,14 +24218,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 3,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 0,
       "traction": 1,
       "growth": 3,
       "scale": 3,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 0,
       "trial-free": 1,
@@ -24236,7 +24236,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 3,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 0,
       "minimal-technical": 3,
       "bold-persuasive": 0,
@@ -24269,7 +24269,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 3,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 0,
       "signup": 0,
@@ -24283,14 +24283,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 3,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 0,
       "traction": 1,
       "growth": 3,
       "scale": 3,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 0,
       "trial-free": 1,
@@ -24301,7 +24301,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 3,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 0,
       "minimal-technical": 3,
       "bold-persuasive": 0,
@@ -24334,7 +24334,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 3,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 0,
       "signup": 0,
@@ -24348,14 +24348,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 3,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 0,
       "traction": 1,
       "growth": 3,
       "scale": 3,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 0,
       "trial-free": 1,
@@ -24366,7 +24366,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 3,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 0,
       "minimal-technical": 3,
       "bold-persuasive": 0,
@@ -24399,7 +24399,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 3,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 0,
       "signup": 0,
@@ -24413,14 +24413,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 3,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 0,
       "traction": 1,
       "growth": 3,
       "scale": 3,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 0,
       "trial-free": 1,
@@ -24431,7 +24431,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 3,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 0,
       "minimal-technical": 3,
       "bold-persuasive": 0,
@@ -24464,7 +24464,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 3,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 0,
       "signup": 0,
@@ -24478,14 +24478,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 3,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 0,
       "traction": 1,
       "growth": 3,
       "scale": 3,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 0,
       "trial-free": 1,
@@ -24496,7 +24496,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 3,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 0,
       "minimal-technical": 3,
       "bold-persuasive": 0,
@@ -24529,7 +24529,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 3,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 0,
       "signup": 0,
@@ -24543,14 +24543,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 3,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 0,
       "traction": 1,
       "growth": 3,
       "scale": 3,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 0,
       "trial-free": 1,
@@ -24561,7 +24561,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 3,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 0,
       "minimal-technical": 3,
       "bold-persuasive": 0,
@@ -24594,7 +24594,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 3,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 0,
       "signup": 0,
@@ -24608,14 +24608,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 3,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 0,
       "traction": 1,
       "growth": 3,
       "scale": 3,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 0,
       "trial-free": 1,
@@ -24626,7 +24626,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 3,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 0,
       "minimal-technical": 3,
       "bold-persuasive": 0,
@@ -24659,7 +24659,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 3,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 0,
       "signup": 0,
@@ -24673,14 +24673,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 3,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 0,
       "traction": 1,
       "growth": 3,
       "scale": 3,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 0,
       "trial-free": 1,
@@ -24691,7 +24691,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 3,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 0,
       "minimal-technical": 3,
       "bold-persuasive": 0,
@@ -24724,7 +24724,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 3,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 0,
       "signup": 0,
@@ -24738,14 +24738,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 3,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 0,
       "traction": 1,
       "growth": 3,
       "scale": 3,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 0,
       "trial-free": 1,
@@ -24756,7 +24756,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 3,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 0,
       "minimal-technical": 3,
       "bold-persuasive": 0,
@@ -24789,7 +24789,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 3,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 0,
       "signup": 0,
@@ -24803,14 +24803,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 3,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 0,
       "traction": 1,
       "growth": 3,
       "scale": 3,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 0,
       "trial-free": 1,
@@ -24821,7 +24821,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 3,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 0,
       "minimal-technical": 3,
       "bold-persuasive": 0,
@@ -24854,7 +24854,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 3,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 0,
       "signup": 0,
@@ -24868,14 +24868,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 3,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 0,
       "traction": 1,
       "growth": 3,
       "scale": 3,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 0,
       "trial-free": 1,
@@ -24886,7 +24886,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 3,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 0,
       "minimal-technical": 3,
       "bold-persuasive": 0,
@@ -24919,7 +24919,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 3,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 0,
       "signup": 0,
@@ -24933,14 +24933,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 3,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 0,
       "traction": 1,
       "growth": 3,
       "scale": 3,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 0,
       "trial-free": 1,
@@ -24951,7 +24951,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 3,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 0,
       "minimal-technical": 3,
       "bold-persuasive": 0,
@@ -24984,7 +24984,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 3,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 0,
       "signup": 0,
@@ -24998,14 +24998,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 3,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 0,
       "traction": 1,
       "growth": 3,
       "scale": 3,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 0,
       "trial-free": 1,
@@ -25016,7 +25016,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 3,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 0,
       "minimal-technical": 3,
       "bold-persuasive": 0,
@@ -25049,7 +25049,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 3,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 0,
       "signup": 0,
@@ -25063,14 +25063,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 3,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 0,
       "traction": 1,
       "growth": 3,
       "scale": 3,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 0,
       "trial-free": 1,
@@ -25081,7 +25081,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 3,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 0,
       "minimal-technical": 3,
       "bold-persuasive": 0,
@@ -25114,7 +25114,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 3,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 0,
       "signup": 0,
@@ -25128,14 +25128,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 3,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 0,
       "traction": 1,
       "growth": 3,
       "scale": 3,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 0,
       "trial-free": 1,
@@ -25146,7 +25146,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 3,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 0,
       "minimal-technical": 3,
       "bold-persuasive": 0,
@@ -25179,7 +25179,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 3,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 0,
       "signup": 0,
@@ -25193,14 +25193,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 3,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 0,
       "traction": 1,
       "growth": 3,
       "scale": 3,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 0,
       "trial-free": 1,
@@ -25211,7 +25211,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 3,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 0,
       "minimal-technical": 3,
       "bold-persuasive": 0,
@@ -25244,7 +25244,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 3,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 0,
       "signup": 0,
@@ -25258,14 +25258,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 3,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 0,
       "traction": 1,
       "growth": 3,
       "scale": 3,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 0,
       "trial-free": 1,
@@ -25276,7 +25276,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 3,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 0,
       "minimal-technical": 3,
       "bold-persuasive": 0,
@@ -25309,7 +25309,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 3,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 0,
       "signup": 0,
@@ -25323,14 +25323,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 3,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 0,
       "traction": 1,
       "growth": 3,
       "scale": 3,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 0,
       "trial-free": 1,
@@ -25341,7 +25341,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 3,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 0,
       "minimal-technical": 3,
       "bold-persuasive": 0,
@@ -25374,7 +25374,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 3,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 0,
       "signup": 0,
@@ -25388,14 +25388,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 3,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 0,
       "traction": 1,
       "growth": 3,
       "scale": 3,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 0,
       "trial-free": 1,
@@ -25406,7 +25406,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 3,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 0,
       "minimal-technical": 3,
       "bold-persuasive": 0,
@@ -25439,7 +25439,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 0,
       "signup": 3,
@@ -25453,14 +25453,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 0,
       "traction": 1,
       "growth": 3,
       "scale": 2,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 0,
       "trial-free": 3,
@@ -25471,7 +25471,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 1,
       "minimal-technical": 3,
       "bold-persuasive": 2,
@@ -25504,7 +25504,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 0,
       "signup": 3,
@@ -25518,14 +25518,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 0,
       "traction": 1,
       "growth": 3,
       "scale": 2,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 0,
       "trial-free": 3,
@@ -25536,7 +25536,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 1,
       "minimal-technical": 3,
       "bold-persuasive": 2,
@@ -25569,7 +25569,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 0,
       "signup": 3,
@@ -25583,14 +25583,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 0,
       "traction": 1,
       "growth": 3,
       "scale": 2,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 0,
       "trial-free": 3,
@@ -25601,7 +25601,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 1,
       "minimal-technical": 3,
       "bold-persuasive": 2,
@@ -25634,7 +25634,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 0,
       "signup": 3,
@@ -25648,14 +25648,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 0,
       "traction": 1,
       "growth": 3,
       "scale": 2,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 0,
       "trial-free": 3,
@@ -25666,7 +25666,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 1,
       "minimal-technical": 3,
       "bold-persuasive": 2,
@@ -25699,7 +25699,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 0,
       "signup": 3,
@@ -25713,14 +25713,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 0,
       "traction": 1,
       "growth": 3,
       "scale": 2,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 0,
       "trial-free": 3,
@@ -25731,7 +25731,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 1,
       "minimal-technical": 3,
       "bold-persuasive": 2,
@@ -25764,7 +25764,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 0,
       "signup": 3,
@@ -25778,14 +25778,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 0,
       "traction": 1,
       "growth": 3,
       "scale": 2,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 0,
       "trial-free": 3,
@@ -25796,7 +25796,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 1,
       "minimal-technical": 3,
       "bold-persuasive": 2,
@@ -25829,7 +25829,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 0,
       "signup": 3,
@@ -25843,14 +25843,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 0,
       "traction": 1,
       "growth": 3,
       "scale": 2,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 0,
       "trial-free": 3,
@@ -25861,7 +25861,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 1,
       "minimal-technical": 3,
       "bold-persuasive": 2,
@@ -25894,7 +25894,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 0,
       "signup": 3,
@@ -25908,14 +25908,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 0,
       "traction": 1,
       "growth": 3,
       "scale": 2,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 0,
       "trial-free": 3,
@@ -25926,7 +25926,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 1,
       "minimal-technical": 3,
       "bold-persuasive": 2,
@@ -25959,7 +25959,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 0,
       "signup": 3,
@@ -25973,14 +25973,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 0,
       "traction": 1,
       "growth": 3,
       "scale": 2,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 0,
       "trial-free": 3,
@@ -25991,7 +25991,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 1,
       "minimal-technical": 3,
       "bold-persuasive": 2,
@@ -26024,7 +26024,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 0,
       "signup": 3,
@@ -26038,14 +26038,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 0,
       "traction": 1,
       "growth": 3,
       "scale": 2,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 0,
       "trial-free": 3,
@@ -26056,7 +26056,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 1,
       "minimal-technical": 3,
       "bold-persuasive": 2,
@@ -26089,7 +26089,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 0,
       "signup": 3,
@@ -26103,14 +26103,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 0,
       "traction": 1,
       "growth": 3,
       "scale": 2,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 0,
       "trial-free": 3,
@@ -26121,7 +26121,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 1,
       "minimal-technical": 3,
       "bold-persuasive": 2,
@@ -26154,7 +26154,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 0,
       "signup": 3,
@@ -26168,14 +26168,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 0,
       "traction": 1,
       "growth": 3,
       "scale": 2,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 0,
       "trial-free": 3,
@@ -26186,7 +26186,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 1,
       "minimal-technical": 3,
       "bold-persuasive": 2,
@@ -26219,7 +26219,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 0,
       "signup": 3,
@@ -26233,14 +26233,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 0,
       "traction": 1,
       "growth": 3,
       "scale": 2,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 0,
       "trial-free": 3,
@@ -26251,7 +26251,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 1,
       "minimal-technical": 3,
       "bold-persuasive": 2,
@@ -26284,7 +26284,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 0,
       "signup": 3,
@@ -26298,14 +26298,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 0,
       "traction": 1,
       "growth": 3,
       "scale": 2,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 0,
       "trial-free": 3,
@@ -26316,7 +26316,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 1,
       "minimal-technical": 3,
       "bold-persuasive": 2,
@@ -26349,7 +26349,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 0,
       "signup": 3,
@@ -26363,14 +26363,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 0,
       "traction": 1,
       "growth": 3,
       "scale": 2,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 0,
       "trial-free": 3,
@@ -26381,7 +26381,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 1,
       "minimal-technical": 3,
       "bold-persuasive": 2,
@@ -26414,7 +26414,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 0,
       "signup": 3,
@@ -26428,14 +26428,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 0,
       "traction": 1,
       "growth": 3,
       "scale": 2,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 0,
       "trial-free": 3,
@@ -26446,7 +26446,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 1,
       "minimal-technical": 3,
       "bold-persuasive": 2,
@@ -26479,7 +26479,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 0,
       "signup": 3,
@@ -26493,14 +26493,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 0,
       "traction": 1,
       "growth": 3,
       "scale": 2,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 0,
       "trial-free": 3,
@@ -26511,7 +26511,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 1,
       "minimal-technical": 3,
       "bold-persuasive": 2,
@@ -26544,7 +26544,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 0,
       "signup": 3,
@@ -26558,14 +26558,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 0,
       "traction": 1,
       "growth": 3,
       "scale": 2,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 0,
       "trial-free": 3,
@@ -26576,7 +26576,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 1,
       "minimal-technical": 3,
       "bold-persuasive": 2,
@@ -26609,7 +26609,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 0,
       "signup": 3,
@@ -26623,14 +26623,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 0,
       "traction": 1,
       "growth": 3,
       "scale": 2,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 0,
       "trial-free": 3,
@@ -26641,7 +26641,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 1,
       "minimal-technical": 3,
       "bold-persuasive": 2,
@@ -26674,7 +26674,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 0,
       "signup": 3,
@@ -26688,14 +26688,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 0,
       "traction": 1,
       "growth": 3,
       "scale": 2,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 0,
       "trial-free": 3,
@@ -26706,7 +26706,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 1,
       "minimal-technical": 3,
       "bold-persuasive": 2,
@@ -26739,7 +26739,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "enterprise": 0,
       "community": 0,
     },
-    "goal": {
+    "landingPageGoals": {
       "waitlist": 0,
       "early-access": 0,
       "signup": 3,
@@ -26753,14 +26753,14 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "watch-video": 0,
       "contact-sales": 0,
     },
-    "stage": {
+    "startupStage": {
       "idea": 0,
       "mvp": 0,
       "traction": 1,
       "growth": 3,
       "scale": 2,
     },
-    "pricing": {
+    "pricingModel": {
       "free": 0,
       "freemium": 0,
       "trial-free": 3,
@@ -26771,7 +26771,7 @@ export const variationScoreMap: Record<string, Record<string, Record<string, 0 |
       "usage-based": 0,
       "custom-quote": 0,
     },
-    "tone": {
+    "toneProfile": {
       "confident-playful": 1,
       "minimal-technical": 3,
       "bold-persuasive": 2,

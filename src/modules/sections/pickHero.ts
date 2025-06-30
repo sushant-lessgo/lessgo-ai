@@ -12,19 +12,19 @@ export type HeroLayout =
  */
 export function pickHeroLayout(input: LayoutPickerInput): HeroLayout {
   const {
-    awarenessLevel,
-    toneProfile,
-    startupStageGroup,
-    marketCategory,
-    landingGoalType,
-    targetAudienceGroup,
-    pricingModel,
-    pricingModifier,
-    pricingCommitmentOption,
-    marketSophisticationLevel,
-    copyIntent,
-    problemType,
-  } = input;
+  awarenessLevel,
+  toneProfile,
+  startupStage,             // ✅ FIXED
+  marketCategory,
+  landingPageGoals,         // ✅ FIXED  
+  targetAudience,           // ✅ FIXED
+  pricingModel,
+  pricingModifier,
+  pricingCommitmentOption,
+  marketSophisticationLevel,
+  copyIntent,
+  problemType,
+} = input;
 
   // High-Priority Rules (Return immediately if matched)
   
@@ -32,25 +32,25 @@ export function pickHeroLayout(input: LayoutPickerInput): HeroLayout {
   if (
     (marketCategory === "Design & Creative Tools" || marketCategory === "AI Tools" || marketCategory === "No-Code & Low-Code Platforms") &&
     (awarenessLevel === "product-aware" || awarenessLevel === "most-aware") &&
-    (landingGoalType === "demo" || landingGoalType === "free-trial")
+    (landingPageGoals === "demo" || landingPageGoals === "free-trial")
   ) {
     return "imageFirst";
   }
 
   // 2. Enterprise audiences with complex value propositions
   if (
-    targetAudienceGroup === "enterprise" &&
+    targetAudience === "enterprise" &&
     marketSophisticationLevel >= "level-4" &&
-    (landingGoalType === "contact-sales" || landingGoalType === "demo" || landingGoalType === "book-call")
+    (landingPageGoals === "contact-sales" || landingPageGoals === "demo" || landingPageGoals === "book-call")
   ) {
     return "leftCopyRightImage";
   }
 
   // 3. Early-stage products building awareness with simple message
   if (
-    (startupStageGroup === "idea" || startupStageGroup === "mvp") &&
+    (startupStage === "idea" || startupStage === "mvp") &&
     (awarenessLevel === "unaware" || awarenessLevel === "problem-aware") &&
-    (landingGoalType === "waitlist" || landingGoalType === "early-access" || landingGoalType === "signup")
+    (landingPageGoals === "waitlist" || landingPageGoals === "early-access" || landingPageGoals === "signup")
   ) {
     return "centerStacked";
   }
@@ -66,7 +66,7 @@ export function pickHeroLayout(input: LayoutPickerInput): HeroLayout {
 
   // 5. Technical products needing detailed explanation
   if (
-    (targetAudienceGroup === "builders" || targetAudienceGroup === "enterprise") &&
+    (targetAudience === "builders" || targetAudience === "enterprise") &&
     (marketCategory === "Engineering & Development Tools" || marketCategory === "Data & Analytics Tools") &&
     marketSophisticationLevel >= "level-3"
   ) {
@@ -83,31 +83,31 @@ export function pickHeroLayout(input: LayoutPickerInput): HeroLayout {
   };
 
   // Landing Goal Scoring (Highest Weight: 4-5 points)
-  if (landingGoalType === "contact-sales" || landingGoalType === "demo" || landingGoalType === "book-call") {
+  if (landingPageGoals === "contact-sales" || landingPageGoals === "demo" || landingPageGoals === "book-call") {
     scores.leftCopyRightImage += 5;
     scores.splitScreen += 3;
     scores.centerStacked += 2;
-  } else if (landingGoalType === "buy-now" || landingGoalType === "subscribe") {
+  } else if (landingPageGoals === "buy-now" || landingPageGoals === "subscribe") {
     scores.splitScreen += 5;
     scores.leftCopyRightImage += 4;
     scores.imageFirst += 2;
-  } else if (landingGoalType === "free-trial") {
+  } else if (landingPageGoals === "free-trial") {
     scores.imageFirst += 5;
     scores.leftCopyRightImage += 4;
     scores.centerStacked += 2;
-  } else if (landingGoalType === "signup") {
+  } else if (landingPageGoals === "signup") {
     scores.centerStacked += 5;
     scores.leftCopyRightImage += 3;
     scores.splitScreen += 2;
-  } else if (landingGoalType === "waitlist" || landingGoalType === "early-access") {
+  } else if (landingPageGoals === "waitlist" || landingPageGoals === "early-access") {
     scores.centerStacked += 5;
     scores.splitScreen += 3;
     scores.imageFirst += 2;
-  } else if (landingGoalType === "download") {
+  } else if (landingPageGoals === "download") {
     scores.centerStacked += 4;
     scores.leftCopyRightImage += 3;
     scores.imageFirst += 2;
-  } else if (landingGoalType === "join-community") {
+  } else if (landingPageGoals === "join-community") {
     scores.centerStacked += 4;
     scores.imageFirst += 2;
   }
@@ -136,23 +136,23 @@ export function pickHeroLayout(input: LayoutPickerInput): HeroLayout {
   }
 
   // Target Audience Scoring (High Weight: 3-4 points)
-  if (targetAudienceGroup === "enterprise") {
+  if (targetAudience === "enterprise") {
     scores.leftCopyRightImage += 4;
     scores.splitScreen += 3;
     scores.centerStacked += 2;
-  } else if (targetAudienceGroup === "builders") {
+  } else if (targetAudience === "builders") {
     scores.leftCopyRightImage += 4;
     scores.imageFirst += 3;
     scores.splitScreen += 2;
-  } else if (targetAudienceGroup === "businesses") {
+  } else if (targetAudience === "businesses") {
     scores.splitScreen += 4;
     scores.leftCopyRightImage += 3;
     scores.centerStacked += 2;
-  } else if (targetAudienceGroup === "founders" || targetAudienceGroup === "creators") {
+  } else if (targetAudience === "founders" || targetAudience === "creators") {
     scores.centerStacked += 4;
     scores.imageFirst += 3;
     scores.splitScreen += 2;
-  } else if (targetAudienceGroup === "marketers") {
+  } else if (targetAudience === "marketers") {
     scores.splitScreen += 4;
     scores.leftCopyRightImage += 3;
     scores.imageFirst += 2;
@@ -208,19 +208,19 @@ export function pickHeroLayout(input: LayoutPickerInput): HeroLayout {
   }
 
   // Startup Stage Scoring (Medium Weight: 2-3 points)
-  if (startupStageGroup === "idea" || startupStageGroup === "mvp") {
+  if (startupStage === "idea" || startupStage === "mvp") {
     scores.centerStacked += 3;
     scores.leftCopyRightImage += 2;
     scores.imageFirst += 1;
-  } else if (startupStageGroup === "traction") {
+  } else if (startupStage === "traction") {
     scores.leftCopyRightImage += 3;
     scores.splitScreen += 2;
     scores.centerStacked += 1;
-  } else if (startupStageGroup === "growth") {
+  } else if (startupStage === "growth") {
     scores.splitScreen += 3;
     scores.leftCopyRightImage += 2;
     scores.imageFirst += 2;
-  } else if (startupStageGroup === "scale") {
+  } else if (startupStage === "scale") {
     scores.leftCopyRightImage += 3;
     scores.splitScreen += 3;
     scores.imageFirst += 1;

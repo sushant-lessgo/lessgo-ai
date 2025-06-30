@@ -6,7 +6,7 @@ export function pickFontFromOnboarding(): FontTheme {
   const hiddenFields = useOnboardingStore.getState().hiddenInferredFields;
 
   // Get tone from inferred fields
-  const toneId = hiddenFields?.brandTone || 'minimal-technical';
+  const toneId = hiddenFields?.toneProfile || 'minimal-technical';
 
   // Look up theme options for the tone
   const fontOptions = fontThemesByTone[toneId] || fontThemesByTone['minimal-technical'];

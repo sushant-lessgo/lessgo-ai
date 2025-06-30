@@ -1,6 +1,8 @@
+// app/api/market-insights/route.ts
 import { NextResponse } from "next/server";
-import { generateFeatures } from "@/modules/inference/generateFeatures"; // You'll need to create this
+import { generateFeatures } from "@/modules/inference/generateFeatures";
 import { validateInferredFields } from "@/modules/inference/validateOutput";
+import { generateMockHiddenInferredFields } from '@/modules/mock/mockDataGenerators';
 
 type FeatureItem = {
   feature: string;
@@ -10,10 +12,24 @@ type FeatureItem = {
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const { category, subcategory, problem, audience, startupStage, pricing, goal } = body;
-
+    // console.log('🔍 REQUEST BODY RECEIVED:', JSON.stringify(body, null, 2));
+    const { category, subcategory, problem, audience, startupStage, pricing, landingPageGoals } = body;
+    // console.log('🔍 DESTRUCTURED FIELDS:', { 
+    //   category, subcategory, problem, audience, startupStage, pricing, landingPageGoals 
+    // });
     // Validate required fields
-    if (!category || !subcategory || !problem || !audience || !startupStage || !pricing || !goal) {
+   if (!category || !subcategory || !problem || !audience || !startupStage || !pricing || !landingPageGoals) {
+
+    // console.log('❌ MISSING FIELDS:', {
+    //     category: !!category,
+    //     subcategory: !!subcategory, 
+    //     problem: !!problem,
+    //     audience: !!audience,
+    //     startupStage: !!startupStage,
+    //     pricing: !!pricing,
+    //     landingPageGoals: !!landingPageGoals
+    //   });
+
       return NextResponse.json({ 
         error: "Missing required fields", 
         features: [] 
@@ -29,8 +45,29 @@ export async function POST(req: Request) {
 
     if (process.env.NEXT_PUBLIC_USE_MOCK_GPT === "true" || token === DEMO_TOKEN) {
       console.log("Using mock data for market insights");
+      
+      // Generate mock features (existing logic)
       const mockFeatures = generateMockFeatures(category, subcategory, problem);
-      return NextResponse.json({ features: mockFeatures });
+      
+      // Generate mock hidden inferred fields (NEW - avoiding embeddings API)
+      const validatedFieldsInput = {
+        marketCategory: category,
+        marketSubcategory: subcategory,
+        keyProblem: problem,
+        targetAudience: audience,
+        startupStage,
+        pricingModel: pricing,
+        landingPageGoals: landingPageGoals,
+      };
+      
+      console.log('🔍 Using mock data for hidden inferred fields (avoiding embeddings API)...');
+      const mockHiddenInferredFields = generateMockHiddenInferredFields(validatedFieldsInput);
+      console.log('✅ Mock hidden inferred fields completed');
+      
+      return NextResponse.json({ 
+        features: mockFeatures,
+        hiddenInferredFields: mockHiddenInferredFields
+      });
     }
 
     // Production: Generate features using AI
@@ -41,7 +78,7 @@ export async function POST(req: Request) {
       targetAudience: audience,
       startupStage,
       pricingModel: pricing,
-      landingGoal: goal,
+      landingPageGoals: landingPageGoals,
     };
 
     console.log('🤖 Generating features with AI...');
@@ -49,7 +86,7 @@ export async function POST(req: Request) {
     // Generate features using AI (similar pattern to inferFields)
     const features = await generateFeatures(inputData);
     
-    // Validate and enhance with semantic search for hidden fields
+    // Validate and enhance with semantic search for hidden fields - REAL EMBEDDINGS API
     console.log('🔍 Performing semantic validation for hidden inferred fields...');
     const hiddenInferredFields = await validateInferredFields(inputData);
     
@@ -66,17 +103,33 @@ export async function POST(req: Request) {
     // Fallback to mock data on error
     try {
       const body = await req.json();
-      const { category, subcategory, problem } = body;
+      const { category, subcategory, problem, audience, startupStage, pricing, landingPageGoals } = body;
+      
+      console.log("AI generation failed, using mock fallback");
       const mockFeatures = generateMockFeatures(category, subcategory, problem);
+      
+      const validatedFieldsInput = {
+        marketCategory: category,
+        marketSubcategory: subcategory,
+        keyProblem: problem,
+        targetAudience: audience,
+        startupStage,
+        pricingModel: pricing,
+        landingPageGoals: landingPageGoals,
+      };
+      
+      const mockHiddenInferredFields = generateMockHiddenInferredFields(validatedFieldsInput);
       
       return NextResponse.json({ 
         features: mockFeatures,
+        hiddenInferredFields: mockHiddenInferredFields,
         error: 'AI generation failed, using fallback data',
         isPartial: true
       });
     } catch {
       return NextResponse.json({
         features: getDefaultMockFeatures(),
+        hiddenInferredFields: {},
         error: 'Complete fallback to default features',
         isPartial: true
       }, { status: 500 });
@@ -84,7 +137,7 @@ export async function POST(req: Request) {
   }
 }
 
-// Mock data generator based on input
+// Keep your existing mock features logic
 function generateMockFeatures(category: string, subcategory: string, problem: string): FeatureItem[] {
   const baseFeatures: Record<string, FeatureItem[]> = {
     'Work & Productivity Tools': [
@@ -113,10 +166,8 @@ function generateMockFeatures(category: string, subcategory: string, problem: st
     ],
   };
 
-  // Get features for the category, or use default if not found
   let features = baseFeatures[category] || baseFeatures['Work & Productivity Tools'];
   
-  // Customize based on problem/subcategory
   if (problem.toLowerCase().includes('time') || problem.toLowerCase().includes('manual')) {
     features = features.map(f => ({
       ...f,
@@ -124,7 +175,7 @@ function generateMockFeatures(category: string, subcategory: string, problem: st
     }));
   }
 
-  return features.slice(0, 4); // Return 4 features by default
+  return features.slice(0, 4);
 }
 
 function getDefaultMockFeatures(): FeatureItem[] {

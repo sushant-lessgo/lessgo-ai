@@ -16,25 +16,25 @@ export type HowItWorksLayout =
  */
 export function pickHowItWorksLayout(input: LayoutPickerInput): HowItWorksLayout {
   const {
-    awarenessLevel,
-    toneProfile,
-    startupStageGroup,
-    marketCategory,
-    landingGoalType,
-    targetAudienceGroup,
-    pricingModel,
-    pricingModifier,
-    pricingCommitmentOption,
-    marketSophisticationLevel,
-    copyIntent,
-    problemType,
-  } = input;
+  awarenessLevel,
+  toneProfile,
+  startupStage,             // ✅ FIXED
+  marketCategory,
+  landingPageGoals,         // ✅ FIXED  
+  targetAudience,           // ✅ FIXED
+  pricingModel,
+  pricingModifier,
+  pricingCommitmentOption,
+  marketSophisticationLevel,
+  copyIntent,
+  problemType,
+} = input;
 
   // High-Priority Rules (Return immediately if matched)
   
   // 1. Complex technical products needing detailed explanations
   if (
-    (targetAudienceGroup === "builders" || targetAudienceGroup === "enterprise") &&
+    (targetAudience === "builders" || targetAudience === "enterprise") &&
     marketSophisticationLevel >= "level-4" &&
     (marketCategory === "Engineering & Development Tools" || marketCategory === "AI Tools" || marketCategory === "Data & Analytics Tools")
   ) {
@@ -43,8 +43,8 @@ export function pickHowItWorksLayout(input: LayoutPickerInput): HowItWorksLayout
 
   // 2. High-touch sales with video demonstration
   if (
-    (landingGoalType === "demo" || landingGoalType === "contact-sales") &&
-    (targetAudienceGroup === "enterprise" || targetAudienceGroup === "businesses") &&
+    (landingPageGoals === "demo" || landingPageGoals === "contact-sales") &&
+    (targetAudience === "enterprise" || targetAudience === "businesses") &&
     marketSophisticationLevel >= "level-3"
   ) {
     return "VideoWalkthrough";
@@ -54,7 +54,7 @@ export function pickHowItWorksLayout(input: LayoutPickerInput): HowItWorksLayout
   if (
     (awarenessLevel === "unaware" || awarenessLevel === "problem-aware") &&
     marketSophisticationLevel <= "level-2" &&
-    (targetAudienceGroup === "founders" || targetAudienceGroup === "creators")
+    (targetAudience === "founders" || targetAudience === "creators")
   ) {
     return "IconCircleSteps";
   }
@@ -62,7 +62,7 @@ export function pickHowItWorksLayout(input: LayoutPickerInput): HowItWorksLayout
   // 4. Interactive products needing hands-on explanation
   if (
     (marketCategory === "Design & Creative Tools" || marketCategory === "No-Code & Low-Code Platforms") &&
-    (landingGoalType === "free-trial" || landingGoalType === "demo") &&
+    (landingPageGoals === "free-trial" || landingPageGoals === "demo") &&
     (awarenessLevel === "solution-aware" || awarenessLevel === "product-aware")
   ) {
     return "CardFlipSteps";
@@ -127,27 +127,27 @@ export function pickHowItWorksLayout(input: LayoutPickerInput): HowItWorksLayout
   }
 
   // Target Audience Scoring (High Weight: 3-4 points)
-  if (targetAudienceGroup === "enterprise") {
+  if (targetAudience === "enterprise") {
     scores.VideoWalkthrough += 4;
     scores.AccordionSteps += 4;
     scores.VerticalTimeline += 3;
     scores.CardFlipSteps += 2;
-  } else if (targetAudienceGroup === "builders") {
+  } else if (targetAudience === "builders") {
     scores.AccordionSteps += 4;
     scores.CardFlipSteps += 3;
     scores.VideoWalkthrough += 3;
     scores.VerticalTimeline += 2;
-  } else if (targetAudienceGroup === "businesses") {
+  } else if (targetAudience === "businesses") {
     scores.VerticalTimeline += 4;
     scores.VideoWalkthrough += 3;
     scores.ThreeStepHorizontal += 3;
     scores.ZigzagImageSteps += 2;
-  } else if (targetAudienceGroup === "founders" || targetAudienceGroup === "creators") {
+  } else if (targetAudience === "founders" || targetAudience === "creators") {
     scores.IconCircleSteps += 4;
     scores.ZigzagImageSteps += 4;
     scores.AnimatedProcessLine += 3;
     scores.ThreeStepHorizontal += 2;
-  } else if (targetAudienceGroup === "marketers") {
+  } else if (targetAudience === "marketers") {
     scores.VerticalTimeline += 4;
     scores.ZigzagImageSteps += 3;
     scores.CardFlipSteps += 2;
@@ -215,37 +215,37 @@ export function pickHowItWorksLayout(input: LayoutPickerInput): HowItWorksLayout
   }
 
   // Landing Goal Scoring (Medium Weight: 2-3 points)
-  if (landingGoalType === "demo" || landingGoalType === "contact-sales") {
+  if (landingPageGoals === "demo" || landingPageGoals === "contact-sales") {
     scores.VideoWalkthrough += 3;
     scores.AccordionSteps += 2;
-  } else if (landingGoalType === "free-trial") {
+  } else if (landingPageGoals === "free-trial") {
     scores.CardFlipSteps += 3;
     scores.VideoWalkthrough += 2;
     scores.VerticalTimeline += 2;
-  } else if (landingGoalType === "signup") {
+  } else if (landingPageGoals === "signup") {
     scores.ThreeStepHorizontal += 3;
     scores.IconCircleSteps += 2;
-  } else if (landingGoalType === "buy-now" || landingGoalType === "subscribe") {
+  } else if (landingPageGoals === "buy-now" || landingPageGoals === "subscribe") {
     scores.VerticalTimeline += 3;
     scores.ZigzagImageSteps += 2;
-  } else if (landingGoalType === "download" || landingGoalType === "waitlist") {
+  } else if (landingPageGoals === "download" || landingPageGoals === "waitlist") {
     scores.AnimatedProcessLine += 3;
     scores.IconCircleSteps += 2;
   }
 
   // Startup Stage Scoring (Low Weight: 1-2 points)
-  if (startupStageGroup === "idea" || startupStageGroup === "mvp") {
+  if (startupStage === "idea" || startupStage === "mvp") {
     scores.IconCircleSteps += 2;
     scores.ThreeStepHorizontal += 2;
     scores.AnimatedProcessLine += 1;
-  } else if (startupStageGroup === "traction") {
+  } else if (startupStage === "traction") {
     scores.ZigzagImageSteps += 2;
     scores.VerticalTimeline += 1;
-  } else if (startupStageGroup === "growth") {
+  } else if (startupStage === "growth") {
     scores.VideoWalkthrough += 2;
     scores.CardFlipSteps += 2;
     scores.AccordionSteps += 1;
-  } else if (startupStageGroup === "scale") {
+  } else if (startupStage === "scale") {
     scores.AccordionSteps += 2;
     scores.VideoWalkthrough += 1;
   }

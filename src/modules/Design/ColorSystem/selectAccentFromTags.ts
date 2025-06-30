@@ -1,14 +1,24 @@
 import { shortlistTags } from './shortlistTags';
 import { accentOptions } from './accentOptions';
+import type { 
+  MarketCategory,
+  TargetAudience, 
+  LandingGoalType,
+  StartupStage,
+  ToneProfile,
+  AwarenessLevel,
+  PricingModel 
+} from '@/modules/inference/taxonomy';
 
+// ✅ MIGRATED: Now uses canonical field names with proper types
 type UserContext = {
-  marketCategory: string;
-  targetAudienceGroups: string;
-  landingGoalTypes: string;
-  startupStageGroups: string;
-  toneProfiles: string;
-  awarenessLevels: string;
-  pricingModels: string;
+  marketCategory: MarketCategory;
+  targetAudience: TargetAudience;
+  landingPageGoals: LandingGoalType;
+  startupStage: StartupStage;
+  toneProfile: ToneProfile;
+  awarenessLevel: AwarenessLevel;
+  pricingModel: PricingModel;
 };
 
 type AccentOption = {

@@ -16,25 +16,25 @@ export type IntegrationLayout =
  */
 export function pickIntegrationLayout(input: LayoutPickerInput): IntegrationLayout {
   const {
-    awarenessLevel,
-    toneProfile,
-    startupStageGroup,
-    marketCategory,
-    landingGoalType,
-    targetAudienceGroup,
-    pricingModel,
-    pricingModifier,
-    pricingCommitmentOption,
-    marketSophisticationLevel,
-    copyIntent,
-    problemType,
-  } = input;
+  awarenessLevel,
+  toneProfile,
+  startupStage,             // ✅ FIXED
+  marketCategory,
+  landingPageGoals,         // ✅ FIXED  
+  targetAudience,           // ✅ FIXED
+  pricingModel,
+  pricingModifier,
+  pricingCommitmentOption,
+  marketSophisticationLevel,
+  copyIntent,
+  problemType,
+} = input;
 
   // High-Priority Rules (Return immediately if matched)
   
   // 1. Complex technical products for developers/enterprise
   if (
-    (targetAudienceGroup === "builders" || targetAudienceGroup === "enterprise") &&
+    (targetAudience === "builders" || targetAudience === "enterprise") &&
     marketSophisticationLevel >= "level-4" &&
     (marketCategory === "Engineering & Development Tools" || marketCategory === "AI Tools" || marketCategory === "Data & Analytics Tools")
   ) {
@@ -44,16 +44,16 @@ export function pickIntegrationLayout(input: LayoutPickerInput): IntegrationLayo
   // 2. No-code/automation platforms showing builder interface
   if (
     (marketCategory === "No-Code & Low-Code Platforms" || marketCategory === "Marketing & Sales Tools") &&
-    (targetAudienceGroup === "builders" || targetAudienceGroup === "marketers") &&
-    (landingGoalType === "demo" || landingGoalType === "free-trial")
+    (targetAudience === "builders" || targetAudience === "marketers") &&
+    (landingPageGoals === "demo" || landingPageGoals === "free-trial")
   ) {
     return "ZapierLikeBuilderPreview";
   }
 
   // 3. Enterprise with social proof and use cases
   if (
-    targetAudienceGroup === "enterprise" &&
-    (startupStageGroup === "growth" || startupStageGroup === "scale") &&
+    targetAudience === "enterprise" &&
+    (startupStage === "growth" || startupStage === "scale") &&
     marketSophisticationLevel >= "level-3"
   ) {
     return "LogoWithQuoteUse";
@@ -61,7 +61,7 @@ export function pickIntegrationLayout(input: LayoutPickerInput): IntegrationLayo
 
   // 4. Technical setup/implementation focused
   if (
-    (targetAudienceGroup === "builders" || targetAudienceGroup === "enterprise") &&
+    (targetAudience === "builders" || targetAudience === "enterprise") &&
     (awarenessLevel === "solution-aware" || awarenessLevel === "product-aware") &&
     (problemType === "manual-repetition" || problemType === "time-freedom-or-automation")
   ) {
@@ -70,7 +70,7 @@ export function pickIntegrationLayout(input: LayoutPickerInput): IntegrationLayo
 
   // 5. Simple trust-building for early stage
   if (
-    (startupStageGroup === "idea" || startupStageGroup === "mvp") &&
+    (startupStage === "idea" || startupStage === "mvp") &&
     marketSophisticationLevel <= "level-2" &&
     (awarenessLevel === "unaware" || awarenessLevel === "problem-aware")
   ) {
@@ -91,27 +91,27 @@ export function pickIntegrationLayout(input: LayoutPickerInput): IntegrationLayo
   };
 
   // Target Audience Scoring (Highest Weight: 4-5 points)
-  if (targetAudienceGroup === "builders") {
+  if (targetAudience === "builders") {
     scores.InteractiveStackDiagram += 5;
     scores.TabbyIntegrationCards += 4;
     scores.ZapierLikeBuilderPreview += 3;
     scores.UseCaseTiles += 2;
-  } else if (targetAudienceGroup === "enterprise") {
+  } else if (targetAudience === "enterprise") {
     scores.LogoWithQuoteUse += 5;
     scores.InteractiveStackDiagram += 4;
     scores.UseCaseTiles += 4;
     scores.TabbyIntegrationCards += 3;
-  } else if (targetAudienceGroup === "businesses") {
+  } else if (targetAudience === "businesses") {
     scores.UseCaseTiles += 4;
     scores.CategoryAccordion += 4;
     scores.LogoWithQuoteUse += 3;
     scores.LogoGrid += 2;
-  } else if (targetAudienceGroup === "founders" || targetAudienceGroup === "creators") {
+  } else if (targetAudience === "founders" || targetAudience === "creators") {
     scores.LogoGrid += 4;
     scores.BadgeCarousel += 4;
     scores.CategoryAccordion += 3;
     scores.ZapierLikeBuilderPreview += 2;
-  } else if (targetAudienceGroup === "marketers") {
+  } else if (targetAudience === "marketers") {
     scores.ZapierLikeBuilderPreview += 4;
     scores.UseCaseTiles += 4;
     scores.CategoryAccordion += 3;
@@ -208,19 +208,19 @@ export function pickIntegrationLayout(input: LayoutPickerInput): IntegrationLayo
   }
 
   // Startup Stage Scoring (Medium Weight: 2-3 points)
-  if (startupStageGroup === "idea" || startupStageGroup === "mvp") {
+  if (startupStage === "idea" || startupStage === "mvp") {
     scores.LogoGrid += 3;
     scores.BadgeCarousel += 2;
     scores.CategoryAccordion += 2;
-  } else if (startupStageGroup === "traction") {
+  } else if (startupStage === "traction") {
     scores.CategoryAccordion += 3;
     scores.UseCaseTiles += 2;
     scores.TabbyIntegrationCards += 1;
-  } else if (startupStageGroup === "growth") {
+  } else if (startupStage === "growth") {
     scores.LogoWithQuoteUse += 3;
     scores.UseCaseTiles += 2;
     scores.InteractiveStackDiagram += 2;
-  } else if (startupStageGroup === "scale") {
+  } else if (startupStage === "scale") {
     scores.InteractiveStackDiagram += 3;
     scores.LogoWithQuoteUse += 2;
     scores.TabbyIntegrationCards += 2;
@@ -250,17 +250,17 @@ export function pickIntegrationLayout(input: LayoutPickerInput): IntegrationLayo
   }
 
   // Landing Goal Scoring (Low Weight: 1-2 points)
-  if (landingGoalType === "demo" || landingGoalType === "free-trial") {
+  if (landingPageGoals === "demo" || landingPageGoals === "free-trial") {
     scores.ZapierLikeBuilderPreview += 2;
     scores.TabbyIntegrationCards += 2;
     scores.InteractiveStackDiagram += 1;
-  } else if (landingGoalType === "contact-sales") {
+  } else if (landingPageGoals === "contact-sales") {
     scores.LogoWithQuoteUse += 2;
     scores.UseCaseTiles += 1;
-  } else if (landingGoalType === "signup") {
+  } else if (landingPageGoals === "signup") {
     scores.CategoryAccordion += 2;
     scores.LogoGrid += 1;
-  } else if (landingGoalType === "buy-now" || landingGoalType === "subscribe") {
+  } else if (landingPageGoals === "buy-now" || landingPageGoals === "subscribe") {
     scores.LogoWithQuoteUse += 2;
     scores.UseCaseTiles += 1;
   }

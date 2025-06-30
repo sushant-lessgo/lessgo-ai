@@ -2,67 +2,109 @@ import { layoutPickers } from "./layoutPickers";
 import { useOnboardingStore } from "@/hooks/useOnboardingStore";
 import { usePageStore } from "@/hooks/usePageStore";
 import type { LayoutPickerInput } from "./layoutPickerInput";
+import { getAudienceGroupForAudience, getStageGroupForStage } from '@/modules/inference/taxonomy';
+
 
 export function generateSectionLayouts(sectionIds: string[]) {
   const onboarding = useOnboardingStore.getState();
   const setSectionLayouts = usePageStore.getState().setSectionLayouts;
 
-  // Map all required fields from onboarding data to LayoutPickerInput
+  console.log('🎨 Generating layouts for sections:', sectionIds);
+  console.log('📊 Onboarding data available:', {
+    validatedFields: Object.keys(onboarding.validatedFields),
+    hiddenInferredFields: Object.keys(onboarding.hiddenInferredFields),
+    validatedFieldsValues: onboarding.validatedFields,
+    hiddenInferredFieldsValues: onboarding.hiddenInferredFields
+  });
+
+  // ✅ FIXED: Map all required fields using canonical field names from onboarding store
   const input: LayoutPickerInput = {
-    // Existing fields (already mapped)
+    // ===== CORE FIELDS FROM HIDDEN INFERRED FIELDS =====
     awarenessLevel: onboarding.hiddenInferredFields.awarenessLevel as LayoutPickerInput["awarenessLevel"],
     toneProfile: onboarding.hiddenInferredFields.toneProfile as LayoutPickerInput["toneProfile"],
-    startupStageGroup: onboarding.validatedFields.startupStageGroup as LayoutPickerInput["startupStageGroup"],
-    marketCategory: onboarding.validatedFields.marketCategory as LayoutPickerInput["marketCategory"],
-    
-    // Additional fields that need to be mapped from onboarding store
-    // Note: You'll need to update these paths based on your actual onboarding store structure
-    landingGoalType: onboarding.validatedFields.landingGoalType as LayoutPickerInput["landingGoalType"],
-    targetAudienceGroup: onboarding.validatedFields.targetAudienceGroup as LayoutPickerInput["targetAudienceGroup"],
-    pricingModel: onboarding.validatedFields.pricingModel as LayoutPickerInput["pricingModel"],
-    pricingModifier: onboarding.validatedFields.pricingModifier as LayoutPickerInput["pricingModifier"],
-    pricingCommitmentOption: onboarding.validatedFields.pricingCommitmentOption as LayoutPickerInput["pricingCommitmentOption"],
     marketSophisticationLevel: onboarding.hiddenInferredFields.marketSophisticationLevel as LayoutPickerInput["marketSophisticationLevel"],
     copyIntent: onboarding.hiddenInferredFields.copyIntent as LayoutPickerInput["copyIntent"],
     problemType: onboarding.hiddenInferredFields.problemType as LayoutPickerInput["problemType"],
+    
+    // ===== CORE FIELDS FROM VALIDATED FIELDS (✅ FIXED: Use canonical field names) =====
+    marketCategory: onboarding.validatedFields.marketCategory as LayoutPickerInput["marketCategory"],
+    startupStage: getStageGroupForStage(onboarding.validatedFields.startupStage ?? '') ?? 'idea',
+    landingPageGoals: onboarding.validatedFields.landingPageGoals as LayoutPickerInput["landingPageGoals"], // ✅ FIXED: was 'landingGoal'
+   targetAudience: getAudienceGroupForAudience(onboarding.validatedFields.targetAudience ?? '') ?? 'founders',
+    pricingModel: onboarding.validatedFields.pricingModel as LayoutPickerInput["pricingModel"],
+    
+    // ===== OPTIONAL PRICING FIELDS =====
+    // These might not be in the current onboarding store, but interface supports them
+    pricingModifier: undefined, // Can be added when this data becomes available
+    pricingCommitmentOption: undefined, // Can be added when this data becomes available
   };
+
+  console.log('🎯 Layout picker input prepared:', input);
 
   const layouts: Record<string, string> = {};
 
   sectionIds.forEach((sectionId) => {
+    // ✅ READY: Uncomment this once all layoutPickers use the fixed LayoutPickerInput interface
     // const picker = layoutPickers[sectionId];
     // if (picker) {
     //   layouts[sectionId] = picker(input);
+    //   console.log(`✅ Layout selected for ${sectionId}:`, layouts[sectionId]);
     // } else {
       
-    //Uncomment above after creating all the sections
+    // ✅ TEMPORARY: Fallback layouts while layoutPickers are being updated to use canonical field names
+    const fallbackLayouts: Record<string, string> = {
+      beforeAfter: "SideBySideBlocks",
+      closeSection: "MockupWithCTA",
+      comparisonTable: "BasicFeatureGrid",
+      faq: "AccordionFAQ",
+      features: "IconGrid",
+      founderNote: "FounderCardWithQuote",
+      hero: "leftCopyRightImage",
+      howItWorks: "ThreeStepHorizontal",
+      integrations: "LogoGrid",
+      objectionHandling: "ObjectionAccordion",
+      pricing: "TierCards",
+      cta: "CenteredHeadlineCTA",
+      problem: "StackedPainBullets",
+      results: "StatBlocks",
+      security: "SecurityChecklist",
+      socialProof: "LogoWall",
+      testimonials: "QuoteGrid",
+      uniqueMechanism: "StackedHighlights",
+      useCases: "PersonaGrid",
+    };
     
-    // Section-specific fallback defaults (copy-friendly layouts)
-      const fallbackLayouts: Record<string, string> = {
-        beforeAfter: "SideBySideBlocks",
-        closeSection: "MockupWithCTA",
-        comparisonTable: "BasicFeatureGrid",
-        faq: "AccordionFAQ",
-        features: "IconGrid",
-        founderNote: "FounderCardWithQuote",
-        hero: "leftCopyRightImage",
-        howItWorks: "ThreeStepHorizontal",
-        integrations: "LogoGrid",
-        objectionHandling: "ObjectionAccordion",
-        pricing: "TierCards",
-        cta: "CenteredHeadlineCTA",
-        problem: "StackedPainBullets",
-        results: "StatBlocks",
-        security: "SecurityChecklist",
-        socialProof: "LogoWall",
-        testimonials: "QuoteGrid",
-        uniqueMechanism: "StackedHighlights",
-        useCases: "PersonaGrid",
-      };
-      
+    // ✅ FIXED: Ensure every section gets a valid layout
+    if (fallbackLayouts[sectionId]) {
       layouts[sectionId] = fallbackLayouts[sectionId];
+      console.log(`📐 Fallback layout assigned for ${sectionId}:`, layouts[sectionId]);
+    } else {
+      // If section is not in fallback list, log warning and assign a contextual layout
+      console.warn(`⚠️ No layout mapping found for section: ${sectionId}`);
+      
+      // Assign contextual fallback based on section name patterns
+      if (sectionId.includes('hero')) {
+        layouts[sectionId] = "leftCopyRightImage";
+      } else if (sectionId.includes('cta') || sectionId.includes('call')) {
+        layouts[sectionId] = "CenteredHeadlineCTA";
+      } else if (sectionId.includes('feature')) {
+        layouts[sectionId] = "IconGrid";
+      } else if (sectionId.includes('testimonial') || sectionId.includes('review')) {
+        layouts[sectionId] = "QuoteGrid";
+      } else if (sectionId.includes('pricing') || sectionId.includes('plan')) {
+        layouts[sectionId] = "TierCards";
+      } else if (sectionId.includes('faq') || sectionId.includes('question')) {
+        layouts[sectionId] = "AccordionFAQ";
+      } else {
+        // Last resort: use a versatile layout
+        layouts[sectionId] = "StackedHighlights";
+      }
+      
+      console.log(`🔧 Contextual fallback layout assigned for ${sectionId}:`, layouts[sectionId]);
+    }
     // }
   });
 
+  console.log('🎨 Final layout assignments:', layouts);
   setSectionLayouts(layouts);
 }

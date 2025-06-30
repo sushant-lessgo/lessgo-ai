@@ -1,25 +1,47 @@
 import { variableTagsMapping } from './variableTagsMapping';
 import { tagsAccentTaxonomy } from './tagsAccentTaxonomy';
+import type { 
+  MarketCategory,
+  TargetAudience, 
+  LandingGoalType,
+  StartupStage,
+  ToneProfile,
+  AwarenessLevel,
+  PricingModel 
+} from '@/modules/inference/taxonomy';
 
 // Tag weighting config (total = 1.0)
 const weights = {
   marketCategory: 0.25,
-  targetAudienceGroups: 0.20,
-  landingGoalTypes: 0.20,
-  startupStageGroups: 0.15,
-  toneProfiles: 0.10,
-  awarenessLevels: 0.05,
-  pricingModels: 0.05
+  targetAudience: 0.20,
+  landingPageGoals: 0.20,
+  startupStage: 0.15,
+  toneProfile: 0.10,
+  awarenessLevel: 0.05,
+  pricingModel: 0.05
 } as const;
 
+// ✅ MAPPING: Convert canonical field names to variableTagsMapping keys
+// Based on the actual keys in your updated variableTagsMapping.ts
+const CANONICAL_TO_MAPPING_KEYS = {
+  marketCategory: 'marketCategories',
+  targetAudience: 'targetAudienceGroups', 
+  landingPageGoals: 'landingPageGoals',  // ✅ Updated to match your file
+  startupStage: 'startupStageGroups',
+  toneProfile: 'toneProfiles',
+  awarenessLevel: 'awarenessLevels',
+  pricingModel: 'pricingModels'
+} as const;
+
+// ✅ MIGRATED: Now uses canonical field names with proper types
 type UserContext = {
-  marketCategory: string;
-  targetAudienceGroups: string;
-  landingGoalTypes: string;
-  startupStageGroups: string;
-  toneProfiles: string;
-  awarenessLevels: string;
-  pricingModels: string;
+  marketCategory: MarketCategory;
+  targetAudience: TargetAudience;
+  landingPageGoals: LandingGoalType;
+  startupStage: StartupStage;
+  toneProfile: ToneProfile;
+  awarenessLevel: AwarenessLevel;
+  pricingModel: PricingModel;
 };
 
 type WeightedTag = { tag: string; weight: number };
@@ -33,10 +55,16 @@ export function collectTagsFromUserContext(
   for (const key in weights) {
     const varId = key as keyof typeof weights;
     const selected = userContext[varId];
-    const tags = variableTagsMapping[varId]?.[selected];
+    
+    // ✅ FIXED: Convert canonical field name to mapping key
+    const mappingKey = CANONICAL_TO_MAPPING_KEYS[varId];
+    
+    // ✅ FIXED: Explicit type handling for variableTagsMapping access
+    const mappingSection = (variableTagsMapping as any)[mappingKey];
+    const tags = mappingSection?.[selected] as string[] | undefined;
 
     if (tags && Array.isArray(tags)) {
-      tags.forEach(tag => {
+      tags.forEach((tag: string) => {
         weightedTags.push({ tag, weight: weights[varId] });
       });
     }
@@ -71,7 +99,11 @@ export function ensureCategoryDiversity(tags: string[], limit = 6): string[] {
 
   for (const tag of tags) {
     for (const category in tagsAccentTaxonomy) {
-      if (tagsAccentTaxonomy[category as keyof typeof tagsAccentTaxonomy].includes(tag)) {
+      const categoryKey = category as keyof typeof tagsAccentTaxonomy;
+      const categoryTags = tagsAccentTaxonomy[categoryKey];
+      
+      // ✅ FIXED: Use type assertion that TypeScript accepts
+      if ((categoryTags as readonly string[]).includes(tag)) {
         if (!seenCategories.has(category)) {
           final.add(tag);
           seenCategories.add(category);

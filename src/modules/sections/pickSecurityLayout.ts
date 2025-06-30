@@ -16,19 +16,19 @@ export type SecurityLayout =
  */
 export function pickSecurityLayout(input: LayoutPickerInput): SecurityLayout {
   const {
-    awarenessLevel,
-    toneProfile,
-    startupStageGroup,
-    marketCategory,
-    landingGoalType,
-    targetAudienceGroup,
-    pricingModel,
-    pricingModifier,
-    pricingCommitmentOption,
-    marketSophisticationLevel,
-    copyIntent,
-    problemType,
-  } = input;
+  awarenessLevel,
+  toneProfile,
+  startupStage,             // ✅ FIXED
+  marketCategory,
+  landingPageGoals,         // ✅ FIXED  
+  targetAudience,           // ✅ FIXED
+  pricingModel,
+  pricingModifier,
+  pricingCommitmentOption,
+  marketSophisticationLevel,
+  copyIntent,
+  problemType,
+} = input;
 
   // High-Priority Rules (Return immediately if matched)
   
@@ -36,14 +36,14 @@ export function pickSecurityLayout(input: LayoutPickerInput): SecurityLayout {
   if (
     (marketCategory === "HR & People Operations Tools" || marketCategory === "Finance & Accounting Tools" || marketCategory === "Customer Support & Service Tools") &&
     (problemType === "compliance-or-risk") &&
-    (targetAudienceGroup === "enterprise" || targetAudienceGroup === "businesses")
+    (targetAudience === "enterprise" || targetAudience === "businesses")
   ) {
     return "ComplianceBadgeRow";
   }
 
   // 2. Technical audiences need infrastructure details
   if (
-    (targetAudienceGroup === "builders" || targetAudienceGroup === "enterprise") &&
+    (targetAudience === "builders" || targetAudience === "enterprise") &&
     (marketCategory === "Engineering & Development Tools" || marketCategory === "Data & Analytics Tools" || marketCategory === "AI Tools") &&
     marketSophisticationLevel >= "level-4"
   ) {
@@ -52,8 +52,8 @@ export function pickSecurityLayout(input: LayoutPickerInput): SecurityLayout {
 
   // 3. Enterprise with formal audit requirements
   if (
-    targetAudienceGroup === "enterprise" &&
-    (startupStageGroup === "growth" || startupStageGroup === "scale") &&
+    targetAudience === "enterprise" &&
+    (startupStage === "growth" || startupStage === "scale") &&
     (problemType === "compliance-or-risk") &&
     marketSophisticationLevel >= "level-4"
   ) {
@@ -63,7 +63,7 @@ export function pickSecurityLayout(input: LayoutPickerInput): SecurityLayout {
   // 4. Detailed security concerns need FAQ format
   if (
     (awarenessLevel === "solution-aware" || awarenessLevel === "product-aware") &&
-    (targetAudienceGroup === "builders" || targetAudienceGroup === "enterprise") &&
+    (targetAudience === "builders" || targetAudience === "enterprise") &&
     marketSophisticationLevel >= "level-3"
   ) {
     return "FAQStyleSecurity";
@@ -71,8 +71,8 @@ export function pickSecurityLayout(input: LayoutPickerInput): SecurityLayout {
 
   // 5. Simple trust building for early stage or SMB
   if (
-    (startupStageGroup === "idea" || startupStageGroup === "mvp") &&
-    (targetAudienceGroup === "founders" || targetAudienceGroup === "businesses") &&
+    (startupStage === "idea" || startupStage === "mvp") &&
+    (targetAudience === "founders" || targetAudience === "businesses") &&
     marketSophisticationLevel <= "level-2"
   ) {
     return "StatWithShieldIcons";
@@ -92,27 +92,27 @@ export function pickSecurityLayout(input: LayoutPickerInput): SecurityLayout {
   };
 
   // Target Audience Scoring (Highest Weight: 4-5 points)
-  if (targetAudienceGroup === "enterprise") {
+  if (targetAudience === "enterprise") {
     scores.ComplianceBadgeRow += 5;
     scores.AuditTrustPanel += 5;
     scores.ExpandablePolicyCards += 4;
     scores.PartnerValidationRow += 4;
     scores.DiagramInfraSecurity += 3;
-  } else if (targetAudienceGroup === "builders") {
+  } else if (targetAudience === "builders") {
     scores.DiagramInfraSecurity += 5;
     scores.FAQStyleSecurity += 4;
     scores.SecurityChecklist += 3;
     scores.ExpandablePolicyCards += 2;
-  } else if (targetAudienceGroup === "businesses") {
+  } else if (targetAudience === "businesses") {
     scores.ComplianceBadgeRow += 4;
     scores.SecurityChecklist += 4;
     scores.PartnerValidationRow += 3;
     scores.StatWithShieldIcons += 3;
-  } else if (targetAudienceGroup === "founders" || targetAudienceGroup === "creators") {
+  } else if (targetAudience === "founders" || targetAudience === "creators") {
     scores.StatWithShieldIcons += 4;
     scores.SecurityChecklist += 3;
     scores.ComplianceBadgeRow += 2;
-  } else if (targetAudienceGroup === "marketers") {
+  } else if (targetAudience === "marketers") {
     scores.SecurityChecklist += 4;
     scores.StatWithShieldIcons += 3;
     scores.ComplianceBadgeRow += 2;
@@ -184,20 +184,20 @@ export function pickSecurityLayout(input: LayoutPickerInput): SecurityLayout {
   }
 
   // Startup Stage Scoring (Medium Weight: 2-3 points)
-  if (startupStageGroup === "idea" || startupStageGroup === "mvp") {
+  if (startupStage === "idea" || startupStage === "mvp") {
     scores.StatWithShieldIcons += 3;
     scores.SecurityChecklist += 2;
     scores.ComplianceBadgeRow += 1;
-  } else if (startupStageGroup === "traction") {
+  } else if (startupStage === "traction") {
     scores.SecurityChecklist += 3;
     scores.PartnerValidationRow += 2;
     scores.ComplianceBadgeRow += 2;
-  } else if (startupStageGroup === "growth") {
+  } else if (startupStage === "growth") {
     scores.AuditTrustPanel += 3;
     scores.PartnerValidationRow += 3;
     scores.ComplianceBadgeRow += 2;
     scores.ExpandablePolicyCards += 2;
-  } else if (startupStageGroup === "scale") {
+  } else if (startupStage === "scale") {
     scores.AuditTrustPanel += 3;
     scores.DiagramInfraSecurity += 3;
     scores.ExpandablePolicyCards += 2;
@@ -242,17 +242,17 @@ export function pickSecurityLayout(input: LayoutPickerInput): SecurityLayout {
   }
 
   // Landing Goal Scoring (Low Weight: 1-2 points)
-  if (landingGoalType === "contact-sales" || landingGoalType === "demo") {
+  if (landingPageGoals === "contact-sales" || landingPageGoals === "demo") {
     scores.AuditTrustPanel += 2;
     scores.DiagramInfraSecurity += 2;
     scores.ExpandablePolicyCards += 1;
-  } else if (landingGoalType === "buy-now" || landingGoalType === "subscribe") {
+  } else if (landingPageGoals === "buy-now" || landingPageGoals === "subscribe") {
     scores.ComplianceBadgeRow += 2;
     scores.PartnerValidationRow += 1;
-  } else if (landingGoalType === "free-trial") {
+  } else if (landingPageGoals === "free-trial") {
     scores.SecurityChecklist += 2;
     scores.FAQStyleSecurity += 1;
-  } else if (landingGoalType === "signup") {
+  } else if (landingPageGoals === "signup") {
     scores.StatWithShieldIcons += 2;
     scores.SecurityChecklist += 1;
   }

@@ -7,24 +7,36 @@ module.exports = {
     "./src/app/**/*.{js,ts,jsx,tsx,mdx}",
   ],
   safelist: [
-    'hover:bg-editable-bg',
-    'hover:bg-editable-primaryBg',
-    'hover:text-black',
-    'hover:outline-editable',
-    'hover:outline-dashed',
-    'hover:outline-1',
-    'text-editable-icon',
-    'w-editable-icon',
-    'h-editable-icon',
-    'top-1',
-    'right-1',
-    'group-hover:opacity-100',
+  'hover:bg-editable-bg',
+  'hover:bg-editable-primaryBg',
+  'hover:text-black',
+  'hover:outline-editable',
+  'hover:outline-dashed',
+  'hover:outline-1',
+  'text-editable-icon',
+  'w-editable-icon',
+  'h-editable-icon',
+  'top-1',
+  'right-1',
+  'group-hover:opacity-100',
   'group-focus-within:opacity-100',
   'opacity-0',
   'transition-opacity',
   'duration-200',
   'ease-in-out',
-  ],
+  
+  // Dynamic gradient backgrounds for background system
+  'bg-gradient-to-tr', 'bg-gradient-to-tl', 'bg-gradient-to-br', 'bg-gradient-to-bl',
+  'bg-gradient-to-t', 'bg-gradient-to-b', 'bg-gradient-to-l', 'bg-gradient-to-r',
+  
+  // Dynamic color variations for background system
+  { pattern: /from-(blue|sky|indigo|purple|pink|red|orange|amber|yellow|lime|green|emerald|teal|cyan|gray|slate|zinc|neutral|stone)-(50|100|200|300|400|500|600|700|800|900)/ },
+  { pattern: /via-(blue|sky|indigo|purple|pink|red|orange|amber|yellow|lime|green|emerald|teal|cyan|gray|slate|zinc|neutral|stone)-(50|100|200|300|400|500|600|700|800|900)/ },
+  { pattern: /to-(blue|sky|indigo|purple|pink|red|orange|amber|yellow|lime|green|emerald|teal|cyan|gray|slate|zinc|neutral|stone)-(50|100|200|300|400|500|600|700|800|900)/ },
+  
+  // Static background utilities that might be used
+  'bg-white', 'bg-gray-50', 'bg-gray-100', 'bg-gray-200',
+],
   theme: {
   	extend: {
   		animation: {

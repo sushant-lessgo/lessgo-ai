@@ -16,26 +16,25 @@ export type SocialProofLayout =
  */
 export function pickSocialProofLayout(input: LayoutPickerInput): SocialProofLayout {
   const {
-    awarenessLevel,
-    toneProfile,
-    startupStageGroup,
-    marketCategory,
-    landingGoalType,
-    targetAudienceGroup,
-    pricingModel,
-    pricingModifier,
-    pricingCommitmentOption,
-    marketSophisticationLevel,
-    copyIntent,
-    problemType,
-  } = input;
-
+  awarenessLevel,
+  toneProfile,
+  startupStage,             // ✅ FIXED
+  marketCategory,
+  landingPageGoals,         // ✅ FIXED  
+  targetAudience,           // ✅ FIXED
+  pricingModel,
+  pricingModifier,
+  pricingCommitmentOption,
+  marketSophisticationLevel,
+  copyIntent,
+  problemType,
+} = input;
   // High-Priority Rules (Return immediately if matched)
   
   // 1. Enterprise audiences need established customer logos
   if (
-    targetAudienceGroup === "enterprise" &&
-    (startupStageGroup === "growth" || startupStageGroup === "scale") &&
+    targetAudience === "enterprise" &&
+    (startupStage === "growth" || startupStage === "scale") &&
     marketSophisticationLevel >= "level-4"
   ) {
     return "LogoWall";
@@ -43,16 +42,16 @@ export function pickSocialProofLayout(input: LayoutPickerInput): SocialProofLayo
 
   // 2. Consumer/growth stage with significant user base
   if (
-    (startupStageGroup === "growth" || startupStageGroup === "scale") &&
-    (landingGoalType === "signup" || landingGoalType === "free-trial") &&
-    (targetAudienceGroup === "founders" || targetAudienceGroup === "creators" || targetAudienceGroup === "marketers")
+    (startupStage === "growth" || startupStage === "scale") &&
+    (landingPageGoals === "signup" || landingPageGoals === "free-trial") &&
+    (targetAudience === "founders" || targetAudience === "creators" || targetAudience === "marketers")
   ) {
     return "UserCountBar";
   }
 
   // 3. Media coverage and PR for credibility
   if (
-    (startupStageGroup === "growth" || startupStageGroup === "scale") &&
+    (startupStage === "growth" || startupStage === "scale") &&
     marketSophisticationLevel >= "level-3" &&
     toneProfile === "luxury-expert"
   ) {
@@ -61,7 +60,7 @@ export function pickSocialProofLayout(input: LayoutPickerInput): SocialProofLayo
 
   // 4. Review-heavy products with ratings focus
   if (
-    (startupStageGroup === "traction" || startupStageGroup === "growth") &&
+    (startupStage === "traction" || startupStage === "growth") &&
     (marketCategory === "Marketing & Sales Tools" || marketCategory === "Work & Productivity Tools" || marketCategory === "Design & Creative Tools") &&
     marketSophisticationLevel >= "level-3"
   ) {
@@ -70,7 +69,7 @@ export function pickSocialProofLayout(input: LayoutPickerInput): SocialProofLayo
 
   // 5. Global/distributed user base visualization
   if (
-    (targetAudienceGroup === "founders" || targetAudienceGroup === "creators") &&
+    (targetAudience === "founders" || targetAudience === "creators") &&
     marketSophisticationLevel <= "level-2" &&
     (awarenessLevel === "unaware" || awarenessLevel === "problem-aware")
   ) {
@@ -91,22 +90,22 @@ export function pickSocialProofLayout(input: LayoutPickerInput): SocialProofLayo
   };
 
   // Startup Stage Scoring (Highest Weight: 4-5 points)
-  if (startupStageGroup === "idea" || startupStageGroup === "mvp") {
+  if (startupStage === "idea" || startupStage === "mvp") {
     scores.IndustryBadgeLine += 4;
     scores.StackedStats += 3;
     scores.MapHeatSpots += 3;
     scores.SocialProofStrip += 2;
-  } else if (startupStageGroup === "traction") {
+  } else if (startupStage === "traction") {
     scores.UserCountBar += 4;
     scores.StackedStats += 4;
     scores.StripWithReviews += 3;
     scores.IndustryBadgeLine += 2;
-  } else if (startupStageGroup === "growth") {
+  } else if (startupStage === "growth") {
     scores.LogoWall += 5;
     scores.UserCountBar += 4;
     scores.MediaMentions += 4;
     scores.StripWithReviews += 3;
-  } else if (startupStageGroup === "scale") {
+  } else if (startupStage === "scale") {
     scores.LogoWall += 5;
     scores.MediaMentions += 4;
     scores.SocialProofStrip += 4;
@@ -114,26 +113,26 @@ export function pickSocialProofLayout(input: LayoutPickerInput): SocialProofLayo
   }
 
   // Target Audience Scoring (High Weight: 3-4 points)
-  if (targetAudienceGroup === "enterprise") {
+  if (targetAudience === "enterprise") {
     scores.LogoWall += 4;
     scores.SocialProofStrip += 4;
     scores.MediaMentions += 3;
     scores.IndustryBadgeLine += 2;
-  } else if (targetAudienceGroup === "builders") {
+  } else if (targetAudience === "builders") {
     scores.StackedStats += 4;
     scores.UserCountBar += 3;
     scores.LogoWall += 2;
-  } else if (targetAudienceGroup === "businesses") {
+  } else if (targetAudience === "businesses") {
     scores.LogoWall += 4;
     scores.StripWithReviews += 4;
     scores.SocialProofStrip += 3;
     scores.IndustryBadgeLine += 2;
-  } else if (targetAudienceGroup === "founders" || targetAudienceGroup === "creators") {
+  } else if (targetAudience === "founders" || targetAudience === "creators") {
     scores.UserCountBar += 4;
     scores.MapHeatSpots += 4;
     scores.StackedStats += 3;
     scores.StripWithReviews += 2;
-  } else if (targetAudienceGroup === "marketers") {
+  } else if (targetAudience === "marketers") {
     scores.StripWithReviews += 4;
     scores.UserCountBar += 3;
     scores.MediaMentions += 3;
@@ -230,21 +229,21 @@ export function pickSocialProofLayout(input: LayoutPickerInput): SocialProofLayo
   }
 
   // Landing Goal Scoring (Low Weight: 1-2 points)
-  if (landingGoalType === "contact-sales" || landingGoalType === "demo") {
+  if (landingPageGoals === "contact-sales" || landingPageGoals === "demo") {
     scores.LogoWall += 2;
     scores.MediaMentions += 2;
     scores.SocialProofStrip += 1;
-  } else if (landingGoalType === "buy-now" || landingGoalType === "subscribe") {
+  } else if (landingPageGoals === "buy-now" || landingPageGoals === "subscribe") {
     scores.StripWithReviews += 2;
     scores.LogoWall += 2;
     scores.UserCountBar += 1;
-  } else if (landingGoalType === "free-trial") {
+  } else if (landingPageGoals === "free-trial") {
     scores.UserCountBar += 2;
     scores.StripWithReviews += 1;
-  } else if (landingGoalType === "signup") {
+  } else if (landingPageGoals === "signup") {
     scores.UserCountBar += 2;
     scores.StackedStats += 1;
-  } else if (landingGoalType === "join-community" || landingGoalType === "waitlist") {
+  } else if (landingPageGoals === "join-community" || landingPageGoals === "waitlist") {
     scores.MapHeatSpots += 2;
     scores.UserCountBar += 1;
   }

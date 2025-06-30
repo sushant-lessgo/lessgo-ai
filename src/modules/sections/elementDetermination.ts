@@ -1,18 +1,13 @@
 import { layoutElementSchema } from './layoutElementSchema';
 import { selectOptionalElements, getAllLayoutElements } from './selectOptionalElements';
 import { sectionList } from './sectionList';
+import type { InputVariables, HiddenInferredFields } from '@/types/core/index';
 
-// Type definitions for stores
+// ✅ FIXED: Store type definitions using proper store types
 type OnboardingStore = {
   oneLiner: string;
-  validatedFields: Record<string, string>;
-  hiddenInferredFields: {
-    awarenessLevel?: string;
-    copyIntent?: string;
-    brandTone?: string;
-    layoutPersona?: string;
-    [key: string]: string | undefined;
-  };
+  validatedFields: Partial<InputVariables>;  // ✅ FIXED: Use proper typed interface
+  hiddenInferredFields: Partial<HiddenInferredFields>;  // ✅ FIXED: Use proper typed interface
   featuresFromAI: Array<{
     feature: string;
     benefit: string;
@@ -27,7 +22,7 @@ type PageStore = {
   meta: {
     onboardingData: {
       oneLiner: string;
-      validatedFields: Record<string, string>;
+      validatedFields: Partial<InputVariables>;  // ✅ FIXED: Use proper typed interface
       featuresFromAI: Array<{
         feature: string;
         benefit: string;
@@ -38,21 +33,8 @@ type PageStore = {
   };
 };
 
-// Variables interface expected by selectOptionalElements
-type Variables = {
-  marketSubcategory: string;
-  landingGoal: string;
-  startupStage: string;
-  targetAudience: string;
-  pricingModel: string;
-  pricingCommitment?: string;
-  pricingModifier?: string;
-  awarenessLevel: string;
-  marketSophistication: string;
-  toneProfile: string;
-  copyIntent: string;
-  problemType: string;
-};
+// ✅ FIXED: Use centralized types instead of custom Variables interface
+type Variables = Partial<InputVariables> & Partial<HiddenInferredFields>;
 
 // Section element requirements
 export type SectionElementRequirements = {
@@ -88,7 +70,7 @@ export function getSectionType(sectionId: string): string {
 }
 
 /**
- * Maps store data to Variables interface expected by selectOptionalElements
+ * ✅ FIXED: Maps store data to Variables type using centralized interfaces
  * @param onboardingStore - The onboarding store data
  * @param pageStore - The page store data
  * @returns Variables object for element selection logic
@@ -101,20 +83,23 @@ export function mapStoreToVariables(
   const validated = onboardingStore.validatedFields || {};
   const hidden = onboardingStore.hiddenInferredFields || {};
 
-  // Map to Variables interface with fallbacks
+  // ✅ FIXED: Return object that matches centralized interfaces
   return {
-    marketSubcategory: validated.marketSubcategory || '',
-    landingGoal: validated.landingGoal || '',
-    startupStage: validated.startupStage || '',
-    targetAudience: validated.targetAudience || pageStore.meta.onboardingData.targetAudience || '',
-    pricingModel: validated.pricingModel || '',
-    pricingCommitment: validated.pricingCommitment,
-    pricingModifier: validated.pricingModifier,
-    awarenessLevel: hidden.awarenessLevel || validated.awarenessLevel || '',
-    marketSophistication: hidden.marketSophistication || validated.marketSophistication || '',
-    toneProfile: hidden.brandTone || validated.toneProfile || '',
-    copyIntent: hidden.copyIntent || validated.copyIntent || '',
-    problemType: validated.problemType || '',
+    // From InputVariables
+    marketCategory: validated.marketCategory,
+    marketSubcategory: validated.marketSubcategory,
+    landingPageGoals: validated.landingPageGoals,
+    startupStage: validated.startupStage,
+    targetAudience: validated.targetAudience,
+    keyProblem: validated.keyProblem,
+    pricingModel: validated.pricingModel,
+    
+    // From HiddenInferredFields
+    awarenessLevel: hidden.awarenessLevel,
+    copyIntent: hidden.copyIntent,
+    toneProfile: hidden.toneProfile,
+    marketSophisticationLevel: hidden.marketSophisticationLevel,
+    problemType: hidden.problemType,
   };
 }
 

@@ -6,10 +6,10 @@ type ScoreMap = Record<string, Record<string, 0 | 1 | 2 | 3>>;
 interface FunnelInput {
   marketCategoryId: string;
   targetAudienceId: string;
-  goalId: string;
-  stageId: string;
-  pricingId: string;
-  toneId: string;
+  landingPageGoalsId: string;  // ✅ Changed from goalId
+  startupStageId: string;      // ✅ Changed from stageId
+  pricingModelId: string;      // ✅ Changed from pricingId
+  toneProfileId: string;       // ✅ Changed from toneId
 }
 
 interface FunnelResult {
@@ -25,19 +25,19 @@ interface FunnelResult {
 function computeScore(scores: {
   marketCategory: number;
   targetAudience: number;
-  goal: number;
-  stage: number;
-  pricing: number;
-  tone: number;
+  landingPageGoals: number;
+  startupStage: number;
+  pricingModel: number;
+  toneProfile: number;
 }): number {
   return (
     0.4 * (scores.marketCategory / 3) +
     0.4 * (scores.targetAudience / 3) +
     0.2 * (
-      0.4 * (scores.goal / 3) +
-      0.3 * (scores.stage / 3) +
-      0.15 * (scores.pricing / 3) +
-      0.15 * (scores.tone / 3)
+      0.4 * (scores.landingPageGoals / 3) +
+      0.3 * (scores.startupStage / 3) +
+      0.15 * (scores.pricingModel / 3) +
+      0.15 * (scores.toneProfile / 3)
     )
   );
 }
@@ -51,12 +51,14 @@ export function getTopVariationWithFunnel(input: FunnelInput): FunnelResult {
     const variation = variationScoreMap[key];
 
     const scores = {
-      marketCategory: variation.marketCategory?.[input.marketCategoryId] ?? 0,
-      targetAudience: variation.targetAudience?.[input.targetAudienceId] ?? 0,
-      goal: variation.goal?.[input.goalId] ?? 0,
-      stage: variation.stage?.[input.stageId] ?? 0,
-      pricing: variation.pricing?.[input.pricingId] ?? 0,
-      tone: variation.tone?.[input.toneId] ?? 0,
+      marketCategory: variation.market?.[input.marketCategoryId] ?? 0,
+      targetAudience: variation.audience?.[input.targetAudienceId] ?? 0,
+      landingPageGoals: variation.landingPageGoals?.[input.landingPageGoalsId] ?? 0,
+      startupStage: variation.startupStage?.[input.startupStageId] ?? 0,
+      pricingModel: variation.pricingModel?.[input.pricingModelId] ?? 0,
+      toneProfile: variation.toneProfile?.[input.toneProfileId] ?? 0,
+
+
     };
 
     if (Object.values(scores).includes(0)) continue;
@@ -80,12 +82,14 @@ export function getTopVariationWithFunnel(input: FunnelInput): FunnelResult {
     const variation = variationScoreMap[key];
 
     const scores = {
-      marketCategory: variation.marketCategory?.[input.marketCategoryId] ?? 0,
-      targetAudience: variation.targetAudience?.[input.targetAudienceId] ?? 0,
-      goal: variation.goal?.[input.goalId] ?? 0,
-      stage: variation.stage?.[input.stageId] ?? 0,
-      pricing: variation.pricing?.[input.pricingId] ?? 0,
-      tone: variation.tone?.[input.toneId] ?? 0,
+      marketCategory: variation.market?.[input.marketCategoryId] ?? 0,
+      targetAudience: variation.audience?.[input.targetAudienceId] ?? 0,
+      landingPageGoals: variation.landingPageGoals?.[input.landingPageGoalsId] ?? 0,
+      startupStage: variation.startupStage?.[input.startupStageId] ?? 0,
+      pricingModel: variation.pricingModel?.[input.pricingModelId] ?? 0,
+      toneProfile: variation.toneProfile?.[input.toneProfileId] ?? 0,
+
+
     };
 
     if (Object.values(scores).includes(0)) continue;
@@ -111,12 +115,14 @@ export function getTopVariationWithFunnel(input: FunnelInput): FunnelResult {
     const variation = variationScoreMap[key];
 
     const scores = {
-      marketCategory: variation.marketCategory?.[input.marketCategoryId] ?? 0,
-      targetAudience: variation.targetAudience?.[input.targetAudienceId] ?? 0,
-      goal: variation.goal?.[input.goalId] ?? 0,
-      stage: variation.stage?.[input.stageId] ?? 0,
-      pricing: variation.pricing?.[input.pricingId] ?? 0,
-      tone: variation.tone?.[input.toneId] ?? 0,
+      marketCategory: variation.market?.[input.marketCategoryId] ?? 0,
+      targetAudience: variation.audience?.[input.targetAudienceId] ?? 0,
+      landingPageGoals: variation.landingPageGoals?.[input.landingPageGoalsId] ?? 0,
+      startupStage: variation.startupStage?.[input.startupStageId] ?? 0,
+      pricingModel: variation.pricingModel?.[input.pricingModelId] ?? 0,
+      toneProfile: variation.toneProfile?.[input.toneProfileId] ?? 0,
+
+
     };
 
     if (Object.values(scores).includes(0)) continue;

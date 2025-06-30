@@ -13,29 +13,7 @@ import LoadingButtonBar from "@/components/shared/LoadingButtonBar";
 import { Button } from "@/components/ui/button";
 import { usePageGeneration } from '@/hooks/usePageGeneration';
 import GenerationAnimation from './GenerationAnimation';
-
-// ===== FIELD CONFIGURATION =====
-// Internal field names for consistent data structure
-const FIELD_ORDER = [
-  "marketCategory",
-  "marketSubcategory",
-  "targetAudience", 
-  "keyProblem",
-  "startupStage",
-  "landingGoal",
-  "pricingModel",
-] as const;
-
-// Display names for UI
-const FIELD_DISPLAY_NAMES: Record<string, string> = {
-  marketCategory: "Market Category",
-  marketSubcategory: "Market Subcategory",
-  targetAudience: "Target Audience",
-  keyProblem: "Key Problem Getting Solved",
-  startupStage: "Startup Stage", 
-  landingGoal: "Landing Page Goals",
-  pricingModel: "Pricing Category and Model",
-};
+import { CANONICAL_FIELD_NAMES, FIELD_DISPLAY_NAMES, type CanonicalFieldName } from "@/types/core/index";
 
 // ===== TYPE DEFINITIONS =====
 interface ConfirmedFieldData {
@@ -49,15 +27,13 @@ type FeatureItem = {
   benefit: string;
 };
 
-type InternalFieldName = typeof FIELD_ORDER[number];
-
 // ===== COMPONENT =====
 export default function RightPanel() {
   const {
     oneLiner,
     setOneLiner,
-    confirmedFields, // AI guesses with confidence (internal names as keys)
-    validatedFields, // User-confirmed values (internal names as keys)
+    confirmedFields, // AI guesses with confidence (canonical names as keys)
+    validatedFields, // User-confirmed values (canonical names as keys)
     setConfirmedFields,
     setValidatedFields,
     confirmField,
@@ -65,6 +41,7 @@ export default function RightPanel() {
     setStepIndex,
     featuresFromAI,
     setFeaturesFromAI,
+    setHiddenInferredFields, // ✅ ADD: Store hidden inferred fields
   } = useOnboardingStore();
 
   const params = useParams();
@@ -74,12 +51,12 @@ export default function RightPanel() {
   const { generationState, handleGeneratePage: generatePage, isGenerating } = usePageGeneration(tokenId);
 
   const isStep1 = !oneLiner;
-  const isFinalStep = stepIndex >= FIELD_ORDER.length;
+  const isFinalStep = stepIndex >= CANONICAL_FIELD_NAMES.length;
   
-  // ✅ UPDATED: Use internal field names consistently
-  const currentInternalField: InternalFieldName | undefined = FIELD_ORDER[stepIndex];
-  const currentDisplayField = currentInternalField ? FIELD_DISPLAY_NAMES[currentInternalField] : undefined;
-  const currentFieldData = currentInternalField ? confirmedFields[currentInternalField] : undefined;
+  // ✅ FIXED: Use canonical field names consistently
+  const currentCanonicalField: CanonicalFieldName | undefined = CANONICAL_FIELD_NAMES[stepIndex];
+  const currentDisplayField = currentCanonicalField ? FIELD_DISPLAY_NAMES[currentCanonicalField] : undefined;
+  const currentFieldData = currentCanonicalField ? confirmedFields[currentCanonicalField] : undefined;
   
   const aiGuess = currentFieldData?.value || "";
   const confidence = currentFieldData?.confidence || 0;
@@ -89,10 +66,10 @@ export default function RightPanel() {
 
   // ✅ UPDATED: Auto-advance logic for high confidence fields
   useEffect(() => {
-    if (!currentInternalField || isFinalStep || !currentFieldData) return;
+    if (!currentCanonicalField || isFinalStep || !currentFieldData) return;
 
     // Auto-confirm and advance if confidence >= 0.85 and not already validated
-    if (currentFieldData.confidence >= 0.85 && !validatedFields[currentInternalField]) {
+    if (currentFieldData.confidence >= 0.85 && !validatedFields[currentCanonicalField]) {
       console.log(`Auto-confirming ${currentDisplayField} with confidence ${currentFieldData.confidence}`);
       
       // Move from confirmedFields → validatedFields
@@ -103,11 +80,11 @@ export default function RightPanel() {
         setStepIndex(stepIndex + 1);
       }, 1500); // Slightly longer delay so user can see what was auto-confirmed
     }
-  }, [stepIndex, currentInternalField, currentDisplayField, currentFieldData, confirmField, setStepIndex, isFinalStep, validatedFields]);
+  }, [stepIndex, currentCanonicalField, currentDisplayField, currentFieldData, confirmField, setStepIndex, isFinalStep, validatedFields]);
 
   // ✅ UPDATED: Handle user confirmation
   const handleConfirm = async (value: string) => {
-    if (!currentInternalField || !currentDisplayField) return;
+    if (!currentCanonicalField || !currentDisplayField) return;
     
     // Move from confirmedFields → validatedFields  
     confirmField(currentDisplayField, value);
@@ -116,7 +93,7 @@ export default function RightPanel() {
     setStepIndex(stepIndex + 1);
     
     // Update auto-save with current validated fields
-    const updatedValidatedFields = { ...validatedFields, [currentInternalField]: value };
+    const updatedValidatedFields = { ...validatedFields, [currentCanonicalField]: value };
       await autoSaveDraft({
         tokenId,
         inputText: oneLiner,
@@ -128,7 +105,7 @@ export default function RightPanel() {
   // ✅ UNCHANGED: Handle initial input success - populate confirmedFields only
   const handleInputSuccess = async (input: string, confirmedFieldsData: Record<string, ConfirmedFieldData>) => {
     setOneLiner(input);
-    setConfirmedFields(confirmedFieldsData); // Store AI guesses (with internal names as keys)
+    setConfirmedFields(confirmedFieldsData); // Store AI guesses (with canonical names as keys)
     setStepIndex(0); // Start field confirmation process
     
     await autoSaveDraft({
@@ -140,7 +117,7 @@ export default function RightPanel() {
     });
       };
 
-  // ✅ UPDATED: Market insights API call (using internal field names)
+  // ✅ FIXED: Market insights API call - now stores hiddenInferredFields
   useEffect(() => {
     const {
       marketCategory: category,
@@ -149,7 +126,7 @@ export default function RightPanel() {
       targetAudience: audience,
       startupStage: startupStage,
       pricingModel: pricing,
-      landingGoal: goal,
+      landingPageGoals: landingPageGoals, // ✅ FIXED: Use canonical field name
     } = validatedFields;
 
     if (isFinalStep && featuresFromAI.length === 0) {
@@ -165,7 +142,7 @@ export default function RightPanel() {
               audience,
               startupStage,
               pricing,
-              goal,
+              landingPageGoals,
             }),
           });
 
@@ -173,8 +150,21 @@ export default function RightPanel() {
             throw new Error('Failed to fetch features');
           }
 
-          const { features } = await res.json();
+          // ✅ FIXED: Extract BOTH features AND hiddenInferredFields
+          const { features, hiddenInferredFields } = await res.json();
+          
+          console.log('📦 Raw API Response:', { features, hiddenInferredFields });
+          
+          // Store features
           setFeaturesFromAI(features || []);
+          
+          // ✅ NEW: Store hidden inferred fields in Zustand store
+          if (hiddenInferredFields) {
+            console.log('💾 Storing hiddenInferredFields:', hiddenInferredFields);
+            setHiddenInferredFields(hiddenInferredFields);
+          } else {
+            console.warn('⚠️ No hiddenInferredFields received from API');
+          }
 
           setTimeout(() => setShowFeatureEditor(true), 2000);
         } catch (error) {
@@ -185,17 +175,17 @@ export default function RightPanel() {
 
       fetchFeatures();
     }
-  }, [isFinalStep, featuresFromAI.length, validatedFields, setFeaturesFromAI]);
+  }, [isFinalStep, featuresFromAI.length, validatedFields, setFeaturesFromAI, setHiddenInferredFields]);
 
   // Calculate progress including auto-confirmed fields
-  const totalFields = FIELD_ORDER.length;
+  const totalFields = CANONICAL_FIELD_NAMES.length;
   const completedFields = Object.keys(validatedFields).length;
   const progressPercentage = Math.min((completedFields / totalFields) * 100, 100);
 
   // Debug logging (remove in production)
   if (process.env.NODE_ENV === 'development') {
     console.log('RightPanel Debug:', {
-      currentInternalField,
+      currentCanonicalField,
       currentDisplayField,
       hasFieldData: !!currentFieldData,
       confirmedFieldsKeys: Object.keys(confirmedFields),
@@ -348,7 +338,7 @@ export default function RightPanel() {
                 )
               ) : (
                 // ✅ UPDATED: Current field confirmation with confidence-based logic
-                currentInternalField && currentDisplayField && (
+                currentCanonicalField && currentDisplayField && (
                   <>
                     {/* Show auto-confirmation message for high confidence */}
                     {confidence >= 0.85 && (

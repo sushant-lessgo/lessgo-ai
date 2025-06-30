@@ -16,19 +16,19 @@ export type ProblemLayout =
  */
 export function pickProblemLayout(input: LayoutPickerInput): ProblemLayout {
   const {
-    awarenessLevel,
-    toneProfile,
-    startupStageGroup,
-    marketCategory,
-    landingGoalType,
-    targetAudienceGroup,
-    pricingModel,
-    pricingModifier,
-    pricingCommitmentOption,
-    marketSophisticationLevel,
-    copyIntent,
-    problemType,
-  } = input;
+  awarenessLevel,
+  toneProfile,
+  startupStage,             // ✅ FIXED
+  marketCategory,
+  landingPageGoals,         // ✅ FIXED  
+  targetAudience,           // ✅ FIXED
+  pricingModel,
+  pricingModifier,
+  pricingCommitmentOption,
+  marketSophisticationLevel,
+  copyIntent,
+  problemType,
+} = input;
 
   // High-Priority Rules (Return immediately if matched)
   
@@ -36,7 +36,7 @@ export function pickProblemLayout(input: LayoutPickerInput): ProblemLayout {
   if (
     (problemType === "burnout-or-overload" || problemType === "personal-growth-or-productivity") &&
     copyIntent === "pain-led" &&
-    (targetAudienceGroup === "founders" || targetAudienceGroup === "creators")
+    (targetAudience === "founders" || targetAudience === "creators")
   ) {
     return "EmotionalQuotes";
   }
@@ -44,7 +44,7 @@ export function pickProblemLayout(input: LayoutPickerInput): ProblemLayout {
   // 2. Complex business problems for sophisticated audiences
   if (
     (problemType === "compliance-or-risk" || problemType === "lost-revenue-or-inefficiency") &&
-    targetAudienceGroup === "enterprise" &&
+    targetAudience === "enterprise" &&
     marketSophisticationLevel >= "level-4"
   ) {
     return "CollapsedCards";
@@ -53,7 +53,7 @@ export function pickProblemLayout(input: LayoutPickerInput): ProblemLayout {
   // 3. Multiple persona types with different pain points
   if (
     marketSophisticationLevel >= "level-3" &&
-    (targetAudienceGroup === "businesses" || targetAudienceGroup === "enterprise") &&
+    (targetAudience === "businesses" || targetAudience === "enterprise") &&
     (awarenessLevel === "unaware" || awarenessLevel === "problem-aware")
   ) {
     return "PersonaPanels";
@@ -62,7 +62,7 @@ export function pickProblemLayout(input: LayoutPickerInput): ProblemLayout {
   // 4. Quantifiable problems that can be measured
   if (
     (problemType === "lost-revenue-or-inefficiency" || problemType === "time-freedom-or-automation") &&
-    (targetAudienceGroup === "businesses" || targetAudienceGroup === "marketers") &&
+    (targetAudience === "businesses" || targetAudience === "marketers") &&
     copyIntent === "pain-led"
   ) {
     return "PainMeterChart";
@@ -158,26 +158,26 @@ export function pickProblemLayout(input: LayoutPickerInput): ProblemLayout {
   }
 
   // Target Audience Scoring (High Weight: 3-4 points)
-  if (targetAudienceGroup === "enterprise") {
+  if (targetAudience === "enterprise") {
     scores.CollapsedCards += 4;
     scores.PersonaPanels += 4;
     scores.ProblemChecklist += 3;
     scores.PainMeterChart += 2;
-  } else if (targetAudienceGroup === "builders") {
+  } else if (targetAudience === "builders") {
     scores.StackedPainBullets += 4;
     scores.CollapsedCards += 3;
     scores.ProblemChecklist += 2;
-  } else if (targetAudienceGroup === "businesses") {
+  } else if (targetAudience === "businesses") {
     scores.PainMeterChart += 4;
     scores.PersonaPanels += 4;
     scores.StackedPainBullets += 3;
     scores.CollapsedCards += 2;
-  } else if (targetAudienceGroup === "founders" || targetAudienceGroup === "creators") {
+  } else if (targetAudience === "founders" || targetAudience === "creators") {
     scores.EmotionalQuotes += 4;
     scores.StackedPainBullets += 3;
     scores.BeforeImageAfterText += 3;
     scores.PersonaPanels += 2;
-  } else if (targetAudienceGroup === "marketers") {
+  } else if (targetAudience === "marketers") {
     scores.BeforeImageAfterText += 4;
     scores.PainMeterChart += 3;
     scores.SideBySideSplit += 3;
@@ -224,19 +224,19 @@ export function pickProblemLayout(input: LayoutPickerInput): ProblemLayout {
   }
 
   // Startup Stage Scoring (Medium Weight: 2-3 points)
-  if (startupStageGroup === "idea" || startupStageGroup === "mvp") {
+  if (startupStage === "idea" || startupStage === "mvp") {
     scores.StackedPainBullets += 3;
     scores.EmotionalQuotes += 2;
     scores.BeforeImageAfterText += 2;
-  } else if (startupStageGroup === "traction") {
+  } else if (startupStage === "traction") {
     scores.PersonaPanels += 3;
     scores.PainMeterChart += 2;
     scores.SideBySideSplit += 2;
-  } else if (startupStageGroup === "growth") {
+  } else if (startupStage === "growth") {
     scores.CollapsedCards += 3;
     scores.PersonaPanels += 2;
     scores.ProblemChecklist += 2;
-  } else if (startupStageGroup === "scale") {
+  } else if (startupStage === "scale") {
     scores.PersonaPanels += 3;
     scores.CollapsedCards += 2;
     scores.ProblemChecklist += 2;
@@ -263,17 +263,17 @@ export function pickProblemLayout(input: LayoutPickerInput): ProblemLayout {
   }
 
   // Landing Goal Scoring (Low Weight: 1-2 points)
-  if (landingGoalType === "buy-now" || landingGoalType === "subscribe") {
+  if (landingPageGoals === "buy-now" || landingPageGoals === "subscribe") {
     scores.PainMeterChart += 2;
     scores.StackedPainBullets += 2;
     scores.EmotionalQuotes += 1;
-  } else if (landingGoalType === "free-trial" || landingGoalType === "demo") {
+  } else if (landingPageGoals === "free-trial" || landingPageGoals === "demo") {
     scores.SideBySideSplit += 2;
     scores.BeforeImageAfterText += 1;
-  } else if (landingGoalType === "contact-sales") {
+  } else if (landingPageGoals === "contact-sales") {
     scores.PersonaPanels += 2;
     scores.CollapsedCards += 1;
-  } else if (landingGoalType === "signup" || landingGoalType === "download") {
+  } else if (landingPageGoals === "signup" || landingPageGoals === "download") {
     scores.ProblemChecklist += 2;
     scores.StackedPainBullets += 1;
   }

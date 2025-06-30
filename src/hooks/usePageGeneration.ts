@@ -107,17 +107,22 @@ export function usePageGeneration(tokenId: string) {
 }> => {
   try {
     // Prepare onboarding data for background generation
-    const onboardingData = {
-      marketCategory: onboardingStore.validatedFields.marketCategory || '',
-      targetAudience: onboardingStore.validatedFields.targetAudience || '',
-      goal: onboardingStore.validatedFields.goal || '',
-      stage: onboardingStore.validatedFields.stage || '',
-      pricing: onboardingStore.validatedFields.pricing || '',
-      tone: onboardingStore.validatedFields.tone || '',
-    };
-
+    
+      const backgroundSystem = generateCompleteBackgroundSystem({
+  // Required InputVariables fields with defaults
+  marketCategory: onboardingStore.validatedFields.marketCategory || 'Work & Productivity Tools',
+  marketSubcategory: onboardingStore.validatedFields.marketSubcategory || 'Project & Task Management',
+  targetAudience: onboardingStore.validatedFields.targetAudience || 'early-stage-founders',
+  keyProblem: onboardingStore.validatedFields.keyProblem || '',
+  startupStage: onboardingStore.validatedFields.startupStage || 'mvp-development',
+  landingPageGoals: onboardingStore.validatedFields.landingPageGoals || 'signup',
+  pricingModel: onboardingStore.validatedFields.pricingModel || 'freemium',
+  
+  // Optional HiddenInferredFields (spread as-is since they're optional)
+  ...onboardingStore.hiddenInferredFields
+});
     // Generate complete background system
-    const backgroundSystem = generateCompleteBackgroundSystem(onboardingData);
+   
     
     console.log('Generated background system:', backgroundSystem);
 
@@ -218,7 +223,7 @@ pageStore.setTheme({
       const prompt = buildFullPrompt(onboardingStore, tempPageStore as any);
       
       // Call AI API
-      const response = await fetch('/api/generate-copy', {
+      const response = await fetch('/api/generate-landing', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -247,7 +252,7 @@ pageStore.setTheme({
       const fallbackContent: any = {};
       sections.forEach(sectionId => {
         fallbackContent[sectionId] = {
-          headline: `Welcome to ${onboardingStore.validatedFields.businessName || 'Your Business'}`,
+          headline: `Welcome to ${onboardingStore.validatedFields.marketCategory || 'Your Business'}`,
           subheadline: 'Transform your business with our innovative solution',
           cta_text: 'Get Started',
           description: 'Discover how our platform can help you achieve your goals.'
@@ -275,7 +280,7 @@ pageStore.setTheme({
       // Update meta data - Create proper meta object
       const metaData = {
         id: tokenId,
-        title: `${onboardingStore.validatedFields.businessName || 'Landing'} Page`,
+        title: `${onboardingStore.validatedFields.marketCategory || 'Landing'} Page`,
         slug: tokenId,
         description: onboardingStore.oneLiner,
         lastUpdated: Date.now(),
@@ -290,8 +295,8 @@ pageStore.setTheme({
       };
 
       // Update meta using proper assignment
-      Object.assign(pageStore.meta, metaData);
-
+      // Object.assign(pageStore.meta, metaData);
+      
       // Set AI generation status
       pageStore.setAIGenerationStatus({
         isGenerating: false,
@@ -333,6 +338,7 @@ pageStore.setTheme({
         validatedFields: onboardingStore.validatedFields,
         featuresFromAI: onboardingStore.featuresFromAI,
         hiddenInferredFields: onboardingStore.hiddenInferredFields,
+        includePageData: true,  // ✅ NEW: Save the complete page state
       });
 
     } catch (error) {

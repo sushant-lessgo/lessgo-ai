@@ -8,17 +8,69 @@ interface BusinessContext {
 
 /**
  * Generates mock AI response for testing and fallback scenarios
+ * NOW PARSES THE PROMPT TO ONLY RETURN REQUESTED SECTIONS
  */
 export function generateMockResponse(prompt: string): any {
   const businessContext = extractBusinessContext(prompt)
+  const requestedSections = extractRequestedSections(prompt)
+  
+  console.log('🎭 Mock Generator:', {
+    requestedSections,
+    businessContext
+  })
   
   return {
     choices: [{
       message: {
-        content: JSON.stringify(generateMockContent(businessContext), null, 2)
+        content: JSON.stringify(generateMockContent(businessContext, requestedSections), null, 2)
       }
     }]
   }
+}
+
+/**
+ * ✅ NEW: Extracts which sections are actually requested in the prompt
+ */
+function extractRequestedSections(prompt: string): string[] {
+  // Look for JSON structure in the prompt which shows requested sections
+  const jsonMatch = prompt.match(/\{[\s\S]*?\}/g)
+  if (!jsonMatch) {
+    console.warn('No JSON structure found in prompt, using fallback sections')
+    return ['hero', 'features', 'cta'] // Safe fallback
+  }
+
+  const jsonString = jsonMatch[jsonMatch.length - 1] // Get the last JSON block (likely the output format)
+  
+  try {
+    // Try to parse the JSON to extract section names
+    const jsonObj = JSON.parse(jsonString)
+    const sections = Object.keys(jsonObj)
+    
+    if (sections.length > 0) {
+      console.log('✅ Extracted sections from prompt JSON:', sections)
+      return sections
+    }
+  } catch (error) {
+    console.warn('Failed to parse JSON from prompt, trying regex extraction')
+  }
+
+  // Fallback: Extract section names from prompt text
+  const sectionPattern = /"([a-zA-Z]+)":\s*\{/g
+  const sections: string[] = []
+  let match
+
+  while ((match = sectionPattern.exec(prompt)) !== null) {
+    sections.push(match[1])
+  }
+
+  if (sections.length > 0) {
+    console.log('✅ Extracted sections from prompt regex:', sections)
+    return sections
+  }
+
+  // Final fallback
+  console.warn('Could not extract sections from prompt, using safe defaults')
+  return ['hero', 'features', 'cta']
 }
 
 /**
@@ -81,9 +133,9 @@ function extractBusinessContext(prompt: string): BusinessContext {
 }
 
 /**
- * Generates comprehensive mock content for all possible landing page sections
+ * ✅ FIXED: Only generates content for requested sections with correct camelCase naming
  */
-function generateMockContent(context: BusinessContext): Record<string, any> {
+function generateMockContent(context: BusinessContext, requestedSections: string[]): Record<string, any> {
   const { industry, productType, targetAudience } = context
   
   // Content variation pools
@@ -201,7 +253,8 @@ function generateMockContent(context: BusinessContext): Record<string, any> {
     return shuffled.slice(0, count)
   }
 
-  return {
+  // ✅ FIXED: Complete section templates with correct camelCase naming
+  const allSectionTemplates: Record<string, any> = {
     hero: {
       headline: randomChoice(contentVariations.headlines),
       subheadline: randomChoice(contentVariations.subheadlines),
@@ -216,7 +269,8 @@ function generateMockContent(context: BusinessContext): Record<string, any> {
       supporting_text: "These issues are costing you time, money, and growth opportunities every day."
     },
 
-    beforeafter: {
+    // ✅ FIXED: Correct camelCase naming
+    beforeAfter: {
       before_label: "Before",
       after_label: "After",
       before_description: "Manual processes, scattered data, limited visibility into performance metrics.",
@@ -225,11 +279,12 @@ function generateMockContent(context: BusinessContext): Record<string, any> {
       comparison_stats: ["5x faster processing", "90% less manual work", "100% data accuracy"]
     },
 
-    usecases: {
+    // ✅ FIXED: Correct camelCase naming
+    useCases: {
       headline: "Perfect for Every Use Case",
       use_case_titles: [
         "Team Collaboration",
-        "Data Management",
+        "Data Management", 
         "Process Automation",
         "Performance Tracking"
       ],
@@ -249,7 +304,8 @@ function generateMockContent(context: BusinessContext): Record<string, any> {
       cta_text: randomChoice(contentVariations.ctaTexts)
     },
 
-    uniquemechanism: {
+    // ✅ FIXED: Correct camelCase naming
+    uniqueMechanism: {
       headline: "Our Unique Approach",
       mechanism_title: "The Power Framework",
       pillars: [
@@ -265,12 +321,13 @@ function generateMockContent(context: BusinessContext): Record<string, any> {
       differentiation_text: "Unlike other solutions, we combine cutting-edge AI with intuitive design."
     },
 
-    howitworks: {
+    // ✅ FIXED: Correct camelCase naming
+    howItWorks: {
       headline: "How It Works",
       subheadline: "Get started in three simple steps",
       step_titles: [
         "Connect Your Data",
-        "Configure Your Workflow",
+        "Configure Your Workflow", 
         "Monitor & Optimize"
       ],
       step_descriptions: [
@@ -303,7 +360,8 @@ function generateMockContent(context: BusinessContext): Record<string, any> {
       rating_sources: ["G2", "Capterra", "TrustPilot"]
     },
 
-    socialproof: {
+    // ✅ FIXED: Correct camelCase naming  
+    socialProof: {
       headline: "Trusted by Industry Leaders",
       user_count: "10,000+",
       company_logos: randomChoices(contentVariations.companyLogos, 6),
@@ -311,13 +369,14 @@ function generateMockContent(context: BusinessContext): Record<string, any> {
       growth_stats: ["500% growth in 2024", "99.9% customer satisfaction", "150+ countries served"]
     },
 
-    comparison: {
+    // ✅ FIXED: Correct camelCase naming
+    comparisonTable: {
       headline: "Why Choose Us",
       your_product_name: "Our Solution",
       competitor_names: ["Competitor A", "Competitor B"],
       feature_comparison: [
         "Advanced AI Features",
-        "Real-time Processing",
+        "Real-time Processing", 
         "24/7 Support",
         "Custom Integrations"
       ],
@@ -328,7 +387,8 @@ function generateMockContent(context: BusinessContext): Record<string, any> {
       ]
     },
 
-    objection: {
+    // ✅ FIXED: Correct camelCase naming
+    objectionHandling: {
       headline: "Common Questions Answered",
       objection_questions: [
         "Is it difficult to implement?",
@@ -380,7 +440,8 @@ function generateMockContent(context: BusinessContext): Record<string, any> {
       money_back_guarantee: "30-day money-back guarantee"
     },
 
-    foundernote: {
+    // ✅ FIXED: Correct camelCase naming
+    founderNote: {
       headline: "A Note from Our Founder",
       founder_name: "Alex Thompson",
       founder_title: "CEO & Founder",
@@ -418,7 +479,8 @@ function generateMockContent(context: BusinessContext): Record<string, any> {
       risk_reversal: "Risk-free with our 30-day money-back guarantee"
     },
 
-    close: {
+    // ✅ FIXED: Correct camelCase naming
+    closeSection: {
       headline: "Don't Wait - Start Today",
       value_stack: [
         "Complete platform access",
@@ -431,4 +493,24 @@ function generateMockContent(context: BusinessContext): Record<string, any> {
       contact_options: ["Live chat", "Email support", "Phone consultation"]
     }
   }
+
+  // ✅ FIXED: Only return content for requested sections
+  const mockContent: Record<string, any> = {}
+  
+  requestedSections.forEach(sectionId => {
+    if (allSectionTemplates[sectionId]) {
+      mockContent[sectionId] = allSectionTemplates[sectionId]
+      console.log(`✅ Generated mock content for: ${sectionId}`)
+    } else {
+      console.warn(`⚠️ No mock template found for section: ${sectionId}`)
+      // Provide basic fallback content
+      mockContent[sectionId] = {
+        headline: `${sectionId.charAt(0).toUpperCase() + sectionId.slice(1)} Section`,
+        description: "Mock content for this section"
+      }
+    }
+  })
+
+  console.log('🎭 Final mock content sections:', Object.keys(mockContent))
+  return mockContent
 }

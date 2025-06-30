@@ -1,36 +1,29 @@
-// getOptionsForField.ts
+// getOptionsForField.ts - Phase 3 Migration: Fixed field name mappings
 import { taxonomy, marketSubcategories } from "@/modules/inference/taxonomy";
 import { useOnboardingStore } from "@/hooks/useOnboardingStore";
+import { DISPLAY_TO_CANONICAL, type CanonicalFieldName } from "@/types/core/index";
 
 // Type for valid market category
 type ValidCategory = keyof typeof marketSubcategories;
 
-const fieldNameMap: Record<string, string> = {
-  "Market Category": "marketCategory",
-  "Market Subcategory": "marketSubcategory",
-  "Target Audience": "targetAudience",
-  "Startup Stage": "startupStage",
-  "Landing Page Goals": "landingGoal",
-  "Pricing Category and Model": "pricingModel",
-};
-
 export function getOptionsForField(displayFieldName: string): readonly string[] {
-  const internalFieldName = fieldNameMap[displayFieldName];
+  // ✅ FIXED: Use canonical mappings from types/core/index.ts
+  const canonicalFieldName = DISPLAY_TO_CANONICAL[displayFieldName as keyof typeof DISPLAY_TO_CANONICAL];
 
-  if (!internalFieldName) {
+  if (!canonicalFieldName) {
     console.warn(`Unknown display field name: ${displayFieldName}`);
     return [];
   }
 
-  // Get validated fields (already stored with internal names)
+  // Get validated fields (already stored with canonical names)
   const validatedFields = useOnboardingStore.getState().validatedFields;
 
-  switch (internalFieldName) {
+  switch (canonicalFieldName) {
     case "marketCategory":
       return taxonomy.marketCategories;
 
     case "marketSubcategory": {
-      // Look for the category using internal name (since that's how it's stored)
+      // Look for the category using canonical name (since that's how it's stored)
       const category = validatedFields.marketCategory;
       if (category && category in marketSubcategories) {
         return marketSubcategories[category as ValidCategory];
@@ -53,25 +46,26 @@ export function getOptionsForField(displayFieldName: string): readonly string[] 
     case "pricingModel":
       return taxonomy.pricingModels.map(model => model.label);
 
-    case "landingGoal":
+    case "landingPageGoals": // ✅ FIXED: Use canonical field name
       return taxonomy.landingGoalTypes.map(goal => goal.label);
 
     default:
-      console.warn(`No options defined for field: ${internalFieldName}`);
+      console.warn(`No options defined for field: ${canonicalFieldName}`);
       return [];
   }
 }
 
 // NEW: Get grouped options from taxonomy structure
 export function getGroupedOptionsForField(displayFieldName: string): Record<string, string[]> | null {
-  const internalFieldName = fieldNameMap[displayFieldName];
+  // ✅ FIXED: Use canonical mappings from types/core/index.ts
+  const canonicalFieldName = DISPLAY_TO_CANONICAL[displayFieldName as keyof typeof DISPLAY_TO_CANONICAL];
 
-  if (!internalFieldName) {
+  if (!canonicalFieldName) {
     console.warn(`Unknown display field name: ${displayFieldName}`);
     return null;
   }
 
-  switch (internalFieldName) {
+  switch (canonicalFieldName) {
     case "targetAudience":
       // Transform targetAudienceGroups to grouped structure
       return taxonomy.targetAudienceGroups.reduce((acc, group) => {
@@ -126,9 +120,9 @@ export function getGroupedOptionsForField(displayFieldName: string): Record<stri
   }
 }
 
-// Helper function to get field options by internal name (useful for validation)
-export function getOptionsByInternalName(internalFieldName: string, parentCategory?: string): readonly string[] {
-  switch (internalFieldName) {
+// Helper function to get field options by canonical name (useful for validation)
+export function getOptionsByCanonicalName(canonicalFieldName: CanonicalFieldName, parentCategory?: string): readonly string[] {
+  switch (canonicalFieldName) {
     case "marketCategory":
       return taxonomy.marketCategories;
 
@@ -151,10 +145,16 @@ export function getOptionsByInternalName(internalFieldName: string, parentCatego
     case "pricingModel":
       return taxonomy.pricingModels.map(model => model.label);
 
-    case "landingGoal":
+    case "landingPageGoals": // ✅ FIXED: Use canonical field name
       return taxonomy.landingGoalTypes.map(goal => goal.label);
 
     default:
       return [];
   }
+}
+
+// ✅ NEW: Legacy support function for backward compatibility
+export function getOptionsByInternalName(internalFieldName: string, parentCategory?: string): readonly string[] {
+  console.warn(`getOptionsByInternalName is deprecated. Use getOptionsByCanonicalName instead. Field: ${internalFieldName}`);
+  return getOptionsByCanonicalName(internalFieldName as CanonicalFieldName, parentCategory);
 }

@@ -16,26 +16,26 @@ export type ResultsLayout =
  */
 export function pickResultsLayout(input: LayoutPickerInput): ResultsLayout {
   const {
-    awarenessLevel,
-    toneProfile,
-    startupStageGroup,
-    marketCategory,
-    landingGoalType,
-    targetAudienceGroup,
-    pricingModel,
-    pricingModifier,
-    pricingCommitmentOption,
-    marketSophisticationLevel,
-    copyIntent,
-    problemType,
-  } = input;
+  awarenessLevel,
+  toneProfile,
+  startupStage,             // ✅ FIXED
+  marketCategory,
+  landingPageGoals,         // ✅ FIXED  
+  targetAudience,           // ✅ FIXED
+  pricingModel,
+  pricingModifier,
+  pricingCommitmentOption,
+  marketSophisticationLevel,
+  copyIntent,
+  problemType,
+} = input;
 
   // High-Priority Rules (Return immediately if matched)
   
   // 1. Enterprise needs credible customer proof with metrics
   if (
-    targetAudienceGroup === "enterprise" &&
-    (startupStageGroup === "growth" || startupStageGroup === "scale") &&
+    targetAudience === "enterprise" &&
+    (startupStage === "growth" || startupStage === "scale") &&
     marketSophisticationLevel >= "level-4"
   ) {
     return "QuoteWithMetric";
@@ -44,7 +44,7 @@ export function pickResultsLayout(input: LayoutPickerInput): ResultsLayout {
   // 2. Quantifiable business problems need measurable outcomes
   if (
     (problemType === "lost-revenue-or-inefficiency" || problemType === "time-freedom-or-automation") &&
-    (targetAudienceGroup === "businesses" || targetAudienceGroup === "enterprise") &&
+    (targetAudience === "businesses" || targetAudience === "enterprise") &&
     copyIntent === "desire-led"
   ) {
     return "BeforeAfterStats";
@@ -62,7 +62,7 @@ export function pickResultsLayout(input: LayoutPickerInput): ResultsLayout {
   // 4. Multiple audience segments with different outcomes
   if (
     marketSophisticationLevel >= "level-3" &&
-    (targetAudienceGroup === "businesses" || targetAudienceGroup === "marketers") &&
+    (targetAudience === "businesses" || targetAudience === "marketers") &&
     (awarenessLevel === "solution-aware" || awarenessLevel === "product-aware")
   ) {
     return "PersonaResultPanels";
@@ -70,7 +70,7 @@ export function pickResultsLayout(input: LayoutPickerInput): ResultsLayout {
 
   // 5. Creative/casual audiences with visual outcomes
   if (
-    (targetAudienceGroup === "creators" || targetAudienceGroup === "founders") &&
+    (targetAudience === "creators" || targetAudience === "founders") &&
     (toneProfile === "friendly-helpful" || toneProfile === "confident-playful") &&
     marketSophisticationLevel <= "level-2"
   ) {
@@ -91,22 +91,22 @@ export function pickResultsLayout(input: LayoutPickerInput): ResultsLayout {
   };
 
   // Startup Stage Scoring (Highest Weight: 4-5 points)
-  if (startupStageGroup === "idea" || startupStageGroup === "mvp") {
+  if (startupStage === "idea" || startupStage === "mvp") {
     scores.OutcomeIcons += 4;
     scores.EmojiOutcomeGrid += 4;
     scores.StackedWinsList += 3;
     scores.StatBlocks += 2;
-  } else if (startupStageGroup === "traction") {
+  } else if (startupStage === "traction") {
     scores.StatBlocks += 4;
     scores.BeforeAfterStats += 3;
     scores.StackedWinsList += 3;
     scores.OutcomeIcons += 2;
-  } else if (startupStageGroup === "growth") {
+  } else if (startupStage === "growth") {
     scores.QuoteWithMetric += 5;
     scores.BeforeAfterStats += 4;
     scores.PersonaResultPanels += 4;
     scores.TimelineResults += 3;
-  } else if (startupStageGroup === "scale") {
+  } else if (startupStage === "scale") {
     scores.QuoteWithMetric += 5;
     scores.PersonaResultPanels += 4;
     scores.TimelineResults += 3;
@@ -114,26 +114,26 @@ export function pickResultsLayout(input: LayoutPickerInput): ResultsLayout {
   }
 
   // Target Audience Scoring (High Weight: 3-4 points)
-  if (targetAudienceGroup === "enterprise") {
+  if (targetAudience === "enterprise") {
     scores.QuoteWithMetric += 4;
     scores.PersonaResultPanels += 4;
     scores.BeforeAfterStats += 3;
     scores.TimelineResults += 2;
-  } else if (targetAudienceGroup === "builders") {
+  } else if (targetAudience === "builders") {
     scores.StatBlocks += 4;
     scores.BeforeAfterStats += 3;
     scores.TimelineResults += 2;
-  } else if (targetAudienceGroup === "businesses") {
+  } else if (targetAudience === "businesses") {
     scores.BeforeAfterStats += 4;
     scores.PersonaResultPanels += 4;
     scores.QuoteWithMetric += 3;
     scores.StatBlocks += 2;
-  } else if (targetAudienceGroup === "founders" || targetAudienceGroup === "creators") {
+  } else if (targetAudience === "founders" || targetAudience === "creators") {
     scores.EmojiOutcomeGrid += 4;
     scores.StackedWinsList += 4;
     scores.OutcomeIcons += 3;
     scores.StatBlocks += 2;
-  } else if (targetAudienceGroup === "marketers") {
+  } else if (targetAudience === "marketers") {
     scores.PersonaResultPanels += 4;
     scores.BeforeAfterStats += 3;
     scores.TimelineResults += 2;
@@ -242,21 +242,21 @@ export function pickResultsLayout(input: LayoutPickerInput): ResultsLayout {
   }
 
   // Landing Goal Scoring (Low Weight: 1-2 points)
-  if (landingGoalType === "buy-now" || landingGoalType === "subscribe") {
+  if (landingPageGoals === "buy-now" || landingPageGoals === "subscribe") {
     scores.BeforeAfterStats += 2;
     scores.QuoteWithMetric += 2;
     scores.StatBlocks += 1;
-  } else if (landingGoalType === "contact-sales" || landingGoalType === "demo") {
+  } else if (landingPageGoals === "contact-sales" || landingPageGoals === "demo") {
     scores.QuoteWithMetric += 2;
     scores.PersonaResultPanels += 2;
     scores.TimelineResults += 1;
-  } else if (landingGoalType === "free-trial") {
+  } else if (landingPageGoals === "free-trial") {
     scores.TimelineResults += 2;
     scores.BeforeAfterStats += 1;
-  } else if (landingGoalType === "signup") {
+  } else if (landingPageGoals === "signup") {
     scores.StackedWinsList += 2;
     scores.OutcomeIcons += 1;
-  } else if (landingGoalType === "join-community" || landingGoalType === "waitlist") {
+  } else if (landingPageGoals === "join-community" || landingPageGoals === "waitlist") {
     scores.EmojiOutcomeGrid += 2;
     scores.StackedWinsList += 1;
   }

@@ -16,26 +16,26 @@ export type FounderNoteLayout =
  */
 export function pickFounderNoteLayout(input: LayoutPickerInput): FounderNoteLayout {
   const {
-    awarenessLevel,
-    toneProfile,
-    startupStageGroup,
-    marketCategory,
-    landingGoalType,
-    targetAudienceGroup,
-    pricingModel,
-    pricingModifier,
-    pricingCommitmentOption,
-    marketSophisticationLevel,
-    copyIntent,
-    problemType,
-  } = input;
+  awarenessLevel,
+  toneProfile,
+  startupStage,             // ✅ FIXED
+  marketCategory,
+  landingPageGoals,         // ✅ FIXED  
+  targetAudience,           // ✅ FIXED
+  pricingModel,
+  pricingModifier,
+  pricingCommitmentOption,
+  marketSophisticationLevel,
+  copyIntent,
+  problemType,
+} = input;
 
   // High-Priority Rules (Return immediately if matched)
   
   // 1. Early-stage founders connecting with fellow entrepreneurs
   if (
-    (startupStageGroup === "idea" || startupStageGroup === "mvp") &&
-    (targetAudienceGroup === "founders" || targetAudienceGroup === "creators") &&
+    (startupStage === "idea" || startupStage === "mvp") &&
+    (targetAudience === "founders" || targetAudience === "creators") &&
     (awarenessLevel === "unaware" || awarenessLevel === "problem-aware")
   ) {
     return "FounderCardWithQuote";
@@ -43,7 +43,7 @@ export function pickFounderNoteLayout(input: LayoutPickerInput): FounderNoteLayo
 
   // 2. Established companies with growth story
   if (
-    (startupStageGroup === "growth" || startupStageGroup === "scale") &&
+    (startupStage === "growth" || startupStage === "scale") &&
     marketSophisticationLevel >= "level-3" &&
     copyIntent === "desire-led"
   ) {
@@ -52,8 +52,8 @@ export function pickFounderNoteLayout(input: LayoutPickerInput): FounderNoteLayo
 
   // 3. Video-first approach for high-touch sales
   if (
-    (landingGoalType === "demo" || landingGoalType === "contact-sales") &&
-    (targetAudienceGroup === "enterprise" || targetAudienceGroup === "businesses") &&
+    (landingPageGoals === "demo" || landingPageGoals === "contact-sales") &&
+    (targetAudience === "enterprise" || targetAudience === "businesses") &&
     marketSophisticationLevel >= "level-4"
   ) {
     return "VideoNoteWithTranscript";
@@ -70,7 +70,7 @@ export function pickFounderNoteLayout(input: LayoutPickerInput): FounderNoteLayo
 
   // 5. Personal, storytelling approach for creators
   if (
-    (targetAudienceGroup === "creators" || targetAudienceGroup === "founders") &&
+    (targetAudience === "creators" || targetAudience === "founders") &&
     (toneProfile === "friendly-helpful" || toneProfile === "confident-playful") &&
     (marketCategory === "Design & Creative Tools" || marketCategory === "Marketing & Sales Tools")
   ) {
@@ -91,44 +91,44 @@ export function pickFounderNoteLayout(input: LayoutPickerInput): FounderNoteLayo
   };
 
   // Target Audience Scoring (Highest Weight: 4-5 points)
-  if (targetAudienceGroup === "founders") {
+  if (targetAudience === "founders") {
     scores.FounderCardWithQuote += 5;
     scores.FoundersBeliefStack += 4;
     scores.SideBySidePhotoStory += 3;
     scores.StoryBlockWithPullquote += 2;
-  } else if (targetAudienceGroup === "creators") {
+  } else if (targetAudience === "creators") {
     scores.SideBySidePhotoStory += 5;
     scores.FounderCardWithQuote += 4;
     scores.StoryBlockWithPullquote += 3;
-  } else if (targetAudienceGroup === "enterprise") {
+  } else if (targetAudience === "enterprise") {
     scores.VideoNoteWithTranscript += 5;
     scores.TimelineToToday += 4;
     scores.LetterStyleBlock += 3;
-  } else if (targetAudienceGroup === "businesses") {
+  } else if (targetAudience === "businesses") {
     scores.TimelineToToday += 4;
     scores.VideoNoteWithTranscript += 4;
     scores.MissionQuoteOverlay += 3;
-  } else if (targetAudienceGroup === "marketers") {
+  } else if (targetAudience === "marketers") {
     scores.StoryBlockWithPullquote += 4;
     scores.SideBySidePhotoStory += 3;
     scores.FounderCardWithQuote += 2;
   }
 
   // Startup Stage Scoring (High Weight: 3-4 points)
-  if (startupStageGroup === "idea" || startupStageGroup === "mvp") {
+  if (startupStage === "idea" || startupStage === "mvp") {
     scores.FounderCardWithQuote += 4;
     scores.MissionQuoteOverlay += 4;
     scores.FoundersBeliefStack += 3;
     scores.SideBySidePhotoStory += 2;
-  } else if (startupStageGroup === "traction") {
+  } else if (startupStage === "traction") {
     scores.StoryBlockWithPullquote += 4;
     scores.FounderCardWithQuote += 3;
     scores.TimelineToToday += 2;
-  } else if (startupStageGroup === "growth") {
+  } else if (startupStage === "growth") {
     scores.TimelineToToday += 4;
     scores.VideoNoteWithTranscript += 3;
     scores.LetterStyleBlock += 2;
-  } else if (startupStageGroup === "scale") {
+  } else if (startupStage === "scale") {
     scores.VideoNoteWithTranscript += 4;
     scores.TimelineToToday += 3;
     scores.LetterStyleBlock += 3;
@@ -221,17 +221,17 @@ export function pickFounderNoteLayout(input: LayoutPickerInput): FounderNoteLayo
   }
 
   // Landing Goal Scoring (Low Weight: 1-2 points)
-  if (landingGoalType === "contact-sales" || landingGoalType === "demo") {
+  if (landingPageGoals === "contact-sales" || landingPageGoals === "demo") {
     scores.VideoNoteWithTranscript += 2;
     scores.LetterStyleBlock += 1;
-  } else if (landingGoalType === "buy-now" || landingGoalType === "subscribe") {
+  } else if (landingPageGoals === "buy-now" || landingPageGoals === "subscribe") {
     scores.TimelineToToday += 2;
     scores.StoryBlockWithPullquote += 1;
-  } else if (landingGoalType === "join-community" || landingGoalType === "waitlist") {
+  } else if (landingPageGoals === "join-community" || landingPageGoals === "waitlist") {
     scores.SideBySidePhotoStory += 2;
     scores.FounderCardWithQuote += 2;
     scores.MissionQuoteOverlay += 1;
-  } else if (landingGoalType === "signup" || landingGoalType === "free-trial") {
+  } else if (landingPageGoals === "signup" || landingPageGoals === "free-trial") {
     scores.FounderCardWithQuote += 2;
     scores.StoryBlockWithPullquote += 1;
   }

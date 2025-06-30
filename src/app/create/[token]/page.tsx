@@ -11,7 +11,7 @@ const FIELD_ORDER = [
   "targetAudience",
   "keyProblem",
   "startupStage",
-  "landingGoal",
+  "landingPageGoals",
   "pricingModel",
 ];
 
