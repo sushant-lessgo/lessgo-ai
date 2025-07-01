@@ -1,9 +1,12 @@
-// utils/autoSaveDraft.ts - Minimal type-safe fix for existing functionality
+// utils/autoSaveDraft.ts - Enhanced Version with Edit Store Integration
+import type { 
+  FeatureItem, 
+  InputVariables, 
+  HiddenInferredFields,
+  CanonicalFieldName 
+} from '@/types/core/index';
 
-import type { FeatureItem, InputVariables, HiddenInferredFields } from '@/types/core/index';
-import { usePageStore } from '@/hooks/usePageStore';
-
-// Interface to match what's being passed from onboarding
+// Enhanced interface to match what's being passed from both onboarding and edit stores
 interface ConfirmedFieldData {
   value: string;
   confidence: number;
@@ -16,13 +19,64 @@ interface AutoSaveDraftParams {
   stepIndex?: number;
   confirmedFields?: Record<string, ConfirmedFieldData>;
   validatedFields?: Record<string, string>;
-  featuresFromAI?: FeatureItem[]; // Use proper type instead of generic array
-  hiddenInferredFields?: HiddenInferredFields; // Use proper type
+  featuresFromAI?: FeatureItem[];
+  hiddenInferredFields?: HiddenInferredFields;
   title?: string;
   includePageData?: boolean;
+  
+  // Enhanced parameters for edit store integration
+  source?: 'onboarding' | 'edit' | 'persistence-manager';
+  conflictResolution?: 'ignore' | 'overwrite' | 'merge';
+  saveMetadata?: {
+    description?: string;
+    source: 'user' | 'ai' | 'system';
+    triggeredBy?: 'timer' | 'user-action' | 'data-change' | 'navigation';
+    sessionId?: string;
+    changes?: Array<{
+      type: 'content' | 'layout' | 'theme';
+      sectionId?: string;
+      elementKey?: string;
+      field?: string;
+    }>;
+  };
+  
+  // Version information for conflict detection
+  localVersion?: number;
+  lastSaved?: number;
+  
+  // Performance options
+  enableCompression?: boolean;
+  compressionThreshold?: number;
+  
+  // Validation options
+  validateBeforeSave?: boolean;
+  skipValidation?: boolean;
 }
 
-export async function autoSaveDraft(params: AutoSaveDraftParams) {
+interface AutoSaveDraftResult {
+  success: boolean;
+  timestamp: number;
+  version?: number;
+  savedFields?: string[];
+  skippedFields?: string[];
+  warnings?: string[];
+  error?: string;
+  conflictDetected?: boolean;
+  serverData?: any;
+  metrics?: {
+    saveTime: number;
+    dataSize: number;
+    compressionRatio?: number;
+  };
+}
+
+/**
+ * ===== ENHANCED AUTO-SAVE FUNCTION =====
+ */
+
+export async function autoSaveDraft(params: AutoSaveDraftParams): Promise<AutoSaveDraftResult> {
+  const startTime = Date.now();
+  
   const {
     tokenId,
     inputText,
@@ -32,11 +86,47 @@ export async function autoSaveDraft(params: AutoSaveDraftParams) {
     featuresFromAI = [],
     hiddenInferredFields = {},
     title,
-    includePageData = false
+    includePageData = false,
+    source = 'onboarding',
+    conflictResolution = 'ignore',
+    saveMetadata,
+    localVersion,
+    lastSaved,
+    enableCompression = false,
+    compressionThreshold = 102400, // 100KB
+    validateBeforeSave = true,
+    skipValidation = false,
   } = params;
 
   try {
-    // Prepare the base payload - keep exact same structure as before
+    console.log('💾 Auto-saving draft:', { 
+      tokenId, 
+      source,
+      stepIndex, 
+      hasInputText: !!inputText,
+      hasConfirmedFields: Object.keys(confirmedFields).length > 0,
+      confirmedFieldsCount: Object.keys(confirmedFields).length,
+      includePageData,
+      conflictResolution,
+      description: saveMetadata?.description,
+    });
+
+    // Step 1: Validate data before saving (if enabled)
+    if (validateBeforeSave && !skipValidation) {
+      const validation = await validateSaveData({
+        validatedFields,
+        hiddenInferredFields,
+        featuresFromAI,
+        tokenId,
+      });
+      
+      if (!validation.isValid) {
+        console.warn('⚠️ Save validation warnings:', validation.warnings);
+        // Continue with warnings, but log them
+      }
+    }
+
+    // Step 2: Prepare the base payload
     const payload: any = {
       tokenId,
       inputText,
@@ -46,59 +136,141 @@ export async function autoSaveDraft(params: AutoSaveDraftParams) {
       featuresFromAI,
       hiddenInferredFields,
       title,
+      
+      // Enhanced metadata
+      saveMetadata: {
+        source,
+        timestamp: Date.now(),
+        ...saveMetadata,
+      },
+      
+      // Version information for conflict detection
+      ...(localVersion && { localVersion }),
+      ...(lastSaved && { lastSaved }),
     };
 
-    // Include page data if requested - exact same logic as before
+    // Step 3: Include page data if requested
+    let pageData: any = null;
     if (includePageData) {
-      let pageData: any;
       try {
-        const { useEditStore } = await import('@/hooks/useEditStore');
-        const editStore = useEditStore.getState();
-        pageData = editStore.export();
-        console.log('💾 Using edit store data for auto-save');
+        if (source === 'edit' || source === 'persistence-manager') {
+          // Try to get data from edit store first
+          const { useEditStore } = await import('@/hooks/useEditStore');
+          const editStore = useEditStore.getState();
+          pageData = editStore.export();
+          console.log('💾 Using edit store data for auto-save');
+        } else {
+          // Fallback to page store for backwards compatibility
+          console.log('💾 Edit store not available, using page store');
+          const { usePageStore } = await import('@/hooks/usePageStore');
+          const pageStore = usePageStore.getState();
+          pageData = pageStore.export();
+        }
       } catch (error) {
-        console.log('💾 Edit store not available, using page store');
-        const pageStore = usePageStore.getState();
-        pageData = pageStore.export();
+        console.warn('⚠️ Could not get page data for save:', error);
+        // Continue without page data
       }
-          
-      payload.finalContent = {
-        layout: pageData?.layout || {},
-        content: pageData?.content || {},
-        meta: pageData?.meta || {},
-        generatedAt: Date.now(),
-      };
       
-      console.log('💾 Auto-saving with complete page data:', {
-        sections: pageData?.layout?.sections?.length || 0,
-        content: Object.keys(pageData?.content || {}).length,
-        hasTheme: !!(pageData?.layout?.theme),
-      });
+      if (pageData) {
+        payload.finalContent = {
+          layout: pageData?.layout || {},
+          content: pageData?.content || {},
+          meta: pageData?.meta || {},
+          generatedAt: Date.now(),
+          source: source,
+          version: localVersion || 1,
+        };
+        
+        console.log('💾 Auto-saving with complete page data:', {
+          sections: pageData?.layout?.sections?.length || 0,
+          content: Object.keys(pageData?.content || {}).length,
+          hasTheme: !!(pageData?.layout?.theme),
+          source,
+        });
+      }
     }
 
-    // Add theme values - exact same logic as before
+    // Step 4: Add theme values
     try {
-      const { getColorTokens } = usePageStore.getState();
-      const colorTokens = getColorTokens();
-      payload.themeValues = {
-        primary: colorTokens.accent,
-        background: colorTokens.bgNeutral,
-        muted: colorTokens.textMuted,
-      };
+      if (source === 'edit' || source === 'persistence-manager') {
+        // Get color tokens from edit store
+        const { useEditStore } = await import('@/hooks/useEditStore');
+        const editStore = useEditStore.getState();
+        const colorTokens = editStore.getColorTokens();
+        
+        payload.themeValues = {
+          primary: colorTokens.accent,
+          background: colorTokens.bgNeutral,
+          muted: colorTokens.textMuted,
+        };
+      } else {
+        // Fallback to page store
+        const { usePageStore } = await import('@/hooks/usePageStore');
+        const { getColorTokens } = usePageStore.getState();
+        const colorTokens = getColorTokens();
+        
+        payload.themeValues = {
+          primary: colorTokens.accent,
+          background: colorTokens.bgNeutral,
+          muted: colorTokens.textMuted,
+        };
+      }
     } catch (error) {
       console.warn('Could not get color tokens for theme values:', error);
     }
 
-    console.log('💾 Auto-saving draft:', { 
-      tokenId, 
-      stepIndex, 
-      hasInputText: !!inputText,
-      hasConfirmedFields: Object.keys(confirmedFields).length > 0,
-      confirmedFieldsCount: Object.keys(confirmedFields).length,
-      includePageData,
-      payloadKeys: Object.keys(payload)
-    });
+    // Step 5: Apply compression if enabled and data is large enough
+    const payloadSize = new Blob([JSON.stringify(payload)]).size;
+    let compressionRatio = 1;
+    
+    if (enableCompression && payloadSize > compressionThreshold) {
+      try {
+        // Simple compression flag - actual compression would be handled by the server
+        payload._compressionRequested = true;
+        console.log('📦 Compression requested for large payload:', {
+          size: `${(payloadSize / 1024).toFixed(2)}KB`,
+          threshold: `${(compressionThreshold / 1024).toFixed(2)}KB`,
+        });
+      } catch (error) {
+        console.warn('⚠️ Compression failed:', error);
+      }
+    }
 
+    // Step 6: Handle conflict detection
+    if (conflictResolution !== 'ignore' && lastSaved) {
+      try {
+        const conflictCheck = await checkForConflicts(tokenId, lastSaved);
+        if (conflictCheck.hasConflict) {
+          console.warn('🔄 Conflict detected during save:', conflictCheck);
+          
+          if (conflictResolution === 'overwrite') {
+            payload._forceOverwrite = true;
+            console.log('⚠️ Force overwriting due to conflict resolution strategy');
+          } else if (conflictResolution === 'merge') {
+            // Attempt simple merge
+            payload._attemptMerge = true;
+            payload._serverVersion = conflictCheck.serverVersion;
+          } else {
+            // Return conflict for manual resolution
+            return {
+              success: false,
+              timestamp: Date.now(),
+              error: 'Conflict detected',
+              conflictDetected: true,
+              serverData: conflictCheck.serverData,
+              metrics: {
+                saveTime: Date.now() - startTime,
+                dataSize: payloadSize,
+              },
+            };
+          }
+        }
+      } catch (error) {
+        console.warn('⚠️ Conflict detection failed, proceeding with save:', error);
+      }
+    }
+
+    // Step 7: Execute the save operation
     const response = await fetch('/api/saveDraft', {
       method: 'POST',
       headers: {
@@ -107,17 +279,497 @@ export async function autoSaveDraft(params: AutoSaveDraftParams) {
       body: JSON.stringify(payload),
     });
 
+    const endTime = Date.now();
+    const saveTime = endTime - startTime;
+
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
       throw new Error(errorData.error || `HTTP ${response.status}`);
     }
 
     const result = await response.json();
-    console.log('✅ Auto-save successful:', result);
     
-    return result;
+    // Step 8: Process successful response
+    console.log('✅ Auto-save successful:', {
+      ...result,
+      saveTime: `${saveTime}ms`,
+      dataSize: `${(payloadSize / 1024).toFixed(2)}KB`,
+      compressionRequested: !!payload._compressionRequested,
+    });
+    
+    return {
+      success: true,
+      timestamp: endTime,
+      version: result.version,
+      savedFields: Object.keys(payload).filter(key => !key.startsWith('_')),
+      metrics: {
+        saveTime,
+        dataSize: payloadSize,
+        compressionRatio,
+      },
+    };
+
   } catch (error) {
-    console.error('❌ Auto-save failed:', error);
-    throw error;
+    const endTime = Date.now();
+    const saveTime = endTime - startTime;
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+    
+    console.error('❌ Auto-save failed:', {
+      error: errorMessage,
+      saveTime: `${saveTime}ms`,
+      tokenId,
+      source,
+    });
+    
+    return {
+      success: false,
+      timestamp: endTime,
+      error: errorMessage,
+      metrics: {
+        saveTime,
+        dataSize: 0,
+      },
+    };
   }
+}
+
+/**
+ * ===== VALIDATION UTILITIES =====
+ */
+
+async function validateSaveData(data: {
+  validatedFields?: Record<string, string>;
+  hiddenInferredFields?: HiddenInferredFields;
+  featuresFromAI?: FeatureItem[];
+  tokenId: string;
+}): Promise<{ isValid: boolean; warnings: string[] }> {
+  const warnings: string[] = [];
+  
+  try {
+    // Import type guards for validation
+    const { TypeGuards } = await import('@/utils/typeGuards');
+    
+    // Validate the structure if we have onboarding data
+    if (data.validatedFields && Object.keys(data.validatedFields).length > 0) {
+      const validation = TypeGuards.validateCompleteInputData({
+        inputVariables: data.validatedFields,
+        hiddenInferredFields: data.hiddenInferredFields,
+        features: data.featuresFromAI,
+      });
+      
+      if (!validation.isValid) {
+        warnings.push(...validation.errors);
+      }
+      
+      warnings.push(...validation.warnings);
+    }
+    
+    // Check for required fields
+    if (!data.tokenId || data.tokenId.trim() === '') {
+      warnings.push('Token ID is required');
+    }
+    
+    return {
+      isValid: warnings.length === 0,
+      warnings,
+    };
+    
+  } catch (error) {
+    warnings.push(`Validation error: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    return {
+      isValid: false,
+      warnings,
+    };
+  }
+}
+
+/**
+ * ===== CONFLICT DETECTION =====
+ */
+
+async function checkForConflicts(tokenId: string, lastSaved: number): Promise<{
+  hasConflict: boolean;
+  serverData?: any;
+  serverVersion?: number;
+}> {
+  try {
+    const response = await fetch(`/api/loadDraft?tokenId=${encodeURIComponent(tokenId)}`);
+    
+    if (!response.ok) {
+      console.warn('⚠️ Could not check for conflicts - load failed');
+      return { hasConflict: false };
+    }
+    
+    const serverData = await response.json();
+    const serverModified = new Date(serverData.lastUpdated || 0).getTime();
+    
+    // Simple conflict detection: server modified after our last save
+    const hasConflict = serverModified > lastSaved;
+    
+    if (hasConflict) {
+      console.log('🔄 Conflict detected:', {
+        serverModified: new Date(serverModified).toISOString(),
+        localLastSaved: new Date(lastSaved).toISOString(),
+        timeDiff: `${Math.round((serverModified - lastSaved) / 1000)}s`,
+      });
+    }
+    
+    return {
+      hasConflict,
+      serverData,
+      serverVersion: serverData.version,
+    };
+    
+  } catch (error) {
+    console.warn('⚠️ Conflict detection failed:', error);
+    return { hasConflict: false };
+  }
+}
+
+/**
+ * ===== BATCH SAVE UTILITIES =====
+ */
+
+interface BatchSaveItem {
+  tokenId: string;
+  data: Partial<AutoSaveDraftParams>;
+  priority: number;
+}
+
+interface BatchSaveOptions {
+  maxBatchSize?: number;
+  batchTimeout?: number;
+  retryFailedSaves?: boolean;
+  enableParallelProcessing?: boolean;
+}
+
+export async function batchSaveDrafts(
+  items: BatchSaveItem[],
+  options: BatchSaveOptions = {}
+): Promise<Array<{ tokenId: string; result: AutoSaveDraftResult }>> {
+  const {
+    maxBatchSize = 10,
+    batchTimeout = 30000,
+    retryFailedSaves = true,
+    enableParallelProcessing = false,
+  } = options;
+
+  console.log('📦 Starting batch save:', {
+    itemCount: items.length,
+    maxBatchSize,
+    enableParallelProcessing,
+  });
+
+  const results: Array<{ tokenId: string; result: AutoSaveDraftResult }> = [];
+  
+  // Sort by priority (lower number = higher priority)
+  const sortedItems = [...items].sort((a, b) => a.priority - b.priority);
+  
+  // Process in batches
+  for (let i = 0; i < sortedItems.length; i += maxBatchSize) {
+    const batch = sortedItems.slice(i, i + maxBatchSize);
+    
+    try {
+      const batchPromises = batch.map(async (item) => {
+        try {
+          // Fix #1: Ensure tokenId is required and present
+          const saveParams: AutoSaveDraftParams = {
+            tokenId: item.tokenId, // This is guaranteed to exist from BatchSaveItem
+            ...item.data,
+          };
+          
+          const result = await Promise.race([
+            autoSaveDraft(saveParams),
+            new Promise<AutoSaveDraftResult>((_, reject) => 
+              setTimeout(() => reject(new Error('Batch save timeout')), batchTimeout)
+            ),
+          ]);
+          
+          return { tokenId: item.tokenId, result };
+        } catch (error) {
+          const errorResult: AutoSaveDraftResult = {
+            success: false,
+            timestamp: Date.now(),
+            error: error instanceof Error ? error.message : 'Batch save failed',
+            metrics: { saveTime: 0, dataSize: 0 },
+          };
+          
+          return { tokenId: item.tokenId, result: errorResult };
+        }
+      });
+      
+      // Fix #2: Properly handle Promise.allSettled results
+      const batchResults = enableParallelProcessing 
+        ? await Promise.all(batchPromises)
+        : await Promise.allSettled(batchPromises).then(results => 
+            results
+              .filter((r): r is PromiseFulfilledResult<{ tokenId: string; result: AutoSaveDraftResult }> => 
+                r.status === 'fulfilled'
+              )
+              .map(r => r.value)
+          );
+      
+      results.push(...batchResults);
+      
+      // Brief pause between batches to avoid overwhelming the server
+      if (i + maxBatchSize < sortedItems.length) {
+        await new Promise(resolve => setTimeout(resolve, 100));
+      }
+      
+    } catch (error) {
+      console.error('❌ Batch save failed:', error);
+      
+      // Add failed results for this batch
+      batch.forEach(item => {
+        results.push({
+          tokenId: item.tokenId,
+          result: {
+            success: false,
+            timestamp: Date.now(),
+            error: 'Batch processing failed',
+            metrics: { saveTime: 0, dataSize: 0 },
+          },
+        });
+      });
+    }
+  }
+  
+  // Retry failed saves if enabled
+  if (retryFailedSaves) {
+    const failedItems = results
+      .filter(r => !r.result.success)
+      .map(r => {
+        const originalItem = items.find(i => i.tokenId === r.tokenId);
+        return originalItem ? {
+          tokenId: r.tokenId,
+          data: originalItem.data,
+          priority: 1
+        } : null;
+      })
+      .filter((item): item is BatchSaveItem => item !== null);
+    
+    if (failedItems.length > 0) {
+      console.log('🔄 Retrying failed saves:', { count: failedItems.length });
+      
+      const retryResults = await batchSaveDrafts(failedItems, {
+        ...options,
+        retryFailedSaves: false, // Prevent infinite retry
+      });
+      
+      // Update results with retry results
+      retryResults.forEach(retryResult => {
+        const originalIndex = results.findIndex(r => r.tokenId === retryResult.tokenId);
+        if (originalIndex !== -1) {
+          results[originalIndex] = retryResult;
+        }
+      });
+    }
+  }
+  
+  const successCount = results.filter(r => r.result.success).length;
+  const failureCount = results.length - successCount;
+  
+  console.log('📦 Batch save completed:', {
+    total: results.length,
+    successful: successCount,
+    failed: failureCount,
+    successRate: `${Math.round((successCount / results.length) * 100)}%`,
+  });
+  
+  return results;
+}
+
+/**
+ * ===== SPECIALIZED SAVE FUNCTIONS =====
+ */
+
+// Quick save for minimal data (onboarding steps)
+export async function quickSaveDraft(tokenId: string, data: {
+  inputText?: string;
+  stepIndex?: number;
+  validatedFields?: Record<string, string>;
+}): Promise<AutoSaveDraftResult> {
+  return autoSaveDraft({
+    tokenId,
+    ...data,
+    source: 'onboarding',
+    skipValidation: true,
+    includePageData: false,
+  });
+}
+
+// Complete save for full edit store data
+export async function completeSaveDraft(tokenId: string, options?: {
+  description?: string;
+  createSnapshot?: boolean;
+  forceOverwrite?: boolean;
+}): Promise<AutoSaveDraftResult> {
+  const { description, createSnapshot, forceOverwrite } = options || {};
+  
+  return autoSaveDraft({
+    tokenId,
+    source: 'edit',
+    includePageData: true,
+    validateBeforeSave: true,
+    conflictResolution: forceOverwrite ? 'overwrite' : 'merge',
+    saveMetadata: {
+      description: description || 'Complete save',
+      source: 'user',
+      triggeredBy: 'user-action',
+      sessionId: generateSessionId(),
+    },
+  });
+}
+
+// Background auto-save
+export async function backgroundSaveDraft(tokenId: string): Promise<AutoSaveDraftResult> {
+  return autoSaveDraft({
+    tokenId,
+    source: 'persistence-manager',
+    includePageData: true,
+    validateBeforeSave: false,
+    conflictResolution: 'ignore', // Background saves shouldn't conflict
+    enableCompression: true,
+    saveMetadata: {
+      description: 'Background auto-save',
+      source: 'system',
+      triggeredBy: 'timer',
+      sessionId: generateSessionId(),
+    },
+  });
+}
+
+/**
+ * ===== UTILITIES =====
+ */
+
+function generateSessionId(): string {
+  return `session-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+}
+
+// Extract meaningful data summary for logging
+export function getSaveDataSummary(params: AutoSaveDraftParams): {
+  hasOnboardingData: boolean;
+  hasPageData: boolean;
+  dataSize: string;
+  keyFields: string[];
+} {
+  const onboardingFields = [
+    params.inputText && 'inputText',
+    params.validatedFields && Object.keys(params.validatedFields).length > 0 && 'validatedFields',
+    params.featuresFromAI && params.featuresFromAI.length > 0 && 'featuresFromAI',
+    params.hiddenInferredFields && Object.keys(params.hiddenInferredFields).length > 0 && 'hiddenInferredFields',
+  ].filter(Boolean) as string[];
+  
+  const hasOnboardingData = onboardingFields.length > 0;
+  // Fix #3: Provide explicit boolean value instead of potentially undefined
+  const hasPageData = Boolean(params.includePageData);
+  
+  const dataSize = new Blob([JSON.stringify(params)]).size;
+  const dataSizeFormatted = dataSize > 1024 
+    ? `${(dataSize / 1024).toFixed(2)}KB`
+    : `${dataSize}B`;
+  
+  return {
+    hasOnboardingData,
+    hasPageData,
+    dataSize: dataSizeFormatted,
+    keyFields: onboardingFields,
+  };
+}
+
+/**
+ * ===== BACKWARDS COMPATIBILITY =====
+ * Maintain the original autoSaveDraft function signature for existing code
+ */
+
+// Legacy function signature for backwards compatibility
+interface LegacyAutoSaveDraftParams {
+  tokenId: string;
+  inputText?: string;
+  stepIndex?: number;
+  confirmedFields?: Record<string, ConfirmedFieldData>;
+  validatedFields?: Record<string, string>;
+  featuresFromAI?: FeatureItem[];
+  hiddenInferredFields?: HiddenInferredFields;
+  title?: string;
+  includePageData?: boolean;
+}
+
+// Keep original function working
+export async function legacyAutoSaveDraft(params: LegacyAutoSaveDraftParams) {
+  // Convert to new format and call enhanced version
+  return autoSaveDraft({
+    ...params,
+    source: 'onboarding',
+    conflictResolution: 'ignore',
+  });
+}
+
+/**
+ * ===== DEVELOPMENT UTILITIES =====
+ */
+
+if (process.env.NODE_ENV === 'development') {
+  (window as any).__autoSaveDraftDebug = {
+    // Direct functions
+    autoSaveDraft,
+    quickSaveDraft,
+    completeSaveDraft,
+    backgroundSaveDraft,
+    batchSaveDrafts,
+    
+    // Utilities
+    getSaveDataSummary,
+    validateSaveData,
+    checkForConflicts,
+    
+    // Test scenarios
+    testSave: async (tokenId: string) => {
+      console.log('🧪 Testing auto-save...');
+      return autoSaveDraft({
+        tokenId,
+        inputText: 'Test input',
+        title: 'Test Project',
+        source: 'edit',
+        saveMetadata: {
+          description: 'Debug test save',
+          source: 'user',
+          triggeredBy: 'user-action',
+        },
+      });
+    },
+    
+    testBatchSave: async (tokenIds: string[]) => {
+      console.log('🧪 Testing batch save...');
+      const items = tokenIds.map((tokenId, index) => ({
+        tokenId,
+        data: {
+          tokenId,
+          inputText: `Test batch ${index}`,
+          title: `Test Project ${index}`,
+          source: 'edit' as const,
+        },
+        priority: index,
+      }));
+      
+      return batchSaveDrafts(items);
+    },
+    
+    simulateConflict: async (tokenId: string) => {
+      console.log('🧪 Simulating conflict...');
+      return autoSaveDraft({
+        tokenId,
+        lastSaved: Date.now() - 60000, // 1 minute ago
+        conflictResolution: 'merge',
+        source: 'edit',
+        saveMetadata: {
+          description: 'Conflict simulation',
+          source: 'user',
+        },
+      });
+    },
+  };
+  
+  console.log('🔧 Enhanced AutoSaveDraft debug utilities available at window.__autoSaveDraftDebug');
 }
