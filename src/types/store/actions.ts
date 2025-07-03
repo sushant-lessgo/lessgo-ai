@@ -29,6 +29,13 @@ export interface LayoutActions {
   updateFromBackgroundSystem: (backgroundSystem: BackgroundSystem) => void;
   updateTypography: (typography: Partial<Theme['typography']>) => void;
   
+/**
+   * ===== RESET TO GENERATED =====
+   */
+  
+  // Reset all customizations to original AI-generated design
+  resetToGenerated: () => void;
+
   // Global Settings
   setDeviceMode: (mode: 'desktop' | 'mobile') => void;
   setZoomLevel: (level: number) => void;
@@ -120,6 +127,13 @@ export interface UIActions {
   
   // History Management
   pushHistory: (entry: EditHistoryEntry) => void;
+
+    // Check if undo is available
+  canUndo: () => boolean;
+  
+  // Check if redo is available
+  canRedo: () => boolean;
+  
   undo: () => void;
   redo: () => void;
   clearHistory: () => void;

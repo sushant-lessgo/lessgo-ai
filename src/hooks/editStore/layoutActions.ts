@@ -28,6 +28,29 @@ const inferElementType = (elementKey: string) => {
 };
 
 /**
+ * ===== BACKGROUND SYSTEM GENERATION =====
+ */
+
+// Mock function - will be replaced with actual rule-based engine integration
+const generateCompleteBackgroundSystem = (onboardingData: any): BackgroundSystem => {
+  // This is a placeholder that generates a basic background system
+  // In production, this would use the sophisticated rule-based engine
+  
+  const baseColors = ['blue', 'purple', 'green', 'orange', 'red', 'teal'];
+  const baseColor = baseColors[Math.floor(Math.random() * baseColors.length)];
+  
+  return {
+    primary: `bg-gradient-to-r from-${baseColor}-500 to-${baseColor}-600`,
+    secondary: `bg-${baseColor}-50`,
+    neutral: 'bg-white',
+    divider: 'bg-gray-100/50',
+    baseColor,
+    accentColor: baseColor,
+    accentCSS: `bg-${baseColor}-600`
+  };
+};
+
+/**
  * ===== LAYOUT ACTIONS CREATOR =====
  */
 export function createLayoutActions(set: any, get: any): LayoutActions {
@@ -344,6 +367,68 @@ export function createLayoutActions(set: any, get: any): LayoutActions {
         });
         
         state.history.redoStack = [];
+      }),
+
+    /**
+     * ===== RESET TO GENERATED =====
+     */
+    
+    resetToGenerated: () =>
+      set((state: EditStore) => {
+        // Store current state for undo
+        const currentState = {
+          theme: { ...state.theme },
+          sections: [...state.sections],
+          sectionLayouts: { ...state.sectionLayouts },
+          content: { ...state.content },
+        };
+        
+        // Generate original background system from onboarding data
+        const originalBackgroundSystem = generateCompleteBackgroundSystem(state.onboardingData);
+        
+        // Reset theme to original AI-generated state
+        state.theme.colors.baseColor = originalBackgroundSystem.baseColor;
+        state.theme.colors.accentColor = originalBackgroundSystem.accentColor;
+        state.theme.colors.accentCSS = originalBackgroundSystem.accentCSS;
+        
+        // Reset section backgrounds
+        state.theme.colors.sectionBackgrounds.primary = originalBackgroundSystem.primary;
+        state.theme.colors.sectionBackgrounds.secondary = originalBackgroundSystem.secondary;
+        state.theme.colors.sectionBackgrounds.neutral = originalBackgroundSystem.neutral;
+        state.theme.colors.sectionBackgrounds.divider = originalBackgroundSystem.divider;
+        
+        // Reset typography to default (if we had original typography, we'd use that)
+        // For now, keeping current typography since we don't have original typography stored
+        
+        // Mark sections as AI-generated again
+        Object.values(state.content).forEach(section => {
+          if (section.aiMetadata) {
+            section.aiMetadata.isCustomized = false;
+            section.aiMetadata.aiGenerated = true;
+            section.aiMetadata.lastGenerated = Date.now();
+          }
+        });
+        
+        state.autoSave.isDirty = true;
+        
+        // Add to history - using 'theme' type since it's primarily a theme reset
+        state.history.undoStack.push({
+          type: 'theme',
+          description: 'Reset to LessGo-generated design',
+          timestamp: Date.now(),
+          beforeState: currentState,
+          afterState: {
+            theme: { ...state.theme },
+            backgroundSystem: originalBackgroundSystem,
+          },
+        });
+        
+        state.history.redoStack = [];
+        
+        console.log('🔄 Reset to original LessGo-generated design', {
+          originalBackgroundSystem,
+          sectionsReset: Object.keys(state.content).length,
+        });
       }),
 
     /**

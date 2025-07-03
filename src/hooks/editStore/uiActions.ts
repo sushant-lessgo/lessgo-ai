@@ -582,6 +582,20 @@ export function createUIActions(set: any, get: any): UIActions {
         state.history.redoStack = [];
       }),
     
+    /**
+     * ===== UNDO/REDO STATE GETTERS =====
+     */
+    
+    canUndo: () => {
+      const state = get();
+      return state.history.undoStack.length > 0;
+    },
+    
+    canRedo: () => {
+      const state = get();
+      return state.history.redoStack.length > 0;
+    },
+    
     undo: () =>
       set((state: EditStore) => {
         const entry = state.history.undoStack.pop();
