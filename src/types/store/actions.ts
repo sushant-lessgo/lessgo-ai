@@ -1,6 +1,6 @@
 // types/store/actions.ts - Single source of truth for ALL action interfaces
 
-import type { Theme, BackgroundType, SectionData } from '@/types/core/index';
+import type { Theme, BackgroundType, SectionData, ColorTokens, FontTheme } from '@/types/core/index';
 import type { BackgroundSystem } from '@/modules/Design/ColorSystem/colorTokens';
 import type { 
   UISlice, 
@@ -8,6 +8,13 @@ import type {
   ToolbarAction, 
   EditHistoryEntry 
 } from './state';
+
+import type { 
+  UndoableAction, 
+  ActionHistoryItem, 
+  UndoRedoState,
+  ResetScope 
+} from '@/types/core';
 
 /**
  * ===== LAYOUT ACTIONS INTERFACE =====
@@ -28,6 +35,11 @@ export interface LayoutActions {
   updateSectionBackground: (type: keyof Theme['colors']['sectionBackgrounds'], value: string) => void;
   updateFromBackgroundSystem: (backgroundSystem: BackgroundSystem) => void;
   updateTypography: (typography: Partial<Theme['typography']>) => void;
+
+  // Typography Actions
+updateTypographyTheme: (newTheme: FontTheme) => void;
+resetTypographyToGenerated: () => void;
+getTypographyForSection: (sectionId: string) => FontTheme;
   
 /**
    * ===== RESET TO GENERATED =====
@@ -42,6 +54,7 @@ export interface LayoutActions {
   
   // Color System Integration
   getColorTokens: () => ReturnType<typeof import('@/modules/Design/ColorSystem/colorTokens').generateColorTokens>;
+  updateColorTokens: (newTokens: ColorTokens) => void;
 }
 
 /**
@@ -127,16 +140,18 @@ export interface UIActions {
   
   // History Management
   pushHistory: (entry: EditHistoryEntry) => void;
-
-    // Check if undo is available
-  canUndo: () => boolean;
   
-  // Check if redo is available
-  canRedo: () => boolean;
-  
+  // Undo/Redo System
   undo: () => void;
   redo: () => void;
+  canUndo: () => boolean;
+  canRedo: () => boolean;
   clearHistory: () => void;
+  executeUndoableAction: <T>(
+    actionType: UndoableAction,
+    actionName: string,
+    action: () => T
+  ) => T;
   
   // Interaction Helpers
   handleKeyboardShortcut: (event: KeyboardEvent) => void;
@@ -346,3 +361,4 @@ export interface AutoSaveActions {
   getPerformanceStats: () => any; // Main store version
   resetPerformanceStats: () => void; // Main store version
 }
+

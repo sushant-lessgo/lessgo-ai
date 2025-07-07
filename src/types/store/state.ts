@@ -9,7 +9,8 @@ import type {
   BackgroundType,
   ElementType,
   ElementEditMode,
-  CanonicalFieldName
+  CanonicalFieldName,
+  TypographyState
 } from '@/types/core/index';
 
 /**
@@ -85,7 +86,7 @@ export interface LayoutSlice {
   
   // Theme System
   theme: Theme;
-  
+  typography: TypographyState;
   // Global Settings
   globalSettings: {
     maxWidth: string;

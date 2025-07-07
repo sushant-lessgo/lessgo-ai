@@ -1,3 +1,5 @@
+import { BackgroundSelectorMode } from './ui';
+
 /**
  * Input context
  */
@@ -3101,4 +3103,196 @@ export interface ParseOptions {
   
   /** Custom extractors */
   customExtractors?: string[];
+}
+
+/**
+ * ===== BACKGROUND VALIDATION API TYPES =====
+ */
+
+/**
+ * Complete validation result for a background
+ */
+export interface BackgroundValidationResult {
+  /** Is the background valid */
+  isValid: boolean;
+  /** Overall validation score (0-100) */
+  score: number;
+  /** Validation warnings */
+  warnings: BackgroundValidationWarning[];
+  /** Validation errors */
+  errors: BackgroundValidationError[];
+  /** Improvement suggestions */
+  suggestions: BackgroundValidationSuggestion[];
+  /** Accessibility analysis */
+  accessibility: BackgroundAccessibilityCheck;
+  /** Performance analysis */
+  performance: BackgroundPerformanceCheck;
+  /** Brand alignment analysis */
+  brandAlignment: BackgroundBrandAlignmentCheck;
+}
+
+/**
+ * Background validation warning
+ */
+export interface BackgroundValidationWarning {
+  /** Warning identifier */
+  id: string;
+  /** Warning category */
+  type: 'contrast' | 'performance' | 'accessibility' | 'brand' | 'usability';
+  /** Warning severity level */
+  severity: 'low' | 'medium' | 'high';
+  /** Warning message */
+  message: string;
+  /** Additional details */
+  details?: string;
+  /** Suggested fix */
+  fix?: string;
+  /** Can be automatically fixed */
+  autoFixable: boolean;
+}
+
+/**
+ * Background validation error
+ */
+export interface BackgroundValidationError {
+  /** Error identifier */
+  id: string;
+  /** Error category */
+  type: 'contrast' | 'accessibility' | 'format' | 'compatibility';
+  /** Error message */
+  message: string;
+  /** Error details */
+  details: string;
+  /** Suggested fix */
+  fix: string;
+  /** Is this error blocking */
+  blocking: boolean;
+}
+
+/**
+ * Background validation suggestion
+ */
+export interface BackgroundValidationSuggestion {
+  /** Suggestion identifier */
+  id: string;
+  /** Suggestion category */
+  type: 'improvement' | 'alternative' | 'optimization';
+  /** Suggestion message */
+  message: string;
+  /** Suggested action */
+  action?: string;
+  /** Suggested value */
+  value?: any;
+}
+
+/**
+ * Background accessibility analysis
+ */
+export interface BackgroundAccessibilityCheck {
+  /** Text contrast ratio */
+  contrastRatio: number;
+  /** WCAG compliance level */
+  wcagLevel: 'AA' | 'AAA' | 'fail';
+  /** Color blind safe */
+  colorBlindSafe: boolean;
+  /** Text readability score */
+  readabilityScore: number;
+  /** Accessibility issues found */
+  issues: BackgroundAccessibilityIssue[];
+}
+
+/**
+ * Background accessibility issue
+ */
+export interface BackgroundAccessibilityIssue {
+  /** Issue type */
+  type: 'contrast' | 'color-blind' | 'readability';
+  /** Issue severity */
+  severity: 'error' | 'warning' | 'info';
+  /** Issue message */
+  message: string;
+  /** Suggested fix */
+  fix?: string;
+}
+
+/**
+ * Background performance analysis
+ */
+export interface BackgroundPerformanceCheck {
+  /** Rendering complexity */
+  complexity: 'low' | 'medium' | 'high';
+  /** Rendering cost (0-100) */
+  renderCost: number;
+  /** Performance optimizations */
+  optimizations: string[];
+  /** Performance issues */
+  issues: BackgroundPerformanceIssue[];
+}
+
+/**
+ * Background performance issue
+ */
+export interface BackgroundPerformanceIssue {
+  /** Issue type */
+  type: 'complexity' | 'size' | 'compatibility';
+  /** Issue message */
+  message: string;
+  /** Performance impact level */
+  impact: 'low' | 'medium' | 'high';
+  /** Suggested fix */
+  fix?: string;
+}
+
+/**
+ * Background brand alignment analysis
+ */
+export interface BackgroundBrandAlignmentCheck {
+  /** Brand alignment score (0-100) */
+  alignmentScore: number;
+  /** Color harmony score (0-100) */
+  colorHarmony: number;
+  /** Brand consistency score (0-100) */
+  consistencyScore: number;
+  /** Brand alignment issues */
+  issues: BackgroundBrandIssue[];
+}
+
+/**
+ * Background brand alignment issue
+ */
+export interface BackgroundBrandIssue {
+  /** Issue type */
+  type: 'color-mismatch' | 'harmony' | 'consistency';
+  /** Issue message */
+  message: string;
+  /** Issue severity */
+  severity: 'low' | 'medium' | 'high';
+  /** Improvement suggestion */
+  suggestion?: string;
+}
+
+/**
+ * Background validation context
+ */
+export interface BackgroundValidationContext {
+  /** Validation mode */
+  mode?: BackgroundSelectorMode;
+  /** Target audience */
+  targetAudience?: string;
+  /** Page section types */
+  sectionTypes?: string[];
+  /** Performance requirements */
+  performanceRequirements?: 'low' | 'medium' | 'high';
+}
+
+/**
+ * Color harmony analysis result
+ */
+export interface ColorHarmonyInfo {
+  /** Color relationship type */
+  relationship: 'identical' | 'analogous' | 'complementary' | 'triadic' | 'neutral' | 'clash';
+  /** Harmony score (0-100) */
+  score: number;
+  /** Harmony description */
+  description: string;
 }

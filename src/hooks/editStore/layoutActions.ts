@@ -5,7 +5,8 @@ import type { Theme } from '@/types/core/index';
 // ✅ CORRECT
 import type { EditStore, EditHistoryEntry } from '@/types/store';
 import type { LayoutActions } from '@/types/store';
-
+import { pickFontFromOnboarding } from '@/modules/Design/fontSystem/pickFont';
+import type { FontTheme, TypographyState } from '@/types/core/index';
 
 /**
  * ===== UTILITY FUNCTIONS =====
@@ -368,6 +369,74 @@ export function createLayoutActions(set: any, get: any): LayoutActions {
         
         state.history.redoStack = [];
       }),
+
+      /**
+ * ===== TYPOGRAPHY MANAGEMENT =====
+ */
+
+updateTypographyTheme: (newTheme: FontTheme) =>
+  set((state: EditStore) => {
+    const oldTypography = { ...state.theme.typography };
+    
+    // Update theme typography
+    state.theme.typography.headingFont = newTheme.headingFont;
+    state.theme.typography.bodyFont = newTheme.bodyFont;
+    
+    state.autoSave.isDirty = true;
+    
+    // Add to history
+    state.history.undoStack.push({
+      type: 'theme',
+      description: 'Updated typography theme',
+      timestamp: Date.now(),
+      beforeState: { typography: oldTypography },
+      afterState: { typography: state.theme.typography },
+    });
+    
+    state.history.redoStack = [];
+  }),
+
+resetTypographyToGenerated: () =>
+  set((state: EditStore) => {
+    const oldTypography = { ...state.theme.typography };
+    
+    // Generate original typography from onboarding data
+    const originalFont = pickFontFromOnboarding();
+    
+    state.theme.typography.headingFont = originalFont.headingFont;
+    state.theme.typography.bodyFont = originalFont.bodyFont;
+    
+    state.autoSave.isDirty = true;
+    
+    // Add to history
+    state.history.undoStack.push({
+      type: 'theme',
+      description: 'Reset typography to generated',
+      timestamp: Date.now(),
+      beforeState: { typography: oldTypography },
+      afterState: { typography: state.theme.typography },
+    });
+    
+    state.history.redoStack = [];
+    
+    console.log('🔄 Reset typography to LessGo-generated fonts', {
+      originalFont,
+      headingFont: originalFont.headingFont,
+      bodyFont: originalFont.bodyFont,
+    });
+  }),
+
+getTypographyForSection: (sectionId: string) => {
+  const state = get();
+  
+  // Check for section-level customizations first
+  // For now, return global typography (section customizations can be added later)
+  return {
+    toneId: state.onboardingData?.hiddenInferredFields?.toneProfile || 'minimal-technical',
+    headingFont: state.theme.typography.headingFont,
+    bodyFont: state.theme.typography.bodyFont,
+  } as FontTheme;
+},
 
     /**
      * ===== RESET TO GENERATED =====

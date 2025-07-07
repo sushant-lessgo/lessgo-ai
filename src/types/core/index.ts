@@ -74,6 +74,8 @@ export type {
   SectionBackgrounds,
   SpacingSystem,
   PageMetadata,
+  FontTheme,
+  TypographyState,
 } from './content';
 
 /**
@@ -249,6 +251,16 @@ export type {
   KeyboardNavigationState,
   FocusManagementState,
   ColorContrastState,
+   ColorTokens,
+  ColorSelectorTier,
+  ColorIntensityLevel,
+  TextContrastLevel,
+  ResetScope,
+  UndoableAction,
+  ActionHistoryItem,
+  UndoRedoState,
+  Toast,
+  ToastActions,
 } from './ui';
 
 /**
@@ -432,6 +444,255 @@ export interface BusinessError extends AppError {
   operation: string;
   entity?: string;
   entityId?: string;
+}
+
+/**
+ * ===== BACKGROUND SYSTEM TYPES =====
+ */
+
+/**
+ * Complete background system for a landing page
+ */
+export interface BackgroundSystem {
+  /** Primary background (hero sections, CTAs) */
+  primary: string;
+  /** Secondary background (features, content sections) */
+  secondary: string;
+  /** Neutral background (testimonials, white sections) */
+  neutral: string;
+  /** Divider background (subtle separators) */
+  divider: string;
+  /** Base color name (e.g., "blue", "purple") */
+  baseColor: string;
+  /** Accent color name (e.g., "purple", "orange") */
+  accentColor: string;
+  /** Accent CSS class (e.g., "bg-purple-600") */
+  accentCSS: string;
+}
+
+/**
+ * Background variation from rule-based engine
+ */
+export interface BackgroundVariation {
+  /** Unique variation identifier */
+  variationId: string;
+  /** Human-readable variation name */
+  variationLabel: string;
+  /** Archetype category (e.g., "soft-gradient-blur") */
+  archetypeId: string;
+  /** Theme identifier (e.g., "modern-blue") */
+  themeId: string;
+  /** Tailwind CSS class for the background */
+  tailwindClass: string;
+  /** Base color family (e.g., "blue", "purple") */
+  baseColor: string;
+}
+
+/**
+ * Brand colors for background compatibility
+ */
+export interface BrandColors {
+  /** Primary brand color (hex format) */
+  primary: string;
+  /** Secondary brand color (optional, hex format) */
+  secondary?: string;
+}
+
+/**
+ * Background selector mode
+ */
+export type BackgroundSelectorMode = 'generated' | 'brand' | 'custom';
+
+/**
+ * ===== BACKGROUND VALIDATION TYPES =====
+ */
+
+/**
+ * Complete validation result for a background
+ */
+export interface BackgroundValidationResult {
+  /** Is the background valid */
+  isValid: boolean;
+  /** Overall validation score (0-100) */
+  score: number;
+  /** Validation warnings */
+  warnings: BackgroundValidationWarning[];
+  /** Validation errors */
+  errors: BackgroundValidationError[];
+  /** Improvement suggestions */
+  suggestions: BackgroundValidationSuggestion[];
+  /** Accessibility analysis */
+  accessibility: BackgroundAccessibilityCheck;
+  /** Performance analysis */
+  performance: BackgroundPerformanceCheck;
+  /** Brand alignment analysis */
+  brandAlignment: BackgroundBrandAlignmentCheck;
+}
+
+/**
+ * Background validation warning
+ */
+export interface BackgroundValidationWarning {
+  /** Warning identifier */
+  id: string;
+  /** Warning category */
+  type: 'contrast' | 'performance' | 'accessibility' | 'brand' | 'usability';
+  /** Warning severity level */
+  severity: 'low' | 'medium' | 'high';
+  /** Warning message */
+  message: string;
+  /** Additional details */
+  details?: string;
+  /** Suggested fix */
+  fix?: string;
+  /** Can be automatically fixed */
+  autoFixable: boolean;
+}
+
+/**
+ * Background validation error
+ */
+export interface BackgroundValidationError {
+  /** Error identifier */
+  id: string;
+  /** Error category */
+  type: 'contrast' | 'accessibility' | 'format' | 'compatibility';
+  /** Error message */
+  message: string;
+  /** Error details */
+  details: string;
+  /** Suggested fix */
+  fix: string;
+  /** Is this error blocking */
+  blocking: boolean;
+}
+
+/**
+ * Background validation suggestion
+ */
+export interface BackgroundValidationSuggestion {
+  /** Suggestion identifier */
+  id: string;
+  /** Suggestion category */
+  type: 'improvement' | 'alternative' | 'optimization';
+  /** Suggestion message */
+  message: string;
+  /** Suggested action */
+  action?: string;
+  /** Suggested value */
+  value?: any;
+}
+
+/**
+ * Background accessibility analysis
+ */
+export interface BackgroundAccessibilityCheck {
+  /** Text contrast ratio */
+  contrastRatio: number;
+  /** WCAG compliance level */
+  wcagLevel: 'AA' | 'AAA' | 'fail';
+  /** Color blind safe */
+  colorBlindSafe: boolean;
+  /** Text readability score */
+  readabilityScore: number;
+  /** Accessibility issues found */
+  issues: BackgroundAccessibilityIssue[];
+}
+
+/**
+ * Background accessibility issue
+ */
+export interface BackgroundAccessibilityIssue {
+  /** Issue type */
+  type: 'contrast' | 'color-blind' | 'readability';
+  /** Issue severity */
+  severity: 'error' | 'warning' | 'info';
+  /** Issue message */
+  message: string;
+  /** Suggested fix */
+  fix?: string;
+}
+
+/**
+ * Background performance analysis
+ */
+export interface BackgroundPerformanceCheck {
+  /** Rendering complexity */
+  complexity: 'low' | 'medium' | 'high';
+  /** Rendering cost (0-100) */
+  renderCost: number;
+  /** Performance optimizations */
+  optimizations: string[];
+  /** Performance issues */
+  issues: BackgroundPerformanceIssue[];
+}
+
+/**
+ * Background performance issue
+ */
+export interface BackgroundPerformanceIssue {
+  /** Issue type */
+  type: 'complexity' | 'size' | 'compatibility';
+  /** Issue message */
+  message: string;
+  /** Performance impact level */
+  impact: 'low' | 'medium' | 'high';
+  /** Suggested fix */
+  fix?: string;
+}
+
+/**
+ * Background brand alignment analysis
+ */
+export interface BackgroundBrandAlignmentCheck {
+  /** Brand alignment score (0-100) */
+  alignmentScore: number;
+  /** Color harmony score (0-100) */
+  colorHarmony: number;
+  /** Brand consistency score (0-100) */
+  consistencyScore: number;
+  /** Brand alignment issues */
+  issues: BackgroundBrandIssue[];
+}
+
+/**
+ * Background brand alignment issue
+ */
+export interface BackgroundBrandIssue {
+  /** Issue type */
+  type: 'color-mismatch' | 'harmony' | 'consistency';
+  /** Issue message */
+  message: string;
+  /** Issue severity */
+  severity: 'low' | 'medium' | 'high';
+  /** Improvement suggestion */
+  suggestion?: string;
+}
+
+/**
+ * Background validation context
+ */
+export interface BackgroundValidationContext {
+  /** Validation mode */
+  mode?: BackgroundSelectorMode;
+  /** Target audience */
+  targetAudience?: string;
+  /** Page section types */
+  sectionTypes?: string[];
+  /** Performance requirements */
+  performanceRequirements?: 'low' | 'medium' | 'high';
+}
+
+/**
+ * Color harmony analysis result
+ */
+export interface ColorHarmonyInfo {
+  /** Color relationship type */
+  relationship: 'identical' | 'analogous' | 'complementary' | 'triadic' | 'neutral' | 'clash';
+  /** Harmony score (0-100) */
+  score: number;
+  /** Harmony description */
+  description: string;
 }
 
 /**

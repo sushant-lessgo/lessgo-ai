@@ -347,3 +347,68 @@ export interface AnimationSettings {
   };
   reducedMotion: boolean;
 }
+
+/**
+ * ===== BACKGROUND SYSTEM TYPES =====
+ * Added additionally
+ */
+
+export interface BackgroundSystem {
+  /** Primary background (hero sections, CTAs) */
+  primary: string;
+  /** Secondary background (features, content sections) */
+  secondary: string;
+  /** Neutral background (testimonials, white sections) */
+  neutral: string;
+  /** Divider background (subtle separators) */
+  divider: string;
+  /** Base color name (e.g., "blue", "purple") */
+  baseColor: string;
+  /** Accent color name (e.g., "purple", "orange") */
+  accentColor: string;
+  /** Accent CSS class (e.g., "bg-purple-600") */
+  accentCSS: string;
+}
+
+/**
+ * Background variation from rule-based engine
+ */
+export interface BackgroundVariation {
+  /** Unique variation identifier */
+  variationId: string;
+  /** Human-readable variation name */
+  variationLabel: string;
+  /** Archetype category (e.g., "soft-gradient-blur") */
+  archetypeId: string;
+  /** Theme identifier (e.g., "modern-blue") */
+  themeId: string;
+  /** Tailwind CSS class for the background */
+  tailwindClass: string;
+  /** Base color family (e.g., "blue", "purple") */
+  baseColor: string;
+}
+
+/**
+ * Brand colors for background compatibility
+ */
+export interface BrandColors {
+  /** Primary brand color (hex format) */
+  primary: string;
+  /** Secondary brand color (optional, hex format) */
+  secondary?: string;
+}
+
+/**
+ * ===== TYPOGRAPHY TYPES =====
+ */
+export interface FontTheme {
+  toneId: string;
+  headingFont: string; // CSS font-family value
+  bodyFont: string;    // CSS font-family value
+}
+
+export interface TypographyState {
+  currentTheme: FontTheme;
+  originalGenerated: FontTheme;
+  customizations: Record<string, Partial<FontTheme>>; // section-level overrides
+}

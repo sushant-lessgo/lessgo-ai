@@ -1,6 +1,12 @@
 // hooks/editStore/uiActions.ts - UI state and interaction actions
 import type { EditStore, UISlice, ElementSelection, ToolbarAction, EditHistoryEntry } from '@/types/store';
 import type { UIActions } from '@/types/store';
+import type { 
+  UndoableAction, 
+  ActionHistoryItem, 
+  UndoRedoState 
+} from '@/types/core';
+
 /**
  * ===== UI ACTIONS CREATOR =====
  */
@@ -581,208 +587,194 @@ export function createUIActions(set: any, get: any): UIActions {
         // Clear redo stack when new action is performed
         state.history.redoStack = [];
       }),
-    
+
     /**
-     * ===== UNDO/REDO STATE GETTERS =====
+     * ===== UNDO/REDO SYSTEM =====
      */
     
+    undo: () =>
+      set((state: EditStore) => {
+        if (state.history.undoStack.length === 0) return;
+        
+        const lastAction = state.history.undoStack.pop()!;
+        state.history.redoStack.push(lastAction);
+        
+        // Restore previous state
+        if (lastAction.type === 'theme') {
+          if (lastAction.beforeState?.theme) {
+            state.theme = lastAction.beforeState.theme;
+          }
+        } else if (lastAction.type === 'section') {
+          if (lastAction.beforeState?.sectionData && lastAction.sectionId) {
+            // Restore section
+            if (!state.sections.includes(lastAction.sectionId)) {
+              state.sections.splice(lastAction.beforeState.sectionIndex || 0, 0, lastAction.sectionId);
+            }
+            state.content[lastAction.sectionId] = lastAction.beforeState.sectionData;
+          } else if (lastAction.afterState?.sectionId) {
+            // Remove section that was added
+            const sectionId = lastAction.afterState.sectionId;
+            const index = state.sections.indexOf(sectionId);
+            if (index !== -1) {
+              state.sections.splice(index, 1);
+              delete state.content[sectionId];
+              delete state.sectionLayouts[sectionId];
+            }
+          }
+        } else if (lastAction.type === 'layout') {
+          if (lastAction.beforeState?.sections) {
+            state.sections = lastAction.beforeState.sections;
+          }
+          if (lastAction.beforeState?.layouts) {
+            state.sectionLayouts = lastAction.beforeState.layouts;
+          }
+        } else if (lastAction.type === 'content') {
+          if (lastAction.sectionId && lastAction.beforeState) {
+            const section = state.content[lastAction.sectionId];
+            if (section && lastAction.beforeState.elementKey) {
+              // Restore element content
+              if (lastAction.beforeState.content !== undefined) {
+                section.elements[lastAction.beforeState.elementKey] = {
+                  content: lastAction.beforeState.content,
+                  type: section.elements[lastAction.beforeState.elementKey]?.type || 'text',
+                  isEditable: true,
+                  editMode: 'inline',
+                };
+              }
+            } else if (section && lastAction.beforeState.elements) {
+              // Restore multiple elements
+              section.elements = lastAction.beforeState.elements;
+            }
+          }
+        }
+        
+        state.autoSave.isDirty = true;
+        
+        console.log('🔄 Undo:', lastAction.description);
+      }),
+
+    redo: () =>
+      set((state: EditStore) => {
+        if (state.history.redoStack.length === 0) return;
+        
+        const actionToRedo = state.history.redoStack.pop()!;
+        state.history.undoStack.push(actionToRedo);
+        
+        // Apply the action again
+        if (actionToRedo.type === 'theme') {
+          if (actionToRedo.afterState?.theme) {
+            state.theme = actionToRedo.afterState.theme;
+          }
+        } else if (actionToRedo.type === 'section') {
+          if (actionToRedo.afterState?.sectionId && actionToRedo.afterState?.sectionType) {
+            // Re-add section
+            const sectionId = actionToRedo.afterState.sectionId;
+            if (!state.sections.includes(sectionId)) {
+              state.sections.push(sectionId);
+            }
+          } else if (actionToRedo.beforeState?.sectionId) {
+            // Re-remove section
+            const sectionId = actionToRedo.beforeState.sectionId;
+            const index = state.sections.indexOf(sectionId);
+            if (index !== -1) {
+              state.sections.splice(index, 1);
+              delete state.content[sectionId];
+              delete state.sectionLayouts[sectionId];
+            }
+          }
+        } else if (actionToRedo.type === 'layout') {
+          if (actionToRedo.afterState?.sections) {
+            state.sections = actionToRedo.afterState.sections;
+          }
+          if (actionToRedo.afterState?.layouts) {
+            state.sectionLayouts = actionToRedo.afterState.layouts;
+          }
+        } else if (actionToRedo.type === 'content') {
+          if (actionToRedo.sectionId && actionToRedo.afterState) {
+            const section = state.content[actionToRedo.sectionId];
+            if (section && actionToRedo.afterState.elementKey) {
+              // Restore element content
+              if (actionToRedo.afterState.content !== undefined) {
+                section.elements[actionToRedo.afterState.elementKey] = {
+                  content: actionToRedo.afterState.content,
+                  type: section.elements[actionToRedo.afterState.elementKey]?.type || 'text',
+                  isEditable: true,
+                  editMode: 'inline',
+                };
+              }
+            } else if (section && actionToRedo.afterState.elements) {
+              // Restore multiple elements
+              section.elements = actionToRedo.afterState.elements;
+            }
+          }
+        }
+        
+        state.autoSave.isDirty = true;
+        
+        console.log('🔄 Redo:', actionToRedo.description);
+      }),
+
     canUndo: () => {
       const state = get();
       return state.history.undoStack.length > 0;
     },
-    
+
     canRedo: () => {
       const state = get();
       return state.history.redoStack.length > 0;
     },
-    
-    undo: () =>
-      set((state: EditStore) => {
-        const entry = state.history.undoStack.pop();
-        if (!entry) return;
-        
-        // Apply undo logic based on entry type
-        try {
-          switch (entry.type) {
-            case 'content':
-              if (entry.sectionId && entry.beforeState) {
-                const section = state.content[entry.sectionId];
-                if (section && entry.beforeState.elementKey) {
-                  // Restore element content
-                  if (entry.beforeState.content !== undefined) {
-                    section.elements[entry.beforeState.elementKey] = {
-                      content: entry.beforeState.content,
-                      type: section.elements[entry.beforeState.elementKey]?.type || 'text',
-                      isEditable: true,
-                      editMode: 'inline',
-                    };
-                  }
-                } else if (section && entry.beforeState.elements) {
-                  // Restore multiple elements
-                  section.elements = entry.beforeState.elements;
-                }
-              }
-              break;
-              
-            case 'section':
-              if (entry.beforeState?.sectionId && entry.beforeState?.sectionData) {
-                // Restore removed section
-                const { sectionId, sectionData, sectionIndex } = entry.beforeState;
-                state.sections.splice(sectionIndex || state.sections.length, 0, sectionId);
-                state.content[sectionId] = sectionData;
-                state.sectionLayouts[sectionId] = sectionData.layout || 'default';
-              } else if (entry.afterState?.sectionId) {
-                // Remove added section
-                const sectionId = entry.afterState.sectionId;
-                state.sections = state.sections.filter(id => id !== sectionId);
-                delete state.content[sectionId];
-                delete state.sectionLayouts[sectionId];
-              }
-              break;
-              
-            case 'layout':
-              if (entry.beforeState?.sections) {
-                // Restore section order
-                state.sections = entry.beforeState.sections;
-              } else if (entry.beforeState?.layouts) {
-                // Restore section layouts
-                state.sectionLayouts = entry.beforeState.layouts;
-              }
-              break;
-              
-            case 'theme':
-              if (entry.beforeState?.theme) {
-                // Restore theme
-                state.theme = entry.beforeState.theme;
-              } else if (entry.beforeState?.baseColor) {
-                state.theme.colors.baseColor = entry.beforeState.baseColor;
-              } else if (entry.beforeState?.accentColor) {
-                state.theme.colors.accentColor = entry.beforeState.accentColor;
-              }
-              break;
-          }
-          
-          console.log('✅ Undo:', entry.description);
-          state.history.redoStack.push(entry);
-          state.autoSave.isDirty = true;
-          
-        } catch (error) {
-          console.error('❌ Undo failed:', error);
-          // Push entry back to undo stack
-          state.history.undoStack.push(entry);
-        }
-      }),
-    
-    redo: () =>
-      set((state: EditStore) => {
-        const entry = state.history.redoStack.pop();
-        if (!entry) return;
-        
-        // Apply redo logic based on entry type
-        try {
-          switch (entry.type) {
-            case 'content':
-              if (entry.sectionId && entry.afterState) {
-                const section = state.content[entry.sectionId];
-                if (section && entry.afterState.elementKey) {
-                  // Restore element content
-                  if (entry.afterState.content !== undefined) {
-                    section.elements[entry.afterState.elementKey] = {
-                      content: entry.afterState.content,
-                      type: section.elements[entry.afterState.elementKey]?.type || 'text',
-                      isEditable: true,
-                      editMode: 'inline',
-                    };
-                  }
-                } else if (section && entry.afterState.elements) {
-                  // Restore multiple elements
-                  section.elements = entry.afterState.elements;
-                }
-              }
-              break;
-              
-            case 'section':
-              if (entry.afterState?.sectionId && !entry.beforeState) {
-                // Re-add section
-                const sectionId = entry.afterState.sectionId;
-                if (!state.sections.includes(sectionId)) {
-                  state.sections.push(sectionId);
-                  // Create basic section if it doesn't exist
-                  if (!state.content[sectionId]) {
-                    state.content[sectionId] = {
-                      id: sectionId,
-                      layout: 'default',
-                      elements: {},
-                      aiMetadata: {
-                        aiGenerated: false,
-                        isCustomized: false,
-                        aiGeneratedElements: [],
-                      },
-                      editMetadata: {
-                        isSelected: false,
-                        isEditing: false,
-                        isDeletable: true,
-                        isMovable: true,
-                        isDuplicable: true,
-                        validationStatus: {
-                          isValid: true,
-                          errors: [],
-                          warnings: [],
-                          missingRequired: [],
-                          lastValidated: Date.now(),
-                        },
-                        completionPercentage: 0,
-                      },
-                    };
-                  }
-                }
-              } else if (entry.beforeState?.sectionId) {
-                // Re-remove section
-                const sectionId = entry.beforeState.sectionId;
-                state.sections = state.sections.filter(id => id !== sectionId);
-                delete state.content[sectionId];
-                delete state.sectionLayouts[sectionId];
-              }
-              break;
-              
-            case 'layout':
-              if (entry.afterState?.sections) {
-                // Restore section order
-                state.sections = entry.afterState.sections;
-              } else if (entry.afterState?.layouts) {
-                // Restore section layouts
-                state.sectionLayouts = entry.afterState.layouts;
-              }
-              break;
-              
-            case 'theme':
-              if (entry.afterState?.theme) {
-                // Restore theme
-                state.theme = entry.afterState.theme;
-              } else if (entry.afterState?.baseColor) {
-                state.theme.colors.baseColor = entry.afterState.baseColor;
-              } else if (entry.afterState?.accentColor) {
-                state.theme.colors.accentColor = entry.afterState.accentColor;
-              }
-              break;
-          }
-          
-          console.log('✅ Redo:', entry.description);
-          state.history.undoStack.push(entry);
-          state.autoSave.isDirty = true;
-          
-        } catch (error) {
-          console.error('❌ Redo failed:', error);
-          // Push entry back to redo stack
-          state.history.redoStack.push(entry);
-        }
-      }),
-    
+
     clearHistory: () =>
       set((state: EditStore) => {
         state.history.undoStack = [];
         state.history.redoStack = [];
       }),
+
+    executeUndoableAction: <T>(
+      actionType: UndoableAction,
+      actionName: string,
+      action: () => T
+    ): T => {
+      const previousState = get();
+      
+      // Execute the action
+      const result = action();
+      
+      const newState = get();
+      
+      // Add to history using EditHistoryEntry format
+      const historyItem: EditHistoryEntry = {
+        type: actionType === 'background-system-change' || actionType === 'color-tokens-update' || actionType === 'typography-theme-change' || actionType === 'theme-update' ? 'theme' :
+              actionType === 'section-add' || actionType === 'section-delete' ? 'section' :
+              actionType === 'section-reorder' ? 'layout' :
+              actionType === 'element-content-update' ? 'content' : 'theme',
+        description: actionName,
+        timestamp: Date.now(),
+        beforeState: {
+          theme: previousState.theme,
+          sections: [...previousState.sections],
+          content: { ...previousState.content },
+          sectionLayouts: { ...previousState.sectionLayouts },
+        },
+        afterState: {
+          theme: newState.theme,
+          sections: [...newState.sections],
+          content: { ...newState.content },
+          sectionLayouts: { ...newState.sectionLayouts },
+        },
+      };
+      
+      set((state: EditStore) => {
+        state.history.undoStack.push(historyItem);
+        state.history.redoStack = [];
+        
+        if (state.history.undoStack.length > state.history.maxHistorySize) {
+          state.history.undoStack.shift();
+        }
+      });
+      
+      return result;
+    },
 
     /**
      * ===== KEYBOARD SHORTCUTS =====

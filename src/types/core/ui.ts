@@ -1,3 +1,6 @@
+
+import { BackgroundSystem, BackgroundVariation, BrandColors } from './content';
+
 /**
  * Toolbar position
  */
@@ -2898,3 +2901,174 @@ export interface StateColors {
   /** Disabled state colors */
   disabled: Record<string, string>;
 }
+
+/**
+ * ===== BACKGROUND SELECTOR UI TYPES =====
+ */
+
+/**
+ * Background selector mode
+ */
+export type BackgroundSelectorMode = 'generated' | 'brand' | 'custom';
+
+/**
+ * Style option component props
+ */
+export interface StyleOptionProps {
+  /** Background variation to display */
+  variation: BackgroundVariation;
+  /** Is this option selected */
+  isSelected?: boolean;
+  /** Click handler */
+  onClick?: () => void;
+  /** Hover start handler */
+  onHover?: () => void;
+  /** Hover end handler */
+  onHoverEnd?: () => void;
+  /** Show detailed information */
+  showDetails?: boolean;
+  /** Size variant */
+  size?: 'small' | 'medium' | 'large';
+  /** Layout orientation */
+  layout?: 'vertical' | 'horizontal';
+  /** Brand colors for validation */
+  brandColors?: BrandColors | null;
+  /** Show validation indicators */
+  showValidation?: boolean;
+  /** Disabled state */
+  disabled?: boolean;
+}
+
+/**
+ * Color analysis component props
+ */
+export interface ColorAnalysisProps {
+  /** Background variation to analyze */
+  variation?: BackgroundVariation | null;
+  /** Brand colors for comparison */
+  brandColors?: BrandColors | null;
+  /** Show detailed analysis */
+  showDetailed?: boolean;
+  /** Compact display mode */
+  compact?: boolean;
+}
+
+/**
+ * Style grid component props
+ */
+export interface StyleGridProps {
+  /** Available background variations */
+  variations: BackgroundVariation[];
+  /** Currently selected variation */
+  selectedVariation?: BackgroundVariation | null;
+  /** Variation selection handler */
+  onVariationSelect: (variation: BackgroundVariation) => void;
+  /** Variation hover handler */
+  onVariationHover?: (variation: BackgroundVariation | null) => void;
+  /** Loading state */
+  isLoading?: boolean;
+  /** Current selector mode */
+  mode: BackgroundSelectorMode;
+  /** Search query */
+  searchQuery?: string;
+  /** Filter category */
+  filterBy?: string;
+}
+
+
+// Color System Selector Types
+export interface ColorTokens {
+  // Interactive Elements (13 tokens)
+  accent: string; accentHover: string; accentBorder: string;
+  ctaBg: string; ctaHover: string; ctaText: string;
+  ctaSecondary: string; ctaSecondaryHover: string; ctaSecondaryText: string;
+  ctaGhost: string; ctaGhostHover: string;
+  link: string; linkHover: string;
+  
+  // Text Hierarchy (7 tokens)  
+  textPrimary: string; textSecondary: string; textMuted: string;
+  textOnLight: string; textOnDark: string; textOnAccent: string; textInverse: string;
+  
+  // Backgrounds (4 tokens)
+  bgPrimary: string; bgSecondary: string; bgNeutral: string; bgDivider: string;
+  
+  // Surfaces & Borders (7 tokens)
+  surfaceCard: string; surfaceElevated: string; surfaceSection: string; surfaceOverlay: string;
+  borderDefault: string; borderSubtle: string; borderFocus: string;
+}
+
+// Add to /types/ui.ts
+
+/**
+ * ===== RESET SYSTEM TYPES =====
+ */
+
+/**
+ * Reset scope for resetToGenerated functionality
+ */
+export type ResetScope = 'design' | 'all' | 'selective';
+
+/**
+ * ===== UNDO/REDO SYSTEM TYPES =====
+ */
+
+/**
+ * Types of actions that can be undone/redone
+ */
+export type UndoableAction = 
+  | 'background-system-change'
+  | 'color-tokens-update' 
+  | 'typography-theme-change'
+  | 'section-reorder'
+  | 'section-add'
+  | 'section-delete'
+  | 'element-content-update'
+  | 'theme-update'
+  | 'reset-to-generated';
+
+/**
+ * Individual action history item
+ */
+export interface ActionHistoryItem {
+  id: string;
+  timestamp: number;
+  actionType: UndoableAction;
+  actionName: string;
+  previousState: any;
+  newState: any;
+}
+
+/**
+ * Undo/redo state management
+ */
+export interface UndoRedoState {
+  history: ActionHistoryItem[];
+  currentIndex: number;
+  maxHistorySize: number;
+}
+
+/**
+ * ===== TOAST NOTIFICATION TYPES =====
+ */
+
+/**
+ * Toast notification data
+ */
+export interface Toast {
+  id: string;
+  message: string;
+  type: 'success' | 'error' | 'info';
+  duration?: number;
+}
+
+/**
+ * Toast notification actions
+ */
+export interface ToastActions {
+  showToast: (message: string, type?: 'success' | 'error' | 'info') => void;
+  removeToast: (id: string) => void;
+}
+
+export type ColorSelectorTier = 1 | 2 | 3;
+export type ColorIntensityLevel = 'soft' | 'medium' | 'bold';
+export type TextContrastLevel = 'subtle' | 'balanced' | 'high';
