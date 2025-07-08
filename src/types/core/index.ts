@@ -261,6 +261,9 @@ export type {
   UndoRedoState,
   Toast,
   ToastActions,
+  EditablePageRendererProps,
+  EditableInteraction,
+  ContentEditingState,
 } from './ui';
 
 /**

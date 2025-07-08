@@ -17,6 +17,10 @@ import { createValidationActions } from './editStore/validationActions';
 import type { EditStore, SectionData } from '@/types/store';
 import type { Theme } from '@/types/core/index';
 
+import { createRegenerationActions } from './editStore/regenerationActions';
+import { createChangeTrackingActions } from './editStore/changeTrackingActions';
+
+
 /**
  * ===== DEFAULT VALUES =====
  */
@@ -203,6 +207,13 @@ function createInitialState() {
     publishing: {
       isPublishReady: false,
     },
+    changeTracking: {
+      originalInputs: {},
+      currentInputs: {},
+      hasChanges: false,
+      changedFields: [],
+      lastChangeTimestamp: Date.now(),
+    },
 
     // Persistence Slice
     persistence: {
@@ -270,7 +281,8 @@ export const useEditStore = create<EditStore>()(
         ...createPersistenceActions(set, get),
         ...createFormsImageActions(set, get),
         ...createValidationActions(set, get),
-        
+        ...createRegenerationActions(set, get),
+        ...createChangeTrackingActions(set, get),
         // Meta Actions (inline - simple enough to keep here)
         updateMeta: (meta: Partial<any>) => {
           set((state) => {

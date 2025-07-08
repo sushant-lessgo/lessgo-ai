@@ -1,5 +1,5 @@
 
-import { BackgroundSystem, BackgroundVariation, BrandColors } from './content';
+import { BackgroundSystem, BackgroundVariation, BrandColors, SectionData, ElementEditMode } from './content';
 
 /**
  * Toolbar position
@@ -3072,3 +3072,32 @@ export interface ToastActions {
 export type ColorSelectorTier = 1 | 2 | 3;
 export type ColorIntensityLevel = 'soft' | 'medium' | 'bold';
 export type TextContrastLevel = 'subtle' | 'balanced' | 'high';
+
+
+// EditablePageRenderer types
+export interface EditablePageRendererProps {
+  sections: string[];
+  content: Record<string, SectionData>;
+  mode: 'edit' | 'preview';
+  onElementClick: (sectionId: string, elementKey: string) => void;
+  onContentUpdate: (sectionId: string, elementKey: string, value: string) => void;
+  showFloatingToolbars: boolean;
+  enableDragDrop: boolean;
+}
+
+// Click-to-edit types
+export interface EditableInteraction {
+  sectionId: string;
+  elementKey: string;
+  elementType: ElementType;
+  editMode: ElementEditMode;
+  position: { x: number; y: number };
+}
+
+// Content editing state
+export interface ContentEditingState {
+  activeElement: EditableInteraction | null;
+  isEditing: boolean;
+  hasChanges: boolean;
+  lastEditTime: number;
+}

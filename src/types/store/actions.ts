@@ -1,6 +1,6 @@
 // types/store/actions.ts - Single source of truth for ALL action interfaces
 
-import type { Theme, BackgroundType, SectionData, ColorTokens, FontTheme } from '@/types/core/index';
+import type { Theme, BackgroundType, SectionData, ColorTokens, FontTheme,CanonicalFieldName } from '@/types/core/index';
 import type { BackgroundSystem } from '@/modules/Design/ColorSystem/colorTokens';
 import type { 
   UISlice, 
@@ -362,3 +362,21 @@ export interface AutoSaveActions {
   resetPerformanceStats: () => void; // Main store version
 }
 
+/**
+ * ===== REGENERATION ACTIONS INTERFACE =====
+ */
+export interface RegenerationActions {
+  // Content-only regeneration (preserves design)
+  regenerateContentOnly: () => Promise<void>;
+  
+  // Design + content regeneration (updates layouts, backgrounds, theme + copy)
+  regenerateDesignAndCopy: () => Promise<void>;
+  
+  // Change tracking for input fields
+  trackInputChange: (field: CanonicalFieldName, newValue: string) => void;
+  getHasFieldChanges: () => boolean;
+  resetChangeTracking: () => void;
+  
+  // Enhanced regeneration with input context
+  regenerateWithInputs: (preserveDesign?: boolean) => Promise<void>;
+}

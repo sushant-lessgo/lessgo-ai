@@ -1,191 +1,360 @@
-// /app/edit/[token]/components/layout/LeftPanel.tsx
+// app/edit/[token]/components/layout/LeftPanel.tsx - Updated with Modal Integration
 "use client";
 
-import React, { useState, useRef, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useEditStore } from '@/hooks/useEditStore';
-import { ElementLibrary } from '../panels/ElementLibrary';
-import { InputVariables } from '../panels/InputVariables';
-import { CopywritingGuide } from '../panels/CopywritingGuide';
-import { AIControls } from '../panels/AIControls';
+import { useOnboardingStore } from '@/hooks/useOnboardingStore';
+import ConfirmedFieldTile from '@/app/create/[token]/components/ConfirmedFieldTile';
+import TaxonomyModalManager from '../modals/TaxonomyModalManager';
+import { FIELD_DISPLAY_NAMES, CANONICAL_FIELD_NAMES, type CanonicalFieldName } from '@/types/core/index';
 
 interface LeftPanelProps {
   tokenId: string;
 }
 
-interface TabConfig {
-  id: 'pageStructure' | 'inputVariables' | 'copywritingGuide' | 'aiControls';
-  label: string;
-  icon: React.ReactNode;
-  badge?: number;
-}
-
 export function LeftPanel({ tokenId }: LeftPanelProps) {
   const {
     leftPanel,
-    sections,
-    onboardingData,
-    setLeftPanelTab,
     setLeftPanelWidth,
-    getColorTokens,
+    toggleLeftPanel,
+    regenerateAllContent,
   } = useEditStore();
 
-  const colorTokens = getColorTokens();
+  const { 
+    oneLiner, 
+    validatedFields, 
+    confirmedFields, 
+    hiddenInferredFields,
+    reopenFieldForEditing 
+  } = useOnboardingStore();
+
   const [isResizing, setIsResizing] = useState(false);
-  const resizeRef = useRef<HTMLDivElement>(null);
-  const startXRef = useRef<number>(0);
-  const startWidthRef = useRef<number>(leftPanel.width);
+  const [hasFieldChanges, setHasFieldChanges] = useState(false);
+  const [isRegenerating, setIsRegenerating] = useState(false);
+  const [includeDesignRegeneration, setIncludeDesignRegeneration] = useState(false);
+  const [mounted, setMounted] = useState(false);
 
-  // Tab configuration
-  const tabs: TabConfig[] = [
-    {
-      id: 'pageStructure',
-      label: 'Elements',
-      icon: (
-        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-        </svg>
-      ),
-      badge: sections.length,
-    },
-    {
-      id: 'inputVariables',
-      label: 'Inputs',
-      icon: (
-        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-        </svg>
-      ),
-      badge: Object.keys(onboardingData.validatedFields || {}).length,
-    },
-    {
-      id: 'copywritingGuide',
-      label: 'Guide',
-      icon: (
-        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-        </svg>
-      ),
-    },
-    {
-      id: 'aiControls',
-      label: 'AI',
-      icon: (
-        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-        </svg>
-      ),
-    },
-  ];
+  useEffect(() => setMounted(true), []);
 
-  // Handle resize start
-  const handleResizeStart = (e: React.MouseEvent) => {
-    e.preventDefault();
+  const handleMouseDown = (e: React.MouseEvent) => {
     setIsResizing(true);
-    startXRef.current = e.clientX;
-    startWidthRef.current = leftPanel.width;
-    
-    document.addEventListener('mousemove', handleResize);
-    document.addEventListener('mouseup', handleResizeEnd);
-    document.body.style.cursor = 'col-resize';
-    document.body.style.userSelect = 'none';
+    e.preventDefault();
   };
 
-  const handleResize = (e: MouseEvent) => {
+  const handleMouseMove = (e: MouseEvent) => {
     if (!isResizing) return;
-    
-    const deltaX = e.clientX - startXRef.current;
-    const newWidth = Math.max(250, Math.min(500, startWidthRef.current + deltaX));
-    setLeftPanelWidth(newWidth);
+    const newWidth = e.clientX;
+    if (newWidth >= 250 && newWidth <= 500) {
+      setLeftPanelWidth(newWidth);
+    }
   };
 
-  const handleResizeEnd = () => {
+  const handleMouseUp = () => {
     setIsResizing(false);
-    document.removeEventListener('mousemove', handleResize);
-    document.removeEventListener('mouseup', handleResizeEnd);
-    document.body.style.cursor = '';
-    document.body.style.userSelect = '';
   };
 
-  // Cleanup resize listeners
   useEffect(() => {
-    return () => {
-      document.removeEventListener('mousemove', handleResize);
-      document.removeEventListener('mouseup', handleResizeEnd);
-      document.body.style.cursor = '';
-      document.body.style.userSelect = '';
+    if (isResizing) {
+      document.addEventListener('mousemove', handleMouseMove);
+      document.addEventListener('mouseup', handleMouseUp);
+      return () => {
+        document.removeEventListener('mousemove', handleMouseMove);
+        document.removeEventListener('mouseup', handleMouseUp);
+      };
+    }
+  }, [isResizing]);
+
+  const handleEditField = (canonicalField: CanonicalFieldName) => {
+    console.log(`Opening modal for field: ${canonicalField}`);
+    
+    // Use global modal manager to open field modal
+    const modalManager = (window as any).__taxonomyModalManager;
+    if (modalManager) {
+      const currentValue = validatedFields[canonicalField] || hiddenInferredFields[canonicalField] || '';
+      modalManager.openFieldModal(canonicalField, currentValue);
+      setHasFieldChanges(true);
+    } else {
+      console.error('Modal manager not available');
+      // Fallback to existing method
+      reopenFieldForEditing(canonicalField);
+      setHasFieldChanges(true);
+    }
+  };
+
+  const handleRegenerateContent = async () => {
+    if (!hasFieldChanges || isRegenerating) return;
+    
+    setIsRegenerating(true);
+    try {
+      if (includeDesignRegeneration) {
+        // Full regeneration: design + copy
+        await regenerateAllContent();
+      } else {
+        // Copy-only regeneration (implement this method)
+        await regenerateContentOnly();
+      }
+      setHasFieldChanges(false);
+      setIncludeDesignRegeneration(false);
+    } catch (error) {
+      console.error('Regeneration failed:', error);
+    } finally {
+      setIsRegenerating(false);
+    }
+  };
+
+  const regenerateContentOnly = async () => {
+    // TODO: Implement copy-only regeneration
+    // This should regenerate text content while preserving design structure
+    console.log('Regenerating content only (preserving design)');
+    await regenerateAllContent(); // Temporary fallback
+  };
+
+  // Watch for field changes to enable regeneration
+  useEffect(() => {
+    const checkForChanges = () => {
+      // This could be enhanced to detect actual changes from initial state
+      const hasValidatedFields = Object.keys(validatedFields).length > 0;
+      const hasHiddenFields = Object.keys(hiddenInferredFields).length > 0;
+      
+      // For now, just check if we have fields and assume changes if regeneration was enabled before
+      setHasFieldChanges(hasValidatedFields || hasHiddenFields);
     };
-  }, []);
+
+    checkForChanges();
+  }, [validatedFields, hiddenInferredFields]);
+
+  if (!mounted || !oneLiner) return null;
+
+  // Prepare confirmed fields data (user-validated)
+  const confirmedFieldsData = Object.entries(validatedFields).map(([canonicalField, value]) => {
+    const canonicalFieldName = canonicalField as CanonicalFieldName;
+    const displayName = FIELD_DISPLAY_NAMES[canonicalFieldName] || canonicalField;
+    const originalFieldData = confirmedFields[canonicalFieldName];
+    const isAutoConfirmed = originalFieldData && originalFieldData.confidence >= 0.85;
+    
+    return {
+      canonicalField: canonicalFieldName,
+      displayName,
+      value,
+      isAutoConfirmed,
+      confidence: originalFieldData?.confidence || 1.0,
+      fieldType: 'validated' as const,
+    };
+  });
+
+  // Prepare hidden inferred fields data (AI-inferred, previously hidden)
+  const hiddenFieldsData = Object.entries(hiddenInferredFields).map(([canonicalField, value]) => {
+    const canonicalFieldName = canonicalField as CanonicalFieldName;
+    const displayName = FIELD_DISPLAY_NAMES[canonicalFieldName] || canonicalField;
+    
+    return {
+      canonicalField: canonicalFieldName,
+      displayName,
+      value,
+      isAutoConfirmed: true, // AI inferred
+      confidence: 0.75, // Default confidence for hidden fields
+      fieldType: 'hidden' as const,
+    };
+  });
+
+  // Combine and sort all fields
+  const allFieldsData = [...confirmedFieldsData, ...hiddenFieldsData];
+  const sortedFields = allFieldsData.sort((a, b) => {
+    const indexA = CANONICAL_FIELD_NAMES.indexOf(a.canonicalField);
+    const indexB = CANONICAL_FIELD_NAMES.indexOf(b.canonicalField);
+    return indexA - indexB;
+  });
+
+  // Separate for visual hierarchy
+  const validatedFieldsOnly = sortedFields.filter(f => f.fieldType === 'validated');
+  const hiddenFieldsOnly = sortedFields.filter(f => f.fieldType === 'hidden');
 
   if (leftPanel.collapsed) {
-    return null;
+    return (
+      <div className="flex flex-col bg-gray-50 border-r border-gray-200">
+        <button
+          onClick={toggleLeftPanel}
+          className="w-12 h-12 flex items-center justify-center text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
+          title="Show Input Variables"
+        >
+          ▶️
+        </button>
+      </div>
+    );
   }
 
   return (
-    <aside className="h-full flex flex-col bg-white">
-      {/* Tab Navigation */}
-      <div className="border-b border-gray-200">
-        <nav className="flex">
-          {tabs.map((tab) => (
+    <>
+      <div 
+        className="flex bg-white border-r border-gray-200 transition-all duration-300"
+        style={{ width: `${leftPanel.width}px` }}
+      >
+        <div className="flex-1 flex flex-col h-full">
+          {/* Panel Header */}
+          <div className="h-16 border-b border-gray-200 flex items-center justify-between px-4">
+            <h2 className="text-base font-semibold text-gray-900">Product Description and Inputs</h2>
             <button
-              key={tab.id}
-              onClick={() => setLeftPanelTab(tab.id)}
-              className={`
-                flex-1 flex flex-col items-center justify-center px-2 py-3 text-xs font-medium transition-colors relative
-                ${leftPanel.activeTab === tab.id
-                  ? `text-blue-600 bg-blue-50 border-b-2 border-blue-600`
-                  : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
-                }
-              `}
-              aria-selected={leftPanel.activeTab === tab.id}
-              role="tab"
+              onClick={toggleLeftPanel}
+              className="p-1 text-gray-400 hover:text-gray-600 transition-colors"
+              title="Hide Panel"
             >
-              <div className="flex items-center justify-center mb-1 relative">
-                {tab.icon}
-                {tab.badge !== undefined && tab.badge > 0 && (
-                  <span className="absolute -top-1 -right-1 bg-blue-600 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">
-                    {tab.badge > 99 ? '99+' : tab.badge}
+              ◀️
+            </button>
+          </div>
+
+          {/* Panel Content */}
+          <div className="flex-1 overflow-y-auto p-4 space-y-6">
+            {/* Product Description Card */}
+            <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
+              <div className="text-sm text-blue-600 font-medium mb-2">Your Product Description</div>
+              <p className="text-base font-semibold text-gray-900 leading-relaxed">{oneLiner}</p>
+            </div>
+
+            {/* Confirmed Fields (Primary) */}
+            {validatedFieldsOnly.length === 0 ? (
+              <div className="text-sm text-gray-400 italic text-center py-8">
+                No fields confirmed yet. Complete the onboarding to see your inputs here.
+              </div>
+            ) : (
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-sm font-semibold text-gray-900">Your Confirmed Inputs</h3>
+                  <span className="text-xs text-green-600 bg-green-50 px-2 py-1 rounded-full">
+                    {validatedFieldsOnly.length} confirmed
                   </span>
+                </div>
+                
+                {validatedFieldsOnly.map(({ canonicalField, displayName, value, isAutoConfirmed, confidence }) => (
+                  <ConfirmedFieldTile 
+                    key={canonicalField}
+                    field={displayName}
+                    value={value}
+                    isAutoConfirmed={isAutoConfirmed}
+                    confidence={confidence}
+                    onEdit={() => handleEditField(canonicalField)}
+                  />
+                ))}
+              </div>
+            )}
+
+            {/* Hidden AI Inferences (Secondary) */}
+            {hiddenFieldsOnly.length > 0 && (
+              <div className="space-y-4">
+                <div className="border-t border-gray-200 pt-6">
+                  <div className="flex items-center justify-between mb-4">
+                    <div>
+                      <h3 className="text-sm font-medium text-gray-700">AI Inferences</h3>
+                      <p className="text-xs text-gray-500 mt-1">
+                        Additional insights you can review and edit
+                      </p>
+                    </div>
+                    <span className="text-xs text-blue-600 bg-blue-50 px-2 py-1 rounded-full">
+                      {hiddenFieldsOnly.length} inferred
+                    </span>
+                  </div>
+                  
+                  <div className="space-y-3">
+                    {hiddenFieldsOnly.map(({ canonicalField, displayName, value, isAutoConfirmed, confidence }) => (
+                      <div key={canonicalField} className="opacity-90">
+                        <ConfirmedFieldTile 
+                          field={displayName}
+                          value={value}
+                          isAutoConfirmed={isAutoConfirmed}
+                          confidence={confidence}
+                          onEdit={() => handleEditField(canonicalField)}
+                        />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Regeneration Controls */}
+            {(validatedFieldsOnly.length > 0 || hiddenFieldsOnly.length > 0) && (
+              <div className="pt-4 border-t border-gray-200 space-y-3">
+                {/* Design Regeneration Option */}
+                {hasFieldChanges && (
+                  <div className="bg-amber-50 border border-amber-200 rounded-lg p-3">
+                    <label className="flex items-start space-x-3 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={includeDesignRegeneration}
+                        onChange={(e) => setIncludeDesignRegeneration(e.target.checked)}
+                        className="mt-0.5 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                      />
+                      <div className="flex-1 min-w-0">
+                        <div className="text-sm font-medium text-amber-800">
+                          Also regenerate design
+                        </div>
+                        <div className="text-xs text-amber-700 mt-1">
+                          Changes sections, layouts & colors. Will lose customizations.
+                        </div>
+                      </div>
+                    </label>
+                  </div>
+                )}
+
+                {/* Primary Regeneration Button */}
+                <button
+                  onClick={handleRegenerateContent}
+                  disabled={!hasFieldChanges || isRegenerating}
+                  className={`
+                    w-full py-3 px-4 rounded-lg font-medium text-sm transition-all duration-200
+                    ${hasFieldChanges && !isRegenerating
+                      ? 'bg-blue-600 hover:bg-blue-700 text-white shadow-md hover:shadow-lg'
+                      : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                    }
+                  `}
+                >
+                  {isRegenerating ? (
+                    <div className="flex items-center justify-center space-x-2">
+                      <div className="w-4 h-4 border-2 border-gray-300 border-t-blue-600 rounded-full animate-spin"></div>
+                      <span>
+                        {includeDesignRegeneration ? 'Regenerating Design + Content...' : 'Regenerating Content...'}
+                      </span>
+                    </div>
+                  ) : hasFieldChanges ? (
+                    <div className="flex items-center justify-center space-x-2">
+                      <span>🔄</span>
+                      <span>
+                        {includeDesignRegeneration ? 'Regenerate Design + Content' : 'Regenerate Content'}
+                      </span>
+                    </div>
+                  ) : (
+                    <div className="flex items-center justify-center space-x-2">
+                      <span>✓</span>
+                      <span>Content is up to date</span>
+                    </div>
+                  )}
+                </button>
+                
+                {!hasFieldChanges && (
+                  <p className="text-xs text-gray-500 text-center">
+                    Edit any field above to enable regeneration
+                  </p>
+                )}
+
+                {hasFieldChanges && !includeDesignRegeneration && (
+                  <p className="text-xs text-gray-500 text-center">
+                    This will update copy while preserving your current design
+                  </p>
                 )}
               </div>
-              <span className="text-center leading-tight">{tab.label}</span>
-            </button>
-          ))}
-        </nav>
+            )}
+          </div>
+        </div>
+
+        {/* Resize Handle */}
+        <div
+          className="w-1 bg-gray-200 hover:bg-gray-300 cursor-ew-resize transition-colors"
+          onMouseDown={handleMouseDown}
+          title="Resize panel"
+        />
       </div>
 
-      {/* Panel Content */}
-      <div className="flex-1 overflow-hidden">
-        {leftPanel.activeTab === 'pageStructure' && (
-          <ElementLibrary tokenId={tokenId} />
-        )}
-        {leftPanel.activeTab === 'inputVariables' && (
-          <InputVariables tokenId={tokenId} />
-        )}
-        {leftPanel.activeTab === 'copywritingGuide' && (
-          <CopywritingGuide />
-        )}
-        {leftPanel.activeTab === 'aiControls' && (
-          <AIControls tokenId={tokenId} />
-        )}
-      </div>
-
-      {/* Resize Handle */}
-      <div
-        ref={resizeRef}
-        className={`
-          absolute top-0 right-0 w-1 h-full cursor-col-resize hover:bg-blue-600 transition-colors z-10
-          ${isResizing ? 'bg-blue-600' : 'bg-transparent hover:bg-gray-300'}
-        `}
-        onMouseDown={handleResizeStart}
-        role="separator"
-        aria-orientation="vertical"
-        aria-label="Resize panel"
-      />
-
-      {/* Resize indicator */}
-      {isResizing && (
-        <div className="absolute top-0 right-0 w-px h-full bg-blue-600 shadow-lg z-20" />
-      )}
-    </aside>
+      {/* Taxonomy Modal Manager */}
+      <TaxonomyModalManager />
+    </>
   );
 }

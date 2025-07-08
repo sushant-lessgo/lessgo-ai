@@ -10,7 +10,8 @@ import type {
   ElementType,
   ElementEditMode,
   CanonicalFieldName,
-  TypographyState
+  TypographyState,
+  ContentEditingState
 } from '@/types/core/index';
 
 /**
@@ -204,9 +205,19 @@ export interface UISlice {
   };
 }
 
+
+
 /**
  * ===== META SLICE INTERFACE =====
  */
+
+export interface ChangeTrackingState {
+  originalInputs: InputVariables & HiddenInferredFields;
+  currentInputs: InputVariables & HiddenInferredFields;
+  hasChanges: boolean;
+  changedFields: CanonicalFieldName[];
+  lastChangeTimestamp: number;
+}
 export interface MetaSlice {
   // Project Metadata
   id: string;
@@ -233,6 +244,9 @@ export interface MetaSlice {
     publishError?: string;
     lastPublished?: number;
   };
+
+   // Change tracking for field modifications
+  changeTracking: ChangeTrackingState;
 }
 
 /**
@@ -480,4 +494,18 @@ export interface StoreState extends
   MetaSlice,
   PersistenceSlice {
   // Additional computed or derived state can be added here
+}
+
+// MainContent specific UI state
+export interface MainContentUIState {
+  contentEditing: ContentEditingState;
+  elementHover: {
+    sectionId: string | null;
+    elementKey: string | null;
+  };
+  sectionHover: string | null;
+  editIndicators: {
+    showEditHints: boolean;
+    showAIBadges: boolean;
+  };
 }
