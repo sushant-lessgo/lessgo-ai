@@ -5,6 +5,9 @@ import { parseAiResponse } from '@/modules/prompt/parseAiResponse';
 import type { BackgroundType } from '@/types/core/index';
 import type { EditStore, APIRequest, ValidationError } from '@/types/store';
 import type { ContentActions } from '@/types/store';
+import type { ElementSelection } from '@/types/core/ui';
+import type { ImageAsset } from '@/types/core/images';
+
 /**
  * ===== UTILITY FUNCTIONS =====
  */
@@ -300,37 +303,50 @@ export function createContentActions(set: any, get: any): ContentActions {
      */
     
     updateElementContent: (sectionId: string, elementKey: string, content: string | string[]) =>
-      set((state: EditStore) => {
-        if (!state.content[sectionId]) return;
-        
-        const oldValue = state.content[sectionId].elements[elementKey]?.content;
-        
-        if (!state.content[sectionId].elements[elementKey]) {
-          state.content[sectionId].elements[elementKey] = {
-            content,
-            type: inferElementType(elementKey),
-            isEditable: true,
-            editMode: 'inline',
-          };
-        } else {
-          state.content[sectionId].elements[elementKey].content = content;
-        }
-        
-        state.content[sectionId].aiMetadata.isCustomized = true;
-        state.autoSave.isDirty = true;
-        
-        // Track change for history
-        state.history.undoStack.push({
-          type: 'content',
-          description: `Updated ${elementKey} in ${sectionId}`,
-          timestamp: Date.now(),
-          beforeState: { sectionId, elementKey, content: oldValue },
-          afterState: { sectionId, elementKey, content },
-          sectionId,
-        });
-        
-        state.history.redoStack = [];
-      }),
+  set((state: EditStore) => {
+    if (!state.content[sectionId]) return;
+    
+    const oldValue = state.content[sectionId].elements[elementKey]?.content;
+    
+    if (!state.content[sectionId].elements[elementKey]) {
+      state.content[sectionId].elements[elementKey] = {
+        content,
+        type: inferElementType(elementKey),
+        isEditable: true,
+        editMode: 'inline',
+      };
+    } else {
+      state.content[sectionId].elements[elementKey].content = content;
+    }
+    
+    // Mark as customized
+    state.content[sectionId].aiMetadata.isCustomized = true;
+    state.autoSave.isDirty = true;
+    
+    // Track change for auto-save
+    state.queuedChanges.push({
+      id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      type: 'content',
+      sectionId,
+      elementKey,
+      oldValue,
+      newValue: content,
+      timestamp: Date.now(),
+    });
+    
+    // Add to history
+    state.history.undoStack.push({
+      type: 'content',
+      description: `Updated ${elementKey} in ${sectionId}`,
+      timestamp: Date.now(),
+      beforeState: { sectionId, elementKey, content: oldValue },
+      afterState: { sectionId, elementKey, content },
+      sectionId,
+    });
+    
+    state.history.redoStack = [];
+  }),
+
 
     bulkUpdateSection: (sectionId: string, elements: Record<string, string | string[]>) =>
       set((state: EditStore) => {
@@ -396,26 +412,40 @@ export function createContentActions(set: any, get: any): ContentActions {
         }
       }),
 
-    setSection: (sectionId: string, data: Partial<import('@/types/core/index').SectionData>) =>
-      set((state: EditStore) => {
-        if (state.content[sectionId]) {
-          const oldData = { ...state.content[sectionId] };
-          Object.assign(state.content[sectionId], data);
-          state.autoSave.isDirty = true;
-          
-          // Track change
-          state.history.undoStack.push({
-            type: 'content',
-            description: `Updated section data`,
-            timestamp: Date.now(),
-            beforeState: { sectionId, data: oldData },
-            afterState: { sectionId, data: state.content[sectionId] },
-            sectionId,
-          });
-          
-          state.history.redoStack = [];
-        }
-      }),
+    setSection: (sectionId: string, sectionData: Partial<any>) =>
+  set((state: EditStore) => {
+    if (state.content[sectionId]) {
+      const oldSection = { ...state.content[sectionId] };
+      
+      // Merge new data
+      Object.assign(state.content[sectionId], sectionData);
+      
+      // Track change
+      state.queuedChanges.push({
+        id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+        type: 'content',
+        sectionId,
+        oldValue: oldSection,
+        newValue: state.content[sectionId],
+        timestamp: Date.now(),
+      });
+      
+      state.autoSave.isDirty = true;
+      state.lastUpdated = Date.now();
+      
+      // Add to history
+      state.history.undoStack.push({
+        type: 'content',
+        description: `Updated section data`,
+        timestamp: Date.now(),
+        beforeState: { sectionId, data: oldSection },
+        afterState: { sectionId, data: state.content[sectionId] },
+        sectionId,
+      });
+      
+      state.history.redoStack = [];
+    }
+  }),
 
     /**
      * ===== AI GENERATION ACTIONS =====
@@ -603,15 +633,16 @@ export function createContentActions(set: any, get: any): ContentActions {
      * ===== ELEMENT VARIATIONS =====
      */
     
-    showElementVariations: (elementId: string, variations: string[]) =>
-      set((state: EditStore) => {
-        state.elementVariations = {
-          visible: true,
-          elementId,
-          variations,
-          selectedVariation: 0,
-        };
-      }),
+   showElementVariations: (elementId: string, variations: string[]) =>
+  set((state: EditStore) => {
+    state.elementVariations = {
+      visible: true,
+      elementId,
+      variations,
+      selectedVariation: 0,
+    };
+  }),
+
     
     hideElementVariations: () =>
       set((state: EditStore) => {
@@ -627,47 +658,88 @@ export function createContentActions(set: any, get: any): ContentActions {
       }),
     
     applySelectedVariation: () =>
-      set((state: EditStore) => {
-        const { elementId, variations, selectedVariation } = state.elementVariations;
-        if (!elementId || selectedVariation === undefined) return;
-        
-        const [sectionId, elementKey] = elementId.split('.');
-        const selectedContent = variations[selectedVariation];
-        
-        if (selectedContent && state.content[sectionId]) {
-          const oldContent = state.content[sectionId].elements[elementKey]?.content;
-          
-          // Update content
-          if (!state.content[sectionId].elements[elementKey]) {
-            state.content[sectionId].elements[elementKey] = {
-              content: selectedContent,
-              type: inferElementType(elementKey),
-              isEditable: true,
-              editMode: 'inline',
-            };
-          } else {
-            state.content[sectionId].elements[elementKey].content = selectedContent;
-          }
-          
-          state.content[sectionId].aiMetadata.isCustomized = true;
-          state.autoSave.isDirty = true;
-          
-          // Track change
-          state.history.undoStack.push({
-            type: 'content',
-            description: `Applied variation ${selectedVariation + 1} to ${elementKey}`,
-            timestamp: Date.now(),
-            beforeState: { sectionId, elementKey, content: oldContent },
-            afterState: { sectionId, elementKey, content: selectedContent },
-            sectionId,
-          });
-          
-          state.history.redoStack = [];
-          
-          // Hide variations
-          state.elementVariations.visible = false;
-        }
-      }),
+  set((state: EditStore) => {
+    const { elementId, variations, selectedVariation } = state.elementVariations;
+    if (!elementId || selectedVariation === undefined) return;
+    
+    const [sectionId, elementKey] = elementId.split('.');
+    const selectedContent = variations[selectedVariation];
+    
+    if (selectedContent && state.content[sectionId]) {
+      const oldContent = state.content[sectionId].elements[elementKey]?.content;
+      
+      // Update content
+      if (!state.content[sectionId].elements[elementKey]) {
+        state.content[sectionId].elements[elementKey] = {
+          content: selectedContent,
+          type: inferElementType(elementKey),
+          isEditable: true,
+          editMode: 'inline',
+        };
+      } else {
+        state.content[sectionId].elements[elementKey].content = selectedContent;
+      }
+      
+      // Mark as customized
+      state.content[sectionId].aiMetadata.isCustomized = true;
+      state.autoSave.isDirty = true;
+      
+      // Track change
+      state.queuedChanges.push({
+        id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+        type: 'content',
+        sectionId,
+        elementKey,
+        oldValue: oldContent,
+        newValue: selectedContent,
+        timestamp: Date.now(),
+      });
+      
+      // Add to history
+      state.history.undoStack.push({
+        type: 'content',
+        description: `Applied variation ${selectedVariation + 1} to ${elementKey}`,
+        timestamp: Date.now(),
+        beforeState: { sectionId, elementKey, content: oldContent },
+        afterState: { sectionId, elementKey, content: selectedContent },
+        sectionId,
+      });
+      
+      state.history.redoStack = [];
+      
+      // Hide variations modal
+      state.elementVariations.visible = false;
+    }
+  }),
+
+
+/**
+ * ===== IMAGE MANAGEMENT =====
+ */
+
+updateImageAsset: (imageId: string, asset: ImageAsset) =>
+  set((state: EditStore) => {
+    const oldAsset = state.images.assets?.[imageId];
+    
+    if (!state.images.assets) {
+      state.images.assets = {};
+    }
+    
+    state.images.assets[imageId] = asset;
+    
+    // Track change
+    state.queuedChanges.push({
+      id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      type: 'content',
+      oldValue: { action: 'update-image-asset', imageId, asset: oldAsset },
+      newValue: { action: 'update-image-asset', imageId, asset },
+      timestamp: Date.now(),
+    });
+    
+    state.autoSave.isDirty = true;
+    state.lastUpdated = Date.now();
+  }),
+
 
     /**
      * ===== CONTENT VALIDATION =====

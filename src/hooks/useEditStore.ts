@@ -131,10 +131,10 @@ function createInitialState() {
       activeTab: 'pageStructure' as const,
     },
     floatingToolbars: {
-      section: { visible: false, position: { x: 0, y: 0 }, contextActions: [] },
-      element: { visible: false, position: { x: 0, y: 0 }, contextActions: [] },
-      form: { visible: false, position: { x: 0, y: 0 }, contextActions: [] },
-      image: { visible: false, position: { x: 0, y: 0 }, contextActions: [] },
+      section: { visible: false, position: { x: 0, y: 0 }, contextActions: [], advancedActions: [] },
+      element: { visible: false, position: { x: 0, y: 0 }, contextActions: [], advancedActions: [] },
+      form: { visible: false, position: { x: 0, y: 0 }, contextActions: [], advancedActions: [] },
+      image: { visible: false, position: { x: 0, y: 0 }, contextActions: [], advancedActions: [] },
     },
     autoSave: {
       isDirty: false,

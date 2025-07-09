@@ -1,6 +1,7 @@
 // hooks/editStore/formsImageActions.ts - Forms and image management actions
 import type { EditStore } from '@/types/store';
 import type { FormsImageActions } from '@/types/store';
+import type { FormField } from '@/types/core/forms';
 /**
  * ===== UTILITY FUNCTIONS =====
  */

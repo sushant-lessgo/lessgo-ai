@@ -253,6 +253,86 @@ export function createLayoutActions(set: any, get: any): LayoutActions {
         state.history.redoStack = [];
       }),
 
+      // Enhanced updateSectionLayout with proper integration
+updateSectionLayout: (sectionId: string, newLayout: string) =>
+  set((state: EditStore) => {
+    const oldLayout = state.sectionLayouts[sectionId];
+    
+    if (oldLayout !== newLayout) {
+      state.sectionLayouts[sectionId] = newLayout;
+      
+      // Update section content layout property
+      if (state.content[sectionId]) {
+        state.content[sectionId].layout = newLayout;
+      }
+      
+      // Track change
+      state.queuedChanges.push({
+        id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+        type: 'layout',
+        sectionId,
+        oldValue: oldLayout,
+        newValue: newLayout,
+        timestamp: Date.now(),
+      });
+      
+      state.autoSave.isDirty = true;
+      state.lastUpdated = Date.now();
+      
+      // Add to history
+      state.history.undoStack.push({
+        type: 'layout',
+        description: `Changed section layout to ${newLayout}`,
+        timestamp: Date.now(),
+        beforeState: { sectionId, layout: oldLayout },
+        afterState: { sectionId, layout: newLayout },
+        sectionId,
+      });
+      
+      state.history.redoStack = [];
+    }
+  }),
+
+// Enhanced moveSection for toolbar integration
+moveSection: (sectionId: string, direction: 'up' | 'down') =>
+  set((state: EditStore) => {
+    const currentIndex = state.sections.indexOf(sectionId);
+    if (currentIndex === -1) return;
+    
+    const newIndex = direction === 'up' ? currentIndex - 1 : currentIndex + 1;
+    
+    if (newIndex >= 0 && newIndex < state.sections.length) {
+      const newSections = [...state.sections];
+      [newSections[currentIndex], newSections[newIndex]] = [newSections[newIndex], newSections[currentIndex]];
+      
+      // Update sections
+      state.sections = newSections;
+      
+      // Track change
+      state.queuedChanges.push({
+        id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+        type: 'layout',
+        oldValue: { sections: [...state.sections] },
+        newValue: { sections: newSections },
+        timestamp: Date.now(),
+      });
+      
+      state.autoSave.isDirty = true;
+      state.lastUpdated = Date.now();
+      
+      // Add to history
+      state.history.undoStack.push({
+        type: 'layout',
+        description: `Moved section ${direction}`,
+        timestamp: Date.now(),
+        beforeState: { sections: [...state.sections] },
+        afterState: { sections: newSections },
+      });
+      
+      state.history.redoStack = [];
+    }
+  }),
+
     /**
      * ===== THEME MANAGEMENT =====
      */
@@ -369,6 +449,45 @@ export function createLayoutActions(set: any, get: any): LayoutActions {
         
         state.history.redoStack = [];
       }),
+
+      /**
+ * ===== BACKGROUND MANAGEMENT =====
+ */
+
+// New setBackgroundType action for toolbar integration
+setBackgroundType: (sectionId: string, backgroundType: BackgroundType) =>
+  set((state: EditStore) => {
+    const section = state.content[sectionId];
+    if (section) {
+      const oldType = section.backgroundType;
+      section.backgroundType = backgroundType;
+      
+      // Track change
+      state.queuedChanges.push({
+        id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+        type: 'layout',
+        sectionId,
+        oldValue: { backgroundType: oldType },
+        newValue: { backgroundType: backgroundType },
+        timestamp: Date.now(),
+      });
+      
+      state.autoSave.isDirty = true;
+      state.lastUpdated = Date.now();
+      
+      // Add to history
+      state.history.undoStack.push({
+        type: 'layout',
+        description: `Changed background type to ${backgroundType}`,
+        timestamp: Date.now(),
+        beforeState: { sectionId, backgroundType: oldType },
+        afterState: { sectionId, backgroundType },
+        sectionId,
+      });
+      
+      state.history.redoStack = [];
+    }
+  }),
 
       /**
  * ===== TYPOGRAPHY MANAGEMENT =====

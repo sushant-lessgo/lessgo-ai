@@ -1,20 +1,44 @@
-// components/layout/EditableContent.tsx - ENHANCED with Dynamic Text Colors
-// Combines ModeWrapper with content update logic and styling
-
-import React from 'react';
+// components/layout/EditableContent.tsx - ENHANCED with InlineTextEditor Integration
+import React, { useCallback, useState, useMemo } from 'react';
+import { InlineTextEditor, defaultEditorConfig } from '@/app/edit/[token]/components/editor/InlineTextEditor';
+import { useTextToolbarIntegration } from '@/hooks/useTextToolbarIntegration';
+import { useAutoSave } from '@/hooks/useAutoSave';
+import type { TextFormatState, AutoSaveConfig, InlineEditorConfig } from '@/app/edit/[token]/components/editor/InlineTextEditor';
 
 interface EditableContentProps {
   mode: 'edit' | 'preview';
   value: string;
   onEdit: (value: string) => void;
-  element: 'h1' | 'h2' | 'h3' | 'h4' | 'p' | 'span' | 'div';
+  element: 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6' | 'p' | 'span' | 'div';
   className?: string;
   style?: React.CSSProperties;
   placeholder?: string;
   required?: boolean;
   multiline?: boolean;
   children?: React.ReactNode;
+  
+  // Enhanced props for inline editor
+  sectionId?: string;
+  elementKey?: string;
+  formatState?: TextFormatState;
+  onFormatChange?: (format: TextFormatState) => void;
+  editorConfig?: Partial<InlineEditorConfig>;
+  autoSave?: Partial<AutoSaveConfig>;
+  enableInlineEditor?: boolean;
 }
+
+const defaultFormatState: TextFormatState = {
+  bold: false,
+  italic: false,
+  underline: false,
+  color: '#000000',
+  fontSize: '16px',
+  fontFamily: 'inherit',
+  textAlign: 'left',
+  lineHeight: '1.5',
+  letterSpacing: 'normal',
+  textTransform: 'none',
+};
 
 export function EditableContent({
   mode,
@@ -26,14 +50,88 @@ export function EditableContent({
   placeholder,
   required = false,
   multiline = false,
-  children
+  children,
+  sectionId,
+  elementKey,
+  formatState = defaultFormatState,
+  onFormatChange,
+  editorConfig = {},
+  autoSave = {},
+  enableInlineEditor = true,
 }: EditableContentProps) {
+  const [isEditing, setIsEditing] = useState(false);
+  const [currentFormatState, setCurrentFormatState] = useState(formatState);
   
-  // Determine if content should be shown (in preview mode or edit mode with content/required)
+  // Determine if content should be shown
   const shouldShow = mode === 'preview' || value || required;
+  
+  // Create final configurations
+  const finalEditorConfig: InlineEditorConfig = useMemo(() => ({
+    ...defaultEditorConfig,
+    ...editorConfig,
+  }), [editorConfig]);
+  
+  const finalAutoSaveConfig: AutoSaveConfig = useMemo(() => ({
+    enabled: true,
+    debounceMs: 1000,
+    onSave: onEdit,
+    ...autoSave,
+  }), [autoSave, onEdit]);
+  
+  // Handle format changes
+  const handleFormatChange = useCallback((newFormat: TextFormatState) => {
+    setCurrentFormatState(newFormat);
+    onFormatChange?.(newFormat);
+  }, [onFormatChange]);
+  
+  // Handle focus and blur
+  const handleFocus = useCallback(() => {
+    setIsEditing(true);
+  }, []);
+  
+  const handleBlur = useCallback(() => {
+    setIsEditing(false);
+  }, []);
+  
+  // Handle selection changes
+  const handleSelectionChange = useCallback((selection: any) => {
+    // Selection change logic can be added here if needed
+  }, []);
   
   if (!shouldShow) return null;
 
+  // Use inline editor in edit mode if enabled and required props are provided
+  if (
+    mode === 'edit' && 
+    enableInlineEditor && 
+    sectionId && 
+    elementKey
+  ) {
+    return (
+      <InlineTextEditor
+        content={value}
+        onContentChange={onEdit}
+        element={Element}
+        elementKey={elementKey}
+        sectionId={sectionId}
+        formatState={currentFormatState}
+        onFormatChange={handleFormatChange}
+        autoSave={finalAutoSaveConfig}
+        config={finalEditorConfig}
+        onFocus={handleFocus}
+        onBlur={handleBlur}
+        onSelectionChange={handleSelectionChange}
+        className={`
+          ${className}
+          ${isEditing ? 'editing' : ''}
+        `}
+        style={style}
+        placeholder={placeholder}
+      />
+    );
+  }
+  
+  // Fallback to original simple contentEditable for edit mode
   if (mode === 'edit') {
     return (
       <Element
@@ -48,6 +146,8 @@ export function EditableContent({
         `}
         style={style}
         data-placeholder={placeholder || 'Click to edit'}
+        data-section-id={sectionId}
+        data-element-key={elementKey}
       >
         {value || placeholder || 'Click to edit'}
       </Element>
@@ -62,32 +162,59 @@ export function EditableContent({
   );
 }
 
-// ✅ ENHANCED: Specialized versions with dynamic text color support
+// Enhanced specialized versions with inline editor support
 export function EditableHeadline({ 
   mode, 
   value, 
   onEdit, 
   level = 'h1',
-  colorClass, // ✅ Can now be dynamic from useLayoutComponent
+  colorClass, 
   textStyle,
-  dynamicColor, // ✅ NEW: Dynamic color from background-aware system
+  dynamicColor,
+  sectionId,
+  elementKey,
+  formatState,
+  onFormatChange,
+  editorConfig,
+  autoSave,
   ...props 
 }: Omit<EditableContentProps, 'element'> & { 
   level?: 'h1' | 'h2' | 'h3' | 'h4',
   colorClass?: string,
   textStyle?: React.CSSProperties,
-  dynamicColor?: string // ✅ NEW: For background-aware text colors
+  dynamicColor?: string,
+  formatState?: TextFormatState,
+  onFormatChange?: (format: TextFormatState) => void,
+  editorConfig?: Partial<InlineEditorConfig>,
+  autoSave?: Partial<AutoSaveConfig>,
 }) {
   
-  // ✅ Use dynamic color if provided, fallback to colorClass
   const finalColorClass = dynamicColor || colorClass || 'text-gray-900';
   
-  console.log(`🎨 EditableHeadline using color: ${finalColorClass}`, {
-    dynamicColor,
-    colorClass,
-    finalColor: finalColorClass,
-    isDynamic: !!dynamicColor
-  });
+  // Enhanced format state for headlines
+  const headlineFormatState = useMemo(() => ({
+    bold: true,
+    italic: false,
+    underline: false,
+    color: dynamicColor || '#000000',
+    fontSize: level === 'h1' ? '2rem' : level === 'h2' ? '1.5rem' : level === 'h3' ? '1.25rem' : '1rem',
+    fontFamily: 'inherit',
+    textAlign: 'left' as const,
+    lineHeight: level === 'h1' ? '1.2' : '1.3',
+    letterSpacing: 'normal',
+    textTransform: 'none' as const,
+    ...formatState,
+  }), [level, dynamicColor, formatState]);
+  
+  const headlineEditorConfig: Partial<InlineEditorConfig> = useMemo(() => ({
+    enterKeyBehavior: 'save',
+    allowedFormats: ['bold', 'italic', 'underline', 'color', 'fontSize', 'textAlign'],
+    validation: {
+      maxLength: 200,
+      minLength: 1,
+    },
+    ...editorConfig,
+  }), [editorConfig]);
   
   return (
     <EditableContent
@@ -98,6 +225,12 @@ export function EditableHeadline({
       className={`font-bold leading-tight ${finalColorClass}`}
       style={textStyle}
       required
+      sectionId={sectionId}
+      elementKey={elementKey}
+      formatState={headlineFormatState}
+      onFormatChange={onFormatChange}
+      editorConfig={headlineEditorConfig}
+      autoSave={autoSave}
       {...props}
     />
   );
@@ -109,17 +242,64 @@ export function EditableText({
   onEdit, 
   colorClass,
   textStyle,
-  dynamicColor, // ✅ NEW: Dynamic color from background-aware system
+  dynamicColor,
+  sectionId,
+  elementKey,
+  formatState,
+  onFormatChange,
+  editorConfig,
+  autoSave,
   ...props 
 }: Omit<EditableContentProps, 'element'> & { 
   colorClass?: string,
   textStyle?: React.CSSProperties,
-  dynamicColor?: string // ✅ NEW: For background-aware text colors
+  dynamicColor?: string,
+  formatState?: TextFormatState,
+  onFormatChange?: (format: TextFormatState) => void,
+  editorConfig?: Partial<InlineEditorConfig>,
+  autoSave?: Partial<AutoSaveConfig>,
 }) {
   
-  // ✅ Use dynamic color if provided, fallback to colorClass
   const finalColorClass = dynamicColor || colorClass || 'text-gray-600';
   
+  // Enhanced format state for text
+  const textFormatState = useMemo(() => ({
+    bold: false,
+    italic: false,
+    underline: false,
+    color: dynamicColor || '#000000',
+    fontSize: '1rem',
+    fontFamily: 'inherit',
+    textAlign: 'left' as const,
+    lineHeight: '1.6',
+    letterSpacing: 'normal',
+    textTransform: 'none' as const,
+    ...formatState,
+  }), [dynamicColor, formatState]);
+  
+  const textEditorConfig: Partial<InlineEditorConfig> = useMemo(() => ({
+    enterKeyBehavior: 'new-line',
+    allowedFormats: ['bold', 'italic', 'underline', 'color', 'fontSize', 'textAlign'],
+    validation: {
+      maxLength: 1000,
+    },
+    autoFormatting: {
+      enabled: true,
+      rules: [
+        {
+          pattern: /\*\*(.*?)\*\*/g,
+          replacement: '$1',
+          formatApplied: { bold: true },
+        },
+        {
+          pattern: /\*(.*?)\*/g,
+          replacement: '$1',
+          formatApplied: { italic: true },
+        },
+      ],
+    },
+    ...editorConfig,
+  }), [editorConfig]);
   
   return (
     <EditableContent
@@ -129,6 +309,13 @@ export function EditableText({
       element="p"
       className={`leading-relaxed ${finalColorClass}`}
       style={textStyle}
+      multiline
+      sectionId={sectionId}
+      elementKey={elementKey}
+      formatState={textFormatState}
+      onFormatChange={onFormatChange}
+      editorConfig={textEditorConfig}
+      autoSave={autoSave}
       {...props}
     />
   );
@@ -140,33 +327,57 @@ export function EditableBadge({
   onEdit, 
   colorTokens,
   textStyle,
-  accentBased = false, // ✅ NEW: Use accent colors instead of generic blue
+  accentBased = false,
+  sectionId,
+  elementKey,
+  formatState,
+  onFormatChange,
+  editorConfig,
+  autoSave,
   ...props 
 }: Omit<EditableContentProps, 'element'> & { 
   colorTokens?: any,
   textStyle?: React.CSSProperties,
-  accentBased?: boolean // ✅ NEW: Whether to use accent colors
+  accentBased?: boolean,
+  formatState?: TextFormatState,
+  onFormatChange?: (format: TextFormatState) => void,
+  editorConfig?: Partial<InlineEditorConfig>,
+  autoSave?: Partial<AutoSaveConfig>,
 }) {
   
-  // ✅ ENHANCED: Use accent colors when available
   let badgeClasses = '';
   
   if (accentBased && colorTokens?.ctaBg) {
-    // Extract color name from accent CSS (e.g., "bg-purple-600" -> "purple")
     const accentColorMatch = colorTokens.ctaBg.match(/bg-(\w+)-\d+/);
     const accentColorName = accentColorMatch ? accentColorMatch[1] : 'blue';
-    
     badgeClasses = `bg-${accentColorName}-100 text-${accentColorName}-800 border-${accentColorName}-200 border`;
-    
-    console.log(`🎨 EditableBadge using accent colors:`, {
-      accentCSS: colorTokens.ctaBg,
-      extractedColor: accentColorName,
-      finalClasses: badgeClasses
-    });
   } else {
-    // Fallback to generic blue
     badgeClasses = 'bg-blue-100 text-blue-800';
   }
+  
+  const badgeFormatState = useMemo(() => ({
+    bold: false,
+    italic: false,
+    underline: false,
+    color: accentBased ? colorTokens?.ctaBg || '#1E40AF' : '#1E40AF',
+    fontSize: '0.875rem',
+    fontFamily: 'inherit',
+    textAlign: 'center' as const,
+    lineHeight: '1.4',
+    letterSpacing: 'normal',
+    textTransform: 'none' as const,
+    ...formatState,
+  }), [accentBased, colorTokens, formatState]);
+  
+  const badgeEditorConfig: Partial<InlineEditorConfig> = useMemo(() => ({
+    enterKeyBehavior: 'save',
+    allowedFormats: ['bold', 'italic', 'color', 'textTransform'],
+    validation: {
+      maxLength: 50,
+      minLength: 1,
+    },
+    ...editorConfig,
+  }), [editorConfig]);
   
   return (
     <EditableContent
@@ -179,25 +390,43 @@ export function EditableBadge({
         ${badgeClasses}
       `}
       style={textStyle}
+      sectionId={sectionId}
+      elementKey={elementKey}
+      formatState={badgeFormatState}
+      onFormatChange={onFormatChange}
+      editorConfig={badgeEditorConfig}
+      autoSave={autoSave}
       {...props}
     />
   );
 }
 
-// ✅ NEW: Enhanced Badge specifically for accent-based designs
+// Enhanced Badge specifically for accent-based designs
 export function AccentBadge({ 
   mode, 
   value, 
   onEdit, 
   colorTokens,
   textStyle,
+  sectionId,
+  elementKey,
+  formatState,
+  onFormatChange,
+  editorConfig,
+  autoSave,
   ...props 
 }: Omit<EditableContentProps, 'element'> & { 
   mode: 'edit' | 'preview',
   value: string,
   onEdit: (value: string) => void,
   colorTokens?: any,
-  textStyle?: React.CSSProperties
+  textStyle?: React.CSSProperties,
+  sectionId?: string,
+  elementKey?: string,
+  formatState?: TextFormatState,
+  onFormatChange?: (format: TextFormatState) => void,
+  editorConfig?: Partial<InlineEditorConfig>,
+  autoSave?: Partial<AutoSaveConfig>,
 }) {
   return (
     <EditableBadge
@@ -207,12 +436,18 @@ export function AccentBadge({
       colorTokens={colorTokens}
       textStyle={textStyle}
       accentBased={true}
+      sectionId={sectionId}
+      elementKey={elementKey}
+      formatState={formatState}
+      onFormatChange={onFormatChange}
+      editorConfig={editorConfig}
+      autoSave={autoSave}
       {...props}
     />
   );
 }
 
-// ✅ NEW: Editable content with automatic color adaptation
+// Enhanced adaptive components with inline editor support
 export function EditableAdaptiveHeadline({
   mode,
   value,
@@ -221,15 +456,24 @@ export function EditableAdaptiveHeadline({
   backgroundType,
   colorTokens,
   textStyle,
+  sectionId,
+  elementKey,
+  formatState,
+  onFormatChange,
+  editorConfig,
+  autoSave,
   ...props
 }: Omit<EditableContentProps, 'element'> & {
   level?: 'h1' | 'h2' | 'h3' | 'h4',
   backgroundType: 'primary' | 'secondary' | 'neutral' | 'divider',
   colorTokens: any,
-  textStyle?: React.CSSProperties
+  textStyle?: React.CSSProperties,
+  formatState?: TextFormatState,
+  onFormatChange?: (format: TextFormatState) => void,
+  editorConfig?: Partial<InlineEditorConfig>,
+  autoSave?: Partial<AutoSaveConfig>,
 }) {
   
-  // ✅ Auto-select text color based on background
   const getAdaptiveTextColor = () => {
     switch(backgroundType) {
       case 'primary':
@@ -245,16 +489,6 @@ export function EditableAdaptiveHeadline({
   
   const adaptiveColor = getAdaptiveTextColor();
   
-  console.log(`🎨 EditableAdaptiveHeadline auto-selected color:`, {
-    backgroundType,
-    selectedColor: adaptiveColor,
-    availableColors: {
-      textOnDark: colorTokens.textOnDark,
-      textOnLight: colorTokens.textOnLight,
-      dynamicHeading: colorTokens.dynamicHeading
-    }
-  });
-  
   return (
     <EditableHeadline
       mode={mode}
@@ -263,6 +497,12 @@ export function EditableAdaptiveHeadline({
       level={level}
       dynamicColor={adaptiveColor}
       textStyle={textStyle}
+      sectionId={sectionId}
+      elementKey={elementKey}
+      formatState={formatState}
+      onFormatChange={onFormatChange}
+      editorConfig={editorConfig}
+      autoSave={autoSave}
       {...props}
     />
   );
@@ -275,16 +515,25 @@ export function EditableAdaptiveText({
   backgroundType,
   colorTokens,
   textStyle,
-  variant = 'body', // 'body' or 'muted'
+  variant = 'body',
+  sectionId,
+  elementKey,
+  formatState,
+  onFormatChange,
+  editorConfig,
+  autoSave,
   ...props
 }: Omit<EditableContentProps, 'element'> & {
   backgroundType: 'primary' | 'secondary' | 'neutral' | 'divider',
   colorTokens: any,
   textStyle?: React.CSSProperties,
-  variant?: 'body' | 'muted'
+  variant?: 'body' | 'muted',
+  formatState?: TextFormatState,
+  onFormatChange?: (format: TextFormatState) => void,
+  editorConfig?: Partial<InlineEditorConfig>,
+  autoSave?: Partial<AutoSaveConfig>,
 }) {
   
-  // ✅ Auto-select text color based on background
   const getAdaptiveTextColor = () => {
     switch(backgroundType) {
       case 'primary':
@@ -313,6 +562,12 @@ export function EditableAdaptiveText({
       onEdit={onEdit}
       dynamicColor={adaptiveColor}
       textStyle={textStyle}
+      sectionId={sectionId}
+      elementKey={elementKey}
+      formatState={formatState}
+      onFormatChange={onFormatChange}
+      editorConfig={editorConfig}
+      autoSave={autoSave}
       {...props}
     />
   );

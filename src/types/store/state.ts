@@ -1,4 +1,4 @@
-// types/store/state.ts - All state slice interfaces
+// types/store/state.ts - Enhanced state interfaces with advanced menu support
 
 import type {
   InputVariables,
@@ -15,7 +15,7 @@ import type {
 } from '@/types/core/index';
 
 /**
- * ===== CORE INTERFACE DEFINITIONS =====
+ * ===== ENHANCED INTERFACE DEFINITIONS =====
  */
 
 export interface ConfirmedFieldData {
@@ -37,6 +37,7 @@ export interface ToolbarState {
   targetId?: string;
   contextActions: ToolbarAction[];
   activeDropdown?: string;
+  advancedActions?: AdvancedActionItem[];
 }
 
 export interface ToolbarAction {
@@ -48,6 +49,30 @@ export interface ToolbarAction {
   handler?: () => void;
   children?: ToolbarAction[];
 }
+
+// Enhanced Advanced Menu State
+export interface AdvancedMenuState {
+  visible: boolean;
+  position: { x: number; y: number };
+  actions: AdvancedActionItem[];
+  triggerElement?: HTMLElement;
+  toolbarType: 'section' | 'element' | 'text' | 'form' | 'image';
+  arrow?: {
+    side: 'top' | 'bottom' | 'left' | 'right';
+    offset: number;
+  };
+}
+
+export interface AdvancedActionItem {
+  id: string;
+  label: string;
+  icon: string;
+  handler: () => void;
+  disabled?: boolean;
+  group?: string;
+  shortcut?: string;
+}
+
 
 export interface ChangeEvent {
   id: string;
@@ -88,6 +113,7 @@ export interface LayoutSlice {
   // Theme System
   theme: Theme;
   typography: TypographyState;
+  
   // Global Settings
   globalSettings: {
     maxWidth: string;
@@ -107,7 +133,7 @@ export interface ContentSlice {
 }
 
 /**
- * ===== UI SLICE INTERFACE =====
+ * ===== ENHANCED UI SLICE INTERFACE =====
  */
 export interface UISlice {
   // Edit Modes
@@ -126,12 +152,26 @@ export interface UISlice {
     activeTab: 'addSections' | 'pageStructure' | 'inputVariables' | 'aiControls' | 'guidance' | 'insights';
   };
   
-  // Floating Toolbars
+  // Enhanced Floating Toolbars with Advanced Menu Support
   floatingToolbars: {
     section: ToolbarState;
     element: ToolbarState;
+    text: ToolbarState;
     form: ToolbarState;
     image: ToolbarState;
+  };
+  
+  // Advanced Menu State
+  advancedMenu?: {
+    visible: boolean;
+    position: { x: number; y: number };
+    actions: AdvancedActionItem[];
+    triggerElement?: HTMLElement;
+    toolbarType: 'section' | 'element' | 'text' | 'form' | 'image';
+    arrow?: {
+      side: 'top' | 'bottom' | 'left' | 'right';
+      offset: number;
+    };
   };
   
   // Auto-Save State
@@ -176,11 +216,11 @@ export interface UISlice {
   images: {
     activeImage?: string;
     stockPhotos: {
-  searchResults: any[];
-  searchQuery: string;
-  searchVisible: boolean;
-  targetElement?: { sectionId: string; elementKey: string }; // Add this
-};
+      searchResults: any[];
+      searchQuery: string;
+      searchVisible: boolean;
+      targetElement?: { sectionId: string; elementKey: string };
+    };
     uploadProgress: Record<string, number>;
   };
   
@@ -205,12 +245,9 @@ export interface UISlice {
   };
 }
 
-
-
 /**
  * ===== META SLICE INTERFACE =====
  */
-
 export interface ChangeTrackingState {
   originalInputs: InputVariables & HiddenInferredFields;
   currentInputs: InputVariables & HiddenInferredFields;
@@ -218,6 +255,7 @@ export interface ChangeTrackingState {
   changedFields: CanonicalFieldName[];
   lastChangeTimestamp: number;
 }
+
 export interface MetaSlice {
   // Project Metadata
   id: string;
@@ -245,7 +283,7 @@ export interface MetaSlice {
     lastPublished?: number;
   };
 
-   // Change tracking for field modifications
+  // Change tracking for field modifications
   changeTracking: ChangeTrackingState;
 }
 
@@ -254,7 +292,7 @@ export interface MetaSlice {
  */
 export interface PersistenceSlice {
   // Persistence Manager
-  persistenceManager?: any; // StatePersistenceManager type - avoiding import cycle
+  persistenceManager?: any;
   
   // Persistence State
   persistence: {

@@ -3101,3 +3101,667 @@ export interface ContentEditingState {
   hasChanges: boolean;
   lastEditTime: number;
 }
+
+// types/core/ui.ts - Enhanced toolbar type definitions for context-aware system
+// Add these enhanced type definitions to the existing ui.ts file:
+
+/**
+ * ===== ENHANCED TOOLBAR TYPES =====
+ */
+
+/**
+ * Enhanced toolbar types with context awareness
+ */
+export type ToolbarType = 
+  | 'section'       // Section-level toolbar (Priority 5)
+  | 'element'       // Element-level toolbar (Priority 1) 
+  | 'text'          // Text formatting toolbar (Priority 2)
+  | 'image'         // Image editing toolbar (Priority 3)
+  | 'form'          // Form editing toolbar (Priority 4)
+  | 'ai'            // AI generation toolbar
+  | 'context'       // Context-sensitive toolbar
+  | 'floating'      // General floating toolbar
+  | 'inline';       // Inline editing toolbar
+
+/**
+ * Element types for context detection
+ */
+export type ContextualElementType = 
+  | 'text'          // Text elements (h1, h2, p, span)
+  | 'image'         // Image elements
+  | 'button'        // Interactive elements (button, a, CTA)
+  | 'form'          // Form elements
+  | 'list'          // List elements (ul, ol)
+  | 'section'       // Section-level
+  | 'unknown';      // Fallback type
+
+/**
+ * Toolbar selection context
+ */
+export interface ToolbarSelectionContext {
+  /** Primary toolbar type */
+  primary: ToolbarType;
+  
+  /** Secondary toolbar (for multi-toolbar scenarios) */
+  secondary?: ToolbarType;
+  
+  /** Element context information */
+  elementInfo: {
+    type: ContextualElementType;
+    tagName: string;
+    elementKey: string;
+    hasText: boolean;
+    isInteractive: boolean;
+    isInForm: boolean;
+  };
+  
+  /** Should show multiple toolbars */
+  shouldShowMultiple: boolean;
+  
+  /** Multi-toolbar display mode */
+  multiToolbarMode?: 'stacked' | 'merged' | 'separate';
+  
+  /** Selection priority (lower = higher priority) */
+  priority: number;
+  
+  /** Available capabilities */
+  capabilities: string[];
+  
+  /** Context restrictions */
+  restrictions?: string[];
+}
+
+/**
+ * Enhanced toolbar action with context awareness
+ */
+export interface ContextualToolbarAction extends ToolbarAction {
+  /** Action category */
+  category: 'primary' | 'secondary' | 'advanced' | 'destructive';
+  
+  /** Context requirements */
+  contextRequirements?: {
+    elementTypes: ContextualElementType[];
+    modes: ('edit' | 'preview')[];
+    conditions?: string[];
+  };
+  
+  /** Action availability */
+  availability: {
+    enabled: boolean;
+    visible: boolean;
+    reason?: string;
+  };
+  
+  /** Keyboard shortcut */
+  shortcut?: {
+    key: string;
+    modifiers: ('ctrl' | 'alt' | 'shift' | 'meta')[];
+    description: string;
+  };
+}
+
+/**
+ * Toolbar detection rules
+ */
+export interface ToolbarDetectionRule {
+  /** Rule name */
+  name: string;
+  
+  /** Target toolbar type */
+  toolbarType: ToolbarType;
+  
+  /** Priority (lower = higher priority) */
+  priority: number;
+  
+  /** Detection criteria */
+  criteria: {
+    /** Tag names to match */
+    tagNames?: string[];
+    
+    /** CSS classes to match */
+    classNames?: string[];
+    
+    /** Element keys to match */
+    elementKeys?: string[];
+    
+    /** Attributes to match */
+    attributes?: Record<string, string | RegExp>;
+    
+    /** Custom detection function */
+    customDetection?: (element: HTMLElement) => boolean;
+  };
+  
+  /** Additional context */
+  context?: {
+    /** Required parent elements */
+    requiredParents?: string[];
+    
+    /** Prohibited parent elements */
+    prohibitedParents?: string[];
+    
+    /** Text content requirements */
+    textRequirements?: {
+      minLength?: number;
+      maxLength?: number;
+      pattern?: RegExp;
+    };
+  };
+}
+
+/**
+ * Enhanced toolbar state with context
+ */
+export interface ContextualToolbarState extends ToolbarState {
+  /** Toolbar context */
+  context?: ToolbarSelectionContext;
+  
+  /** Available actions with context */
+  contextualActions: ContextualToolbarAction[];
+  
+  /** Multi-toolbar configuration */
+  multiToolbar?: {
+    mode: 'stacked' | 'merged' | 'separate';
+    secondaryToolbar?: ToolbarType;
+    spacing: number;
+  };
+  
+  /** Auto-hide configuration */
+  autoHide?: {
+    enabled: boolean;
+    delay: number;
+    triggers: ('click-outside' | 'escape' | 'scroll' | 'resize')[];
+  };
+}
+
+/**
+ * Toolbar priority configuration
+ */
+export interface ToolbarPriorityConfig {
+  /** Priority mappings */
+  priorities: Record<ToolbarType, number>;
+  
+  /** Conflict resolution strategy */
+  conflictResolution: 'priority' | 'merge' | 'separate' | 'user-choice';
+  
+  /** Maximum simultaneous toolbars */
+  maxSimultaneous: number;
+  
+  /** Priority overrides for specific contexts */
+  contextOverrides?: Record<string, Partial<Record<ToolbarType, number>>>;
+}
+
+/**
+ * Default toolbar priority configuration
+ */
+export const DEFAULT_TOOLBAR_PRIORITIES: ToolbarPriorityConfig = {
+  priorities: {
+    'element': 1,      // Highest priority for interactive elements
+    'text': 2,         // Second priority for text formatting
+    'image': 3,        // Third priority for image editing
+    'form': 4,         // Fourth priority for form controls
+    'section': 5,      // Fifth priority for section-level actions
+    'ai': 6,           // AI tools when no specific element selected
+    'context': 7,      // Context-sensitive tools
+    'floating': 8,     // General floating toolbars
+    'inline': 9,       // Lowest priority for inline editors
+  },
+  conflictResolution: 'priority',
+  maxSimultaneous: 2,
+  contextOverrides: {
+    'form-context': {
+      'form': 1,       // Forms get priority in form contexts
+      'element': 2,
+    },
+    'rich-text': {
+      'text': 1,       // Text tools get priority in rich text contexts
+      'element': 2,
+    },
+  },
+};
+
+/**
+ * Detection rules for different toolbar types
+ */
+export const TOOLBAR_DETECTION_RULES: ToolbarDetectionRule[] = [
+  // Element Toolbar Rules (Priority 1)
+  {
+    name: 'button-elements',
+    toolbarType: 'element',
+    priority: 1,
+    criteria: {
+      tagNames: ['button', 'a'],
+      attributes: { role: 'button' },
+    },
+  },
+  {
+    name: 'cta-elements',
+    toolbarType: 'element',
+    priority: 1,
+    criteria: {
+      elementKeys: ['cta', 'button'],
+      classNames: ['btn', 'button', 'cta'],
+    },
+  },
+  
+  // Text Toolbar Rules (Priority 2)
+  {
+    name: 'heading-elements',
+    toolbarType: 'text',
+    priority: 2,
+    criteria: {
+      tagNames: ['h1', 'h2', 'h3', 'h4', 'h5', 'h6'],
+    },
+  },
+  {
+    name: 'text-elements',
+    toolbarType: 'text',
+    priority: 2,
+    criteria: {
+      tagNames: ['p', 'span', 'div'],
+      elementKeys: ['headline', 'title', 'text', 'description'],
+      customDetection: (element) => element.textContent?.trim().length > 0,
+    },
+  },
+  
+  // Image Toolbar Rules (Priority 3)
+  {
+    name: 'image-elements',
+    toolbarType: 'image',
+    priority: 3,
+    criteria: {
+      tagNames: ['img'],
+      elementKeys: ['image', 'photo', 'picture'],
+      classNames: ['image', 'img'],
+    },
+  },
+  
+  // Form Toolbar Rules (Priority 4)
+  {
+    name: 'form-elements',
+    toolbarType: 'form',
+    priority: 4,
+    criteria: {
+      tagNames: ['form', 'fieldset', 'input', 'select', 'textarea'],
+      elementKeys: ['form'],
+    },
+  },
+  
+  // Section Toolbar Rules (Priority 5 - Default)
+  {
+    name: 'section-fallback',
+    toolbarType: 'section',
+    priority: 5,
+    criteria: {
+      customDetection: () => true, // Always matches as fallback
+    },
+  },
+];
+
+/**
+ * Multi-toolbar scenarios configuration
+ */
+export interface MultiToolbarScenario {
+  /** Scenario name */
+  name: string;
+  
+  /** Primary toolbar */
+  primary: ToolbarType;
+  
+  /** Secondary toolbar */
+  secondary: ToolbarType;
+  
+  /** Display mode */
+  mode: 'stacked' | 'merged' | 'separate';
+  
+  /** Trigger conditions */
+  conditions: {
+    /** Element must match these criteria */
+    element: {
+      tagNames?: string[];
+      attributes?: Record<string, any>;
+      customCheck?: (element: HTMLElement) => boolean;
+    };
+    
+    /** Context requirements */
+    context?: {
+      hasText?: boolean;
+      isInteractive?: boolean;
+      isInForm?: boolean;
+      hasParent?: string[];
+    };
+  };
+  
+  /** Position configuration */
+  positioning: {
+    spacing: number;
+    offset: { x: number; y: number };
+    preferredDirection: 'below' | 'above' | 'right' | 'left';
+  };
+}
+
+/**
+ * Multi-toolbar scenarios
+ */
+export const MULTI_TOOLBAR_SCENARIOS: MultiToolbarScenario[] = [
+  {
+    name: 'interactive-text',
+    primary: 'element',
+    secondary: 'text',
+    mode: 'merged',
+    conditions: {
+      element: {
+        tagNames: ['a', 'button'],
+        customCheck: (el) => el.textContent?.trim().length > 0,
+      },
+    },
+    positioning: {
+      spacing: 0,
+      offset: { x: 0, y: 0 },
+      preferredDirection: 'below',
+    },
+  },
+  {
+    name: 'form-inputs',
+    primary: 'form',
+    secondary: 'element',
+    mode: 'separate',
+    conditions: {
+      element: {
+        tagNames: ['input', 'button'],
+        customCheck: (el) => el.closest('form') !== null,
+      },
+    },
+    positioning: {
+      spacing: 60,
+      offset: { x: 0, y: 60 },
+      preferredDirection: 'below',
+    },
+  },
+  {
+    name: 'clickable-images',
+    primary: 'image',
+    secondary: 'element',
+    mode: 'stacked',
+    conditions: {
+      element: {
+        tagNames: ['img'],
+        customCheck: (el) => el.closest('a') !== null || el.getAttribute('role') === 'button',
+      },
+    },
+    positioning: {
+      spacing: 48,
+      offset: { x: 0, y: 48 },
+      preferredDirection: 'below',
+    },
+  },
+];
+
+/**
+ * Context-aware toolbar configuration
+ */
+export interface ContextAwareToolbarConfig {
+  /** Detection rules */
+  detectionRules: ToolbarDetectionRule[];
+  
+  /** Priority configuration */
+  priorities: ToolbarPriorityConfig;
+  
+  /** Multi-toolbar scenarios */
+  multiToolbarScenarios: MultiToolbarScenario[];
+  
+  /** Global settings */
+  settings: {
+    /** Enable context detection */
+    enableContextDetection: boolean;
+    
+    /** Enable multi-toolbar support */
+    enableMultiToolbar: boolean;
+    
+    /** Animation settings */
+    animations: {
+      duration: number;
+      easing: string;
+      stagger: number;
+    };
+    
+    /** Auto-hide settings */
+    autoHide: {
+      enabled: boolean;
+      delay: number;
+      triggers: ('click-outside' | 'escape' | 'scroll' | 'resize')[];
+    };
+    
+    /** Collision detection */
+    collisionDetection: {
+      enabled: boolean;
+      margin: number;
+      resolution: 'reposition' | 'stack' | 'hide-secondary';
+    };
+    
+    /** Accessibility */
+    accessibility: {
+      announceChanges: boolean;
+      keyboardNavigation: boolean;
+      focusManagement: boolean;
+      screenReaderSupport: boolean;
+    };
+  };
+}
+
+/**
+ * Default context-aware toolbar configuration
+ */
+export const DEFAULT_CONTEXT_TOOLBAR_CONFIG: ContextAwareToolbarConfig = {
+  detectionRules: TOOLBAR_DETECTION_RULES,
+  priorities: DEFAULT_TOOLBAR_PRIORITIES,
+  multiToolbarScenarios: MULTI_TOOLBAR_SCENARIOS,
+  settings: {
+    enableContextDetection: true,
+    enableMultiToolbar: true,
+    animations: {
+      duration: 200,
+      easing: 'cubic-bezier(0.4, 0, 0.2, 1)',
+      stagger: 50,
+    },
+    autoHide: {
+      enabled: true,
+      delay: 3000,
+      triggers: ['click-outside', 'escape'],
+    },
+    collisionDetection: {
+      enabled: true,
+      margin: 12,
+      resolution: 'reposition',
+    },
+    accessibility: {
+      announceChanges: true,
+      keyboardNavigation: true,
+      focusManagement: true,
+      screenReaderSupport: true,
+    },
+  },
+};
+
+/**
+ * Toolbar context detection result
+ */
+export interface ToolbarDetectionResult {
+  /** Detected toolbar type */
+  toolbarType: ToolbarType;
+  
+  /** Element type */
+  elementType: ContextualElementType;
+  
+  /** Detection confidence (0-1) */
+  confidence: number;
+  
+  /** Matched rules */
+  matchedRules: string[];
+  
+  /** Additional context */
+  context: {
+    hasText: boolean;
+    isInteractive: boolean;
+    isInForm: boolean;
+    parentTypes: string[];
+    elementKey: string;
+    tagName: string;
+    classNames: string[];
+  };
+  
+  /** Multi-toolbar possibilities */
+  multiToolbarOptions?: {
+    secondary: ToolbarType;
+    mode: 'stacked' | 'merged' | 'separate';
+    confidence: number;
+  }[];
+}
+
+/**
+ * Enhanced toolbar positioning with context
+ */
+export interface ContextualToolbarPosition extends ToolbarPosition {
+  /** Position context */
+  context: {
+    /** Target element info */
+    target: {
+      bounds: DOMRect;
+      type: ContextualElementType;
+      priority: number;
+    };
+    
+    /** Collision avoidance */
+    collisions: {
+      detected: boolean;
+      resolvedBy: 'reposition' | 'stack' | 'offset';
+      originalPosition?: { x: number; y: number };
+    };
+    
+    /** Multi-toolbar positioning */
+    multiToolbar?: {
+      isPrimary: boolean;
+      relatedToolbars: string[];
+      stackOrder: number;
+    };
+  };
+}
+
+/**
+ * Toolbar action execution context
+ */
+export interface ActionExecutionContext {
+  /** Current selection */
+  selection: {
+    type: 'section' | 'element';
+    sectionId: string;
+    elementKey?: string;
+    elementType?: ContextualElementType;
+  };
+  
+  /** Toolbar context */
+  toolbar: {
+    type: ToolbarType;
+    priority: number;
+    capabilities: string[];
+  };
+  
+  /** User context */
+  user: {
+    mode: 'edit' | 'preview';
+    preferences?: Record<string, any>;
+    permissions?: string[];
+  };
+  
+  /** System context */
+  system: {
+    isLoading: boolean;
+    hasUnsavedChanges: boolean;
+    networkStatus: 'online' | 'offline';
+    performanceMode?: 'normal' | 'reduced';
+  };
+}
+
+/**
+ * Context-aware action handler
+ */
+export interface ContextualActionHandler {
+  /** Action ID */
+  actionId: string;
+  
+  /** Handler function */
+  handler: (context: ActionExecutionContext, params?: any) => Promise<void> | void;
+  
+  /** Pre-execution validation */
+  validate?: (context: ActionExecutionContext) => boolean | string;
+  
+  /** Post-execution callback */
+  onComplete?: (context: ActionExecutionContext, result: any) => void;
+  
+  /** Error handler */
+  onError?: (context: ActionExecutionContext, error: Error) => void;
+}
+
+/**
+ * Toolbar analytics data
+ */
+export interface ToolbarAnalytics {
+  /** Usage statistics */
+  usage: {
+    totalShows: number;
+    averageDisplayTime: number;
+    mostUsedActions: Record<string, number>;
+    leastUsedActions: Record<string, number>;
+  };
+  
+  /** Performance metrics */
+  performance: {
+    averageShowTime: number;
+    averageHideTime: number;
+    positionCalculationTime: number;
+    actionExecutionTime: Record<string, number>;
+  };
+  
+  /** Context statistics */
+  context: {
+    mostCommonToolbars: Record<ToolbarType, number>;
+    multiToolbarFrequency: number;
+    collisionResolutions: Record<string, number>;
+  };
+  
+  /** User behavior */
+  behavior: {
+    clickOutsideRate: number;
+    escapeKeyUsage: number;
+    keyboardNavigationUsage: number;
+    averageActionsPerSession: number;
+  };
+}
+
+/**
+ * Export all enhanced types for context-aware toolbar system
+ */
+export type {
+  ContextualElementType,
+  ToolbarSelectionContext,
+  ContextualToolbarAction,
+  ToolbarDetectionRule,
+  ContextualToolbarState,
+  ToolbarPriorityConfig,
+  MultiToolbarScenario,
+  ContextAwareToolbarConfig,
+  ToolbarDetectionResult,
+  ContextualToolbarPosition,
+  ActionExecutionContext,
+  ContextualActionHandler,
+  ToolbarAnalytics,
+};
+
+/**
+ * Re-export enhanced toolbar types
+ */
+export {
+  DEFAULT_TOOLBAR_PRIORITIES,
+  TOOLBAR_DETECTION_RULES,
+  MULTI_TOOLBAR_SCENARIOS,
+  DEFAULT_CONTEXT_TOOLBAR_CONFIG,
+};
