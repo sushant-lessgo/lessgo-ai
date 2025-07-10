@@ -6,7 +6,10 @@ import { useTextToolbarIntegration } from './useTextToolbarIntegration';
 import { useToolbarContext } from './useToolbarContext';
 import type { ElementSelection, ToolbarAction } from '@/types/core/ui';
 import type { BackgroundType, ElementType } from '@/types/core/index';
-
+import { useElementPicker } from './useElementPicker';
+import { useElementCRUD } from './useElementCRUD';
+import type { UniversalElementType } from '@/types/universalElements';
+import { UNIVERSAL_ELEMENTS } from '@/types/universalElements';
 export function useToolbarActions() {
   const {
     // Content actions
@@ -55,6 +58,9 @@ export function useToolbarActions() {
     trackChange,
     triggerAutoSave,
   } = useEditStore();
+
+  const { showElementPicker } = useElementPicker();
+const { addElement } = useElementCRUD();
 
   // Enhanced inline editor actions
   const {
@@ -270,46 +276,91 @@ export function useToolbarActions() {
     return false;
   }, [updateSectionLayout]);
 
-  const handleAddElement = useCallback(async (params: { sectionId: string }) => {
-    const { sectionId } = params;
-    
-    const elements = [
-      { id: 'text', name: 'Text Block', key: 'text' },
-      { id: 'headline', name: 'Headline', key: 'headline' },
-      { id: 'subheadline', name: 'Subheadline', key: 'subheadline' },
-      { id: 'button', name: 'Button', key: 'cta' },
-      { id: 'image', name: 'Image', key: 'image' },
-      { id: 'video', name: 'Video', key: 'video' },
-      { id: 'form', name: 'Form', key: 'form' },
-      { id: 'list', name: 'List', key: 'list' },
-    ];
-
-    const selectedElement = prompt(`Add element:\n${elements.map((e, i) => `${i + 1}. ${e.name}`).join('\n')}`);
-    const elementIndex = parseInt(selectedElement || '0') - 1;
-    
-    if (elementIndex >= 0 && elementIndex < elements.length) {
-      const element = elements[elementIndex];
+  const handleAddElement = useCallback(async (params: { 
+  sectionId: string; 
+  elementType?: UniversalElementType;
+  position?: { x: number; y: number };
+}) => {
+  const { sectionId, elementType, position } = params;
+  
+  // If elementType is specified, add element directly using ElementCRUD
+  if (elementType) {
+    try {
+      const elementKey = await addElement(sectionId, elementType, {
+        autoFocus: true,
+        position: Object.keys(content[sectionId]?.elements || {}).length,
+      });
       
-      const newElementKey = `${element.key}-${Date.now()}`;
-      const currentSection = content[sectionId];
+      // Announce success
+      const elementConfig = UNIVERSAL_ELEMENTS[elementType];
+      console.log(`Added ${elementConfig.label} element`);
       
-      if (currentSection) {
-        const updatedElements = {
-          ...currentSection.elements,
-          [newElementKey]: {
-            content: getDefaultContent(element.id),
-            type: element.id as ElementType,
-            isEditable: true,
-            editMode: 'inline' as const,
-          }
-        };
-        
-        setSection(sectionId, { elements: updatedElements });
-        return true;
-      }
+      return true;
+    } catch (error) {
+      console.error('Failed to add element:', error);
+      return false;
     }
-    return false;
-  }, [content, setSection]);
+  }
+  
+  // Otherwise, show ElementPicker for user selection
+  const buttonElement = document.querySelector('[data-action="add-element"]');
+  let pickerPosition = position;
+  
+  if (!pickerPosition && buttonElement) {
+    const rect = buttonElement.getBoundingClientRect();
+    pickerPosition = {
+      x: rect.left,
+      y: rect.bottom + 8,
+    };
+  }
+  
+  if (pickerPosition) {
+    showElementPicker(sectionId, pickerPosition, {
+      autoFocus: true,
+      categories: ['text', 'interactive', 'media', 'layout'],
+    });
+    return true;
+  }
+  
+  // Fallback to original prompt-based selection
+  const elements = [
+    { id: 'text', name: 'Text Block', key: 'text' },
+    { id: 'headline', name: 'Headline', key: 'headline' },
+    { id: 'subheadline', name: 'Subheadline', key: 'subheadline' },
+    { id: 'button', name: 'Button', key: 'cta' },
+    { id: 'image', name: 'Image', key: 'image' },
+    { id: 'video', name: 'Video', key: 'video' },
+    { id: 'form', name: 'Form', key: 'form' },
+    { id: 'list', name: 'List', key: 'list' },
+  ];
+
+  const selectedElement = prompt(`Add element:\n${elements.map((e, i) => `${i + 1}. ${e.name}`).join('\n')}`);
+  const elementIndex = parseInt(selectedElement || '0') - 1;
+  
+  if (elementIndex >= 0 && elementIndex < elements.length) {
+    const element = elements[elementIndex];
+    
+    const newElementKey = `${element.key}-${Date.now()}`;
+    const currentSection = content[sectionId];
+    
+    if (currentSection) {
+      const updatedElements = {
+        ...currentSection.elements,
+        [newElementKey]: {
+          content: getDefaultContent(element.id),
+          type: element.id as ElementType,
+          isEditable: true,
+          editMode: 'inline' as const,
+        }
+      };
+      
+      setSection(sectionId, { elements: updatedElements });
+      return true;
+    }
+  }
+  return false;
+}, [content, setSection, showElementPicker, addElement, getDefaultContent]);
+
 
   const handleMoveSection = useCallback(async (params: { sectionId: string; direction: 'up' | 'down' }) => {
     const { sectionId, direction } = params;

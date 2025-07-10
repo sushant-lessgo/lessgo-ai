@@ -6,7 +6,224 @@ import type { PersistenceActions } from '@/types/store';
 /**
  * ===== PERSISTENCE ACTIONS CREATOR =====
  */
+
+
+
+
 export function createPersistenceActions(set: any, get: any): PersistenceActions {
+
+  const serializationActions = {
+    // Serialization methods
+    serialize: () => {
+      const state = get();
+      return {
+        version: 1,
+        timestamp: Date.now(),
+        sections: state.sections,
+        sectionLayouts: state.sectionLayouts,
+        content: state.content,
+        theme: state.theme,
+        globalSettings: state.globalSettings,
+        metadata: {
+          title: state.title,
+          tokenId: state.tokenId,
+          lastUpdated: state.lastUpdated,
+        },
+      };
+    },
+
+    // Deserialization methods
+    deserialize: (serializedData: any) => {
+      set((state: EditStore) => {
+        if (serializedData.sections) state.sections = serializedData.sections;
+        if (serializedData.sectionLayouts) state.sectionLayouts = serializedData.sectionLayouts;
+        if (serializedData.content) state.content = serializedData.content;
+        if (serializedData.theme) state.theme = serializedData.theme;
+        if (serializedData.globalSettings) state.globalSettings = serializedData.globalSettings;
+        
+        if (serializedData.metadata) {
+          if (serializedData.metadata.title) state.title = serializedData.metadata.title;
+          if (serializedData.metadata.tokenId) state.tokenId = serializedData.metadata.tokenId;
+          if (serializedData.metadata.lastUpdated) state.lastUpdated = serializedData.metadata.lastUpdated;
+        }
+        
+        state.persistence.isDirty = false;
+        state.persistence.isLoading = false;
+        state.persistence.lastSaved = Date.now();
+      });
+    },
+
+    // Validation
+    validateSerializedData: (data: any) => {
+      const errors: string[] = [];
+      
+      if (!data || typeof data !== 'object') {
+        errors.push('Data must be an object');
+        return { isValid: false, errors };
+      }
+
+      if (typeof data.version !== 'number') {
+        errors.push('Version must be a number');
+      }
+
+      if (!Array.isArray(data.sections)) {
+        errors.push('Sections must be an array');
+      }
+
+      if (!data.content || typeof data.content !== 'object') {
+        errors.push('Content must be an object');
+      }
+
+      return { isValid: errors.length === 0, errors };
+    },
+
+    // Enhanced save with serialization
+    saveWithSerialization: async () => {
+      const state = get();
+      
+      try {
+        set((draft: EditStore) => {
+          draft.persistence.isSaving = true;
+          draft.persistence.saveError = undefined;
+        });
+
+        const serializedData = get().serialize();
+        
+        // Validate before saving
+        const validation = get().validateSerializedData(serializedData);
+        if (!validation.isValid) {
+          throw new Error(`Validation failed: ${validation.errors.join(', ')}`);
+        }
+
+        // Save via API
+        const response = await fetch('/api/saveDraft', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            tokenId: state.tokenId,
+            finalContent: serializedData,
+            saveMetadata: {
+              source: 'edit',
+              description: 'Serialized save',
+              timestamp: Date.now(),
+            },
+          }),
+        });
+
+        if (!response.ok) {
+          throw new Error(`Save failed: ${response.status}`);
+        }
+
+        const result = await response.json();
+        
+        set((draft: EditStore) => {
+          draft.persistence.isSaving = false;
+          draft.persistence.lastSaved = Date.now();
+          draft.persistence.isDirty = false;
+          draft.persistence.metrics.totalSaves += 1;
+          draft.persistence.metrics.successfulSaves += 1;
+          draft.version = result.version || draft.version + 1;
+        });
+
+        return { success: true, version: result.version };
+      } catch (error) {
+        set((draft: EditStore) => {
+          draft.persistence.isSaving = false;
+          draft.persistence.saveError = error instanceof Error ? error.message : 'Save failed';
+          draft.persistence.metrics.failedSaves += 1;
+        });
+        throw error;
+      }
+    },
+
+    // Enhanced load with deserialization
+    loadWithDeserialization: async (tokenId: string) => {
+      try {
+        set((state: EditStore) => {
+          state.persistence.isLoading = true;
+          state.persistence.loadError = undefined;
+        });
+
+        const response = await fetch(`/api/loadDraft?tokenId=${encodeURIComponent(tokenId)}`);
+        
+        if (!response.ok) {
+          throw new Error(`Load failed: ${response.status}`);
+        }
+
+        const data = await response.json();
+        
+        // Check if we have serialized content
+        if (data.finalContent && data.finalContent.version) {
+          const validation = get().validateSerializedData(data.finalContent);
+          if (!validation.isValid) {
+            console.warn('Deserialization validation failed:', validation.errors);
+          }
+          
+          get().deserialize(data.finalContent);
+        } else {
+          // Fallback to standard loading
+          await get().loadFromDraft(data);
+        }
+
+        set((state: EditStore) => {
+          state.persistence.isLoading = false;
+          state.persistence.metrics.totalLoads += 1;
+        });
+
+        return { success: true, data };
+      } catch (error) {
+        set((state: EditStore) => {
+          state.persistence.isLoading = false;
+          state.persistence.loadError = error instanceof Error ? error.message : 'Load failed';
+        });
+        throw error;
+      }
+    },
+
+    // Get serialization status
+    getSerializationStatus: () => {
+      const state = get();
+      const serialized = state.serialize();
+      const size = new Blob([JSON.stringify(serialized)]).size;
+      
+      return {
+        canSerialize: true,
+        size: size > 1024 ? `${(size / 1024).toFixed(2)}KB` : `${size}B`,
+        sectionsCount: serialized.sections?.length || 0,
+        contentCount: Object.keys(serialized.content || {}).length,
+        hasTheme: !!(serialized.theme && Object.keys(serialized.theme).length > 0),
+        lastSerialized: serialized.timestamp,
+      };
+    },
+
+    // Export for external use
+    exportSerialized: () => {
+      const serialized = get().serialize();
+      return JSON.stringify(serialized, null, 2);
+    },
+
+    // Import from external source
+    importSerialized: (jsonString: string) => {
+      try {
+        const data = JSON.parse(jsonString);
+        const validation = get().validateSerializedData(data);
+        
+        if (!validation.isValid) {
+          throw new Error(`Import validation failed: ${validation.errors.join(', ')}`);
+        }
+        
+        get().deserialize(data);
+        return { success: true };
+      } catch (error) {
+        return { 
+          success: false, 
+          error: error instanceof Error ? error.message : 'Import failed' 
+        };
+      }
+    },
+  };
+
+
   return {
     /**
      * ===== PERSISTENCE INITIALIZATION =====
@@ -35,6 +252,13 @@ export function createPersistenceActions(set: any, get: any): PersistenceActions
         }
       }),
 
+      // Add all serialization actions here
+    ...serializationActions,
+
+    /**
+     * ===== MANUAL SAVE OPERATIONS =====
+     */
+    
     /**
      * ===== MANUAL SAVE OPERATIONS =====
      */
@@ -48,47 +272,50 @@ export function createPersistenceActions(set: any, get: any): PersistenceActions
       });
       
       try {
-        const startTime = Date.now();
-        
-        const result = await completeSaveDraft(state.tokenId, {
-          description: description || 'Manual save',
-          createSnapshot: true,
-          forceOverwrite: false,
-        });
-        
-        const saveTime = Date.now() - startTime;
-        
-        set((state: EditStore) => {
-          state.persistence.isSaving = false;
-          state.persistence.lastSaved = result.timestamp;
-          state.persistence.isDirty = false;
-          state.autoSave.isDirty = false;
-          state.autoSave.lastSaved = result.timestamp;
-          state.version += 1;
+        // Try serialized save first, fallback to regular save
+        try {
+          const result = await get().saveWithSerialization();
+          console.log('✅ Manual save with serialization successful');
+          return result;
+        } catch (serializationError) {
+          console.warn('Serialized save failed, falling back to regular save:', serializationError);
           
-          // Update metrics
-          state.persistence.metrics.totalSaves += 1;
-          state.persistence.metrics.successfulSaves += 1;
-          state.persistence.metrics.lastSaveTime = saveTime;
-          state.persistence.metrics.averageSaveTime = 
-            (state.persistence.metrics.averageSaveTime * (state.persistence.metrics.totalSaves - 1) + saveTime) / 
-            state.persistence.metrics.totalSaves;
+          // Fallback to regular save
+          const startTime = Date.now();
+          const result = await completeSaveDraft(state.tokenId, {
+            description: description || 'Manual save',
+            createSnapshot: true,
+            forceOverwrite: false,
+          });
           
-          // Update sync status
-          state.persistence.syncStatus.localVersion = state.version;
-          state.persistence.syncStatus.serverVersion = state.version;
-          state.persistence.syncStatus.status = 'synced';
-          state.persistence.syncStatus.lastSyncAt = result.timestamp;
-          state.persistence.syncStatus.pendingChanges = 0;
-        });
-        
-        console.log('✅ Manual save successful:', {
-          saveTime: `${saveTime}ms`,
-          description,
-          version: get().version,
-        });
-        
-        
+          const saveTime = Date.now() - startTime;
+          
+          set((state: EditStore) => {
+            state.persistence.isSaving = false;
+            state.persistence.lastSaved = result.timestamp;
+            state.persistence.isDirty = false;
+            state.autoSave.isDirty = false;
+            state.autoSave.lastSaved = result.timestamp;
+            state.version += 1;
+            
+            // Update metrics
+            state.persistence.metrics.totalSaves += 1;
+            state.persistence.metrics.successfulSaves += 1;
+            state.persistence.metrics.lastSaveTime = saveTime;
+            state.persistence.metrics.averageSaveTime = 
+              (state.persistence.metrics.averageSaveTime * (state.persistence.metrics.totalSaves - 1) + saveTime) / 
+              state.persistence.metrics.totalSaves;
+            
+            // Update sync status
+            state.persistence.syncStatus.localVersion = state.version;
+            state.persistence.syncStatus.serverVersion = state.version;
+            state.persistence.syncStatus.status = 'synced';
+            state.persistence.syncStatus.lastSyncAt = result.timestamp;
+            state.persistence.syncStatus.pendingChanges = 0;
+          });
+          
+          return result;
+        }
         
       } catch (error) {
         set((state: EditStore) => {
@@ -144,8 +371,6 @@ export function createPersistenceActions(set: any, get: any): PersistenceActions
           throw new Error(result.error || 'Save failed');
         }
         
-    
-        
       } catch (error) {
         set((state: EditStore) => {
           state.persistence.saveError = error instanceof Error ? error.message : 'Save failed';
@@ -199,52 +424,63 @@ export function createPersistenceActions(set: any, get: any): PersistenceActions
      * ===== LOAD OPERATIONS =====
      */
     
+    // Enhanced load that tries deserialization first
     loadFromServer: async (useCache: boolean = true) => {
       const state = get();
       
-      set((state: EditStore) => {
-        state.persistence.isLoading = true;
-        state.persistence.loadError = undefined;
-      });
-      
       try {
-        const response = await fetch(`/api/loadDraft?tokenId=${encodeURIComponent(state.tokenId)}`);
+        // Try enhanced load with deserialization first
+        const result = await get().loadWithDeserialization(state.tokenId);
+        console.log('✅ Loaded with deserialization successful');
+        return result;
+      } catch (deserializationError) {
+        console.warn('Deserialized load failed, falling back to regular load:', deserializationError);
         
-        if (!response.ok) {
-          throw new Error(`Failed to load: ${response.status}`);
-        }
-        
-        const data = await response.json();
-        
-        // Use the existing loadFromDraft method
-        await get().loadFromDraft(data);
-        
+        // Fallback to regular load
         set((state: EditStore) => {
-          state.persistence.isLoading = false;
-          state.persistence.lastLoaded = Date.now();
-          state.persistence.metrics.totalLoads += 1;
+          state.persistence.isLoading = true;
+          state.persistence.loadError = undefined;
+        });
+        
+        try {
+          const response = await fetch(`/api/loadDraft?tokenId=${encodeURIComponent(state.tokenId)}`);
           
-          if (useCache) {
-            state.persistence.metrics.cacheHits += 1;
-          } else {
-            state.persistence.metrics.cacheMisses += 1;
+          if (!response.ok) {
+            throw new Error(`Failed to load: ${response.status}`);
           }
           
-          // Update sync status
-          state.persistence.syncStatus.status = 'synced';
-          state.persistence.syncStatus.lastSyncAt = Date.now();
-        });
-        
-        console.log('✅ Loaded from server successfully');
-        
-      } catch (error) {
-        set((state: EditStore) => {
-          state.persistence.isLoading = false;
-          state.persistence.loadError = error instanceof Error ? error.message : 'Load failed';
-        });
-        
-        console.error('❌ Failed to load from server:', error);
-        throw error;
+          const data = await response.json();
+          
+          // Use the existing loadFromDraft method
+          await get().loadFromDraft(data);
+          
+          set((state: EditStore) => {
+            state.persistence.isLoading = false;
+            state.persistence.lastLoaded = Date.now();
+            state.persistence.metrics.totalLoads += 1;
+            
+            if (useCache) {
+              state.persistence.metrics.cacheHits += 1;
+            } else {
+              state.persistence.metrics.cacheMisses += 1;
+            }
+            
+            // Update sync status
+            state.persistence.syncStatus.status = 'synced';
+            state.persistence.syncStatus.lastSyncAt = Date.now();
+          });
+          
+          console.log('✅ Loaded from server successfully (fallback)');
+          
+        } catch (error) {
+          set((state: EditStore) => {
+            state.persistence.isLoading = false;
+            state.persistence.loadError = error instanceof Error ? error.message : 'Load failed';
+          });
+          
+          console.error('❌ Failed to load from server:', error);
+          throw error;
+        }
       }
     },
 
@@ -604,6 +840,8 @@ export function createPersistenceActions(set: any, get: any): PersistenceActions
       }
     },
 
+
+    
     /**
      * ===== CLEANUP =====
      */

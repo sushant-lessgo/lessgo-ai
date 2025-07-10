@@ -23,7 +23,7 @@ interface AutoSaveDraftParams {
   hiddenInferredFields?: HiddenInferredFields;
   title?: string;
   includePageData?: boolean;
-  
+  serializationOptions?: SerializationOptions;
   // Enhanced parameters for edit store integration
   source?: 'onboarding' | 'edit' | 'persistence-manager';
   conflictResolution?: 'ignore' | 'overwrite' | 'merge';
@@ -68,6 +68,12 @@ interface AutoSaveDraftResult {
     dataSize: number;
     compressionRatio?: number;
   };
+}
+
+interface SerializationOptions {
+  useContentSerializer?: boolean;
+  validateSerialization?: boolean;
+  includeContentSummary?: boolean;
 }
 
 /**
@@ -149,46 +155,74 @@ export async function autoSaveDraft(params: AutoSaveDraftParams): Promise<AutoSa
       ...(lastSaved && { lastSaved }),
     };
 
-    // Step 3: Include page data if requested
-    let pageData: any = null;
-    if (includePageData) {
-      try {
-        if (source === 'edit' || source === 'persistence-manager') {
-          // Try to get data from edit store first
-          const { useEditStore } = await import('@/hooks/useEditStore');
-          const editStore = useEditStore.getState();
-          pageData = editStore.export();
-          console.log('💾 Using edit store data for auto-save');
-        } else {
-          // Fallback to page store for backwards compatibility
-          console.log('💾 Edit store not available, using page store');
-          const { usePageStore } = await import('@/hooks/usePageStore');
-          const pageStore = usePageStore.getState();
-          pageData = pageStore.export();
-        }
-      } catch (error) {
-        console.warn('⚠️ Could not get page data for save:', error);
-        // Continue without page data
-      }
+
+// Step 3: Include page data with serialization support
+   let pageData: any = null;
+if (includePageData) {
+  try {
+    const { serializationOptions = {} } = params;
+    
+    if (source === 'edit' || source === 'persistence-manager') {
+      const { useEditStore } = await import('@/hooks/useEditStore');
+      const editStore = useEditStore.getState();
       
-      if (pageData) {
-        payload.finalContent = {
-          layout: pageData?.layout || {},
-          content: pageData?.content || {},
-          meta: pageData?.meta || {},
-          generatedAt: Date.now(),
-          source: source,
-          version: localVersion || 1,
-        };
+      if (serializationOptions.useContentSerializer) {
+        // Use content serializer for structured data
+        const { useContentSerializer } = await import('@/hooks/useContentSerializer');
+        const { serialize, validate, getSerializedSize } = useContentSerializer();
         
-        console.log('💾 Auto-saving with complete page data:', {
-          sections: pageData?.layout?.sections?.length || 0,
-          content: Object.keys(pageData?.content || {}).length,
-          hasTheme: !!(pageData?.layout?.theme),
-          source,
+        const serializedContent = serialize();
+        
+        if (serializationOptions.validateSerialization) {
+          const validation = validate(serializedContent);
+          if (!validation.isValid) {
+            console.warn('⚠️ Serialization validation failed:', validation.errors);
+            payload.warnings = validation.errors;
+          }
+        }
+        
+        pageData = serializedContent;
+        
+        if (serializationOptions.includeContentSummary) {
+          const { getContentSummary } = await import('@/utils/contentSerialization');
+          payload.contentSummary = getContentSummary(serializedContent);
+        }
+        
+        console.log('💾 Using content serializer for structured save:', {
+          size: `${(getSerializedSize() / 1024).toFixed(2)}KB`,
+          validation: serializationOptions.validateSerialization,
         });
+      } else {
+        // Use standard export
+        pageData = editStore.exportForSerialization ? editStore.exportForSerialization() : editStore.export();
       }
+    } else {
+      // Fallback to page store
+      const { usePageStore } = await import('@/hooks/usePageStore');
+      const pageStore = usePageStore.getState();
+      pageData = pageStore.export();
     }
+  } catch (error) {
+    console.warn('⚠️ Could not get page data for save:', error);
+  }
+  
+  if (pageData) {
+    payload.finalContent = {
+      ...pageData,
+      generatedAt: Date.now(),
+      source: source,
+      version: localVersion || 1,
+    };
+    
+    console.log('💾 Auto-saving with page data:', {
+      sections: pageData?.sections?.length || 0,
+      content: Object.keys(pageData?.content || {}).length,
+      hasTheme: !!(pageData?.theme),
+      source,
+      useSerializer: serializationOptions.useContentSerializer,
+    });
+  }
+}
 
     // Step 4: Add theme values
     try {
@@ -621,6 +655,90 @@ export async function completeSaveDraft(tokenId: string, options?: {
   });
 }
 
+// Serialized complete save
+export async function serializedSaveDraft(tokenId: string, options?: {
+  description?: string;
+  validateSerialization?: boolean;
+  includeContentSummary?: boolean;
+  forceOverwrite?: boolean;
+}): Promise<AutoSaveDraftResult> {
+  const { description, validateSerialization, includeContentSummary, forceOverwrite } = options || {};
+  
+  return autoSaveDraft({
+    tokenId,
+    source: 'edit',
+    includePageData: true,
+    validateBeforeSave: true,
+    conflictResolution: forceOverwrite ? 'overwrite' : 'merge',
+    serializationOptions: {
+      useContentSerializer: true,
+      validateSerialization: validateSerialization ?? true,
+      includeContentSummary: includeContentSummary ?? true,
+    },
+    saveMetadata: {
+      description: description || 'Serialized complete save',
+      source: 'user',
+      triggeredBy: 'user-action',
+      sessionId: generateSessionId(),
+    },
+  });
+}
+
+// Load with deserialization support
+export async function loadDraftWithDeserialization(tokenId: string): Promise<{
+  success: boolean;
+  data?: any;
+  error?: string;
+}> {
+  try {
+    const response = await fetch(`/api/loadDraft?tokenId=${encodeURIComponent(tokenId)}`);
+    
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}`);
+    }
+    
+    const data = await response.json();
+    
+    // Check if we have serialized content
+    if (data.finalContent && data.finalContent.version) {
+      const { useContentSerializer } = await import('@/hooks/useContentSerializer');
+      const { deserialize, validate } = useContentSerializer();
+      
+      // Validate before deserializing
+      const validation = validate(data.finalContent);
+      if (!validation.isValid) {
+        console.warn('⚠️ Deserialization validation failed:', validation.errors);
+        // Continue with warnings
+      }
+      
+      // Deserialize into edit store
+      deserialize(data.finalContent);
+      
+      console.log('✅ Successfully loaded and deserialized content');
+      return { success: true, data };
+    } else {
+      // Fallback to standard loading
+      const { useEditStore } = await import('@/hooks/useEditStore');
+      const editStore = useEditStore.getState();
+      
+      if (editStore.loadFromSerialized) {
+        editStore.loadFromSerialized(data);
+      } else {
+        await editStore.loadFromDraft(data);
+      }
+      
+      console.log('✅ Successfully loaded content (fallback method)');
+      return { success: true, data };
+    }
+  } catch (error) {
+    console.error('❌ Failed to load draft:', error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Unknown error',
+    };
+  }
+}
+
 // Background auto-save
 export async function backgroundSaveDraft(tokenId: string): Promise<AutoSaveDraftResult> {
   return autoSaveDraft({
@@ -767,9 +885,55 @@ if (process.env.NODE_ENV === 'development') {
           description: 'Conflict simulation',
           source: 'user',
         },
+
+         // Serialization functions
+    serializedSaveDraft,
+    loadDraftWithDeserialization,
+    
+    // Test serialization
+    testSerialization: async (tokenId: string) => {
+      console.log('🧪 Testing serialization...');
+      const { useContentSerializer } = await import('@/hooks/useContentSerializer');
+      const { serialize, validate, getSerializedSize } = useContentSerializer();
+      
+      const serialized = serialize();
+      const validation = validate(serialized);
+      const size = getSerializedSize();
+      
+      console.log('📊 Serialization test results:', {
+        isValid: validation.isValid,
+        errors: validation.errors,
+        warnings: validation.warnings,
+        size: `${(size / 1024).toFixed(2)}KB`,
+        content: serialized,
+      });
+      
+      return { serialized, validation, size };
+    },
+    
+    testDeserialization: async (data: any) => {
+      console.log('🧪 Testing deserialization...');
+      const { useContentSerializer } = await import('@/hooks/useContentSerializer');
+      const { deserialize, validate } = useContentSerializer();
+      
+      const validation = validate(data);
+      if (validation.isValid) {
+        deserialize(data);
+        console.log('✅ Deserialization successful');
+      } else {
+        console.error('❌ Deserialization failed:', validation.errors);
+      }
+      
+      return validation;
+    },
+ 
+
+
       });
     },
   };
   
   console.log('🔧 Enhanced AutoSaveDraft debug utilities available at window.__autoSaveDraftDebug');
+
+  
 }

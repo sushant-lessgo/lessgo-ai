@@ -10,6 +10,8 @@ import { AddSectionButton } from '../ui/AddSectionButton';
 import { SelectionSystem, KeyboardNavigationHelper } from '../selection/SelectionSystem';
 import { ElementDetector, ElementBoundaryVisualizer } from '../selection/ElementDetector';
 import { useToolbarContext } from '@/hooks/useToolbarContext';
+import { useElementPicker } from '@/hooks/useElementPicker';
+import { ElementPicker } from '../content/ElementPicker';
 
 interface MainContentProps {
   tokenId: string;
@@ -55,6 +57,15 @@ export function MainContent({ tokenId }: MainContentProps) {
     navigateToElement,
     clearSelectionCache,
   } = useSelection();
+
+const {
+  isPickerVisible,
+  pickerPosition,
+  pickerSectionId,
+  pickerOptions,
+  hideElementPicker,
+  handleElementSelect,
+} = useElementPicker();
 
   const colorTokens = getColorTokens();
 
@@ -350,26 +361,28 @@ export function MainContent({ tokenId }: MainContentProps) {
   };
 
   // Clear selection on background click
-  const handleBackgroundClick = (event: React.MouseEvent) => {
-    // Only clear if clicking directly on the background, not on children
-    if (event.target === event.currentTarget) {
+ const handleBackgroundClick = (event: React.MouseEvent) => {
+  // Only clear if clicking directly on the background, not on children
+  if (event.target === event.currentTarget) {
+    clearSelection();
+    hideElementPicker(); // ADD THIS LINE
+    announceLiveRegion('Cleared selection');
+  }
+};
+
+  // Handle escape key for clearing selection
+ useEffect(() => {
+  const handleKeyDown = (event: KeyboardEvent) => {
+    if (event.key === 'Escape' && mode === 'edit') {
       clearSelection();
+      hideElementPicker(); // ADD THIS LINE
       announceLiveRegion('Cleared selection');
     }
   };
 
-  // Handle escape key for clearing selection
-  useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape' && mode === 'edit') {
-        clearSelection();
-        announceLiveRegion('Cleared selection');
-      }
-    };
-
-    document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [mode, clearSelection, announceLiveRegion]);
+  document.addEventListener('keydown', handleKeyDown);
+  return () => document.removeEventListener('keydown', handleKeyDown);
+}, [mode, clearSelection, hideElementPicker, announceLiveRegion]);
 
   return (
     <SelectionSystem>
@@ -554,6 +567,17 @@ export function MainContent({ tokenId }: MainContentProps) {
           <div className="h-32" />
         </div>
 
+          {/* Element Picker */}
+                  {isPickerVisible && pickerSectionId && (
+                    <ElementPicker
+                      sectionId={pickerSectionId}
+                      isVisible={isPickerVisible}
+                      position={pickerPosition}
+                      onElementSelect={handleElementSelect}
+                      onClose={hideElementPicker}
+                      options={pickerOptions}
+                    />
+                  )}
         {/* Floating Toolbars */}
         <FloatingToolbars />
 
@@ -679,6 +703,9 @@ export function MainContent({ tokenId }: MainContentProps) {
               {selectedElement && (
                 <div>Element: {selectedElement.elementKey}</div>
               )}
+              {isPickerVisible && (
+        <div className="text-yellow-300">Element Picker: Open</div>
+      )}
             </div>
           </div>
         )}

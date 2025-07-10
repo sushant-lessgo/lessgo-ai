@@ -1,12 +1,14 @@
-// hooks/editStore/contentActions.ts - Content and AI generation actions
+// hooks/editStore/contentActions.ts - Enhanced content actions with section CRUD methods
 import { useOnboardingStore } from '../useOnboardingStore';
 import { buildFullPrompt, buildSectionPrompt, buildElementPrompt } from '@/modules/prompt/buildPrompt';
 import { parseAiResponse } from '@/modules/prompt/parseAiResponse';
+import { createSectionCRUDActions } from './sectionCRUDActions';
 import type { BackgroundType } from '@/types/core/index';
 import type { EditStore, APIRequest, ValidationError } from '@/types/store';
 import type { ContentActions } from '@/types/store';
 import type { ElementSelection } from '@/types/core/ui';
 import type { ImageAsset } from '@/types/core/images';
+import type { SectionType } from '@/types/store/state';
 
 /**
  * ===== UTILITY FUNCTIONS =====
@@ -294,59 +296,61 @@ const handleDraftSave = async (payload: any, getState: () => EditStore, setState
 };
 
 /**
- * ===== CONTENT ACTIONS CREATOR =====
+ * ===== ENHANCED CONTENT ACTIONS CREATOR =====
  */
 export function createContentActions(set: any, get: any): ContentActions {
+  // Get section CRUD actions
+  const sectionCRUDActions = createSectionCRUDActions(set, get);
+
   return {
     /**
      * ===== BASIC CONTENT OPERATIONS =====
      */
     
     updateElementContent: (sectionId: string, elementKey: string, content: string | string[]) =>
-  set((state: EditStore) => {
-    if (!state.content[sectionId]) return;
-    
-    const oldValue = state.content[sectionId].elements[elementKey]?.content;
-    
-    if (!state.content[sectionId].elements[elementKey]) {
-      state.content[sectionId].elements[elementKey] = {
-        content,
-        type: inferElementType(elementKey),
-        isEditable: true,
-        editMode: 'inline',
-      };
-    } else {
-      state.content[sectionId].elements[elementKey].content = content;
-    }
-    
-    // Mark as customized
-    state.content[sectionId].aiMetadata.isCustomized = true;
-    state.autoSave.isDirty = true;
-    
-    // Track change for auto-save
-    state.queuedChanges.push({
-      id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-      type: 'content',
-      sectionId,
-      elementKey,
-      oldValue,
-      newValue: content,
-      timestamp: Date.now(),
-    });
-    
-    // Add to history
-    state.history.undoStack.push({
-      type: 'content',
-      description: `Updated ${elementKey} in ${sectionId}`,
-      timestamp: Date.now(),
-      beforeState: { sectionId, elementKey, content: oldValue },
-      afterState: { sectionId, elementKey, content },
-      sectionId,
-    });
-    
-    state.history.redoStack = [];
-  }),
-
+      set((state: EditStore) => {
+        if (!state.content[sectionId]) return;
+        
+        const oldValue = state.content[sectionId].elements[elementKey]?.content;
+        
+        if (!state.content[sectionId].elements[elementKey]) {
+          state.content[sectionId].elements[elementKey] = {
+            content,
+            type: inferElementType(elementKey),
+            isEditable: true,
+            editMode: 'inline',
+          };
+        } else {
+          state.content[sectionId].elements[elementKey].content = content;
+        }
+        
+        // Mark as customized
+        state.content[sectionId].aiMetadata.isCustomized = true;
+        state.autoSave.isDirty = true;
+        
+        // Track change for auto-save
+        state.queuedChanges.push({
+          id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+          type: 'content',
+          sectionId,
+          elementKey,
+          oldValue,
+          newValue: content,
+          timestamp: Date.now(),
+        });
+        
+        // Add to history
+        state.history.undoStack.push({
+          type: 'content',
+          description: `Updated ${elementKey} in ${sectionId}`,
+          timestamp: Date.now(),
+          beforeState: { sectionId, elementKey, content: oldValue },
+          afterState: { sectionId, elementKey, content },
+          sectionId,
+        });
+        
+        state.history.redoStack = [];
+      }),
 
     bulkUpdateSection: (sectionId: string, elements: Record<string, string | string[]>) =>
       set((state: EditStore) => {
@@ -413,39 +417,121 @@ export function createContentActions(set: any, get: any): ContentActions {
       }),
 
     setSection: (sectionId: string, sectionData: Partial<any>) =>
-  set((state: EditStore) => {
-    if (state.content[sectionId]) {
-      const oldSection = { ...state.content[sectionId] };
-      
-      // Merge new data
-      Object.assign(state.content[sectionId], sectionData);
-      
-      // Track change
-      state.queuedChanges.push({
-        id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-        type: 'content',
-        sectionId,
-        oldValue: oldSection,
-        newValue: state.content[sectionId],
-        timestamp: Date.now(),
-      });
-      
-      state.autoSave.isDirty = true;
-      state.lastUpdated = Date.now();
-      
-      // Add to history
-      state.history.undoStack.push({
-        type: 'content',
-        description: `Updated section data`,
-        timestamp: Date.now(),
-        beforeState: { sectionId, data: oldSection },
-        afterState: { sectionId, data: state.content[sectionId] },
-        sectionId,
-      });
-      
-      state.history.redoStack = [];
-    }
-  }),
+      set((state: EditStore) => {
+        if (state.content[sectionId]) {
+          const oldSection = { ...state.content[sectionId] };
+          
+          // Merge new data
+          Object.assign(state.content[sectionId], sectionData);
+          
+          // Track change
+          state.queuedChanges.push({
+            id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+            type: 'content',
+            sectionId,
+            oldValue: oldSection,
+            newValue: state.content[sectionId],
+            timestamp: Date.now(),
+          });
+          
+          state.autoSave.isDirty = true;
+          state.lastUpdated = Date.now();
+          
+          // Add to history
+          state.history.undoStack.push({
+            type: 'content',
+            description: `Updated section data`,
+            timestamp: Date.now(),
+            beforeState: { sectionId, data: oldSection },
+            afterState: { sectionId, data: state.content[sectionId] },
+            sectionId,
+          });
+          
+          state.history.redoStack = [];
+        }
+      }),
+
+    /**
+     * ===== SECTION CRUD OPERATIONS (from sectionCRUDActions) =====
+     */
+    ...sectionCRUDActions,
+
+    /**
+     * ===== ENHANCED SECTION MANAGEMENT =====
+     */
+    
+    createSectionFromType: (sectionType: SectionType, position?: number) => {
+      const { addSection } = sectionCRUDActions;
+      return addSection(undefined, position, sectionType);
+    },
+
+    cloneSectionToPosition: (sourceSectionId: string, targetPosition: number) =>
+      set((state: EditStore) => {
+        const sourceSection = state.content[sourceSectionId];
+        if (!sourceSection) return;
+
+        const newSectionId = `${sourceSectionId}-clone-${Date.now()}`;
+        const clonedData = JSON.parse(JSON.stringify(sourceSection));
+        clonedData.id = newSectionId;
+        clonedData.aiMetadata.isCustomized = true;
+        clonedData.aiMetadata.lastGenerated = Date.now();
+
+        // Insert into sections array
+        const newSections = [...state.sections];
+        newSections.splice(targetPosition, 0, newSectionId);
+        state.sections = newSections;
+
+        // Clone layout
+        state.sectionLayouts[newSectionId] = state.sectionLayouts[sourceSectionId];
+
+        // Set cloned content
+        state.content[newSectionId] = clonedData;
+
+        // Track change
+        state.queuedChanges.push({
+          id: generateId(),
+          type: 'section',
+          action: 'clone',
+          sectionId: newSectionId,
+          oldValue: null,
+          newValue: { sourceSectionId, targetPosition },
+          timestamp: Date.now(),
+        });
+
+        state.autoSave.isDirty = true;
+        state.lastUpdated = Date.now();
+      }),
+
+    reorderSectionsByDrag: (draggedSectionId: string, targetSectionId: string, position: 'before' | 'after') =>
+      set((state: EditStore) => {
+        const draggedIndex = state.sections.indexOf(draggedSectionId);
+        const targetIndex = state.sections.indexOf(targetSectionId);
+        
+        if (draggedIndex === -1 || targetIndex === -1) return;
+
+        const newSections = [...state.sections];
+        newSections.splice(draggedIndex, 1);
+
+        const adjustedTargetIndex = draggedIndex < targetIndex ? targetIndex - 1 : targetIndex;
+        const insertIndex = position === 'before' ? adjustedTargetIndex : adjustedTargetIndex + 1;
+
+        newSections.splice(insertIndex, 0, draggedSectionId);
+        state.sections = newSections;
+
+        // Track change
+        state.queuedChanges.push({
+          id: generateId(),
+          type: 'section',
+          action: 'drag-reorder',
+          sectionId: draggedSectionId,
+          oldValue: { fromIndex: draggedIndex },
+          newValue: { toIndex: insertIndex },
+          timestamp: Date.now(),
+        });
+
+        state.autoSave.isDirty = true;
+        state.lastUpdated = Date.now();
+      }),
 
     /**
      * ===== AI GENERATION ACTIONS =====
@@ -633,16 +719,15 @@ export function createContentActions(set: any, get: any): ContentActions {
      * ===== ELEMENT VARIATIONS =====
      */
     
-   showElementVariations: (elementId: string, variations: string[]) =>
-  set((state: EditStore) => {
-    state.elementVariations = {
-      visible: true,
-      elementId,
-      variations,
-      selectedVariation: 0,
-    };
-  }),
-
+    showElementVariations: (elementId: string, variations: string[]) =>
+      set((state: EditStore) => {
+        state.elementVariations = {
+          visible: true,
+          elementId,
+          variations,
+          selectedVariation: 0,
+        };
+      }),
     
     hideElementVariations: () =>
       set((state: EditStore) => {
@@ -658,88 +743,86 @@ export function createContentActions(set: any, get: any): ContentActions {
       }),
     
     applySelectedVariation: () =>
-  set((state: EditStore) => {
-    const { elementId, variations, selectedVariation } = state.elementVariations;
-    if (!elementId || selectedVariation === undefined) return;
-    
-    const [sectionId, elementKey] = elementId.split('.');
-    const selectedContent = variations[selectedVariation];
-    
-    if (selectedContent && state.content[sectionId]) {
-      const oldContent = state.content[sectionId].elements[elementKey]?.content;
-      
-      // Update content
-      if (!state.content[sectionId].elements[elementKey]) {
-        state.content[sectionId].elements[elementKey] = {
-          content: selectedContent,
-          type: inferElementType(elementKey),
-          isEditable: true,
-          editMode: 'inline',
-        };
-      } else {
-        state.content[sectionId].elements[elementKey].content = selectedContent;
-      }
-      
-      // Mark as customized
-      state.content[sectionId].aiMetadata.isCustomized = true;
-      state.autoSave.isDirty = true;
-      
-      // Track change
-      state.queuedChanges.push({
-        id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-        type: 'content',
-        sectionId,
-        elementKey,
-        oldValue: oldContent,
-        newValue: selectedContent,
-        timestamp: Date.now(),
-      });
-      
-      // Add to history
-      state.history.undoStack.push({
-        type: 'content',
-        description: `Applied variation ${selectedVariation + 1} to ${elementKey}`,
-        timestamp: Date.now(),
-        beforeState: { sectionId, elementKey, content: oldContent },
-        afterState: { sectionId, elementKey, content: selectedContent },
-        sectionId,
-      });
-      
-      state.history.redoStack = [];
-      
-      // Hide variations modal
-      state.elementVariations.visible = false;
-    }
-  }),
+      set((state: EditStore) => {
+        const { elementId, variations, selectedVariation } = state.elementVariations;
+        if (!elementId || selectedVariation === undefined) return;
+        
+        const [sectionId, elementKey] = elementId.split('.');
+        const selectedContent = variations[selectedVariation];
+        
+        if (selectedContent && state.content[sectionId]) {
+          const oldContent = state.content[sectionId].elements[elementKey]?.content;
+          
+          // Update content
+          if (!state.content[sectionId].elements[elementKey]) {
+            state.content[sectionId].elements[elementKey] = {
+              content: selectedContent,
+              type: inferElementType(elementKey),
+              isEditable: true,
+              editMode: 'inline',
+            };
+          } else {
+            state.content[sectionId].elements[elementKey].content = selectedContent;
+          }
+          
+          // Mark as customized
+          state.content[sectionId].aiMetadata.isCustomized = true;
+          state.autoSave.isDirty = true;
+          
+          // Track change
+          state.queuedChanges.push({
+            id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+            type: 'content',
+            sectionId,
+            elementKey,
+            oldValue: oldContent,
+            newValue: selectedContent,
+            timestamp: Date.now(),
+          });
+          
+          // Add to history
+          state.history.undoStack.push({
+            type: 'content',
+            description: `Applied variation ${selectedVariation + 1} to ${elementKey}`,
+            timestamp: Date.now(),
+            beforeState: { sectionId, elementKey, content: oldContent },
+            afterState: { sectionId, elementKey, content: selectedContent },
+            sectionId,
+          });
+          
+          state.history.redoStack = [];
+          
+          // Hide variations modal
+          state.elementVariations.visible = false;
+        }
+      }),
 
+    /**
+     * ===== IMAGE MANAGEMENT =====
+     */
 
-/**
- * ===== IMAGE MANAGEMENT =====
- */
-
-updateImageAsset: (imageId: string, asset: ImageAsset) =>
-  set((state: EditStore) => {
-    const oldAsset = state.images.assets?.[imageId];
-    
-    if (!state.images.assets) {
-      state.images.assets = {};
-    }
-    
-    state.images.assets[imageId] = asset;
-    
-    // Track change
-    state.queuedChanges.push({
-      id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-      type: 'content',
-      oldValue: { action: 'update-image-asset', imageId, asset: oldAsset },
-      newValue: { action: 'update-image-asset', imageId, asset },
-      timestamp: Date.now(),
-    });
-    
-    state.autoSave.isDirty = true;
-    state.lastUpdated = Date.now();
-  }),
-
+    updateImageAsset: (imageId: string, asset: ImageAsset) =>
+      set((state: EditStore) => {
+        const oldAsset = state.images.assets?.[imageId];
+        
+        if (!state.images.assets) {
+          state.images.assets = {};
+        }
+        
+        state.images.assets[imageId] = asset;
+        
+        // Track change
+        state.queuedChanges.push({
+          id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+          type: 'content',
+          oldValue: { action: 'update-image-asset', imageId, asset: oldAsset },
+          newValue: { action: 'update-image-asset', imageId, asset },
+          timestamp: Date.now(),
+        });
+        
+        state.autoSave.isDirty = true;
+        state.lastUpdated = Date.now();
+      }),
 
     /**
      * ===== CONTENT VALIDATION =====
@@ -765,12 +848,12 @@ updateImageAsset: (imageId: string, asset: ImageAsset) =>
         if (state.content[sectionId]) {
           state.content[sectionId].editMetadata.validationStatus = {
             isValid,
-           errors: isValid ? [] : [{
-            elementKey: 'general',
-            code: 'validation',
-            message: 'Missing required content',
-            severity: 'error' as const,
-          }],
+            errors: isValid ? [] : [{
+              elementKey: 'general',
+              code: 'validation',
+              message: 'Missing required content',
+              severity: 'error' as const,
+            }],
             warnings: [],
             missingRequired: isValid ? [] : requiredElements.filter(key => !section.elements[key]?.content),
             lastValidated: Date.now(),
@@ -782,10 +865,10 @@ updateImageAsset: (imageId: string, asset: ImageAsset) =>
     },
 
     /**
-     * ===== CONTENT UTILITIES =====
+     * ===== SECTION UTILITIES =====
      */
     
-    getContentSummary: (sectionId: string) => {
+    getSectionSummary: (sectionId: string) => {
       const state = get();
       const section = state.content[sectionId];
       
@@ -794,18 +877,48 @@ updateImageAsset: (imageId: string, asset: ImageAsset) =>
       return {
         elementCount: Object.keys(section.elements).length,
         hasContent: Object.values(section.elements).some((el: any) => 
-            el.content && (
-              typeof el.content === 'string' ? el.content.trim().length > 0 :
-              Array.isArray(el.content) && el.content.length > 0
-            )
-          ),
-        
+          el.content && (
+            typeof el.content === 'string' ? el.content.trim().length > 0 :
+            Array.isArray(el.content) && el.content.length > 0
+          )
+        ),
         isAIGenerated: section.aiMetadata.aiGenerated,
         isCustomized: section.aiMetadata.isCustomized,
         lastModified: section.aiMetadata.lastGenerated,
         completionPercentage: section.editMetadata.completionPercentage,
+        isVisible: section.isVisible !== false,
+        sectionType: section.type || 'custom',
       };
     },
+
+    getSectionsByType: (sectionType: SectionType) => {
+      const state = get();
+      return state.sections.filter(sectionId => 
+        state.content[sectionId]?.type === sectionType
+      );
+    },
+
+    getVisibleSections: () => {
+      const state = get();
+      return state.sections.filter(sectionId => 
+        state.content[sectionId]?.isVisible !== false
+      );
+    },
+
+    getIncompleteSections: () => {
+      const state = get();
+      return state.sections.filter(sectionId => {
+        const section = state.content[sectionId];
+        return section && (
+          !section.editMetadata?.validationStatus?.isValid ||
+          section.editMetadata?.completionPercentage < 80
+        );
+      });
+    },
+
+    /**
+     * ===== CONTENT UTILITIES =====
+     */
     
     exportSectionContent: (sectionId: string) => {
       const state = get();
@@ -815,18 +928,20 @@ updateImageAsset: (imageId: string, asset: ImageAsset) =>
       
       return {
         id: sectionId,
+        type: section.type,
         layout: section.layout,
         elements: Object.fromEntries(
-         Object.entries(section.elements).map(([key, element]) => [
-          key, 
-          (element as any).content
-        ])
+          Object.entries(section.elements).map(([key, element]) => [
+            key, 
+            (element as any).content
+          ])
         ),
         metadata: {
           aiGenerated: section.aiMetadata.aiGenerated,
           isCustomized: section.aiMetadata.isCustomized,
           lastGenerated: section.aiMetadata.lastGenerated,
           backgroundType: section.backgroundType,
+          isVisible: section.isVisible,
         },
         exportedAt: Date.now(),
       };
@@ -858,6 +973,9 @@ updateImageAsset: (imageId: string, asset: ImageAsset) =>
         // Update metadata
         section.aiMetadata.isCustomized = true;
         section.backgroundType = importData.metadata?.backgroundType || section.backgroundType;
+        if (importData.metadata?.isVisible !== undefined) {
+          section.isVisible = importData.metadata.isVisible;
+        }
         
         state.autoSave.isDirty = true;
         
@@ -873,5 +991,129 @@ updateImageAsset: (imageId: string, asset: ImageAsset) =>
         
         state.history.redoStack = [];
       }),
+
+    /**
+     * ===== BULK OPERATIONS =====
+     */
+
+    bulkOperationSections: (sectionIds: string[], operation: 'show' | 'hide' | 'delete' | 'duplicate') =>
+      set((state: EditStore) => {
+        const changes: any[] = [];
+        
+        sectionIds.forEach(sectionId => {
+          const section = state.content[sectionId];
+          if (!section) return;
+
+          switch (operation) {
+            case 'show':
+              if (section.isVisible === false) {
+                section.isVisible = true;
+                changes.push({ sectionId, action: 'show' });
+              }
+              break;
+            case 'hide':
+              if (section.isVisible !== false) {
+                section.isVisible = false;
+                changes.push({ sectionId, action: 'hide' });
+              }
+              break;
+            case 'delete':
+              // Mark for deletion (actual deletion handled by removeSection)
+              changes.push({ sectionId, action: 'delete' });
+              break;
+            case 'duplicate':
+              // Mark for duplication (actual duplication handled by duplicateSection)
+              changes.push({ sectionId, action: 'duplicate' });
+              break;
+          }
+        });
+
+        if (changes.length > 0) {
+          // Track bulk change
+          state.queuedChanges.push({
+            id: generateId(),
+            type: 'section',
+            action: `bulk-${operation}`,
+            oldValue: { sectionIds, operation },
+            newValue: { changes },
+            timestamp: Date.now(),
+          });
+
+          state.autoSave.isDirty = true;
+          state.lastUpdated = Date.now();
+        }
+      }),
+
+    /**
+     * ===== PERFORMANCE UTILITIES =====
+     */
+
+    optimizeContentState: () =>
+      set((state: EditStore) => {
+        // Remove empty or invalid sections
+        const validSections = state.sections.filter(sectionId => {
+          const section = state.content[sectionId];
+          return section && typeof section === 'object';
+        });
+
+        if (validSections.length !== state.sections.length) {
+          state.sections = validSections;
+        }
+
+        // Clean up orphaned content
+        Object.keys(state.content).forEach(sectionId => {
+          if (!state.sections.includes(sectionId)) {
+            delete state.content[sectionId];
+          }
+        });
+
+        // Clean up orphaned layouts
+        Object.keys(state.sectionLayouts).forEach(sectionId => {
+          if (!state.sections.includes(sectionId)) {
+            delete state.sectionLayouts[sectionId];
+          }
+        });
+
+        // Limit history size
+        if (state.history.undoStack.length > state.history.maxHistorySize) {
+          state.history.undoStack = state.history.undoStack.slice(-state.history.maxHistorySize);
+        }
+
+        // Clear old queued changes
+        const oneHourAgo = Date.now() - (60 * 60 * 1000);
+        state.queuedChanges = state.queuedChanges.filter(change => 
+          change.timestamp > oneHourAgo
+        );
+      }),
+
+    getContentStats: () => {
+      const state = get();
+      
+      return {
+        totalSections: state.sections.length,
+        sectionsWithContent: state.sections.filter(sectionId => {
+          const section = state.content[sectionId];
+          return section && Object.keys(section.elements || {}).length > 0;
+        }).length,
+        totalElements: state.sections.reduce((total, sectionId) => {
+          const section = state.content[sectionId];
+          return total + (section ? Object.keys(section.elements || {}).length : 0);
+        }, 0),
+        aiGeneratedSections: state.sections.filter(sectionId => {
+          const section = state.content[sectionId];
+          return section?.aiMetadata?.aiGenerated;
+        }).length,
+        customizedSections: state.sections.filter(sectionId => {
+          const section = state.content[sectionId];
+          return section?.aiMetadata?.isCustomized;
+        }).length,
+        hiddenSections: state.sections.filter(sectionId => {
+          const section = state.content[sectionId];
+          return section?.isVisible === false;
+        }).length,
+        lastModified: state.lastUpdated,
+        isDirty: state.autoSave.isDirty,
+      };
+    },
   };
 }

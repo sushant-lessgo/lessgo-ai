@@ -98,3 +98,502 @@ h1, h2, h3, h4, h5 {
     @apply bg-background text-foreground;
   }
 }
+
+/* Drag-Drop CSS Styles */
+/* Add to your global CSS file */
+
+/* Base drag-drop styles */
+.drag-drop-provider {
+  position: relative;
+}
+
+/* Draggable elements */
+.draggable-section-container,
+.draggable-element-container {
+  position: relative;
+  transition: all 0.2s ease;
+}
+
+.draggable-section-container.dragging,
+.draggable-element-container.dragging {
+  opacity: 0.5;
+  transform: scale(0.95);
+  z-index: 1;
+}
+
+/* Drag handles */
+.section-drag-handle,
+.element-drag-handle {
+  position: absolute;
+  z-index: 10;
+  transition: opacity 0.2s ease;
+}
+
+.section-drag-handle {
+  left: -3rem;
+  top: 1rem;
+}
+
+.element-drag-handle {
+  left: -2rem;
+  top: 0;
+}
+
+.drag-handle-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: move;
+  border-radius: 0.5rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s ease;
+}
+
+.drag-handle-icon:hover {
+  transform: scale(1.05);
+  box-shadow: 0 6px 12px -2px rgba(0, 0, 0, 0.15);
+}
+
+.drag-handle-icon:active {
+  transform: scale(0.95);
+}
+
+/* Drop zones */
+.section-drop-zone,
+.element-drop-zone {
+  position: relative;
+  padding: 0.5rem 0;
+  margin: 0.25rem 0;
+  transition: all 0.2s ease;
+}
+
+.section-drop-zone.before {
+  margin-bottom: 0;
+}
+
+.section-drop-zone.after {
+  margin-top: 0;
+}
+
+.element-drop-zone.before {
+  margin-bottom: 0;
+}
+
+.element-drop-zone.after {
+  margin-top: 0;
+}
+
+.drop-zone-indicator {
+  position: relative;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.section-drop-zone:hover .drop-zone-indicator,
+.element-drop-zone:hover .drop-zone-indicator,
+.drop-zone-indicator.active {
+  opacity: 1;
+}
+
+.drop-zone-line {
+  position: relative;
+  width: 100%;
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.drop-zone-pulse {
+  animation: pulse 1s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { 
+    opacity: 0.6; 
+    transform: scale(1);
+  }
+  50% { 
+    opacity: 1; 
+    transform: scale(1.02);
+  }
+}
+
+.drop-zone-message {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  white-space: nowrap;
+  z-index: 20;
+}
+
+/* Active drop zone styles */
+.drag-drop-zone-active {
+  background-color: rgba(59, 130, 246, 0.1) !important;
+  border: 2px dashed #3B82F6 !important;
+  border-radius: 8px !important;
+  animation: highlight 0.5s ease-in-out;
+}
+
+@keyframes highlight {
+  0% { 
+    background-color: rgba(59, 130, 246, 0.05);
+    border-color: rgba(59, 130, 246, 0.3);
+  }
+  50% { 
+    background-color: rgba(59, 130, 246, 0.15);
+    border-color: #3B82F6;
+  }
+  100% { 
+    background-color: rgba(59, 130, 246, 0.1);
+    border-color: #3B82F6;
+  }
+}
+
+/* Drag preview */
+.drag-preview {
+  pointer-events: none;
+  animation: dragFloat 0.3s ease-out;
+}
+
+@keyframes dragFloat {
+  0% { 
+    opacity: 0;
+    transform: rotate(0deg) scale(0.8);
+  }
+  100% { 
+    opacity: 0.9;
+    transform: rotate(2deg) scale(1);
+  }
+}
+
+/* Drag overlay */
+.drag-overlay {
+  position: relative;
+}
+
+.drag-overlay .drag-overlay-content {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(59, 130, 246, 0.1);
+  border: 2px dashed #3B82F6;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  animation: dragOverlay 0.3s ease-out;
+}
+
+@keyframes dragOverlay {
+  0% { 
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  100% { 
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Global styles during drag */
+body.dragging {
+  cursor: grabbing !important;
+  user-select: none !important;
+}
+
+body.dragging * {
+  cursor: grabbing !important;
+  user-select: none !important;
+}
+
+/* Section-specific styles */
+.draggable-section-container {
+  margin: 0.5rem 0;
+}
+
+.draggable-section-container:hover .section-drag-handle {
+  opacity: 1;
+}
+
+.draggable-section-container:hover .drop-zone-indicator {
+  opacity: 0.6;
+}
+
+/* Element-specific styles */
+.draggable-element-container {
+  margin: 0.25rem 0;
+  padding-left: 1rem;
+  position: relative;
+}
+
+.draggable-element-container:hover .element-drag-handle {
+  opacity: 1;
+}
+
+.draggable-element-container:hover .drop-zone-indicator {
+  opacity: 0.6;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .section-drag-handle {
+    left: -2rem;
+    top: 0.5rem;
+  }
+
+  .element-drag-handle {
+    left: -1.5rem;
+    top: 0;
+  }
+
+  .drag-handle-icon {
+    padding: 0.25rem;
+  }
+
+  .drag-handle-icon svg {
+    width: 0.75rem;
+    height: 0.75rem;
+  }
+
+  .drop-zone-message {
+    font-size: 0.75rem;
+  }
+}
+
+/* Touch device adjustments */
+@media (hover: none) and (pointer: coarse) {
+  .section-drag-handle,
+  .element-drag-handle {
+    opacity: 1;
+  }
+
+  .drag-handle-icon {
+    padding: 0.5rem;
+    min-width: 2rem;
+    min-height: 2rem;
+  }
+
+  .section-drop-zone,
+  .element-drop-zone {
+    padding: 1rem 0;
+  }
+
+  .drop-zone-indicator {
+    opacity: 0.8;
+  }
+
+  .drop-zone-line {
+    height: 3px;
+  }
+}
+
+/* Accessibility styles */
+.drag-handle-icon:focus {
+  outline: 2px solid #3B82F6;
+  outline-offset: 2px;
+}
+
+.drag-handle-icon:focus-visible {
+  outline: 2px solid #3B82F6;
+  outline-offset: 2px;
+}
+
+/* High contrast mode */
+@media (prefers-contrast: high) {
+  .drag-drop-zone-active {
+    background-color: rgba(0, 0, 0, 0.1) !important;
+    border: 3px solid #000 !important;
+  }
+
+  .drop-zone-line {
+    background-color: #000;
+    height: 3px;
+  }
+
+  .drag-handle-icon {
+    border: 2px solid #000;
+  }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .draggable-section-container,
+  .draggable-element-container,
+  .section-drag-handle,
+  .element-drag-handle,
+  .drop-zone-indicator,
+  .drag-handle-icon {
+    transition: none;
+  }
+
+  .drop-zone-pulse,
+  .drag-preview {
+    animation: none;
+  }
+
+  .drag-drop-zone-active {
+    animation: none;
+  }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .drag-handle-icon {
+    background-color: rgba(31, 41, 55, 0.9);
+    border-color: rgba(75, 85, 99, 0.8);
+    color: rgb(229, 231, 235);
+  }
+
+  .drag-handle-icon:hover {
+    background-color: rgba(31, 41, 55, 1);
+  }
+
+  .drag-drop-zone-active {
+    background-color: rgba(59, 130, 246, 0.2) !important;
+    border-color: rgba(59, 130, 246, 0.8) !important;
+  }
+
+  .drop-zone-line {
+    background-color: rgba(59, 130, 246, 0.8);
+  }
+
+  .section-drop-zone .drop-zone-line {
+    background-color: rgba(59, 130, 246, 0.8);
+  }
+
+  .element-drop-zone .drop-zone-line {
+    background-color: rgba(34, 197, 94, 0.8);
+  }
+}
+
+/* Print styles */
+@media print {
+  .section-drag-handle,
+  .element-drag-handle,
+  .section-drop-zone,
+  .element-drop-zone,
+  .drag-preview {
+    display: none !important;
+  }
+}
+
+/* Animation utilities */
+.drag-drop-animate-in {
+  animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+  0% { 
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  100% { 
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.drag-drop-animate-out {
+  animation: slideOut 0.3s ease-in;
+}
+
+@keyframes slideOut {
+  0% { 
+    opacity: 1;
+    transform: translateY(0);
+  }
+  100% { 
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+}
+
+/* Success and error animations */
+.drag-drop-success {
+  animation: success 0.6s ease-in-out;
+}
+
+@keyframes success {
+  0% { 
+    transform: scale(1);
+  }
+  25% { 
+    transform: scale(1.05);
+    background-color: rgba(34, 197, 94, 0.1);
+  }
+  50% { 
+    transform: scale(1.02);
+    background-color: rgba(34, 197, 94, 0.05);
+  }
+  100% { 
+    transform: scale(1);
+    background-color: transparent;
+  }
+}
+
+.drag-drop-error {
+  animation: error 0.6s ease-in-out;
+}
+
+@keyframes error {
+  0% { 
+    transform: translateX(0);
+  }
+  15% { 
+    transform: translateX(-10px);
+    background-color: rgba(239, 68, 68, 0.1);
+  }
+  30% { 
+    transform: translateX(10px);
+    background-color: rgba(239, 68, 68, 0.1);
+  }
+  45% { 
+    transform: translateX(-5px);
+    background-color: rgba(239, 68, 68, 0.05);
+  }
+  60% { 
+    transform: translateX(5px);
+    background-color: rgba(239, 68, 68, 0.05);
+  }
+  100% { 
+    transform: translateX(0);
+    background-color: transparent;
+  }
+}
+
+/* Utility classes */
+.drag-drop-disabled {
+  pointer-events: none;
+  opacity: 0.5;
+}
+
+.drag-drop-hidden {
+  display: none !important;
+}
+
+.drag-drop-ghost {
+  opacity: 0.5;
+  transform: scale(0.95);
+  pointer-events: none;
+}
+
+.drag-drop-placeholder {
+  background: repeating-linear-gradient(
+    45deg,
+    rgba(59, 130, 246, 0.1),
+    rgba(59, 130, 246, 0.1) 10px,
+    transparent 10px,
+    transparent 20px
+  );
+  border: 2px dashed rgba(59, 130, 246, 0.3);
+  border-radius: 8px;
+  min-height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(59, 130, 246, 0.7);
+  font-size: 0.875rem;
+  font-weight: 500;
+}

@@ -1,9 +1,13 @@
-// app/edit/[token]/components/toolbars/SectionToolbar.tsx - Complete Section Toolbar
+// app/edit/[token]/components/toolbars/SectionToolbar.tsx - Enhanced with ElementPicker Integration
 import React, { useState, useRef, useEffect } from 'react';
 import { useEditStore } from '@/hooks/useEditStore';
 import { useToolbarActions } from '@/hooks/useToolbarActions';
+import { useElementPicker } from '@/hooks/useElementPicker';
+import { useSectionCRUD } from '@/hooks/useSectionCRUD';
 import { calculateArrowPosition } from '@/utils/toolbarPositioning';
 import { AdvancedActionsMenu } from './AdvancedActionsMenu';
+import { AddSectionButton } from '../content/SectionCRUD';
+import type { SectionType } from '@/types/store/state';
 
 interface SectionToolbarProps {
   sectionId: string;
@@ -17,24 +21,34 @@ export function SectionToolbar({ sectionId, position, contextActions }: SectionT
   const advancedRef = useRef<HTMLDivElement>(null);
 
   const {
-    duplicateSection,
-    removeSection,
-    moveSection,
-    regenerateSection,
-    updateSectionBackground,
-    addElementToSection,
-    reorderSections,
+    content,
+    sections,
     announceLiveRegion,
   } = useEditStore();
 
   const { executeAction } = useToolbarActions();
+  const { showElementPicker } = useElementPicker();
+
+  const {
+    duplicateSection,
+    removeSection,
+    moveSectionUp,
+    moveSectionDown,
+    toggleSectionVisibility,
+    saveAsTemplate,
+    validateSection,
+  } = useSectionCRUD();
+
+  const section = content[sectionId];
+  const sectionIndex = sections.indexOf(sectionId);
+  const validation = validateSection(sectionId);
 
   // Calculate arrow position
   const targetElement = document.querySelector(`[data-section-id="${sectionId}"]`);
   const arrowInfo = targetElement ? calculateArrowPosition(
     position,
     targetElement.getBoundingClientRect(),
-    { width: 320, height: 48 }
+    { width: 400, height: 48 }
   ) : null;
 
   // Close advanced menu when clicking outside
@@ -55,7 +69,24 @@ export function SectionToolbar({ sectionId, position, contextActions }: SectionT
     }
   }, [showAdvanced]);
 
-  // Primary Actions
+  // Handle Add Element action - Show ElementPicker
+  const handleAddElement = () => {
+    const buttonElement = document.querySelector('[data-action="add-element"]');
+    if (buttonElement) {
+      const rect = buttonElement.getBoundingClientRect();
+      const pickerPosition = {
+        x: rect.left,
+        y: rect.bottom + 8, // Position below the button
+      };
+      
+      showElementPicker(sectionId, pickerPosition, {
+        autoFocus: true,
+        categories: ['text', 'interactive', 'media', 'layout'],
+      });
+    }
+  };
+
+  // Primary Actions with enhanced functionality
   const primaryActions = [
     {
       id: 'change-layout',
@@ -67,43 +98,62 @@ export function SectionToolbar({ sectionId, position, contextActions }: SectionT
       id: 'add-element',
       label: 'Add Element',
       icon: 'plus',
-      handler: () => executeAction('add-element', { sectionId }),
+      handler: handleAddElement,
     },
     {
       id: 'move-up',
       label: 'Move Up',
       icon: 'arrow-up',
-      handler: () => executeAction('move-section', { sectionId, direction: 'up' }),
+      disabled: sectionIndex === 0,
+      handler: () => {
+        moveSectionUp(sectionId);
+        announceLiveRegion(`Moved section up`);
+      },
     },
     {
       id: 'move-down',
       label: 'Move Down',
       icon: 'arrow-down',
-      handler: () => executeAction('move-section', { sectionId, direction: 'down' }),
+      disabled: sectionIndex === sections.length - 1,
+      handler: () => {
+        moveSectionDown(sectionId);
+        announceLiveRegion(`Moved section down`);
+      },
     },
     {
       id: 'duplicate',
       label: 'Duplicate',
       icon: 'copy',
+      handler: async () => {
+        const newSectionId = await duplicateSection(sectionId);
+        announceLiveRegion(`Duplicated section as ${newSectionId}`);
+      },
+    },
+    {
+      id: 'visibility',
+      label: section?.isVisible === false ? 'Show' : 'Hide',
+      icon: section?.isVisible === false ? 'eye' : 'eye-off',
       handler: () => {
-        duplicateSection(sectionId);
-        announceLiveRegion(`Duplicated section ${sectionId}`);
+        toggleSectionVisibility(sectionId);
+        const newState = section?.isVisible === false ? 'shown' : 'hidden';
+        announceLiveRegion(`Section ${newState}`);
       },
     },
     {
       id: 'delete',
       label: 'Delete',
       icon: 'trash',
-      handler: () => {
-        if (confirm('Are you sure you want to delete this section?')) {
-          removeSection(sectionId);
+      variant: 'danger',
+      handler: async () => {
+        const confirmed = await removeSection(sectionId);
+        if (confirmed) {
           announceLiveRegion(`Deleted section ${sectionId}`);
         }
       },
     },
   ];
 
-  // Advanced Actions
+  // Enhanced Advanced Actions
   const advancedActions = [
     {
       id: 'background-settings',
@@ -113,11 +163,32 @@ export function SectionToolbar({ sectionId, position, contextActions }: SectionT
     },
     {
       id: 'regenerate-section',
-      label: 'Regenerate Section',
+      label: 'Regenerate Content',
       icon: 'refresh',
+      handler: () => executeAction('regenerate-section', { sectionId }),
+    },
+    {
+      id: 'save-template',
+      label: 'Save as Template',
+      icon: 'bookmark',
+      handler: async () => {
+        const templateName = prompt('Enter template name:');
+        if (templateName) {
+          await saveAsTemplate(sectionId, templateName);
+          announceLiveRegion(`Saved template: ${templateName}`);
+        }
+      },
+    },
+    {
+      id: 'validate-section',
+      label: 'Validate Section',
+      icon: 'check-circle',
       handler: () => {
-        regenerateSection(sectionId);
-        announceLiveRegion(`Regenerating section ${sectionId}`);
+        const result = validateSection(sectionId);
+        const message = result.isValid 
+          ? `Section is valid (${result.completionPercentage}% complete)`
+          : `Section has ${result.errors.length} errors`;
+        announceLiveRegion(message);
       },
     },
     {
@@ -167,10 +238,18 @@ export function SectionToolbar({ sectionId, position, contextActions }: SectionT
         )}
         
         <div className="flex items-center px-3 py-2">
-          {/* Section Indicator */}
-          <div className="flex items-center space-x-1 mr-3">
-            <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-            <span className="text-xs font-medium text-gray-700">Section</span>
+          {/* Section Indicator with Validation */}
+          <div className="flex items-center space-x-2 mr-3">
+            <div className={`w-2 h-2 rounded-full ${
+              validation.isValid ? 'bg-green-500' : 
+              validation.completionPercentage > 50 ? 'bg-yellow-500' : 'bg-red-500'
+            }`}></div>
+            <span className="text-xs font-medium text-gray-700">
+              {section?.type ? section.type.charAt(0).toUpperCase() + section.type.slice(1) : 'Section'}
+            </span>
+            <span className="text-xs text-gray-500">
+              {validation.completionPercentage}%
+            </span>
           </div>
           
           {/* Primary Actions */}
@@ -179,7 +258,15 @@ export function SectionToolbar({ sectionId, position, contextActions }: SectionT
               {index > 0 && <div className="w-px h-6 bg-gray-200 mx-1" />}
               <button
                 onClick={action.handler}
-                className="flex items-center space-x-1 px-2 py-1 text-xs rounded transition-colors text-gray-700 hover:bg-gray-100 hover:text-gray-900"
+                disabled={action.disabled}
+                data-action={action.id}
+                className={`flex items-center space-x-1 px-2 py-1 text-xs rounded transition-colors ${
+                  action.disabled
+                    ? 'text-gray-400 cursor-not-allowed'
+                    : action.variant === 'danger'
+                    ? 'text-red-600 hover:bg-red-50'
+                    : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
+                }`}
                 title={action.label}
               >
                 <ActionIcon icon={action.icon} />
@@ -210,7 +297,7 @@ export function SectionToolbar({ sectionId, position, contextActions }: SectionT
           ref={advancedRef}
           actions={advancedActions}
           position={{
-            x: position.x + 320,
+            x: position.x + 400,
             y: position.y,
           }}
           onClose={() => setShowAdvanced(false)}
@@ -220,7 +307,7 @@ export function SectionToolbar({ sectionId, position, contextActions }: SectionT
   );
 }
 
-// Action Icon Component
+// Enhanced Action Icon Component
 function ActionIcon({ icon }: { icon: string }) {
   const iconMap = {
     'layout': (
@@ -248,6 +335,17 @@ function ActionIcon({ icon }: { icon: string }) {
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
       </svg>
     ),
+    'eye': (
+      <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+      </svg>
+    ),
+    'eye-off': (
+      <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L3 3m6.878 6.878L21 21" />
+      </svg>
+    ),
     'trash': (
       <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -261,6 +359,16 @@ function ActionIcon({ icon }: { icon: string }) {
     'refresh': (
       <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+      </svg>
+    ),
+    'bookmark': (
+      <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
+      </svg>
+    ),
+    'check-circle': (
+      <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
       </svg>
     ),
     'settings': (

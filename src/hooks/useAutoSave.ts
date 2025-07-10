@@ -8,7 +8,11 @@ import type { ChangeEvent } from '@/middleware/autoSaveMiddleware';
 /**
  * ===== HOOK TYPES =====
  */
-
+interface SerializationConfig {
+  useContentSerializer?: boolean;
+  validateSerialization?: boolean;
+  includeContentSummary?: boolean;
+}
 export interface AutoSaveHookConfig {
   enableAutoSave: boolean;
   enableVersioning: boolean;
@@ -18,6 +22,19 @@ export interface AutoSaveHookConfig {
   onSaveError?: (error: string) => void;
   onConflictDetected?: (conflict: ConflictResolution) => void;
   onVersionCreated?: (versionId: string) => void;
+  serialization?: SerializationConfig;
+}
+
+interface SerializationStatus {
+  serializationEnabled: boolean;
+  lastSerializationSize?: number;
+  serializationValidationPassed?: boolean;
+  contentSummary?: {
+    sectionsCount: number;
+    elementsCount: number;
+    hasTheme: boolean;
+    size: string;
+  };
 }
 
 export interface AutoSaveStatus {
@@ -45,8 +62,16 @@ export interface AutoSaveStatus {
   // Queue Status
   queuedChanges: number;
   isOnline: boolean;
-}
 
+  serialization?: SerializationStatus;
+}
+interface SerializationActions {
+  saveWithSerialization: () => Promise<void>;
+  loadWithDeserialization: (tokenId: string) => Promise<boolean>;
+  validateCurrentState: () => Promise<{ isValid: boolean; errors: string[]; warnings: string[] }>;
+  exportSerializedState: () => any;
+  getSerializationStatus: () => SerializationStatus;
+}
 export interface AutoSaveActions {
   // Save Operations
   triggerSave: () => void;
@@ -69,6 +94,8 @@ export interface AutoSaveActions {
   // Development/Debug
   getPerformanceStats: () => AutoSaveState['performance'];
   exportHistory: () => any;
+
+  serialization?: SerializationActions;
 }
 
 export interface UseAutoSaveReturn {
@@ -93,13 +120,17 @@ export interface UseAutoSaveReturn {
 export const useAutoSave = (config: Partial<AutoSaveHookConfig> = {}): UseAutoSaveReturn => {
   // Configuration with defaults
   const finalConfig: AutoSaveHookConfig = {
-    enableAutoSave: true,
-    enableVersioning: true,
-    snapshotInterval: 5,
-    conflictResolution: 'prompt',
-    ...config,
-  };
-
+  enableAutoSave: true,
+  enableVersioning: true,
+  snapshotInterval: 5,
+  conflictResolution: 'prompt',
+  serialization: {
+    useContentSerializer: true,
+    validateSerialization: true,
+    includeContentSummary: false,
+  },
+  ...config,
+};
   // Store integration
   const store = useEditStore();
   
@@ -224,6 +255,7 @@ export const useAutoSave = (config: Partial<AutoSaveHookConfig> = {}): UseAutoSa
       // Queue Status
       queuedChanges: store.queuedChanges.length,
       isOnline: isOnlineRef.current,
+      serialization: serializationStatus,
     };
   }, [
     store.isDirty,
@@ -247,28 +279,113 @@ export const useAutoSave = (config: Partial<AutoSaveHookConfig> = {}): UseAutoSa
     }
   }, [store, finalConfig.enableAutoSave]);
 
-  const forceSave = useCallback(async () => {
-    if (!isOnlineRef.current) {
-      throw new Error('Cannot save while offline');
-    }
+  // Enhanced forceSave implementation to replace existing:
+const forceSave = useCallback(async () => {
+  if (!isOnlineRef.current) {
+    throw new Error('Cannot save while offline');
+  }
 
-    try {
-      await store.forceSave();
+  try {
+    const { serialization = {} } = finalConfig;
+    
+    if (serialization.useContentSerializer) {
+      // Use enhanced serialization save
+      const { serializedSaveDraft } = await import('@/utils/autoSaveDraft');
       
-      // Create version snapshot on manual save
-      if (finalConfig.enableVersioning && versionManagerRef.current) {
-        const snapshot = versionManagerRef.current.createSnapshot(
-          store.export(),
-          'Manual save',
-          'user'
-        );
-        finalConfig.onVersionCreated?.(snapshot);
-      }
-    } catch (error) {
-      console.error('Force save failed:', error);
-      throw error;
+      await serializedSaveDraft(store.tokenId, {
+        description: 'Force save with serialization',
+        validateSerialization: serialization.validateSerialization,
+        includeContentSummary: serialization.includeContentSummary,
+        forceOverwrite: true,
+      });
+    } else {
+      // Use standard force save
+      await store.forceSave();
     }
-  }, [store, finalConfig]);
+    
+    // Create version snapshot on manual save
+    if (finalConfig.enableVersioning && versionManagerRef.current) {
+      const snapshot = versionManagerRef.current.createSnapshot(
+        store.export(),
+        'Manual save with serialization',
+        'user'
+      );
+      finalConfig.onVersionCreated?.(snapshot);
+    }
+  } catch (error) {
+    console.error('Force save failed:', error);
+    throw error;
+  }
+}, [store, finalConfig]);
+
+const serializationStatus: SerializationStatus = useMemo(() => {
+  const { serialization = {} } = finalConfig;
+  
+  return {
+    serializationEnabled: serialization.useContentSerializer || false,
+    lastSerializationSize: undefined, // Will be updated after saves
+    serializationValidationPassed: undefined, // Will be updated after validation
+    contentSummary: undefined, // Will be populated if enabled
+  };
+}, [finalConfig]);
+
+const saveWithSerialization = useCallback(async () => {
+  const { serializedSaveDraft } = await import('@/utils/autoSaveDraft');
+  
+  await serializedSaveDraft(store.tokenId, {
+    description: 'Save with content serialization',
+    validateSerialization: finalConfig.serialization?.validateSerialization,
+    includeContentSummary: finalConfig.serialization?.includeContentSummary,
+  });
+}, [store, finalConfig]);
+
+const loadWithDeserialization = useCallback(async (tokenId: string): Promise<boolean> => {
+  try {
+    const { loadDraftWithDeserialization } = await import('@/utils/autoSaveDraft');
+    const result = await loadDraftWithDeserialization(tokenId);
+    return result.success;
+  } catch (error) {
+    console.error('Load with deserialization failed:', error);
+    return false;
+  }
+}, []);
+
+const validateCurrentState = useCallback(async () => {
+  try {
+    const { useContentSerializer } = await import('@/hooks/useContentSerializer');
+    const { serialize, validate } = useContentSerializer();
+    
+    const serialized = serialize();
+    const validation = validate(serialized);
+    
+    return {
+      isValid: validation.isValid,
+      errors: validation.errors,
+      warnings: validation.warnings,
+    };
+  } catch (error) {
+    return {
+      isValid: false,
+      errors: [error instanceof Error ? error.message : 'Validation failed'],
+      warnings: [],
+    };
+  }
+}, []);
+
+const exportSerializedState = useCallback(() => {
+  try {
+    const { useContentSerializer } = await import('@/hooks/useContentSerializer');
+    const { serialize } = useContentSerializer();
+    return serialize();
+  } catch (error) {
+    console.error('Export serialized state failed:', error);
+    return null;
+  }
+}, []);
+
+const getSerializationStatus = useCallback((): SerializationStatus => {
+  return serializationStatus;
+}, [serializationStatus]);
 
   const undo = useCallback(async (): Promise<boolean> => {
     if (!finalConfig.enableVersioning || !versionManagerRef.current) {
@@ -463,6 +580,18 @@ export const useAutoSave = (config: Partial<AutoSaveHookConfig> = {}): UseAutoSa
     return 'No changes yet';
   }, [status]);
 
+     const saveWithSerializationNow = useCallback(async () => {
+  await saveWithSerialization();
+}, [saveWithSerialization]);
+
+const validateAndSave = useCallback(async () => {
+  const validation = await validateCurrentState();
+  if (!validation.isValid) {
+    throw new Error(`Validation failed: ${validation.errors.join(', ')}`);
+  }
+  await saveWithSerialization();
+}, [validateCurrentState, saveWithSerialization]);
+
   const getSaveStatusColor = useCallback((): 'green' | 'yellow' | 'red' | 'gray' => {
     if (status.saveError) return 'red';
     if (status.isSaving) return 'yellow';
@@ -479,6 +608,8 @@ export const useAutoSave = (config: Partial<AutoSaveHookConfig> = {}): UseAutoSa
     const conflicts = getActiveConflicts();
     const conflictTypes = conflicts.map(c => c.conflictType);
     const uniqueTypes = [...new Set(conflictTypes)];
+
+ 
     
     return `${status.conflictCount} conflict(s): ${uniqueTypes.join(', ')}`;
   }, [status, getActiveConflicts]);
@@ -486,7 +617,13 @@ export const useAutoSave = (config: Partial<AutoSaveHookConfig> = {}): UseAutoSa
   /**
    * ===== RETURN OBJECT =====
    */
-
+const serializationActions: SerializationActions = {
+  saveWithSerialization,
+  loadWithDeserialization,
+  validateCurrentState,
+  exportSerializedState,
+  getSerializationStatus,
+};
   const actions: AutoSaveActions = {
     triggerSave,
     forceSave,
@@ -500,6 +637,7 @@ export const useAutoSave = (config: Partial<AutoSaveHookConfig> = {}): UseAutoSa
     clearSaveError,
     getPerformanceStats,
     exportHistory,
+    serialization: serializationActions,
   };
 
   return {
@@ -511,6 +649,9 @@ export const useAutoSave = (config: Partial<AutoSaveHookConfig> = {}): UseAutoSa
     getSaveStatusMessage,
     getSaveStatusColor,
     getConflictSummary,
+    saveWithSerializationNow,
+    validateAndSave,
+    
   };
 };
 
@@ -567,6 +708,50 @@ export const useConflictResolution = () => {
     getActiveConflicts: actions.getActiveConflicts,
     resolveConflict: actions.resolveConflict,
     conflictSummary: getConflictSummary(),
+  };
+};
+
+// Hook for content serialization only
+export const useContentSerialization = () => {
+  const { actions, status } = useAutoSave({
+    enableAutoSave: false,
+    enableVersioning: false,
+    serialization: {
+      useContentSerializer: true,
+      validateSerialization: true,
+      includeContentSummary: true,
+    },
+  });
+
+  return {
+    serialize: actions.serialization?.exportSerializedState,
+    validate: actions.serialization?.validateCurrentState,
+    save: actions.serialization?.saveWithSerialization,
+    load: actions.serialization?.loadWithDeserialization,
+    status: status.serialization,
+  };
+};
+
+// Hook for validated auto-save
+export const useValidatedAutoSave = () => {
+  const { status, actions, saveNow } = useAutoSave({
+    enableAutoSave: true,
+    enableVersioning: true,
+    serialization: {
+      useContentSerializer: true,
+      validateSerialization: true,
+      includeContentSummary: false,
+    },
+  });
+
+  return {
+    isDirty: status.isDirty,
+    isSaving: status.isSaving,
+    isValid: status.serialization?.serializationValidationPassed,
+    saveNow: actions.serialization?.saveWithSerialization || saveNow,
+    validate: actions.serialization?.validateCurrentState,
+    lastSaved: status.lastSaved,
+    serializationEnabled: status.serialization?.serializationEnabled,
   };
 };
 
