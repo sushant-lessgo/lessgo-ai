@@ -24,6 +24,7 @@ export function MainContent({ tokenId }: MainContentProps) {
   const {
     sections,
     content,
+    sectionLayouts,
     mode,
     globalSettings,
     selectedSection,
@@ -34,7 +35,7 @@ export function MainContent({ tokenId }: MainContentProps) {
     addSection,
     reorderSections,
     setActiveSection,
-    showSectionToolbar,
+    
     showElementToolbar,
     getColorTokens,
     trackPerformance,
@@ -197,87 +198,85 @@ const {
     handleContextualClick(event.nativeEvent, target);
   };
 
-  // Context-aware action execution
-  const executeContextualAction = (actionId: string, additionalParams?: any) => {
-    if (!hasCapability(actionId)) {
-      console.warn(`Action ${actionId} is not available in current context`);
-      return;
-    }
+ const executeContextualAction = (actionId: string, additionalParams?: any) => {
+  if (!hasCapability(actionId)) {
+    console.warn(`Action ${actionId} is not available in current context`);
+    return;
+  }
 
-    const actions = getContextualActions();
-    const action = actions.find(a => a.id === actionId);
-    
-    if (!action?.enabled) {
-      console.warn(`Action ${actionId} is disabled`);
-      return;
-    }
+  const actions = getContextualActions();
+  const action = actions.find(a => a.id === actionId);
+  
+  if (!action?.enabled) {
+    console.warn(`Action ${actionId} is disabled`);
+    return;
+  }
 
-    // Execute the action based on type and context
-    switch (actionId) {
-      case 'regenerate':
-      case 'regenerate-section':
-        if (selectedSection) {
-          get().regenerateSection(selectedSection);
+  // Execute the action based on type and context
+  switch (actionId) {
+    case 'regenerate':
+    case 'regenerate-section':
+      if (selectedSection) {
+        useEditStore.getState().regenerateSection(selectedSection);
+      }
+      break;
+      
+    case 'regenerate-copy':
+      if (selectedElement) {
+        useEditStore.getState().regenerateElement(selectedElement.sectionId, selectedElement.elementKey);
+      }
+      break;
+      
+    case 'get-variations':
+      if (selectedElement) {
+        useEditStore.getState().regenerateElement(selectedElement.sectionId, selectedElement.elementKey, 5);
+      }
+      break;
+      
+    case 'convert-form':
+      if (selectedElement) {
+        useEditStore.getState().convertCTAToForm(selectedElement.sectionId, selectedElement.elementKey);
+      }
+      break;
+      
+    case 'duplicate':
+    case 'duplicate-section':
+      if (selectedSection) {
+        useEditStore.getState().duplicateSection(selectedSection);
+      }
+      break;
+      
+    case 'delete':
+      if (selectedElement && selectedSection) {
+        // Delete element logic
+        if (confirm('Are you sure you want to delete this element?')) {
+          // Implementation for element deletion
+          console.log('Delete element:', selectedElement.elementKey);
         }
-        break;
-        
-      case 'regenerate-copy':
-        if (selectedElement) {
-          get().regenerateElement(selectedElement.sectionId, selectedElement.elementKey);
-        }
-        break;
-        
-      case 'get-variations':
-        if (selectedElement) {
-          get().regenerateElement(selectedElement.sectionId, selectedElement.elementKey, 5);
-        }
-        break;
-        
-      case 'convert-form':
-        if (selectedElement) {
-          get().convertCTAToForm(selectedElement.sectionId, selectedElement.elementKey);
-        }
-        break;
-        
-      case 'duplicate':
-      case 'duplicate-section':
-        if (selectedSection) {
-          get().duplicateSection(selectedSection);
-        }
-        break;
-        
-      case 'delete':
-        if (selectedElement && selectedSection) {
-          // Delete element logic
-          if (confirm('Are you sure you want to delete this element?')) {
-            // Implementation for element deletion
-            console.log('Delete element:', selectedElement.elementKey);
-          }
-        }
-        break;
-        
-      case 'change-layout':
-        if (selectedSection) {
-          // Open layout picker modal
-          console.log('Open layout picker for section:', selectedSection);
-        }
-        break;
-        
-      case 'add-element':
-        if (selectedSection) {
-          // Open element picker
-          console.log('Open element picker for section:', selectedSection);
-        }
-        break;
-        
-      default:
-        console.log('Execute action:', actionId, 'with params:', additionalParams);
-    }
-    
-    // Announce action execution
-    announceLiveRegion(`Executed ${action.name}`);
-  };
-
+      }
+      break;
+      
+    case 'change-layout':
+      if (selectedSection) {
+        // Open layout picker modal
+        console.log('Open layout picker for section:', selectedSection);
+      }
+      break;
+      
+    case 'add-element':
+      if (selectedSection) {
+        // Open element picker
+        console.log('Open element picker for section:', selectedSection);
+      }
+      break;
+      
+    default:
+      console.log('Execute action:', actionId, 'with params:', additionalParams);
+  }
+  
+  // Announce action execution
+  announceLiveRegion(`Executed ${action.name}`);
+};
 
   // Enhanced content update handler
   const handleContentUpdate = (sectionId: string, elementKey: string, value: string) => {
@@ -291,31 +290,38 @@ const {
   };
 
   // Handle add section
-  const handleAddSection = (afterSectionId?: string) => {
-    const sectionTypes = [
-      { id: 'hero', label: 'Hero Section', icon: '🏆' },
-      { id: 'features', label: 'Features', icon: '⭐' },
-      { id: 'testimonials', label: 'Testimonials', icon: '💬' },
-      { id: 'pricing', label: 'Pricing', icon: '💰' },
-      { id: 'faq', label: 'FAQ', icon: '❓' },
-      { id: 'cta', label: 'Call to Action', icon: '🎯' },
-    ];
+const handleAddSection = (afterSectionId?: string) => {
+  const sectionTypes = [
+    { id: 'hero', label: 'Hero Section', icon: '🏆' },
+    { id: 'features', label: 'Features', icon: '⭐' },
+    { id: 'testimonials', label: 'Testimonials', icon: '💬' },
+    { id: 'pricing', label: 'Pricing', icon: '💰' },
+    { id: 'faq', label: 'FAQ', icon: '❓' },
+    { id: 'cta', label: 'Call to Action', icon: '🎯' },
+  ];
 
-    // For now, add a basic section - in production this would show a picker
-    const newSectionId = `section-${Date.now()}`;
-    addSection('hero', afterSectionId ? sections.indexOf(afterSectionId) + 1 : undefined, {
-      layout: 'hero-centered',
-      content: {
-        headline: 'New Section Headline',
-        subheadline: 'Add your content here',
-        cta: 'Get Started',
-      },
-    });
+  // Fix: Use the correct addSection signature (type, position)
+  const position = afterSectionId ? sections.indexOf(afterSectionId) + 1 : undefined;
+  const newSectionId = addSection('hero', position);
 
-    // Auto-select the new section
-    setActiveSection(newSectionId);
-    announceLiveRegion(`Added new section`);
-  };
+  // Then update the section content separately using updateElementContent
+  const store = useEditStore.getState();
+  
+  // Set the section layout first
+  store.setSection(newSectionId, {
+    layout: 'hero-centered',
+    elements: {}, // Empty elements object initially
+  });
+  
+  // Add content using updateElementContent which handles proper element types
+  store.updateElementContent(newSectionId, 'headline', 'New Section Headline');
+  store.updateElementContent(newSectionId, 'subheadline', 'Add your content here');
+  store.updateElementContent(newSectionId, 'cta', 'Get Started');
+
+  // Auto-select the new section
+  setActiveSection(newSectionId);
+  announceLiveRegion(`Added new section`);
+};
 
   // Handle section drag and drop
   const handleSectionDragStart = (sectionId: string, event: React.DragEvent) => {
@@ -477,7 +483,7 @@ const {
                       <EditablePageRenderer
                         sectionId={sectionId}
                         sectionData={content[sectionId]}
-                        layout={content[sectionId]?.layout || 'default'}
+                        layout={sectionLayouts[sectionId] || content[sectionId]?.layout || 'default'}  // ← Gets correct layout
                         mode={mode}
                         isSelected={selectedSection === sectionId}
                         onElementClick={handleElementClick}

@@ -2,27 +2,25 @@
 
 import React, { useEffect, useState, useMemo } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { usePageStore } from '@/hooks/usePageStore';
+import { useEditStore } from '@/hooks/useEditStore';
 import LandingPageRenderer from '@/modules/generatedLanding/LandingPageRenderer';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { SlugModal } from '@/components/SlugModal';
 import posthog from "posthog-js";
-import { StoreDebugPanel } from '@/app/create/[token]/components/StoreDebugPanel';
-import { OnboardingDebugPanel } from '@/app/create/[token]/components/OnboardingDebugPanel';
 
 export default function PreviewPage() {
   const params = useParams();
   const router = useRouter();
   const tokenId = params?.token as string;
 
-  // Page store state
+  // Edit store state (after migration)
   const { 
-    layout: { sections },
+    sections,
     content,
-    ui: { mode },
-    setMode,
-    meta: { onboardingData }
-  } = usePageStore();
+    theme,
+    title,
+    onboardingData
+  } = useEditStore();
 
   // UI state
   const [publishing, setPublishing] = useState(false);
@@ -34,113 +32,27 @@ export default function PreviewPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Determine navigation context
-  const fromEdit = useMemo(() => {
-    if (typeof window !== 'undefined') {
-      return document.referrer.includes('/edit/');
-    }
-    return false;
-  }, []);
-
   // Validate publish readiness
   const isPublishReady = useMemo(() => {
-    const cta = content.hero?.elements;
-    return !!(cta?.cta_text && (cta?.cta_url || cta?.cta_embed));
+    const heroContent = content.hero?.elements;
+    return !!(heroContent?.cta_text && (heroContent?.cta_url || heroContent?.cta_embed));
   }, [content.hero?.elements]);
 
-  // Button hierarchy based on context
-  const buttonHierarchy = useMemo(() => ({
-    edit: {
-      variant: fromEdit ? 'secondary' : 'primary',
-      className: fromEdit 
-        ? 'bg-gray-100 hover:bg-gray-200 text-gray-700 border border-gray-300'
-        : 'bg-brand-accentPrimary hover:bg-orange-500 text-white'
-    },
-    publish: {
-      variant: (fromEdit && isPublishReady) ? 'primary' : 'secondary',
-      disabled: !isPublishReady,
-      className: (fromEdit && isPublishReady)
-        ? 'bg-brand-accentPrimary hover:bg-orange-500 text-white'
-        : 'bg-gray-100 hover:bg-gray-200 text-gray-700 border border-gray-300'
+  // Initialize and validate data
+  useEffect(() => {
+    // Check if EditStore has data
+    if (sections.length === 0) {
+      setError('No page data found. Please go back to edit mode.');
+      setIsLoading(false);
+      return;
     }
-  }), [fromEdit, isPublishReady]);
 
-  // Initialize preview mode and validate data
-  // In your app/preview/[token]/page.tsx file, find the useEffect that contains this comment:
-// "// Initialize preview mode and validate data"
-// Replace that ENTIRE useEffect with this new one:
-
-useEffect(() => {
-  // Set preview mode
-  if (mode !== 'preview') {
-    setMode('preview');
-  }
-
-  // Check if store has data
-  if (sections.length === 0) {
-    // Try to load from API as fallback
-    const loadData = async () => {
-      try {
-        setIsLoading(true);
-        setError(null);
-        
-        console.log('📥 Loading draft data for token:', tokenId);
-        
-        const response = await fetch(`/api/loadDraft?tokenId=${tokenId}`);
-        
-        if (!response.ok) {
-          throw new Error('Failed to load page data');
-        }
-
-        const data = await response.json();
-        console.log('📦 Received API response:', data);
-        
-        // ✅ NEW: Use the loadFromDraft method
-        const pageStore = usePageStore.getState();
-        await pageStore.loadFromDraft(data);
-        
-        console.log('✅ Successfully loaded draft data into stores');
-        
-      } catch (err) {
-        console.error('Failed to load page data:', err);
-        
-        if (err instanceof Error && err.message.includes('regeneration required')) {
-          // We have onboarding data but no generated page - redirect to edit for regeneration
-          setError('Page needs to be regenerated. Redirecting to edit mode...');
-          setTimeout(() => {
-            router.push(`/edit/${tokenId}`);
-          }, 2000);
-        } else {
-          setError('Failed to load page data. Please return to the main page and try again.');
-        }
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    loadData();
-  } else {
     setIsLoading(false);
-  }
-}, [sections.length, tokenId, mode, setMode, router]);
-
-useEffect(() => {
-  console.log('Preview mounted with store:', {
-    sections: sections.length,
-    content: Object.keys(content).length,
-    storeState: usePageStore.getState()
-  });
-}, []);
+  }, [sections.length]);
 
   // Handle edit navigation
   const handleEdit = () => {
-    if (fromEdit) {
-      // Close current tab if opened from edit
-      window.close();
-    } else {
-      // Navigate to edit page
-      // router.push(`/edit/${tokenId}`);
-    }
+    router.push(`/edit/${tokenId}`);
   };
 
   // Handle publish flow
@@ -172,9 +84,12 @@ useEffect(() => {
 
       const htmlContent = previewElement.innerHTML;
 
-      // Get theme values from store
-      const { getColorTokens } = usePageStore.getState();
-      const colorTokens = getColorTokens();
+      // Get theme values from EditStore
+      const colorTokens = {
+        accent: theme.colors.accentColor,
+        bgNeutral: theme.colors.baseColor,
+        textMuted: 'gray-600'
+      };
 
       // Publish the page
       const response = await fetch('/api/publish', {
@@ -183,8 +98,11 @@ useEffect(() => {
         body: JSON.stringify({
           slug: customSlug,
           htmlContent,
-          title: content.hero?.elements?.headline || 'Untitled Page',
-          content: { layout: usePageStore.getState().layout, content },
+          title: content.hero?.elements?.headline || title || 'Untitled Page',
+          content: { 
+            layout: { sections, theme },
+            content 
+          },
           themeValues: {
             primary: colorTokens.accent,
             background: colorTokens.bgNeutral,
@@ -209,7 +127,7 @@ useEffect(() => {
         slug: customSlug,
         title: content.hero?.elements?.headline || "",
         hasCTA: isPublishReady,
-        fromEdit,
+        fromEdit: true,
       });
 
       setShowSlugModal(false);
@@ -227,7 +145,7 @@ useEffect(() => {
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-accentPrimary mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading your page...</p>
+          <p className="text-gray-600">Loading preview...</p>
         </div>
       </div>
     );
@@ -243,22 +161,14 @@ useEffect(() => {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4.5c-.77-.833-1.964-.833-2.732 0L5.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
             </svg>
           </div>
-          <h2 className="text-xl font-semibold text-gray-900 mb-2">Unable to Load Page</h2>
+          <h2 className="text-xl font-semibold text-gray-900 mb-2">Preview Not Available</h2>
           <p className="text-gray-600 mb-6">{error}</p>
-          <div className="space-y-3">
-            <button
-              onClick={() => router.push(`/edit/${tokenId}`)}
-              className="w-full bg-brand-accentPrimary hover:bg-orange-500 text-white px-4 py-2 rounded-lg transition-colors"
-            >
-              Go to Edit Mode
-            </button>
-            <button
-              onClick={() => window.location.reload()}
-              className="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg transition-colors"
-            >
-              Reload Page
-            </button>
-          </div>
+          <button
+            onClick={() => router.push(`/edit/${tokenId}`)}
+            className="w-full bg-brand-accentPrimary hover:bg-orange-500 text-white px-4 py-2 rounded-lg transition-colors"
+          >
+            Go to Edit Mode
+          </button>
         </div>
       </div>
     );
@@ -276,7 +186,7 @@ useEffect(() => {
         <div className="max-w-screen-xl mx-auto flex justify-between items-center">
           {/* Context Info */}
           <div className="text-sm text-gray-500">
-            {fromEdit ? 'Preview opened from edit mode' : 'Generated from onboarding'}
+            Preview from edit mode
           </div>
 
           {/* Action Buttons */}
@@ -284,9 +194,9 @@ useEffect(() => {
             {/* Edit Button */}
             <button
               onClick={handleEdit}
-              className={`px-5 py-2 rounded-lg font-medium text-sm transition-all duration-200 ${buttonHierarchy.edit.className}`}
+              className="px-5 py-2 rounded-lg font-medium text-sm transition-all duration-200 bg-gray-100 hover:bg-gray-200 text-gray-700 border border-gray-300"
             >
-              {fromEdit ? 'Back to Edit' : 'Edit Page'}
+              Back to Edit
             </button>
 
             {/* Publish Button */}
@@ -300,7 +210,7 @@ useEffect(() => {
                       className={`px-5 py-2 rounded-lg font-medium text-sm transition-all duration-200 ${
                         !isPublishReady || publishing
                           ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                          : buttonHierarchy.publish.className
+                          : 'bg-brand-accentPrimary hover:bg-orange-500 text-white'
                       }`}
                     >
                       {publishing ? (
@@ -324,8 +234,7 @@ useEffect(() => {
           </div>
         </div>
       </div>
-{process.env.NODE_ENV === 'development' && <StoreDebugPanel />}
-{process.env.NODE_ENV === 'development' && <OnboardingDebugPanel />}
+
       {/* Slug Modal */}
       {showSlugModal && (
         <SlugModal

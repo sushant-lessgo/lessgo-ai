@@ -1,7 +1,7 @@
 // app/edit/[token]/components/modals/TaxonomyModalManager.tsx
 "use client";
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { useOnboardingStore } from '@/hooks/useOnboardingStore';
 import { useEditStore } from '@/hooks/useEditStore';
 import type { CanonicalFieldName } from '@/types/core/index';
@@ -132,7 +132,7 @@ export function TaxonomyModalManager() {
   };
 
   // Expose modal manager to parent components
-  React.useEffect(() => {
+  useEffect(() => {
     // Global modal manager instance
     (window as any).__taxonomyModalManager = {
       openFieldModal,

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { useEditStore } from "@/hooks/useEditStore";
 import { EditLayout } from "./components/layout/EditLayout";
 import { EditLayoutErrorBoundary } from "@/app/edit/[token]/components/layout/EditLayoutErrorBoundary";
@@ -11,6 +11,7 @@ console.log("Edit page module loaded");
 export default function EditPage() {
   const params = useParams();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const tokenId = params?.token as string;
   
   const [loadingState, setLoadingState] = useState<'loading' | 'success' | 'error'>('loading');
@@ -19,13 +20,49 @@ export default function EditPage() {
   const {
     loadFromDraft,
     reset,
-    initializeAutoSave,
+    sections, // Check if we already have data
     triggerAutoSave,
   } = useEditStore();
+
+  console.log('🔍 EditPage mount state check:', {
+    sectionsLength: sections.length,
+   // contentKeys: Object.keys(content).length,
+    sections: sections,
+    isMigrated: searchParams.get('migrated') === 'true',
+    storeInstance: !!useEditStore
+  });
+  
+  // Check if this is a migration from generate page
+  const isMigrated = searchParams.get('migrated') === 'true';
   
   console.log("EditPage mounted");
   console.log("params:", params);
   console.log("tokenId:", tokenId);
+  console.log("isMigrated:", isMigrated);
+
+
+  // In EditPage, add this at the very top
+useEffect(() => {
+  console.log('🔍 EditPage effect - checking store every 500ms for 5 seconds');
+  
+  const interval = setInterval(() => {
+    const state = useEditStore.getState();
+    console.log('📊 Store state check:', {
+      timestamp: Date.now(),
+      sections: state.sections.length,
+      content: Object.keys(state.content).length,
+      isDirty: state.isDirty,
+      isLoading: state.persistence?.isLoading
+    });
+  }, 500);
+  
+  setTimeout(() => {
+    clearInterval(interval);
+    console.log('🛑 Stopping store monitoring');
+  }, 5000);
+  
+  return () => clearInterval(interval);
+}, []);
 
   useEffect(() => {
     if (!tokenId) {
@@ -35,17 +72,32 @@ export default function EditPage() {
       return;
     }
 
-    const loadDraft = async () => {
+    const initializeEditor = async () => {
       try {
         setLoadingState('loading');
-        console.log("🔄 Loading draft for edit mode, token:", tokenId);
+        
+        // If coming from migration, check if we already have data
+        if (isMigrated) {
+          console.log("🔄 Checking for migrated data in EditStore...");
+          
+          // Check if EditStore already has sections (migration successful)
+          if (sections.length > 0) {
+            console.log("✅ Migration data found in EditStore, skipping API load");
+            setLoadingState('success');
+            return;
+          } else {
+            console.warn("⚠️ Migration flag set but no data in EditStore, falling back to API load");
+          }
+        }
+        
+        // Load from API (either no migration flag or migration failed)
+        console.log("🔄 Loading draft for edit mode from API, token:", tokenId);
         
         const response = await fetch(`/api/loadDraft?tokenId=${tokenId}`);
         
         if (!response.ok) {
           if (response.status === 404) {
             console.log("📝 No existing draft found, initializing empty edit state");
-            // Initialize with empty state for new edit session
             reset();
             setLoadingState('success');
             return;
@@ -67,9 +119,6 @@ export default function EditPage() {
         // Load the draft data into edit store
         await loadFromDraft(data);
         
-        // Initialize auto-save for this token
-        initializeAutoSave(tokenId);
-        
         console.log("✅ Edit store populated from draft:", {
           tokenId,
           sectionsCount: useEditStore.getState().sections.length,
@@ -84,6 +133,7 @@ export default function EditPage() {
         console.error("❌ Draft load failed for edit:", {
           error: errorMsg,
           tokenId,
+          isMigrated,
         });
         
         setErrorMessage(errorMsg);
@@ -91,7 +141,7 @@ export default function EditPage() {
       }
     };
 
-    loadDraft();
+    initializeEditor();
     
     // Cleanup function
     return () => {
@@ -101,7 +151,7 @@ export default function EditPage() {
         triggerAutoSave();
       }
     };
-  }, [tokenId, loadFromDraft, reset, initializeAutoSave, triggerAutoSave, loadingState]);
+  }, [tokenId, loadFromDraft, reset, triggerAutoSave, isMigrated, sections.length]);
 
   // Handle loading state
   if (loadingState === 'loading') {
@@ -109,8 +159,15 @@ export default function EditPage() {
       <div className="h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <h2 className="text-xl font-semibold text-gray-900 mb-2">Loading Editor</h2>
-          <p className="text-gray-600">Preparing your landing page for editing...</p>
+          <h2 className="text-xl font-semibold text-gray-900 mb-2">
+            {isMigrated ? 'Finalizing Migration' : 'Loading Editor'}
+          </h2>
+          <p className="text-gray-600">
+            {isMigrated 
+              ? 'Setting up your page for editing...' 
+              : 'Preparing your landing page for editing...'
+            }
+          </p>
         </div>
       </div>
     );
@@ -143,6 +200,14 @@ export default function EditPage() {
             >
               Return to Setup
             </button>
+            {isMigrated && (
+              <button
+                onClick={() => router.push(`/generate/${tokenId}`)}
+                className="w-full bg-orange-600 text-white px-4 py-2 rounded-lg hover:bg-orange-700 transition-colors"
+              >
+                Back to Generated Page
+              </button>
+            )}
           </div>
         </div>
       </div>

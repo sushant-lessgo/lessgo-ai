@@ -1,4 +1,4 @@
-// usePageStore.ts - FIXED: Import and type issues resolved
+// usePageStore.ts - FIXED: Section management and content synchronization issues
 import { create } from "zustand";
 import { immer } from "zustand/middleware/immer";
 import { devtools } from "zustand/middleware";
@@ -7,15 +7,16 @@ import {
   generateColorTokens, 
   generateColorTokensFromBackgroundSystem, 
   SectionBackgroundInput,
-  type BackgroundSystem  // ✅ Import the type
+  type BackgroundSystem
 } from '@/modules/Design/ColorSystem/colorTokens';
 import { pickFontFromOnboarding } from '@/modules/Design/fontSystem/pickFont';
 import { getSectionBackgroundType, getSectionBackgroundCSS } from '@/modules/Design/background/backgroundIntegration';
 import { useOnboardingStore } from './useOnboardingStore';
+
 // Add typography scales
 const typographyScales = {
   default: landingTypography,
-  compact: landingTypography, // You can create variants later
+  compact: landingTypography,
   comfortable: landingTypography,
   spacious: landingTypography
 };
@@ -27,9 +28,9 @@ type Theme = {
     scale: keyof typeof typographyScales;
   };
   colors: {
-    baseColor: string;        // "gray", "slate", "stone"
-    accentColor: string;      // "purple", "blue", "emerald"
-    accentCSS?: string;       // ✅ Store the sophisticated accent CSS
+    baseColor: string;
+    accentColor: string;
+    accentCSS?: string;
     sectionBackgrounds: SectionBackgroundInput;
   };
   spacing: {
@@ -41,7 +42,6 @@ type Theme = {
   };
 };
 
-// ... (other types remain the same - FeatureItem, SectionData, etc.)
 type FeatureItem = {
   feature: string;
   benefit: string;
@@ -63,10 +63,9 @@ type SectionData = {
     url?: string;
     variant?: 'primary' | 'secondary' | 'ghost';
   };
-  // Add metadata for AI regeneration
   aiPrompt?: string;
   lastGenerated?: number;
-  isCustomized?: boolean; // Has user manually edited?
+  isCustomized?: boolean;
   aiGeneratedElements?: string[];
 };
 
@@ -130,9 +129,12 @@ type PageStore = {
   ui: UISlice;
   meta: MetaSlice;
 
-
-    loadFromDraft: (apiResponse: any) => Promise<void>;
-  // Add new AI actions
+  loadFromDraft: (apiResponse: any) => Promise<void>;
+  
+  // ✅ NEW: Bulk section initialization method
+  initializeSections: (sectionIds: string[], sectionLayouts: Record<string, string>) => void;
+  
+  // AI actions
   updateFromAIResponse: (aiResponse: any) => void;
   setAIGenerationStatus: (status: Partial<AIGenerationStatus>) => void;
   clearAIErrors: () => void;
@@ -155,8 +157,6 @@ type PageStore = {
   updateTypography: (typography: Partial<Theme['typography']>) => void;
   updateFontsFromTone: () => void;
   setCustomFonts: (headingFont: string, bodyFont: string) => void;
-
-  // ✅ FIXED: Properly typed background system integration
   updateFromBackgroundSystem: (backgroundSystem: BackgroundSystem) => void;
 
   // Content Actions
@@ -201,12 +201,12 @@ const defaultTheme: Theme = {
   colors: {
     baseColor: 'gray',
     accentColor: 'purple',
-    accentCSS: undefined,     // ✅ Will be populated by background system
+    accentCSS: undefined,
     sectionBackgrounds: {
-      primary: undefined,     // Will come from bgVariations
-      secondary: undefined,   // ✅ Will come from accentOptions.tailwind
-      neutral: undefined,     // Will use bg-white
-      divider: undefined      // Will use pattern
+      primary: undefined,
+      secondary: undefined,
+      neutral: undefined,
+      divider: undefined
     },
   },
   spacing: {
@@ -218,9 +218,8 @@ const defaultTheme: Theme = {
   },
 };
 
-// Mock AI service - replace with your actual implementation
+// Mock AI service
 const generateSectionContent = async (sectionId: string, prompt?: string): Promise<Record<string, string>> => {
-  // Simulate API call
   await new Promise(resolve => setTimeout(resolve, 1000));
   return {
     headline: `AI Generated Headline for ${sectionId}`,
@@ -263,7 +262,6 @@ export const usePageStore = create<PageStore>()(
       },
       content: {},
       ui: defaultUIState,
-
       meta: {
         id: "",
         title: "",
@@ -280,17 +278,53 @@ export const usePageStore = create<PageStore>()(
         },
       },
 
-      // ✅ FIXED: getColorTokens now properly integrates with background system
+      // ✅ FIXED: Proper section initialization method
+      initializeSections: (sectionIds: string[], sectionLayouts: Record<string, string>) =>
+        set((state) => {
+          console.log('🏗️ Initializing sections:', { sectionIds, sectionLayouts });
+          
+          // Set sections array
+          state.layout.sections = [...sectionIds];
+          
+          // Set section layouts
+          state.layout.sectionLayouts = { ...sectionLayouts };
+          
+          // ✅ CRITICAL FIX: Initialize content for ALL sections
+          sectionIds.forEach(sectionId => {
+            const layout = sectionLayouts[sectionId] || 'default';
+            const backgroundType = getSectionBackgroundType(sectionId);
+            
+            // Create content entry for each section
+            state.content[sectionId] = {
+              id: sectionId,
+              layout: layout,
+              elements: {}, // Will be populated by AI
+              backgroundType: backgroundType,
+              lastGenerated: Date.now(),
+              isCustomized: false,
+              aiGeneratedElements: []
+            };
+            
+            console.log(`✅ Section ${sectionId} initialized with layout: ${layout}, background: ${backgroundType}`);
+          });
+          
+          state.ui.unsavedChanges = true;
+          
+          console.log('📊 Initialization complete:', {
+            sectionsCount: state.layout.sections.length,
+            contentCount: Object.keys(state.content).length,
+            layoutsCount: Object.keys(state.layout.sectionLayouts).length
+          });
+        }),
+
       getColorTokens: () => {
         const { theme } = get().layout;
         
-        // Check if we have a complete background system
         const hasCompleteBackgroundSystem = 
           theme.colors.sectionBackgrounds.primary && 
           theme.colors.sectionBackgrounds.secondary;
 
         if (hasCompleteBackgroundSystem && theme.colors.accentCSS) {
-          // ✅ FIXED: Properly construct the BackgroundSystem object
           const backgroundSystemData: BackgroundSystem = {
             primary: theme.colors.sectionBackgrounds.primary!,
             secondary: theme.colors.sectionBackgrounds.secondary!,
@@ -304,7 +338,6 @@ export const usePageStore = create<PageStore>()(
           console.log('🎨 Using integrated background system for color tokens:', backgroundSystemData);
           return generateColorTokensFromBackgroundSystem(backgroundSystemData);
         } else {
-          // Fallback to basic generation
           console.warn('Using fallback color token generation - background system not fully integrated');
           return generateColorTokens({
             baseColor: theme.colors.baseColor,
@@ -315,19 +348,16 @@ export const usePageStore = create<PageStore>()(
         }
       },
 
-      // ✅ FIXED: Properly typed action to update theme from background system
       updateFromBackgroundSystem: (backgroundSystem: BackgroundSystem) =>
         set((state) => {
           console.log('🔄 Updating theme from background system:', backgroundSystem);
           
-          // Update all color-related theme properties
           state.layout.theme.colors.baseColor = backgroundSystem.baseColor;
           state.layout.theme.colors.accentColor = backgroundSystem.accentColor;
           state.layout.theme.colors.accentCSS = backgroundSystem.accentCSS;
           
-          // Update section backgrounds
           state.layout.theme.colors.sectionBackgrounds.primary = backgroundSystem.primary;
-          state.layout.theme.colors.sectionBackgrounds.secondary = backgroundSystem.secondary;  // ✅ This gets the sophisticated accent background
+          state.layout.theme.colors.sectionBackgrounds.secondary = backgroundSystem.secondary;
           state.layout.theme.colors.sectionBackgrounds.neutral = backgroundSystem.neutral;
           state.layout.theme.colors.sectionBackgrounds.divider = backgroundSystem.divider;
           
@@ -336,43 +366,106 @@ export const usePageStore = create<PageStore>()(
           console.log('✅ Theme updated with sophisticated background system');
         }),
 
-      // Layout Actions (unchanged)
+      // ✅ FIXED: Proper section creation with content initialization
       setSection: (sectionId, data) =>
         set((state) => {
           if (!state.content[sectionId]) {
+            // Create new section with proper defaults
             state.content[sectionId] = { 
               id: sectionId, 
-              layout: "default", 
+              layout: data.layout || "default", 
               elements: {},
+              backgroundType: data.backgroundType || getSectionBackgroundType(sectionId),
               lastGenerated: Date.now(),
+              isCustomized: false,
+              aiGeneratedElements: []
             };
+            
+            // Also ensure it's in sections array if not already
+            if (!state.layout.sections.includes(sectionId)) {
+              state.layout.sections.push(sectionId);
+            }
+            
+            // And in section layouts
+            if (!state.layout.sectionLayouts[sectionId]) {
+              state.layout.sectionLayouts[sectionId] = data.layout || 'default';
+            }
           }
+          
+          // Apply the updates
           Object.assign(state.content[sectionId]!, data);
           state.ui.unsavedChanges = true;
+          
+          console.log(`✅ Section ${sectionId} set/updated:`, data);
         }),
 
       setLayout: (sectionId, layout) =>
         set((state) => {
+          // Update layout mapping
           state.layout.sectionLayouts[sectionId] = layout;
+          
+          // Update content if it exists
           if (state.content[sectionId]) {
             state.content[sectionId]!.layout = layout;
+          } else {
+            // Create content if it doesn't exist
+            state.content[sectionId] = {
+              id: sectionId,
+              layout: layout,
+              elements: {},
+              backgroundType: getSectionBackgroundType(sectionId),
+              lastGenerated: Date.now(),
+              isCustomized: false,
+              aiGeneratedElements: []
+            };
           }
+          
           state.ui.unsavedChanges = true;
+          console.log(`✅ Layout set for ${sectionId}: ${layout}`);
         }),
       
+      // ✅ FIXED: Proper bulk section layout updates with content sync
       setSectionLayouts: (layouts) =>
         set((state) => {
-          // Bulk update all section layouts
+          console.log('🔄 Setting section layouts:', layouts);
+          
+          // Update all section layouts
           Object.assign(state.layout.sectionLayouts, layouts);
           
-          // Also update the layout property in each section's content
+          // Ensure content exists for each section and update layout
           Object.entries(layouts).forEach(([sectionId, layout]) => {
-            if (state.content[sectionId]) {
+            if (!state.content[sectionId]) {
+              // Create content if it doesn't exist
+              state.content[sectionId] = {
+                id: sectionId,
+                layout: layout,
+                elements: {},
+                backgroundType: getSectionBackgroundType(sectionId),
+                lastGenerated: Date.now(),
+                isCustomized: false,
+                aiGeneratedElements: []
+              };
+              console.log(`✅ Created content for section ${sectionId} with layout ${layout}`);
+            } else {
+              // Update existing content layout
               state.content[sectionId]!.layout = layout;
+              console.log(`✅ Updated layout for section ${sectionId} to ${layout}`);
+            }
+            
+            // Ensure section is in sections array
+            if (!state.layout.sections.includes(sectionId)) {
+              state.layout.sections.push(sectionId);
+              console.log(`✅ Added section ${sectionId} to sections array`);
             }
           });
           
           state.ui.unsavedChanges = true;
+          
+          console.log('📊 setSectionLayouts complete:', {
+            layoutsSet: Object.keys(layouts).length,
+            totalSections: state.layout.sections.length,
+            totalContent: Object.keys(state.content).length
+          });
         }),
 
       addSection: (sectionType, position) => {
@@ -381,13 +474,20 @@ export const usePageStore = create<PageStore>()(
           const insertPos = position ?? state.layout.sections.length;
           state.layout.sections.splice(insertPos, 0, sectionId);
           state.layout.sectionLayouts[sectionId] = 'default';
+          
+          // ✅ FIXED: Proper content initialization
           state.content[sectionId] = {
             id: sectionId,
             layout: 'default',
             elements: {},
+            backgroundType: getSectionBackgroundType(sectionId),
             lastGenerated: Date.now(),
+            isCustomized: false,
+            aiGeneratedElements: []
           };
+          
           state.ui.unsavedChanges = true;
+          console.log(`✅ Added section ${sectionId} at position ${insertPos}`);
         });
         return sectionId;
       },
@@ -404,12 +504,14 @@ export const usePageStore = create<PageStore>()(
             state.ui.activeSection = undefined;
           }
           state.ui.unsavedChanges = true;
+          console.log(`✅ Removed section ${sectionId}`);
         }),
 
       reorderSections: (newOrder) =>
         set((state) => {
           state.layout.sections = newOrder;
           state.ui.unsavedChanges = true;
+          console.log('✅ Sections reordered:', newOrder);
         }),
 
       duplicateSection: (sectionId) => {
@@ -424,14 +526,16 @@ export const usePageStore = create<PageStore>()(
               ...originalSection,
               id: newId,
               lastGenerated: Date.now(),
+              isCustomized: false // Reset customization flag for copy
             };
             state.ui.unsavedChanges = true;
+            console.log(`✅ Duplicated section ${sectionId} to ${newId}`);
           }
         });
         return newId;
       },
 
-      // Theme Actions
+      // Theme Actions (unchanged)
       setTheme: (theme) =>
         set((state) => {
           Object.assign(state.layout.theme, theme);
@@ -485,11 +589,20 @@ export const usePageStore = create<PageStore>()(
           state.ui.unsavedChanges = true;
         }),
 
-      // Content Actions (unchanged)
+      // Content Actions (mostly unchanged but with better error handling)
       updateElementContent: (sectionId, element, content) =>
         set((state) => {
           if (!state.content[sectionId]) {
-            state.content[sectionId] = { id: sectionId, layout: "default", elements: {} };
+            // Create section if it doesn't exist
+            state.content[sectionId] = { 
+              id: sectionId, 
+              layout: state.layout.sectionLayouts[sectionId] || "default", 
+              elements: {},
+              backgroundType: getSectionBackgroundType(sectionId),
+              lastGenerated: Date.now(),
+              isCustomized: false,
+              aiGeneratedElements: []
+            };
           }
           state.content[sectionId]!.elements[element] = content;
           state.content[sectionId]!.isCustomized = true;
@@ -499,7 +612,15 @@ export const usePageStore = create<PageStore>()(
       bulkUpdateSection: (sectionId, elements) =>
         set((state) => {
           if (!state.content[sectionId]) {
-            state.content[sectionId] = { id: sectionId, layout: "default", elements: {} };
+            state.content[sectionId] = { 
+              id: sectionId, 
+              layout: state.layout.sectionLayouts[sectionId] || "default", 
+              elements: {},
+              backgroundType: getSectionBackgroundType(sectionId),
+              lastGenerated: Date.now(),
+              isCustomized: false,
+              aiGeneratedElements: []
+            };
           }
           Object.assign(state.content[sectionId]!.elements, elements);
           state.content[sectionId]!.isCustomized = true;
@@ -610,8 +731,7 @@ export const usePageStore = create<PageStore>()(
         const section = state.content[sectionId];
         if (!section) return false;
         
-        // Add your validation logic here - this should be configurable per layout type
-        const requiredElements = ['headline']; // This should come from your layout schema
+        const requiredElements = ['headline'];
         return requiredElements.every(element => 
           section.elements[element] && 
           (typeof section.elements[element] === 'string' 
@@ -625,8 +745,7 @@ export const usePageStore = create<PageStore>()(
         const section = state.content[sectionId];
         if (!section) return [];
         
-        // This should come from your layout schema
-        const requiredElements = ['headline']; // Define per section type
+        const requiredElements = ['headline'];
         return requiredElements.filter(element => 
           !section.elements[element] || 
           (typeof section.elements[element] === 'string' 
@@ -646,7 +765,6 @@ export const usePageStore = create<PageStore>()(
         const state = get();
         const suggestions: string[] = [];
         
-        // Add business logic for suggestions
         if (!state.meta.title) suggestions.push("Add a page title");
         if (!state.meta.description) suggestions.push("Add a meta description");
         if (state.layout.sections.length < 3) suggestions.push("Consider adding more sections");
@@ -658,9 +776,6 @@ export const usePageStore = create<PageStore>()(
       save: async () => {
         set((state) => { state.ui.isLoading = true; });
         try {
-          // Implement save logic here
-          // await savePageData(get().export());
-          
           set((state) => {
             state.ui.lastSaved = Date.now();
             state.ui.unsavedChanges = false;
@@ -680,8 +795,6 @@ export const usePageStore = create<PageStore>()(
         set((state) => { state.ui.isLoading = true; });
         try {
           // Implement load logic here
-          // const pageData = await loadPageData(pageId);
-          // set(pageData);
         } catch (error) {
           set((state) => {
             state.ui.errors['global'] = error instanceof Error ? error.message : 'Failed to load';
@@ -733,7 +846,6 @@ export const usePageStore = create<PageStore>()(
           },
         })),
 
-      // TODO: Implement undo/redo with history tracking
       undo: () => {
         console.log("Undo not implemented yet");
       },
@@ -742,124 +854,145 @@ export const usePageStore = create<PageStore>()(
         console.log("Redo not implemented yet");
       },
 
-      // ✅ FIXED: updateFromAIResponse now properly handles backgrounds
-     updateFromAIResponse: (aiResponse: any) => {
-  set((state) => {
-    // Update AI generation status
-    state.ui.aiGeneration.isGenerating = false;
-    state.ui.aiGeneration.success = aiResponse.success || false;
-    state.ui.aiGeneration.isPartial = aiResponse.isPartial || false;
-    state.ui.aiGeneration.warnings = aiResponse.warnings || [];
-    state.ui.aiGeneration.errors = aiResponse.errors || [];
-    state.ui.aiGeneration.lastGenerated = Date.now();
-    state.ui.aiGeneration.sectionsGenerated = [];
-    state.ui.aiGeneration.sectionsSkipped = [];
+      // ✅ COMPLETELY FIXED: updateFromAIResponse with proper section management
+      updateFromAIResponse: (aiResponse: any) => {
+        set((state) => {
+          console.log('🤖 updateFromAIResponse called with:', {
+            success: aiResponse.success,
+            isPartial: aiResponse.isPartial,
+            contentKeys: Object.keys(aiResponse.content || {}),
+            currentSections: state.layout.sections,
+            currentContent: Object.keys(state.content)
+          });
 
-    // ✅ FIXED: Get the pre-selected sections from the store
-    const preSelectedSections = state.layout.sections;
-    console.log('🔒 updateFromAIResponse - Pre-selected sections:', preSelectedSections);
-    console.log('🤖 updateFromAIResponse - AI returned sections:', Object.keys(aiResponse.content || {}));
+          // Update AI generation status
+          state.ui.aiGeneration.isGenerating = false;
+          state.ui.aiGeneration.success = aiResponse.success || false;
+          state.ui.aiGeneration.isPartial = aiResponse.isPartial || false;
+          state.ui.aiGeneration.warnings = aiResponse.warnings || [];
+          state.ui.aiGeneration.errors = aiResponse.errors || [];
+          state.ui.aiGeneration.lastGenerated = Date.now();
+          state.ui.aiGeneration.sectionsGenerated = [];
+          state.ui.aiGeneration.sectionsSkipped = [];
 
-    // ✅ Get background system from theme (properly populated by background system)
-    const theme = state.layout.theme.colors;
-    const backgroundSystem = {
-      primary: theme.sectionBackgrounds.primary || 'bg-white',
-      secondary: theme.sectionBackgrounds.secondary || 'bg-gray-50',
-      neutral: theme.sectionBackgrounds.neutral || 'bg-white',
-      divider: theme.sectionBackgrounds.divider || 'bg-gray-100',
-    };
-
-    // ✅ FIXED: Only process sections that were pre-selected by rules
-    if (aiResponse.content && typeof aiResponse.content === 'object') {
-      Object.entries(aiResponse.content).forEach(([sectionId, sectionData]: [string, any]) => {
-        // ✅ CRITICAL FIX: Only process if section was pre-selected
-        if (!preSelectedSections.includes(sectionId)) {
-          console.warn(`🚫 Ignoring section "${sectionId}" - not in pre-selected sections:`, preSelectedSections);
-          state.ui.aiGeneration.sectionsSkipped.push(sectionId);
-          return;
-        }
-
-        if (!sectionData || typeof sectionData !== 'object') {
-          console.warn(`⚠️ Section ${sectionId} has invalid format`);
-          state.ui.aiGeneration.sectionsSkipped.push(sectionId);
-          return;
-        }
-
-        console.log(`✅ Processing pre-selected section: ${sectionId}`);
-
-        // ✅ Section was pre-selected, so it should already be in layout.sections
-        // No need to add it again - it's already there from the rules
-
-        // Determine background type and CSS for this section
-        const backgroundType = getSectionBackgroundType(sectionId);
-        const backgroundCSS = backgroundSystem[backgroundType];
-
-        // Create or update section content
-        if (!state.content[sectionId]) {
-          state.content[sectionId] = {
-            id: sectionId,
-            layout: 'default',
-            elements: {},
-            backgroundType: backgroundType,
-            lastGenerated: Date.now(),
-            aiGeneratedElements: [],
-          };
-        }
-
-        // Update elements
-        const section = state.content[sectionId]!;
-        const generatedElements: string[] = [];
-
-        Object.entries(sectionData).forEach(([elementKey, elementValue]: [string, any]) => {
-          if (elementValue !== undefined && elementValue !== null) {
-            section.elements[elementKey] = elementValue;
-            generatedElements.push(elementKey);
+          // ✅ CRITICAL FIX: Get pre-selected sections that should already exist in the store
+          const preSelectedSections = state.layout.sections;
+          console.log('🔒 Pre-selected sections from store:', preSelectedSections);
+          
+          // ✅ CRITICAL FIX: If no sections in store, this means sections weren't properly initialized
+          if (preSelectedSections.length === 0) {
+            console.error('❌ CRITICAL: No sections found in store! Sections should be initialized before AI response.');
+            state.ui.aiGeneration.errors.push('No sections initialized in store before AI response');
+            return;
           }
+
+          // Get background system from theme
+          const theme = state.layout.theme.colors;
+          const backgroundSystem = {
+            primary: theme.sectionBackgrounds.primary || 'bg-white',
+            secondary: theme.sectionBackgrounds.secondary || 'bg-gray-50',
+            neutral: theme.sectionBackgrounds.neutral || 'bg-white',
+            divider: theme.sectionBackgrounds.divider || 'bg-gray-100',
+          };
+
+          // ✅ FIXED: Process AI content only for pre-selected sections
+          if (aiResponse.content && typeof aiResponse.content === 'object') {
+            Object.entries(aiResponse.content).forEach(([sectionId, sectionData]: [string, any]) => {
+              // ✅ CRITICAL: Only process sections that were pre-selected by rules
+              if (!preSelectedSections.includes(sectionId)) {
+                console.warn(`🚫 Ignoring section "${sectionId}" - not in pre-selected sections`);
+                state.ui.aiGeneration.sectionsSkipped.push(sectionId);
+                return;
+              }
+
+              if (!sectionData || typeof sectionData !== 'object') {
+                console.warn(`⚠️ Section ${sectionId} has invalid data format`);
+                state.ui.aiGeneration.sectionsSkipped.push(sectionId);
+                return;
+              }
+
+              console.log(`✅ Processing pre-selected section: ${sectionId}`);
+
+              // ✅ FIXED: Section should already exist in content, but verify
+              if (!state.content[sectionId]) {
+                console.error(`❌ CRITICAL: Section ${sectionId} not found in content store! This should not happen.`);
+                // Create it as fallback, but this indicates a bug in initialization
+                state.content[sectionId] = {
+                  id: sectionId,
+                  layout: state.layout.sectionLayouts[sectionId] || 'default',
+                  elements: {},
+                  backgroundType: getSectionBackgroundType(sectionId),
+                  lastGenerated: Date.now(),
+                  isCustomized: false,
+                  aiGeneratedElements: []
+                };
+              }
+
+              // Get the section and update its content
+              const section = state.content[sectionId]!;
+              const generatedElements: string[] = [];
+
+              // Update elements with AI-generated content
+              Object.entries(sectionData).forEach(([elementKey, elementValue]: [string, any]) => {
+                if (elementValue !== undefined && elementValue !== null) {
+                  section.elements[elementKey] = elementValue;
+                  generatedElements.push(elementKey);
+                }
+              });
+
+              // Update section metadata
+              section.lastGenerated = Date.now();
+              section.isCustomized = false;
+              section.aiGeneratedElements = generatedElements;
+              
+              // Ensure background type is set
+              if (!section.backgroundType) {
+                section.backgroundType = getSectionBackgroundType(sectionId);
+              }
+
+              console.log(`✅ Section ${sectionId} updated with ${generatedElements.length} elements`);
+              state.ui.aiGeneration.sectionsGenerated.push(sectionId);
+            });
+          }
+
+          // ✅ VALIDATION: Check if all pre-selected sections were processed
+          const processedSections = state.ui.aiGeneration.sectionsGenerated;
+          const missingSections = preSelectedSections.filter(sectionId => !processedSections.includes(sectionId));
+          
+          if (missingSections.length > 0) {
+            console.warn('⚠️ Some pre-selected sections were not returned by AI:', missingSections);
+            state.ui.aiGeneration.warnings.push(`AI did not generate content for: ${missingSections.join(', ')}`);
+            state.ui.aiGeneration.isPartial = true;
+          }
+
+          // ✅ FINAL VALIDATION: Ensure content and layout are in sync
+          const finalSectionCount = state.layout.sections.length;
+          const finalContentCount = Object.keys(state.content).length;
+          
+          if (finalSectionCount !== finalContentCount) {
+            console.error('❌ CRITICAL: Section/Content mismatch after AI response!', {
+              sectionsInLayout: finalSectionCount,
+              sectionsInContent: finalContentCount,
+              layoutSections: state.layout.sections,
+              contentSections: Object.keys(state.content)
+            });
+            state.ui.aiGeneration.errors.push(`Section/Content count mismatch: ${finalSectionCount} layout vs ${finalContentCount} content`);
+          }
+
+          console.log('📊 updateFromAIResponse Summary:', {
+            preSelectedSections: preSelectedSections.length,
+            sectionsFromAI: Object.keys(aiResponse.content || {}).length,
+            sectionsProcessed: state.ui.aiGeneration.sectionsGenerated.length,
+            sectionsSkipped: state.ui.aiGeneration.sectionsSkipped.length,
+            missingSections: missingSections.length,
+            finalStoreSections: state.layout.sections.length,
+            finalContentSections: Object.keys(state.content).length,
+            isSuccessful: state.ui.aiGeneration.sectionsGenerated.length > 0
+          });
+
+          state.ui.unsavedChanges = true;
         });
-
-        // Update metadata with proper background assignment
-        section.lastGenerated = Date.now();
-        section.isCustomized = false;
-        section.aiGeneratedElements = generatedElements;
-        section.backgroundType = backgroundType;
-
-        // Enhanced logging
-        console.log(`✅ Section ${sectionId} processed successfully:`, {
-          elementsGenerated: generatedElements.length,
-          backgroundType: backgroundType,
-          backgroundCSS: backgroundCSS,
-          isSecondary: backgroundType === 'secondary',
-          usesSophisticatedAccent: backgroundType === 'secondary' && theme.sectionBackgrounds.secondary?.includes('gradient')
-        });
-
-        state.ui.aiGeneration.sectionsGenerated.push(sectionId);
-      });
-    }
-
-    // ✅ VALIDATION: Check if all pre-selected sections were processed
-    const processedSections = state.ui.aiGeneration.sectionsGenerated;
-    const missingSections = preSelectedSections.filter(sectionId => !processedSections.includes(sectionId));
-    
-    if (missingSections.length > 0) {
-      console.warn('⚠️ Some pre-selected sections were not returned by AI:', missingSections);
-      state.ui.aiGeneration.warnings.push(`AI did not generate content for: ${missingSections.join(', ')}`);
-      state.ui.aiGeneration.isPartial = true;
-    }
-
-    // ✅ SUMMARY LOGGING
-    console.log('📊 updateFromAIResponse Summary:', {
-      preSelectedSections: preSelectedSections.length,
-      sectionsFromAI: Object.keys(aiResponse.content || {}).length,
-      sectionsProcessed: state.ui.aiGeneration.sectionsGenerated.length,
-      sectionsSkipped: state.ui.aiGeneration.sectionsSkipped.length,
-      missingSections: missingSections.length,
-      finalStoreSections: state.layout.sections.length,
-      finalContentSections: Object.keys(state.content).length
-    });
-
-    state.ui.unsavedChanges = true;
-  });
-},
+      },
 
       setAIGenerationStatus: (status: Partial<AIGenerationStatus>) => {
         set((state) => {
@@ -874,167 +1007,199 @@ export const usePageStore = create<PageStore>()(
         });
       },
 
-// Add this method to your usePageStore.ts file
-// Place it after your existing methods (like after clearAIErrors)
-
-loadFromDraft: async (apiResponse: any) => {
-  try {
-    console.log('🔄 Loading from draft API response:', apiResponse);
-    
-    set((state) => {
-      state.ui.isLoading = true;
-      state.ui.errors = {};
-    });
-
-    // 1. Populate Onboarding Store (if available)
-    if (apiResponse.validatedFields || apiResponse.featuresFromAI) {
-      const onboardingStore = useOnboardingStore.getState();
-      
-      // Update onboarding store with loaded data
-      if (apiResponse.inputText) {
-        onboardingStore.setOneLiner(apiResponse.inputText);
-      }
-      
-      if (apiResponse.validatedFields) {
-        onboardingStore.setValidatedFields(apiResponse.validatedFields);
-      }
-      
-      if (apiResponse.featuresFromAI) {
-        onboardingStore.setFeaturesFromAI(apiResponse.featuresFromAI);
-      }
-      
-      if (apiResponse.stepIndex !== undefined) {
-        onboardingStore.setStepIndex(apiResponse.stepIndex);
-      }
-      
-      if (apiResponse.confirmedFields) {
-        onboardingStore.setConfirmedFields(apiResponse.confirmedFields);
-      }
-      
-      if (apiResponse.hiddenInferredFields) {
-        onboardingStore.setHiddenInferredFields(apiResponse.hiddenInferredFields);
-      }
-      
-      console.log('✅ Onboarding store populated from API');
-    }
-
-    // 2. Check if we have complete page data (finalContent)
-    if (apiResponse.finalContent && apiResponse.finalContent.layout && apiResponse.finalContent.content) {
-      console.log('📦 Found complete finalContent, restoring page state...');
-      
-      const { finalContent } = apiResponse;
-      
-      set((state) => {
-        // Restore layout data
-        if (finalContent.layout) {
-          state.layout.sections = finalContent.layout.sections || [];
-          state.layout.sectionLayouts = finalContent.layout.sectionLayouts || {};
+      // ✅ FIXED: loadFromDraft with proper section initialization
+      loadFromDraft: async (apiResponse: any) => {
+        try {
+          console.log('🔄 Loading from draft API response:', apiResponse);
           
-          // Restore theme if available
-          if (finalContent.layout.theme) {
-            Object.assign(state.layout.theme, finalContent.layout.theme);
-          }
-          
-          // Restore global settings if available
-          if (finalContent.layout.globalSettings) {
-            Object.assign(state.layout.globalSettings, finalContent.layout.globalSettings);
-          }
-        }
-        
-        // Restore content data
-        if (finalContent.content) {
-          state.content = { ...finalContent.content };
-        }
-        
-        // Restore meta data
-        if (finalContent.meta) {
-          Object.assign(state.meta, {
-            ...finalContent.meta,
-            id: apiResponse.tokenId || state.meta.id,
-            title: apiResponse.title || finalContent.meta.title || state.meta.title,
-            lastUpdated: Date.now(),
+          set((state) => {
+            state.ui.isLoading = true;
+            state.ui.errors = {};
           });
-        }
-        
-        // Update meta with onboarding data
-        state.meta.onboardingData = {
-          oneLiner: apiResponse.inputText || '',
-          validatedFields: apiResponse.validatedFields || {},
-          featuresFromAI: apiResponse.featuresFromAI || [],
-          targetAudience: apiResponse.validatedFields?.targetAudience || '',
-          businessType: apiResponse.validatedFields?.marketCategory || '',
-        };
-        
-        state.ui.isLoading = false;
-        state.ui.unsavedChanges = false;
-        state.ui.lastSaved = new Date(apiResponse.lastUpdated).getTime();
-      });
-      
-      console.log('✅ Complete page state restored from finalContent');
-      
-    } else {
-      console.log('⚠️ No complete finalContent found, page will need regeneration');
-      
-      // We have onboarding data but no generated page - set appropriate state
-      set((state) => {
-        // Clear any partial data
-        state.layout.sections = [];
-        state.layout.sectionLayouts = {};
-        state.content = {};
-        
-        // Update meta with available data
-        state.meta.id = apiResponse.tokenId || '';
-        state.meta.title = apiResponse.title || 'Untitled Project';
-        state.meta.onboardingData = {
-          oneLiner: apiResponse.inputText || '',
-          validatedFields: apiResponse.validatedFields || {},
-          featuresFromAI: apiResponse.featuresFromAI || [],
-          targetAudience: apiResponse.validatedFields?.targetAudience || '',
-          businessType: apiResponse.validatedFields?.marketCategory || '',
-        };
-        
-        state.ui.isLoading = false;
-        state.ui.unsavedChanges = false;
-      });
-      
-      // This indicates the page needs to be regenerated
-      throw new Error('Page content not found - regeneration required');
-    }
-    
-    // 3. Apply theme values if provided separately
-    if (apiResponse.themeValues) {
-      set((state) => {
-        // If themeValues is provided separately, it might override theme from finalContent
-        console.log('🎨 Applying separate theme values:', apiResponse.themeValues);
-        
-        // Update theme colors if provided
-        if (apiResponse.themeValues.primary) {
-          state.layout.theme.colors.accentColor = apiResponse.themeValues.primary;
-        }
-        if (apiResponse.themeValues.background) {
-          state.layout.theme.colors.baseColor = apiResponse.themeValues.background;
-        }
-      });
-    }
 
-    console.log('🎉 Draft loaded successfully:', {
-      hasSections: get().layout.sections.length > 0,
-      hasContent: Object.keys(get().content).length > 0,
-      hasOnboardingData: Object.keys(get().meta.onboardingData.validatedFields).length > 0,
-    });
+          // 1. Populate Onboarding Store (if available)
+          if (apiResponse.validatedFields || apiResponse.featuresFromAI) {
+            const onboardingStore = useOnboardingStore.getState();
+            
+            if (apiResponse.inputText) {
+              onboardingStore.setOneLiner(apiResponse.inputText);
+            }
+            
+            if (apiResponse.validatedFields) {
+              onboardingStore.setValidatedFields(apiResponse.validatedFields);
+            }
+            
+            if (apiResponse.featuresFromAI) {
+              onboardingStore.setFeaturesFromAI(apiResponse.featuresFromAI);
+            }
+            
+            if (apiResponse.stepIndex !== undefined) {
+              onboardingStore.setStepIndex(apiResponse.stepIndex);
+            }
+            
+            if (apiResponse.confirmedFields) {
+              onboardingStore.setConfirmedFields(apiResponse.confirmedFields);
+            }
+            
+            if (apiResponse.hiddenInferredFields) {
+              onboardingStore.setHiddenInferredFields(apiResponse.hiddenInferredFields);
+            }
+            
+            console.log('✅ Onboarding store populated from API');
+          }
 
-  } catch (error) {
-    console.error('❌ Failed to load from draft:', error);
-    
-    set((state) => {
-      state.ui.isLoading = false;
-      state.ui.errors['global'] = error instanceof Error ? error.message : 'Failed to load draft data';
-    });
-    
-    // Re-throw the error so the calling component can handle it
-    throw error;
-  }
-},
+          // 2. Check if we have complete page data (finalContent)
+          if (apiResponse.finalContent && apiResponse.finalContent.layout && apiResponse.finalContent.content) {
+            console.log('📦 Found complete finalContent, restoring page state...');
+            
+            const { finalContent } = apiResponse;
+            
+            set((state) => {
+              // ✅ FIXED: Restore layout data with proper validation
+              if (finalContent.layout) {
+                state.layout.sections = finalContent.layout.sections || [];
+                state.layout.sectionLayouts = finalContent.layout.sectionLayouts || {};
+                
+                // Restore theme if available
+                if (finalContent.layout.theme) {
+                  Object.assign(state.layout.theme, finalContent.layout.theme);
+                }
+                
+                // Restore global settings if available
+                if (finalContent.layout.globalSettings) {
+                  Object.assign(state.layout.globalSettings, finalContent.layout.globalSettings);
+                }
+              }
+              
+              // ✅ FIXED: Restore content with validation
+              if (finalContent.content) {
+                state.content = { ...finalContent.content };
+                
+                // ✅ CRITICAL: Ensure all sections in layout have corresponding content
+                state.layout.sections.forEach(sectionId => {
+                  if (!state.content[sectionId]) {
+                    console.warn(`⚠️ Creating missing content for section: ${sectionId}`);
+                    state.content[sectionId] = {
+                      id: sectionId,
+                      layout: state.layout.sectionLayouts[sectionId] || 'default',
+                      elements: {},
+                      backgroundType: getSectionBackgroundType(sectionId),
+                      lastGenerated: Date.now(),
+                      isCustomized: false,
+                      aiGeneratedElements: []
+                    };
+                  }
+                });
+                
+                // ✅ CRITICAL: Remove any orphaned content (content without corresponding layout)
+                Object.keys(state.content).forEach(sectionId => {
+                  if (!state.layout.sections.includes(sectionId)) {
+                    console.warn(`⚠️ Removing orphaned content for section: ${sectionId}`);
+                    delete state.content[sectionId];
+                  }
+                });
+              }
+              
+              // Restore meta data
+              if (finalContent.meta) {
+                Object.assign(state.meta, {
+                  ...finalContent.meta,
+                  id: apiResponse.tokenId || state.meta.id,
+                  title: apiResponse.title || finalContent.meta.title || state.meta.title,
+                  lastUpdated: Date.now(),
+                });
+              }
+              
+              // Update meta with onboarding data
+              state.meta.onboardingData = {
+                oneLiner: apiResponse.inputText || '',
+                validatedFields: apiResponse.validatedFields || {},
+                featuresFromAI: apiResponse.featuresFromAI || [],
+                targetAudience: apiResponse.validatedFields?.targetAudience || '',
+                businessType: apiResponse.validatedFields?.marketCategory || '',
+              };
+              
+              state.ui.isLoading = false;
+              state.ui.unsavedChanges = false;
+              state.ui.lastSaved = new Date(apiResponse.lastUpdated).getTime();
+            });
+            
+            // ✅ VALIDATION: Final check after loading
+            const finalState = get();
+            const sectionCount = finalState.layout.sections.length;
+            const contentCount = Object.keys(finalState.content).length;
+            
+            if (sectionCount !== contentCount) {
+              console.error('❌ CRITICAL: Section/Content mismatch after loading!', {
+                sectionsInLayout: sectionCount,
+                sectionsInContent: contentCount
+              });
+              throw new Error(`Data integrity error: ${sectionCount} sections vs ${contentCount} content entries`);
+            }
+            
+            console.log('✅ Complete page state restored from finalContent:', {
+              sections: sectionCount,
+              contentEntries: contentCount,
+              hasTheme: !!finalState.layout.theme,
+              hasOnboardingData: Object.keys(finalState.meta.onboardingData.validatedFields).length > 0
+            });
+            
+          } else {
+            console.log('⚠️ No complete finalContent found, page will need regeneration');
+            
+            // We have onboarding data but no generated page - set appropriate state
+            set((state) => {
+              // Clear any partial data
+              state.layout.sections = [];
+              state.layout.sectionLayouts = {};
+              state.content = {};
+              
+              // Update meta with available data
+              state.meta.id = apiResponse.tokenId || '';
+              state.meta.title = apiResponse.title || 'Untitled Project';
+              state.meta.onboardingData = {
+                oneLiner: apiResponse.inputText || '',
+                validatedFields: apiResponse.validatedFields || {},
+                featuresFromAI: apiResponse.featuresFromAI || [],
+                targetAudience: apiResponse.validatedFields?.targetAudience || '',
+                businessType: apiResponse.validatedFields?.marketCategory || '',
+              };
+              
+              state.ui.isLoading = false;
+              state.ui.unsavedChanges = false;
+            });
+            
+            // This indicates the page needs to be regenerated
+            throw new Error('Page content not found - regeneration required');
+          }
+          
+          // 3. Apply theme values if provided separately
+          if (apiResponse.themeValues) {
+            set((state) => {
+              console.log('🎨 Applying separate theme values:', apiResponse.themeValues);
+              
+              if (apiResponse.themeValues.primary) {
+                state.layout.theme.colors.accentColor = apiResponse.themeValues.primary;
+              }
+              if (apiResponse.themeValues.background) {
+                state.layout.theme.colors.baseColor = apiResponse.themeValues.background;
+              }
+            });
+          }
+
+          console.log('🎉 Draft loaded successfully');
+
+        } catch (error) {
+          console.error('❌ Failed to load from draft:', error);
+          
+          set((state) => {
+            state.ui.isLoading = false;
+            state.ui.errors['global'] = error instanceof Error ? error.message : 'Failed to load draft data';
+          });
+          
+          throw error;
+        }
+      },
 
     })),
     { name: "PageStore" }

@@ -470,8 +470,8 @@ pageStore.setTheme({
         hasContent: Object.keys(pageStore.content).length > 0
       });
       
-      // Navigate to preview
-      router.push(`/preview/${tokenId}`);
+      // Navigate to generate
+      router.push(`/generate/${tokenId}`);
       
     } catch (error) {
       console.error('Page generation failed:', error);

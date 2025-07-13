@@ -19,7 +19,7 @@ import type { Theme } from '@/types/core/index';
 
 import { createRegenerationActions } from './editStore/regenerationActions';
 import { createChangeTrackingActions } from './editStore/changeTrackingActions';
-
+import { persist } from "zustand/middleware";
 
 /**
  * ===== DEFAULT VALUES =====
@@ -270,6 +270,7 @@ function createInitialState() {
 export const useEditStore = create<EditStore>()(
   devtools(
     subscribeWithSelector(
+      persist(
       immer((set, get) => ({
         // Initial state
         ...createInitialState(),
@@ -335,25 +336,173 @@ export const useEditStore = create<EditStore>()(
           };
         },
 
-        loadFromDraft: async (apiResponse: any) => {
-          try {
-            set((state) => {
-              // Load the draft data into the store
-              if (apiResponse.content) {
-                Object.assign(state, apiResponse.content);
+  loadFromDraft: async (apiResponse: any) => {
+  try {
+    console.log('🔄 EditStore: Loading from draft...', apiResponse);
+    
+    set((state) => {
+      state.persistence.isLoading = true;
+      state.persistence.loadError = undefined;
+    });
+
+    // Check if we have finalContent (complete page data)
+    if (apiResponse.finalContent) {
+      console.log('📦 EditStore: Loading complete finalContent');
+      
+      set((state) => {
+        const { finalContent } = apiResponse;
+        
+        // ✅ SURGICAL RESTORATION: Only restore specific properties
+        
+        // 1. Restore layout data
+        if (finalContent.layout) {
+          state.sections = finalContent.layout.sections || [];
+          state.sectionLayouts = finalContent.layout.sectionLayouts || {};
+          
+          // ✅ CRITICAL: Restore theme without triggering background generation
+          if (finalContent.layout.theme) {
+            // Deep merge theme to avoid reference issues
+            state.theme = {
+              ...defaultTheme,
+              ...finalContent.layout.theme,
+              colors: {
+                ...defaultTheme.colors,
+                ...finalContent.layout.theme.colors,
+                sectionBackgrounds: {
+                  ...defaultTheme.colors.sectionBackgrounds,
+                  ...finalContent.layout.theme.colors?.sectionBackgrounds
+                }
               }
-              state.lastUpdated = Date.now();
-              state.persistence.isLoading = false;
-              state.persistence.loadError = undefined;
-            });
-          } catch (error) {
-            set((state) => {
-              state.persistence.isLoading = false;
-              state.persistence.loadError = error instanceof Error ? error.message : 'Failed to load draft';
-            });
-            throw error;
+            };
           }
-        },
+          
+          // Restore global settings
+          if (finalContent.layout.globalSettings) {
+            Object.assign(state.globalSettings, finalContent.layout.globalSettings);
+          }
+        }
+        
+        // 2. Restore content data
+        if (finalContent.content) {
+          state.content = { ...finalContent.content };
+        }
+        
+        // 3. Update meta information
+        state.id = apiResponse.tokenId || '';
+        state.title = apiResponse.title || finalContent.meta?.title || 'Untitled Project';
+        state.tokenId = apiResponse.tokenId || '';
+        
+        // 4. Restore onboarding data
+        state.onboardingData = {
+          oneLiner: apiResponse.inputText || '',
+          validatedFields: apiResponse.validatedFields || {},
+          featuresFromAI: apiResponse.featuresFromAI || [],
+          hiddenInferredFields: apiResponse.hiddenInferredFields || {},
+          confirmedFields: apiResponse.confirmedFields || {}
+        };
+        
+        // 5. Update timestamps and flags
+        state.lastUpdated = Date.now();
+        state.persistence.isLoading = false;
+        state.persistence.isDirty = false;
+        state.isDirty = false;
+        
+        console.log('✅ EditStore: Complete finalContent restored', {
+          sections: state.sections.length,
+          content: Object.keys(state.content).length,
+          hasTheme: !!state.theme,
+          themeColors: !!state.theme.colors,
+          backgrounds: !!state.theme.colors.sectionBackgrounds
+        });
+      });
+      
+    } else if (apiResponse.content) {
+      console.log('📦 EditStore: Loading legacy content format');
+      
+      set((state) => {
+        // ✅ SURGICAL ASSIGNMENT: Only assign specific known properties
+        
+        // Map known content properties individually
+        if (apiResponse.content.sections) {
+          state.sections = apiResponse.content.sections;
+        }
+        if (apiResponse.content.sectionLayouts) {
+          state.sectionLayouts = apiResponse.content.sectionLayouts;
+        }
+        if (apiResponse.content.content) {
+          state.content = apiResponse.content.content;
+        }
+        if (apiResponse.content.theme) {
+          // ✅ CRITICAL: Restore theme carefully
+          state.theme = {
+            ...defaultTheme,
+            ...apiResponse.content.theme,
+            colors: {
+              ...defaultTheme.colors,
+              ...apiResponse.content.theme.colors,
+              sectionBackgrounds: {
+                ...defaultTheme.colors.sectionBackgrounds,
+                ...apiResponse.content.theme.colors?.sectionBackgrounds
+              }
+            }
+          };
+        }
+        
+        // Update meta
+        state.id = apiResponse.tokenId || state.id;
+        state.title = apiResponse.title || state.title;
+        state.tokenId = apiResponse.tokenId || state.tokenId;
+        state.lastUpdated = Date.now();
+        state.persistence.isLoading = false;
+        state.persistence.isDirty = false;
+        state.isDirty = false;
+        
+        console.log('✅ EditStore: Legacy content restored');
+      });
+      
+    } else {
+      console.log('📦 EditStore: Loading onboarding-only data');
+      
+      set((state) => {
+        // Only restore onboarding data, clear page data
+        state.sections = [];
+        state.sectionLayouts = {};
+        state.content = {};
+        state.theme = defaultTheme;
+        
+        state.onboardingData = {
+          oneLiner: apiResponse.inputText || '',
+          validatedFields: apiResponse.validatedFields || {},
+          featuresFromAI: apiResponse.featuresFromAI || [],
+          hiddenInferredFields: apiResponse.hiddenInferredFields || {},
+          confirmedFields: apiResponse.confirmedFields || {}
+        };
+        
+        state.id = apiResponse.tokenId || '';
+        state.title = apiResponse.title || 'Untitled Project';
+        state.tokenId = apiResponse.tokenId || '';
+        state.lastUpdated = Date.now();
+        state.persistence.isLoading = false;
+        state.persistence.isDirty = false;
+        state.isDirty = false;
+        
+        console.log('✅ EditStore: Onboarding-only data restored');
+      });
+    }
+
+    console.log('🎉 EditStore: loadFromDraft completed successfully');
+
+  } catch (error) {
+    console.error('❌ EditStore: loadFromDraft failed:', error);
+    
+    set((state) => {
+      state.persistence.isLoading = false;
+      state.persistence.loadError = error instanceof Error ? error.message : 'Failed to load draft';
+    });
+    
+    throw error;
+  }
+},
 
         save: async () => {
           try {
@@ -434,7 +583,36 @@ export const useEditStore = create<EditStore>()(
             };
           });
         },
-      }))
+      })),
+      {                         // ← Persistence config as second argument to persist()
+          name: "edit-store-storage",
+          partialize: (state) => ({
+            sections: state.sections,
+            sectionLayouts: state.sectionLayouts,
+            content: state.content,
+            theme: state.theme,
+            globalSettings: state.globalSettings,
+            tokenId: state.tokenId,
+            onboardingData: state.onboardingData,
+            id: state.id,
+            title: state.title,
+            lastUpdated: state.lastUpdated,
+            version: state.version,
+          }),
+          onRehydrateStorage: () => (state) => {
+            if (state) {
+              console.log('🔄 EditStore rehydrated from localStorage:', {
+                sections: state.sections?.length || 0,
+                content: Object.keys(state.content || {}).length,
+                tokenId: state.tokenId,
+                hasTheme: !!state.theme
+              });
+            }
+          }
+        }                         // ← Close persist() config
+                                // ← Close persist()
+    ),                           // ← Close subscribeWithSelector()
+  
     ),
     { name: "EditStore" }
   )

@@ -495,7 +495,7 @@ export function useSectionCRUD() {
   }, []);
 
   // Validate all sections
-  const validateAllSections = useCallback(): SectionValidationResult[] => {
+  const validateAllSections = useCallback((): SectionValidationResult[] => {
     return sections.map(sectionId => validateSectionEnhanced(sectionId));
   }, [sections, validateSectionEnhanced]);
 

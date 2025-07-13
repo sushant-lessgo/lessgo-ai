@@ -3,7 +3,7 @@ import { useCallback, useEffect, useRef } from 'react';
 import { useEditStore } from './useEditStore';
 import type { ElementSelection } from '@/types/store';
 import type { ToolbarType } from '@/types/core';
-
+import { useToolbarPositioning } from './useToolbarPositioning';
 
 export interface SelectableElement {
   id: string;
@@ -45,6 +45,7 @@ export function useSelection() {
     announceLiveRegion,
   } = useEditStore();
 
+  const { showSmartToolbar, hideSmartToolbar } = useToolbarPositioning();
   const selectionCacheRef = useRef<Map<string, SelectableElement>>(new Map());
   const lastSelectionRef = useRef<ElementSelection | null>(null);
 
@@ -811,7 +812,7 @@ const handleEnhancedClickWithContext = useCallback((event: MouseEvent) => {
       setMultiSelection([]);
       
       // Show section toolbar with smart positioning
-      const { showSmartToolbar } = useToolbarPositioning();
+      
       showSmartToolbar('section', sectionId, {
         preferredPosition: 'top',
         followTarget: true,
@@ -841,7 +842,7 @@ const handleEnhancedClickWithContext = useCallback((event: MouseEvent) => {
   setMultiSelection([]);
   
   // Show appropriate toolbar(s) with smart positioning
-  const { showSmartToolbar, hideSmartToolbar } = useToolbarPositioning();
+  
   const elementId = `${sectionId}.${elementKey}`;
   
   // Hide all toolbars first
@@ -973,4 +974,5 @@ return {
   prioritizeToolbars,
   handleEnhancedClickWithContext,
   getCurrentToolbarContext,
+}
 }

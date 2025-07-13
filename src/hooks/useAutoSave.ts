@@ -222,6 +222,17 @@ export const useAutoSave = (config: Partial<AutoSaveHookConfig> = {}): UseAutoSa
     }
   }, [store.autoSave.error, finalConfig]);
 
+  const serializationStatus: SerializationStatus = useMemo(() => {
+  const { serialization = {} } = finalConfig;
+  
+  return {
+    serializationEnabled: serialization.useContentSerializer || false,
+    lastSerializationSize: undefined, // Will be updated after saves
+    serializationValidationPassed: undefined, // Will be updated after validation
+    contentSummary: undefined, // Will be populated if enabled
+  };
+}, [finalConfig]);
+
   /**
    * ===== STATUS COMPUTATION =====
    */
@@ -318,16 +329,7 @@ const forceSave = useCallback(async () => {
   }
 }, [store, finalConfig]);
 
-const serializationStatus: SerializationStatus = useMemo(() => {
-  const { serialization = {} } = finalConfig;
-  
-  return {
-    serializationEnabled: serialization.useContentSerializer || false,
-    lastSerializationSize: undefined, // Will be updated after saves
-    serializationValidationPassed: undefined, // Will be updated after validation
-    contentSummary: undefined, // Will be populated if enabled
-  };
-}, [finalConfig]);
+
 
 const saveWithSerialization = useCallback(async () => {
   const { serializedSaveDraft } = await import('@/utils/autoSaveDraft');
@@ -372,7 +374,7 @@ const validateCurrentState = useCallback(async () => {
   }
 }, []);
 
-const exportSerializedState = useCallback(() => {
+const exportSerializedState = useCallback(async () => {
   try {
     const { useContentSerializer } = await import('@/hooks/useContentSerializer');
     const { serialize } = useContentSerializer();

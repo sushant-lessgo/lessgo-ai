@@ -15,7 +15,7 @@ import { AdvancedActionsMenu } from '../toolbars/AdvancedActionsMenu';
 
 export function FloatingToolbars() {
   const { 
-    ui: { floatingToolbars },
+    floatingToolbars,
     selectedSection,
     selectedElement,
     mode,

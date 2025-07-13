@@ -7,10 +7,12 @@ import { GlobalAppHeader } from './GlobalAppHeader';
 import { EditHeader } from './EditHeader';
 import { LeftPanel } from './LeftPanel';
 import { MainContent } from './MainContent';
+import { useAutoSave } from '@/hooks/useAutoSave';
 
 interface EditLayoutProps {
   tokenId: string;
 }
+
 
 export function EditLayout({ tokenId }: EditLayoutProps) {
   const {
@@ -20,6 +22,11 @@ export function EditLayout({ tokenId }: EditLayoutProps) {
     handleKeyboardShortcut,
     getColorTokens,
   } = useEditStore();
+
+  const { status, actions } = useAutoSave({
+  enableAutoSave: true,
+  enableVersioning: true,
+});
 
   const colorTokens = getColorTokens();
 
