@@ -3,7 +3,19 @@
     "allow": [
       "Bash(find:*)",
       "Bash(git add:*)",
-      "Bash(git commit:*)"
+      "Bash(git commit:*)",
+      "Bash(ls:*)",
+      "Bash(git config:*)",
+      "Bash(fsutil volume diskfree:*)",
+      "Bash(npm ls:*)",
+      "Bash(npm run build:*)",
+      "Bash(mv:*)",
+      "Bash(grep:*)",
+      "Bash(npm run dev:*)",
+      "WebFetch(domain:localhost)",
+      "Bash(npm run typecheck:*)",
+      "Bash(del nul)",
+      "Bash(rm:*)"
     ],
     "deny": []
   }

@@ -3,7 +3,7 @@
 
 import { useEffect } from 'react';
 import { useTypography } from '@/hooks/useTypography';
-import { usePageStore } from '@/hooks/usePageStore';
+import { useEditStore } from '@/hooks/useEditStore';
 import { 
   LayoutComponentProps, 
   extractLayoutContent,
@@ -24,15 +24,15 @@ export function useLayoutComponent<T = Record<string, any>>({
   const { getTextStyle } = useTypography();
   const { 
     content, 
-    ui: { mode }, 
-    layout: { theme },
+    mode, 
+    theme,
     updateElementContent,
     getColorTokens
-  } = usePageStore();
+  } = useEditStore();
 
   // Initialize fonts on component mount
   useEffect(() => {
-    const { updateFontsFromTone } = usePageStore.getState();
+    const { updateFontsFromTone } = useEditStore.getState();
     updateFontsFromTone();
   }, []);
 

@@ -11,7 +11,7 @@ const InferredFieldsSchema = z.object({
   targetAudience: z.string(),
   startupStage: z.string(),
   pricingModel: z.string(),
-  landingGoal: z.string(),
+  landingPageGoals: z.string(),
 });
 
 export type InferredFields = z.infer<typeof InferredFieldsSchema>;
@@ -34,7 +34,7 @@ Given a one-line startup idea, infer the following 7 structured fields based on 
 
 6. pricingModel - suggest the most likely SaaS pricing model (e.g., freemium, tiered, usage-based, one-time fee).
 
-7. landingGoal - recommend the most appropriate landing page goal (e.g., collect emails, request demo, start free trial, join waitlist, etc.).
+7. landingPageGoals - recommend the most appropriate landing page goal (e.g., collect emails, request demo, start free trial, join waitlist, etc.).
 
 
 Only return a JSON object with the inferred values. Do not explain.

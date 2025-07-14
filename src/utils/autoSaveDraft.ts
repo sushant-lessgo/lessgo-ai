@@ -198,9 +198,9 @@ if (includePageData) {
       }
     } else {
       // Fallback to page store
-      const { usePageStore } = await import('@/hooks/usePageStore');
-      const pageStore = usePageStore.getState();
-      pageData = pageStore.export();
+      const { useEditStore } = await import('@/hooks/useEditStore');
+      const editStore = useEditStore.getState();
+      pageData = editStore.export();
     }
   } catch (error) {
     console.warn('⚠️ Could not get page data for save:', error);
@@ -239,8 +239,8 @@ if (includePageData) {
         };
       } else {
         // Fallback to page store
-        const { usePageStore } = await import('@/hooks/usePageStore');
-        const { getColorTokens } = usePageStore.getState();
+        const { useEditStore } = await import('@/hooks/useEditStore');
+        const { getColorTokens } = useEditStore.getState();
         const colorTokens = getColorTokens();
         
         payload.themeValues = {

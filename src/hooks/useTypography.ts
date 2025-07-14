@@ -1,10 +1,10 @@
 // useTypography.ts
 
-import { usePageStore } from '@/hooks/usePageStore';
+import { useEditStore } from '@/hooks/useEditStore';
 import { landingTypography } from '@/modules/Design/fontSystem/landingTypography';
 
 export function useTypography() {
-  const { layout: { theme } } = usePageStore();
+  const { theme } = useEditStore();
   
   const getTextStyle = (variant: keyof typeof landingTypography) => {
     const baseStyle = landingTypography[variant];

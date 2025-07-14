@@ -1,13 +1,13 @@
 import { layoutPickers } from "./layoutPickers";
 import { useOnboardingStore } from "@/hooks/useOnboardingStore";
-import { usePageStore } from "@/hooks/usePageStore";
+import { useEditStore } from "@/hooks/useEditStore";
 import type { LayoutPickerInput } from "./layoutPickerInput";
 import { getAudienceGroupForAudience, getStageGroupForStage } from '@/modules/inference/taxonomy';
 
 
 export function generateSectionLayouts(sectionIds: string[]) {
   const onboarding = useOnboardingStore.getState();
-  const setSectionLayouts = usePageStore.getState().setSectionLayouts;
+  const setSectionLayouts = useEditStore.getState().setSectionLayouts;
 
   console.log('🎨 Generating layouts for sections:', sectionIds);
   console.log('📊 Onboarding data available:', {
@@ -77,7 +77,7 @@ export function generateSectionLayouts(sectionIds: string[]) {
     // ✅ FIXED: Ensure every section gets a valid layout
     if (fallbackLayouts[sectionId]) {
       layouts[sectionId] = fallbackLayouts[sectionId];
-      console.log(`📐 Fallback layout assigned for ${sectionId}:`, layouts[sectionId]);
+      console.log(`📐 Fallback layout assigned for ${sectionId}:`, layouts[sectionId], `(from fallback: ${fallbackLayouts[sectionId]})`);
     } else {
       // If section is not in fallback list, log warning and assign a contextual layout
       console.warn(`⚠️ No layout mapping found for section: ${sectionId}`);
@@ -106,5 +106,11 @@ export function generateSectionLayouts(sectionIds: string[]) {
   });
 
   console.log('🎨 Final layout assignments:', layouts);
+  console.log('🎨 About to call setSectionLayouts with:', {
+    layoutCount: Object.keys(layouts).length,
+    heroLayout: layouts.hero,
+    allLayouts: Object.entries(layouts).map(([section, layout]) => `${section}: ${layout}`)
+  });
   setSectionLayouts(layouts);
+  console.log('🎨 setSectionLayouts called successfully');
 }

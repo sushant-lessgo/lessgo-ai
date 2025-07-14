@@ -1,17 +1,20 @@
 import React, { useState } from 'react';
-import { usePageStore } from '@/hooks/usePageStore';
+import { useEditStore } from '@/hooks/useEditStore';
 
 export function StoreDebugPanel() {
   const [isOpen, setIsOpen] = useState(false);
   const [activeTab, setActiveTab] = useState('theme');
   
   const { 
-    layout, 
+    sections,
+    sectionLayouts,
+    theme,
     content, 
-    ui, 
-    meta, 
+    mode,
+    errors,
+    title,
     getColorTokens 
-  } = usePageStore();
+  } = useEditStore();
 
   const colorTokens = getColorTokens();
 

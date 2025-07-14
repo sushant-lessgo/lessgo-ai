@@ -2,8 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { usePageStore } from '@/hooks/usePageStore';
-import { useStoreMigration } from '@/hooks/useStoreMigration';
+import { useEditStore } from '@/hooks/useEditStore';
 import LandingPageRenderer from '@/modules/generatedLanding/LandingPageRenderer';
 import { StoreDebugPanel } from '@/app/create/[token]/components/StoreDebugPanel';
 import { OnboardingDebugPanel } from '@/app/create/[token]/components/OnboardingDebugPanel';
@@ -13,21 +12,18 @@ export default function GeneratePage() {
   const router = useRouter();
   const tokenId = params?.token as string;
 
-  // Page store state (generation phase)
+  // EditStore state (now handles both generation and editing)
   const { 
-    layout: { sections },
+    sections,
     content,
-    ui: { mode },
+    mode,
     setMode,
-  } = usePageStore();
-
-  // Migration hook
-  const { migrateToEditStore } = useStoreMigration();
+    loadFromDraft,
+  } = useEditStore();
 
   // UI state
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [isMigrating, setIsMigrating] = useState(false);
 
   // Initialize preview mode and validate data
   useEffect(() => {
@@ -55,11 +51,10 @@ export default function GeneratePage() {
           const data = await response.json();
           console.log('📦 Received API response:', data);
           
-          // Use the loadFromDraft method
-          const pageStore = usePageStore.getState();
-          await pageStore.loadFromDraft(data);
+          // Use the loadFromDraft method from EditStore
+          await loadFromDraft(data);
           
-          console.log('✅ Successfully loaded draft data into PageStore');
+          console.log('✅ Successfully loaded draft data into EditStore');
           
         } catch (err) {
           console.error('Failed to load page data:', err);
@@ -83,27 +78,26 @@ export default function GeneratePage() {
     }
   }, [sections.length, tokenId, mode, setMode, router]);
 
-  // Handle edit navigation with migration
+  // Handle edit navigation (no migration needed anymore)
   const handleEdit = async () => {
-    console.log('🚀 handleEdit clicked!');
-    try {
-      setIsMigrating(true);
-      
-      console.log('🔄 Starting migration process...');
-      
-      // Perform the one-time migration
-      await migrateToEditStore(tokenId);
-      
-      console.log('✅ Migration completed, navigating to edit...');
-      
-      // Navigate to edit page with migration flag
-      router.push(`/edit/${tokenId}?migrated=true`);
-      
-    } catch (error) {
-      console.error('❌ Migration failed:', error);
-      setError('Failed to prepare edit mode. Please try again.');
-      setIsMigrating(false);
-    }
+    console.log('🚀 Navigating to edit mode...');
+    
+    // Set edit mode in the store
+    setMode('edit');
+    
+    // Ensure persistence by triggering auto-save
+    const currentState = useEditStore.getState();
+    console.log('📊 Pre-navigation store state:', {
+      sections: currentState.sections.length,
+      content: Object.keys(currentState.content).length,
+      sectionsArray: currentState.sections
+    });
+    
+    // Small delay to ensure state changes are applied
+    await new Promise(resolve => setTimeout(resolve, 50));
+    
+    // Navigate to edit page with flag to indicate data is already in store
+    router.push(`/edit/${tokenId}?migrated=true`);
   };
 
   // Loading state
@@ -118,18 +112,6 @@ export default function GeneratePage() {
     );
   }
 
-  // Migration loading state
-  if (isMigrating) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-accentPrimary mx-auto mb-4"></div>
-          <h2 className="text-xl font-semibold text-gray-900 mb-2">Preparing Edit Mode</h2>
-          <p className="text-gray-600">Setting up your page for editing...</p>
-        </div>
-      </div>
-    );
-  }
 
   // Error state
   if (error) {
@@ -182,21 +164,9 @@ export default function GeneratePage() {
             {/* Edit Button */}
             <button
               onClick={handleEdit}
-              disabled={isMigrating}
-              className={`px-6 py-3 rounded-lg font-medium text-base transition-all duration-200 ${
-                isMigrating
-                  ? 'bg-gray-400 text-gray-700 cursor-not-allowed'
-                  : 'bg-brand-accentPrimary hover:bg-orange-500 text-white hover:shadow-lg transform hover:scale-105'
-              }`}
+              className="px-6 py-3 rounded-lg font-medium text-base transition-all duration-200 bg-brand-accentPrimary hover:bg-orange-500 text-white hover:shadow-lg transform hover:scale-105"
             >
-              {isMigrating ? (
-                <div className="flex items-center space-x-2">
-                  <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin"></div>
-                  <span>Preparing...</span>
-                </div>
-              ) : (
-                'Edit Page'
-              )}
+              Edit Page
             </button>
 
             {/* Info Text */}

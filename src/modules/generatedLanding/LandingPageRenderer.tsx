@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo } from 'react';
-import { usePageStore } from '@/hooks/usePageStore';
+import { useEditStore } from '@/hooks/useEditStore';
 import { useOnboardingStore } from '@/hooks/useOnboardingStore';
 import { sectionList } from '@/modules/sections/sectionList';
 import { getComponent } from '@/modules/generatedLanding/componentRegistry';
@@ -62,7 +62,7 @@ const MissingLayoutComponent: React.FC<{ sectionId: string; layout: string }> = 
   sectionId, 
   layout 
 }) => {
-  const { ui: { mode } } = usePageStore();
+  const { mode } = useEditStore();
   
   return (
     <section className="py-16 px-4 bg-yellow-50 border-2 border-yellow-200">
@@ -102,13 +102,16 @@ interface LandingPageRendererProps {
 
 export default function LandingPageRenderer({ className = '' }: LandingPageRendererProps) {
   const { 
-    layout: { sections, sectionLayouts, theme },
+    sections,
+    sectionLayouts, 
+    theme,
     content,
-    ui: { mode, errors },
+    mode,
+    errors,
     updateFontsFromTone,
     getColorTokens,
     updateFromBackgroundSystem
-  } = usePageStore();
+  } = useEditStore();
 
   // Get onboarding data for dynamic backgrounds
   const { validatedFields, hiddenInferredFields } = useOnboardingStore();

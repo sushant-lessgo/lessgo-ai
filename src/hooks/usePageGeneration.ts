@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useOnboardingStore } from '@/hooks/useOnboardingStore';
-import { usePageStore } from '@/hooks/usePageStore';
+import { useEditStore } from '@/hooks/useEditStore';
 import { getSectionsFromRules } from '@/modules/sections/getSectionsFromRules';
 import { generateSectionLayouts } from '@/modules/sections/generateSectionLayouts';
 import { getCompleteElementsMap } from '@/modules/sections/elementDetermination';
@@ -45,7 +45,7 @@ interface GenerationResult {
 export function usePageGeneration(tokenId: string) {
   const router = useRouter();
   const onboardingStore = useOnboardingStore();
-  const pageStore = usePageStore();
+  const editStore = useEditStore();
   
   const [generationState, setGenerationState] = useState<GenerationState>({
     isGenerating: false,
@@ -126,7 +126,7 @@ export function usePageGeneration(tokenId: string) {
     
     console.log('Generated background system:', backgroundSystem);
 
-pageStore.setTheme({
+editStore.updateTheme({
       colors: {
         baseColor: backgroundSystem.baseColor,
         accentColor: backgroundSystem.accentColor,
@@ -152,10 +152,19 @@ pageStore.setTheme({
   // Step 2: Generate layouts for each section
   const generateLayouts = async (sections: string[]): Promise<{ layouts: Record<string, string>, errors: string[] }> => {
     try {
-      // This function updates the pageStore directly
+      // This function updates the editStore directly
       generateSectionLayouts(sections);
       
-      const { sectionLayouts } = pageStore.layout;
+      // Get fresh state after layout generation
+      const { sectionLayouts } = editStore.getState();
+      
+      console.log('🎯 Layout generation complete:', {
+        sections,
+        sectionLayouts,
+        layoutKeys: Object.keys(sectionLayouts),
+        heroLayout: sectionLayouts.hero,
+        allLayoutAssignments: Object.entries(sectionLayouts).map(([section, layout]) => `${section}: ${layout}`)
+      });
       
       // Validate that all sections have layouts
       const missingLayouts = sections.filter(sectionId => !sectionLayouts[sectionId]);
@@ -273,9 +282,16 @@ pageStore.setTheme({
     try {
       console.log('Transferring data to store:', result);
 
-      // CRITICAL FIX: Use store actions instead of direct mutation
-      pageStore.reorderSections(result.sections);
-      pageStore.setSectionLayouts(result.sectionLayouts);
+      // CRITICAL FIX: Use proper initialization for first-time setup
+      console.log('🏗️ Initializing sections in EditStore:', {
+        sections: result.sections,
+        layouts: result.sectionLayouts,
+        heroLayoutFromResult: result.sectionLayouts.hero,
+        layoutEntries: Object.entries(result.sectionLayouts).map(([section, layout]) => `${section}: ${layout}`)
+      });
+      
+      // Use initializeSections for fresh setup instead of reorderSections
+      editStore.initializeSections(result.sections, result.sectionLayouts);
 
       // Update meta data - Create proper meta object
       const metaData = {
@@ -295,10 +311,10 @@ pageStore.setTheme({
       };
 
       // Update meta using proper assignment
-      // Object.assign(pageStore.meta, metaData);
+      // Object.assign(editStore.meta, metaData);
       
       // Set AI generation status
-      pageStore.setAIGenerationStatus({
+      editStore.setAIGenerationStatus({
         isGenerating: false,
         success: result.success,
         isPartial: result.isPartial,
@@ -310,22 +326,30 @@ pageStore.setTheme({
 
       // CRITICAL: Update content using the store's updateFromAIResponse method
       if (result.generatedContent) {
-        console.log('Updating store with AI content:', result.generatedContent);
-        pageStore.updateFromAIResponse({
+        console.log('🤖 Updating store with AI content:', {
+          contentKeys: Object.keys(result.generatedContent),
+          sampleContent: Object.entries(result.generatedContent).slice(0, 2),
+          success: result.success,
+          isPartial: result.isPartial
+        });
+        
+        editStore.updateFromAIResponse({
           success: result.success,
           content: result.generatedContent,
           isPartial: result.isPartial,
           warnings: result.warnings,
           errors: result.errors
         });
+      } else {
+        console.warn('⚠️ No generated content found in result:', result);
       }
 
       // Debug: Verify store state after updates
-      const storeAfterUpdate = pageStore.export();
+      const storeAfterUpdate = editStore.export();
       console.log('Store state after transfer:', {
-        sections: pageStore.layout.sections.length,
-        content: Object.keys(pageStore.content).length,
-        hasData: pageStore.layout.sections.length > 0,
+        sections: editStore.sections.length,
+        content: Object.keys(editStore.content).length,
+        hasData: editStore.sections.length > 0,
         fullStore: storeAfterUpdate
       });
 
@@ -450,6 +474,16 @@ pageStore.setTheme({
         isPartial: isPartial || allErrors.length > 0
       };
       
+      console.log('📊 Final generation result:', {
+        success: result.success,
+        sectionsCount: result.sections.length,
+        sectionsArray: result.sections,
+        layoutsCount: Object.keys(result.sectionLayouts).length,
+        contentKeys: Object.keys(result.generatedContent || {}),
+        errorsCount: result.errors.length,
+        isMockMode: process.env.NEXT_PUBLIC_USE_MOCK_GPT === "true"
+      });
+      
       // Transfer data to page store
       await transferDataToPageStore(result);
       
@@ -465,9 +499,9 @@ pageStore.setTheme({
       
       // Add debug log right before navigation
       console.log('About to navigate to preview. Final store state:', {
-        sections: pageStore.layout.sections.length,
-        content: Object.keys(pageStore.content).length,
-        hasContent: Object.keys(pageStore.content).length > 0
+        sections: editStore.sections.length,
+        content: Object.keys(editStore.content).length,
+        hasContent: Object.keys(editStore.content).length > 0
       });
       
       // Navigate to generate

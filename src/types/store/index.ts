@@ -26,6 +26,7 @@ export type {
   ValidationActions,
   MetaActions,
   AutoSaveActions,
+  GenerationActions,
 } from './actions';
 
 /**
@@ -154,6 +155,7 @@ import type {
   ValidationActions,
   MetaActions,
   AutoSaveActions,
+  GenerationActions,
 } from './actions';
 
 import type {
@@ -174,6 +176,7 @@ export interface EditStore extends
   FormsImageActions,
   ValidationActions,
   MetaActions,
+  GenerationActions,
   AutoSaveMiddlewareState {
   
   // Any additional store-specific properties can be added here
@@ -225,6 +228,7 @@ export type FormsImageActionCreator = ActionCreator<FormsImageActions>;
 export type ValidationActionCreator = ActionCreator<ValidationActions>;
 export type MetaActionCreator = ActionCreator<MetaActions>;
 export type AutoSaveActionCreator = ActionCreator<AutoSaveActions>;
+export type GenerationActionCreator = ActionCreator<GenerationActions>;
 
 /**
  * ===== HOOK TYPES =====

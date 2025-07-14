@@ -380,3 +380,37 @@ export interface RegenerationActions {
   // Enhanced regeneration with input context
   regenerateWithInputs: (preserveDesign?: boolean) => Promise<void>;
 }
+
+/**
+ * ===== GENERATION ACTIONS INTERFACE =====
+ * Actions for AI-powered page generation and content creation
+ */
+export interface GenerationActions {
+  // Bulk Section Initialization
+  initializeSections: (sectionIds: string[], sectionLayouts: Record<string, string>) => void;
+  
+  // AI Response Processing
+  updateFromAIResponse: (aiResponse: any) => void;
+  setAIGenerationStatus: (status: Partial<{
+    isGenerating: boolean;
+    lastGenerated?: number;
+    success: boolean;
+    isPartial: boolean;
+    warnings: string[];
+    errors: string[];
+    sectionsGenerated: string[];
+    sectionsSkipped: string[];
+  }>) => void;
+  clearAIErrors: () => void;
+  regenerateAllContent: () => Promise<void>;
+  
+  // Background System Integration
+  updateFromBackgroundSystem: (backgroundSystem: BackgroundSystem) => void;
+  
+  // Font System Integration
+  updateFontsFromTone: () => void;
+  setCustomFonts: (headingFont: string, bodyFont: string) => void;
+  
+  // Color Token Generation
+  getColorTokens: () => ReturnType<typeof import('@/modules/Design/ColorSystem/colorTokens').generateColorTokens>;
+}

@@ -359,7 +359,7 @@ const { addElement } = useElementCRUD();
     }
   }
   return false;
-}, [content, setSection, showElementPicker, addElement, getDefaultContent]);
+}, [content, setSection, showElementPicker, addElement]);
 
 
   const handleMoveSection = useCallback(async (params: { sectionId: string; direction: 'up' | 'down' }) => {

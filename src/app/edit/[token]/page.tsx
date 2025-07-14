@@ -80,8 +80,19 @@ useEffect(() => {
         if (isMigrated) {
           console.log("🔄 Checking for migrated data in EditStore...");
           
+          // Give a small delay for Zustand persistence to rehydrate
+          await new Promise(resolve => setTimeout(resolve, 100));
+          
+          // Re-check sections after potential rehydration
+          const currentState = useEditStore.getState();
+          console.log("🔍 EditStore state after rehydration check:", {
+            sections: currentState.sections.length,
+            content: Object.keys(currentState.content).length,
+            sectionsArray: currentState.sections
+          });
+          
           // Check if EditStore already has sections (migration successful)
-          if (sections.length > 0) {
+          if (currentState.sections.length > 0) {
             console.log("✅ Migration data found in EditStore, skipping API load");
             setLoadingState('success');
             return;
@@ -115,6 +126,20 @@ useEffect(() => {
           stepIndex: data.stepIndex,
           lastUpdated: data.lastUpdated,
         });
+        
+        // 🔍 DEBUG: Log finalContent structure to understand the issue
+        if (data.finalContent) {
+          console.log("🔍 DEBUG: FinalContent structure:", {
+            keys: Object.keys(data.finalContent),
+            hasSections: !!data.finalContent.sections,
+            hasLayout: !!data.finalContent.layout,
+            hasContent: !!data.finalContent.content,
+            sectionsType: typeof data.finalContent.sections,
+            sectionsValue: data.finalContent.sections,
+            layoutSections: data.finalContent.layout?.sections,
+            contentKeys: data.finalContent.content ? Object.keys(data.finalContent.content) : 'no content',
+          });
+        }
 
         // Load the draft data into edit store
         await loadFromDraft(data);

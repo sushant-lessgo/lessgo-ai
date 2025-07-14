@@ -12,6 +12,7 @@ import { createUIActions } from './editStore/uiActions';
 import { createPersistenceActions } from './editStore/persistenceActions';
 import { createFormsImageActions } from './editStore/formsImageActions';
 import { createValidationActions } from './editStore/validationActions';
+import { createGenerationActions } from './editStore/generationActions';
 
 // Import centralized types
 import type { EditStore, SectionData } from '@/types/store';
@@ -122,12 +123,14 @@ function createInitialState() {
     // UI Slice
     mode: 'edit' as const,
     editMode: 'section' as const,
+    generationMode: false, // Optimization flag for generation flow
     selectedSection: undefined as string | undefined,
     selectedElement: undefined as any,
     multiSelection: [] as string[],
     leftPanel: {
       width: 300,
       collapsed: false,
+      manuallyToggled: false,
       activeTab: 'pageStructure' as const,
     },
     floatingToolbars: {
@@ -284,12 +287,29 @@ export const useEditStore = create<EditStore>()(
         ...createValidationActions(set, get),
         ...createRegenerationActions(set, get),
         ...createChangeTrackingActions(set, get),
+        ...createGenerationActions(set, get),
         // Meta Actions (inline - simple enough to keep here)
         updateMeta: (meta: Partial<any>) => {
           set((state) => {
             Object.assign(state, meta);
             state.lastUpdated = Date.now();
             state.version += 1;
+          });
+        },
+
+        // Performance Optimization Actions
+        setGenerationMode: (enabled: boolean) => {
+          set((state) => {
+            state.generationMode = enabled;
+            
+            if (enabled) {
+              // Disable heavy features during generation
+              state.leftPanel.collapsed = true;
+              state.floatingToolbars.section.visible = false;
+              state.floatingToolbars.element.visible = false;
+              state.floatingToolbars.form.visible = false;
+              state.floatingToolbars.image.visible = false;
+            }
           });
         },
 
@@ -321,7 +341,7 @@ export const useEditStore = create<EditStore>()(
 
         export: () => {
           const state = get();
-          return {
+          const exportData = {
             id: state.id,
             title: state.title,
             slug: state.slug,
@@ -334,6 +354,17 @@ export const useEditStore = create<EditStore>()(
             lastUpdated: state.lastUpdated,
             version: state.version,
           };
+          
+          // 🔍 DEBUG: Log export data structure
+          console.log('📤 EditStore export data:', {
+            sectionsCount: exportData.sections.length,
+            sectionsArray: exportData.sections,
+            contentKeys: Object.keys(exportData.content),
+            hasTheme: !!exportData.theme,
+            hasGlobalSettings: !!exportData.globalSettings,
+          });
+          
+          return exportData;
         },
 
   loadFromDraft: async (apiResponse: any) => {
@@ -354,14 +385,57 @@ export const useEditStore = create<EditStore>()(
         
         // ✅ SURGICAL RESTORATION: Only restore specific properties
         
-        // 1. Restore layout data
-        if (finalContent.layout) {
+        // 🔧 FIXED: Handle both nested and flat finalContent structures
+        
+        // First, check if we have the flat structure (new serialization format)
+        if (finalContent.sections && Array.isArray(finalContent.sections)) {
+          console.log('📦 Using flat finalContent structure');
+          
+          // 1. Restore layout data from flat structure
+          state.sections = finalContent.sections || [];
+          state.sectionLayouts = finalContent.sectionLayouts || {};
+          
+          // 2. Restore content data from flat structure  
+          if (finalContent.content) {
+            state.content = { ...finalContent.content };
+          }
+          
+          // 3. Restore theme from flat structure
+          if (finalContent.theme) {
+            state.theme = {
+              ...defaultTheme,
+              ...finalContent.theme,
+              colors: {
+                ...defaultTheme.colors,
+                ...finalContent.theme.colors,
+                sectionBackgrounds: {
+                  ...defaultTheme.colors.sectionBackgrounds,
+                  ...finalContent.theme.colors?.sectionBackgrounds
+                }
+              }
+            };
+          }
+          
+          // 4. Restore global settings from flat structure
+          if (finalContent.globalSettings) {
+            Object.assign(state.globalSettings, finalContent.globalSettings);
+          }
+        } 
+        // Fallback to nested structure (legacy format)
+        else if (finalContent.layout) {
+          console.log('📦 Using nested finalContent structure (legacy)');
+          
+          // 1. Restore layout data from nested structure
           state.sections = finalContent.layout.sections || [];
           state.sectionLayouts = finalContent.layout.sectionLayouts || {};
           
-          // ✅ CRITICAL: Restore theme without triggering background generation
+          // 2. Restore content data from nested structure
+          if (finalContent.content) {
+            state.content = { ...finalContent.content };
+          }
+          
+          // 3. Restore theme from nested structure
           if (finalContent.layout.theme) {
-            // Deep merge theme to avoid reference issues
             state.theme = {
               ...defaultTheme,
               ...finalContent.layout.theme,
@@ -376,15 +450,20 @@ export const useEditStore = create<EditStore>()(
             };
           }
           
-          // Restore global settings
+          // 4. Restore global settings from nested structure
           if (finalContent.layout.globalSettings) {
             Object.assign(state.globalSettings, finalContent.layout.globalSettings);
           }
         }
-        
-        // 2. Restore content data
-        if (finalContent.content) {
-          state.content = { ...finalContent.content };
+        else {
+          console.warn('⚠️ Unknown finalContent structure, attempting direct property access');
+          
+          // Direct property access fallback
+          if (finalContent.sections) state.sections = finalContent.sections;
+          if (finalContent.sectionLayouts) state.sectionLayouts = finalContent.sectionLayouts;
+          if (finalContent.content) state.content = finalContent.content;
+          if (finalContent.theme) state.theme = { ...defaultTheme, ...finalContent.theme };
+          if (finalContent.globalSettings) Object.assign(state.globalSettings, finalContent.globalSettings);
         }
         
         // 3. Update meta information
@@ -393,6 +472,17 @@ export const useEditStore = create<EditStore>()(
         state.tokenId = apiResponse.tokenId || '';
         
         // 4. Restore onboarding data
+        if (process.env.NODE_ENV === 'development') {
+          console.log('🔍 loadFromDraft - API Response onboarding data:', {
+            inputText: apiResponse.inputText,
+            validatedFields: apiResponse.validatedFields,
+            hiddenInferredFields: apiResponse.hiddenInferredFields,
+            confirmedFields: apiResponse.confirmedFields,
+            featuresFromAI: apiResponse.featuresFromAI,
+            hiddenInferredFieldsKeys: Object.keys(apiResponse.hiddenInferredFields || {}),
+          });
+        }
+        
         state.onboardingData = {
           oneLiner: apiResponse.inputText || '',
           validatedFields: apiResponse.validatedFields || {},
@@ -409,10 +499,18 @@ export const useEditStore = create<EditStore>()(
         
         console.log('✅ EditStore: Complete finalContent restored', {
           sections: state.sections.length,
+          sectionsArray: state.sections,
           content: Object.keys(state.content).length,
+          contentKeys: Object.keys(state.content),
           hasTheme: !!state.theme,
           themeColors: !!state.theme.colors,
-          backgrounds: !!state.theme.colors.sectionBackgrounds
+          backgrounds: !!state.theme.colors.sectionBackgrounds,
+          finalContentStructure: {
+            hasSections: !!finalContent.sections,
+            hasLayout: !!finalContent.layout,
+            hasContent: !!finalContent.content,
+            keys: Object.keys(finalContent)
+          }
         });
       });
       
@@ -461,14 +559,50 @@ export const useEditStore = create<EditStore>()(
       });
       
     } else {
-      console.log('📦 EditStore: Loading onboarding-only data');
+      console.log('📦 EditStore: Loading direct data or onboarding-only data');
+      console.log('🔍 API Response structure:', {
+        hasSections: !!apiResponse.sections,
+        hasSectionLayouts: !!apiResponse.sectionLayouts,
+        hasContent: !!apiResponse.content,
+        hasLayout: !!apiResponse.layout,
+        keys: Object.keys(apiResponse)
+      });
       
       set((state) => {
-        // Only restore onboarding data, clear page data
-        state.sections = [];
-        state.sectionLayouts = {};
-        state.content = {};
-        state.theme = defaultTheme;
+        // Check if sections are directly on the response (EditStore format)
+        if (apiResponse.sections && Array.isArray(apiResponse.sections)) {
+          console.log('✅ Found sections directly on response:', apiResponse.sections);
+          state.sections = apiResponse.sections;
+          state.sectionLayouts = apiResponse.sectionLayouts || {};
+          state.content = apiResponse.content || {};
+          
+          if (apiResponse.theme) {
+            state.theme = {
+              ...defaultTheme,
+              ...apiResponse.theme,
+              colors: {
+                ...defaultTheme.colors,
+                ...apiResponse.theme.colors,
+                sectionBackgrounds: {
+                  ...defaultTheme.colors.sectionBackgrounds,
+                  ...apiResponse.theme.colors?.sectionBackgrounds
+                }
+              }
+            };
+          }
+          
+          console.log('✅ EditStore: Direct data format loaded', {
+            sections: state.sections.length,
+            content: Object.keys(state.content).length
+          });
+        } else {
+          console.log('⚠️ No sections found, clearing page data');
+          // Only restore onboarding data, clear page data
+          state.sections = [];
+          state.sectionLayouts = {};
+          state.content = {};
+          state.theme = defaultTheme;
+        }
         
         state.onboardingData = {
           oneLiner: apiResponse.inputText || '',

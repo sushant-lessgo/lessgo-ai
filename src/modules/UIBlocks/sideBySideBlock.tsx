@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { generateColorTokens } from '../Design/ColorSystem/colorTokens';
 import { useTypography } from '@/hooks/useTypography';
-import { usePageStore } from '@/hooks/usePageStore';
+import { useEditStore } from '@/hooks/useEditStore';
 import { useOnboardingStore } from '@/hooks/useOnboardingStore';
 import { 
   LayoutComponentProps, 
@@ -63,10 +63,10 @@ export default function SideBySideBlocks({
   const { getTextStyle } = useTypography();
   const { 
     content, 
-    ui: { mode }, 
-    layout: { theme },
+    mode, 
+    theme,
     updateElementContent 
-  } = usePageStore();
+  } = useEditStore();
 
   // Get content for this section with type safety
   const sectionContent = content[sectionId];
@@ -104,7 +104,7 @@ export default function SideBySideBlocks({
 
   // Initialize fonts on component mount
   useEffect(() => {
-    const { updateFontsFromTone } = usePageStore.getState();
+    const { updateFontsFromTone } = useEditStore.getState();
     updateFontsFromTone(); // Set fonts based on current tone
   }, []);
 
