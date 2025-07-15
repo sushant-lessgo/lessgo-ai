@@ -155,7 +155,7 @@ export const useAutoSave = (config: Partial<AutoSaveHookConfig> = {}): UseAutoSa
     const handleOnline = () => {
       isOnlineRef.current = true;
       // Trigger save when coming back online if there are changes
-      if (store.isDirty && finalConfig.enableAutoSave) {
+      if (store.persistence.isDirty && finalConfig.enableAutoSave) {
         store.triggerAutoSave();
       }
     };
@@ -178,7 +178,7 @@ export const useAutoSave = (config: Partial<AutoSaveHookConfig> = {}): UseAutoSa
     if (finalConfig.enableAutoSave && isOnlineRef.current) {
       // Enable auto-save when conditions are met
       const interval = setInterval(() => {
-        if (store.isDirty && !store.isSaving) {
+        if (store.persistence.isDirty && !store.persistence.isSaving) {
           store.triggerAutoSave();
         }
       }, 1000); // Check every second
@@ -192,7 +192,7 @@ export const useAutoSave = (config: Partial<AutoSaveHookConfig> = {}): UseAutoSa
     if (!finalConfig.enableVersioning || !versionManagerRef.current) return;
 
     // Create snapshot when significant changes accumulate
-    if (store.queuedChanges.length > 0) {
+    if ((store.queuedChanges || []).length > 0) {
       changeCountRef.current += 1;
       
       if (versionManagerRef.current.shouldCreateAutoSnapshot(changeCountRef.current)) {
@@ -200,27 +200,27 @@ export const useAutoSave = (config: Partial<AutoSaveHookConfig> = {}): UseAutoSa
           store.export(),
           `Auto-snapshot after ${changeCountRef.current} changes`,
           'auto-save',
-          store.queuedChanges
+          store.queuedChanges || []
         );
         
         changeCountRef.current = 0; // Reset counter
         finalConfig.onVersionCreated?.(snapshot);
       }
     }
-  }, [store.queuedChanges, finalConfig, store]);
+  }, [store.queuedChanges || [], finalConfig, store]);
 
   // Save success/error callbacks
   useEffect(() => {
-    if (store.lastSaved && finalConfig.onSaveSuccess) {
+    if (store.persistence.lastSaved && finalConfig.onSaveSuccess) {
       finalConfig.onSaveSuccess(store.getPerformanceStats().lastSaveTime);
     }
-  }, [store.lastSaved, finalConfig]);
+  }, [store.persistence.lastSaved, finalConfig]);
 
  useEffect(() => {
-    if (store.autoSave.error && finalConfig.onSaveError) {
-      finalConfig.onSaveError(store.autoSave.error);
+    if (store.persistence.saveError && finalConfig.onSaveError) {
+      finalConfig.onSaveError(store.persistence.saveError);
     }
-  }, [store.autoSave.error, finalConfig]);
+  }, [store.persistence.saveError, finalConfig]);
 
   const serializationStatus: SerializationStatus = useMemo(() => {
   const { serialization = {} } = finalConfig;
@@ -243,10 +243,10 @@ export const useAutoSave = (config: Partial<AutoSaveHookConfig> = {}): UseAutoSa
 
     return {
       // Save State
-      isDirty: store.isDirty,
-      isSaving: store.isSaving,
-      lastSaved: store.lastSaved ? new Date(store.lastSaved) : undefined,
-      saveError: store.autoSave.error,
+      isDirty: store.persistence.isDirty,
+      isSaving: store.persistence.isSaving,
+      lastSaved: store.persistence.lastSaved ? new Date(store.persistence.lastSaved) : undefined,
+      saveError: store.persistence.saveError,
       
       // Performance
       saveCount: store.getPerformanceStats().saveCount,
@@ -264,17 +264,17 @@ export const useAutoSave = (config: Partial<AutoSaveHookConfig> = {}): UseAutoSa
       conflictCount: conflicts.length,
       
       // Queue Status
-      queuedChanges: store.queuedChanges.length,
+      queuedChanges: (store.queuedChanges || []).length,
       isOnline: isOnlineRef.current,
       serialization: serializationStatus,
     };
   }, [
-    store.isDirty,
-    store.isSaving,
-    store.lastSaved,
-    store.autoSave.error,
+    store.persistence.isDirty,
+    store.persistence.isSaving,
+    store.persistence.lastSaved,
+    store.persistence.saveError,
     store.getPerformanceStats(),
-    store.queuedChanges.length,
+    (store.queuedChanges || []).length,
     versionManagerRef.current,
   ]);
 

@@ -11,6 +11,26 @@ import type { AdvancedActionItem, AdvancedMenuState } from '@/app/edit/[token]/c
 import type { ElementSelection } from '@/types/core/ui';
 
 /**
+ * Helper function to get context-aware actions for toolbar types
+ */
+function getActionsForType(type: string, targetId: string, state: EditStore): string[] {
+  switch (type) {
+    case 'section':
+      return ['change-layout', 'add-element', 'background-settings', 'regenerate-section', 'duplicate-section', 'delete-section'];
+    case 'element':
+      return ['regenerate-element', 'duplicate-element', 'element-style', 'delete-element'];
+    case 'text':
+      return ['format-bold', 'format-italic', 'text-color', 'font-size', 'text-align', 'regenerate'];
+    case 'image':
+      return ['replace-image', 'stock-photos', 'edit-image', 'alt-text', 'delete-image'];
+    case 'form':
+      return ['add-field', 'form-settings', 'integrations', 'form-styling'];
+    default:
+      return [];
+  }
+}
+
+/**
  * ===== UI ACTIONS CREATOR =====
  */
 export function createUIActions(set: any, get: any): UIActions {
@@ -27,8 +47,8 @@ export function createUIActions(set: any, get: any): UIActions {
         if (mode === 'preview') {
           state.selectedSection = undefined;
           state.selectedElement = undefined;
-          state.floatingToolbars.section.visible = false;
-          state.floatingToolbars.element.visible = false;
+          state.toolbar.visible = false;
+          state.toolbar.type = null;
         }
       }),
     
@@ -39,14 +59,17 @@ export function createUIActions(set: any, get: any): UIActions {
         // Clear inappropriate selections for mode
         if (mode === 'section') {
           state.selectedElement = undefined;
-          state.floatingToolbars.element.visible = false;
+          if (state.toolbar.type === 'element') {
+            state.toolbar.visible = false;
+            state.toolbar.type = null;
+          }
         } else if (mode === 'element') {
           // Keep element selection if valid
         } else if (mode === 'global') {
           state.selectedSection = undefined;
           state.selectedElement = undefined;
-          state.floatingToolbars.section.visible = false;
-          state.floatingToolbars.element.visible = false;
+          state.toolbar.visible = false;
+          state.toolbar.type = null;
         }
       }),
 
@@ -61,7 +84,10 @@ export function createUIActions(set: any, get: any): UIActions {
         // Clear element selection when changing sections
         if (state.selectedElement && state.selectedElement.sectionId !== sectionId) {
           state.selectedElement = undefined;
-          state.floatingToolbars.element.visible = false;
+          if (state.toolbar.type === 'element') {
+            state.toolbar.visible = false;
+            state.toolbar.type = null;
+          }
         }
         
         // Update section metadata
@@ -72,13 +98,24 @@ export function createUIActions(set: any, get: any): UIActions {
         });
         
         // Hide section toolbar if no section selected
-        if (!sectionId) {
-          state.floatingToolbars.section.visible = false;
+        if (!sectionId && state.toolbar.type === 'section') {
+          state.toolbar.visible = false;
+          state.toolbar.type = null;
         }
       }),
     
     selectElement: (selection: ElementSelection | null) =>
       set((state: EditStore) => {
+        // Prevent infinite loops by checking if selection actually changed
+        const currentSelection = state.selectedElement;
+        const isSameSelection = currentSelection && selection && 
+          currentSelection.sectionId === selection.sectionId && 
+          currentSelection.elementKey === selection.elementKey;
+        
+        if (isSameSelection) {
+          return; // No change, prevent infinite loop
+        }
+        
         state.selectedElement = selection || undefined;
         
         // Update active section to match selected element
@@ -165,6 +202,7 @@ setActiveSection: (sectionId: string | undefined) =>
     toggleLeftPanel: () =>
       set((state: EditStore) => {
         state.leftPanel.collapsed = !state.leftPanel.collapsed;
+        state.leftPanel.manuallyToggled = true; // Mark as manually toggled
       }),
     
     setLeftPanelTab: (tab: UISlice['leftPanel']['activeTab']) =>
@@ -173,297 +211,101 @@ setActiveSection: (sectionId: string | undefined) =>
       }),
 
     /**
-     * ===== FLOATING TOOLBAR MANAGEMENT =====
+     * ===== SIMPLIFIED TOOLBAR MANAGEMENT =====
      */
     
-    showSectionToolbar: (sectionId: string, position: { x: number; y: number }) =>
-  set((state: EditStore) => {
-    // Hide other toolbars first
-    Object.keys(state.floatingToolbars).forEach(key => {
-      if (key !== 'section') {
-        state.floatingToolbars[key as keyof typeof state.floatingToolbars].visible = false;
-      }
-    });
-    
-    // Show section toolbar with context-aware actions
-    state.floatingToolbars.section = {
-      visible: true,
-      position,
-      targetId: sectionId,
-      contextActions: [
-        { id: 'change-layout', label: 'Change Layout', icon: 'layout', type: 'button' },
-        { id: 'add-element', label: 'Add Element', icon: 'plus', type: 'button' },
-        { id: 'background-settings', label: 'Background', icon: 'image', type: 'button' },
-        { id: 'regenerate-section', label: 'Regenerate', icon: 'refresh', type: 'button' },
-        { id: 'duplicate-section', label: 'Duplicate', icon: 'copy', type: 'button' },
-        { id: 'delete-section', label: 'Delete', icon: 'trash', type: 'button' },
-      ],
-      advancedActions: [
-        { id: 'section-settings', label: 'Section Settings', icon: 'settings', handler: () => {} },
-        { id: 'export-section', label: 'Export Section', icon: 'download', handler: () => {} },
-        { id: 'section-analytics', label: 'Section Analytics', icon: 'chart', handler: () => {} },
-      ],
-    };
-    
-    // Update selection
-    state.selectedSection = sectionId;
-    state.selectedElement = undefined;
-  }),
-
-    
-    hideSectionToolbar: () =>
+    showToolbar: (type: 'section' | 'element' | 'text' | 'image' | 'form', targetId: string, position?: { x: number; y: number }) =>
       set((state: EditStore) => {
-        state.floatingToolbars.section.visible = false;
-      }),
-    
-   showElementToolbar: (elementId: string, position: { x: number; y: number }) =>
-  set((state: EditStore) => {
-    const [sectionId, elementKey] = elementId.split('.');
-    const section = state.content[sectionId];
-    const element = section?.elements[elementKey];
-    
-    if (!element) return;
-    
-    // Hide other toolbars first
-    Object.keys(state.floatingToolbars).forEach(key => {
-      if (key !== 'element') {
-        state.floatingToolbars[key as keyof typeof state.floatingToolbars].visible = false;
-      }
-    });
-    
-    // Determine context actions based on element type
-    let contextActions: any[] = [
-      { id: 'element-regenerate', label: 'Regenerate', icon: 'refresh', type: 'button' },
-      { id: 'element-variations', label: 'Variations', icon: 'layers', type: 'button' },
-      { id: 'duplicate-element', label: 'Duplicate', icon: 'copy', type: 'button' },
-      { id: 'delete-element', label: 'Delete', icon: 'trash', type: 'button' },
-    ];
-    
-    // Add type-specific actions
-    if (element.type === 'button' || elementKey.includes('cta')) {
-      contextActions.unshift(
-        { id: 'link-settings', label: 'Link Settings', icon: 'link', type: 'button' },
-        { id: 'convert-cta-to-form', label: 'Convert to Form', icon: 'form-input', type: 'button' }
-      );
-    }
-    
-    if (['text', 'headline', 'subheadline'].includes(element.type)) {
-      contextActions.unshift(
-        { id: 'apply-text-format', label: 'Bold', icon: 'bold', type: 'button' },
-        { id: 'change-text-color', label: 'Color', icon: 'palette', type: 'button' },
-        { id: 'change-font-size', label: 'Size', icon: 'type', type: 'button' }
-      );
-    }
-    
-    state.floatingToolbars.element = {
-      visible: true,
-      position,
-      targetId: elementId,
-      contextActions,
-      advancedActions: [
-        { id: 'element-style', label: 'Element Styling', icon: 'palette', handler: () => {} },
-        { id: 'change-element-type', label: 'Change Type', icon: 'transform', handler: () => {} },
-        { id: 'element-analytics', label: 'Element Analytics', icon: 'chart', handler: () => {} },
-      ],
-    };
-    
-    // Update selection
-    state.selectedElement = {
-      sectionId,
-      elementKey,
-      type: element.type,
-      editMode: element.editMode,
-    };
-    state.selectedSection = sectionId;
-  }),
-
-    
-    hideElementToolbar: () =>
-      set((state: EditStore) => {
-        state.floatingToolbars.element.visible = false;
-      }),
-    
-    showFormToolbar: (formId: string, position: { x: number; y: number }) =>
-      set((state: EditStore) => {
-        // Hide other toolbars first
-        state.floatingToolbars.section.visible = false;
-        state.floatingToolbars.element.visible = false;
-        state.floatingToolbars.image.visible = false;
+        // Simple position calculation if not provided
+        const pos = position || { x: 0, y: 0 };
         
-        state.floatingToolbars.form = {
-          visible: true,
-          position,
-          targetId: formId,
-          contextActions: [
-            { 
-              id: 'edit-fields', 
-              label: 'Edit Fields', 
-              type: 'button', 
-              icon: 'list',
-              handler: () => get().showFormBuilder()
-            },
-            { 
-              id: 'settings', 
-              label: 'Form Settings', 
-              type: 'button', 
-              icon: 'settings',
-              handler: () => {
-                // Open form settings modal
-              }
-            },
-            { 
-              id: 'integrations', 
-              label: 'Connect Integration', 
-              type: 'button', 
-              icon: 'link',
-              handler: () => {
-                // Open integrations panel
-              }
-            },
-            { id: 'separator1', label: '', type: 'separator' },
-            { 
-              id: 'preview', 
-              label: 'Preview Form', 
-              type: 'button', 
-              icon: 'eye',
-              handler: () => {
-                // Open form preview
-              }
-            },
-            { 
-              id: 'test', 
-              label: 'Test Form', 
-              type: 'button', 
-              icon: 'play',
-              handler: () => {
-                // Test form submission
-              }
-            },
-          ],
-        };
-      }),
-    
-    hideFormToolbar: () =>
-      set((state: EditStore) => {
-        state.floatingToolbars.form.visible = false;
-      }),
-    
-    showImageToolbar: (imageId: string, position: { x: number; y: number }) =>
-      set((state: EditStore) => {
-        // Hide other toolbars first
-        state.floatingToolbars.section.visible = false;
-        state.floatingToolbars.element.visible = false;
-        state.floatingToolbars.form.visible = false;
+        // Get context-aware actions based on type
+        const actions = getActionsForType(type, targetId, state);
         
-        state.floatingToolbars.image = {
+        // Update toolbar state
+        state.toolbar = {
+          type,
           visible: true,
-          position,
-          targetId: imageId,
-          contextActions: [
-            { 
-              id: 'replace', 
-              label: 'Replace Image', 
-              type: 'button', 
-              icon: 'image',
-              handler: () => {
-                // Open image picker
-              }
-            },
-            { 
-              id: 'edit', 
-              label: 'Edit Image', 
-              type: 'button', 
-              icon: 'edit',
-              handler: () => {
-                // Open image editor
-              }
-            },
-            { 
-              id: 'alt-text', 
-              label: 'Edit Alt Text', 
-              type: 'button', 
-              icon: 'type',
-              handler: () => {
-                // Open alt text editor
-              }
-            },
-            { id: 'separator1', label: '', type: 'separator' },
-            { 
-              id: 'optimize', 
-              label: 'Optimize', 
-              type: 'button', 
-              icon: 'zap',
-              handler: () => {
-                // Optimize image
-              }
-            },
-            { 
-              id: 'stock-search', 
-              label: 'Find Similar', 
-              type: 'button', 
-              icon: 'search',
-              handler: () => {
-                get().showStockPhotoSearch('similar image');
-              }
-            },
-          ],
+          position: pos,
+          targetId,
+          actions,
         };
+        
+        // Update selection state
+        if (type === 'section') {
+          state.selectedSection = targetId;
+          state.selectedElement = undefined;
+        } else if (type === 'element') {
+          const [sectionId, elementKey] = targetId.split('.');
+          state.selectedElement = { sectionId, elementKey };
+          state.selectedSection = sectionId;
+        }
       }),
     
-    hideImageToolbar: () =>
+    hideToolbar: () =>
       set((state: EditStore) => {
-        state.floatingToolbars.image.visible = false;
+        state.toolbar.visible = false;
+        state.toolbar.type = null;
+        state.toolbar.targetId = null;
+        state.toolbar.actions = [];
       }),
+    
+    // Legacy wrapper functions for compatibility
+    showSectionToolbar: (sectionId: string, position: { x: number; y: number }) => 
+      get().showToolbar('section', sectionId, position),
+    
+    showElementToolbar: (elementId: string, position: { x: number; y: number }) => 
+      get().showToolbar('element', elementId, position),
+    
+    hideSectionToolbar: () => get().hideToolbar(),
+    hideElementToolbar: () => get().hideToolbar(),
+    
+    showFormToolbar: (formId: string, position: { x: number; y: number }) => 
+      get().showToolbar('form', formId, position),
+    
+    hideFormToolbar: () => get().hideToolbar(),
+    
+    showImageToolbar: (imageId: string, position: { x: number; y: number }) => 
+      get().showToolbar('image', imageId, position),
+    
+    hideImageToolbar: () => get().hideToolbar(),
+    
+    showTextToolbar: (position: { x: number; y: number }) => 
+      get().showToolbar('text', 'current-text', position),
+    
+    hideTextToolbar: () => get().hideToolbar(),
 
     /**
      * ===== AUTO-SAVE UI =====
      */
     
     triggerAutoSave: () => {
-  const state = get();
-  if (state.autoSave.isDirty && !state.autoSave.isSaving && state.queuedChanges.length > 0) {
-    // Debounce auto-save
-    if (state.autoSaveTimer) {
-      clearTimeout(state.autoSaveTimer);
-    }
-    
-    set((state: EditStore) => {
-      state.autoSaveTimer = setTimeout(async () => {
-        try {
-          await state.save();
-        } catch (error) {
-          console.error('Auto-save failed:', error);
-        }
-      }, 2000); // 2 second debounce
-    });
-  }
-},
+      const state = get();
+      if (state.persistence.isDirty && !state.persistence.isSaving) {
+        // Simplified auto-save trigger
+        setTimeout(async () => {
+          try {
+            await state.save();
+          } catch (error) {
+            console.error('Auto-save failed:', error);
+          }
+        }, 2000);
+      }
+    },
     
     clearAutoSaveError: () =>
       set((state: EditStore) => {
-        state.autoSave.error = undefined;
+        // Clear error from persistence state
+        state.persistence.saveError = undefined;
       }),
 
-// Enhanced trackChange for toolbar actions
-trackChange: (change: any) => {
-  set((state: EditStore) => {
-    state.queuedChanges.push({
-      ...change,
-      id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-      timestamp: Date.now(),
-    });
-    state.autoSave.isDirty = true;
-    state.lastUpdated = Date.now();
-  });
-},
-
-// Clear queued changes after successful save
-clearQueuedChanges: () => {
-  set((state: EditStore) => {
-    state.queuedChanges = [];
-    state.autoSave.isDirty = false;
-  });
-},
+    // Simplified trackChange for toolbar actions
+    trackChange: (change: any) => {
+      set((state: EditStore) => {
+        state.persistence.isDirty = true;
+        state.lastUpdated = Date.now();
+      });
+    },
 
 
     /**
@@ -517,7 +359,7 @@ clearQueuedChanges: () => {
         
         state.forms.activeForm = formId;
         state.forms.formBuilder.visible = true;
-        state.autoSave.isDirty = true;
+        state.persistence.isDirty = true;
       }),
 
     /**
@@ -566,6 +408,33 @@ clearQueuedChanges: () => {
           
           // Update section validation
           if (state.content[sectionId]) {
+            // Initialize editMetadata if it doesn't exist
+            if (!state.content[sectionId].editMetadata) {
+              state.content[sectionId].editMetadata = {
+                isSelected: false,
+                lastModified: Date.now(),
+                completionPercentage: 0,
+                validationStatus: {
+                  isValid: true,
+                  errors: [],
+                  warnings: [],
+                  missingRequired: [],
+                  lastValidated: Date.now(),
+                },
+              };
+            }
+            
+            // Initialize validationStatus if it doesn't exist
+            if (!state.content[sectionId].editMetadata.validationStatus) {
+              state.content[sectionId].editMetadata.validationStatus = {
+                isValid: true,
+                errors: [],
+                warnings: [],
+                missingRequired: [],
+                lastValidated: Date.now(),
+              };
+            }
+            
             state.content[sectionId].editMetadata.validationStatus.errors.push({
               elementKey: 'general',
               code: 'error',
@@ -585,6 +454,33 @@ clearQueuedChanges: () => {
           
           // Clear section validation errors
           if (state.content[sectionId]) {
+            // Initialize editMetadata if it doesn't exist
+            if (!state.content[sectionId].editMetadata) {
+              state.content[sectionId].editMetadata = {
+                isSelected: false,
+                lastModified: Date.now(),
+                completionPercentage: 0,
+                validationStatus: {
+                  isValid: true,
+                  errors: [],
+                  warnings: [],
+                  missingRequired: [],
+                  lastValidated: Date.now(),
+                },
+              };
+            }
+            
+            // Initialize validationStatus if it doesn't exist
+            if (!state.content[sectionId].editMetadata.validationStatus) {
+              state.content[sectionId].editMetadata.validationStatus = {
+                isValid: true,
+                errors: [],
+                warnings: [],
+                missingRequired: [],
+                lastValidated: Date.now(),
+              };
+            }
+            
             state.content[sectionId].editMetadata.validationStatus.errors = 
               state.content[sectionId].editMetadata.validationStatus.errors.filter(
                 err => err.elementKey !== 'general'
@@ -737,7 +633,7 @@ clearQueuedChanges: () => {
           }
         }
         
-        state.autoSave.isDirty = true;
+        state.persistence.isDirty = true;
         
         console.log('🔄 Undo:', lastAction.description);
       }),
@@ -798,7 +694,7 @@ clearQueuedChanges: () => {
           }
         }
         
-        state.autoSave.isDirty = true;
+        state.persistence.isDirty = true;
         
         console.log('🔄 Redo:', actionToRedo.description);
       }),
@@ -1007,9 +903,14 @@ clearQueuedChanges: () => {
         const width = window.innerWidth;
         const height = window.innerHeight;
         
-        // Auto-collapse left panel on mobile
-        if (width < 768 && !state.leftPanel.collapsed) {
+        // Auto-collapse left panel on mobile (but allow manual toggle back)
+        if (width < 768 && !state.leftPanel.collapsed && !state.leftPanel.manuallyToggled) {
           state.leftPanel.collapsed = true;
+        }
+        
+        // Auto-expand on desktop if it was auto-collapsed
+        if (width >= 768 && state.leftPanel.collapsed && !state.leftPanel.manuallyToggled) {
+          state.leftPanel.collapsed = false;
         }
         
         // Adjust panel width for smaller screens

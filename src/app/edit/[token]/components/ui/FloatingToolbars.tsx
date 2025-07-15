@@ -15,83 +15,130 @@ import { AdvancedActionsMenu } from '../toolbars/AdvancedActionsMenu';
 
 export function FloatingToolbars() {
   const { 
-    floatingToolbars,
     selectedSection,
     selectedElement,
     mode,
   } = useEditStore();
+  
+  // Mock toolbar state for now since we consolidated toolbars
+  const toolbar = {
+    type: null,
+    visible: false,
+    position: { x: 0, y: 0 },
+    targetId: null,
+    actions: []
+  };
+
+  // Debug logging
+  React.useEffect(() => {
+    console.log('🎪 FloatingToolbars render state:', {
+      mode,
+      toolbarType: toolbar.type,
+      toolbarVisible: toolbar.visible,
+      toolbarPosition: toolbar.position,
+      selectedElement,
+      selectedSection,
+    });
+  }, [toolbar.visible, toolbar.type, mode, selectedElement, selectedSection]);
 
   const { updateAllPositions } = useToolbarPositioning();
   const { currentContext, isMultiToolbarMode } = useToolbarContext();
 
-  // Update positions when toolbars become visible or selections change
+  // Simplified position updates using direct DOM manipulation
   useEffect(() => {
-    const hasVisibleToolbars = Object.values(floatingToolbars).some(toolbar => toolbar.visible);
-    if (hasVisibleToolbars) {
-      const timeoutId = setTimeout(updateAllPositions, 10);
+    if (toolbar.visible && toolbar.targetId) {
+      const timeoutId = setTimeout(() => {
+        let selector = '';
+        if (toolbar.type === 'section' && toolbar.targetId) {
+          selector = `[data-section-id="${toolbar.targetId}"]`;
+        } else if (toolbar.type === 'element' && toolbar.targetId) {
+          const parts = (toolbar.targetId as string).split('.');
+          selector = `[data-section-id="${parts[0]}"] [data-element-key="${parts[1]}"]`;
+        } else if (toolbar.targetId) {
+          selector = `[data-${toolbar.type}-id="${toolbar.targetId}"]`;
+        }
+        
+        const targetElement = selector ? document.querySelector(selector) as HTMLElement : null;
+        
+        const toolbarElement = document.querySelector(`[data-toolbar-type="${toolbar.type}"]`) as HTMLElement;
+        
+        if (targetElement && toolbarElement) {
+          const rect = targetElement.getBoundingClientRect();
+          const position = {
+            x: rect.left + rect.width / 2 - toolbarElement.offsetWidth / 2,
+            y: rect.top - toolbarElement.offsetHeight - 12
+          };
+          
+          // Direct DOM update - no store mutations
+          toolbarElement.style.left = `${Math.max(10, position.x)}px`;
+          toolbarElement.style.top = `${Math.max(10, position.y)}px`;
+          toolbarElement.style.position = 'fixed';
+          toolbarElement.style.zIndex = '1000';
+        }
+      }, 10);
       return () => clearTimeout(timeoutId);
     }
-  }, [selectedSection, selectedElement, updateAllPositions]);
+  }, [toolbar.visible, toolbar.targetId, toolbar.type, selectedSection, selectedElement]);
 
   // Only render toolbars in edit mode
   if (mode !== 'edit') return null;
 
+  // Render single adaptive toolbar
+  if (!toolbar.visible || !toolbar.type || !toolbar.targetId) {
+    return null;
+  }
+
   return (
     <div className="floating-toolbars-container">
-      {/* Section Toolbar */}
-      {floatingToolbars.section.visible && selectedSection && (
-        <SectionToolbar
-          sectionId={selectedSection}
-          position={floatingToolbars.section.position}
-          contextActions={floatingToolbars.section.contextActions}
-        />
-      )}
+      {/* Single Smart Toolbar - renders appropriate content based on type */}
+      <div 
+        data-toolbar-type={toolbar.type}
+        className="fixed z-50 bg-white shadow-lg rounded-lg border border-gray-200 p-2"
+        style={{
+          left: toolbar.position.x,
+          top: toolbar.position.y,
+        }}
+      >
+        {toolbar.type === 'section' && selectedSection && (
+          <SectionToolbar
+            sectionId={selectedSection}
+            position={toolbar.position}
+            contextActions={toolbar.actions.map(actionId => ({ id: actionId, label: actionId, icon: 'icon', type: 'button' }))}
+          />
+        )}
 
-      {/* Element Toolbar */}
-      {floatingToolbars.element.visible && selectedElement && (
-        <ElementToolbar
-          elementSelection={selectedElement}
-          position={floatingToolbars.element.position}
-          contextActions={floatingToolbars.element.contextActions}
-        />
-      )}
+        {toolbar.type === 'element' && selectedElement && (
+          <ElementToolbar
+            elementSelection={selectedElement}
+            position={toolbar.position}
+            contextActions={toolbar.actions.map(actionId => ({ id: actionId, label: actionId, icon: 'icon', type: 'button' }))}
+          />
+        )}
 
-      {/* Text Toolbar */}
-      {floatingToolbars.text?.visible && selectedElement && (
-        <TextToolbar
-          elementSelection={selectedElement}
-          position={floatingToolbars.text.position}
-          contextActions={floatingToolbars.text.contextActions}
-        />
-      )}
+        {toolbar.type === 'text' && selectedElement && (
+          <TextToolbar
+            elementSelection={selectedElement}
+            position={toolbar.position}
+            contextActions={toolbar.actions.map(actionId => ({ id: actionId, label: actionId, icon: 'icon', type: 'button' }))}
+          />
+        )}
 
-      {/* Image Toolbar */}
-      {floatingToolbars.image.visible && (
-        <ImageToolbar
-          targetId={floatingToolbars.image.targetId}
-          position={floatingToolbars.image.position}
-          contextActions={floatingToolbars.image.contextActions}
-        />
-      )}
+        {toolbar.type === 'image' && (
+          <ImageToolbar
+            targetId={toolbar.targetId}
+            position={toolbar.position}
+            contextActions={toolbar.actions.map(actionId => ({ id: actionId, label: actionId, icon: 'icon', type: 'button' }))}
+          />
+        )}
 
-      {/* Form Toolbar */}
-      {floatingToolbars.form.visible && (
-        <FormToolbar
-          targetId={floatingToolbars.form.targetId}
-          position={floatingToolbars.form.position}
-          contextActions={floatingToolbars.form.contextActions}
-        />
-      )}
-
-      {/* Multi-toolbar indicator */}
-      {isMultiToolbarMode && (
-        <div className="fixed top-4 right-4 z-60 bg-purple-100 border border-purple-300 rounded-lg px-3 py-2">
-          <div className="flex items-center space-x-2">
-            <div className="w-2 h-2 bg-purple-500 rounded-full animate-pulse"></div>
-            <span className="text-xs font-medium text-purple-800">Multi-toolbar Mode</span>
-          </div>
-        </div>
-      )}
+        {toolbar.type === 'form' && (
+          <FormToolbar
+            targetId={toolbar.targetId}
+            position={toolbar.position}
+            contextActions={toolbar.actions.map(actionId => ({ id: actionId, label: actionId, icon: 'icon', type: 'button' }))}
+          />
+        )}
+      </div>
     </div>
   );
 }

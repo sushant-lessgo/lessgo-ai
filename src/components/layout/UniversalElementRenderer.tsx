@@ -381,7 +381,7 @@ function UniversalButton({
   const ButtonElement = mode === 'preview' && props.url ? 'a' : 'button';
   const elementProps = mode === 'preview' && props.url 
     ? { href: props.url, target: props.target || '_self' }
-    : { type: 'button' };
+    : { type: 'button' as const };
 
   return (
     <ButtonElement

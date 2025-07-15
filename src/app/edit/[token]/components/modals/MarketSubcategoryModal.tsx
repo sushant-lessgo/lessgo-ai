@@ -1,7 +1,7 @@
 // app/edit/[token]/components/modals/MarketSubcategoryModal.tsx
 "use client";
 
-import { useState, useMemo } from 'react';
+import React, { useState, useMemo } from 'react';
 import BaseModal from './BaseModal';
 import TaxonomyTile from '../ui/TaxonomyTile';
 import { marketSubcategories, getSubcategoriesForCategory } from '@/modules/inference/taxonomy';

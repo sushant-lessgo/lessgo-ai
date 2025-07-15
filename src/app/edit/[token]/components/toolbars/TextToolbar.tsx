@@ -18,6 +18,11 @@ export function TextToolbar({ elementSelection, position, contextActions }: Text
   const [currentSize, setCurrentSize] = useState('16px');
   const [currentAlign, setCurrentAlign] = useState('left');
   
+  // Debug logging
+  React.useEffect(() => {
+    console.log('🎨 TextToolbar rendered with:', { elementSelection, position, contextActions });
+  }, [elementSelection, position, contextActions]);
+  
   const toolbarRef = useRef<HTMLDivElement>(null);
   const advancedRef = useRef<HTMLDivElement>(null);
 
@@ -28,6 +33,12 @@ export function TextToolbar({ elementSelection, position, contextActions }: Text
   } = useEditStore();
 
   const { executeAction } = useToolbarActions();
+
+  // Early return if elementSelection is invalid
+  if (!elementSelection || !elementSelection.sectionId || !elementSelection.elementKey) {
+    console.warn('TextToolbar: Invalid elementSelection', elementSelection);
+    return null;
+  }
 
   // Calculate arrow position
   const targetSelector = `[data-section-id="${elementSelection.sectionId}"] [data-element-key="${elementSelection.elementKey}"]`;
@@ -210,11 +221,12 @@ export function TextToolbar({ elementSelection, position, contextActions }: Text
     <>
       <div 
         ref={toolbarRef}
-        className="fixed z-50 bg-white border border-gray-200 rounded-lg shadow-lg transition-all duration-200"
+        className="fixed z-50 bg-white border-2 border-blue-500 rounded-lg shadow-xl transition-all duration-200"
         style={{
           left: position.x,
           top: position.y,
         }}
+        data-toolbar-type="text"
       >
         {/* Arrow */}
         {arrowInfo && (
@@ -292,10 +304,9 @@ export function TextToolbar({ elementSelection, position, contextActions }: Text
         <AdvancedActionsMenu
           ref={advancedRef}
           actions={advancedActions}
-          position={{
-            x: position.x + 400,
-            y: position.y,
-          }}
+          triggerElement={document.body}
+          toolbarType="text"
+          isVisible={showAdvanced}
           onClose={() => setShowAdvanced(false)}
         />
       )}

@@ -313,7 +313,14 @@ export function ColorSystemModal({ isOpen, onClose, tokenId }: ColorSystemModalP
                   <CategoryControls
                     currentTokens={previewTokens}
                     backgroundSystem={currentBackgroundSystem}
-                    onTokensChange={handleTokenChange}
+                    onTokensChange={(tokens: Partial<ColorTokens>) => {
+                      // Convert to individual token changes
+                      Object.entries(tokens).forEach(([key, value]) => {
+                        if (value !== undefined) {
+                          handleTokenChange(key as keyof ColorTokens, value);
+                        }
+                      });
+                    }}
                     disabled={isLoading || !currentBackgroundSystem}
                   />
 

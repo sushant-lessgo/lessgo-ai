@@ -5,7 +5,7 @@ import React from 'react';
 import { useEditStore } from '@/hooks/useEditStore';
 
 export function DeviceToggle() {
-  const { globalSettings, setGlobalSettings } = useEditStore();
+  const { globalSettings, /* setGlobalSettings */ } = useEditStore();
 
   const devices = [
     { id: 'desktop', label: 'Desktop', icon: '🖥️', width: '100%' },
@@ -18,7 +18,10 @@ export function DeviceToggle() {
       {devices.map((device) => (
         <button
           key={device.id}
-          onClick={() => setGlobalSettings({ deviceMode: device.id as any })}
+          onClick={() => {
+            // setGlobalSettings({ deviceMode: device.id as any });
+            console.log('Device mode changed to:', device.id);
+          }}
           className={`
             px-3 py-1.5 text-sm font-medium rounded-md transition-colors
             ${globalSettings.deviceMode === device.id

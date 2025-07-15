@@ -70,6 +70,20 @@ const {
 
   const colorTokens = getColorTokens();
 
+  // Debug logging for sections rendering (throttled)
+  React.useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      console.log('🖼️ MainContent render:', {
+        sectionsLength: sections.length,
+        sections: sections,
+        contentKeys: Object.keys(content),
+        mode: mode,
+        selectedSection: selectedSection
+      });
+    }, 100);
+    return () => clearTimeout(timeoutId);
+  }, [sections.length, mode, selectedSection]);
+
   // Handle scroll indicator
   useEffect(() => {
     const container = containerRef.current;
@@ -159,6 +173,13 @@ const {
     // Analyze element context to determine appropriate toolbar
     const elementContext = analyzeElementContext(actualElement);
     
+    // Calculate position for toolbar
+    const rect = actualElement.getBoundingClientRect();
+    const position = {
+      x: rect.left + rect.width / 2,
+      y: rect.top - 10
+    };
+
     // Update store with element selection
     selectElement({
       sectionId,
@@ -172,9 +193,13 @@ const {
       state.multiSelection = [];
     });
 
-    // Show contextual toolbar(s) using the new system
+    // Show element toolbar with calculated position (use timeout to avoid infinite loop)
     const elementId = `${sectionId}.${elementKey}`;
-    showContextualToolbars(actualElement, elementId);
+    setTimeout(() => {
+      showElementToolbar(elementId, position);
+    }, 0);
+
+    console.log('🎯 Element selected, toolbar should show:', { elementId, position });
 
     trackPerformance('element-selection', startTime);
     
@@ -395,6 +420,7 @@ const handleAddSection = (afterSectionId?: string) => {
       <main 
         ref={containerRef}
         className="flex-1 overflow-y-auto bg-gray-50 relative"
+        style={{ maxHeight: '100vh' }}
         onClick={handleBackgroundClick}
       >
         {/* Main Content Container */}

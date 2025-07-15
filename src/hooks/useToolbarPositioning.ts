@@ -20,15 +20,9 @@ export interface PositioningOptions {
 
 export function useToolbarPositioning() {
   const {
-    floatingToolbars,
-    showSectionToolbar,
-    showElementToolbar,
-    showFormToolbar,
-    showImageToolbar,
-    hideSectionToolbar,
-    hideElementToolbar,
-    hideFormToolbar,
-    hideImageToolbar,
+    toolbar,
+    showToolbar,
+    hideToolbar,
   } = useEditStore();
 
   const positionCacheRef = useRef<Map<string, ToolbarPosition>>(new Map());
@@ -65,8 +59,8 @@ export function useToolbarPositioning() {
     basePosition = adjustForViewport(basePosition, toolbarType);
 
     // Resolve collisions with other toolbars
-    if (avoidCollisions) {
-      const visibleToolbars = getVisibleToolbars(floatingToolbars);
+    if (avoidCollisions && toolbar.visible) {
+      const visibleToolbars = [{ type: toolbar.type, position: toolbar.position }];
       basePosition = resolveCollisions(
         { type: toolbarType, position: basePosition },
         visibleToolbars
@@ -78,7 +72,7 @@ export function useToolbarPositioning() {
     positionCacheRef.current.set(cacheKey, basePosition);
 
     return basePosition;
-  }, [floatingToolbars]);
+  }, [toolbar]);
 
   // Show toolbar with smart positioning
   const showSmartToolbar = useCallback((
@@ -101,21 +95,8 @@ export function useToolbarPositioning() {
 
     const position = calculatePosition(targetElement, toolbarType, options);
 
-    // Show appropriate toolbar
-    switch (toolbarType) {
-      case 'section':
-        showSectionToolbar(targetId, { x: position.x, y: position.y });
-        break;
-      case 'element':
-        showElementToolbar(targetId, { x: position.x, y: position.y });
-        break;
-      case 'form':
-        showFormToolbar(targetId, { x: position.x, y: position.y });
-        break;
-      case 'image':
-        showImageToolbar(targetId, { x: position.x, y: position.y });
-        break;
-    }
+    // Show toolbar
+    showToolbar(toolbarType, targetId, { x: position.x, y: position.y });
 
     // Setup follow target behavior
     if (options.followTarget) {
@@ -123,10 +104,7 @@ export function useToolbarPositioning() {
     }
   }, [
     calculatePosition,
-    showSectionToolbar,
-    showElementToolbar,
-    showFormToolbar,
-    showImageToolbar
+    showToolbar
   ]);
 
   // Setup target following (position updates on scroll/resize)
@@ -152,27 +130,8 @@ export function useToolbarPositioning() {
         const newPosition = calculatePosition(targetElement, toolbarType, options);
         
         // Update store with new position
-        switch (toolbarType) {
-          case 'section':
-            if (floatingToolbars.section.visible) {
-              showSectionToolbar(targetId, { x: newPosition.x, y: newPosition.y });
-            }
-            break;
-          case 'element':
-            if (floatingToolbars.element.visible) {
-              showElementToolbar(targetId, { x: newPosition.x, y: newPosition.y });
-            }
-            break;
-          case 'form':
-            if (floatingToolbars.form.visible) {
-              showFormToolbar(targetId, { x: newPosition.x, y: newPosition.y });
-            }
-            break;
-          case 'image':
-            if (floatingToolbars.image.visible) {
-              showImageToolbar(targetId, { x: newPosition.x, y: newPosition.y });
-            }
-            break;
+        if (toolbar.visible && toolbar.type === toolbarType) {
+          showToolbar(toolbarType, targetId, { x: newPosition.x, y: newPosition.y });
         }
       }, 16); // 60fps throttling
     };
@@ -185,39 +144,22 @@ export function useToolbarPositioning() {
     window.addEventListener('resize', resizeListenerRef.current);
   }, [
     calculatePosition,
-    floatingToolbars,
-    showSectionToolbar,
-    showElementToolbar,
-    showFormToolbar,
-    showImageToolbar
+    toolbar,
+    showToolbar
   ]);
 
   // Hide toolbar with cleanup
   const hideSmartToolbar = useCallback((toolbarType: ToolbarType) => {
-    // Hide appropriate toolbar
-    switch (toolbarType) {
-      case 'section':
-        hideSectionToolbar();
-        break;
-      case 'element':
-        hideElementToolbar();
-        break;
-      case 'form':
-        hideFormToolbar();
-        break;
-      case 'image':
-        hideImageToolbar();
-        break;
-    }
+    // Hide toolbar
+    hideToolbar();
 
     // Clean up position cache
     const keysToRemove = Array.from(positionCacheRef.current.keys())
       .filter(key => key.startsWith(`${toolbarType}-`));
     keysToRemove.forEach(key => positionCacheRef.current.delete(key));
 
-    // Clean up listeners if no toolbars are visible
-    const anyVisible = Object.values(floatingToolbars).some(toolbar => toolbar.visible);
-    if (!anyVisible) {
+    // Clean up listeners if toolbar is not visible
+    if (!toolbar.visible) {
       if (scrollListenerRef.current) {
         window.removeEventListener('scroll', scrollListenerRef.current, true);
         scrollListenerRef.current = null;
@@ -228,74 +170,51 @@ export function useToolbarPositioning() {
       }
     }
   }, [
-    hideSectionToolbar,
-    hideElementToolbar,
-    hideFormToolbar,
-    hideImageToolbar,
-    floatingToolbars
+    hideToolbar,
+    toolbar
   ]);
 
   // Update all visible toolbar positions
   const updateAllPositions = useCallback(() => {
-    Object.entries(floatingToolbars).forEach(([type, toolbar]) => {
-      if (toolbar.visible && toolbar.targetId) {
-        const targetElement = document.querySelector(
-          type === 'section' 
-            ? `[data-section-id="${toolbar.targetId}"]`
-            : type === 'element'
-            ? `[data-section-id="${toolbar.targetId.split('.')[0]}"] [data-element-key="${toolbar.targetId.split('.')[1]}"]`
-            : `[data-${type}-id="${toolbar.targetId}"]`
-        ) as HTMLElement;
+    if (toolbar.visible && toolbar.targetId && toolbar.type) {
+      const targetElement = document.querySelector(
+        toolbar.type === 'section' 
+          ? `[data-section-id="${toolbar.targetId}"]`
+          : toolbar.type === 'element'
+          ? `[data-section-id="${toolbar.targetId.split('.')[0]}"] [data-element-key="${toolbar.targetId.split('.')[1]}"]`
+          : `[data-${toolbar.type}-id="${toolbar.targetId}"]`
+      ) as HTMLElement;
 
-        if (targetElement) {
-          const newPosition = calculatePosition(
-            targetElement, 
-            type as ToolbarType,
-            { followTarget: true }
-          );
+      if (targetElement) {
+        const newPosition = calculatePosition(
+          targetElement, 
+          toolbar.type as ToolbarType,
+          { followTarget: true }
+        );
 
-          // Update position in store
-          switch (type) {
-            case 'section':
-              showSectionToolbar(toolbar.targetId, { x: newPosition.x, y: newPosition.y });
-              break;
-            case 'element':
-              showElementToolbar(toolbar.targetId, { x: newPosition.x, y: newPosition.y });
-              break;
-            case 'form':
-              showFormToolbar(toolbar.targetId, { x: newPosition.x, y: newPosition.y });
-              break;
-            case 'image':
-              showImageToolbar(toolbar.targetId, { x: newPosition.x, y: newPosition.y });
-              break;
-          }
-        }
+        // Update position in store
+        showToolbar(toolbar.type, toolbar.targetId, { x: newPosition.x, y: newPosition.y });
       }
-    });
+    }
   }, [
-    floatingToolbars,
+    toolbar,
     calculatePosition,
-    showSectionToolbar,
-    showElementToolbar,
-    showFormToolbar,
-    showImageToolbar
+    showToolbar
   ]);
 
   // Check if point is inside any visible toolbar
   const isPointInToolbar = useCallback((x: number, y: number): boolean => {
-    return Object.values(floatingToolbars).some(toolbar => {
-      if (!toolbar.visible) return false;
-      
-      // Approximate toolbar bounds (will be refined with actual DOM measurement)
-      const toolbarWidth = 300; // Estimated toolbar width
-      const toolbarHeight = 48; // Estimated toolbar height
-      
-      return x >= toolbar.position.x && 
-             x <= toolbar.position.x + toolbarWidth &&
-             y >= toolbar.position.y && 
-             y <= toolbar.position.y + toolbarHeight;
-    });
-  }, [floatingToolbars]);
+    if (!toolbar.visible) return false;
+    
+    // Approximate toolbar bounds (will be refined with actual DOM measurement)
+    const toolbarWidth = 300; // Estimated toolbar width
+    const toolbarHeight = 48; // Estimated toolbar height
+    
+    return x >= toolbar.position.x && 
+           x <= toolbar.position.x + toolbarWidth &&
+           y >= toolbar.position.y && 
+           y <= toolbar.position.y + toolbarHeight;
+  }, [toolbar]);
 
   // Get cached position for a target
   const getCachedPosition = useCallback((toolbarType: ToolbarType, targetId: string): ToolbarPosition | null => {
@@ -333,8 +252,6 @@ export function useToolbarPositioning() {
     clearPositionCache,
     
     // State
-    visibleToolbars: Object.entries(floatingToolbars)
-      .filter(([_, toolbar]) => toolbar.visible)
-      .map(([type, toolbar]) => ({ type: type as ToolbarType, ...toolbar })),
+    visibleToolbars: toolbar.visible ? [{ type: toolbar.type as ToolbarType, ...toolbar }] : [],
   };
 }

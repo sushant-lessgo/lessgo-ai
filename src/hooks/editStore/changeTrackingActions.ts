@@ -44,7 +44,7 @@ export function createChangeTrackingActions(set: any, get: () => EditStore): Cha
         const oldValue = state.changeTracking.originalInputs[field as keyof typeof state.changeTracking.originalInputs];
         
         // Update current value
-        state.changeTracking.currentInputs[field as keyof typeof state.changeTracking.currentInputs] = newValue as any;
+        (state.changeTracking.currentInputs as any)[field] = newValue;
         
         // Track changes
         if (oldValue !== newValue) {

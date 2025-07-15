@@ -1,7 +1,7 @@
 // app/edit/[token]/components/modals/PricingModelModal.tsx
 "use client";
 
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import BaseModal from './BaseModal';
 import TaxonomyTile from '../ui/TaxonomyTile';
 import { pricingModels } from '@/modules/inference/taxonomy';

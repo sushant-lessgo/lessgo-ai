@@ -214,6 +214,15 @@ export const getStringContent = <K extends keyof StoreElementTypes>(
   value: StoreElementTypes[K] | undefined, 
   defaultValue: string = ''
 ): string => {
+  // Handle element objects with {content, type, isEditable, editMode} structure
+  if (value && typeof value === 'object' && !Array.isArray(value) && 'content' in value) {
+    const content = (value as any).content;
+    if (Array.isArray(content)) {
+      return content.length > 0 ? content[0] : defaultValue;
+    }
+    return content || defaultValue;
+  }
+  
   if (Array.isArray(value)) {
     // For arrays that should be strings, take first item
     return value.length > 0 ? value[0] : defaultValue;
@@ -225,6 +234,15 @@ export const getArrayContent = <K extends keyof StoreElementTypes>(
   value: StoreElementTypes[K] | undefined, 
   defaultValue: string[] = []
 ): string[] => {
+  // Handle element objects with {content, type, isEditable, editMode} structure
+  if (value && typeof value === 'object' && !Array.isArray(value) && 'content' in value) {
+    const content = (value as any).content;
+    if (Array.isArray(content)) {
+      return content.length > 0 ? content : defaultValue;
+    }
+    return content ? [content] : defaultValue;
+  }
+  
   if (Array.isArray(value)) {
     return value.length > 0 ? value : defaultValue;
   }

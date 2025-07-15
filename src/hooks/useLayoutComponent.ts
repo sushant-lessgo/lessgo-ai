@@ -10,6 +10,7 @@ import {
   StoreElementTypes 
 } from '@/types/storeTypes';
 import { getTextColorForBackground } from '@/modules/Design/background/backgroundIntegration';
+import { validateTextBackgroundContrast } from '@/utils/textContrastUtils';
 
 export interface UseLayoutComponentProps extends LayoutComponentProps {
   contentSchema: Record<string, { type: 'string' | 'array'; default: string }>;
@@ -41,24 +42,25 @@ export function useLayoutComponent<T = Record<string, any>>({
   const elements = sectionContent?.elements || {} as Partial<StoreElementTypes>;
 
   // Extract content with type safety and defaults
+  console.log(`🔍 useLayoutComponent extracting content for ${sectionId}:`, {
+    elements: elements,
+    elementKeys: Object.keys(elements),
+    firstElement: Object.values(elements)[0],
+    contentSchema: Object.keys(contentSchema)
+  });
+  
   const blockContent = extractLayoutContent(elements, contentSchema) as T;
+  
+  console.log(`📦 Extracted blockContent for ${sectionId}:`, {
+    blockContent,
+    headlineType: typeof blockContent.headline,
+    headlineValue: blockContent.headline
+  });
 
   // Get color tokens from store
   const colorTokens = getColorTokens();
 
-  // ✅ NEW: Get dynamic text colors based on background type
-  const dynamicTextColors = getTextColorForBackground(backgroundType, colorTokens);
-
-  console.log(`🎨 Dynamic text colors for ${sectionId} (${backgroundType}):`, {
-    backgroundType,
-    heading: dynamicTextColors.heading,
-    body: dynamicTextColors.body,
-    muted: dynamicTextColors.muted,
-    willUseWhiteText: backgroundType === 'primary',
-    willUseDarkText: backgroundType !== 'primary'
-  });
-
-  // Get section background CSS class
+  // ✅ MOVED: Get section background CSS class (define before usage)
   const getSectionBackground = () => {
     const backgrounds = theme?.colors?.sectionBackgrounds;
     if (!backgrounds) {
@@ -78,26 +80,48 @@ export function useLayoutComponent<T = Record<string, any>>({
     }
   };
 
+  // ✅ NEW: Get dynamic text colors based on background type
+  const dynamicTextColors = getTextColorForBackground(backgroundType, colorTokens);
+
+  // ✅ CONSERVATIVE: Always use safe gray text colors for maximum readability
+  const sectionBackground = getSectionBackground();
+  const validatedTextColors = {
+    heading: backgroundType === 'primary' ? 'text-white' : 'text-gray-900',
+    body: backgroundType === 'primary' ? 'text-gray-100' : 'text-gray-700',
+    muted: backgroundType === 'primary' ? 'text-gray-300' : 'text-gray-500'
+  };
+
+  console.log(`🎨 Dynamic text colors for ${sectionId} (${backgroundType}):`, {
+    backgroundType,
+    original: dynamicTextColors,
+    validated: validatedTextColors,
+    background: sectionBackground,
+    willUseWhiteText: backgroundType === 'primary',
+    willUseDarkText: backgroundType !== 'primary'
+  });
+
   // Content update handler
   const handleContentUpdate = (elementKey: string, value: string) => {
     updateElementContent(sectionId, elementKey, value);
   };
 
-  // ✅ ENHANCED: Create enhanced color tokens with dynamic text colors
+  // ✅ ENHANCED: Create enhanced color tokens with validated text colors
   const enhancedColorTokens = {
     ...colorTokens,
     
-    // ✅ Dynamic text colors based on background
-    dynamicHeading: dynamicTextColors.heading,
-    dynamicBody: dynamicTextColors.body,
-    dynamicMuted: dynamicTextColors.muted,
+    // ✅ Validated dynamic text colors based on background
+    dynamicHeading: validatedTextColors.heading,
+    dynamicBody: validatedTextColors.body,
+    dynamicMuted: validatedTextColors.muted,
     
-    // ✅ Backwards compatibility
-    textOnLight: colorTokens.textOnLight,
-    textOnDark: colorTokens.textOnDark,
-    textPrimary: colorTokens.textPrimary,
-    textSecondary: colorTokens.textSecondary,
-    textMuted: colorTokens.textMuted,
+    // ✅ Override primary text colors with validated ones
+    textPrimary: validatedTextColors.heading,
+    textSecondary: validatedTextColors.body,
+    textMuted: validatedTextColors.muted,
+    
+    // ✅ Backwards compatibility with fallbacks
+    textOnLight: colorTokens.textOnLight || validatedTextColors.heading,
+    textOnDark: colorTokens.textOnDark || 'text-white',
     
     // ✅ CTA colors (ensure accent colors are used)
     ctaBg: colorTokens.ctaBg || colorTokens.accent,
@@ -132,7 +156,7 @@ export function useLayoutComponent<T = Record<string, any>>({
     
     // ✅ ENHANCED: Dynamic styling based on background
     colorTokens: enhancedColorTokens,
-    dynamicTextColors, // ✅ NEW: Direct access to dynamic colors
+    dynamicTextColors: validatedTextColors, // ✅ NEW: Direct access to validated dynamic colors
     getTextStyle,
     sectionBackground: getSectionBackground(),
     

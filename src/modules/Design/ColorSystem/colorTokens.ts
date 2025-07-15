@@ -1,6 +1,14 @@
 // colorTokens.ts - UPDATED to properly integrate with background system
 // Clean separation: backgrounds from backgroundIntegration, interactive elements here
 
+import { 
+  getReadableTextColor, 
+  validateTextBackgroundContrast, 
+  getSafeTextColorsForBackground,
+  isLightBackground,
+  hasGoodContrast
+} from '@/utils/textContrastUtils';
+
 export type SectionBackgroundInput = {
   primary?: string;    // From bgVariations (hero sections)
   secondary?: string;  // From accentOptions.tailwind (features, testimonials)
@@ -29,15 +37,68 @@ export function generateColorTokens({
     accentCSS.replace('bg-', 'border-') : 
     `border-${accentColor}-600`;
 
+  // ✅ CONSERVATIVE: Always use neutral grays for light backgrounds, white for dark
+  const getContrastingTextColor = (backgroundColor: string | undefined) => {
+    if (!backgroundColor) return 'text-gray-900'; // Default to safe gray
+    
+    // For colored backgrounds (secondary/divider), always use gray for maximum readability
+    if (backgroundColor.includes('bg-') && !backgroundColor.includes('white')) {
+      return 'text-gray-900';
+    }
+    
+    return 'text-gray-900'; // Always use safe gray
+  };
+
+  // ✅ CONSERVATIVE: Always use neutral gray for secondary text
+  const getSafeSecondaryTextColor = (backgroundColor: string | undefined) => {
+    // Always use gray for secondary text - no more base color confusion
+    return 'text-gray-700';
+  };
+
+  // ✅ CONSERVATIVE: Always use neutral gray for muted text
+  const getSafeMutedTextColor = (backgroundColor: string | undefined) => {
+    // Always use gray for muted text - no more base color confusion
+    return 'text-gray-500';
+  };
+
+  // ✅ NEW: Validate CTA colors against background
+  const validateCTAColors = () => {
+    // Ensure CTA has good contrast on all background types
+    const backgrounds = [
+      sectionBackgrounds.primary,
+      sectionBackgrounds.secondary,
+      sectionBackgrounds.neutral,
+      sectionBackgrounds.divider
+    ];
+    
+    let safeCTABg = smartAccentCSS;
+    let safeCTAText = "text-white";
+    
+    // Check if accent color works on any background
+    const hasGoodContrastOnAny = backgrounds.some(bg => 
+      bg && hasGoodContrast(smartAccentCSS, bg)
+    );
+    
+    if (!hasGoodContrastOnAny) {
+      // Fallback to high contrast CTA
+      safeCTABg = "bg-gray-900";
+      safeCTAText = "text-white";
+    }
+    
+    return { safeCTABg, safeCTAText };
+  };
+
+  const { safeCTABg, safeCTAText } = validateCTAColors();
+
   return {
-    // 🎨 CTA & Interactive Elements - Uses accentColor for clean, consistent buttons
+    // 🎨 CTA & Interactive Elements - Uses validated accent colors for clean, consistent buttons
     accent: smartAccentCSS,                    // ✅ For buttons: "bg-purple-600"
     accentHover: smartAccentHover,             // ✅ For button hover: "bg-purple-700" 
     accentBorder: smartAccentBorder,           // ✅ For focused inputs: "border-purple-600"
 
-    ctaBg: smartAccentCSS,                     // ✅ Primary CTA background
+    ctaBg: safeCTABg,                          // ✅ Validated CTA background
     ctaHover: smartAccentHover,                // ✅ Primary CTA hover
-    ctaText: "text-white",                     // ✅ CTA text color
+    ctaText: safeCTAText,                      // ✅ Validated CTA text color
 
     // 🖋️ Interactive Text Colors - Uses accentColor for consistency
     link: `text-${accentColor}-600`,           // ✅ Links match CTA color
@@ -49,14 +110,20 @@ export function generateColorTokens({
     bgNeutral: sectionBackgrounds.neutral || "bg-white",
     bgDivider: sectionBackgrounds.divider || `bg-${baseColor}-100/50`,
 
-    // 📘 Text Colors - Based on baseColor for readability
-    textOnLight: `text-${baseColor}-900`,      // Dark text on light backgrounds
-    textOnDark: "text-white",                  // Light text on dark backgrounds  
-    textOnAccent: "text-white",                // Text on accent-colored elements
-    textPrimary: `text-${baseColor}-900`,      // Primary body text
-    textSecondary: `text-${baseColor}-600`,    // Secondary text
-    textMuted: `text-${baseColor}-500`,        // Muted text
-    textInverse: "text-white",                 // Inverse text
+    // 📘 Text Colors - CONSERVATIVE: Always use safe grays (no more base color confusion!)
+    textOnLight: "text-gray-900",                                          // Always safe dark gray on light backgrounds
+    textOnDark: "text-white",                                              // White text on dark backgrounds  
+    textOnAccent: "text-white",                                            // White text on accent-colored elements
+    textPrimary: "text-gray-900",                                          // Always safe dark gray for headlines
+    textSecondary: "text-gray-700",                                        // Always safe medium gray for body text
+    textMuted: "text-gray-500",                                            // Always safe light gray for muted text
+    textInverse: "text-white",                                             // White text for inverse
+
+    // 📘 Background-specific text colors - ALL SAFE GRAYS
+    textOnPrimary: "text-white",                                           // White on primary (gradient) backgrounds
+    textOnSecondary: "text-gray-900",                                      // Dark gray on secondary backgrounds  
+    textOnNeutral: "text-gray-900",                                        // Dark gray on neutral backgrounds
+    textOnDivider: "text-gray-900",                                        // Dark gray on divider backgrounds
 
     // 📦 Surface Colors - Based on baseColor
     surfaceCard: "bg-white",                   // Card backgrounds

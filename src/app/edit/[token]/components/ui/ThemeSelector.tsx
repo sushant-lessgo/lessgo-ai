@@ -5,7 +5,7 @@ import React, { useState } from 'react';
 import { useEditStore } from '@/hooks/useEditStore';
 
 export function ThemeSelector() {
-  const { theme, setTheme, getColorTokens } = useEditStore();
+  const { theme, /* setTheme, */ getColorTokens } = useEditStore();
   const [showColorPicker, setShowColorPicker] = useState(false);
   
   const colorTokens = getColorTokens();
@@ -20,14 +20,15 @@ export function ThemeSelector() {
   ];
 
   const handleColorChange = (baseColor: string, accentColor: string) => {
-    setTheme({
-      ...theme,
-      colors: {
-        ...theme.colors,
-        baseColor,
-        accentColor,
-      },
-    });
+    // setTheme({
+    //   ...theme,
+    //   colors: {
+    //     ...theme.colors,
+    //     baseColor,
+    //     accentColor,
+    //   },
+    // });
+    console.log('Theme would change to:', baseColor, accentColor);
   };
 
   return (

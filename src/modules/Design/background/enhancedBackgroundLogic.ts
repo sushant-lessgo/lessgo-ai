@@ -20,33 +20,46 @@ type UserProfile = Pick<InputVariables, 'landingPageGoals' | 'targetAudience' | 
 type SectionBackgroundType = 'primary' | 'secondary' | 'neutral' | 'divider';
 type BaselineBackgroundType = 'primary-highlight' | 'secondary-highlight' | 'neutral' | 'divider-zone';
 
-// ===== TEXT COLOR HELPER FUNCTIONS (MOVED TO TOP) =====
+// ===== TEXT COLOR HELPER FUNCTIONS (UPDATED WITH SAFE FALLBACKS) =====
 export function getTextColorForBackground(
   backgroundType: 'primary' | 'secondary' | 'neutral' | 'divider',
   colorTokens: any
 ): { heading: string; body: string; muted: string } {
   switch(backgroundType) {
     case 'primary':
-      // Dark gradients need white/light text
+      // Dark gradients need white/light text - use safe defaults
       return {
-        heading: colorTokens.textOnDark || 'text-white',
-        body: colorTokens.textOnDark || 'text-white', 
+        heading: colorTokens.textOnPrimary || colorTokens.textOnDark || 'text-white',
+        body: colorTokens.textOnPrimary || colorTokens.textOnDark || 'text-white', 
         muted: colorTokens.textInverse || 'text-gray-200'
       };
     case 'secondary':
-    case 'neutral': 
-    case 'divider':
-      // Light backgrounds need dark text
+      // Secondary backgrounds may have color tints - ALWAYS use safe gray text
       return {
-        heading: colorTokens.textOnLight || colorTokens.textPrimary || 'text-gray-900',
-        body: colorTokens.textSecondary || 'text-gray-600',
-        muted: colorTokens.textMuted || 'text-gray-500'
+        heading: 'text-gray-900',     // Always safe dark gray for headlines
+        body: 'text-gray-700',        // Always safe medium gray for body
+        muted: 'text-gray-500'        // Always safe light gray for muted
+      };
+    case 'neutral': 
+      // Neutral backgrounds - use safe gray text
+      return {
+        heading: 'text-gray-900',     // Always safe dark gray
+        body: 'text-gray-700',        // Always safe medium gray  
+        muted: 'text-gray-500'        // Always safe light gray
+      };
+    case 'divider':
+      // Divider backgrounds - use safe gray text
+      return {
+        heading: 'text-gray-900',     // Always safe dark gray
+        body: 'text-gray-700',        // Always safe medium gray
+        muted: 'text-gray-500'        // Always safe light gray
       };
     default:
+      // Safe fallback for any unknown background type
       return {
-        heading: colorTokens.textPrimary || 'text-gray-900',
-        body: colorTokens.textSecondary || 'text-gray-600',
-        muted: colorTokens.textMuted || 'text-gray-500'
+        heading: 'text-gray-900',
+        body: 'text-gray-700',
+        muted: 'text-gray-500'
       };
   }
 }

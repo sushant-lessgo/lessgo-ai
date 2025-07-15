@@ -828,7 +828,7 @@ export async function legacyAutoSaveDraft(params: LegacyAutoSaveDraftParams) {
  * ===== DEVELOPMENT UTILITIES =====
  */
 
-if (process.env.NODE_ENV === 'development') {
+if (process.env.NODE_ENV === 'development' && typeof window !== 'undefined') {
   (window as any).__autoSaveDraftDebug = {
     // Direct functions
     autoSaveDraft,

@@ -86,11 +86,13 @@ export function ElementDetector({ sectionId, children }: ElementDetectorProps) {
       `;
       
       // Add to section (relative positioning context)
-      if (sectionRef.current.style.position !== 'relative' && sectionRef.current.style.position !== 'absolute') {
-        sectionRef.current.style.position = 'relative';
+      if (sectionRef.current) {
+        if (sectionRef.current.style.position !== 'relative' && sectionRef.current.style.position !== 'absolute') {
+          sectionRef.current.style.position = 'relative';
+        }
+        
+        sectionRef.current.appendChild(hint);
       }
-      
-      sectionRef.current.appendChild(hint);
       
       // Show hint on hover
       element.addEventListener('mouseenter', () => {

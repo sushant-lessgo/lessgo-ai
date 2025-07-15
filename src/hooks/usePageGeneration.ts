@@ -518,9 +518,9 @@ editStore.updateTheme({
         warnings: allWarnings
       }));
       
-      // Even on error, try to navigate with whatever we have
+      // Even on error, try to navigate to generate page with whatever we have
       setTimeout(() => {
-        router.push(`/preview/${tokenId}`);
+        router.push(`/generate/${tokenId}`);
       }, 2000);
     }
   };

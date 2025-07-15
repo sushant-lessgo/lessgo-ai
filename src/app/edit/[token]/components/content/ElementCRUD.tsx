@@ -494,4 +494,4 @@ function BulkElementActions({ selectedCount, onBulkAction, onClearSelection }: B
 }
 
 // Export all components
-export { ElementManager, ElementCard, ElementValidationIndicator, BulkElementActions };
+export { ElementCard, ElementValidationIndicator, BulkElementActions };

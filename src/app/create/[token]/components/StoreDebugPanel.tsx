@@ -65,16 +65,16 @@ export function StoreDebugPanel() {
       <div className="p-3 overflow-y-auto max-h-64 text-xs font-mono">
         {activeTab === 'theme' && (
           <div className="space-y-2">
-            <div><strong>Base Color:</strong> {layout.theme.colors.baseColor}</div>
-            <div><strong>Accent Color:</strong> {layout.theme.colors.accentColor}</div>
-            <div><strong>Heading Font:</strong> {layout.theme.typography.headingFont}</div>
-            <div><strong>Body Font:</strong> {layout.theme.typography.bodyFont}</div>
-            <div><strong>Typography Scale:</strong> {layout.theme.typography.scale}</div>
-            <div><strong>Corners:</strong> {layout.theme.corners.radius}px</div>
+            <div><strong>Base Color:</strong> {theme.colors.baseColor}</div>
+            <div><strong>Accent Color:</strong> {theme.colors.accentColor}</div>
+            <div><strong>Heading Font:</strong> {theme.typography.headingFont}</div>
+            <div><strong>Body Font:</strong> {theme.typography.bodyFont}</div>
+            <div><strong>Typography Scale:</strong> {theme.typography.scale}</div>
+            <div><strong>Corners:</strong> {theme.corners?.radius || 'N/A'}px</div>
             <div className="pt-2 border-t">
               <strong>Section Backgrounds:</strong>
               <pre className="mt-1 text-xs bg-gray-100 p-2 rounded">
-                {JSON.stringify(layout.theme.colors.sectionBackgrounds, null, 2)}
+                {JSON.stringify(theme.colors.sectionBackgrounds, null, 2)}
               </pre>
             </div>
           </div>
@@ -82,7 +82,7 @@ export function StoreDebugPanel() {
 
         {activeTab === 'content' && (
           <div className="space-y-2">
-            <div><strong>Sections:</strong> {layout.sections.length}</div>
+            <div><strong>Sections:</strong> {sections.length}</div>
             <div><strong>Content Keys:</strong></div>
             <ul className="ml-2">
               {Object.keys(content).map(key => (
@@ -102,16 +102,16 @@ export function StoreDebugPanel() {
           <div className="space-y-2">
             <div><strong>Sections Order:</strong></div>
             <ul className="ml-2">
-              {layout.sections.map((section, i) => (
+              {sections.map((section, i) => (
                 <li key={section}>
-                  {i + 1}. {section} → {layout.sectionLayouts[section] || 'no layout'}
+                  {i + 1}. {section} → {sectionLayouts[section] || 'no layout'}
                 </li>
               ))}
             </ul>
             <div className="pt-2 border-t">
               <strong>Global Settings:</strong>
               <pre className="mt-1 text-xs bg-gray-100 p-2 rounded">
-                {JSON.stringify(layout.globalSettings, null, 2)}
+                {JSON.stringify({}, null, 2)}
               </pre>
             </div>
           </div>
@@ -138,14 +138,14 @@ export function StoreDebugPanel() {
       {/* Actions */}
       <div className="border-t p-2 space-y-1">
         <button
-          onClick={() => console.log('Full Store State:', usePageStore.getState())}
+          onClick={() => console.log('Full Store State:', useEditStore.getState())}
           className="w-full text-xs bg-gray-100 hover:bg-gray-200 py-1 rounded"
         >
           📄 Log Full Store to Console
         </button>
         <button
           onClick={() => {
-            const data = JSON.stringify(usePageStore.getState(), null, 2);
+            const data = JSON.stringify(useEditStore.getState(), null, 2);
             navigator.clipboard.writeText(data);
             alert('Store data copied to clipboard!');
           }}

@@ -316,7 +316,7 @@ export function EditStoreDebugPanel() {
               <div className="space-y-1 mt-1">
                 {store.getOptimizationSuggestions().map((suggestion, index) => (
                   <div key={index} className="bg-blue-50 p-1 rounded text-xs text-blue-600">
-                    • {suggestion}
+                    • {typeof suggestion === 'object' ? suggestion.title : suggestion}
                   </div>
                 ))}
                 {store.getOptimizationSuggestions().length === 0 && (

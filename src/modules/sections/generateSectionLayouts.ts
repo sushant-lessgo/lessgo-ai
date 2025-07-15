@@ -44,6 +44,8 @@ export function generateSectionLayouts(sectionIds: string[]) {
   const layouts: Record<string, string> = {};
 
   sectionIds.forEach((sectionId) => {
+    console.log(`🔍 Processing section: "${sectionId}" (type: ${typeof sectionId})`);
+    
     // ✅ READY: Uncomment this once all layoutPickers use the fixed LayoutPickerInput interface
     // const picker = layoutPickers[sectionId];
     // if (picker) {
@@ -74,6 +76,18 @@ export function generateSectionLayouts(sectionIds: string[]) {
       useCases: "PersonaGrid",
     };
     
+    console.log(`🔎 Checking fallback for "${sectionId}":`, {
+      sectionId,
+      sectionIdLength: sectionId.length,
+      sectionIdCharCodes: Array.from(sectionId).map(c => c.charCodeAt(0)),
+      hasInFallback: sectionId in fallbackLayouts,
+      fallbackValue: fallbackLayouts[sectionId],
+      directLookup: fallbackLayouts[sectionId] !== undefined,
+      relevantKeys: Object.keys(fallbackLayouts).filter(key => 
+        key.includes('before') || key.includes('unique') || key.includes('how') || key.includes('social')
+      )
+    });
+    
     // ✅ FIXED: Ensure every section gets a valid layout
     if (fallbackLayouts[sectionId]) {
       layouts[sectionId] = fallbackLayouts[sectionId];
@@ -95,8 +109,16 @@ export function generateSectionLayouts(sectionIds: string[]) {
         layouts[sectionId] = "TierCards";
       } else if (sectionId.includes('faq') || sectionId.includes('question')) {
         layouts[sectionId] = "AccordionFAQ";
+      } else if (sectionId.includes('beforeAfter') || sectionId.includes('before')) {
+        layouts[sectionId] = "SideBySideBlocks";
+      } else if (sectionId.includes('uniqueMechanism') || sectionId.includes('unique')) {
+        layouts[sectionId] = "StackedHighlights";
+      } else if (sectionId.includes('howItWorks') || sectionId.includes('how')) {
+        layouts[sectionId] = "ThreeStepHorizontal";
+      } else if (sectionId.includes('socialProof') || sectionId.includes('social')) {
+        layouts[sectionId] = "LogoWall";
       } else {
-        // Last resort: use a versatile layout
+        // Last resort: use a versatile layout that always works
         layouts[sectionId] = "StackedHighlights";
       }
       

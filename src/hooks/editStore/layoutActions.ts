@@ -94,7 +94,7 @@ export function createLayoutActions(set: any, get: any): LayoutActions {
           },
         };
         
-        state.autoSave.isDirty = true;
+        state.persistence.isDirty = true;
         
         // Add to history
         state.history.undoStack.push({
@@ -132,7 +132,7 @@ export function createLayoutActions(set: any, get: any): LayoutActions {
         delete state.loadingStates[sectionId];
         delete state.errors[sectionId];
         
-        state.autoSave.isDirty = true;
+        state.persistence.isDirty = true;
         
         // Add to history
         state.history.undoStack.push({
@@ -151,7 +151,7 @@ export function createLayoutActions(set: any, get: any): LayoutActions {
       set((state: EditStore) => {
         const oldOrder = [...state.sections];
         state.sections = newOrder;
-        state.autoSave.isDirty = true;
+        state.persistence.isDirty = true;
         
         state.history.undoStack.push({
           type: 'layout',
@@ -189,7 +189,7 @@ export function createLayoutActions(set: any, get: any): LayoutActions {
           },
         };
         
-        state.autoSave.isDirty = true;
+        state.persistence.isDirty = true;
         
         state.history.undoStack.push({
           type: 'section',
@@ -214,7 +214,7 @@ export function createLayoutActions(set: any, get: any): LayoutActions {
           state.content[sectionId].layout = layout;
         }
         
-        state.autoSave.isDirty = true;
+        state.persistence.isDirty = true;
         
         state.history.undoStack.push({
           type: 'layout',
@@ -240,7 +240,7 @@ export function createLayoutActions(set: any, get: any): LayoutActions {
           }
         });
         
-        state.autoSave.isDirty = true;
+        state.persistence.isDirty = true;
         
         state.history.undoStack.push({
           type: 'layout',
@@ -276,7 +276,7 @@ updateSectionLayout: (sectionId: string, newLayout: string) =>
         timestamp: Date.now(),
       });
       
-      state.autoSave.isDirty = true;
+      state.persistence.isDirty = true;
       state.lastUpdated = Date.now();
       
       // Add to history
@@ -317,7 +317,7 @@ moveSection: (sectionId: string, direction: 'up' | 'down') =>
         timestamp: Date.now(),
       });
       
-      state.autoSave.isDirty = true;
+      state.persistence.isDirty = true;
       state.lastUpdated = Date.now();
       
       // Add to history
@@ -341,7 +341,7 @@ moveSection: (sectionId: string, direction: 'up' | 'down') =>
       set((state: EditStore) => {
         const oldTheme = { ...state.theme };
         Object.assign(state.theme, theme);
-        state.autoSave.isDirty = true;
+        state.persistence.isDirty = true;
         
         state.history.undoStack.push({
           type: 'theme',
@@ -358,7 +358,7 @@ moveSection: (sectionId: string, direction: 'up' | 'down') =>
       set((state: EditStore) => {
         const oldBaseColor = state.theme.colors.baseColor;
         state.theme.colors.baseColor = baseColor;
-        state.autoSave.isDirty = true;
+        state.persistence.isDirty = true;
         
         state.history.undoStack.push({
           type: 'theme',
@@ -375,7 +375,7 @@ moveSection: (sectionId: string, direction: 'up' | 'down') =>
       set((state: EditStore) => {
         const oldAccentColor = state.theme.colors.accentColor;
         state.theme.colors.accentColor = accentColor;
-        state.autoSave.isDirty = true;
+        state.persistence.isDirty = true;
         
         state.history.undoStack.push({
           type: 'theme',
@@ -392,7 +392,7 @@ moveSection: (sectionId: string, direction: 'up' | 'down') =>
       set((state: EditStore) => {
         const oldValue = state.theme.colors.sectionBackgrounds[type];
         state.theme.colors.sectionBackgrounds[type] = value;
-        state.autoSave.isDirty = true;
+        state.persistence.isDirty = true;
         
         state.history.undoStack.push({
           type: 'theme',
@@ -420,7 +420,7 @@ moveSection: (sectionId: string, direction: 'up' | 'down') =>
         state.theme.colors.sectionBackgrounds.neutral = backgroundSystem.neutral;
         state.theme.colors.sectionBackgrounds.divider = backgroundSystem.divider;
         
-        state.autoSave.isDirty = true;
+        state.persistence.isDirty = true;
         
         state.history.undoStack.push({
           type: 'theme',
@@ -437,7 +437,7 @@ moveSection: (sectionId: string, direction: 'up' | 'down') =>
       set((state: EditStore) => {
         const oldTypography = { ...state.theme.typography };
         Object.assign(state.theme.typography, typography);
-        state.autoSave.isDirty = true;
+        state.persistence.isDirty = true;
         
         state.history.undoStack.push({
           type: 'theme',
@@ -472,7 +472,7 @@ setBackgroundType: (sectionId: string, backgroundType: BackgroundType) =>
         timestamp: Date.now(),
       });
       
-      state.autoSave.isDirty = true;
+      state.persistence.isDirty = true;
       state.lastUpdated = Date.now();
       
       // Add to history
@@ -501,7 +501,7 @@ updateTypographyTheme: (newTheme: FontTheme) =>
     state.theme.typography.headingFont = newTheme.headingFont;
     state.theme.typography.bodyFont = newTheme.bodyFont;
     
-    state.autoSave.isDirty = true;
+    state.persistence.isDirty = true;
     
     // Add to history
     state.history.undoStack.push({
@@ -525,7 +525,7 @@ resetTypographyToGenerated: () =>
     state.theme.typography.headingFont = originalFont.headingFont;
     state.theme.typography.bodyFont = originalFont.bodyFont;
     
-    state.autoSave.isDirty = true;
+    state.persistence.isDirty = true;
     
     // Add to history
     state.history.undoStack.push({
@@ -597,7 +597,7 @@ getTypographyForSection: (sectionId: string) => {
           }
         });
         
-        state.autoSave.isDirty = true;
+        state.persistence.isDirty = true;
         
         // Add to history - using 'theme' type since it's primarily a theme reset
         state.history.undoStack.push({

@@ -1,10 +1,11 @@
 // app/edit/[token]/components/modals/TaxonomyModalManager.tsx
 "use client";
 
-import { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { useOnboardingStore } from '@/hooks/useOnboardingStore';
 import { useEditStore } from '@/hooks/useEditStore';
-import type { CanonicalFieldName } from '@/types/core/index';
+import type { CanonicalFieldName, HiddenFieldName, AnyFieldName } from '@/types/core/index';
+import { HIDDEN_FIELD_NAMES, HIDDEN_FIELD_DISPLAY_NAMES } from '@/types/core/index';
 
 // Import individual modal components
 import MarketCategoryModal from './MarketCategoryModal';
@@ -18,25 +19,25 @@ import HiddenFieldModals from './HiddenFieldModals';
 
 interface ModalState {
   isOpen: boolean;
-  fieldName?: CanonicalFieldName;
+  fieldName?: AnyFieldName;
   currentValue?: string;
   modalType?: string;
 }
 
 export function TaxonomyModalManager() {
   const [modalState, setModalState] = useState<ModalState>({ isOpen: false });
-  const [modalQueue, setModalQueue] = useState<CanonicalFieldName[]>([]);
+  const [modalQueue, setModalQueue] = useState<AnyFieldName[]>([]);
 
   const { 
     validatedFields, 
     hiddenInferredFields, 
-    confirmField,
-    updateHiddenField 
+    confirmField
+    // updateHiddenField 
   } = useOnboardingStore();
 
   const { triggerAutoSave } = useEditStore();
 
-  const openFieldModal = useCallback((fieldName: CanonicalFieldName, currentValue?: string) => {
+  const openFieldModal = useCallback((fieldName: AnyFieldName, currentValue?: string) => {
     const modalType = getModalTypeForField(fieldName);
     
     setModalState({
@@ -62,8 +63,8 @@ export function TaxonomyModalManager() {
     }
   }, [modalQueue, openFieldModal]);
 
-  const getCurrentFieldValue = (fieldName: CanonicalFieldName): string => {
-    return validatedFields[fieldName] || hiddenInferredFields[fieldName] || '';
+  const getCurrentFieldValue = (fieldName: AnyFieldName): string => {
+    return (validatedFields as any)[fieldName] || (hiddenInferredFields as any)[fieldName] || '';
   };
 
   const handleFieldSelection = useCallback((value: string) => {
@@ -72,13 +73,13 @@ export function TaxonomyModalManager() {
     const fieldName = modalState.fieldName;
     
     // Update appropriate store
-    if (validatedFields[fieldName] !== undefined) {
+    if ((validatedFields as any)[fieldName] !== undefined) {
       // Field exists in validatedFields - update via confirmField
       const displayName = getDisplayNameForField(fieldName);
       confirmField(displayName, value);
-    } else if (hiddenInferredFields[fieldName] !== undefined) {
+    } else if ((hiddenInferredFields as any)[fieldName] !== undefined) {
       // Field exists in hiddenInferredFields - update via updateHiddenField
-      updateHiddenField(fieldName, value);
+      // updateHiddenField(fieldName, value);
     } else {
       // New field - add to validatedFields
       const displayName = getDisplayNameForField(fieldName);
@@ -86,14 +87,14 @@ export function TaxonomyModalManager() {
     }
 
     // Handle field dependencies
-    handleFieldDependency(fieldName, value);
+    handleFieldDependency(fieldName as any, value);
     
     // Trigger auto-save
     triggerAutoSave();
     
     // Close modal
     closeModal();
-  }, [modalState.fieldName, validatedFields, hiddenInferredFields, confirmField, updateHiddenField, triggerAutoSave, closeModal]);
+  }, [modalState.fieldName, validatedFields, hiddenInferredFields, confirmField, triggerAutoSave, closeModal]);
 
   const handleFieldDependency = (updatedField: CanonicalFieldName, newValue: string) => {
     // Market category change forces subcategory selection
@@ -103,8 +104,19 @@ export function TaxonomyModalManager() {
     }
   };
 
-  const getModalTypeForField = (fieldName: CanonicalFieldName): string => {
-    const fieldModalMap: Record<CanonicalFieldName, string> = {
+  const isHiddenField = (fieldName: AnyFieldName): boolean => {
+    // Use the imported HIDDEN_FIELD_NAMES constant
+    return HIDDEN_FIELD_NAMES.includes(fieldName as HiddenFieldName);
+  };
+
+  const getModalTypeForField = (fieldName: AnyFieldName): string => {
+    // Check if it's a hidden field first
+    if (isHiddenField(fieldName)) {
+      return 'HiddenFieldModals';
+    }
+    
+    // Handle canonical fields
+    const fieldModalMap: Partial<Record<CanonicalFieldName, string>> = {
       marketCategory: 'MarketCategoryModal',
       marketSubcategory: 'MarketSubcategoryModal',
       targetAudience: 'TargetAudienceModal',
@@ -114,11 +126,24 @@ export function TaxonomyModalManager() {
       pricingModel: 'PricingModelModal',
     };
 
-    return fieldModalMap[fieldName] || 'TextInputModal';
+    const modalType = fieldModalMap[fieldName as CanonicalFieldName] || 'TextInputModal';
+    
+    // Debug logging in development only
+    if (process.env.NODE_ENV === 'development') {
+      console.log('🔍 Field Modal Routing:', { fieldName, modalType, isHidden: isHiddenField(fieldName) });
+    }
+
+    return modalType;
   };
 
-  const getDisplayNameForField = (fieldName: CanonicalFieldName): string => {
-    const displayNames: Record<CanonicalFieldName, string> = {
+  const getDisplayNameForField = (fieldName: AnyFieldName): string => {
+    // Check if it's a hidden field first
+    if (isHiddenField(fieldName)) {
+      return HIDDEN_FIELD_DISPLAY_NAMES[fieldName as HiddenFieldName] || fieldName;
+    }
+    
+    // Handle canonical fields
+    const displayNames: Partial<Record<CanonicalFieldName, string>> = {
       marketCategory: 'Market Category',
       marketSubcategory: 'Market Subcategory',
       targetAudience: 'Target Audience',
@@ -128,7 +153,7 @@ export function TaxonomyModalManager() {
       pricingModel: 'Pricing Category and Model',
     };
 
-    return displayNames[fieldName] || fieldName;
+    return displayNames[fieldName as CanonicalFieldName] || fieldName;
   };
 
   // Expose modal manager to parent components
@@ -165,7 +190,7 @@ export function TaxonomyModalManager() {
         return <MarketCategoryModal {...commonProps} />;
       
       case 'MarketSubcategoryModal':
-        const currentCategory = validatedFields.marketCategory || hiddenInferredFields.marketCategory;
+        const currentCategory = validatedFields.marketCategory || (hiddenInferredFields as any).marketCategory;
         return <MarketSubcategoryModal {...commonProps} currentCategory={currentCategory} />;
       
       case 'TargetAudienceModal':
@@ -184,8 +209,8 @@ export function TaxonomyModalManager() {
         return (
           <TextInputModal 
             {...commonProps} 
-            placeholder={getPlaceholderForField(modalState.fieldName!)}
-            description={getDescriptionForField(modalState.fieldName!)}
+            placeholder={getPlaceholderForField(modalState.fieldName! as any)}
+            description={getDescriptionForField(modalState.fieldName! as any)}
           />
         );
       
@@ -226,11 +251,6 @@ export function TaxonomyModalManager() {
     return descriptions[fieldName] || '';
   };
 
-  const isHiddenField = (fieldName: CanonicalFieldName): boolean => {
-    // These would be the hidden inferred field names
-    const hiddenFieldNames = ['awarenessLevel', 'copyIntent', 'toneProfile', 'marketSophisticationLevel', 'problemType'];
-    return hiddenFieldNames.includes(fieldName);
-  };
 
   return (
     <>

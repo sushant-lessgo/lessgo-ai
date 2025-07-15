@@ -116,6 +116,8 @@ export interface UIActions {
   hideFormToolbar: () => void;
   showImageToolbar: (imageId: string, position: { x: number; y: number }) => void;
   hideImageToolbar: () => void;
+  showTextToolbar: (position: { x: number; y: number }) => void;
+  hideTextToolbar: () => void;
   
   // Auto-Save UI
   triggerAutoSave: () => void;

@@ -95,7 +95,7 @@ CONTENT-ONLY REGENERATION:
       state.aiGeneration.currentOperation = null;
       state.aiGeneration.lastGenerated = Date.now();
       state.isLoading = false;
-      state.autoSave.isDirty = true;
+      state.persistence.isDirty = true;
 
       state.history.undoStack.push({
         type: 'content',
@@ -213,7 +213,7 @@ const handleDesignAndCopyRegeneration = async (
       state.aiGeneration.currentOperation = null;
       state.aiGeneration.lastGenerated = Date.now();
       state.isLoading = false;
-      state.autoSave.isDirty = true;
+      state.persistence.isDirty = true;
 
       state.history.undoStack.push({
         type: 'content',

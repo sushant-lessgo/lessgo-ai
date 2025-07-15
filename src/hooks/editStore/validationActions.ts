@@ -79,6 +79,33 @@ export function createValidationActions(set: any, get: any): ValidationActions {
       // Update section validation status
       set((state: EditStore) => {
         if (state.content[sectionId]) {
+          // Initialize editMetadata if it doesn't exist
+          if (!state.content[sectionId].editMetadata) {
+            state.content[sectionId].editMetadata = {
+              isSelected: false,
+              lastModified: Date.now(),
+              completionPercentage: 0,
+              validationStatus: {
+                isValid: true,
+                errors: [],
+                warnings: [],
+                missingRequired: [],
+                lastValidated: Date.now(),
+              },
+            };
+          }
+          
+          // Initialize validationStatus if it doesn't exist
+          if (!state.content[sectionId].editMetadata.validationStatus) {
+            state.content[sectionId].editMetadata.validationStatus = {
+              isValid: true,
+              errors: [],
+              warnings: [],
+              missingRequired: [],
+              lastValidated: Date.now(),
+            };
+          }
+          
           state.content[sectionId].editMetadata.validationStatus = {
             isValid,
             errors: errors.map((error: string) => ({

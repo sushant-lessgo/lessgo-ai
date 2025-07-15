@@ -1,5 +1,5 @@
 // app/edit/[token]/components/toolbars/SectionToolbar.tsx - Enhanced with ElementPicker Integration
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { useEditStore } from '@/hooks/useEditStore';
 import { useToolbarActions } from '@/hooks/useToolbarActions';
 import { useElementPicker } from '@/hooks/useElementPicker';
@@ -7,7 +7,7 @@ import { useSectionCRUD } from '@/hooks/useSectionCRUD';
 import { calculateArrowPosition } from '@/utils/toolbarPositioning';
 import { AdvancedActionsMenu } from './AdvancedActionsMenu';
 import { AddSectionButton } from '../content/SectionCRUD';
-import type { SectionType } from '@/types/store/state';
+import type { SectionType } from '@/types/core/content';
 
 interface SectionToolbarProps {
   sectionId: string;
@@ -41,7 +41,36 @@ export function SectionToolbar({ sectionId, position, contextActions }: SectionT
 
   const section = content[sectionId];
   const sectionIndex = sections.indexOf(sectionId);
-  const validation = validateSection(sectionId);
+  
+  // Get validation status from existing metadata (read-only)
+  const validation = useMemo(() => {
+    if (!section) return null;
+    
+    // Read validation from existing metadata instead of triggering validation
+    const validationStatus = section.editMetadata?.validationStatus;
+    if (validationStatus) {
+      return {
+        sectionId,
+        valid: validationStatus.isValid,
+        isValid: validationStatus.isValid,
+        errors: validationStatus.errors?.map(e => e.message) || [],
+        completionPercentage: section.editMetadata?.completionPercentage || 0,
+        missingElements: validationStatus.missingRequired || [],
+        hasRequiredContent: validationStatus.missingRequired?.length === 0,
+      };
+    }
+    
+    // Fallback to basic validation without triggering state updates
+    return {
+      sectionId,
+      valid: true,
+      isValid: true,
+      errors: [],
+      completionPercentage: 100,
+      missingElements: [],
+      hasRequiredContent: true,
+    };
+  }, [sectionId, section?.editMetadata]);
 
   // Calculate arrow position
   const targetElement = document.querySelector(`[data-section-id="${sectionId}"]`);
@@ -131,11 +160,11 @@ export function SectionToolbar({ sectionId, position, contextActions }: SectionT
     },
     {
       id: 'visibility',
-      label: section?.isVisible === false ? 'Show' : 'Hide',
-      icon: section?.isVisible === false ? 'eye' : 'eye-off',
+      label: 'Toggle',
+      icon: 'eye',
       handler: () => {
         toggleSectionVisibility(sectionId);
-        const newState = section?.isVisible === false ? 'shown' : 'hidden';
+        const newState = 'toggled';
         announceLiveRegion(`Section ${newState}`);
       },
     },
@@ -241,14 +270,14 @@ export function SectionToolbar({ sectionId, position, contextActions }: SectionT
           {/* Section Indicator with Validation */}
           <div className="flex items-center space-x-2 mr-3">
             <div className={`w-2 h-2 rounded-full ${
-              validation.isValid ? 'bg-green-500' : 
-              validation.completionPercentage > 50 ? 'bg-yellow-500' : 'bg-red-500'
+              validation?.isValid ? 'bg-green-500' : 
+              (validation?.completionPercentage || 0) > 50 ? 'bg-yellow-500' : 'bg-red-500'
             }`}></div>
             <span className="text-xs font-medium text-gray-700">
-              {section?.type ? section.type.charAt(0).toUpperCase() + section.type.slice(1) : 'Section'}
+              {sectionId.charAt(0).toUpperCase() + sectionId.slice(1)}
             </span>
             <span className="text-xs text-gray-500">
-              {validation.completionPercentage}%
+              {validation?.completionPercentage || 0}%
             </span>
           </div>
           
@@ -296,10 +325,9 @@ export function SectionToolbar({ sectionId, position, contextActions }: SectionT
         <AdvancedActionsMenu
           ref={advancedRef}
           actions={advancedActions}
-          position={{
-            x: position.x + 400,
-            y: position.y,
-          }}
+          triggerElement={document.body}
+          toolbarType="section"
+          isVisible={showAdvanced}
           onClose={() => setShowAdvanced(false)}
         />
       )}

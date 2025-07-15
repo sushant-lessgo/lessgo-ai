@@ -76,8 +76,8 @@ export function ResponsiveBackgroundModal({ isOpen, onClose, tokenId }: Responsi
 
   if (!isOpen) return null;
 
-  const hasErrors = validationResult?.errors.length > 0;
-  const hasWarnings = validationResult?.warnings.length > 0;
+  const hasErrors = validationResult?.errors && validationResult.errors.length > 0;
+  const hasWarnings = validationResult?.warnings && validationResult.warnings.length > 0;
 
   return (
     <>

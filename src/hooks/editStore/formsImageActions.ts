@@ -58,7 +58,7 @@ export function createFormsImageActions(set: any, get: any): FormsImageActions {
         }
         
         state.forms.activeForm = formId;
-        state.autoSave.isDirty = true;
+        state.persistence.isDirty = true;
       });
       
       console.log('✅ Form created:', formId);
@@ -124,7 +124,7 @@ export function createFormsImageActions(set: any, get: any): FormsImageActions {
           );
         }
         
-        state.autoSave.isDirty = true;
+        state.persistence.isDirty = true;
         console.log('✅ Form field added:', { formId, fieldType, fieldId });
       }),
     
@@ -151,7 +151,7 @@ export function createFormsImageActions(set: any, get: any): FormsImageActions {
             });
             
             state.history.redoStack = [];
-            state.autoSave.isDirty = true;
+            state.persistence.isDirty = true;
             
             console.log('✅ Form field updated:', { formId, fieldId, properties });
           }
@@ -186,7 +186,7 @@ export function createFormsImageActions(set: any, get: any): FormsImageActions {
             });
             
             state.history.redoStack = [];
-            state.autoSave.isDirty = true;
+            state.persistence.isDirty = true;
             
             console.log('✅ Form field deleted:', { formId, fieldId });
           }
@@ -221,7 +221,7 @@ export function createFormsImageActions(set: any, get: any): FormsImageActions {
           });
           
           state.history.redoStack = [];
-          state.autoSave.isDirty = true;
+          state.persistence.isDirty = true;
           
           console.log('✅ Form settings updated:', { formId, settings });
         }
@@ -259,7 +259,7 @@ export function createFormsImageActions(set: any, get: any): FormsImageActions {
             });
             
             state.history.redoStack = [];
-            state.autoSave.isDirty = true;
+            state.persistence.isDirty = true;
             
             console.log('✅ Form integration connected:', { formId, integration });
           }
@@ -659,6 +659,33 @@ export function createFormsImageActions(set: any, get: any): FormsImageActions {
       // Update form validation status
       set((state: EditStore) => {
         if (state.content[`form-${formId}`]) {
+          // Initialize editMetadata if it doesn't exist
+          if (!state.content[`form-${formId}`].editMetadata) {
+            state.content[`form-${formId}`].editMetadata = {
+              isSelected: false,
+              lastModified: Date.now(),
+              completionPercentage: 0,
+              validationStatus: {
+                isValid: true,
+                errors: [],
+                warnings: [],
+                missingRequired: [],
+                lastValidated: Date.now(),
+              },
+            };
+          }
+          
+          // Initialize validationStatus if it doesn't exist
+          if (!state.content[`form-${formId}`].editMetadata.validationStatus) {
+            state.content[`form-${formId}`].editMetadata.validationStatus = {
+              isValid: true,
+              errors: [],
+              warnings: [],
+              missingRequired: [],
+              lastValidated: Date.now(),
+            };
+          }
+          
           state.content[`form-${formId}`].editMetadata.validationStatus = {
             isValid,
             errors: errors.map(error => ({
@@ -768,7 +795,7 @@ export function createFormsImageActions(set: any, get: any): FormsImageActions {
         }
         
         state.forms.activeForm = formId;
-        state.autoSave.isDirty = true;
+        state.persistence.isDirty = true;
         
         // Track change
         state.history.undoStack.push({

@@ -395,7 +395,26 @@ export const DISPLAY_TO_CANONICAL = {
   'Pricing Category and Model': 'pricingModel'
 } as const;
 
+// Hidden AI-inferred field names (not part of onboarding flow)
+export const HIDDEN_FIELD_NAMES = [
+  'awarenessLevel',
+  'copyIntent', 
+  'toneProfile',
+  'marketSophisticationLevel',
+  'problemType'
+] as const;
+
+export const HIDDEN_FIELD_DISPLAY_NAMES: Record<string, string> = {
+  awarenessLevel: 'Awareness Level',
+  copyIntent: 'Copy Intent',
+  toneProfile: 'Tone Profile',
+  marketSophisticationLevel: 'Market Sophistication',
+  problemType: 'Problem Type'
+};
+
 export type CanonicalFieldName = typeof CANONICAL_FIELD_NAMES[number];
+export type HiddenFieldName = typeof HIDDEN_FIELD_NAMES[number];
+export type AnyFieldName = CanonicalFieldName | HiddenFieldName;
 export type DisplayFieldName = typeof FIELD_DISPLAY_NAMES[CanonicalFieldName];
 
 /**

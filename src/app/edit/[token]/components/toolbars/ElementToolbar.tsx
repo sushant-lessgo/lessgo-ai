@@ -282,10 +282,9 @@ export function ElementToolbar({ elementSelection, position, contextActions }: E
         <AdvancedActionsMenu
           ref={advancedRef}
           actions={advancedActions}
-          position={{
-            x: position.x + 380,
-            y: position.y,
-          }}
+          triggerElement={document.body}
+          toolbarType="element"
+          isVisible={showAdvanced}
           onClose={() => setShowAdvanced(false)}
         />
       )}

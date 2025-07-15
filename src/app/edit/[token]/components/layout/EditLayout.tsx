@@ -84,16 +84,16 @@ export function EditLayout({ tokenId }: EditLayoutProps) {
           className={`
             transition-all duration-300 ease-in-out border-r border-gray-200 bg-white
             ${leftPanel.collapsed 
-              ? 'w-0 -translate-x-full lg:translate-x-0 lg:w-0' 
+              ? 'w-12 lg:w-12' 
               : `w-[${leftPanel.width}px]`
             }
             lg:relative absolute lg:static z-30 lg:z-auto
             ${leftPanel.collapsed ? '' : 'shadow-lg lg:shadow-none'}
           `}
           style={{
-            width: leftPanel.collapsed ? 0 : `${leftPanel.width}px`,
-            maxWidth: leftPanel.collapsed ? 0 : '500px',
-            minWidth: leftPanel.collapsed ? 0 : '250px',
+            width: leftPanel.collapsed ? '48px' : `${leftPanel.width}px`,
+            maxWidth: leftPanel.collapsed ? '48px' : '500px',
+            minWidth: leftPanel.collapsed ? '48px' : '250px',
           }}
         >
           <LeftPanel tokenId={tokenId} />

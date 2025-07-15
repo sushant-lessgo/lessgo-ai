@@ -23,8 +23,8 @@ export function ImageToolbar({ targetId, position, contextActions }: ImageToolba
 
   const {
     images,
-    updateImageAsset,
-    toggleStockPhotoSearch,
+    // updateImageAsset,
+    // toggleStockPhotoSearch,
     announceLiveRegion,
   } = useEditStore();
 
@@ -76,16 +76,16 @@ export function ImageToolbar({ targetId, position, contextActions }: ImageToolba
       const previewUrl = URL.createObjectURL(file);
       
       // Update image asset
-      updateImageAsset(targetId, {
-        id: targetId,
-        url: previewUrl,
-        alt: file.name,
-        width: 0, // Will be set after loading
-        height: 0,
-        format: file.type.split('/')[1] as any,
-        size: file.size,
-        isOptimized: false,
-      });
+      // updateImageAsset(targetId, {
+      //   id: targetId,
+      //   url: previewUrl,
+      //   alt: file.name,
+      //   width: 0, // Will be set after loading
+      //   height: 0,
+      //   format: file.type.split('/')[1] as any,
+      //   size: file.size,
+      //   isOptimized: false,
+      // });
 
       announceLiveRegion('Image uploaded successfully');
       setShowUploader(false);
@@ -94,7 +94,7 @@ export function ImageToolbar({ targetId, position, contextActions }: ImageToolba
 
   // Handle stock photo search
   const handleStockPhotos = () => {
-    toggleStockPhotoSearch();
+    // toggleStockPhotoSearch();
     setShowStockPhotos(true);
     announceLiveRegion('Opening stock photo search');
   };
@@ -285,10 +285,9 @@ export function ImageToolbar({ targetId, position, contextActions }: ImageToolba
         <AdvancedActionsMenu
           ref={advancedRef}
           actions={advancedActions}
-          position={{
-            x: position.x + 340,
-            y: position.y,
-          }}
+          triggerElement={document.body}
+          toolbarType="image"
+          isVisible={showAdvanced}
           onClose={() => setShowAdvanced(false)}
         />
       )}
@@ -302,16 +301,16 @@ export function ImageToolbar({ targetId, position, contextActions }: ImageToolba
           }}
           onClose={() => setShowStockPhotos(false)}
           onSelectImage={(imageUrl) => {
-            updateImageAsset(targetId, {
-              id: targetId,
-              url: imageUrl,
-              alt: 'Stock photo',
-              width: 0,
-              height: 0,
-              format: 'jpg',
-              size: 0,
-              isOptimized: true,
-            });
+            // updateImageAsset(targetId, {
+            //   id: targetId,
+            //   url: imageUrl,
+            //   alt: 'Stock photo',
+            //   width: 0,
+            //   height: 0,
+            //   format: 'jpg',
+            //   size: 0,
+            //   isOptimized: true,
+            // });
             setShowStockPhotos(false);
             announceLiveRegion('Stock photo selected');
           }}

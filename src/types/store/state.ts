@@ -149,16 +149,17 @@ export interface UISlice {
   leftPanel: {
     width: number;
     collapsed: boolean;
+    manuallyToggled: boolean;
     activeTab: 'addSections' | 'pageStructure' | 'inputVariables' | 'aiControls' | 'guidance' | 'insights';
   };
   
-  // Enhanced Floating Toolbars with Advanced Menu Support
-  floatingToolbars: {
-    section: ToolbarState;
-    element: ToolbarState;
-    text: ToolbarState;
-    form: ToolbarState;
-    image: ToolbarState;
+  // Simplified single toolbar state
+  toolbar: {
+    type: 'section' | 'element' | 'text' | 'image' | 'form' | null;
+    visible: boolean;
+    position: { x: number; y: number };
+    targetId: string | null;
+    actions: string[];
   };
   
   // Advanced Menu State
@@ -174,14 +175,7 @@ export interface UISlice {
     };
   };
   
-  // Auto-Save State
-  autoSave: {
-    isDirty: boolean;
-    isSaving: boolean;
-    lastSaved?: number;
-    queuedChanges: ChangeEvent[];
-    error?: string;
-  };
+  // Note: Auto-save functionality is handled by the persistence slice
   
   // AI Generation State
   aiGeneration: {

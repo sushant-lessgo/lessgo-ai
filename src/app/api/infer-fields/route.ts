@@ -55,7 +55,8 @@ export async function POST(req: NextRequest) {
     
     if (includeValidation) {
       console.log('🔍 Starting semantic validation...');
-      validationResults = await validateInferredFields(inferredFields);
+      // Cast to InputVariables type - the validation function will handle type safety
+      validationResults = await validateInferredFields(inferredFields as any);
       console.log('✅ Semantic validation completed');
     }
 

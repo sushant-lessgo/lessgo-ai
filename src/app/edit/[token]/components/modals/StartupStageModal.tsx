@@ -1,7 +1,7 @@
 // app/edit/[token]/components/modals/StartupStageModal.tsx
 "use client";
 
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import BaseModal from './BaseModal';
 import TaxonomyTile from '../ui/TaxonomyTile';
 import { startupStageGroups } from '@/modules/inference/taxonomy';
@@ -79,7 +79,7 @@ export function StartupStageModal({
                 <div className="flex items-center space-x-3">
                   <span className="text-sm font-medium text-gray-900">{group.label}</span>
                   <span className="text-xs text-gray-500 bg-gray-200 px-2 py-1 rounded-full">
-                    {group.stages.length} {group.stages.length === 1 ? 'stage' : 'stages'}
+                    {group.stages.length} stages
                   </span>
                 </div>
                 <svg 
@@ -123,7 +123,7 @@ export function StartupStageModal({
               </div>
               <div className="flex-1">
                 <p className="text-sm font-medium text-blue-900">
-                  Selected: {startupStageGroups.flatMap(g => g.stages).find(s => s.id === selectedStage)?.label}
+                  Selected: {startupStageGroups.flatMap(g => g.stages as any).find((s: any) => s.id === selectedStage)?.label}
                 </p>
                 <p className="text-sm text-blue-700 mt-1">
                   This helps tailor your content to your current business phase.

@@ -99,7 +99,7 @@ export function createEnhancedContentActions(set: any, get: any) {
 
         state.content[sectionId].elements[elementKey] = newElement;
         state.content[sectionId].aiMetadata.isCustomized = true;
-        state.autoSave.isDirty = true;
+        state.persistence.isDirty = true;
 
         // Track change for auto-save
         state.queuedChanges.push({
@@ -161,7 +161,7 @@ export function createEnhancedContentActions(set: any, get: any) {
         }
 
         state.content[sectionId].aiMetadata.isCustomized = true;
-        state.autoSave.isDirty = true;
+        state.persistence.isDirty = true;
 
         // Track change
         state.queuedChanges.push({
@@ -230,7 +230,7 @@ export function createEnhancedContentActions(set: any, get: any) {
 
         state.content[sectionId].elements[newElementKey] = duplicatedElement;
         state.content[sectionId].aiMetadata.isCustomized = true;
-        state.autoSave.isDirty = true;
+        state.persistence.isDirty = true;
 
         // Track change
         state.queuedChanges.push({
@@ -279,7 +279,7 @@ export function createEnhancedContentActions(set: any, get: any) {
         });
 
         state.content[sectionId].aiMetadata.isCustomized = true;
-        state.autoSave.isDirty = true;
+        state.persistence.isDirty = true;
 
         // Track change
         state.queuedChanges.push({
@@ -362,7 +362,7 @@ export function createEnhancedContentActions(set: any, get: any) {
         }
 
         state.content[sectionId].aiMetadata.isCustomized = true;
-        state.autoSave.isDirty = true;
+        state.persistence.isDirty = true;
 
         // Track change
         state.queuedChanges.push({
@@ -417,7 +417,7 @@ export function createEnhancedContentActions(set: any, get: any) {
         }
 
         state.content[sectionId].aiMetadata.isCustomized = true;
-        state.autoSave.isDirty = true;
+        state.persistence.isDirty = true;
 
         // Track change
         state.queuedChanges.push({
@@ -469,7 +469,7 @@ export function createEnhancedContentActions(set: any, get: any) {
         });
 
         state.content[sectionId].aiMetadata.isCustomized = true;
-        state.autoSave.isDirty = true;
+        state.persistence.isDirty = true;
 
         // Track change
         state.queuedChanges.push({
@@ -684,7 +684,7 @@ export function createEnhancedContentActions(set: any, get: any) {
         });
 
         state.content[sectionId].aiMetadata.isCustomized = true;
-        state.autoSave.isDirty = true;
+        state.persistence.isDirty = true;
 
         // Track change
         state.queuedChanges.push({

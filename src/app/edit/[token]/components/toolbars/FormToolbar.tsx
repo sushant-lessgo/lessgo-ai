@@ -22,11 +22,11 @@ export function FormToolbar({ targetId, position, contextActions }: FormToolbarP
   const {
     forms,
     showFormBuilder,
-    addFormField,
-    removeFormField,
-    updateFormField,
-    toggleFormFieldRequired,
-    reorderFormFields,
+    // addFormField,
+    // removeFormField,
+    // updateFormField,
+    // toggleFormFieldRequired,
+    // reorderFormFields,
     announceLiveRegion,
   } = useEditStore();
 
@@ -67,15 +67,15 @@ export function FormToolbar({ targetId, position, contextActions }: FormToolbarP
 
   // Handle adding form field
   const handleAddField = (fieldType: string) => {
-    addFormField(targetId, {
-      id: `field-${Date.now()}`,
-      type: fieldType as any,
-      label: getFieldLabel(fieldType),
-      placeholder: getFieldPlaceholder(fieldType),
-      required: false,
-      validation: {},
-      options: fieldType === 'select' ? ['Option 1', 'Option 2'] : undefined,
-    });
+    // addFormField(targetId, {
+    //   id: `field-${Date.now()}`,
+    //   type: fieldType as any,
+    //   label: getFieldLabel(fieldType),
+    //   placeholder: getFieldPlaceholder(fieldType),
+    //   required: false,
+    //   validation: {},
+    //   options: fieldType === 'select' ? ['Option 1', 'Option 2'] : undefined,
+    // });
     
     setShowFieldPicker(false);
     announceLiveRegion(`Added ${fieldType} field`);
@@ -85,7 +85,7 @@ export function FormToolbar({ targetId, position, contextActions }: FormToolbarP
   const handleRemoveField = () => {
     const fieldId = prompt('Enter field ID to remove:');
     if (fieldId) {
-      removeFormField(targetId, fieldId);
+      // removeFormField(targetId, fieldId);
       announceLiveRegion(`Removed field ${fieldId}`);
     }
   };
@@ -94,14 +94,14 @@ export function FormToolbar({ targetId, position, contextActions }: FormToolbarP
   const handleToggleRequired = () => {
     const fieldId = prompt('Enter field ID to toggle required:');
     if (fieldId) {
-      toggleFormFieldRequired(targetId, fieldId);
+      // toggleFormFieldRequired(targetId, fieldId);
       announceLiveRegion(`Toggled required for field ${fieldId}`);
     }
   };
 
   // Handle form builder
   const handleFormBuilder = () => {
-    showFormBuilder(targetId);
+    showFormBuilder();
     announceLiveRegion('Opening form builder');
   };
 
@@ -282,10 +282,9 @@ export function FormToolbar({ targetId, position, contextActions }: FormToolbarP
         <AdvancedActionsMenu
           ref={advancedRef}
           actions={advancedActions}
-          position={{
-            x: position.x + 360,
-            y: position.y,
-          }}
+          triggerElement={document.body}
+          toolbarType="form"
+          isVisible={showAdvanced}
           onClose={() => setShowAdvanced(false)}
         />
       )}

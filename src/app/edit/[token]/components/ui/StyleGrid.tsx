@@ -38,6 +38,9 @@ export function StyleGrid({
 
   // Filter and sort variations
   const processedVariations = useMemo(() => {
+    if (!variations || !Array.isArray(variations)) {
+      return [];
+    }
     let filtered = [...variations];
 
     // Apply search filter
@@ -89,6 +92,9 @@ export function StyleGrid({
 
   // Generate filter options
   const filterOptions: FilterOption[] = useMemo(() => {
+    if (!variations || !Array.isArray(variations)) {
+      return [{ id: 'all', label: 'All Styles', count: 0 }];
+    }
     const options = [
       { id: 'all', label: 'All Styles', count: variations.length },
       { 
@@ -325,6 +331,9 @@ export function CompactStyleGrid({
   onVariationSelect,
   maxItems = 6,
 }: CompactStyleGridProps) {
+  if (!variations || !Array.isArray(variations)) {
+    return <div className="text-center text-gray-500 text-sm">No variations available</div>;
+  }
   const displayVariations = variations.slice(0, maxItems);
 
   return (
@@ -368,6 +377,9 @@ export function CategorizedStyleGrid({
   groupBy,
 }: CategorizedStyleGridProps) {
   const groupedVariations = useMemo(() => {
+    if (!variations || !Array.isArray(variations)) {
+      return {};
+    }
     const groups: Record<string, BackgroundVariation[]> = {};
     
     variations.forEach((variation) => {

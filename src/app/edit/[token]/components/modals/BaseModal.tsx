@@ -1,7 +1,7 @@
 // app/edit/[token]/components/modals/BaseModal.tsx
 "use client";
 
-import { useEffect, useRef } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 
 interface BaseModalProps {

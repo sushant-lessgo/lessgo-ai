@@ -46,11 +46,11 @@ export const AdvancedActionsMenu = forwardRef<HTMLDivElement, AdvancedActionsMen
 
     // Combine refs
     const combinedRef = (node: HTMLDivElement) => {
-      menuRef.current = node;
+      (menuRef as any).current = node;
       if (typeof ref === 'function') {
         ref(node);
       } else if (ref) {
-        ref.current = node;
+        (ref as any).current = node;
       }
     };
 

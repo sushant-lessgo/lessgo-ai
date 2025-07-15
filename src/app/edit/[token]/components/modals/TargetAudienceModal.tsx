@@ -1,7 +1,7 @@
 // app/edit/[token]/components/modals/TargetAudienceModal.tsx
 "use client";
 
-import { useState, useMemo } from 'react';
+import React, { useState, useMemo } from 'react';
 import BaseModal from './BaseModal';
 import TaxonomyTile from '../ui/TaxonomyTile';
 import { targetAudienceGroups } from '@/modules/inference/taxonomy';
@@ -183,7 +183,7 @@ export function TargetAudienceModal({
                   {/* Group Content */}
                   {expandedGroups.has(group.id) && (
                     <div className="p-4 space-y-3">
-                      {group.audiences.map((audience) => (
+                      {group.audiences.map((audience: any) => (
                         <TaxonomyTile
                           key={audience.id}
                           id={audience.id}

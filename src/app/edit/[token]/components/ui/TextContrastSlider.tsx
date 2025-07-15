@@ -45,34 +45,27 @@ export function TextContrastSlider({
   ];
 
   const getPreviewColors = (level: TextContrastLevel) => {
-    if (!backgroundSystem) {
-      return {
-        primary: 'text-gray-800',
-        secondary: 'text-gray-600',
-        muted: 'text-gray-400'
-      };
-    }
-
-    const baseColor = backgroundSystem.baseColor;
+    // ✅ CONSERVATIVE: Always use safe gray colors regardless of base color
+    // This prevents blue text on purple backgrounds and similar issues
     
     switch (level) {
       case 'subtle':
         return {
-          primary: `text-${baseColor}-700`,
-          secondary: `text-${baseColor}-500`,
-          muted: `text-${baseColor}-400`
+          primary: 'text-gray-700',    // Subtle but still readable
+          secondary: 'text-gray-500',  // Light gray
+          muted: 'text-gray-400'       // Very light gray
         };
       case 'balanced':
         return {
-          primary: `text-${baseColor}-800`,
-          secondary: `text-${baseColor}-600`,
-          muted: `text-${baseColor}-400`
+          primary: 'text-gray-800',    // Good readability
+          secondary: 'text-gray-600',  // Medium gray
+          muted: 'text-gray-400'       // Light gray
         };
       case 'high':
         return {
-          primary: `text-${baseColor}-900`,
-          secondary: `text-${baseColor}-700`,
-          muted: `text-${baseColor}-500`
+          primary: 'text-gray-900',    // Maximum contrast
+          secondary: 'text-gray-700',  // Dark gray
+          muted: 'text-gray-500'       // Medium gray
         };
     }
   };

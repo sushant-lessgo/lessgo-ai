@@ -15,7 +15,12 @@
       "WebFetch(domain:localhost)",
       "Bash(npm run typecheck:*)",
       "Bash(del nul)",
-      "Bash(rm:*)"
+      "Bash(rm:*)",
+      "Bash(npm run lint)",
+      "Bash(echo:*)",
+      "Bash(echo \"validatedFields: $validatedFields:-''not set''\")",
+      "Bash(npx tsc:*)",
+      "Bash(node:*)"
     ],
     "deny": []
   }

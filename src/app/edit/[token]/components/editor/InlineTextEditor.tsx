@@ -224,6 +224,8 @@ export function InlineTextEditor({
 
   const handleInternalSelectionChange = useCallback(() => {
     const selection = getSelection();
+    console.log('📝 InlineTextEditor selection changed:', { selection, isCollapsed: selection?.isCollapsed });
+    
     setCurrentSelection(selection);
     selectionRef.current = selection;
     onSelectionChange(selection);
@@ -296,7 +298,7 @@ export function InlineTextEditor({
       
       config.autoFormatting.rules.forEach(rule => {
         if (rule.pattern.test(content)) {
-          const newContent = content.replace(rule.pattern, rule.replacement);
+          const newContent = content.replace(rule.pattern, rule.replacement as string);
           if (newContent !== content && editorRef.current) {
             editorRef.current.textContent = newContent;
             if (rule.formatApplied) {
@@ -374,7 +376,7 @@ export function InlineTextEditor({
 
   return (
     <Element
-      ref={editorRef}
+      ref={editorRef as any}
       contentEditable
       suppressContentEditableWarning
       onInput={handleContentChange}

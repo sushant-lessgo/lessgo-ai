@@ -59,7 +59,10 @@ export default function PreviewPage() {
   const handlePublishClick = () => {
     if (!isPublishReady) return;
 
-    const defaultSlug = (content?.hero?.elements?.headline || `page-${Date.now()}`)
+    const headline = content?.hero?.elements?.headline as any;
+    const headlineText = headline?.content || headline?.text || headline || '';
+    
+    const defaultSlug = (headlineText || `page-${Date.now()}`)
       .toLowerCase()
       .replace(/[^a-z0-9]+/g, "-")
       .replace(/^-+|-+$/g, "")

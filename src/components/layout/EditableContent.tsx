@@ -3,7 +3,9 @@ import { DraggableElement } from '@/app/edit/[token]/components/content/DragDrop
 import { InlineTextEditor, defaultEditorConfig } from '@/app/edit/[token]/components/editor/InlineTextEditor';
 import { useTextToolbarIntegration } from '@/hooks/useTextToolbarIntegration';
 import { useAutoSave } from '@/hooks/useAutoSave';
-import type { TextFormatState, AutoSaveConfig, InlineEditorConfig } from '@/app/edit/[token]/components/editor/InlineTextEditor';
+import { useEditStore } from '@/hooks/useEditStore';
+import { generateAccessibleBadgeColors } from '@/utils/textContrastUtils';
+import type { TextFormatState, AutoSaveConfig, InlineEditorConfig, TextSelection } from '@/app/edit/[token]/components/editor/InlineTextEditor';
 
 interface EditableContentProps {
   mode: 'edit' | 'preview';
@@ -74,6 +76,9 @@ export function EditableContent({
   const [isEditing, setIsEditing] = useState(false);
   const [currentFormatState, setCurrentFormatState] = useState(formatState);
   
+  // Get showTextToolbar from the store
+  const showTextToolbar = useEditStore(state => state.showTextToolbar);
+  
   // Determine if content should be shown
   const shouldShow = mode === 'preview' || value || required;
   
@@ -106,9 +111,19 @@ export function EditableContent({
   }, []);
   
   // Handle selection changes
-  const handleSelectionChange = useCallback((selection: any) => {
-    // Selection change logic can be added here if needed
-  }, []);
+  const handleSelectionChange = useCallback((selection: TextSelection | null) => {
+    if (selection && !selection.isCollapsed) {
+      // Calculate position for the text toolbar
+      const rect = selection.containerElement.getBoundingClientRect();
+      const position = {
+        x: rect.left + rect.width / 2,
+        y: rect.top - 10
+      };
+      
+      // Show the text toolbar
+      showTextToolbar(position);
+    }
+  }, [showTextToolbar]);
   
   if (!shouldShow) return null;
 
@@ -424,9 +439,12 @@ export function EditableBadge({
   if (accentBased && colorTokens?.ctaBg) {
     const accentColorMatch = colorTokens.ctaBg.match(/bg-(\w+)-\d+/);
     const accentColorName = accentColorMatch ? accentColorMatch[1] : 'blue';
-    badgeClasses = `bg-${accentColorName}-100 text-${accentColorName}-800 border-${accentColorName}-200 border`;
+    
+    // ✅ NEW: Use generateAccessibleBadgeColors for safe badge colors
+    badgeClasses = generateAccessibleBadgeColors(accentColorName);
   } else {
-    badgeClasses = 'bg-blue-100 text-blue-800';
+    // ✅ NEW: Use safe default badge colors
+    badgeClasses = 'bg-blue-50 text-blue-900 border-blue-200 border';
   }
   
   const badgeFormatState = useMemo(() => ({

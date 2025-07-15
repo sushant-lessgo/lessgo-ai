@@ -168,7 +168,7 @@ export const isValidConfirmedFields = (
 };
 
 // ✅ DEBUG: Development helper (remove in production)
-if (process.env.NODE_ENV === 'development') {
+if (process.env.NODE_ENV === 'development' && typeof window !== 'undefined') {
   // @ts-ignore - Development debugging
   window.__onboardingStoreDebug = {
     getState: () => useOnboardingStore.getState(),

@@ -274,6 +274,8 @@ export default function LeftCopyRightImage(props: LayoutComponentProps) {
                   colorTokens={colorTokens}
                   textStyle={getTextStyle('body-sm')}
                   placeholder="🎉 New Feature Launch"
+                  sectionId={sectionId}
+                  elementKey="badge_text"
                 />
               </div>
             )}
@@ -288,6 +290,8 @@ export default function LeftCopyRightImage(props: LayoutComponentProps) {
               colorTokens={colorTokens}
               textStyle={getTextStyle('h1')}
               className="leading-tight"
+              sectionId={sectionId}
+              elementKey="headline"
             />
 
             {/* ✅ ENHANCED: Subheadline with Dynamic Text Color */}
@@ -302,6 +306,8 @@ export default function LeftCopyRightImage(props: LayoutComponentProps) {
                 textStyle={getTextStyle('body-lg')}
                 className="text-lg lg:text-xl leading-relaxed"
                 placeholder="Add a compelling subheadline that supports your main message and explains the key benefit..."
+                sectionId={sectionId}
+                elementKey="subheadline"
               />
             )}
 
@@ -317,6 +323,8 @@ export default function LeftCopyRightImage(props: LayoutComponentProps) {
                 textStyle={getTextStyle('body')}
                 className="leading-relaxed"
                 placeholder="Add supporting text with social proof, customer count, or key metrics..."
+                sectionId={sectionId}
+                elementKey="supporting_text"
               />
             )}
 

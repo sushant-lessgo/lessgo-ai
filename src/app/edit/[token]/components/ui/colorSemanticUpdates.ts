@@ -22,10 +22,10 @@ export function updateInteractiveColors(
     ctaHover: `bg-${newAccentColor}-700`,
     ctaText: 'text-white',
     
-    // Secondary CTAs - Use base color for hierarchy
-    ctaSecondary: `bg-${baseColor}-100`,
-    ctaSecondaryHover: `bg-${baseColor}-200`,
-    ctaSecondaryText: `text-${baseColor}-700`,
+    // Secondary CTAs - Use safe colors for hierarchy
+    ctaSecondary: `bg-gray-100`,
+    ctaSecondaryHover: `bg-gray-200`,
+    ctaSecondaryText: `text-gray-700`,
     
     // Ghost CTAs - Use accent color
     ctaGhost: `text-${newAccentColor}-600`,
@@ -48,24 +48,26 @@ export function updateTextContrast(
   baseColor: string, 
   currentTokens: ColorTokens
 ): ColorTokens {
+  // ✅ CONSERVATIVE: Always use safe gray colors instead of base colors
+  // This prevents blue text on purple backgrounds and similar issues
   const contrastMaps = {
     subtle: {
-      textPrimary: `text-${baseColor}-700`,
-      textSecondary: `text-${baseColor}-500`,
-      textMuted: `text-${baseColor}-400`,
-      textOnLight: `text-${baseColor}-700`,
+      textPrimary: 'text-gray-700',        // Subtle but readable
+      textSecondary: 'text-gray-500',      // Light gray
+      textMuted: 'text-gray-400',          // Very light gray
+      textOnLight: 'text-gray-700',        // Subtle on light backgrounds
     },
     balanced: {
-      textPrimary: `text-${baseColor}-800`,
-      textSecondary: `text-${baseColor}-600`,
-      textMuted: `text-${baseColor}-400`,
-      textOnLight: `text-${baseColor}-800`,
+      textPrimary: 'text-gray-800',        // Good readability  
+      textSecondary: 'text-gray-600',      // Medium gray
+      textMuted: 'text-gray-400',          // Light gray
+      textOnLight: 'text-gray-800',        // Balanced on light backgrounds
     },
     high: {
-      textPrimary: `text-${baseColor}-900`,
-      textSecondary: `text-${baseColor}-700`,
-      textMuted: `text-${baseColor}-500`,
-      textOnLight: `text-${baseColor}-900`,
+      textPrimary: 'text-gray-900',        // Maximum contrast
+      textSecondary: 'text-gray-700',      // Dark gray
+      textMuted: 'text-gray-500',          // Medium gray
+      textOnLight: 'text-gray-900',        // High contrast on light backgrounds
     },
   };
 

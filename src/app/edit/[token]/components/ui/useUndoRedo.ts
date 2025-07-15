@@ -9,26 +9,30 @@ export function useUndoRedo() {
   const { undo, redo, canUndo, canRedo, triggerAutoSave } = useEditStore();
   const { showToast } = useToast();
 
+  // Safety checks
+  const isUndoAvailable = typeof canUndo === 'function';
+  const isRedoAvailable = typeof canRedo === 'function';
+
   const handleUndo = useCallback(() => {
-    if (canUndo()) {
+    if (isUndoAvailable && canUndo()) {
       undo();
       triggerAutoSave();
       showToast('Undid last action', 'info');
     }
-  }, [undo, canUndo, triggerAutoSave, showToast]);
+  }, [undo, canUndo, triggerAutoSave, showToast, isUndoAvailable]);
 
   const handleRedo = useCallback(() => {
-    if (canRedo()) {
+    if (isRedoAvailable && canRedo()) {
       redo();
       triggerAutoSave();
       showToast('Redid action', 'info');
     }
-  }, [redo, canRedo, triggerAutoSave, showToast]);
+  }, [redo, canRedo, triggerAutoSave, showToast, isRedoAvailable]);
 
   return {
     handleUndo,
     handleRedo,
-    canUndo: canUndo(),
-    canRedo: canRedo(),
+    canUndo: isUndoAvailable ? canUndo() : false,
+    canRedo: isRedoAvailable ? canRedo() : false,
   };
 }

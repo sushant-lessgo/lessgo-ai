@@ -3,6 +3,9 @@ import React from 'react';
 import { getComponent } from '@/modules/generatedLanding/componentRegistry';
 import { sectionList } from '@/modules/sections/sectionList';
 import { useLayoutComponent } from '@/hooks/useLayoutComponent';
+import { InlineTextEditor, defaultEditorConfig } from '@/app/edit/[token]/components/editor/InlineTextEditor';
+import { useEditStore } from '@/hooks/useEditStore';
+import type { TextFormatState, AutoSaveConfig, InlineEditorConfig, TextSelection } from '@/app/edit/[token]/components/editor/InlineTextEditor';
 
 interface EditablePageRendererProps {
   sectionId: string;
@@ -250,135 +253,297 @@ const EnhancedLayoutWrapper: React.FC<{
   globalSettings,
 }) => {
   
-  // Create enhanced props that wrap content with selection attributes
-  const enhancedProps = React.useMemo(() => {
-    if (mode !== 'edit' || !sectionData?.elements) {
-      return { ...sectionData, backgroundType, className: '' };
-    }
-
-    const enhancedElements: any = {};
-    
-    Object.entries(sectionData.elements).forEach(([elementKey, elementData]: [string, any]) => {
-      const originalContent = elementData.content;
-      
-      // For text elements, wrap with selectable wrapper
-      if (elementData.type === 'text' || elementData.type === 'headline' || elementData.type === 'subheadline') {
-        enhancedElements[elementKey] = {
-          ...elementData,
-          content: (
-            <SelectableElementWrapper
-              elementKey={elementKey}
-              mode={mode}
-              onClick={onElementClick(elementKey)}
-              className="editable-text-element"
-            >
-              {typeof originalContent === 'string' ? (
-                <EditableTextContent
-                  content={originalContent}
-                  onUpdate={onContentUpdate(elementKey)}
-                  mode={mode}
-                  elementType={elementData.type}
-                />
-              ) : (
-                originalContent
-              )}
-            </SelectableElementWrapper>
-          ),
-        };
-      }
-      // For button elements
-      else if (elementData.type === 'button') {
-        enhancedElements[elementKey] = {
-          ...elementData,
-          content: (
-            <SelectableElementWrapper
-              elementKey={elementKey}
-              mode={mode}
-              onClick={onElementClick(elementKey)}
-              className="editable-button-element"
-            >
-              <EditableButtonContent
-                content={originalContent}
-                onUpdate={onContentUpdate(elementKey)}
-                mode={mode}
-                colorTokens={colorTokens}
-              />
-            </SelectableElementWrapper>
-          ),
-        };
-      }
-      // For image elements
-      else if (elementData.type === 'image') {
-        enhancedElements[elementKey] = {
-          ...elementData,
-          content: (
-            <SelectableElementWrapper
-              elementKey={elementKey}
-              mode={mode}
-              onClick={onElementClick(elementKey)}
-              className="editable-image-element"
-            >
-              <EditableImageContent
-                content={originalContent}
-                onUpdate={onContentUpdate(elementKey)}
-                mode={mode}
-              />
-            </SelectableElementWrapper>
-          ),
-        };
-      }
-      // For list elements
-      else if (elementData.type === 'list') {
-        enhancedElements[elementKey] = {
-          ...elementData,
-          content: (
-            <SelectableElementWrapper
-              elementKey={elementKey}
-              mode={mode}
-              onClick={onElementClick(elementKey)}
-              className="editable-list-element"
-            >
-              <EditableListContent
-                content={originalContent}
-                onUpdate={onContentUpdate(elementKey)}
-                mode={mode}
-              />
-            </SelectableElementWrapper>
-          ),
-        };
-      }
-      // Default fallback for other element types
-      else {
-        enhancedElements[elementKey] = {
-          ...elementData,
-          content: (
-            <SelectableElementWrapper
-              elementKey={elementKey}
-              mode={mode}
-              onClick={onElementClick(elementKey)}
-              className={`editable-${elementData.type}-element`}
-            >
-              {originalContent}
-            </SelectableElementWrapper>
-          ),
-        };
-      }
-    });
-
+  // The layout component should get its data from the store via useLayoutComponent
+  // We only need to pass the essential props
+  const originalProps = React.useMemo(() => {
     return {
-      ...sectionData,
-      elements: enhancedElements,
+      sectionId,
       backgroundType,
       className: '',
     };
-  }, [sectionData, mode, backgroundType, onElementClick, onContentUpdate, colorTokens]);
+  }, [sectionId, backgroundType]);
 
-  return (
+  // Debug what props we're passing to the layout component
+  console.log(`🏧 Rendering layout for ${sectionId}:`, {
+    LayoutComponent: LayoutComponent.name,
+    props: originalProps,
+    sectionDataStructure: {
+      hasElements: !!sectionData?.elements,
+      elementKeys: sectionData?.elements ? Object.keys(sectionData.elements) : [],
+      firstElementType: sectionData?.elements ? typeof Object.values(sectionData.elements)[0] : 'none'
+    }
+  });
+
+  const RenderedLayout = (
     <LayoutComponent
-      sectionId={sectionId}
-      {...enhancedProps}
+      {...originalProps}
     />
   );
+
+  // In preview mode, just return the layout as-is
+  if (mode !== 'edit') {
+    return RenderedLayout;
+  }
+
+  // In edit mode, add click handlers and editing overlay
+  return (
+    <div className="relative" data-section-id={sectionId}>
+      {RenderedLayout}
+      
+      {/* Editing overlay for each element - with delay to ensure DOM is ready */}
+      {sectionData?.elements && Object.entries(sectionData.elements).map(([elementKey, elementData]: [string, any]) => {
+        console.log(`🗺️ Creating overlay for ${sectionId}.${elementKey}:`, {
+          type: elementData.type,
+          content: typeof elementData.content === 'string' ? elementData.content.slice(0, 50) : typeof elementData.content,
+          hasContent: !!elementData.content,
+          isTextElement: elementData.type === 'text' || elementData.type === 'headline' || elementData.type === 'subheadline'
+        });
+        
+        return (
+          <ElementEditingOverlay
+            key={elementKey}
+            sectionId={sectionId}
+            elementKey={elementKey}
+            elementData={elementData}
+            onElementClick={onElementClick(elementKey)}
+            onContentUpdate={onContentUpdate(elementKey)}
+            mode={mode}
+          />
+        );
+      })}
+    </div>
+  );
+};
+
+// Component to handle editing overlay for individual elements
+const ElementEditingOverlay: React.FC<{
+  sectionId: string;
+  elementKey: string;
+  elementData: any;
+  onElementClick: (event: React.MouseEvent) => void;
+  onContentUpdate: (value: string) => void;
+  mode: 'edit' | 'preview';
+}> = ({ sectionId, elementKey, elementData, onElementClick, onContentUpdate, mode }) => {
+  const [targetElement, setTargetElement] = React.useState<HTMLElement | null>(null);
+  const [isEditing, setIsEditing] = React.useState(false);
+  const [editValue, setEditValue] = React.useState(elementData.content || '');
+  const [formatState, setFormatState] = React.useState<TextFormatState>({
+    bold: false,
+    italic: false,
+    underline: false,
+    color: '#000000',
+    fontSize: '16px',
+    fontFamily: 'inherit',
+    textAlign: 'left',
+    lineHeight: '1.5',
+    letterSpacing: 'normal',
+    textTransform: 'none',
+  });
+  
+  // Get showTextToolbar from the store
+  const showTextToolbar = useEditStore(state => state.showTextToolbar);
+  
+  // Debug: Log overlay mount
+  React.useEffect(() => {
+    console.log(`🎯 ElementEditingOverlay mounted for ${sectionId}.${elementKey}:`, {
+      type: elementData.type,
+      content: elementData.content,
+      mode
+    });
+  }, []);
+  
+  // Find the actual DOM element using cascading selectors with delay
+  React.useEffect(() => {
+    // Add a small delay to ensure the layout component has rendered
+    const timer = setTimeout(() => {
+      // Try multiple selector strategies
+      const selectors = [
+        `[data-section-id="${sectionId}"] [data-element-key="${elementKey}"]`,
+        `[data-section-id="${sectionId}"] [data-element-key="${elementKey}"] h1`,
+        `[data-section-id="${sectionId}"] [data-element-key="${elementKey}"] h2`,
+        `[data-section-id="${sectionId}"] [data-element-key="${elementKey}"] h3`,
+        `[data-section-id="${sectionId}"] [data-element-key="${elementKey}"] p`,
+        `[data-section-id="${sectionId}"] [data-element-key="${elementKey}"] span`,
+        `[data-section-id="${sectionId}"] [data-element-key="${elementKey}"] div`,
+      ];
+      
+      let element: HTMLElement | null = null;
+      for (const selector of selectors) {
+        element = document.querySelector(selector) as HTMLElement;
+        if (element) break;
+      }
+      
+      const availableElements = Array.from(document.querySelectorAll(`[data-section-id="${sectionId}"]`)).map(el => ({
+        tag: el.tagName,
+        content: el.textContent?.slice(0, 30),
+        hasElementKey: !!el.getAttribute('data-element-key'),
+        elementKey: el.getAttribute('data-element-key')
+      }));
+      
+      console.log(`🎯 Element targeting for ${sectionId}.${elementKey}:`, {
+        found: !!element,
+        selector: selectors.find(s => document.querySelector(s)),
+        elementTag: element?.tagName,
+        elementContent: element?.textContent?.slice(0, 50),
+        allSelectorsChecked: selectors.map(s => ({ selector: s, found: !!document.querySelector(s) })),
+        availableElements,
+        searchingFor: elementKey,
+        sectionSelector: `[data-section-id="${sectionId}"]`,
+        elementSelector: `[data-element-key="${elementKey}"]`
+      });
+      
+      setTargetElement(element);
+    }, 100); // 100ms delay to ensure DOM is ready
+    
+    return () => clearTimeout(timer);
+  }, [sectionId, elementKey]);
+  
+  // Handle text selection changes
+  const handleSelectionChange = React.useCallback((selection: TextSelection | null) => {
+    console.log('🔤 handleSelectionChange called:', { selection, isCollapsed: selection?.isCollapsed });
+    
+    if (selection && !selection.isCollapsed) {
+      // Calculate position for the text toolbar
+      const rect = selection.containerElement.getBoundingClientRect();
+      const position = {
+        x: rect.left + rect.width / 2,
+        y: rect.top - 10
+      };
+      
+      console.log('🔤 Showing text toolbar at position:', position);
+      
+      // Show the text toolbar
+      showTextToolbar(position);
+    }
+  }, [showTextToolbar]);
+
+  const handleClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    console.log(`🖱️ Element clicked: ${elementKey}`, { type: elementData.type });
+    
+    if (elementData.type === 'text' || elementData.type === 'headline' || elementData.type === 'subheadline') {
+      console.log(`🖱️ Setting isEditing to true for text element: ${elementKey}`);
+      setIsEditing(true);
+    }
+    onElementClick(e);
+  };
+  
+  const handleSave = () => {
+    setIsEditing(false);
+    if (editValue !== elementData.content) {
+      console.log(`💾 Saving content for ${elementKey}:`, { old: elementData.content, new: editValue });
+      onContentUpdate(editValue);
+    }
+  };
+  
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleSave();
+    }
+    if (e.key === 'Escape') {
+      setEditValue(elementData.content);
+      setIsEditing(false);
+    }
+  };
+  
+  // Don't render overlay if we can't find the target element
+  if (!targetElement) {
+    return null;
+  }
+  
+  // Add click handler directly to the target element
+  React.useEffect(() => {
+    if (targetElement && !isEditing) {
+      const handleElementClick = (e: MouseEvent) => {
+        e.stopPropagation();
+        handleClick(e as any);
+      };
+      
+      targetElement.addEventListener('click', handleElementClick);
+      targetElement.style.cursor = 'pointer';
+      targetElement.classList.add('hover:bg-blue-50', 'hover:bg-opacity-50', 'transition-colors', 'rounded');
+      
+      return () => {
+        targetElement.removeEventListener('click', handleElementClick);
+        targetElement.style.cursor = '';
+        targetElement.classList.remove('hover:bg-blue-50', 'hover:bg-opacity-50', 'transition-colors', 'rounded');
+      };
+    }
+  }, [targetElement, isEditing]);
+  
+  // Render inline editor when editing
+  if (isEditing && targetElement) {
+    const isTextElement = elementData.type === 'text' || elementData.type === 'headline' || elementData.type === 'subheadline';
+    const rect = targetElement.getBoundingClientRect();
+    
+    console.log(`📝 Rendering editor for ${elementKey}:`, { isEditing, isTextElement, elementType: elementData.type });
+    
+    if (isTextElement) {
+      // Use InlineTextEditor for text elements
+      const element = elementData.type === 'headline' ? 'h2' : elementData.type === 'subheadline' ? 'h3' : 'p';
+      
+      const autoSaveConfig: AutoSaveConfig = {
+        enabled: true,
+        debounceMs: 500,
+        onSave: onContentUpdate,
+      };
+      
+      console.log(`📝 Rendering InlineTextEditor for ${elementKey} with element type: ${element}`);
+      
+      return (
+        <div
+          className="fixed z-50 bg-white border border-blue-500 rounded shadow-lg p-2"
+          style={{
+            left: rect.left,
+            top: rect.top - 50,
+            minWidth: Math.max(300, rect.width),
+          }}
+        >
+          <InlineTextEditor
+            content={editValue}
+            onContentChange={setEditValue}
+            element={element}
+            elementKey={elementKey}
+            sectionId={sectionId}
+            formatState={formatState}
+            onFormatChange={setFormatState}
+            autoSave={autoSaveConfig}
+            config={defaultEditorConfig}
+            onFocus={() => {}}
+            onBlur={handleSave}
+            onSelectionChange={handleSelectionChange}
+            className="w-full"
+          />
+        </div>
+      );
+    } else {
+      // Use simple input for non-text elements
+      return (
+        <div
+          className="fixed z-50 bg-white border border-blue-500 rounded shadow-lg"
+          style={{
+            left: rect.left,
+            top: rect.top - 40,
+            minWidth: Math.max(200, rect.width),
+          }}
+        >
+          <input
+            type="text"
+            value={editValue}
+            onChange={(e) => setEditValue(e.target.value)}
+            onBlur={handleSave}
+            onKeyDown={handleKeyDown}
+            autoFocus
+            className="w-full px-3 py-2 text-sm border-none outline-none"
+            placeholder="Enter text..."
+          />
+        </div>
+      );
+    }
+  }
+  
+  return null;
 };
 
 // Editable content components
@@ -392,6 +557,15 @@ const EditableTextContent: React.FC<{
   const [value, setValue] = React.useState(content);
 
   const handleDoubleClick = () => {
+    console.log('🖱️ Double click on text element:', { mode, elementType });
+    if (mode === 'edit') {
+      setIsEditing(true);
+    }
+  };
+
+  const handleClick = (e: React.MouseEvent) => {
+    console.log('🖱️ Single click on text element:', { mode, elementType });
+    e.stopPropagation();
     if (mode === 'edit') {
       setIsEditing(true);
     }
@@ -420,6 +594,7 @@ const EditableTextContent: React.FC<{
   }
 
   if (isEditing) {
+    console.log('📝 Text editor active for:', { elementType, content, value });
     return (
       <input
         type="text"
@@ -436,9 +611,10 @@ const EditableTextContent: React.FC<{
 
   return (
     <span
+      onClick={handleClick}
       onDoubleClick={handleDoubleClick}
       className="cursor-text hover:bg-blue-50 hover:bg-opacity-50 rounded px-1 transition-colors"
-      title="Double-click to edit"
+      title="Click to edit"
     >
       {content || 'Click to edit'}
     </span>

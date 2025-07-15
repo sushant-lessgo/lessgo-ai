@@ -62,7 +62,7 @@ export function useBackgroundSelector(tokenId: string) {
         return getSafeDefaultBackground();
       }
 
-      return generateCompleteBackgroundSystem(onboardingData);
+      return generateCompleteBackgroundSystem(onboardingData as any);
     } catch (error) {
       console.error('Failed to get current background system:', error);
       return getSafeDefaultBackground();
@@ -153,8 +153,9 @@ export function useBackgroundSelector(tokenId: string) {
         setValidationErrors([]);
       }
 
-      // Use debounced search for brand and custom modes
-      return debouncedGetCompatibleBackgrounds(mode, brandColors, currentBackgroundSystem) || [];
+      // Use debounced search for brand and custom modes - returns void so we handle async
+      debouncedGetCompatibleBackgrounds(mode, brandColors, currentBackgroundSystem);
+      return [];
       
     } catch (error) {
       console.error('Error in compatibleOptions:', error);
@@ -335,7 +336,7 @@ export function useBackgroundSelector(tokenId: string) {
       // Generate original background with error handling
       let originalBackground: BackgroundSystem;
       try {
-        originalBackground = generateCompleteBackgroundSystem(onboardingData);
+        originalBackground = generateCompleteBackgroundSystem(onboardingData as any);
       } catch (error) {
         console.warn('Failed to generate from onboarding data, using safe defaults:', error);
         originalBackground = getSafeDefaultBackground();

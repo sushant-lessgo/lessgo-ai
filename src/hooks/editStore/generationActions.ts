@@ -89,7 +89,7 @@ export const createGenerationActions: StateCreator<EditStore, [], [], {
         console.log(`✅ Section ${sectionId} initialized with layout: ${layout}, background: ${backgroundType}`);
       });
       
-      state.autoSave.isDirty = true;
+      state.persistence.isDirty = true;
       
       console.log('📊 Initialization complete:', {
         sectionsCount: state.sections.length,
@@ -230,7 +230,7 @@ export const createGenerationActions: StateCreator<EditStore, [], [], {
         isSuccessful: sectionsGenerated.length > 0
       });
 
-      state.autoSave.isDirty = true;
+      state.persistence.isDirty = true;
     });
   },
 
@@ -334,7 +334,7 @@ export const createGenerationActions: StateCreator<EditStore, [], [], {
       state.theme.colors.sectionBackgrounds.neutral = backgroundSystem.neutral;
       state.theme.colors.sectionBackgrounds.divider = backgroundSystem.divider;
       
-      state.autoSave.isDirty = true;
+      state.persistence.isDirty = true;
       
       console.log('✅ EditStore: Theme updated with sophisticated background system');
     }),
@@ -346,7 +346,7 @@ export const createGenerationActions: StateCreator<EditStore, [], [], {
       set((state) => {
         state.theme.typography.headingFont = fontTheme.headingFont;
         state.theme.typography.bodyFont = fontTheme.bodyFont;
-        state.autoSave.isDirty = true;
+        state.persistence.isDirty = true;
       });
     } catch (error) {
       console.error('Failed to update fonts from tone:', error);
@@ -361,7 +361,7 @@ export const createGenerationActions: StateCreator<EditStore, [], [], {
     set((state) => {
       state.theme.typography.headingFont = headingFont;
       state.theme.typography.bodyFont = bodyFont;
-      state.autoSave.isDirty = true;
+      state.persistence.isDirty = true;
     }),
 
   // ✅ Color Token Generation from PageStore

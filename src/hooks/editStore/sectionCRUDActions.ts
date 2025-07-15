@@ -104,7 +104,7 @@ export function createSectionCRUDActions(set: any, get: any) {
         });
         
         // Update state flags
-        state.autoSave.isDirty = true;
+        state.persistence.isDirty = true;
         state.lastUpdated = Date.now();
         
         // Add to history
@@ -176,7 +176,7 @@ export function createSectionCRUDActions(set: any, get: any) {
         });
         
         // Update state flags
-        state.autoSave.isDirty = true;
+        state.persistence.isDirty = true;
         state.lastUpdated = Date.now();
         
         // Add to history
@@ -255,7 +255,7 @@ export function createSectionCRUDActions(set: any, get: any) {
         });
         
         // Update state flags
-        state.autoSave.isDirty = true;
+        state.persistence.isDirty = true;
         state.lastUpdated = Date.now();
         
         // Add to history
@@ -296,7 +296,7 @@ export function createSectionCRUDActions(set: any, get: any) {
         });
         
         // Update state flags
-        state.autoSave.isDirty = true;
+        state.persistence.isDirty = true;
         state.lastUpdated = Date.now();
         
         // Add to history
@@ -337,7 +337,7 @@ export function createSectionCRUDActions(set: any, get: any) {
         });
         
         // Update state flags
-        state.autoSave.isDirty = true;
+        state.persistence.isDirty = true;
         state.lastUpdated = Date.now();
         
         return true;
@@ -369,7 +369,7 @@ export function createSectionCRUDActions(set: any, get: any) {
         });
         
         // Update state flags
-        state.autoSave.isDirty = true;
+        state.persistence.isDirty = true;
         state.lastUpdated = Date.now();
         
         return true;
@@ -404,7 +404,7 @@ export function createSectionCRUDActions(set: any, get: any) {
         });
         
         // Update state flags
-        state.autoSave.isDirty = true;
+        state.persistence.isDirty = true;
         state.lastUpdated = Date.now();
         
         return true;
@@ -435,7 +435,7 @@ export function createSectionCRUDActions(set: any, get: any) {
         });
         
         // Update state flags
-        state.autoSave.isDirty = true;
+        state.persistence.isDirty = true;
         state.lastUpdated = Date.now();
         
         return true;
@@ -472,7 +472,7 @@ export function createSectionCRUDActions(set: any, get: any) {
           });
           
           // Update state flags
-          state.autoSave.isDirty = true;
+          state.persistence.isDirty = true;
           state.lastUpdated = Date.now();
         }
       }),
@@ -508,7 +508,7 @@ export function createSectionCRUDActions(set: any, get: any) {
           });
           
           // Update state flags
-          state.autoSave.isDirty = true;
+          state.persistence.isDirty = true;
           state.lastUpdated = Date.now();
         }
       }),
@@ -548,7 +548,7 @@ export function createSectionCRUDActions(set: any, get: any) {
           });
           
           // Update state flags
-          state.autoSave.isDirty = true;
+          state.persistence.isDirty = true;
           state.lastUpdated = Date.now();
         }
       }),
@@ -580,7 +580,7 @@ export function createSectionCRUDActions(set: any, get: any) {
         });
         
         // Update state flags
-        state.autoSave.isDirty = true;
+        state.persistence.isDirty = true;
         state.lastUpdated = Date.now();
         
         return true;
@@ -619,7 +619,7 @@ export function createSectionCRUDActions(set: any, get: any) {
         });
         
         // Update state flags
-        state.autoSave.isDirty = true;
+        state.persistence.isDirty = true;
         state.lastUpdated = Date.now();
         
         return true;
@@ -669,7 +669,7 @@ export function createSectionCRUDActions(set: any, get: any) {
           });
           
           // Update state flags
-          state.autoSave.isDirty = true;
+          state.persistence.isDirty = true;
           state.lastUpdated = Date.now();
         }
       }),

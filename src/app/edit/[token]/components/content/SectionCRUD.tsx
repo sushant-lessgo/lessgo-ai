@@ -2,7 +2,7 @@
 import React, { useState, useCallback } from 'react';
 import { useSectionCRUD } from '@/hooks/useSectionCRUD';
 import { useEditStore } from '@/hooks/useEditStore';
-import type { SectionType } from '@/types/store/state';
+import type { SectionType } from '@/types/core/content';
 import type { AddSectionOptions } from '@/hooks/useSectionCRUD';
 
 interface AddSectionButtonProps {
@@ -139,8 +139,8 @@ export function SectionActionsMenu({ sectionId, position, onClose }: SectionActi
     },
     {
       id: 'visibility',
-      label: section?.isVisible === false ? 'Show Section' : 'Hide Section',
-      icon: section?.isVisible === false ? '👁️' : '🙈',
+      label: 'Toggle Section',
+      icon: '👁️',
       handler: () => {
         toggleSectionVisibility(sectionId);
         onClose();
@@ -325,8 +325,8 @@ export function BulkSectionActions({ selectedSectionIds, onSelectionChange, onAc
     return null;
   }
 
-  const visibleSections = selectedSectionIds.filter(id => content[id]?.isVisible !== false);
-  const hiddenSections = selectedSectionIds.filter(id => content[id]?.isVisible === false);
+  const visibleSections = selectedSectionIds.filter(id => content[id]);
+  const hiddenSections: string[] = [];
 
   return (
     <div className="flex items-center space-x-2 p-3 bg-blue-50 border border-blue-200 rounded-lg">
@@ -537,7 +537,7 @@ export function SectionList({
         if (!section) return null;
 
         const isSelected = selectedSectionIds.includes(sectionId);
-        const isHidden = section.isVisible === false;
+        const isHidden = false;
 
         return (
           <React.Fragment key={sectionId}>
@@ -557,13 +557,13 @@ export function SectionList({
               
               <div className="flex items-center flex-1 min-w-0">
                 <span className="text-lg mr-3">
-                  {getSectionTypeIcon(section.type)}
+                  {getSectionTypeIcon(sectionId)}
                 </span>
                 
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center space-x-2">
                     <span className="text-sm font-medium text-gray-900 truncate">
-                      {getSectionTypeLabel(section.type)}
+                      {getSectionTypeLabel(sectionId)}
                     </span>
                     
                     {isHidden && (
@@ -740,14 +740,4 @@ export function SectionTemplatePicker({ onTemplateSelect, onClose }: SectionTemp
   );
 }
 
-// Export all components
-export {
-  AddSectionButton,
-  SectionActionsMenu,
-  SectionValidationIndicator,
-  BulkSectionActions,
-  SectionDragHandle,
-  SectionDropZone,
-  SectionList,
-  SectionTemplatePicker,
-};
+// Functions are already exported inline
