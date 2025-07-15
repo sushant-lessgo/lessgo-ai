@@ -1,8 +1,7 @@
 // app/edit/[token]/components/ui/FloatingToolbars.tsx - Complete 5 Toolbar Implementation
 import React, { useEffect, useRef, useState } from 'react';
 import { useEditStore } from '@/hooks/useEditStore';
-import { useToolbarPositioning } from '@/hooks/useToolbarPositioning';
-import { useToolbarContext } from '@/hooks/useToolbarContext';
+// Removed complex positioning hooks - using simple React-based positioning
 import { calculateArrowPosition } from '@/utils/toolbarPositioning';
 
 // Import action handlers
@@ -18,16 +17,8 @@ export function FloatingToolbars() {
     selectedSection,
     selectedElement,
     mode,
+    toolbar,
   } = useEditStore();
-  
-  // Mock toolbar state for now since we consolidated toolbars
-  const toolbar = {
-    type: null,
-    visible: false,
-    position: { x: 0, y: 0 },
-    targetId: null,
-    actions: []
-  };
 
   // Debug logging
   React.useEffect(() => {
@@ -41,44 +32,10 @@ export function FloatingToolbars() {
     });
   }, [toolbar.visible, toolbar.type, mode, selectedElement, selectedSection]);
 
-  const { updateAllPositions } = useToolbarPositioning();
-  const { currentContext, isMultiToolbarMode } = useToolbarContext();
+  // No longer need these hooks - they were removed
 
-  // Simplified position updates using direct DOM manipulation
-  useEffect(() => {
-    if (toolbar.visible && toolbar.targetId) {
-      const timeoutId = setTimeout(() => {
-        let selector = '';
-        if (toolbar.type === 'section' && toolbar.targetId) {
-          selector = `[data-section-id="${toolbar.targetId}"]`;
-        } else if (toolbar.type === 'element' && toolbar.targetId) {
-          const parts = (toolbar.targetId as string).split('.');
-          selector = `[data-section-id="${parts[0]}"] [data-element-key="${parts[1]}"]`;
-        } else if (toolbar.targetId) {
-          selector = `[data-${toolbar.type}-id="${toolbar.targetId}"]`;
-        }
-        
-        const targetElement = selector ? document.querySelector(selector) as HTMLElement : null;
-        
-        const toolbarElement = document.querySelector(`[data-toolbar-type="${toolbar.type}"]`) as HTMLElement;
-        
-        if (targetElement && toolbarElement) {
-          const rect = targetElement.getBoundingClientRect();
-          const position = {
-            x: rect.left + rect.width / 2 - toolbarElement.offsetWidth / 2,
-            y: rect.top - toolbarElement.offsetHeight - 12
-          };
-          
-          // Direct DOM update - no store mutations
-          toolbarElement.style.left = `${Math.max(10, position.x)}px`;
-          toolbarElement.style.top = `${Math.max(10, position.y)}px`;
-          toolbarElement.style.position = 'fixed';
-          toolbarElement.style.zIndex = '1000';
-        }
-      }, 10);
-      return () => clearTimeout(timeoutId);
-    }
-  }, [toolbar.visible, toolbar.targetId, toolbar.type, selectedSection, selectedElement]);
+  // React-only positioning - no DOM manipulation
+  // Position is calculated when toolbar is shown and stored in state
 
   // Only render toolbars in edit mode
   if (mode !== 'edit') return null;
@@ -93,10 +50,15 @@ export function FloatingToolbars() {
       {/* Single Smart Toolbar - renders appropriate content based on type */}
       <div 
         data-toolbar-type={toolbar.type}
-        className="fixed z-50 bg-white shadow-lg rounded-lg border border-gray-200 p-2"
+        className="fixed z-50 bg-white shadow-lg rounded-lg border border-gray-200 p-2 transition-all duration-200 ease-out"
         style={{
-          left: toolbar.position.x,
-          top: toolbar.position.y,
+          left: `${toolbar.position.x}px`,
+          top: `${toolbar.position.y}px`,
+          transform: 'translate(-50%, -100%)', // Center horizontally and position above
+          minWidth: '280px',
+          maxWidth: '400px',
+          opacity: toolbar.visible ? 1 : 0,
+          pointerEvents: toolbar.visible ? 'auto' : 'none',
         }}
       >
         {toolbar.type === 'section' && selectedSection && (

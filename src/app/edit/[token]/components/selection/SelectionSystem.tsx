@@ -1,7 +1,7 @@
 // app/edit/[token]/components/selection/SelectionSystem.tsx
 import React, { useEffect } from 'react';
 import { useEditStore } from '@/hooks/useEditStore';
-import { useSelection } from '@/hooks/useSelection';
+// Removed useSelection - functionality now in unified useEditor system
 
 interface SelectionSystemProps {
   children: React.ReactNode;
@@ -9,12 +9,8 @@ interface SelectionSystemProps {
 
 export function SelectionSystem({ children }: SelectionSystemProps) {
   const { mode } = useEditStore();
-  const {
-    selectedSection,
-    selectedElement,
-    multiSelection,
-    focusSelectedElement,
-  } = useSelection();
+  // Selection state now comes from unified editor system
+  const { selectedSection, selectedElement, multiSelection } = useEditStore();
 
   // Setup accessibility attributes
   useEffect(() => {

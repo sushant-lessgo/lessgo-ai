@@ -6,7 +6,6 @@ import { useEditStore } from "@/hooks/useEditStore";
 import { EditLayout } from "./components/layout/EditLayout";
 import { EditLayoutErrorBoundary } from "@/app/edit/[token]/components/layout/EditLayoutErrorBoundary";
 
-console.log("Edit page module loaded");
 
 export default function EditPage() {
   const params = useParams();
@@ -24,41 +23,21 @@ export default function EditPage() {
     triggerAutoSave,
   } = useEditStore();
 
-  console.log('🔍 EditPage mount state check:', {
-    sectionsLength: sections.length,
-   // contentKeys: Object.keys(content).length,
-    sections: sections,
-    isMigrated: searchParams.get('migrated') === 'true',
-    storeInstance: !!useEditStore
-  });
   
   // Check if this is a migration from generate page
   const isMigrated = searchParams.get('migrated') === 'true';
   
-  console.log("EditPage mounted");
-  console.log("params:", params);
-  console.log("tokenId:", tokenId);
-  console.log("isMigrated:", isMigrated);
 
 
   // In EditPage, add this at the very top
 useEffect(() => {
-  console.log('🔍 EditPage effect - checking store every 500ms for 5 seconds');
   
   const interval = setInterval(() => {
-    const state = useEditStore.getState();
-    console.log('📊 Store state check:', {
-      timestamp: Date.now(),
-      sections: state.sections.length,
-      content: Object.keys(state.content).length,
-      isDirty: state.isDirty,
-      isLoading: state.persistence?.isLoading
-    });
+    // Store monitoring active
   }, 500);
   
   setTimeout(() => {
     clearInterval(interval);
-    console.log('🛑 Stopping store monitoring');
   }, 5000);
   
   return () => clearInterval(interval);
@@ -78,22 +57,15 @@ useEffect(() => {
         
         // If coming from migration, check if we already have data
         if (isMigrated) {
-          console.log("🔄 Checking for migrated data in EditStore...");
           
           // Give a small delay for Zustand persistence to rehydrate
           await new Promise(resolve => setTimeout(resolve, 100));
           
           // Re-check sections after potential rehydration
           const currentState = useEditStore.getState();
-          console.log("🔍 EditStore state after rehydration check:", {
-            sections: currentState.sections.length,
-            content: Object.keys(currentState.content).length,
-            sectionsArray: currentState.sections
-          });
           
           // Check if EditStore already has sections (migration successful)
           if (currentState.sections.length > 0) {
-            console.log("✅ Migration data found in EditStore, skipping API load");
             setLoadingState('success');
             return;
           } else {
@@ -102,13 +74,11 @@ useEffect(() => {
         }
         
         // Load from API (either no migration flag or migration failed)
-        console.log("🔄 Loading draft for edit mode from API, token:", tokenId);
         
         const response = await fetch(`/api/loadDraft?tokenId=${tokenId}`);
         
         if (!response.ok) {
           if (response.status === 404) {
-            console.log("📝 No existing draft found, initializing empty edit state");
             reset();
             setLoadingState('success');
             return;
@@ -118,38 +88,11 @@ useEffect(() => {
         }
         
         const data = await response.json();
-        console.log("📊 Loaded draft data for edit:", {
-          hasInputText: !!data.inputText,
-          hasValidatedFields: !!(data.validatedFields && Object.keys(data.validatedFields).length > 0),
-          hasFinalContent: !!data.finalContent,
-          hasThemeValues: !!data.themeValues,
-          stepIndex: data.stepIndex,
-          lastUpdated: data.lastUpdated,
-        });
         
-        // 🔍 DEBUG: Log finalContent structure to understand the issue
-        if (data.finalContent) {
-          console.log("🔍 DEBUG: FinalContent structure:", {
-            keys: Object.keys(data.finalContent),
-            hasSections: !!data.finalContent.sections,
-            hasLayout: !!data.finalContent.layout,
-            hasContent: !!data.finalContent.content,
-            sectionsType: typeof data.finalContent.sections,
-            sectionsValue: data.finalContent.sections,
-            layoutSections: data.finalContent.layout?.sections,
-            contentKeys: data.finalContent.content ? Object.keys(data.finalContent.content) : 'no content',
-          });
-        }
 
         // Load the draft data into edit store
         await loadFromDraft(data);
         
-        console.log("✅ Edit store populated from draft:", {
-          tokenId,
-          sectionsCount: useEditStore.getState().sections.length,
-          hasContent: Object.keys(useEditStore.getState().content).length > 0,
-          hasTheme: !!useEditStore.getState().theme,
-        });
 
         setLoadingState('success');
 
@@ -170,7 +113,6 @@ useEffect(() => {
     
     // Cleanup function
     return () => {
-      console.log("🧹 EditPage cleanup");
       // Trigger final save on unmount
       if (loadingState === 'success') {
         triggerAutoSave();

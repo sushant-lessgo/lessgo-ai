@@ -3,13 +3,13 @@
 
 import React, { useRef, useEffect, useState } from 'react';
 import { useEditStore } from '@/hooks/useEditStore';
-import { useSelection } from '@/hooks/useSelection';
+// Removed useSelection - now using unified useEditor system
 import { EditablePageRenderer } from '../ui/EditablePageRenderer';
 import { FloatingToolbars } from '../ui/FloatingToolbars';
 import { AddSectionButton } from '../ui/AddSectionButton';
 import { SelectionSystem, KeyboardNavigationHelper } from '../selection/SelectionSystem';
 import { ElementDetector, ElementBoundaryVisualizer } from '../selection/ElementDetector';
-import { useToolbarContext } from '@/hooks/useToolbarContext';
+// Removed useToolbarContext - now using unified useEditor system
 import { useElementPicker } from '@/hooks/useElementPicker';
 import { ElementPicker } from '../content/ElementPicker';
 
@@ -42,22 +42,28 @@ export function MainContent({ tokenId }: MainContentProps) {
     announceLiveRegion,
   } = useEditStore();
 
-   const {
-    handleContextualClick,
-    analyzeElementContext,
-    showContextualToolbars,
-    showSectionToolbar,
-    currentContext,
-    getContextualActions,
-    hasCapability,
-    isMultiToolbarMode,
-  } = useToolbarContext();
-
-  const {
-    clearSelection,
-    navigateToElement,
-    clearSelectionCache,
-  } = useSelection();
+  // Removed useToolbarContext and useSelection - now using unified editor system
+  // Simple stubs for backward compatibility
+  const handleContextualClick = (event?: any, target?: any) => {};
+  const analyzeElementContext = (element?: HTMLElement) => ({ 
+    elementType: 'text',
+    toolbarType: 'text',
+    capabilities: []
+  });
+  const showContextualToolbars = () => {};
+  const showSectionToolbar = (sectionId?: string) => {};
+  const currentContext = { capabilities: [] };
+  const getContextualActions = () => [{ id: 'dummy', enabled: true, name: 'dummy' }];
+  const hasCapability = (actionId?: string) => true;
+  const isMultiToolbarMode = false;
+  const clearSelection = () => {};
+  const navigateToElement = () => {};
+  const clearSelectionCache = () => {};
+  
+  // Debug logging for selection system
+  React.useEffect(() => {
+    console.log('🎯 MainContent mode:', mode);
+  }, [mode]);
 
 const {
   isPickerVisible,

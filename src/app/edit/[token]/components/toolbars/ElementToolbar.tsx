@@ -1,6 +1,7 @@
 // app/edit/[token]/components/toolbars/ElementToolbar.tsx - Complete Element Toolbar
 import React, { useState, useRef, useEffect } from 'react';
 import { useEditStore } from '@/hooks/useEditStore';
+import { useEditor } from '@/hooks/useEditor';
 import { useToolbarActions } from '@/hooks/useToolbarActions';
 import { calculateArrowPosition } from '@/utils/toolbarPositioning';
 import { AdvancedActionsMenu } from './AdvancedActionsMenu';
@@ -32,6 +33,12 @@ export function ElementToolbar({ elementSelection, position, contextActions }: E
   } = useEditStore();
 
   const { executeAction } = useToolbarActions();
+  const { enterTextEditMode } = useEditor();
+
+  // Enter text editing mode using unified system
+  const handleEditText = () => {
+    enterTextEditMode(elementSelection.elementKey, elementSelection.sectionId);
+  };
 
   // Calculate arrow position
   const targetSelector = `[data-section-id="${elementSelection.sectionId}"] [data-element-key="${elementSelection.elementKey}"]`;
@@ -129,8 +136,23 @@ export function ElementToolbar({ elementSelection, position, contextActions }: E
     return elementSelection.elementKey.includes('cta') || elementSelection.elementKey.includes('button');
   };
 
+  // Check if element has text content
+  const hasTextContent = () => {
+    const elementKey = elementSelection.elementKey;
+    return elementKey.includes('text') || elementKey.includes('headline') || 
+           elementKey.includes('subhead') || elementKey.includes('cta') || 
+           elementKey.includes('button') || elementKey.includes('description');
+  };
+
   // Primary Actions
   const primaryActions = [
+    // Add Edit Text as first action if element has text
+    ...(hasTextContent() ? [{
+      id: 'edit-text',
+      label: 'Edit Text',
+      icon: 'edit',
+      handler: handleEditText,
+    }] : []),
     {
       id: 'regenerate-copy',
       label: 'Regenerate',
@@ -252,7 +274,11 @@ export function ElementToolbar({ elementSelection, position, contextActions }: E
               {index > 0 && <div className="w-px h-6 bg-gray-200 mx-1" />}
               <button
                 onClick={action.handler}
-                className="flex items-center space-x-1 px-2 py-1 text-xs rounded transition-colors text-gray-700 hover:bg-gray-100 hover:text-gray-900"
+                className={`flex items-center space-x-1 px-2 py-1 text-xs rounded transition-colors ${
+                  action.id === 'edit-text' 
+                    ? 'bg-blue-500 text-white hover:bg-blue-600' 
+                    : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
+                }`}
                 title={action.label}
               >
                 <ElementIcon icon={action.icon} />
@@ -372,6 +398,11 @@ export function ElementToolbar({ elementSelection, position, contextActions }: E
 // Element Icon Component
 function ElementIcon({ icon }: { icon: string }) {
   const iconMap = {
+    'edit': (
+      <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+      </svg>
+    ),
     'refresh': (
       <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />

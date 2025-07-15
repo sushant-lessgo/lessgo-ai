@@ -12,6 +12,164 @@ body {
   @apply font-body text-brand-text bg-white antialiased;
 }
 
+/* Default: All elements show pointer cursor for selection - UNLESS in text editing mode */
+[data-element-key]:not([contenteditable="true"][data-editing="true"]) {
+  cursor: pointer;
+  user-select: none;
+  transition: all 0.2s ease;
+}
+
+/* Hover state for elements - only when NOT in edit mode */
+[data-element-key]:hover:not([contenteditable="true"][data-editing="true"]) {
+  background-color: rgba(59, 130, 246, 0.05);
+  border-radius: 4px;
+}
+
+/* Edit mode: Only contenteditable elements show text cursor */
+[data-element-key][contenteditable="true"][data-editing="true"] {
+  cursor: text !important;
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+  border-radius: 4px;
+  user-select: text !important;
+  -webkit-user-select: text !important;
+  background-color: rgba(59, 130, 246, 0.05);
+  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+}
+
+/* Ensure text cursor takes precedence over pointer cursor */
+[data-element-key][contenteditable="true"][data-editing="true"]:hover {
+  cursor: text !important;
+}
+
+/* Force text cursor in all states during edit mode - maximum specificity */
+[data-element-key][contenteditable="true"][data-editing="true"],
+[data-element-key][contenteditable="true"][data-editing="true"]:hover,
+[data-element-key][contenteditable="true"][data-editing="true"]:focus,
+[data-element-key][contenteditable="true"][data-editing="true"]:active,
+[data-element-key][contenteditable="true"][data-editing="true"]:visited {
+  cursor: text !important;
+}
+
+/* Override any other cursor rules for text elements in edit mode */
+[data-element-key*="text"][contenteditable="true"][data-editing="true"],
+[data-element-key*="headline"][contenteditable="true"][data-editing="true"],
+[data-element-key*="subhead"][contenteditable="true"][data-editing="true"],
+[data-element-key*="description"][contenteditable="true"][data-editing="true"],
+[data-element-key*="cta"][contenteditable="true"][data-editing="true"],
+[data-element-key*="button"][contenteditable="true"][data-editing="true"] {
+  cursor: text !important;
+}
+
+/* Force text cursor with inline style override */
+[data-element-key][contenteditable="true"][data-editing="true"][style*="cursor"] {
+  cursor: text !important;
+}
+
+/* Text selection styling */
+[data-element-key][contenteditable="true"][data-editing="true"]::selection {
+  background-color: rgba(59, 130, 246, 0.3);
+  color: inherit;
+}
+
+/* Prevent text selection on non-editable elements */
+[data-element-key]:not([contenteditable="true"][data-editing="true"]) {
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* Enhanced visual feedback for different element types - only when NOT in edit mode */
+[data-element-key*="headline"]:hover:not([contenteditable="true"][data-editing="true"]) {
+  background-color: rgba(139, 69, 19, 0.05);
+}
+
+[data-element-key*="cta"]:hover:not([contenteditable="true"][data-editing="true"]),
+[data-element-key*="button"]:hover:not([contenteditable="true"][data-editing="true"]) {
+  background-color: rgba(16, 185, 129, 0.05);
+}
+
+/* Smooth transitions */
+[data-element-key] {
+  transition: background-color 0.2s ease, box-shadow 0.2s ease, outline 0.2s ease;
+}
+
+/* Edit mode entrance animation */
+@keyframes editModeEnter {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.4);
+  }
+  50% {
+    transform: scale(1.02);
+    box-shadow: 0 0 0 8px rgba(59, 130, 246, 0.2);
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+  }
+}
+
+[data-element-key][contenteditable="true"][data-editing="true"] {
+  animation: editModeEnter 0.3s ease-out;
+}
+
+/* Pulse animation for active editing */
+@keyframes editPulse {
+  0%, 100% {
+    outline-offset: 2px;
+  }
+  50% {
+    outline-offset: 4px;
+  }
+}
+
+[data-element-key][contenteditable="true"][data-editing="true"]:focus {
+  animation: editPulse 2s ease-in-out infinite;
+}
+
+/* Toolbar fade-in animation */
+@keyframes toolbarFadeIn {
+  0% {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+[data-toolbar-type] {
+  animation: toolbarFadeIn 0.2s ease-out;
+}
+
+/* Enhanced text editing styles */
+[data-element-key][contenteditable="true"][data-editing="true"] {
+  cursor: text !important;
+  user-select: text !important;
+  -webkit-user-select: text !important;
+  -moz-user-select: text !important;
+  -ms-user-select: text !important;
+  min-height: 1.5em;
+  line-height: 1.5;
+}
+
+/* Ensure text selection is visible */
+[data-element-key][contenteditable="true"][data-editing="true"]::selection {
+  background-color: rgba(59, 130, 246, 0.2);
+  color: inherit;
+}
+
+/* Smooth toolbar transitions */
+.floating-toolbars-container [data-toolbar-type] {
+  transition: opacity 0.2s ease-out, transform 0.2s ease-out;
+}
+
+/* Clear focus outline for better UX */
+[data-element-key][contenteditable="true"][data-editing="true"]:focus {
+  outline: none;
+}
+
 @keyframes pulseBorder {
   0%, 100% {
     box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.4);
@@ -567,6 +725,36 @@ body.dragging * {
 .drag-drop-disabled {
   pointer-events: none;
   opacity: 0.5;
+}
+
+/* CRITICAL: Text editing mode takes absolute priority - override ALL other cursor rules */
+[data-element-key][contenteditable="true"][data-editing="true"],
+[data-element-key][contenteditable="true"][data-editing="true"]:hover,
+[data-element-key][contenteditable="true"][data-editing="true"]:focus,
+[data-element-key][contenteditable="true"][data-editing="true"]:active,
+[data-element-key][contenteditable="true"][data-editing="true"]:visited {
+  cursor: text !important;
+  user-select: text !important;
+  -webkit-user-select: text !important;
+  -moz-user-select: text !important;
+  -ms-user-select: text !important;
+}
+
+/* Override drag-drop cursor during text editing */
+body.dragging [data-element-key][contenteditable="true"][data-editing="true"],
+body.dragging [data-element-key][contenteditable="true"][data-editing="true"] * {
+  cursor: text !important;
+}
+
+/* Text editing mode class for additional control */
+.text-editing-mode,
+.text-editing-mode:hover,
+.text-editing-mode:focus,
+.text-editing-mode:active,
+.text-editing-mode * {
+  cursor: text !important;
+  user-select: text !important;
+  -webkit-user-select: text !important;
 }
 
 .drag-drop-hidden {

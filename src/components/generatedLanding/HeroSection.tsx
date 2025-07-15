@@ -69,7 +69,7 @@ export default function HeroSection({
       >
         {/* Left Column */}
         <div className="flex flex-col gap-6">
-          <EditableWrapper isEditable={isEditable}>
+          <EditableWrapper isEditable={isEditable} sectionId={sectionId} elementKey="headline">
             <EditableText
               value={headline}
               onChange={(val) => {
@@ -79,12 +79,13 @@ export default function HeroSection({
               className={`text-4xl leading-tight md:text-5xl font-extrabold text-landing-textPrimary ${
                 isTwoColumn ? "max-w-xl text-left" : "max-w-[70rem] text-center mx-auto"
               }`}
-
               isEditable={isEditable}
+              sectionId={sectionId}
+              elementKey="headline"
             />
           </EditableWrapper>
 
-          <EditableWrapper isEditable={isEditable}>
+          <EditableWrapper isEditable={isEditable} sectionId={sectionId} elementKey="subheadline">
             <EditableText
               value={subheadline}
               onChange={(val) => {
@@ -94,12 +95,13 @@ export default function HeroSection({
               className={`text-lg text-landing-textSecondary ${
                 isTwoColumn ? "max-w-xl text-left" : "max-w-[50rem] text-center mx-auto"
               }`}
-
               isEditable={isEditable}
+              sectionId={sectionId}
+              elementKey="subheadline"
             />
           </EditableWrapper>
 
-          <EditableWrapper isEditable={isEditable}>
+          <EditableWrapper isEditable={isEditable} sectionId={sectionId} elementKey="body_text">
             {body_text && (
               <EditableText
                 value={body_text}
@@ -110,8 +112,9 @@ export default function HeroSection({
                 className={`text-base text-landing-textSecondary ${
                   isTwoColumn ? "max-w-xl text-left" : "max-w-[40rem] text-center mx-auto"
                 }`}
-
                 isEditable={isEditable}
+                sectionId={sectionId}
+                elementKey="body_text"
               />
             )}
           </EditableWrapper>
@@ -124,6 +127,8 @@ export default function HeroSection({
                 isEditable={isEditable}
                 dispatch={dispatch}
                 ctaText={cta_text}
+                sectionId={sectionId}
+                elementKey="cta_button"
               />
             )}
 

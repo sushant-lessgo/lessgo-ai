@@ -105,17 +105,7 @@ export async function autoSaveDraft(params: AutoSaveDraftParams): Promise<AutoSa
   } = params;
 
   try {
-    console.log('💾 Auto-saving draft:', { 
-      tokenId, 
-      source,
-      stepIndex, 
-      hasInputText: !!inputText,
-      hasConfirmedFields: Object.keys(confirmedFields).length > 0,
-      confirmedFieldsCount: Object.keys(confirmedFields).length,
-      includePageData,
-      conflictResolution,
-      description: saveMetadata?.description,
-    });
+    // Auto-saving draft data
 
     // Step 1: Validate data before saving (if enabled)
     if (validateBeforeSave && !skipValidation) {
@@ -188,10 +178,7 @@ if (includePageData) {
           payload.contentSummary = getContentSummary(serializedContent);
         }
         
-        console.log('💾 Using content serializer for structured save:', {
-          size: `${(getSerializedSize() / 1024).toFixed(2)}KB`,
-          validation: serializationOptions.validateSerialization,
-        });
+        // Using content serializer for structured save
       } else {
         // Use standard export
         pageData = editStore.exportForSerialization ? editStore.exportForSerialization() : editStore.export();
@@ -214,13 +201,7 @@ if (includePageData) {
       version: localVersion || 1,
     };
     
-    console.log('💾 Auto-saving with page data:', {
-      sections: pageData?.sections?.length || 0,
-      content: Object.keys(pageData?.content || {}).length,
-      hasTheme: !!(pageData?.theme),
-      source,
-      useSerializer: serializationOptions.useContentSerializer,
-    });
+    // Auto-saving with page data
   }
 }
 
@@ -261,10 +242,7 @@ if (includePageData) {
       try {
         // Simple compression flag - actual compression would be handled by the server
         payload._compressionRequested = true;
-        console.log('📦 Compression requested for large payload:', {
-          size: `${(payloadSize / 1024).toFixed(2)}KB`,
-          threshold: `${(compressionThreshold / 1024).toFixed(2)}KB`,
-        });
+        // Compression requested for large payload
       } catch (error) {
         console.warn('⚠️ Compression failed:', error);
       }
@@ -279,7 +257,6 @@ if (includePageData) {
           
           if (conflictResolution === 'overwrite') {
             payload._forceOverwrite = true;
-            console.log('⚠️ Force overwriting due to conflict resolution strategy');
           } else if (conflictResolution === 'merge') {
             // Attempt simple merge
             payload._attemptMerge = true;
@@ -324,12 +301,7 @@ if (includePageData) {
     const result = await response.json();
     
     // Step 8: Process successful response
-    console.log('✅ Auto-save successful:', {
-      ...result,
-      saveTime: `${saveTime}ms`,
-      dataSize: `${(payloadSize / 1024).toFixed(2)}KB`,
-      compressionRequested: !!payload._compressionRequested,
-    });
+    // Auto-save successful
     
     return {
       success: true,

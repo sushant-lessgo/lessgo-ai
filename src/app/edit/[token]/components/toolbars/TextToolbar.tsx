@@ -1,6 +1,7 @@
 // app/edit/[token]/components/toolbars/TextToolbar.tsx - Complete Text Toolbar
 import React, { useState, useRef, useEffect } from 'react';
 import { useEditStore } from '@/hooks/useEditStore';
+import { useEditor } from '@/hooks/useEditor';
 import { useToolbarActions } from '@/hooks/useToolbarActions';
 import { calculateArrowPosition } from '@/utils/toolbarPositioning';
 import { AdvancedActionsMenu } from './AdvancedActionsMenu';
@@ -33,6 +34,7 @@ export function TextToolbar({ elementSelection, position, contextActions }: Text
   } = useEditStore();
 
   const { executeAction } = useToolbarActions();
+  const { exitTextEditMode } = useEditor();
 
   // Early return if elementSelection is invalid
   if (!elementSelection || !elementSelection.sectionId || !elementSelection.elementKey) {
@@ -48,6 +50,32 @@ export function TextToolbar({ elementSelection, position, contextActions }: Text
     targetElement.getBoundingClientRect(),
     { width: 400, height: 48 }
   ) : null;
+
+  // Detect current formatting state
+  useEffect(() => {
+    const targetElement = document.querySelector(targetSelector) as HTMLElement;
+    if (!targetElement) return;
+    
+    const currentFormats = new Set<string>();
+    
+    // Check for formatting
+    const computedStyle = window.getComputedStyle(targetElement);
+    
+    if (computedStyle.fontWeight === 'bold' || parseInt(computedStyle.fontWeight) >= 600) {
+      currentFormats.add('bold');
+    }
+    if (computedStyle.fontStyle === 'italic') {
+      currentFormats.add('italic');
+    }
+    if (computedStyle.textDecoration.includes('underline')) {
+      currentFormats.add('underline');
+    }
+    
+    setActiveFormats(currentFormats);
+    setCurrentColor(computedStyle.color);
+    setCurrentSize(computedStyle.fontSize);
+    setCurrentAlign(computedStyle.textAlign);
+  }, [targetSelector]);
 
   // Close advanced menu when clicking outside
   useEffect(() => {
@@ -69,41 +97,219 @@ export function TextToolbar({ elementSelection, position, contextActions }: Text
 
   // Format text functions
   const toggleFormat = (format: string) => {
+    const targetElement = document.querySelector(targetSelector) as HTMLElement;
+    if (!targetElement) return;
+
     const newActiveFormats = new Set(activeFormats);
-    if (newActiveFormats.has(format)) {
+    const isActive = newActiveFormats.has(format);
+    
+    if (isActive) {
       newActiveFormats.delete(format);
     } else {
       newActiveFormats.add(format);
     }
     setActiveFormats(newActiveFormats);
     
-    // Apply formatting logic would go here
-    executeAction('apply-text-format', { 
-      elementSelection, 
-      format, 
-      active: newActiveFormats.has(format) 
-    });
+    // Apply formatting directly to the element
+    switch (format) {
+      case 'bold':
+        targetElement.style.fontWeight = isActive ? 'normal' : 'bold';
+        break;
+      case 'italic':
+        targetElement.style.fontStyle = isActive ? 'normal' : 'italic';
+        break;
+      case 'underline':
+        targetElement.style.textDecoration = isActive ? 'none' : 'underline';
+        break;
+    }
     
-    announceLiveRegion(`${format} ${newActiveFormats.has(format) ? 'applied' : 'removed'}`);
+    // Save content to store
+    updateElementContent(
+      elementSelection.sectionId,
+      elementSelection.elementKey,
+      targetElement.textContent || ''
+    );
+    
+    announceLiveRegion(`${format} ${!isActive ? 'applied' : 'removed'}`);
   };
 
   const changeTextColor = (color: string) => {
+    const targetElement = document.querySelector(targetSelector) as HTMLElement;
+    if (!targetElement) return;
+    
     setCurrentColor(color);
-    executeAction('change-text-color', { elementSelection, color });
+    targetElement.style.color = color;
+    
+    // Save content to store
+    updateElementContent(
+      elementSelection.sectionId,
+      elementSelection.elementKey,
+      targetElement.textContent || ''
+    );
+    
     announceLiveRegion(`Text color changed to ${color}`);
   };
 
   const changeFontSize = (size: string) => {
+    const targetElement = document.querySelector(targetSelector) as HTMLElement;
+    if (!targetElement) return;
+    
     setCurrentSize(size);
-    executeAction('change-font-size', { elementSelection, size });
+    targetElement.style.fontSize = size;
+    
+    // Save content to store
+    updateElementContent(
+      elementSelection.sectionId,
+      elementSelection.elementKey,
+      targetElement.textContent || ''
+    );
+    
     announceLiveRegion(`Font size changed to ${size}`);
   };
 
   const changeTextAlign = (align: string) => {
+    const targetElement = document.querySelector(targetSelector) as HTMLElement;
+    if (!targetElement) return;
+    
     setCurrentAlign(align);
-    executeAction('change-text-align', { elementSelection, align });
+    targetElement.style.textAlign = align;
+    
+    // Save content to store
+    updateElementContent(
+      elementSelection.sectionId,
+      elementSelection.elementKey,
+      targetElement.textContent || ''
+    );
+    
     announceLiveRegion(`Text aligned ${align}`);
   };
+
+  // Handle list formatting
+  const handleListFormat = (listType: string) => {
+    const targetElement = document.querySelector(targetSelector) as HTMLElement;
+    if (!targetElement) return;
+    
+    const parent = targetElement.parentElement;
+    if (!parent) return;
+    
+    switch (listType) {
+      case 'bullet':
+        if (parent.tagName.toLowerCase() !== 'ul') {
+          const ul = document.createElement('ul');
+          ul.className = 'list-disc pl-6';
+          const li = document.createElement('li');
+          li.appendChild(targetElement.cloneNode(true));
+          ul.appendChild(li);
+          parent.replaceChild(ul, targetElement);
+        }
+        break;
+      case 'numbered':
+        if (parent.tagName.toLowerCase() !== 'ol') {
+          const ol = document.createElement('ol');
+          ol.className = 'list-decimal pl-6';
+          const li = document.createElement('li');
+          li.appendChild(targetElement.cloneNode(true));
+          ol.appendChild(li);
+          parent.replaceChild(ol, targetElement);
+        }
+        break;
+      case 'none':
+        if (parent.tagName.toLowerCase() === 'ul' || parent.tagName.toLowerCase() === 'ol') {
+          const text = targetElement.textContent || '';
+          const newElement = document.createElement('p');
+          newElement.textContent = text;
+          newElement.setAttribute('data-section-id', elementSelection.sectionId);
+          newElement.setAttribute('data-element-key', elementSelection.elementKey);
+          parent.parentElement?.replaceChild(newElement, parent);
+        }
+        break;
+    }
+    
+    announceLiveRegion(`List format changed to ${listType}`);
+  };
+
+  // Clear all formatting
+  const clearFormatting = () => {
+    const targetElement = document.querySelector(targetSelector) as HTMLElement;
+    if (!targetElement) return;
+    
+    // Reset all formatting
+    targetElement.style.fontWeight = 'normal';
+    targetElement.style.fontStyle = 'normal';
+    targetElement.style.textDecoration = 'none';
+    targetElement.style.color = '';
+    targetElement.style.fontSize = '';
+    targetElement.style.textAlign = '';
+    
+    // Reset state
+    setActiveFormats(new Set());
+    setCurrentColor('#000000');
+    setCurrentSize('16px');
+    setCurrentAlign('left');
+    
+    // Save content to store
+    updateElementContent(
+      elementSelection.sectionId,
+      elementSelection.elementKey,
+      targetElement.textContent || ''
+    );
+    
+    announceLiveRegion('All formatting cleared');
+  };
+
+  // Handle keyboard shortcuts
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      const targetElement = document.querySelector(targetSelector) as HTMLElement;
+      if (!targetElement || !targetElement.isContentEditable) return;
+      
+      const isMac = navigator.platform.toUpperCase().indexOf('MAC') >= 0;
+      const cmdKey = isMac ? e.metaKey : e.ctrlKey;
+      
+      if (cmdKey && !e.shiftKey && !e.altKey) {
+        switch (e.key.toLowerCase()) {
+          case 'b':
+            e.preventDefault();
+            toggleFormat('bold');
+            break;
+          case 'i':
+            e.preventDefault();
+            toggleFormat('italic');
+            break;
+          case 'u':
+            e.preventDefault();
+            toggleFormat('underline');
+            break;
+        }
+      }
+    };
+    
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [targetSelector, toggleFormat]);
+
+  // Simplified selection handling - let the text editing system handle everything
+  useEffect(() => {
+    const handleSelectionChange = () => {
+      const targetElement = document.querySelector(targetSelector) as HTMLElement;
+      if (!targetElement || !targetElement.isContentEditable) return;
+      
+      const selection = window.getSelection();
+      if (selection && selection.rangeCount > 0) {
+        const range = selection.getRangeAt(0);
+        // Check if selection is within our target element
+        if (range.commonAncestorContainer === targetElement || 
+            targetElement.contains(range.commonAncestorContainer)) {
+          console.log('🎯 Text selection detected in text toolbar');
+        }
+      }
+    };
+    
+    document.addEventListener('selectionchange', handleSelectionChange);
+    return () => {
+      document.removeEventListener('selectionchange', handleSelectionChange);
+    };
+  }, [targetSelector]);
 
   // Primary Actions
   const primaryActions = [
@@ -168,6 +374,14 @@ export function TextToolbar({ elementSelection, position, contextActions }: Text
         announceLiveRegion(`Regenerating ${elementSelection.elementKey}`);
       },
     },
+    {
+      id: 'done',
+      label: 'Done',
+      icon: 'check',
+      handler: () => {
+        exitTextEditMode(elementSelection.elementKey, elementSelection.sectionId);
+      },
+    },
   ];
 
   // Advanced Actions
@@ -200,11 +414,7 @@ export function TextToolbar({ elementSelection, position, contextActions }: Text
       id: 'clear-formatting',
       label: 'Clear Formatting',
       icon: 'clear',
-      handler: () => {
-        setActiveFormats(new Set());
-        executeAction('clear-formatting', { elementSelection });
-        announceLiveRegion('Formatting cleared');
-      },
+      handler: clearFormatting,
     },
     {
       id: 'text-variations',
@@ -227,6 +437,16 @@ export function TextToolbar({ elementSelection, position, contextActions }: Text
           top: position.y,
         }}
         data-toolbar-type="text"
+        onMouseDown={(e) => {
+          // Prevent toolbar clicks from blurring the text element
+          e.preventDefault();
+          e.stopPropagation();
+        }}
+        onMouseUp={(e) => {
+          // Prevent toolbar clicks from affecting text selection
+          e.preventDefault();
+          e.stopPropagation();
+        }}
       >
         {/* Arrow */}
         {arrowInfo && (
@@ -247,8 +467,8 @@ export function TextToolbar({ elementSelection, position, contextActions }: Text
         <div className="flex items-center px-3 py-2">
           {/* Text Indicator */}
           <div className="flex items-center space-x-1 mr-3">
-            <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-            <span className="text-xs font-medium text-gray-700">Text</span>
+            <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+            <span className="text-xs font-medium text-gray-700">Editing Text</span>
           </div>
           
           {/* Primary Actions */}
@@ -264,6 +484,7 @@ export function TextToolbar({ elementSelection, position, contextActions }: Text
                     if (action.id === 'color') changeTextColor(value);
                     else if (action.id === 'size') changeFontSize(value);
                     else if (action.id === 'align') changeTextAlign(value);
+                    else if (action.id === 'list') handleListFormat(value);
                   }}
                 />
               ) : (
@@ -461,6 +682,11 @@ function TextIcon({ icon }: { icon: string }) {
     'refresh': (
       <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+      </svg>
+    ),
+    'check': (
+      <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
       </svg>
     ),
     'font': (

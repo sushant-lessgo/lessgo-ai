@@ -1,6 +1,6 @@
 import { useCallback, useState, useEffect, useRef } from 'react';
 import { useEditStore } from './useEditStore';
-import { useSelection } from './useSelection';
+// Removed useSelection - drag drop now uses unified editor system
 import { useToolbarActions } from './useToolbarActions';
 
 export interface DragDropState {
@@ -76,7 +76,8 @@ export function useDragDrop(config: Partial<DragDropConfig> = {}) {
     hideElementToolbar,
   } = useEditStore();
 
-  const { clearSelection } = useSelection();
+  // Clear selection is now handled by unified editor system
+  const { setActiveSection, selectElement } = useEditStore();
   const { executeAction } = useToolbarActions();
 
   // Initialize drag-and-drop

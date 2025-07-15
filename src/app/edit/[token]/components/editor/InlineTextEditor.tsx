@@ -377,7 +377,7 @@ export function InlineTextEditor({
   return (
     <Element
       ref={editorRef as any}
-      contentEditable
+      contentEditable={isEditing}
       suppressContentEditableWarning
       onInput={handleContentChange}
       onFocus={handleFocus}

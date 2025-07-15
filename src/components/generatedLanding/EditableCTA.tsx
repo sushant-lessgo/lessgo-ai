@@ -14,9 +14,11 @@ interface EditableCTAProps {
   isEditable: boolean;
   dispatch?: React.Dispatch<Action>;
   ctaText: string;
+  sectionId?: string;
+  elementKey?: string;
 }
 
-export function EditableCTA({ ctaConfig, isEditable, dispatch, ctaText }: EditableCTAProps) {
+export function EditableCTA({ ctaConfig, isEditable, dispatch, ctaText, sectionId, elementKey }: EditableCTAProps) {
   const [open, setOpen] = useState(false);
   const posthog = usePostHog();
 
@@ -60,6 +62,8 @@ export function EditableCTA({ ctaConfig, isEditable, dispatch, ctaText }: Editab
         <div
           onClick={openConfig}
           className="w-full cursor-pointer border border-gray-300 bg-muted p-6 rounded-xl flex flex-col items-center justify-center gap-2 text-center hover:bg-gray-100 transition shadow-sm"
+          data-section-id={sectionId}
+          data-element-key={elementKey}
         >
           <Settings className="w-6 h-6 text-gray-500" />
           <span className="text-sm font-medium text-gray-700">Configure CTA</span>

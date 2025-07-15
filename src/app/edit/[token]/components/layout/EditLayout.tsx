@@ -3,6 +3,7 @@
 
 import React, { useEffect, useCallback } from 'react';
 import { useEditStore } from '@/hooks/useEditStore';
+import { useEditor } from '@/hooks/useEditor';
 import { GlobalAppHeader } from './GlobalAppHeader';
 import { EditHeader } from './EditHeader';
 import { LeftPanel } from './LeftPanel';
@@ -22,6 +23,9 @@ export function EditLayout({ tokenId }: EditLayoutProps) {
     handleKeyboardShortcut,
     getColorTokens,
   } = useEditStore();
+
+  // Initialize unified editor system
+  const editor = useEditor();
 
   const { status, actions } = useAutoSave({
   enableAutoSave: true,

@@ -3,7 +3,7 @@ import { useCallback } from 'react';
 import { useEditStore } from './useEditStore';
 import { useInlineEditorActions } from './useInlineEditorActions';
 import { useTextToolbarIntegration } from './useTextToolbarIntegration';
-import { useToolbarContext } from './useToolbarContext';
+// Removed useToolbarContext - now using unified editor system
 import type { ElementSelection, ToolbarAction } from '@/types/core/ui';
 import type { BackgroundType, ElementType } from '@/types/core/index';
 import { useElementPicker } from './useElementPicker';
@@ -79,7 +79,10 @@ const { addElement } = useElementCRUD();
     hasActiveEditor,
   } = useInlineEditorActions();
 
-  const { currentContext, hasCapability } = useToolbarContext();
+  // Toolbar context functionality now integrated into unified editor system
+  // Simple capability check - for now, all actions are available
+  const hasCapability = useCallback((actionId: string) => true, []);
+  const currentContext = null;
 
   // ===== CORE ACTION EXECUTION =====
   

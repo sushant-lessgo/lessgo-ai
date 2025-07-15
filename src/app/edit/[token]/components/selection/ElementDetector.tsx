@@ -1,7 +1,7 @@
 // app/edit/[token]/components/selection/ElementDetector.tsx
 import React, { useEffect, useRef, useCallback } from 'react';
 import { useEditStore } from '@/hooks/useEditStore';
-import { useSelection } from '@/hooks/useSelection';
+// Removed useSelection - functionality now in unified useEditor system
 
 interface ElementDetectorProps {
   sectionId: string;
@@ -10,35 +10,23 @@ interface ElementDetectorProps {
 
 export function ElementDetector({ sectionId, children }: ElementDetectorProps) {
   const { mode } = useEditStore();
-  const { detectElementBoundaries, getSelectableElements } = useSelection();
+  // Element detection is now handled by the unified editor system
   const sectionRef = useRef<HTMLDivElement>(null);
   const observerRef = useRef<MutationObserver | null>(null);
 
-  // Detect and mark selectable elements
+  // Element marking is now handled by the unified editor system
   const markSelectableElements = useCallback(() => {
     if (!sectionRef.current || mode !== 'edit') return;
-
-    const boundaries = detectElementBoundaries(sectionRef.current);
     
-    boundaries.forEach((boundary) => {
-      const elementKey = boundary.id.split('.')[1];
-      const element = sectionRef.current?.querySelector(`[data-element-key="${elementKey}"]`);
-      
-      if (element) {
-        // Add selection attributes
-        element.setAttribute('data-selectable', boundary.isSelectable.toString());
-        element.setAttribute('data-element-type', boundary.type);
-        
-        // Add selection classes for styling
-        if (boundary.isSelectable) {
-          element.classList.add('selectable-element');
-          
-          // Add type-specific classes
-          element.classList.add(`element-type-${boundary.type}`);
-        }
-      }
+    // Simple element marking for backward compatibility
+    const elements = sectionRef.current.querySelectorAll('[data-element-key]');
+    elements.forEach((element) => {
+      (element as HTMLElement).setAttribute('data-selectable', 'true');
+      (element as HTMLElement).setAttribute('role', 'button');
+      (element as HTMLElement).setAttribute('tabindex', '0');
+      (element as HTMLElement).classList.add('selectable-element');
     });
-  }, [detectElementBoundaries, mode]);
+  }, [mode]);
 
   // Add visual hints for elements
   const addElementHints = useCallback(() => {

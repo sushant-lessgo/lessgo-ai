@@ -149,7 +149,6 @@ export class StatePersistenceManager {
 
   // Manual save triggered by user action
   async saveManual(data: any, description?: string): Promise<SaveResult> {
-    console.log('💾 Manual save triggered:', { description });
     
     // Cancel debounced save
     this.debouncedSave.cancel();
@@ -169,12 +168,10 @@ export class StatePersistenceManager {
   // Auto save triggered by data changes (debounced)
   saveAuto(data: any): void {
     if (this.state.isSaving) {
-      console.log('💾 Save in progress, queueing auto-save');
       this.queueSave(data, 'auto', 2);
       return;
     }
 
-    console.log('💾 Auto save triggered (debounced)');
     this.state.isDirty = true;
     this.debouncedSave(data, 'auto', 2);
   }
@@ -185,13 +182,11 @@ export class StatePersistenceManager {
       return;
     }
 
-    console.log('💾 Background save triggered');
     await this.performSave(data, 'background', 3);
   }
 
   // Force save (bypasses all queuing)
   async forceSave(data: any, description?: string): Promise<SaveResult> {
-    console.log('💾 Force save triggered:', { description });
     
     // Cancel any pending saves
     this.debouncedSave.cancel();
@@ -256,7 +251,6 @@ export class StatePersistenceManager {
       // Compress if necessary
       if (this.shouldCompressData(savePayload)) {
         savePayload._compressed = true;
-        console.log('📦 Compressing save data');
       }
 
       // Execute save operation
@@ -290,13 +284,6 @@ export class StatePersistenceManager {
         );
       }
 
-      console.log('✅ Save successful:', {
-        saveId,
-        type,
-        saveTime: `${saveTime}ms`,
-        version: this.state.localVersion,
-        compressed: !!savePayload._compressed,
-      });
 
       return {
         success: true,
@@ -321,7 +308,6 @@ export class StatePersistenceManager {
 
       // Retry logic
       if (this.state.retryCount < this.config.maxRetries) {
-        console.log(`🔄 Retrying save in ${this.config.retryDelay}ms (attempt ${this.state.retryCount + 1}/${this.config.maxRetries})`);
         
         setTimeout(() => {
           this.performSave(data, type, priority);
@@ -352,7 +338,6 @@ export class StatePersistenceManager {
       if (useCache) {
         const cached = this.getFromCache(tokenId);
         if (cached) {
-          console.log('📋 Loading from cache:', { tokenId, age: Date.now() - cached.timestamp });
           this.metrics.cacheHits++;
           
           this.state.isLoading = false;
@@ -370,7 +355,6 @@ export class StatePersistenceManager {
       this.metrics.cacheMisses++;
 
       // Load from server
-      console.log('🌐 Loading from server:', { tokenId });
       
       const response = await fetch(`/api/loadDraft?tokenId=${encodeURIComponent(tokenId)}`);
       
@@ -396,12 +380,6 @@ export class StatePersistenceManager {
       this.state.isLoading = false;
       this.state.lastLoaded = loadEndTime;
 
-      console.log('✅ Load successful:', {
-        tokenId,
-        loadTime: `${loadEndTime - loadStartTime}ms`,
-        hasContent: !!serverData.finalContent,
-        hasDraft: !!serverData.inputText,
-      });
 
       return {
         success: true,

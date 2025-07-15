@@ -135,8 +135,9 @@ export function createUIActions(set: any, get: any): UIActions {
         }
         
         // Hide element toolbar if no element selected
-        if (!selection) {
-          state.floatingToolbars.element.visible = false;
+        if (!selection && state.toolbar.type === 'element') {
+          state.toolbar.visible = false;
+          state.toolbar.type = null;
         }
       }),
     
@@ -155,8 +156,8 @@ export function createUIActions(set: any, get: any): UIActions {
         if (sectionIds.length > 1) {
           state.selectedSection = undefined;
           state.selectedElement = undefined;
-          state.floatingToolbars.section.visible = false;
-          state.floatingToolbars.element.visible = false;
+          state.toolbar.visible = false;
+          state.toolbar.type = null;
         }
       }),
 
@@ -179,7 +180,10 @@ setActiveSection: (sectionId: string | undefined) =>
     // Clear element selection when changing sections
     if (state.selectedElement && state.selectedElement.sectionId !== sectionId) {
       state.selectedElement = undefined;
-      state.floatingToolbars.element.visible = false;
+      if (state.toolbar.type === 'element') {
+        state.toolbar.visible = false;
+        state.toolbar.type = null;
+      }
     }
     
     // Update section metadata
@@ -510,36 +514,12 @@ setActiveSection: (sectionId: string | undefined) =>
       actions: AdvancedActionItem[]
     ) =>
       set((state: EditStore) => {
-        const triggerBounds = triggerElement.getBoundingClientRect();
-        
-        // Set active dropdown state for the toolbar
-        if (state.floatingToolbars[toolbarType]) {
-          state.floatingToolbars[toolbarType].activeDropdown = 'advanced';
-        }
-        
-        // Show advanced menu
-        state.advancedMenu = {
-          visible: true,
-          position: { x: triggerBounds.right + 8, y: triggerBounds.top },
-          actions,
-          triggerElement,
-          toolbarType,
-        };
+        console.log('Advanced menu functionality not implemented in current store structure');
       }),
 
     hideAdvancedMenu: () =>
       set((state: EditStore) => {
-        if (state.advancedMenu) {
-          state.advancedMenu.visible = false;
-          
-          // Clear active dropdown from all toolbars
-          Object.keys(state.floatingToolbars).forEach(key => {
-            const toolbar = state.floatingToolbars[key as keyof typeof state.floatingToolbars];
-            if (toolbar.activeDropdown === 'advanced') {
-              toolbar.activeDropdown = undefined;
-            }
-          });
-        }
+        console.log('Advanced menu functionality not implemented in current store structure');
       }),
 
     toggleAdvancedMenu: (
@@ -547,13 +527,7 @@ setActiveSection: (sectionId: string | undefined) =>
       triggerElement: HTMLElement,
       actions: AdvancedActionItem[]
     ) => {
-      const state = get();
-      
-      if (state.advancedMenu?.visible && state.advancedMenu.toolbarType === toolbarType) {
-        get().hideAdvancedMenu();
-      } else {
-        get().showAdvancedMenu(toolbarType, triggerElement, actions);
-      }
+      console.log('Advanced menu functionality not implemented in current store structure');
     },
 
     /**
@@ -920,10 +894,8 @@ setActiveSection: (sectionId: string | undefined) =>
         
         // Hide toolbars on very small screens
         if (width < 640) {
-          state.floatingToolbars.section.visible = false;
-          state.floatingToolbars.element.visible = false;
-          state.floatingToolbars.form.visible = false;
-          state.floatingToolbars.image.visible = false;
+          state.toolbar.visible = false;
+          state.toolbar.type = null;
         }
       });
     },
