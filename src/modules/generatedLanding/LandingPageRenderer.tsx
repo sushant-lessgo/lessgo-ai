@@ -118,21 +118,21 @@ export default function LandingPageRenderer({ className = '' }: LandingPageRende
 
   // ✅ Generate dynamic background system (unchanged)
  const dynamicBackgroundSystem = useMemo(() => {
-  console.log('=== BACKGROUND SYSTEM DEBUG ===');
-  console.log('Raw validatedFields:', validatedFields);
-  console.log('Raw hiddenInferredFields:', hiddenInferredFields);
+  // console.log('=== BACKGROUND SYSTEM DEBUG ===');
+ // console.log('Raw validatedFields:', validatedFields);
+ // console.log('Raw hiddenInferredFields:', hiddenInferredFields);
   
   const hasOnboardingData = validatedFields && Object.keys(validatedFields).length > 0;
-  console.log('Has onboarding data:', hasOnboardingData);
+ // console.log('Has onboarding data:', hasOnboardingData);
   
   if (!hasOnboardingData) {
-    console.log('No onboarding data available, using static fallbacks');
+  //  console.log('No onboarding data available, using static fallbacks');
     return null;
   }
 
   try {
-    console.log('Step 1: Using data directly with centralized types...');
-    console.log('Step 2: Calling generateCompleteBackgroundSystem...');
+   // console.log('Step 1: Using data directly with centralized types...');
+   // console.log('Step 2: Calling generateCompleteBackgroundSystem...');
     const backgroundSystem = generateCompleteBackgroundSystem({
   // Required InputVariables fields with defaults
   marketCategory: validatedFields.marketCategory || 'Work & Productivity Tools',
@@ -146,7 +146,7 @@ export default function LandingPageRenderer({ className = '' }: LandingPageRende
   // Optional HiddenInferredFields
   ...hiddenInferredFields
 });
-    console.log('Step 2 Complete - Generated background system:', backgroundSystem);
+  //  console.log('Step 2 Complete - Generated background system:', backgroundSystem);
     
     return backgroundSystem;
   } catch (error) {
@@ -161,15 +161,15 @@ export default function LandingPageRenderer({ className = '' }: LandingPageRende
   // ✅ Sync background system with store theme
   useEffect(() => {
     if (dynamicBackgroundSystem) {
-      console.log('🔄 Syncing background system with store theme...');
+     // console.log('🔄 Syncing background system with store theme...');
       updateFromBackgroundSystem(dynamicBackgroundSystem);
-      console.log('✅ Background system synced with store theme');
+    //  console.log('✅ Background system synced with store theme');
     }
   }, [dynamicBackgroundSystem, updateFromBackgroundSystem]);
 
   // ✅ Generate color tokens
   const colorTokens = useMemo(() => {
-    console.log('🎨 Generating color tokens...');
+   // console.log('🎨 Generating color tokens...');
     const tokens = getColorTokens();
     console.log('✅ Color tokens generated:', {
       accent: tokens.accent,

@@ -40,7 +40,7 @@ export default function GeneratePage() {
           setIsLoading(true);
           setError(null);
           
-          console.log('📥 Loading draft data for token:', tokenId);
+         // console.log('📥 Loading draft data for token:', tokenId);
           
           const response = await fetch(`/api/loadDraft?tokenId=${tokenId}`);
           
@@ -49,12 +49,12 @@ export default function GeneratePage() {
           }
 
           const data = await response.json();
-          console.log('📦 Received API response:', data);
+          // console.log('📦 Received API response:', data);
           
           // Use the loadFromDraft method from EditStore
           await loadFromDraft(data);
           
-          console.log('✅ Successfully loaded draft data into EditStore');
+         // console.log('✅ Successfully loaded draft data into EditStore');
           
         } catch (err) {
           console.error('Failed to load page data:', err);
@@ -80,7 +80,7 @@ export default function GeneratePage() {
 
   // Handle edit navigation (no migration needed anymore)
   const handleEdit = async () => {
-    console.log('🚀 Navigating to edit mode...');
+   // console.log('🚀 Navigating to edit mode...');
     
     // Set edit mode in the store
     setMode('edit');

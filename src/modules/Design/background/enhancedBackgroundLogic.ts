@@ -179,7 +179,7 @@ function analyzeUserProfile(userProfile: UserProfile): string[] {
   // Universal tag
   profileTags.push('all');
   
-  console.log('👤 User profile tags:', profileTags);
+ // console.log('👤 User profile tags:', profileTags);
   return profileTags;
 }
 
@@ -249,32 +249,32 @@ export function assignEnhancedBackgroundsToSections(
   userProfile: UserProfile
 ): Record<string, SectionBackgroundType> {
   
-  console.log('🎨 Starting Enhanced Background Assignment (Baseline-First)...');
-  console.log('📋 Sections:', sections);
-  console.log('👤 User Profile:', userProfile);
+ // console.log('🎨 Starting Enhanced Background Assignment (Baseline-First)...');
+ // console.log('📋 Sections:', sections);
+ // console.log('👤 User Profile:', userProfile);
   
   const backgroundAssignments: Record<string, SectionBackgroundType> = {};
   const userProfileTags = analyzeUserProfile(userProfile);
   
   // ===== STEP 1: START WITH BASELINE ASSIGNMENTS =====
-  console.log('\n📊 STEP 1: Applying Baseline Backgrounds');
+ // console.log('\n📊 STEP 1: Applying Baseline Backgrounds');
   sections.forEach(sectionId => {
     const baselineType = getBaselineBackground(sectionId);
     const mappedType = mapToBackgroundType(baselineType);
     backgroundAssignments[sectionId] = mappedType;
-    console.log(`📌 ${sectionId}: ${baselineType} → ${mappedType} (baseline)`);
+   // console.log(`📌 ${sectionId}: ${baselineType} → ${mappedType} (baseline)`);
   });
   
   // ===== STEP 2: ANALYZE CONVERSION IMPORTANCE =====
-  console.log('\n🎯 STEP 2: Analyzing Conversion Importance');
+ // console.log('\n🎯 STEP 2: Analyzing Conversion Importance');
   const conversionAnalysis = sections.map(sectionId => {
     const importance = calculateConversionImportance(sectionId, userProfileTags);
-    console.log(`📊 ${sectionId}: Score=${importance.score}, Tier=${importance.tier}, Relevant=${importance.isRelevant} (${importance.reasoning})`);
+  //  console.log(`📊 ${sectionId}: Score=${importance.score}, Tier=${importance.tier}, Relevant=${importance.isRelevant} (${importance.reasoning})`);
     return { sectionId, ...importance };
   });
   
   // ===== STEP 3: IDENTIFY UPGRADE CANDIDATES =====
-  console.log('\n⬆️ STEP 3: Identifying Upgrade Candidates');
+ // console.log('\n⬆️ STEP 3: Identifying Upgrade Candidates');
   const upgradeCandidates = conversionAnalysis.filter(analysis => {
     const currentBackground = backgroundAssignments[analysis.sectionId];
     
@@ -295,10 +295,10 @@ export function assignEnhancedBackgroundsToSections(
     return false;
   });
   
-  console.log('🎯 Upgrade candidates:', upgradeCandidates.map(c => `${c.sectionId}(${c.score})`));
+ // console.log('🎯 Upgrade candidates:', upgradeCandidates.map(c => `${c.sectionId}(${c.score})`));
   
   // ===== STEP 4: APPLY SMART UPGRADES WITH RHYTHM CHECK =====
-  console.log('\n🎨 STEP 4: Applying Smart Upgrades');
+ // console.log('\n🎨 STEP 4: Applying Smart Upgrades');
   upgradeCandidates.forEach((candidate, index) => {
     const sectionIndex = sections.indexOf(candidate.sectionId);
     
@@ -307,7 +307,7 @@ export function assignEnhancedBackgroundsToSections(
       .map(s => backgroundAssignments[s]);
     
     const consecutiveHighlights = countConsecutiveHighlights(recentBackgrounds);
-    console.log(`🔍 ${candidate.sectionId}: ${consecutiveHighlights} consecutive highlights before`);
+   // console.log(`🔍 ${candidate.sectionId}: ${consecutiveHighlights} consecutive highlights before`);
     
     // Determine upgrade path
     const currentBackground = backgroundAssignments[candidate.sectionId];
@@ -322,25 +322,25 @@ export function assignEnhancedBackgroundsToSections(
           newBackground = 'primary';
         }
       } else {
-        console.log(`⚠️ ${candidate.sectionId}: Tier 1 blocked by rhythm (${consecutiveHighlights} consecutive)`);
+       // console.log(`⚠️ ${candidate.sectionId}: Tier 1 blocked by rhythm (${consecutiveHighlights} consecutive)`);
       }
     } else if (candidate.tier === 2) {
       // Tier 2 (Important): Respect rhythm at 2 consecutive
       if (consecutiveHighlights < 2 && currentBackground === 'neutral' && candidate.score >= 20) {
         newBackground = 'secondary';
       } else {
-        console.log(`⚠️ ${candidate.sectionId}: Tier 2 blocked by rhythm (${consecutiveHighlights} consecutive)`);
+       // console.log(`⚠️ ${candidate.sectionId}: Tier 2 blocked by rhythm (${consecutiveHighlights} consecutive)`);
       }
     }
     
     if (newBackground !== currentBackground) {
       backgroundAssignments[candidate.sectionId] = newBackground;
-      console.log(`⬆️ UPGRADE: ${candidate.sectionId}: ${currentBackground} → ${newBackground} (score: ${candidate.score}, tier: ${candidate.tier})`);
+     // console.log(`⬆️ UPGRADE: ${candidate.sectionId}: ${currentBackground} → ${newBackground} (score: ${candidate.score}, tier: ${candidate.tier})`);
     }
   });
   
   // ===== STEP 5: APPLY RHYTHM ENFORCEMENT (DOWNGRADES) =====
-  console.log('\n⬇️ STEP 5: Applying Rhythm Enforcement');
+  // console.log('\n⬇️ STEP 5: Applying Rhythm Enforcement');
   sections.forEach((sectionId, index) => {
     const currentBackground = backgroundAssignments[sectionId];
     
@@ -360,21 +360,21 @@ export function assignEnhancedBackgroundsToSections(
     if (consecutiveHighlights > 3) {
       // Hard limit: Never more than 3 consecutive
       backgroundAssignments[sectionId] = 'neutral';
-      console.log(`⬇️ FORCE DOWNGRADE: ${sectionId}: ${currentBackground} → neutral (hard limit: ${consecutiveHighlights} consecutive)`);
+      // console.log(`⬇️ FORCE DOWNGRADE: ${sectionId}: ${currentBackground} → neutral (hard limit: ${consecutiveHighlights} consecutive)`);
     } else if (consecutiveHighlights === 3 && importance.tier > 1) {
       // Soft limit: Tier 2+ yields at 3 consecutive
       backgroundAssignments[sectionId] = 'neutral';
-      console.log(`⬇️ SMART DOWNGRADE: ${sectionId}: ${currentBackground} → neutral (tier ${importance.tier} yields at 3 consecutive)`);
+      // console.log(`⬇️ SMART DOWNGRADE: ${sectionId}: ${currentBackground} → neutral (tier ${importance.tier} yields at 3 consecutive)`);
     }
   });
   
   // ===== STEP 6: FINAL VALIDATION AND REPORTING =====
-  console.log('\n✅ STEP 6: Final Validation');
+  // console.log('\n✅ STEP 6: Final Validation');
   const finalPattern = sections.map(section => 
     `${section}(${backgroundAssignments[section]})`
   ).join(' → ');
   
-  console.log('🎨 ENHANCED Final background pattern:', finalPattern);
+  // console.log('🎨 ENHANCED Final background pattern:', finalPattern);
   
   // Validate and report metrics
   validateEnhancedPattern(sections, backgroundAssignments, userProfileTags);
@@ -400,7 +400,7 @@ function validateEnhancedPattern(
   assignments: Record<string, SectionBackgroundType>,
   userProfileTags: string[]
 ): void {
-  console.log('\n🔍 Enhanced Pattern Validation');
+ // console.log('\n🔍 Enhanced Pattern Validation');
   
   let consecutiveHighlights = 0;
   let maxConsecutive = 0;
@@ -453,20 +453,20 @@ function validateEnhancedPattern(
   
   // Quality assessment
   if (violations.length === 0) {
-    console.log('✅ Rhythm validation: PASSED - Excellent visual breathing');
+   // console.log('✅ Rhythm validation: PASSED - Excellent visual breathing');
   } else {
     console.warn('⚠️ Rhythm violations:', violations);
   }
   
   if (highlightRatio >= 30 && highlightRatio <= 60) {
-    console.log('✅ Balance validation: PASSED - Good highlight/neutral ratio');
+   // console.log('✅ Balance validation: PASSED - Good highlight/neutral ratio');
   } else if (highlightRatio > 60) {
     console.warn('⚠️ Too many highlights - Consider more neutral sections');
   } else {
     console.warn('⚠️ Too few highlights - Consider upgrading key sections');
   }
   
-  console.log('🎯 Conversion-focused changes:', `${upgrades} upgrades, ${downgrades} rhythm downgrades`);
+ // console.log('🎯 Conversion-focused changes:', `${upgrades} upgrades, ${downgrades} rhythm downgrades`);
 }
 
 function getBackgroundWeight(background: SectionBackgroundType): number {

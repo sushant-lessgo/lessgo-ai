@@ -97,7 +97,7 @@ export function useBackgroundSelector(tokenId: string) {
         // Check cache first
         if (compatibilityCache.has(cacheKey)) {
           const cached = compatibilityCache.get(cacheKey)!;
-          console.log('📦 Using cached compatibility results:', cached.length);
+         // console.log('📦 Using cached compatibility results:', cached.length);
           return cached;
         }
 
@@ -109,7 +109,7 @@ export function useBackgroundSelector(tokenId: string) {
           // Update cache
           setCompatibilityCache(prev => new Map(prev).set(cacheKey, results));
           
-          console.log('🔍 Found compatible backgrounds:', results.length);
+         // console.log('🔍 Found compatible backgrounds:', results.length);
           
           if (!isUnmountedRef.current) {
             setIsLoading(false);
@@ -235,7 +235,7 @@ export function useBackgroundSelector(tokenId: string) {
 
   // Enhanced mode change handler
   const handleModeChange = useCallback((newMode: BackgroundSelectorMode) => {
-    console.log('🎨 Background selector mode changing:', mode, '->', newMode);
+   // console.log('🎨 Background selector mode changing:', mode, '->', newMode);
     
     setMode(newMode);
     setSelectedBackground(null);
@@ -368,7 +368,7 @@ export function useBackgroundSelector(tokenId: string) {
       // Trigger auto-save
       await triggerAutoSave();
 
-      console.log('🔄 Reset to LessGo-generated background completed');
+     // console.log('🔄 Reset to LessGo-generated background completed');
       
       if (!isUnmountedRef.current) {
         setIsLoading(false);
@@ -420,7 +420,7 @@ export function useBackgroundSelector(tokenId: string) {
         timestamp: new Date().toISOString(),
       };
       
-      console.log('🎨 Background Selector Performance:', perfData);
+     // console.log('🎨 Background Selector Performance:', perfData);
     }
   }, [mode, selectedBackground, previewBackground, compatibleOptions.length, validationErrors.length, canApply, isLoading, compatibilityCache.size, brandColors]);
 

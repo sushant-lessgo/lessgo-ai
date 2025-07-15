@@ -323,7 +323,7 @@ export function useColorSystemSelector(tokenId: string) {
       setTextContrast('balanced');
       setOverallIntensity('medium');
 
-      console.log('🔄 Reset to LessGo-generated colors completed');
+      // console.log('🔄 Reset to LessGo-generated colors completed');
       
       if (!isUnmountedRef.current) {
         setIsLoading(false);
@@ -374,7 +374,7 @@ export function useColorSystemSelector(tokenId: string) {
         timestamp: new Date().toISOString(),
       };
       
-      console.log('🎨 Color System Selector Performance:', perfData);
+      // console.log('🎨 Color System Selector Performance:', perfData);
     }
   }, [previewTokens, selectedAccent, textContrast, overallIntensity, validationErrors.length, canApply, isLoading, currentBackgroundSystem]);
 
