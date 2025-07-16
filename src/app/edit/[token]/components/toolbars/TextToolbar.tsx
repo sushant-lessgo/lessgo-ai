@@ -19,9 +19,9 @@ export function TextToolbar({ elementSelection, position, contextActions }: Text
   const [currentSize, setCurrentSize] = useState('16px');
   const [currentAlign, setCurrentAlign] = useState('left');
   
-  // Debug logging
+  // Component lifecycle tracking (removed console logs for production)
   React.useEffect(() => {
-    console.log('🎨 TextToolbar rendered with:', { elementSelection, position, contextActions });
+    // Component mounted with new selection
   }, [elementSelection, position, contextActions]);
   
   const toolbarRef = useRef<HTMLDivElement>(null);
@@ -51,27 +51,27 @@ export function TextToolbar({ elementSelection, position, contextActions }: Text
     { width: 400, height: 48 }
   ) : null;
 
-  // Detect current formatting state
+  // Detect current formatting state - enhanced for dual mode
   useEffect(() => {
     const targetElement = document.querySelector(targetSelector) as HTMLElement;
     if (!targetElement) return;
     
-    const currentFormats = new Set<string>();
+    if (USE_PARTIAL_SELECTION) {
+      const selectionInfo = getSelectionInfo();
+      if (selectionInfo?.hasSelection) {
+        // Update format state based on selection
+        updateFormatStateFromSelection();
+      } else {
+        // Fallback to element-level detection
+        detectCurrentFormatsElementLevel();
+      }
+    } else {
+      // Original element-level detection
+      detectCurrentFormatsElementLevel();
+    }
     
-    // Check for formatting
+    // Always update other properties from element
     const computedStyle = window.getComputedStyle(targetElement);
-    
-    if (computedStyle.fontWeight === 'bold' || parseInt(computedStyle.fontWeight) >= 600) {
-      currentFormats.add('bold');
-    }
-    if (computedStyle.fontStyle === 'italic') {
-      currentFormats.add('italic');
-    }
-    if (computedStyle.textDecoration.includes('underline')) {
-      currentFormats.add('underline');
-    }
-    
-    setActiveFormats(currentFormats);
     setCurrentColor(computedStyle.color);
     setCurrentSize(computedStyle.fontSize);
     setCurrentAlign(computedStyle.textAlign);
@@ -95,8 +95,136 @@ export function TextToolbar({ elementSelection, position, contextActions }: Text
     }
   }, [showAdvanced]);
 
-  // Format text functions
-  const toggleFormat = (format: string) => {
+  // Feature flag for partial selection formatting
+  const USE_PARTIAL_SELECTION = true;
+
+  // Get selection information
+  const getSelectionInfo = () => {
+    const selection = window.getSelection();
+    if (!selection || selection.rangeCount === 0) return null;
+    
+    const range = selection.getRangeAt(0);
+    const isTextSelected = !range.collapsed && range.toString().length > 0;
+    
+    return {
+      hasSelection: isTextSelected,
+      range: range,
+      selectedText: range.toString(),
+      isElementLevel: !isTextSelected
+    };
+  };
+
+  // Apply formatting to selected text range
+  const applyFormatToSelection = (format: string, range: Range, container: HTMLElement) => {
+    const selection = window.getSelection();
+    if (!selection || !range) return;
+    
+    // Save current selection
+    const savedRange = range.cloneRange();
+    
+    try {
+      // Apply formatting using document.execCommand (simple, reliable)
+      document.execCommand('styleWithCSS', false, 'true');
+      
+      switch (format) {
+        case 'bold':
+          document.execCommand('bold', false, '');
+          break;
+        case 'italic':
+          document.execCommand('italic', false, '');
+          break;
+        case 'underline':
+          document.execCommand('underline', false, '');
+          break;
+      }
+      
+      // Restore selection
+      selection.removeAllRanges();
+      selection.addRange(savedRange);
+      
+      // Update format state based on new selection
+      updateFormatStateFromSelection();
+      
+    } catch (error) {
+      console.error('Selection formatting failed:', error);
+      // Fallback to element-level formatting
+      toggleFormatElementLevel(format);
+    }
+  };
+
+  // Update format state from current selection (non-destructive)
+  const updateFormatStateFromSelection = () => {
+    const selectionInfo = getSelectionInfo();
+    if (!selectionInfo?.hasSelection) return;
+    
+    try {
+      const range = selectionInfo.range;
+      const currentFormats = new Set<string>();
+      
+      // Check if selection contains formatted elements
+      const commonAncestor = range.commonAncestorContainer;
+      const parentElement = commonAncestor.nodeType === Node.TEXT_NODE 
+        ? commonAncestor.parentElement 
+        : commonAncestor as HTMLElement;
+      
+      if (parentElement) {
+        const computedStyle = window.getComputedStyle(parentElement);
+        
+        // Check for bold
+        if (computedStyle.fontWeight === 'bold' || parseInt(computedStyle.fontWeight) >= 600) {
+          currentFormats.add('bold');
+        }
+        
+        // Check for italic
+        if (computedStyle.fontStyle === 'italic') {
+          currentFormats.add('italic');
+        }
+        
+        // Check for underline
+        if (computedStyle.textDecoration.includes('underline')) {
+          currentFormats.add('underline');
+        }
+        
+        // Check for strong/em tags within selection
+        const strongTags = parentElement.querySelectorAll('strong, b');
+        const emTags = parentElement.querySelectorAll('em, i');
+        const uTags = parentElement.querySelectorAll('u');
+        
+        if (strongTags.length > 0) currentFormats.add('bold');
+        if (emTags.length > 0) currentFormats.add('italic');
+        if (uTags.length > 0) currentFormats.add('underline');
+      }
+      
+      setActiveFormats(currentFormats);
+    } catch (e) {
+      // Fallback to element-level detection
+      detectCurrentFormatsElementLevel();
+    }
+  };
+
+  // Element-level format detection (extracted from existing logic)
+  const detectCurrentFormatsElementLevel = () => {
+    const targetElement = document.querySelector(targetSelector) as HTMLElement;
+    if (!targetElement) return;
+    
+    const currentFormats = new Set<string>();
+    const computedStyle = window.getComputedStyle(targetElement);
+    
+    if (computedStyle.fontWeight === 'bold' || parseInt(computedStyle.fontWeight) >= 600) {
+      currentFormats.add('bold');
+    }
+    if (computedStyle.fontStyle === 'italic') {
+      currentFormats.add('italic');
+    }
+    if (computedStyle.textDecoration.includes('underline')) {
+      currentFormats.add('underline');
+    }
+    
+    setActiveFormats(currentFormats);
+  };
+
+  // Element-level formatting (original logic extracted)
+  const toggleFormatElementLevel = (format: string) => {
     const targetElement = document.querySelector(targetSelector) as HTMLElement;
     if (!targetElement) return;
 
@@ -133,12 +261,73 @@ export function TextToolbar({ elementSelection, position, contextActions }: Text
     announceLiveRegion(`${format} ${!isActive ? 'applied' : 'removed'}`);
   };
 
+  // Safe partial formatting with fallback
+  const safeApplyPartialFormatting = (format: string) => {
+    try {
+      const selectionInfo = getSelectionInfo();
+      const targetElement = document.querySelector(targetSelector) as HTMLElement;
+      
+      if (selectionInfo?.hasSelection && targetElement) {
+        applyFormatToSelection(format, selectionInfo.range, targetElement);
+        
+        // Save content to store after partial formatting
+        updateElementContent(
+          elementSelection.sectionId,
+          elementSelection.elementKey,
+          targetElement.textContent || ''
+        );
+        
+        announceLiveRegion(`${format} applied to selected text`);
+      } else {
+        // Fallback to existing element-level formatting
+        toggleFormatElementLevel(format);
+      }
+    } catch (error) {
+      console.error('Partial formatting failed, using element-level:', error);
+      // Fallback to existing element-level formatting
+      toggleFormatElementLevel(format);
+    }
+  };
+
+  // Main format function - dual mode
+  const toggleFormat = (format: string) => {
+    if (USE_PARTIAL_SELECTION) {
+      safeApplyPartialFormatting(format);
+    } else {
+      // Original behavior for fallback
+      toggleFormatElementLevel(format);
+    }
+  };
+
   const changeTextColor = (color: string) => {
     const targetElement = document.querySelector(targetSelector) as HTMLElement;
     if (!targetElement) return;
     
     setCurrentColor(color);
-    targetElement.style.color = color;
+    
+    if (USE_PARTIAL_SELECTION) {
+      const selectionInfo = getSelectionInfo();
+      if (selectionInfo?.hasSelection) {
+        // Apply color to selected text
+        try {
+          document.execCommand('styleWithCSS', false, 'true');
+          document.execCommand('foreColor', false, color);
+          announceLiveRegion(`Text color changed to ${color} for selected text`);
+        } catch (error) {
+          // Fallback to element-level
+          targetElement.style.color = color;
+          announceLiveRegion(`Text color changed to ${color}`);
+        }
+      } else {
+        // Element-level color change
+        targetElement.style.color = color;
+        announceLiveRegion(`Text color changed to ${color}`);
+      }
+    } else {
+      // Original element-level behavior
+      targetElement.style.color = color;
+      announceLiveRegion(`Text color changed to ${color}`);
+    }
     
     // Save content to store
     updateElementContent(
@@ -146,8 +335,6 @@ export function TextToolbar({ elementSelection, position, contextActions }: Text
       elementSelection.elementKey,
       targetElement.textContent || ''
     );
-    
-    announceLiveRegion(`Text color changed to ${color}`);
   };
 
   const changeFontSize = (size: string) => {
@@ -155,7 +342,44 @@ export function TextToolbar({ elementSelection, position, contextActions }: Text
     if (!targetElement) return;
     
     setCurrentSize(size);
-    targetElement.style.fontSize = size;
+    
+    if (USE_PARTIAL_SELECTION) {
+      const selectionInfo = getSelectionInfo();
+      if (selectionInfo?.hasSelection) {
+        // Apply font size to selected text
+        try {
+          document.execCommand('styleWithCSS', false, 'true');
+          document.execCommand('fontSize', false, '7'); // Reset to default
+          // Apply custom font size via CSS
+          const selection = window.getSelection();
+          if (selection && selection.rangeCount > 0) {
+            const range = selection.getRangeAt(0);
+            const span = document.createElement('span');
+            span.style.fontSize = size;
+            try {
+              range.surroundContents(span);
+              announceLiveRegion(`Font size changed to ${size} for selected text`);
+            } catch (e) {
+              // Fallback to element-level
+              targetElement.style.fontSize = size;
+              announceLiveRegion(`Font size changed to ${size}`);
+            }
+          }
+        } catch (error) {
+          // Fallback to element-level
+          targetElement.style.fontSize = size;
+          announceLiveRegion(`Font size changed to ${size}`);
+        }
+      } else {
+        // Element-level font size change
+        targetElement.style.fontSize = size;
+        announceLiveRegion(`Font size changed to ${size}`);
+      }
+    } else {
+      // Original element-level behavior
+      targetElement.style.fontSize = size;
+      announceLiveRegion(`Font size changed to ${size}`);
+    }
     
     // Save content to store
     updateElementContent(
@@ -163,8 +387,6 @@ export function TextToolbar({ elementSelection, position, contextActions }: Text
       elementSelection.elementKey,
       targetElement.textContent || ''
     );
-    
-    announceLiveRegion(`Font size changed to ${size}`);
   };
 
   const changeTextAlign = (align: string) => {
@@ -288,7 +510,7 @@ export function TextToolbar({ elementSelection, position, contextActions }: Text
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, [targetSelector, toggleFormat]);
 
-  // Simplified selection handling - let the text editing system handle everything
+  // Enhanced selection handling - update format state on selection changes
   useEffect(() => {
     const handleSelectionChange = () => {
       const targetElement = document.querySelector(targetSelector) as HTMLElement;
@@ -300,7 +522,17 @@ export function TextToolbar({ elementSelection, position, contextActions }: Text
         // Check if selection is within our target element
         if (range.commonAncestorContainer === targetElement || 
             targetElement.contains(range.commonAncestorContainer)) {
-          console.log('🎯 Text selection detected in text toolbar');
+          
+          if (USE_PARTIAL_SELECTION) {
+            const selectionInfo = getSelectionInfo();
+            if (selectionInfo?.hasSelection) {
+              // Update format state based on selection
+              updateFormatStateFromSelection();
+            } else {
+              // No selection, use element-level detection
+              detectCurrentFormatsElementLevel();
+            }
+          }
         }
       }
     };
