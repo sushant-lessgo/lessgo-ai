@@ -241,26 +241,57 @@ export function InlineTextEditor({
 
   // Event handlers
   const handleFocus = useCallback(() => {
+    console.log('📝 InlineTextEditor handleFocus called');
     setIsEditing(true);
     // Mark as actively typing to prevent store updates during typing
     if (editorRef.current) {
       editorRef.current.dataset.activelyTyping = 'true';
+      
+      // Safety timeout to clear activelyTyping flag if blur doesn't fire
+      const safetyClearTimeout = setTimeout(() => {
+        if (editorRef.current) {
+          console.log('📝 Safety timeout: clearing activelyTyping flag');
+          editorRef.current.dataset.activelyTyping = 'false';
+        }
+      }, 10000); // 10 second safety timeout
+      
+      editorRef.current.dataset.safetyClearTimeout = safetyClearTimeout.toString();
     }
     onFocus();
   }, [onFocus]);
 
   const handleBlur = useCallback(() => {
+    console.log('📝 InlineTextEditor handleBlur called');
     setIsEditing(false);
     
     // Clear actively typing flag and save any pending content
     if (editorRef.current) {
       editorRef.current.dataset.activelyTyping = 'false';
       
+      // Clear safety timeout
+      const timeoutId = editorRef.current.dataset.safetyClearTimeout;
+      if (timeoutId) {
+        clearTimeout(parseInt(timeoutId));
+        delete editorRef.current.dataset.safetyClearTimeout;
+      }
+      
+      // Get the current content directly from the element
+      const currentElementContent = editorRef.current.textContent || '';
+      console.log('📝 Current element content on blur:', currentElementContent);
+      console.log('📝 Stored current content:', currentContent);
+      
       // Save any pending content that was deferred during typing
       if (editorRef.current.dataset.pendingContent) {
         const pendingContent = editorRef.current.dataset.pendingContent;
+        console.log('📝 Saving pending content:', pendingContent);
+        editorRef.current.dataset.lastSaveTime = Date.now().toString();
         onContentChange(pendingContent);
         delete editorRef.current.dataset.pendingContent;
+      } else if (currentElementContent !== currentContent) {
+        // If no pending content but element content differs, save the current element content
+        console.log('📝 Saving current element content (no pending):', currentElementContent);
+        editorRef.current.dataset.lastSaveTime = Date.now().toString();
+        onContentChange(currentElementContent);
       }
     }
     
@@ -270,7 +301,7 @@ export function InlineTextEditor({
     if (autoSave.enabled) {
       debouncedSave.flush();
     }
-  }, [onBlur, autoSave.enabled, debouncedSave, onContentChange]);
+  }, [onBlur, autoSave.enabled, debouncedSave, onContentChange, currentContent]);
 
   const handleInternalSelectionChange = useCallback(() => {
     // Check if element is in text editing mode or actively typing - if so, don't interfere
@@ -305,6 +336,7 @@ export function InlineTextEditor({
           // Save any pending content before blur
           if (editorRef.current?.dataset.pendingContent) {
             const pendingContent = editorRef.current.dataset.pendingContent;
+            editorRef.current.dataset.lastSaveTime = Date.now().toString();
             onContentChange(pendingContent);
             delete editorRef.current.dataset.pendingContent;
           }
@@ -329,6 +361,7 @@ export function InlineTextEditor({
           // Save any pending content before blur
           if (editorRef.current?.dataset.pendingContent) {
             const pendingContent = editorRef.current.dataset.pendingContent;
+            editorRef.current.dataset.lastSaveTime = Date.now().toString();
             onContentChange(pendingContent);
             delete editorRef.current.dataset.pendingContent;
           }
@@ -421,12 +454,49 @@ export function InlineTextEditor({
     }
   }, [registerEditor, unregisterEditor]);
 
-  // Sync content when prop changes
+  // Sync content when prop changes (only from external sources, not user input)
   useEffect(() => {
-    if (content !== currentContent && !isEditing) {
-      setCurrentContent(content);
-      if (editorRef.current) {
+    if (content !== currentContent && !isEditing && editorRef.current) {
+      // Check if this content change came from the user's own input
+      const currentElementContent = editorRef.current.textContent || '';
+      const isPendingUserContent = editorRef.current.dataset.pendingContent;
+      const isActivelyTyping = editorRef.current.dataset.activelyTyping === 'true';
+      
+      console.log('📝 Content sync useEffect triggered:', {
+        content,
+        currentContent,
+        currentElementContent,
+        isEditing,
+        isPendingUserContent,
+        isActivelyTyping
+      });
+      
+      // Only sync if the content prop is genuinely different from user's current input
+      // AND it's not a result of the user's own changes being saved and returned from store
+      const isUserCurrentlyEditing = isActivelyTyping || isPendingUserContent;
+      const shouldSync = !isUserCurrentlyEditing && content !== currentElementContent;
+      
+      // IMPORTANT: Don't sync if the user just finished editing and we're getting the saved content back
+      // Check if this might be the user's own content being returned from the store
+      const mightBeUserContentEcho = Math.abs(Date.now() - (editorRef.current.dataset.lastSaveTime || 0)) < 1000;
+      
+      console.log('📝 Content sync decision:', {
+        shouldSync,
+        isUserCurrentlyEditing,
+        mightBeUserContentEcho,
+        timeSinceLastSave: Date.now() - (editorRef.current.dataset.lastSaveTime || 0)
+      });
+      
+      if (shouldSync && !mightBeUserContentEcho) {
+        console.log('📝 Syncing external content change:', content);
+        setCurrentContent(content);
         editorRef.current.textContent = content;
+      } else {
+        console.log('📝 Skipping content sync - likely user content echo or user is editing');
+        // Just update our internal state to match the current DOM content
+        if (currentElementContent !== currentContent) {
+          setCurrentContent(currentElementContent);
+        }
       }
     }
   }, [content, currentContent, isEditing]);
@@ -456,6 +526,10 @@ export function InlineTextEditor({
       onKeyDown={handleKeyDown}
       onMouseUp={handleInternalSelectionChange}
       onKeyUp={handleInternalSelectionChange}
+      onClick={(e) => {
+        console.log('📝 InlineTextEditor clicked');
+        // Don't prevent default - we want normal click behavior
+      }}
       className={`
         inline-text-editor outline-none transition-all duration-200
         ${isEditing ? 'ring-2 ring-blue-500 ring-opacity-50' : 'hover:bg-gray-50'}

@@ -1,5 +1,5 @@
 // app/edit/[token]/components/toolbars/TextToolbar.tsx - Complete Text Toolbar
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { useEditStore } from '@/hooks/useEditStore';
 import { useEditor } from '@/hooks/useEditor';
 import { useToolbarActions } from '@/hooks/useToolbarActions';
@@ -18,6 +18,8 @@ export function TextToolbar({ elementSelection, position, contextActions }: Text
   const [currentColor, setCurrentColor] = useState('#000000');
   const [currentSize, setCurrentSize] = useState('16px');
   const [currentAlign, setCurrentAlign] = useState('left');
+  const [isRegenerating, setIsRegenerating] = useState(false);
+  const [isGeneratingVariations, setIsGeneratingVariations] = useState(false);
   
   // Component lifecycle tracking (removed console logs for production)
   React.useEffect(() => {
@@ -33,6 +35,21 @@ export function TextToolbar({ elementSelection, position, contextActions }: Text
     announceLiveRegion,
   } = useEditStore();
 
+  // Debounced content update for better performance
+  const debouncedUpdateContent = useMemo(
+    () => {
+      const debounce = (func: Function, delay: number) => {
+        let timeoutId: NodeJS.Timeout;
+        return (...args: any[]) => {
+          clearTimeout(timeoutId);
+          timeoutId = setTimeout(() => func.apply(null, args), delay);
+        };
+      };
+      return debounce(updateElementContent, 150);
+    },
+    [updateElementContent]
+  );
+
   const { executeAction } = useToolbarActions();
   const { exitTextEditMode } = useEditor();
 
@@ -42,18 +59,25 @@ export function TextToolbar({ elementSelection, position, contextActions }: Text
     return null;
   }
 
-  // Calculate arrow position
-  const targetSelector = `[data-section-id="${elementSelection.sectionId}"] [data-element-key="${elementSelection.elementKey}"]`;
-  const targetElement = document.querySelector(targetSelector);
-  const arrowInfo = targetElement ? calculateArrowPosition(
+  // Calculate arrow position with memoized target selector
+  const targetSelector = useMemo(() => 
+    `[data-section-id="${elementSelection.sectionId}"] [data-element-key="${elementSelection.elementKey}"]`,
+    [elementSelection.sectionId, elementSelection.elementKey]
+  );
+  
+  const targetElement = useMemo(() => 
+    document.querySelector(targetSelector) as HTMLElement,
+    [targetSelector]
+  );
+  
+  const arrowInfo = useMemo(() => targetElement ? calculateArrowPosition(
     position,
     targetElement.getBoundingClientRect(),
     { width: 400, height: 48 }
-  ) : null;
+  ) : null, [position, targetElement]);
 
   // Detect current formatting state - enhanced for dual mode
   useEffect(() => {
-    const targetElement = document.querySelector(targetSelector) as HTMLElement;
     if (!targetElement) return;
     
     if (USE_PARTIAL_SELECTION) {
@@ -75,7 +99,7 @@ export function TextToolbar({ elementSelection, position, contextActions }: Text
     setCurrentColor(computedStyle.color);
     setCurrentSize(computedStyle.fontSize);
     setCurrentAlign(computedStyle.textAlign);
-  }, [targetSelector]);
+  }, [targetElement]);
 
   // Close advanced menu when clicking outside
   useEffect(() => {
@@ -513,7 +537,6 @@ export function TextToolbar({ elementSelection, position, contextActions }: Text
   // Enhanced selection handling - update format state on selection changes
   useEffect(() => {
     const handleSelectionChange = () => {
-      const targetElement = document.querySelector(targetSelector) as HTMLElement;
       if (!targetElement || !targetElement.isContentEditable) return;
       
       const selection = window.getSelection();
@@ -541,7 +564,7 @@ export function TextToolbar({ elementSelection, position, contextActions }: Text
     return () => {
       document.removeEventListener('selectionchange', handleSelectionChange);
     };
-  }, [targetSelector]);
+  }, [targetElement]);
 
   // Primary Actions
   const primaryActions = [
@@ -599,12 +622,20 @@ export function TextToolbar({ elementSelection, position, contextActions }: Text
     },
     {
       id: 'regenerate',
-      label: 'Regenerate',
+      label: isRegenerating ? 'Regenerating...' : 'Regenerate',
       icon: 'refresh',
-      handler: () => {
-        regenerateElement(elementSelection.sectionId, elementSelection.elementKey);
-        announceLiveRegion(`Regenerating ${elementSelection.elementKey}`);
+      handler: async () => {
+        setIsRegenerating(true);
+        try {
+          await regenerateElement(elementSelection.sectionId, elementSelection.elementKey);
+          announceLiveRegion(`Regenerated ${elementSelection.elementKey}`);
+        } catch (error) {
+          announceLiveRegion(`Failed to regenerate ${elementSelection.elementKey}`);
+        } finally {
+          setIsRegenerating(false);
+        }
       },
+      isLoading: isRegenerating,
     },
     {
       id: 'done',
@@ -650,12 +681,20 @@ export function TextToolbar({ elementSelection, position, contextActions }: Text
     },
     {
       id: 'text-variations',
-      label: 'Get Variations',
+      label: isGeneratingVariations ? 'Generating...' : 'Get Variations',
       icon: 'variations',
-      handler: () => {
-        regenerateElement(elementSelection.sectionId, elementSelection.elementKey, 5);
-        announceLiveRegion('Generating text variations');
+      handler: async () => {
+        setIsGeneratingVariations(true);
+        try {
+          await regenerateElement(elementSelection.sectionId, elementSelection.elementKey, 5);
+          announceLiveRegion('Generated text variations');
+        } catch (error) {
+          announceLiveRegion('Failed to generate variations');
+        } finally {
+          setIsGeneratingVariations(false);
+        }
       },
+      isLoading: isGeneratingVariations,
     },
   ];
 
@@ -665,8 +704,11 @@ export function TextToolbar({ elementSelection, position, contextActions }: Text
         ref={toolbarRef}
         className="fixed z-50 bg-white border-2 border-blue-500 rounded-lg shadow-xl transition-all duration-200"
         style={{
-          left: position.x,
-          top: position.y,
+          left: Math.max(10, Math.min(position.x, window.innerWidth - 400)), // Constrain to viewport
+          top: Math.max(10, Math.min(position.y, window.innerHeight - 100)), // Constrain to viewport
+          minWidth: '300px',
+          maxWidth: '400px',
+          maxHeight: '80px', // Limit height to ensure visibility
         }}
         data-toolbar-type="text"
         onMouseDown={(e) => {
@@ -696,7 +738,7 @@ export function TextToolbar({ elementSelection, position, contextActions }: Text
           />
         )}
         
-        <div className="flex items-center px-3 py-2">
+        <div className="flex items-center px-3 py-2 overflow-x-auto scrollbar-thin scrollbar-thumb-gray-300">
           {/* Text Indicator */}
           <div className="flex items-center space-x-1 mr-3">
             <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
@@ -722,14 +764,19 @@ export function TextToolbar({ elementSelection, position, contextActions }: Text
               ) : (
                 <button
                   onClick={action.handler}
-                  className={`flex items-center space-x-1 px-2 py-1 text-xs rounded transition-colors ${
+                  disabled={action.isLoading}
+                  className={`flex items-center space-x-1 px-2 py-1 text-xs rounded transition-all duration-150 ${
                     action.isActive 
-                      ? 'bg-blue-100 text-blue-800 border border-blue-200' 
-                      : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
-                  }`}
+                      ? 'bg-blue-100 text-blue-800 border border-blue-200 shadow-sm' 
+                      : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900 hover:shadow-sm'
+                  } ${action.isLoading ? 'opacity-50 cursor-not-allowed' : 'hover:scale-105'}`}
                   title={action.label}
                 >
-                  <TextIcon icon={action.icon} />
+                  {action.isLoading ? (
+                    <div className="w-3 h-3 border border-gray-400 border-t-transparent rounded-full animate-spin" />
+                  ) : (
+                    <TextIcon icon={action.icon} />
+                  )}
                   <span>{action.label}</span>
                 </button>
               )}
@@ -740,10 +787,10 @@ export function TextToolbar({ elementSelection, position, contextActions }: Text
           <div className="w-px h-6 bg-gray-200 mx-1" />
           <button
             onClick={() => setShowAdvanced(!showAdvanced)}
-            className={`flex items-center space-x-1 px-2 py-1 text-xs rounded transition-colors ${
+            className={`flex items-center space-x-1 px-2 py-1 text-xs rounded transition-all duration-150 ${
               showAdvanced 
-                ? 'bg-gray-100 text-gray-900' 
-                : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
+                ? 'bg-gray-100 text-gray-900 shadow-sm' 
+                : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900 hover:shadow-sm hover:scale-105'
             }`}
             title="More text options"
           >
@@ -845,7 +892,7 @@ function TextDropdown({ action, elementSelection, onValueChange }: {
       </button>
       
       {showDropdown && (
-        <div className="absolute top-full left-0 mt-1 bg-white border border-gray-200 rounded-md shadow-lg z-10 min-w-[120px]">
+        <div className="absolute top-full left-0 mt-1 bg-white border border-gray-200 rounded-md shadow-lg z-50 min-w-[140px] max-h-48 overflow-y-auto">
           {getDropdownOptions().map((option) => (
             <button
               key={option.value}
@@ -853,17 +900,40 @@ function TextDropdown({ action, elementSelection, onValueChange }: {
                 onValueChange(option.value);
                 setShowDropdown(false);
               }}
-              className={`flex items-center w-full px-3 py-2 text-xs text-left hover:bg-gray-50 ${
-                action.currentValue === option.value ? 'bg-blue-50 text-blue-700' : 'text-gray-700'
-              }`}
+              className={`flex items-center w-full px-3 py-2 text-xs text-left transition-colors duration-150 ${
+                action.currentValue === option.value 
+                  ? 'bg-blue-50 text-blue-700 font-medium' 
+                  : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900'
+              } first:rounded-t-md last:rounded-b-md`}
             >
               {action.id === 'color' && (
                 <div 
-                  className="w-3 h-3 rounded-full mr-2 border border-gray-300"
+                  className="w-3 h-3 rounded-full mr-2 border border-gray-300 shadow-sm"
                   style={{ backgroundColor: option.value }}
                 />
               )}
+              {action.id === 'size' && (
+                <div 
+                  className="w-3 h-3 mr-2 flex items-center justify-center text-gray-500"
+                  style={{ fontSize: '8px' }}
+                >
+                  Aa
+                </div>
+              )}
+              {action.id === 'align' && (
+                <div className="w-3 h-3 mr-2 flex items-center justify-center">
+                  {option.value === 'left' && <div className="w-2 h-0.5 bg-gray-500 mr-auto" />}
+                  {option.value === 'center' && <div className="w-2 h-0.5 bg-gray-500 mx-auto" />}
+                  {option.value === 'right' && <div className="w-2 h-0.5 bg-gray-500 ml-auto" />}
+                  {option.value === 'justify' && <div className="w-2 h-0.5 bg-gray-500" />}
+                </div>
+              )}
               <span>{option.label}</span>
+              {action.currentValue === option.value && (
+                <svg className="w-3 h-3 ml-auto text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                </svg>
+              )}
             </button>
           ))}
         </div>

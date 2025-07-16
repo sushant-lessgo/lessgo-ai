@@ -36,9 +36,16 @@ type Props = {
 
     const handleBlur = (e: React.FocusEvent<HTMLDivElement>) => {
       const newValue = e.currentTarget.innerText.trim();
+      console.log('📝 EditableText handleBlur called');
+      console.log('📝 Original value:', value);
+      console.log('📝 New value:', newValue);
+      
       // Only call onChange if value actually changed to prevent unnecessary re-renders
       if (newValue !== value) {
+        console.log('📝 EditableText: Value changed, calling onChange');
         onChange(newValue);
+      } else {
+        console.log('📝 EditableText: Value unchanged, skipping onChange');
       }
     };
 
