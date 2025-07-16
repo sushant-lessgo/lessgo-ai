@@ -421,10 +421,10 @@ const ElementEditingOverlay: React.FC<{
     e.stopPropagation();
     console.log(`🖱️ Element clicked: ${elementKey}`, { type: elementData.type });
     
-    if (elementData.type === 'text' || elementData.type === 'headline' || elementData.type === 'subheadline') {
-      console.log(`🖱️ Setting isEditing to true for text element: ${elementKey}`);
-      setIsEditing(true);
-    }
+    // DISABLED: Don't set isEditing here - let useEditor handle all text editing
+    // This prevents conflicts between editing systems
+    console.log(`🖱️ Click handled by useEditor system for: ${elementKey}`);
+    
     onElementClick(e);
   };
   
@@ -472,75 +472,14 @@ const ElementEditingOverlay: React.FC<{
     }
   }, [targetElement, isEditing]);
   
-  // Render inline editor when editing
+  // DISABLED: Use the unified text editing system from useEditor hook instead
+  // The ElementEditingOverlay conflicts with the useEditor system
+  // Let the useEditor handle all text editing to avoid conflicts
+  
+  // Don't render the overlay editor - let useEditor system handle it
   if (isEditing && targetElement) {
-    const isTextElement = elementData.type === 'text' || elementData.type === 'headline' || elementData.type === 'subheadline';
-    const rect = targetElement.getBoundingClientRect();
-    
-    console.log(`📝 Rendering editor for ${elementKey}:`, { isEditing, isTextElement, elementType: elementData.type });
-    
-    if (isTextElement) {
-      // Use InlineTextEditor for text elements
-      const element = elementData.type === 'headline' ? 'h2' : elementData.type === 'subheadline' ? 'h3' : 'p';
-      
-      const autoSaveConfig: AutoSaveConfig = {
-        enabled: true,
-        debounceMs: 500,
-        onSave: onContentUpdate,
-      };
-      
-      console.log(`📝 Rendering InlineTextEditor for ${elementKey} with element type: ${element}`);
-      
-      return (
-        <div
-          className="fixed z-50 bg-white border border-blue-500 rounded shadow-lg p-2"
-          style={{
-            left: rect.left,
-            top: rect.top - 50,
-            minWidth: Math.max(300, rect.width),
-          }}
-        >
-          <InlineTextEditor
-            content={editValue}
-            onContentChange={setEditValue}
-            element={element}
-            elementKey={elementKey}
-            sectionId={sectionId}
-            formatState={formatState}
-            onFormatChange={setFormatState}
-            autoSave={autoSaveConfig}
-            config={defaultEditorConfig}
-            onFocus={() => {}}
-            onBlur={handleSave}
-            onSelectionChange={handleSelectionChange}
-            className="w-full"
-          />
-        </div>
-      );
-    } else {
-      // Use simple input for non-text elements
-      return (
-        <div
-          className="fixed z-50 bg-white border border-blue-500 rounded shadow-lg"
-          style={{
-            left: rect.left,
-            top: rect.top - 40,
-            minWidth: Math.max(200, rect.width),
-          }}
-        >
-          <input
-            type="text"
-            value={editValue}
-            onChange={(e) => setEditValue(e.target.value)}
-            onBlur={handleSave}
-            onKeyDown={handleKeyDown}
-            autoFocus
-            className="w-full px-3 py-2 text-sm border-none outline-none"
-            placeholder="Enter text..."
-          />
-        </div>
-      );
-    }
+    console.log(`📝 Editing disabled for ${elementKey} - using unified useEditor system instead`);
+    return null;
   }
   
   return null;

@@ -186,10 +186,23 @@ export function InlineTextEditor({
     const newContent = editorRef.current.textContent || '';
     
     if (newContent !== currentContent) {
-      setCurrentContent(newContent);
-      onContentChange(newContent);
+      // Store cursor position before any state updates
+      const selection = window.getSelection();
+      const range = selection?.rangeCount ? selection.getRangeAt(0) : null;
+      const cursorPosition = range?.startOffset || 0;
       
-      // Track for auto-save
+      setCurrentContent(newContent);
+      
+      // Only call onContentChange if not actively typing to prevent re-renders
+      // Store the content locally and defer the store update
+      if (!editorRef.current.dataset.activelyTyping) {
+        onContentChange(newContent);
+      } else {
+        // Store pending content to save later
+        editorRef.current.dataset.pendingContent = newContent;
+      }
+      
+      // Track for auto-save but don't trigger immediate save during typing
       if (autoSave.enabled) {
         trackContentChange({
           id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
@@ -201,28 +214,72 @@ export function InlineTextEditor({
           formatChanges: formatState,
         });
         
+        // Only trigger debounced save, not immediate save
         debouncedSave(newContent);
       }
+      
+      // Restore cursor position after any potential re-render
+      requestAnimationFrame(() => {
+        if (editorRef.current && selection && range) {
+          try {
+            const textNode = editorRef.current.firstChild || editorRef.current;
+            if (textNode.nodeType === Node.TEXT_NODE) {
+              const newRange = document.createRange();
+              const safePosition = Math.min(cursorPosition, textNode.textContent?.length || 0);
+              newRange.setStart(textNode, safePosition);
+              newRange.setEnd(textNode, safePosition);
+              selection.removeAllRanges();
+              selection.addRange(newRange);
+            }
+          } catch (error) {
+            console.warn('Failed to restore cursor position:', error);
+          }
+        }
+      });
     }
   }, [currentContent, onContentChange, autoSave.enabled, debouncedSave, trackContentChange, sectionId, elementKey, formatState]);
 
   // Event handlers
   const handleFocus = useCallback(() => {
     setIsEditing(true);
+    // Mark as actively typing to prevent store updates during typing
+    if (editorRef.current) {
+      editorRef.current.dataset.activelyTyping = 'true';
+    }
     onFocus();
   }, [onFocus]);
 
   const handleBlur = useCallback(() => {
     setIsEditing(false);
+    
+    // Clear actively typing flag and save any pending content
+    if (editorRef.current) {
+      editorRef.current.dataset.activelyTyping = 'false';
+      
+      // Save any pending content that was deferred during typing
+      if (editorRef.current.dataset.pendingContent) {
+        const pendingContent = editorRef.current.dataset.pendingContent;
+        onContentChange(pendingContent);
+        delete editorRef.current.dataset.pendingContent;
+      }
+    }
+    
     onBlur();
     
     // Final save on blur
     if (autoSave.enabled) {
       debouncedSave.flush();
     }
-  }, [onBlur, autoSave.enabled, debouncedSave]);
+  }, [onBlur, autoSave.enabled, debouncedSave, onContentChange]);
 
   const handleInternalSelectionChange = useCallback(() => {
+    // Check if element is in text editing mode or actively typing - if so, don't interfere
+    if (editorRef.current?.hasAttribute('data-editing') || 
+        editorRef.current?.dataset.activelyTyping === 'true') {
+      console.log('📝 InlineTextEditor: Skipping selection change - element in text editing mode or actively typing');
+      return;
+    }
+    
     const selection = getSelection();
     console.log('📝 InlineTextEditor selection changed:', { selection, isCollapsed: selection?.isCollapsed });
     
@@ -245,6 +302,12 @@ export function InlineTextEditor({
       case 'Enter':
         if (config.enterKeyBehavior === 'save') {
           e.preventDefault();
+          // Save any pending content before blur
+          if (editorRef.current?.dataset.pendingContent) {
+            const pendingContent = editorRef.current.dataset.pendingContent;
+            onContentChange(pendingContent);
+            delete editorRef.current.dataset.pendingContent;
+          }
           editorRef.current?.blur();
         } else if (config.enterKeyBehavior === 'ignore') {
           e.preventDefault();
@@ -257,10 +320,18 @@ export function InlineTextEditor({
           setCurrentContent(content);
           if (editorRef.current) {
             editorRef.current.textContent = content;
+            // Clear any pending content since we're canceling
+            delete editorRef.current.dataset.pendingContent;
           }
           editorRef.current?.blur();
         } else if (config.escapeKeyBehavior === 'save') {
           e.preventDefault();
+          // Save any pending content before blur
+          if (editorRef.current?.dataset.pendingContent) {
+            const pendingContent = editorRef.current.dataset.pendingContent;
+            onContentChange(pendingContent);
+            delete editorRef.current.dataset.pendingContent;
+          }
           editorRef.current?.blur();
         }
         break;
