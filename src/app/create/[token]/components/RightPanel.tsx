@@ -70,7 +70,7 @@ export default function RightPanel() {
 
     // Auto-confirm and advance if confidence >= 0.85 and not already validated
     if (currentFieldData.confidence >= 0.85 && !validatedFields[currentCanonicalField]) {
-      console.log(`Auto-confirming ${currentDisplayField} with confidence ${currentFieldData.confidence}`);
+     // console.log(`Auto-confirming ${currentDisplayField} with confidence ${currentFieldData.confidence}`);
       
       // Move from confirmedFields → validatedFields
       confirmField(currentDisplayField!, currentFieldData.value);
@@ -153,14 +153,14 @@ export default function RightPanel() {
           // ✅ FIXED: Extract BOTH features AND hiddenInferredFields
           const { features, hiddenInferredFields } = await res.json();
           
-          console.log('📦 Raw API Response:', { features, hiddenInferredFields });
+        //  console.log('📦 Raw API Response:', { features, hiddenInferredFields });
           
           // Store features
           setFeaturesFromAI(features || []);
           
           // ✅ NEW: Store hidden inferred fields in Zustand store
           if (hiddenInferredFields) {
-            console.log('💾 Storing hiddenInferredFields:', hiddenInferredFields);
+           // console.log('💾 Storing hiddenInferredFields:', hiddenInferredFields);
             setHiddenInferredFields(hiddenInferredFields);
           } else {
             console.warn('⚠️ No hiddenInferredFields received from API');

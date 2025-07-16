@@ -80,12 +80,12 @@ export function CTAButton({
     const primaryText = colorTokens.ctaText || 'text-white';
     const primaryHover = colorTokens.ctaHover || colorTokens.accentHover || 'bg-blue-700';
     
-    console.log('🎨 CTA Button using accent colors:', {
-      bg: primaryBg,
-      text: primaryText,
-      hover: primaryHover,
-      fromAccentSystem: primaryBg.includes('purple') || primaryBg.includes('indigo') || primaryBg.includes('emerald')
-    });
+    // console.log('🎨 CTA Button using accent colors:', {
+    //   bg: primaryBg,
+    //   text: primaryText,
+    //   hover: primaryHover,
+    //   fromAccentSystem: primaryBg.includes('purple') || primaryBg.includes('indigo') || primaryBg.includes('emerald')
+    // });
     
     return `${primaryBg} ${primaryText} hover:${primaryHover} transition-all duration-200`;
   };

@@ -166,7 +166,7 @@ export function generateColorTokensFromBackgroundSystem(backgroundSystem: {
   accentColor: string;
   accentCSS: string;
 }) {
-  console.log('🎨 Generating color tokens from background system:', backgroundSystem);
+  // console.log('🎨 Generating color tokens from background system:', backgroundSystem);
   
   return generateColorTokens({
     baseColor: backgroundSystem.baseColor,

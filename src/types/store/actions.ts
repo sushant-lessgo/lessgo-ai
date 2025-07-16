@@ -102,6 +102,9 @@ export interface UIActions {
   selectElement: (selection: ElementSelection | null) => void;
   setMultiSelection: (sectionIds: string[]) => void;
   
+  // Text Editing Management
+  setTextEditingMode: (isEditing: boolean, element?: { sectionId: string; elementKey: string }) => void;
+  
   // Panel Management
   setLeftPanelWidth: (width: number) => void;
   toggleLeftPanel: () => void;

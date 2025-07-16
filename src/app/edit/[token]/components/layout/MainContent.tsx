@@ -21,6 +21,7 @@ export function MainContent({ tokenId }: MainContentProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [showScrollIndicator, setShowScrollIndicator] = useState(false);
 
+  const store = useEditStore();
   const {
     sections,
     content,
@@ -37,10 +38,18 @@ export function MainContent({ tokenId }: MainContentProps) {
     setActiveSection,
     
     showElementToolbar,
+    showSectionToolbar,
     getColorTokens,
     trackPerformance,
     announceLiveRegion,
-  } = useEditStore();
+  } = store;
+  
+  // Debug: check if functions exist
+  console.log('🔍 Store functions available:', {
+    showSectionToolbar: typeof showSectionToolbar,
+    showElementToolbar: typeof showElementToolbar,
+    availableFunctions: Object.keys(store).filter(key => typeof store[key] === 'function').slice(0, 20)
+  });
 
   // Removed useToolbarContext and useSelection - now using unified editor system
   // Simple stubs for backward compatibility
@@ -51,7 +60,6 @@ export function MainContent({ tokenId }: MainContentProps) {
     capabilities: []
   });
   const showContextualToolbars = () => {};
-  const showSectionToolbar = (sectionId?: string) => {};
   const currentContext = { capabilities: [] };
   const getContextualActions = () => [{ id: 'dummy', enabled: true, name: 'dummy' }];
   const hasCapability = (actionId?: string) => true;
@@ -115,6 +123,7 @@ const {
   // Enhanced section click handler
  // Enhanced section click handler with context awareness
   const handleSectionClick = (sectionId: string, event: React.MouseEvent) => {
+    console.log('🔥 Section clicked:', sectionId, 'mode:', mode);
     if (mode !== 'edit') return;
 
     const startTime = performance.now();
@@ -151,8 +160,28 @@ const {
         state.multiSelection = [];
       });
       
-      // Use context-aware section toolbar
-      showSectionToolbar(sectionId);
+      // Calculate position for section toolbar
+      const sectionElement = document.querySelector(`[data-section-id="${sectionId}"]`);
+      if (sectionElement) {
+        const rect = sectionElement.getBoundingClientRect();
+        const position = {
+          x: rect.left + rect.width / 2,
+          y: rect.top - 10
+        };
+        
+        // Use context-aware section toolbar
+        console.log('🎪 Showing section toolbar for:', sectionId, 'at position:', position);
+        
+        if (typeof showSectionToolbar === 'function') {
+          showSectionToolbar(sectionId, position);
+        } else {
+          console.error('❌ showSectionToolbar is not a function:', typeof showSectionToolbar);
+          // Fallback: use direct store access
+          if (store.showToolbar) {
+            store.showToolbar('section', sectionId, position);
+          }
+        }
+      }
     }
 
     trackPerformance('section-selection', startTime);
@@ -165,6 +194,7 @@ const {
 // Enhanced element click handler with smart positioning
 // Enhanced element click handler with full context analysis
   const handleElementClick = (sectionId: string, elementKey: string, event: React.MouseEvent) => {
+    console.log('🎯 Element clicked:', sectionId, elementKey, 'mode:', mode);
     if (mode !== 'edit') return;
 
     const startTime = performance.now();
@@ -202,7 +232,15 @@ const {
     // Show element toolbar with calculated position (use timeout to avoid infinite loop)
     const elementId = `${sectionId}.${elementKey}`;
     setTimeout(() => {
-      showElementToolbar(elementId, position);
+      if (typeof showElementToolbar === 'function') {
+        showElementToolbar(elementId, position);
+      } else {
+        console.error('❌ showElementToolbar is not a function:', typeof showElementToolbar);
+        // Fallback: use direct store access
+        if (store.showToolbar) {
+          store.showToolbar('element', elementId, position);
+        }
+      }
     }, 0);
 
     console.log('🎯 Element selected, toolbar should show:', { elementId, position });
@@ -503,7 +541,8 @@ const handleAddSection = (afterSectionId?: string) => {
                         }
                       `}
                       draggable={mode === 'edit'}
-                      onClick={(e) => handleSectionClick(sectionId, e)}
+                      // DISABLED: Using unified click handler from useEditor instead
+                      // onClick={(e) => handleSectionClick(sectionId, e)}
                       onDragStart={(e) => handleSectionDragStart(sectionId, e)}
                       data-section-id={sectionId}
                       role="button"

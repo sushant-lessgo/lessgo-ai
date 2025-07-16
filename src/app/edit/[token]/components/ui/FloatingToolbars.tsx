@@ -29,8 +29,10 @@ export function FloatingToolbars() {
       toolbarPosition: toolbar.position,
       selectedElement,
       selectedSection,
+      toolbarTargetId: toolbar.targetId,
+      toolbarActions: toolbar.actions,
     });
-  }, [toolbar.visible, toolbar.type, mode, selectedElement, selectedSection]);
+  }, [toolbar.visible, toolbar.type, mode, selectedElement, selectedSection, toolbar.targetId, toolbar.actions]);
 
   // No longer need these hooks - they were removed
 
@@ -42,8 +44,11 @@ export function FloatingToolbars() {
 
   // Render single adaptive toolbar
   if (!toolbar.visible || !toolbar.type || !toolbar.targetId) {
+    console.log('🎪 FloatingToolbars not rendering because:', { visible: toolbar.visible, type: toolbar.type, targetId: toolbar.targetId });
     return null;
   }
+  
+  console.log('🎪 FloatingToolbars rendering with:', { type: toolbar.type, targetId: toolbar.targetId, position: toolbar.position });
 
   return (
     <div className="floating-toolbars-container">
@@ -61,6 +66,9 @@ export function FloatingToolbars() {
           pointerEvents: toolbar.visible ? 'auto' : 'none',
         }}
       >
+        <div style={{ backgroundColor: 'red', color: 'white', padding: '4px', fontSize: '12px', marginBottom: '4px' }}>
+          DEBUG: {toolbar.type} toolbar visible
+        </div>
         {toolbar.type === 'section' && selectedSection && (
           <SectionToolbar
             sectionId={selectedSection}

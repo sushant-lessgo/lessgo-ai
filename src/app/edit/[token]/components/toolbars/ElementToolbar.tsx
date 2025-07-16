@@ -36,7 +36,11 @@ export function ElementToolbar({ elementSelection, position, contextActions }: E
   const { enterTextEditMode } = useEditor();
 
   // Enter text editing mode using unified system
-  const handleEditText = () => {
+  const handleEditText = (e?: React.MouseEvent) => {
+    if (e) {
+      e.stopPropagation();
+      e.preventDefault();
+    }
     enterTextEditMode(elementSelection.elementKey, elementSelection.sectionId);
   };
 
@@ -273,7 +277,13 @@ export function ElementToolbar({ elementSelection, position, contextActions }: E
             <React.Fragment key={action.id}>
               {index > 0 && <div className="w-px h-6 bg-gray-200 mx-1" />}
               <button
-                onClick={action.handler}
+                onClick={(e) => {
+                  if (action.id === 'edit-text') {
+                    e.stopPropagation();
+                    e.preventDefault();
+                  }
+                  action.handler(e);
+                }}
                 className={`flex items-center space-x-1 px-2 py-1 text-xs rounded transition-colors ${
                   action.id === 'edit-text' 
                     ? 'bg-blue-500 text-white hover:bg-blue-600' 

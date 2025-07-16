@@ -36,7 +36,7 @@ export async function POST(req: Request) {
       }, { status: 400 });
     }
 
-    console.log('🚀 Starting market insights generation for:', { category, subcategory, problem, audience });
+   // console.log('🚀 Starting market insights generation for:', { category, subcategory, problem, audience });
 
     // Check if we should use mock data
     const DEMO_TOKEN = "lessgodemomockdata";
@@ -60,9 +60,9 @@ export async function POST(req: Request) {
         landingPageGoals: landingPageGoals,
       };
       
-      console.log('🔍 Using mock data for hidden inferred fields (avoiding embeddings API)...');
+     // console.log('🔍 Using mock data for hidden inferred fields (avoiding embeddings API)...');
       const mockHiddenInferredFields = generateMockHiddenInferredFields(validatedFieldsInput);
-      console.log('✅ Mock hidden inferred fields completed');
+     // console.log('✅ Mock hidden inferred fields completed');
       
       return NextResponse.json({ 
         features: mockFeatures,
@@ -81,16 +81,16 @@ export async function POST(req: Request) {
       landingPageGoals: landingPageGoals,
     };
 
-    console.log('🤖 Generating features with AI...');
+   // console.log('🤖 Generating features with AI...');
     
     // Generate features using AI (similar pattern to inferFields)
     const features = await generateFeatures(inputData);
     
     // Validate and enhance with semantic search for hidden fields - REAL EMBEDDINGS API
-    console.log('🔍 Performing semantic validation for hidden inferred fields...');
+   // console.log('🔍 Performing semantic validation for hidden inferred fields...');
     const hiddenInferredFields = await validateInferredFields(inputData);
     
-    console.log('✅ Market insights generation completed');
+   // console.log('✅ Market insights generation completed');
 
     return NextResponse.json({ 
       features: features || [],

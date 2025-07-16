@@ -226,18 +226,18 @@ export default function LeftCopyRightImage(props: LayoutComponentProps) {
   // ✅ ENHANCED: Get muted text color for trust indicators
   const mutedTextColor = dynamicTextColors?.muted || colorTokens.textMuted;
 
-  console.log(`🎨 LeftCopyRightImage rendering with dynamic colors:`, {
-    backgroundType: props.backgroundType,
-    backgroundCSS: sectionBackground,
-    headingColor: dynamicTextColors?.heading,
-    bodyColor: dynamicTextColors?.body,
-    mutedColor: dynamicTextColors?.muted,
-    ctaColors: {
-      bg: colorTokens.ctaBg,
-      hover: colorTokens.ctaHover,
-      text: colorTokens.ctaText
-    }
-  });
+  // console.log(`🎨 LeftCopyRightImage rendering with dynamic colors:`, {
+  //   backgroundType: props.backgroundType,
+  //   backgroundCSS: sectionBackground,
+  //   headingColor: dynamicTextColors?.heading,
+  //   bodyColor: dynamicTextColors?.body,
+  //   mutedColor: dynamicTextColors?.muted,
+  //   ctaColors: {
+  //     bg: colorTokens.ctaBg,
+  //     hover: colorTokens.ctaHover,
+  //     text: colorTokens.ctaText
+  //   }
+  // });
 
   return (
     <LayoutSection

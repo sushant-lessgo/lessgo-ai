@@ -1,5 +1,5 @@
 // app/edit/[token]/components/selection/ElementDetector.tsx
-import React, { useEffect, useRef, useCallback } from 'react';
+import React, { useEffect, useRef, useCallback, useState } from 'react';
 import { useEditStore } from '@/hooks/useEditStore';
 // Removed useSelection - functionality now in unified useEditor system
 
@@ -333,9 +333,33 @@ function ElementDetectorStyles() {
 // Element boundary visualization (debug mode)
 export function ElementBoundaryVisualizer({ sectionId }: { sectionId: string }) {
   const { mode } = useEditStore();
-  const { detectElementBoundaries } = useSelection();
-  const [showBoundaries, setShowBoundaries] = React.useState(false);
-  const [boundaries, setBoundaries] = React.useState<any[]>([]);
+  const [showBoundaries, setShowBoundaries] = useState(false);
+  const [boundaries, setBoundaries] = useState<any[]>([]);
+
+  // Local implementation of detectElementBoundaries
+  const detectElementBoundaries = useCallback((container: HTMLElement) => {
+    const elements = container.querySelectorAll('[data-element-key]');
+    const detectedBoundaries: any[] = [];
+
+    elements.forEach((element) => {
+      const rect = element.getBoundingClientRect();
+      const elementKey = element.getAttribute('data-element-key');
+      const elementType = element.getAttribute('data-element-type') || 'unknown';
+
+      detectedBoundaries.push({
+        id: elementKey,
+        type: elementType,
+        bounds: {
+          left: rect.left + window.scrollX,
+          top: rect.top + window.scrollY,
+          width: rect.width,
+          height: rect.height,
+        },
+      });
+    });
+
+    return detectedBoundaries;
+  }, []);
 
   useEffect(() => {
     if (!showBoundaries || mode !== 'edit') return;

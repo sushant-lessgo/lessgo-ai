@@ -67,12 +67,28 @@ export function SelectionSystem({ children }: SelectionSystemProps) {
 
   // Handle focus management
   useEffect(() => {
+    const focusSelectedElement = () => {
+      if (selectedElement) {
+        const element = document.querySelector(
+          `[data-section-id="${selectedElement.sectionId}"] [data-element-key="${selectedElement.elementKey}"]`
+        );
+        if (element instanceof HTMLElement) {
+          element.focus();
+        }
+      } else if (selectedSection) {
+        const section = document.querySelector(`[data-section-id="${selectedSection}"]`);
+        if (section instanceof HTMLElement) {
+          section.focus();
+        }
+      }
+    };
+
     if (mode === 'edit' && (selectedSection || selectedElement)) {
       // Small delay to ensure DOM is updated
       const timer = setTimeout(focusSelectedElement, 50);
       return () => clearTimeout(timer);
     }
-  }, [mode, selectedSection, selectedElement, focusSelectedElement]);
+  }, [mode, selectedSection, selectedElement]);
 
   return (
     <div className="selection-system">

@@ -15,7 +15,7 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const { input, includeValidation } = RequestSchema.parse(body);
 
-    console.log('🚀 Starting inference for:', input);
+    // console.log('🚀 Starting inference for:', input);
     
     // Check for mock data usage
     const DEMO_TOKEN = "lessgodemomockdata";
@@ -23,7 +23,7 @@ export async function POST(req: NextRequest) {
     const token = authHeader.replace("Bearer ", "").trim();
 
     if (process.env.NEXT_PUBLIC_USE_MOCK_GPT === "true" || token === DEMO_TOKEN) {
-      console.log("Using mock data for field inference and validation");
+      // console.log("Using mock data for field inference and validation");
       
       // Generate mock inferred fields
       const mockInferredFields = generateMockInferredFields(input);
@@ -32,9 +32,9 @@ export async function POST(req: NextRequest) {
       // Generate mock validation results if requested (THIS IS THE KEY CHANGE)
       let mockValidationResults: Record<string, ValidationResult> | undefined;
       if (includeValidation) {
-        console.log('🔍 Using mock semantic validation (avoiding embeddings API)...');
+      //  console.log('🔍 Using mock semantic validation (avoiding embeddings API)...');
         mockValidationResults = generateMockValidationResults(mockInferredFields);
-        console.log('✅ Mock semantic validation completed');
+      //  console.log('✅ Mock semantic validation completed');
       }
 
       return Response.json({ 
@@ -48,16 +48,16 @@ export async function POST(req: NextRequest) {
 
     // Production: Real AI inference
     const inferredFields = await inferFields(input);
-    console.log('✅ AI inference completed');
+   // console.log('✅ AI inference completed');
 
     // Step 2: Semantic Validation (if requested) - REAL EMBEDDINGS API
     let validationResults: Record<string, ValidationResult> | undefined;
     
     if (includeValidation) {
-      console.log('🔍 Starting semantic validation...');
+     // console.log('🔍 Starting semantic validation...');
       // Cast to InputVariables type - the validation function will handle type safety
       validationResults = await validateInferredFields(inferredFields as any);
-      console.log('✅ Semantic validation completed');
+      // console.log('✅ Semantic validation completed');
     }
 
     return Response.json({ 
@@ -76,7 +76,7 @@ export async function POST(req: NextRequest) {
       const body = await req.json();
       const { input, includeValidation } = body;
       
-      console.log("AI inference failed, using mock fallback");
+     // console.log("AI inference failed, using mock fallback");
       const mockInferredFields = generateMockInferredFields(input || "");
       const mockValidationResults = includeValidation ? generateMockValidationResults(mockInferredFields) : undefined;
       

@@ -42,20 +42,20 @@ export function useLayoutComponent<T = Record<string, any>>({
   const elements = sectionContent?.elements || {} as Partial<StoreElementTypes>;
 
   // Extract content with type safety and defaults
-  console.log(`🔍 useLayoutComponent extracting content for ${sectionId}:`, {
-    elements: elements,
-    elementKeys: Object.keys(elements),
-    firstElement: Object.values(elements)[0],
-    contentSchema: Object.keys(contentSchema)
-  });
+  // console.log(`🔍 useLayoutComponent extracting content for ${sectionId}:`, {
+  //   elements: elements,
+  //   elementKeys: Object.keys(elements),
+  //   firstElement: Object.values(elements)[0],
+  //   contentSchema: Object.keys(contentSchema)
+  // });
   
   const blockContent = extractLayoutContent(elements, contentSchema) as T;
   
-  console.log(`📦 Extracted blockContent for ${sectionId}:`, {
-    blockContent,
-    headlineType: typeof blockContent.headline,
-    headlineValue: blockContent.headline
-  });
+  // console.log(`📦 Extracted blockContent for ${sectionId}:`, {
+  //   blockContent,
+  //   headlineType: typeof blockContent.headline,
+  //   headlineValue: blockContent.headline
+  // });
 
   // Get color tokens from store
   const colorTokens = getColorTokens();
@@ -91,14 +91,14 @@ export function useLayoutComponent<T = Record<string, any>>({
     muted: backgroundType === 'primary' ? 'text-gray-300' : 'text-gray-500'
   };
 
-  console.log(`🎨 Dynamic text colors for ${sectionId} (${backgroundType}):`, {
-    backgroundType,
-    original: dynamicTextColors,
-    validated: validatedTextColors,
-    background: sectionBackground,
-    willUseWhiteText: backgroundType === 'primary',
-    willUseDarkText: backgroundType !== 'primary'
-  });
+  // console.log(`🎨 Dynamic text colors for ${sectionId} (${backgroundType}):`, {
+  //   backgroundType,
+  //   original: dynamicTextColors,
+  //   validated: validatedTextColors,
+  //   background: sectionBackground,
+  //   willUseWhiteText: backgroundType === 'primary',
+  //   willUseDarkText: backgroundType !== 'primary'
+  // });
 
   // Content update handler
   const handleContentUpdate = (elementKey: string, value: string) => {
@@ -134,18 +134,18 @@ export function useLayoutComponent<T = Record<string, any>>({
   };
 
   // Debug logging
-  console.log(`Layout Component ${sectionId}:`, {
-    backgroundType,
-    sectionBackground: getSectionBackground(),
-    mode,
-    hasContent: Object.keys(elements).length > 0,
-    backgroundCSS: getSectionBackground(),
-    ctaColors: {
-      bg: enhancedColorTokens.ctaBg,
-      hover: enhancedColorTokens.ctaHover,
-      text: enhancedColorTokens.ctaText
-    }
-  });
+  // console.log(`Layout Component ${sectionId}:`, {
+  //   backgroundType,
+  //   sectionBackground: getSectionBackground(),
+  //   mode,
+  //   hasContent: Object.keys(elements).length > 0,
+  //   backgroundCSS: getSectionBackground(),
+  //   ctaColors: {
+  //     bg: enhancedColorTokens.ctaBg,
+  //     hover: enhancedColorTokens.ctaHover,
+  //     text: enhancedColorTokens.ctaText
+  //   }
+  // });
 
   return {
     // Core data

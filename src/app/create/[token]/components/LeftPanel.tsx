@@ -16,8 +16,8 @@ export default function LeftPanel() {
   
   if (!mounted || !oneLiner) return null;
 
-  console.log("validatedFields (user-confirmed):", validatedFields);
-  console.log("confirmedFields (AI guesses):", confirmedFields);
+ // console.log("validatedFields (user-confirmed):", validatedFields);
+ // console.log("confirmedFields (AI guesses):", confirmedFields);
 
   // ✅ FIXED: Use canonical field names and type-safe mapping
   const confirmedFieldsData = Object.entries(validatedFields).map(([canonicalField, value]) => {
@@ -48,7 +48,7 @@ export default function LeftPanel() {
   });
 
   const handleEditField = (canonicalField: CanonicalFieldName) => {
-    console.log(`Editing field: ${canonicalField}`);
+   // console.log(`Editing field: ${canonicalField}`);
     // Pass the canonical field name directly to reopenFieldForEditing
     reopenFieldForEditing(canonicalField);
   };

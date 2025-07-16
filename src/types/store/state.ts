@@ -145,6 +145,13 @@ export interface UISlice {
   selectedElement?: ElementSelection;
   multiSelection: string[];
   
+  // Text Editing State
+  isTextEditing: boolean;
+  textEditingElement?: {
+    sectionId: string;
+    elementKey: string;
+  };
+  
   // Panel State
   leftPanel: {
     width: number;

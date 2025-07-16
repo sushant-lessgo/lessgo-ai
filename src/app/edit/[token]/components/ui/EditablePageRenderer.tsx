@@ -264,15 +264,15 @@ const EnhancedLayoutWrapper: React.FC<{
   }, [sectionId, backgroundType]);
 
   // Debug what props we're passing to the layout component
-  console.log(`🏧 Rendering layout for ${sectionId}:`, {
-    LayoutComponent: LayoutComponent.name,
-    props: originalProps,
-    sectionDataStructure: {
-      hasElements: !!sectionData?.elements,
-      elementKeys: sectionData?.elements ? Object.keys(sectionData.elements) : [],
-      firstElementType: sectionData?.elements ? typeof Object.values(sectionData.elements)[0] : 'none'
-    }
-  });
+  // console.log(`🏧 Rendering layout for ${sectionId}:`, {
+  //   LayoutComponent: LayoutComponent.name,
+  //   props: originalProps,
+  //   sectionDataStructure: {
+  //     hasElements: !!sectionData?.elements,
+  //     elementKeys: sectionData?.elements ? Object.keys(sectionData.elements) : [],
+  //     firstElementType: sectionData?.elements ? typeof Object.values(sectionData.elements)[0] : 'none'
+  //   }
+  // });
 
   const RenderedLayout = (
     <LayoutComponent
@@ -410,12 +410,12 @@ const ElementEditingOverlay: React.FC<{
         y: rect.top - 10
       };
       
-      console.log('🔤 Showing text toolbar at position:', position);
+      console.log('🔤 Text selection detected, but using unified toolbar system instead');
       
-      // Show the text toolbar
-      showTextToolbar(position);
+      // DISABLED: Using unified toolbar system from useEditor instead
+      // showTextToolbar(position);
     }
-  }, [showTextToolbar]);
+  }, []);
 
   const handleClick = (e: React.MouseEvent) => {
     e.stopPropagation();

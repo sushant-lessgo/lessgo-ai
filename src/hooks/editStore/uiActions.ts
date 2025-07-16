@@ -195,6 +195,22 @@ setActiveSection: (sectionId: string | undefined) =>
   }),
 
     /**
+     * ===== TEXT EDITING MANAGEMENT =====
+     */
+    
+    setTextEditingMode: (isEditing: boolean, element?: { sectionId: string; elementKey: string }) =>
+      set((state: EditStore) => {
+        state.isTextEditing = isEditing;
+        state.textEditingElement = isEditing && element ? element : undefined;
+        
+        console.log('📝 Text editing mode changed:', { 
+          isEditing, 
+          element,
+          currentToolbar: state.toolbar.type 
+        });
+      }),
+
+    /**
      * ===== PANEL MANAGEMENT =====
      */
     
@@ -226,6 +242,8 @@ setActiveSection: (sectionId: string | undefined) =>
         // Get context-aware actions based on type
         const actions = getActionsForType(type, targetId, state);
         
+        console.log('🎪 showToolbar called:', { type, targetId, position: pos, actions, currentToolbar: state.toolbar });
+        
         // Update toolbar state
         state.toolbar = {
           type,
@@ -243,6 +261,13 @@ setActiveSection: (sectionId: string | undefined) =>
           const [sectionId, elementKey] = targetId.split('.');
           state.selectedElement = { sectionId, elementKey };
           state.selectedSection = sectionId;
+        } else if (type === 'text') {
+          // For text toolbar, maintain the current element selection
+          const [sectionId, elementKey] = targetId.split('.');
+          if (sectionId && elementKey) {
+            state.selectedElement = { sectionId, elementKey };
+            state.selectedSection = sectionId;
+          }
         }
       }),
     

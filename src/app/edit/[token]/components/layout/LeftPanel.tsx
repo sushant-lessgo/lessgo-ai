@@ -48,28 +48,28 @@ export function LeftPanel({ tokenId }: LeftPanelProps) {
   
   // Debug: Log when fields are available (only in development)
   if (process.env.NODE_ENV === 'development') {
-    console.log('🔍 LeftPanel Data Sources (Detailed):', {
-      editStore: {
-        oneLiner: onboardingData.oneLiner,
-        validatedFields: onboardingData.validatedFields,
-        hiddenInferredFields: onboardingData.hiddenInferredFields,
-        validatedFieldsCount: Object.keys(onboardingData.validatedFields || {}).length,
-        hiddenInferredFieldsCount: Object.keys(onboardingData.hiddenInferredFields || {}).length,
-      },
-      onboardingStore: {
-        oneLiner: onboardingStoreState.oneLiner,
-        validatedFields: onboardingStoreState.validatedFields,
-        hiddenInferredFields: onboardingStoreState.hiddenInferredFields,
-        validatedFieldsCount: Object.keys(onboardingStoreState.validatedFields || {}).length,
-        hiddenInferredFieldsCount: Object.keys(onboardingStoreState.hiddenInferredFields || {}).length,
-      },
-      hybrid: {
-        validatedFieldsCount: Object.keys(validatedFields || {}).length,
-        hiddenInferredFieldsCount: Object.keys(hiddenInferredFields || {}).length,
-        actualValidatedFields: validatedFields,
-        actualHiddenInferredFields: hiddenInferredFields,
-      }
-    });
+    // console.log('🔍 LeftPanel Data Sources (Detailed):', {
+    //   editStore: {
+    //     oneLiner: onboardingData.oneLiner,
+    //     validatedFields: onboardingData.validatedFields,
+    //     hiddenInferredFields: onboardingData.hiddenInferredFields,
+    //     validatedFieldsCount: Object.keys(onboardingData.validatedFields || {}).length,
+    //     hiddenInferredFieldsCount: Object.keys(onboardingData.hiddenInferredFields || {}).length,
+    //   },
+    //   onboardingStore: {
+    //     oneLiner: onboardingStoreState.oneLiner,
+    //     validatedFields: onboardingStoreState.validatedFields,
+    //     hiddenInferredFields: onboardingStoreState.hiddenInferredFields,
+    //     validatedFieldsCount: Object.keys(onboardingStoreState.validatedFields || {}).length,
+    //     hiddenInferredFieldsCount: Object.keys(onboardingStoreState.hiddenInferredFields || {}).length,
+    //   },
+    //   hybrid: {
+    //     validatedFieldsCount: Object.keys(validatedFields || {}).length,
+    //     hiddenInferredFieldsCount: Object.keys(hiddenInferredFields || {}).length,
+    //     actualValidatedFields: validatedFields,
+    //     actualHiddenInferredFields: hiddenInferredFields,
+    //   }
+    // });
   }
 
   const [isResizing, setIsResizing] = useState(false);
@@ -154,7 +154,7 @@ export function LeftPanel({ tokenId }: LeftPanelProps) {
 
   const regenerateContentOnly = async () => {
     // Regenerate only the text content while preserving design structure
-    console.log('Regenerating content only (preserving design)');
+   // console.log('Regenerating content only (preserving design)');
     
     try {
       // Call the content-only regeneration endpoint
@@ -173,7 +173,7 @@ export function LeftPanel({ tokenId }: LeftPanelProps) {
       }
       
       const result = await response.json();
-      console.log('Content regeneration completed:', result);
+     // console.log('Content regeneration completed:', result);
       
       // Update the content in the store
       // This should trigger a content update without changing layout/design
@@ -198,18 +198,18 @@ export function LeftPanel({ tokenId }: LeftPanelProps) {
     const editStoreHasData = Object.keys(onboardingData.hiddenInferredFields || {}).length > 0 || 
                             Object.keys(onboardingData.validatedFields || {}).length > 0;
     
-    if (process.env.NODE_ENV === 'development') {
-      console.log('🔄 Bidirectional sync check:', {
-        onboardingStoreHasData,
-        editStoreHasData,
-        onboardingStoreHiddenFields: onboardingStoreState.hiddenInferredFields,
-        editStoreHiddenFields: onboardingData.hiddenInferredFields,
-      });
-    }
+    // if (process.env.NODE_ENV === 'development') {
+    //   console.log('🔄 Bidirectional sync check:', {
+    //     onboardingStoreHasData,
+    //     editStoreHasData,
+    //     onboardingStoreHiddenFields: onboardingStoreState.hiddenInferredFields,
+    //     editStoreHiddenFields: onboardingData.hiddenInferredFields,
+    //   });
+    // }
     
     // If onboarding store has data but edit store doesn't, sync onboarding → edit
     if (onboardingStoreHasData && !editStoreHasData) {
-      console.log('📤 Syncing from onboarding store to edit store');
+     // console.log('📤 Syncing from onboarding store to edit store');
       updateOnboardingData({
         oneLiner: onboardingStoreState.oneLiner || onboardingData.oneLiner,
         validatedFields: { ...onboardingData.validatedFields, ...onboardingStoreState.validatedFields },
@@ -220,7 +220,7 @@ export function LeftPanel({ tokenId }: LeftPanelProps) {
     }
     // If edit store has data but onboarding store doesn't, sync edit → onboarding  
     else if (editStoreHasData && !onboardingStoreHasData) {
-      console.log('📥 Syncing from edit store to onboarding store');
+     // console.log('📥 Syncing from edit store to onboarding store');
       if (onboardingData.validatedFields && Object.keys(onboardingData.validatedFields).length > 0) {
         setValidatedFields(onboardingData.validatedFields);
       }

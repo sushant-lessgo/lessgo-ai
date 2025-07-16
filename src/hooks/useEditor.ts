@@ -19,18 +19,70 @@ export function useEditor() {
     setActiveSection,
     selectElement,
     announceLiveRegion,
+    setTextEditingMode,
+    isTextEditing,
+    textEditingElement,
+    toolbar,
   } = useEditStore();
 
   // Determine what was clicked and its context
   const determineClickTarget = useCallback((event: MouseEvent): ClickTarget | null => {
     const target = event.target as HTMLElement;
     
-    // Check if we're in a protected editing zone
-    const isEditing = target.closest('[contenteditable="true"][data-editing="true"]');
-    if (isEditing) {
-      console.log('🛡️ Click in editing zone - ignoring');
-      return null;
+    // Check if we're in text editing mode using store state
+    // Double validation: Check both text editing state AND toolbar type
+    if ((isTextEditing && textEditingElement) || toolbar.type === 'text') {
+      // Check if clicking on the element being edited
+      const elementWithKey = target.closest('[data-element-key]') as HTMLElement;
+      const sectionElement = target.closest('[data-section-id]') as HTMLElement;
+      
+      if (elementWithKey && sectionElement) {
+        const elementKey = elementWithKey.getAttribute('data-element-key');
+        const sectionId = sectionElement.getAttribute('data-section-id');
+        
+        // If clicking on the same element that's being edited, ignore the click
+        if (textEditingElement && 
+            elementKey === textEditingElement.elementKey && 
+            sectionId === textEditingElement.sectionId) {
+          console.log('🛡️ Click on text editing element - ignoring', { 
+            target, 
+            textEditingElement,
+            clickedElement: { sectionId, elementKey },
+            isTextEditing,
+            toolbarType: toolbar.type
+          });
+          return null;
+        }
+        
+        // Also ignore if toolbar is text type and clicking on the toolbar target
+        if (toolbar.type === 'text' && toolbar.targetId) {
+          const [toolbarSectionId, toolbarElementKey] = toolbar.targetId.split('.');
+          if (elementKey === toolbarElementKey && sectionId === toolbarSectionId) {
+            console.log('🛡️ Click on text toolbar target element - ignoring', { 
+              target, 
+              toolbarTarget: toolbar.targetId,
+              clickedElement: { sectionId, elementKey }
+            });
+            return null;
+          }
+        }
+      }
     }
+    
+    // Debug: Check what we're clicking on
+    console.log('🎯 Click target debug:', {
+      tagName: target.tagName,
+      className: target.className,
+      hasDataElementKey: target.hasAttribute('data-element-key'),
+      hasDataSectionId: target.hasAttribute('data-section-id'),
+      closestElementKey: target.closest('[data-element-key]')?.getAttribute('data-element-key'),
+      closestSectionId: target.closest('[data-section-id]')?.getAttribute('data-section-id'),
+      isContentEditable: target.contentEditable,
+      isTextEditing,
+      textEditingElement,
+      toolbarType: toolbar.type,
+      toolbarTargetId: toolbar.targetId
+    });
 
     // Check if clicking on toolbar - prevent interference
     const isToolbarClick = target.closest('[data-toolbar-type]');
@@ -74,7 +126,7 @@ export function useEditor() {
         type: 'section'
       };
     }
-  }, []);
+  }, [isTextEditing, textEditingElement, toolbar]);
 
   // Calculate optimal toolbar position for target
   const calculateToolbarPosition = useCallback((
@@ -161,7 +213,10 @@ export function useEditor() {
     if (mode !== 'edit') return;
 
     const clickTarget = determineClickTarget(event);
-    if (!clickTarget) return;
+    if (!clickTarget) {
+      console.log('🎯 Editor click ignored - no target or in text editing mode');
+      return;
+    }
 
     console.log('🎯 Editor click:', clickTarget);
 
@@ -208,6 +263,9 @@ export function useEditor() {
       showToolbar(elementType as any, targetId, position);
       
       announceLiveRegion(`Selected ${clickTarget.elementKey} in ${clickTarget.sectionId}`);
+      
+      // Stop propagation since we handled this element click
+      event.stopPropagation();
       return;
     }
   }, [
@@ -304,53 +362,254 @@ export function useEditor() {
   // Text editing helpers
   const enterTextEditMode = useCallback((elementKey: string, sectionId: string) => {
     const selector = `[data-section-id="${sectionId}"] [data-element-key="${elementKey}"]`;
-    const element = document.querySelector(selector) as HTMLElement;
+    const wrapper = document.querySelector(selector) as HTMLElement;
     
-    if (!element) return;
+    if (!wrapper) {
+      console.log('❌ Wrapper not found for text editing:', selector);
+      return;
+    }
 
+    // Find the actual text element inside the wrapper, prioritizing text elements and InlineTextEditor
+    const textElement = wrapper.querySelector('.inline-text-editor, h1, h2, h3, h4, h5, h6, p, span, div:not(.element-drag-handle):not(.drag-handle-icon)') as HTMLElement;
+    const element = textElement || wrapper;
+    
+    console.log('✏️ Entering text edit mode for:', { 
+      elementKey, 
+      sectionId, 
+      wrapper: { 
+        tagName: wrapper.tagName, 
+        className: wrapper.className,
+        innerHTML: wrapper.innerHTML.substring(0, 200) + '...' 
+      }, 
+      element: { 
+        tagName: element.tagName, 
+        className: element.className,
+        contentEditable: element.contentEditable,
+        hasDataEditing: element.hasAttribute('data-editing'),
+        currentContent: element.textContent
+      }
+    });
+    
     // Make element editable
     element.contentEditable = 'true';
     element.setAttribute('data-editing', 'true');
     element.classList.add('text-editing-mode');
     
+    // Debug: Verify the class was added
+    console.log('✏️ After adding text-editing-mode class:', {
+      hasClass: element.classList.contains('text-editing-mode'),
+      classList: element.classList.toString(),
+      hasDataEditing: element.hasAttribute('data-editing'),
+      dataEditingValue: element.getAttribute('data-editing'),
+      elementReference: element
+    });
+    
+    // Check if the class is still there after a short delay
+    setTimeout(() => {
+      console.log('✏️ Class status after 100ms:', {
+        hasClass: element.classList.contains('text-editing-mode'),
+        classList: element.classList.toString(),
+        hasDataEditing: element.hasAttribute('data-editing'),
+        dataEditingValue: element.getAttribute('data-editing')
+      });
+    }, 100);
+    
+    // Force text cursor and override any conflicting styles
+    element.style.cssText += `
+      cursor: text !important;
+      user-select: text !important;
+      pointer-events: auto !important;
+      -webkit-user-select: text !important;
+      -moz-user-select: text !important;
+      -ms-user-select: text !important;
+    `;
+    
+    // Debug: Check if properties were set correctly
+    console.log('✏️ After setting properties:', {
+      contentEditable: element.contentEditable,
+      hasDataEditing: element.hasAttribute('data-editing'),
+      hasTextEditingMode: element.classList.contains('text-editing-mode'),
+      computedStyle: {
+        cursor: window.getComputedStyle(element).cursor,
+        userSelect: window.getComputedStyle(element).userSelect,
+        pointerEvents: window.getComputedStyle(element).pointerEvents
+      },
+      parentStyles: {
+        cursor: window.getComputedStyle(element.parentElement!).cursor,
+        pointerEvents: window.getComputedStyle(element.parentElement!).pointerEvents
+      },
+      elementPosition: element.getBoundingClientRect(),
+      zIndex: window.getComputedStyle(element).zIndex
+    });
+    
+    // Debug: Check what element is actually at the cursor position
+    setTimeout(() => {
+      const rect = element.getBoundingClientRect();
+      const centerX = rect.left + rect.width / 2;
+      const centerY = rect.top + rect.height / 2;
+      const elementAtPoint = document.elementFromPoint(centerX, centerY);
+      
+      console.log('🎯 Element at cursor position:', {
+        expectedElement: element,
+        actualElement: elementAtPoint,
+        isSameElement: element === elementAtPoint,
+        actualElementInfo: elementAtPoint ? {
+          tagName: elementAtPoint.tagName,
+          className: elementAtPoint.className,
+          cursor: window.getComputedStyle(elementAtPoint).cursor
+        } : null
+      });
+    }, 100);
+    
+    // Instead of disabling pointer events, we need to make the wrapper have text cursor too
+    const selectableWrapper = element.closest('.selectable-element');
+    if (selectableWrapper) {
+      // Don't disable pointer events - we need them for text selection
+      // selectableWrapper.style.pointerEvents = 'none';
+      selectableWrapper.classList.add('force-text-cursor');
+      
+      // Create a very high specificity style override
+      const styleId = 'text-cursor-override';
+      let styleElement = document.getElementById(styleId);
+      if (!styleElement) {
+        styleElement = document.createElement('style');
+        styleElement.id = styleId;
+        document.head.appendChild(styleElement);
+      }
+      
+      styleElement.textContent = `
+        .force-text-cursor,
+        .force-text-cursor *,
+        .force-text-cursor .selectable-element,
+        .force-text-cursor .inline-text-editor {
+          cursor: text !important;
+          user-select: text !important;
+          -webkit-user-select: text !important;
+          -moz-user-select: text !important;
+          -ms-user-select: text !important;
+        }
+      `;
+    }
+    
+    // Disable InlineTextEditor's event handlers temporarily
+    const originalOnInput = element.oninput;
+    const originalOnFocus = element.onfocus;
+    const originalOnBlur = element.onblur;
+    const originalOnKeyDown = element.onkeydown;
+    
+    // Remove InlineTextEditor event handlers
+    element.oninput = null;
+    element.onfocus = null;
+    element.onblur = null;
+    element.onkeydown = null;
+    
+    // Store original handlers for restoration
+    element.dataset.originalHandlers = JSON.stringify({
+      oninput: !!originalOnInput,
+      onfocus: !!originalOnFocus,
+      onblur: !!originalOnBlur,
+      onkeydown: !!originalOnKeyDown
+    });
+    
     // Focus and select text
     element.focus();
     
-    // Select all text
-    const range = document.createRange();
-    const selection = window.getSelection();
-    range.selectNodeContents(element);
-    selection?.removeAllRanges();
-    selection?.addRange(range);
+    // Select all text after a short delay to ensure focus is set
+    setTimeout(() => {
+      const range = document.createRange();
+      const selection = window.getSelection();
+      range.selectNodeContents(element);
+      selection?.removeAllRanges();
+      selection?.addRange(range);
+      
+      console.log('✏️ Text selection attempted:', {
+        rangeStartOffset: range.startOffset,
+        rangeEndOffset: range.endOffset,
+        selectionText: selection?.toString(),
+        selectionRangeCount: selection?.rangeCount
+      });
+    }, 50);
 
-    // Show text toolbar
-    const position = calculateToolbarPosition(element, 'text');
-    showToolbar('text', `${sectionId}.${elementKey}`, position);
+    // Show text toolbar positioned away from the text element
+    const rect = element.getBoundingClientRect();
+    const position = {
+      x: rect.left + rect.width / 2,
+      y: rect.top - 80  // Position toolbar further away from text
+    };
+    
+    const elementId = `${sectionId}.${elementKey}`;
+    console.log('✏️ About to show text toolbar:', { 
+      elementId, 
+      position, 
+      sectionId, 
+      elementKey, 
+      calculatedId: `${sectionId}.${elementKey}` 
+    });
+    
+    // Set text editing state in store
+    setTextEditingMode(true, { sectionId, elementKey });
+    
+    showToolbar('text', elementId, position);
+    console.log('✏️ Text toolbar shown');
     
     announceLiveRegion('Entered text editing mode');
-  }, [calculateToolbarPosition, showToolbar, announceLiveRegion]);
+  }, [calculateToolbarPosition, showToolbar, announceLiveRegion, setTextEditingMode]);
 
   const exitTextEditMode = useCallback((elementKey: string, sectionId: string) => {
     const selector = `[data-section-id="${sectionId}"] [data-element-key="${elementKey}"]`;
-    const element = document.querySelector(selector) as HTMLElement;
+    const wrapper = document.querySelector(selector) as HTMLElement;
     
-    if (!element) return;
+    if (!wrapper) return;
+
+    // Find the actual text element inside the wrapper (same as enterTextEditMode)
+    const textElement = wrapper.querySelector('.inline-text-editor, h1, h2, h3, h4, h5, h6, p, span, div:not(.element-drag-handle):not(.drag-handle-icon)') as HTMLElement;
+    const element = textElement || wrapper;
+
+    console.log('✏️ Exiting text edit mode for:', { elementKey, sectionId, wrapper, element });
 
     // Make element non-editable
     element.contentEditable = 'false';
     element.removeAttribute('data-editing');
     element.classList.remove('text-editing-mode');
     
+    // Restore element styles
+    element.style.cursor = '';
+    element.style.userSelect = '';
+    element.style.pointerEvents = '';
+    
+    // Restore InlineTextEditor event handlers
+    if (element.dataset.originalHandlers) {
+      const handlers = JSON.parse(element.dataset.originalHandlers);
+      // Note: We can't fully restore the original handlers, but we can remove our interference
+      // The InlineTextEditor will re-attach its handlers on next render
+      delete element.dataset.originalHandlers;
+    }
+    
+    // Restore wrapper styles
+    const selectableWrapper = element.closest('.selectable-element');
+    if (selectableWrapper) {
+      selectableWrapper.classList.remove('force-text-cursor');
+      
+      // Remove the style override
+      const styleElement = document.getElementById('text-cursor-override');
+      if (styleElement) {
+        styleElement.remove();
+      }
+    }
+    
     // Clear selection
     const selection = window.getSelection();
     selection?.removeAllRanges();
+    
+    // Clear text editing state in store
+    setTextEditingMode(false);
     
     // Show element toolbar instead
     const position = calculateToolbarPosition(element, 'element');
     showToolbar('element', `${sectionId}.${elementKey}`, position);
     
     announceLiveRegion('Exited text editing mode');
-  }, [calculateToolbarPosition, showToolbar, announceLiveRegion]);
+  }, [calculateToolbarPosition, showToolbar, announceLiveRegion, setTextEditingMode]);
 
   return {
     // Event handlers

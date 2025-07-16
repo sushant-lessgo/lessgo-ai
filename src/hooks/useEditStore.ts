@@ -122,6 +122,8 @@ function createInitialState() {
     selectedSection: undefined as string | undefined,
     selectedElement: undefined as any,
     multiSelection: [] as string[],
+    isTextEditing: false,
+    textEditingElement: undefined as { sectionId: string; elementKey: string } | undefined,
     leftPanel: {
       width: 300,
       collapsed: false,

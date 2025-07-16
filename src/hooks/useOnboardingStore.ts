@@ -66,7 +66,7 @@ export const useOnboardingStore = create<OnboardingStore>((set, get) => ({
   },
   
   setValidatedFields: (fields) => {
-    console.log('Setting validated fields:', fields);
+    // console.log('Setting validated fields:', fields);
     set({ validatedFields: fields });
   },
   
