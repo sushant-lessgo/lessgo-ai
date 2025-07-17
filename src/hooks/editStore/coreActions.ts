@@ -72,6 +72,30 @@ export function createCoreActions(set: any, get: any) {
         state.persistence.isDirty = true;
       }),
 
+    moveSectionUp: (sectionId: string) =>
+      set((state: EditStore) => {
+        const currentIndex = state.sections.indexOf(sectionId);
+        if (currentIndex > 0) {
+          const newSections = [...state.sections];
+          const [moved] = newSections.splice(currentIndex, 1);
+          newSections.splice(currentIndex - 1, 0, moved);
+          state.sections = newSections;
+          state.persistence.isDirty = true;
+        }
+      }),
+
+    moveSectionDown: (sectionId: string) =>
+      set((state: EditStore) => {
+        const currentIndex = state.sections.indexOf(sectionId);
+        if (currentIndex < state.sections.length - 1) {
+          const newSections = [...state.sections];
+          const [moved] = newSections.splice(currentIndex, 1);
+          newSections.splice(currentIndex + 1, 0, moved);
+          state.sections = newSections;
+          state.persistence.isDirty = true;
+        }
+      }),
+
     updateSectionLayout: (sectionId: string, layout: string) =>
       set((state: EditStore) => {
         if (state.sectionLayouts[sectionId]) {

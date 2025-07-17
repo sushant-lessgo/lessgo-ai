@@ -51,65 +51,46 @@ export function FloatingToolbars() {
   // console.log('🎪 FloatingToolbars rendering with:', { type: toolbar.type, targetId: toolbar.targetId, position: toolbar.position });
 
   return (
-    <div className="floating-toolbars-container">
-      {/* Single Smart Toolbar - renders appropriate content based on type */}
-      <div 
-        data-toolbar-type={toolbar.type}
-        className="fixed z-50 bg-white shadow-lg rounded-lg border border-gray-200 p-2 transition-all duration-200 ease-out"
-        style={{
-          left: `${toolbar.position.x}px`,
-          top: `${toolbar.position.y}px`,
-          transform: 'translate(-50%, -100%)', // Center horizontally and position above
-          minWidth: '300px',
-          maxWidth: '500px',
-          opacity: toolbar.visible ? 1 : 0,
-          pointerEvents: toolbar.visible ? 'auto' : 'none',
-          zIndex: 9999, // Ensure toolbar is always on top
-        }}
-      >
-        <div style={{ backgroundColor: 'red', color: 'white', padding: '4px', fontSize: '12px', marginBottom: '4px' }}>
-          DEBUG: {toolbar.type} toolbar visible
-        </div>
-        {toolbar.type === 'section' && selectedSection && (
-          <SectionToolbar
-            sectionId={selectedSection}
-            position={toolbar.position}
-            contextActions={toolbar.actions.map(actionId => ({ id: actionId, label: actionId, icon: 'icon', type: 'button' }))}
-          />
-        )}
+    <>
+      {toolbar.type === 'section' && selectedSection && (
+        <SectionToolbar
+          sectionId={selectedSection}
+          position={toolbar.position}
+          contextActions={toolbar.actions.map(actionId => ({ id: actionId, label: actionId, icon: 'icon', type: 'button' }))}
+        />
+      )}
 
-        {toolbar.type === 'element' && selectedElement && (
-          <ElementToolbar
-            elementSelection={selectedElement}
-            position={toolbar.position}
-            contextActions={toolbar.actions.map(actionId => ({ id: actionId, label: actionId, icon: 'icon', type: 'button' }))}
-          />
-        )}
+      {toolbar.type === 'element' && selectedElement && (
+        <ElementToolbar
+          elementSelection={selectedElement}
+          position={toolbar.position}
+          contextActions={toolbar.actions.map(actionId => ({ id: actionId, label: actionId, icon: 'icon', type: 'button' }))}
+        />
+      )}
 
-        {toolbar.type === 'text' && selectedElement && (
-          <TextToolbar
-            elementSelection={selectedElement}
-            position={toolbar.position}
-            contextActions={toolbar.actions.map(actionId => ({ id: actionId, label: actionId, icon: 'icon', type: 'button' }))}
-          />
-        )}
+      {toolbar.type === 'text' && selectedElement && (
+        <TextToolbar
+          elementSelection={selectedElement}
+          position={toolbar.position}
+          contextActions={toolbar.actions.map(actionId => ({ id: actionId, label: actionId, icon: 'icon', type: 'button' }))}
+        />
+      )}
 
-        {toolbar.type === 'image' && (
-          <ImageToolbar
-            targetId={toolbar.targetId}
-            position={toolbar.position}
-            contextActions={toolbar.actions.map(actionId => ({ id: actionId, label: actionId, icon: 'icon', type: 'button' }))}
-          />
-        )}
+      {toolbar.type === 'image' && (
+        <ImageToolbar
+          targetId={toolbar.targetId}
+          position={toolbar.position}
+          contextActions={toolbar.actions.map(actionId => ({ id: actionId, label: actionId, icon: 'icon', type: 'button' }))}
+        />
+      )}
 
-        {toolbar.type === 'form' && (
-          <FormToolbar
-            targetId={toolbar.targetId}
-            position={toolbar.position}
-            contextActions={toolbar.actions.map(actionId => ({ id: actionId, label: actionId, icon: 'icon', type: 'button' }))}
-          />
-        )}
-      </div>
-    </div>
+      {toolbar.type === 'form' && (
+        <FormToolbar
+          targetId={toolbar.targetId}
+          position={toolbar.position}
+          contextActions={toolbar.actions.map(actionId => ({ id: actionId, label: actionId, icon: 'icon', type: 'button' }))}
+        />
+      )}
+    </>
   );
 }

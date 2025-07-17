@@ -36,7 +36,9 @@ export function CTAButton({
   variant = 'primary',
   disabled = false,
   loading = false,
-  ariaLabel
+  ariaLabel,
+  sectionId,
+  elementKey
 }: {
   text: string;
   colorTokens: any;
@@ -48,6 +50,8 @@ export function CTAButton({
   disabled?: boolean;
   loading?: boolean;
   ariaLabel?: string;
+  sectionId?: string;
+  elementKey?: string;
 }) {
   
   const sizeClasses = {
@@ -100,6 +104,8 @@ export function CTAButton({
       onClick={onClick}
       disabled={disabled || loading}
       aria-label={ariaLabel || text}
+      data-section-id={sectionId}
+      data-element-key={elementKey}
       className={`
         inline-flex items-center justify-center font-semibold rounded-lg 
         shadow-lg hover:shadow-xl transform hover:scale-105 

@@ -16,6 +16,8 @@ import type {
   ResetScope 
 } from '@/types/core';
 
+import type { FormActions } from './formActions';
+
 /**
  * ===== LAYOUT ACTIONS INTERFACE =====
  */
@@ -241,8 +243,8 @@ export interface PersistenceActions {
 /**
  * ===== FORMS & IMAGE ACTIONS INTERFACE =====
  */
-export interface FormsImageActions {
-  // Form Management
+export interface FormsImageActions extends FormActions {
+  // Form Management (Legacy)
   createForm: (sectionId: string, elementKey: string) => string;
   addFormField: (formId: string, fieldType: string) => void;
   updateFormField: (formId: string, fieldId: string, properties: any) => void;
@@ -426,6 +428,17 @@ export interface GenerationActions {
   }>) => void;
   clearAIErrors: () => void;
   regenerateAllContent: () => Promise<void>;
+  
+  // Element-level AI Actions
+  regenerateElement: (sectionId: string, elementKey: string, variationCount?: number) => Promise<void>;
+  regenerateElementWithVariations: (sectionId: string, elementKey: string, variationCount?: number) => Promise<string[]>;
+  generateVariations: (sectionId: string, elementKey: string, count?: number) => Promise<string[]>;
+  
+  // Variations Management
+  showElementVariations: (elementId: string, variations: string[]) => void;
+  hideElementVariations: () => void;
+  setVariationSelection: (index: number) => void;
+  applyVariation: (sectionId: string, elementKey: string, variationIndex: number) => void;
   
   // Background System Integration
   updateFromBackgroundSystem: (backgroundSystem: BackgroundSystem) => void;

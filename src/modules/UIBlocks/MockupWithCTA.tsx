@@ -195,6 +195,8 @@ export default function MockupWithCTA(props: LayoutComponentProps) {
                 textStyle={getTextStyle('body-lg')}
                 size="large"
                 className="shadow-lg hover:shadow-xl"
+                sectionId={sectionId}
+                elementKey="cta_text"
               />
             </div>
 

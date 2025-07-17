@@ -12,6 +12,7 @@ import { createAIActions } from './editStore/aiActions';
 import { createPersistenceActions } from './editStore/persistenceActions';
 import { createGenerationActions } from './editStore/generationActions';
 import { createUIActions } from './editStore/uiActions';
+import { createFormActions } from './editStore/formActions';
 
 // Import centralized types
 import type { EditStore, SectionData } from '@/types/store';
@@ -271,12 +272,13 @@ export const useEditStore = create<EditStore>()(
         // Initial state
         ...createInitialState(),
         
-        // Consolidated action creators (5 files instead of 9+)
+        // Consolidated action creators (6 files instead of 9+)
         ...createCoreActions(set, get),
         ...createAIActions(set, get),
         ...createPersistenceActions(set, get),
         ...createGenerationActions(set, get),
         ...createUIActions(set, get),
+        ...createFormActions(set, get),
         // Simple inline actions that don't need separate files
         loadFromOnboarding: () => {
           console.warn('loadFromOnboarding: Not yet implemented - needs onboarding store integration');

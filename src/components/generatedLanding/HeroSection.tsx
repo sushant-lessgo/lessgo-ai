@@ -5,6 +5,8 @@ import EditableText from "@/modules/generatedLanding/EditableText";
 import EditableWrapper from "@/modules/generatedLanding/EditableWrapper";
 import { trackEdit } from '@/utils/trackEdit';
 import { EditableCTA } from "@/components/generatedLanding/EditableCTA";
+import { FormPlacementRenderer } from "@/components/forms/FormPlacementRenderer";
+import { FormConnectedButton } from "@/components/forms/FormConnectedButton";
 import type { Action } from "@/modules/generatedLanding/landingPageReducer";
 import type { CtaConfigType } from "@/types";
 import type { GPTOutput } from "@/modules/prompt/types"
@@ -162,9 +164,19 @@ export default function HeroSection({
                 {ctaConfig.type === "email-form" && ctaConfig.placement === "hero" && (
                   <EmailFormEmbed embedCode={ctaConfig.embed_code!} />
                 )}
+
+                {ctaConfig.type === "form" && (
+                  <FormConnectedButton 
+                    ctaConfig={ctaConfig}
+                    className="bg-landing-primary text-white hover:bg-landing-primaryHover transition w-full sm:w-auto text-center"
+                  />
+                )}
               </>
             )}
           </div>
+
+          {/* Form Placement for Hero */}
+          <FormPlacementRenderer placement="hero" className="mt-6" />
 
           <EditableWrapper isEditable={isEditable}>
             {urgency_text && (

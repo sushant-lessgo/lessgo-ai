@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Settings } from 'lucide-react';
 import { usePostHog } from 'posthog-js/react';
 import { CTAConfiguratorPopover } from './CTAConfiguratorPopover';
+import { FormConnectedButton } from '@/components/forms/FormConnectedButton';
 import type { CtaConfigType } from '@/types';
 import type { Action } from '@/modules/generatedLanding/landingPageReducer';
 
@@ -30,28 +31,50 @@ export function EditableCTA({ ctaConfig, isEditable, dispatch, ctaText, sectionI
     });
   };
 
-  // Special case: email-form placed in hero → show gear only
+  // Special case: CTA configured → show actual button with gear
   if (ctaConfig?.type != null) {
     return (
-      <Popover open={open} onOpenChange={setOpen}>
-        <PopoverTrigger asChild>
-          <button
-            onClick={openConfig}
-            className="absolute top-0 right-0 bg-white shadow rounded-full p-2 hover:bg-gray-100 transition z-10"
-            title="Edit CTA"
-          >
-            <Settings className="w-6 h-6 text-gray-600" />
-          </button>
-        </PopoverTrigger>
-        <PopoverContent className="w-96">
-          <CTAConfiguratorPopover
+      <div className="relative">
+        {ctaConfig.type === 'form' ? (
+          <FormConnectedButton 
             ctaConfig={ctaConfig}
-            dispatch={dispatch}
-            closePopover={() => setOpen(false)}
-            gptCtaText={ctaText}
+            className="w-full"
           />
-        </PopoverContent>
-      </Popover>
+        ) : (
+          <Button 
+            className="w-full"
+            onClick={() => {
+              if (ctaConfig.type === 'link' && ctaConfig.url) {
+                window.open(ctaConfig.url, '_blank');
+              }
+            }}
+          >
+            {ctaConfig.cta_text}
+          </Button>
+        )}
+        
+        {isEditable && (
+          <Popover open={open} onOpenChange={setOpen}>
+            <PopoverTrigger asChild>
+              <button
+                onClick={openConfig}
+                className="absolute top-0 right-0 bg-white shadow rounded-full p-2 hover:bg-gray-100 transition z-10"
+                title="Edit CTA"
+              >
+                <Settings className="w-6 h-6 text-gray-600" />
+              </button>
+            </PopoverTrigger>
+            <PopoverContent className="w-96">
+              <CTAConfiguratorPopover
+                ctaConfig={ctaConfig}
+                dispatch={dispatch}
+                closePopover={() => setOpen(false)}
+                gptCtaText={ctaText}
+              />
+            </PopoverContent>
+          </Popover>
+        )}
+      </div>
     );
   }
 

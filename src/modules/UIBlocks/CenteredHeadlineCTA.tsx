@@ -137,6 +137,8 @@ export default function CenteredHeadlineCTA(props: LayoutComponentProps) {
             textStyle={getTextStyle('h3')}
             size="large"
             className="text-xl px-12 py-6 shadow-2xl hover:shadow-3xl"
+            sectionId={sectionId}
+            elementKey="cta_text"
           />
         </div>
 

@@ -338,6 +338,8 @@ export default function LeftCopyRightImage(props: LayoutComponentProps) {
                 textStyle={getTextStyle('body-lg')}
                 className="shadow-xl hover:shadow-2xl transform hover:-translate-y-0.5 transition-all duration-200"
                 variant="primary"
+                sectionId={sectionId}
+                elementKey="cta_text"
               />
 
               {/* ✅ ENHANCED: Trust Indicators with Dynamic Color */}

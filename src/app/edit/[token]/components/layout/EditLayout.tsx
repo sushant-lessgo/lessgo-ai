@@ -9,6 +9,8 @@ import { EditHeader } from './EditHeader';
 import { LeftPanel } from './LeftPanel';
 import { MainContent } from './MainContent';
 import { useAutoSave } from '@/hooks/useAutoSave';
+import { SimpleFormBuilder } from '@/components/forms/SimpleFormBuilder';
+import { GlobalButtonConfigModal } from '@/components/layout/GlobalButtonConfigModal';
 
 interface EditLayoutProps {
   tokenId: string;
@@ -128,6 +130,12 @@ export function EditLayout({ tokenId }: EditLayoutProps) {
         aria-atomic="true"
         className="absolute -left-[10000px] w-px h-px overflow-hidden"
       />
+      
+      {/* Form Builder Modal */}
+      <SimpleFormBuilder />
+      
+      {/* Global Button Configuration Modal */}
+      <GlobalButtonConfigModal />
     </div>
   );
 }

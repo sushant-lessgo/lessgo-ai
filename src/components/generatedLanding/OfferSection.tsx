@@ -5,6 +5,8 @@ import EditableWrapper from "@/modules/generatedLanding/EditableWrapper";
 import type { Action } from "@/modules/generatedLanding/landingPageReducer";
 import { trackEdit } from '@/utils/trackEdit';
 import { EmailFormEmbed } from "@/components/generatedLanding/EmailFormEmbed";
+import { FormPlacementRenderer } from "@/components/forms/FormPlacementRenderer";
+import { FormConnectedButton } from "@/components/forms/FormConnectedButton";
 import type { CtaConfigType } from "@/types";
 import type { GPTOutput } from "@/modules/prompt/types";
 import { Button } from "@/components/ui/button";
@@ -128,6 +130,13 @@ export default function OfferSection({
   </Button>
 </a>
 
+        ) : ctaConfig?.type === "form" ? (
+          <div className="mt-6">
+            <FormConnectedButton 
+              ctaConfig={ctaConfig}
+              className="bg-white text-landing-primary font-semibold px-6 py-3 rounded-lg text-base hover:bg-gray-100 transition w-full sm:w-auto text-center"
+            />
+          </div>
         ) : ctaConfig && ctaConfig.type !== "email-form" ? (
           <EditableWrapper useAltHover={true} isEditable={isEditable}>
             <EditableText
@@ -152,6 +161,9 @@ export default function OfferSection({
       : "⚠️ No CTA configured. Your visitors will have nothing to click here."}
   </div>
 )}
+
+        {/* Form Placement for CTA Section */}
+        <FormPlacementRenderer placement="cta-section" className="mt-8 w-full max-w-2xl" />
       </div>
     </section>
   );

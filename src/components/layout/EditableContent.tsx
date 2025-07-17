@@ -1,5 +1,4 @@
 import React, { useCallback, useState, useMemo } from 'react';
-import { DraggableElement } from '@/app/edit/[token]/components/content/DragDropComponents';
 import { InlineTextEditor, defaultEditorConfig } from '@/app/edit/[token]/components/editor/InlineTextEditor';
 import { useTextToolbarIntegration } from '@/hooks/useTextToolbarIntegration';
 import { useAutoSave } from '@/hooks/useAutoSave';
@@ -27,13 +26,6 @@ interface EditableContentProps {
   editorConfig?: Partial<InlineEditorConfig>;
   autoSave?: Partial<AutoSaveConfig>;
   enableInlineEditor?: boolean;
-  
-  // Enhanced props for drag-drop
-  enableDragDrop?: boolean;
-  showDropZones?: boolean;
-  onDragStart?: (sectionId: string, elementKey: string) => void;
-  onDragEnd?: (sectionId: string, elementKey: string) => void;
-  onDrop?: (draggedElementKey: string, targetElementKey: string, position: 'before' | 'after') => void;
 }
 
 const defaultFormatState: TextFormatState = {
@@ -67,8 +59,6 @@ export function EditableContent({
   editorConfig = {},
   autoSave = {},
   enableInlineEditor = true,
-  enableDragDrop = true,
-  showDropZones = true,
   onDragStart,
   onDragEnd,
   onDrop,
@@ -127,44 +117,13 @@ export function EditableContent({
   
   if (!shouldShow) return null;
 
-  // Use inline editor with drag-drop in edit mode if enabled and required props are provided
+  // Use inline editor in edit mode if enabled and required props are provided
   if (
     mode === 'edit' && 
     enableInlineEditor && 
     sectionId && 
     elementKey
   ) {
-    // With drag-drop enabled
-    if (enableDragDrop) {
-      return (
-        <DraggableElement
-          sectionId={sectionId}
-          elementKey={elementKey}
-          showDropZones={showDropZones}
-          className={`relative ${isEditing ? 'editing' : ''}`}
-        >
-          <InlineTextEditor
-            content={value}
-            onContentChange={onEdit}
-            element={Element}
-            elementKey={elementKey}
-            sectionId={sectionId}
-            formatState={currentFormatState}
-            onFormatChange={handleFormatChange}
-            autoSave={finalAutoSaveConfig}
-            config={finalEditorConfig}
-            onFocus={handleFocus}
-            onBlur={handleBlur}
-            onSelectionChange={handleSelectionChange}
-            className={className}
-            style={style}
-            placeholder={placeholder}
-          />
-        </DraggableElement>
-      );
-    }
-    
-    // Without drag-drop
     return (
       <InlineTextEditor
         content={value}
@@ -211,19 +170,6 @@ export function EditableContent({
       </Element>
     );
     
-    // With drag-drop enabled for fallback editor
-    if (enableDragDrop && sectionId && elementKey) {
-      return (
-        <DraggableElement
-          sectionId={sectionId}
-          elementKey={elementKey}
-          showDropZones={showDropZones}
-        >
-          {editableElement}
-        </DraggableElement>
-      );
-    }
-    
     return editableElement;
   }
 
@@ -250,8 +196,6 @@ export function EditableHeadline({
   onFormatChange,
   editorConfig,
   autoSave,
-  enableDragDrop = true,
-  showDropZones = true,
   ...props 
 }: Omit<EditableContentProps, 'element'> & { 
   level?: 'h1' | 'h2' | 'h3' | 'h4',
@@ -262,8 +206,6 @@ export function EditableHeadline({
   onFormatChange?: (format: TextFormatState) => void,
   editorConfig?: Partial<InlineEditorConfig>,
   autoSave?: Partial<AutoSaveConfig>,
-  enableDragDrop?: boolean,
-  showDropZones?: boolean,
 }) {
   
   const finalColorClass = dynamicColor || colorClass || 'text-gray-900';
@@ -308,8 +250,6 @@ export function EditableHeadline({
       onFormatChange={onFormatChange}
       editorConfig={headlineEditorConfig}
       autoSave={autoSave}
-      enableDragDrop={enableDragDrop}
-      showDropZones={showDropZones}
       {...props}
     />
   );
@@ -328,8 +268,6 @@ export function EditableText({
   onFormatChange,
   editorConfig,
   autoSave,
-  enableDragDrop = true,
-  showDropZones = true,
   ...props 
 }: Omit<EditableContentProps, 'element'> & { 
   colorClass?: string,
@@ -339,8 +277,6 @@ export function EditableText({
   onFormatChange?: (format: TextFormatState) => void,
   editorConfig?: Partial<InlineEditorConfig>,
   autoSave?: Partial<AutoSaveConfig>,
-  enableDragDrop?: boolean,
-  showDropZones?: boolean,
 }) {
   
   const finalColorClass = dynamicColor || colorClass || 'text-gray-600';
@@ -399,8 +335,6 @@ export function EditableText({
       onFormatChange={onFormatChange}
       editorConfig={textEditorConfig}
       autoSave={autoSave}
-      enableDragDrop={enableDragDrop}
-      showDropZones={showDropZones}
       {...props}
     />
   );
@@ -419,8 +353,6 @@ export function EditableBadge({
   onFormatChange,
   editorConfig,
   autoSave,
-  enableDragDrop = true,
-  showDropZones = true,
   ...props 
 }: Omit<EditableContentProps, 'element'> & { 
   colorTokens?: any,
@@ -430,8 +362,6 @@ export function EditableBadge({
   onFormatChange?: (format: TextFormatState) => void,
   editorConfig?: Partial<InlineEditorConfig>,
   autoSave?: Partial<AutoSaveConfig>,
-  enableDragDrop?: boolean,
-  showDropZones?: boolean,
 }) {
   
   let badgeClasses = '';
@@ -488,8 +418,6 @@ export function EditableBadge({
       onFormatChange={onFormatChange}
       editorConfig={badgeEditorConfig}
       autoSave={autoSave}
-      enableDragDrop={enableDragDrop}
-      showDropZones={showDropZones}
       {...props}
     />
   );
@@ -508,8 +436,6 @@ export function AccentBadge({
   onFormatChange,
   editorConfig,
   autoSave,
-  enableDragDrop = true,
-  showDropZones = true,
   ...props 
 }: Omit<EditableContentProps, 'element'> & { 
   mode: 'edit' | 'preview',
@@ -523,8 +449,6 @@ export function AccentBadge({
   onFormatChange?: (format: TextFormatState) => void,
   editorConfig?: Partial<InlineEditorConfig>,
   autoSave?: Partial<AutoSaveConfig>,
-  enableDragDrop?: boolean,
-  showDropZones?: boolean,
 }) {
   return (
     <EditableBadge
@@ -540,8 +464,6 @@ export function AccentBadge({
       onFormatChange={onFormatChange}
       editorConfig={editorConfig}
       autoSave={autoSave}
-      enableDragDrop={enableDragDrop}
-      showDropZones={showDropZones}
       {...props}
     />
   );
@@ -562,8 +484,6 @@ export function EditableAdaptiveHeadline({
   onFormatChange,
   editorConfig,
   autoSave,
-  enableDragDrop = true,
-  showDropZones = true,
   ...props
 }: Omit<EditableContentProps, 'element'> & {
   level?: 'h1' | 'h2' | 'h3' | 'h4',
@@ -574,8 +494,6 @@ export function EditableAdaptiveHeadline({
   onFormatChange?: (format: TextFormatState) => void,
   editorConfig?: Partial<InlineEditorConfig>,
   autoSave?: Partial<AutoSaveConfig>,
-  enableDragDrop?: boolean,
-  showDropZones?: boolean,
 }) {
   
   const getAdaptiveTextColor = () => {
@@ -607,8 +525,6 @@ export function EditableAdaptiveHeadline({
       onFormatChange={onFormatChange}
       editorConfig={editorConfig}
       autoSave={autoSave}
-      enableDragDrop={enableDragDrop}
-      showDropZones={showDropZones}
       {...props}
     />
   );
@@ -628,8 +544,6 @@ export function EditableAdaptiveText({
   onFormatChange,
   editorConfig,
   autoSave,
-  enableDragDrop = true,
-  showDropZones = true,
   ...props
 }: Omit<EditableContentProps, 'element'> & {
   backgroundType: 'primary' | 'secondary' | 'neutral' | 'divider',
@@ -640,8 +554,6 @@ export function EditableAdaptiveText({
   onFormatChange?: (format: TextFormatState) => void,
   editorConfig?: Partial<InlineEditorConfig>,
   autoSave?: Partial<AutoSaveConfig>,
-  enableDragDrop?: boolean,
-  showDropZones?: boolean,
 }) {
   
   const getAdaptiveTextColor = () => {
@@ -678,8 +590,6 @@ export function EditableAdaptiveText({
       onFormatChange={onFormatChange}
       editorConfig={editorConfig}
       autoSave={autoSave}
-      enableDragDrop={enableDragDrop}
-      showDropZones={showDropZones}
       {...props}
     />
   );

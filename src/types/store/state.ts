@@ -15,6 +15,8 @@ import type {
   FormField
 } from '@/types/core/index';
 
+import type { SimpleFormData } from '@/types/simpleForms';
+
 /**
  * ===== ENHANCED INTERFACE DEFINITIONS =====
  */
@@ -200,9 +202,10 @@ export interface UISlice {
   // Element Variations
   elementVariations: {
     visible: boolean;
-    elementId?: string;
     variations: string[];
-    selectedVariation?: number;
+    selectedIndex: number;
+    sectionId: string;
+    elementKey: string;
   };
   
   // Forms State
@@ -345,6 +348,9 @@ export interface FormsSlice {
   // Form Data
   forms: Record<string, FormData>;
   
+  // Simple Forms (MVP)
+  simpleForms?: SimpleFormData[];
+  
   // Active Form State
   activeForm?: string;
   
@@ -352,6 +358,7 @@ export interface FormsSlice {
   formBuilder: {
     visible: boolean;
     editingField?: string;
+    editingFormId?: string;
     fieldLibrary: FormFieldType[];
   };
   

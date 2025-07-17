@@ -478,13 +478,13 @@ export function InlineTextEditor({
       
       // IMPORTANT: Don't sync if the user just finished editing and we're getting the saved content back
       // Check if this might be the user's own content being returned from the store
-      const mightBeUserContentEcho = Math.abs(Date.now() - (editorRef.current.dataset.lastSaveTime || 0)) < 1000;
+      const mightBeUserContentEcho = Math.abs(Date.now() - (parseInt(editorRef.current.dataset.lastSaveTime || '0', 10))) < 1000;
       
       console.log('📝 Content sync decision:', {
         shouldSync,
         isUserCurrentlyEditing,
         mightBeUserContentEcho,
-        timeSinceLastSave: Date.now() - (editorRef.current.dataset.lastSaveTime || 0)
+        timeSinceLastSave: Date.now() - (parseInt(editorRef.current.dataset.lastSaveTime || '0', 10))
       });
       
       if (shouldSync && !mightBeUserContentEcho) {

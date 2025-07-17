@@ -235,7 +235,12 @@ export function createUIActions(set: any, get: any): UIActions {
           // For text toolbar, maintain the current element selection
           const [sectionId, elementKey] = targetId.split('.');
           if (sectionId && elementKey) {
-            state.selectedElement = { sectionId, elementKey };
+            state.selectedElement = { 
+              sectionId, 
+              elementKey,
+              type: 'text' as any,
+              editMode: 'inline' as any
+            };
             state.selectedSection = sectionId;
           }
         }
@@ -815,53 +820,6 @@ export function createUIActions(set: any, get: any): UIActions {
       }
     },
 
-    /**
-     * ===== DRAG AND DROP =====
-     */
-    
-    handleDragStart: (sectionId: string, event: DragEvent) => {
-      if (event.dataTransfer) {
-        event.dataTransfer.setData('text/plain', sectionId);
-        event.dataTransfer.effectAllowed = 'move';
-      }
-      
-      set((state: EditStore) => {
-        state.selectedSection = sectionId;
-      });
-    },
-    
-    handleDragOver: (event: DragEvent) => {
-      event.preventDefault();
-      if (event.dataTransfer) {
-        event.dataTransfer.dropEffect = 'move';
-      }
-    },
-    
-    handleDrop: (targetSectionId: string, position: 'before' | 'after', event: DragEvent) => {
-      event.preventDefault();
-      
-      const draggedSectionId = event.dataTransfer?.getData('text/plain');
-      if (!draggedSectionId || draggedSectionId === targetSectionId) return;
-      
-      const state = get();
-      const currentSections = [...state.sections];
-      const draggedIndex = currentSections.indexOf(draggedSectionId);
-      const targetIndex = currentSections.indexOf(targetSectionId);
-      
-      if (draggedIndex === -1 || targetIndex === -1) return;
-      
-      // Remove dragged section
-      currentSections.splice(draggedIndex, 1);
-      
-      // Calculate new position
-      const adjustedTargetIndex = draggedIndex < targetIndex ? targetIndex - 1 : targetIndex;
-      const newIndex = position === 'before' ? adjustedTargetIndex : adjustedTargetIndex + 1;
-      
-      // Insert at new position
-      currentSections.splice(newIndex, 0, draggedSectionId);
-      
-      get().reorderSections(currentSections);
-    },
 
     /**
      * ===== RESPONSIVE HELPERS =====

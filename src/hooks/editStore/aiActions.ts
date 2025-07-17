@@ -87,6 +87,70 @@ export function createAIActions(set: any, get: any) {
       }
     },
 
+    // Unified regenerate function that always returns variations
+    regenerateElementWithVariations: async (sectionId: string, elementKey: string, variationCount: number = 5) => {
+      set((state: EditStore) => {
+        state.aiGeneration.isGenerating = true;
+        state.aiGeneration.currentOperation = 'element';
+        state.aiGeneration.progress = 0;
+        state.aiGeneration.status = 'Generating variations...';
+      });
+
+      try {
+        const currentState = get() as any;
+        const section = currentState.content[sectionId];
+        if (!section || !section.elements[elementKey]) {
+          throw new Error('Element not found');
+        }
+
+        const currentContent = section.elements[elementKey].content;
+        
+        // Call the new API endpoint
+        const response = await fetch('/api/regenerate-element', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            sectionId,
+            elementKey,
+            currentContent,
+            variationCount
+          })
+        });
+
+        if (!response.ok) {
+          throw new Error(`API error: ${response.status}`);
+        }
+
+        const result = await response.json();
+        
+        set((state: EditStore) => {
+          state.elementVariations = {
+            visible: true,
+            variations: [currentContent, ...result.variations], // Include current as first option
+            selectedIndex: 0,
+            sectionId,
+            elementKey
+          };
+          
+          state.aiGeneration.isGenerating = false;
+          state.aiGeneration.currentOperation = null;
+          state.aiGeneration.progress = 100;
+          state.aiGeneration.status = 'Variations generated successfully';
+        });
+
+        return result.variations;
+      } catch (error) {
+        set((state: EditStore) => {
+          state.aiGeneration.isGenerating = false;
+          state.aiGeneration.currentOperation = null;
+          state.aiGeneration.errors.push(error instanceof Error ? error.message : 'Variation generation failed');
+        });
+        throw error;
+      }
+    },
+
     generateVariations: async (sectionId: string, elementKey: string, count: number = 5) => {
       set((state: EditStore) => {
         state.aiGeneration.isGenerating = true;
@@ -106,6 +170,9 @@ export function createAIActions(set: any, get: any) {
           state.elementVariations = {
             visible: true,
             variations: mockVariations,
+            selectedIndex: 0,
+            sectionId,
+            elementKey
           };
           
           state.aiGeneration.isGenerating = false;
@@ -129,9 +196,14 @@ export function createAIActions(set: any, get: any) {
      */
     showElementVariations: (elementId: string, variations: string[]) =>
       set((state: EditStore) => {
+        // Parse elementId to get sectionId and elementKey
+        const [sectionId, elementKey] = elementId.split('.');
         state.elementVariations = {
           visible: true,
           variations,
+          selectedIndex: 0,
+          sectionId: sectionId || '',
+          elementKey: elementKey || ''
         };
       }),
 
@@ -140,7 +212,15 @@ export function createAIActions(set: any, get: any) {
         state.elementVariations = {
           visible: false,
           variations: [],
+          selectedIndex: 0,
+          sectionId: '',
+          elementKey: ''
         };
+      }),
+
+    setVariationSelection: (index: number) =>
+      set((state: EditStore) => {
+        state.elementVariations.selectedIndex = index;
       }),
 
     applyVariation: (sectionId: string, elementKey: string, variationIndex: number) =>
@@ -153,10 +233,20 @@ export function createAIActions(set: any, get: any) {
             section.editMetadata.lastModified = Date.now();
             state.persistence.isDirty = true;
             
+            // Update AI metadata
+            (section.elements[elementKey] as any).aiMetadata = {
+              ...(section.elements[elementKey] as any).aiMetadata,
+              lastGenerated: Date.now(),
+              isCustomized: variationIndex === 0, // First option is original content
+            };
+            
             // Hide variations after applying
             state.elementVariations = {
               visible: false,
               variations: [],
+              selectedIndex: 0,
+              sectionId: '',
+              elementKey: ''
             };
           }
         }

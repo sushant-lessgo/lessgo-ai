@@ -1,10 +1,12 @@
 // app/edit/[token]/components/toolbars/ElementToolbar.tsx - Complete Element Toolbar
 import React, { useState, useRef, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { useEditStore } from '@/hooks/useEditStore';
 import { useEditor } from '@/hooks/useEditor';
 import { useToolbarActions } from '@/hooks/useToolbarActions';
 import { calculateArrowPosition } from '@/utils/toolbarPositioning';
 import { AdvancedActionsMenu } from './AdvancedActionsMenu';
+import { useButtonConfigModal } from '@/hooks/useButtonConfigModal';
 
 interface ElementToolbarProps {
   elementSelection: any;
@@ -14,19 +16,18 @@ interface ElementToolbarProps {
 
 export function ElementToolbar({ elementSelection, position, contextActions }: ElementToolbarProps) {
   const [showAdvanced, setShowAdvanced] = useState(false);
-  const [showVariations, setShowVariations] = useState(false);
-  const [variations, setVariations] = useState<string[]>([]);
-  const [selectedVariation, setSelectedVariation] = useState(0);
+  const { openModal } = useButtonConfigModal();
   
   const toolbarRef = useRef<HTMLDivElement>(null);
   const advancedRef = useRef<HTMLDivElement>(null);
   const variationsRef = useRef<HTMLDivElement>(null);
 
   const {
-    regenerateElement,
-    showElementVariations,
+    regenerateElementWithVariations,
+    elementVariations,
+    applyVariation,
     hideElementVariations,
-    applySelectedVariation,
+    setVariationSelection,
     updateElementContent,
     content,
     announceLiveRegion,
@@ -68,50 +69,37 @@ export function ElementToolbar({ elementSelection, position, contextActions }: E
         !variationsRef.current.contains(event.target as Node) &&
         !toolbarRef.current?.contains(event.target as Node)
       ) {
-        setShowVariations(false);
+        // Hide variations using store action
+        hideElementVariations();
       }
     };
 
-    if (showAdvanced || showVariations) {
+    if (showAdvanced || elementVariations.visible) {
       document.addEventListener('mousedown', handleClickOutside);
       return () => document.removeEventListener('mousedown', handleClickOutside);
     }
-  }, [showAdvanced, showVariations]);
+  }, [showAdvanced, elementVariations.visible]);
 
-  // Handle regeneration with variations
-  const handleRegenerateWithVariations = async () => {
+  // Handle unified regeneration with variations
+  const handleRegenerate = async () => {
     try {
-      await regenerateElement(elementSelection.sectionId, elementSelection.elementKey, 5);
-      
-      // Mock variations for now - in production this would come from the store
-      const mockVariations = [
-        "Original version of the content",
-        "Enhanced version with more details",
-        "Shorter, more concise version",
-        "More persuasive tone version",
-        "Technical-focused version"
-      ];
-      
-      setVariations(mockVariations);
-      setSelectedVariation(0);
-      setShowVariations(true);
-      
-      announceLiveRegion('Generated 5 variations');
+      await regenerateElementWithVariations(elementSelection.sectionId, elementSelection.elementKey, 5);
+      announceLiveRegion('Generated variations');
     } catch (error) {
       console.error('Failed to generate variations:', error);
+      announceLiveRegion('Failed to generate variations');
     }
   };
 
   // Apply selected variation
   const handleApplyVariation = () => {
-    if (variations[selectedVariation]) {
-      updateElementContent(
-        elementSelection.sectionId,
-        elementSelection.elementKey,
-        variations[selectedVariation]
+    if (elementVariations.variations[elementVariations.selectedIndex]) {
+      applyVariation(
+        elementVariations.sectionId,
+        elementVariations.elementKey,
+        elementVariations.selectedIndex
       );
-      setShowVariations(false);
-      announceLiveRegion(`Applied variation ${selectedVariation + 1}`);
+      announceLiveRegion(`Applied variation ${elementVariations.selectedIndex + 1}`);
     }
   };
 
@@ -124,6 +112,17 @@ export function ElementToolbar({ elementSelection, position, contextActions }: E
       });
       announceLiveRegion('Converting CTA to form');
     }
+  };
+
+  // Handle button configuration
+  const handleButtonConfiguration = (e?: React.MouseEvent) => {
+    if (e) {
+      e.stopPropagation();
+      e.preventDefault();
+    }
+    
+    // Use global modal state that persists across component unmounts
+    openModal(elementSelection);
   };
 
   // Get element type for context
@@ -157,20 +156,18 @@ export function ElementToolbar({ elementSelection, position, contextActions }: E
       icon: 'edit',
       handler: handleEditText,
     }] : []),
+    // Add Button Configuration for button/CTA elements
+    ...(canConvertToForm() ? [{
+      id: 'button-config',
+      label: 'Button Settings',
+      icon: 'settings',
+      handler: handleButtonConfiguration,
+    }] : []),
     {
       id: 'regenerate-copy',
       label: 'Regenerate',
       icon: 'refresh',
-      handler: () => {
-        regenerateElement(elementSelection.sectionId, elementSelection.elementKey);
-        announceLiveRegion(`Regenerating ${elementSelection.elementKey}`);
-      },
-    },
-    {
-      id: 'get-variations',
-      label: 'Variations',
-      icon: 'variations',
-      handler: handleRegenerateWithVariations,
+      handler: handleRegenerate,
     },
     {
       id: 'element-style',
@@ -278,11 +275,20 @@ export function ElementToolbar({ elementSelection, position, contextActions }: E
               {index > 0 && <div className="w-px h-6 bg-gray-200 mx-1" />}
               <button
                 onClick={(e) => {
-                  if (action.id === 'edit-text') {
+                  if (action.id === 'edit-text' || action.id === 'button-config') {
                     e.stopPropagation();
                     e.preventDefault();
                   }
                   action.handler(e);
+                }}
+                onMouseDown={(e) => {
+                  if (action.id === 'button-config') {
+                    e.stopPropagation();
+                    e.preventDefault();
+                    // Call handler directly on mousedown for button-config
+                    action.handler(e);
+                    return;
+                  }
                 }}
                 className={`flex items-center space-x-1 px-2 py-1 text-xs rounded transition-colors ${
                   action.id === 'edit-text' 
@@ -292,7 +298,7 @@ export function ElementToolbar({ elementSelection, position, contextActions }: E
                 title={action.label}
               >
                 <ElementIcon icon={action.icon} />
-                <span>{action.label}</span>
+                <span style={action.id === 'button-config' ? { pointerEvents: 'none' } : {}}>{action.label}</span>
               </button>
             </React.Fragment>
           ))}
@@ -326,7 +332,7 @@ export function ElementToolbar({ elementSelection, position, contextActions }: E
       )}
 
       {/* Variations Menu */}
-      {showVariations && (
+      {elementVariations.visible && (
         <div
           ref={variationsRef}
           className="fixed z-50 bg-white border border-gray-200 rounded-lg shadow-lg"
@@ -341,7 +347,7 @@ export function ElementToolbar({ elementSelection, position, contextActions }: E
             <div className="flex items-center justify-between mb-3">
               <h3 className="text-sm font-medium text-gray-900">Choose Variation</h3>
               <button
-                onClick={() => setShowVariations(false)}
+                onClick={() => hideElementVariations()}
                 className="text-gray-400 hover:text-gray-600"
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -351,29 +357,29 @@ export function ElementToolbar({ elementSelection, position, contextActions }: E
             </div>
             
             <div className="space-y-2 max-h-48 overflow-y-auto">
-              {variations.map((variation, index) => (
+              {elementVariations.variations.map((variation, index) => (
                 <div
                   key={index}
                   className={`p-3 rounded-lg border cursor-pointer transition-colors ${
-                    selectedVariation === index
+                    elementVariations.selectedIndex === index
                       ? 'border-blue-500 bg-blue-50'
                       : 'border-gray-200 hover:border-gray-300'
                   }`}
-                  onClick={() => setSelectedVariation(index)}
+                  onClick={() => setVariationSelection(index)}
                 >
                   <div className="flex items-start space-x-2">
                     <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center mt-0.5 ${
-                      selectedVariation === index
+                      elementVariations.selectedIndex === index
                         ? 'border-blue-500 bg-blue-500'
                         : 'border-gray-300'
                     }`}>
-                      {selectedVariation === index && (
+                      {elementVariations.selectedIndex === index && (
                         <div className="w-2 h-2 bg-white rounded-full"></div>
                       )}
                     </div>
                     <div className="flex-1">
                       <div className="text-xs font-medium text-gray-700 mb-1">
-                        Variation {index + 1}
+                        {index === 0 ? 'Current' : `Variation ${index}`}
                       </div>
                       <div className="text-sm text-gray-600 line-clamp-2">
                         {variation}
@@ -386,7 +392,7 @@ export function ElementToolbar({ elementSelection, position, contextActions }: E
             
             <div className="flex items-center justify-between mt-4 pt-3 border-t border-gray-200">
               <button
-                onClick={() => setShowVariations(false)}
+                onClick={() => hideElementVariations()}
                 className="px-3 py-1 text-sm text-gray-600 hover:text-gray-800"
               >
                 Cancel
@@ -401,6 +407,7 @@ export function ElementToolbar({ elementSelection, position, contextActions }: E
           </div>
         </div>
       )}
+
     </>
   );
 }
@@ -466,6 +473,12 @@ function ElementIcon({ icon }: { icon: string }) {
     'chart': (
       <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+      </svg>
+    ),
+    'settings': (
+      <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
       </svg>
     ),
   };

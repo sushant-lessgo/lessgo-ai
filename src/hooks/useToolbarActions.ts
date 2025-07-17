@@ -154,9 +154,6 @@ const { addElement } = useElementCRUD();
         case 'text-regenerate':
           result = await handleTextRegenerate(params);
           break;
-        case 'text-variations':
-          result = await handleTextVariations(params);
-          break;
 
         // ===== ELEMENT ACTIONS =====
         case 'duplicate-element':
@@ -179,9 +176,6 @@ const { addElement } = useElementCRUD();
           break;
         case 'element-regenerate':
           result = await handleElementRegenerate(params);
-          break;
-        case 'element-variations':
-          result = await handleElementVariations(params);
           break;
 
         // ===== IMAGE ACTIONS =====
@@ -741,26 +735,6 @@ const { addElement } = useElementCRUD();
     }
   }, [regenerateElement]);
 
-  const handleTextVariations = useCallback(async (params: { 
-    elementSelection: ElementSelection 
-  }) => {
-    const { elementSelection } = params;
-    
-    try {
-      await regenerateElement(elementSelection.sectionId, elementSelection.elementKey, 5);
-      showElementVariations(`${elementSelection.sectionId}.${elementSelection.elementKey}`, [
-        "Variation 1 - Enhanced version",
-        "Variation 2 - Shorter version", 
-        "Variation 3 - More detailed version",
-        "Variation 4 - Professional tone",
-        "Variation 5 - Casual tone"
-      ]);
-      return true;
-    } catch (error) {
-      console.error('Text variations failed:', error);
-      return false;
-    }
-  }, [regenerateElement, showElementVariations]);
 
   // ===== ELEMENT ACTION HANDLERS =====
   
@@ -910,24 +884,6 @@ const { addElement } = useElementCRUD();
     }
   }, [regenerateElement]);
 
-  const handleElementVariations = useCallback(async (params: { elementSelection: ElementSelection }) => {
-    const { elementSelection } = params;
-    
-    try {
-      await regenerateElement(elementSelection.sectionId, elementSelection.elementKey, 5);
-      showElementVariations(`${elementSelection.sectionId}.${elementSelection.elementKey}`, [
-        "Professional tone variation",
-        "Casual tone variation",
-        "Detailed explanation variation",
-        "Concise version variation",
-        "Action-oriented variation"
-      ]);
-      return true;
-    } catch (error) {
-      console.error('Element variations failed:', error);
-      return false;
-    }
-  }, [regenerateElement, showElementVariations]);
 
   // ===== IMAGE ACTION HANDLERS =====
   
@@ -1262,7 +1218,7 @@ const { addElement } = useElementCRUD();
     const actions = getAvailableActions();
     
     const categories = {
-      content: actions.filter(a => ['regenerate', 'variations', 'clear-formatting'].some(term => a.id.includes(term))),
+      content: actions.filter(a => ['regenerate', 'clear-formatting'].some(term => a.id.includes(term))),
       layout: actions.filter(a => ['change-layout', 'add-element', 'move-section'].some(term => a.id.includes(term))),
       style: actions.filter(a => ['element-style', 'background-settings', 'form-styling'].some(term => a.id.includes(term))),
       interaction: actions.filter(a => ['link-settings', 'animation-settings', 'form-logic'].some(term => a.id.includes(term))),
@@ -1394,7 +1350,6 @@ const { addElement } = useElementCRUD();
     handleChangeTextTransform,
     handleClearFormatting,
     handleTextRegenerate,
-    handleTextVariations,
     
     // Element action handlers
     handleDuplicateElement,
@@ -1404,7 +1359,6 @@ const { addElement } = useElementCRUD();
     handleConvertCTAToForm,
     handleLinkSettings,
     handleElementRegenerate,
-    handleElementVariations,
     
     // Image action handlers
     handleReplaceImage,

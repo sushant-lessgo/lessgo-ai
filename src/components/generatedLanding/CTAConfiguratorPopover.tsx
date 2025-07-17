@@ -5,10 +5,13 @@ import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { usePostHog } from 'posthog-js/react';
 import type { CtaConfigType } from "@/types";
 import type { Action } from "@/modules/generatedLanding/landingPageReducer";
 import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
+import { useEditStore } from '@/hooks/useEditStore';
+import { Plus } from 'lucide-react';
 
 
 type CTAConfiguratorPopoverProps = {
@@ -25,13 +28,17 @@ export function CTAConfiguratorPopover({
   gptCtaText,
 }: CTAConfiguratorPopoverProps) {
   const posthog = usePostHog();
+  const { getAllForms, showFormBuilder } = useEditStore();
+  const availableForms = getAllForms();
 
-  const [ctaType, setCtaType] = useState<'link' | 'email-form'>();
+  const [ctaType, setCtaType] = useState<'link' | 'email-form' | 'form'>();
   const [ctaText, setCtaText] = useState('');
   const [url, setUrl] = useState('');
   const [embedCode, setEmbedCode] = useState('');
   const [placement, setPlacement] = useState<'hero' | 'separate-section'>('hero');
-  const [errors, setErrors] = useState<{ ctaText?: string; url?: string; embedCode?: string }>({});
+  const [selectedFormId, setSelectedFormId] = useState<string>('');
+  const [formBehavior, setFormBehavior] = useState<'scrollTo' | 'openModal'>('scrollTo');
+  const [errors, setErrors] = useState<{ ctaText?: string; url?: string; embedCode?: string; form?: string }>({});
 
   useEffect(() => {
     if (ctaConfig) {
@@ -39,6 +46,9 @@ export function CTAConfiguratorPopover({
       setCtaText(ctaConfig.cta_text || '');
       if (ctaConfig.type === 'link') {
         setUrl(ctaConfig.url || '');
+      } else if (ctaConfig.type === 'form') {
+        setSelectedFormId(ctaConfig.formId || '');
+        setFormBehavior(ctaConfig.behavior || 'scrollTo');
       } else {
         setEmbedCode(ctaConfig.embed_code || '');
         setPlacement(ctaConfig.placement || 'hero');
@@ -63,15 +73,21 @@ export function CTAConfiguratorPopover({
       newErrors.embedCode = 'Embed code is required for email form.';
     }
 
+    if (ctaType === 'form' && !selectedFormId) {
+      newErrors.form = 'Please select a form or create a new one.';
+    }
+
     setErrors(newErrors);
 
     if (Object.keys(newErrors).length > 0) return;
 
-    const newConfig = {
+    const newConfig: CtaConfigType = {
       type: ctaType!,
       cta_text: ctaText.trim(),
       ...(ctaType === 'link'
         ? { url: url.trim() }
+        : ctaType === 'form'
+        ? { formId: selectedFormId, behavior: formBehavior }
         : { embed_code: embedCode.trim(), placement }),
     };
 
@@ -94,7 +110,14 @@ export function CTAConfiguratorPopover({
       url,
       embed_code: embedCode,
       placement,
+      form_id: selectedFormId,
+      behavior: formBehavior,
     });
+    closePopover();
+  };
+
+  const handleCreateNewForm = () => {
+    showFormBuilder();
     closePopover();
   };
 
@@ -112,7 +135,7 @@ export function CTAConfiguratorPopover({
     <RadioGroupItem value="link" id="link" />
     <div>
       <Label htmlFor="link">External Link</Label>
-      <p className="text-sm text-muted-foreground">
+      <p className="text-sm text-gray-600">
         Redirect visitors to a tool like Typeform, Calendly, Notion, or your own site.
       </p>
     </div>
@@ -122,8 +145,18 @@ export function CTAConfiguratorPopover({
     <RadioGroupItem value="email-form" id="email-form" />
     <div>
       <Label htmlFor="email-form">Email Form Embed</Label>
-      <p className="text-sm text-muted-foreground">
+      <p className="text-sm text-gray-600">
         Paste raw HTML from Mailchimp, ConvertKit, Brevo, etc. to collect emails here directly.
+      </p>
+    </div>
+  </div>
+
+  <div className="flex items-start space-x-2 mt-2">
+    <RadioGroupItem value="form" id="form" />
+    <div>
+      <Label htmlFor="form">Native Form</Label>
+      <p className="text-sm text-gray-600">
+        Create a custom form with name, email, phone, and message fields.
       </p>
     </div>
   </div>
@@ -135,7 +168,7 @@ export function CTAConfiguratorPopover({
 
 {ctaType === 'link' && (
   <>
-    <div className="p-2 bg-muted border text-sm rounded-md text-muted-foreground my-2">
+    <div className="p-2 bg-gray-50 border text-sm rounded-md text-gray-600 my-2">
       Paste a URL from tools like Typeform, Calendly, Notion, or any external landing page.
     </div>
     <Label>URL*</Label>
@@ -151,7 +184,7 @@ export function CTAConfiguratorPopover({
 
 {ctaType === 'email-form' && (
   <>
-    <div className="p-2 bg-muted border text-sm rounded-md text-muted-foreground my-2">
+    <div className="p-2 bg-gray-50 border text-sm rounded-md text-gray-600 my-2">
       Paste full HTML embed code (without scripts) from tools like Mailchimp, ConvertKit, or Brevo.
       <br />
       <span className="italic text-xs">Example:</span>
@@ -171,7 +204,7 @@ export function CTAConfiguratorPopover({
       onChange={(e) => setEmbedCode(e.target.value)}
     />
     {errors.embedCode && <p className="text-sm text-red-500 mt-1">{errors.embedCode}</p>}
-    <p className="text-xs text-muted-foreground mt-1">
+    <p className="text-xs text-gray-600 mt-1">
       Only pure HTML embeds are supported. Script-based forms (e.g. Mailchimp JS) are not supported.
     </p>
 
@@ -208,6 +241,66 @@ export function CTAConfiguratorPopover({
         </Tooltip>
       </div>
     </RadioGroup>
+  </>
+)}
+
+{ctaType === 'form' && (
+  <>
+    <div className="p-2 bg-gray-50 border text-sm rounded-md text-gray-600 my-2">
+      Select an existing form or create a new one with custom fields.
+    </div>
+
+    <Label>Form Selection*</Label>
+    <div className="space-y-2">
+      {availableForms.length > 0 ? (
+        <Select value={selectedFormId} onValueChange={setSelectedFormId}>
+          <SelectTrigger>
+            <SelectValue placeholder="Select a form" />
+          </SelectTrigger>
+          <SelectContent>
+            {availableForms.map((form) => (
+              <SelectItem key={form.id} value={form.id}>
+                {form.name} ({form.fields.length} fields)
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      ) : (
+        <div className="text-sm text-gray-600">
+          No forms available. Create your first form below.
+        </div>
+      )}
+      
+      <Button 
+        type="button" 
+        variant="outline" 
+        onClick={handleCreateNewForm}
+        className="w-full"
+      >
+        <Plus className="w-4 h-4 mr-2" />
+        Create New Form
+      </Button>
+    </div>
+    {errors.form && <p className="text-sm text-red-500 mt-1">{errors.form}</p>}
+
+    {selectedFormId && (
+      <>
+        <Label className="mt-4 block">Button Behavior</Label>
+        <RadioGroup
+          value={formBehavior}
+          onValueChange={(val) => setFormBehavior(val as 'scrollTo' | 'openModal')}
+        >
+          <div className="flex items-center space-x-2">
+            <RadioGroupItem value="scrollTo" id="scroll-to" />
+            <Label htmlFor="scroll-to">Scroll to Form</Label>
+          </div>
+          <div className="flex items-center space-x-2">
+            <RadioGroupItem value="openModal" id="open-modal" />
+            <Label htmlFor="open-modal">Open in Modal</Label>
+          </div>
+        </RadioGroup>
+      </>
+    )}
   </>
 )}
 
