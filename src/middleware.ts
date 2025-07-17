@@ -1,4 +1,5 @@
 import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server'
+import { NextResponse } from 'next/server'
 
 const isPublicRoute = createRouteMatcher([
   '/sign-in(.*)',
@@ -21,6 +22,21 @@ const isPublicRoute = createRouteMatcher([
 ])
 
 export default clerkMiddleware(async (auth, req) => {
+  const host = req.headers.get('host')
+  const url = req.nextUrl.clone()
+  
+  // Handle subdomain routing for published pages
+  if (host && host.includes('.lessgo.ai')) {
+    const subdomain = host.split('.')[0]
+    
+    // Skip www and main domain
+    if (subdomain && subdomain !== 'www' && subdomain !== 'lessgo') {
+      // Rewrite subdomain requests to /p/[slug] route
+      url.pathname = `/p/${subdomain}`
+      return NextResponse.rewrite(url)
+    }
+  }
+  
   if (!isPublicRoute(req)) {
     await auth.protect()
   }

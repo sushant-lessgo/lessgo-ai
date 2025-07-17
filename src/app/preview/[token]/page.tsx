@@ -34,6 +34,11 @@ export default function PreviewPage() {
 
   // Validate publish readiness
   const isPublishReady = useMemo(() => {
+    // Skip CTA validation when using mock GPT
+    if (process.env.NEXT_PUBLIC_USE_MOCK_GPT === 'true') {
+      return true;
+    }
+    
     const heroContent = content.hero?.elements;
     return !!(heroContent?.cta_text && (heroContent?.cta_url || heroContent?.cta_embed));
   }, [content.hero?.elements]);

@@ -85,7 +85,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({
       message: 'Page published successfully',
-      url: `${baseUrl}/p/${slug}`,
+      url: `https://${slug}.lessgo.ai`,
     });
 
   } catch (err) {

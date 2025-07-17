@@ -22,7 +22,7 @@ export function SlugModal({
   loading,
   error
 }: SlugModalProps) {
-  const fullUrl = `https://lessgo.ai/p/${slug}`;
+  const fullUrl = `https://${slug}.lessgo.ai`;
 
   return (
     <div className="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center px-4">
@@ -39,19 +39,22 @@ export function SlugModal({
           This is how your link will appear:
         </p>
         <div className="text-sm mb-3">
-          <span className="text-gray-500">https://lessgo.ai/p/</span>
-          <Input
-            className="inline w-full mt-1"
-            value={slug}
-            onChange={(e) =>
-              onChange(
-                e.target.value
-                  .toLowerCase()
-                  .replace(/[^a-z0-9]+/g, '-')
-                  .replace(/^-+|-+$/g, '')
-              )
-            }
-          />
+          <div className="flex items-center">
+            <span className="text-gray-500">https://</span>
+            <Input
+              className="inline mx-1 min-w-0 flex-1"
+              value={slug}
+              onChange={(e) =>
+                onChange(
+                  e.target.value
+                    .toLowerCase()
+                    .replace(/[^a-z0-9]+/g, '-')
+                    .replace(/^-+|-+$/g, '')
+                )
+              }
+            />
+            <span className="text-gray-500">.lessgo.ai</span>
+          </div>
         </div>
 
         {error && <p className="text-sm text-red-500 mt-2">{error}</p>}
