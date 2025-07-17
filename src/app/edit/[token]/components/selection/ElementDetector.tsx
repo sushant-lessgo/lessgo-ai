@@ -174,9 +174,17 @@ export function ElementDetector({ sectionId, children }: ElementDetectorProps) {
 
   // Handle nested element detection
   const handleNestedElementClick = useCallback((event: React.MouseEvent) => {
+    
     if (mode !== 'edit') return;
 
     const target = event.target as HTMLElement;
+    
+    // Check if target is an image with data-image-id - let image click handlers work
+    if (target.tagName === 'IMG' && target.getAttribute('data-image-id')) {
+      event.stopPropagation();
+      // Allow image click handlers to work by not intercepting
+      return;
+    }
     
     // Find the closest selectable element
     let current = target;
@@ -201,7 +209,7 @@ export function ElementDetector({ sectionId, children }: ElementDetectorProps) {
       // Store depth information for hierarchy display
       current.setAttribute('data-selection-depth', depth.toString());
     }
-  }, [mode]);
+  }, [mode, sectionId]);
 
   // Cleanup on mode change
   useEffect(() => {

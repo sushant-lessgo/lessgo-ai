@@ -30,6 +30,7 @@ export function useLayoutComponent<T = Record<string, any>>({
     updateElementContent,
     getColorTokens
   } = useEditStore();
+  
 
   // Initialize fonts on component mount
   useEffect(() => {

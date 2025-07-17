@@ -3,6 +3,7 @@
 
 import React from 'react';
 import { useLayoutComponent } from '@/hooks/useLayoutComponent';
+import { useEditStore } from '@/hooks/useEditStore';
 import { LayoutSection } from '@/components/layout/LayoutSection';
 import { 
   EditableAdaptiveHeadline, 
@@ -23,6 +24,7 @@ interface LeftCopyRightImageContent {
   supporting_text?: string;
   badge_text?: string;
   trust_items?: string;
+  hero_image?: string;
 }
 
 // Content schema - defines structure and defaults
@@ -50,6 +52,10 @@ const CONTENT_SCHEMA = {
   trust_items: { 
     type: 'string' as const, 
     default: 'Free 14-day trial|No credit card required|Cancel anytime' 
+  },
+  hero_image: { 
+    type: 'string' as const, 
+    default: '/hero-placeholder.jpg' 
   }
 };
 
@@ -202,6 +208,7 @@ const HeroImagePlaceholder = React.memo(() => (
 HeroImagePlaceholder.displayName = 'HeroImagePlaceholder';
 
 export default function LeftCopyRightImage(props: LayoutComponentProps) {
+  
   // ✅ ENHANCED: Use the abstraction hook with background type support
   const {
     sectionId,
@@ -226,6 +233,10 @@ export default function LeftCopyRightImage(props: LayoutComponentProps) {
 
   // ✅ ENHANCED: Get muted text color for trust indicators
   const mutedTextColor = dynamicTextColors?.muted || colorTokens.textMuted;
+  
+  // Get showImageToolbar for handling image clicks
+  const showImageToolbar = useEditStore((state) => state.showImageToolbar);
+  
 
   // console.log(`🎨 LeftCopyRightImage rendering with dynamic colors:`, {
   //   backgroundType: props.backgroundType,
@@ -384,7 +395,30 @@ export default function LeftCopyRightImage(props: LayoutComponentProps) {
 
           {/* Right Column - Hero Image */}
           <div className="order-1 lg:order-2">
-            <HeroImagePlaceholder />
+            {/* Show actual image (either uploaded or default) */}
+            {blockContent.hero_image && blockContent.hero_image !== '' ? (
+              <div className="relative w-full h-full min-h-[500px] lg:min-h-[600px]">
+                <img
+                  src={blockContent.hero_image}
+                  alt="Hero"
+                  className="w-full h-full object-cover rounded-2xl shadow-2xl cursor-pointer"
+                  data-image-id={`${sectionId}-hero-image`}
+                  onMouseUp={(e) => {
+                    if (mode === 'edit') {
+                      e.stopPropagation();
+                      e.preventDefault();
+                      const rect = e.currentTarget.getBoundingClientRect();
+                      showImageToolbar(`${sectionId}-hero-image`, {
+                        x: rect.left + rect.width / 2,
+                        y: rect.top - 10
+                      });
+                    }
+                  }}
+                />
+              </div>
+            ) : (
+              <HeroImagePlaceholder />
+            )}
           </div>
         </div>
       </div>
@@ -409,7 +443,8 @@ export const componentMeta = {
     { key: 'supporting_text', label: 'Supporting Text', type: 'textarea', required: false },
     { key: 'cta_text', label: 'CTA Button Text', type: 'text', required: true },
     { key: 'badge_text', label: 'Badge Text (uses accent colors)', type: 'text', required: false },
-    { key: 'trust_items', label: 'Trust Indicators (pipe separated)', type: 'text', required: false }
+    { key: 'trust_items', label: 'Trust Indicators (pipe separated)', type: 'text', required: false },
+    { key: 'hero_image', label: 'Hero Image', type: 'image', required: false }
   ],
   
   // ✅ NEW: Enhanced features

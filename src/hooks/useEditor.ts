@@ -64,6 +64,13 @@ export function useEditor() {
       return null;
     }
 
+    // Check if clicking on image with data-image-id - let image handlers work
+    const imageElement = target.closest('[data-image-id]') as HTMLElement;
+    if (imageElement) {
+      // Return null to prevent section toolbar from showing
+      return null;
+    }
+
     // Find the closest element with data-element-key
     const elementWithKey = target.closest('[data-element-key]') as HTMLElement;
     

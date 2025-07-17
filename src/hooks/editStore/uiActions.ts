@@ -201,6 +201,7 @@ export function createUIActions(set: any, get: any): UIActions {
     
     showToolbar: (type: 'section' | 'element' | 'text' | 'image' | 'form', targetId: string, position?: { x: number; y: number }) =>
       set((state: EditStore) => {
+        
         // Simple position calculation if not provided
         const pos = position || { x: 0, y: 0 };
         

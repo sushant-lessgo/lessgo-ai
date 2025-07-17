@@ -211,10 +211,11 @@ export function ImageToolbar({ targetId, position, contextActions }: ImageToolba
     <>
       <div 
         ref={toolbarRef}
-        className="fixed z-50 bg-white border border-gray-200 rounded-lg shadow-lg transition-all duration-200"
+        className="fixed bg-white border border-gray-200 rounded-lg shadow-lg transition-all duration-200"
         style={{
           left: position.x,
           top: position.y,
+          zIndex: 10000,
         }}
       >
         {/* Arrow */}
