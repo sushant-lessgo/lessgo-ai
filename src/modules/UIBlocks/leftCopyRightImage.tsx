@@ -218,6 +218,7 @@ export default function LeftCopyRightImage(props: LayoutComponentProps) {
     contentSchema: CONTENT_SCHEMA
   });
 
+
   // Parse trust indicators from pipe-separated string
   const trustItems = blockContent.trust_items 
     ? blockContent.trust_items.split('|').map(item => item.trim()).filter(Boolean)

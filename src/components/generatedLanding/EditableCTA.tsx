@@ -34,7 +34,11 @@ export function EditableCTA({ ctaConfig, isEditable, dispatch, ctaText, sectionI
   // Special case: CTA configured → show actual button with gear
   if (ctaConfig?.type != null) {
     return (
-      <div className="relative">
+      <div 
+        className="relative"
+        data-section-id={sectionId}
+        data-element-key={elementKey}
+      >
         {ctaConfig.type === 'form' ? (
           <FormConnectedButton 
             ctaConfig={ctaConfig}

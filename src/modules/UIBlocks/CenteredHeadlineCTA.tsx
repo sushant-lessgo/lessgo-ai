@@ -101,6 +101,8 @@ export default function CenteredHeadlineCTA(props: LayoutComponentProps) {
               textStyle={getTextStyle('body-sm')}
               placeholder="🔥 Limited Time: 50% Off First Month"
               className="animate-pulse"
+              sectionId={sectionId}
+              elementKey="urgency_text"
             />
           </div>
         )}
@@ -114,6 +116,8 @@ export default function CenteredHeadlineCTA(props: LayoutComponentProps) {
           colorClass={colorTokens.textOnLight || colorTokens.textPrimary}
           textStyle={getTextStyle('hero')}
           className="leading-tight mb-6"
+          sectionId={sectionId}
+          elementKey="headline"
         />
 
         {/* Subheadline */}
@@ -126,6 +130,8 @@ export default function CenteredHeadlineCTA(props: LayoutComponentProps) {
             textStyle={getTextStyle('body-lg')}
             className="max-w-3xl mx-auto leading-relaxed mb-8"
             placeholder="Add a compelling subheadline that reinforces your value proposition..."
+            sectionId={sectionId}
+            elementKey="subheadline"
           />
         )}
 

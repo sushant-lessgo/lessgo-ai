@@ -178,7 +178,7 @@ export default function HeroSection({
           {/* Form Placement for Hero */}
           <FormPlacementRenderer placement="hero" className="mt-6" />
 
-          <EditableWrapper isEditable={isEditable}>
+          <EditableWrapper isEditable={isEditable} sectionId={sectionId} elementKey="urgency_text">
             {urgency_text && (
               <EditableText
                 value={urgency_text}
@@ -188,6 +188,8 @@ export default function HeroSection({
                 }}
                 className="text-sm text-red-600 sm:mt-0"
                 isEditable={isEditable}
+                sectionId={sectionId}
+                elementKey="urgency_text"
               />
             )}
           </EditableWrapper>

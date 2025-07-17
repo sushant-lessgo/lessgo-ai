@@ -45,13 +45,6 @@ export function useEditor() {
         if (textEditingElement && 
             elementKey === textEditingElement.elementKey && 
             sectionId === textEditingElement.sectionId) {
-          console.log('🛡️ Click on text editing element - ignoring', { 
-            target, 
-            textEditingElement,
-            clickedElement: { sectionId, elementKey },
-            isTextEditing,
-            toolbarType: toolbar.type
-          });
           return null;
         }
         
@@ -59,36 +52,15 @@ export function useEditor() {
         if (toolbar.type === 'text' && toolbar.targetId) {
           const [toolbarSectionId, toolbarElementKey] = toolbar.targetId.split('.');
           if (elementKey === toolbarElementKey && sectionId === toolbarSectionId) {
-            console.log('🛡️ Click on text toolbar target element - ignoring', { 
-              target, 
-              toolbarTarget: toolbar.targetId,
-              clickedElement: { sectionId, elementKey }
-            });
             return null;
           }
         }
       }
     }
-    
-    // Debug: Check what we're clicking on
-    console.log('🎯 Click target debug:', {
-      tagName: target.tagName,
-      className: target.className,
-      hasDataElementKey: target.hasAttribute('data-element-key'),
-      hasDataSectionId: target.hasAttribute('data-section-id'),
-      closestElementKey: target.closest('[data-element-key]')?.getAttribute('data-element-key'),
-      closestSectionId: target.closest('[data-section-id]')?.getAttribute('data-section-id'),
-      isContentEditable: target.contentEditable,
-      isTextEditing,
-      textEditingElement,
-      toolbarType: toolbar.type,
-      toolbarTargetId: toolbar.targetId
-    });
 
     // Check if clicking on toolbar - prevent interference
     const isToolbarClick = target.closest('[data-toolbar-type]');
     if (isToolbarClick) {
-      console.log('🛡️ Toolbar click - ignoring');
       return null;
     }
 
@@ -215,11 +187,8 @@ export function useEditor() {
 
     const clickTarget = determineClickTarget(event);
     if (!clickTarget) {
-      console.log('🎯 Editor click ignored - no target or in text editing mode');
       return;
     }
-
-    console.log('🎯 Editor click:', clickTarget);
 
     // Prevent event bubbling for our handled clicks
     event.stopPropagation();
@@ -366,12 +335,36 @@ export function useEditor() {
     const wrapper = document.querySelector(selector) as HTMLElement;
     
     if (!wrapper) {
-      console.log('❌ Wrapper not found for text editing:', selector);
       return;
     }
 
-    // Find the actual text element inside the wrapper, prioritizing text elements and InlineTextEditor
-    const textElement = wrapper.querySelector('.inline-text-editor, h1, h2, h3, h4, h5, h6, p, span, div:not(.element-drag-handle):not(.drag-handle-icon)') as HTMLElement;
+    // Check if this is an InlineTextEditor component (modern approach)
+    // The wrapper itself might be the InlineTextEditor, or it might contain one
+    const inlineEditor = wrapper.classList.contains('inline-text-editor') 
+      ? wrapper 
+      : wrapper.querySelector('.inline-text-editor') as HTMLElement;
+    
+    if (inlineEditor) {
+      // For InlineTextEditor, just focus the element and show text toolbar
+      inlineEditor.focus();
+      
+      // Calculate position for text toolbar
+      const rect = inlineEditor.getBoundingClientRect();
+      const position = {
+        x: rect.left + rect.width / 2,
+        y: rect.top - 60
+      };
+      
+      // Set text editing state and show toolbar
+      setTextEditingMode(true, { sectionId, elementKey });
+      showToolbar('text', `${sectionId}.${elementKey}`, position);
+      
+      announceLiveRegion('Entered text editing mode');
+      return;
+    }
+
+    // Legacy fallback for non-InlineTextEditor components
+    const textElement = wrapper.querySelector('h1, h2, h3, h4, h5, h6, p, span, div:not(.element-drag-handle):not(.drag-handle-icon)') as HTMLElement;
     const element = textElement || wrapper;
     
     // Entering text edit mode

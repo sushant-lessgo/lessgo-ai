@@ -234,11 +234,13 @@ export function ElementToolbar({ elementSelection, position, contextActions }: E
     },
   ];
 
+
   return (
     <>
       <div 
         ref={toolbarRef}
         className="fixed z-50 bg-white border border-gray-200 rounded-lg shadow-lg transition-all duration-200"
+        data-toolbar-type="element"
         style={{
           left: position.x,
           top: position.y,

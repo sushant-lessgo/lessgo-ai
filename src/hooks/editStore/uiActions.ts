@@ -207,7 +207,6 @@ export function createUIActions(set: any, get: any): UIActions {
         // Get context-aware actions based on type
         const actions = getActionsForType(type, targetId, state);
         
-        console.log('🎪 showToolbar called:', { type, targetId, position: pos, actions, currentToolbar: state.toolbar });
         
         // Update toolbar state
         state.toolbar = {

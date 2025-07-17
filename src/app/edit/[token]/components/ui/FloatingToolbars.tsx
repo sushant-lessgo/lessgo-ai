@@ -20,19 +20,6 @@ export function FloatingToolbars() {
     toolbar,
   } = useEditStore();
 
-  // Debug logging
-  React.useEffect(() => {
-    console.log('🎪 FloatingToolbars render state:', {
-      mode,
-      toolbarType: toolbar.type,
-      toolbarVisible: toolbar.visible,
-      toolbarPosition: toolbar.position,
-      selectedElement,
-      selectedSection,
-      toolbarTargetId: toolbar.targetId,
-      toolbarActions: toolbar.actions,
-    });
-  }, [toolbar.visible, toolbar.type, mode, selectedElement, selectedSection, toolbar.targetId, toolbar.actions]);
 
   // No longer need these hooks - they were removed
 
@@ -44,11 +31,9 @@ export function FloatingToolbars() {
 
   // Render single adaptive toolbar
   if (!toolbar.visible || !toolbar.type || !toolbar.targetId) {
-    // console.log('🎪 FloatingToolbars not rendering because:', { visible: toolbar.visible, type: toolbar.type, targetId: toolbar.targetId });
     return null;
   }
   
-  // console.log('🎪 FloatingToolbars rendering with:', { type: toolbar.type, targetId: toolbar.targetId, position: toolbar.position });
 
   return (
     <>

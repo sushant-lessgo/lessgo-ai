@@ -55,7 +55,7 @@ export default function OfferSection({
 
       <div className="max-w-5xl mx-auto flex flex-col items-center text-center gap-10">
         {/* Headline */}
-        <EditableWrapper useAltHover={true} isEditable={isEditable}>
+        <EditableWrapper useAltHover={true} isEditable={isEditable} sectionId={sectionId} elementKey="headline">
           <EditableText
             value={headline}
             onChange={(val) => {
@@ -67,11 +67,13 @@ export default function OfferSection({
             }}
             className="text-3xl md:text-4xl font-bold leading-snug"
             isEditable={isEditable}
+            sectionId={sectionId}
+            elementKey="headline"
           />
         </EditableWrapper>
 
         {/* Urgency Text */}
-        <EditableWrapper useAltHover={true} isEditable={isEditable}>
+        <EditableWrapper useAltHover={true} isEditable={isEditable} sectionId={sectionId} elementKey="urgency_text">
           <EditableText
             value={urgency_text}
             onChange={(val) => {
@@ -83,6 +85,8 @@ export default function OfferSection({
             }}
             className="text-base"
             isEditable={isEditable}
+            sectionId={sectionId}
+            elementKey="urgency_text"
           />
         </EditableWrapper>
 
@@ -91,7 +95,7 @@ export default function OfferSection({
           {bullets.map((point, i) => (
             <div key={i} className="flex items-center gap-2">
               <span className="text-landing-accent text-base leading-none">✔</span>
-              <EditableWrapper useAltHover={true} isEditable={isEditable}>
+              <EditableWrapper useAltHover={true} isEditable={isEditable} sectionId={sectionId} elementKey={`bullet_${i}`}>
                 <EditableText
                   value={point}
                   onChange={(val) => {
@@ -102,6 +106,8 @@ export default function OfferSection({
                     });
                   }}
                   isEditable={isEditable}
+                  sectionId={sectionId}
+                  elementKey={`bullet_${i}`}
                 />
               </EditableWrapper>
             </div>
@@ -138,7 +144,7 @@ export default function OfferSection({
             />
           </div>
         ) : ctaConfig && ctaConfig.type !== "email-form" ? (
-          <EditableWrapper useAltHover={true} isEditable={isEditable}>
+          <EditableWrapper useAltHover={true} isEditable={isEditable} sectionId={sectionId} elementKey="cta_text">
             <EditableText
               value={cta_text}
               onChange={(val) => {
@@ -150,6 +156,8 @@ export default function OfferSection({
               }}
               className="bg-white text-landing-primary font-semibold px-6 py-3 rounded-lg text-base hover:bg-gray-100 transition w-full sm:w-auto text-center"
               isEditable={isEditable}
+              sectionId={sectionId}
+              elementKey="cta_text"
             />
           </EditableWrapper>
         ) : null}
