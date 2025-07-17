@@ -53,7 +53,7 @@ export function createContentActions(set: any, get: any): ContentActions {
      * ===== BASIC CONTENT OPERATIONS =====
      */
     
-    updateContent: (sectionId: string, elementKey: string, content: string | string[]) =>
+    updateElementContent: (sectionId: string, elementKey: string, content: string | string[]) =>
       set((state: EditStore) => {
         if (!state.content[sectionId]) {
           console.warn(`Section ${sectionId} not found`);
@@ -92,90 +92,7 @@ export function createContentActions(set: any, get: any): ContentActions {
     // Include all section CRUD actions
     ...sectionCRUDActions,
 
-    /**
-     * ===== AI GENERATION OPERATIONS =====
-     */
 
-    regenerateSection: async (sectionId: string, userGuidance?: string): Promise<void> => {
-      // Mock AI regeneration - replace with actual API call
-      console.log('🤖 Regenerating section:', sectionId, userGuidance);
-      
-      set((state: EditStore) => {
-        state.aiGeneration.isGenerating = true;
-        state.aiGeneration.currentOperation = 'section';
-        state.aiGeneration.status = 'Generating new content...';
-      });
-
-      // Simulate AI processing
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      set((state: EditStore) => {
-        if (state.content[sectionId]) {
-          // Update AI metadata
-          state.content[sectionId].aiMetadata = {
-            ...state.content[sectionId].aiMetadata,
-            lastGenerated: Date.now(),
-            isCustomized: false,
-          };
-          
-          state.aiGeneration.isGenerating = false;
-          state.aiGeneration.currentOperation = null;
-          state.aiGeneration.status = 'Section regenerated successfully';
-        }
-      });
-    },
-
-    regenerateElement: async (sectionId: string, elementKey: string, variationCount: number = 3): Promise<void> => {
-      console.log('🤖 Regenerating element:', `${sectionId}.${elementKey}`, { variationCount });
-      
-      set((state: EditStore) => {
-        state.aiGeneration.isGenerating = true;
-        state.aiGeneration.currentOperation = 'element';
-        state.aiGeneration.status = 'Generating element variations...';
-      });
-
-      // Simulate AI processing
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      set((state: EditStore) => {
-        const section = state.content[sectionId];
-        if (section && section.elements[elementKey]) {
-          // Update element with new content
-          (section.elements[elementKey] as any).aiMetadata = {
-            ...(section.elements[elementKey] as any).aiMetadata,
-            lastGenerated: Date.now(),
-            isCustomized: false,
-          };
-          
-          section.editMetadata.lastModified = Date.now();
-          state.aiGeneration.isGenerating = false;
-          state.aiGeneration.currentOperation = null;
-          state.aiGeneration.status = 'Element regenerated successfully';
-        }
-      });
-    },
-
-    /**
-     * ===== HISTORY MANAGEMENT =====
-     */
-
-    undo: () =>
-      set((state: EditStore) => {
-        // History functionality simplified for now
-        console.log('Undo action triggered');
-      }),
-
-    redo: () =>
-      set((state: EditStore) => {
-        // History functionality simplified for now
-        console.log('Redo action triggered');
-      }),
-
-    clearHistory: () =>
-      set((state: EditStore) => {
-        // History functionality simplified for now
-        console.log('Clear history action triggered');
-      }),
 
     /**
      * ===== SECTION DATA MANAGEMENT =====
@@ -300,17 +217,98 @@ export function createContentActions(set: any, get: any): ContentActions {
         state.lastUpdated = Date.now();
       }),
 
-    getContentSummary: () => {
+    getContentSummary: (sectionId: string) => {
       const state = get();
+      const section = state.content[sectionId];
+      
+      if (!section) return null;
+      
       return {
-        totalSections: state.sections.length,
-        totalElements: state.sections.reduce((total: number, sectionId: string) => {
-          const section = state.content[sectionId];
-          return total + (section ? Object.keys(section.elements || {}).length : 0);
-        }, 0),
-        lastModified: state.lastUpdated,
-        isDirty: state.persistence.isDirty,
+        sectionId,
+        elementCount: Object.keys(section.elements || {}).length,
+        isCustomized: section.aiMetadata?.isCustomized || false,
+        lastModified: section.editMetadata?.lastModified || 0,
+        completionPercentage: section.editMetadata?.completionPercentage || 0,
+        backgroundType: section.backgroundType,
       };
+    },
+
+    // Missing methods that should be delegated to other action creators
+    bulkUpdateSection: (sectionId: string, elements: Record<string, string | string[]>) =>
+      set((state: EditStore) => {
+        if (!state.content[sectionId]) {
+          console.warn(`Section ${sectionId} not found`);
+          return;
+        }
+
+        const section = state.content[sectionId];
+        
+        // Update all elements in bulk
+        Object.entries(elements).forEach(([elementKey, content]) => {
+          if (section.elements[elementKey]) {
+            section.elements[elementKey].content = content;
+          }
+        });
+        
+        // Mark as customized
+        section.aiMetadata.isCustomized = true;
+        state.persistence.isDirty = true;
+        state.lastUpdated = Date.now();
+      }),
+
+    selectVariation: (index: number) =>
+      set((state: EditStore) => {
+        // This is a placeholder - actual implementation would select from shown variations
+        console.log('Selecting variation:', index);
+      }),
+
+    applySelectedVariation: () =>
+      set((state: EditStore) => {
+        // This is a placeholder - actual implementation would apply the selected variation
+        console.log('Applying selected variation');
+      }),
+
+    // These methods are implemented in coreActions.ts but required by ContentActions interface
+    setBackgroundType: (sectionId: string, backgroundType: BackgroundType) => {
+      console.warn('setBackgroundType should be called from coreActions');
+    },
+
+    markAsCustomized: (sectionId: string) => {
+      console.warn('markAsCustomized should be called from coreActions');
+    },
+
+    // These methods are implemented in aiActions.ts but required by ContentActions interface
+    regenerateSection: async (sectionId: string, userGuidance?: string) => {
+      console.warn('regenerateSection should be called from aiActions');
+    },
+
+    regenerateElement: async (sectionId: string, elementKey: string, variationCount?: number) => {
+      console.warn('regenerateElement should be called from aiActions');
+    },
+
+    showElementVariations: (elementId: string, variations: string[]) => {
+      console.warn('showElementVariations should be called from aiActions');
+    },
+
+    hideElementVariations: () => {
+      console.warn('hideElementVariations should be called from aiActions');
+    },
+
+    clearAIErrors: () => {
+      console.warn('clearAIErrors should be called from aiActions');
+    },
+
+    // These methods are implemented in generationActions.ts but required by ContentActions interface
+    regenerateAllContent: async () => {
+      console.warn('regenerateAllContent should be called from generationActions');
+    },
+
+    updateFromAIResponse: (aiResponse: any) => {
+      console.warn('updateFromAIResponse should be called from generationActions');
+    },
+
+    setAIGenerationStatus: (status: Partial<any>) => {
+      console.warn('setAIGenerationStatus should be called from generationActions');
     },
 
   };

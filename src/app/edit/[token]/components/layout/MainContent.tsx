@@ -45,11 +45,11 @@ export function MainContent({ tokenId }: MainContentProps) {
   } = store;
   
   // Debug: check if functions exist
-  console.log('🔍 Store functions available:', {
-    showSectionToolbar: typeof showSectionToolbar,
-    showElementToolbar: typeof showElementToolbar,
-    availableFunctions: Object.keys(store).filter(key => typeof store[key] === 'function').slice(0, 20)
-  });
+  // console.log('🔍 Store functions available:', {
+  //   showSectionToolbar: typeof showSectionToolbar,
+  //   showElementToolbar: typeof showElementToolbar,
+  //   availableFunctions: Object.keys(store).filter(key => typeof store[key] === 'function').slice(0, 20)
+  // });
 
   // Removed useToolbarContext and useSelection - now using unified editor system
   // Simple stubs for backward compatibility
@@ -177,8 +177,9 @@ const {
         } else {
           console.error('❌ showSectionToolbar is not a function:', typeof showSectionToolbar);
           // Fallback: use direct store access
-          if (store.showToolbar) {
-            store.showToolbar('section', sectionId, position);
+          const storeInstance = useEditStore.getState();
+          if (typeof storeInstance.showToolbar === 'function') {
+            storeInstance.showToolbar('section', sectionId, position);
           }
         }
       }
@@ -237,7 +238,7 @@ const {
       } else {
         console.error('❌ showElementToolbar is not a function:', typeof showElementToolbar);
         // Fallback: use direct store access
-        if (store.showToolbar) {
+        if (typeof store.showToolbar === 'function') {
           store.showToolbar('element', elementId, position);
         }
       }

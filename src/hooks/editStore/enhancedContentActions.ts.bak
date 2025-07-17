@@ -6,9 +6,9 @@ import type {
   AddElementOptions, 
   RemoveElementOptions,
   DuplicateElementOptions,
-  ElementUpdate,
-  UNIVERSAL_ELEMENTS 
+  ElementUpdate
 } from '@/types/universalElements';
+import { UNIVERSAL_ELEMENTS } from '@/types/universalElements';
 
 // Generate unique IDs
 const generateElementKey = (type: UniversalElementType): string => {

@@ -665,6 +665,10 @@ export function createFormsImageActions(set: any, get: any): FormsImageActions {
               isSelected: false,
               lastModified: Date.now(),
               completionPercentage: 0,
+              isEditing: false,
+              isDeletable: true,
+              isMovable: true,
+              isDuplicable: true,
               validationStatus: {
                 isValid: true,
                 errors: [],

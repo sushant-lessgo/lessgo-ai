@@ -30,24 +30,12 @@ const generateSectionContent = async (sectionId: string, prompt?: string): Promi
   };
 };
 
-export const createGenerationActions: StateCreator<EditStore, [], [], {
-  // AI Generation Methods (from PageStore)
-  initializeSections: (sectionIds: string[], sectionLayouts: Record<string, string>) => void;
-  updateFromAIResponse: (aiResponse: any) => void;
-  setAIGenerationStatus: (status: Partial<AIGenerationStatus>) => void;
-  clearAIErrors: () => void;
-  regenerateAllContent: () => Promise<void>;
-  
-  // Background System Methods (from PageStore)
-  updateFromBackgroundSystem: (backgroundSystem: BackgroundSystem) => void;
-  updateFontsFromTone: () => void;
-  setCustomFonts: (headingFont: string, bodyFont: string) => void;
-  getColorTokens: () => ReturnType<typeof generateColorTokens>;
-}> = (set, get) => ({
+export function createGenerationActions(set: any, get: any) {
+  return {
 
   // ✅ Bulk section initialization method from PageStore
   initializeSections: (sectionIds: string[], sectionLayouts: Record<string, string>) =>
-    set((state) => {
+    set((state: EditStore) => {
       console.log('🏗️ EditStore: Initializing sections:', { 
         sectionIds, 
         sectionLayouts,
@@ -83,7 +71,23 @@ export const createGenerationActions: StateCreator<EditStore, [], [], {
             aiGenerated: false,
             isCustomized: false,
             aiGeneratedElements: []
-          }
+          },
+          editMetadata: {
+            isSelected: false,
+            lastModified: Date.now(),
+            completionPercentage: 0,
+            isEditing: false,
+            isDeletable: true,
+            isMovable: true,
+            isDuplicable: true,
+            validationStatus: {
+              isValid: true,
+              errors: [],
+              warnings: [],
+              missingRequired: [],
+              lastValidated: Date.now(),
+            },
+          },
         };
         
         console.log(`✅ Section ${sectionId} initialized with layout: ${layout}, background: ${backgroundType}`);
@@ -100,7 +104,7 @@ export const createGenerationActions: StateCreator<EditStore, [], [], {
 
   // ✅ AI Response Processing from PageStore (adapted for EditStore structure)
   updateFromAIResponse: (aiResponse: any) => {
-    set((state) => {
+    set((state: EditStore) => {
       console.log('🤖 EditStore: updateFromAIResponse called with:', {
         success: aiResponse.success,
         isPartial: aiResponse.isPartial,
@@ -163,6 +167,23 @@ export const createGenerationActions: StateCreator<EditStore, [], [], {
                 aiGenerated: false,
                 isCustomized: false,
                 aiGeneratedElements: []
+              },
+              editMetadata: {
+                isSelected: false,
+                isEditing: false,
+                lastModified: Date.now(),
+                lastModifiedBy: 'user',
+                isDeletable: false,
+                isMovable: true,
+                isDuplicable: true,
+                validationStatus: {
+                  isValid: true,
+                  errors: [],
+                  warnings: [],
+                  missingRequired: [],
+                  lastValidated: Date.now(),
+                },
+                completionPercentage: 100,
               }
             };
           }
@@ -236,7 +257,7 @@ export const createGenerationActions: StateCreator<EditStore, [], [], {
 
   // ✅ AI Generation Status Management
   setAIGenerationStatus: (status: Partial<AIGenerationStatus>) => {
-    set((state) => {
+    set((state: EditStore) => {
       if (status.isGenerating !== undefined) state.aiGeneration.isGenerating = status.isGenerating;
       if (status.success !== undefined) state.aiGeneration.status = status.success ? 'completed' : 'failed';
       if (status.isPartial !== undefined) {
@@ -264,7 +285,7 @@ export const createGenerationActions: StateCreator<EditStore, [], [], {
 
   // ✅ Clear AI Errors
   clearAIErrors: () => {
-    set((state) => {
+    set((state: EditStore) => {
       state.aiGeneration.warnings = [];
       state.aiGeneration.errors = [];
     });
@@ -274,7 +295,7 @@ export const createGenerationActions: StateCreator<EditStore, [], [], {
   regenerateAllContent: async () => {
     const state = get();
     
-    set((draft) => { 
+    set((draft: EditStore) => { 
       draft.aiGeneration.isGenerating = true;
       draft.aiGeneration.currentOperation = 'page';
       draft.aiGeneration.progress = 0;
@@ -286,24 +307,24 @@ export const createGenerationActions: StateCreator<EditStore, [], [], {
       let completed = 0;
       
       await Promise.all(
-        sections.map(async (sectionId) => {
+        sections.map(async (sectionId: string) => {
           try {
             await state.regenerateSection(sectionId);
             completed++;
             
-            set((draft) => {
+            set((draft: EditStore) => {
               draft.aiGeneration.progress = Math.round((completed / sections.length) * 100);
             });
           } catch (error) {
             console.error(`Failed to regenerate section ${sectionId}:`, error);
-            set((draft) => {
+            set((draft: EditStore) => {
               draft.aiGeneration.errors.push(`Failed to regenerate ${sectionId}: ${error instanceof Error ? error.message : 'Unknown error'}`);
             });
           }
         })
       );
       
-      set((draft) => {
+      set((draft: EditStore) => {
         draft.aiGeneration.isGenerating = false;
         draft.aiGeneration.currentOperation = null;
         draft.aiGeneration.progress = 100;
@@ -311,7 +332,7 @@ export const createGenerationActions: StateCreator<EditStore, [], [], {
       });
       
     } catch (error) {
-      set((draft) => {
+      set((draft: EditStore) => {
         draft.aiGeneration.isGenerating = false;
         draft.aiGeneration.currentOperation = null;
         draft.aiGeneration.status = 'Failed to regenerate content';
@@ -322,7 +343,7 @@ export const createGenerationActions: StateCreator<EditStore, [], [], {
 
   // ✅ Background System Integration from PageStore
   updateFromBackgroundSystem: (backgroundSystem: BackgroundSystem) =>
-    set((state) => {
+    set((state: EditStore) => {
       console.log('🔄 EditStore: Updating theme from background system:', backgroundSystem);
       
       state.theme.colors.baseColor = backgroundSystem.baseColor;
@@ -343,14 +364,14 @@ export const createGenerationActions: StateCreator<EditStore, [], [], {
   updateFontsFromTone: () => {
     try {
       const fontTheme = pickFontFromOnboarding();
-      set((state) => {
+      set((state: EditStore) => {
         state.theme.typography.headingFont = fontTheme.headingFont;
         state.theme.typography.bodyFont = fontTheme.bodyFont;
         state.persistence.isDirty = true;
       });
     } catch (error) {
       console.error('Failed to update fonts from tone:', error);
-      set((state) => {
+      set((state: EditStore) => {
         state.errors['fontUpdate'] = 'Failed to update fonts from tone';
       });
     }
@@ -358,7 +379,7 @@ export const createGenerationActions: StateCreator<EditStore, [], [], {
 
   // ✅ Custom Fonts Setter
   setCustomFonts: (headingFont: string, bodyFont: string) =>
-    set((state) => {
+    set((state: EditStore) => {
       state.theme.typography.headingFont = headingFont;
       state.theme.typography.bodyFont = bodyFont;
       state.persistence.isDirty = true;
@@ -396,4 +417,5 @@ export const createGenerationActions: StateCreator<EditStore, [], [], {
     }
   },
 
-});
+  };
+}

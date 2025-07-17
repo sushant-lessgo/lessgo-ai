@@ -1,7 +1,7 @@
 // hooks/editStore/layoutActions.ts - Layout and theme management actions
 import { generateColorTokens, generateColorTokensFromBackgroundSystem } from '@/modules/Design/ColorSystem/colorTokens';
 import type { BackgroundSystem } from '@/modules/Design/ColorSystem/colorTokens';
-import type { Theme } from '@/types/core/index';
+import type { Theme, ColorTokens } from '@/types/core/index';
 // ✅ CORRECT
 import type { EditStore, EditHistoryEntry } from '@/types/store';
 import type { LayoutActions } from '@/types/store';
@@ -274,6 +274,7 @@ updateSectionLayout: (sectionId: string, newLayout: string) =>
         oldValue: oldLayout,
         newValue: newLayout,
         timestamp: Date.now(),
+        source: 'user',
       });
       
       state.persistence.isDirty = true;
@@ -315,6 +316,7 @@ moveSection: (sectionId: string, direction: 'up' | 'down') =>
         oldValue: { sections: [...state.sections] },
         newValue: { sections: newSections },
         timestamp: Date.now(),
+        source: 'user',
       });
       
       state.persistence.isDirty = true;
@@ -454,40 +456,6 @@ moveSection: (sectionId: string, direction: 'up' | 'down') =>
  * ===== BACKGROUND MANAGEMENT =====
  */
 
-// New setBackgroundType action for toolbar integration
-setBackgroundType: (sectionId: string, backgroundType: BackgroundType) =>
-  set((state: EditStore) => {
-    const section = state.content[sectionId];
-    if (section) {
-      const oldType = section.backgroundType;
-      section.backgroundType = backgroundType;
-      
-      // Track change
-      state.queuedChanges.push({
-        id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-        type: 'layout',
-        sectionId,
-        oldValue: { backgroundType: oldType },
-        newValue: { backgroundType: backgroundType },
-        timestamp: Date.now(),
-      });
-      
-      state.persistence.isDirty = true;
-      state.lastUpdated = Date.now();
-      
-      // Add to history
-      state.history.undoStack.push({
-        type: 'layout',
-        description: `Changed background type to ${backgroundType}`,
-        timestamp: Date.now(),
-        beforeState: { sectionId, backgroundType: oldType },
-        afterState: { sectionId, backgroundType },
-        sectionId,
-      });
-      
-      state.history.redoStack = [];
-    }
-  }),
 
       /**
  * ===== TYPOGRAPHY MANAGEMENT =====
@@ -670,5 +638,26 @@ getTypographyForSection: (sectionId: string) => {
         });
       }
     },
+
+    updateColorTokens: (newTokens: ColorTokens) =>
+      set((state: EditStore) => {
+        // Update the theme with the new color tokens
+        // This method would integrate the color tokens back into the theme structure
+        // For now, we'll add a placeholder that developers can extend
+        console.log('🎨 Updating color tokens:', newTokens);
+        
+        // Track the change for auto-save
+        state.queuedChanges.push({
+          id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+          type: 'theme',
+          oldValue: state.theme.colors,
+          newValue: newTokens,
+          timestamp: Date.now(),
+          source: 'user',
+        });
+        
+        state.persistence.isDirty = true;
+        state.lastUpdated = Date.now();
+      }),
   };
 }

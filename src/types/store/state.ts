@@ -11,7 +11,8 @@ import type {
   ElementEditMode,
   CanonicalFieldName,
   TypographyState,
-  ContentEditingState
+  ContentEditingState,
+  FormField
 } from '@/types/core/index';
 
 /**
@@ -213,9 +214,12 @@ export interface UISlice {
     };
   };
   
+  formData: Record<string, { fields: any[]; settings: any }>;
+  
   // Images State
   images: {
     activeImage?: string;
+    assets?: Record<string, any>;
     stockPhotos: {
       searchResults: any[];
       searchQuery: string;

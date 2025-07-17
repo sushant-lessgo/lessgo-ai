@@ -44,11 +44,11 @@ export function FloatingToolbars() {
 
   // Render single adaptive toolbar
   if (!toolbar.visible || !toolbar.type || !toolbar.targetId) {
-    console.log('🎪 FloatingToolbars not rendering because:', { visible: toolbar.visible, type: toolbar.type, targetId: toolbar.targetId });
+    // console.log('🎪 FloatingToolbars not rendering because:', { visible: toolbar.visible, type: toolbar.type, targetId: toolbar.targetId });
     return null;
   }
   
-  console.log('🎪 FloatingToolbars rendering with:', { type: toolbar.type, targetId: toolbar.targetId, position: toolbar.position });
+  // console.log('🎪 FloatingToolbars rendering with:', { type: toolbar.type, targetId: toolbar.targetId, position: toolbar.position });
 
   return (
     <div className="floating-toolbars-container">
@@ -60,10 +60,11 @@ export function FloatingToolbars() {
           left: `${toolbar.position.x}px`,
           top: `${toolbar.position.y}px`,
           transform: 'translate(-50%, -100%)', // Center horizontally and position above
-          minWidth: '280px',
-          maxWidth: '400px',
+          minWidth: '300px',
+          maxWidth: '500px',
           opacity: toolbar.visible ? 1 : 0,
           pointerEvents: toolbar.visible ? 'auto' : 'none',
+          zIndex: 9999, // Ensure toolbar is always on top
         }}
       >
         <div style={{ backgroundColor: 'red', color: 'white', padding: '4px', fontSize: '12px', marginBottom: '4px' }}>

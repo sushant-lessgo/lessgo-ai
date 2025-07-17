@@ -22,13 +22,17 @@ export function createCoreActions(set: any, get: any) {
             aiMetadata: {
               aiGenerated: false,
               isCustomized: false,
-              confidence: 0,
-              lastRegenerated: Date.now(),
+              lastGenerated: Date.now(),
+              aiGeneratedElements: [],
             },
             editMetadata: {
               isSelected: false,
               lastModified: Date.now(),
               completionPercentage: 0,
+              isEditing: false,
+              isDeletable: true,
+              isMovable: true,
+              isDuplicable: true,
               validationStatus: {
                 isValid: true,
                 errors: [],
@@ -203,60 +207,6 @@ export function createCoreActions(set: any, get: any) {
         }
       }),
 
-    // Simplified toolbar management
-    showToolbar: (type: 'section' | 'element' | 'text' | 'image' | 'form', targetId: string, position?: { x: number; y: number }) =>
-      set((state: EditStore) => {
-        const pos = position || { x: 0, y: 0 };
-        
-        // Get context-aware actions based on type
-        const actions = getActionsForType(type, targetId, state);
-        
-        state.toolbar = {
-          type,
-          visible: true,
-          position: pos,
-          targetId,
-          actions,
-        };
-        
-        // Update selection state
-        if (type === 'section') {
-          state.selectedSection = targetId;
-          state.selectedElement = undefined;
-        } else if (type === 'element') {
-          const [sectionId, elementKey] = targetId.split('.');
-          state.selectedElement = { sectionId, elementKey };
-          state.selectedSection = sectionId;
-        }
-      }),
-    
-    hideToolbar: () =>
-      set((state: EditStore) => {
-        state.toolbar.visible = false;
-        state.toolbar.type = null;
-        state.toolbar.targetId = null;
-        state.toolbar.actions = [];
-      }),
-
-    // Legacy wrapper functions for compatibility
-    showSectionToolbar: (sectionId: string, position: { x: number; y: number }) => 
-      get().showToolbar('section', sectionId, position),
-    
-    showElementToolbar: (elementId: string, position: { x: number; y: number }) => 
-      get().showToolbar('element', elementId, position),
-    
-    hideSectionToolbar: () => get().hideToolbar(),
-    hideElementToolbar: () => get().hideToolbar(),
-    showFormToolbar: (formId: string, position: { x: number; y: number }) => 
-      get().showToolbar('form', formId, position),
-    hideFormToolbar: () => get().hideToolbar(),
-    showImageToolbar: (imageId: string, position: { x: number; y: number }) => 
-      get().showToolbar('image', imageId, position),
-    hideImageToolbar: () => get().hideToolbar(),
-    showTextToolbar: (position: { x: number; y: number }) => 
-      get().showToolbar('text', 'current-text', position),
-    hideTextToolbar: () => get().hideToolbar(),
-
     /**
      * ===== CHANGE TRACKING =====
      */
@@ -280,24 +230,4 @@ export function createCoreActions(set: any, get: any) {
       }
     },
   };
-}
-
-/**
- * Helper function to get context-aware actions for toolbar types
- */
-function getActionsForType(type: string, targetId: string, state: EditStore): string[] {
-  switch (type) {
-    case 'section':
-      return ['change-layout', 'add-element', 'background-settings', 'regenerate-section', 'duplicate-section', 'delete-section'];
-    case 'element':
-      return ['regenerate-element', 'duplicate-element', 'element-style', 'delete-element'];
-    case 'text':
-      return ['format-bold', 'format-italic', 'text-color', 'font-size', 'text-align', 'regenerate'];
-    case 'image':
-      return ['replace-image', 'stock-photos', 'edit-image', 'alt-text', 'delete-image'];
-    case 'form':
-      return ['add-field', 'form-settings', 'integrations', 'form-styling'];
-    default:
-      return [];
-  }
 }

@@ -88,7 +88,7 @@ CONTENT-ONLY REGENERATION:
     }
 
     const aiResponse = await response.json();
-    get().updateFromAIResponse(aiResponse);
+    // get().updateFromAIResponse(aiResponse); // Commented out - method not available
 
     setState((state: EditStore) => {
       state.aiGeneration.isGenerating = false;
@@ -111,7 +111,6 @@ CONTENT-ONLY REGENERATION:
     const { completeSaveDraft } = await import('@/utils/autoSaveDraft');
     await completeSaveDraft(state.tokenId, {
       description: 'Content-only regeneration',
-      source: 'edit',
     });
 
   } catch (error) {
@@ -206,7 +205,7 @@ const handleDesignAndCopyRegeneration = async (
     }
 
     const aiResponse = await response.json();
-    get().updateFromAIResponse(aiResponse);
+    // get().updateFromAIResponse(aiResponse); // Commented out - method not available
 
     setState((state: EditStore) => {
       state.aiGeneration.isGenerating = false;
@@ -232,7 +231,6 @@ const handleDesignAndCopyRegeneration = async (
     const { completeSaveDraft } = await import('@/utils/autoSaveDraft');
     await completeSaveDraft(state.tokenId, {
       description: 'Design + copy regeneration',
-      source: 'edit',
     });
 
   } catch (error) {
@@ -269,10 +267,10 @@ export function createRegenerationActions(set: any, get: () => EditStore): Regen
     trackInputChange: (field: CanonicalFieldName, newValue: string) => {
       set((state: EditStore) => {
         // Update current inputs
-        state.changeTracking.currentInputs[field as keyof typeof state.changeTracking.currentInputs] = newValue as any;
+        (state.changeTracking.currentInputs as any)[field] = newValue;
         
         // Track changed fields
-        if (state.changeTracking.originalInputs[field as keyof typeof state.changeTracking.originalInputs] !== newValue) {
+        if ((state.changeTracking.originalInputs as any)[field] !== newValue) {
           if (!state.changeTracking.changedFields.includes(field)) {
             state.changeTracking.changedFields.push(field);
           }

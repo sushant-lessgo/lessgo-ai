@@ -1,5 +1,5 @@
 // hooks/editStore/persistenceActions.ts - Simplified persistence and forms/images actions
-import type { EditStore, FormFieldData, ImageAsset } from '@/types/store';
+import type { EditStore, FormField, ImageAsset } from '@/types/store';
 
 /**
  * Consolidated persistence actions for save/load operations plus forms and images
@@ -114,33 +114,33 @@ export function createPersistenceActions(set: any, get: any) {
     /**
      * ===== FORMS MANAGEMENT =====
      */
-    addFormField: (formId: string, field: FormFieldData) =>
+    addFormField: (formId: string, field: FormField) =>
       set((state: EditStore) => {
-        if (!state.forms[formId]) {
-          state.forms[formId] = { fields: [], settings: {} };
+        if (!state.formData[formId]) {
+          state.formData[formId] = { fields: [], settings: {} };
         }
-        state.forms[formId].fields.push(field);
+        state.formData[formId].fields.push(field);
         state.persistence.isDirty = true;
       }),
 
     removeFormField: (formId: string, fieldId: string) =>
       set((state: EditStore) => {
-        if (state.forms[formId]) {
-          state.forms[formId].fields = state.forms[formId].fields.filter(
+        if (state.formData[formId]) {
+          state.formData[formId].fields = state.formData[formId].fields.filter(
             field => field.id !== fieldId
           );
           state.persistence.isDirty = true;
         }
       }),
 
-    updateFormField: (formId: string, fieldId: string, updates: Partial<FormFieldData>) =>
+    updateFormField: (formId: string, fieldId: string, updates: Partial<FormField>) =>
       set((state: EditStore) => {
-        if (state.forms[formId]) {
-          const fieldIndex = state.forms[formId].fields.findIndex(
+        if (state.formData[formId]) {
+          const fieldIndex = state.formData[formId].fields.findIndex(
             field => field.id === fieldId
           );
           if (fieldIndex !== -1) {
-            Object.assign(state.forms[formId].fields[fieldIndex], updates);
+            Object.assign(state.formData[formId].fields[fieldIndex], updates);
             state.persistence.isDirty = true;
           }
         }
@@ -148,8 +148,8 @@ export function createPersistenceActions(set: any, get: any) {
 
     toggleFormFieldRequired: (formId: string, fieldId: string) =>
       set((state: EditStore) => {
-        if (state.forms[formId]) {
-          const field = state.forms[formId].fields.find(f => f.id === fieldId);
+        if (state.formData[formId]) {
+          const field = state.formData[formId].fields.find(f => f.id === fieldId);
           if (field) {
             field.required = !field.required;
             state.persistence.isDirty = true;

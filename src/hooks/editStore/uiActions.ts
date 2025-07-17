@@ -1,14 +1,12 @@
 // hooks/editStore/uiActions.ts - UI state and interaction actions
 import type { EditStore, UISlice, ElementSelection, ToolbarAction, EditHistoryEntry } from '@/types/store';
 import type { UIActions } from '@/types/store';
+import type { AdvancedActionItem, AdvancedMenuState } from '@/types/store/state';
 import type { 
   UndoableAction, 
   ActionHistoryItem, 
   UndoRedoState 
 } from '@/types/core';
-
-import type { AdvancedActionItem, AdvancedMenuState } from '@/app/edit/[token]/components/toolbars/AdvancedActionsMenu';
-import type { ElementSelection } from '@/types/core/ui';
 
 /**
  * Helper function to get context-aware actions for toolbar types
@@ -161,39 +159,6 @@ export function createUIActions(set: any, get: any): UIActions {
         }
       }),
 
-      // Enhanced setSelectedElement for toolbar integration
-setSelectedElement: (elementSelection: ElementSelection | undefined) =>
-  set((state: EditStore) => {
-    state.selectedElement = elementSelection;
-    
-    // Update active section when element is selected
-    if (elementSelection) {
-      state.selectedSection = elementSelection.sectionId;
-    }
-  }),
-
-// Enhanced setActiveSection for toolbar integration
-setActiveSection: (sectionId: string | undefined) =>
-  set((state: EditStore) => {
-    state.selectedSection = sectionId;
-    
-    // Clear element selection when changing sections
-    if (state.selectedElement && state.selectedElement.sectionId !== sectionId) {
-      state.selectedElement = undefined;
-      if (state.toolbar.type === 'element') {
-        state.toolbar.visible = false;
-        state.toolbar.type = null;
-      }
-    }
-    
-    // Update section metadata
-    Object.values(state.content).forEach(section => {
-      if (section.editMetadata) {
-        section.editMetadata.isSelected = section.id === sectionId;
-      }
-    });
-  }),
-
     /**
      * ===== TEXT EDITING MANAGEMENT =====
      */
@@ -259,7 +224,12 @@ setActiveSection: (sectionId: string | undefined) =>
           state.selectedElement = undefined;
         } else if (type === 'element') {
           const [sectionId, elementKey] = targetId.split('.');
-          state.selectedElement = { sectionId, elementKey };
+          state.selectedElement = { 
+            sectionId, 
+            elementKey, 
+            type: 'text' as any, // Default type
+            editMode: 'edit' as any // Default edit mode
+          };
           state.selectedSection = sectionId;
         } else if (type === 'text') {
           // For text toolbar, maintain the current element selection

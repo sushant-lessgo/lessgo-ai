@@ -3,6 +3,7 @@ import { create } from "zustand";
 import { immer } from "zustand/middleware/immer";
 import { devtools } from "zustand/middleware";
 import { subscribeWithSelector } from "zustand/middleware";
+import type { FormField } from "@/types/core/index";
 // At top of useEditStore.ts
 
 // Import consolidated action creators
@@ -156,7 +157,9 @@ function createInitialState() {
         visible: false,
       },
     },
+    formData: {} as Record<string, { fields: FormField[]; settings: any }>,
     images: {
+      assets: {},
       stockPhotos: {
         searchResults: [],
         searchQuery: '',

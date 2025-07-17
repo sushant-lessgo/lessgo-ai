@@ -27,6 +27,8 @@ export interface LayoutActions {
   duplicateSection: (sectionId: string) => string;
   setLayout: (sectionId: string, layout: string) => void;
   setSectionLayouts: (layouts: Record<string, string>) => void;
+  updateSectionLayout: (sectionId: string, newLayout: string) => void;
+  moveSection: (sectionId: string, direction: 'up' | 'down') => void;
   
   // Theme Management  
   updateTheme: (theme: Partial<Theme>) => void;
@@ -111,6 +113,8 @@ export interface UIActions {
   setLeftPanelTab: (tab: UISlice['leftPanel']['activeTab']) => void;
   
   // Floating Toolbar Management
+  showToolbar: (type: 'section' | 'element' | 'text' | 'image' | 'form', targetId: string, position?: { x: number; y: number }) => void;
+  hideToolbar: () => void;
   showSectionToolbar: (sectionId: string, position: { x: number; y: number }) => void;
   hideSectionToolbar: () => void;
   showElementToolbar: (elementId: string, position: { x: number; y: number }) => void;
@@ -125,6 +129,7 @@ export interface UIActions {
   // Auto-Save UI
   triggerAutoSave: () => void;
   clearAutoSaveError: () => void;
+  trackChange: (change: any) => void;
   
   // Forms UI
   setActiveForm: (formId?: string) => void;
@@ -167,6 +172,19 @@ export interface UIActions {
   announceLiveRegion: (message: string, priority?: 'polite' | 'assertive') => void;
   focusElement: (elementId: string) => void;
   trackPerformance: (operation: string, startTime: number) => void;
+  
+  // Advanced Menu Management
+  showAdvancedMenu: (
+    toolbarType: 'section' | 'element' | 'text' | 'form' | 'image',
+    triggerElement: HTMLElement,
+    actions: any[]
+  ) => void;
+  hideAdvancedMenu: () => void;
+  toggleAdvancedMenu: (
+    toolbarType: 'section' | 'element' | 'text' | 'form' | 'image',
+    triggerElement: HTMLElement,
+    actions: any[]
+  ) => void;
 }
 
 /**
