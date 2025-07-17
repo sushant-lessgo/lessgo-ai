@@ -16,10 +16,36 @@ export function createPersistenceActions(set: any, get: any) {
           state.persistence.saveError = undefined;
         });
 
-        const exportedData = get().export();
+        const state = get();
+        const exportedData = state.export();
         
-        // Mock save operation - replace with actual API call
-        await new Promise(resolve => setTimeout(resolve, 500));
+        console.log('💾 Calling /api/saveDraft with data:', { 
+          tokenId: state.tokenId, 
+          hasContent: !!exportedData 
+        });
+        
+        if (!state.tokenId) {
+          throw new Error('No tokenId available in EditStore');
+        }
+        
+        // Real API call to save draft
+        const response = await fetch('/api/saveDraft', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            tokenId: state.tokenId,
+            content: exportedData,
+          }),
+        });
+
+        if (!response.ok) {
+          throw new Error(`Save failed: ${response.status} ${response.statusText}`);
+        }
+
+        const result = await response.json();
+        console.log('✅ Save API response:', result);
         
         set((state: EditStore) => {
           state.persistence.isSaving = false;
@@ -30,6 +56,7 @@ export function createPersistenceActions(set: any, get: any) {
           state.persistence.metrics.lastSaveTime = Date.now();
         });
       } catch (error) {
+        console.error('❌ Save failed:', error);
         set((state: EditStore) => {
           state.persistence.isSaving = false;
           state.persistence.saveError = error instanceof Error ? error.message : 'Save failed';
@@ -39,7 +66,7 @@ export function createPersistenceActions(set: any, get: any) {
       }
     },
 
-    loadFromDraft: async (apiResponse: any) => {
+    loadFromDraft: async (apiResponse: any, urlTokenId?: string) => {
       try {
         set((state: EditStore) => {
           state.persistence.isLoading = true;
@@ -67,9 +94,10 @@ export function createPersistenceActions(set: any, get: any) {
             }
             
             // Restore meta data
-            state.id = apiResponse.tokenId || '';
+            state.id = apiResponse.tokenId || urlTokenId || '';
             state.title = apiResponse.title || 'Untitled Project';
-            state.tokenId = apiResponse.tokenId || '';
+            state.tokenId = apiResponse.tokenId || urlTokenId || '';
+            
             
             // Restore onboarding data
             state.onboardingData = {
@@ -83,6 +111,16 @@ export function createPersistenceActions(set: any, get: any) {
             state.lastUpdated = Date.now();
             state.persistence.isLoading = false;
             state.persistence.isDirty = false;
+            
+            // Ensure performance object is initialized
+            if (!state.performance) {
+              state.performance = {
+                saveCount: 0,
+                averageSaveTime: 0,
+                lastSaveTime: 0,
+                failedSaves: 0,
+              };
+            }
           });
         }
       } catch (error) {
@@ -251,16 +289,22 @@ export function createPersistenceActions(set: any, get: any) {
       }),
 
     // Auto-save middleware actions
-    triggerAutoSave: () => {
+    triggerAutoSave: async () => {
       const state = get();
       if (state.persistence.isDirty && !state.persistence.isSaving) {
-        setTimeout(async () => {
-          try {
-            await state.save();
-          } catch (error) {
-            console.error('Auto-save failed:', error);
-          }
-        }, 2000);
+        console.log('🔄 TriggerAutoSave: Saving dirty state...');
+        try {
+          await state.save();
+          console.log('✅ TriggerAutoSave: Save completed');
+        } catch (error) {
+          console.error('❌ TriggerAutoSave: Save failed:', error);
+          throw error;
+        }
+      } else {
+        console.log('⏭️ TriggerAutoSave: No save needed', { 
+          isDirty: state.persistence.isDirty, 
+          isSaving: state.persistence.isSaving 
+        });
       }
     },
 

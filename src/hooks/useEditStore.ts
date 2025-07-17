@@ -314,6 +314,7 @@ export const useEditStore = create<EditStore>()(
             title: state.title,
             lastUpdated: state.lastUpdated,
             version: state.version,
+            performance: state.performance,
           }),
           onRehydrateStorage: () => (state) => {
             if (state) {
@@ -323,6 +324,16 @@ export const useEditStore = create<EditStore>()(
                 tokenId: state.tokenId,
                 hasTheme: !!state.theme
               });
+              
+              // Ensure performance object is initialized after rehydration
+              if (!state.performance) {
+                state.performance = {
+                  saveCount: 0,
+                  averageSaveTime: 0,
+                  lastSaveTime: 0,
+                  failedSaves: 0,
+                };
+              }
             }
           }
         }                         // ← Close persist() config

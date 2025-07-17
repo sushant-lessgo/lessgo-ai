@@ -200,6 +200,15 @@ export const autoSaveMiddleware = <T extends Record<string, any>>(
             
             // Update performance stats
             if (finalConfig.performanceTracking) {
+              // Initialize performance object if it doesn't exist
+              if (!draft.performance) {
+                draft.performance = {
+                  saveCount: 0,
+                  averageSaveTime: 0,
+                  lastSaveTime: 0,
+                  failedSaves: 0,
+                };
+              }
               draft.performance.saveCount += 1;
               draft.performance.lastSaveTime = saveTime;
               draft.performance.averageSaveTime = calculateAverageTime(
@@ -213,7 +222,7 @@ export const autoSaveMiddleware = <T extends Record<string, any>>(
           console.log('✅ Auto-save successful:', {
             saveTime: `${saveTime}ms`,
             changesCount: state.queuedChanges.length,
-            totalSaves: state.performance.saveCount + 1,
+            totalSaves: (state.performance?.saveCount || 0) + 1,
           });
           
         } catch (error) {
@@ -224,6 +233,15 @@ export const autoSaveMiddleware = <T extends Record<string, any>>(
             draft.saveError = errorMessage;
             
             if (finalConfig.performanceTracking) {
+              // Initialize performance object if it doesn't exist
+              if (!draft.performance) {
+                draft.performance = {
+                  saveCount: 0,
+                  averageSaveTime: 0,
+                  lastSaveTime: 0,
+                  failedSaves: 0,
+                };
+              }
               draft.performance.failedSaves += 1;
             }
           });
@@ -231,7 +249,7 @@ export const autoSaveMiddleware = <T extends Record<string, any>>(
           console.error('❌ Auto-save failed:', error);
           
           // Retry logic for failed saves
-          if (state.performance.failedSaves < finalConfig.retryAttempts) {
+          if ((state.performance?.failedSaves || 0) < finalConfig.retryAttempts) {
             console.log(`🔄 Retrying auto-save in ${finalConfig.retryDelay}ms...`);
             
             setTimeout(() => {

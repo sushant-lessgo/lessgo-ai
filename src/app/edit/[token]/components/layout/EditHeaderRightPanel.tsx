@@ -12,7 +12,9 @@ interface EditHeaderRightPanelProps {
 
 export function EditHeaderRightPanel({ tokenId }: EditHeaderRightPanelProps) {
   return (
-    <div className="flex items-center space-x-3">
+    <div 
+      className="flex items-center space-x-3"
+    >
       <UndoRedoButtons />
       <ResetButton />
       <PreviewButton tokenId={tokenId} />

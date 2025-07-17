@@ -25,6 +25,7 @@ export function EditLayout({ tokenId }: EditLayoutProps) {
     handleKeyboardShortcut,
     getColorTokens,
   } = useEditStore();
+  
 
   // Initialize unified editor system
   const editor = useEditor();

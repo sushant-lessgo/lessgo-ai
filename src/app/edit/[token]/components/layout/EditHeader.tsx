@@ -16,7 +16,15 @@ export function EditHeader({ tokenId }: EditHeaderProps) {
   const [showColorModal, setShowColorModal] = useState(false);
   
   const { theme, getColorTokens } = useEditStore();
-  const colorTokens = getColorTokens();
+  
+  
+  let colorTokens;
+  try {
+    colorTokens = getColorTokens();
+  } catch (error) {
+    console.error('❌ getColorTokens error:', error);
+    colorTokens = { accent: 'bg-blue-500' };
+  }
 
   const handleBackgroundSelector = () => {
     setShowBackgroundModal(true);
@@ -26,15 +34,21 @@ export function EditHeader({ tokenId }: EditHeaderProps) {
     setShowColorModal(true);
   };
 
-  const currentBackgroundPreview = theme.colors.sectionBackgrounds.primary || 'bg-gradient-to-br from-blue-500 to-purple-600';
+  const currentBackgroundPreview = theme?.colors?.sectionBackgrounds?.primary || 'bg-gradient-to-br from-blue-500 to-purple-600';
 
   return (
     <>
-      <header className="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-6 relative z-30">
+      <header 
+        className="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-6 relative z-50"
+      >
         {/* Left Section - System Selectors */}
         <div className="flex items-center space-x-4">
           <button
             onClick={handleBackgroundSelector}
+            onMouseUp={() => {
+              // Workaround: Manually trigger click handler since click events are blocked
+              handleBackgroundSelector();
+            }}
             className="flex items-center space-x-2 px-3 py-1.5 text-sm text-gray-700 hover:bg-gray-50 rounded-md transition-colors border border-gray-200"
             title="Background System - Click to customize your page backgrounds"
           >
@@ -44,6 +58,10 @@ export function EditHeader({ tokenId }: EditHeaderProps) {
 
           <button
             onClick={handleColorSelector}
+            onMouseUp={() => {
+              // Workaround: Manually trigger click handler since click events are blocked
+              handleColorSelector();
+            }}
             className="flex items-center space-x-2 px-3 py-1.5 text-sm text-gray-700 hover:bg-gray-50 rounded-md transition-colors border border-gray-200"
             title="Color System - Customize accent colors and interactive elements"
           >

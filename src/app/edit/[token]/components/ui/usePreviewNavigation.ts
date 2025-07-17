@@ -13,12 +13,25 @@ export function usePreviewNavigation(tokenId: string) {
   const { showToast } = useToast();
 
   const handlePreviewClick = useCallback(async () => {
+    console.log('🚀 handlePreviewClick called');
     try {
+      console.log('🔄 Setting isNavigating to true');
       setIsNavigating(true);
+      
+      console.log('💾 Triggering auto-save...');
       await triggerAutoSave();
-      router.push(`/preview/${tokenId}?editMode=true`);
+      console.log('✅ Auto-save completed');
+      
+      const previewUrl = `/preview/${tokenId}?editMode=true`;
+      console.log('🔗 Opening preview URL:', previewUrl);
+      
+      const newWindow = window.open(previewUrl, '_blank');
+      console.log('🪟 Window.open result:', newWindow);
+      
+      console.log('🔄 Setting isNavigating to false');
+      setIsNavigating(false);
     } catch (error) {
-      console.error('Preview navigation failed:', error);
+      console.error('❌ Preview navigation failed:', error);
       showToast('Failed to save changes. Please try again.', 'error');
       setIsNavigating(false);
     }

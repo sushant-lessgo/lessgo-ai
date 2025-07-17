@@ -66,6 +66,10 @@ useEffect(() => {
           
           // Check if EditStore already has sections (migration successful)
           if (currentState.sections.length > 0) {
+            // Ensure tokenId is set during migration
+            if (!currentState.tokenId) {
+              useEditStore.setState({ tokenId });
+            }
             setLoadingState('success');
             return;
           } else {
@@ -80,6 +84,8 @@ useEffect(() => {
         if (!response.ok) {
           if (response.status === 404) {
             reset();
+            // Set tokenId even when no draft exists
+            useEditStore.setState({ tokenId });
             setLoadingState('success');
             return;
           }
@@ -91,7 +97,7 @@ useEffect(() => {
         
 
         // Load the draft data into edit store
-        await loadFromDraft(data);
+        await loadFromDraft(data, tokenId);
         
 
         setLoadingState('success');
