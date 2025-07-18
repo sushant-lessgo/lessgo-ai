@@ -26,6 +26,9 @@ interface EditableContentProps {
   editorConfig?: Partial<InlineEditorConfig>;
   autoSave?: Partial<AutoSaveConfig>;
   enableInlineEditor?: boolean;
+  backgroundType?: string;
+  colorTokens?: any;
+  sectionBackground?: string;
 }
 
 const defaultFormatState: TextFormatState = {
@@ -59,9 +62,9 @@ export function EditableContent({
   editorConfig = {},
   autoSave = {},
   enableInlineEditor = true,
-  onDragStart,
-  onDragEnd,
-  onDrop,
+  backgroundType = 'primary',
+  colorTokens = {},
+  sectionBackground,
 }: EditableContentProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [currentFormatState, setCurrentFormatState] = useState(formatState);
@@ -144,6 +147,9 @@ export function EditableContent({
         `}
         style={style}
         placeholder={placeholder}
+        backgroundType={backgroundType}
+        colorTokens={colorTokens}
+        sectionBackground={sectionBackground}
       />
     );
   }
@@ -196,6 +202,8 @@ export function EditableHeadline({
   onFormatChange,
   editorConfig,
   autoSave,
+  backgroundType,
+  colorTokens,
   ...props 
 }: Omit<EditableContentProps, 'element'> & { 
   level?: 'h1' | 'h2' | 'h3' | 'h4',
@@ -206,6 +214,8 @@ export function EditableHeadline({
   onFormatChange?: (format: TextFormatState) => void,
   editorConfig?: Partial<InlineEditorConfig>,
   autoSave?: Partial<AutoSaveConfig>,
+  backgroundType?: string,
+  colorTokens?: any,
 }) {
   
   const finalColorClass = dynamicColor || colorClass || 'text-gray-900';
@@ -250,6 +260,8 @@ export function EditableHeadline({
       onFormatChange={onFormatChange}
       editorConfig={headlineEditorConfig}
       autoSave={autoSave}
+      backgroundType={backgroundType}
+      colorTokens={colorTokens}
       {...props}
     />
   );
@@ -268,6 +280,8 @@ export function EditableText({
   onFormatChange,
   editorConfig,
   autoSave,
+  backgroundType,
+  colorTokens,
   ...props 
 }: Omit<EditableContentProps, 'element'> & { 
   colorClass?: string,
@@ -277,6 +291,8 @@ export function EditableText({
   onFormatChange?: (format: TextFormatState) => void,
   editorConfig?: Partial<InlineEditorConfig>,
   autoSave?: Partial<AutoSaveConfig>,
+  backgroundType?: string,
+  colorTokens?: any,
 }) {
   
   const finalColorClass = dynamicColor || colorClass || 'text-gray-600';
@@ -335,6 +351,8 @@ export function EditableText({
       onFormatChange={onFormatChange}
       editorConfig={textEditorConfig}
       autoSave={autoSave}
+      backgroundType={backgroundType}
+      colorTokens={colorTokens}
       {...props}
     />
   );
@@ -525,6 +543,8 @@ export function EditableAdaptiveHeadline({
       onFormatChange={onFormatChange}
       editorConfig={editorConfig}
       autoSave={autoSave}
+      backgroundType={backgroundType}
+      colorTokens={colorTokens}
       {...props}
     />
   );
@@ -590,6 +610,8 @@ export function EditableAdaptiveText({
       onFormatChange={onFormatChange}
       editorConfig={editorConfig}
       autoSave={autoSave}
+      backgroundType={backgroundType}
+      colorTokens={colorTokens}
       {...props}
     />
   );

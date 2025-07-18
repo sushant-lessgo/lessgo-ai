@@ -288,6 +288,7 @@ export default function LeftCopyRightImage(props: LayoutComponentProps) {
                   placeholder="🎉 New Feature Launch"
                   sectionId={sectionId}
                   elementKey="badge_text"
+                  sectionBackground={sectionBackground}
                 />
               </div>
             )}
@@ -304,6 +305,7 @@ export default function LeftCopyRightImage(props: LayoutComponentProps) {
               className="leading-tight"
               sectionId={sectionId}
               elementKey="headline"
+              sectionBackground={sectionBackground}
             />
 
             {/* ✅ ENHANCED: Subheadline with Dynamic Text Color */}
@@ -320,6 +322,7 @@ export default function LeftCopyRightImage(props: LayoutComponentProps) {
                 placeholder="Add a compelling subheadline that supports your main message and explains the key benefit..."
                 sectionId={sectionId}
                 elementKey="subheadline"
+                sectionBackground={sectionBackground}
               />
             )}
 
@@ -337,6 +340,7 @@ export default function LeftCopyRightImage(props: LayoutComponentProps) {
                 placeholder="Add supporting text with social proof, customer count, or key metrics..."
                 sectionId={sectionId}
                 elementKey="supporting_text"
+                sectionBackground={sectionBackground}
               />
             )}
 

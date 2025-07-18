@@ -4,6 +4,7 @@ import { debounce } from 'lodash';
 import { useTextToolbarIntegration } from '@/hooks/useTextToolbarIntegration';
 import { useInlineEditorAutoSave } from '@/hooks/useInlineEditorAutoSave';
 import { useTextSelection } from '@/hooks/useTextSelection';
+import { getEditingIndicatorColors } from '@/utils/textContrastUtils';
 
 export interface TextFormatState {
   bold: boolean;
@@ -77,6 +78,9 @@ interface InlineTextEditorProps {
   className?: string;
   style?: React.CSSProperties;
   placeholder?: string;
+  backgroundType?: string;
+  colorTokens?: any;
+  sectionBackground?: string;
 }
 
 const defaultFormatState: TextFormatState = {
@@ -107,7 +111,10 @@ export function InlineTextEditor({
   onSelectionChange,
   className = '',
   style = {},
-  placeholder = 'Click to edit'
+  placeholder = 'Click to edit',
+  backgroundType = 'primary',
+  colorTokens = {},
+  sectionBackground
 }: InlineTextEditorProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [currentContent, setCurrentContent] = useState(content);
@@ -126,6 +133,9 @@ export function InlineTextEditor({
     applyFormatToSelection,
     handleSelectionChange 
   } = useTextSelection(editorRef);
+
+  // Get dynamic editing indicator colors based on background type and actual background
+  const editingColors = getEditingIndicatorColors(backgroundType, colorTokens, sectionBackground);
 
   // Auto-save with debouncing
   const debouncedSave = useMemo(
@@ -547,6 +557,21 @@ export function InlineTextEditor({
     }
   }, [executeFormat, applyFormat]);
 
+  // Dynamic styles based on background type - use CSS custom properties
+  const dynamicStyles = {
+    '--editing-outline': editingColors.outline,
+    '--editing-glow': editingColors.glow,
+    '--editing-background': editingColors.background,
+    outline: isEditing ? `2px solid ${editingColors.outline}` : 'none',
+    outlineOffset: isEditing ? '2px' : '0',
+    borderRadius: isEditing ? '4px' : '0',
+    backgroundColor: isEditing ? editingColors.background : 'transparent',
+    boxShadow: isEditing ? `0 0 0 4px ${editingColors.glow}` : 'none',
+    transition: 'all 0.2s ease-in-out',
+    ...style
+  } as React.CSSProperties;
+
+
   return (
     <Element
       ref={editorRef as any}
@@ -563,16 +588,17 @@ export function InlineTextEditor({
         // Don't prevent default - we want normal click behavior
       }}
       className={`
-        inline-text-editor outline-none transition-all duration-200
-        ${isEditing ? 'ring-2 ring-blue-500 ring-opacity-50' : 'hover:bg-gray-50'}
+        inline-text-editor cursor-text
+        ${isEditing ? '' : 'hover:bg-opacity-10'}
         ${!isValid ? 'ring-2 ring-red-500 ring-opacity-50' : ''}
         ${className}
       `}
-      style={style}
+      style={dynamicStyles}
       data-section-id={sectionId}
       data-element-key={elementKey}
       data-editing={isEditing}
       data-valid={isValid}
+      data-background-type={backgroundType}
       role="textbox"
       aria-label={`Edit ${elementKey}`}
       aria-multiline={Element !== 'span'}

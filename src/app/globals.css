@@ -28,13 +28,27 @@ body {
 /* Edit mode: Only contenteditable elements show text cursor */
 [data-element-key][contenteditable="true"][data-editing="true"] {
   cursor: text !important;
+  user-select: text !important;
+  -webkit-user-select: text !important;
+  /* Dynamic colors are now set via inline styles in InlineTextEditor */
+}
+
+/* Background-specific edit mode colors (fallback) */
+[data-element-key][contenteditable="true"][data-editing="true"]:not([data-background-type]) {
   outline: 2px solid #3b82f6;
   outline-offset: 2px;
   border-radius: 4px;
-  user-select: text !important;
-  -webkit-user-select: text !important;
   background-color: rgba(59, 130, 246, 0.05);
   box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+}
+
+/* Background-aware editing indicators - use CSS custom properties with high specificity */
+[data-element-key][contenteditable="true"][data-editing="true"][data-background-type] {
+  outline: 2px solid var(--editing-outline, #3b82f6) !important;
+  outline-offset: 2px !important;
+  border-radius: 4px !important;
+  background-color: var(--editing-background, rgba(59, 130, 246, 0.05)) !important;
+  box-shadow: 0 0 0 4px var(--editing-glow, rgba(59, 130, 246, 0.1)) !important;
 }
 
 /* Ensure text cursor takes precedence over pointer cursor */

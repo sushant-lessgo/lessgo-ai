@@ -19,6 +19,71 @@ export function getReadableTextColor(backgroundColor: string, baseColor: string)
 }
 
 /**
+ * Gets appropriate editing indicator colors based on background type and actual background
+ * Uses background-aware color selection for optimal contrast
+ */
+export function getEditingIndicatorColors(backgroundType: string, colorTokens: any, sectionBackground?: string) {
+  const colors = {
+    outline: '',
+    glow: '',
+    background: '',
+    hover: ''
+  };
+
+  // Check if the actual background contains blue colors
+  const hasBlueBackground = sectionBackground && (
+    sectionBackground.includes('blue') || 
+    sectionBackground.includes('sky') || 
+    sectionBackground.includes('indigo') ||
+    sectionBackground.includes('cyan')
+  );
+
+  // If we have a blue background, use orange indicators regardless of backgroundType
+  if (hasBlueBackground) {
+    colors.outline = '#f59e0b'; // amber-500
+    colors.glow = 'rgba(245, 158, 11, 0.2)';
+    colors.background = 'rgba(245, 158, 11, 0.1)';
+    colors.hover = 'rgba(245, 158, 11, 0.05)';
+    return colors;
+  }
+
+  switch (backgroundType) {
+    case 'primary':
+      // Light backgrounds - use blue indicators
+      colors.outline = '#3b82f6'; // blue-500
+      colors.glow = 'rgba(59, 130, 246, 0.1)';
+      colors.background = 'rgba(59, 130, 246, 0.05)';
+      colors.hover = 'rgba(59, 130, 246, 0.05)';
+      break;
+      
+    case 'secondary':
+      // Dark backgrounds - use light indicators
+      colors.outline = '#f8fafc'; // slate-50
+      colors.glow = 'rgba(248, 250, 252, 0.2)';
+      colors.background = 'rgba(248, 250, 252, 0.1)';
+      colors.hover = 'rgba(248, 250, 252, 0.05)';
+      break;
+      
+    case 'neutral':
+      // Blue/colored backgrounds - use orange indicators for contrast
+      colors.outline = '#f59e0b'; // amber-500
+      colors.glow = 'rgba(245, 158, 11, 0.2)';
+      colors.background = 'rgba(245, 158, 11, 0.1)';
+      colors.hover = 'rgba(245, 158, 11, 0.05)';
+      break;
+      
+    default:
+      // Fallback to blue
+      colors.outline = '#3b82f6';
+      colors.glow = 'rgba(59, 130, 246, 0.1)';
+      colors.background = 'rgba(59, 130, 246, 0.05)';
+      colors.hover = 'rgba(59, 130, 246, 0.05)';
+  }
+
+  return colors;
+}
+
+/**
  * Validates that text and background colors have good contrast
  * Returns false for problematic combinations like purple-on-purple
  */
