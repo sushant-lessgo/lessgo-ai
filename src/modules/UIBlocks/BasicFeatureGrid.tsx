@@ -8,7 +8,6 @@ import {
   EditableHeadline, 
   EditableText 
 } from '@/components/layout/EditableContent';
-import { EditableList } from '@/components/layout/EditableList';
 import { LayoutComponentProps } from '@/types/storeTypes';
 import { parsePipeData, updateListData } from '@/utils/dataParsingUtils';
 
@@ -157,15 +156,6 @@ export default function BasicFeatureGrid(props: LayoutComponentProps) {
       sectionBackground={sectionBackground}
       mode={mode}
       className={props.className}
-      editModeInfo={{
-        componentName: 'BasicFeatureGrid',
-        description: 'Feature comparison table showing competitive advantages',
-        tips: [
-          'Features are compared automatically with strategic advantages',
-          'Your product is highlighted as the primary option',
-          'Use pipe separators (|) for all list data'
-        ]
-      }}
     >
       <div className="max-w-6xl mx-auto">
         {/* Header Section */}
@@ -283,32 +273,6 @@ export default function BasicFeatureGrid(props: LayoutComponentProps) {
           </div>
         </div>
 
-        {/* Bulk Edit Interface */}
-        <EditableList
-          mode={mode}
-          items={features}
-          onUpdateItem={() => {}} // Handled via bulk edit
-          renderItem={() => null} // Items already rendered above
-          bulkEditFields={[
-            {
-              key: 'feature_names',
-              label: 'Feature Names',
-              currentValue: blockContent.feature_names,
-              onUpdate: (value) => handleContentUpdate('feature_names', value)
-            },
-            {
-              key: 'competitor_names',
-              label: 'Competitor Names',
-              currentValue: blockContent.competitor_names,
-              onUpdate: (value) => handleContentUpdate('competitor_names', value)
-            }
-          ]}
-          listName="Feature Comparison"
-          tips={[
-            'Comparison data is generated automatically to show your advantages',
-            'Your product name can be edited in the table header above'
-          ]}
-        />
       </div>
     </LayoutSection>
   );

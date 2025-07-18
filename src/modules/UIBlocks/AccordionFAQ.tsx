@@ -8,7 +8,6 @@ import {
   EditableHeadline, 
   EditableText 
 } from '@/components/layout/EditableContent';
-import { EditableList } from '@/components/layout/EditableList';
 import { LayoutComponentProps } from '@/types/storeTypes';
 import { parsePipeData, updateListData } from '@/utils/dataParsingUtils';
 
@@ -209,15 +208,6 @@ export default function AccordionFAQ(props: LayoutComponentProps) {
       sectionBackground={sectionBackground}
       mode={mode}
       className={props.className}
-      editModeInfo={{
-        componentName: 'AccordionFAQ',
-        description: 'Interactive FAQ section with expandable questions and answers',
-        tips: [
-          'Questions and answers are paired by position',
-          'Click on individual questions/answers to edit them directly',
-          'Questions and answers should be separated by | character'
-        ]
-      }}
     >
       <div className="max-w-4xl mx-auto">
         {/* Header Section */}
@@ -263,35 +253,6 @@ export default function AccordionFAQ(props: LayoutComponentProps) {
           ))}
         </div>
 
-        {/* Bulk Edit Interface */}
-        <EditableList
-          mode={mode}
-          items={faqItems}
-          onUpdateItem={(field, index, value) => {
-            if (field === 'question') handleQuestionEdit(index, value);
-            if (field === 'answer') handleAnswerEdit(index, value);
-          }}
-          renderItem={() => null} // Items already rendered above
-          bulkEditFields={[
-            {
-              key: 'questions',
-              label: 'Questions',
-              currentValue: blockContent.questions,
-              onUpdate: (value) => handleContentUpdate('questions', value)
-            },
-            {
-              key: 'answers',
-              label: 'Answers',
-              currentValue: blockContent.answers,
-              onUpdate: (value) => handleContentUpdate('answers', value)
-            }
-          ]}
-          listName="FAQ Items"
-          tips={[
-            'Questions and answers are paired by position - make sure you have the same number of each',
-            'You can edit individual items by clicking directly on them above'
-          ]}
-        />
       </div>
     </LayoutSection>
   );

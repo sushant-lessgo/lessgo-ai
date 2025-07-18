@@ -8,7 +8,6 @@ import {
   EditableHeadline, 
   EditableText 
 } from '@/components/layout/EditableContent';
-import { EditableList } from '@/components/layout/EditableList';
 import { LayoutComponentProps } from '@/types/storeTypes';
 import { parsePipeData, updateListData } from '@/utils/dataParsingUtils';
 
@@ -182,15 +181,6 @@ export default function LogoGrid(props: LayoutComponentProps) {
       sectionBackground={sectionBackground}
       mode={mode}
       className={props.className}
-      editModeInfo={{
-        componentName: 'LogoGrid',
-        description: 'Integration logo grid showing connected tools and services',
-        tips: [
-          'Logo placeholders are auto-generated with colors based on names',
-          'Click on individual integration names to edit them directly',
-          'Grid adapts automatically to any number of integrations'
-        ]
-      }}
     >
       <div className="max-w-6xl mx-auto">
         {/* Header Section */}
@@ -251,28 +241,6 @@ export default function LogoGrid(props: LayoutComponentProps) {
           </div>
         )}
 
-        {/* Bulk Edit Interface */}
-        <EditableList
-          mode={mode}
-          items={integrationItems}
-          onUpdateItem={(field, index, value) => {
-            if (field === 'name') handleNameEdit(index, value);
-          }}
-          renderItem={() => null} // Items already rendered above
-          bulkEditFields={[
-            {
-              key: 'integration_names',
-              label: 'Integration Names',
-              currentValue: blockContent.integration_names,
-              onUpdate: (value) => handleContentUpdate('integration_names', value)
-            }
-          ]}
-          listName="Integration Grid"
-          tips={[
-            'Logo placeholders are auto-generated with colors based on integration names',
-            'You can edit individual names by clicking directly on them above'
-          ]}
-        />
       </div>
     </LayoutSection>
   );

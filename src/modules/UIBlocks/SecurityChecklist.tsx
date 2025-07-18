@@ -375,55 +375,6 @@ export default function SecurityChecklist({
           </div>
         </div>
 
-        {/* Edit Mode Data Editing */}
-        {mode === 'edit' && (
-          <div className="mt-12 space-y-4">
-            <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
-              <div className="flex items-center text-blue-700 mb-3">
-                <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
-                </svg>
-                <span className="text-sm font-medium">
-                  SecurityChecklist - Edit security items or click individual elements above
-                </span>
-              </div>
-              
-              <div className="space-y-4 text-sm">
-                <div>
-                  <label className="block text-blue-700 font-medium mb-1">Security Items (separated by |):</label>
-                  <ModeWrapper
-                    mode={mode}
-                    sectionId={sectionId}
-                    elementKey="security_items"
-                    onEdit={(value) => handleContentUpdate('security_items', value)}
-                  >
-                    <div className="bg-white p-3 rounded border text-gray-800 text-xs leading-relaxed max-h-40 overflow-y-auto">
-                      {blockContent.security_items}
-                    </div>
-                  </ModeWrapper>
-                </div>
-                
-                <div>
-                  <label className="block text-blue-700 font-medium mb-1">Item Descriptions (optional, separated by |):</label>
-                  <ModeWrapper
-                    mode={mode}
-                    sectionId={sectionId}
-                    elementKey="item_descriptions"
-                    onEdit={(value) => handleContentUpdate('item_descriptions', value)}
-                  >
-                    <div className={`bg-white p-3 rounded border text-gray-800 text-xs leading-relaxed max-h-32 overflow-y-auto ${!blockContent.item_descriptions ? 'opacity-50 italic' : ''}`}>
-                      {blockContent.item_descriptions || 'Add optional descriptions to explain security measures...'}
-                    </div>
-                  </ModeWrapper>
-                </div>
-                
-                <div className="text-xs text-blue-600 bg-blue-100 p-2 rounded">
-                  💡 Tip: Icons are auto-selected based on security item content (encryption, compliance, authentication, etc.). You can edit individual items by clicking directly on them above.
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
       </div>
     </section>
   );

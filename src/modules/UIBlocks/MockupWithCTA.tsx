@@ -142,15 +142,6 @@ export default function MockupWithCTA(props: LayoutComponentProps) {
       sectionBackground={sectionBackground}
       mode={mode}
       className={props.className}
-      editModeInfo={{
-        componentName: 'MockupWithCTA',
-        description: 'Device mockup with focused CTA content',
-        tips: [
-          'Device mockup will be replaced with actual product screenshots',
-          'Urgency and guarantee text are optional for building trust',
-          'Use action-oriented headlines for better conversion'
-        ]
-      }}
     >
       <div className="max-w-7xl mx-auto">
         <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">

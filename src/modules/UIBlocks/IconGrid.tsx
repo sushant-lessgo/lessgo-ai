@@ -8,7 +8,6 @@ import {
   EditableHeadline, 
   EditableText 
 } from '@/components/layout/EditableContent';
-import { EditableList } from '@/components/layout/EditableList';
 import { FeatureIcon } from '@/components/layout/ComponentRegistry';
 import { LayoutComponentProps } from '@/types/storeTypes';
 import { parsePipeData, updateListData } from '@/utils/dataParsingUtils';
@@ -190,15 +189,6 @@ export default function IconGrid(props: LayoutComponentProps) {
       sectionBackground={sectionBackground}
       mode={mode}
       className={props.className}
-      editModeInfo={{
-        componentName: 'IconGrid',
-        description: 'Feature grid with icons, titles, and descriptions',
-        tips: [
-          'Icons are auto-selected based on feature titles',
-          'Click on individual titles/descriptions to edit them directly',
-          'Features are displayed in responsive grid layout'
-        ]
-      }}
     >
       <div className="max-w-7xl mx-auto">
         {/* Header Section */}
@@ -242,35 +232,6 @@ export default function IconGrid(props: LayoutComponentProps) {
           ))}
         </div>
 
-        {/* Bulk Edit Interface */}
-        <EditableList
-          mode={mode}
-          items={featureItems}
-          onUpdateItem={(field, index, value) => {
-            if (field === 'title') handleTitleEdit(index, value);
-            if (field === 'description') handleDescriptionEdit(index, value);
-          }}
-          renderItem={() => null} // Items already rendered above
-          bulkEditFields={[
-            {
-              key: 'feature_titles',
-              label: 'Feature Titles',
-              currentValue: blockContent.feature_titles,
-              onUpdate: (value) => handleContentUpdate('feature_titles', value)
-            },
-            {
-              key: 'feature_descriptions',
-              label: 'Feature Descriptions',
-              currentValue: blockContent.feature_descriptions,
-              onUpdate: (value) => handleContentUpdate('feature_descriptions', value)
-            }
-          ]}
-          listName="Feature Grid"
-          tips={[
-            'Icons are auto-selected based on feature titles',
-            'You can edit individual features by clicking directly on them above'
-          ]}
-        />
       </div>
     </LayoutSection>
   );

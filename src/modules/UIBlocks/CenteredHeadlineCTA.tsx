@@ -78,15 +78,6 @@ export default function CenteredHeadlineCTA(props: LayoutComponentProps) {
       sectionBackground={sectionBackground}
       mode={mode}
       className={props.className}
-      editModeInfo={{
-        componentName: 'CenteredHeadlineCTA',
-        description: 'Conversion-focused CTA section with headline, button, and social proof',
-        tips: [
-          'Use action-oriented headlines that create urgency',
-          'Keep CTA button text clear and benefit-focused',
-          'Trust items are separated by | character'
-        ]
-      }}
     >
       <div className="max-w-4xl mx-auto text-center">
         

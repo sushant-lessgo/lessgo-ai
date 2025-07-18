@@ -396,69 +396,6 @@ export default function StatBlocks({
           </div>
         </div>
 
-        {/* Edit Mode Data Editing */}
-        {mode === 'edit' && (
-          <div className="mt-12 space-y-4">
-            <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
-              <div className="flex items-center text-blue-700 mb-3">
-                <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
-                </svg>
-                <span className="text-sm font-medium">
-                  StatBlocks - Edit statistics or click individual elements above
-                </span>
-              </div>
-              
-              <div className="grid md:grid-cols-2 gap-4 text-sm">
-                <div>
-                  <label className="block text-blue-700 font-medium mb-1">Stat Values (|):</label>
-                  <ModeWrapper
-                    mode={mode}
-                    sectionId={sectionId}
-                    elementKey="stat_values"
-                    onEdit={(value) => handleContentUpdate('stat_values', value)}
-                  >
-                    <div className="bg-white p-2 rounded border text-gray-800 text-xs">
-                      {blockContent.stat_values}
-                    </div>
-                  </ModeWrapper>
-                </div>
-                
-                <div>
-                  <label className="block text-blue-700 font-medium mb-1">Stat Labels (|):</label>
-                  <ModeWrapper
-                    mode={mode}
-                    sectionId={sectionId}
-                    elementKey="stat_labels"
-                    onEdit={(value) => handleContentUpdate('stat_labels', value)}
-                  >
-                    <div className="bg-white p-2 rounded border text-gray-800 text-xs">
-                      {blockContent.stat_labels}
-                    </div>
-                  </ModeWrapper>
-                </div>
-                
-                <div className="md:col-span-2">
-                  <label className="block text-blue-700 font-medium mb-1">Descriptions (optional, |):</label>
-                  <ModeWrapper
-                    mode={mode}
-                    sectionId={sectionId}
-                    elementKey="stat_descriptions"
-                    onEdit={(value) => handleContentUpdate('stat_descriptions', value)}
-                  >
-                    <div className={`bg-white p-2 rounded border text-gray-800 text-xs max-h-20 overflow-y-auto ${!blockContent.stat_descriptions ? 'opacity-50 italic' : ''}`}>
-                      {blockContent.stat_descriptions || 'Add optional descriptions...'}
-                    </div>
-                  </ModeWrapper>
-                </div>
-              </div>
-              
-              <div className="mt-3 text-xs text-blue-600 bg-blue-100 p-2 rounded">
-                💡 Tip: Icons are auto-selected based on stat labels (customers, satisfaction, revenue, etc.). Grid adapts automatically to 2-4+ stats.
-              </div>
-            </div>
-          </div>
-        )}
       </div>
     </section>
   );

@@ -8,7 +8,6 @@ import {
   EditableHeadline, 
   EditableText 
 } from '@/components/layout/EditableContent';
-import { EditableList } from '@/components/layout/EditableList';
 import { LayoutComponentProps } from '@/types/storeTypes';
 import { parsePipeData, updateListData } from '@/utils/dataParsingUtils';
 
@@ -261,15 +260,6 @@ export default function ObjectionAccordion(props: LayoutComponentProps) {
       sectionBackground={sectionBackground}
       mode={mode}
       className={props.className}
-      editModeInfo={{
-        componentName: 'ObjectionAccordion',
-        description: 'Address customer objections with expandable responses',
-        tips: [
-          'Icons are auto-selected based on objection content (cost, security, etc.)',
-          'Use honest, specific responses that address real concerns',
-          'Click individual objections to edit them directly'
-        ]
-      }}
     >
       <div className="max-w-4xl mx-auto">
         {/* Header Section */}
@@ -325,35 +315,6 @@ export default function ObjectionAccordion(props: LayoutComponentProps) {
           </div>
         </div>
 
-        {/* Bulk Edit Interface */}
-        <EditableList
-          mode={mode}
-          items={objectionItems}
-          onUpdateItem={(field, index, value) => {
-            if (field === 'title') handleTitleEdit(index, value);
-            if (field === 'response') handleResponseEdit(index, value);
-          }}
-          renderItem={() => null} // Items already rendered above
-          bulkEditFields={[
-            {
-              key: 'objection_titles',
-              label: 'Objection Titles',
-              currentValue: blockContent.objection_titles,
-              onUpdate: (value) => handleContentUpdate('objection_titles', value)
-            },
-            {
-              key: 'objection_responses',
-              label: 'Objection Responses',
-              currentValue: blockContent.objection_responses,
-              onUpdate: (value) => handleContentUpdate('objection_responses', value)
-            }
-          ]}
-          listName="Objection Handling"
-          tips={[
-            'Icons are auto-selected based on objection content (cost, security, etc.)',
-            'You can edit individual objections by clicking directly on them above'
-          ]}
-        />
       </div>
     </LayoutSection>
   );

@@ -259,16 +259,6 @@ export default function LeftCopyRightImage(props: LayoutComponentProps) {
       sectionBackground={sectionBackground}
       mode={mode}
       className={props.className}
-      editModeInfo={{
-        componentName: 'LeftCopyRightImage',
-        description: 'Hero section with copy on left and image on right. Text colors automatically adapt to background.',
-        tips: [
-          'Badge text appears above headline and uses accent colors when available',
-          'Text colors automatically adjust: white on dark backgrounds, dark on light backgrounds',
-          'CTA button uses your brand accent colors from the design system',
-          'Trust items are separated by | character (e.g., "Free trial|No credit card|Cancel anytime")'
-        ]
-      }}
     >
       <div className="max-w-7xl mx-auto">
         <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center min-h-[600px]">

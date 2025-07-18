@@ -309,15 +309,6 @@ export default function QuoteGrid(props: LayoutComponentProps) {
       sectionBackground={sectionBackground}
       mode={mode}
       className={props.className}
-      editModeInfo={{
-        componentName: 'QuoteGrid',
-        description: 'Customer testimonial quotes with attribution',
-        tips: [
-          'Customer avatars are auto-generated from names',
-          'Grid adapts automatically to 1-4+ testimonials',
-          'Click individual elements to edit them directly'
-        ]
-      }}
     >
       <div className="max-w-7xl mx-auto">
         {/* Header Section */}
@@ -365,50 +356,6 @@ export default function QuoteGrid(props: LayoutComponentProps) {
           </div>
         </div>
 
-        {/* Bulk Edit Interface */}
-        <EditableList
-          mode={mode}
-          items={testimonials}
-          onUpdateItem={(field, index, value) => {
-            if (field === 'quote') handleQuoteEdit(index, value);
-            if (field === 'name') handleNameEdit(index, value);
-            if (field === 'title') handleTitleEdit(index, value);
-            if (field === 'company') handleCompanyEdit(index, value);
-          }}
-          renderItem={() => null} // Items already rendered above
-          bulkEditFields={[
-            {
-              key: 'testimonial_quotes',
-              label: 'Testimonial Quotes',
-              currentValue: blockContent.testimonial_quotes,
-              onUpdate: (value) => handleContentUpdate('testimonial_quotes', value)
-            },
-            {
-              key: 'customer_names',
-              label: 'Customer Names',
-              currentValue: blockContent.customer_names,
-              onUpdate: (value) => handleContentUpdate('customer_names', value)
-            },
-            {
-              key: 'customer_titles',
-              label: 'Customer Titles (optional)',
-              currentValue: blockContent.customer_titles || '',
-              onUpdate: (value) => handleContentUpdate('customer_titles', value)
-            },
-            {
-              key: 'customer_companies',
-              label: 'Customer Companies (optional)',
-              currentValue: blockContent.customer_companies || '',
-              onUpdate: (value) => handleContentUpdate('customer_companies', value)
-            }
-          ]}
-          listName="Testimonial Grid"
-          tips={[
-            'Customer avatars are auto-generated from names',
-            'Grid adapts automatically to 1-4+ testimonials',
-            'You can edit individual elements by clicking directly on them above'
-          ]}
-        />
       </div>
     </LayoutSection>
   );

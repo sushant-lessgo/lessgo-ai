@@ -8,7 +8,6 @@ import {
   EditableHeadline, 
   EditableText 
 } from '@/components/layout/EditableContent';
-import { EditableList } from '@/components/layout/EditableList';
 import { SocialProofNumber } from '@/components/layout/ComponentRegistry';
 import { LayoutComponentProps } from '@/types/storeTypes';
 import { parsePipeData, updateListData } from '@/utils/dataParsingUtils';
@@ -166,15 +165,6 @@ export default function LogoWall(props: LayoutComponentProps) {
       sectionBackground={sectionBackground}
       mode={mode}
       className={props.className}
-      editModeInfo={{
-        componentName: 'LogoWall',
-        description: 'Company logo wall showing trusted partners and customers',
-        tips: [
-          'Logo placeholders are auto-generated with professional colors and initials',
-          'Click on individual company names to edit them directly',
-          'Grid adapts automatically to any number of companies'
-        ]
-      }}
     >
       <div className="max-w-7xl mx-auto">
         {/* Header Section */}
@@ -245,28 +235,6 @@ export default function LogoWall(props: LayoutComponentProps) {
           </div>
         </div>
 
-        {/* Bulk Edit Interface */}
-        <EditableList
-          mode={mode}
-          items={companyLogos}
-          onUpdateItem={(field, index, value) => {
-            if (field === 'name') handleNameEdit(index, value);
-          }}
-          renderItem={() => null} // Items already rendered above
-          bulkEditFields={[
-            {
-              key: 'company_names',
-              label: 'Company Names',
-              currentValue: blockContent.company_names,
-              onUpdate: (value) => handleContentUpdate('company_names', value)
-            }
-          ]}
-          listName="Company Logo Wall"
-          tips={[
-            'Logo placeholders are auto-generated with professional colors and initials',
-            'Grid adapts automatically to any number of companies (2-6 per row)'
-          ]}
-        />
       </div>
     </LayoutSection>
   );

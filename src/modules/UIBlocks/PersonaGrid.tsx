@@ -8,7 +8,6 @@ import {
   EditableHeadline, 
   EditableText 
 } from '@/components/layout/EditableContent';
-import { EditableList } from '@/components/layout/EditableList';
 import { LayoutComponentProps } from '@/types/storeTypes';
 import { parsePipeData, updateListData } from '@/utils/dataParsingUtils';
 
@@ -227,15 +226,6 @@ export default function PersonaGrid(props: LayoutComponentProps) {
       sectionBackground={sectionBackground}
       mode={mode}
       className={props.className}
-      editModeInfo={{
-        componentName: 'PersonaGrid',
-        description: 'Show how your product serves different user personas',
-        tips: [
-          'Avatars and role colors are auto-generated based on persona names',
-          'Grid adapts automatically to 1-6+ personas',
-          'Click individual elements to edit them directly'
-        ]
-      }}
     >
       <div className="max-w-7xl mx-auto">
         {/* Header Section */}
@@ -283,35 +273,6 @@ export default function PersonaGrid(props: LayoutComponentProps) {
           </div>
         </div>
 
-        {/* Bulk Edit Interface */}
-        <EditableList
-          mode={mode}
-          items={personas}
-          onUpdateItem={(field, index, value) => {
-            if (field === 'name') handleNameEdit(index, value);
-            if (field === 'description') handleDescriptionEdit(index, value);
-          }}
-          renderItem={() => null} // Items already rendered above
-          bulkEditFields={[
-            {
-              key: 'persona_names',
-              label: 'Persona Names',
-              currentValue: blockContent.persona_names,
-              onUpdate: (value) => handleContentUpdate('persona_names', value)
-            },
-            {
-              key: 'persona_descriptions',
-              label: 'Persona Descriptions',
-              currentValue: blockContent.persona_descriptions,
-              onUpdate: (value) => handleContentUpdate('persona_descriptions', value)
-            }
-          ]}
-          listName="Persona Grid"
-          tips={[
-            'Avatars and role icons are auto-generated based on persona names (Marketing, Sales, Operations, etc.)',
-            'Grid adapts automatically to 1-6+ personas'
-          ]}
-        />
       </div>
     </LayoutSection>
   );

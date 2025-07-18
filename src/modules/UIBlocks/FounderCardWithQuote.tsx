@@ -82,15 +82,6 @@ export default function FounderCardWithQuote(props: LayoutComponentProps) {
       sectionBackground={sectionBackground}
       mode={mode}
       className={props.className}
-      editModeInfo={{
-        componentName: 'FounderCardWithQuote',
-        description: 'Founder quote section with avatar and personal message',
-        tips: [
-          'Quote should be personal and authentic from the founder',
-          'Bio is optional but adds credibility and personal connection',
-          'Avatar shows initials based on founder name'
-        ]
-      }}
     >
       <div className="max-w-4xl mx-auto">
         {/* Main Founder Card */}
