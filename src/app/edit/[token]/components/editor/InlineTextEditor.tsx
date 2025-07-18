@@ -504,9 +504,41 @@ export function InlineTextEditor({
   // Apply initial format state
   useEffect(() => {
     if (editorRef.current) {
-      applyFormat(formatState);
+      const element = editorRef.current;
+      
+      // Apply format directly to DOM without triggering onFormatChange
+      if (formatState.bold !== undefined) {
+        element.style.fontWeight = formatState.bold ? 'bold' : 'normal';
+      }
+      if (formatState.italic !== undefined) {
+        element.style.fontStyle = formatState.italic ? 'italic' : 'normal';
+      }
+      if (formatState.underline !== undefined) {
+        element.style.textDecoration = formatState.underline ? 'underline' : 'none';
+      }
+      if (formatState.color) {
+        element.style.color = formatState.color;
+      }
+      if (formatState.fontSize) {
+        element.style.fontSize = formatState.fontSize;
+      }
+      if (formatState.fontFamily) {
+        element.style.fontFamily = formatState.fontFamily;
+      }
+      if (formatState.textAlign) {
+        element.style.textAlign = formatState.textAlign;
+      }
+      if (formatState.lineHeight) {
+        element.style.lineHeight = formatState.lineHeight;
+      }
+      if (formatState.letterSpacing) {
+        element.style.letterSpacing = formatState.letterSpacing;
+      }
+      if (formatState.textTransform) {
+        element.style.textTransform = formatState.textTransform;
+      }
     }
-  }, [formatState, applyFormat]);
+  }, [formatState]);
 
   // Expose format application function for toolbar integration
   useEffect(() => {
