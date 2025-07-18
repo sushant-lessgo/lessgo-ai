@@ -27,6 +27,7 @@ export function EditHeader({ tokenId }: EditHeaderProps) {
   }
 
   const handleBackgroundSelector = () => {
+    console.log('handleBackgroundSelector clicked');
     setShowBackgroundModal(true);
   };
 
@@ -45,10 +46,6 @@ export function EditHeader({ tokenId }: EditHeaderProps) {
         <div className="flex items-center space-x-4">
           <button
             onClick={handleBackgroundSelector}
-            onMouseUp={() => {
-              // Workaround: Manually trigger click handler since click events are blocked
-              handleBackgroundSelector();
-            }}
             className="flex items-center space-x-2 px-3 py-1.5 text-sm text-gray-700 hover:bg-gray-50 rounded-md transition-colors border border-gray-200"
             title="Background System - Click to customize your page backgrounds"
           >
@@ -58,10 +55,6 @@ export function EditHeader({ tokenId }: EditHeaderProps) {
 
           <button
             onClick={handleColorSelector}
-            onMouseUp={() => {
-              // Workaround: Manually trigger click handler since click events are blocked
-              handleColorSelector();
-            }}
             className="flex items-center space-x-2 px-3 py-1.5 text-sm text-gray-700 hover:bg-gray-50 rounded-md transition-colors border border-gray-200"
             title="Color System - Customize accent colors and interactive elements"
           >

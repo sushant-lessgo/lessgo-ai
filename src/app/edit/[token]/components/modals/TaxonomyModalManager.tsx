@@ -27,6 +27,7 @@ interface ModalState {
 export function TaxonomyModalManager() {
   const [modalState, setModalState] = useState<ModalState>({ isOpen: false });
   const [modalQueue, setModalQueue] = useState<AnyFieldName[]>([]);
+  const [queueTimeoutId, setQueueTimeoutId] = useState<NodeJS.Timeout | null>(null);
 
   const { 
     validatedFields, 
@@ -51,17 +52,30 @@ export function TaxonomyModalManager() {
   const closeModal = useCallback(() => {
     setModalState({ isOpen: false });
     
+    // Clear any existing queue timeout
+    if (queueTimeoutId) {
+      clearTimeout(queueTimeoutId);
+      setQueueTimeoutId(null);
+    }
+    
     // Process queue if there are pending modals
     if (modalQueue.length > 0) {
       const nextField = modalQueue[0];
       setModalQueue(prev => prev.slice(1));
       
-      // Delay to prevent modal flash
-      setTimeout(() => {
-        openFieldModal(nextField);
+      // Delay to prevent modal flash - with cleanup tracking
+      const timeoutId = setTimeout(() => {
+        try {
+          openFieldModal(nextField);
+        } catch (error) {
+          console.warn('Failed to open next modal from queue:', error);
+        }
+        setQueueTimeoutId(null);
       }, 150);
+      
+      setQueueTimeoutId(timeoutId);
     }
-  }, [modalQueue, openFieldModal]);
+  }, [modalQueue, openFieldModal, queueTimeoutId]);
 
   const getCurrentFieldValue = (fieldName: AnyFieldName): string => {
     return (validatedFields as any)[fieldName] || (hiddenInferredFields as any)[fieldName] || '';
@@ -156,6 +170,15 @@ export function TaxonomyModalManager() {
     return displayNames[fieldName as CanonicalFieldName] || fieldName;
   };
 
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (queueTimeoutId) {
+        clearTimeout(queueTimeoutId);
+      }
+    };
+  }, [queueTimeoutId]);
+
   // Expose modal manager to parent components
   useEffect(() => {
     // Global modal manager instance
@@ -164,12 +187,25 @@ export function TaxonomyModalManager() {
       closeModal,
       isModalOpen: modalState.isOpen,
       currentField: modalState.fieldName,
+      // Add emergency reset function
+      reset: () => {
+        setModalState({ isOpen: false });
+        setModalQueue([]);
+        if (queueTimeoutId) {
+          clearTimeout(queueTimeoutId);
+          setQueueTimeoutId(null);
+        }
+      }
     };
 
     return () => {
+      // Cleanup on unmount
+      if (queueTimeoutId) {
+        clearTimeout(queueTimeoutId);
+      }
       delete (window as any).__taxonomyModalManager;
     };
-  }, [openFieldModal, closeModal, modalState.isOpen, modalState.fieldName]);
+  }, [openFieldModal, closeModal, modalState.isOpen, modalState.fieldName, queueTimeoutId]);
 
   if (!modalState.isOpen || !modalState.fieldName || !modalState.modalType) {
     return null;

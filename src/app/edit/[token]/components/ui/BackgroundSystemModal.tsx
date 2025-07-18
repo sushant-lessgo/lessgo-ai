@@ -10,6 +10,7 @@ import { BrandColorPicker } from './BrandColorPicker';
 import { StyleGrid } from './StyleGrid';
 import { ModalActions } from './ModalActions';
 import { ValidationWarnings } from './ValidationWarnings';
+import { BaseModal } from '../modals/BaseModal';
 import type { BackgroundValidationResult } from '@/types/core';
 
 interface BackgroundSystemModalProps {
@@ -74,6 +75,7 @@ export function BackgroundSystemModal({ isOpen, onClose, tokenId }: BackgroundSy
 
   // Handle modal close with cleanup
   const handleCancel = () => {
+    console.log('BackgroundSystemModal: handleCancel called');
     setSelectedBackground(null);
     setPreviewBackground(null);
     setValidationResult(null);
@@ -150,12 +152,17 @@ export function BackgroundSystemModal({ isOpen, onClose, tokenId }: BackgroundSy
     };
   }, [validationResult, selectedBackground, previewBackground]);
 
-  if (!isOpen) return null;
-
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg shadow-xl w-full max-w-5xl h-[700px] max-h-[90vh] overflow-hidden">
-        {/* Header */}
+    <BaseModal
+      isOpen={isOpen}
+      onClose={handleCancel}
+      title=""
+      size="full"
+      className="!max-w-5xl !h-[700px]"
+      showCloseButton={false}
+    >
+      <div className="flex flex-col h-full -m-6">
+        {/* Custom Header with Mode Toggle */}
         <div className="flex items-center justify-between p-6 border-b border-gray-200">
           <div className="flex items-center space-x-4">
             <h2 className="text-lg font-semibold text-gray-900">Background System</h2>
@@ -317,6 +324,6 @@ export function BackgroundSystemModal({ isOpen, onClose, tokenId }: BackgroundSy
           hasSelection={validationState.hasSelection}
         />
       </div>
-    </div>
+    </BaseModal>
   );
 }

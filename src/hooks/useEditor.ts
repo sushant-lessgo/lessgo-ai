@@ -192,6 +192,29 @@ export function useEditor() {
   const handleEditorClick = useCallback((event: MouseEvent) => {
     if (mode !== 'edit') return;
 
+    const target = event.target as HTMLElement;
+    
+    // Check if click is on header elements - don't interfere
+    const isHeaderClick = target.closest('header') || target.closest('[class*="EditHeader"]');
+    if (isHeaderClick) {
+      console.log('useEditor: Ignoring header click');
+      return;
+    }
+
+    // Check if click is on a modal or modal-related element - don't interfere
+    const isModalClick = 
+      target.closest('[role="dialog"]') || 
+      target.closest('.fixed.inset-0') || // Modal backdrop
+      target.closest('[data-radix-portal]') || // Radix UI portals
+      target.closest('#radix-\\:') || // Radix UI elements
+      target.closest('.modal') ||
+      target.closest('[aria-modal="true"]');
+    
+    if (isModalClick) {
+      // Don't interfere with modal interactions
+      return;
+    }
+
     const clickTarget = determineClickTarget(event);
     if (!clickTarget) {
       return;
@@ -326,12 +349,12 @@ export function useEditor() {
   useEffect(() => {
     if (mode !== 'edit') return;
 
-    // Use capture phase to handle events before other handlers
-    document.addEventListener('click', handleEditorClick, true);
+    // Use bubble phase instead of capture phase to allow button clicks to work
+    document.addEventListener('click', handleEditorClick, false);
     document.addEventListener('keydown', handleKeyboardNavigation);
 
     return () => {
-      document.removeEventListener('click', handleEditorClick, true);
+      document.removeEventListener('click', handleEditorClick, false);
       document.removeEventListener('keydown', handleKeyboardNavigation);
     };
   }, [mode, handleEditorClick, handleKeyboardNavigation]);

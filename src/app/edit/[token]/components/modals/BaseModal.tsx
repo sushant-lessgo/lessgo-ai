@@ -3,6 +3,7 @@
 
 import React, { useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
+import { bodyScrollLock } from '@/utils/bodyScrollLock';
 
 interface BaseModalProps {
   isOpen: boolean;
@@ -32,7 +33,7 @@ export function BaseModal({
   const modalRef = useRef<HTMLDivElement>(null);
   const previousFocusRef = useRef<HTMLElement | null>(null);
 
-  // Handle escape key
+  // Handle escape key with cleanup safety
   useEffect(() => {
     if (!isOpen || !closeOnEscape) return;
 
@@ -43,33 +44,54 @@ export function BaseModal({
     };
 
     document.addEventListener('keydown', handleEscape);
-    return () => document.removeEventListener('keydown', handleEscape);
+    return () => {
+      // Safe cleanup with error handling
+      try {
+        document.removeEventListener('keydown', handleEscape);
+      } catch (error) {
+        console.warn('Failed to remove escape key listener:', error);
+      }
+    };
   }, [isOpen, closeOnEscape, onClose]);
 
-  // Handle focus management
+  // Handle focus management with safety
   useEffect(() => {
     if (isOpen) {
-      // Store current focus
-      previousFocusRef.current = document.activeElement as HTMLElement;
+      // Store current focus safely
+      try {
+        previousFocusRef.current = document.activeElement as HTMLElement;
+      } catch (error) {
+        console.warn('Failed to store previous focus:', error);
+      }
       
-      // Focus modal
-      setTimeout(() => {
-        if (modalRef.current) {
-          const firstFocusable = modalRef.current.querySelector(
-            'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
-          ) as HTMLElement;
-          
-          if (firstFocusable) {
-            firstFocusable.focus();
-          } else {
-            modalRef.current.focus();
+      // Focus modal with error handling
+      const focusTimeout = setTimeout(() => {
+        try {
+          if (modalRef.current) {
+            const firstFocusable = modalRef.current.querySelector(
+              'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+            ) as HTMLElement;
+            
+            if (firstFocusable) {
+              firstFocusable.focus();
+            } else {
+              modalRef.current.focus();
+            }
           }
+        } catch (error) {
+          console.warn('Failed to focus modal:', error);
         }
       }, 100);
+      
+      return () => clearTimeout(focusTimeout);
     } else {
       // Restore focus when modal closes
-      if (previousFocusRef.current) {
-        previousFocusRef.current.focus();
+      try {
+        if (previousFocusRef.current && typeof previousFocusRef.current.focus === 'function') {
+          previousFocusRef.current.focus();
+        }
+      } catch (error) {
+        console.warn('Failed to restore focus:', error);
       }
     }
   }, [isOpen]);
@@ -108,16 +130,23 @@ export function BaseModal({
   useEffect(() => {
     if (isOpen) {
       document.addEventListener('keydown', handleKeyDown as any);
-      return () => document.removeEventListener('keydown', handleKeyDown as any);
+      return () => {
+        // Safe cleanup with error handling
+        try {
+          document.removeEventListener('keydown', handleKeyDown as any);
+        } catch (error) {
+          console.warn('Failed to remove focus trap listener:', error);
+        }
+      };
     }
   }, [isOpen]);
 
-  // Prevent body scroll when modal is open
+  // Prevent body scroll when modal is open - using safe reference counter
   useEffect(() => {
     if (isOpen) {
-      document.body.style.overflow = 'hidden';
+      bodyScrollLock.lock();
       return () => {
-        document.body.style.overflow = 'unset';
+        bodyScrollLock.unlock();
       };
     }
   }, [isOpen]);

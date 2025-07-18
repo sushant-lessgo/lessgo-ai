@@ -11,6 +11,8 @@ import { MainContent } from './MainContent';
 import { useAutoSave } from '@/hooks/useAutoSave';
 import { SimpleFormBuilder } from '@/components/forms/SimpleFormBuilder';
 import { GlobalButtonConfigModal } from '@/components/layout/GlobalButtonConfigModal';
+import { modalEmergencyReset } from '@/utils/modalEmergencyReset';
+import { ModalDebugPanel } from '@/components/debug/ModalDebugPanel';
 
 interface EditLayoutProps {
   tokenId: string;
@@ -65,6 +67,12 @@ export function EditLayout({ tokenId }: EditLayoutProps) {
       document.removeEventListener('keydown', handleKeyDown);
     };
   }, [handleKeyboardShortcut]);
+
+  // Initialize modal emergency reset on component mount
+  useEffect(() => {
+    // This ensures the emergency reset is available
+    modalEmergencyReset.enableDiagnosticMode();
+  }, []);
 
   // Prevent context menu in edit mode for cleaner UX
   const handleContextMenu = useCallback((event: React.MouseEvent) => {
@@ -137,6 +145,9 @@ export function EditLayout({ tokenId }: EditLayoutProps) {
       
       {/* Global Button Configuration Modal */}
       <GlobalButtonConfigModal />
+      
+      {/* Modal Debug Panel - Only in development */}
+      {process.env.NODE_ENV === 'development' && <ModalDebugPanel />}
     </div>
   );
 }
