@@ -1,12 +1,12 @@
-// components/layout/IconGrid.tsx
-// Production-ready feature grid with icons using abstraction system
+// components/layout/IconGrid.tsx - ENHANCED with Dynamic Text Colors
+// Production-ready feature grid with icons using abstraction system with background-aware text colors
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useLayoutComponent } from '@/hooks/useLayoutComponent';
 import { LayoutSection } from '@/components/layout/LayoutSection';
 import { 
-  EditableHeadline, 
-  EditableText 
+  EditableAdaptiveHeadline, 
+  EditableAdaptiveText 
 } from '@/components/layout/EditableContent';
 import { FeatureIcon } from '@/components/layout/ComponentRegistry';
 import { LayoutComponentProps } from '@/types/storeTypes';
@@ -75,97 +75,114 @@ const parseFeatureData = (titles: string, descriptions: string): FeatureItem[] =
   }));
 };
 
-// Individual Feature Card
+// Enhanced Individual Feature Card with Adaptive Colors
 const FeatureCard = React.memo(({ 
   item, 
   mode, 
   colorTokens,
+  dynamicTextColors,
   getTextStyle,
   onTitleEdit,
-  onDescriptionEdit 
+  onDescriptionEdit,
+  sectionId,
+  backgroundType,
+  sectionBackground
 }: {
   item: FeatureItem;
   mode: 'edit' | 'preview';
   colorTokens: any;
-  getTextStyle: (variant: 'display' | 'hero' | 'h1' | 'h2' | 'h3' | 'h4' | 'body-lg' | 'body' | 'body-sm' | 'caption') => React.CSSProperties;
+  dynamicTextColors: any;
+  getTextStyle: (variant: string) => React.CSSProperties;
   onTitleEdit: (index: number, value: string) => void;
   onDescriptionEdit: (index: number, value: string) => void;
+  sectionId: string;
+  backgroundType: string;
+  sectionBackground: string;
 }) => {
   
+  // ✅ ENHANCED: Get card background based on section background
+  const cardBackground = backgroundType === 'primary' 
+    ? 'bg-white/10 backdrop-blur-sm border-white/20' 
+    : 'bg-white border-gray-200';
+    
+  const cardHover = backgroundType === 'primary'
+    ? 'hover:bg-white/20 hover:border-white/30'
+    : 'hover:border-blue-300 hover:shadow-lg';
+  
   return (
-    <div className="group p-6 bg-white rounded-lg border border-gray-200 hover:border-blue-300 hover:shadow-md transition-all duration-300">
-      {/* Icon */}
+    <div className={`group p-6 rounded-xl border ${cardBackground} ${cardHover} transition-all duration-300`}>
+      {/* ✅ ENHANCED: Icon with Accent Colors */}
       <div className="mb-4">
-        <FeatureIcon
-          type={item.iconType}
-          colorTokens={colorTokens}
-          size="medium"
-          className="group-hover:scale-110 transition-transform duration-300"
-        />
+        <div className={`inline-flex items-center justify-center w-12 h-12 rounded-lg ${colorTokens.ctaBg || 'bg-blue-600'} bg-opacity-10 group-hover:bg-opacity-20 transition-all duration-300`}>
+          <FeatureIcon
+            type={item.iconType}
+            colorTokens={colorTokens}
+            size="medium"
+            className="group-hover:scale-110 transition-transform duration-300"
+          />
+        </div>
       </div>
 
-      {/* Title */}
-      <div className="mb-3">
-        {mode === 'edit' ? (
-          <div 
-            contentEditable
-            suppressContentEditableWarning
-            onBlur={(e) => onTitleEdit(item.index, e.currentTarget.textContent || '')}
-            className="outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-1 min-h-[24px] cursor-text hover:bg-gray-50 font-semibold"
-            style={getTextStyle('h4')}
-          >
-            {item.title}
-          </div>
-        ) : (
-          <h3 
-            className={`font-semibold ${colorTokens.textPrimary}`}
-            style={getTextStyle('h4')}
-          >
-            {item.title}
-          </h3>
-        )}
-      </div>
+      {/* ✅ ENHANCED: Title with Adaptive Text */}
+      <EditableAdaptiveText
+        mode={mode}
+        value={item.title}
+        onEdit={(value) => onTitleEdit(item.index, value)}
+        backgroundType={backgroundType}
+        colorTokens={colorTokens}
+        variant="heading"
+        textStyle={{
+          ...getTextStyle('h4'),
+          fontWeight: 600
+        }}
+        className="mb-3"
+        placeholder="Feature title..."
+        sectionId={sectionId}
+        elementKey={`feature_title_${item.index}`}
+        sectionBackground={sectionBackground}
+      />
 
-      {/* Description */}
-      <div>
-        {mode === 'edit' ? (
-          <div 
-            contentEditable
-            suppressContentEditableWarning
-            onBlur={(e) => onDescriptionEdit(item.index, e.currentTarget.textContent || '')}
-            className="outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-1 min-h-[24px] cursor-text hover:bg-gray-50 leading-relaxed"
-            style={getTextStyle('body')}
-          >
-            {item.description}
-          </div>
-        ) : (
-          <p 
-            className={`${colorTokens.textSecondary} leading-relaxed`}
-            style={getTextStyle('body')}
-          >
-            {item.description}
-          </p>
-        )}
-      </div>
+      {/* ✅ ENHANCED: Description with Adaptive Text */}
+      <EditableAdaptiveText
+        mode={mode}
+        value={item.description}
+        onEdit={(value) => onDescriptionEdit(item.index, value)}
+        backgroundType={backgroundType}
+        colorTokens={colorTokens}
+        variant="body"
+        textStyle={getTextStyle('body')}
+        className="leading-relaxed opacity-90"
+        placeholder="Describe this feature..."
+        sectionId={sectionId}
+        elementKey={`feature_description_${item.index}`}
+        sectionBackground={sectionBackground}
+      />
     </div>
   );
 });
 FeatureCard.displayName = 'FeatureCard';
 
 export default function IconGrid(props: LayoutComponentProps) {
-  // Use the abstraction hook for all common functionality
+  
+  console.log('🎯 IconGrid component rendering with props:', props);
+  
+  // ✅ ENHANCED: Use the abstraction hook with background type support
   const {
     sectionId,
     mode,
     blockContent,
     colorTokens,
+    dynamicTextColors,
     getTextStyle,
     sectionBackground,
+    backgroundType,
     handleContentUpdate
   } = useLayoutComponent<IconGridContent>({
     ...props,
     contentSchema: CONTENT_SCHEMA
   });
+  
+  console.log('🎯 IconGrid hook result:', { sectionId, mode });
 
   // Parse feature data
   const featureItems = parseFeatureData(blockContent.feature_titles, blockContent.feature_descriptions);
@@ -181,6 +198,32 @@ export default function IconGrid(props: LayoutComponentProps) {
     handleContentUpdate('feature_descriptions', updatedDescriptions);
   };
 
+  // Force center alignment for headline - DIRECT DOM TARGETING
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      // Target the exact element we saw in the DOM
+      const headlineElement = document.querySelector('h2[data-section-id="features"][data-element-key="headline"]');
+      
+      if (headlineElement) {
+        const htmlElement = headlineElement as HTMLElement;
+        htmlElement.style.setProperty('text-align', 'center', 'important');
+        htmlElement.style.setProperty('display', 'block', 'important');
+        
+        // Also set it on the parent div
+        const parentDiv = htmlElement.closest('.text-center');
+        if (parentDiv) {
+          (parentDiv as HTMLElement).style.setProperty('text-align', 'center', 'important');
+        }
+        
+        console.log('✅ FORCED HEADLINE TO CENTER via direct DOM targeting');
+      } else {
+        console.log('❌ Still could not find headline element');
+      }
+    }, 1000); // Longer timeout
+    
+    return () => clearTimeout(timer);
+  }, []);
+
   return (
     <LayoutSection
       sectionId={sectionId}
@@ -193,61 +236,87 @@ export default function IconGrid(props: LayoutComponentProps) {
       <div className="max-w-7xl mx-auto">
         {/* Header Section */}
         <div className="text-center mb-12">
-          <EditableHeadline
-            mode={mode}
-            value={blockContent.headline}
-            onEdit={(value) => handleContentUpdate('headline', value)}
-            level="h2"
-            colorClass={colorTokens.textOnLight || colorTokens.textPrimary}
-            textStyle={getTextStyle('h1')}
-            className="mb-4"
-          />
-
-          {/* Subheadline */}
-          {(blockContent.subheadline || mode === 'edit') && (
-            <EditableText
+          {/* ✅ ENHANCED: Main Headline with Dynamic Text Color */}
+          <div className="text-center">
+            <EditableAdaptiveHeadline
               mode={mode}
-              value={blockContent.subheadline || ''}
-              onEdit={(value) => handleContentUpdate('subheadline', value)}
-              colorClass={colorTokens.textSecondary}
-              textStyle={getTextStyle('body-lg')}
-              className="max-w-2xl mx-auto"
-              placeholder="Add optional subheadline..."
+              value={blockContent.headline}
+              onEdit={(value) => handleContentUpdate('headline', value)}
+              level="h2"
+              backgroundType={props.backgroundType || 'neutral'}
+              colorTokens={colorTokens}
+              textStyle={{
+                ...getTextStyle('h2'),
+                textAlign: 'center'
+              }}
+              className="mb-4 !text-center"
+              sectionId={sectionId}
+              elementKey="headline"
+              sectionBackground={sectionBackground}
             />
+          </div>
+
+          {/* ✅ ENHANCED: Subheadline with Dynamic Text Color */}
+          {(blockContent.subheadline || mode === 'edit') && (
+            <div style={{ textAlign: 'center' }}>
+              <EditableAdaptiveText
+                mode={mode}
+                value={blockContent.subheadline || ''}
+                onEdit={(value) => handleContentUpdate('subheadline', value)}
+                backgroundType={props.backgroundType || 'neutral'}
+                colorTokens={colorTokens}
+                variant="body"
+                textStyle={{
+                  ...getTextStyle('body-lg'),
+                  textAlign: 'center'
+                }}
+                className="max-w-3xl mx-auto"
+                placeholder="Add optional subheadline to describe your features..."
+                sectionId={sectionId}
+                elementKey="subheadline"
+                sectionBackground={sectionBackground}
+                formatState={{
+                  textAlign: 'center'
+                }}
+              />
+            </div>
           )}
         </div>
 
-        {/* Features Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        {/* ✅ ENHANCED: Features Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
           {featureItems.map((item) => (
             <FeatureCard
               key={item.id}
               item={item}
               mode={mode}
               colorTokens={colorTokens}
+              dynamicTextColors={dynamicTextColors}
               getTextStyle={getTextStyle}
               onTitleEdit={handleTitleEdit}
               onDescriptionEdit={handleDescriptionEdit}
+              sectionId={sectionId}
+              backgroundType={props.backgroundType || 'neutral'}
+              sectionBackground={sectionBackground}
             />
           ))}
         </div>
-
       </div>
     </LayoutSection>
   );
 }
 
-// Export additional metadata for the component registry
+// ✅ ENHANCED: Export metadata with adaptive color features
 export const componentMeta = {
   name: 'IconGrid',
   category: 'Feature Sections',
-  description: 'Feature grid with auto-selected icons, titles, and descriptions',
-  tags: ['features', 'grid', 'icons', 'benefits'],
+  description: 'Feature grid with auto-selected icons and adaptive text colors for any background',
+  tags: ['features', 'grid', 'icons', 'benefits', 'adaptive-colors'],
   defaultBackgroundType: 'neutral' as const,
   complexity: 'medium',
   estimatedBuildTime: '20 minutes',
   
-  // Schema for component generation tools
+  // ✅ ENHANCED: Schema for component generation tools
   contentFields: [
     { key: 'headline', label: 'Section Headline', type: 'text', required: true },
     { key: 'subheadline', label: 'Subheadline', type: 'textarea', required: false },
@@ -255,11 +324,23 @@ export const componentMeta = {
     { key: 'feature_descriptions', label: 'Feature Descriptions (pipe separated)', type: 'textarea', required: true }
   ],
   
+  // ✅ NEW: Enhanced features
+  features: [
+    'Automatic text color adaptation based on background type',
+    'Icons use generated accent colors from design system',
+    'Cards adapt appearance based on section background',
+    'Smooth hover animations and transitions',
+    'Fully editable titles and descriptions',
+    'Auto-selected icons based on content keywords',
+    'Responsive grid layout'
+  ],
+  
   // Usage examples
   useCases: [
-    'Product feature showcase',
-    'Service benefits section',
-    'Platform capabilities',
-    'Tool features overview'
+    'Product feature showcase on dark hero sections',
+    'Service benefits with light backgrounds',
+    'Platform capabilities on gradient backgrounds',
+    'Tool features overview with brand colors',
+    'Key benefits section with any background type'
   ]
 };

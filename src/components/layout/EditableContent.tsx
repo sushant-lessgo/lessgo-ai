@@ -221,19 +221,31 @@ export function EditableHeadline({
   const finalColorClass = dynamicColor || colorClass || 'text-gray-900';
   
   // Enhanced format state for headlines
-  const headlineFormatState = useMemo(() => ({
-    bold: true,
-    italic: false,
-    underline: false,
-    color: dynamicColor || '#000000',
-    fontSize: level === 'h1' ? '2rem' : level === 'h2' ? '1.5rem' : level === 'h3' ? '1.25rem' : '1rem',
-    fontFamily: 'inherit',
-    textAlign: 'left' as const,
-    lineHeight: level === 'h1' ? '1.2' : '1.3',
-    letterSpacing: 'normal',
-    textTransform: 'none' as const,
-    ...formatState,
-  }), [level, dynamicColor, formatState]);
+  const headlineFormatState = useMemo(() => {
+    const baseState = {
+      bold: true,
+      italic: false,
+      underline: false,
+      color: dynamicColor || '#000000',
+      fontSize: level === 'h1' ? '2rem' : level === 'h2' ? '1.5rem' : level === 'h3' ? '1.25rem' : '1rem',
+      fontFamily: 'inherit',
+      textAlign: (textStyle?.textAlign as any) || 'left' as const,
+      lineHeight: level === 'h1' ? '1.2' : '1.3',
+      letterSpacing: 'normal',
+      textTransform: 'none' as const,
+      ...formatState,
+    };
+    
+    // Debug logging
+    console.log('🔍 EditableAdaptiveHeadline formatState debug:', {
+      inputFormatState: formatState,
+      textStyleTextAlign: textStyle?.textAlign,
+      finalState: baseState,
+      elementKey: props.elementKey
+    });
+    
+    return baseState;
+  }, [level, dynamicColor, formatState, textStyle?.textAlign]);
   
   const headlineEditorConfig: Partial<InlineEditorConfig> = useMemo(() => ({
     enterKeyBehavior: 'save',
@@ -305,12 +317,12 @@ export function EditableText({
     color: dynamicColor || '#000000',
     fontSize: '1rem',
     fontFamily: 'inherit',
-    textAlign: 'left' as const,
+    textAlign: (textStyle?.textAlign as any) || 'left' as const,
     lineHeight: '1.6',
     letterSpacing: 'normal',
     textTransform: 'none' as const,
     ...formatState,
-  }), [dynamicColor, formatState]);
+  }), [dynamicColor, formatState, textStyle?.textAlign]);
   
   const textEditorConfig: Partial<InlineEditorConfig> = useMemo(() => ({
     enterKeyBehavior: 'new-line',
@@ -513,6 +525,15 @@ export function EditableAdaptiveHeadline({
   editorConfig?: Partial<InlineEditorConfig>,
   autoSave?: Partial<AutoSaveConfig>,
 }) {
+  
+  // Debug logging
+  console.log('🔍 EditableAdaptiveHeadline received props:', {
+    elementKey,
+    sectionId,
+    formatState,
+    textStyle,
+    level
+  });
   
   const getAdaptiveTextColor = () => {
     switch(backgroundType) {

@@ -1,267 +1,325 @@
-import React, { useEffect } from 'react';
-import { generateColorTokens } from '../Design/ColorSystem/colorTokens';
-import { useTypography } from '@/hooks/useTypography';
+import React from 'react';
+import { useLayoutComponent } from '@/hooks/useLayoutComponent';
 import { useEditStore } from '@/hooks/useEditStore';
-import { useOnboardingStore } from '@/hooks/useOnboardingStore';
+import { LayoutSection } from '@/components/layout/LayoutSection';
 import { 
-  LayoutComponentProps, 
-  SideBySideContent, 
-  extractLayoutContent,
-  StoreElementTypes 
-} from '@/types/storeTypes';
+  EditableAdaptiveHeadline, 
+  EditableAdaptiveText
+} from '@/components/layout/EditableContent';
+import { 
+  CTAButton,
+  TrustIndicators 
+} from '@/components/layout/ComponentRegistry';
+import { LayoutComponentProps } from '@/types/storeTypes';
 
-interface SideBySideBlocksProps extends LayoutComponentProps {}
+// Content interface for type safety
+interface SideBySideContent {
+  headline: string;
+  before_label: string;
+  after_label: string;
+  before_description: string;
+  after_description: string;
+  subheadline?: string;
+  supporting_text?: string;
+  cta_text?: string;
+  trust_items?: string;
+}
 
-// Content schema for SideBySideBlocks layout
+// Content schema - defines structure and defaults
 const CONTENT_SCHEMA = {
-  headline: { type: 'string' as const, default: 'Your Transformation Story' },
-  before_label: { type: 'string' as const, default: 'Before' },
-  after_label: { type: 'string' as const, default: 'After' },
-  before_description: { type: 'string' as const, default: 'Describe the current state or problem your audience faces.' },
-  after_description: { type: 'string' as const, default: 'Describe the improved state or solution you provide.' },
-  subheadline: { type: 'string' as const, default: '' },
-  supporting_text: { type: 'string' as const, default: '' }
-};
-
-// ModeWrapper component for handling edit/preview modes
-const ModeWrapper = ({ 
-  mode, 
-  children, 
-  sectionId, 
-  elementKey,
-  onEdit 
-}: {
-  mode: 'edit' | 'preview';
-  children: React.ReactNode;
-  sectionId: string;
-  elementKey: string;
-  onEdit?: (value: string) => void;
-}) => {
-  if (mode === 'edit' && onEdit) {
-    return (
-      <div 
-        contentEditable
-        suppressContentEditableWarning
-        onBlur={(e) => onEdit(e.currentTarget.textContent || '')}
-        className="outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-1 min-h-[24px] cursor-text hover:bg-gray-50"
-        data-placeholder={`Edit ${elementKey.replace('_', ' ')}`}
-      >
-        {children}
-      </div>
-    );
+  headline: { 
+    type: 'string' as const, 
+    default: 'Your Transformation Story' 
+  },
+  before_label: { 
+    type: 'string' as const, 
+    default: 'Before' 
+  },
+  after_label: { 
+    type: 'string' as const, 
+    default: 'After' 
+  },
+  before_description: { 
+    type: 'string' as const, 
+    default: 'Describe the current state or problem your audience faces.' 
+  },
+  after_description: { 
+    type: 'string' as const, 
+    default: 'Describe the improved state or solution you provide.' 
+  },
+  subheadline: { 
+    type: 'string' as const, 
+    default: '' 
+  },
+  supporting_text: { 
+    type: 'string' as const, 
+    default: '' 
+  },
+  cta_text: { 
+    type: 'string' as const, 
+    default: '' 
+  },
+  trust_items: { 
+    type: 'string' as const, 
+    default: '' 
   }
-  
-  return <>{children}</>;
 };
 
-export default function SideBySideBlocks({ 
-  sectionId, 
-  className = '',
-  backgroundType = 'neutral' 
-}: SideBySideBlocksProps) {
-
-  const { getTextStyle } = useTypography();
-  const { 
-    content, 
-    mode, 
-    theme,
-    updateElementContent 
-  } = useEditStore();
-
-  // Get content for this section with type safety
-  const sectionContent = content[sectionId];
-  const elements = sectionContent?.elements || {} as Partial<StoreElementTypes>;
-
-  // Helper to handle content updates
-  const handleContentUpdate = (elementKey: string, value: string) => {
-    updateElementContent(sectionId, elementKey, value);
-  };
-
-  // Extract content with type safety and defaults using the new system
-  const blockContent: SideBySideContent = extractLayoutContent(elements, CONTENT_SCHEMA);
-
-  // Generate color tokens from theme with correct nested structure
-  const colorTokens = generateColorTokens({
-    baseColor: theme?.colors?.baseColor || '#3B82F6',
-    accentColor: theme?.colors?.accentColor || '#10B981',
-    sectionBackgrounds: theme?.colors?.sectionBackgrounds || {
-      primary: '#F8FAFC',
-      secondary: '#F1F5F9', 
-      neutral: '#FFFFFF',
-      divider: '#E2E8F0'
-    }
+export default function SideBySideBlocks(props: LayoutComponentProps) {
+  
+  // ✅ ENHANCED: Use the abstraction hook with background type support
+  const {
+    sectionId,
+    mode,
+    blockContent,
+    colorTokens, // ✅ Now includes dynamic text colors
+    dynamicTextColors, // ✅ NEW: Direct access to background-aware colors
+    getTextStyle,
+    sectionBackground,
+    backgroundType, // ✅ NEW: Background type passed from hook
+    handleContentUpdate
+  } = useLayoutComponent<SideBySideContent>({
+    ...props,
+    contentSchema: CONTENT_SCHEMA
   });
 
-  // Get section background based on type
-  const getSectionBackground = () => {
-    switch(backgroundType) {
-      case 'primary': return colorTokens.bgPrimary;
-      case 'secondary': return colorTokens.bgSecondary;
-      case 'divider': return colorTokens.bgDivider;
-      default: return colorTokens.bgNeutral;
-    }
-  };
+  // Parse trust indicators from pipe-separated string
+  const trustItems = blockContent.trust_items 
+    ? blockContent.trust_items.split('|').map(item => item.trim()).filter(Boolean)
+    : [];
 
-  // Initialize fonts on component mount
-  useEffect(() => {
-    const { updateFontsFromTone } = useEditStore.getState();
-    updateFontsFromTone(); // Set fonts based on current tone
-  }, []);
-
-  // Handle tone changes (you might call this from a parent component)
+  // ✅ ENHANCED: Get muted text color for labels and supporting text
+  const mutedTextColor = dynamicTextColors?.muted || colorTokens.textMuted;
   
-
+  // ✅ Get accent colors for visual indicators
+  const accentColor = colorTokens.ctaBg || 'bg-blue-600';
+  const accentHover = colorTokens.ctaHover || 'bg-blue-700';
+  
   return (
-    <section 
-      className={`py-16 px-4 ${getSectionBackground()} ${className}`}
-      data-section-id={sectionId}
-      data-section-type="SideBySideBlocks"
+    <LayoutSection
+      sectionId={sectionId}
+      sectionType="SideBySideBlocks"
+      backgroundType={props.backgroundType || 'neutral'}
+      sectionBackground={sectionBackground}
+      mode={mode}
+      className={props.className}
     >
       <div className="max-w-6xl mx-auto">
         {/* Header Section */}
         <div className="text-center mb-12">
-          <ModeWrapper
+          {/* ✅ ENHANCED: Main Headline with Dynamic Text Color */}
+          <EditableAdaptiveHeadline
             mode={mode}
+            value={blockContent.headline}
+            onEdit={(value) => handleContentUpdate('headline', value)}
+            level="h2"
+            backgroundType={props.backgroundType || 'neutral'}
+            colorTokens={colorTokens}
+            textStyle={getTextStyle('h2')}
+            className="mb-4"
             sectionId={sectionId}
             elementKey="headline"
-            onEdit={(value) => handleContentUpdate('headline', value)}
-          >
-            <h2 
-              className={`mb-4 ${colorTokens.textPrimary}`}
-              style={getTextStyle('h1')} // Use typography system
-            >
-              {blockContent.headline}
-            </h2>
-          </ModeWrapper>
+            sectionBackground={sectionBackground}
+          />
 
-          {/* Optional Subheadline */}
+          {/* ✅ ENHANCED: Optional Subheadline with Dynamic Text Color */}
           {(blockContent.subheadline || mode === 'edit') && (
-            <ModeWrapper
+            <EditableAdaptiveText
               mode={mode}
+              value={blockContent.subheadline || ''}
+              onEdit={(value) => handleContentUpdate('subheadline', value)}
+              backgroundType={props.backgroundType || 'neutral'}
+              colorTokens={colorTokens}
+              variant="body"
+              textStyle={getTextStyle('body-lg')}
+              className="text-lg mb-6 max-w-3xl mx-auto"
+              placeholder="Add optional subheadline to introduce the comparison..."
               sectionId={sectionId}
               elementKey="subheadline"
-              onEdit={(value) => handleContentUpdate('subheadline', value)}
-            >
-              <p 
-                className={`mb-6 ${colorTokens.textSecondary} ${!blockContent.subheadline && mode === 'edit' ? 'opacity-50' : ''}`}
-                style={getTextStyle('body-lg')} // Use typography system
-              >
-                {blockContent.subheadline || (mode === 'edit' ? 'Add optional subheadline...' : '')}
-              </p>
-            </ModeWrapper>
+              sectionBackground={sectionBackground}
+            />
           )}
         </div>
 
         {/* Side by Side Blocks */}
         <div className="grid md:grid-cols-2 gap-8 md:gap-12 mb-12">
           {/* Before Block */}
-          <div 
-            className={`${colorTokens.surfaceCard} rounded-lg shadow-lg p-8 border`}
-            style={{ borderColor: `var(--border-color, #e5e7eb)` }}
-          >
-            <div className="flex items-center mb-6">
-              <div className="w-3 h-3 rounded-full mr-3 bg-red-500" />
-              <ModeWrapper
-                mode={mode}
-                sectionId={sectionId}
-                elementKey="before_label"
-                onEdit={(value) => handleContentUpdate('before_label', value)}
-              >
-                <h3 
-                  className="uppercase tracking-wide text-red-500"
-                  style={getTextStyle('h3')} // Use typography system
-                >
-                  {blockContent.before_label}
-                </h3>
-              </ModeWrapper>
-            </div>
+          <div className="group">
+            <div className={`${colorTokens.surfaceCard} rounded-lg shadow-lg p-8 border border-gray-200 hover:shadow-xl transition-shadow duration-300 h-full`}>
+              <div className="flex items-center mb-6">
+                <div className="w-3 h-3 rounded-full mr-3 bg-red-500 ring-4 ring-red-100" />
+                <EditableAdaptiveText
+                  mode={mode}
+                  value={blockContent.before_label}
+                  onEdit={(value) => handleContentUpdate('before_label', value)}
+                  backgroundType={props.backgroundType || 'neutral'}
+                  colorTokens={colorTokens}
+                  variant="body"
+                  textStyle={{
+                    ...getTextStyle('body'),
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.05em',
+                    fontWeight: 600,
+                    color: '#ef4444' // red-500
+                  }}
+                  className="text-red-500"
+                  sectionId={sectionId}
+                  elementKey="before_label"
+                  sectionBackground={sectionBackground}
+                />
+              </div>
 
-            <ModeWrapper
-              mode={mode}
-              sectionId={sectionId}
-              elementKey="before_description"
-              onEdit={(value) => handleContentUpdate('before_description', value)}
-            >
-              <p 
-                className={colorTokens.textPrimary}
-                style={getTextStyle('body')} // Use typography system
-              >
-                {blockContent.before_description}
-              </p>
-            </ModeWrapper>
+              <EditableAdaptiveText
+                mode={mode}
+                value={blockContent.before_description}
+                onEdit={(value) => handleContentUpdate('before_description', value)}
+                backgroundType={props.backgroundType || 'neutral'}
+                colorTokens={colorTokens}
+                variant="body"
+                textStyle={getTextStyle('body')}
+                className="leading-relaxed"
+                sectionId={sectionId}
+                elementKey="before_description"
+                sectionBackground={sectionBackground}
+              />
+            </div>
           </div>
 
           {/* After Block */}
-          <div 
-            className={`${colorTokens.surfaceCard} rounded-lg shadow-lg p-8 border`}
-            style={{ borderColor: `var(--border-color, #e5e7eb)` }}
-          >
-            <div className="flex items-center mb-6">
-              <div className="w-3 h-3 rounded-full mr-3 bg-green-500" />
-              <ModeWrapper
-                mode={mode}
-                sectionId={sectionId}
-                elementKey="after_label"
-                onEdit={(value) => handleContentUpdate('after_label', value)}
-              >
-                <h3 
-                  className="uppercase tracking-wide text-green-500"
-                  style={getTextStyle('h3')} // Use typography system
-                >
-                  {blockContent.after_label}
-                </h3>
-              </ModeWrapper>
-            </div>
+          <div className="group">
+            <div className={`${colorTokens.surfaceCard} rounded-lg shadow-lg p-8 border border-gray-200 hover:shadow-xl transition-shadow duration-300 h-full`}>
+              <div className="flex items-center mb-6">
+                <div className="w-3 h-3 rounded-full mr-3 bg-green-500 ring-4 ring-green-100" />
+                <EditableAdaptiveText
+                  mode={mode}
+                  value={blockContent.after_label}
+                  onEdit={(value) => handleContentUpdate('after_label', value)}
+                  backgroundType={props.backgroundType || 'neutral'}
+                  colorTokens={colorTokens}
+                  variant="body"
+                  textStyle={{
+                    ...getTextStyle('body'),
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.05em',
+                    fontWeight: 600,
+                    color: '#10b981' // green-500
+                  }}
+                  className="text-green-500"
+                  sectionId={sectionId}
+                  elementKey="after_label"
+                  sectionBackground={sectionBackground}
+                />
+              </div>
 
-            <ModeWrapper
-              mode={mode}
-              sectionId={sectionId}
-              elementKey="after_description"
-              onEdit={(value) => handleContentUpdate('after_description', value)}
-            >
-              <p 
-                className={colorTokens.textPrimary}
-                style={getTextStyle('body')} // Use typography system
-              >
-                {blockContent.after_description}
-              </p>
-            </ModeWrapper>
+              <EditableAdaptiveText
+                mode={mode}
+                value={blockContent.after_description}
+                onEdit={(value) => handleContentUpdate('after_description', value)}
+                backgroundType={props.backgroundType || 'neutral'}
+                colorTokens={colorTokens}
+                variant="body"
+                textStyle={getTextStyle('body')}
+                className="leading-relaxed"
+                sectionId={sectionId}
+                elementKey="after_description"
+                sectionBackground={sectionBackground}
+              />
+            </div>
           </div>
         </div>
 
-        {/* Optional Supporting Text */}
-        {(blockContent.supporting_text || mode === 'edit') && (
-          <div className="text-center">
-            <ModeWrapper
-              mode={mode}
-              sectionId={sectionId}
-              elementKey="supporting_text"
-              onEdit={(value) => handleContentUpdate('supporting_text', value)}
-            >
-              <p 
-                className={`max-w-3xl mx-auto ${colorTokens.textSecondary} ${!blockContent.supporting_text && mode === 'edit' ? 'opacity-50' : ''}`}
-                style={getTextStyle('body-lg')} // Use typography system
-              >
-                {blockContent.supporting_text || (mode === 'edit' ? 'Add optional supporting text to reinforce your message...' : '')}
-              </p>
-            </ModeWrapper>
-          </div>
-        )}
+        {/* ✅ NEW: Optional CTA and Trust Section */}
+        {(blockContent.cta_text || blockContent.trust_items || mode === 'edit') && (
+          <div className="text-center space-y-6">
+            {/* Optional Supporting Text */}
+            {(blockContent.supporting_text || mode === 'edit') && (
+              <EditableAdaptiveText
+                mode={mode}
+                value={blockContent.supporting_text || ''}
+                onEdit={(value) => handleContentUpdate('supporting_text', value)}
+                backgroundType={props.backgroundType || 'neutral'}
+                colorTokens={colorTokens}
+                variant="body"
+                textStyle={getTextStyle('body-lg')}
+                className="max-w-3xl mx-auto mb-8"
+                placeholder="Add optional supporting text to reinforce your message..."
+                sectionId={sectionId}
+                elementKey="supporting_text"
+                sectionBackground={sectionBackground}
+              />
+            )}
 
-        {/* Edit Mode Indicators */}
-        {mode === 'edit' && (
-          <div className="mt-8 p-4 bg-blue-50 rounded-lg border border-blue-200">
-            <div className="flex items-center text-blue-700">
-              <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
-              </svg>
-              <span className="text-sm font-medium">
-                SideBySideBlocks - Click any text to edit
-              </span>
-            </div>
+            {/* ✅ NEW: CTA Button and Trust Indicators */}
+            {(blockContent.cta_text || trustItems.length > 0) && (
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
+                {blockContent.cta_text && (
+                  <CTAButton
+                    text={blockContent.cta_text}
+                    colorTokens={colorTokens}
+                    textStyle={getTextStyle('body-lg')}
+                    className="shadow-xl hover:shadow-2xl transform hover:-translate-y-0.5 transition-all duration-200"
+                    variant="primary"
+                    sectionId={sectionId}
+                    elementKey="cta_text"
+                  />
+                )}
+
+                {trustItems.length > 0 && (
+                  <TrustIndicators 
+                    items={trustItems}
+                    colorClass={mutedTextColor}
+                    iconColor="text-green-500"
+                  />
+                )}
+              </div>
+            )}
           </div>
         )}
       </div>
-    </section>
+    </LayoutSection>
   );
 }
+
+// Export additional metadata for the component registry
+export const componentMeta = {
+  name: 'SideBySideBlocks',
+  category: 'Comparison',
+  description: 'Before/After comparison section that clearly shows transformation. Automatically adapts text colors to background.',
+  tags: ['comparison', 'before-after', 'transformation', 'adaptive-colors'],
+  defaultBackgroundType: 'neutral' as const,
+  complexity: 'simple',
+  estimatedBuildTime: '10 minutes',
+  
+  // ✅ ENHANCED: Schema for component generation tools
+  contentFields: [
+    { key: 'headline', label: 'Main Headline', type: 'text', required: true },
+    { key: 'subheadline', label: 'Subheadline', type: 'textarea', required: false },
+    { key: 'before_label', label: 'Before Label', type: 'text', required: true },
+    { key: 'before_description', label: 'Before Description', type: 'textarea', required: true },
+    { key: 'after_label', label: 'After Label', type: 'text', required: true },
+    { key: 'after_description', label: 'After Description', type: 'textarea', required: true },
+    { key: 'supporting_text', label: 'Supporting Text', type: 'textarea', required: false },
+    { key: 'cta_text', label: 'CTA Button Text', type: 'text', required: false },
+    { key: 'trust_items', label: 'Trust Indicators (pipe separated)', type: 'text', required: false }
+  ],
+  
+  // ✅ NEW: Enhanced features
+  features: [
+    'Automatic text color adaptation based on background type',
+    'Visual before/after indicators with brand colors',
+    'Optional CTA button using accent colors',
+    'Trust indicators for social proof',
+    'Hover effects for enhanced interactivity',
+    'Responsive grid layout with equal height cards',
+    'Full integration with design system'
+  ],
+  
+  // Usage examples
+  useCases: [
+    'Product comparison showing old vs new features',
+    'Service transformation highlighting improvements',
+    'Process optimization showing efficiency gains',
+    'Customer journey before and after using product',
+    'Business metrics comparison pre/post implementation'
+  ]
+};
