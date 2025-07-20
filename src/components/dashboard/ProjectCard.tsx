@@ -22,14 +22,31 @@ type Props = {
 export default function ProjectCard({ project, onEdit, onPreview }: Props) {
   const router = useRouter()
 
-  const handleEdit = () => {
+  const handleEdit = async () => {
     posthog.capture('project_edit_clicked', {
       project_id: project.id,
       project_name: project.name,
     })
 
     if (project.tokenId) {
-      router.push(`/start/${project.tokenId}`)
+      // Check if project has completed onboarding
+      try {
+        const response = await fetch(`/api/loadDraft?tokenId=${project.tokenId}`)
+        if (response.ok) {
+          const data = await response.json()
+          
+          // If has finalContent, go to edit; otherwise go to create (onboarding)
+          const destination = data.finalContent ? '/edit/' : '/create/'
+          router.push(`${destination}${project.tokenId}`)
+        } else {
+          // Fallback to create for any errors
+          router.push(`/create/${project.tokenId}`)
+        }
+      } catch (error) {
+        // Fallback to create for any errors
+        console.warn('Failed to check project status, defaulting to create:', error)
+        router.push(`/create/${project.tokenId}`)
+      }
     }
 
     onEdit?.()
@@ -63,7 +80,7 @@ export default function ProjectCard({ project, onEdit, onPreview }: Props) {
             onClick={handleEdit}
             className="border border-brand-accentPrimary text-brand-accentPrimary text-sm px-3 py-1 rounded-md hover:bg-brand-highlightBG transition"
           >
-            Edit
+            Continue
           </button>
         )}
 

@@ -15,21 +15,68 @@ export default async function DashboardPage() {
     where: { clerkId: userId },
     include: {
       projects: {
-        include: { token: true },
+        select: {
+          id: true,
+          title: true,
+          content: true,
+          inputText: true,
+          updatedAt: true,
+          token: { select: { value: true } },
+        },
         orderBy: { updatedAt: 'desc' },
       },
     },
   })
 
-  const draftProjects = user?.projects.map((project) => ({
-    id: project.id,
-    name: project.title || 'Untitled Project',
-    status: 'Draft' as const,
-    updatedAt: project.updatedAt.toISOString(),
-    tokenId: project.token.value,
-    slug: null,
-    type: 'draft' as const,
-  })) ?? []
+  const draftProjects = user?.projects.map((project) => {
+    // Generate smart project name from available data
+    let smartName = project.title;
+    
+    if (!smartName || smartName === 'Untitled Project') {
+      const content = project.content as any;
+      const onboarding = content?.onboarding || {};
+      const validatedFields = onboarding.validatedFields || {};
+      const confirmedFields = onboarding.confirmedFields || {};
+      
+      // Helper function to capitalize and clean field values
+      const formatField = (field: string) => {
+        return field.split(/[-_\s]+/)
+          .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+          .join(' ');
+      };
+      
+      // Try different naming strategies in order of preference
+      if (validatedFields.marketCategory && validatedFields.targetAudience) {
+        smartName = `${formatField(validatedFields.marketCategory)} for ${formatField(validatedFields.targetAudience)}`;
+      } else if (confirmedFields.marketCategory?.value && confirmedFields.targetAudience?.value) {
+        smartName = `${formatField(confirmedFields.marketCategory.value)} for ${formatField(confirmedFields.targetAudience.value)}`;
+      } else if (validatedFields.marketCategory) {
+        smartName = `${formatField(validatedFields.marketCategory)} Tool`;
+      } else if (confirmedFields.marketCategory?.value) {
+        smartName = `${formatField(confirmedFields.marketCategory.value)} Tool`;
+      } else if (project.inputText) {
+        // Extract first meaningful part of inputText (up to 50 chars)
+        const shortInput = project.inputText.slice(0, 50).trim();
+        smartName = shortInput.length === 50 ? `${shortInput}...` : shortInput;
+      } else if (onboarding.oneLiner) {
+        // Extract first meaningful part of oneLiner (up to 50 chars) 
+        const shortOneLiner = onboarding.oneLiner.slice(0, 50).trim();
+        smartName = shortOneLiner.length === 50 ? `${shortOneLiner}...` : shortOneLiner;
+      } else {
+        smartName = 'New Project';
+      }
+    }
+    
+    return {
+      id: project.id,
+      name: smartName,
+      status: 'Draft' as const,
+      updatedAt: project.updatedAt.toISOString(),
+      tokenId: project.token.value,
+      slug: null,
+      type: 'draft' as const,
+    };
+  }) ?? []
 
   // 2. Fetch published pages
   const publishedPages = await prisma.publishedPage.findMany({
