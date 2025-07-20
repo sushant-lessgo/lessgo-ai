@@ -290,3 +290,36 @@ export default function StackedTextVisual({
     </section>
   );
 }
+
+export const componentMeta = {
+  name: 'StackedTextVisual',
+  category: 'Comparison',
+  description: 'Before/after comparison with adaptive text colors and visual transitions',
+  tags: ['before-after', 'comparison', 'transformation', 'visual', 'adaptive-colors'],
+  features: [
+    'Automatic text color adaptation based on background type',
+    'Editable before and after text content',
+    'Visual transition connector with optional text',
+    'Color-coded blocks (gray for before, green for after)',
+    'Contextual icons for each state',
+    'Optional subheadline for additional context'
+  ],
+  props: {
+    sectionId: 'string - Required section identifier',
+    backgroundType: '"primary" | "secondary" | "neutral" | "divider" - Controls text color adaptation',
+    className: 'string - Additional CSS classes'
+  },
+  contentSchema: {
+    headline: 'Main heading text',
+    before_text: 'Text describing the "before" state',
+    after_text: 'Text describing the "after" state',
+    transition_text: 'Optional text for the transition connector',
+    subheadline: 'Optional subheading for additional context'
+  },
+  examples: [
+    'Problem to solution comparison',
+    'Current state vs future state',
+    'Transformation showcase',
+    'Process improvement illustration'
+  ]
+};

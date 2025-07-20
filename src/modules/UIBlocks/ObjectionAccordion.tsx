@@ -5,8 +5,8 @@ import React, { useState } from 'react';
 import { useLayoutComponent } from '@/hooks/useLayoutComponent';
 import { LayoutSection } from '@/components/layout/LayoutSection';
 import { 
-  EditableHeadline, 
-  EditableText 
+  EditableAdaptiveHeadline, 
+  EditableAdaptiveText 
 } from '@/components/layout/EditableContent';
 import { LayoutComponentProps } from '@/types/storeTypes';
 import { parsePipeData, updateListData } from '@/utils/dataParsingUtils';
@@ -216,8 +216,10 @@ export default function ObjectionAccordion(props: LayoutComponentProps) {
     mode,
     blockContent,
     colorTokens,
+    dynamicTextColors,
     getTextStyle,
     sectionBackground,
+    backgroundType,
     handleContentUpdate
   } = useLayoutComponent<ObjectionAccordionContent>({
     ...props,
@@ -264,26 +266,41 @@ export default function ObjectionAccordion(props: LayoutComponentProps) {
       <div className="max-w-4xl mx-auto">
         {/* Header Section */}
         <div className="text-center mb-12">
-          <EditableHeadline
+          <EditableAdaptiveHeadline
             mode={mode}
             value={blockContent.headline}
             onEdit={(value) => handleContentUpdate('headline', value)}
             level="h2"
-            colorClass={colorTokens.textOnLight || colorTokens.textPrimary}
-            textStyle={getTextStyle('h1')}
+            backgroundType={props.backgroundType || 'neutral'}
+            colorTokens={colorTokens}
+            textStyle={{
+              ...getTextStyle('h1'),
+              textAlign: 'center'
+            }}
             className="mb-4"
+            sectionId={sectionId}
+            elementKey="headline"
+            sectionBackground={sectionBackground}
           />
 
           {/* Subheadline */}
           {(blockContent.subheadline || mode === 'edit') && (
-            <EditableText
+            <EditableAdaptiveText
               mode={mode}
               value={blockContent.subheadline || ''}
               onEdit={(value) => handleContentUpdate('subheadline', value)}
-              colorClass={colorTokens.textSecondary}
-              textStyle={getTextStyle('body-lg')}
+              backgroundType={props.backgroundType || 'neutral'}
+              colorTokens={colorTokens}
+              variant="body"
+              textStyle={{
+                ...getTextStyle('body-lg'),
+                textAlign: 'center'
+              }}
               className="max-w-2xl mx-auto"
               placeholder="Add optional subheadline to provide context..."
+              sectionId={sectionId}
+              elementKey="subheadline"
+              sectionBackground={sectionBackground}
             />
           )}
         </div>
@@ -324,13 +341,13 @@ export default function ObjectionAccordion(props: LayoutComponentProps) {
 export const componentMeta = {
   name: 'ObjectionAccordion',
   category: 'Conversion Sections',
-  description: 'Address customer objections with expandable responses',
-  tags: ['objections', 'accordion', 'conversion', 'sales'],
+  description: 'Address customer objections with adaptive text colors and expandable responses',
+  tags: ['objections', 'accordion', 'conversion', 'sales', 'adaptive-colors'],
   defaultBackgroundType: 'neutral' as const,
   complexity: 'medium',
   estimatedBuildTime: '25 minutes',
   
-  // Schema for component generation tools
+  // ✅ ENHANCED: Schema for component generation tools
   contentFields: [
     { key: 'headline', label: 'Section Headline', type: 'text', required: true },
     { key: 'subheadline', label: 'Subheadline', type: 'textarea', required: false },
@@ -338,11 +355,21 @@ export const componentMeta = {
     { key: 'objection_responses', label: 'Objection Responses (pipe separated)', type: 'textarea', required: true }
   ],
   
+  // ✅ NEW: Enhanced features
+  features: [
+    'Automatic text color adaptation based on background type',
+    'Professional objection handling design',
+    'Smooth accordion animations with icons',
+    'Individual objection editing in edit mode',
+    'Persuasive response formatting',
+    'Mobile-optimized accordion behavior'
+  ],
+  
   // Usage examples
   useCases: [
-    'Sales page objection handling',
-    'FAQ with persuasive responses',
-    'Conversion optimization',
-    'Trust building section'
+    'Sales page objection handling on dark backgrounds',
+    'FAQ with persuasive responses on brand colors',
+    'Conversion optimization with custom styling',
+    'Trust building section with adaptive text'
   ]
 };

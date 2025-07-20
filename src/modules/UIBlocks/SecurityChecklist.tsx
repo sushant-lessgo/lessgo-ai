@@ -379,3 +379,35 @@ export default function SecurityChecklist({
     </section>
   );
 }
+
+export const componentMeta = {
+  name: 'SecurityChecklist',
+  category: 'Trust & Security',
+  description: 'Interactive security feature checklist with adaptive text colors based on background type',
+  tags: ['security', 'checklist', 'trust', 'features', 'adaptive-colors'],
+  features: [
+    'Automatic text color adaptation based on background type',
+    'Editable security items with optional descriptions',
+    'Visual security icons that match content',
+    'Optional compliance note section',
+    'Trust reinforcement footer',
+    'Responsive design with hover effects'
+  ],
+  props: {
+    sectionId: 'string - Required section identifier',
+    backgroundType: '"primary" | "secondary" | "neutral" | "divider" - Controls text color adaptation',
+    className: 'string - Additional CSS classes'
+  },
+  contentSchema: {
+    headline: 'Main heading text',
+    security_items: 'Pipe-separated list of security features',
+    item_descriptions: 'Optional pipe-separated descriptions for each item',
+    compliance_note: 'Optional compliance and certification text'
+  },
+  examples: [
+    'Enterprise security overview',
+    'Data protection checklist', 
+    'Compliance features list',
+    'Trust indicators section'
+  ]
+};

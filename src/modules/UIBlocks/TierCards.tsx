@@ -464,3 +464,38 @@ export default function TierCards({
     </section>
   );
 }
+
+export const componentMeta = {
+  name: 'TierCards',
+  category: 'Pricing',
+  description: 'Pricing tier cards with adaptive text colors and popular tier highlighting',
+  tags: ['pricing', 'tiers', 'cards', 'features', 'adaptive-colors'],
+  features: [
+    'Automatic text color adaptation based on background type',
+    'Editable tier names, prices, descriptions, and CTAs',
+    'Intelligent feature generation based on tier names',
+    'Popular tier highlighting and scaling',
+    'Responsive grid layout based on tier count',
+    'Trust indicators footer'
+  ],
+  props: {
+    sectionId: 'string - Required section identifier',
+    backgroundType: '"primary" | "secondary" | "neutral" | "divider" - Controls text color adaptation',
+    className: 'string - Additional CSS classes'
+  },
+  contentSchema: {
+    headline: 'Main heading text',
+    tier_names: 'Pipe-separated list of tier names',
+    tier_prices: 'Pipe-separated list of tier prices',
+    tier_descriptions: 'Pipe-separated list of tier descriptions',
+    cta_texts: 'Pipe-separated list of CTA button texts',
+    feature_lists: 'Optional double-pipe separated feature lists',
+    popular_labels: 'Optional pipe-separated boolean values for popular tiers'
+  },
+  examples: [
+    'SaaS pricing plans',
+    'Service tier comparison',
+    'Product package options',
+    'Subscription levels'
+  ]
+};

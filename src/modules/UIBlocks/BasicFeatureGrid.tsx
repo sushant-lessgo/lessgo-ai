@@ -5,8 +5,8 @@ import React from 'react';
 import { useLayoutComponent } from '@/hooks/useLayoutComponent';
 import { LayoutSection } from '@/components/layout/LayoutSection';
 import { 
-  EditableHeadline, 
-  EditableText 
+  EditableAdaptiveHeadline, 
+  EditableAdaptiveText 
 } from '@/components/layout/EditableContent';
 import { LayoutComponentProps } from '@/types/storeTypes';
 import { parsePipeData, updateListData } from '@/utils/dataParsingUtils';
@@ -133,8 +133,10 @@ export default function BasicFeatureGrid(props: LayoutComponentProps) {
     mode,
     blockContent,
     colorTokens,
+    dynamicTextColors,
     getTextStyle,
     sectionBackground,
+    backgroundType,
     handleContentUpdate
   } = useLayoutComponent<BasicFeatureGridContent>({
     ...props,
@@ -160,26 +162,41 @@ export default function BasicFeatureGrid(props: LayoutComponentProps) {
       <div className="max-w-6xl mx-auto">
         {/* Header Section */}
         <div className="text-center mb-12">
-          <EditableHeadline
+          <EditableAdaptiveHeadline
             mode={mode}
             value={blockContent.headline}
             onEdit={(value) => handleContentUpdate('headline', value)}
             level="h2"
-            colorClass={colorTokens.textOnLight || colorTokens.textPrimary}
-            textStyle={getTextStyle('h1')}
+            backgroundType={props.backgroundType || 'neutral'}
+            colorTokens={colorTokens}
+            textStyle={{
+              ...getTextStyle('h1'),
+              textAlign: 'center'
+            }}
             className="mb-4"
+            sectionId={sectionId}
+            elementKey="headline"
+            sectionBackground={sectionBackground}
           />
 
           {/* Subheadline */}
           {(blockContent.subheadline || mode === 'edit') && (
-            <EditableText
+            <EditableAdaptiveText
               mode={mode}
               value={blockContent.subheadline || ''}
               onEdit={(value) => handleContentUpdate('subheadline', value)}
-              colorClass={colorTokens.textSecondary}
-              textStyle={getTextStyle('body-lg')}
+              backgroundType={props.backgroundType || 'neutral'}
+              colorTokens={colorTokens}
+              variant="body"
+              textStyle={{
+                ...getTextStyle('body-lg'),
+                textAlign: 'center'
+              }}
               className="max-w-3xl mx-auto"
               placeholder="Add a subheadline explaining your competitive advantages..."
+              sectionId={sectionId}
+              elementKey="subheadline"
+              sectionBackground={sectionBackground}
             />
           )}
         </div>
@@ -282,13 +299,13 @@ export default function BasicFeatureGrid(props: LayoutComponentProps) {
 export const componentMeta = {
   name: 'BasicFeatureGrid',
   category: 'Comparison Sections',
-  description: 'Feature comparison table showing competitive advantages',
-  tags: ['comparison', 'features', 'competitive', 'table'],
+  description: 'Feature comparison table with adaptive text colors showing competitive advantages',
+  tags: ['comparison', 'features', 'competitive', 'table', 'adaptive-colors'],
   defaultBackgroundType: 'neutral' as const,
   complexity: 'medium',
   estimatedBuildTime: '25 minutes',
   
-  // Schema for component generation tools
+  // ✅ ENHANCED: Schema for component generation tools
   contentFields: [
     { key: 'headline', label: 'Section Headline', type: 'text', required: true },
     { key: 'subheadline', label: 'Subheadline', type: 'textarea', required: false },
@@ -297,9 +314,18 @@ export const componentMeta = {
     { key: 'competitor_names', label: 'Competitor Names (pipe separated)', type: 'text', required: true }
   ],
   
+  // ✅ NEW: Enhanced features
+  features: [
+    'Automatic text color adaptation based on background type',
+    'Interactive comparison table with checkmarks and X marks',
+    'Responsive design for mobile and desktop',
+    'Highlighted primary product column',
+    'Professional table styling with hover effects'
+  ],
+  
   // Usage examples
   useCases: [
-    'SaaS feature comparison',
+    'SaaS feature comparison on branded backgrounds',
     'Product specification tables',
     'Service comparison pages',
     'Competitive analysis sections'

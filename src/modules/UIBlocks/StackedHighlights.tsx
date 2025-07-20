@@ -379,3 +379,35 @@ export default function StackedHighlights({
     </section>
   );
 }
+
+export const componentMeta = {
+  name: 'StackedHighlights',
+  category: 'Features',
+  description: 'Vertical feature highlights with adaptive text colors and unique mechanism branding',
+  tags: ['features', 'highlights', 'stacked', 'mechanism', 'adaptive-colors'],
+  features: [
+    'Automatic text color adaptation based on background type',
+    'Editable highlight titles and descriptions',
+    'Smart icons that match highlight content',
+    'Optional mechanism/brand name badge',
+    'Unique value proposition footer',
+    'Connection lines for visual flow'
+  ],
+  props: {
+    sectionId: 'string - Required section identifier',
+    backgroundType: '"primary" | "secondary" | "neutral" | "divider" - Controls text color adaptation',
+    className: 'string - Additional CSS classes'
+  },
+  contentSchema: {
+    headline: 'Main heading text',
+    highlight_titles: 'Pipe-separated list of highlight titles',
+    highlight_descriptions: 'Pipe-separated list of highlight descriptions',
+    mechanism_name: 'Optional mechanism or brand name'
+  },
+  examples: [
+    'Proprietary system features',
+    'Unique value propositions',
+    'Product capability highlights',
+    'Service differentiators'
+  ]
+};

@@ -5,7 +5,7 @@ import React from 'react';
 import { useLayoutComponent } from '@/hooks/useLayoutComponent';
 import { LayoutSection } from '@/components/layout/LayoutSection';
 import { 
-  EditableHeadline 
+  EditableAdaptiveHeadline 
 } from '@/components/layout/EditableContent';
 import { EditableList } from '@/components/layout/EditableList';
 import { StarRating } from '@/components/layout/ComponentRegistry';
@@ -266,7 +266,9 @@ export default function QuoteGrid(props: LayoutComponentProps) {
     colorTokens,
     getTextStyle,
     sectionBackground,
-    handleContentUpdate
+    handleContentUpdate,
+    dynamicTextColors,
+    backgroundType
   } = useLayoutComponent<QuoteGridContent>({
     ...props,
     contentSchema: CONTENT_SCHEMA
@@ -313,13 +315,18 @@ export default function QuoteGrid(props: LayoutComponentProps) {
       <div className="max-w-7xl mx-auto">
         {/* Header Section */}
         <div className="text-center mb-16">
-          <EditableHeadline
+          <EditableAdaptiveHeadline
             mode={mode}
             value={blockContent.headline}
             onEdit={(value) => handleContentUpdate('headline', value)}
             level="h2"
-            colorClass={colorTokens.textOnLight || colorTokens.textPrimary}
+            backgroundType={props.backgroundType || 'neutral'}
+            colorTokens={colorTokens}
+            sectionId={sectionId}
+            elementKey="headline"
+            sectionBackground={sectionBackground}
             textStyle={getTextStyle('h1')}
+            textAlign="center"
             className="mb-4"
           />
         </div>
@@ -365,11 +372,20 @@ export default function QuoteGrid(props: LayoutComponentProps) {
 export const componentMeta = {
   name: 'QuoteGrid',
   category: 'Social Proof',
-  description: 'Customer testimonial quotes with attribution and star ratings',
-  tags: ['testimonials', 'quotes', 'social-proof', 'customers'],
+  description: 'Customer testimonial quotes with attribution, star ratings, and adaptive text colors',
+  tags: ['testimonials', 'quotes', 'social-proof', 'customers', 'adaptive-colors'],
   defaultBackgroundType: 'neutral' as const,
   complexity: 'medium',
   estimatedBuildTime: '20 minutes',
+  
+  // Key features
+  features: [
+    'Automatic text color adaptation based on background type',
+    'Customer testimonials with star ratings',
+    'Editable quote cards',
+    'Customer attribution with avatars',
+    'Trust reinforcement elements'
+  ],
   
   // Schema for component generation tools
   contentFields: [

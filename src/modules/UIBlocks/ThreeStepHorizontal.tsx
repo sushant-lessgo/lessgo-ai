@@ -355,3 +355,36 @@ export default function ThreeStepHorizontal({
     </section>
   );
 }
+
+export const componentMeta = {
+  name: 'ThreeStepHorizontal',
+  category: 'Process',
+  description: 'Horizontal step-by-step process with adaptive text colors and connecting arrows',
+  tags: ['steps', 'process', 'horizontal', 'workflow', 'adaptive-colors'],
+  features: [
+    'Automatic text color adaptation based on background type',
+    'Editable step titles and descriptions',
+    'Connecting arrows on desktop layout',
+    'Responsive mobile stacking',
+    'Contextual step icons',
+    'Optional conclusion text'
+  ],
+  props: {
+    sectionId: 'string - Required section identifier',
+    backgroundType: '"primary" | "secondary" | "neutral" | "divider" - Controls text color adaptation',
+    className: 'string - Additional CSS classes'
+  },
+  contentSchema: {
+    headline: 'Main heading text',
+    step_titles: 'Pipe-separated list of step titles',
+    step_descriptions: 'Pipe-separated list of step descriptions',
+    step_numbers: 'Optional pipe-separated custom step numbers',
+    conclusion_text: 'Optional conclusion text to summarize the process'
+  },
+  examples: [
+    'How it works process',
+    'Getting started guide',
+    'Implementation steps',
+    'Onboarding flow'
+  ]
+};

@@ -330,3 +330,35 @@ export default function StackedPainBullets({
     </section>
   );
 }
+
+export const componentMeta = {
+  name: 'StackedPainBullets',
+  category: 'Problem Identification',
+  description: 'Pain point identification with adaptive text colors and emotional appeal',
+  tags: ['pain-points', 'problems', 'empathy', 'bullets', 'adaptive-colors'],
+  features: [
+    'Automatic text color adaptation based on background type',
+    'Editable pain points with optional descriptions',
+    'Contextual warning icons for each pain point',
+    'Optional subheadline for additional context',
+    'Emotional conclusion to build empathy',
+    'Red-themed design for urgency'
+  ],
+  props: {
+    sectionId: 'string - Required section identifier',
+    backgroundType: '"primary" | "secondary" | "neutral" | "divider" - Controls text color adaptation',
+    className: 'string - Additional CSS classes'
+  },
+  contentSchema: {
+    headline: 'Main heading text (often a question)',
+    pain_points: 'Pipe-separated list of pain points',
+    pain_descriptions: 'Optional pipe-separated descriptions for each pain point',
+    subheadline: 'Optional subheading for additional context'
+  },
+  examples: [
+    'Customer frustration identification',
+    'Problem statement section',
+    'Challenge recognition',
+    'Pain point validation'
+  ]
+};

@@ -5,8 +5,8 @@ import React from 'react';
 import { useLayoutComponent } from '@/hooks/useLayoutComponent';
 import { LayoutSection } from '@/components/layout/LayoutSection';
 import { 
-  EditableHeadline, 
-  EditableText 
+  EditableAdaptiveHeadline, 
+  EditableAdaptiveText 
 } from '@/components/layout/EditableContent';
 import { LayoutComponentProps } from '@/types/storeTypes';
 import { parsePipeData, updateListData } from '@/utils/dataParsingUtils';
@@ -198,7 +198,9 @@ export default function PersonaGrid(props: LayoutComponentProps) {
     colorTokens,
     getTextStyle,
     sectionBackground,
-    handleContentUpdate
+    handleContentUpdate,
+    dynamicTextColors,
+    backgroundType
   } = useLayoutComponent<PersonaGridContent>({
     ...props,
     contentSchema: CONTENT_SCHEMA
@@ -230,13 +232,18 @@ export default function PersonaGrid(props: LayoutComponentProps) {
       <div className="max-w-7xl mx-auto">
         {/* Header Section */}
         <div className="text-center mb-16">
-          <EditableHeadline
+          <EditableAdaptiveHeadline
             mode={mode}
             value={blockContent.headline}
             onEdit={(value) => handleContentUpdate('headline', value)}
             level="h2"
-            colorClass={colorTokens.textOnLight || colorTokens.textPrimary}
+            backgroundType={props.backgroundType || 'neutral'}
+            colorTokens={colorTokens}
+            sectionId={sectionId}
+            elementKey="headline"
+            sectionBackground={sectionBackground}
             textStyle={getTextStyle('h1')}
+            textAlign="center"
             className="mb-4"
           />
         </div>
@@ -282,11 +289,20 @@ export default function PersonaGrid(props: LayoutComponentProps) {
 export const componentMeta = {
   name: 'PersonaGrid',
   category: 'Feature Sections',
-  description: 'Show how your product serves different user personas',
-  tags: ['personas', 'users', 'grid', 'targeting'],
+  description: 'Show how your product serves different user personas with adaptive text colors',
+  tags: ['personas', 'users', 'grid', 'targeting', 'adaptive-colors'],
   defaultBackgroundType: 'neutral' as const,
   complexity: 'medium',
   estimatedBuildTime: '20 minutes',
+  
+  // Key features
+  features: [
+    'Automatic text color adaptation based on background type',
+    'Role-based persona avatars',
+    'Editable persona descriptions',
+    'Professional role indicators',
+    'Responsive grid layout'
+  ],
   
   // Schema for component generation tools
   contentFields: [

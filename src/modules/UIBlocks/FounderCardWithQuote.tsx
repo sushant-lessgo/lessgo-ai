@@ -5,8 +5,8 @@ import React from 'react';
 import { useLayoutComponent } from '@/hooks/useLayoutComponent';
 import { LayoutSection } from '@/components/layout/LayoutSection';
 import { 
-  EditableHeadline, 
-  EditableText 
+  EditableAdaptiveHeadline, 
+  EditableAdaptiveText 
 } from '@/components/layout/EditableContent';
 import { LayoutComponentProps } from '@/types/storeTypes';
 
@@ -68,7 +68,9 @@ export default function FounderCardWithQuote(props: LayoutComponentProps) {
     colorTokens,
     getTextStyle,
     sectionBackground,
-    handleContentUpdate
+    handleContentUpdate,
+    dynamicTextColors,
+    backgroundType
   } = useLayoutComponent<FounderCardWithQuoteContent>({
     ...props,
     contentSchema: CONTENT_SCHEMA
@@ -106,11 +108,15 @@ export default function FounderCardWithQuote(props: LayoutComponentProps) {
                     <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h4v10h-10z"/>
                   </svg>
                   
-                  <EditableText
+                  <EditableAdaptiveText
                     mode={mode}
                     value={blockContent.founder_quote}
                     onEdit={(value) => handleContentUpdate('founder_quote', value)}
-                    colorClass={colorTokens.textPrimary}
+                    backgroundType={props.backgroundType || 'neutral'}
+                    colorTokens={colorTokens}
+                    sectionId={sectionId}
+                    elementKey="founder_quote"
+                    sectionBackground={sectionBackground}
                     textStyle={getTextStyle('body-lg')}
                     className="text-lg md:text-xl leading-relaxed italic mb-6"
                     placeholder="Add an authentic, personal quote from the founder..."
@@ -119,20 +125,28 @@ export default function FounderCardWithQuote(props: LayoutComponentProps) {
 
                 {/* Founder Info */}
                 <div className="space-y-2">
-                  <EditableHeadline
+                  <EditableAdaptiveHeadline
                     mode={mode}
                     value={blockContent.founder_name}
                     onEdit={(value) => handleContentUpdate('founder_name', value)}
                     level="h3"
-                    colorClass={colorTokens.textPrimary}
+                    backgroundType={props.backgroundType || 'neutral'}
+                    colorTokens={colorTokens}
+                    sectionId={sectionId}
+                    elementKey="founder_name"
+                    sectionBackground={sectionBackground}
                     textStyle={getTextStyle('h3')}
                   />
 
-                  <EditableText
+                  <EditableAdaptiveText
                     mode={mode}
                     value={blockContent.founder_title}
                     onEdit={(value) => handleContentUpdate('founder_title', value)}
-                    colorClass={colorTokens.textSecondary}
+                    backgroundType={props.backgroundType || 'neutral'}
+                    colorTokens={colorTokens}
+                    sectionId={sectionId}
+                    elementKey="founder_title"
+                    sectionBackground={sectionBackground}
                     textStyle={getTextStyle('body')}
                     className="font-medium"
                     placeholder="CEO & Co-Founder"
@@ -144,11 +158,15 @@ export default function FounderCardWithQuote(props: LayoutComponentProps) {
             {/* Optional Founder Bio */}
             {(blockContent.founder_bio || mode === 'edit') && (
               <div className="mt-8 pt-8 border-t border-gray-200">
-                <EditableText
+                <EditableAdaptiveText
                   mode={mode}
                   value={blockContent.founder_bio || ''}
                   onEdit={(value) => handleContentUpdate('founder_bio', value)}
-                  colorClass={colorTokens.textSecondary}
+                  backgroundType={props.backgroundType || 'neutral'}
+                  colorTokens={colorTokens}
+                  sectionId={sectionId}
+                  elementKey="founder_bio"
+                  sectionBackground={sectionBackground}
                   textStyle={getTextStyle('body')}
                   className="leading-relaxed text-center md:text-left"
                   placeholder="Add optional founder bio to share background and experience..."
@@ -173,11 +191,20 @@ export default function FounderCardWithQuote(props: LayoutComponentProps) {
 export const componentMeta = {
   name: 'FounderCardWithQuote',
   category: 'Social Proof',
-  description: 'Founder quote section with avatar and personal message',
-  tags: ['founder', 'quote', 'personal', 'testimonial'],
+  description: 'Founder quote section with avatar, personal message, and adaptive text colors',
+  tags: ['founder', 'quote', 'personal', 'testimonial', 'adaptive-colors'],
   defaultBackgroundType: 'neutral' as const,
   complexity: 'simple',
   estimatedBuildTime: '15 minutes',
+  
+  // Key features
+  features: [
+    'Automatic text color adaptation based on background type',
+    'Founder avatar with initials',
+    'Authentic personal quotes',
+    'Optional founder bio section',
+    'Professional testimonial layout'
+  ],
   
   // Schema for component generation tools
   contentFields: [

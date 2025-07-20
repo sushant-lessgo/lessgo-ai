@@ -1,13 +1,11 @@
-import React, { useEffect } from 'react';
-import { generateColorTokens } from '../Design/ColorSystem/colorTokens';
+import React from 'react';
+import { useLayoutComponent } from '@/hooks/useLayoutComponent';
 import { useTypography } from '@/hooks/useTypography';
-import { useEditStore } from '@/hooks/useEditStore';
-import { useOnboardingStore } from '@/hooks/useOnboardingStore';
 import { 
-  LayoutComponentProps, 
-  extractLayoutContent,
-  StoreElementTypes 
-} from '@/types/storeTypes';
+  EditableAdaptiveHeadline, 
+  EditableAdaptiveText 
+} from '@/components/layout/EditableContent';
+import { LayoutComponentProps } from '@/types/storeTypes';
 
 interface StatBlocksProps extends LayoutComponentProps {}
 
@@ -248,31 +246,21 @@ const StatBlock = ({
   );
 };
 
-export default function StatBlocks({ 
-  sectionId, 
-  className = '',
-  backgroundType = 'neutral' 
-}: StatBlocksProps) {
-
-  const { getTextStyle } = useTypography();
-  const { 
-    content, 
-    mode, 
-    theme,
-    updateElementContent 
-  } = useEditStore();
-
-  // Get content for this section with type safety
-  const sectionContent = content[sectionId];
-  const elements = sectionContent?.elements || {} as Partial<StoreElementTypes>;
-
-  // Helper to handle content updates
-  const handleContentUpdate = (elementKey: string, value: string) => {
-    updateElementContent(sectionId, elementKey, value);
-  };
-
-  // Extract content with type safety and defaults using the new system
-  const blockContent: StatBlocksContent = extractLayoutContent(elements, CONTENT_SCHEMA);
+export default function StatBlocks(props: StatBlocksProps) {
+  const {
+    sectionId,
+    mode,
+    blockContent,
+    colorTokens,
+    dynamicTextColors,
+    getTextStyle,
+    sectionBackground,
+    backgroundType,
+    handleContentUpdate
+  } = useLayoutComponent<StatBlocksContent>({
+    ...props,
+    contentSchema: CONTENT_SCHEMA
+  });
 
   // Parse stat data
   const statItems = parseStatData(blockContent.stat_values, blockContent.stat_labels, blockContent.stat_descriptions);
@@ -296,72 +284,45 @@ export default function StatBlocks({
     handleContentUpdate('stat_descriptions', descriptions.join('|'));
   };
 
-  // Generate color tokens from theme with correct nested structure
-  const colorTokens = generateColorTokens({
-    baseColor: theme?.colors?.baseColor || '#3B82F6',
-    accentColor: theme?.colors?.accentColor || '#10B981',
-    sectionBackgrounds: theme?.colors?.sectionBackgrounds || {
-      primary: '#F8FAFC',
-      secondary: '#F1F5F9', 
-      neutral: '#FFFFFF',
-      divider: '#E2E8F0'
-    }
-  });
-
-  // Get section background based on type
-  const getSectionBackground = () => {
-    switch(backgroundType) {
-      case 'primary': return colorTokens.bgPrimary;
-      case 'secondary': return colorTokens.bgSecondary;
-      case 'divider': return colorTokens.bgDivider;
-      default: return colorTokens.bgNeutral;
-    }
-  };
-
-  // Initialize fonts on component mount
-  useEffect(() => {
-    const { updateFontsFromTone } = useEditStore.getState();
-    updateFontsFromTone(); // Set fonts based on current tone
-  }, []);
-
   return (
     <section 
-      className={`py-16 px-4 ${getSectionBackground()} ${className}`}
+      className={`py-16 px-4`}
+      style={{ backgroundColor: sectionBackground }}
       data-section-id={sectionId}
       data-section-type="StatBlocks"
     >
       <div className="max-w-7xl mx-auto">
         {/* Header Section */}
         <div className="text-center mb-16">
-          <ModeWrapper
+          <EditableAdaptiveHeadline
             mode={mode}
+            value={blockContent.headline}
+            onEdit={(value) => handleContentUpdate('headline', value)}
+            level="h2"
+            backgroundType={backgroundType}
+            colorTokens={colorTokens}
+            textStyle={getTextStyle('h1')}
+            className="mb-4"
             sectionId={sectionId}
             elementKey="headline"
-            onEdit={(value) => handleContentUpdate('headline', value)}
-          >
-            <h2 
-              className={`mb-4 ${colorTokens.textPrimary}`}
-              style={getTextStyle('h1')}
-            >
-              {blockContent.headline}
-            </h2>
-          </ModeWrapper>
+            sectionBackground={sectionBackground}
+          />
 
           {/* Optional Subheadline */}
           {(blockContent.subheadline || mode === 'edit') && (
-            <ModeWrapper
+            <EditableAdaptiveText
               mode={mode}
+              value={blockContent.subheadline}
+              onEdit={(value) => handleContentUpdate('subheadline', value)}
+              backgroundType={backgroundType}
+              colorTokens={colorTokens}
+              textStyle={getTextStyle('body-lg')}
+              className="mb-6 max-w-2xl mx-auto"
+              placeholder="Add optional subheadline..."
               sectionId={sectionId}
               elementKey="subheadline"
-              onEdit={(value) => handleContentUpdate('subheadline', value)}
-            >
-              <p 
-                className={`mb-6 max-w-2xl mx-auto ${colorTokens.textSecondary} ${!blockContent.subheadline && mode === 'edit' ? 'opacity-50' : ''}`}
-                style={getTextStyle('body-lg')}
-              >
-                {blockContent.subheadline || (mode === 'edit' ? 'Add optional subheadline...' : '')}
-              </p>
-            </ModeWrapper>
+              sectionBackground={sectionBackground}
+            />
           )}
         </div>
 
@@ -400,3 +361,36 @@ export default function StatBlocks({
     </section>
   );
 }
+
+export const componentMeta = {
+  name: 'StatBlocks',
+  category: 'Metrics',
+  description: 'Statistical metrics display with adaptive text colors and optional descriptions',
+  tags: ['stats', 'metrics', 'numbers', 'achievements', 'adaptive-colors'],
+  features: [
+    'Automatic text color adaptation based on background type',
+    'Editable stat values, labels, and descriptions',
+    'Smart grid layout based on stat count',
+    'Contextual icons that match stat content',
+    'Optional subheadline for context',
+    'Achievement footer for credibility'
+  ],
+  props: {
+    sectionId: 'string - Required section identifier',
+    backgroundType: '"primary" | "secondary" | "neutral" | "divider" - Controls text color adaptation',
+    className: 'string - Additional CSS classes'
+  },
+  contentSchema: {
+    headline: 'Main heading text',
+    stat_values: 'Pipe-separated list of stat values (e.g., "10,000+|98%|2.5x")',
+    stat_labels: 'Pipe-separated list of stat labels',
+    stat_descriptions: 'Optional pipe-separated descriptions for each stat',
+    subheadline: 'Optional subheading for context'
+  },
+  examples: [
+    'Company achievements',
+    'Product performance metrics',
+    'Customer satisfaction stats',
+    'Growth indicators'
+  ]
+};

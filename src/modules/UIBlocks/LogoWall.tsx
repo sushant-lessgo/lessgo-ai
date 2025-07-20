@@ -5,8 +5,8 @@ import React from 'react';
 import { useLayoutComponent } from '@/hooks/useLayoutComponent';
 import { LayoutSection } from '@/components/layout/LayoutSection';
 import { 
-  EditableHeadline, 
-  EditableText 
+  EditableAdaptiveHeadline, 
+  EditableAdaptiveText 
 } from '@/components/layout/EditableContent';
 import { SocialProofNumber } from '@/components/layout/ComponentRegistry';
 import { LayoutComponentProps } from '@/types/storeTypes';
@@ -142,7 +142,9 @@ export default function LogoWall(props: LayoutComponentProps) {
     colorTokens,
     getTextStyle,
     sectionBackground,
-    handleContentUpdate
+    handleContentUpdate,
+    dynamicTextColors,
+    backgroundType
   } = useLayoutComponent<LogoWallContent>({
     ...props,
     contentSchema: CONTENT_SCHEMA
@@ -169,24 +171,34 @@ export default function LogoWall(props: LayoutComponentProps) {
       <div className="max-w-7xl mx-auto">
         {/* Header Section */}
         <div className="text-center mb-12">
-          <EditableHeadline
+          <EditableAdaptiveHeadline
             mode={mode}
             value={blockContent.headline}
             onEdit={(value) => handleContentUpdate('headline', value)}
             level="h2"
-            colorClass={colorTokens.textOnLight || colorTokens.textPrimary}
+            backgroundType={props.backgroundType || 'neutral'}
+            colorTokens={colorTokens}
+            sectionId={sectionId}
+            elementKey="headline"
+            sectionBackground={sectionBackground}
             textStyle={getTextStyle('h1')}
+            textAlign="center"
             className="mb-4"
           />
 
           {/* Subheadline */}
           {(blockContent.subheadline || mode === 'edit') && (
-            <EditableText
+            <EditableAdaptiveText
               mode={mode}
               value={blockContent.subheadline || ''}
               onEdit={(value) => handleContentUpdate('subheadline', value)}
-              colorClass={colorTokens.textSecondary}
+              backgroundType={props.backgroundType || 'neutral'}
+              colorTokens={colorTokens}
+              sectionId={sectionId}
+              elementKey="subheadline"
+              sectionBackground={sectionBackground}
               textStyle={getTextStyle('body-lg')}
+              textAlign="center"
               className="max-w-2xl mx-auto"
               placeholder="Add optional subheadline to provide context..."
             />
@@ -244,11 +256,20 @@ export default function LogoWall(props: LayoutComponentProps) {
 export const componentMeta = {
   name: 'LogoWall',
   category: 'Social Proof',
-  description: 'Company logo wall showing trusted partners and customers',
-  tags: ['logos', 'companies', 'social-proof', 'trust'],
+  description: 'Company logo wall showing trusted partners and customers with adaptive text colors',
+  tags: ['logos', 'companies', 'social-proof', 'trust', 'adaptive-colors'],
   defaultBackgroundType: 'neutral' as const,
   complexity: 'simple',
   estimatedBuildTime: '15 minutes',
+  
+  // Key features
+  features: [
+    'Automatic text color adaptation based on background type',
+    'Company logo placeholders',
+    'Social proof statistics',
+    'Trust reinforcement elements',
+    'Professional design layout'
+  ],
   
   // Schema for component generation tools
   contentFields: [
