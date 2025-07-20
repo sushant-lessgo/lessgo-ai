@@ -5,8 +5,8 @@ import React from 'react';
 import { useLayoutComponent } from '@/hooks/useLayoutComponent';
 import { LayoutSection } from '@/components/layout/LayoutSection';
 import { 
-  EditableHeadline, 
-  EditableText,
+  EditableAdaptiveHeadline, 
+  EditableAdaptiveText,
   EditableBadge 
 } from '@/components/layout/EditableContent';
 import { 
@@ -57,8 +57,10 @@ export default function CenteredHeadlineCTA(props: LayoutComponentProps) {
     mode,
     blockContent,
     colorTokens,
+    dynamicTextColors,
     getTextStyle,
     sectionBackground,
+    backgroundType,
     handleContentUpdate
   } = useLayoutComponent<CenteredHeadlineCTAContent>({
     ...props,
@@ -99,30 +101,41 @@ export default function CenteredHeadlineCTA(props: LayoutComponentProps) {
         )}
 
         {/* Main Headline */}
-        <EditableHeadline
+        <EditableAdaptiveHeadline
           mode={mode}
           value={blockContent.headline}
           onEdit={(value) => handleContentUpdate('headline', value)}
           level="h1"
-          colorClass={colorTokens.textOnLight || colorTokens.textPrimary}
-          textStyle={getTextStyle('hero')}
+          backgroundType={props.backgroundType || 'primary'}
+          colorTokens={colorTokens}
+          textStyle={{
+            ...getTextStyle('hero'),
+            textAlign: 'center'
+          }}
           className="leading-tight mb-6"
           sectionId={sectionId}
           elementKey="headline"
+          sectionBackground={sectionBackground}
         />
 
         {/* Subheadline */}
         {(blockContent.subheadline || mode === 'edit') && (
-          <EditableText
+          <EditableAdaptiveText
             mode={mode}
             value={blockContent.subheadline || ''}
             onEdit={(value) => handleContentUpdate('subheadline', value)}
-            colorClass={colorTokens.textSecondary}
-            textStyle={getTextStyle('body-lg')}
+            backgroundType={props.backgroundType || 'primary'}
+            colorTokens={colorTokens}
+            variant="body"
+            textStyle={{
+              ...getTextStyle('body-lg'),
+              textAlign: 'center'
+            }}
             className="max-w-3xl mx-auto leading-relaxed mb-8"
             placeholder="Add a compelling subheadline that reinforces your value proposition..."
             sectionId={sectionId}
             elementKey="subheadline"
+            sectionBackground={sectionBackground}
           />
         )}
 
@@ -179,13 +192,13 @@ export default function CenteredHeadlineCTA(props: LayoutComponentProps) {
 export const componentMeta = {
   name: 'CenteredHeadlineCTA',
   category: 'CTA Sections',
-  description: 'High-conversion centered CTA section with headline, urgency, and social proof',
-  tags: ['cta', 'conversion', 'centered', 'headline'],
+  description: 'High-conversion centered CTA section with adaptive text colors and social proof',
+  tags: ['cta', 'conversion', 'centered', 'headline', 'adaptive-colors'],
   defaultBackgroundType: 'primary' as const,
   complexity: 'simple',
   estimatedBuildTime: '15 minutes',
   
-  // Schema for component generation tools
+  // ✅ ENHANCED: Schema for component generation tools
   contentFields: [
     { key: 'headline', label: 'Main Headline', type: 'text', required: true },
     { key: 'subheadline', label: 'Subheadline', type: 'textarea', required: false },
@@ -194,11 +207,21 @@ export const componentMeta = {
     { key: 'trust_items', label: 'Trust Indicators (pipe separated)', type: 'text', required: false }
   ],
   
+  // ✅ NEW: Enhanced features
+  features: [
+    'Automatic text color adaptation based on background type',
+    'High-conversion centered layout design',
+    'Social proof and trust indicators',
+    'Urgency messaging support',
+    'Professional CTA button styling',
+    'Star ratings and compliance badges'
+  ],
+  
   // Usage examples
   useCases: [
-    'Landing page final CTA',
-    'Free trial conversion',
-    'Newsletter signup CTA',
-    'Contact form promotion'
+    'Landing page final CTA on dark gradients',
+    'Free trial conversion with light backgrounds',
+    'Newsletter signup CTA on brand colors',
+    'Contact form promotion with adaptive styling'
   ]
 };

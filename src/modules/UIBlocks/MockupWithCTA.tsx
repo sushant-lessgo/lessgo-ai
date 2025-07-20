@@ -5,8 +5,8 @@ import React from 'react';
 import { useLayoutComponent } from '@/hooks/useLayoutComponent';
 import { LayoutSection } from '@/components/layout/LayoutSection';
 import { 
-  EditableHeadline, 
-  EditableText 
+  EditableAdaptiveHeadline, 
+  EditableAdaptiveText 
 } from '@/components/layout/EditableContent';
 import { CTAButton } from '@/components/layout/ComponentRegistry';
 import { LayoutComponentProps } from '@/types/storeTypes';
@@ -126,8 +126,10 @@ export default function MockupWithCTA(props: LayoutComponentProps) {
     mode,
     blockContent,
     colorTokens,
+    dynamicTextColors,
     getTextStyle,
     sectionBackground,
+    backgroundType,
     handleContentUpdate
   } = useLayoutComponent<MockupWithCTAContent>({
     ...props,
@@ -155,26 +157,35 @@ export default function MockupWithCTA(props: LayoutComponentProps) {
           <div className="order-2 lg:order-2 text-center lg:text-left">
             
             {/* Headline */}
-            <EditableHeadline
+            <EditableAdaptiveHeadline
               mode={mode}
               value={blockContent.headline}
               onEdit={(value) => handleContentUpdate('headline', value)}
               level="h1"
-              colorClass={colorTokens.textOnLight || colorTokens.textPrimary}
+              backgroundType={props.backgroundType || 'neutral'}
+              colorTokens={colorTokens}
               textStyle={getTextStyle('h1')}
               className="mb-6"
+              sectionId={sectionId}
+              elementKey="headline"
+              sectionBackground={sectionBackground}
             />
 
             {/* Subheadline */}
             {(blockContent.subheadline || mode === 'edit') && (
-              <EditableText
+              <EditableAdaptiveText
                 mode={mode}
                 value={blockContent.subheadline || ''}
                 onEdit={(value) => handleContentUpdate('subheadline', value)}
-                colorClass={colorTokens.textSecondary}
+                backgroundType={props.backgroundType || 'neutral'}
+                colorTokens={colorTokens}
+                variant="body"
                 textStyle={getTextStyle('body-lg')}
                 className="mb-8"
                 placeholder="Add optional subheadline to provide more context..."
+                sectionId={sectionId}
+                elementKey="subheadline"
+                sectionBackground={sectionBackground}
               />
             )}
 
@@ -195,27 +206,37 @@ export default function MockupWithCTA(props: LayoutComponentProps) {
             <div className="space-y-3">
               {/* Urgency Text */}
               {(blockContent.urgency_text || mode === 'edit') && (
-                <EditableText
+                <EditableAdaptiveText
                   mode={mode}
                   value={blockContent.urgency_text || ''}
                   onEdit={(value) => handleContentUpdate('urgency_text', value)}
-                  colorClass={colorTokens.textSecondary}
+                  backgroundType={props.backgroundType || 'neutral'}
+                  colorTokens={colorTokens}
+                  variant="body"
                   textStyle={getTextStyle('body-sm')}
                   className="flex items-center justify-center lg:justify-start text-sm"
                   placeholder="Add urgency text (e.g., Limited time offer...)"
+                  sectionId={sectionId}
+                  elementKey="urgency_text"
+                  sectionBackground={sectionBackground}
                 />
               )}
 
               {/* Guarantee Text */}
               {(blockContent.guarantee_text || mode === 'edit') && (
-                <EditableText
+                <EditableAdaptiveText
                   mode={mode}
                   value={blockContent.guarantee_text || ''}
                   onEdit={(value) => handleContentUpdate('guarantee_text', value)}
-                  colorClass={colorTokens.textSecondary}
+                  backgroundType={props.backgroundType || 'neutral'}
+                  colorTokens={colorTokens}
+                  variant="body"
                   textStyle={getTextStyle('body-sm')}
                   className="flex items-center justify-center lg:justify-start text-sm"
                   placeholder="Add guarantee text (e.g., 30-day money back guarantee)"
+                  sectionId={sectionId}
+                  elementKey="guarantee_text"
+                  sectionBackground={sectionBackground}
                 />
               )}
             </div>
@@ -230,13 +251,13 @@ export default function MockupWithCTA(props: LayoutComponentProps) {
 export const componentMeta = {
   name: 'MockupWithCTA',
   category: 'CTA Sections',
-  description: 'Device mockup with focused CTA content for product demonstrations',
-  tags: ['mockup', 'cta', 'device', 'conversion'],
+  description: 'Device mockup with focused CTA content and adaptive text colors for product demonstrations',
+  tags: ['mockup', 'cta', 'device', 'conversion', 'adaptive-colors'],
   defaultBackgroundType: 'neutral' as const,
   complexity: 'simple',
   estimatedBuildTime: '15 minutes',
   
-  // Schema for component generation tools
+  // ✅ ENHANCED: Schema for component generation tools
   contentFields: [
     { key: 'headline', label: 'Main Headline', type: 'text', required: true },
     { key: 'subheadline', label: 'Subheadline', type: 'textarea', required: false },
@@ -245,11 +266,20 @@ export const componentMeta = {
     { key: 'guarantee_text', label: 'Guarantee Text', type: 'text', required: false }
   ],
   
+  // ✅ NEW: Enhanced features
+  features: [
+    'Automatic text color adaptation based on background type',
+    'Professional device mockup (laptop and phone options)',
+    'Focused CTA design for higher conversions',
+    'Responsive layout adapting to screen sizes',
+    'Urgency and guarantee messaging support'
+  ],
+  
   // Usage examples
   useCases: [
-    'Product demo section',
-    'App showcase with CTA',
-    'Software preview',
-    'Platform demonstration'
+    'Product demo section on dark backgrounds',
+    'App showcase with brand color backgrounds',
+    'Software preview with adaptive styling',
+    'Platform demonstration with high contrast'
   ]
 };
