@@ -17,7 +17,7 @@ export const createFormActions = (
   updateForm: (id: string, updates: Partial<SimpleFormData>) => {
     set((state) => {
       state.simpleForms = state.simpleForms || [];
-      const formIndex = state.simpleForms.findIndex(f => f.id === id);
+      const formIndex = state.simpleForms.findIndex((f: SimpleFormData) => f.id === id);
       if (formIndex !== -1) {
         state.simpleForms[formIndex] = {
           ...state.simpleForms[formIndex],
@@ -31,7 +31,7 @@ export const createFormActions = (
   deleteForm: (id: string) => {
     set((state) => {
       state.simpleForms = state.simpleForms || [];
-      state.simpleForms = state.simpleForms.filter(f => f.id !== id);
+      state.simpleForms = state.simpleForms.filter((f: SimpleFormData) => f.id !== id);
       
       // Also remove any button links to this form
       Object.keys(state.content).forEach(sectionId => {
@@ -51,7 +51,7 @@ export const createFormActions = (
   addFormField: (formId: string, field: SimpleFormField) => {
     set((state) => {
       state.simpleForms = state.simpleForms || [];
-      const form = state.simpleForms.find(f => f.id === formId);
+      const form = state.simpleForms.find((f: SimpleFormData) => f.id === formId);
       if (form) {
         form.fields.push(field);
         form.updatedAt = new Date();
@@ -62,9 +62,9 @@ export const createFormActions = (
   updateFormField: (formId: string, fieldId: string, updates: Partial<SimpleFormField>) => {
     set((state) => {
       state.simpleForms = state.simpleForms || [];
-      const form = state.simpleForms.find(f => f.id === formId);
+      const form = state.simpleForms.find((f: SimpleFormData) => f.id === formId);
       if (form) {
-        const fieldIndex = form.fields.findIndex(f => f.id === fieldId);
+        const fieldIndex = form.fields.findIndex((f: SimpleFormField) => f.id === fieldId);
         if (fieldIndex !== -1) {
           form.fields[fieldIndex] = { ...form.fields[fieldIndex], ...updates };
           form.updatedAt = new Date();
@@ -76,9 +76,9 @@ export const createFormActions = (
   removeFormField: (formId: string, fieldId: string) => {
     set((state) => {
       state.simpleForms = state.simpleForms || [];
-      const form = state.simpleForms.find(f => f.id === formId);
+      const form = state.simpleForms.find((f: SimpleFormData) => f.id === formId);
       if (form) {
-        form.fields = form.fields.filter(f => f.id !== fieldId);
+        form.fields = form.fields.filter((f: SimpleFormField) => f.id !== fieldId);
         form.updatedAt = new Date();
       }
     });
@@ -87,9 +87,9 @@ export const createFormActions = (
   reorderFormFields: (formId: string, fieldIds: string[]) => {
     set((state) => {
       state.simpleForms = state.simpleForms || [];
-      const form = state.simpleForms.find(f => f.id === formId);
+      const form = state.simpleForms.find((f: SimpleFormData) => f.id === formId);
       if (form) {
-        form.fields = fieldIds.map(id => form.fields.find(f => f.id === id)!).filter(Boolean);
+        form.fields = fieldIds.map(id => form.fields.find((f: SimpleFormField) => f.id === id)!).filter(Boolean);
         form.updatedAt = new Date();
       }
     });
@@ -121,22 +121,22 @@ export const createFormActions = (
   // Form builder UI
   showFormBuilder: (formId?: string) => {
     set((state) => {
-      state.forms.formBuilder.visible = true;
-      state.forms.formBuilder.editingFormId = formId;
+      state.formBuilder.visible = true;
+      state.formBuilder.editingFormId = formId;
     });
   },
 
   hideFormBuilder: () => {
     set((state) => {
-      state.forms.formBuilder.visible = false;
-      delete state.forms.formBuilder.editingFormId;
+      state.formBuilder.visible = false;
+      delete state.formBuilder.editingFormId;
     });
   },
 
   // Get form by ID
   getFormById: (id: string): SimpleFormData | undefined => {
     const state = get();
-    return state.simpleForms?.find(f => f.id === id);
+    return state.simpleForms?.find((f: SimpleFormData) => f.id === id);
   },
 
   // Get all forms
@@ -148,6 +148,6 @@ export const createFormActions = (
   // Get forms for a specific placement
   getFormsByPlacement: (placement: 'hero' | 'cta-section'): SimpleFormData[] => {
     const state = get();
-    return (state.simpleForms || []).filter(f => f.placement === placement);
+    return (state.simpleForms || []).filter((f: SimpleFormData) => f.placement === placement);
   }
 });

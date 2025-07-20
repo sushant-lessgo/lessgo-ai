@@ -167,9 +167,15 @@ export default function HeroSection({
 
                 {ctaConfig.type === "form" && (
                   <FormConnectedButton 
-                    ctaConfig={ctaConfig}
+                    buttonConfig={{
+                      type: ctaConfig.type,
+                      formId: ctaConfig.formId,
+                      behavior: ctaConfig.behavior
+                    }}
                     className="bg-landing-primary text-white hover:bg-landing-primaryHover transition w-full sm:w-auto text-center"
-                  />
+                  >
+                    {ctaConfig.cta_text}
+                  </FormConnectedButton>
                 )}
               </>
             )}

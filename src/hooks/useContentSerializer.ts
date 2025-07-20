@@ -62,11 +62,24 @@ export const useContentSerializer = (): UseContentSerializerReturn => {
       throw new Error(`Invalid content structure: ${validation.errors.join(', ')}`);
     }
 
-    store.setSections(data.sections);
-    store.setSectionLayouts(data.sectionLayouts);
-    store.setContent(data.content);
-    store.setTheme(data.theme);
-    store.setGlobalSettings(data.globalSettings);
+    // Initialize sections and layouts
+    store.initializeSections(data.sections, data.sectionLayouts);
+    
+    // Update content for each section
+    Object.keys(data.content).forEach(sectionId => {
+      store.setSection(sectionId, data.content[sectionId]);
+    });
+    
+    // Update theme
+    store.updateTheme(data.theme);
+    
+    // Update global settings - need to use specific setters
+    if (data.globalSettings.deviceMode) {
+      store.setDeviceMode(data.globalSettings.deviceMode);
+    }
+    if (data.globalSettings.zoomLevel) {
+      store.setZoomLevel(data.globalSettings.zoomLevel);
+    }
     store.updateMeta({
       title: data.metadata.title,
       tokenId: data.metadata.tokenId,

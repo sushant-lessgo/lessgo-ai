@@ -416,7 +416,11 @@ export function createUIActions(set: any, get: any): UIActions {
             if (!state.content[sectionId].editMetadata) {
               state.content[sectionId].editMetadata = {
                 isSelected: false,
+                isEditing: false,
                 lastModified: Date.now(),
+                isDeletable: true,
+                isMovable: true,
+                isDuplicable: true,
                 completionPercentage: 0,
                 validationStatus: {
                   isValid: true,
@@ -462,7 +466,11 @@ export function createUIActions(set: any, get: any): UIActions {
             if (!state.content[sectionId].editMetadata) {
               state.content[sectionId].editMetadata = {
                 isSelected: false,
+                isEditing: false,
                 lastModified: Date.now(),
+                isDeletable: true,
+                isMovable: true,
+                isDuplicable: true,
                 completionPercentage: 0,
                 validationStatus: {
                   isValid: true,
@@ -895,6 +903,27 @@ export function createUIActions(set: any, get: any): UIActions {
     },
 
     /**
+     * ===== DRAG AND DROP =====
+     */
+    
+    handleDragStart: (sectionId: string, event: DragEvent) => {
+      // TODO: Implement drag start functionality
+      console.log('Drag start:', sectionId, event);
+    },
+
+    handleDragOver: (event: DragEvent) => {
+      // TODO: Implement drag over functionality
+      event.preventDefault();
+      console.log('Drag over:', event);
+    },
+
+    handleDrop: (targetSectionId: string, position: 'before' | 'after', event: DragEvent) => {
+      // TODO: Implement drop functionality
+      event.preventDefault();
+      console.log('Drop:', targetSectionId, position, event);
+    },
+
+    /**
      * ===== PERFORMANCE MONITORING =====
      */
     
@@ -913,6 +942,16 @@ export function createUIActions(set: any, get: any): UIActions {
           debug.trackRender(operation, duration);
         }
       }
+    },
+
+    getPerformanceStats: () => {
+      // TODO: Implement performance stats
+      return {
+        totalOperations: 0,
+        averageOperationTime: 0,
+        slowOperations: [],
+        memoryUsage: 0
+      };
     },
   };
 }

@@ -89,6 +89,7 @@ export interface EditableElement {
   aiContext?: ElementAiContext;
   defaultValue?: string | string[];
   uiProps?: ElementUIProps;
+  metadata?: Record<string, any>;
 }
 
 export type ElementType = 
@@ -132,6 +133,9 @@ export interface SectionCTA {
   size: 'small' | 'medium' | 'large';
   trackingId?: string;
   testVariant?: string;
+  type?: 'link' | 'form' | 'email-form';
+  formId?: string;
+  behavior?: 'scrollTo' | 'openModal';
 }
 
 export interface AiGenerationMetadata {

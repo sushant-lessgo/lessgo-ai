@@ -17,6 +17,7 @@ import type { SimpleFormData, SimpleFormField } from '@/types/simpleForms';
 export function SimpleFormBuilder() {
   const { 
     forms, 
+    formBuilder,
     hideFormBuilder, 
     addForm, 
     updateForm, 
@@ -25,6 +26,14 @@ export function SimpleFormBuilder() {
     updateFormField,
     removeFormField
   } = useEditStore();
+
+  // Provide fallback if formBuilder is undefined
+  const safeFormBuilder = formBuilder || {
+    visible: false,
+    editingFormId: undefined,
+    editingField: undefined,
+    fieldLibrary: []
+  };
 
   const [formData, setFormData] = useState<SimpleFormData>({
     id: '',
@@ -40,7 +49,7 @@ export function SimpleFormBuilder() {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isEditing, setIsEditing] = useState(false);
 
-  const editingFormId = forms.formBuilder.editingFormId;
+  const editingFormId = safeFormBuilder.editingFormId;
 
   useEffect(() => {
     if (editingFormId) {
@@ -131,10 +140,10 @@ export function SimpleFormBuilder() {
     hideFormBuilder();
   };
 
-  if (!forms.formBuilder.visible) return null;
+  if (!safeFormBuilder.visible) return null;
 
   return (
-    <Dialog open={forms.formBuilder.visible} onOpenChange={handleClose}>
+    <Dialog open={safeFormBuilder.visible} onOpenChange={handleClose}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>

@@ -139,9 +139,15 @@ export default function OfferSection({
         ) : ctaConfig?.type === "form" ? (
           <div className="mt-6">
             <FormConnectedButton 
-              ctaConfig={ctaConfig}
+              buttonConfig={{
+                type: ctaConfig.type,
+                formId: ctaConfig.formId,
+                behavior: ctaConfig.behavior
+              }}
               className="bg-white text-landing-primary font-semibold px-6 py-3 rounded-lg text-base hover:bg-gray-100 transition w-full sm:w-auto text-center"
-            />
+            >
+              {ctaConfig.cta_text}
+            </FormConnectedButton>
           </div>
         ) : ctaConfig && ctaConfig.type !== "email-form" ? (
           <EditableWrapper useAltHover={true} isEditable={isEditable} sectionId={sectionId} elementKey="cta_text">

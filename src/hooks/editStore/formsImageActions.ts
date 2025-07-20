@@ -2,6 +2,7 @@
 import type { EditStore } from '@/types/store';
 import type { FormsImageActions } from '@/types/store';
 import type { FormField } from '@/types/core/forms';
+import { createFormActions } from './formActions';
 /**
  * ===== UTILITY FUNCTIONS =====
  */
@@ -24,7 +25,11 @@ const getFileSizeMB = (file: File): number => {
  * ===== FORMS & IMAGE ACTIONS CREATOR =====
  */
 export function createFormsImageActions(set: any, get: any): FormsImageActions {
+  const formActions = createFormActions(set, get);
+  
   return {
+    // Include all form actions
+    ...formActions,
     /**
      * ===== FORM MANAGEMENT =====
      */

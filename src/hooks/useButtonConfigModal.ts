@@ -1,6 +1,6 @@
 // Global state for button configuration modal
 import { create } from 'zustand';
-import type { ElementSelection } from '@/types/core/ui';
+import type { ElementSelection } from '@/types/store/state';
 
 interface ButtonConfigModalState {
   isOpen: boolean;

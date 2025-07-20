@@ -208,15 +208,6 @@ export interface UISlice {
     elementKey: string;
   };
   
-  // Forms State
-  forms: {
-    activeForm?: string;
-    formBuilder: {
-      visible: boolean;
-      editingField?: string;
-    };
-  };
-  
   formData: Record<string, { fields: any[]; settings: any }>;
   
   // Images State
@@ -542,7 +533,8 @@ export interface StoreState extends
   ContentSlice,
   UISlice,
   MetaSlice,
-  PersistenceSlice {
+  PersistenceSlice,
+  FormsSlice {
   // Additional computed or derived state can be added here
 }
 

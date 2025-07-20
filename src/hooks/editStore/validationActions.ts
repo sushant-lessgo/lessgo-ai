@@ -83,7 +83,11 @@ export function createValidationActions(set: any, get: any): ValidationActions {
           if (!state.content[sectionId].editMetadata) {
             state.content[sectionId].editMetadata = {
               isSelected: false,
+              isEditing: false,
               lastModified: Date.now(),
+              isDeletable: true,
+              isMovable: true,
+              isDuplicable: true,
               completionPercentage: 0,
               validationStatus: {
                 isValid: true,

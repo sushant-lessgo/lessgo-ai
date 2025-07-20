@@ -9,7 +9,7 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useEditStore } from '@/hooks/useEditStore';
 import { Plus } from 'lucide-react';
-import type { ElementSelection } from '@/types/core/ui';
+import type { ElementSelection } from '@/types/store/state';
 
 interface ButtonConfig {
   type: 'link' | 'email-form' | 'form';

@@ -59,6 +59,7 @@ getTypographyForSection: (sectionId: string) => FontTheme;
   // Color System Integration
   getColorTokens: () => ReturnType<typeof import('@/modules/Design/ColorSystem/colorTokens').generateColorTokens>;
   updateColorTokens: (newTokens: ColorTokens) => void;
+  initializeSections: (sectionIds: string[], sectionLayouts: Record<string, string>) => void;
 }
 
 /**
@@ -174,6 +175,7 @@ export interface UIActions {
   announceLiveRegion: (message: string, priority?: 'polite' | 'assertive') => void;
   focusElement: (elementId: string) => void;
   trackPerformance: (operation: string, startTime: number) => void;
+  getPerformanceStats: () => any;
   
   // Advanced Menu Management
   showAdvancedMenu: (
@@ -365,7 +367,7 @@ export interface MetaActions {
   // Global Operations
   reset: () => void;
   export: () => object;
-  loadFromDraft: (apiResponse: any) => Promise<void>;
+  loadFromDraft: (apiResponse: any, urlTokenId?: string) => Promise<void>;
   save: () => Promise<void>;
 }
 

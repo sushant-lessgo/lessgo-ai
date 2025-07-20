@@ -153,11 +153,6 @@ function createInitialState() {
       visible: false,
       variations: [] as string[],
     },
-    forms: {
-      formBuilder: {
-        visible: false,
-      },
-    },
     formData: {} as Record<string, { fields: FormField[]; settings: any }>,
     images: {
       assets: {},
@@ -216,6 +211,19 @@ function createInitialState() {
       changedFields: [],
       lastChangeTimestamp: Date.now(),
     },
+
+    // FormsSlice 
+    forms: {} as Record<string, any>,
+    simpleForms: [] as any[],
+    activeForm: undefined as string | undefined,
+    formBuilder: {
+      visible: false,
+      editingField: undefined as string | undefined,
+      editingFormId: undefined as string | undefined,
+      fieldLibrary: [],
+    },
+    integrations: {} as Record<string, any>,
+    analytics: {} as Record<string, any>,
 
     // Persistence Slice
     persistence: {

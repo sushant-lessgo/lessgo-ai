@@ -41,9 +41,15 @@ export function EditableCTA({ ctaConfig, isEditable, dispatch, ctaText, sectionI
       >
         {ctaConfig.type === 'form' ? (
           <FormConnectedButton 
-            ctaConfig={ctaConfig}
+            buttonConfig={{
+              type: ctaConfig.type,
+              formId: ctaConfig.formId,
+              behavior: ctaConfig.behavior
+            }}
             className="w-full"
-          />
+          >
+            {ctaConfig.cta_text}
+          </FormConnectedButton>
         ) : (
           <Button 
             className="w-full"

@@ -659,5 +659,13 @@ getTypographyForSection: (sectionId: string) => {
         state.persistence.isDirty = true;
         state.lastUpdated = Date.now();
       }),
+
+    initializeSections: (sectionIds: string[], sectionLayouts: Record<string, string>) =>
+      set((state: EditStore) => {
+        state.sections = sectionIds;
+        state.sectionLayouts = sectionLayouts;
+        state.persistence.isDirty = true;
+        state.lastUpdated = Date.now();
+      }),
   };
 }

@@ -46,7 +46,7 @@ export function PreviewButton({ tokenId }: PreviewButtonProps) {
     }
   }, []);
   
-  const handleClick = (e) => {
+  const handleClick = (e: React.MouseEvent) => {
     try {
       handlePreviewClick();
     } catch (error) {
@@ -60,7 +60,7 @@ export function PreviewButton({ tokenId }: PreviewButtonProps) {
       onClick={handleClick}
       onMouseUp={() => {
         // Workaround: Manually trigger click handler since click events are blocked
-        handleClick({} as any);
+        handleClick({} as React.MouseEvent);
       }}
       disabled={isNavigating}
       className={`
