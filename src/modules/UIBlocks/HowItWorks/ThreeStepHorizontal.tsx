@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { generateColorTokens } from '../Design/ColorSystem/colorTokens';
+import { generateColorTokens } from '../../Design/ColorSystem/colorTokens';
 import { useTypography } from '@/hooks/useTypography';
 import { useEditStore } from '@/hooks/useEditStore';
 import { useOnboardingStore } from '@/hooks/useOnboardingStore';

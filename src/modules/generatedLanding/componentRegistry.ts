@@ -1,25 +1,25 @@
 import React from 'react';
 
-import AccordionFAQ from '@/modules/UIBlocks/AccordionFAQ';
-import BasicFeatureGrid from '@/modules/UIBlocks/BasicFeatureGrid';
-import CenteredHeadlineCTA from '@/modules/UIBlocks/CenteredHeadlineCTA';
-import FounderCardWithQuote from '@/modules/UIBlocks/FounderCardWithQuote';
-import IconGrid from '@/modules/UIBlocks/IconGrid';
-import LeftCopyRightImage from '@/modules/UIBlocks/leftCopyRightImage';
-import LogoGrid from '@/modules/UIBlocks/LogoGrid';
-import LogoWall from '@/modules/UIBlocks/LogoWall';
-import MockupWithCTA from '@/modules/UIBlocks/MockupWithCTA';
-import ObjectionAccordion from '@/modules/UIBlocks/ObjectionAccordion';
-import PersonaGrid from '@/modules/UIBlocks/PersonaGrid';
-import QuoteGrid from '@/modules/UIBlocks/QuoteGrid';
-import SecurityChecklist from '@/modules/UIBlocks/SecurityChecklist';
-import SideBySideBlock from '@/modules/UIBlocks/sideBySideBlock';
-import StackedHighlights from '@/modules/UIBlocks/StackedHighlights';
-import StackedPainBullets from '@/modules/UIBlocks/StackedPainBullets';
-import StackedTextVisual from '@/modules/UIBlocks/StackedTextVisual';
-import StatBlocks from '@/modules/UIBlocks/StatBlocks';
-import ThreeStepHorizontal from '@/modules/UIBlocks/ThreeStepHorizontal';
-import TierCards from '@/modules/UIBlocks/TierCards';
+import AccordionFAQ from '@/modules/UIBlocks/FAQ/AccordionFAQ';
+import BasicFeatureGrid from '@/modules/UIBlocks/Comparison/BasicFeatureGrid';
+import CenteredHeadlineCTA from '@/modules/UIBlocks/PrimaryCTA/CenteredHeadlineCTA';
+import FounderCardWithQuote from '@/modules/UIBlocks/FounderNote/FounderCardWithQuote';
+import IconGrid from '@/modules/UIBlocks/Features/IconGrid';
+import LeftCopyRightImage from '@/modules/UIBlocks/Hero/leftCopyRightImage';
+import LogoGrid from '@/modules/UIBlocks/Integration/LogoGrid';
+import LogoWall from '@/modules/UIBlocks/SocialProof/LogoWall';
+import MockupWithCTA from '@/modules/UIBlocks/Close/MockupWithCTA';
+import ObjectionAccordion from '@/modules/UIBlocks/Objection/ObjectionAccordion';
+import PersonaGrid from '@/modules/UIBlocks/UseCase/PersonaGrid';
+import QuoteGrid from '@/modules/UIBlocks/Testimonial/QuoteGrid';
+import SecurityChecklist from '@/modules/UIBlocks/Security/SecurityChecklist';
+import SideBySideBlock from '@/modules/UIBlocks/BeforeAfter/SideBySideBlock';
+import StackedHighlights from '@/modules/UIBlocks/UniqueMechanism/StackedHighlights';
+import StackedPainBullets from '@/modules/UIBlocks/Problem/StackedPainBullets';
+import StackedTextVisual from '@/modules/UIBlocks/BeforeAfter/StackedTextVisual';
+import StatBlocks from '@/modules/UIBlocks/Results/StatBlocks';
+import ThreeStepHorizontal from '@/modules/UIBlocks/HowItWorks/ThreeStepHorizontal';
+import TierCards from '@/modules/UIBlocks/Pricing/TierCards';
 
 
 // Component registry type definition

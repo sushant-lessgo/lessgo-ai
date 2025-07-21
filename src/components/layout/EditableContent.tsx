@@ -236,13 +236,6 @@ export function EditableHeadline({
       ...formatState,
     };
     
-    // Debug logging
-    console.log('🔍 EditableAdaptiveHeadline formatState debug:', {
-      inputFormatState: formatState,
-      textStyleTextAlign: textStyle?.textAlign,
-      finalState: baseState,
-      elementKey: props.elementKey
-    });
     
     return baseState;
   }, [level, dynamicColor, formatState, textStyle?.textAlign]);
