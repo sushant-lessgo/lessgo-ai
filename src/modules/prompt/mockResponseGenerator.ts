@@ -32,6 +32,34 @@ export function generateMockResponse(prompt: string): any {
  * ✅ NEW: Extracts which sections are actually requested in the prompt
  */
 function extractRequestedSections(prompt: string): string[] {
+  console.log('🔍 Mock generator: Extracting sections from prompt')
+  
+  // First, try to extract from pageStore sections (most reliable)
+  const pageStoreSectionsPatterns = [
+    /sections.*?\[([^\]]+)\]/s,
+    /"sections":\s*\[([^\]]+)\]/s,
+    /layout.*sections.*\[([^\]]+)\]/s
+  ]
+  
+  for (const pattern of pageStoreSectionsPatterns) {
+    const match = prompt.match(pattern)
+    if (match) {
+      try {
+        const sectionsArray = match[1]
+          .split(',')
+          .map(s => s.trim().replace(/['"]/g, ''))
+          .filter(s => s.length > 0)
+        
+        if (sectionsArray.length > 0 && sectionsArray.length <= 10) {
+          console.log('✅ Extracted sections from pageStore pattern:', sectionsArray)
+          return sectionsArray
+        }
+      } catch (error) {
+        console.warn('Failed to parse sections from pageStore match')
+      }
+    }
+  }
+
   // Look for JSON structure in the prompt which shows requested sections
   const jsonMatch = prompt.match(/\{[\s\S]*?\}/g)
   if (!jsonMatch) {
@@ -46,15 +74,25 @@ function extractRequestedSections(prompt: string): string[] {
     const jsonObj = JSON.parse(jsonString)
     const sections = Object.keys(jsonObj)
     
-    if (sections.length > 0) {
-      console.log('✅ Extracted sections from prompt JSON:', sections)
-      return sections
+    // Filter to only known valid sections to prevent returning too many
+    const validSections = [
+      'hero', 'problem', 'beforeAfter', 'useCases', 'features', 'uniqueMechanism', 
+      'howItWorks', 'results', 'testimonials', 'socialProof', 'comparisonTable', 
+      'objectionHandling', 'integrations', 'security', 'pricing', 'founderNote', 
+      'faq', 'cta', 'closeSection'
+    ]
+    
+    const filteredSections = sections.filter(s => validSections.includes(s))
+    
+    if (filteredSections.length > 0 && filteredSections.length <= 12) { // Reasonable limit
+      console.log('✅ Extracted sections from prompt JSON:', filteredSections)
+      return filteredSections
     }
   } catch (error) {
     console.warn('Failed to parse JSON from prompt, trying regex extraction')
   }
 
-  // Fallback: Extract section names from prompt text
+  // Fallback: Extract section names from prompt text  
   const sectionPattern = /"([a-zA-Z]+)":\s*\{/g
   const sections: string[] = []
   let match
@@ -63,14 +101,15 @@ function extractRequestedSections(prompt: string): string[] {
     sections.push(match[1])
   }
 
-  if (sections.length > 0) {
+  if (sections.length > 0 && sections.length <= 12) { // Reasonable limit
     console.log('✅ Extracted sections from prompt regex:', sections)
     return sections
   }
 
-  // Final fallback
-  console.warn('Could not extract sections from prompt, using safe defaults')
-  return ['hero', 'features', 'cta']
+  // Final fallback - only essential sections
+  console.warn('Could not extract sections from prompt, using minimal safe defaults')
+  console.log('📝 Prompt preview (first 500 chars):', prompt.substring(0, 500))
+  return ['hero', 'problem', 'features', 'cta'] // Only 4 essential sections
 }
 
 /**

@@ -2,7 +2,7 @@
 "use client";
 
 import React, { useState } from 'react';
-import { useEditStore } from '@/hooks/useEditStore';
+import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
 import { TypographyControls } from '../ui/TypographyControls';
 import { BackgroundSystemModal } from '../ui/BackgroundSystemModal';
 import { EditHeaderRightPanel } from './EditHeaderRightPanel';

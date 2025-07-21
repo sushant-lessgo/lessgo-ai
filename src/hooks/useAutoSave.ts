@@ -1,6 +1,6 @@
 // hooks/useAutoSave.ts - React Hook for Auto-Save Integration
 import { useCallback, useEffect, useRef, useMemo } from 'react';
-import { useEditStore } from './useEditStore';
+import { useEditStoreLegacy as useEditStore } from './useEditStoreLegacy';
 import { VersionManager, type ConflictResolution } from '@/utils/versionManager';
 import type { AutoSaveState } from '@/middleware/autoSaveMiddleware';
 import type { ChangeEvent } from '@/middleware/autoSaveMiddleware';
@@ -651,9 +651,6 @@ const serializationActions: SerializationActions = {
     getSaveStatusMessage,
     getSaveStatusColor,
     getConflictSummary,
-    saveWithSerializationNow,
-    validateAndSave,
-    
   };
 };
 

@@ -2,7 +2,7 @@
 "use client";
 
 import React, { useState } from 'react';
-import { useEditStore } from '@/hooks/useEditStore';
+import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
 
 export function ThemeSelector() {
   const { theme, /* setTheme, */ getColorTokens } = useEditStore();

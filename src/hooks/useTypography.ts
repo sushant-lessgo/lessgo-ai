@@ -1,6 +1,6 @@
 // useTypography.ts
 
-import { useEditStore } from '@/hooks/useEditStore';
+import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
 import { landingTypography } from '@/modules/Design/fontSystem/landingTypography';
 
 export function useTypography() {

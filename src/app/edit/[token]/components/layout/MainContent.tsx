@@ -2,7 +2,7 @@
 "use client";
 
 import React, { useRef, useEffect, useState } from 'react';
-import { useEditStore } from '@/hooks/useEditStore';
+import { useEditStoreContext, useStoreState } from '@/components/EditProvider';
 // Removed useSelection - now using unified useEditor system
 import { EditablePageRenderer } from '../ui/EditablePageRenderer';
 import { FloatingToolbars } from '../ui/FloatingToolbars';
@@ -17,32 +17,64 @@ interface MainContentProps {
   tokenId: string;
 }
 
+// Helper function to get fallback layouts for sections
+function getSectionFallbackLayout(sectionId: string): string {
+  const sectionFallbacks: Record<string, string> = {
+    beforeAfter: "SideBySideBlocks",
+    closeSection: "MockupWithCTA", 
+    comparisonTable: "BasicFeatureGrid",
+    faq: "AccordionFAQ",
+    features: "IconGrid",
+    founderNote: "FounderCardWithQuote",
+    hero: "leftCopyRightImage",
+    howItWorks: "ThreeStepHorizontal",
+    integrations: "LogoGrid",
+    objectionHandling: "ObjectionAccordion",
+    pricing: "TierCards",
+    cta: "CenteredHeadlineCTA",
+    problem: "StackedPainBullets",
+    results: "StatBlocks",
+    security: "ComplianceBadgeRow",
+    socialProof: "LogoWall",
+    testimonials: "QuoteGrid",
+    uniqueMechanism: "StackedHighlights",
+    useCases: "PersonaGrid",
+  };
+  
+  return sectionFallbacks[sectionId] || "IconGrid"; // Ultimate fallback
+}
+
 export function MainContent({ tokenId }: MainContentProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [showScrollIndicator, setShowScrollIndicator] = useState(false);
 
-  const store = useEditStore();
+  // Get store context and state
+  const { store } = useEditStoreContext();
+  
+  // Use selectors for frequently accessed state
+  const sections = useStoreState(state => state.sections);
+  const content = useStoreState(state => state.content);
+  const sectionLayouts = useStoreState(state => state.sectionLayouts);
+  const mode = useStoreState(state => state.mode);
+  const globalSettings = useStoreState(state => state.globalSettings);
+  const selectedSection = useStoreState(state => state.selectedSection);
+  const selectedElement = useStoreState(state => state.selectedElement);
+  const multiSelection = useStoreState(state => state.multiSelection);
+  
+  // Get actions from store
+  const storeState = store?.getState();
   const {
-    sections,
-    content,
-    sectionLayouts,
-    mode,
-    globalSettings,
-    selectedSection,
-    selectedElement,
-    multiSelection,
     selectElement,
     updateElementContent,
     addSection,
     reorderSections,
     setActiveSection,
-    
     showElementToolbar,
     showSectionToolbar,
     getColorTokens,
     trackPerformance,
     announceLiveRegion,
-  } = store;
+  } = storeState || {};
   
   // Debug: check if functions exist
   // console.log('🔍 Store functions available:', {
@@ -136,9 +168,11 @@ const {
       const currentMulti = multiSelection.includes(sectionId) 
         ? multiSelection.filter(id => id !== sectionId)
         : [...multiSelection, sectionId];
-      useEditStore.setState(state => {
-        state.multiSelection = currentMulti;
-      });
+      if (store) {
+        store.setState((state: any) => {
+          state.multiSelection = currentMulti;
+        });
+      }
     } else if (isShiftClick && selectedSection) {
       // Range selection
       const allSections = sections;
@@ -149,16 +183,20 @@ const {
         const rangeStart = Math.min(startIndex, endIndex);
         const rangeEnd = Math.max(startIndex, endIndex);
         const rangeSelection = allSections.slice(rangeStart, rangeEnd + 1);
-        useEditStore.setState(state => {
-          state.multiSelection = rangeSelection;
-        });
+        if (store) {
+          store.setState((state: any) => {
+            state.multiSelection = rangeSelection;
+          });
+        }
       }
     } else {
       // Single selection with context-aware toolbar
       setActiveSection(sectionId);
-      useEditStore.setState(state => {
-        state.multiSelection = [];
-      });
+      if (store) {
+        store.setState((state: any) => {
+          state.multiSelection = [];
+        });
+      }
       
       // Calculate position for section toolbar
       const sectionElement = document.querySelector(`[data-section-id="${sectionId}"]`);
@@ -177,8 +215,8 @@ const {
         } else {
           console.error('❌ showSectionToolbar is not a function:', typeof showSectionToolbar);
           // Fallback: use direct store access
-          const storeInstance = useEditStore.getState();
-          if (typeof storeInstance.showToolbar === 'function') {
+          const storeInstance = store?.getState();
+          if (storeInstance && typeof storeInstance.showToolbar === 'function') {
             storeInstance.showToolbar('section', sectionId, position);
           }
         }
@@ -226,9 +264,11 @@ const {
     });
 
     // Clear multi-selection when selecting element
-    useEditStore.setState(state => {
-      state.multiSelection = [];
-    });
+    if (store) {
+      store.setState((state: any) => {
+        state.multiSelection = [];
+      });
+    }
 
     // Show element toolbar with calculated position (use timeout to avoid infinite loop)
     const elementId = `${sectionId}.${elementKey}`;
@@ -287,32 +327,32 @@ const {
     case 'regenerate':
     case 'regenerate-section':
       if (selectedSection) {
-        useEditStore.getState().regenerateSection(selectedSection);
+        store?.getState().regenerateSection?.(selectedSection);
       }
       break;
       
     case 'regenerate-copy':
       if (selectedElement) {
-        useEditStore.getState().regenerateElement(selectedElement.sectionId, selectedElement.elementKey);
+        store?.getState().regenerateElement?.(selectedElement.sectionId, selectedElement.elementKey);
       }
       break;
       
     case 'get-variations':
       if (selectedElement) {
-        useEditStore.getState().regenerateElement(selectedElement.sectionId, selectedElement.elementKey, 5);
+        store?.getState().regenerateElement(selectedElement.sectionId, selectedElement.elementKey, 5);
       }
       break;
       
     case 'convert-form':
       if (selectedElement) {
-        useEditStore.getState().convertCTAToForm(selectedElement.sectionId, selectedElement.elementKey);
+        store?.getState().convertCTAToForm(selectedElement.sectionId, selectedElement.elementKey);
       }
       break;
       
     case 'duplicate':
     case 'duplicate-section':
       if (selectedSection) {
-        useEditStore.getState().duplicateSection(selectedSection);
+        store?.getState().duplicateSection(selectedSection);
       }
       break;
       
@@ -375,10 +415,10 @@ const handleAddSection = (afterSectionId?: string) => {
   const newSectionId = addSection('hero', position);
 
   // Then update the section content separately using updateElementContent
-  const store = useEditStore.getState();
+  const storeState = store?.getState();
   
   // Set the section layout first
-  store.setSection(newSectionId, {
+  storeState?.setSection?.(newSectionId, {
     layout: 'hero-centered',
     elements: {}, // Empty elements object initially
   });
@@ -555,7 +595,7 @@ const handleAddSection = (afterSectionId?: string) => {
                       <EditablePageRenderer
                         sectionId={sectionId}
                         sectionData={content[sectionId]}
-                        layout={sectionLayouts[sectionId] || content[sectionId]?.layout || 'default'}  // ← Gets correct layout
+                        layout={sectionLayouts[sectionId] || content[sectionId]?.layout || getSectionFallbackLayout(sectionId)}  // ← Gets correct layout
                         mode={mode}
                         isSelected={selectedSection === sectionId}
                         onElementClick={handleElementClick}
@@ -674,9 +714,9 @@ const handleAddSection = (afterSectionId?: string) => {
                       // Bulk delete selected sections
                       if (confirm(`Delete ${multiSelection.length} selected sections?`)) {
                         multiSelection.forEach(sectionId => {
-                          useEditStore.getState().removeSection(sectionId);
+                          store?.getState().removeSection(sectionId);
                         });
-                        useEditStore.setState(state => {
+                        store?.setState((state: any) => {
                           state.multiSelection = [];
                         });
                         announceLiveRegion(`Deleted ${multiSelection.length} sections`);
@@ -691,7 +731,7 @@ const handleAddSection = (afterSectionId?: string) => {
                     onClick={() => {
                       // Duplicate selected sections
                       multiSelection.forEach(sectionId => {
-                        useEditStore.getState().duplicateSection(sectionId);
+                        store?.getState().duplicateSection(sectionId);
                       });
                       announceLiveRegion(`Duplicated ${multiSelection.length} sections`);
                     }}
@@ -702,7 +742,7 @@ const handleAddSection = (afterSectionId?: string) => {
                   
                   <button
                     onClick={() => {
-                      useEditStore.setState(state => {
+                      store?.setState((state: any) => {
                         state.multiSelection = [];
                       });
                       announceLiveRegion('Cleared multi-selection');

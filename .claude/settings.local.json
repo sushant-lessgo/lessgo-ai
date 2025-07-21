@@ -25,7 +25,10 @@
       "Bash(pkill:*)",
       "Bash(git log:*)",
       "Bash(cp:*)",
-      "Bash(mkdir:*)"
+      "Bash(mkdir:*)",
+      "Bash(sed:*)",
+      "Bash(timeout 30s npm run dev)",
+      "Bash(true)"
     ],
     "deny": []
   }

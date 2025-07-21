@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { generateColorTokens } from '../../Design/ColorSystem/colorTokens';
 import { useTypography } from '@/hooks/useTypography';
-import { useEditStore } from '@/hooks/useEditStore';
+import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
 import { useOnboardingStore } from '@/hooks/useOnboardingStore';
 import { 
   LayoutComponentProps, 

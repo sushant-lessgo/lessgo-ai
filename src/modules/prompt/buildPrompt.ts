@@ -10,7 +10,7 @@ import type {
 // ✅ PERMANENT FIX: Use the actual store state interfaces
 // Import the store state getter function to access current types
 import { useOnboardingStore } from '@/hooks/useOnboardingStore';
-import { useEditStore } from '@/hooks/useEditStore';
+import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
 
 // ✅ FIXED: Extract actual store types from Zustand stores
 type OnboardingStore = ReturnType<typeof useOnboardingStore.getState>;

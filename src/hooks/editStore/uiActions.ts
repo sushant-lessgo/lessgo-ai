@@ -318,19 +318,19 @@ export function createUIActions(set: any, get: any): UIActions {
     
     setActiveForm: (formId?: string) =>
       set((state: EditStore) => {
-        state.forms.activeForm = formId;
+        (state.forms as any).activeForm = formId;
       }),
     
     showFormBuilder: () =>
       set((state: EditStore) => {
-        state.forms.formBuilder.visible = true;
+        (state.forms as any).formBuilder.visible = true;
         state.leftPanel.activeTab = 'pageStructure'; // Or dedicated forms tab
       }),
     
     hideFormBuilder: () =>
       set((state: EditStore) => {
-        state.forms.formBuilder.visible = false;
-        state.forms.formBuilder.editingField = undefined;
+        (state.forms as any).formBuilder.visible = false;
+        (state.forms as any).formBuilder.editingField = undefined;
       }),
     
     convertCTAToForm: (sectionId: string, elementKey: string) =>
@@ -361,8 +361,8 @@ export function createUIActions(set: any, get: any): UIActions {
           state.history.redoStack = [];
         }
         
-        state.forms.activeForm = formId;
-        state.forms.formBuilder.visible = true;
+        (state.forms as any).activeForm = formId;
+        (state.forms as any).formBuilder.visible = true;
         state.persistence.isDirty = true;
       }),
 

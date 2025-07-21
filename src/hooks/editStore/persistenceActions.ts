@@ -197,12 +197,12 @@ export function createPersistenceActions(set: any, get: any) {
 
     showFormBuilder: () =>
       set((state: EditStore) => {
-        state.forms.formBuilder.visible = true;
+        (state.forms as any).formBuilder.visible = true;
       }),
 
     hideFormBuilder: () =>
       set((state: EditStore) => {
-        state.forms.formBuilder.visible = false;
+        (state.forms as any).formBuilder.visible = false;
       }),
 
     /**

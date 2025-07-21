@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useEditStore } from '@/hooks/useEditStore';
+import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
 import { Plus } from 'lucide-react';
 import type { ElementSelection } from '@/types/store/state';
 
@@ -227,7 +227,7 @@ export function ButtonConfigurationModal({
                         <SelectValue placeholder="Select a form" />
                       </SelectTrigger>
                       <SelectContent>
-                        {availableForms.map((form) => (
+                        {availableForms.map((form: any) => (
                           <SelectItem key={form.id} value={form.id}>
                             {form.name} ({form.fields.length} fields)
                           </SelectItem>

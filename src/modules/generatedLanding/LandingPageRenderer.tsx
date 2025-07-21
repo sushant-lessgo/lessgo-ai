@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo } from 'react';
-import { useEditStore } from '@/hooks/useEditStore';
+import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
 import { useOnboardingStore } from '@/hooks/useOnboardingStore';
 import { sectionList } from '@/modules/sections/sectionList';
 import { getComponent } from '@/modules/generatedLanding/componentRegistry';

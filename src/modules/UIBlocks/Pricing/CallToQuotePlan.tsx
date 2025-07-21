@@ -34,7 +34,7 @@ const CONTENT_SCHEMA = {
   },
   value_proposition: { 
     type: 'string' as const, 
-    default: 'Get a custom solution designed specifically for your organization\\'s unique requirements, complete with dedicated support and enterprise-grade security.' 
+    default: `Get a custom solution designed specifically for your organization's unique requirements, complete with dedicated support and enterprise-grade security.` 
   },
   enterprise_features: { 
     type: 'string' as const, 

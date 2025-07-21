@@ -1,7 +1,7 @@
 // app/edit/[token]/components/content/SectionCRUD.tsx - Section management components
 import React, { useState, useCallback } from 'react';
 import { useSectionCRUD } from '@/hooks/useSectionCRUD';
-import { useEditStore } from '@/hooks/useEditStore';
+import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
 import type { SectionType } from '@/types/core/content';
 import type { AddSectionOptions } from '@/hooks/useSectionCRUD';
 
@@ -532,7 +532,7 @@ export function SectionList({
         />
       )}
       
-      {sections.map((sectionId, index) => {
+      {sections.map((sectionId: string, index: number) => {
         const section = content[sectionId];
         if (!section) return null;
 

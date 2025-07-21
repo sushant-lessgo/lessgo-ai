@@ -1,13 +1,47 @@
 import { layoutPickers } from "./layoutPickers";
 import { useOnboardingStore } from "@/hooks/useOnboardingStore";
-import { useEditStore } from "@/hooks/useEditStore";
 import type { LayoutPickerInput } from "./layoutPickerInput";
 import { getAudienceGroupForAudience, getStageGroupForStage } from '@/modules/inference/taxonomy';
+import type { EditStoreInstance } from '@/stores/editStore';
+
+// Helper function to get fallback layouts for sections
+function getSectionFallback(sectionId: string): string {
+  const sectionFallbacks: Record<string, string> = {
+    beforeAfter: "SideBySideBlocks",
+    closeSection: "MockupWithCTA", 
+    comparisonTable: "BasicFeatureGrid",
+    faq: "AccordionFAQ",
+    features: "IconGrid",
+    founderNote: "FounderCardWithQuote",
+    hero: "leftCopyRightImage",
+    howItWorks: "ThreeStepHorizontal",
+    integrations: "LogoGrid",
+    objectionHandling: "ObjectionAccordion",
+    pricing: "TierCards",
+    cta: "CenteredHeadlineCTA",
+    problem: "StackedPainBullets",
+    results: "StatBlocks",
+    security: "ComplianceBadgeRow",
+    socialProof: "LogoWall",
+    testimonials: "QuoteGrid",
+    uniqueMechanism: "StackedHighlights",
+    useCases: "PersonaGrid",
+  };
+  
+  return sectionFallbacks[sectionId] || "IconGrid"; // Ultimate fallback
+}
 
 
-export function generateSectionLayouts(sectionIds: string[]) {
+export function generateSectionLayouts(sectionIds: string[], editStore?: EditStoreInstance) {
   const onboarding = useOnboardingStore.getState();
-  const setSectionLayouts = useEditStore.getState().setSectionLayouts;
+  
+  // Get setSectionLayouts function
+  const setSectionLayouts = editStore 
+    ? editStore.getState().setSectionLayouts
+    : (() => {
+        console.warn('⚠️ No editStore provided to generateSectionLayouts, layouts will not be saved');
+        return () => {};
+      })();
 
   console.log('🎨 Generating layouts for sections:', sectionIds);
   console.log('📊 Onboarding data available:', {
@@ -46,85 +80,32 @@ export function generateSectionLayouts(sectionIds: string[]) {
   sectionIds.forEach((sectionId) => {
     console.log(`🔍 Processing section: "${sectionId}" (type: ${typeof sectionId})`);
     
-    // ✅ READY: Uncomment this once all layoutPickers use the fixed LayoutPickerInput interface
-    // const picker = layoutPickers[sectionId];
-    // if (picker) {
-    //   layouts[sectionId] = picker(input);
-    //   console.log(`✅ Layout selected for ${sectionId}:`, layouts[sectionId]);
-    // } else {
-      
-    // ✅ TEMPORARY: Fallback layouts while layoutPickers are being updated to use canonical field names
-    const fallbackLayouts: Record<string, string> = {
-      beforeAfter: "SideBySideBlocks",
-      closeSection: "MockupWithCTA",
-      comparisonTable: "BasicFeatureGrid",
-      faq: "AccordionFAQ",
-      features: "IconGrid",
-      founderNote: "FounderCardWithQuote",
-      hero: "leftCopyRightImage",
-      howItWorks: "ThreeStepHorizontal",
-      integrations: "LogoGrid",
-      objectionHandling: "ObjectionAccordion",
-      pricing: "TierCards",
-      cta: "CenteredHeadlineCTA",
-      problem: "StackedPainBullets",
-      results: "StatBlocks",
-      security: "SecurityChecklist",
-      socialProof: "LogoWall",
-      testimonials: "QuoteGrid",
-      uniqueMechanism: "StackedHighlights",
-      useCases: "PersonaGrid",
-    };
-    
-    console.log(`🔎 Checking fallback for "${sectionId}":`, {
-      sectionId,
-      sectionIdLength: sectionId.length,
-      sectionIdCharCodes: Array.from(sectionId).map(c => c.charCodeAt(0)),
-      hasInFallback: sectionId in fallbackLayouts,
-      fallbackValue: fallbackLayouts[sectionId],
-      directLookup: fallbackLayouts[sectionId] !== undefined,
-      relevantKeys: Object.keys(fallbackLayouts).filter(key => 
-        key.includes('before') || key.includes('unique') || key.includes('how') || key.includes('social')
-      )
-    });
-    
-    // ✅ FIXED: Ensure every section gets a valid layout
-    if (fallbackLayouts[sectionId]) {
-      layouts[sectionId] = fallbackLayouts[sectionId];
-      console.log(`📐 Fallback layout assigned for ${sectionId}:`, layouts[sectionId], `(from fallback: ${fallbackLayouts[sectionId]})`);
-    } else {
-      // If section is not in fallback list, log warning and assign a contextual layout
-      console.warn(`⚠️ No layout mapping found for section: ${sectionId}`);
-      
-      // Assign contextual fallback based on section name patterns
-      if (sectionId.includes('hero')) {
-        layouts[sectionId] = "leftCopyRightImage";
-      } else if (sectionId.includes('cta') || sectionId.includes('call')) {
-        layouts[sectionId] = "CenteredHeadlineCTA";
-      } else if (sectionId.includes('feature')) {
-        layouts[sectionId] = "IconGrid";
-      } else if (sectionId.includes('testimonial') || sectionId.includes('review')) {
-        layouts[sectionId] = "QuoteGrid";
-      } else if (sectionId.includes('pricing') || sectionId.includes('plan')) {
-        layouts[sectionId] = "TierCards";
-      } else if (sectionId.includes('faq') || sectionId.includes('question')) {
-        layouts[sectionId] = "AccordionFAQ";
-      } else if (sectionId.includes('beforeAfter') || sectionId.includes('before')) {
-        layouts[sectionId] = "SideBySideBlocks";
-      } else if (sectionId.includes('uniqueMechanism') || sectionId.includes('unique')) {
-        layouts[sectionId] = "StackedHighlights";
-      } else if (sectionId.includes('howItWorks') || sectionId.includes('how')) {
-        layouts[sectionId] = "ThreeStepHorizontal";
-      } else if (sectionId.includes('socialProof') || sectionId.includes('social')) {
-        layouts[sectionId] = "LogoWall";
-      } else {
-        // Last resort: use a versatile layout that always works
-        layouts[sectionId] = "StackedHighlights";
+    // Use intelligent layout picker functions that select from all 148+ available layouts
+    const picker = layoutPickers[sectionId];
+    if (picker) {
+      try {
+        const selectedLayout = picker(input);
+        if (selectedLayout && selectedLayout !== 'default') {
+          layouts[sectionId] = selectedLayout;
+          console.log(`✅ Smart layout selected for ${sectionId}:`, layouts[sectionId]);
+        } else {
+          console.warn(`⚠️ Layout picker returned invalid layout for ${sectionId}:`, selectedLayout);
+          layouts[sectionId] = getSectionFallback(sectionId);
+          console.log(`🔧 Using fallback layout for ${sectionId}:`, layouts[sectionId]);
+        }
+      } catch (error) {
+        console.error(`❌ Layout picker error for ${sectionId}:`, error);
+        layouts[sectionId] = getSectionFallback(sectionId);
+        console.log(`🔧 Using fallback layout for ${sectionId}:`, layouts[sectionId]);
       }
+    } else {
+      // If section is not in layoutPickers, use the most universal layout for that section type
+      console.warn(`⚠️ No layout picker found for section: ${sectionId}`);
       
-      console.log(`🔧 Contextual fallback layout assigned for ${sectionId}:`, layouts[sectionId]);
+      // Use section-specific fallback 
+      layouts[sectionId] = getSectionFallback(sectionId);
+      console.log(`🔧 Section-specific fallback layout assigned for ${sectionId}:`, layouts[sectionId]);
     }
-    // }
   });
 
   console.log('🎨 Final layout assignments:', layouts);

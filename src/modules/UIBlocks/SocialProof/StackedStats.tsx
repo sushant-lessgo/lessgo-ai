@@ -328,7 +328,7 @@ export default function StackedStats(props: LayoutComponentProps) {
               <div className="w-px h-12 bg-gray-300"></div>
               <div className="text-center">
                 <div className={`text-2xl font-bold ${dynamicTextColors?.heading || 'text-gray-900'}`}>
-                  <3min
+                  {"<3min"}
                 </div>
                 <div className={`text-sm ${dynamicTextColors?.muted || 'text-gray-600'}`}>
                   Average Response Time

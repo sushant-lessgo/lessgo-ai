@@ -2,7 +2,7 @@
 "use client";
 
 import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
-import { useEditStore } from '@/hooks/useEditStore';
+import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
 import { updateInteractiveColors, updateTextContrast, updateOverallIntensity } from './colorSemanticUpdates';
 import type { 
   ColorTokens, 
@@ -17,11 +17,13 @@ export function useColorSystemSelector(tokenId: string) {
   const isUnmountedRef = useRef(false);
 
   // EditStore integration with selective subscriptions
-  const theme = useEditStore(state => state.theme);
-  const getColorTokens = useEditStore(state => state.getColorTokens);
-  const updateColorTokens = useEditStore(state => state.updateColorTokens);
-  const triggerAutoSave = useEditStore(state => state.triggerAutoSave);
-  const resetToGenerated = useEditStore(state => state.resetToGenerated);
+  const { 
+    theme, 
+    getColorTokens, 
+    updateColorTokens, 
+    triggerAutoSave, 
+    resetToGenerated 
+  } = useEditStore();
 
   // Local state
   const [previewTokens, setPreviewTokens] = useState<ColorTokens | null>(null);

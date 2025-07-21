@@ -2,7 +2,7 @@
 "use client";
 
 import { useCallback } from 'react';
-import { useEditStore } from '@/hooks/useEditStore';
+import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
 import { useToast } from './useToast';
 
 export function useUndoRedo() {

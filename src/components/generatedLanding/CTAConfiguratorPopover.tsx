@@ -10,7 +10,7 @@ import { usePostHog } from 'posthog-js/react';
 import type { CtaConfigType } from "@/types";
 import type { Action } from "@/modules/generatedLanding/landingPageReducer";
 import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
-import { useEditStore } from '@/hooks/useEditStore';
+import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
 import { Plus } from 'lucide-react';
 
 
@@ -258,7 +258,7 @@ export function CTAConfiguratorPopover({
             <SelectValue placeholder="Select a form" />
           </SelectTrigger>
           <SelectContent>
-            {availableForms.map((form) => (
+            {availableForms.map((form: any) => (
               <SelectItem key={form.id} value={form.id}>
                 {form.name} ({form.fields.length} fields)
               </SelectItem>

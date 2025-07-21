@@ -1,0 +1,332 @@
+/**
+ * EditProvider - Context provider for token-scoped EditStore management
+ * Handles loading states, error boundaries, and store lifecycle
+ */
+
+'use client';
+
+import React, { createContext, useContext, useEffect, useState, useRef } from 'react';
+import { useEditStore } from '@/hooks/useEditStore';
+import type { EditStoreInstance } from '@/stores/editStore';
+import type { EditStore } from '@/types/store';
+import { EditErrorBoundary } from './EditErrorBoundary';
+
+// Context interfaces
+interface EditStoreContext {
+  store: EditStoreInstance | null;
+  tokenId: string;
+  isInitialized: boolean;
+  isHydrating: boolean;
+  error: string | null;
+  isReady: boolean;
+  retryInitialization: () => void;
+  
+  // Convenience accessors
+  sections: string[];
+  content: Record<string, any>;
+  theme: any;
+}
+
+interface EditProviderProps {
+  children: React.ReactNode;
+  tokenId: string;
+  
+  // Configuration options
+  options?: {
+    suspense?: boolean;
+    preload?: boolean;
+    resetOnTokenChange?: boolean;
+    showLoadingState?: boolean;
+    showErrorBoundary?: boolean;
+    fallbackComponent?: React.ComponentType<{ error: string; retry: () => void }>;
+    loadingComponent?: React.ComponentType<{ tokenId: string }>;
+  };
+}
+
+// Create context with default values
+const EditStoreContext = createContext<EditStoreContext | null>(null);
+
+/**
+ * Default loading component
+ */
+const DefaultLoadingComponent: React.FC<{ tokenId: string }> = ({ tokenId }) => (
+  <div className="flex items-center justify-center min-h-screen">
+    <div className="text-center space-y-4">
+      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto"></div>
+      <p className="text-gray-600">Loading project...</p>
+      <p className="text-xs text-gray-400">Token: {tokenId.slice(0, 8)}...</p>
+    </div>
+  </div>
+);
+
+/**
+ * Default error fallback component
+ */
+const DefaultErrorComponent: React.FC<{ error: string; retry: () => void }> = ({ 
+  error, 
+  retry 
+}) => (
+  <div className="flex items-center justify-center min-h-screen">
+    <div className="text-center space-y-4 p-8 max-w-md">
+      <div className="text-red-500 text-4xl">⚠️</div>
+      <h2 className="text-xl font-semibold text-gray-900">Store Loading Failed</h2>
+      <p className="text-gray-600">{error}</p>
+      <button
+        onClick={retry}
+        className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
+      >
+        Try Again
+      </button>
+    </div>
+  </div>
+);
+
+/**
+ * EditProvider component that manages store lifecycle and provides context
+ */
+export function EditProvider({ children, tokenId, options = {} }: EditProviderProps) {
+  const {
+    suspense = false,
+    preload = false,
+    resetOnTokenChange = true,
+    showLoadingState = true,
+    showErrorBoundary = true,
+    fallbackComponent: FallbackComponent = DefaultErrorComponent,
+    loadingComponent: LoadingComponent = DefaultLoadingComponent,
+  } = options;
+
+  // Hook into the store management
+  const {
+    store,
+    isInitialized,
+    isHydrating,
+    error,
+    isReady,
+    sections,
+    content,
+    theme,
+    retryInitialization,
+  } = useEditStore(tokenId, {
+    suspense,
+    preload,
+    resetOnTokenChange,
+  });
+
+  // Track token changes for debugging
+  const previousTokenRef = useRef<string>();
+  useEffect(() => {
+    if (previousTokenRef.current && previousTokenRef.current !== tokenId) {
+      console.log(`🔄 EditProvider: Token changed from ${previousTokenRef.current} to ${tokenId}`);
+    }
+    previousTokenRef.current = tokenId;
+  }, [tokenId]);
+
+  // Create context value
+  const contextValue: EditStoreContext = {
+    store,
+    tokenId,
+    isInitialized,
+    isHydrating,
+    error,
+    isReady: isReady || false,
+    retryInitialization,
+    sections: sections || [],
+    content: content || {},
+    theme: theme || {},
+  };
+
+  // Show error state
+  if (error && showErrorBoundary) {
+    return <FallbackComponent error={error} retry={retryInitialization} />;
+  }
+
+  // Show loading state
+  if (isHydrating && showLoadingState) {
+    return <LoadingComponent tokenId={tokenId} />;
+  }
+
+  // Provide context to children with error boundary
+  return (
+    <EditErrorBoundary 
+      tokenId={tokenId}
+      onError={(error, errorInfo) => {
+        console.error('🚨 EditProvider error boundary caught:', {
+          error: error.message,
+          tokenId,
+          componentStack: errorInfo.componentStack,
+        });
+      }}
+    >
+      <EditStoreContext.Provider value={contextValue}>
+        {children}
+      </EditStoreContext.Provider>
+    </EditErrorBoundary>
+  );
+}
+
+/**
+ * Hook to consume EditStore context
+ */
+function useEditStoreContext(): EditStoreContext {
+  const context = useContext(EditStoreContext);
+  
+  if (!context) {
+    throw new Error('useEditStoreContext must be used within an EditProvider');
+  }
+  
+  return context;
+}
+
+/**
+ * Hook to get store instance from context (with validation)
+ */
+function useStore(): EditStoreInstance {
+  const context = useEditStoreContext();
+  
+  if (!context.store) {
+    throw new Error('Store is not available. Check if EditProvider is properly configured.');
+  }
+  
+  return context.store;
+}
+
+/**
+ * Hook to get store state with automatic re-renders
+ */
+function useStoreState<T>(
+  selector: (state: EditStore) => T,
+  equalityFn?: (a: T, b: T) => boolean
+): T {
+  const store = useStore();
+  const [state, setState] = useState(() => selector(store.getState()));
+  
+  useEffect(() => {
+    const unsubscribe = store.subscribe((newState: any) => {
+      const selectedState = selector(newState);
+      setState(current => {
+        if (equalityFn && equalityFn(current, selectedState)) {
+          return current;
+        }
+        return selectedState;
+      });
+    });
+    
+    return unsubscribe;
+  }, [store, selector, equalityFn]);
+  
+  return state;
+}
+
+/**
+ * Hook to get store actions (methods)
+ */
+function useStoreActions() {
+  const store = useStore();
+  
+  // Return a stable reference to actions
+  return React.useMemo(() => {
+    const state = store.getState();
+    
+    // Extract all action methods (functions) from store
+    const actions: Record<string, Function> = {};
+    for (const [key, value] of Object.entries(state)) {
+      if (typeof value === 'function') {
+        actions[key] = value;
+      }
+    }
+    
+    return actions;
+  }, [store]);
+}
+
+/**
+ * HOC for wrapping components with EditProvider
+ */
+function withEditProvider<P extends object>(
+  Component: React.ComponentType<P>,
+  providerOptions?: Omit<EditProviderProps, 'children' | 'tokenId'>
+) {
+  const WrappedComponent: React.FC<P & { tokenId: string }> = (props) => {
+    const { tokenId, ...componentProps } = props;
+    
+    return (
+      <EditProvider tokenId={tokenId} {...providerOptions}>
+        <Component {...(componentProps as P)} />
+      </EditProvider>
+    );
+  };
+  
+  WrappedComponent.displayName = `withEditProvider(${Component.displayName || Component.name})`;
+  
+  return WrappedComponent;
+}
+
+/**
+ * Utility component for conditional rendering based on store state
+ */
+const EditStoreGate: React.FC<{
+  children: React.ReactNode;
+  fallback?: React.ReactNode;
+  when?: 'ready' | 'initialized' | 'loading' | 'error';
+}> = ({ children, fallback = null, when = 'ready' }) => {
+  const context = useEditStoreContext();
+  
+  let shouldRender = false;
+  
+  switch (when) {
+    case 'ready':
+      shouldRender = context.isReady;
+      break;
+    case 'initialized':
+      shouldRender = context.isInitialized;
+      break;
+    case 'loading':
+      shouldRender = context.isHydrating;
+      break;
+    case 'error':
+      shouldRender = !!context.error;
+      break;
+  }
+  
+  return shouldRender ? <>{children}</> : <>{fallback}</>;
+};
+
+/**
+ * Development utilities
+ */
+if (process.env.NODE_ENV === 'development') {
+  (window as any).__editProviderDebug = {
+    // Debug utilities for development
+    getContext: () => {
+      try {
+        // This won't work outside of React context, but useful for debugging
+        console.warn('Use React DevTools to inspect EditProvider context');
+        return null;
+      } catch {
+        return null;
+      }
+    },
+    DefaultLoadingComponent,
+    DefaultErrorComponent,
+  };
+  
+  console.log('🔧 EditProvider debug utilities available at window.__editProviderDebug');
+}
+
+// Export types for external use
+export type { 
+  EditStoreContext, 
+  EditProviderProps 
+};
+
+// Export all hooks and components
+export {
+  useEditStoreContext,
+  useStore,
+  useStoreState,
+  useStoreActions,
+  withEditProvider,
+  EditStoreGate,
+};
+
+export default EditProvider;

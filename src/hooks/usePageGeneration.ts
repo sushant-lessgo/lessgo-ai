@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useOnboardingStore } from '@/hooks/useOnboardingStore';
-import { useEditStore } from '@/hooks/useEditStore';
+import { storeManager } from '@/stores/storeManager';
+import type { EditStoreInstance } from '@/stores/editStore';
 import { getSectionsFromRules } from '@/modules/sections/getSectionsFromRules';
 import { generateSectionLayouts } from '@/modules/sections/generateSectionLayouts';
 import { getCompleteElementsMap } from '@/modules/sections/elementDetermination';
@@ -45,7 +46,14 @@ interface GenerationResult {
 export function usePageGeneration(tokenId: string) {
   const router = useRouter();
   const onboardingStore = useOnboardingStore();
-  const editStore = useEditStore();
+  
+  // Get token-scoped store instance
+  const getEditStore = (): EditStoreInstance => {
+    if (!tokenId) {
+      throw new Error('Token ID is required for page generation');
+    }
+    return storeManager.getEditStore(tokenId);
+  };
   
   const [generationState, setGenerationState] = useState<GenerationState>({
     isGenerating: false,
@@ -126,7 +134,8 @@ export function usePageGeneration(tokenId: string) {
     
     console.log('Generated background system:', backgroundSystem);
 
-editStore.updateTheme({
+    const editStore = getEditStore();
+    editStore.updateTheme({
       colors: {
         baseColor: backgroundSystem.baseColor,
         accentColor: backgroundSystem.accentColor,
@@ -152,8 +161,10 @@ editStore.updateTheme({
   // Step 2: Generate layouts for each section
   const generateLayouts = async (sections: string[]): Promise<{ layouts: Record<string, string>, errors: string[] }> => {
     try {
+      const editStore = getEditStore();
+      
       // This function updates the editStore directly
-      generateSectionLayouts(sections);
+      generateSectionLayouts(sections, editStore);
       
       // Get fresh state after layout generation
       const { sectionLayouts } = editStore.getState();
@@ -247,8 +258,25 @@ editStore.updateTheme({
 
       const result = await response.json();
       
+      // Filter content to only include requested sections
+      const filteredContent: any = {};
+      if (result.content) {
+        sections.forEach(sectionId => {
+          if (result.content[sectionId]) {
+            filteredContent[sectionId] = result.content[sectionId];
+          }
+        });
+      }
+      
+      console.log('🎯 Content filtering:', {
+        requestedSections: sections,
+        receivedSections: Object.keys(result.content || {}),
+        filteredSections: Object.keys(filteredContent),
+        filteredCount: Object.keys(filteredContent).length
+      });
+      
       return {
-        content: result.content || {},
+        content: filteredContent,
         errors: result.errors || [],
         warnings: result.warnings || [],
         isPartial: result.isPartial || false
@@ -280,7 +308,10 @@ editStore.updateTheme({
   // Step 4: Transfer data to page store - FIXED VERSION
   const transferDataToPageStore = async (result: GenerationResult) => {
     try {
-      console.log('Transferring data to store:', result);
+      const editStore = getEditStore();
+      const storeState = editStore.getState();
+      
+      console.log('Transferring data to token-scoped store:', { tokenId, result });
 
       // CRITICAL FIX: Use proper initialization for first-time setup
       console.log('🏗️ Initializing sections in EditStore:', {
@@ -291,7 +322,7 @@ editStore.updateTheme({
       });
       
       // Use initializeSections for fresh setup instead of reorderSections
-      editStore.initializeSections(result.sections, result.sectionLayouts);
+      storeState.initializeSections(result.sections, result.sectionLayouts);
 
       // Update meta data - Create proper meta object
       const metaData = {
@@ -309,12 +340,9 @@ editStore.updateTheme({
           businessType: onboardingStore.validatedFields.marketCategory || ''
         }
       };
-
-      // Update meta using proper assignment
-      // Object.assign(editStore.meta, metaData);
       
       // Set AI generation status
-      editStore.setAIGenerationStatus({
+      storeState.setAIGenerationStatus({
         isGenerating: false,
         success: result.success,
         isPartial: result.isPartial,
@@ -333,7 +361,7 @@ editStore.updateTheme({
           isPartial: result.isPartial
         });
         
-        editStore.updateFromAIResponse({
+        storeState.updateFromAIResponse({
           success: result.success,
           content: result.generatedContent,
           isPartial: result.isPartial,
@@ -345,11 +373,12 @@ editStore.updateTheme({
       }
 
       // Debug: Verify store state after updates
-      const storeAfterUpdate = editStore.export();
+      const storeAfterUpdate = storeState.export();
       console.log('Store state after transfer:', {
-        sections: editStore.sections.length,
-        content: Object.keys(editStore.content).length,
-        hasData: editStore.sections.length > 0,
+        tokenId,
+        sections: storeState.sections.length,
+        content: Object.keys(storeState.content).length,
+        hasData: storeState.sections.length > 0,
         fullStore: storeAfterUpdate
       });
 
@@ -498,10 +527,12 @@ editStore.updateTheme({
       }));
       
       // Add debug log right before navigation
+      const finalEditStore = getEditStore();
+      const finalStoreState = finalEditStore.getState();
       console.log('About to navigate to preview. Final store state:', {
-        sections: editStore.sections.length,
-        content: Object.keys(editStore.content).length,
-        hasContent: Object.keys(editStore.content).length > 0
+        sections: finalStoreState.sections.length,
+        content: Object.keys(finalStoreState.content).length,
+        hasContent: Object.keys(finalStoreState.content).length > 0
       });
       
       // Navigate to generate

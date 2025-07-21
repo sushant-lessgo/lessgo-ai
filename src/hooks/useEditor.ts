@@ -1,6 +1,6 @@
 // hooks/useEditor.ts - Unified editor interaction system
 import { useCallback, useEffect } from 'react';
-import { useEditStore } from './useEditStore';
+import { useEditStoreLegacy as useEditStore } from './useEditStoreLegacy';
 
 export interface ClickTarget {
   element: HTMLElement;
@@ -556,8 +556,7 @@ export function useEditor() {
         const walker = document.createTreeWalker(
           element,
           NodeFilter.SHOW_TEXT,
-          null,
-          false
+          null
         );
         
         let lastTextNode = null;
@@ -666,8 +665,8 @@ export function useEditor() {
       const handlers = JSON.parse(element.dataset.originalHandlers);
       
       // Restore the selection handlers we disabled
-      element.onmouseup = handlers.onmouseup ? 'restored' : null;
-      element.onkeyup = handlers.onkeyup ? 'restored' : null;
+      (element as any).onmouseup = handlers.onmouseup || null;
+      (element as any).onkeyup = handlers.onkeyup || null;
       
       console.log('🔍 Restored InlineTextEditor handlers:', {
         onmouseup: handlers.onmouseup,

@@ -47,27 +47,22 @@ const CONTENT_SCHEMA = {
 };
 
 // PersonaUseCaseCompare component - Role-based comparison showing different use cases
-export default function PersonaUseCaseCompare({ 
-  sectionId, 
-  className = '',
-  backgroundType = 'neutral' 
-}: LayoutComponentProps) {
-  const {
-    content,
-    fonts,
-    colorTokens,
-    mode,
-    handleContentUpdate,
-    handleListUpdate
-  } = useLayoutComponent(sectionId);
+export default function PersonaUseCaseCompare(props: LayoutComponentProps) {
+  const { sectionId, className = '', backgroundType = 'secondary' } = props;
+  
+  const { 
+    mode, 
+    blockContent, 
+    colorTokens, 
+    getTextStyle, 
+    sectionBackground, 
+    handleContentUpdate 
+  } = useLayoutComponent<PersonaUseCaseCompareContent>({ 
+    ...props, 
+    contentSchema: CONTENT_SCHEMA 
+  });
 
   const [activePersona, setActivePersona] = useState(0);
-
-  // Extract content with defaults
-  const blockContent: PersonaUseCaseCompareContent = Object.entries(CONTENT_SCHEMA).reduce((acc, [key, schema]) => {
-    acc[key] = content?.[key] || schema.default;
-    return acc;
-  }, {} as PersonaUseCaseCompareContent);
 
   // Parse data
   const personaLabels = parsePipeData(blockContent.persona_labels);
@@ -81,11 +76,15 @@ export default function PersonaUseCaseCompare({
 
   // Update handlers
   const handlePersonaLabelUpdate = (index: number, value: string) => {
-    handleListUpdate(personaLabels, index, value, 'persona_labels');
+    const newLabels = [...personaLabels];
+    newLabels[index] = value;
+    handleContentUpdate('persona_labels', newLabels.join('|'));
   };
 
   const handlePersonaDescriptionUpdate = (index: number, value: string) => {
-    handleListUpdate(personaDescriptions, index, value, 'persona_descriptions');
+    const newDescriptions = [...personaDescriptions];
+    newDescriptions[index] = value;
+    handleContentUpdate('persona_descriptions', newDescriptions.join('|'));
   };
 
   // Get persona icon
@@ -115,9 +114,11 @@ export default function PersonaUseCaseCompare({
   return (
     <LayoutSection
       sectionId={sectionId}
+      sectionType="PersonaUseCaseCompare"
+      backgroundType={backgroundType || 'secondary'}
+      sectionBackground={sectionBackground}
+      mode={mode}
       className={className}
-      backgroundType={backgroundType}
-      colorTokens={colorTokens}
     >
       <div className="max-w-7xl mx-auto">
         {/* Header Section */}
@@ -153,7 +154,7 @@ export default function PersonaUseCaseCompare({
               onClick={() => setActivePersona(index)}
               className={`p-4 rounded-lg border-2 transition-all ${
                 activePersona === index 
-                  ? `border-${colorTokens.textAccent.replace('text-', '')} ${colorTokens.bgAccent} bg-opacity-10` 
+                  ? `border-${(colorTokens.textAccent || 'text-blue-600').replace('text-', '')} ${colorTokens.bgAccent || 'bg-blue-500'} bg-opacity-10` 
                   : `${colorTokens.borderColor} hover:border-gray-400`
               }`}
             >
@@ -171,10 +172,10 @@ export default function PersonaUseCaseCompare({
                     }}
                     onClick={(e) => e.stopPropagation()}
                     className="mt-2 text-center bg-transparent outline-none focus:ring-2 focus:ring-blue-500 rounded px-1 font-medium"
-                    style={fonts.body}
+                    style={getTextStyle('body')}
                   />
                 ) : (
-                  <span className="mt-2 font-medium" style={fonts.body}>{label}</span>
+                  <span className="mt-2 font-medium" style={getTextStyle('body')}>{label}</span>
                 )}
               </div>
               {mode === 'edit' ? (
@@ -214,7 +215,7 @@ export default function PersonaUseCaseCompare({
                   <svg className={`w-5 h-5 ${colorTokens.textAccent} mr-3 mt-0.5 flex-shrink-0`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
-                  <span className={colorTokens.textSecondary} style={fonts.body}>
+                  <span className={colorTokens.textSecondary} style={getTextStyle('body')}>
                     {useCase.trim()}
                   </span>
                 </li>
@@ -223,7 +224,7 @@ export default function PersonaUseCaseCompare({
           </div>
 
           {/* Our Solutions */}
-          <div className={`rounded-lg ${colorTokens.bgAccent} bg-opacity-10 p-8 border-2 border-${colorTokens.textAccent.replace('text-', '')}`}>
+          <div className={`rounded-lg ${colorTokens.bgAccent || 'bg-blue-500'} bg-opacity-10 p-8 border-2 border-${(colorTokens.textAccent || 'text-blue-600').replace('text-', '')}`}>
             <h3 className={`text-xl font-semibold mb-6 ${colorTokens.textAccent}`} style={fonts.h3}>
               Our Solutions
             </h3>
@@ -233,7 +234,7 @@ export default function PersonaUseCaseCompare({
                   <svg className={`w-5 h-5 ${colorTokens.textAccent} mr-3 mt-0.5 flex-shrink-0`} fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                   </svg>
-                  <span className={`font-medium ${colorTokens.textPrimary}`} style={fonts.body}>
+                  <span className={`font-medium ${colorTokens.textPrimary}`} style={getTextStyle('body')}>
                     {solution.trim()}
                   </span>
                 </li>

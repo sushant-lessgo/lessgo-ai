@@ -47,25 +47,20 @@ const CONTENT_SCHEMA = {
 };
 
 // CompetitorCallouts component - Direct competitor comparison with issues/solutions
-export default function CompetitorCallouts({ 
-  sectionId, 
-  className = '',
-  backgroundType = 'neutral' 
-}: LayoutComponentProps) {
-  const {
-    content,
-    fonts,
-    colorTokens,
-    mode,
-    handleContentUpdate,
-    handleListUpdate
-  } = useLayoutComponent(sectionId);
-
-  // Extract content with defaults
-  const blockContent: CompetitorCalloutsContent = Object.entries(CONTENT_SCHEMA).reduce((acc, [key, schema]) => {
-    acc[key] = content?.[key] || schema.default;
-    return acc;
-  }, {} as CompetitorCalloutsContent);
+export default function CompetitorCallouts(props: LayoutComponentProps) {
+  const { sectionId, className = '', backgroundType = 'secondary' } = props;
+  
+  const { 
+    mode, 
+    blockContent, 
+    colorTokens, 
+    getTextStyle, 
+    sectionBackground, 
+    handleContentUpdate 
+  } = useLayoutComponent<CompetitorCalloutsContent>({ 
+    ...props, 
+    contentSchema: CONTENT_SCHEMA 
+  });
 
   // Parse data
   const competitorNames = parsePipeData(blockContent.competitor_names);
@@ -74,23 +69,31 @@ export default function CompetitorCallouts({
 
   // Update handlers
   const handleCompetitorNameUpdate = (index: number, value: string) => {
-    handleListUpdate(competitorNames, index, value, 'competitor_names');
+    const newNames = [...competitorNames];
+    newNames[index] = value;
+    handleContentUpdate('competitor_names', newNames.join('|'));
   };
 
   const handleCompetitorIssueUpdate = (index: number, value: string) => {
-    handleListUpdate(competitorIssues, index, value, 'competitor_issues');
+    const newIssues = [...competitorIssues];
+    newIssues[index] = value;
+    handleContentUpdate('competitor_issues', newIssues.join('|'));
   };
 
   const handleOurSolutionUpdate = (index: number, value: string) => {
-    handleListUpdate(ourSolutions, index, value, 'our_solution');
+    const newSolutions = [...ourSolutions];
+    newSolutions[index] = value;
+    handleContentUpdate('our_solution', newSolutions.join('|'));
   };
 
   return (
     <LayoutSection
       sectionId={sectionId}
+      sectionType="CompetitorCallouts"
+      backgroundType={backgroundType || 'secondary'}
+      sectionBackground={sectionBackground}
+      mode={mode}
       className={className}
-      backgroundType={backgroundType}
-      colorTokens={colorTokens}
     >
       <div className="max-w-6xl mx-auto">
         {/* Header Section */}
@@ -151,11 +154,11 @@ export default function CompetitorCallouts({
                         value={competitorIssues[index]}
                         onChange={(e) => handleCompetitorIssueUpdate(index, e.target.value)}
                         className={`flex-1 bg-transparent outline-none focus:ring-2 focus:ring-blue-500 rounded px-2 resize-none ${colorTokens.textSecondary}`}
-                        style={fonts.body}
+                        style={getTextStyle('body')}
                         rows={2}
                       />
                     ) : (
-                      <p className={`text-sm ${colorTokens.textSecondary}`} style={fonts.body}>
+                      <p className={`text-sm ${colorTokens.textSecondary}`} style={getTextStyle('body')}>
                         {competitorIssues[index]}
                       </p>
                     )}
@@ -184,11 +187,11 @@ export default function CompetitorCallouts({
                         value={ourSolutions[index]}
                         onChange={(e) => handleOurSolutionUpdate(index, e.target.value)}
                         className={`flex-1 bg-transparent outline-none focus:ring-2 focus:ring-blue-500 rounded px-2 resize-none ${colorTokens.textPrimary}`}
-                        style={fonts.body}
+                        style={getTextStyle('body')}
                         rows={2}
                       />
                     ) : (
-                      <p className={`text-sm font-medium ${colorTokens.textPrimary}`} style={fonts.body}>
+                      <p className={`text-sm font-medium ${colorTokens.textPrimary}`} style={getTextStyle('body')}>
                         {ourSolutions[index]}
                       </p>
                     )}

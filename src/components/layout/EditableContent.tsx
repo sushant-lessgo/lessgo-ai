@@ -2,7 +2,7 @@ import React, { useCallback, useState, useMemo } from 'react';
 import { InlineTextEditor, defaultEditorConfig } from '@/app/edit/[token]/components/editor/InlineTextEditor';
 import { useTextToolbarIntegration } from '@/hooks/useTextToolbarIntegration';
 import { useAutoSave } from '@/hooks/useAutoSave';
-import { useEditStore } from '@/hooks/useEditStore';
+import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
 import { generateAccessibleBadgeColors } from '@/utils/textContrastUtils';
 import type { TextFormatState, AutoSaveConfig, InlineEditorConfig, TextSelection } from '@/app/edit/[token]/components/editor/InlineTextEditor';
 
@@ -70,7 +70,7 @@ export function EditableContent({
   const [currentFormatState, setCurrentFormatState] = useState(formatState);
   
   // Get showTextToolbar from the store
-  const showTextToolbar = useEditStore(state => state.showTextToolbar);
+  const { showTextToolbar } = useEditStore();
   
   // Determine if content should be shown
   const shouldShow = mode === 'preview' || value || required;

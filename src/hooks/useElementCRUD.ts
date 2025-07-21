@@ -1,7 +1,7 @@
 // hooks/useElementCRUD.ts - Element CRUD operations hook
 
 import { useCallback } from 'react';
-import { useEditStore } from './useEditStore';
+import { useEditStoreLegacy as useEditStore } from './useEditStoreLegacy';
 import { UNIVERSAL_ELEMENTS } from '@/types/universalElements';
 import type { 
   UniversalElementType, 

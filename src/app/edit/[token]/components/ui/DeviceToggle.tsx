@@ -2,7 +2,7 @@
 "use client";
 
 import React from 'react';
-import { useEditStore } from '@/hooks/useEditStore';
+import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
 
 export function DeviceToggle() {
   const { globalSettings, /* setGlobalSettings */ } = useEditStore();

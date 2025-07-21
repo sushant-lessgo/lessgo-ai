@@ -1,22 +1,36 @@
 import React, { useState } from 'react';
-import { useEditStore } from '@/hooks/useEditStore';
+import { useEditStoreContext } from '@/components/EditProvider';
 
 export function StoreDebugPanel() {
-  const [isOpen, setIsOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState('theme');
+  // Early return for non-development environments
+  if (process.env.NODE_ENV !== 'development') {
+    return null;
+  }
   
-  const { 
-    sections,
-    sectionLayouts,
-    theme,
-    content, 
-    mode,
-    errors,
-    title,
-    getColorTokens 
-  } = useEditStore();
+  // Wrap in try-catch to handle missing context
+  try {
+    const context = useEditStoreContext();
+    const [isOpen, setIsOpen] = useState(false);
+    const [activeTab, setActiveTab] = useState('theme');
+    
+    const { 
+      sections,
+      content, 
+      theme,
+      store,
+    } = context;
 
-  const colorTokens = getColorTokens();
+    if (!store) {
+      return null;
+    }
+
+    const storeState = store.getState();
+    const sectionLayouts = storeState.sectionLayouts || {};
+    const mode = storeState.mode || 'edit';
+    const errors = storeState.errors || {};
+    const title = storeState.title || 'Untitled';
+    const getColorTokens = storeState.getColorTokens;
+    const colorTokens = getColorTokens ? getColorTokens() : {};
 
   if (!isOpen) {
     return (
@@ -125,9 +139,9 @@ export function StoreDebugPanel() {
                 <div key={key} className="flex items-center">
                   <div 
                     className="w-4 h-4 rounded border mr-2" 
-                    style={{ backgroundColor: value }}
+                    style={{ backgroundColor: typeof value === 'string' ? value : '#gray' }}
                   ></div>
-                  <span className="text-xs">{key}: {value}</span>
+                  <span className="text-xs">{key}: {typeof value === 'string' ? value : JSON.stringify(value)}</span>
                 </div>
               ))}
             </div>
@@ -138,14 +152,14 @@ export function StoreDebugPanel() {
       {/* Actions */}
       <div className="border-t p-2 space-y-1">
         <button
-          onClick={() => console.log('Full Store State:', useEditStore.getState())}
+          onClick={() => console.log('Full Store State:', store.getState())}
           className="w-full text-xs bg-gray-100 hover:bg-gray-200 py-1 rounded"
         >
           📄 Log Full Store to Console
         </button>
         <button
           onClick={() => {
-            const data = JSON.stringify(useEditStore.getState(), null, 2);
+            const data = JSON.stringify(store.getState(), null, 2);
             navigator.clipboard.writeText(data);
             alert('Store data copied to clipboard!');
           }}
@@ -156,4 +170,15 @@ export function StoreDebugPanel() {
       </div>
     </div>
   );
+  
+  } catch (error) {
+    // If we're not inside an EditProvider context, show a simple message
+    return (
+      <div className="fixed bottom-4 left-4 z-50">
+        <div className="bg-yellow-100 border border-yellow-300 text-yellow-800 px-3 py-2 rounded-lg text-sm">
+          Debug panel requires EditProvider context
+        </div>
+      </div>
+    );
+  }
 }

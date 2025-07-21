@@ -284,6 +284,6 @@ export function pickSecurityLayout(input: LayoutPickerInput): SecurityLayout {
     { layout: "SecurityChecklist" as SecurityLayout, score: 0 }
   );
 
-  // Return top scoring layout, fallback to universal default
+  // Return top scoring layout, fallback to most universal available layout
   return topLayout.score > 0 ? topLayout.layout : "SecurityChecklist";
 }

@@ -307,6 +307,12 @@ export const extractLayoutContent = <T extends Record<string, any>>(
 ): T => {
   const result = {} as T;
   
+  // Guard against null or undefined contentSchema
+  if (!contentSchema || typeof contentSchema !== 'object') {
+    console.error('extractLayoutContent: contentSchema is null or undefined', { contentSchema });
+    return result;
+  }
+  
   for (const [key, config] of Object.entries(contentSchema)) {
     const elementValue = elements[key as keyof StoreElementTypes];
     

@@ -1,6 +1,6 @@
 // components/dev/EditStoreDebugPanel.tsx - Debug Panel for Edit Store
 import React, { useState, useMemo } from 'react';
-import { useEditStore } from '@/hooks/useEditStore';
+import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
 import { useDevTools } from '@/hooks/useDevTools';
 
 export function EditStoreDebugPanel() {
@@ -20,18 +20,18 @@ export function EditStoreDebugPanel() {
       sections: {
         count: store.sections.length,
         withContent: Object.keys(store.content).length,
-        missing: store.sections.filter(id => !store.content[id]),
+        missing: store.sections.filter((id: any) => !store.content[id]),
       },
       content: {
         totalSections: Object.keys(store.content).length,
         withElements: Object.values(store.content).filter(
-          section => Object.keys(section.elements || {}).length > 0
+          (section: any) => Object.keys(section.elements || {}).length > 0
         ).length,
         aiGenerated: Object.values(store.content).filter(
-          section => section.aiMetadata?.aiGenerated
+          (section: any) => section.aiMetadata?.aiGenerated
         ).length,
         customized: Object.values(store.content).filter(
-          section => section.aiMetadata?.isCustomized
+          (section: any) => section.aiMetadata?.isCustomized
         ).length,
       },
       ui: {
@@ -255,7 +255,7 @@ export function EditStoreDebugPanel() {
               <div className="mt-2">
                 <strong className="text-red-600">AI Errors ({store.aiGeneration.errors.length}):</strong>
                 <div className="space-y-1 mt-1 max-h-20 overflow-y-auto">
-                  {store.aiGeneration.errors.map((error, index) => (
+                  {store.aiGeneration.errors.map((error: any, index: number) => (
                     <div key={index} className="bg-red-50 p-1 rounded text-xs text-red-600">
                       {error}
                     </div>
@@ -268,7 +268,7 @@ export function EditStoreDebugPanel() {
               <div className="mt-2">
                 <strong className="text-yellow-600">AI Warnings ({store.aiGeneration.warnings.length}):</strong>
                 <div className="space-y-1 mt-1 max-h-20 overflow-y-auto">
-                  {store.aiGeneration.warnings.map((warning, index) => (
+                  {store.aiGeneration.warnings.map((warning: any, index: number) => (
                     <div key={index} className="bg-yellow-50 p-1 rounded text-xs text-yellow-600">
                       {warning}
                     </div>
@@ -306,7 +306,7 @@ export function EditStoreDebugPanel() {
               <strong className="text-orange-600">Quick Checks:</strong>
               <div className="space-y-1 mt-1">
                 <div>Can Publish: <span className={store.canPublish() ? 'text-green-600' : 'text-red-600'}>{store.canPublish() ? 'Yes' : 'No'}</span></div>
-                <div>Sections Valid: <span className={store.sections.every(id => store.validateSection(id)) ? 'text-green-600' : 'text-red-600'}>{store.sections.every(id => store.validateSection(id)) ? 'All Valid' : 'Issues Found'}</span></div>
+                <div>Sections Valid: <span className={store.sections.every((id: any) => store.validateSection(id)) ? 'text-green-600' : 'text-red-600'}>{store.sections.every((id: any) => store.validateSection(id)) ? 'All Valid' : 'Issues Found'}</span></div>
                 <div>Content Consistency: <span className={store.sections.length === Object.keys(store.content).length ? 'text-green-600' : 'text-yellow-600'}>{store.sections.length === Object.keys(store.content).length ? 'Consistent' : 'Mismatch'}</span></div>
               </div>
             </div>
@@ -314,7 +314,7 @@ export function EditStoreDebugPanel() {
             <div className="mt-3">
               <strong className="text-orange-600">Optimization Suggestions:</strong>
               <div className="space-y-1 mt-1">
-                {store.getOptimizationSuggestions().map((suggestion, index) => (
+                {store.getOptimizationSuggestions().map((suggestion: any, index: number) => (
                   <div key={index} className="bg-blue-50 p-1 rounded text-xs text-blue-600">
                     • {typeof suggestion === 'object' ? suggestion.title : suggestion}
                   </div>

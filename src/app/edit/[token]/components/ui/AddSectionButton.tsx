@@ -1,6 +1,6 @@
 // app/edit/[token]/components/ui/AddSectionButton.tsx
 import React from 'react';
-import { useEditStore } from '@/hooks/useEditStore';
+import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
 
 interface AddSectionButtonProps {
   onAdd: () => void;

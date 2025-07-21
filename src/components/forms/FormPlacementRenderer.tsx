@@ -1,6 +1,6 @@
 'use client';
 
-import { useEditStore } from '@/hooks/useEditStore';
+import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
 import { SimpleFormRenderer } from './SimpleFormRenderer';
 import type { SimpleFormData } from '@/types/simpleForms';
 
@@ -19,7 +19,7 @@ export function FormPlacementRenderer({ placement, className }: FormPlacementRen
 
   return (
     <div className={className}>
-      {forms.map((form) => (
+      {forms.map((form: any) => (
         <div key={form.id} id={`form-${form.id}`} className="mb-8">
           <SimpleFormRenderer form={form} />
         </div>

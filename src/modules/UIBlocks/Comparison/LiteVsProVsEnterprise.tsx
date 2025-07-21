@@ -62,25 +62,20 @@ const CONTENT_SCHEMA = {
 };
 
 // LiteVsProVsEnterprise component - Tiered product comparison
-export default function LiteVsProVsEnterprise({ 
-  sectionId, 
-  className = '',
-  backgroundType = 'neutral' 
-}: LayoutComponentProps) {
-  const {
-    content,
-    fonts,
-    colorTokens,
-    mode,
-    handleContentUpdate,
-    handleListUpdate
-  } = useLayoutComponent(sectionId);
-
-  // Extract content with defaults
-  const blockContent: LiteVsProVsEnterpriseContent = Object.entries(CONTENT_SCHEMA).reduce((acc, [key, schema]) => {
-    acc[key] = content?.[key] || schema.default;
-    return acc;
-  }, {} as LiteVsProVsEnterpriseContent);
+export default function LiteVsProVsEnterprise(props: LayoutComponentProps) {
+  const { sectionId, className = '', backgroundType = 'secondary' } = props;
+  
+  const { 
+    mode, 
+    blockContent, 
+    colorTokens, 
+    getTextStyle, 
+    sectionBackground, 
+    handleContentUpdate 
+  } = useLayoutComponent<LiteVsProVsEnterpriseContent>({ 
+    ...props, 
+    contentSchema: CONTENT_SCHEMA 
+  });
 
   // Parse data
   const tierNames = parsePipeData(blockContent.tier_names);
@@ -99,19 +94,27 @@ export default function LiteVsProVsEnterprise({
 
   // Update handlers
   const handleTierNameUpdate = (index: number, value: string) => {
-    handleListUpdate(tierNames, index, value, 'tier_names');
+    const newNames = [...tierNames];
+    newNames[index] = value;
+    handleContentUpdate('tier_names', newNames.join('|'));
   };
 
   const handleTierPriceUpdate = (index: number, value: string) => {
-    handleListUpdate(tierPrices, index, value, 'tier_prices');
+    const newPrices = [...tierPrices];
+    newPrices[index] = value;
+    handleContentUpdate('tier_prices', newPrices.join('|'));
   };
 
   const handleTierDescriptionUpdate = (index: number, value: string) => {
-    handleListUpdate(tierDescriptions, index, value, 'tier_descriptions');
+    const newDescriptions = [...tierDescriptions];
+    newDescriptions[index] = value;
+    handleContentUpdate('tier_descriptions', newDescriptions.join('|'));
   };
 
   const handleTierCtaUpdate = (index: number, value: string) => {
-    handleListUpdate(tierCtas, index, value, 'tier_ctas');
+    const newCtas = [...tierCtas];
+    newCtas[index] = value;
+    handleContentUpdate('tier_ctas', newCtas.join('|'));
   };
 
   // Check if tier is recommended (middle tier)
@@ -120,9 +123,11 @@ export default function LiteVsProVsEnterprise({
   return (
     <LayoutSection
       sectionId={sectionId}
+      sectionType="LiteVsProVsEnterprise"
+      backgroundType={backgroundType || 'secondary'}
+      sectionBackground={sectionBackground}
+      mode={mode}
       className={className}
-      backgroundType={backgroundType}
-      colorTokens={colorTokens}
     >
       <div className="max-w-7xl mx-auto">
         {/* Header Section */}
@@ -157,7 +162,7 @@ export default function LiteVsProVsEnterprise({
               key={tierIndex} 
               className={`rounded-lg ${
                 isRecommended(tierIndex) 
-                  ? `ring-2 ring-${colorTokens.textAccent.replace('text-', '')} shadow-xl` 
+                  ? `ring-2 ring-${(colorTokens.textAccent || 'text-blue-600').replace('text-', '')} shadow-xl` 
                   : 'shadow-lg'
               } ${colorTokens.bgNeutral} overflow-hidden`}
             >
@@ -208,11 +213,11 @@ export default function LiteVsProVsEnterprise({
                     value={tierDescriptions[tierIndex]}
                     onChange={(e) => handleTierDescriptionUpdate(tierIndex, e.target.value)}
                     className={`w-full bg-transparent outline-none focus:ring-2 focus:ring-blue-500 rounded px-2 mb-6 resize-none ${colorTokens.textSecondary}`}
-                    style={fonts.body}
+                    style={getTextStyle('body')}
                     rows={2}
                   />
                 ) : (
-                  <p className={`mb-6 ${colorTokens.textSecondary}`} style={fonts.body}>
+                  <p className={`mb-6 ${colorTokens.textSecondary}`} style={getTextStyle('body')}>
                     {tierDescriptions[tierIndex]}
                   </p>
                 )}
@@ -233,7 +238,7 @@ export default function LiteVsProVsEnterprise({
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" />
                           </svg>
                         )}
-                        <span className={`text-sm ${hasFeature ? colorTokens.textPrimary : 'text-gray-400'}`} style={fonts.body}>
+                        <span className={`text-sm ${hasFeature ? colorTokens.textPrimary : 'text-gray-400'}`} style={getTextStyle('body')}>
                           {feature}
                         </span>
                       </div>
@@ -245,7 +250,7 @@ export default function LiteVsProVsEnterprise({
                 <button className={`w-full py-3 rounded-lg font-semibold transition-all ${
                   isRecommended(tierIndex)
                     ? `${colorTokens.bgAccent} text-white hover:opacity-90`
-                    : `${colorTokens.bgNeutral} border-2 ${colorTokens.borderColor} ${colorTokens.textPrimary} hover:border-${colorTokens.textAccent.replace('text-', '')}`
+                    : `${colorTokens.bgNeutral || 'bg-gray-50'} border-2 ${colorTokens.borderColor || 'border-gray-200'} ${colorTokens.textPrimary || 'text-gray-900'} hover:border-${(colorTokens.textAccent || 'text-blue-600').replace('text-', '')}`
                 }`}>
                   {mode === 'edit' ? (
                     <input

@@ -29,7 +29,7 @@ const CONTENT_SCHEMA = {
   },
   reframe_blocks: { 
     type: 'string' as const, 
-    default: '"We don\'t have time to learn new tools"|Think of this as investing 30 minutes to save 5 hours every week|"Our current process works fine"|Every manual process is an opportunity waiting to be optimized|"It\'s too risky to change systems"|The biggest risk is staying behind while competitors automate|"We can\'t afford another subscription"|Can you afford to keep paying your team to do manual work?" 
+    default: `"We don't have time to learn new tools"|Think of this as investing 30 minutes to save 5 hours every week|"Our current process works fine"|Every manual process is an opportunity waiting to be optimized|"It's too risky to change systems"|The biggest risk is staying behind while competitors automate|"We can't afford another subscription"|Can you afford to keep paying your team to do manual work?` 
   }
 };
 

@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { useEditStore } from '@/hooks/useEditStore';
+import { EditProvider, useEditStoreContext } from '@/components/EditProvider';
 import LandingPageRenderer from '@/modules/generatedLanding/LandingPageRenderer';
 import { StoreDebugPanel } from '@/app/create/[token]/components/StoreDebugPanel';
 import { OnboardingDebugPanel } from '@/app/create/[token]/components/OnboardingDebugPanel';
@@ -11,25 +11,55 @@ export default function GeneratePage() {
   const params = useParams();
   const router = useRouter();
   const tokenId = params?.token as string;
+  
+  if (!tokenId) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center max-w-md">
+          <h2 className="text-xl font-semibold text-gray-900 mb-2">Invalid URL</h2>
+          <p className="text-gray-600 mb-6">No token provided in URL</p>
+          <button
+            onClick={() => router.push('/dashboard')}
+            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+          >
+            Return to Dashboard
+          </button>
+        </div>
+      </div>
+    );
+  }
 
-  // EditStore state (now handles both generation and editing)
-  const { 
-    sections,
-    content,
-    mode,
-    setMode,
-    loadFromDraft,
-  } = useEditStore();
+  return (
+    <EditProvider 
+      tokenId={tokenId}
+      options={{
+        showLoadingState: true,
+        showErrorBoundary: true,
+        preload: true,
+      }}
+    >
+      <GeneratePageContent tokenId={tokenId} />
+    </EditProvider>
+  );
+}
 
+// Separate component for the actual page logic
+function GeneratePageContent({ tokenId }: { tokenId: string }) {
+  const router = useRouter();
+  const { store, sections, content, isInitialized } = useEditStoreContext();
+  
   // UI state
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   // Initialize preview mode and validate data
   useEffect(() => {
+    if (!store || !isInitialized) return;
+    
     // Set preview mode
-    if (mode !== 'preview') {
-      setMode('preview');
+    const currentState = store.getState();
+    if (currentState.mode !== 'preview') {
+      store.getState().setMode('preview');
     }
 
     // Check if store has data
@@ -40,8 +70,6 @@ export default function GeneratePage() {
           setIsLoading(true);
           setError(null);
           
-         // console.log('📥 Loading draft data for token:', tokenId);
-          
           const response = await fetch(`/api/loadDraft?tokenId=${tokenId}`);
           
           if (!response.ok) {
@@ -49,12 +77,9 @@ export default function GeneratePage() {
           }
 
           const data = await response.json();
-          // console.log('📦 Received API response:', data);
           
           // Use the loadFromDraft method from EditStore
-          await loadFromDraft(data);
-          
-         // console.log('✅ Successfully loaded draft data into EditStore');
+          await store.getState().loadFromDraft(data, tokenId);
           
         } catch (err) {
           console.error('Failed to load page data:', err);
@@ -76,17 +101,17 @@ export default function GeneratePage() {
     } else {
       setIsLoading(false);
     }
-  }, [sections.length, tokenId, mode, setMode, router]);
+  }, [sections.length, tokenId, store, isInitialized, router]);
 
   // Handle edit navigation (no migration needed anymore)
   const handleEdit = async () => {
-   // console.log('🚀 Navigating to edit mode...');
+    if (!store) return;
     
     // Set edit mode in the store
-    setMode('edit');
+    store.getState().setMode('edit');
     
     // Ensure persistence by triggering auto-save
-    const currentState = useEditStore.getState();
+    const currentState = store.getState();
     console.log('📊 Pre-navigation store state:', {
       sections: currentState.sections.length,
       content: Object.keys(currentState.content).length,

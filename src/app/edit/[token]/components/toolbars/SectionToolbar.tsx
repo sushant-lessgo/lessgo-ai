@@ -1,6 +1,6 @@
 // app/edit/[token]/components/toolbars/SectionToolbar.tsx - Enhanced with ElementPicker Integration
 import React, { useState, useRef, useEffect, useMemo } from 'react';
-import { useEditStore } from '@/hooks/useEditStore';
+import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
 import { useToolbarActions } from '@/hooks/useToolbarActions';
 import { useElementPicker } from '@/hooks/useElementPicker';
 import { useSectionCRUD } from '@/hooks/useSectionCRUD';
@@ -53,7 +53,7 @@ export function SectionToolbar({ sectionId, position, contextActions }: SectionT
         sectionId,
         valid: validationStatus.isValid,
         isValid: validationStatus.isValid,
-        errors: validationStatus.errors?.map(e => e.message) || [],
+        errors: validationStatus.errors?.map((e: any) => e.message) || [],
         completionPercentage: section.editMetadata?.completionPercentage || 0,
         missingElements: validationStatus.missingRequired || [],
         hasRequiredContent: validationStatus.missingRequired?.length === 0,

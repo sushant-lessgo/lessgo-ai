@@ -1,6 +1,6 @@
 // utils/devTools.ts - Core Dev Tools Utilities for Edit Store
 // Import the store hook, not the type (we'll define our own type)
-import { useEditStore } from '@/hooks/useEditStore';
+import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
 
 // Define our own EditStore type to avoid circular dependency
 type EditStoreType = ReturnType<typeof useEditStore.getState>;

@@ -52,25 +52,20 @@ const CONTENT_SCHEMA = {
 };
 
 // YouVsThemHighlight component - Side-by-side pain vs gain comparison
-export default function YouVsThemHighlight({ 
-  sectionId, 
-  className = '',
-  backgroundType = 'neutral' 
-}: LayoutComponentProps) {
-  const {
-    content,
-    fonts,
-    colorTokens,
-    mode,
-    handleContentUpdate,
-    handleListUpdate
-  } = useLayoutComponent(sectionId);
-
-  // Extract content with defaults
-  const blockContent: YouVsThemHighlightContent = Object.entries(CONTENT_SCHEMA).reduce((acc, [key, schema]) => {
-    acc[key] = content?.[key] || schema.default;
-    return acc;
-  }, {} as YouVsThemHighlightContent);
+export default function YouVsThemHighlight(props: LayoutComponentProps) {
+  const { sectionId, className = '', backgroundType = 'secondary' } = props;
+  
+  const { 
+    mode, 
+    blockContent, 
+    colorTokens, 
+    getTextStyle, 
+    sectionBackground, 
+    handleContentUpdate 
+  } = useLayoutComponent<YouVsThemHighlightContent>({ 
+    ...props, 
+    contentSchema: CONTENT_SCHEMA 
+  });
 
   // Parse list data
   const themPoints = parsePipeData(blockContent.them_points);
@@ -78,42 +73,55 @@ export default function YouVsThemHighlight({
 
   // Update handlers for lists
   const handleThemPointUpdate = (index: number, value: string) => {
-    handleListUpdate(themPoints, index, value, 'them_points');
+    const newPoints = [...themPoints];
+    newPoints[index] = value;
+    handleContentUpdate('them_points', newPoints.join('|'));
   };
 
   const handleYouPointUpdate = (index: number, value: string) => {
-    handleListUpdate(youPoints, index, value, 'you_points');
+    const newPoints = [...youPoints];
+    newPoints[index] = value;
+    handleContentUpdate('you_points', newPoints.join('|'));
   };
 
   return (
     <LayoutSection
       sectionId={sectionId}
+      sectionType="YouVsThemHighlight"
+      backgroundType={backgroundType || 'secondary'}
+      sectionBackground={sectionBackground}
+      mode={mode}
       className={className}
-      backgroundType={backgroundType}
-      colorTokens={colorTokens}
     >
       <div className="max-w-6xl mx-auto">
         {/* Header Section */}
         <div className="text-center mb-12">
           <EditableAdaptiveHeadline
-            content={blockContent.headline}
             mode={mode}
-            onUpdate={(value) => handleContentUpdate('headline', value)}
-            className="mb-4"
-            fonts={fonts}
+            value={blockContent.headline}
+            onEdit={(value) => handleContentUpdate('headline', value)}
+            level="h1"
+            backgroundType={backgroundType}
             colorTokens={colorTokens}
-            variant="h1"
+            textStyle={getTextStyle('h1')}
+            className="mb-4"
+            sectionId={sectionId}
+            elementKey="headline"
+            sectionBackground={sectionBackground}
           />
           
           {(blockContent.subheadline || mode === 'edit') && (
             <EditableAdaptiveText
-              content={blockContent.subheadline || 'Add subheadline...'}
               mode={mode}
-              onUpdate={(value) => handleContentUpdate('subheadline', value)}
-              className={`max-w-2xl mx-auto ${!blockContent.subheadline && mode === 'edit' ? 'opacity-50' : ''}`}
-              fonts={fonts}
+              value={blockContent.subheadline || 'Add subheadline...'}
+              onEdit={(value) => handleContentUpdate('subheadline', value)}
+              backgroundType={backgroundType}
               colorTokens={colorTokens}
-              variant="body-lg"
+              textStyle={getTextStyle('body-lg')}
+              className={`max-w-2xl mx-auto ${!blockContent.subheadline && mode === 'edit' ? 'opacity-50' : ''}`}
+              sectionId={sectionId}
+              elementKey="subheadline"
+              variant="body"
             />
           )}
         </div>
@@ -121,7 +129,7 @@ export default function YouVsThemHighlight({
         {/* Comparison Grid */}
         <div className="grid md:grid-cols-2 gap-8 mb-12">
           {/* Them Column - Pain Points */}
-          <div className={`rounded-lg p-8 ${colorTokens.bgNeutral} border ${colorTokens.borderColor}`}>
+          <div className={`rounded-lg p-8 ${colorTokens.bgNeutral || 'bg-gray-50'} border ${colorTokens.borderColor || 'border-gray-200'}`}>
             <div className="flex items-center mb-6">
               <div className="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center mr-4">
                 <svg className="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -129,12 +137,16 @@ export default function YouVsThemHighlight({
                 </svg>
               </div>
               <EditableAdaptiveHeadline
-                content={blockContent.them_headline}
                 mode={mode}
-                onUpdate={(value) => handleContentUpdate('them_headline', value)}
-                fonts={fonts}
+                value={blockContent.them_headline}
+                onEdit={(value) => handleContentUpdate('them_headline', value)}
+                level="h3"
+                backgroundType={backgroundType}
                 colorTokens={colorTokens}
-                variant="h3"
+                textStyle={getTextStyle('h3')}
+                sectionId={sectionId}
+                elementKey="them_headline"
+                sectionBackground={sectionBackground}
               />
             </div>
             
@@ -148,10 +160,10 @@ export default function YouVsThemHighlight({
                       value={point}
                       onChange={(e) => handleThemPointUpdate(index, e.target.value)}
                       className={`flex-1 bg-transparent outline-none focus:ring-2 focus:ring-blue-500 rounded px-2 ${colorTokens.textSecondary}`}
-                      style={fonts.body}
+                      style={getTextStyle('body')}
                     />
                   ) : (
-                    <span className={colorTokens.textSecondary} style={fonts.body}>
+                    <span className={colorTokens.textSecondary} style={getTextStyle('body')}>
                       {point}
                     </span>
                   )}
@@ -161,37 +173,41 @@ export default function YouVsThemHighlight({
           </div>
 
           {/* You Column - Benefits */}
-          <div className={`rounded-lg p-8 ${colorTokens.bgAccent} bg-opacity-10 border-2 border-${colorTokens.textAccent.replace('text-', '')}`}>
+          <div className={`rounded-lg p-8 ${colorTokens.bgAccent || 'bg-blue-500'} bg-opacity-10 border-2 border-${(colorTokens.textAccent || 'text-blue-600').replace('text-', '')}`}>
             <div className="flex items-center mb-6">
-              <div className={`w-12 h-12 rounded-full ${colorTokens.bgAccent} flex items-center justify-center mr-4`}>
+              <div className={`w-12 h-12 rounded-full ${colorTokens.bgAccent || 'bg-blue-500'} flex items-center justify-center mr-4`}>
                 <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                 </svg>
               </div>
               <EditableAdaptiveHeadline
-                content={blockContent.you_headline}
                 mode={mode}
-                onUpdate={(value) => handleContentUpdate('you_headline', value)}
-                fonts={fonts}
+                value={blockContent.you_headline}
+                onEdit={(value) => handleContentUpdate('you_headline', value)}
+                level="h3"
+                backgroundType={backgroundType}
                 colorTokens={colorTokens}
-                variant="h3"
+                textStyle={getTextStyle('h3')}
+                sectionId={sectionId}
+                elementKey="you_headline"
+                sectionBackground={sectionBackground}
               />
             </div>
             
             <ul className="space-y-4">
               {youPoints.map((point, index) => (
                 <li key={index} className="flex items-start">
-                  <span className={`${colorTokens.textAccent} mr-3 mt-1 flex-shrink-0`}>✓</span>
+                  <span className={`${colorTokens.textAccent || 'text-blue-600'} mr-3 mt-1 flex-shrink-0`}>✓</span>
                   {mode === 'edit' ? (
                     <input
                       type="text"
                       value={point}
                       onChange={(e) => handleYouPointUpdate(index, e.target.value)}
                       className={`flex-1 bg-transparent outline-none focus:ring-2 focus:ring-blue-500 rounded px-2 ${colorTokens.textPrimary}`}
-                      style={fonts.body}
+                      style={getTextStyle('body')}
                     />
                   ) : (
-                    <span className={colorTokens.textPrimary} style={fonts.body}>
+                    <span className={colorTokens.textPrimary} style={getTextStyle('body')}>
                       {point}
                     </span>
                   )}
@@ -204,15 +220,18 @@ export default function YouVsThemHighlight({
         {/* CTA Section */}
         {(blockContent.cta_text || mode === 'edit') && (
           <div className="text-center">
-            <button className={`${colorTokens.bgAccent} text-white px-8 py-4 rounded-lg font-semibold hover:opacity-90 transition-opacity`}>
+            <button className={`${colorTokens.bgAccent || 'bg-blue-500'} text-white px-8 py-4 rounded-lg font-semibold hover:opacity-90 transition-opacity`}>
               <EditableAdaptiveText
-                content={blockContent.cta_text || 'Add CTA text...'}
                 mode={mode}
-                onUpdate={(value) => handleContentUpdate('cta_text', value)}
-                className={!blockContent.cta_text && mode === 'edit' ? 'opacity-75' : ''}
-                fonts={fonts}
+                value={blockContent.cta_text || 'Add CTA text...'}
+                onEdit={(value) => handleContentUpdate('cta_text', value)}
+                backgroundType={backgroundType}
                 colorTokens={{ ...colorTokens, textPrimary: 'text-white' }}
-                variant="button"
+                textStyle={getTextStyle('body')}
+                className={!blockContent.cta_text && mode === 'edit' ? 'opacity-75' : ''}
+                sectionId={sectionId}
+                elementKey="cta_text"
+                variant="body"
               />
             </button>
           </div>

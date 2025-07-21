@@ -1,7 +1,7 @@
 // app/edit/[token]/components/toolbars/ElementToolbar.tsx - Complete Element Toolbar
 import React, { useState, useRef, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { useEditStore } from '@/hooks/useEditStore';
+import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
 import { useEditor } from '@/hooks/useEditor';
 import { useToolbarActions } from '@/hooks/useToolbarActions';
 import { calculateArrowPosition } from '@/utils/toolbarPositioning';
@@ -359,7 +359,7 @@ export function ElementToolbar({ elementSelection, position, contextActions }: E
             </div>
             
             <div className="space-y-2 max-h-48 overflow-y-auto">
-              {elementVariations.variations.map((variation, index) => (
+              {elementVariations.variations.map((variation: any, index: number) => (
                 <div
                   key={index}
                   className={`p-3 rounded-lg border cursor-pointer transition-colors ${

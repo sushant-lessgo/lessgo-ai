@@ -2,7 +2,7 @@
 "use client";
 
 import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
-import { useEditStore } from '@/hooks/useEditStore';
+import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
 import { generateCompleteBackgroundSystem } from '@/modules/Design/background/backgroundIntegration';
 import { getCompatibleBackgrounds, validateBrandColor } from './backgroundCompatibility';
 import type { BackgroundSystem, BrandColors, BackgroundVariation, BackgroundSelectorMode } from '@/types/core';
@@ -13,11 +13,13 @@ export function useBackgroundSelector(tokenId: string) {
   const isUnmountedRef = useRef(false);
 
   // EditStore integration with selective subscriptions for performance
-  const theme = useEditStore(state => state.theme);
-  const onboardingData = useEditStore(state => state.onboardingData);
-  const updateFromBackgroundSystem = useEditStore(state => state.updateFromBackgroundSystem);
-  const triggerAutoSave = useEditStore(state => state.triggerAutoSave);
-  const resetToGenerated = useEditStore(state => state.resetToGenerated);
+  const { 
+    theme, 
+    onboardingData, 
+    updateFromBackgroundSystem, 
+    triggerAutoSave, 
+    resetToGenerated 
+  } = useEditStore();
 
   // Local state
   const [mode, setMode] = useState<BackgroundSelectorMode>('generated');

@@ -293,6 +293,6 @@ export function pickHowItWorksLayout(input: LayoutPickerInput): HowItWorksLayout
     { layout: "ThreeStepHorizontal" as HowItWorksLayout, score: 0 }
   );
 
-  // Return top scoring layout, fallback to universal default
+  // Return top scoring layout, fallback to most universal available layout
   return topLayout.score > 0 ? topLayout.layout : "ThreeStepHorizontal";
 }

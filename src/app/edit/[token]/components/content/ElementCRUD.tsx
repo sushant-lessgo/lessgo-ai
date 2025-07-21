@@ -2,7 +2,7 @@
 
 import React, { useState, useCallback, useMemo } from 'react';
 import { useElementCRUD } from '@/hooks/useElementCRUD';
-import { useEditStore } from '@/hooks/useEditStore';
+import { useEditStoreContext, useStoreState } from '@/components/EditProvider';
 import { useElementPicker } from '@/hooks/useElementPicker';
 import { ElementPicker } from './ElementPicker';
 import type { 
@@ -23,7 +23,11 @@ export function ElementManager({ sectionId, className = '', showValidation = tru
   const [dragOverElement, setDragOverElement] = useState<string | null>(null);
   const [dragPosition, setDragPosition] = useState<'before' | 'after' | null>(null);
 
-  const { content, announceLiveRegion } = useEditStore();
+  // Get store context and state
+  const { store } = useEditStoreContext();
+  const content = useStoreState(state => state.content);
+  const storeState = store?.getState();
+  const announceLiveRegion = storeState?.announceLiveRegion;
   const {
     getAllElements,
     moveElementUp,

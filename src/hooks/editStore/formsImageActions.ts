@@ -62,7 +62,7 @@ export function createFormsImageActions(set: any, get: any): FormsImageActions {
           state.history.redoStack = [];
         }
         
-        state.forms.activeForm = formId;
+        (state.forms as any).activeForm = formId;
         state.persistence.isDirty = true;
       });
       
@@ -803,7 +803,7 @@ export function createFormsImageActions(set: any, get: any): FormsImageActions {
           }
         }
         
-        state.forms.activeForm = formId;
+        (state.forms as any).activeForm = formId;
         state.persistence.isDirty = true;
         
         // Track change

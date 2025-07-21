@@ -2,7 +2,7 @@
 "use client";
 
 import { useState, useEffect } from 'react';
-import { useEditStore } from '@/hooks/useEditStore';
+import { useEditStoreContext, useStoreState } from '@/components/EditProvider';
 import { useOnboardingStore } from '@/hooks/useOnboardingStore';
 import ConfirmedFieldTile from '@/app/create/[token]/components/ConfirmedFieldTile';
 import TaxonomyModalManager from '../modals/TaxonomyModalManager';
@@ -13,14 +13,18 @@ interface LeftPanelProps {
 }
 
 export function LeftPanel({ tokenId }: LeftPanelProps) {
+  // Get store context and state
+  const { store } = useEditStoreContext();
+  const leftPanel = useStoreState(state => state.leftPanel);
+  const onboardingData = useStoreState(state => state.onboardingData);
+  
+  const storeState = store?.getState();
   const {
-    leftPanel,
     setLeftPanelWidth,
     toggleLeftPanel,
     regenerateAllContent,
-    onboardingData,
     updateOnboardingData,
-  } = useEditStore();
+  } = storeState || {};
 
   const { 
     reopenFieldForEditing,

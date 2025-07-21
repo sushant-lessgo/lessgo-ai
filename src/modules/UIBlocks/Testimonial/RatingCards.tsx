@@ -35,7 +35,7 @@ const CONTENT_SCHEMA = {
   },
   testimonial_quotes: { 
     type: 'string' as const, 
-    default: 'Absolutely game-changing! The interface is intuitive and the results are consistently excellent. Best tool I\\'ve used in years.|Outstanding customer support and powerful features. This platform has saved me countless hours and improved my workflow significantly.|Impressive functionality with a clean, user-friendly design. The automation features alone make this worth every penny.|Exceeded all expectations. The learning curve is minimal and the impact on productivity is immediate. Highly recommended.|Top-notch quality and reliability. Been using it for 6 months and it keeps getting better with regular updates.|Perfect for creative professionals. The templates are beautiful and the customization options are endless.' 
+    default: `Absolutely game-changing! The interface is intuitive and the results are consistently excellent. Best tool I've used in years.|Outstanding customer support and powerful features. This platform has saved me countless hours and improved my workflow significantly.|Impressive functionality with a clean, user-friendly design. The automation features alone make this worth every penny.|Exceeded all expectations. The learning curve is minimal and the impact on productivity is immediate. Highly recommended.|Top-notch quality and reliability. Been using it for 6 months and it keeps getting better with regular updates.|Perfect for creative professionals. The templates are beautiful and the customization options are endless.` 
   },
   customer_names: { 
     type: 'string' as const, 

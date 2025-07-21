@@ -34,7 +34,7 @@ const CONTENT_SCHEMA = {
   },
   testimonial_quotes: { 
     type: 'string' as const, 
-    default: 'This tool revolutionized my creative workflow. I can now focus on what I love most - creating amazing content for my audience.|The global community and collaboration features are incredible. I\\'ve connected with creators worldwide and learned so much.|As an international freelancer, having a platform that works seamlessly across time zones and currencies is essential.|The creative freedom this platform provides is unmatched. I\\'ve been able to express my vision in ways I never thought possible.|Building my personal brand became so much easier with these tools. The engagement from my audience has tripled.|The cultural diversity of the community inspires me daily. Every creator brings something unique to the platform.' 
+    default: `This tool revolutionized my creative workflow. I can now focus on what I love most - creating amazing content for my audience.|The global community and collaboration features are incredible. I've connected with creators worldwide and learned so much.|As an international freelancer, having a platform that works seamlessly across time zones and currencies is essential.|The creative freedom this platform provides is unmatched. I've been able to express my vision in ways I never thought possible.|Building my personal brand became so much easier with these tools. The engagement from my audience has tripled.|The cultural diversity of the community inspires me daily. Every creator brings something unique to the platform.` 
   },
   customer_names: { 
     type: 'string' as const, 

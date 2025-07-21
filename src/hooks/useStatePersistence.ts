@@ -1,6 +1,6 @@
 // hooks/useStatePersistence.ts - React Hook for State Persistence
 import { useEffect, useRef, useCallback, useState } from 'react';
-import { useEditStore } from '@/hooks/useEditStore';
+import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
 import { 
   StatePersistenceManager, 
   getPersistenceManager,

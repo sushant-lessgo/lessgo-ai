@@ -315,6 +315,6 @@ export function pickPricingLayout(input: LayoutPickerInput): PricingLayout {
     { layout: "TierCards" as PricingLayout, score: 0 }
   );
 
-  // Return top scoring layout, fallback to universal default
+  // Return top scoring layout, fallback to most universal available layout
   return topLayout.score > 0 ? topLayout.layout : "TierCards";
 }

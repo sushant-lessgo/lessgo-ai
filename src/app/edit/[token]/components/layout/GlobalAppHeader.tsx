@@ -3,7 +3,7 @@
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useEditStore } from '@/hooks/useEditStore';
+import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
 import { UserButton, useUser } from '@clerk/nextjs';
 import Logo from '@/components/shared/Logo';
 
@@ -127,7 +127,7 @@ export function GlobalAppHeader({ tokenId }: GlobalAppHeaderProps) {
         {/* App Menu (Hamburger for mobile) */}
         <button
           className="w-8 h-8 rounded border border-gray-200 flex items-center justify-center hover:bg-gray-50 transition-colors lg:hidden"
-          onClick={() => useEditStore.getState().toggleLeftPanel()}
+          onClick={() => useEditStore().toggleLeftPanel?.()}
           aria-label="Toggle navigation menu"
         >
           <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">

@@ -47,25 +47,20 @@ const CONTENT_SCHEMA = {
 };
 
 // CheckmarkComparison component - Classic feature comparison table with checkmarks
-export default function CheckmarkComparison({ 
-  sectionId, 
-  className = '',
-  backgroundType = 'neutral' 
-}: LayoutComponentProps) {
-  const {
-    content,
-    fonts,
-    colorTokens,
-    mode,
-    handleContentUpdate,
-    handleListUpdate
-  } = useLayoutComponent(sectionId);
-
-  // Extract content with defaults
-  const blockContent: CheckmarkComparisonContent = Object.entries(CONTENT_SCHEMA).reduce((acc, [key, schema]) => {
-    acc[key] = content?.[key] || schema.default;
-    return acc;
-  }, {} as CheckmarkComparisonContent);
+export default function CheckmarkComparison(props: LayoutComponentProps) {
+  const { sectionId, className = '', backgroundType = 'secondary' } = props;
+  
+  const { 
+    mode, 
+    blockContent, 
+    colorTokens, 
+    getTextStyle, 
+    sectionBackground, 
+    handleContentUpdate 
+  } = useLayoutComponent<CheckmarkComparisonContent>({ 
+    ...props, 
+    contentSchema: CONTENT_SCHEMA 
+  });
 
   // Parse comparison data
   const columnHeaders = parsePipeData(blockContent.column_headers);
@@ -75,42 +70,55 @@ export default function CheckmarkComparison({
 
   // Update handlers for lists
   const handleColumnHeaderUpdate = (index: number, value: string) => {
-    handleListUpdate(columnHeaders, index, value, 'column_headers');
+    const newHeaders = [...columnHeaders];
+    newHeaders[index] = value;
+    handleContentUpdate('column_headers', newHeaders.join('|'));
   };
 
   const handleFeatureLabelUpdate = (index: number, value: string) => {
-    handleListUpdate(featureLabels, index, value, 'feature_labels');
+    const newLabels = [...featureLabels];
+    newLabels[index] = value;
+    handleContentUpdate('feature_labels', newLabels.join('|'));
   };
 
   return (
     <LayoutSection
       sectionId={sectionId}
+      sectionType="CheckmarkComparison"
+      backgroundType={backgroundType || 'secondary'}
+      sectionBackground={sectionBackground}
+      mode={mode}
       className={className}
-      backgroundType={backgroundType}
-      colorTokens={colorTokens}
     >
       <div className="max-w-7xl mx-auto">
         {/* Header Section */}
         <div className="text-center mb-12">
           <EditableAdaptiveHeadline
-            content={blockContent.headline}
             mode={mode}
-            onUpdate={(value) => handleContentUpdate('headline', value)}
-            className="mb-4"
-            fonts={fonts}
+            value={blockContent.headline}
+            onEdit={(value) => handleContentUpdate('headline', value)}
+            level="h1"
+            backgroundType={backgroundType}
             colorTokens={colorTokens}
-            variant="h1"
+            textStyle={getTextStyle('h1')}
+            className="mb-4"
+            sectionId={sectionId}
+            elementKey="headline"
+            sectionBackground={sectionBackground}
           />
           
           {(blockContent.subheadline || mode === 'edit') && (
             <EditableAdaptiveText
-              content={blockContent.subheadline || 'Add subheadline...'}
               mode={mode}
-              onUpdate={(value) => handleContentUpdate('subheadline', value)}
-              className={`max-w-3xl mx-auto ${!blockContent.subheadline && mode === 'edit' ? 'opacity-50' : ''}`}
-              fonts={fonts}
+              value={blockContent.subheadline || 'Add subheadline...'}
+              onEdit={(value) => handleContentUpdate('subheadline', value)}
+              backgroundType={backgroundType}
               colorTokens={colorTokens}
-              variant="body-lg"
+              textStyle={getTextStyle('body-lg')}
+              className={`max-w-3xl mx-auto ${!blockContent.subheadline && mode === 'edit' ? 'opacity-50' : ''}`}
+              sectionId={sectionId}
+              elementKey="subheadline"
+              variant="body"
             />
           )}
         </div>
@@ -121,7 +129,7 @@ export default function CheckmarkComparison({
             <thead>
               <tr>
                 <th className={`text-left p-4 border-b ${colorTokens.borderColor}`}>
-                  <span className={colorTokens.textPrimary} style={fonts.body}>Features</span>
+                  <span className={colorTokens.textPrimary} style={getTextStyle('body')}>Features</span>
                 </th>
                 {columnHeaders.map((header, index) => (
                   <th 
@@ -138,12 +146,12 @@ export default function CheckmarkComparison({
                         className={`w-full text-center bg-transparent outline-none focus:ring-2 focus:ring-blue-500 rounded px-2 ${
                           index === highlightIndex ? 'text-white font-semibold' : colorTokens.textPrimary
                         }`}
-                        style={fonts.body}
+                        style={getTextStyle('body')}
                       />
                     ) : (
                       <span 
                         className={index === highlightIndex ? 'text-white font-semibold' : colorTokens.textPrimary}
-                        style={fonts.body}
+                        style={getTextStyle('body')}
                       >
                         {header}
                       </span>
@@ -162,10 +170,10 @@ export default function CheckmarkComparison({
                         value={label}
                         onChange={(e) => handleFeatureLabelUpdate(rowIndex, e.target.value)}
                         className={`w-full bg-transparent outline-none focus:ring-2 focus:ring-blue-500 rounded px-2 ${colorTokens.textSecondary}`}
-                        style={fonts.body}
+                        style={getTextStyle('body')}
                       />
                     ) : (
-                      <span className={colorTokens.textSecondary} style={fonts.body}>
+                      <span className={colorTokens.textSecondary} style={getTextStyle('body')}>
                         {label}
                       </span>
                     )}

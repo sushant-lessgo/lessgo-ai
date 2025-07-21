@@ -272,6 +272,6 @@ export function pickFounderNoteLayout(input: LayoutPickerInput): FounderNoteLayo
     { layout: "FounderCardWithQuote" as FounderNoteLayout, score: 0 }
   );
 
-  // Return top scoring layout, fallback to universal default
+  // Return top scoring layout, fallback to most universal available layout
   return topLayout.score > 0 ? topLayout.layout : "FounderCardWithQuote";
 }

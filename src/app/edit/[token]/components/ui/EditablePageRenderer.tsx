@@ -4,7 +4,7 @@ import { getComponent } from '@/modules/generatedLanding/componentRegistry';
 import { sectionList } from '@/modules/sections/sectionList';
 import { useLayoutComponent } from '@/hooks/useLayoutComponent';
 import { InlineTextEditor, defaultEditorConfig } from '@/app/edit/[token]/components/editor/InlineTextEditor';
-import { useEditStore } from '@/hooks/useEditStore';
+import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
 import type { TextFormatState, AutoSaveConfig, InlineEditorConfig, TextSelection } from '@/app/edit/[token]/components/editor/InlineTextEditor';
 
 interface EditablePageRendererProps {
@@ -341,7 +341,7 @@ const ElementEditingOverlay: React.FC<{
   });
   
   // Get showTextToolbar from the store
-  const showTextToolbar = useEditStore(state => state.showTextToolbar);
+  const { showTextToolbar } = useEditStore();
   
   // Debug: Log overlay mount
   React.useEffect(() => {

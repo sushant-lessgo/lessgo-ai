@@ -298,6 +298,6 @@ export function pickUseCaseLayout(input: LayoutPickerInput): UseCaseLayout {
     { layout: "PersonaGrid" as UseCaseLayout, score: 0 }
   );
 
-  // Return top scoring layout, fallback to universal default
+  // Return top scoring layout, fallback to most universal available layout
   return topLayout.score > 0 ? topLayout.layout : "PersonaGrid";
 }

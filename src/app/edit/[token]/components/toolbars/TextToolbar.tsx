@@ -1,6 +1,6 @@
 // app/edit/[token]/components/toolbars/TextToolbar.tsx - Complete Text Toolbar
 import React, { useState, useRef, useEffect, useMemo } from 'react';
-import { useEditStore } from '@/hooks/useEditStore';
+import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
 import { useEditor } from '@/hooks/useEditor';
 import { useToolbarActions } from '@/hooks/useToolbarActions';
 import { calculateArrowPosition } from '@/utils/toolbarPositioning';

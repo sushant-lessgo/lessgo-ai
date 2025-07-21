@@ -1,6 +1,6 @@
 // hooks/useContentSerializer.ts - Basic content serialization/deserialization for MVP
 import { useCallback, useMemo } from 'react';
-import { useEditStore } from './useEditStore';
+import { useEditStoreLegacy as useEditStore } from './useEditStoreLegacy';
 import { validateContentStructure } from '@/utils/contentSerialization';
 
 export interface SerializedContent {

@@ -3,7 +3,7 @@
 
 import { useEffect } from 'react';
 import { useTypography } from '@/hooks/useTypography';
-import { useEditStore } from '@/hooks/useEditStore';
+import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
 import { 
   LayoutComponentProps, 
   extractLayoutContent,

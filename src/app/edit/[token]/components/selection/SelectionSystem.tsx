@@ -1,6 +1,6 @@
 // app/edit/[token]/components/selection/SelectionSystem.tsx
 import React, { useEffect } from 'react';
-import { useEditStore } from '@/hooks/useEditStore';
+import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
 // Removed useSelection - functionality now in unified useEditor system
 
 interface SelectionSystemProps {
@@ -229,7 +229,7 @@ function SelectionIndicators() {
       )}
       
       {/* Multi-Selection Badges */}
-      {multiSelection.map((sectionId, index) => (
+      {multiSelection.map((sectionId: string, index: number) => (
         <SelectionBadge
           key={sectionId}
           targetSelector={`[data-section-id="${sectionId}"]`}

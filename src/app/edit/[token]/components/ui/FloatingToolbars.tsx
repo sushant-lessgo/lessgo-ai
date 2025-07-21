@@ -1,6 +1,6 @@
 // app/edit/[token]/components/ui/FloatingToolbars.tsx - Complete 5 Toolbar Implementation
 import React, { useEffect, useRef, useState } from 'react';
-import { useEditStore } from '@/hooks/useEditStore';
+import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
 // Removed complex positioning hooks - using simple React-based positioning
 import { calculateArrowPosition } from '@/utils/toolbarPositioning';
 
@@ -41,7 +41,7 @@ export function FloatingToolbars() {
         <SectionToolbar
           sectionId={selectedSection}
           position={toolbar.position}
-          contextActions={toolbar.actions.map(actionId => ({ id: actionId, label: actionId, icon: 'icon', type: 'button' }))}
+          contextActions={toolbar.actions.map((actionId: any) => ({ id: actionId, label: actionId, icon: 'icon', type: 'button' }))}
         />
       )}
 
@@ -49,7 +49,7 @@ export function FloatingToolbars() {
         <ElementToolbar
           elementSelection={selectedElement}
           position={toolbar.position}
-          contextActions={toolbar.actions.map(actionId => ({ id: actionId, label: actionId, icon: 'icon', type: 'button' }))}
+          contextActions={toolbar.actions.map((actionId: any) => ({ id: actionId, label: actionId, icon: 'icon', type: 'button' }))}
         />
       )}
 
@@ -57,7 +57,7 @@ export function FloatingToolbars() {
         <TextToolbar
           elementSelection={selectedElement}
           position={toolbar.position}
-          contextActions={toolbar.actions.map(actionId => ({ id: actionId, label: actionId, icon: 'icon', type: 'button' }))}
+          contextActions={toolbar.actions.map((actionId: any) => ({ id: actionId, label: actionId, icon: 'icon', type: 'button' }))}
         />
       )}
 
@@ -65,7 +65,7 @@ export function FloatingToolbars() {
         <ImageToolbar
           targetId={toolbar.targetId}
           position={toolbar.position}
-          contextActions={toolbar.actions.map(actionId => ({ id: actionId, label: actionId, icon: 'icon', type: 'button' }))}
+          contextActions={toolbar.actions.map((actionId: any) => ({ id: actionId, label: actionId, icon: 'icon', type: 'button' }))}
         />
       )}
 
@@ -73,7 +73,7 @@ export function FloatingToolbars() {
         <FormToolbar
           targetId={toolbar.targetId}
           position={toolbar.position}
-          contextActions={toolbar.actions.map(actionId => ({ id: actionId, label: actionId, icon: 'icon', type: 'button' }))}
+          contextActions={toolbar.actions.map((actionId: any) => ({ id: actionId, label: actionId, icon: 'icon', type: 'button' }))}
         />
       )}
     </>

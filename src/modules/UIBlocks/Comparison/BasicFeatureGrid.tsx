@@ -216,7 +216,7 @@ export default function BasicFeatureGrid(props: LayoutComponentProps) {
                       key={competitor.key}
                       className={`px-6 py-4 text-center text-sm font-semibold ${
                         competitor.isPrimary 
-                          ? colorTokens.ctaBg.replace('bg-', 'bg-') + '/10 ' + colorTokens.textOnLight + ' border-l-4 ' + colorTokens.ctaBg.replace('bg-', 'border-')
+                          ? (colorTokens.ctaBg || 'bg-blue-500').replace('bg-', 'bg-') + '/10 ' + (colorTokens.textOnLight || 'text-gray-900') + ' border-l-4 ' + (colorTokens.ctaBg || 'bg-blue-500').replace('bg-', 'border-')
                           : colorTokens.textPrimary
                       }`}
                     >
@@ -264,7 +264,7 @@ export default function BasicFeatureGrid(props: LayoutComponentProps) {
                       <td 
                         key={competitor.key}
                         className={`px-6 py-4 text-center ${
-                          competitor.isPrimary ? colorTokens.ctaBg.replace('bg-', 'bg-') + '/5 border-l-4 ' + colorTokens.ctaBg.replace('bg-', 'border-') : ''
+                          competitor.isPrimary ? (colorTokens.ctaBg || 'bg-blue-500').replace('bg-', 'bg-') + '/5 border-l-4 ' + (colorTokens.ctaBg || 'bg-blue-500').replace('bg-', 'border-') : ''
                         }`}
                       >
                         <FeatureValue 

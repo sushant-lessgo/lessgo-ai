@@ -230,6 +230,6 @@ export function pickBeforeAfterLayout(input: LayoutPickerInput): BeforeAfterLayo
     { layout: "SideBySideBlocks" as BeforeAfterLayout, score: 0 }
   );
 
-  // Return top scoring layout, fallback to universal default
+  // Return top scoring layout, fallback to most universal available layout
   return topLayout.score > 0 ? topLayout.layout : "SideBySideBlocks";
 }

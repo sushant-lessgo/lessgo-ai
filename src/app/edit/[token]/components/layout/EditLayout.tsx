@@ -2,7 +2,7 @@
 "use client";
 
 import React, { useEffect, useCallback } from 'react';
-import { useEditStore } from '@/hooks/useEditStore';
+import { useEditStoreContext, useStoreState } from '@/components/EditProvider';
 import { useEditor } from '@/hooks/useEditor';
 import { GlobalAppHeader } from './GlobalAppHeader';
 import { EditHeader } from './EditHeader';
@@ -20,13 +20,20 @@ interface EditLayoutProps {
 
 
 export function EditLayout({ tokenId }: EditLayoutProps) {
+  // Get store context and state
+  const { store } = useEditStoreContext();
+  
+  // Use selectors for state
+  const leftPanel = useStoreState(state => state.leftPanel);
+  const mode = useStoreState(state => state.mode);
+  
+  // Get actions from store
+  const storeState = store?.getState();
   const {
-    leftPanel,
-    mode,
     updateViewportInfo,
     handleKeyboardShortcut,
     getColorTokens,
-  } = useEditStore();
+  } = storeState || {};
   
 
   // Initialize unified editor system
@@ -37,7 +44,7 @@ export function EditLayout({ tokenId }: EditLayoutProps) {
   enableVersioning: true,
 });
 
-  const colorTokens = getColorTokens();
+  const colorTokens = getColorTokens ? getColorTokens() : {};
 
   // Handle responsive viewport changes
   useEffect(() => {
@@ -118,7 +125,7 @@ export function EditLayout({ tokenId }: EditLayoutProps) {
         {!leftPanel.collapsed && (
           <div 
             className="fixed inset-0 bg-black bg-opacity-25 z-20 lg:hidden"
-            onClick={() => useEditStore.getState().toggleLeftPanel()}
+            onClick={() => storeState?.toggleLeftPanel?.()}
           />
         )}
 

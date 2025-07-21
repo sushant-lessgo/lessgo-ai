@@ -1,424 +1,326 @@
-// hooks/useEditStore.ts - Main store orchestrator using centralized types
-import { create } from "zustand";
-import { immer } from "zustand/middleware/immer";
-import { devtools } from "zustand/middleware";
-import { subscribeWithSelector } from "zustand/middleware";
-import type { FormField } from "@/types/core/index";
-// At top of useEditStore.ts
-
-// Import consolidated action creators
-import { createCoreActions } from './editStore/coreActions';
-import { createAIActions } from './editStore/aiActions';
-import { createPersistenceActions } from './editStore/persistenceActions';
-import { createGenerationActions } from './editStore/generationActions';
-import { createUIActions } from './editStore/uiActions';
-import { createFormActions } from './editStore/formActions';
-
-// Import centralized types
-import type { EditStore, SectionData } from '@/types/store';
-import type { Theme } from '@/types/core/index';
-import { persist } from "zustand/middleware";
-
 /**
- * ===== DEFAULT VALUES =====
+ * SSR-Safe useEditStore Hook - Token-scoped store access
+ * Replaces the global useEditStore with token-aware store management
  */
-const defaultTheme: Theme = {
-  typography: {
-    headingFont: 'Inter, sans-serif',
-    bodyFont: 'Inter, sans-serif',
-    scale: 'comfortable',
-    lineHeight: 1.5,
-    fontWeights: {
-      light: 300,
-      normal: 400,
-      medium: 500,
-      semibold: 600,
-      bold: 700,
-    },
-  },
-  colors: {
-    baseColor: 'gray',
-    accentColor: 'purple',
-    accentCSS: undefined,
-    sectionBackgrounds: {
-      primary: undefined,
-      secondary: undefined,
-      neutral: undefined,
-      divider: undefined,
-    },
-    semantic: {
-      success: 'bg-green-500',
-      warning: 'bg-yellow-500',
-      error: 'bg-red-500',
-      info: 'bg-blue-500',
-      neutral: 'bg-gray-500',
-    },
-    states: {
-      hover: {},
-      focus: {},
-      active: {},
-      disabled: {},
-    },
-  },
-  spacing: {
-    unit: 8,
-    scale: [0, 4, 8, 12, 16, 20, 24, 32, 40, 48, 64, 80, 96, 128],
-    presets: {
-      xs: '0.5rem',
-      sm: '0.75rem',
-      md: '1rem',
-      lg: '1.5rem',
-      xl: '2rem',
-      xxl: '3rem',
-    },
-  },
-  corners: {
-    radius: 8,
-    scale: {
-      small: 4,
-      medium: 8,
-      large: 16,
-      full: 9999,
-    },
-  },
-  animations: {
-    enabled: true,
-    duration: {
-      fast: 150,
-      medium: 300,
-      slow: 500,
-    },
-    easing: {
-      easeIn: 'cubic-bezier(0.4, 0, 1, 1)',
-      easeOut: 'cubic-bezier(0, 0, 0.2, 1)',
-      easeInOut: 'cubic-bezier(0.4, 0, 0.2, 1)',
-    },
-    reducedMotion: false,
-  },
-};
 
-/**
- * ===== INITIAL STATE CREATOR =====
- */
-function createInitialState() {
-  return {
-    // Layout Slice
-    sections: [] as string[],
-    sectionLayouts: {} as Record<string, string>,
-    theme: defaultTheme,
-    globalSettings: {
-      maxWidth: '1200px',
-      containerPadding: '32px',
-      sectionSpacing: '64px',
-      deviceMode: 'desktop' as const,
-      zoomLevel: 100,
-    },
-    
-    // Content Slice
-    content: {} as Record<string, SectionData>,
-    
-    // UI Slice
-    mode: 'edit' as const,
-    editMode: 'section' as const,
-    generationMode: false, // Optimization flag for generation flow
-    selectedSection: undefined as string | undefined,
-    selectedElement: undefined as any,
-    multiSelection: [] as string[],
-    isTextEditing: false,
-    textEditingElement: undefined as { sectionId: string; elementKey: string } | undefined,
-    leftPanel: {
-      width: 300,
-      collapsed: false,
-      manuallyToggled: false,
-      activeTab: 'pageStructure' as const,
-    },
-    // Simplified single toolbar state
-    toolbar: {
-      type: null as 'section' | 'element' | 'text' | 'image' | 'form' | null,
-      visible: false,
-      position: { x: 0, y: 0 },
-      targetId: null as string | null,
-      actions: [] as string[],
-    },
-    // Removed: autoSave object (keeping only persistence)
-    aiGeneration: {
-      isGenerating: false,
-      currentOperation: null as 'section' | 'element' | 'page' | null,
-      progress: 0,
-      status: '',
-      errors: [] as string[],
-      warnings: [] as string[],
-    },
-    elementVariations: {
-      visible: false,
-      variations: [] as string[],
-    },
-    formData: {} as Record<string, { fields: FormField[]; settings: any }>,
-    images: {
-      assets: {},
-      stockPhotos: {
-        searchResults: [],
-        searchQuery: '',
-        searchVisible: false,
-      },
-      uploadProgress: {},
-    },
-    errors: {} as Record<string, string>,
-    loadingStates: {} as Record<string, boolean>,
-    isLoading: false,
-    history: {
-      undoStack: [],
-      redoStack: [],
-      maxHistorySize: 50,
-    },
-    apiQueue: {
-      queue: [],
-      processing: false,
-      rateLimitRemaining: 100,
-      rateLimitReset: Date.now() + 60000,
-    },
-    
-    // Meta Slice
-    id: '',
-    title: 'Untitled Project',
-    slug: '',
-    description: '',
-    lastUpdated: Date.now(),
-    version: 1,
-    tokenId: '',
-    onboardingData: {
-      oneLiner: '',
-      validatedFields: {},
-      featuresFromAI: [],
-      hiddenInferredFields: {},
-      confirmedFields: {
-        marketCategory: { value: '', confidence: 0 },
-        marketSubcategory: { value: '', confidence: 0 },
-        targetAudience: { value: '', confidence: 0 },
-        keyProblem: { value: '', confidence: 0 },
-        startupStage: { value: '', confidence: 0 },
-        landingPageGoals: { value: '', confidence: 0 },
-        pricingModel: { value: '', confidence: 0 },
-      },
-    },
-    publishing: {
-      isPublishReady: false,
-    },
-    changeTracking: {
-      originalInputs: {},
-      currentInputs: {},
-      hasChanges: false,
-      changedFields: [],
-      lastChangeTimestamp: Date.now(),
-    },
+import { useEffect, useState, useRef } from 'react';
+import { storeManager } from '@/stores/storeManager';
+import type { EditStoreInstance } from '@/stores/editStore';
+import type { EditStore } from '@/types/store';
+import { isStorageAvailable } from '@/utils/storage';
 
-    // FormsSlice 
-    forms: {} as Record<string, any>,
-    simpleForms: [] as any[],
-    activeForm: undefined as string | undefined,
-    formBuilder: {
-      visible: false,
-      editingField: undefined as string | undefined,
-      editingFormId: undefined as string | undefined,
-      fieldLibrary: [],
-    },
-    integrations: {} as Record<string, any>,
-    analytics: {} as Record<string, any>,
-
-    // Persistence Slice
-    persistence: {
-      isDirty: false,
-      isSaving: false,
-      isLoading: false,
-      hasActiveConflicts: false,
-      backgroundSaveEnabled: true,
-      autoSaveEnabled: true,
-      retryCount: 0,
-      metrics: {
-        totalSaves: 0,
-        successfulSaves: 0,
-        failedSaves: 0,
-        averageSaveTime: 0,
-        lastSaveTime: 0,
-        totalLoads: 0,
-        cacheHits: 0,
-        cacheMisses: 0,
-        conflictsDetected: 0,
-        conflictsResolved: 0,
-      },
-      syncStatus: {
-        localVersion: 1,
-        serverVersion: 1,
-        status: 'synced' as const,
-        pendingChanges: 0,
-      },
-    },
-
-    // Removed: duplicate auto-save state (using persistence instead)
-    conflictResolution: {
-      hasConflict: false,
-      conflictData: undefined as any,
-      resolveStrategy: 'manual' as const,
-    },
-    performance: {
-      saveCount: 0,
-      averageSaveTime: 0,
-      lastSaveTime: 0,
-      failedSaves: 0,
-    },
-} as unknown as EditStore; // Type assertion to satisfy TypeScript
+// Hook state for managing store lifecycle
+interface UseEditStoreState {
+  store: EditStoreInstance | null;
+  isInitialized: boolean;
+  isHydrating: boolean;
+  error: string | null;
 }
 
 /**
- * ===== MAIN STORE CREATION =====
+ * SSR-safe hook for accessing token-scoped EditStore
+ * 
+ * @param tokenId - The token ID for the project
+ * @param options - Configuration options
+ * @returns Store instance and loading states
  */
-export const useEditStore = create<EditStore>()(
-  devtools(
-    subscribeWithSelector(
-      persist(
-      immer((set, get) => ({
-        // Initial state
-        ...createInitialState(),
-        
-        // Consolidated action creators (6 files instead of 9+)
-        ...createCoreActions(set, get),
-        ...createAIActions(set, get),
-        ...createPersistenceActions(set, get),
-        ...createGenerationActions(set, get),
-        ...createUIActions(set, get),
-        ...createFormActions(set, get),
-        // Simple inline actions that don't need separate files
-        loadFromOnboarding: () => {
-          console.warn('loadFromOnboarding: Not yet implemented - needs onboarding store integration');
-        },
+export function useEditStore(
+  tokenId: string,
+  options: {
+    suspense?: boolean;
+    preload?: boolean;
+    resetOnTokenChange?: boolean;
+  } = {}
+) {
+  const {
+    suspense = false,
+    preload = false,
+    resetOnTokenChange = true
+  } = options;
 
-        updateOnboardingData: (data: Partial<any>) => {
-          set((state) => {
-            Object.assign(state.onboardingData, data);
-            state.lastUpdated = Date.now();
+  // State management
+  const [state, setState] = useState<UseEditStoreState>({
+    store: null,
+    isInitialized: false,
+    isHydrating: true,
+    error: null,
+  });
+
+  // Ref to track current token and prevent unnecessary re-renders
+  const currentTokenRef = useRef<string | null>(null);
+  const initializationRef = useRef<Promise<EditStoreInstance> | null>(null);
+
+  /**
+   * Initialize store for the given token
+   */
+  const initializeStore = async (newTokenId: string): Promise<EditStoreInstance> => {
+    try {
+      console.log(`🎯 useEditStore: Initializing store for token ${newTokenId}`);
+      
+      // Check if we're switching tokens
+      const isTokenSwitch = currentTokenRef.current && currentTokenRef.current !== newTokenId;
+      if (isTokenSwitch && resetOnTokenChange) {
+        console.log(`🔄 useEditStore: Token switch detected: ${currentTokenRef.current} → ${newTokenId}`);
+      }
+
+      // Get store from manager
+      const store = storeManager.getEditStore(newTokenId);
+      currentTokenRef.current = newTokenId;
+
+      // Wait for hydration if storage is available
+      if (isStorageAvailable()) {
+        // Give the persist middleware time to hydrate
+        await new Promise(resolve => {
+          const unsubscribe = store.persist.onFinishHydration(() => {
+            unsubscribe();
+            resolve(void 0);
           });
-        },
+          
+          // Fallback timeout in case hydration events don't fire
+          setTimeout(() => {
+            unsubscribe();
+            resolve(void 0);
+          }, 1000);
+        });
+      }
 
-        updatePublishingState: (publishingState: Partial<any>) => {
-          set((state) => {
-            Object.assign(state.publishing, publishingState);
-            state.lastUpdated = Date.now();
-          });
-        },
+      // Mark store as initialized in manager
+      storeManager.markStoreInitialized(newTokenId);
 
-        // These functions are now in persistenceActions.ts - removing duplicates
-      })),
-      {                         // ← Persistence config as second argument to persist()
-          name: "edit-store-storage",
-          partialize: (state) => ({
-            sections: state.sections,
-            sectionLayouts: state.sectionLayouts,
-            content: state.content,
-            theme: state.theme,
-            globalSettings: state.globalSettings,
-            tokenId: state.tokenId,
-            onboardingData: state.onboardingData,
-            id: state.id,
-            title: state.title,
-            lastUpdated: state.lastUpdated,
-            version: state.version,
-            performance: state.performance,
-          }),
-          onRehydrateStorage: () => (state) => {
-            if (state) {
-              console.log('🔄 EditStore rehydrated from localStorage:', {
-                sections: state.sections?.length || 0,
-                content: Object.keys(state.content || {}).length,
-                tokenId: state.tokenId,
-                hasTheme: !!state.theme
-              });
-              
-              // Ensure performance object is initialized after rehydration
-              if (!state.performance) {
-                state.performance = {
-                  saveCount: 0,
-                  averageSaveTime: 0,
-                  lastSaveTime: 0,
-                  failedSaves: 0,
-                };
-              }
-            }
-          }
-        }                         // ← Close persist() config
-                                // ← Close persist()
-    ),                           // ← Close subscribeWithSelector()
-  
-    ),
-    { name: "EditStore" }
-  )
-);
+      setState({
+        store,
+        isInitialized: true,
+        isHydrating: false,
+        error: null,
+      });
+
+      return store;
+
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      console.error(`❌ useEditStore: Failed to initialize store for token ${newTokenId}:`, error);
+      
+      setState(prev => ({
+        ...prev,
+        isHydrating: false,
+        error: errorMessage,
+      }));
+
+      throw error;
+    }
+  };
+
+  /**
+   * Handle token changes and initialization
+   */
+  useEffect(() => {
+    // Skip on server side
+    if (typeof window === 'undefined') return;
+
+    // Validate token
+    if (!tokenId || typeof tokenId !== 'string') {
+      setState(prev => ({
+        ...prev,
+        isHydrating: false,
+        error: 'Invalid token ID provided',
+      }));
+      return;
+    }
+
+    // Skip if already initializing the same token
+    if (currentTokenRef.current === tokenId && state.store && !state.error) {
+      return;
+    }
+
+    // Initialize or switch store
+    const initPromise = initializeStore(tokenId);
+    initializationRef.current = initPromise;
+
+    // Handle initialization result
+    initPromise.catch(error => {
+      // Error is already handled in initializeStore
+      console.warn('useEditStore initialization failed:', error);
+    });
+
+    return () => {
+      // Cleanup on unmount or token change
+      if (initializationRef.current === initPromise) {
+        initializationRef.current = null;
+      }
+    };
+  }, [tokenId, resetOnTokenChange]);
+
+  /**
+   * Preload effect for performance optimization
+   */
+  useEffect(() => {
+    if (preload && tokenId && typeof window !== 'undefined') {
+      // Preload in the background without affecting state
+      storeManager.preloadStore(tokenId).catch(error => {
+        console.warn('Store preloading failed:', error);
+      });
+    }
+  }, [tokenId, preload]);
+
+  /**
+   * SSR compatibility - return minimal state on server
+   */
+  if (typeof window === 'undefined') {
+    return {
+      // Server-side safe values
+      store: null,
+      isInitialized: false,
+      isHydrating: true,
+      error: null,
+      // Dummy functions for SSR
+      sections: [],
+      content: {},
+      theme: null,
+      // State management helpers
+      isLoading: true,
+      hasError: false,
+      retryInitialization: () => {},
+    };
+  }
+
+  /**
+   * Suspense support for React concurrent features
+   */
+  if (suspense && state.isHydrating && !state.error) {
+    if (initializationRef.current) {
+      throw initializationRef.current;
+    }
+  }
+
+  /**
+   * Retry initialization function
+   */
+  const retryInitialization = () => {
+    if (tokenId) {
+      setState(prev => ({ ...prev, error: null, isHydrating: true }));
+      initializeStore(tokenId);
+    }
+  };
+
+  // Extract commonly used store properties for convenience
+  const storeState = state.store?.getState();
+  const sections = storeState?.sections || [];
+  const content = storeState?.content || {};
+  const theme = storeState?.theme || null;
+
+  return {
+    // Core store access
+    store: state.store,
+    isInitialized: state.isInitialized,
+    isHydrating: state.isHydrating,
+    error: state.error,
+
+    // Convenience properties
+    sections,
+    content,
+    theme,
+
+    // Status helpers
+    isLoading: state.isHydrating,
+    hasError: !!state.error,
+    isReady: state.isInitialized && !state.error && !state.isHydrating,
+
+    // Actions
+    retryInitialization,
+  };
+}
 
 /**
- * ===== DEBUG UTILITIES (Development Only) =====
+ * Hook for getting the current store instance (for components that already have a store)
+ * Useful when you need direct store access without re-initialization
+ */
+export function useCurrentEditStore(tokenId: string) {
+  const [store, setStore] = useState<EditStoreInstance | null>(null);
+  
+  useEffect(() => {
+    if (typeof window !== 'undefined' && tokenId) {
+      // Get existing store from manager (won't create new one)
+      try {
+        const existingStore = storeManager.getEditStore(tokenId);
+        setStore(existingStore);
+      } catch (error) {
+        console.warn('Failed to get current store:', error);
+        setStore(null);
+      }
+    }
+  }, [tokenId]);
+
+  return store;
+}
+
+/**
+ * Hook for subscribing to specific store state changes
+ * Optimized for performance with selective subscriptions
+ */
+export function useEditStoreSelector<T>(
+  tokenId: string,
+  selector: (state: EditStore) => T,
+  equalityFn?: (a: T, b: T) => boolean
+): T | undefined {
+  const { store, isInitialized } = useEditStore(tokenId);
+  const [selectedState, setSelectedState] = useState<T | undefined>();
+
+  useEffect(() => {
+    if (!store || !isInitialized) {
+      setSelectedState(undefined);
+      return;
+    }
+
+    // Initial value
+    const initialValue = selector(store.getState());
+    setSelectedState(initialValue);
+
+    // Subscribe to changes
+    const unsubscribe = store.subscribe((state: any) => {
+      const newValue = selector(state);
+      setSelectedState(current => {
+        // Use custom equality function if provided
+        if (equalityFn && current !== undefined) {
+          return equalityFn(current, newValue) ? current : newValue;
+        }
+        // Default equality check
+        return current === newValue ? current : newValue;
+      });
+    });
+
+    return unsubscribe;
+  }, [store, isInitialized, selector, equalityFn]);
+
+  return selectedState;
+}
+
+/**
+ * Development utilities
  */
 if (process.env.NODE_ENV === 'development') {
-  // Enhanced global store access for debugging
-  (window as any).__editStoreDebug = {
-    getState: () => useEditStore.getState(),
-    setState: (newState: Partial<EditStore>) => useEditStore.setState(newState),
-    subscribe: (callback: (state: EditStore) => void) => useEditStore.subscribe(callback),
-    
-    // Utility functions
-    exportState: () => useEditStore.getState().export(),
-    clearHistory: () => useEditStore.getState().clearHistory(),
-    triggerAutoSave: () => useEditStore.getState().triggerAutoSave(),
-    validateAllSections: () => {
-      const state = useEditStore.getState();
-      return state.sections.map(sectionId => ({
-        sectionId,
-        isValid: state.validateSection(sectionId),
-        incompleteElements: state.getIncompleteElements(sectionId),
-      }));
-    },
-    
-    analyzeStore: () => {
-      const state = useEditStore.getState();
-      
-      return {
-        timestamp: Date.now(),
-        sections: {
-          total: state.sections.length,
-          withContent: Object.keys(state.content).length,
-          missing: state.sections.filter(id => !state.content[id]),
-        },
-        content: {
-          totalSections: Object.keys(state.content).length,
-          withElements: Object.values(state.content).filter(
-            section => Object.keys(section.elements || {}).length > 0
-          ).length,
-          aiGenerated: Object.values(state.content).filter(
-            section => section.aiMetadata?.aiGenerated
-          ).length,
-          customized: Object.values(state.content).filter(
-            section => section.aiMetadata?.isCustomized
-          ).length,
-        },
-        ui: {
-          mode: state.mode,
-          editMode: state.editMode,
-          selectedSection: state.selectedSection,
-          selectedElement: state.selectedElement,
-          hasErrors: Object.keys(state.errors).length > 0,
-          isLoading: state.isLoading,
-        },
-        autoSave: {
-          isDirty: state.isDirty,
-          isSaving: state.isSaving,
-          lastSaved: state.lastSaved,
-          hasError: !!state.saveError,
-          queuedChanges: state.queuedChanges?.length || 0,
-        },
-      };
-    },
+  (window as any).__useEditStoreDebug = {
+    storeManager,
+    getCurrentStore: (tokenId: string) => storeManager.getEditStore(tokenId),
+    getCacheStats: () => storeManager.getCacheStats(),
+    isStorageAvailable,
   };
   
-  console.log('🔧 Edit Store Debug utilities available at window.__editStoreDebug');
+  console.log('🔧 useEditStore debug utilities available at window.__useEditStoreDebug');
 }
 
-// Export types for use in components
-export type { EditStore } from '@/types/store';
+// Export types for consumer components
+export type { EditStore, EditStoreInstance };
+
+// Legacy compatibility - export the factory function with warning
+export const createEditStore = (tokenId?: string) => {
+  console.warn(
+    'Direct createEditStore usage is deprecated. Use useEditStore hook instead.',
+    'If you need direct store access, use storeManager.getEditStore(tokenId)'
+  );
+  if (!tokenId) throw new Error('tokenId is required');
+  return storeManager.getEditStore(tokenId);
+};
+
+// Legacy compatibility - for components that use useEditStore() without tokenId
+// This will use the legacy compatibility layer
+export { useEditStoreLegacy as useEditStoreCompat } from './useEditStoreLegacy';

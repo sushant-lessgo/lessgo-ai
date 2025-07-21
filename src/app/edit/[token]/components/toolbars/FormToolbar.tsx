@@ -1,6 +1,6 @@
 // app/edit/[token]/components/toolbars/FormToolbar.tsx - Complete Form Toolbar
 import React, { useState, useRef, useEffect } from 'react';
-import { useEditStore } from '@/hooks/useEditStore';
+import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
 import { useToolbarActions } from '@/hooks/useToolbarActions';
 import { calculateArrowPosition } from '@/utils/toolbarPositioning';
 import { AdvancedActionsMenu } from './AdvancedActionsMenu';

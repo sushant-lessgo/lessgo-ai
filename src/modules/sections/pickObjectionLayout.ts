@@ -295,6 +295,6 @@ export function pickObjectionLayout(input: LayoutPickerInput): ObjectionLayout {
     { layout: "ObjectionAccordion" as ObjectionLayout, score: 0 }
   );
 
-  // Return top scoring layout, fallback to universal default
+  // Return top scoring layout, fallback to most universal available layout
   return topLayout.score > 0 ? topLayout.layout : "ObjectionAccordion";
 }

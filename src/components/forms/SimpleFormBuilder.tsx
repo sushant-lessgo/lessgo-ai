@@ -10,7 +10,7 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Trash2, GripVertical, Plus } from 'lucide-react';
-import { useEditStore } from '@/hooks/useEditStore';
+import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
 import { FORM_FIELD_OPTIONS } from '@/types/simpleForms';
 import type { SimpleFormData, SimpleFormField } from '@/types/simpleForms';
 

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useLayoutComponent } from '@/hooks/useLayoutComponent';
-import { useEditStore } from '@/hooks/useEditStore';
+import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
 import { LayoutSection } from '@/components/layout/LayoutSection';
 import { 
   EditableAdaptiveHeadline, 
@@ -35,7 +35,7 @@ const CONTENT_SCHEMA = {
   },
   testimonial_quotes: { 
     type: 'string' as const, 
-    default: 'This tool completely changed how I approach my creative projects. The interface is intuitive and the results are professional-grade every time.|As a content creator, time is everything. This platform helps me create stunning visuals in minutes, not hours.|The community and support are incredible. I\\'ve learned so much and my audience engagement has tripled.|From idea to published content in record time. This tool has become essential to my creative workflow.|The quality of output is consistently amazing. My clients are always impressed with what I can create.' 
+    default: `This tool completely changed how I approach my creative projects. The interface is intuitive and the results are professional-grade every time.|As a content creator, time is everything. This platform helps me create stunning visuals in minutes, not hours.|The community and support are incredible. I've learned so much and my audience engagement has tripled.|From idea to published content in record time. This tool has become essential to my creative workflow.|The quality of output is consistently amazing. My clients are always impressed with what I can create.` 
   },
   customer_names: { 
     type: 'string' as const, 

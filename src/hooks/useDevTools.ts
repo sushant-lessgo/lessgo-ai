@@ -1,6 +1,6 @@
 // hooks/useDevTools.ts - React Hook for Dev Tools Integration
 import React, { useEffect, useRef, useCallback, useMemo } from 'react';
-import { useEditStore } from './useEditStore';
+import { useEditStoreLegacy as useEditStore } from './useEditStoreLegacy';
 import { getDevTools, measurePerformance, withErrorTracking } from '@/utils/devTools';
 import type { DevToolsManager, ActionHistoryEntry, PerformanceEntry } from '@/utils/devTools';
 

@@ -47,25 +47,20 @@ const CONTENT_SCHEMA = {
 };
 
 // AnimatedUpgradePath component - Visual journey from current state to ideal state
-export default function AnimatedUpgradePath({ 
-  sectionId, 
-  className = '',
-  backgroundType = 'neutral' 
-}: LayoutComponentProps) {
-  const {
-    content,
-    fonts,
-    colorTokens,
-    mode,
-    handleContentUpdate,
-    handleListUpdate
-  } = useLayoutComponent(sectionId);
-
-  // Extract content with defaults
-  const blockContent: AnimatedUpgradePathContent = Object.entries(CONTENT_SCHEMA).reduce((acc, [key, schema]) => {
-    acc[key] = content?.[key] || schema.default;
-    return acc;
-  }, {} as AnimatedUpgradePathContent);
+export default function AnimatedUpgradePath(props: LayoutComponentProps) {
+  const { sectionId, className = '', backgroundType = 'secondary' } = props;
+  
+  const { 
+    mode, 
+    blockContent, 
+    colorTokens, 
+    getTextStyle, 
+    sectionBackground, 
+    handleContentUpdate 
+  } = useLayoutComponent<AnimatedUpgradePathContent>({ 
+    ...props, 
+    contentSchema: CONTENT_SCHEMA 
+  });
 
   // Parse data
   const stageTitles = parsePipeData(blockContent.stage_titles);
@@ -74,11 +69,15 @@ export default function AnimatedUpgradePath({
 
   // Update handlers
   const handleStageTitleUpdate = (index: number, value: string) => {
-    handleListUpdate(stageTitles, index, value, 'stage_titles');
+    const newTitles = [...stageTitles];
+    newTitles[index] = value;
+    handleContentUpdate('stage_titles', newTitles.join('|'));
   };
 
   const handleStageDescriptionUpdate = (index: number, value: string) => {
-    handleListUpdate(stageDescriptions, index, value, 'stage_descriptions');
+    const newDescriptions = [...stageDescriptions];
+    newDescriptions[index] = value;
+    handleContentUpdate('stage_descriptions', newDescriptions.join('|'));
   };
 
   // Get icon based on stage
@@ -118,9 +117,11 @@ export default function AnimatedUpgradePath({
   return (
     <LayoutSection
       sectionId={sectionId}
+      sectionType="AnimatedUpgradePath"
+      backgroundType={backgroundType || 'secondary'}
+      sectionBackground={sectionBackground}
+      mode={mode}
       className={className}
-      backgroundType={backgroundType}
-      colorTokens={colorTokens}
     >
       <div className="max-w-6xl mx-auto">
         {/* Header Section */}
@@ -159,7 +160,7 @@ export default function AnimatedUpgradePath({
                 {/* Stage Card */}
                 <div className={`rounded-lg p-6 text-center ${
                   index === stageTitles.length - 1 
-                    ? `${colorTokens.bgAccent} bg-opacity-5 border-2 border-${colorTokens.textAccent.replace('text-', '')}` 
+                    ? `${colorTokens.bgAccent || 'bg-blue-500'} bg-opacity-5 border-2 border-${(colorTokens.textAccent || 'text-blue-600').replace('text-', '')}` 
                     : `${colorTokens.bgNeutral} border ${colorTokens.borderColor}`
                 }`}>
                   {/* Icon */}
@@ -192,11 +193,11 @@ export default function AnimatedUpgradePath({
                       value={stageDescriptions[index]}
                       onChange={(e) => handleStageDescriptionUpdate(index, e.target.value)}
                       className={`w-full text-center bg-transparent outline-none focus:ring-2 focus:ring-blue-500 rounded px-2 resize-none ${colorTokens.textSecondary}`}
-                      style={fonts.body}
+                      style={getTextStyle('body')}
                       rows={3}
                     />
                   ) : (
-                    <p className={colorTokens.textSecondary} style={fonts.body}>
+                    <p className={colorTokens.textSecondary} style={getTextStyle('body')}>
                       {stageDescriptions[index]}
                     </p>
                   )}

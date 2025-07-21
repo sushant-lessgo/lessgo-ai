@@ -47,27 +47,22 @@ const CONTENT_SCHEMA = {
 };
 
 // ToggleableComparison component - Interactive comparison with toggle between options
-export default function ToggleableComparison({ 
-  sectionId, 
-  className = '',
-  backgroundType = 'neutral' 
-}: LayoutComponentProps) {
-  const {
-    content,
-    fonts,
-    colorTokens,
-    mode,
-    handleContentUpdate,
-    handleListUpdate
-  } = useLayoutComponent(sectionId);
+export default function ToggleableComparison(props: LayoutComponentProps) {
+  const { sectionId, className = '', backgroundType = 'secondary' } = props;
+  
+  const { 
+    mode, 
+    blockContent, 
+    colorTokens, 
+    getTextStyle, 
+    sectionBackground, 
+    handleContentUpdate 
+  } = useLayoutComponent<ToggleableComparisonContent>({ 
+    ...props, 
+    contentSchema: CONTENT_SCHEMA 
+  });
 
   const [activeOption, setActiveOption] = useState(0);
-
-  // Extract content with defaults
-  const blockContent: ToggleableComparisonContent = Object.entries(CONTENT_SCHEMA).reduce((acc, [key, schema]) => {
-    acc[key] = content?.[key] || schema.default;
-    return acc;
-  }, {} as ToggleableComparisonContent);
 
   // Parse data
   const optionLabels = parsePipeData(blockContent.option_labels);
@@ -83,15 +78,19 @@ export default function ToggleableComparison({
 
   // Update handlers
   const handleOptionLabelUpdate = (index: number, value: string) => {
-    handleListUpdate(optionLabels, index, value, 'option_labels');
+    const newLabels = [...optionLabels];
+    newLabels[index] = value;
+    handleContentUpdate('option_labels', newLabels.join('|'));
   };
 
   return (
     <LayoutSection
       sectionId={sectionId}
+      sectionType="ToggleableComparison"
+      backgroundType={backgroundType || 'secondary'}
+      sectionBackground={sectionBackground}
+      mode={mode}
       className={className}
-      backgroundType={backgroundType}
-      colorTokens={colorTokens}
     >
       <div className="max-w-5xl mx-auto">
         {/* Header Section */}
@@ -131,7 +130,7 @@ export default function ToggleableComparison({
                     ? `${colorTokens.bgAccent} text-white`
                     : `${colorTokens.textSecondary} hover:${colorTokens.textPrimary}`
                 }`}
-                style={fonts.body}
+                style={getTextStyle('body')}
               >
                 {mode === 'edit' ? (
                   <input
@@ -177,7 +176,7 @@ export default function ToggleableComparison({
                       
                       return (
                         <div key={itemIndex} className="flex items-center justify-between">
-                          <span className={colorTokens.textSecondary} style={fonts.body}>
+                          <span className={colorTokens.textSecondary} style={getTextStyle('body')}>
                             {item}
                           </span>
                           
@@ -186,12 +185,12 @@ export default function ToggleableComparison({
                               <svg className={`w-5 h-5 ${colorTokens.textAccent} mr-2`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                               </svg>
-                              <span className={`${colorTokens.textAccent} font-medium`} style={fonts.body}>
+                              <span className={`${colorTokens.textAccent} font-medium`} style={getTextStyle('body')}>
                                 Included
                               </span>
                             </div>
                           ) : (
-                            <span className="text-gray-400" style={fonts.body}>
+                            <span className="text-gray-400" style={getTextStyle('body')}>
                               Not available
                             </span>
                           )}
