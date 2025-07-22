@@ -42,7 +42,33 @@ function computeScore(scores: {
   );
 }
 
+// Map input values to existing variation keys
+function mapInputToVariationKeys(input: FunnelInput): FunnelInput {
+  const audienceMapping: Record<string, string> = {
+    'online-educators': 'creators',
+    'developers': 'builders', 
+    'designers': 'creators',
+    'small-business': 'businesses',
+    'startups': 'founders',
+    'agencies': 'businesses'
+  };
+
+  const stageMapping: Record<string, string> = {
+    'early-feedback': 'mvp',
+    'pre-launch': 'idea',
+    'product-market-fit': 'traction'
+  };
+
+  return {
+    ...input,
+    targetAudienceId: audienceMapping[input.targetAudienceId] || input.targetAudienceId,
+    startupStageId: stageMapping[input.startupStageId] || input.startupStageId
+  };
+}
+
 export function getTopVariationWithFunnel(input: FunnelInput): FunnelResult {
+  // Map input values to existing keys
+  const mappedInput = mapInputToVariationKeys(input);
   const archetypeScores: Record<string, number> = {};
 
   // Step 1: Score archetypes
@@ -51,17 +77,17 @@ export function getTopVariationWithFunnel(input: FunnelInput): FunnelResult {
     const variation = variationScoreMap[key];
 
     const scores = {
-      marketCategory: variation.market?.[input.marketCategoryId] ?? 0,
-      targetAudience: variation.audience?.[input.targetAudienceId] ?? 0,
-      landingPageGoals: variation.landingPageGoals?.[input.landingPageGoalsId] ?? 0,
-      startupStage: variation.startupStage?.[input.startupStageId] ?? 0,
-      pricingModel: variation.pricingModel?.[input.pricingModelId] ?? 0,
-      toneProfile: variation.toneProfile?.[input.toneProfileId] ?? 0,
+      marketCategory: variation.market?.[mappedInput.marketCategoryId] ?? 0,
+      targetAudience: variation.audience?.[mappedInput.targetAudienceId] ?? 0,
+      landingPageGoals: variation.landingPageGoals?.[mappedInput.landingPageGoalsId] ?? 0,
+      startupStage: variation.startupStage?.[mappedInput.startupStageId] ?? 0,
+      pricingModel: variation.pricingModel?.[mappedInput.pricingModelId] ?? 0,
+      toneProfile: variation.toneProfile?.[mappedInput.toneProfileId] ?? 0,
 
 
     };
 
-    if (Object.values(scores).includes(0)) continue;
+    // Allow variations with partial matches - don't skip zero scores
 
     const score = computeScore(scores);
     archetypeScores[archetypeId] = Math.max(archetypeScores[archetypeId] ?? 0, score);
@@ -82,17 +108,17 @@ export function getTopVariationWithFunnel(input: FunnelInput): FunnelResult {
     const variation = variationScoreMap[key];
 
     const scores = {
-      marketCategory: variation.market?.[input.marketCategoryId] ?? 0,
-      targetAudience: variation.audience?.[input.targetAudienceId] ?? 0,
-      landingPageGoals: variation.landingPageGoals?.[input.landingPageGoalsId] ?? 0,
-      startupStage: variation.startupStage?.[input.startupStageId] ?? 0,
-      pricingModel: variation.pricingModel?.[input.pricingModelId] ?? 0,
-      toneProfile: variation.toneProfile?.[input.toneProfileId] ?? 0,
+      marketCategory: variation.market?.[mappedInput.marketCategoryId] ?? 0,
+      targetAudience: variation.audience?.[mappedInput.targetAudienceId] ?? 0,
+      landingPageGoals: variation.landingPageGoals?.[mappedInput.landingPageGoalsId] ?? 0,
+      startupStage: variation.startupStage?.[mappedInput.startupStageId] ?? 0,
+      pricingModel: variation.pricingModel?.[mappedInput.pricingModelId] ?? 0,
+      toneProfile: variation.toneProfile?.[mappedInput.toneProfileId] ?? 0,
 
 
     };
 
-    if (Object.values(scores).includes(0)) continue;
+    // Allow variations with partial matches - don't skip zero scores
 
     const score = computeScore(scores);
     const themeKey = `${archetypeId}::${themeId}`;
@@ -115,17 +141,17 @@ export function getTopVariationWithFunnel(input: FunnelInput): FunnelResult {
     const variation = variationScoreMap[key];
 
     const scores = {
-      marketCategory: variation.market?.[input.marketCategoryId] ?? 0,
-      targetAudience: variation.audience?.[input.targetAudienceId] ?? 0,
-      landingPageGoals: variation.landingPageGoals?.[input.landingPageGoalsId] ?? 0,
-      startupStage: variation.startupStage?.[input.startupStageId] ?? 0,
-      pricingModel: variation.pricingModel?.[input.pricingModelId] ?? 0,
-      toneProfile: variation.toneProfile?.[input.toneProfileId] ?? 0,
+      marketCategory: variation.market?.[mappedInput.marketCategoryId] ?? 0,
+      targetAudience: variation.audience?.[mappedInput.targetAudienceId] ?? 0,
+      landingPageGoals: variation.landingPageGoals?.[mappedInput.landingPageGoalsId] ?? 0,
+      startupStage: variation.startupStage?.[mappedInput.startupStageId] ?? 0,
+      pricingModel: variation.pricingModel?.[mappedInput.pricingModelId] ?? 0,
+      toneProfile: variation.toneProfile?.[mappedInput.toneProfileId] ?? 0,
 
 
     };
 
-    if (Object.values(scores).includes(0)) continue;
+    // Allow variations with partial matches - don't skip zero scores
 
     const score = computeScore(scores);
     variationScores.push({ key, score });

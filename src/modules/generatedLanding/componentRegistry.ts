@@ -258,6 +258,14 @@ export const componentRegistry: ComponentRegistry = {
     RoleBasedScenarios: RoleBasedScenarios,
     UseCaseCarousel: UseCaseCarousel,
     WorkflowDiagrams: WorkflowDiagrams,
+    // Map missing layouts from layoutRegistry to existing components
+    TabbedUseCases: UseCaseCarousel,
+    IndustryTiles: IndustryUseCaseGrid,
+    ScenarioCards: RoleBasedScenarios,
+    JobToBeDoneList: WorkflowDiagrams,
+    SegmentSplitBlocks: PersonaGrid,
+    CarouselAvatars: UseCaseCarousel,
+    RoleBenefitMatrix: RoleBasedScenarios,
   },
   
   uniqueMechanism: {
@@ -271,6 +279,13 @@ export const componentRegistry: ComponentRegistry = {
     SecretSauceReveal: SecretSauceReveal,
     SystemArchitecture: SystemArchitecture,
     TechnicalAdvantage: TechnicalAdvantage,
+    // Map missing layouts from layoutRegistry to existing components
+    ExplainerWithTags: MethodologyBreakdown, 
+    VisualFlywheel: ProcessFlowDiagram,
+    PillarIcons: StackedHighlights,
+    IllustratedModel: SystemArchitecture,
+    PatentStrip: SecretSauceReveal,
+    SingleBigIdea: TechnicalAdvantage,
   },
   
   socialProof: {
@@ -291,8 +306,14 @@ export const componentRegistry: ComponentRegistry = {
     PrivacyCommitmentBlock: PrivacyCommitmentBlock,
     SecurityGuaranteePanel: SecurityGuaranteePanel,
     TrustSealCollection: TrustSealCollection,
-    // ComplianceBadgeRow: ComplianceBadgeRow - file doesn't exist
-    // AuditTrustPanel: AuditTrustPanel - file doesn't exist
+    // Map missing layouts from layoutRegistry to existing components
+    ComplianceBadgeRow: TrustSealCollection,
+    AuditTrustPanel: AuditResultsPanel,
+    FAQStyleSecurity: SecurityChecklist,
+    StatWithShieldIcons: SecurityGuaranteePanel,
+    PartnerValidationRow: TrustSealCollection,
+    DiagramInfraSecurity: SecurityGuaranteePanel,
+    ExpandablePolicyCards: PrivacyCommitmentBlock,
   },
   
   integrations: {

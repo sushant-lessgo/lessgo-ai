@@ -52,6 +52,12 @@ export function selectPrimaryVariation(onboardingData: OnboardingDataInput): {
     const funnelResult = getTopVariationWithFunnel(funnelInput);
     const primaryVariationKey = funnelResult?.primaryVariation;
     
+    console.log('🔍 Funnel result debug:', {
+      inputData: funnelInput,
+      primaryVariationKey,
+      topVariations: funnelResult?.trace?.topVariations
+    });
+    
     if (!primaryVariationKey || typeof primaryVariationKey !== 'string' || !primaryVariationKey.includes('::')) {
       console.warn('Invalid or missing primaryVariationKey from funnel, using smart fallback');
       return getSmartFallbackVariation(onboardingData);
@@ -59,20 +65,39 @@ export function selectPrimaryVariation(onboardingData: OnboardingDataInput): {
     
     const [archetypeId, themeId] = primaryVariationKey.split("::");
     
+    console.log('🔍 Looking for variation:', { archetypeId, themeId });
+    
     const matchingVariation = bgVariations.find(
       variation => 
         variation.archetypeId === archetypeId && 
         variation.themeId === themeId
     );
 
+    console.log('🔍 Found matching variations:', bgVariations.filter(v => 
+      v.archetypeId === archetypeId && v.themeId === themeId
+    ).map(v => ({ id: v.variationId, class: v.tailwindClass })));
+
     if (!matchingVariation) {
       console.warn(`No matching variation found for ${primaryVariationKey}, using fallback`);
       return getSmartFallbackVariation(onboardingData);
     }
 
+    // Fix for missing assets: remove problematic bg-url classes temporarily
+    let cleanTailwindClass = matchingVariation.tailwindClass;
+    if (cleanTailwindClass.includes("bg-[url('/noise.svg')]")) {
+      cleanTailwindClass = cleanTailwindClass.replace("bg-[url('/noise.svg')] ", "").replace(" bg-blend-overlay", "");
+      console.log('🔧 Removed missing noise.svg from background class');
+    }
+
+    console.log('✅ Selected primary variation:', {
+      variationId: matchingVariation.variationId,
+      tailwindClass: cleanTailwindClass,
+      baseColor: matchingVariation.baseColor,
+    });
+
     return {
       variationId: matchingVariation.variationId,
-      tailwindClass: matchingVariation.tailwindClass,
+      tailwindClass: cleanTailwindClass,
       baseColor: matchingVariation.baseColor,
     };
     
@@ -89,20 +114,48 @@ function getSmartFallbackVariation(onboardingData: OnboardingDataInput): {
 } {
   let selectedVariation;
   
-  // ✅ PHASE 5.2: Use canonical field names for fallback logic
-  if (onboardingData.targetAudience?.includes('enterprise') || 
-      onboardingData.marketCategory?.includes('Enterprise')) {
-    selectedVariation = bgVariations.find(v => v.baseColor === 'slate' || v.baseColor === 'blue') || bgVariations[0];
+  // Enhanced fallback logic with more variety
+  const audienceVariations = [
+    { key: 'enterprise', colors: ['slate', 'blue', 'gray'] },
+    { key: 'educator', colors: ['emerald', 'teal', 'green'] },
+    { key: 'creator', colors: ['purple', 'indigo', 'violet'] },
+    { key: 'business', colors: ['blue', 'cyan', 'sky'] }
+  ];
+  
+  const stageVariations = [
+    { key: 'early', colors: ['purple', 'indigo', 'violet'] },
+    { key: 'mvp', colors: ['orange', 'amber', 'yellow'] },
+    { key: 'growth', colors: ['green', 'emerald', 'teal'] }
+  ];
+
+  // Try audience-based selection
+  for (const audienceVar of audienceVariations) {
+    if (onboardingData.targetAudience?.includes(audienceVar.key)) {
+      for (const color of audienceVar.colors) {
+        selectedVariation = bgVariations.find(v => v.baseColor === color);
+        if (selectedVariation) break;
+      }
+      if (selectedVariation) break;
+    }
   }
-  else if (onboardingData.startupStage?.includes('mvp') || onboardingData.startupStage?.includes('early')) {
-    selectedVariation = bgVariations.find(v => v.baseColor === 'purple' || v.baseColor === 'indigo') || bgVariations[0];
+  
+  // Try stage-based selection if no audience match
+  if (!selectedVariation) {
+    for (const stageVar of stageVariations) {
+      if (onboardingData.startupStage?.includes(stageVar.key)) {
+        for (const color of stageVar.colors) {
+          selectedVariation = bgVariations.find(v => v.baseColor === color);
+          if (selectedVariation) break;
+        }
+        if (selectedVariation) break;
+      }
+    }
   }
-  else if (onboardingData.marketCategory?.includes('Productivity') || 
-           onboardingData.marketCategory?.includes('HR')) {
-    selectedVariation = bgVariations.find(v => v.baseColor === 'emerald' || v.baseColor === 'teal') || bgVariations[0];
-  }
-  else {
-    selectedVariation = bgVariations[0];
+  
+  // Random selection if no matches
+  if (!selectedVariation) {
+    const randomIndex = Math.floor(Math.random() * Math.min(bgVariations.length, 10)); // First 10 variations
+    selectedVariation = bgVariations[randomIndex];
   }
   
  // console.log('Smart fallback selected:', selectedVariation);
