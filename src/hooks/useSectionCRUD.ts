@@ -1,7 +1,6 @@
 // hooks/useSectionCRUD.ts - Section CRUD operations hook
 import { useCallback } from 'react';
-import { useEditStore } from './useEditStore';
-import { useModalManager } from './useModalManager';
+import { useEditStoreLegacy as useEditStore } from './useEditStoreLegacy';
 import type { ValidationResult } from '@/types/store';
 import type { SectionType } from '@/types/store/state';
 
@@ -76,7 +75,6 @@ export function useSectionCRUD() {
     announceLiveRegion,
   } = useEditStore();
 
-  const { openModal, closeModal } = useModalManager();
 
   // Generate unique section ID
   const generateSectionId = useCallback((sectionType: SectionType): string => {
@@ -225,28 +223,14 @@ export function useSectionCRUD() {
     const { confirmRequired = true, archiveInstead = false, saveBackup = true } = options;
 
     if (confirmRequired) {
-      return new Promise((resolve) => {
-        openModal('confirmation', {
-          title: 'Delete Section',
-          message: `Are you sure you want to delete this section? This action cannot be undone.`,
-          confirmText: 'Delete',
-          cancelText: 'Cancel',
-          variant: 'danger',
-          onConfirm: async () => {
-            closeModal();
-            const result = await performRemoveSection(sectionId, { ...options, confirmRequired: false });
-            resolve(result);
-          },
-          onCancel: () => {
-            closeModal();
-            resolve(false);
-          },
-        });
-      });
+      const confirmed = window.confirm('Are you sure you want to delete this section? This action cannot be undone.');
+      if (!confirmed) {
+        return false;
+      }
     }
 
     return performRemoveSection(sectionId, options);
-  }, [openModal, closeModal]);
+  }, []);
 
   // Perform actual section removal
   const performRemoveSection = useCallback(async (
@@ -408,30 +392,18 @@ export function useSectionCRUD() {
 
   // Batch delete sections
   const batchDeleteSections = useCallback(async (sectionIds: string[]): Promise<boolean> => {
-    return new Promise((resolve) => {
-      openModal('confirmation', {
-        title: 'Delete Multiple Sections',
-        message: `Are you sure you want to delete ${sectionIds.length} sections? This action cannot be undone.`,
-        confirmText: 'Delete All',
-        cancelText: 'Cancel',
-        variant: 'danger',
-        onConfirm: async () => {
-          closeModal();
-          
-          for (const sectionId of sectionIds) {
-            await performRemoveSection(sectionId, { confirmRequired: false });
-          }
-          
-          announceLiveRegion(`Deleted ${sectionIds.length} sections`);
-          resolve(true);
-        },
-        onCancel: () => {
-          closeModal();
-          resolve(false);
-        },
-      });
-    });
-  }, [openModal, closeModal, performRemoveSection, announceLiveRegion]);
+    const confirmed = window.confirm(`Are you sure you want to delete ${sectionIds.length} sections? This action cannot be undone.`);
+    if (!confirmed) {
+      return false;
+    }
+    
+    for (const sectionId of sectionIds) {
+      await performRemoveSection(sectionId, { confirmRequired: false });
+    }
+    
+    announceLiveRegion(`Deleted ${sectionIds.length} sections`);
+    return true;
+  }, [performRemoveSection, announceLiveRegion]);
 
   // Validate section
   const validateSectionEnhanced = useCallback((sectionId: string): SectionValidationResult => {
