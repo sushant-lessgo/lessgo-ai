@@ -3,6 +3,7 @@
 
 import React, { useRef, useEffect, useState, useCallback } from 'react';
 import { useEditStoreContext, useStoreState } from '@/components/EditProvider';
+import { cn } from '@/lib/utils';
 // Removed useSelection - now using unified useEditor system
 import { EditablePageRenderer } from '../ui/EditablePageRenderer';
 import { FloatingToolbars } from '../ui/FloatingToolbars';
@@ -585,21 +586,33 @@ const handleAddSection = (afterSectionId?: string) => {
                 <p className="text-gray-600 mb-6">
                   Add sections from the left panel or start with a pre-built template.
                 </p>
-                <EnhancedAddSection
-                  position="end"
-                  existingSections={sections}
-                  onAddSection={handleEnhancedAddSection}
-                  className="px-6 py-3 rounded-lg font-medium transition-all duration-200 bg-primary text-white hover:opacity-90 shadow-sm hover:shadow-md"
-                />
+                <div className="text-center">
+                  <EnhancedAddSection
+                    position="end"
+                    existingSections={sections}
+                    onAddSection={handleEnhancedAddSection}
+                  />
+                </div>
               </div>
             </div>
           )}
 
           {/* Sections Renderer */}
           {sections.length > 0 && (
-            <div className="space-y-0">
+            <div className={cn(
+              "space-y-0", 
+              mode === 'edit' && "space-y-4" // Add spacing in edit mode
+            )}>
               {sections.map((sectionId, index) => (
-                <div key={sectionId} className="relative group">
+                <div key={sectionId} className={cn(
+                  "relative group transition-all duration-200",
+                  mode === 'edit' && [
+                    "rounded-lg border border-transparent hover:border-primary/20",
+                    "hover:shadow-sm px-4 py-2 -mx-4 -my-2",
+                    selectedSection === sectionId && "border-primary/40 shadow-md bg-primary/5",
+                    multiSelection.includes(sectionId) && "border-purple-400/40 shadow-md bg-purple-50"
+                  ]
+                )}>
                   {/* Add Section Button (Between Sections) */}
                   {index > 0 && (
                     <EnhancedAddSection
@@ -660,7 +673,7 @@ const handleAddSection = (afterSectionId?: string) => {
                           {/* Section Label */}
                           <div className="absolute top-2 left-2 opacity-0 group-hover:opacity-100 transition-opacity">
                             <div className="flex items-center space-x-2">
-                              <span className="inline-flex items-center px-2 py-1 text-xs font-medium bg-gray-900 text-white rounded">
+                              <span className="inline-flex items-center px-3 py-1 text-xs font-medium bg-gray-900/90 text-white rounded-md shadow-sm backdrop-blur-sm">
                                 {content[sectionId]?.layout || 'Section'}
                               </span>
                               {/* Multi-selection indicator */}
@@ -674,10 +687,12 @@ const handleAddSection = (afterSectionId?: string) => {
 
                           {/* Drag Handle */}
                           <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                            <div className="p-1 bg-white border border-gray-200 rounded cursor-move shadow-sm">
-                              <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 8V6a2 2 0 012-2h2M4 16v2a2 2 0 002 2h2M16 4h2a2 2 0 012 2v2M16 20h2a2 2 0 01-2 2h-2" />
-                              </svg>
+                            <div className="flex items-center space-x-1">
+                              <div className="p-2 bg-white/90 border border-gray-200 rounded-md cursor-move shadow-sm backdrop-blur-sm hover:bg-white transition-colors">
+                                <svg className="w-4 h-4 text-gray-500" fill="currentColor" viewBox="0 0 24 24">
+                                  <path d="M8 6a2 2 0 1 1 4 0 2 2 0 0 1-4 0ZM8 12a2 2 0 1 1 4 0 2 2 0 0 1-4 0ZM8 18a2 2 0 1 1 4 0 2 2 0 0 1-4 0ZM14 6a2 2 0 1 1 4 0 2 2 0 0 1-4 0ZM14 12a2 2 0 1 1 4 0 2 2 0 0 1-4 0ZM14 18a2 2 0 1 1 4 0 2 2 0 0 1-4 0Z"/>
+                                </svg>
+                              </div>
                             </div>
                           </div>
 

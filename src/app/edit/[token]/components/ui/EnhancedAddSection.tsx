@@ -132,20 +132,43 @@ export function EnhancedAddSection({
 
   return (
     <>
-      <Button
-        variant={position === 'end' ? 'outline' : 'ghost'}
-        size={position === 'end' ? 'default' : 'sm'}
-        className={cn(
-          position === 'between' && "opacity-0 hover:opacity-100 transition-opacity",
-          className
-        )}
-        onClick={() => setShowSectionSelector(true)}
-      >
-        <Plus className="h-4 w-4" />
-        <span className={cn(position === 'between' && "sr-only")}>
-          Add Section
-        </span>
-      </Button>
+      {position === 'between' ? (
+        // Between sections - show on hover with better visibility
+        <div className="group relative py-8 -my-4">
+          <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300">
+            <div className="bg-background border-2 border-dashed border-primary/30 rounded-lg px-8 py-4 shadow-lg">
+              <Button
+                variant="outline"
+                size="sm"
+                className="border-primary/50 text-primary hover:bg-primary hover:text-primary-foreground transition-all"
+                onClick={() => setShowSectionSelector(true)}
+              >
+                <Plus className="h-4 w-4 mr-2" />
+                Add Section Here
+              </Button>
+            </div>
+          </div>
+          <div className="h-px bg-border opacity-20 group-hover:opacity-60 transition-opacity" />
+        </div>
+      ) : (
+        // End section - always visible with prominent styling
+        <div className="flex justify-center py-12">
+          <Button
+            variant="outline"
+            size="lg"
+            className={cn(
+              "border-2 border-dashed border-primary/40 bg-primary/5 hover:bg-primary/10",
+              "text-primary hover:border-primary/60 transition-all duration-200",
+              "px-8 py-6 text-base font-medium rounded-xl shadow-sm hover:shadow-md",
+              className
+            )}
+            onClick={() => setShowSectionSelector(true)}
+          >
+            <Plus className="h-5 w-5 mr-2" />
+            Add New Section
+          </Button>
+        </div>
+      )}
 
       <SectionTypeSelector
         isOpen={showSectionSelector}
