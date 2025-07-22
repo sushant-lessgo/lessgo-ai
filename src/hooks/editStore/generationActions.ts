@@ -104,13 +104,17 @@ export function createGenerationActions(set: any, get: any) {
 
   // ✅ AI Response Processing from PageStore (adapted for EditStore structure)
   updateFromAIResponse: (aiResponse: any) => {
+    console.log('🔍 updateFromAIResponse RAW INPUT:', JSON.stringify(aiResponse, null, 2));
     set((state: EditStore) => {
       console.log('🤖 EditStore: updateFromAIResponse called with:', {
         success: aiResponse.success,
         isPartial: aiResponse.isPartial,
-        contentKeys: Object.keys(aiResponse.content || {}),
+        hasContent: !!aiResponse.content,
+        contentType: typeof aiResponse.content,
+        contentKeys: aiResponse.content ? Object.keys(aiResponse.content) : [],
         currentSections: state.sections,
-        currentContent: Object.keys(state.content)
+        currentContent: Object.keys(state.content),
+        fullAiResponse: aiResponse
       });
 
       // Update AI generation status
@@ -137,6 +141,17 @@ export function createGenerationActions(set: any, get: any) {
 
       // ✅ Process AI content only for pre-selected sections
       if (aiResponse.content && typeof aiResponse.content === 'object') {
+        console.log('🎯 Processing AI response content:', {
+          contentKeys: Object.keys(aiResponse.content),
+          totalSections: Object.keys(aiResponse.content).length,
+          sampleContent: Object.entries(aiResponse.content).slice(0, 2).map(([k, v]) => ({
+            section: k,
+            hasContent: !!v,
+            contentType: typeof v,
+            keys: v && typeof v === 'object' ? Object.keys(v) : []
+          }))
+        });
+        
         Object.entries(aiResponse.content).forEach(([sectionId, sectionData]: [string, any]) => {
           // ✅ Only process sections that were pre-selected by rules
           if (!preSelectedSections.includes(sectionId)) {
@@ -193,10 +208,15 @@ export function createGenerationActions(set: any, get: any) {
           const generatedElements: string[] = [];
 
           // Update elements with AI-generated content
+          console.log(`📝 Processing elements for section ${sectionId}:`, Object.keys(sectionData));
+          
           Object.entries(sectionData).forEach(([elementKey, elementValue]: [string, any]) => {
             if (elementValue !== undefined && elementValue !== null) {
               section.elements[elementKey] = elementValue;
               generatedElements.push(elementKey);
+              console.log(`  ✅ Added element: ${elementKey} = "${typeof elementValue === 'string' ? elementValue.substring(0, 50) + '...' : elementValue}"`);
+            } else {
+              console.log(`  ⚠️ Skipped null/undefined element: ${elementKey}`);
             }
           });
 
@@ -215,6 +235,19 @@ export function createGenerationActions(set: any, get: any) {
 
           console.log(`✅ Section ${sectionId} updated with ${generatedElements.length} elements`);
           sectionsGenerated.push(sectionId);
+          
+          // Debug: Verify the section content was actually updated
+          console.log(`🔍 Verifying section ${sectionId} content:`, {
+            hasContent: !!state.content[sectionId],
+            elementCount: Object.keys(state.content[sectionId]?.elements || {}).length,
+            elements: Object.keys(state.content[sectionId]?.elements || {})
+          });
+        });
+      } else {
+        console.error('❌ No AI content received or content is not an object:', {
+          hasContent: !!aiResponse.content,
+          contentType: typeof aiResponse.content,
+          aiResponse
         });
       }
 
@@ -234,7 +267,7 @@ export function createGenerationActions(set: any, get: any) {
         console.error('❌ CRITICAL: Section/Content mismatch after AI response!', {
           sectionsInLayout: finalSectionCount,
           sectionsInContent: finalContentCount,
-          layoutSections: state.sections,
+          layoutSections: [...state.sections], // Create a copy to avoid Proxy issues
           contentSections: Object.keys(state.content)
         });
         state.aiGeneration.errors.push(`Section/Content count mismatch: ${finalSectionCount} layout vs ${finalContentCount} content`);
@@ -252,6 +285,17 @@ export function createGenerationActions(set: any, get: any) {
       // });
 
       state.persistence.isDirty = true;
+      
+      // Final content check
+      console.log('✅ Final store content state after AI update:', {
+        sections: [...state.sections], // Create a copy to avoid Proxy issues
+        contentKeys: Object.keys(state.content),
+        sampleContent: Object.entries(state.content).map(([id, section]) => ({
+          id,
+          elementCount: Object.keys(section.elements || {}).length,
+          elements: Object.keys(section.elements || {})
+        }))
+      });
     });
   },
 

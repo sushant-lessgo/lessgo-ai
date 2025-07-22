@@ -169,6 +169,7 @@ function createInitialState(tokenId: string): EditStore {
     errors: {} as Record<string, string>,
     loadingStates: {} as Record<string, boolean>,
     isLoading: false,
+    queuedChanges: [] as any[],
     history: {
       undoStack: [],
       redoStack: [],

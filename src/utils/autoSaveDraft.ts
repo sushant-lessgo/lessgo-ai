@@ -153,8 +153,9 @@ if (includePageData) {
     const { serializationOptions = {} } = params;
     
     if (source === 'edit' || source === 'persistence-manager') {
-      const { useEditStore } = await import('@/hooks/useEditStore');
-      const editStore = useEditStore.getState();
+      const { storeManager } = await import('@/stores/storeManager');
+      const editStore = storeManager.getEditStore(tokenId);
+      const editStoreState = editStore.getState();
       
       if (serializationOptions.useContentSerializer) {
         // Use content serializer for structured data
@@ -181,13 +182,14 @@ if (includePageData) {
         // Using content serializer for structured save
       } else {
         // Use standard export
-        pageData = editStore.exportForSerialization ? editStore.exportForSerialization() : editStore.export();
+        pageData = editStoreState.exportForSerialization ? editStoreState.exportForSerialization() : editStoreState.export();
       }
     } else {
-      // Fallback to page store
-      const { useEditStore } = await import('@/hooks/useEditStore');
-      const editStore = useEditStore.getState();
-      pageData = editStore.export();
+      // Fallback to onboarding - use token-based store
+      const { storeManager } = await import('@/stores/storeManager');
+      const editStore = storeManager.getEditStore(tokenId);
+      const editStoreState = editStore.getState();
+      pageData = editStoreState.export();
     }
   } catch (error) {
     console.warn('⚠️ Could not get page data for save:', error);
@@ -207,22 +209,12 @@ if (includePageData) {
 
     // Step 4: Add theme values
     try {
-      if (source === 'edit' || source === 'persistence-manager') {
-        // Get color tokens from edit store
-        const { useEditStore } = await import('@/hooks/useEditStore');
-        const editStore = useEditStore.getState();
-        const colorTokens = editStore.getColorTokens();
-        
-        payload.themeValues = {
-          primary: colorTokens.accent,
-          background: colorTokens.bgNeutral,
-          muted: colorTokens.textMuted,
-        };
-      } else {
-        // Fallback to page store
-        const { useEditStore } = await import('@/hooks/useEditStore');
-        const { getColorTokens } = useEditStore.getState();
-        const colorTokens = getColorTokens();
+      const { storeManager } = await import('@/stores/storeManager');
+      const editStore = storeManager.getEditStore(tokenId);
+      const editStoreState = editStore.getState();
+      
+      if (editStoreState.getColorTokens) {
+        const colorTokens = editStoreState.getColorTokens();
         
         payload.themeValues = {
           primary: colorTokens.accent,
@@ -690,13 +682,14 @@ export async function loadDraftWithDeserialization(tokenId: string): Promise<{
       return { success: true, data };
     } else {
       // Fallback to standard loading
-      const { useEditStore } = await import('@/hooks/useEditStore');
-      const editStore = useEditStore.getState();
+      const { storeManager } = await import('@/stores/storeManager');
+      const editStore = storeManager.getEditStore(tokenId);
+      const editStoreState = editStore.getState();
       
-      if (editStore.loadFromSerialized) {
-        editStore.loadFromSerialized(data);
+      if (editStoreState.loadFromSerialized) {
+        editStoreState.loadFromSerialized(data);
       } else {
-        await editStore.loadFromDraft(data);
+        await editStoreState.loadFromDraft(data, tokenId);
       }
       
       console.log('✅ Successfully loaded content (fallback method)');

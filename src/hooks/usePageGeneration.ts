@@ -135,7 +135,8 @@ export function usePageGeneration(tokenId: string) {
     console.log('Generated background system:', backgroundSystem);
 
     const editStore = getEditStore();
-    editStore.updateTheme({
+    const { updateTheme } = editStore.getState();
+    updateTheme({
       colors: {
         baseColor: backgroundSystem.baseColor,
         accentColor: backgroundSystem.accentColor,
@@ -242,7 +243,15 @@ export function usePageGeneration(tokenId: string) {
       // Build the prompt
       const prompt = buildFullPrompt(onboardingStore, tempPageStore as any);
       
+      console.log('📝 Sending prompt to API:', {
+        promptLength: prompt.length,
+        sections: tempPageStore.layout.sections,
+        layouts: tempPageStore.layout.sectionLayouts,
+        promptPreview: prompt.substring(0, 500) + '...'
+      });
+      
       // Call AI API
+      console.log('🌐 Making API call to /api/generate-landing');
       const response = await fetch('/api/generate-landing', {
         method: 'POST',
         headers: {
@@ -252,11 +261,25 @@ export function usePageGeneration(tokenId: string) {
         body: JSON.stringify({ prompt })
       });
 
+      console.log('📡 API Response status:', response.status, response.statusText);
+
       if (!response.ok) {
+        const errorText = await response.text();
+        console.error('❌ API Error response:', errorText);
         throw new Error(`AI API failed: ${response.status} ${response.statusText}`);
       }
 
       const result = await response.json();
+      
+      console.log('🌐 API Response received:', {
+        success: result.success,
+        hasContent: !!result.content,
+        contentKeys: result.content ? Object.keys(result.content) : [],
+        errors: result.errors,
+        warnings: result.warnings,
+        isPartial: result.isPartial,
+        rawResult: result
+      });
       
       // Filter content to only include requested sections
       const filteredContent: any = {};

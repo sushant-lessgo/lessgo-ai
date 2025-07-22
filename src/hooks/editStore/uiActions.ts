@@ -201,6 +201,7 @@ export function createUIActions(set: any, get: any): UIActions {
     
     showToolbar: (type: 'section' | 'element' | 'text' | 'image' | 'form', targetId: string, position?: { x: number; y: number }) =>
       set((state: EditStore) => {
+        console.log('🔧 showToolbar called with:', { type, targetId, position });
         
         // Simple position calculation if not provided
         const pos = position || { x: 0, y: 0 };
@@ -208,6 +209,7 @@ export function createUIActions(set: any, get: any): UIActions {
         // Get context-aware actions based on type
         const actions = getActionsForType(type, targetId, state);
         
+        console.log('🔧 Setting toolbar state:', { type, visible: true, position: pos, targetId, actions });
         
         // Update toolbar state
         state.toolbar = {

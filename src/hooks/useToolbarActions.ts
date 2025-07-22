@@ -947,7 +947,7 @@ const { addElement } = useElementCRUD();
       if (targetElement) {
         targetElement.alt = newAltText;
         
-        const currentAsset = images.assets?.[imageId];
+        const currentAsset = images?.assets?.[imageId];
         if (currentAsset) {
           updateImageAsset(imageId, { ...currentAsset, alt: newAltText });
         }
@@ -956,7 +956,7 @@ const { addElement } = useElementCRUD();
       }
     }
     return false;
-  }, [images.assets, updateImageAsset]);
+  }, [images?.assets, updateImageAsset]);
 
   const handleImageFilters = useCallback(async (params: { imageId: string }) => {
     const { imageId } = params;
@@ -997,7 +997,7 @@ const { addElement } = useElementCRUD();
       return true;
     }
     return false;
-  }, [images.assets, updateImageAsset]);
+  }, [images?.assets, updateImageAsset]);
 
   const handleDeleteImage = useCallback(async (params: { imageId: string }) => {
     const { imageId } = params;

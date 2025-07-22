@@ -3,8 +3,10 @@ import { parseAiResponse } from "@/modules/prompt/parseAiResponse"
 import { generateMockResponse } from "@/modules/prompt/mockResponseGenerator"
 
 export async function POST(req: Request) {
+  console.log("🚀 /api/generate-landing route called")
   try {
     const { prompt } = await req.json()
+    console.log("📝 Prompt received, length:", prompt?.length || 0)
 
     if (!prompt || typeof prompt !== 'string') {
       return NextResponse.json({ 
@@ -16,12 +18,25 @@ export async function POST(req: Request) {
     const DEMO_TOKEN = "lessgodemomockdata"
     const authHeader = req.headers.get("Authorization") || ""
     const token = authHeader.replace("Bearer ", "").trim()
+    
+    console.log("🔍 Environment check:", {
+      NEXT_PUBLIC_USE_MOCK_GPT: process.env.NEXT_PUBLIC_USE_MOCK_GPT,
+      token: token.substring(0, 10) + '...',
+      isDemoToken: token === DEMO_TOKEN
+    })
 
     // Check for mock data usage
     if (process.env.NEXT_PUBLIC_USE_MOCK_GPT === "true" || token === DEMO_TOKEN) {
-      console.log("Using mock response for AI copy generation")
+      console.log("🤖 Using mock response for AI copy generation")
       const mockResponse = generateMockResponse(prompt)
+      console.log("📦 Mock response content:", mockResponse.choices[0].message.content.substring(0, 500) + '...')
       const parsed = parseAiResponse(mockResponse.choices[0].message.content)
+      console.log("📊 Parsed result:", {
+        success: parsed.success,
+        contentKeys: Object.keys(parsed.content),
+        errors: parsed.errors,
+        warnings: parsed.warnings
+      })
       return NextResponse.json(parsed)
     }
 

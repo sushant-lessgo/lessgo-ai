@@ -447,19 +447,14 @@ const ElementEditingOverlay: React.FC<{
     }
   };
   
-  // Don't render overlay if we can't find the target element
-  if (!targetElement) {
-    return null;
-  }
-  
-  // Add click handler directly to the target element
+  // Add click handler directly to the target element - MUST be before early return
   React.useEffect(() => {
+    const handleElementClick = (e: MouseEvent) => {
+      e.stopPropagation();
+      handleClick(e as any);
+    };
+
     if (targetElement && !isEditing) {
-      const handleElementClick = (e: MouseEvent) => {
-        e.stopPropagation();
-        handleClick(e as any);
-      };
-      
       targetElement.addEventListener('click', handleElementClick);
       targetElement.style.cursor = 'pointer';
       targetElement.classList.add('hover:bg-blue-50', 'hover:bg-opacity-50', 'transition-colors', 'rounded');
@@ -471,6 +466,11 @@ const ElementEditingOverlay: React.FC<{
       };
     }
   }, [targetElement, isEditing]);
+  
+  // Don't render overlay if we can't find the target element
+  if (!targetElement) {
+    return null;
+  }
   
   // DISABLED: Use the unified text editing system from useEditor hook instead
   // The ElementEditingOverlay conflicts with the useEditor system

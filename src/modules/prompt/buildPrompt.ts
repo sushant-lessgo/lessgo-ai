@@ -313,6 +313,8 @@ function buildSectionFlowContext(elementsMap: any, pageStore: PageStore): string
   });
 
   return `SECTION FLOW FOR COHESIVE MESSAGING:
+Selected sections: [${sectionOrder.map(s => `"${s}"`).join(', ')}]
+
 ${flowContext.join('\n')}`;
 }
 
@@ -469,11 +471,11 @@ function buildOutputFormat(elementsMap: any): string {
   });
 
   return `OUTPUT FORMAT:
-Return a valid JSON object with this exact structure:
+Return a valid JSON object with this exact structure where each key is a section ID and contains the required elements:
 
 ${JSON.stringify(formatExample, null, 2)}
 
-}`;
+IMPORTANT: The above is the structure. Replace the example values with actual generated content.`;
 }
 
 /**

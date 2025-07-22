@@ -21,7 +21,12 @@ export function createPersistenceActions(set: any, get: any) {
         
         console.log('💾 Calling /api/saveDraft with data:', { 
           tokenId: state.tokenId, 
-          hasContent: !!exportedData 
+          hasContent: !!exportedData,
+          sectionsCount: exportedData.sections?.length || 0,
+          contentKeys: Object.keys(exportedData.content || {}),
+          hasAnyElements: Object.values(exportedData.content || {}).some((section: any) => 
+            section.elements && Object.keys(section.elements).length > 0
+          )
         });
         
         if (!state.tokenId) {
@@ -36,7 +41,8 @@ export function createPersistenceActions(set: any, get: any) {
           },
           body: JSON.stringify({
             tokenId: state.tokenId,
-            content: exportedData,
+            finalContent: exportedData,  // Changed from 'content' to 'finalContent' to match API
+            title: state.title,
           }),
         });
 
@@ -73,57 +79,98 @@ export function createPersistenceActions(set: any, get: any) {
           state.persistence.loadError = undefined;
         });
 
-        // Simplified loading logic - handle different response formats
-        if (apiResponse.finalContent) {
-          const { finalContent } = apiResponse;
+        console.log('🔄 Loading draft data:', {
+          hasContent: !!apiResponse.content,
+          hasFinalContent: !!apiResponse.finalContent,
+          tokenId: apiResponse.tokenId || urlTokenId,
+          apiResponseKeys: Object.keys(apiResponse)
+        });
+
+        // Handle different response formats - check both finalContent and content
+        // The API stores the data under content.finalContent path
+        const contentToLoad = apiResponse.finalContent || apiResponse.content?.finalContent || apiResponse.content;
+        
+        set((state: EditStore) => {
+          // Restore core content if available
+          if (contentToLoad && contentToLoad.sections && Array.isArray(contentToLoad.sections)) {
+            console.log('📥 Restoring sections and content:', {
+              sectionsCount: contentToLoad.sections.length,
+              contentKeys: Object.keys(contentToLoad.content || {}).length,
+              sectionLayoutsCount: Object.keys(contentToLoad.sectionLayouts || {}).length
+            });
+            
+            state.sections = contentToLoad.sections;
+            state.sectionLayouts = contentToLoad.sectionLayouts || {};
+            state.content = contentToLoad.content || {};
+            
+            // Log section/content match for debugging
+            const sectionsInContent = Object.keys(state.content).length;
+            const sectionsInLayout = state.sections.length;
+            
+            if (sectionsInContent !== sectionsInLayout) {
+              console.warn('⚠️ Section/Content mismatch detected:', {
+                sectionsInLayout,
+                sectionsInContent,
+                sections: state.sections,
+                contentKeys: Object.keys(state.content)
+              });
+            } else {
+              console.log('✅ Section/Content match confirmed:', {
+                count: sectionsInContent
+              });
+            }
+          } else {
+            console.log('📝 No section data found in response, keeping empty state');
+          }
           
-          set((state: EditStore) => {
-            // Restore core content
-            if (finalContent.sections && Array.isArray(finalContent.sections)) {
-              state.sections = finalContent.sections;
-              state.sectionLayouts = finalContent.sectionLayouts || {};
-              state.content = finalContent.content || {};
-            }
-            
-            // Restore theme and settings
-            if (finalContent.theme) {
-              state.theme = { ...state.theme, ...finalContent.theme };
-            }
-            if (finalContent.globalSettings) {
-              Object.assign(state.globalSettings, finalContent.globalSettings);
-            }
-            
-            // Restore meta data
-            state.id = apiResponse.tokenId || urlTokenId || '';
-            state.title = apiResponse.title || 'Untitled Project';
-            state.tokenId = apiResponse.tokenId || urlTokenId || '';
-            
-            
-            // Restore onboarding data
-            state.onboardingData = {
-              oneLiner: apiResponse.inputText || '',
-              validatedFields: apiResponse.validatedFields || {},
-              featuresFromAI: apiResponse.featuresFromAI || [],
-              hiddenInferredFields: apiResponse.hiddenInferredFields || {},
-              confirmedFields: apiResponse.confirmedFields || {}
+          // Restore theme and settings if available
+          if (contentToLoad && contentToLoad.theme) {
+            console.log('🎨 Restoring theme data');
+            state.theme = { ...state.theme, ...contentToLoad.theme };
+          }
+          if (contentToLoad && contentToLoad.globalSettings) {
+            Object.assign(state.globalSettings, contentToLoad.globalSettings);
+          }
+          
+          // Restore meta data
+          state.id = apiResponse.tokenId || urlTokenId || '';
+          state.title = apiResponse.title || 'Untitled Project';
+          state.tokenId = apiResponse.tokenId || urlTokenId || '';
+          
+          // Restore onboarding data
+          state.onboardingData = {
+            oneLiner: apiResponse.inputText || '',
+            validatedFields: apiResponse.validatedFields || {},
+            featuresFromAI: apiResponse.featuresFromAI || [],
+            hiddenInferredFields: apiResponse.hiddenInferredFields || {},
+            confirmedFields: apiResponse.confirmedFields || {}
+          };
+          
+          state.lastUpdated = Date.now();
+          state.persistence.isLoading = false;
+          state.persistence.isDirty = false;
+          
+          // Ensure performance object is initialized
+          if (!state.performance) {
+            state.performance = {
+              saveCount: 0,
+              averageSaveTime: 0,
+              lastSaveTime: 0,
+              failedSaves: 0,
             };
-            
-            state.lastUpdated = Date.now();
-            state.persistence.isLoading = false;
-            state.persistence.isDirty = false;
-            
-            // Ensure performance object is initialized
-            if (!state.performance) {
-              state.performance = {
-                saveCount: 0,
-                averageSaveTime: 0,
-                lastSaveTime: 0,
-                failedSaves: 0,
-              };
-            }
+          }
+
+          console.log('✅ Draft loading complete:', {
+            tokenId: state.tokenId,
+            title: state.title,
+            sectionsCount: state.sections.length,
+            contentKeysCount: Object.keys(state.content).length,
+            hasTheme: !!state.theme
           });
-        }
+        });
+        
       } catch (error) {
+        console.error('❌ Error in loadFromDraft:', error);
         set((state: EditStore) => {
           state.persistence.isLoading = false;
           state.persistence.loadError = error instanceof Error ? error.message : 'Failed to load draft';
@@ -134,7 +181,7 @@ export function createPersistenceActions(set: any, get: any) {
 
     export: () => {
       const state = get();
-      return {
+      const exportData = {
         id: state.id,
         title: state.title,
         slug: state.slug,
@@ -147,6 +194,17 @@ export function createPersistenceActions(set: any, get: any) {
         lastUpdated: state.lastUpdated,
         version: state.version,
       };
+      
+      // Debug logging
+      console.log('📤 Exporting store data:', {
+        sections: exportData.sections.length,
+        contentKeys: Object.keys(exportData.content),
+        hasElements: Object.values(exportData.content).some((section: any) => 
+          section.elements && Object.keys(section.elements).length > 0
+        )
+      });
+      
+      return exportData;
     },
 
     /**

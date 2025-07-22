@@ -114,6 +114,8 @@ export function EditProvider({ children, tokenId, options = {} }: EditProviderPr
 
   // Track token changes for debugging
   const previousTokenRef = useRef<string>();
+  const hasLoadedDataRef = useRef<Set<string>>(new Set());
+  
   useEffect(() => {
     if (previousTokenRef.current && previousTokenRef.current !== tokenId) {
       console.log(`🔄 EditProvider: Token changed from ${previousTokenRef.current} to ${tokenId}`);
@@ -121,7 +123,47 @@ export function EditProvider({ children, tokenId, options = {} }: EditProviderPr
     previousTokenRef.current = tokenId;
   }, [tokenId]);
 
-  // Create context value
+  // Auto-load project data after store initialization
+  useEffect(() => {
+    if (store && isInitialized && !isHydrating && !hasLoadedDataRef.current.has(tokenId)) {
+      console.log(`📥 EditProvider: Loading project data for token ${tokenId}`);
+      hasLoadedDataRef.current.add(tokenId);
+      
+      // Load project data from API
+      fetch(`/api/loadDraft?tokenId=${tokenId}`)
+        .then(response => {
+          if (!response.ok) {
+            throw new Error(`Failed to load draft: ${response.status}`);
+          }
+          return response.json();
+        })
+        .then(data => {
+          console.log(`✅ EditProvider: Loaded project data for token ${tokenId}`, {
+            hasFinalContent: !!data.finalContent,
+            sectionsCount: data.finalContent?.sections?.length || 0
+          });
+          
+          // Load data into store using existing loadFromDraft action
+          const storeState = store.getState();
+          if (typeof storeState.loadFromDraft === 'function') {
+            storeState.loadFromDraft(data, tokenId);
+          } else {
+            console.warn('loadFromDraft action not found in store');
+          }
+        })
+        .catch(error => {
+          console.error(`❌ EditProvider: Failed to load project data for token ${tokenId}:`, error);
+          // Don't show error for missing projects - they might be new projects
+          if (!error.message.includes('404')) {
+            // Only log non-404 errors
+            console.error('Project load error:', error);
+          }
+        });
+    }
+  }, [store, isInitialized, isHydrating, tokenId]);
+
+  // Create context value - get fresh data from store if available
+  const storeState = store?.getState();
   const contextValue: EditStoreContext = {
     store,
     tokenId,
@@ -130,9 +172,9 @@ export function EditProvider({ children, tokenId, options = {} }: EditProviderPr
     error,
     isReady: isReady || false,
     retryInitialization,
-    sections: sections || [],
-    content: content || {},
-    theme: theme || {},
+    sections: storeState?.sections || sections || [],
+    content: storeState?.content || content || {},
+    theme: storeState?.theme || theme || {},
   };
 
   // Show error state
@@ -201,6 +243,16 @@ function useStoreState<T>(
   const [state, setState] = useState(() => selector(store.getState()));
   
   useEffect(() => {
+    // Get initial state (in case data was loaded after initial render)
+    const currentState = selector(store.getState());
+    setState(prev => {
+      if (equalityFn && equalityFn(prev, currentState)) {
+        return prev;
+      }
+      return currentState;
+    });
+    
+    // Subscribe to future changes
     const unsubscribe = store.subscribe((newState: any) => {
       const selectedState = selector(newState);
       setState(current => {

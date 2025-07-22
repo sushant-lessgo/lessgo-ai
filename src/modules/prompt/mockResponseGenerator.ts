@@ -16,7 +16,9 @@ export function generateMockResponse(prompt: string): any {
   
   console.log('🎭 Mock Generator:', {
     requestedSections,
-    businessContext
+    businessContext,
+    promptLength: prompt.length,
+    promptPreview: prompt.substring(0, 200) + '...'
   })
   
   return {
@@ -36,14 +38,19 @@ function extractRequestedSections(prompt: string): string[] {
   
   // First, try to extract from pageStore sections (most reliable)
   const pageStoreSectionsPatterns = [
-    /sections.*?\[([^\]]+)\]/s,
-    /"sections":\s*\[([^\]]+)\]/s,
-    /layout.*sections.*\[([^\]]+)\]/s
+    // More specific patterns first
+    /"sections":\s*\[([^\]]+)\]/,
+    /layout\.sections:\s*\[([^\]]+)\]/,
+    /Selected sections:\s*\[([^\]]+)\]/,
+    /Sections to generate:\s*\[([^\]]+)\]/,
+    // Generic pattern last (most likely to match wrong content)
+    /sections.*?\[([^\]]+)\]/s
   ]
   
   for (const pattern of pageStoreSectionsPatterns) {
     const match = prompt.match(pattern)
     if (match) {
+      console.log('🎯 Pattern matched:', pattern.toString(), 'Match:', match[0].substring(0, 100))
       try {
         const sectionsArray = match[1]
           .split(',')
@@ -55,7 +62,7 @@ function extractRequestedSections(prompt: string): string[] {
           return sectionsArray
         }
       } catch (error) {
-        console.warn('Failed to parse sections from pageStore match')
+        console.warn('Failed to parse sections from pageStore match:', error)
       }
     }
   }
@@ -63,16 +70,21 @@ function extractRequestedSections(prompt: string): string[] {
   // Look for JSON structure in the prompt which shows requested sections
   const jsonMatch = prompt.match(/\{[\s\S]*?\}/g)
   if (!jsonMatch) {
-    console.warn('No JSON structure found in prompt, using fallback sections')
+    console.warn('❌ No JSON structure found in prompt, using fallback sections')
     return ['hero', 'features', 'cta'] // Safe fallback
   }
+  
+  console.log('📋 Found JSON structures in prompt:', jsonMatch.length)
 
   const jsonString = jsonMatch[jsonMatch.length - 1] // Get the last JSON block (likely the output format)
+  
+  console.log('🔍 Found JSON string to parse:', jsonString.substring(0, 200) + '...')
   
   try {
     // Try to parse the JSON to extract section names
     const jsonObj = JSON.parse(jsonString)
     const sections = Object.keys(jsonObj)
+    console.log('📋 Extracted sections from JSON:', sections)
     
     // Filter to only known valid sections to prevent returning too many
     const validSections = [

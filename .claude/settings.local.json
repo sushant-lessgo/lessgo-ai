@@ -28,7 +28,8 @@
       "Bash(mkdir:*)",
       "Bash(sed:*)",
       "Bash(timeout 30s npm run dev)",
-      "Bash(true)"
+      "Bash(true)",
+      "Bash(curl:*)"
     ],
     "deny": []
   }

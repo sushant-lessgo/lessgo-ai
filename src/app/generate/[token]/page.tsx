@@ -46,26 +46,37 @@ export default function GeneratePage() {
 // Separate component for the actual page logic
 function GeneratePageContent({ tokenId }: { tokenId: string }) {
   const router = useRouter();
-  const { store, sections, content, isInitialized } = useEditStoreContext();
+  const { store, sections, content, isInitialized, isHydrating } = useEditStoreContext();
   
   // UI state
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [dataLoaded, setDataLoaded] = useState(false);
 
   // Initialize preview mode and validate data
   useEffect(() => {
-    if (!store || !isInitialized) return;
+    if (!store || !isInitialized || isHydrating) return;
     
-    // Set preview mode
-    const currentState = store.getState();
-    if (currentState.mode !== 'preview') {
-      store.getState().setMode('preview');
-    }
+    // Wait a bit for hydration to complete
+    const checkData = async () => {
+      // Small delay to ensure hydration is complete
+      await new Promise(resolve => setTimeout(resolve, 100));
+      
+      const currentState = store.getState();
+      console.log('🔍 Generate page checking store state:', {
+        sections: currentState.sections.length,
+        content: Object.keys(currentState.content).length,
+        hasElements: Object.values(currentState.content).some((s: any) => s.elements && Object.keys(s.elements).length > 0)
+      });
+      
+      // Set preview mode
+      if (currentState.mode !== 'preview') {
+        currentState.setMode('preview');
+      }
 
-    // Check if store has data
-    if (sections.length === 0) {
-      // Try to load from API as fallback
-      const loadData = async () => {
+      // Check if store has data
+      if (currentState.sections.length === 0) {
+        // Try to load from API as fallback
         try {
           setIsLoading(true);
           setError(null);
@@ -79,7 +90,8 @@ function GeneratePageContent({ tokenId }: { tokenId: string }) {
           const data = await response.json();
           
           // Use the loadFromDraft method from EditStore
-          await store.getState().loadFromDraft(data, tokenId);
+          await currentState.loadFromDraft(data, tokenId);
+          setDataLoaded(true);
           
         } catch (err) {
           console.error('Failed to load page data:', err);
@@ -95,34 +107,70 @@ function GeneratePageContent({ tokenId }: { tokenId: string }) {
         } finally {
           setIsLoading(false);
         }
-      };
+      } else {
+        setDataLoaded(true);
+        setIsLoading(false);
+      }
+    };
+    
+    checkData();
+  }, [tokenId, store, isInitialized, isHydrating, router]);
 
-      loadData();
-    } else {
-      setIsLoading(false);
-    }
-  }, [sections.length, tokenId, store, isInitialized, router]);
-
-  // Handle edit navigation (no migration needed anymore)
+  // Handle edit navigation - ensure data is saved before transitioning
   const handleEdit = async () => {
     if (!store) return;
     
-    // Set edit mode in the store
-    store.getState().setMode('edit');
-    
-    // Ensure persistence by triggering auto-save
-    const currentState = store.getState();
-    console.log('📊 Pre-navigation store state:', {
-      sections: currentState.sections.length,
-      content: Object.keys(currentState.content).length,
-      sectionsArray: currentState.sections
-    });
-    
-    // Small delay to ensure state changes are applied
-    await new Promise(resolve => setTimeout(resolve, 50));
-    
-    // Navigate to edit page with flag to indicate data is already in store
-    router.push(`/edit/${tokenId}?migrated=true`);
+    try {
+      // Log current state for debugging
+      const currentState = store.getState();
+      console.log('📊 Pre-navigation store state:', {
+        sections: currentState.sections.length,
+        content: Object.keys(currentState.content).length,
+        sectionsArray: currentState.sections,
+        hasContent: Object.keys(currentState.content).length > 0
+      });
+      
+      // Ensure we have data to save
+      if (currentState.sections.length === 0) {
+        setError('No sections to edit. Please generate content first.');
+        return;
+      }
+      
+      // Check if we have content for the sections
+      const hasContent = Object.keys(currentState.content).length > 0 && 
+                        Object.values(currentState.content).some((section: any) => 
+                          section.elements && Object.keys(section.elements).length > 0
+                        );
+      
+      if (!hasContent) {
+        console.warn('⚠️ Sections exist but no content found. This might be a data loading issue.');
+        // Don't block navigation, but log the issue
+      }
+      
+      // Force save to database before navigation
+      console.log('💾 Saving data before navigation...');
+      await currentState.save();
+      
+      // Also ensure the persist middleware has saved to localStorage
+      if (store.persist && typeof store.persist.rehydrate === 'function') {
+        // Force a persist cycle
+        await new Promise(resolve => setTimeout(resolve, 100));
+      }
+      
+      // Set edit mode in the store
+      currentState.setMode('edit');
+      
+      // Small delay to ensure all async operations complete
+      await new Promise(resolve => setTimeout(resolve, 200));
+      
+      console.log('✅ Data saved, navigating to edit page...');
+      
+      // Navigate to edit page with flag to indicate data is already in store
+      router.push(`/edit/${tokenId}?migrated=true`);
+    } catch (error) {
+      console.error('❌ Failed to prepare for edit mode:', error);
+      setError('Failed to save changes. Please try again.');
+    }
   };
 
   // Loading state

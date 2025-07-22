@@ -94,17 +94,15 @@ function validateContent(content: any): {
     return validation
   }
 
-  // Required sections
-  const requiredSections = ['hero', 'cta']
+  // Required sections - removed hardcoded requirement
+  // Different pages might have different sections based on business rules
   const availableSections = Object.keys(content)
-
-  // Check for required sections
-  requiredSections.forEach(section => {
-    if (!availableSections.includes(section)) {
-      validation.errors.push(`Missing required section: ${section}`)
-      validation.isPartial = true
-    }
-  })
+  
+  // Only warn if no sections at all
+  if (availableSections.length === 0) {
+    validation.errors.push('No sections found in content')
+    validation.isPartial = true
+  }
 
   // Process each section
   Object.entries(content).forEach(([sectionId, sectionContent]) => {
