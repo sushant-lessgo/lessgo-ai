@@ -1,12 +1,14 @@
 // app/edit/[token]/components/layout/MainContent.tsx - Enhanced with Selection System
 "use client";
 
-import React, { useRef, useEffect, useState } from 'react';
+import React, { useRef, useEffect, useState, useCallback } from 'react';
 import { useEditStoreContext, useStoreState } from '@/components/EditProvider';
 // Removed useSelection - now using unified useEditor system
 import { EditablePageRenderer } from '../ui/EditablePageRenderer';
 import { FloatingToolbars } from '../ui/FloatingToolbars';
 import { AddSectionButton } from '../ui/AddSectionButton';
+import { EnhancedAddSection } from '../ui/EnhancedAddSection';
+import type { EditableElement } from '@/types/core/content';
 import { SelectionSystem, KeyboardNavigationHelper } from '../selection/SelectionSystem';
 import { ElementDetector, ElementBoundaryVisualizer } from '../selection/ElementDetector';
 // Removed useToolbarContext - now using unified useEditor system
@@ -75,6 +77,32 @@ export function MainContent({ tokenId }: MainContentProps) {
     trackPerformance,
     announceLiveRegion,
   } = storeState || {};
+  
+  // Enhanced add section handler
+  const handleEnhancedAddSection = useCallback((
+    sectionType: string,
+    layoutId: string,
+    elements: Record<string, EditableElement>,
+    position?: number
+  ) => {
+    const newSectionId = addSection(sectionType, position);
+    
+    // Set the section with layout and elements
+    storeState?.setSection?.(newSectionId, {
+      layout: layoutId,
+      elements: elements,
+    });
+    
+    // Update section layout mapping
+    storeState?.setSectionLayouts?.({
+      ...sectionLayouts,
+      [newSectionId]: layoutId,
+    });
+    
+    // Auto-select the new section
+    setActiveSection(newSectionId);
+    announceLiveRegion(`Added ${sectionType} section`);
+  }, [addSection, sectionLayouts, setActiveSection, announceLiveRegion, storeState]);
   
   // Debug: check if functions exist
   // console.log('🔍 Store functions available:', {
@@ -417,16 +445,39 @@ const handleAddSection = (afterSectionId?: string) => {
   // Then update the section content separately using updateElementContent
   const storeState = store?.getState();
   
-  // Set the section layout first
+  // Get the appropriate layout for hero section
+  const heroLayout = getSectionFallbackLayout('hero'); // Returns 'leftCopyRightImage'
+  
+  // Set the section layout and initialize elements with proper structure
   storeState?.setSection?.(newSectionId, {
-    layout: 'hero-centered',
-    elements: {}, // Empty elements object initially
+    layout: heroLayout,
+    elements: {
+      headline: {
+        content: 'New Section Headline',
+        type: 'headline',
+        isEditable: true,
+        editMode: 'inline',
+      },
+      subheadline: {
+        content: 'Add your content here',
+        type: 'subheadline',
+        isEditable: true,
+        editMode: 'inline',
+      },
+      cta: {
+        content: 'Get Started',
+        type: 'button',
+        isEditable: true,
+        editMode: 'inline',
+      },
+    },
   });
   
-  // Add content using updateElementContent which handles proper element types
-  store.updateElementContent(newSectionId, 'headline', 'New Section Headline');
-  store.updateElementContent(newSectionId, 'subheadline', 'Add your content here');
-  store.updateElementContent(newSectionId, 'cta', 'Get Started');
+  // Also update the section layout in sectionLayouts
+  storeState?.setSectionLayouts?.({
+    ...sectionLayouts,
+    [newSectionId]: heroLayout,
+  });
 
   // Auto-select the new section
   setActiveSection(newSectionId);
@@ -534,15 +585,12 @@ const handleAddSection = (afterSectionId?: string) => {
                 <p className="text-gray-600 mb-6">
                   Add sections from the left panel or start with a pre-built template.
                 </p>
-                <button
-                  onClick={() => handleAddSection()}
-                  className={`
-                    px-6 py-3 rounded-lg font-medium transition-all duration-200
-                    ${colorTokens.accent} text-white hover:opacity-90 shadow-sm hover:shadow-md
-                  `}
-                >
-                  Add Your First Section
-                </button>
+                <EnhancedAddSection
+                  position="end"
+                  existingSections={sections}
+                  onAddSection={handleEnhancedAddSection}
+                  className="px-6 py-3 rounded-lg font-medium transition-all duration-200 bg-primary text-white hover:opacity-90 shadow-sm hover:shadow-md"
+                />
               </div>
             </div>
           )}
@@ -554,9 +602,11 @@ const handleAddSection = (afterSectionId?: string) => {
                 <div key={sectionId} className="relative group">
                   {/* Add Section Button (Between Sections) */}
                   {index > 0 && (
-                    <AddSectionButton
-                      onAdd={() => handleAddSection(sections[index - 1])}
+                    <EnhancedAddSection
                       position="between"
+                      afterSectionId={sections[index - 1]}
+                      existingSections={sections}
+                      onAddSection={handleEnhancedAddSection}
                     />
                   )}
 
@@ -674,9 +724,11 @@ const handleAddSection = (afterSectionId?: string) => {
               ))}
 
               {/* Add Section Button (End) */}
-              <AddSectionButton
-                onAdd={() => handleAddSection(sections[sections.length - 1])}
+              <EnhancedAddSection
                 position="end"
+                afterSectionId={sections[sections.length - 1]}
+                existingSections={sections}
+                onAddSection={handleEnhancedAddSection}
               />
             </div>
           )}

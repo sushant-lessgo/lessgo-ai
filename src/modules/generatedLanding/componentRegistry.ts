@@ -383,11 +383,22 @@ export const componentRegistry: ComponentRegistry = {
   },
 };
 
+// Helper function to extract section type from section ID
+function extractSectionType(sectionId: string): string {
+  // Section IDs are in format: sectionType-timestamp (e.g., "hero-1753195467366")
+  // Extract everything before the last dash and numbers
+  const match = sectionId.match(/^([a-zA-Z]+)/);
+  return match ? match[1] : sectionId;
+}
+
 // Helper function to get a component by section and layout
-export function getComponent(sectionType: string, layoutName: string): React.ComponentType<any> | null {
+export function getComponent(sectionIdOrType: string, layoutName: string): React.ComponentType<any> | null {
+  // Extract section type from section ID if needed
+  const sectionType = extractSectionType(sectionIdOrType);
+  
   const sectionComponents = componentRegistry[sectionType];
   if (!sectionComponents) {
-    console.warn(`No components found for section type: ${sectionType}`);
+    console.warn(`No components found for section type: ${sectionType} (from: ${sectionIdOrType})`);
     return null;
   }
   
