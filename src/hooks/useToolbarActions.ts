@@ -1,8 +1,9 @@
 // hooks/useToolbarActions.ts - Enhanced toolbar action handlers with inline editor integration
 import { useCallback } from 'react';
-import { useEditStore } from './useEditStore';
+import { useEditStoreLegacy as useEditStore } from './useEditStoreLegacy';
 import { useInlineEditorActions } from './useInlineEditorActions';
 import { useTextToolbarIntegration } from './useTextToolbarIntegration';
+import { getSectionTypeFromLayout } from '@/utils/layoutSectionTypeMapping';
 // Removed useToolbarContext - now using unified editor system
 import type { ElementSelection, ToolbarAction } from '@/types/core/ui';
 import type { BackgroundType, ElementType } from '@/types/core/index';
@@ -49,10 +50,14 @@ export function useToolbarActions() {
     // State
     content,
     sections,
+    sectionLayouts,
     selectedElement,
     selectedSection,
     forms,
     images,
+    
+    // UI Modal actions
+    showLayoutChangeModal,
     
     // Auto-save
     trackChange,
@@ -252,26 +257,79 @@ const { addElement } = useElementCRUD();
   const handleChangeLayout = useCallback(async (params: { sectionId: string }) => {
     const { sectionId } = params;
     
-    const layouts = [
-      { id: 'hero-centered', name: 'Centered Hero' },
-      { id: 'hero-split', name: 'Split Hero' },
-      { id: 'features-grid', name: 'Feature Grid' },
-      { id: 'features-list', name: 'Feature List' },
-      { id: 'testimonials-slider', name: 'Testimonial Slider' },
-      { id: 'pricing-table', name: 'Pricing Table' },
-      { id: 'faq-accordion', name: 'FAQ Accordion' },
-      { id: 'cta-banner', name: 'CTA Banner' },
-    ];
-
-    const selectedLayout = prompt(`Select layout:\n${layouts.map((l, i) => `${i + 1}. ${l.name}`).join('\n')}`);
-    const layoutIndex = parseInt(selectedLayout || '0') - 1;
+    // Get section data
+    const section = content[sectionId];
+    const currentLayout = sectionLayouts[sectionId];
     
-    if (layoutIndex >= 0 && layoutIndex < layouts.length) {
-      updateSectionLayout(sectionId, layouts[layoutIndex].id);
-      return true;
+    if (!section || !currentLayout) {
+      console.error('Section or layout not found for:', sectionId, { section, currentLayout });
+      return false;
     }
-    return false;
-  }, [updateSectionLayout]);
+    
+    // Get section type from the current layout name
+    let sectionType = getSectionTypeFromLayout(currentLayout);
+    
+    // If we couldn't determine from layout, use the sectionId or aiMetadata
+    if (sectionType === 'hero') {
+      // First try using the sectionId itself as it might be the section type
+      const sectionIdMapping: Record<string, string> = {
+        'uniqueMechanism': 'uniqueMechanism',
+        'unique-mechanism': 'uniqueMechanism',
+        'unique_mechanism': 'uniqueMechanism',
+        'cta': 'cta',
+        'CTA': 'cta',
+        'beforeAfter': 'beforeAfter',
+        'features': 'features',
+        'faq': 'faq',
+        'pricing': 'pricing',
+        'testimonials': 'testimonials',
+        'howItWorks': 'howItWorks',
+        'problem': 'problem',
+        'results': 'results',
+        'security': 'security',
+        'socialProof': 'socialProof',
+        'founderNote': 'founderNote',
+        'integrations': 'integrations',
+        'objectionHandling': 'objectionHandling',
+        'useCases': 'useCases',
+        'comparisonTable': 'comparisonTable',
+        'closeSection': 'closeSection',
+      };
+      
+      if (sectionIdMapping[sectionId]) {
+        sectionType = sectionIdMapping[sectionId];
+      } else if (section.aiMetadata?.sectionType) {
+        // Try aiMetadata as last resort
+        sectionType = section.aiMetadata.sectionType;
+        
+        // Handle any naming differences in aiMetadata
+        const aiMetadataMapping: Record<string, string> = {
+          'unique-mechanism': 'uniqueMechanism',
+          'unique_mechanism': 'uniqueMechanism',
+          'UniqueMechanism': 'uniqueMechanism',
+          'CTA': 'cta',
+          'Cta': 'cta',
+        };
+        
+        if (aiMetadataMapping[sectionType]) {
+          sectionType = aiMetadataMapping[sectionType];
+        }
+      }
+    }
+    
+    console.log('Layout change debug:', { 
+      sectionId, 
+      currentLayout,
+      determinedSectionType: sectionType,
+      aiMetadata: section.aiMetadata,
+      fallbackReason: sectionType === 'hero' ? 'Could not determine from layout' : 'Determined from layout'
+    });
+    
+    // Show the layout change modal
+    showLayoutChangeModal(sectionId, sectionType, currentLayout, section.elements);
+    
+    return true;
+  }, [content, sectionLayouts, showLayoutChangeModal]);
 
   const handleAddElement = useCallback(async (params: { 
   sectionId: string; 

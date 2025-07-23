@@ -189,6 +189,10 @@ export interface UIActions {
     triggerElement: HTMLElement,
     actions: any[]
   ) => void;
+  
+  // Layout Change Modal
+  showLayoutChangeModal: (sectionId: string, sectionType: string, currentLayout: string, currentData: Record<string, any>) => void;
+  hideLayoutChangeModal: () => void;
 }
 
 /**

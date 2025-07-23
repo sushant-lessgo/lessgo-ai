@@ -1,0 +1,163 @@
+import { layoutElementSchema } from '@/modules/sections/layoutElementSchema';
+import type { EditableElement, SectionData } from '@/types/core';
+
+export interface MigrationResult {
+  migratedData: Record<string, EditableElement>;
+  preservedFields: string[];
+  newRequiredFields: string[];
+  warnings: string[];
+}
+
+export function migrateLayoutData(
+  currentData: Record<string, EditableElement>,
+  fromLayout: string,
+  toLayout: string
+): MigrationResult {
+  const fromSchema = layoutElementSchema[fromLayout] || [];
+  const toSchema = layoutElementSchema[toLayout] || [];
+  
+  const migratedData: Record<string, EditableElement> = {};
+  const preservedFields: string[] = [];
+  const newRequiredFields: string[] = [];
+  const warnings: string[] = [];
+
+  // Create mapping of target fields
+  const targetFields = new Set(toSchema.map(item => item.element));
+  const requiredTargetFields = new Set(
+    toSchema.filter(item => item.mandatory).map(item => item.element)
+  );
+
+  // Migrate existing data where fields match
+  Object.entries(currentData).forEach(([fieldName, fieldData]) => {
+    if (targetFields.has(fieldName)) {
+      // Ensure the content is in the right format
+      if (fieldData && typeof fieldData === 'object' && 'content' in fieldData) {
+        migratedData[fieldName] = { ...fieldData };
+      } else {
+        // Handle cases where the data might be in a different format
+        migratedData[fieldName] = {
+          content: fieldData,
+          type: isListField(fieldName) ? 'list' : 'text',
+          isEditable: true,
+          editMode: 'inline'
+        };
+      }
+      preservedFields.push(fieldName);
+    } else {
+      warnings.push(`Field '${fieldName}' will be lost in new layout`);
+    }
+  });
+
+  // Identify new required fields that need values
+  toSchema.forEach(({ element, mandatory }) => {
+    if (mandatory && !migratedData[element]) {
+      newRequiredFields.push(element);
+      
+      // Create placeholder for new required fields
+      migratedData[element] = {
+        content: getDefaultContentForElement(element),
+        type: isListField(element) ? 'list' : 'text',
+        isEditable: true,
+        editMode: 'inline'
+      };
+    }
+  });
+
+  return {
+    migratedData,
+    preservedFields,
+    newRequiredFields,
+    warnings
+  };
+}
+
+function getDefaultContentForElement(element: string): string | string[] {
+  // Handle list-type fields that use pipe-separated values
+  const listFields = [
+    'feature_titles',
+    'feature_descriptions',
+    'benefit_titles',
+    'benefit_descriptions',
+    'faq_questions',
+    'faq_answers',
+    'questions',
+    'answers',
+    'tier_names',
+    'tier_prices',
+    'tier_features',
+    'cta_texts',
+    'testimonial_quotes',
+    'customer_names',
+    'customer_companies',
+    'integration_names',
+    'step_titles',
+    'step_descriptions'
+  ];
+
+  // Check if this is a list field
+  for (const listField of listFields) {
+    if (element.includes(listField)) {
+      // Return pipe-separated default values
+      if (element.includes('titles') || element.includes('names')) {
+        return 'Item 1|Item 2|Item 3';
+      } else if (element.includes('descriptions') || element.includes('quotes')) {
+        return 'Description for item 1|Description for item 2|Description for item 3';
+      } else if (element.includes('questions')) {
+        return 'Question 1?|Question 2?|Question 3?';
+      } else if (element.includes('answers')) {
+        return 'Answer to question 1|Answer to question 2|Answer to question 3';
+      } else if (element.includes('prices')) {
+        return '$9|$29|$99';
+      }
+    }
+  }
+
+  // Single value defaults
+  const defaults: Record<string, string> = {
+    headline: 'Your Headline Here',
+    subheadline: 'Your subheadline here',
+    cta_text: 'Get Started',
+    supporting_text: 'Add your supporting text here',
+    description: 'Add description here',
+    title: 'Add title here',
+    text: 'Add text here'
+  };
+
+  // Check for pattern matches
+  for (const [pattern, defaultValue] of Object.entries(defaults)) {
+    if (element.toLowerCase().includes(pattern)) {
+      return defaultValue;
+    }
+  }
+
+  return 'Add content here';
+}
+
+// Helper to determine if a field is a list-type field
+function isListField(fieldName: string): boolean {
+  const listPatterns = [
+    '_titles', '_descriptions', '_names', '_quotes', 
+    '_questions', '_answers', '_features', '_prices',
+    '_texts', '_companies', 'questions', 'answers'
+  ];
+  
+  return listPatterns.some(pattern => fieldName.includes(pattern));
+}
+
+export function getLayoutCompatibilityScore(
+  fromLayout: string,
+  toLayout: string
+): number {
+  const fromSchema = layoutElementSchema[fromLayout] || [];
+  const toSchema = layoutElementSchema[toLayout] || [];
+  
+  if (fromSchema.length === 0 || toSchema.length === 0) return 0;
+
+  const fromFields = new Set(fromSchema.map(item => item.element));
+  const toFields = new Set(toSchema.map(item => item.element));
+  
+  const intersection = new Set([...fromFields].filter(x => toFields.has(x)));
+  const union = new Set([...fromFields, ...toFields]);
+  
+  return intersection.size / union.size;
+}

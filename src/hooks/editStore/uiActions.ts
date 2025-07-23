@@ -955,5 +955,31 @@ export function createUIActions(set: any, get: any): UIActions {
         memoryUsage: 0
       };
     },
+
+    /**
+     * ===== LAYOUT CHANGE MODAL =====
+     */
+    
+    showLayoutChangeModal: (sectionId: string, sectionType: string, currentLayout: string, currentData: Record<string, any>) =>
+      set((state: EditStore) => {
+        state.layoutChangeModal = {
+          visible: true,
+          sectionId,
+          sectionType,
+          currentLayout,
+          currentData,
+        };
+      }),
+
+    hideLayoutChangeModal: () =>
+      set((state: EditStore) => {
+        state.layoutChangeModal = {
+          visible: false,
+          sectionId: undefined,
+          sectionType: undefined,
+          currentLayout: undefined,
+          currentData: undefined,
+        };
+      }),
   };
 }

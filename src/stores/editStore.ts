@@ -156,6 +156,13 @@ function createInitialState(tokenId: string): EditStore {
       visible: false,
       variations: [] as string[],
     },
+    layoutChangeModal: {
+      visible: false,
+      sectionId: undefined as string | undefined,
+      sectionType: undefined as string | undefined,
+      currentLayout: undefined as string | undefined,
+      currentData: undefined as Record<string, any> | undefined,
+    },
     formData: {} as Record<string, { fields: FormField[]; settings: any }>,
     images: {
       assets: {},

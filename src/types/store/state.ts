@@ -208,6 +208,15 @@ export interface UISlice {
     elementKey: string;
   };
   
+  // Layout Change Modal
+  layoutChangeModal: {
+    visible: boolean;
+    sectionId?: string;
+    sectionType?: string;
+    currentLayout?: string;
+    currentData?: Record<string, any>;
+  };
+  
   formData: Record<string, { fields: any[]; settings: any }>;
   
   // Images State

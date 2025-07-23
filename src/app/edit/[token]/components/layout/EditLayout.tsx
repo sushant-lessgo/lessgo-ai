@@ -11,6 +11,7 @@ import { MainContent } from './MainContent';
 import { useAutoSave } from '@/hooks/useAutoSave';
 import { SimpleFormBuilder } from '@/components/forms/SimpleFormBuilder';
 import { GlobalButtonConfigModal } from '@/components/layout/GlobalButtonConfigModal';
+import { LayoutChangeModal } from '../ui/LayoutChangeModal';
 import { modalEmergencyReset } from '@/utils/modalEmergencyReset';
 import { ModalDebugPanel } from '@/components/debug/ModalDebugPanel';
 
@@ -152,6 +153,9 @@ export function EditLayout({ tokenId }: EditLayoutProps) {
       
       {/* Global Button Configuration Modal */}
       <GlobalButtonConfigModal />
+      
+      {/* Layout Change Modal */}
+      <LayoutChangeModal />
       
       {/* Modal Debug Panel - Only in development */}
       {process.env.NODE_ENV === 'development' && <ModalDebugPanel />}
