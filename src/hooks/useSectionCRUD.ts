@@ -343,29 +343,6 @@ export function useSectionCRUD() {
     return true;
   }, [sections, reorderSections, trackChange, triggerAutoSave]);
 
-  // Toggle section visibility
-  const toggleSectionVisibility = useCallback((sectionId: string): boolean => {
-    const sectionData = content[sectionId];
-    if (!sectionData) return false;
-
-    const newVisibility = !sectionData.isVisible;
-    
-    setSection(sectionId, { isVisible: newVisibility });
-
-    trackChange({
-      type: 'section',
-      action: 'visibility',
-      sectionId,
-      oldValue: { isVisible: sectionData.isVisible },
-      newValue: { isVisible: newVisibility },
-      timestamp: Date.now(),
-    });
-
-    triggerAutoSave();
-    announceLiveRegion(`Section ${newVisibility ? 'shown' : 'hidden'}`);
-
-    return true;
-  }, [content, setSection, trackChange, triggerAutoSave, announceLiveRegion]);
 
   // Batch update sections
   const batchUpdateSections = useCallback((updates: SectionUpdate[]): void => {
@@ -562,14 +539,6 @@ export function useSectionCRUD() {
     moveSectionDown,
     moveSectionToPosition,
     
-    // Section visibility
-    toggleSectionVisibility,
-    hideSections: (sectionIds: string[]) => {
-      sectionIds.forEach(id => toggleSectionVisibility(id));
-    },
-    showSections: (sectionIds: string[]) => {
-      sectionIds.forEach(id => toggleSectionVisibility(id));
-    },
     
     // Batch operations
     batchUpdateSections,

@@ -739,11 +739,6 @@ export function TextToolbar({ elementSelection, position, contextActions }: Text
         )}
         
         <div className="flex items-center px-3 py-2 overflow-x-auto scrollbar-thin scrollbar-thumb-gray-300">
-          {/* Text Indicator */}
-          <div className="flex items-center space-x-1 mr-3">
-            <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-            <span className="text-xs font-medium text-gray-700">Editing Text</span>
-          </div>
           
           {/* Primary Actions */}
           {primaryActions.map((action, index) => (

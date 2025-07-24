@@ -201,6 +201,17 @@ export function useEditor() {
       return;
     }
 
+    // Check if click is on a toolbar - don't hide toolbar when clicking inside it
+    const isToolbarClick = 
+      target.closest('.fixed.z-50.bg-white.border.border-gray-200.rounded-lg.shadow-lg') || // Section toolbar
+      target.closest('[data-toolbar]') ||
+      target.closest('.toolbar') ||
+      (target.tagName === 'BUTTON' && target.textContent === '⋯'); // Triple dots button
+    
+    if (isToolbarClick) {
+      return;
+    }
+    
     // Check if click is on a modal or modal-related element - don't interfere
     const isModalClick = 
       target.closest('[role="dialog"]') || 

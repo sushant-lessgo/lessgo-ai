@@ -378,6 +378,19 @@ export const componentMeta = {
   complexity: 'simple',
   estimatedBuildTime: '10 minutes',
   
+  // Element restriction information
+  elementRestrictions: {
+    allowsUniversalElements: false,
+    restrictionLevel: 'strict' as const,
+    reason: "Hero sections use predefined content schemas with specific vertical alignment that additional elements would disrupt",
+    alternativeSuggestions: [
+      "Edit the existing content fields (headline, subheadline, supporting text)",
+      "Use the badge_text field for additional messaging",
+      "Modify trust_items for social proof elements",
+      "Switch to a flexible content section for custom elements"
+    ]
+  },
+  
   contentFields: [
     { key: 'headline', label: 'Main Headline', type: 'text', required: true },
     { key: 'subheadline', label: 'Subheadline', type: 'textarea', required: false },
@@ -394,7 +407,8 @@ export const componentMeta = {
     'CTA buttons use generated accent colors from design system',
     'Badge component uses brand accent colors',
     'Trust indicators adapt to background contrast',
-    'Responsive design with mobile-first approach'
+    'Responsive design with mobile-first approach',
+    'Structured content schema prevents layout conflicts'
   ],
   
   useCases: [

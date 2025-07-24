@@ -30,6 +30,13 @@ export const AdvancedActionsMenu = forwardRef<HTMLDivElement, AdvancedActionsMen
   ({ actions, triggerElement, onClose, toolbarType, isVisible }, ref) => {
     const menuRef = useRef<HTMLDivElement>(null);
     
+    console.log('🎯 AdvancedActionsMenu rendered with props:', {
+      actions: actions?.length || 0,
+      hasTriggerElement: !!triggerElement,
+      toolbarType,
+      isVisible
+    });
+    
     const {
       position,
       groupedActions,
@@ -74,7 +81,16 @@ export const AdvancedActionsMenu = forwardRef<HTMLDivElement, AdvancedActionsMen
       }
     }, [isVisible, triggerElement, updatePosition]);
 
-    if (!isVisible) return null;
+    if (!isVisible) {
+      console.log('🎯 AdvancedActionsMenu not visible, returning null');
+      return null;
+    }
+    
+    console.log('🎯 AdvancedActionsMenu rendering menu with:', {
+      position,
+      groupedActionsCount: groupedActions.length,
+      groupedActions: groupedActions.map(g => ({ id: g.id, label: g.label, actionCount: g.actions.length }))
+    });
 
     return (
       <div

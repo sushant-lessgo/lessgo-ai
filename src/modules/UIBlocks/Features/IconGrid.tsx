@@ -306,7 +306,7 @@ export default function IconGrid(props: LayoutComponentProps) {
   );
 }
 
-// ✅ ENHANCED: Export metadata with adaptive color features
+// ✅ ENHANCED: Export metadata with adaptive color features and element restrictions
 export const componentMeta = {
   name: 'IconGrid',
   category: 'Feature Sections',
@@ -315,6 +315,19 @@ export const componentMeta = {
   defaultBackgroundType: 'neutral' as const,
   complexity: 'medium',
   estimatedBuildTime: '20 minutes',
+  
+  // Element restriction information
+  elementRestrictions: {
+    allowsUniversalElements: false,
+    restrictionLevel: 'strict' as const,
+    reason: "Icon grid layouts use precise 3-column arrangements with structured feature data that additional elements would disrupt",
+    alternativeSuggestions: [
+      "Edit the feature_titles and feature_descriptions using pipe-separated format",
+      "Modify the headline and subheadline for section introduction",
+      "Icons are automatically selected based on feature titles",
+      "Switch to a flexible content section for custom elements"
+    ]
+  },
   
   // ✅ ENHANCED: Schema for component generation tools
   contentFields: [
@@ -332,7 +345,8 @@ export const componentMeta = {
     'Smooth hover animations and transitions',
     'Fully editable titles and descriptions',
     'Auto-selected icons based on content keywords',
-    'Responsive grid layout'
+    'Responsive grid layout',
+    'Structured content format prevents layout conflicts'
   ],
   
   // Usage examples

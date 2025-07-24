@@ -11,6 +11,11 @@ import { useElementPicker } from './useElementPicker';
 import { useElementCRUD } from './useElementCRUD';
 import type { UniversalElementType } from '@/types/universalElements';
 import { UNIVERSAL_ELEMENTS } from '@/types/universalElements';
+import { 
+  validateElementAddition, 
+  getElementRestrictions,
+  getRestrictionSummary 
+} from '@/utils/elementRestrictions';
 export function useToolbarActions() {
   const {
     // Content actions
@@ -336,10 +341,37 @@ const { addElement } = useElementCRUD();
   elementType?: UniversalElementType;
   position?: { x: number; y: number };
 }) => {
+  console.log('🎯 handleAddElement called:', params);
   const { sectionId, elementType, position } = params;
   
-  // If elementType is specified, add element directly using ElementCRUD
+  // Get section information for restriction checking
+  const sectionData = content[sectionId];
+  // Use the sectionId itself as the section type since that's where the type is stored
+  const sectionType = sectionId || 'content';
+  const layoutType = sectionData?.layout;
+  
+  console.log('🎯 Section data:', { 
+    sectionType, 
+    layoutType, 
+    sectionData,
+    sectionDataKeys: sectionData ? Object.keys(sectionData) : [],
+    possibleSectionType: sectionData?.type || sectionData?.sectionType || sectionId
+  });
+  
+  // If elementType is specified, validate and add element directly
   if (elementType) {
+    // Validate element addition against restrictions
+    const validation = validateElementAddition(elementType, sectionType, layoutType);
+    
+    if (!validation.allowed) {
+      console.warn(`Element addition blocked: ${validation.reason}`);
+      // Could show user-friendly notification here
+      if (validation.suggestion) {
+        console.info(`Suggestion: ${validation.suggestion}`);
+      }
+      return false;
+    }
+    
     try {
       const elementKey = await addElement(sectionId, elementType, {
         autoFocus: true,
@@ -357,7 +389,7 @@ const { addElement } = useElementCRUD();
     }
   }
   
-  // Otherwise, show ElementPicker for user selection
+  // Otherwise, show ElementPicker with restriction context
   const buttonElement = document.querySelector('[data-action="add-element"]');
   let pickerPosition = position;
   
@@ -370,9 +402,26 @@ const { addElement } = useElementCRUD();
   }
   
   if (pickerPosition) {
+    // Get restriction information to pass to ElementPicker
+    const restrictions = getElementRestrictions(sectionType, layoutType);
+    const restrictionSummary = getRestrictionSummary(sectionType, layoutType);
+    
+    console.log('🎯 About to call showElementPicker with restrictions:', {
+      restrictions,
+      restrictionSummary,
+      pickerPosition
+    });
+    
     showElementPicker(sectionId, pickerPosition, {
       autoFocus: true,
       categories: ['text', 'interactive', 'media', 'layout'],
+      restrictedTypes: restrictions.restrictedElements,
+      restrictionReason: restrictions.restriction.reason,
+      restrictionContext: {
+        sectionType,
+        layoutType,
+        sectionId,
+      },
     });
     return true;
   }

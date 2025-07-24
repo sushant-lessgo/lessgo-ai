@@ -26,9 +26,10 @@ const generateId = () => `${Date.now()}-${Math.random().toString(36).substr(2, 9
 export function useElementCRUD() {
   const { 
     content, 
-    updateElementContent, 
+    setSection,
     trackChange, 
     announceLiveRegion,
+    triggerAutoSave,
     history,
     autoSave 
   } = useEditStore();
@@ -84,9 +85,6 @@ export function useElementCRUD() {
 
     const element = createElement(sectionId, elementType, options);
     
-    // Add to store
-    const oldElements = { ...section.elements };
-    
     // Insert at specified position
     if (options?.insertMode && options?.referenceElementKey) {
       const referenceElement = section.elements[options.referenceElementKey];
@@ -98,18 +96,40 @@ export function useElementCRUD() {
       }
     }
 
-    // Update positions of existing elements if needed
-    const elements = Object.values(section.elements);
-    elements.forEach((el: any) => {
-      if (el.metadata?.position >= element.metadata.position) {
-        el.metadata.position += 1;
+    // Create new element object
+    const newElement = {
+      content: element.content,
+      type: element.type,
+      isEditable: true,
+      editMode: 'inline' as const,
+      props: element.props,
+      metadata: element.metadata,
+    };
+    
+    // Create updated elements object with position adjustments
+    const updatedElements = { ...section.elements };
+    
+    // Update positions of existing elements that need to be shifted
+    Object.keys(updatedElements).forEach(existingKey => {
+      const existingElement = updatedElements[existingKey];
+      if (existingElement.metadata?.position >= element.metadata.position) {
+        updatedElements[existingKey] = {
+          ...existingElement,
+          metadata: {
+            ...existingElement.metadata,
+            position: (existingElement.metadata.position || 0) + 1,
+            lastModified: Date.now(),
+          }
+        };
       }
     });
-
-    // Add new element
-    updateElementContent(sectionId, element.elementKey, element.content);
     
-    // Track change
+    // Add the new element
+    updatedElements[element.elementKey] = newElement;
+    
+    setSection(sectionId, { elements: updatedElements });
+    
+    // Track change and trigger auto-save
     trackChange({
       type: 'element-add',
       sectionId,
@@ -119,6 +139,7 @@ export function useElementCRUD() {
       newValue: element,
     });
 
+    triggerAutoSave();
     announceLiveRegion(`Added ${elementType} element`);
     
     // Auto-focus if requested
@@ -132,7 +153,7 @@ export function useElementCRUD() {
     }
 
     return element.elementKey;
-  }, [content, createElement, updateElementContent, trackChange, announceLiveRegion]);
+  }, [content, setSection, createElement, trackChange, triggerAutoSave, announceLiveRegion]);
 
   // Remove element from section
   const removeElement = useCallback(async (
@@ -164,18 +185,28 @@ export function useElementCRUD() {
       localStorage.setItem(`element_backup_${elementKey}`, JSON.stringify(backup));
     }
 
-    // Remove from store
-    delete section.elements[elementKey];
+    // Create updated elements object without the removed element
+    const { [elementKey]: removed, ...remainingElements } = section.elements;
     
     // Update positions if requested
     if (options?.updatePositions !== false) {
-      const elements = Object.values(section.elements);
-      elements.forEach((el: any) => {
+      Object.keys(remainingElements).forEach(key => {
+        const el = remainingElements[key];
         if (el.metadata?.position > element.metadata?.position) {
-          el.metadata.position -= 1;
+          remainingElements[key] = {
+            ...el,
+            metadata: {
+              ...el.metadata,
+              position: (el.metadata.position || 0) - 1,
+              lastModified: Date.now(),
+            }
+          };
         }
       });
     }
+    
+    // Update section with new elements
+    setSection(sectionId, { elements: remainingElements });
 
     // Track change
     trackChange({
@@ -188,7 +219,7 @@ export function useElementCRUD() {
 
     announceLiveRegion(`Deleted ${element.type} element`);
     return true;
-  }, [content, trackChange, announceLiveRegion]);
+  }, [content, setSection, trackChange, announceLiveRegion]);
 
   // Duplicate element
   const duplicateElement = useCallback(async (
@@ -238,16 +269,28 @@ export function useElementCRUD() {
       duplicate.props = { ...config.defaultProps };
     }
 
-    // Update positions of existing elements
-    const elements = Object.values(section.elements);
-    elements.forEach((el: any) => {
-      if (el.metadata?.position >= duplicate.metadata.position) {
-        el.metadata.position += 1;
+    // Create updated elements object with position adjustments
+    const updatedElements = { ...section.elements };
+    
+    // Update positions of existing elements that need to be shifted
+    Object.keys(updatedElements).forEach(existingKey => {
+      const existingElement = updatedElements[existingKey];
+      if (existingElement.metadata?.position >= duplicate.metadata.position) {
+        updatedElements[existingKey] = {
+          ...existingElement,
+          metadata: {
+            ...existingElement.metadata,
+            position: (existingElement.metadata.position || 0) + 1,
+            lastModified: Date.now(),
+          }
+        };
       }
     });
-
-    // Add to store
-    updateElementContent(sectionId, newElementKey, duplicate.content);
+    
+    // Add the duplicate element
+    updatedElements[newElementKey] = duplicate;
+    
+    setSection(sectionId, { elements: updatedElements });
 
     // Track change
     trackChange({
@@ -261,7 +304,7 @@ export function useElementCRUD() {
 
     announceLiveRegion(`Duplicated ${originalElement.type} element`);
     return newElementKey;
-  }, [content, updateElementContent, trackChange, announceLiveRegion]);
+  }, [content, setSection, trackChange, announceLiveRegion]);
 
   // Reorder elements
   const reorderElements = useCallback((sectionId: string, newOrder: string[]) => {
@@ -378,29 +421,55 @@ export function useElementCRUD() {
     
     if (currentPosition === targetPosition) return false;
 
-    // Update all affected positions
-    const elements = Object.values(section.elements);
+    // Create updated elements object with position adjustments
+    const updatedElements = { ...section.elements };
     
     if (targetPosition > currentPosition) {
       // Moving down - shift elements up
-      elements.forEach((el: any) => {
+      Object.keys(updatedElements).forEach(key => {
+        const el = updatedElements[key];
         const pos = el.metadata?.position || 0;
         if (pos > currentPosition && pos <= targetPosition) {
-          el.metadata.position = pos - 1;
+          updatedElements[key] = {
+            ...el,
+            metadata: {
+              ...el.metadata,
+              position: pos - 1,
+              lastModified: Date.now(),
+            }
+          };
         }
       });
     } else {
       // Moving up - shift elements down
-      elements.forEach((el: any) => {
+      Object.keys(updatedElements).forEach(key => {
+        const el = updatedElements[key];
         const pos = el.metadata?.position || 0;
         if (pos >= targetPosition && pos < currentPosition) {
-          el.metadata.position = pos + 1;
+          updatedElements[key] = {
+            ...el,
+            metadata: {
+              ...el.metadata,
+              position: pos + 1,
+              lastModified: Date.now(),
+            }
+          };
         }
       });
     }
 
-    // Set new position
-    element.metadata.position = targetPosition;
+    // Set new position for the moved element
+    updatedElements[elementKey] = {
+      ...element,
+      metadata: {
+        ...element.metadata,
+        position: targetPosition,
+        lastModified: Date.now(),
+      }
+    };
+    
+    // Update section with new elements
+    setSection(sectionId, { elements: updatedElements });
 
     // Track change
     trackChange({
@@ -413,7 +482,7 @@ export function useElementCRUD() {
 
     announceLiveRegion(`Moved ${element.type} element to position ${targetPosition + 1}`);
     return true;
-  }, [content, trackChange, announceLiveRegion]);
+  }, [content, setSection, trackChange, announceLiveRegion]);
 
   // Move element to different section
   const moveElementToSection = useCallback((

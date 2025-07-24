@@ -143,6 +143,16 @@ const {
   handleElementSelect,
 } = useElementPicker();
 
+// Debug logging for element picker state
+React.useEffect(() => {
+  console.log('🎯 ElementPicker state changed:', {
+    isPickerVisible,
+    pickerSectionId,
+    pickerPosition,
+    pickerOptions
+  });
+}, [isPickerVisible, pickerSectionId, pickerPosition, pickerOptions]);
+
   const colorTokens = getColorTokens();
 
   // Debug logging for sections rendering (throttled)
@@ -846,34 +856,6 @@ const handleAddSection = (afterSectionId?: string) => {
           </div>
         )}
 
-        {/* Selection Status Panel (Edit Mode) */}
-        {mode === 'edit' && (selectedSection || selectedElement) && (
-          <div className="fixed top-16 left-4 z-40">
-            <div className="bg-white border border-gray-200 rounded-lg shadow-lg p-3 max-w-sm">
-              <div className="text-sm">
-                <div className="font-medium text-gray-700 mb-1">Current Selection</div>
-                
-                {selectedElement && (
-                  <div className="text-green-600">
-                    <strong>Element:</strong> {selectedElement.elementKey}
-                    <br />
-                    <span className="text-gray-500">in {selectedElement.sectionId}</span>
-                  </div>
-                )}
-                
-                {selectedSection && !selectedElement && (
-                  <div className="text-blue-600">
-                    <strong>Section:</strong> {selectedSection}
-                  </div>
-                )}
-                
-                <div className="mt-2 text-xs text-gray-500">
-                  Press <kbd className="px-1 py-0.5 bg-gray-100 rounded">?</kbd> for keyboard shortcuts
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
 
         {/* Keyboard Navigation Helper */}
         <KeyboardNavigationHelper />

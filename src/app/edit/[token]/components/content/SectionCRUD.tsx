@@ -97,7 +97,6 @@ export function SectionActionsMenu({ sectionId, position, onClose }: SectionActi
   const { 
     duplicateSection, 
     removeSection, 
-    toggleSectionVisibility,
     saveAsTemplate,
     moveSectionUp,
     moveSectionDown,
@@ -134,15 +133,6 @@ export function SectionActionsMenu({ sectionId, position, onClose }: SectionActi
       disabled: sectionIndex === sections.length - 1,
       handler: () => {
         moveSectionDown(sectionId);
-        onClose();
-      },
-    },
-    {
-      id: 'visibility',
-      label: 'Toggle Section',
-      icon: '👁️',
-      handler: () => {
-        toggleSectionVisibility(sectionId);
         onClose();
       },
     },
@@ -283,8 +273,6 @@ interface BulkSectionActionsProps {
 export function BulkSectionActions({ selectedSectionIds, onSelectionChange, onActionComplete }: BulkSectionActionsProps) {
   const { 
     batchDeleteSections, 
-    hideSections, 
-    showSections, 
     duplicateSections 
   } = useSectionCRUD();
   
@@ -304,12 +292,6 @@ export function BulkSectionActions({ selectedSectionIds, onSelectionChange, onAc
         case 'delete':
           await batchDeleteSections(selectedSectionIds);
           break;
-        case 'hide':
-          hideSections(selectedSectionIds);
-          break;
-        case 'show':
-          showSections(selectedSectionIds);
-          break;
         case 'duplicate':
           await duplicateSections(selectedSectionIds);
           break;
@@ -319,14 +301,12 @@ export function BulkSectionActions({ selectedSectionIds, onSelectionChange, onAc
     } catch (error) {
       console.error('Bulk action failed:', error);
     }
-  }, [selectedSectionIds, batchDeleteSections, hideSections, showSections, duplicateSections, onSelectionChange, onActionComplete]);
+  }, [selectedSectionIds, batchDeleteSections, duplicateSections, onSelectionChange, onActionComplete]);
 
   if (selectedSectionIds.length === 0) {
     return null;
   }
 
-  const visibleSections = selectedSectionIds.filter(id => content[id]);
-  const hiddenSections: string[] = [];
 
   return (
     <div className="flex items-center space-x-2 p-3 bg-blue-50 border border-blue-200 rounded-lg">
@@ -341,24 +321,6 @@ export function BulkSectionActions({ selectedSectionIds, onSelectionChange, onAc
         >
           Duplicate
         </button>
-        
-        {hiddenSections.length > 0 && (
-          <button
-            onClick={() => handleBulkAction('show')}
-            className="px-2 py-1 text-xs bg-green-100 text-green-700 rounded hover:bg-green-200 transition-colors"
-          >
-            Show ({hiddenSections.length})
-          </button>
-        )}
-        
-        {visibleSections.length > 0 && (
-          <button
-            onClick={() => handleBulkAction('hide')}
-            className="px-2 py-1 text-xs bg-yellow-100 text-yellow-700 rounded hover:bg-yellow-200 transition-colors"
-          >
-            Hide ({visibleSections.length})
-          </button>
-        )}
         
         <button
           onClick={() => handleBulkAction('delete')}

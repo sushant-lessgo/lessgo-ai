@@ -1,7 +1,7 @@
 // hooks/useUniversalElements.ts - Universal element management system
 
 import { useCallback, useMemo } from 'react';
-import { useEditStore } from './useEditStore';
+import { useEditStoreLegacy as useEditStore } from './useEditStoreLegacy';
 import type {
   UniversalElementType,
   UniversalElementInstance,
@@ -16,8 +16,8 @@ import type {
   ElementTemplate,
   ValidationError,
   ValidationWarning,
-  UNIVERSAL_ELEMENTS,
 } from '@/types/universalElements';
+import { UNIVERSAL_ELEMENTS } from '@/types/universalElements';
 
 const generateElementKey = (type: UniversalElementType): string => {
   return `${type}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
@@ -28,14 +28,19 @@ const generateElementId = (): string => {
 };
 
 export function useUniversalElements() {
+  const store = useEditStore();
   const {
     content,
     updateElementContent,
     setSection,
-    trackChange,
-    triggerAutoSave,
-    announceLiveRegion,
-  } = useEditStore();
+  } = store;
+
+  // Fallbacks for methods that might not exist in legacy store
+  const trackChange = store.trackChange || (() => {});
+  const triggerAutoSave = store.triggerAutoSave || (() => {});
+  const announceLiveRegion = store.announceLiveRegion || ((message: string) => {
+    console.log('Live region announcement:', message);
+  });
 
   // Element Creation
   const createElement = useCallback((

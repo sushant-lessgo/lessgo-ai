@@ -410,40 +410,6 @@ export function createSectionCRUDActions(set: any, get: any) {
         return true;
       }),
 
-    /**
-     * Toggle section visibility
-     */
-    toggleSectionVisibility: (sectionId: string) =>
-      set((state: EditStore) => {
-        const section = state.content[sectionId];
-        if (!section) return false;
-        
-        // TODO: Section visibility toggle functionality is not available in current SectionData structure
-        // Implementation needed when isVisible property is added to SectionData type
-        console.warn('toggleSectionVisibility: Not implemented - SectionData type needs isVisible property');
-        
-        return false;
-      }),
-
-    /**
-     * Batch hide sections
-     */
-    hideSections: (sectionIds: string[]) =>
-      set((state: EditStore) => {
-        // TODO: Section visibility functionality is not available in current SectionData structure
-        // Implementation needed when isVisible property is added to SectionData type
-        console.warn('hideSections: Not implemented - SectionData type needs isVisible property');
-      }),
-
-    /**
-     * Batch show sections
-     */
-    showSections: (sectionIds: string[]) =>
-      set((state: EditStore) => {
-        // TODO: Section visibility functionality is not available in current SectionData structure
-        // Implementation needed when isVisible property is added to SectionData type
-        console.warn('showSections: Not implemented - SectionData type needs isVisible property');
-      }),
 
     /**
      * Batch update sections
