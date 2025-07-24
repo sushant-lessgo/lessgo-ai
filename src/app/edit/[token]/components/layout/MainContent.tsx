@@ -199,74 +199,36 @@ React.useEffect(() => {
 
     const startTime = performance.now();
     
-    const isCtrlClick = event.ctrlKey || event.metaKey;
-    const isShiftClick = event.shiftKey;
+    // MULTI-SELECTION DISABLED FOR MVP - Only single selection
+    // Single selection with context-aware toolbar
+    setActiveSection(sectionId);
     
-    if (isCtrlClick) {
-      // Multi-select toggle
-      const currentMulti = multiSelection.includes(sectionId) 
-        ? multiSelection.filter(id => id !== sectionId)
-        : [...multiSelection, sectionId];
-      if (store) {
-        store.setState((state: any) => {
-          state.multiSelection = currentMulti;
-        });
-      }
-    } else if (isShiftClick && selectedSection) {
-      // Range selection
-      const allSections = sections;
-      const startIndex = allSections.indexOf(selectedSection);
-      const endIndex = allSections.indexOf(sectionId);
+    // Calculate position for section toolbar
+    const sectionElement = document.querySelector(`[data-section-id="${sectionId}"]`);
+    if (sectionElement) {
+      const rect = sectionElement.getBoundingClientRect();
+      const position = {
+        x: rect.left + rect.width / 2,
+        y: rect.top - 10
+      };
       
-      if (startIndex !== -1 && endIndex !== -1) {
-        const rangeStart = Math.min(startIndex, endIndex);
-        const rangeEnd = Math.max(startIndex, endIndex);
-        const rangeSelection = allSections.slice(rangeStart, rangeEnd + 1);
-        if (store) {
-          store.setState((state: any) => {
-            state.multiSelection = rangeSelection;
-          });
-        }
-      }
-    } else {
-      // Single selection with context-aware toolbar
-      setActiveSection(sectionId);
-      if (store) {
-        store.setState((state: any) => {
-          state.multiSelection = [];
-        });
-      }
+      // Use context-aware section toolbar
+      console.log('🎪 Showing section toolbar for:', sectionId, 'at position:', position);
       
-      // Calculate position for section toolbar
-      const sectionElement = document.querySelector(`[data-section-id="${sectionId}"]`);
-      if (sectionElement) {
-        const rect = sectionElement.getBoundingClientRect();
-        const position = {
-          x: rect.left + rect.width / 2,
-          y: rect.top - 10
-        };
-        
-        // Use context-aware section toolbar
-        console.log('🎪 Showing section toolbar for:', sectionId, 'at position:', position);
-        
-        if (typeof showSectionToolbar === 'function') {
-          showSectionToolbar(sectionId, position);
-        } else {
-          console.error('❌ showSectionToolbar is not a function:', typeof showSectionToolbar);
-          // Fallback: use direct store access
-          const storeInstance = store?.getState();
-          if (storeInstance && typeof storeInstance.showToolbar === 'function') {
-            storeInstance.showToolbar('section', sectionId, position);
-          }
+      if (typeof showSectionToolbar === 'function') {
+        showSectionToolbar(sectionId, position);
+      } else {
+        console.error('❌ showSectionToolbar is not a function:', typeof showSectionToolbar);
+        // Fallback: use direct store access
+        const storeInstance = store?.getState();
+        if (storeInstance && typeof storeInstance.showToolbar === 'function') {
+          storeInstance.showToolbar('section', sectionId, position);
         }
       }
     }
 
     trackPerformance('section-selection', startTime);
-    
-    const selectionType = isCtrlClick ? 'multi-selected' : isShiftClick ? 'range-selected' : 'selected';
-    const contextInfo = currentContext ? ` with ${currentContext.capabilities.length} available actions` : '';
-    announceLiveRegion(`${selectionType} section ${sectionId}${contextInfo}`);
+    announceLiveRegion(`Selected section ${sectionId}`);
   };
 
 // Enhanced element click handler with smart positioning
@@ -302,12 +264,7 @@ React.useEffect(() => {
       editMode: 'inline',
     });
 
-    // Clear multi-selection when selecting element
-    if (store) {
-      store.setState((state: any) => {
-        state.multiSelection = [];
-      });
-    }
+    // Multi-selection disabled for MVP
 
     // Show element toolbar with calculated position (use timeout to avoid infinite loop)
     const elementId = `${sectionId}.${elementKey}`;
@@ -619,8 +576,7 @@ const handleAddSection = (afterSectionId?: string) => {
                   mode === 'edit' && [
                     "rounded-lg border border-transparent hover:border-primary/20",
                     "hover:shadow-sm px-4 py-2 -mx-4 -my-2",
-                    selectedSection === sectionId && "border-primary/40 shadow-md bg-primary/5",
-                    multiSelection.includes(sectionId) && "border-purple-400/40 shadow-md bg-purple-50"
+                    selectedSection === sectionId && "border-primary/40 shadow-md bg-primary/5"
                   ]
                 )}>
                   {/* Add Section Button (Between Sections) */}
@@ -649,8 +605,6 @@ const handleAddSection = (afterSectionId?: string) => {
                         relative transition-all duration-200 cursor-pointer
                         ${selectedSection === sectionId 
                           ? 'ring-2 ring-blue-500 ring-offset-2 ring-offset-gray-50' 
-                          : multiSelection.includes(sectionId)
-                          ? 'ring-2 ring-purple-500 ring-dashed ring-offset-2 ring-offset-gray-50'
                           : 'hover:ring-1 hover:ring-gray-300'
                         }
                       `}
@@ -662,7 +616,7 @@ const handleAddSection = (afterSectionId?: string) => {
                       role="button"
                       tabIndex={0}
                       aria-label={`Section ${sectionId}`}
-                      aria-selected={selectedSection === sectionId || multiSelection.includes(sectionId)}
+                      aria-selected={selectedSection === sectionId}
                     >
                       {/* Section Content */}
                       <EditablePageRenderer
@@ -686,12 +640,6 @@ const handleAddSection = (afterSectionId?: string) => {
                               <span className="inline-flex items-center px-3 py-1 text-xs font-medium bg-gray-900/90 text-white rounded-md shadow-sm backdrop-blur-sm">
                                 {content[sectionId]?.layout || 'Section'}
                               </span>
-                              {/* Multi-selection indicator */}
-                              {multiSelection.includes(sectionId) && (
-                                <span className="inline-flex items-center px-2 py-1 text-xs font-medium bg-purple-600 text-white rounded">
-                                  {multiSelection.indexOf(sectionId) + 1}
-                                </span>
-                              )}
                             </div>
                           </div>
 
@@ -706,29 +654,7 @@ const handleAddSection = (afterSectionId?: string) => {
                             </div>
                           </div>
 
-                          {/* Selection Status Indicator */}
-                          {(selectedSection === sectionId || multiSelection.includes(sectionId)) && (
-                            <div className="absolute bottom-2 left-2">
-                              <div className="flex items-center space-x-1 px-2 py-1 bg-blue-600 text-white text-xs rounded shadow-sm">
-                                {selectedSection === sectionId && (
-                                  <>
-                                    <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                                    </svg>
-                                    <span>Selected</span>
-                                  </>
-                                )}
-                                {multiSelection.includes(sectionId) && !selectedSection && (
-                                  <>
-                                    <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                                      <path fillRule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clipRule="evenodd" />
-                                    </svg>
-                                    <span>Multi-selected ({multiSelection.indexOf(sectionId) + 1})</span>
-                                  </>
-                                )}
-                              </div>
-                            </div>
-                          )}
+                          {/* Selection Status Indicator - REMOVED for cleaner UI */}
                         </div>
                       )}
                     </div>
@@ -776,63 +702,7 @@ const handleAddSection = (afterSectionId?: string) => {
         {/* Floating Toolbars */}
         <FloatingToolbars />
 
-        {/* Multi-Selection Controls */}
-        {mode === 'edit' && multiSelection.length > 1 && (
-          <div className="fixed bottom-6 left-1/2 transform -translate-x-1/2 z-40">
-            <div className="bg-white border border-gray-200 rounded-lg shadow-lg p-3">
-              <div className="flex items-center space-x-3">
-                <span className="text-sm font-medium text-gray-700">
-                  {multiSelection.length} sections selected
-                </span>
-                
-                <div className="flex items-center space-x-2">
-                  <button
-                    onClick={() => {
-                      // Bulk delete selected sections
-                      if (confirm(`Delete ${multiSelection.length} selected sections?`)) {
-                        multiSelection.forEach(sectionId => {
-                          store?.getState().removeSection(sectionId);
-                        });
-                        store?.setState((state: any) => {
-                          state.multiSelection = [];
-                        });
-                        announceLiveRegion(`Deleted ${multiSelection.length} sections`);
-                      }
-                    }}
-                    className="px-3 py-1 text-sm bg-red-600 text-white rounded hover:bg-red-700 transition-colors"
-                  >
-                    Delete All
-                  </button>
-                  
-                  <button
-                    onClick={() => {
-                      // Duplicate selected sections
-                      multiSelection.forEach(sectionId => {
-                        store?.getState().duplicateSection(sectionId);
-                      });
-                      announceLiveRegion(`Duplicated ${multiSelection.length} sections`);
-                    }}
-                    className="px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
-                  >
-                    Duplicate All
-                  </button>
-                  
-                  <button
-                    onClick={() => {
-                      store?.setState((state: any) => {
-                        state.multiSelection = [];
-                      });
-                      announceLiveRegion('Cleared multi-selection');
-                    }}
-                    className="px-3 py-1 text-sm bg-gray-600 text-white rounded hover:bg-gray-700 transition-colors"
-                  >
-                    Clear Selection
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
+        {/* Multi-Selection Controls - DISABLED for MVP */}
 
         {/* Scroll Indicator */}
         {showScrollIndicator && (
@@ -860,22 +730,7 @@ const handleAddSection = (afterSectionId?: string) => {
         {/* Keyboard Navigation Helper */}
         <KeyboardNavigationHelper />
 
-        {/* Performance Monitor (Development Only) */}
-        {process.env.NODE_ENV === 'development' && (
-          <div className="absolute top-4 right-4 z-50">
-            <div className="bg-black bg-opacity-75 text-white text-xs px-2 py-1 rounded font-mono">
-              <div>Sections: {sections.length}</div>
-              <div>Selected: {selectedSection || 'None'}</div>
-              <div>Multi: {multiSelection.length}</div>
-              {selectedElement && (
-                <div>Element: {selectedElement.elementKey}</div>
-              )}
-              {isPickerVisible && (
-        <div className="text-yellow-300">Element Picker: Open</div>
-      )}
-            </div>
-          </div>
-        )}
+        {/* Performance Monitor - REMOVED for production */}
       </main>
     </SelectionSystem>
   );

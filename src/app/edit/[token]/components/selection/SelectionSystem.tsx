@@ -210,33 +210,25 @@ function SelectionIndicators() {
 
   return (
     <>
-      {/* Section Selection Badge */}
-      {selectedSection && (
+      {/* Section Selection Badge - DISABLED to avoid overlapping with toolbar */}
+      {/* {selectedSection && (
         <SelectionBadge
           targetSelector={`[data-section-id="${selectedSection}"]`}
           type="section"
           label="Selected"
         />
-      )}
+      )} */}
       
-      {/* Element Selection Badge */}
-      {selectedElement && (
+      {/* Element Selection Badge - DISABLED to avoid overlapping with toolbar */}
+      {/* {selectedElement && (
         <SelectionBadge
           targetSelector={`[data-section-id="${selectedElement.sectionId}"] [data-element-key="${selectedElement.elementKey}"]`}
           type="element"
           label="Editing"
         />
-      )}
+      )} */}
       
-      {/* Multi-Selection Badges */}
-      {multiSelection.map((sectionId: string, index: number) => (
-        <SelectionBadge
-          key={sectionId}
-          targetSelector={`[data-section-id="${sectionId}"]`}
-          type="multi"
-          label={`${index + 1}`}
-        />
-      ))}
+      {/* Multi-Selection Badges - DISABLED for MVP */}
     </>
   );
 }
