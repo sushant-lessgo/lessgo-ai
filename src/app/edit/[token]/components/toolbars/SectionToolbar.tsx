@@ -7,6 +7,7 @@ import { useSectionCRUD } from '@/hooks/useSectionCRUD';
 import { calculateArrowPosition } from '@/utils/toolbarPositioning';
 import { AdvancedActionsMenu } from './AdvancedActionsMenu';
 import { AddSectionButton } from '../content/SectionCRUD';
+import { SectionBackgroundModal } from '../ui/SectionBackgroundModal';
 import type { SectionType } from '@/types/core/content';
 // import { getRestrictionSummary } from '@/utils/elementRestrictions'; // Preserved for future use
 
@@ -18,6 +19,7 @@ interface SectionToolbarProps {
 
 export function SectionToolbar({ sectionId, position, contextActions }: SectionToolbarProps) {
   const [showAdvanced, setShowAdvanced] = useState(false);
+  const [showBackgroundModal, setShowBackgroundModal] = useState(false);
   const toolbarRef = useRef<HTMLDivElement>(null);
   const advancedRef = useRef<HTMLDivElement>(null);
   const advancedTriggerRef = useRef<HTMLButtonElement>(null);
@@ -198,7 +200,11 @@ export function SectionToolbar({ sectionId, position, contextActions }: SectionT
       id: 'background-settings',
       label: 'Background Settings',
       icon: 'palette',
-      handler: () => executeAction('background-settings', { sectionId }),
+      handler: () => {
+        console.log('Background settings clicked, current state:', showBackgroundModal);
+        setShowBackgroundModal(true);
+        console.log('State should now be true');
+      },
     },
     {
       id: 'regenerate-section',
@@ -325,6 +331,33 @@ export function SectionToolbar({ sectionId, position, contextActions }: SectionT
           ))}
         </div>
       )}
+      
+      {/* Debug: Simple test element */}
+      {showBackgroundModal && (
+        <div
+          id="toolbar-test-element"
+          style={{
+            position: 'fixed',
+            top: '10px',
+            left: '10px',
+            width: '150px',
+            height: '50px',
+            backgroundColor: 'purple',
+            color: 'white',
+            zIndex: 999999,
+            padding: '5px'
+          }}
+        >
+          TOOLBAR TEST
+        </div>
+      )}
+      
+      {/* Section Background Modal */}
+      <SectionBackgroundModal
+        isOpen={showBackgroundModal}
+        onClose={() => setShowBackgroundModal(false)}
+        sectionId={sectionId}
+      />
     </>
   );
 }

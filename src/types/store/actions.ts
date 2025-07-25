@@ -1,6 +1,6 @@
 // types/store/actions.ts - Single source of truth for ALL action interfaces
 
-import type { Theme, BackgroundType, SectionData, ColorTokens, FontTheme,CanonicalFieldName } from '@/types/core/index';
+import type { Theme, BackgroundType, SectionBackground, SectionData, ColorTokens, FontTheme,CanonicalFieldName } from '@/types/core/index';
 import type { BackgroundSystem } from '@/modules/Design/ColorSystem/colorTokens';
 import type { 
   UISlice, 
@@ -70,6 +70,7 @@ export interface ContentActions {
   updateElementContent: (sectionId: string, elementKey: string, content: string | string[]) => void;
   bulkUpdateSection: (sectionId: string, elements: Record<string, string | string[]>) => void;
   setBackgroundType: (sectionId: string, backgroundType: BackgroundType) => void;
+  setSectionBackground: (sectionId: string, sectionBackground: SectionBackground) => void;
   markAsCustomized: (sectionId: string) => void;
   setSection: (sectionId: string, data: Partial<SectionData>) => void;
   

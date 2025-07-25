@@ -4,6 +4,7 @@
  */
 
 import { useContext, createContext } from 'react';
+import { useStore } from 'zustand';
 import { useEditStoreContext } from '@/components/EditProvider';
 import type { EditStoreInstance } from '@/stores/editStore';
 
@@ -22,15 +23,11 @@ export function useEditStoreLegacy() {
   const editContext = useEditStoreContext();
   
   if (editContext.store) {
-    // Return the store state and actions in the old format
-    const store = editContext.store;
-    const state = store.getState();
-    
     // Update global reference for static access
-    globalStoreRef = store;
+    globalStoreRef = editContext.store;
     
-    // Return all store properties and methods as before
-    return state;
+    // Use useStore hook to get reactive state and actions
+    return useStore(editContext.store);
   }
   
   // Fallback error

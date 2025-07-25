@@ -487,22 +487,10 @@ const { addElement } = useElementCRUD();
   const handleBackgroundSettings = useCallback(async (params: { sectionId: string }) => {
     const { sectionId } = params;
     
-    const backgroundTypes = [
-      { id: 'primary', name: 'Primary Background' },
-      { id: 'secondary', name: 'Secondary Background' },
-      { id: 'neutral', name: 'Neutral Background' },
-      { id: 'divider', name: 'Divider Background' },
-    ];
-
-    const selected = prompt(`Select background:\n${backgroundTypes.map((b, i) => `${i + 1}. ${b.name}`).join('\n')}`);
-    const index = parseInt(selected || '0') - 1;
-    
-    if (index >= 0 && index < backgroundTypes.length) {
-      setBackgroundType(sectionId, backgroundTypes[index].id as BackgroundType);
-      return true;
-    }
-    return false;
-  }, [setBackgroundType]);
+    // This will be handled by the SectionToolbar showing the modal
+    // Return true to indicate the action was processed
+    return true;
+  }, []);
 
   const handleRegenerateSection = useCallback(async (params: { sectionId: string; userGuidance?: string }) => {
     const { sectionId, userGuidance } = params;

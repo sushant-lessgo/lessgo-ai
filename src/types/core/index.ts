@@ -60,6 +60,10 @@ export type {
   ElementType,
   ElementEditMode,
   BackgroundType,
+  SectionBackground,
+  CustomBackground,
+  BackgroundValidation,
+  BackgroundCSS,
   SectionType,
   SectionMedia,
   SectionCTA,
@@ -148,6 +152,23 @@ export type {
   Collaborator,
   FormComment,
 } from './forms';
+
+/**
+ * ===== SECTION BACKGROUND TYPES =====
+ */
+export type {
+  CustomBackgroundStyle,
+  GradientType,
+  GradientStop,
+  SolidBackground,
+  LinearGradient,
+  RadialGradient,
+  GradientConfig,
+  BrandColorSuggestion,
+  GradientPreset,
+  BackgroundPickerMode,
+  BackgroundPickerState,
+} from '../sectionBackground';
 
 /**
  * ===== IMAGES SYSTEM TYPES =====

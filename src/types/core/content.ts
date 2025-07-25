@@ -74,6 +74,7 @@ export interface SectionData {
   layout: string;
   elements: Record<string, EditableElement>;
   backgroundType?: BackgroundType;
+  sectionBackground?: SectionBackground;
   media?: SectionMedia;
   cta?: SectionCTA;
   aiMetadata: AiGenerationMetadata;
@@ -117,7 +118,14 @@ export type ElementEditMode =
   | 'dropdown'
   | 'readonly';
 
-export type BackgroundType = 'primary' | 'secondary' | 'neutral' | 'divider';
+// Import enhanced background types
+export type { 
+  BackgroundType, 
+  SectionBackground, 
+  CustomBackground,
+  BackgroundValidation,
+  BackgroundCSS 
+} from '../sectionBackground';
 
 export interface SectionMedia {
   image?: ImageAsset;

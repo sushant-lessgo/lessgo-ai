@@ -115,6 +115,16 @@ export function createCoreActions(set: any, get: any) {
         }
       }),
 
+    setSectionBackground: (sectionId: string, sectionBackground: import('@/types/core').SectionBackground) =>
+      set((state: EditStore) => {
+        if (state.content[sectionId]) {
+          state.content[sectionId].sectionBackground = sectionBackground;
+          // Also update the legacy backgroundType for backward compatibility
+          state.content[sectionId].backgroundType = sectionBackground.type;
+          state.persistence.isDirty = true;
+        }
+      }),
+
     updateTheme: (themeUpdates: Partial<Theme>) =>
       set((state: EditStore) => {
         state.theme = { ...state.theme, ...themeUpdates };
