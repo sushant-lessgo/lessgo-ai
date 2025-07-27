@@ -50,11 +50,17 @@ export function SectionBackgroundModal({ isOpen, onClose, sectionId }: SectionBa
     sectionsCount: sections?.length
   });
   
-  // Create background object for modal state
-  const currentBackground: SectionBackground = { 
-    type: 'theme' as BackgroundType, 
-    themeColor: currentThemeColor
-  };
+  // Create background object for modal state - check for existing custom background
+  const currentBackground: SectionBackground = section?.backgroundType === 'custom' && section?.sectionBackground?.type === 'custom'
+    ? section.sectionBackground  // Use existing custom background
+    : { type: 'theme' as BackgroundType, themeColor: currentThemeColor }; // Default to theme
+  
+  console.log('🔧 currentBackground calculation:', {
+    hasCustomBackground: section?.backgroundType === 'custom' && section?.sectionBackground?.type === 'custom',
+    sectionBackgroundType: section?.backgroundType,
+    sectionBackgroundData: section?.sectionBackground,
+    resultingCurrentBackground: currentBackground
+  });
   
   // Local state for background editing
   const [pickerMode, setPickerMode] = useState<BackgroundPickerMode>('solid');
@@ -64,24 +70,42 @@ export function SectionBackgroundModal({ isOpen, onClose, sectionId }: SectionBa
     sectionId,
     finalThemeColor: currentThemeColor,
     localBackground,
-    themeColors: theme?.colors?.sectionBackgrounds
+    themeColors: theme?.colors?.sectionBackgrounds,
+    sectionBackgroundType: section?.backgroundType,
+    sectionBackgroundData: section?.sectionBackground
   });
   const [validation, setValidation] = useState<BackgroundValidation | null>(null);
   
   // Initialize local state when modal opens
   useEffect(() => {
     if (isOpen && section) {
-      // Use the current background based on backgroundType
-      const initBackground: SectionBackground = {
-        type: 'theme',
-        themeColor: (section.backgroundType as ThemeColorType) || 'neutral'
-      };
+      let initBackground: SectionBackground;
+      
+      // ✅ Check if there's already a custom background
+      if (section.backgroundType === 'custom' && section.sectionBackground?.type === 'custom') {
+        // Use the existing custom background
+        initBackground = section.sectionBackground;
+        console.log('🎨 Initializing with existing custom background:', initBackground);
+        console.log('🎨 Custom solid color:', initBackground.custom?.solid);
+        console.log('🎨 Custom gradient:', initBackground.custom?.gradient);
+      } else {
+        // Use theme background
+        initBackground = {
+          type: 'theme',
+          themeColor: (section.backgroundType as ThemeColorType) || 'neutral'
+        };
+        console.log('🎨 Initializing with theme background:', initBackground);
+      }
+      
       setLocalBackground(initBackground);
       
-      if (section.sectionBackground?.type === 'custom' && section.sectionBackground.custom?.gradient) {
+      // ✅ Set picker mode based on custom background type
+      if (initBackground.type === 'custom' && initBackground.custom?.gradient) {
         setPickerMode('gradient');
+        console.log('🎨 Setting picker mode to gradient');
       } else {
         setPickerMode('solid');
+        console.log('🎨 Setting picker mode to solid');
       }
     }
   }, [isOpen, section]);
@@ -151,7 +175,9 @@ export function SectionBackgroundModal({ isOpen, onClose, sectionId }: SectionBa
     console.log('🔥 Apply clicked!', { 
       sectionId, 
       localBackground,
-      newBackgroundType: localBackground.themeColor,
+      backgroundType: localBackground.type,
+      themeColor: localBackground.themeColor,
+      customBackground: localBackground.custom,
       setBackgroundType: !!setBackgroundType,
       setSectionBackground: !!setSectionBackground 
     });
@@ -164,9 +190,25 @@ export function SectionBackgroundModal({ isOpen, onClose, sectionId }: SectionBa
       } else {
         console.error('❌ setBackgroundType function not available');
       }
+    } else if (localBackground.type === 'custom' && localBackground.custom) {
+      // ✅ NEW: Handle custom backgrounds
+      console.log('🎨 Applying custom background:', localBackground.custom);
+      
+      // For custom backgrounds, we need to set a special backgroundType and store the custom data
+      if (setBackgroundType) {
+        // Set backgroundType to 'custom' so components know to look for custom background data
+        setBackgroundType(sectionId, 'custom' as any);
+        console.log('✅ setBackgroundType called with: custom');
+      }
+      
+      // Save the custom background data
+      if (setSectionBackground) {
+        setSectionBackground(sectionId, localBackground);
+        console.log('✅ setSectionBackground called with custom data:', localBackground);
+      }
     }
     
-    // Also save to the new sectionBackground format for future compatibility
+    // Always save to the new sectionBackground format for future compatibility
     if (setSectionBackground) {
       setSectionBackground(sectionId, localBackground);
       console.log('✅ setSectionBackground called for future compatibility');
@@ -345,8 +387,19 @@ export function SectionBackgroundModal({ isOpen, onClose, sectionId }: SectionBa
                 <div className="mb-6">
                   {pickerMode === 'solid' ? (
                     <SolidColorPicker
-                      color={localBackground.custom?.solid || '#ffffff'}
-                      onChange={(color) => handleBackgroundChange({ solid: color })}
+                      value={(() => {
+                        const solidColor = typeof localBackground.custom?.solid === 'string' 
+                          ? localBackground.custom.solid 
+                          : localBackground.custom?.solid?.color || '#ffffff';
+                        console.log('🎨 Passing value to SolidColorPicker:', {
+                          solidData: localBackground.custom?.solid,
+                          solidDataType: typeof localBackground.custom?.solid,
+                          finalColor: solidColor,
+                          valueObject: { color: solidColor }
+                        });
+                        return { color: solidColor };
+                      })()}
+                      onChange={(background) => handleBackgroundChange({ solid: background })}
                     />
                   ) : (
                     <GradientPicker

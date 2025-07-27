@@ -1,10 +1,14 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
     darkMode: ["class"],
+    // ✅ FORCE JIT to be more permissive with arbitrary values
+    mode: 'jit',
     content: [
     "./src/pages/**/*.{js,ts,jsx,tsx,mdx}",
     "./src/components/**/*.{js,ts,jsx,tsx,mdx}",
     "./src/app/**/*.{js,ts,jsx,tsx,mdx}",
+    "./src/styles/**/*.css", // Include CSS files for pattern detection
+    "./src/utils/tailwind-seed.js", // Include seed file for arbitrary patterns
   ],
   safelist: [
   'hover:bg-editable-bg',
@@ -37,18 +41,26 @@ module.exports = {
   // Static background utilities that might be used
   'bg-white', 'bg-gray-50', 'bg-gray-100', 'bg-gray-200',
   
-  // ✅ CRITICAL: Safelist custom hex background colors from bgVariations
-  { pattern: /bg-\[#[0-9a-fA-F]{6}\]/ }, // Matches bg-[#e6f0ff], bg-[#ff6b5c], etc.
-  { pattern: /bg-\[#[0-9a-fA-F]{8}\]/ }, // Matches bg-[#e6f0ffaa] (with alpha)
+  // ✅ COMPREHENSIVE: Multiple patterns to catch all possible hex variations
+  { pattern: /bg-\[#[0-9A-Fa-f]{6}\]/ }, // 6-digit hex (case insensitive)
+  { pattern: /bg-\[#[0-9A-Fa-f]{3}\]/ }, // 3-digit hex (case insensitive)
+  { pattern: /bg-\[#[0-9A-Fa-f]{8}\]/ }, // 8-digit hex with alpha (case insensitive)
+  { pattern: /bg-\[[^\]]+\]/ }, // Fallback for any other bg-[...] pattern
   
   // ✅ Complex background patterns that might be used
   { pattern: /bg-\[radial-gradient\(.*\)\]/ }, // Matches radial gradients
   { pattern: /bg-\[linear-gradient\(.*\)\]/ }, // Matches linear gradients
+  { pattern: /bg-\[conic-gradient\(.*\)\]/ }, // Matches conic gradients
   { pattern: /bg-\[url\(.*\)\]/ }, // Matches background images
   
   // ✅ Opacity variations for custom colors
   'bg-opacity-10', 'bg-opacity-20', 'bg-opacity-30', 'bg-opacity-40', 
   'bg-opacity-50', 'bg-opacity-60', 'bg-opacity-70', 'bg-opacity-80', 'bg-opacity-90',
+  
+  // ✅ NEW: Opacity slash notation for background colors (bg-blue-50/70)
+  { pattern: /bg-(blue|sky|indigo|purple|pink|red|orange|amber|yellow|lime|green|emerald|teal|cyan|gray|slate|zinc|neutral|stone)-(50|100|200|300|400|500|600|700|800|900)\/(10|20|30|40|50|60|70|80|90|95)/ },
+  { pattern: /bg-white\/(10|20|30|40|50|60|70|80|90|95)/ },
+  { pattern: /bg-black\/(10|20|30|40|50|60|70|80|90|95)/ },
   
   // ✅ Backdrop blur effects used in variations
   'backdrop-blur-sm', 'backdrop-blur-md', 'backdrop-blur-lg',

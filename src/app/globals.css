@@ -1,6 +1,7 @@
-/* 1. Import your Google Fonts */
+/* 1. Import your Google Fonts and custom CSS */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Montserrat:wght@700;800&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Sora:wght@100..800&display=swap');
+@import '../styles/custom-backgrounds.css';
 
 /* 2. Import Tailwind layers */
 @tailwind base;

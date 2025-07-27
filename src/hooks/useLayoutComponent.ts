@@ -73,6 +73,7 @@ export function useLayoutComponent<T = Record<string, any>>({
     // ✅ In edit mode, ALWAYS calculate from current store backgroundType
     if (mode === 'edit') {
       const currentBackgroundType = sectionContent?.backgroundType || backgroundType;
+      const customBackground = sectionContent?.sectionBackground;
       const backgrounds = theme?.colors?.sectionBackgrounds;
       
       console.log(`🔍 EDIT MODE Background calc for ${sectionId}:`, {
@@ -80,8 +81,38 @@ export function useLayoutComponent<T = Record<string, any>>({
         storedBackgroundType: sectionContent?.backgroundType,
         propsBackgroundType: backgroundType,
         finalBackgroundType: currentBackgroundType,
+        hasCustomBackground: !!customBackground,
+        customBackgroundType: customBackground?.type,
         hasSectionBackgrounds: !!backgrounds
       });
+      
+      // ✅ NEW: Handle custom backgrounds
+      if (currentBackgroundType === 'custom' && customBackground?.type === 'custom' && customBackground.custom) {
+        const custom = customBackground.custom;
+        let customCSS = '';
+        
+        if (custom.solid) {
+          // Solid color background - handle both {color: '#hex'} and '#hex' formats
+          const solidColor = typeof custom.solid === 'string' ? custom.solid : custom.solid.color;
+          customCSS = `bg-[${solidColor}]`;
+        } else if (custom.gradient) {
+          // Gradient background
+          const { type, angle, stops } = custom.gradient;
+          const gradientStops = stops.map(stop => `${stop.color} ${stop.position}%`).join(', ');
+          
+          if (type === 'linear') {
+            customCSS = `bg-[linear-gradient(${angle}deg, ${gradientStops})]`;
+          } else if (type === 'radial') {
+            customCSS = `bg-[radial-gradient(circle, ${gradientStops})]`;
+          }
+        }
+        
+        console.log(`🎨 useLayoutComponent CUSTOM: Generated CSS for ${sectionId}:`, {
+          custom,
+          generatedCSS: customCSS
+        });
+        return customCSS;
+      }
       
       if (!backgrounds) {
         console.warn('No section backgrounds found in theme, using fallback');
@@ -115,6 +146,32 @@ export function useLayoutComponent<T = Record<string, any>>({
     }
     
     // ✅ Fallback to local calculation (for standalone component usage)
+    const customBackground = sectionContent?.sectionBackground;
+    
+    // ✅ Handle custom backgrounds in fallback mode too
+    if (backgroundType === 'custom' && customBackground?.type === 'custom' && customBackground.custom) {
+      const custom = customBackground.custom;
+      let customCSS = '';
+      
+      if (custom.solid) {
+        // Handle both {color: '#hex'} and '#hex' formats
+        const solidColor = typeof custom.solid === 'string' ? custom.solid : custom.solid.color;
+        customCSS = `bg-[${solidColor}]`;
+      } else if (custom.gradient) {
+        const { type, angle, stops } = custom.gradient;
+        const gradientStops = stops.map(stop => `${stop.color} ${stop.position}%`).join(', ');
+        
+        if (type === 'linear') {
+          customCSS = `bg-[linear-gradient(${angle}deg, ${gradientStops})]`;
+        } else if (type === 'radial') {
+          customCSS = `bg-[radial-gradient(circle, ${gradientStops})]`;
+        }
+      }
+      
+      console.log(`🎨 useLayoutComponent FALLBACK CUSTOM: Generated CSS for ${sectionId}:`, customCSS);
+      return customCSS;
+    }
+    
     const backgrounds = theme?.colors?.sectionBackgrounds;
     if (!backgrounds) {
       console.warn('No section backgrounds found in theme, using fallback');
@@ -139,16 +196,72 @@ export function useLayoutComponent<T = Record<string, any>>({
   };
 
   // ✅ NEW: Get dynamic text colors based on background type
-  const dynamicTextColors = getTextColorForBackground(backgroundType, colorTokens);
+  const currentBackgroundType = sectionContent?.backgroundType || backgroundType;
+  const customBackground = sectionContent?.sectionBackground;
+  
+  // ✅ Determine effective background type for text color calculation
+  let effectiveBackgroundType = currentBackgroundType;
+  
+  // ✅ For custom backgrounds, analyze if they're light or dark
+  if (currentBackgroundType === 'custom' && customBackground?.type === 'custom' && customBackground.custom) {
+    const custom = customBackground.custom;
+    
+    // Simple heuristic: analyze the primary color to determine if background is light or dark
+    let primaryColor = '#ffffff'; // default to light
+    
+    if (custom.solid) {
+      // Handle both {color: '#hex'} and '#hex' formats
+      primaryColor = typeof custom.solid === 'string' ? custom.solid : custom.solid.color;
+    } else if (custom.gradient && custom.gradient.stops.length > 0) {
+      // Use the first color stop as primary color
+      primaryColor = custom.gradient.stops[0].color;
+    }
+    
+    // Convert hex to RGB and calculate luminance
+    // Ensure primaryColor is a valid string and has # prefix
+    const validColor = typeof primaryColor === 'string' && primaryColor ? primaryColor : '#ffffff';
+    const normalizedColor = validColor.startsWith('#') ? validColor : `#${validColor}`;
+    const hex = normalizedColor.replace('#', '');
+    
+    // Handle both 3-char and 6-char hex colors
+    let r, g, b;
+    if (hex.length === 3) {
+      r = parseInt(hex.charAt(0) + hex.charAt(0), 16);
+      g = parseInt(hex.charAt(1) + hex.charAt(1), 16);
+      b = parseInt(hex.charAt(2) + hex.charAt(2), 16);
+    } else if (hex.length >= 6) {
+      r = parseInt(hex.substr(0, 2), 16);
+      g = parseInt(hex.substr(2, 2), 16);
+      b = parseInt(hex.substr(4, 2), 16);
+    } else {
+      // Invalid hex, default to white
+      r = 255; g = 255; b = 255;
+    }
+    
+    const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+    
+    // If luminance < 0.5, it's a dark background, treat like primary
+    // If luminance >= 0.5, it's a light background, treat like neutral
+    effectiveBackgroundType = luminance < 0.5 ? 'primary' : 'neutral';
+    
+    console.log(`🎨 Custom background analysis for ${sectionId}:`, {
+      primaryColor,
+      rgb: { r, g, b },
+      luminance,
+      effectiveBackgroundType
+    });
+  }
+
+  const dynamicTextColors = getTextColorForBackground(effectiveBackgroundType, colorTokens);
 
   // ✅ CONSERVATIVE: Always use safe gray text colors for maximum readability
   const sectionBackground = getSectionBackground();
   
   console.log(`🎨 Final sectionBackground for ${sectionId}:`, sectionBackground);
   const validatedTextColors = {
-    heading: backgroundType === 'primary' ? 'text-white' : 'text-gray-900',
-    body: backgroundType === 'primary' ? 'text-gray-100' : 'text-gray-700',
-    muted: backgroundType === 'primary' ? 'text-gray-300' : 'text-gray-500'
+    heading: effectiveBackgroundType === 'primary' ? 'text-white' : 'text-gray-900',
+    body: effectiveBackgroundType === 'primary' ? 'text-gray-100' : 'text-gray-700',
+    muted: effectiveBackgroundType === 'primary' ? 'text-gray-300' : 'text-gray-500'
   };
 
   // console.log(`🎨 Dynamic text colors for ${sectionId} (${backgroundType}):`, {
@@ -212,7 +325,7 @@ export function useLayoutComponent<T = Record<string, any>>({
     sectionId,
     mode,
     blockContent,
-    backgroundType, // ✅ NEW: Pass background type to components
+    backgroundType: effectiveBackgroundType, // ✅ UPDATED: Use effective background type for components
     
     // ✅ ENHANCED: Dynamic styling based on background
     colorTokens: enhancedColorTokens,

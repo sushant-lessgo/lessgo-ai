@@ -3,7 +3,7 @@ import React, { forwardRef } from 'react';
 interface LayoutSectionProps {
   sectionId: string;
   sectionType: string;
-  backgroundType: 'primary' | 'secondary' | 'neutral' | 'divider';
+  backgroundType: 'primary' | 'secondary' | 'neutral' | 'divider' | 'custom';
   sectionBackground: string;
   mode: 'edit' | 'preview';
   className?: string;

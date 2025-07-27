@@ -32,7 +32,8 @@
       "Bash(curl:*)",
       "Bash(powershell:*)",
       "Bash(python:*)",
-      "Bash(del \"C:\\Users\\susha\\lessgo-ai\\count_files.py\")"
+      "Bash(del \"C:\\Users\\susha\\lessgo-ai\\count_files.py\")",
+      "Bash(taskkill:*)"
     ],
     "deny": []
   }

@@ -297,7 +297,7 @@ export interface StatBlocksContent {
 export interface LayoutComponentProps {
   sectionId: string;
   className?: string;
-  backgroundType?: 'primary' | 'secondary' | 'neutral' | 'divider';
+  backgroundType?: 'primary' | 'secondary' | 'neutral' | 'divider' | 'custom';
   sectionBackgroundCSS?: string; // ✅ NEW: CSS class calculated in renderer
 }
 
