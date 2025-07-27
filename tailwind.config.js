@@ -36,6 +36,22 @@ module.exports = {
   
   // Static background utilities that might be used
   'bg-white', 'bg-gray-50', 'bg-gray-100', 'bg-gray-200',
+  
+  // ✅ CRITICAL: Safelist custom hex background colors from bgVariations
+  { pattern: /bg-\[#[0-9a-fA-F]{6}\]/ }, // Matches bg-[#e6f0ff], bg-[#ff6b5c], etc.
+  { pattern: /bg-\[#[0-9a-fA-F]{8}\]/ }, // Matches bg-[#e6f0ffaa] (with alpha)
+  
+  // ✅ Complex background patterns that might be used
+  { pattern: /bg-\[radial-gradient\(.*\)\]/ }, // Matches radial gradients
+  { pattern: /bg-\[linear-gradient\(.*\)\]/ }, // Matches linear gradients
+  { pattern: /bg-\[url\(.*\)\]/ }, // Matches background images
+  
+  // ✅ Opacity variations for custom colors
+  'bg-opacity-10', 'bg-opacity-20', 'bg-opacity-30', 'bg-opacity-40', 
+  'bg-opacity-50', 'bg-opacity-60', 'bg-opacity-70', 'bg-opacity-80', 'bg-opacity-90',
+  
+  // ✅ Backdrop blur effects used in variations
+  'backdrop-blur-sm', 'backdrop-blur-md', 'backdrop-blur-lg',
 ],
   theme: {
   	extend: {

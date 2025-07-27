@@ -19,8 +19,15 @@ export interface UseLayoutComponentProps extends LayoutComponentProps {
 export function useLayoutComponent<T = Record<string, any>>({ 
   sectionId, 
   backgroundType = 'neutral',
+  sectionBackgroundCSS, // ✅ NEW: Accept the CSS class from renderer
   contentSchema 
 }: UseLayoutComponentProps) {
+  
+  console.log(`🔍 useLayoutComponent DEBUG for ${sectionId}:`, {
+    backgroundType,
+    sectionBackgroundCSS,
+    hasSectionBackgroundCSS: !!sectionBackgroundCSS
+  });
   
   const { getTextStyle } = useTypography();
   const { 
@@ -61,24 +68,74 @@ export function useLayoutComponent<T = Record<string, any>>({
   // Get color tokens from store
   const colorTokens = getColorTokens();
 
-  // ✅ MOVED: Get section background CSS class (define before usage)
+  // ✅ FIXED: Always use store backgroundType in edit mode for live updates
   const getSectionBackground = () => {
+    // ✅ In edit mode, ALWAYS calculate from current store backgroundType
+    if (mode === 'edit') {
+      const currentBackgroundType = sectionContent?.backgroundType || backgroundType;
+      const backgrounds = theme?.colors?.sectionBackgrounds;
+      
+      console.log(`🔍 EDIT MODE Background calc for ${sectionId}:`, {
+        sectionContentExists: !!sectionContent,
+        storedBackgroundType: sectionContent?.backgroundType,
+        propsBackgroundType: backgroundType,
+        finalBackgroundType: currentBackgroundType,
+        hasSectionBackgrounds: !!backgrounds
+      });
+      
+      if (!backgrounds) {
+        console.warn('No section backgrounds found in theme, using fallback');
+        return 'bg-white';
+      }
+
+      const editModeCSS = (() => {
+        switch(currentBackgroundType) {
+          case 'primary': 
+            return backgrounds.primary || 'bg-gradient-to-br from-blue-500 to-blue-600';
+          case 'secondary': 
+            return backgrounds.secondary || 'bg-gray-50';
+          case 'divider': 
+            return backgrounds.divider || 'bg-gray-100/50';
+          default: 
+            return backgrounds.neutral || 'bg-white';
+        }
+      })();
+      
+      console.log(`🎨 useLayoutComponent EDIT MODE: Recalculated CSS for ${sectionId}:`, {
+        storedBackgroundType: currentBackgroundType,
+        calculatedCSS: editModeCSS
+      });
+      return editModeCSS;
+    }
+    
+    // ✅ In preview mode, use the CSS class from renderer for performance
+    if (sectionBackgroundCSS) {
+      console.log(`🎨 useLayoutComponent: Using CSS from renderer for ${sectionId}:`, sectionBackgroundCSS);
+      return sectionBackgroundCSS;
+    }
+    
+    // ✅ Fallback to local calculation (for standalone component usage)
     const backgrounds = theme?.colors?.sectionBackgrounds;
     if (!backgrounds) {
       console.warn('No section backgrounds found in theme, using fallback');
       return 'bg-white';
     }
 
-    switch(backgroundType) {
-      case 'primary': 
-        return backgrounds.primary || 'bg-gradient-to-br from-blue-500 to-blue-600';
-      case 'secondary': 
-        return backgrounds.secondary || 'bg-gray-50';
-      case 'divider': 
-        return backgrounds.divider || 'bg-gray-100/50';
-      default: 
-        return backgrounds.neutral || 'bg-white';
-    }
+    const fallbackCSS = (() => {
+      switch(backgroundType) {
+        case 'primary': 
+          return backgrounds.primary || 'bg-gradient-to-br from-blue-500 to-blue-600';
+        case 'secondary': 
+          return backgrounds.secondary || 'bg-gray-50';
+        case 'divider': 
+          return backgrounds.divider || 'bg-gray-100/50';
+        default: 
+          return backgrounds.neutral || 'bg-white';
+      }
+    })();
+    
+    console.log(`🎨 useLayoutComponent: Using fallback CSS for ${sectionId}:`, fallbackCSS);
+    return fallbackCSS;
   };
 
   // ✅ NEW: Get dynamic text colors based on background type
@@ -86,6 +143,8 @@ export function useLayoutComponent<T = Record<string, any>>({
 
   // ✅ CONSERVATIVE: Always use safe gray text colors for maximum readability
   const sectionBackground = getSectionBackground();
+  
+  console.log(`🎨 Final sectionBackground for ${sectionId}:`, sectionBackground);
   const validatedTextColors = {
     heading: backgroundType === 'primary' ? 'text-white' : 'text-gray-900',
     body: backgroundType === 'primary' ? 'text-gray-100' : 'text-gray-700',

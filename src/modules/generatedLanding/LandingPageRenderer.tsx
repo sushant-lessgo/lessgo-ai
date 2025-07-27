@@ -289,11 +289,29 @@ const finalSections: OrderedSection[] = processedSections
 
     // Map background type
     const backgroundType = backgroundTypeMapping[background] || 'neutral';
+    
+    // ✅ CRITICAL FIX: Get the actual CSS class for this background type
+    const sectionBackgroundCSS = (() => {
+      const backgrounds = theme?.colors?.sectionBackgrounds;
+      if (!backgrounds) return 'bg-white';
+      
+      switch(backgroundType) {
+        case 'primary': 
+          return backgrounds.primary || 'bg-gradient-to-br from-blue-500 to-blue-600';
+        case 'secondary': 
+          return backgrounds.secondary || 'bg-gray-50';
+        case 'divider': 
+          return backgrounds.divider || 'bg-gray-100/50';
+        default: 
+          return backgrounds.neutral || 'bg-white';
+      }
+    })();
 
     // Enhanced background logging
     if (backgroundType === 'secondary') {
       console.log(`🎨 Rendering secondary section ${sectionId}:`, {
-        backgroundCSS: theme.colors.sectionBackgrounds.secondary,
+        backgroundCSS: sectionBackgroundCSS,
+        themeSecondary: theme.colors.sectionBackgrounds.secondary,
         isFromAccentOptions: theme.colors.sectionBackgrounds.secondary?.includes('gradient'),
         accentColor: theme.colors.accentColor,
         baseColor: theme.colors.baseColor,
@@ -306,10 +324,13 @@ const finalSections: OrderedSection[] = processedSections
       console.log(`🔄 Rendering alternated section ${sectionId}:`, {
         originallyWouldBe: 'secondary',
         actuallyIs: backgroundType,
+        actualCSS: sectionBackgroundCSS,
         previousSection: alternatingInfo.previousSection,
         reason: 'Previous section was secondary, so this became neutral for visual break'
       });
     }
+    
+    console.log(`🎨 Section ${sectionId} CSS class:`, sectionBackgroundCSS);
 
     // Handle section-specific errors
     const sectionError = errors[sectionId];
@@ -342,6 +363,7 @@ const finalSections: OrderedSection[] = processedSections
           key={sectionId}
           sectionId={sectionId}
           backgroundType={backgroundType}
+          sectionBackgroundCSS={sectionBackgroundCSS}
           className=""
           {...(data || {})}
         />

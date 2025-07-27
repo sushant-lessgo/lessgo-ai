@@ -298,6 +298,7 @@ export interface LayoutComponentProps {
   sectionId: string;
   className?: string;
   backgroundType?: 'primary' | 'secondary' | 'neutral' | 'divider';
+  sectionBackgroundCSS?: string; // ✅ NEW: CSS class calculated in renderer
 }
 
 // Generic content extractor for any layout

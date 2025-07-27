@@ -3,6 +3,8 @@ import { generateColorTokens } from '../../Design/ColorSystem/colorTokens';
 import { useTypography } from '@/hooks/useTypography';
 import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
 import { useOnboardingStore } from '@/hooks/useOnboardingStore';
+import { useLayoutComponent } from '@/hooks/useLayoutComponent';
+import { LayoutSection } from '@/components/layout/LayoutSection';
 import { 
   LayoutComponentProps, 
   extractLayoutContent,
@@ -60,65 +62,32 @@ const ModeWrapper = ({
   return <>{children}</>;
 };
 
-export default function StackedTextVisual({ 
-  sectionId, 
-  className = '',
-  backgroundType = 'neutral' 
-}: StackedTextVisualProps) {
-
-  const { getTextStyle } = useTypography();
-  const { 
-    content, 
-    mode, 
-    theme,
-    updateElementContent 
-  } = useEditStore();
-
-  // Get content for this section with type safety
-  const sectionContent = content[sectionId];
-  const elements = sectionContent?.elements || {} as Partial<StoreElementTypes>;
-
-  // Helper to handle content updates
-  const handleContentUpdate = (elementKey: string, value: string) => {
-    updateElementContent(sectionId, elementKey, value);
-  };
-
-  // Extract content with type safety and defaults using the new system
-  const blockContent: StackedTextVisualContent = extractLayoutContent(elements, CONTENT_SCHEMA);
-
-  // Generate color tokens from theme with correct nested structure
-  const colorTokens = generateColorTokens({
-    baseColor: theme?.colors?.baseColor || '#3B82F6',
-    accentColor: theme?.colors?.accentColor || '#10B981',
-    sectionBackgrounds: theme?.colors?.sectionBackgrounds || {
-      primary: '#F8FAFC',
-      secondary: '#F1F5F9', 
-      neutral: '#FFFFFF',
-      divider: '#E2E8F0'
-    }
+export default function StackedTextVisual(props: StackedTextVisualProps) {
+  // ✅ Use the standard useLayoutComponent hook
+  const {
+    sectionId,
+    mode,
+    blockContent,
+    colorTokens,
+    dynamicTextColors,
+    getTextStyle,
+    sectionBackground,
+    backgroundType,
+    handleContentUpdate,
+    theme
+  } = useLayoutComponent<StackedTextVisualContent>({
+    ...props,
+    contentSchema: CONTENT_SCHEMA
   });
 
-  // Get section background based on type
-  const getSectionBackground = () => {
-    switch(backgroundType) {
-      case 'primary': return colorTokens.bgPrimary;
-      case 'secondary': return colorTokens.bgSecondary;
-      case 'divider': return colorTokens.bgDivider;
-      default: return colorTokens.bgNeutral;
-    }
-  };
-
-  // Initialize fonts on component mount
-  useEffect(() => {
-    const { updateFontsFromTone } = useEditStore.getState();
-    updateFontsFromTone(); // Set fonts based on current tone
-  }, []);
-
   return (
-    <section 
-      className={`py-16 px-4 ${getSectionBackground()} ${className}`}
-      data-section-id={sectionId}
-      data-section-type="StackedTextVisual"
+    <LayoutSection
+      sectionId={sectionId}
+      sectionType="StackedTextVisual"
+      backgroundType={backgroundType}
+      sectionBackground={sectionBackground}
+      mode={mode}
+      className={props.className}
     >
       <div className="max-w-4xl mx-auto">
         {/* Header Section */}
@@ -287,7 +256,7 @@ export default function StackedTextVisual({
           </div>
         )}
       </div>
-    </section>
+    </LayoutSection>
   );
 }
 

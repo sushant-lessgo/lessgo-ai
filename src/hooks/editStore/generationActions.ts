@@ -52,12 +52,15 @@ export function createGenerationActions(set: any, get: any) {
       // ✅ CRITICAL: Initialize content for ALL sections
       sectionIds.forEach(sectionId => {
         const layout = sectionLayouts[sectionId] || 'default';
-        const backgroundType = getSectionBackgroundType(sectionId);
+        const backgroundType = getSectionBackgroundType(sectionId, sectionIds, undefined, state.onboardingData);
         
         console.log(`🔧 Processing section ${sectionId}:`, {
           availableLayout: sectionLayouts[sectionId],
           finalLayout: layout,
-          isDefault: layout === 'default'
+          isDefault: layout === 'default',
+          backgroundType: backgroundType,
+          hasOnboardingData: !!state.onboardingData,
+          sectionCount: sectionIds.length
         });
         
         // Create content entry for each section
@@ -176,7 +179,7 @@ export function createGenerationActions(set: any, get: any) {
               id: sectionId,
               layout: state.sectionLayouts[sectionId] || 'default',
               elements: {},
-              backgroundType: getSectionBackgroundType(sectionId),
+              backgroundType: getSectionBackgroundType(sectionId, state.sections, undefined, state.onboardingData),
               aiMetadata: {
                 lastGenerated: Date.now(),
                 aiGenerated: false,
@@ -230,7 +233,7 @@ export function createGenerationActions(set: any, get: any) {
           
           // Ensure background type is set
           if (!section.backgroundType) {
-            section.backgroundType = getSectionBackgroundType(sectionId);
+            section.backgroundType = getSectionBackgroundType(sectionId, get().sections, undefined, get().onboardingData);
           }
 
           console.log(`✅ Section ${sectionId} updated with ${generatedElements.length} elements`);
