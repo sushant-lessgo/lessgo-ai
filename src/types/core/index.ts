@@ -60,6 +60,7 @@ export type {
   ElementType,
   ElementEditMode,
   BackgroundType,
+  ThemeColorType,
   SectionBackground,
   CustomBackground,
   BackgroundValidation,

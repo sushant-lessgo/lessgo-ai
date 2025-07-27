@@ -1,9 +1,14 @@
 // types/sectionBackground.ts - Enhanced section background types with custom support
 
 /**
- * Enhanced background type including custom option
+ * Enhanced background type including theme and custom options
  */
-export type BackgroundType = 'primary' | 'secondary' | 'neutral' | 'divider' | 'custom';
+export type BackgroundType = 'theme' | 'custom';
+
+/**
+ * Theme color options for background
+ */
+export type ThemeColorType = 'primary' | 'secondary' | 'neutral' | 'divider';
 
 /**
  * Custom background style types
@@ -35,7 +40,7 @@ export interface SolidBackground {
  */
 export interface LinearGradient {
   type: 'linear';
-  direction: number; // degrees (0-360)
+  angle: number; // degrees (0-360)
   stops: GradientStop[];
 }
 
@@ -59,8 +64,7 @@ export type GradientConfig = LinearGradient | RadialGradient;
  * Custom background configuration
  */
 export interface CustomBackground {
-  style: CustomBackgroundStyle;
-  solid?: SolidBackground;
+  solid?: string;
   gradient?: GradientConfig;
 }
 
@@ -69,7 +73,8 @@ export interface CustomBackground {
  */
 export interface SectionBackground {
   type: BackgroundType;
-  custom?: CustomBackground;
+  themeColor?: ThemeColorType; // Used when type is 'theme'
+  custom?: CustomBackground; // Used when type is 'custom'
   // Optional metadata
   name?: string; // User-defined name for custom backgrounds
   createdAt?: number; // timestamp
@@ -120,7 +125,7 @@ export interface GradientPreset {
 /**
  * Background picker mode
  */
-export type BackgroundPickerMode = 'preset' | 'custom';
+export type BackgroundPickerMode = 'solid' | 'gradient';
 
 /**
  * Background picker state

@@ -120,7 +120,11 @@ export function createCoreActions(set: any, get: any) {
         if (state.content[sectionId]) {
           state.content[sectionId].sectionBackground = sectionBackground;
           // Also update the legacy backgroundType for backward compatibility
-          state.content[sectionId].backgroundType = sectionBackground.type;
+          if (sectionBackground.type === 'theme' && sectionBackground.themeColor) {
+            state.content[sectionId].backgroundType = sectionBackground.themeColor;
+          } else {
+            state.content[sectionId].backgroundType = sectionBackground.type;
+          }
           state.persistence.isDirty = true;
         }
       }),

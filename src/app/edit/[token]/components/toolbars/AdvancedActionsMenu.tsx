@@ -28,10 +28,11 @@ interface AdvancedActionsMenuProps {
 
 export const AdvancedActionsMenu = forwardRef<HTMLDivElement, AdvancedActionsMenuProps>(
   ({ actions, triggerElement, onClose, toolbarType, isVisible }, ref) => {
-    const menuRef = useRef<HTMLDivElement>(null);
+    const internalMenuRef = useRef<HTMLDivElement>(null);
     
     console.log('🎯 AdvancedActionsMenu rendered with props:', {
       actions: actions?.length || 0,
+      actionDetails: actions,
       hasTriggerElement: !!triggerElement,
       toolbarType,
       isVisible
@@ -40,6 +41,7 @@ export const AdvancedActionsMenu = forwardRef<HTMLDivElement, AdvancedActionsMen
     const {
       position,
       groupedActions,
+      menuRef: hookMenuRef,
       updatePosition,
       handleClickOutside,
       handleKeyNavigation,
@@ -50,15 +52,32 @@ export const AdvancedActionsMenu = forwardRef<HTMLDivElement, AdvancedActionsMen
       actions,
       toolbarType,
     });
+    
+    console.log('🎯 AdvancedActionsMenu received from hook:', {
+      groupedActionsLength: groupedActions?.length || 0,
+      groupedActions
+    });
 
-    // Combine refs
+    // Combine refs - make sure both the hook's menuRef and the forwarded ref get the node
     const combinedRef = (node: HTMLDivElement) => {
-      (menuRef as any).current = node;
+      // Set the hook's menuRef
+      if (hookMenuRef) {
+        (hookMenuRef as any).current = node;
+      }
+      // Set the internal ref
+      (internalMenuRef as any).current = node;
+      // Set the forwarded ref
       if (typeof ref === 'function') {
         ref(node);
       } else if (ref) {
         (ref as any).current = node;
       }
+      
+      console.log('🎯 Combined ref set:', { 
+        node: !!node, 
+        hookMenuRef: !!hookMenuRef?.current, 
+        internalMenuRef: !!internalMenuRef.current 
+      });
     };
 
     // Handle click outside
@@ -89,8 +108,13 @@ export const AdvancedActionsMenu = forwardRef<HTMLDivElement, AdvancedActionsMen
     console.log('🎯 AdvancedActionsMenu rendering menu with:', {
       position,
       groupedActionsCount: groupedActions.length,
-      groupedActions: groupedActions.map(g => ({ id: g.id, label: g.label, actionCount: g.actions.length }))
+      groupedActionsDetails: groupedActions.map(g => ({ id: g.id, label: g.label, actionCount: g.actions.length }))
     });
+    
+    if (groupedActions.length === 0) {
+      console.warn('🚨 No grouped actions to render!');
+      return null;
+    }
 
     return (
       <div
@@ -138,27 +162,35 @@ export const AdvancedActionsMenu = forwardRef<HTMLDivElement, AdvancedActionsMen
               )}
 
               {/* Group actions */}
-              {group.actions.map((action) => (
-                <button
-                  key={action.id}
-                  onClick={() => {
-                    if (!action.disabled) {
-                      action.handler();
-                      onClose();
-                    }
-                  }}
-                  disabled={action.disabled}
-                  className={`
-                    flex items-center w-full px-3 py-2 text-sm text-left transition-colors
-                    ${action.disabled 
-                      ? 'text-gray-400 cursor-not-allowed' 
-                      : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900 focus:bg-gray-50 focus:text-gray-900'
-                    }
-                    focus:outline-none
-                  `}
-                  role="menuitem"
-                  tabIndex={action.disabled ? -1 : 0}
-                >
+              {group.actions.map((action) => {
+                console.log('🎨 Rendering action:', action.id, action.label);
+                return (
+                  <button
+                    key={action.id}
+                    onClick={(e) => {
+                      console.log('🎨 Action clicked:', action.id);
+                      e.preventDefault();
+                      e.stopPropagation();
+                      if (!action.disabled) {
+                        console.log('🎨 Executing handler for:', action.id);
+                        action.handler();
+                        onClose();
+                      } else {
+                        console.log('🎨 Action disabled:', action.id);
+                      }
+                    }}
+                    disabled={action.disabled}
+                    className={`
+                      flex items-center w-full px-3 py-2 text-sm text-left transition-colors
+                      ${action.disabled 
+                        ? 'text-gray-400 cursor-not-allowed' 
+                        : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900 focus:bg-gray-50 focus:text-gray-900'
+                      }
+                      focus:outline-none
+                    `}
+                    role="menuitem"
+                    tabIndex={action.disabled ? -1 : 0}
+                  >
                   <div className="flex items-center justify-center w-4 h-4 mr-3 flex-shrink-0">
                     <AdvancedActionIcon icon={action.icon} />
                   </div>
@@ -171,7 +203,8 @@ export const AdvancedActionsMenu = forwardRef<HTMLDivElement, AdvancedActionsMen
                     </span>
                   )}
                 </button>
-              ))}
+                );
+              })}
             </React.Fragment>
           ))}
         </div>

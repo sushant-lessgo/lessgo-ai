@@ -20,6 +20,45 @@ interface UseAdvancedActionsMenuProps {
   toolbarType: 'section' | 'element' | 'text' | 'form' | 'image';
 }
 
+// Get group configurations based on toolbar type
+const getGroupConfigs = (toolbarType: string) => {
+  const configs = {
+    section: [
+      { key: 'layout', label: 'Layout' },
+      { key: 'content', label: 'Content' },
+      { key: 'design', label: 'Design' },
+      { key: 'ai', label: 'AI Tools' },
+      { key: 'advanced', label: 'Advanced' },
+    ],
+    element: [
+      { key: 'edit', label: 'Edit' },
+      { key: 'ai', label: 'AI Tools' },
+      { key: 'style', label: 'Style' },
+      { key: 'advanced', label: 'Advanced' },
+    ],
+    text: [
+      { key: 'format', label: 'Format' },
+      { key: 'style', label: 'Style' },
+      { key: 'typography', label: 'Typography' },
+      { key: 'advanced', label: 'Advanced' },
+    ],
+    form: [
+      { key: 'fields', label: 'Fields' },
+      { key: 'validation', label: 'Validation' },
+      { key: 'integration', label: 'Integration' },
+      { key: 'advanced', label: 'Advanced' },
+    ],
+    image: [
+      { key: 'edit', label: 'Edit' },
+      { key: 'filters', label: 'Filters' },
+      { key: 'optimization', label: 'Optimization' },
+      { key: 'advanced', label: 'Advanced' },
+    ],
+  };
+
+  return configs[toolbarType as keyof typeof configs] || [];
+};
+
 export function useAdvancedActionsMenu({
   triggerElement,
   isVisible,
@@ -33,6 +72,8 @@ export function useAdvancedActionsMenu({
 
   // Group actions by their group property
   const groupActions = useCallback((actions: AdvancedActionItem[]): AdvancedActionGroup[] => {
+    console.log('🎯 groupActions called with:', actions);
+    
     const groups = new Map<string, AdvancedActionItem[]>();
     
     // Group actions by their group property
@@ -43,6 +84,8 @@ export function useAdvancedActionsMenu({
       }
       groups.get(groupKey)!.push(action);
     });
+    
+    console.log('🎯 Groups map:', Array.from(groups.entries()));
 
     // Convert to array with proper labels based on toolbar type
     const result: AdvancedActionGroup[] = [];
@@ -72,47 +115,9 @@ export function useAdvancedActionsMenu({
       });
     }
 
+    console.log('🎯 Final grouped actions:', result);
     return result;
   }, [toolbarType]);
-
-  // Get group configurations based on toolbar type
-  const getGroupConfigs = (toolbarType: string) => {
-    const configs = {
-      section: [
-        { key: 'layout', label: 'Layout' },
-        { key: 'content', label: 'Content' },
-        { key: 'design', label: 'Design' },
-        { key: 'ai', label: 'AI Tools' },
-        { key: 'advanced', label: 'Advanced' },
-      ],
-      element: [
-        { key: 'edit', label: 'Edit' },
-        { key: 'ai', label: 'AI Tools' },
-        { key: 'style', label: 'Style' },
-        { key: 'advanced', label: 'Advanced' },
-      ],
-      text: [
-        { key: 'format', label: 'Format' },
-        { key: 'style', label: 'Style' },
-        { key: 'typography', label: 'Typography' },
-        { key: 'advanced', label: 'Advanced' },
-      ],
-      form: [
-        { key: 'fields', label: 'Fields' },
-        { key: 'validation', label: 'Validation' },
-        { key: 'integrations', label: 'Integrations' },
-        { key: 'advanced', label: 'Advanced' },
-      ],
-      image: [
-        { key: 'edit', label: 'Edit' },
-        { key: 'optimize', label: 'Optimize' },
-        { key: 'accessibility', label: 'Accessibility' },
-        { key: 'advanced', label: 'Advanced' },
-      ],
-    };
-
-    return configs[toolbarType as keyof typeof configs] || configs.element;
-  };
 
   // Calculate optimal position for menu relative to trigger element
   const calculateOptimalPosition = useCallback((
@@ -222,12 +227,20 @@ export function useAdvancedActionsMenu({
   // Handle click outside to close menu
   const handleClickOutside = useCallback((event: MouseEvent) => {
     const target = event.target as HTMLElement;
+    console.log('🎯 handleClickOutside called:', {
+      target: target.tagName,
+      targetClass: target.className,
+      isInTrigger: triggerElement?.contains(target),
+      isInMenu: menuRef.current?.contains(target)
+    });
     
     // Don't close if clicking on the trigger element or menu
     if (triggerElement?.contains(target) || menuRef.current?.contains(target)) {
+      console.log('🎯 Click inside menu or trigger, not closing');
       return;
     }
 
+    console.log('🎯 Click outside, closing menu');
     onClose();
   }, [triggerElement, onClose]);
 
@@ -282,6 +295,7 @@ export function useAdvancedActionsMenu({
   // Update grouped actions when actions change
   useEffect(() => {
     const grouped = groupActions(actions);
+    console.log('🎯 Setting grouped actions:', grouped);
     setGroupedActions(grouped);
   }, [actions, groupActions]);
 
@@ -324,6 +338,12 @@ export function useAdvancedActionsMenu({
       }
     }
   }, [isVisible]);
+
+  console.log('🎯 useAdvancedActionsMenu returning:', { 
+    position, 
+    groupedActionsLength: groupedActions.length,
+    groupedActions 
+  });
 
   return {
     position,

@@ -9,6 +9,7 @@ import { EditablePageRenderer } from '../ui/EditablePageRenderer';
 import { FloatingToolbars } from '../ui/FloatingToolbars';
 import { AddSectionButton } from '../ui/AddSectionButton';
 import { EnhancedAddSection } from '../ui/EnhancedAddSection';
+import { GlobalModals } from '../ui/GlobalModals';
 import type { EditableElement } from '@/types/core/content';
 import { SelectionSystem, KeyboardNavigationHelper } from '../selection/SelectionSystem';
 import { ElementDetector, ElementBoundaryVisualizer } from '../selection/ElementDetector';
@@ -701,6 +702,9 @@ const handleAddSection = (afterSectionId?: string) => {
                   )}
         {/* Floating Toolbars */}
         <FloatingToolbars />
+        
+        {/* Global Modals - Persist regardless of toolbar state */}
+        <GlobalModals />
 
         {/* Multi-Selection Controls - DISABLED for MVP */}
 

@@ -7,7 +7,7 @@ import { useSectionCRUD } from '@/hooks/useSectionCRUD';
 import { calculateArrowPosition } from '@/utils/toolbarPositioning';
 import { AdvancedActionsMenu } from './AdvancedActionsMenu';
 import { AddSectionButton } from '../content/SectionCRUD';
-import { SectionBackgroundModal } from '../ui/SectionBackgroundModal';
+import { showBackgroundModal } from '../ui/GlobalModals';
 import type { SectionType } from '@/types/core/content';
 // import { getRestrictionSummary } from '@/utils/elementRestrictions'; // Preserved for future use
 
@@ -19,10 +19,25 @@ interface SectionToolbarProps {
 
 export function SectionToolbar({ sectionId, position, contextActions }: SectionToolbarProps) {
   const [showAdvanced, setShowAdvanced] = useState(false);
-  const [showBackgroundModal, setShowBackgroundModal] = useState(false);
   const toolbarRef = useRef<HTMLDivElement>(null);
   const advancedRef = useRef<HTMLDivElement>(null);
   const advancedTriggerRef = useRef<HTMLButtonElement>(null);
+  
+  // Debug instance
+  const instanceId = useRef(Math.random().toString(36).substr(2, 9));
+  
+  // Debug mounting/unmounting
+  useEffect(() => {
+    console.log(`🟢 SectionToolbar[${instanceId.current}] MOUNTED for section:`, sectionId);
+    return () => {
+      console.log(`🔴 SectionToolbar[${instanceId.current}] UNMOUNTING for section:`, sectionId);
+    };
+  }, []);
+  
+  // Debug state changes
+  useEffect(() => {
+    console.log(`🔍 SectionToolbar[${instanceId.current}] - showAdvanced changed to:`, showAdvanced);
+  }, [showAdvanced]);
 
   const {
     content,
@@ -201,9 +216,8 @@ export function SectionToolbar({ sectionId, position, contextActions }: SectionT
       label: 'Background Settings',
       icon: 'palette',
       handler: () => {
-        console.log('Background settings clicked, current state:', showBackgroundModal);
-        setShowBackgroundModal(true);
-        console.log('State should now be true');
+        console.log('Background settings clicked for section:', sectionId);
+        showBackgroundModal(sectionId);
       },
     },
     {
@@ -285,6 +299,8 @@ export function SectionToolbar({ sectionId, position, contextActions }: SectionT
             onClick={(e) => {
               e.stopPropagation();
               e.preventDefault();
+              console.log('🎯 Advanced trigger clicked, current state:', showAdvanced);
+              console.log('🎯 Advanced actions:', advancedActions);
               setShowAdvanced(!showAdvanced);
             }}
             onMouseDown={(e) => {
@@ -303,61 +319,17 @@ export function SectionToolbar({ sectionId, position, contextActions }: SectionT
         </div>
       </div>
 
-      {/* Advanced Actions Menu */}
-      {showAdvanced && (
-        <div
+      {/* Advanced Actions Menu - Using the dedicated component */}
+      {showAdvanced && advancedTriggerRef.current && (
+        <AdvancedActionsMenu
           ref={advancedRef}
-          className="fixed z-60 bg-white border border-gray-200 rounded-lg shadow-lg py-1 min-w-[200px]"
-          style={{
-            left: position.x,
-            top: position.y + 55,
-          }}
-        >
-          <div className="px-3 py-2 border-b border-gray-100">
-            <span className="text-xs font-medium text-gray-500 uppercase tracking-wider">Advanced</span>
-          </div>
-          {advancedActions.map(action => (
-            <button
-              key={action.id}
-              onClick={() => {
-                action.handler();
-                setShowAdvanced(false);
-              }}
-              className="w-full px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 hover:text-gray-900 transition-colors flex items-center space-x-2"
-            >
-              <ActionIcon icon={action.icon} />
-              <span>{action.label}</span>
-            </button>
-          ))}
-        </div>
+          actions={advancedActions}
+          triggerElement={advancedTriggerRef.current}
+          onClose={() => setShowAdvanced(false)}
+          toolbarType="section"
+          isVisible={showAdvanced}
+        />
       )}
-      
-      {/* Debug: Simple test element */}
-      {showBackgroundModal && (
-        <div
-          id="toolbar-test-element"
-          style={{
-            position: 'fixed',
-            top: '10px',
-            left: '10px',
-            width: '150px',
-            height: '50px',
-            backgroundColor: 'purple',
-            color: 'white',
-            zIndex: 999999,
-            padding: '5px'
-          }}
-        >
-          TOOLBAR TEST
-        </div>
-      )}
-      
-      {/* Section Background Modal */}
-      <SectionBackgroundModal
-        isOpen={showBackgroundModal}
-        onClose={() => setShowBackgroundModal(false)}
-        sectionId={sectionId}
-      />
     </>
   );
 }
