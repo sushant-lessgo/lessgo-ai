@@ -20,14 +20,13 @@ export function ResponsiveBackgroundModal({ isOpen, onClose, tokenId }: Responsi
 
   const {
     mode,
-    brandColors,
     selectedBackground,
     previewBackground,
     compatibleOptions,
     isLoading,
     canApply,
     setMode,
-    setBrandColors,
+    setCustomColors,
     setSelectedBackground,
     setPreviewBackground,
     handleApplyBackground,
@@ -43,9 +42,9 @@ export function ResponsiveBackgroundModal({ isOpen, onClose, tokenId }: Responsi
       return;
     }
 
-    const result = validateBackgroundSystem(backgroundToValidate, brandColors, { mode });
+    const result = validateBackgroundSystem(backgroundToValidate, null, { mode });
     setValidationResult(result);
-  }, [previewBackground, selectedBackground, brandColors, mode]);
+  }, [previewBackground, selectedBackground, mode]);
 
   const handleCancel = () => {
     setSelectedBackground(null);
@@ -105,7 +104,7 @@ export function ResponsiveBackgroundModal({ isOpen, onClose, tokenId }: Responsi
         {/* Mode Toggle - Mobile */}
         <div className="px-4 py-3 border-b border-gray-200 bg-gray-50">
           <div className="flex space-x-1">
-            {(['generated', 'brand', 'custom'] as const).map((modeOption) => (
+            {(['recommended', 'custom'] as const).map((modeOption) => (
               <button
                 key={modeOption}
                 onClick={() => setMode(modeOption)}
@@ -182,46 +181,18 @@ export function ResponsiveBackgroundModal({ isOpen, onClose, tokenId }: Responsi
           {/* Options Tab */}
           {activeTab === 'options' && (
             <div className="p-4 space-y-4">
-              {/* Brand Color Picker for Brand Mode */}
-              {mode === 'brand' && (
-                <div className="space-y-3">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Primary Brand Color *
-                    </label>
-                    <div className="flex items-center space-x-3">
-                      <input
-                        type="color"
-                        value={brandColors?.primary || '#3b82f6'}
-                        onChange={(e) => setBrandColors({ 
-                          ...brandColors, 
-                          primary: e.target.value 
-                        })}
-                        className="w-12 h-10 rounded border border-gray-300"
-                        disabled={isLoading}
-                      />
-                      <input
-                        type="text"
-                        value={brandColors?.primary || '#3b82f6'}
-                        onChange={(e) => setBrandColors({ 
-                          ...brandColors, 
-                          primary: e.target.value 
-                        })}
-                        className="flex-1 px-3 py-2 border border-gray-300 rounded-md text-sm"
-                        placeholder="#3b82f6"
-                        disabled={isLoading}
-                      />
-                    </div>
-                  </div>
+              {/* Custom Color Picker for Custom Mode */}
+              {mode === 'custom' && (
+                <div className="text-sm text-gray-500 p-3 bg-gray-50 rounded-lg">
+                  Custom color picker (mobile-optimized version coming soon)
                 </div>
               )}
 
               {/* Background Options Grid - Mobile Optimized */}
               <div>
                 <div className="text-sm font-medium text-gray-700 mb-3">
-                  {mode === 'generated' && 'Generated Variations'}
-                  {mode === 'brand' && `Compatible Backgrounds (${compatibleOptions.length})`}
-                  {mode === 'custom' && 'All Background Styles'}
+                  {mode === 'recommended' && 'Recommended Variations'}
+                  {mode === 'custom' && 'Custom Background Styles'}
                 </div>
                 
                 {compatibleOptions.length > 0 ? (

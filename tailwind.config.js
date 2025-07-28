@@ -34,12 +34,14 @@ module.exports = {
   'bg-gradient-to-t', 'bg-gradient-to-b', 'bg-gradient-to-l', 'bg-gradient-to-r',
   
   // Dynamic color variations for background system
+  { pattern: /bg-(blue|sky|indigo|purple|pink|red|orange|amber|yellow|lime|green|emerald|teal|cyan|gray|slate|zinc|neutral|stone)-(50|100|200|300|400|500|600|700|800|900)/ },
   { pattern: /from-(blue|sky|indigo|purple|pink|red|orange|amber|yellow|lime|green|emerald|teal|cyan|gray|slate|zinc|neutral|stone)-(50|100|200|300|400|500|600|700|800|900)/ },
   { pattern: /via-(blue|sky|indigo|purple|pink|red|orange|amber|yellow|lime|green|emerald|teal|cyan|gray|slate|zinc|neutral|stone)-(50|100|200|300|400|500|600|700|800|900)/ },
   { pattern: /to-(blue|sky|indigo|purple|pink|red|orange|amber|yellow|lime|green|emerald|teal|cyan|gray|slate|zinc|neutral|stone)-(50|100|200|300|400|500|600|700|800|900)/ },
   
   // Static background utilities that might be used
   'bg-white', 'bg-gray-50', 'bg-gray-100', 'bg-gray-200',
+  'to-transparent', 'via-transparent', 'from-transparent',
   
   // ✅ Opacity variations for custom colors
   'bg-opacity-10', 'bg-opacity-20', 'bg-opacity-30', 'bg-opacity-40', 
@@ -52,6 +54,28 @@ module.exports = {
   
   // ✅ Backdrop blur effects used in variations
   'backdrop-blur-sm', 'backdrop-blur-md', 'backdrop-blur-lg',
+  
+  // ✅ Text shadow effects for radial gradient backgrounds
+  'drop-shadow-sm', 'drop-shadow', 'drop-shadow-md',
+  
+  // ✅ Important text colors for radial gradients (force override)
+  '!text-gray-900', '!text-gray-800', '!text-gray-600',
+  
+  // ✅ Specific radial gradient backgrounds from bgVariations  
+  'bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))]',
+  'bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))]',
+  'bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))]',
+  'blur-[160px]',
+  'blur-[120px]',
+  'blur-[100px]',
+  
+  // ✅ Specific hex color classes from bgVariations
+  'from-[#b4d8ff]',
+  'via-[#dceeff]',
+  'to-[#ffffff]',
+  
+  // ✅ CSS variable usage in gradients  
+  'var(--tw-gradient-stops)',
 ],
   theme: {
   	extend: {

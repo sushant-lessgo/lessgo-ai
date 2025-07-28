@@ -7,6 +7,17 @@ import type { TextFormatState } from '@/app/edit/[token]/components/editor/Inlin
 import type { ElementSelection } from '@/types/core/ui';
 
 export function useInlineEditorActions() {
+  // Temporarily commented out due to missing store methods
+  return {
+    handleApplyTextFormat: () => {},
+    handleContentUpdate: () => {},
+    handleContentSave: () => {},
+    handleContentCancel: () => {},
+    handleFormatChange: () => {},
+  };
+  
+  // Original implementation below - restore when store methods are available
+  /*
   const { 
     activeEditor, 
     formatState, 
@@ -530,4 +541,5 @@ export function useInlineEditorActions() {
     hasActiveEditor: () => activeEditor !== null,
     getActiveEditor: () => activeEditor?.current || null,
   };
+  */
 }

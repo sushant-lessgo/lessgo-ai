@@ -422,6 +422,27 @@ moveSection: (sectionId: string, direction: 'up' | 'down') =>
         state.theme.colors.sectionBackgrounds.neutral = backgroundSystem.neutral;
         state.theme.colors.sectionBackgrounds.divider = backgroundSystem.divider;
         
+        // ✅ CLEAR CUSTOM SECTION BACKGROUND OVERRIDES
+        // When global background changes, reset all sections to use the new global theme
+        Object.keys(state.content).forEach(sectionId => {
+          const section = state.content[sectionId];
+          if (section && section.backgroundType && section.backgroundType !== 'primary' && section.backgroundType !== 'secondary' && section.backgroundType !== 'neutral' && section.backgroundType !== 'divider') {
+            // Reset custom colors back to theme-based backgrounds
+            const sectionType = sectionId.toLowerCase();
+            if (sectionType.includes('hero') || sectionType.includes('cta')) {
+              section.backgroundType = 'primary';
+            } else if (sectionType.includes('faq')) {
+              section.backgroundType = 'divider';
+            } else {
+              section.backgroundType = 'secondary';
+            }
+            // Clear custom background data
+            if (section.sectionBackground) {
+              delete section.sectionBackground;
+            }
+          }
+        });
+        
         state.persistence.isDirty = true;
         
         state.history.undoStack.push({

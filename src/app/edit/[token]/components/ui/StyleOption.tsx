@@ -90,6 +90,9 @@ export function StyleOption({
   // Helper to convert Tailwind classes to inline styles
   const getBackgroundStyle = (bgClass: string) => {
     // Handle gradients
+    if (bgClass.includes('gradient-to-br') && bgClass.includes('from-blue-300') && bgClass.includes('to-white')) {
+      return { background: 'linear-gradient(to bottom right, #93c5fd, #ffffff)' };
+    }
     if (bgClass.includes('gradient-to-br')) {
       if (bgClass.includes('blue-500') && bgClass.includes('purple-600')) {
         return { background: 'linear-gradient(to bottom right, #3b82f6, #9333ea)' };
@@ -106,16 +109,33 @@ export function StyleOption({
       if (bgClass.includes('blue-500') && bgClass.includes('sky-300')) {
         return { background: 'linear-gradient(to top right, #3b82f6, #7dd3fc)' };
       }
+      if (bgClass.includes('from-blue-500') && bgClass.includes('to-sky-300')) {
+        return { background: 'linear-gradient(to top right, #3b82f6, #7dd3fc)' };
+      }
     }
     
     if (bgClass.includes('gradient-to-tl')) {
       if (bgClass.includes('sky-400') && bgClass.includes('indigo-400')) {
         return { background: 'linear-gradient(to top left, #38bdf8, #818cf8)' };
       }
+      if (bgClass.includes('from-sky-400') && bgClass.includes('to-indigo-400')) {
+        return { background: 'linear-gradient(to top left, #38bdf8, #818cf8)' };
+      }
     }
 
     if (bgClass.includes('radial-gradient')) {
+      if (bgClass.includes('from-blue-400')) {
+        return { background: 'radial-gradient(ellipse at center, #60a5fa, transparent)' };
+      }
+      if (bgClass.includes('from-sky-300')) {
+        return { background: 'radial-gradient(ellipse at top, #7dd3fc, transparent)' };
+      }
       return { background: 'radial-gradient(ellipse at center, #3b82f6, #1e40af)' };
+    }
+
+    // Handle white with opacity and backdrop blur
+    if (bgClass.includes('bg-white') && bgClass.includes('bg-opacity-60')) {
+      return { background: 'rgba(255, 255, 255, 0.6)', backdropFilter: 'blur(8px)' };
     }
     
     // Handle solid colors

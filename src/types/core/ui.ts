@@ -2909,7 +2909,7 @@ export interface StateColors {
 /**
  * Background selector mode
  */
-export type BackgroundSelectorMode = 'generated' | 'brand' | 'custom';
+export type BackgroundSelectorMode = 'recommended' | 'custom';
 
 /**
  * Style option component props

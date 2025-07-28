@@ -4,8 +4,8 @@
 import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
 import { generateCompleteBackgroundSystem } from '@/modules/Design/background/backgroundIntegration';
-import { getCompatibleBackgrounds, validateBrandColor } from './backgroundCompatibility';
-import type { BackgroundSystem, BrandColors, BackgroundVariation, BackgroundSelectorMode } from '@/types/core';
+import { getCompatibleBackgrounds } from './backgroundCompatibility';
+import type { BackgroundSystem, BackgroundVariation, BackgroundSelectorMode } from '@/types/core';
 
 export function useBackgroundSelector(tokenId: string) {
   // Refs for cleanup and debouncing
@@ -22,13 +22,15 @@ export function useBackgroundSelector(tokenId: string) {
   } = useEditStore();
 
   // Local state
-  const [mode, setMode] = useState<BackgroundSelectorMode>('generated');
-  const [brandColors, setBrandColors] = useState<BrandColors | null>(null);
+  const [mode, setMode] = useState<BackgroundSelectorMode>('recommended');
+  // Custom colors state (will be implemented later)
+  const [customColors, setCustomColors] = useState<any>(null);
   const [selectedBackground, setSelectedBackground] = useState<BackgroundSystem | null>(null);
   const [previewBackground, setPreviewBackground] = useState<BackgroundSystem | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [validationErrors, setValidationErrors] = useState<string[]>([]);
   const [compatibilityCache, setCompatibilityCache] = useState<Map<string, BackgroundVariation[]>>(new Map());
+  const [asyncCompatibleOptions, setAsyncCompatibleOptions] = useState<BackgroundVariation[]>([]);
 
   // Cleanup on unmount
   useEffect(() => {
@@ -86,7 +88,7 @@ export function useBackgroundSelector(tokenId: string) {
 
   // Debounced compatibility search
   const debouncedGetCompatibleBackgrounds = useCallback(
-    (searchMode: BackgroundSelectorMode, colors: BrandColors | null, current: BackgroundSystem) => {
+    (searchMode: BackgroundSelectorMode, current: BackgroundSystem) => {
       if (debounceTimerRef.current) {
         clearTimeout(debounceTimerRef.current);
       }
@@ -94,19 +96,22 @@ export function useBackgroundSelector(tokenId: string) {
       debounceTimerRef.current = setTimeout(() => {
         if (isUnmountedRef.current) return;
 
-        const cacheKey = `${searchMode}-${JSON.stringify(colors)}-${current.baseColor}`;
+        const cacheKey = `${searchMode}-${current.baseColor}`;
         
         // Check cache first
         if (compatibilityCache.has(cacheKey)) {
           const cached = compatibilityCache.get(cacheKey)!;
          // console.log('📦 Using cached compatibility results:', cached.length);
+          if (!isUnmountedRef.current && searchMode !== 'recommended') {
+            setAsyncCompatibleOptions(cached);
+          }
           return cached;
         }
 
         setIsLoading(true);
         
         try {
-          const results = getCompatibleBackgrounds(searchMode, colors, current);
+          const results = getCompatibleBackgrounds(searchMode, null, current);
           
           // Update cache
           setCompatibilityCache(prev => new Map(prev).set(cacheKey, results));
@@ -115,6 +120,10 @@ export function useBackgroundSelector(tokenId: string) {
           
           if (!isUnmountedRef.current) {
             setIsLoading(false);
+            // Set the async results for custom mode (recommended is synchronous)
+            if (searchMode !== 'recommended') {
+              setAsyncCompatibleOptions(results);
+            }
           }
           
           return results;
@@ -123,10 +132,11 @@ export function useBackgroundSelector(tokenId: string) {
           if (!isUnmountedRef.current) {
             setIsLoading(false);
             setValidationErrors(prev => [...prev, 'Failed to load background options']);
+            setAsyncCompatibleOptions([]);
           }
           return [];
         }
-      }, searchMode === 'brand' ? 500 : 150); // Longer delay for brand mode
+      }, 150); // Standard delay for all modes
     },
     [compatibilityCache]
   );
@@ -134,37 +144,27 @@ export function useBackgroundSelector(tokenId: string) {
   // Get compatible options with performance optimization
   const compatibleOptions = useMemo((): BackgroundVariation[] => {
     try {
-      // Quick return for generated mode
-      if (mode === 'generated') {
-        return getCompatibleBackgrounds('generated', null, currentBackgroundSystem);
+      // Quick return for recommended mode (same as old generated)
+      if (mode === 'recommended') {
+        return getCompatibleBackgrounds('recommended', null, currentBackgroundSystem);
       }
 
-      // Validate brand colors before processing
-      if (mode === 'brand') {
-        if (!brandColors?.primary) {
-          return [];
-        }
-
-        const validation = validateBrandColor(brandColors.primary);
-        if (!validation.isValid) {
-          setValidationErrors([validation.error || 'Invalid brand color']);
-          return [];
-        }
-
-        // Clear validation errors if color is valid
-        setValidationErrors([]);
+      // For custom mode, no compatible options needed
+      if (mode === 'custom') {
+        // Custom mode doesn't need background variations
+        // User creates their own custom background
+        return [];
       }
 
-      // Use debounced search for brand and custom modes - returns void so we handle async
-      debouncedGetCompatibleBackgrounds(mode, brandColors, currentBackgroundSystem);
-      return [];
+      // Fallback
+      return asyncCompatibleOptions;
       
     } catch (error) {
       console.error('Error in compatibleOptions:', error);
       setValidationErrors(['Failed to load background options']);
       return [];
     }
-  }, [mode, brandColors, currentBackgroundSystem, debouncedGetCompatibleBackgrounds]);
+  }, [mode, currentBackgroundSystem, asyncCompatibleOptions]);
 
   // Enhanced validation with debouncing
   const validateSelection = useCallback((background: BackgroundSystem | null): string[] => {
@@ -182,29 +182,25 @@ export function useBackgroundSelector(tokenId: string) {
         errors.push('Base color is required');
       }
 
-      // Brand color validation for brand mode
-      if (mode === 'brand' && brandColors?.primary) {
-        const validation = validateBrandColor(brandColors.primary);
-        if (!validation.isValid) {
-          errors.push(validation.error || 'Invalid primary brand color');
-        }
-
-        if (brandColors.secondary) {
-          const secondaryValidation = validateBrandColor(brandColors.secondary);
-          if (!secondaryValidation.isValid) {
-            errors.push('Invalid secondary brand color');
-          }
-        }
-      }
+      // Custom mode validation will be added here later
 
       // Accessibility validation
       if (background.primary === background.secondary) {
         errors.push('Primary and secondary backgrounds should be different for better visual hierarchy');
       }
 
-      // CSS class validation
-      if (background.primary && !background.primary.startsWith('bg-')) {
+      // CSS class validation (only for recommended mode)
+      if (mode === 'recommended' && background.primary && !background.primary.startsWith('bg-')) {
         errors.push('Invalid background CSS class format');
+      }
+      
+      // Custom mode validation
+      if (mode === 'custom' && background.primary) {
+        // Custom mode uses raw CSS, not Tailwind classes
+        // Just ensure it's not empty
+        if (!background.primary.trim()) {
+          errors.push('Custom background cannot be empty');
+        }
       }
 
     } catch (error) {
@@ -213,7 +209,7 @@ export function useBackgroundSelector(tokenId: string) {
     }
 
     return errors;
-  }, [mode, brandColors]);
+  }, [mode]);
 
   // Update validation when selection changes (debounced)
   useEffect(() => {
@@ -243,25 +239,24 @@ export function useBackgroundSelector(tokenId: string) {
     setSelectedBackground(null);
     setPreviewBackground(null);
     setValidationErrors([]);
-
-    // Reset brand colors when leaving brand mode
-    if (newMode !== 'brand') {
-      setBrandColors(null);
-    } else if (!brandColors) {
-      // Initialize with default brand colors
-      setBrandColors({
-        primary: '#3B82F6',
-        secondary: '#6B7280',
-      });
-    }
+    setAsyncCompatibleOptions([]); // Reset async options
 
     // Clear cache when switching modes for fresh results
     setCompatibilityCache(new Map());
-  }, [mode, brandColors]);
+  }, [mode]);
 
   // Enhanced apply handler with better error handling
   const handleApplyBackground = useCallback(async (): Promise<boolean> => {
+    console.log('🎯 handleApplyBackground called');
     const backgroundToApply = selectedBackground || previewBackground;
+    
+    console.log('🎯 Background to apply:', {
+      selectedBackground: selectedBackground ? 'exists' : 'null',
+      previewBackground: previewBackground ? 'exists' : 'null',
+      backgroundToApply: backgroundToApply ? 'exists' : 'null',
+      primary: backgroundToApply?.primary,
+      baseColor: backgroundToApply?.baseColor
+    });
     
     if (!backgroundToApply) {
       console.warn('⚠️ No background selected to apply');
@@ -283,9 +278,12 @@ export function useBackgroundSelector(tokenId: string) {
       // Update the store with timeout protection
       const updatePromise = new Promise<void>((resolve, reject) => {
         try {
+          console.log('🔄 Calling updateFromBackgroundSystem with:', backgroundToApply);
           updateFromBackgroundSystem(backgroundToApply);
+          console.log('✅ updateFromBackgroundSystem completed successfully');
           resolve();
         } catch (error) {
+          console.error('❌ updateFromBackgroundSystem failed:', error);
           reject(error);
         }
       });
@@ -297,12 +295,21 @@ export function useBackgroundSelector(tokenId: string) {
       await Promise.race([updatePromise, timeoutPromise]);
 
       // Trigger auto-save with timeout protection
-      const savePromise = triggerAutoSave();
-      const saveTimeoutPromise = new Promise<never>((_, reject) => {
-        setTimeout(() => reject(new Error('Save timeout')), 10000);
-      });
+      console.log('🔄 Starting auto-save...');
+      try {
+        const savePromise = triggerAutoSave().then(() => {
+          console.log('✅ Auto-save completed');
+        });
+        const saveTimeoutPromise = new Promise<never>((_, reject) => {
+          setTimeout(() => reject(new Error('Save timeout')), 5000); // Reduced timeout
+        });
 
-      await Promise.race([savePromise, saveTimeoutPromise]);
+        await Promise.race([savePromise, saveTimeoutPromise]);
+        console.log('🔄 Auto-save race completed');
+      } catch (saveError) {
+        console.warn('⚠️ Auto-save failed, but background was applied:', saveError);
+        // Don't fail the whole operation if just auto-save fails
+      }
 
       console.log('✅ Background system applied successfully:', {
         mode,
@@ -311,21 +318,22 @@ export function useBackgroundSelector(tokenId: string) {
         timestamp: new Date().toISOString(),
       });
 
-      if (!isUnmountedRef.current) {
-        setIsLoading(false);
-      }
-      
       return true;
 
     } catch (error) {
       console.error('❌ Failed to apply background system:', error);
       
       if (!isUnmountedRef.current) {
-        setIsLoading(false);
         setValidationErrors(['Failed to apply background system. Please try again.']);
       }
       
       return false;
+    } finally {
+      // Always reset loading state
+      if (!isUnmountedRef.current) {
+        setIsLoading(false);
+        console.log('🔄 Loading state reset');
+      }
     }
   }, [selectedBackground, previewBackground, validateSelection, updateFromBackgroundSystem, triggerAutoSave, mode]);
 
@@ -361,16 +369,15 @@ export function useBackgroundSelector(tokenId: string) {
       await Promise.race([resetPromise, timeoutPromise]);
 
       // Update local state
-      setMode('generated');
+      setMode('recommended');
       setSelectedBackground(null);
       setPreviewBackground(null);
-      setBrandColors(null);
       setCompatibilityCache(new Map());
 
       // Trigger auto-save
       await triggerAutoSave();
 
-     // console.log('🔄 Reset to LessGo-generated background completed');
+     // console.log('🔄 Reset to Lessgo-generated background completed');
       
       if (!isUnmountedRef.current) {
         setIsLoading(false);
@@ -386,9 +393,9 @@ export function useBackgroundSelector(tokenId: string) {
     }
   }, [onboardingData, updateFromBackgroundSystem, triggerAutoSave, getSafeDefaultBackground]);
 
-  // Enhanced brand colors handler with validation
-  const handleBrandColorsChange = useCallback((colors: BrandColors | null) => {
-    setBrandColors(colors);
+  // Custom colors handler (will be implemented later)
+  const handleCustomColorsChange = useCallback((colors: any) => {
+    setCustomColors(colors);
     
     // Clear validation errors when colors change
     setValidationErrors([]);
@@ -418,18 +425,17 @@ export function useBackgroundSelector(tokenId: string) {
         canApply,
         isLoading,
         cacheSize: compatibilityCache.size,
-        brandColors: !!brandColors,
+        customColors: !!customColors,
         timestamp: new Date().toISOString(),
       };
       
      // console.log('🎨 Background Selector Performance:', perfData);
     }
-  }, [mode, selectedBackground, previewBackground, compatibleOptions.length, validationErrors.length, canApply, isLoading, compatibilityCache.size, brandColors]);
+  }, [mode, selectedBackground, previewBackground, compatibleOptions.length, validationErrors.length, canApply, isLoading, compatibilityCache.size]);
 
   return {
     // State
     mode,
-    brandColors,
     selectedBackground,
     previewBackground,
     compatibleOptions,
@@ -440,7 +446,7 @@ export function useBackgroundSelector(tokenId: string) {
 
     // Actions
     setMode: handleModeChange,
-    setBrandColors: handleBrandColorsChange,
+    setCustomColors: handleCustomColorsChange,
     setSelectedBackground,
     setPreviewBackground,
     handleApplyBackground,

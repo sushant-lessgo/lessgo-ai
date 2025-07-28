@@ -1,12 +1,23 @@
 // /app/edit/[token]/components/ui/BackgroundSystemModal.tsx - Complete Integration
 "use client";
 
+/*
+Tailwind Safelist: These classes are used dynamically in bgVariations and need to be preserved:
+bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-blue-400 via-blue-200 to-transparent blur-[160px]
+bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-sky-300 via-blue-200 to-transparent  
+bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-[#b4d8ff] via-[#dceeff] to-white
+bg-gradient-to-br from-blue-300 via-blue-100 to-white
+bg-gradient-to-tr from-blue-500 via-blue-400 to-sky-300  
+bg-gradient-to-tl from-sky-400 via-blue-500 to-indigo-400
+bg-white bg-opacity-60 backdrop-blur-sm blur-[100px]
+*/
+
 import React, { useState, useEffect, useMemo } from 'react';
 import { useBackgroundSelector } from './useBackgroundSelector';
 import { validateBackgroundSystem } from './backgroundValidation';
 import { ModeToggle } from './ModeToggle';
 import { PreviewSection } from './PreviewSection';
-import { BrandColorPicker } from './BrandColorPicker';
+import { CustomBackgroundPicker } from './CustomBackgroundPicker';
 import { StyleGrid } from './StyleGrid';
 import { ModalActions } from './ModalActions';
 import { ValidationWarnings } from './ValidationWarnings';
@@ -22,10 +33,10 @@ interface BackgroundSystemModalProps {
 export function BackgroundSystemModal({ isOpen, onClose, tokenId }: BackgroundSystemModalProps) {
   const [validationResult, setValidationResult] = useState<BackgroundValidationResult | null>(null);
   const [isValidating, setIsValidating] = useState(false);
+  const [selectedVariation, setSelectedVariation] = useState<any>(null);
 
   const {
     mode,
-    brandColors,
     selectedBackground,
     previewBackground,
     compatibleOptions,
@@ -34,7 +45,7 @@ export function BackgroundSystemModal({ isOpen, onClose, tokenId }: BackgroundSy
     currentBackgroundSystem,
     canApply,
     setMode,
-    setBrandColors,
+    setCustomColors,
     setSelectedBackground,
     setPreviewBackground,
     handleApplyBackground,
@@ -54,7 +65,7 @@ export function BackgroundSystemModal({ isOpen, onClose, tokenId }: BackgroundSy
       try {
         const result = validateBackgroundSystem(
           backgroundToValidate,
-          brandColors,
+          null, // No brand colors needed anymore
           {
             mode,
             performanceRequirements: 'medium',
@@ -71,7 +82,7 @@ export function BackgroundSystemModal({ isOpen, onClose, tokenId }: BackgroundSy
 
     const timeoutId = setTimeout(validateAsync, 300);
     return () => clearTimeout(timeoutId);
-  }, [previewBackground, selectedBackground, brandColors, mode]);
+  }, [previewBackground, selectedBackground, mode]);
 
   // Handle modal close with cleanup
   const handleCancel = () => {
@@ -79,6 +90,7 @@ export function BackgroundSystemModal({ isOpen, onClose, tokenId }: BackgroundSy
     setSelectedBackground(null);
     setPreviewBackground(null);
     setValidationResult(null);
+    setSelectedVariation(null);
     onClose();
   };
 
@@ -117,6 +129,7 @@ export function BackgroundSystemModal({ isOpen, onClose, tokenId }: BackgroundSy
       accentCSS: `bg-${variation.baseColor}-600`,
     };
 
+    setSelectedVariation(variation);
     setPreviewBackground(backgroundSystem);
     setSelectedBackground(backgroundSystem);
   };
@@ -158,12 +171,12 @@ export function BackgroundSystemModal({ isOpen, onClose, tokenId }: BackgroundSy
       onClose={handleCancel}
       title=""
       size="full"
-      className="!max-w-5xl !h-[700px]"
+      className="!max-w-5xl"
       showCloseButton={false}
     >
-      <div className="flex flex-col h-full -m-6">
+      <div className="flex flex-col min-h-[80vh] max-h-[90vh] -m-6">
         {/* Custom Header with Mode Toggle */}
-        <div className="flex items-center justify-between p-6 border-b border-gray-200">
+        <div className="flex items-center justify-between p-6 border-b border-gray-200 flex-shrink-0">
           <div className="flex items-center space-x-4">
             <h2 className="text-lg font-semibold text-gray-900">Background System</h2>
             <ModeToggle 
@@ -214,9 +227,9 @@ export function BackgroundSystemModal({ isOpen, onClose, tokenId }: BackgroundSy
         </div>
 
         {/* Content */}
-        <div className="flex-1 flex min-h-0">
+        <div className="flex-1 flex min-h-0 overflow-hidden">
           {/* Left Panel - Preview */}
-          <div className="w-1/2 p-6 border-r border-gray-200 overflow-y-auto">
+          <div className="w-1/2 p-6 border-r border-gray-200 overflow-y-auto flex-shrink-0">
             <PreviewSection
               currentBackground={currentBackgroundSystem}
               previewBackground={previewBackground}
@@ -224,60 +237,52 @@ export function BackgroundSystemModal({ isOpen, onClose, tokenId }: BackgroundSy
           </div>
 
           {/* Right Panel - Controls */}
-          <div className="w-1/2 flex flex-col min-h-0">
+          <div className="w-1/2 flex flex-col min-h-0 overflow-hidden">
             {/* Controls Header */}
-            <div className="p-6 border-b border-gray-200">
+            <div className="p-6 border-b border-gray-200 flex-shrink-0">
               <h3 className="text-sm font-medium text-gray-700 mb-2">
-                {mode === 'generated' && 'Generated Options'}
-                {mode === 'brand' && 'Brand Color Matching'}
-                {mode === 'custom' && 'Custom Background Selection'}
+                {mode === 'recommended' && 'Recommended Backgrounds'}
+                {mode === 'custom' && 'Custom Color Scheme'}
               </h3>
               
               <p className="text-sm text-gray-600">
-                {mode === 'generated' && 
-                  'LessGo\'s AI has selected the perfect background. Explore different intensity levels while maintaining design coherence.'
-                }
-                {mode === 'brand' && 
-                  'Enter your brand colors and we\'ll find compatible background options that maintain your brand identity.'
+                {mode === 'recommended' && 
+                  'Smart backgrounds chosen for your content. Explore different styles while maintaining design coherence.'
                 }
                 {mode === 'custom' && 
-                  'Choose from all available background archetypes. Advanced users can select any background style.'
+                  'Pick your primary color and we\'ll calculate complementary colors. Override any color as needed.'
                 }
               </p>
             </div>
 
             {/* Scrollable Content Area */}
             <div className="flex-1 overflow-y-auto p-6 space-y-4">
-              {/* Brand Color Picker for Brand Mode */}
-              {mode === 'brand' && (
-                <BrandColorPicker
-                  brandColors={brandColors}
-                  onColorsChange={setBrandColors}
+              {/* Custom Background Picker for Custom Mode */}
+              {mode === 'custom' && (
+                <CustomBackgroundPicker
+                  colors={null} // TODO: Connect to actual custom colors state
+                  onColorsChange={setCustomColors}
+                  onBackgroundChange={(bg) => {
+                    // Handle background system change
+                    setPreviewBackground(bg);
+                    setSelectedBackground(bg);
+                  }}
                   disabled={isLoading}
                 />
               )}
 
-              {/* Custom Mode Warning */}
-              {mode === 'custom' && (
-                <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg">
-                  <div className="flex items-start space-x-2">
-                    <svg className="w-4 h-4 text-amber-600 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
-                    </svg>
-                    <div>
-                      <div className="text-sm font-medium text-amber-800">Override Design System</div>
-                      <div className="text-xs text-amber-700 mt-1">
-                        This will override LessGo's intelligent background selection and may impact design coherence.
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )}
 
-              {/* Style Grid - TODO: Fix props */}
-              <div className="text-center text-gray-500 py-8">
-                Style Grid component needs to be fixed
-              </div>
+              {/* Style Grid - Only show for recommended mode */}
+              {mode === 'recommended' && (
+                <StyleGrid
+                  variations={compatibleOptions}
+                  selectedVariation={selectedVariation}
+                  onVariationSelect={handleOptionSelect}
+                  onVariationHover={handleOptionHover}
+                  isLoading={isLoading}
+                  mode={mode}
+                />
+              )}
 
               {/* Validation Warnings */}
               <ValidationWarnings 
@@ -295,17 +300,17 @@ export function BackgroundSystemModal({ isOpen, onClose, tokenId }: BackgroundSy
                 </div>
               )}
 
-              {/* No Results Message */}
-              {!isLoading && mode === 'brand' && brandColors?.primary && compatibleOptions.length === 0 && (
+              {/* No Results Message (for any mode) */}
+              {!isLoading && compatibleOptions.length === 0 && (
                 <div className="text-center py-8">
-                  <div className="w-16 h-16 mx-auto mb-4 bg-yellow-100 rounded-full flex items-center justify-center">
-                    <svg className="w-8 h-8 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                  <div className="w-16 h-16 mx-auto mb-4 bg-gray-100 rounded-full flex items-center justify-center">
+                    <svg className="w-8 h-8 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9.172 16.172a4 4 0 015.656 0M9 12h6m-6-4h6m2 5.291A7.962 7.962 0 0112 15c-2.34 0-4.291-1.1-5.7-2.7" />
                     </svg>
                   </div>
-                  <p className="text-sm font-medium text-gray-900 mb-2">Limited Compatible Options</p>
+                  <p className="text-sm font-medium text-gray-900 mb-2">No Background Options</p>
                   <p className="text-xs text-gray-600">
-                    Your brand color may have limited background options. Consider custom mode for more choices.
+                    Unable to load background options. Please try refreshing.
                   </p>
                 </div>
               )}
@@ -314,15 +319,17 @@ export function BackgroundSystemModal({ isOpen, onClose, tokenId }: BackgroundSy
         </div>
 
         {/* Footer Actions */}
-        <ModalActions
-          onCancel={handleCancel}
-          onApply={handleApply}
-          onReset={handleReset}
-          canApply={!!canApply}
-          isLoading={isLoading}
-          validationResult={validationResult || undefined}
-          hasSelection={validationState.hasSelection}
-        />
+        <div className="flex-shrink-0 border-t border-gray-200">
+          <ModalActions
+            onCancel={handleCancel}
+            onApply={handleApply}
+            onReset={handleReset}
+            canApply={!!canApply}
+            isLoading={isLoading}
+            validationResult={validationResult || undefined}
+            hasSelection={validationState.hasSelection}
+          />
+        </div>
       </div>
     </BaseModal>
   );

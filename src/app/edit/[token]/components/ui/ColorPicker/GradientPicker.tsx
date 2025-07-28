@@ -11,7 +11,7 @@ interface GradientPickerProps {
 
 export function GradientPicker({ value, onChange }: GradientPickerProps) {
   const [gradientType, setGradientType] = useState<'linear' | 'radial'>(value?.type || 'linear');
-  const [direction, setDirection] = useState(value?.type === 'linear' ? value.direction : 45);
+  const [direction, setDirection] = useState(value?.type === 'linear' ? value.angle : 45);
   const [stops, setStops] = useState<GradientStop[]>(
     value?.stops || [
       { color: '#3B82F6', position: 0 },
@@ -25,7 +25,7 @@ export function GradientPicker({ value, onChange }: GradientPickerProps) {
       setGradientType(value.type);
       setStops(value.stops);
       if (value.type === 'linear') {
-        setDirection(value.direction);
+        setDirection(value.angle);
       }
     }
   }, [value]);
@@ -35,7 +35,7 @@ export function GradientPicker({ value, onChange }: GradientPickerProps) {
     if (gradientType === 'linear') {
       return {
         type: 'linear',
-        direction,
+        angle: direction,
         stops: stops.sort((a, b) => a.position - b.position),
       };
     } else {
@@ -98,7 +98,7 @@ export function GradientPicker({ value, onChange }: GradientPickerProps) {
       category: 'professional',
       gradient: {
         type: 'linear',
-        direction: 45,
+        angle: 45,
         stops: [
           { color: '#3B82F6', position: 0 },
           { color: '#8B5CF6', position: 100 },
@@ -112,7 +112,7 @@ export function GradientPicker({ value, onChange }: GradientPickerProps) {
       category: 'creative',
       gradient: {
         type: 'linear',
-        direction: 135,
+        angle: 135,
         stops: [
           { color: '#F59E0B', position: 0 },
           { color: '#EF4444', position: 50 },
@@ -127,7 +127,7 @@ export function GradientPicker({ value, onChange }: GradientPickerProps) {
       category: 'professional',
       gradient: {
         type: 'linear',
-        direction: 90,
+        angle: 90,
         stops: [
           { color: '#0EA5E9', position: 0 },
           { color: '#06B6D4', position: 100 },
@@ -141,7 +141,7 @@ export function GradientPicker({ value, onChange }: GradientPickerProps) {
       category: 'professional',
       gradient: {
         type: 'linear',
-        direction: 180,
+        angle: 180,
         stops: [
           { color: '#10B981', position: 0 },
           { color: '#047857', position: 100 },
@@ -157,7 +157,7 @@ export function GradientPicker({ value, onChange }: GradientPickerProps) {
     setGradientType(config.type);
     setStops(config.stops);
     if (config.type === 'linear') {
-      setDirection(config.direction);
+      setDirection(config.angle);
     }
     onChange(config);
   }, [onChange]);

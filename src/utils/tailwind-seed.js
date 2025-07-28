@@ -30,13 +30,29 @@ function tailwindSeed() {
   const gradients = [
     'bg-[linear-gradient(90deg,#ff0000,#00ff00)]',
     'bg-[linear-gradient(45deg,#000000,#ffffff)]',
-    'bg-[radial-gradient(circle,#ff0000,#0000ff)]'
+    'bg-[radial-gradient(circle,#ff0000,#0000ff)]',
+    // Radial gradients from bgVariations
+    'bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))]',
+    'bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))]',
+    'bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))]'
+  ];
+  
+  // Blur patterns used in backgrounds
+  const blurClasses = [
+    'blur-[100px]', 'blur-[120px]', 'blur-[160px]'
+  ];
+  
+  // Complex background classes from bgVariations
+  const complexBackgrounds = [
+    'bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-blue-400 via-blue-200 to-transparent blur-[160px]',
+    'bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-sky-300 via-blue-200 to-transparent',
+    'bg-white bg-opacity-60 backdrop-blur-sm blur-[100px]'
   ];
   
   // This creates a template that shows Tailwind what patterns to expect
   const dynamicClass = (color) => `bg-[${color}]`;
   
-  return { hexColors, rgbColors, gradients, dynamicClass };
+  return { hexColors, rgbColors, gradients, blurClasses, complexBackgrounds, dynamicClass };
 }
 
 // Export for potential debugging

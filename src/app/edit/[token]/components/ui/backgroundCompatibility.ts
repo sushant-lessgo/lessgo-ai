@@ -25,7 +25,7 @@ interface BackgroundVariation {
   baseColor: string;
 }
 
-type CompatibilityMode = 'generated' | 'brand' | 'custom';
+type CompatibilityMode = 'recommended' | 'custom';
 
 /**
  * Get compatible background variations based on mode and constraints
@@ -35,18 +35,22 @@ export function getCompatibleBackgrounds(
   brandColors: BrandColors | null,
   currentBackground: BackgroundSystem
 ): BackgroundVariation[] {
-  console.log('🔍 Finding compatible backgrounds:', { mode, brandColors, currentBackground });
+  console.log('🔍 Finding compatible backgrounds:', { 
+    mode, 
+    brandColors, 
+    currentBackground: currentBackground ? 'BackgroundSystem' : 'null',
+    baseColor: currentBackground?.baseColor 
+  });
 
   try {
     switch (mode) {
-      case 'generated':
+      case 'recommended':
         return getGeneratedVariations(currentBackground);
       
-      case 'brand':
-        return getBrandCompatibleBackgrounds(brandColors, currentBackground);
-      
       case 'custom':
-        return getCustomBackgroundOptions();
+        // In custom mode, no need to search for compatible backgrounds
+        // User is creating their own custom background
+        return [];
       
       default:
         console.warn('Unknown compatibility mode:', mode);
@@ -96,6 +100,41 @@ function getGeneratedVariations(currentBackground: BackgroundSystem): Background
   });
 
   console.log(`🎨 Found ${variations.length} generated variations for baseColor: ${baseColor}`);
+  
+  // If no variations found with preferred archetypes, expand search
+  if (variations.length === 0) {
+    console.log(`🔍 No preferred archetypes found for ${baseColor}, expanding search...`);
+    
+    // Try all variations with the same base color
+    const allColorVariations = bgVariations.filter(v => v.baseColor === baseColor);
+    
+    if (allColorVariations.length > 0) {
+      console.log(`✅ Found ${allColorVariations.length} variations with baseColor: ${baseColor}`);
+      return allColorVariations.slice(0, 8);
+    }
+    
+    // If still no matches, try harmonious colors
+    const harmoniousColors = getHarmoniousColors(baseColor);
+    const harmoniousVariations = bgVariations.filter(v => 
+      harmoniousColors.includes(v.baseColor) && 
+      ['soft-gradient-blur', 'startup-skybox', 'glass-morph-with-pop'].includes(v.archetypeId)
+    );
+    
+    if (harmoniousVariations.length > 0) {
+      console.log(`🎨 Found ${harmoniousVariations.length} harmonious variations`);
+      return harmoniousVariations.slice(0, 8);
+    }
+    
+    // Final fallback: return some default professional variations
+    console.log(`⚠️ Using fallback variations for ${baseColor}`);
+    const fallbackVariations = bgVariations.filter(v => 
+      ['blue', 'gray', 'slate'].includes(v.baseColor) &&
+      ['soft-gradient-blur', 'startup-skybox'].includes(v.archetypeId)
+    );
+    
+    return fallbackVariations.slice(0, 8);
+  }
+  
   return variations.slice(0, 8); // Limit to 8 options
 }
 

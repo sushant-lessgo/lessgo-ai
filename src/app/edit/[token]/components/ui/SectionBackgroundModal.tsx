@@ -114,9 +114,8 @@ export function SectionBackgroundModal({ isOpen, onClose, sectionId }: SectionBa
   useEffect(() => {
     if (localBackground.type === 'custom' && localBackground.custom && theme?.colors?.text) {
       const validationResult = validateBackgroundAccessibility(
-        localBackground.custom,
-        theme.colors.text.primary || '#000000',
-        theme.colors.text.secondary || '#666666'
+        localBackground,
+        'black'
       );
       setValidation(validationResult);
     } else {
@@ -388,9 +387,7 @@ export function SectionBackgroundModal({ isOpen, onClose, sectionId }: SectionBa
                   {pickerMode === 'solid' ? (
                     <SolidColorPicker
                       value={(() => {
-                        const solidColor = typeof localBackground.custom?.solid === 'string' 
-                          ? localBackground.custom.solid 
-                          : localBackground.custom?.solid?.color || '#ffffff';
+                        const solidColor = localBackground.custom?.solid || '#ffffff';
                         console.log('🎨 Passing value to SolidColorPicker:', {
                           solidData: localBackground.custom?.solid,
                           solidDataType: typeof localBackground.custom?.solid,
@@ -399,11 +396,11 @@ export function SectionBackgroundModal({ isOpen, onClose, sectionId }: SectionBa
                         });
                         return { color: solidColor };
                       })()}
-                      onChange={(background) => handleBackgroundChange({ solid: background })}
+                      onChange={(background) => handleBackgroundChange({ solid: background.color })}
                     />
                   ) : (
                     <GradientPicker
-                      gradient={localBackground.custom?.gradient || {
+                      value={localBackground.custom?.gradient || {
                         type: 'linear',
                         angle: 90,
                         stops: [
@@ -419,32 +416,29 @@ export function SectionBackgroundModal({ isOpen, onClose, sectionId }: SectionBa
                 {/* Accessibility Validation */}
                 {validation && (
                   <div className={`p-4 rounded-md mb-4 ${
-                    validation.wcagAA ? 'bg-green-50 border border-green-200' : 'bg-yellow-50 border border-yellow-200'
+                    validation.wcagLevel === 'AA' || validation.wcagLevel === 'AAA' ? 'bg-green-50 border border-green-200' : 'bg-yellow-50 border border-yellow-200'
                   }`}>
                     <h4 className="text-sm font-medium mb-2 text-gray-900">
                       Accessibility Check
                     </h4>
                     <ul className="text-sm space-y-1">
-                      <li className={validation.wcagAA ? 'text-green-700' : 'text-yellow-700'}>
-                        WCAG AA: {validation.wcagAA ? '✓ Pass' : '⚠ Needs improvement'}
+                      <li className={validation.wcagLevel === 'AA' || validation.wcagLevel === 'AAA' ? 'text-green-700' : 'text-yellow-700'}>
+                        WCAG Level: {validation.wcagLevel ? validation.wcagLevel : 'Fail'}
                       </li>
                       <li className="text-gray-600">
-                        Primary text contrast: {validation.primaryTextContrast.toFixed(2)}:1
+                        Contrast ratio: {validation.contrastRatio?.toFixed(2)}:1
                       </li>
-                      <li className="text-gray-600">
-                        Secondary text contrast: {validation.secondaryTextContrast.toFixed(2)}:1
-                      </li>
+                      {validation.warnings.length > 0 && (
+                        <li className="text-yellow-600">
+                          Warnings: {validation.warnings.join(', ')}
+                        </li>
+                      )}
+                      {validation.errors.length > 0 && (
+                        <li className="text-red-600">
+                          Errors: {validation.errors.join(', ')}
+                        </li>
+                      )}
                     </ul>
-                    {validation.suggestions.length > 0 && (
-                      <div className="mt-2">
-                        <p className="text-sm font-medium text-gray-700">Suggestions:</p>
-                        <ul className="text-sm text-gray-600 list-disc list-inside">
-                          {validation.suggestions.map((suggestion, index) => (
-                            <li key={index}>{suggestion}</li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
                   </div>
                 )}
               </>
@@ -469,9 +463,13 @@ export function SectionBackgroundModal({ isOpen, onClose, sectionId }: SectionBa
                     ? localBackground.custom?.solid 
                       ? localBackground.custom.solid
                       : localBackground.custom?.gradient
-                      ? `linear-gradient(${localBackground.custom.gradient.angle}deg, ${
-                          localBackground.custom.gradient.stops.map(s => `${s.color} ${s.position}%`).join(', ')
-                        })`
+                      ? localBackground.custom.gradient.type === 'linear'
+                        ? `linear-gradient(${localBackground.custom.gradient.angle}deg, ${
+                            localBackground.custom.gradient.stops.map(s => `${s.color} ${s.position}%`).join(', ')
+                          })`
+                        : `radial-gradient(circle, ${
+                            localBackground.custom.gradient.stops.map(s => `${s.color} ${s.position}%`).join(', ')
+                          })`
                       : undefined
                     : undefined
                 }}

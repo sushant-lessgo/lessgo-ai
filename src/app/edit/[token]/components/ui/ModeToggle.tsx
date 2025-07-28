@@ -3,7 +3,7 @@
 
 import React from 'react';
 
-export type BackgroundSelectorMode = 'generated' | 'brand' | 'custom';
+export type BackgroundSelectorMode = 'recommended' | 'custom';
 
 interface ModeToggleProps {
   mode: BackgroundSelectorMode;
@@ -22,23 +22,17 @@ interface ModeOption {
 
 const modeOptions: ModeOption[] = [
   {
-    id: 'generated',
-    label: 'Generated',
-    description: 'AI-selected backgrounds optimized for your content',
-    icon: '🤖',
-    badge: 'Recommended',
-  },
-  {
-    id: 'brand',
-    label: 'Brand Colors',
-    description: 'Backgrounds compatible with your brand palette',
-    icon: '🎨',
+    id: 'recommended',
+    label: 'Recommended',
+    description: 'Smart backgrounds chosen for your content',
+    icon: '🎯',
+    badge: 'Smart',
   },
   {
     id: 'custom',
-    label: 'Custom',
-    description: 'Full control over background selection',
-    icon: '⚙️',
+    label: 'Custom Colors',
+    description: 'Direct control over your color scheme',
+    icon: '🎨',
     badge: 'Advanced',
   },
 ];
@@ -241,14 +235,10 @@ export function getModeConfig(mode: BackgroundSelectorMode) {
 /**
  * Utility function to check if mode requires special handling
  */
-export function isBrandMode(mode: BackgroundSelectorMode): boolean {
-  return mode === 'brand';
-}
-
 export function isCustomMode(mode: BackgroundSelectorMode): boolean {
   return mode === 'custom';
 }
 
-export function isGeneratedMode(mode: BackgroundSelectorMode): boolean {
-  return mode === 'generated';
+export function isRecommendedMode(mode: BackgroundSelectorMode): boolean {
+  return mode === 'recommended';
 }

@@ -311,5 +311,10 @@ export function createContentActions(set: any, get: any): ContentActions {
       console.warn('setAIGenerationStatus should be called from generationActions');
     },
 
+    // This method is implemented in coreActions.ts but required by ContentActions interface
+    setSectionBackground: (sectionId: string, sectionBackground: any) => {
+      console.warn('setSectionBackground should be called from coreActions');
+    },
+
   };
 }

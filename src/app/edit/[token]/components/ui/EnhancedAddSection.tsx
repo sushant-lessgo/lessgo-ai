@@ -100,8 +100,10 @@ export function EnhancedAddSection({
           minLength: elementType === 'headline' ? 10 : 5,
         } : undefined,
         aiContext: {
-          role: element,
-          guidelines: `This is the ${element} for the ${sectionInfo?.label} section`,
+          generationType: 'creative',
+          contextElements: [element],
+          instructions: `This is the ${element} for the ${sectionInfo?.label} section`,
+          generateVariations: false,
         },
       };
     });

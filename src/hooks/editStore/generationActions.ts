@@ -52,7 +52,7 @@ export function createGenerationActions(set: any, get: any) {
       // ✅ CRITICAL: Initialize content for ALL sections
       sectionIds.forEach(sectionId => {
         const layout = sectionLayouts[sectionId] || 'default';
-        const backgroundType = getSectionBackgroundType(sectionId, sectionIds, undefined, state.onboardingData);
+        const backgroundType = getSectionBackgroundType(sectionId, sectionIds, undefined, state.onboardingData as any);
         
         console.log(`🔧 Processing section ${sectionId}:`, {
           availableLayout: sectionLayouts[sectionId],
@@ -179,7 +179,7 @@ export function createGenerationActions(set: any, get: any) {
               id: sectionId,
               layout: state.sectionLayouts[sectionId] || 'default',
               elements: {},
-              backgroundType: getSectionBackgroundType(sectionId, state.sections, undefined, state.onboardingData),
+              backgroundType: getSectionBackgroundType(sectionId, state.sections, undefined, state.onboardingData as any),
               aiMetadata: {
                 lastGenerated: Date.now(),
                 aiGenerated: false,

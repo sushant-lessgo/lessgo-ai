@@ -381,7 +381,7 @@ const EnhancedLayoutWrapper: React.FC<{
                 <UniversalElementRenderer
                   element={universalElement}
                   mode={mode}
-                  onContentChange={(content) => onContentUpdate(sectionId, elementKey, Array.isArray(content) ? content.join('\n') : content)}
+                  onContentChange={(content) => onContentUpdate(elementKey)(Array.isArray(content) ? content.join('\n') : content)}
                   onPropsChange={(props) => {
                     // Handle props changes - would need to be implemented in the store
                     console.log('Props changed for', elementKey, props);

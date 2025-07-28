@@ -27,6 +27,33 @@ export function getTextColorForBackground(
 ): { heading: string; body: string; muted: string } {
   switch(backgroundType) {
     case 'primary':
+      // For radial gradients with blur, ensure high contrast text
+      // Check if this is a radial gradient (which might have blur effects)
+      const isRadialGradient = colorTokens.bgPrimary?.includes('radial-gradient') || colorTokens.bgPrimary?.includes('blur-[');
+      
+      if (isRadialGradient) {
+        // Force high contrast for radial gradients with blur
+        // The blue radial gradient with blur creates a light background effect
+        return {
+          heading: '!text-gray-900 font-bold drop-shadow-sm',  // !important to override other styles
+          body: '!text-gray-800 drop-shadow-sm',               // !important for strong dark text
+          muted: '!text-gray-600 drop-shadow-sm'               // !important for medium gray
+        };
+      }
+      
+      // Check if it's a light gradient (like from-blue-300 to-white)
+      const isLightGradient = colorTokens.bgPrimary?.includes('to-white') || 
+                             colorTokens.bgPrimary?.includes('from-blue-300') ||
+                             colorTokens.bgPrimary?.includes('via-blue-100');
+      
+      if (isLightGradient) {
+        return {
+          heading: 'text-gray-900 font-bold',  // Dark text for light backgrounds
+          body: 'text-gray-800',               // Strong dark text
+          muted: 'text-gray-600'               // Medium gray
+        };
+      }
+      
       // Dark gradients need white/light text - use safe defaults
       return {
         heading: colorTokens.textOnPrimary || colorTokens.textOnDark || 'text-white',

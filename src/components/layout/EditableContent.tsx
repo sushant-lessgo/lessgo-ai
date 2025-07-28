@@ -4,6 +4,7 @@ import { useTextToolbarIntegration } from '@/hooks/useTextToolbarIntegration';
 import { useAutoSave } from '@/hooks/useAutoSave';
 import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
 import { generateAccessibleBadgeColors } from '@/utils/textContrastUtils';
+import { getTextColorForBackground } from '@/modules/Design/background/enhancedBackgroundLogic';
 import type { TextFormatState, AutoSaveConfig, InlineEditorConfig, TextSelection } from '@/app/edit/[token]/components/editor/InlineTextEditor';
 
 interface EditableContentProps {
@@ -256,7 +257,7 @@ export function EditableHeadline({
       value={value}
       onEdit={onEdit}
       element={level}
-      className={`font-bold leading-tight ${finalColorClass}`}
+      className={`font-bold leading-tight ${finalColorClass} ${props.className || ''}`}
       style={textStyle}
       required
       sectionId={sectionId}
@@ -267,7 +268,7 @@ export function EditableHeadline({
       autoSave={autoSave}
       backgroundType={backgroundType}
       colorTokens={colorTokens}
-      {...props}
+      {...(props as any)}
     />
   );
 }
@@ -347,7 +348,7 @@ export function EditableText({
       value={value}
       onEdit={onEdit}
       element="p"
-      className={`leading-relaxed ${finalColorClass}`}
+      className={`leading-relaxed ${finalColorClass} ${props.className || ''}`}
       style={textStyle}
       multiline
       sectionId={sectionId}
@@ -358,7 +359,7 @@ export function EditableText({
       autoSave={autoSave}
       backgroundType={backgroundType}
       colorTokens={colorTokens}
-      {...props}
+      {...(props as any)}
     />
   );
 }
@@ -529,16 +530,19 @@ export function EditableAdaptiveHeadline({
   });
   
   const getAdaptiveTextColor = () => {
-    switch(backgroundType) {
-      case 'primary':
-        return colorTokens.textOnDark || colorTokens.dynamicHeading || 'text-white';
-      case 'secondary':
-      case 'neutral':
-      case 'divider':
-        return colorTokens.textOnLight || colorTokens.dynamicHeading || 'text-gray-900';
-      default:
-        return colorTokens.textPrimary || 'text-gray-900';
-    }
+    // ✅ Use enhanced background logic for proper text contrast
+    const textColors = getTextColorForBackground(backgroundType || 'neutral', colorTokens);
+    
+    // Extract color value for inline styles - convert Tailwind class to hex
+    const colorClass = textColors.heading;
+    let colorValue = '#000000'; // Default fallback
+    
+    if (colorClass.includes('text-gray-900')) colorValue = '#111827';
+    else if (colorClass.includes('text-gray-800')) colorValue = '#1f2937';
+    else if (colorClass.includes('text-white')) colorValue = '#ffffff';
+    else if (colorClass.includes('text-gray-200')) colorValue = '#e5e7eb';
+    
+    return { class: colorClass, value: colorValue };
   };
   
   const adaptiveColor = getAdaptiveTextColor();
@@ -549,7 +553,8 @@ export function EditableAdaptiveHeadline({
       value={value}
       onEdit={onEdit}
       level={level}
-      dynamicColor={adaptiveColor}
+      dynamicColor={adaptiveColor.value}
+      className={`${adaptiveColor.class} ${props.className || ''}`}
       textStyle={textStyle}
       sectionId={sectionId}
       elementKey={elementKey}
@@ -591,22 +596,23 @@ export function EditableAdaptiveText({
 }) {
   
   const getAdaptiveTextColor = () => {
-    switch(backgroundType) {
-      case 'primary':
-        return variant === 'muted' ? 
-          (colorTokens.textInverse || colorTokens.dynamicMuted || 'text-gray-200') :
-          (colorTokens.textOnDark || colorTokens.dynamicBody || 'text-white');
-      case 'secondary':
-      case 'neutral':
-      case 'divider':
-        return variant === 'muted' ? 
-          (colorTokens.textMuted || colorTokens.dynamicMuted || 'text-gray-500') :
-          (colorTokens.textSecondary || colorTokens.dynamicBody || 'text-gray-600');
-      default:
-        return variant === 'muted' ? 
-          (colorTokens.textMuted || 'text-gray-500') :
-          (colorTokens.textSecondary || 'text-gray-600');
-    }
+    // ✅ Use enhanced background logic for proper text contrast
+    const textColors = getTextColorForBackground(backgroundType || 'neutral', colorTokens);
+    
+    const colorClass = variant === 'muted' ? textColors.muted : textColors.body;
+    
+    // Extract color value for inline styles - convert Tailwind class to hex
+    let colorValue = '#000000'; // Default fallback
+    
+    if (colorClass.includes('text-gray-900')) colorValue = '#111827';
+    else if (colorClass.includes('text-gray-800')) colorValue = '#1f2937';
+    else if (colorClass.includes('text-gray-700')) colorValue = '#374151';
+    else if (colorClass.includes('text-gray-600')) colorValue = '#4b5563';
+    else if (colorClass.includes('text-gray-500')) colorValue = '#6b7280';
+    else if (colorClass.includes('text-white')) colorValue = '#ffffff';
+    else if (colorClass.includes('text-gray-200')) colorValue = '#e5e7eb';
+    
+    return { class: colorClass, value: colorValue };
   };
   
   const adaptiveColor = getAdaptiveTextColor();
@@ -616,7 +622,8 @@ export function EditableAdaptiveText({
       mode={mode}
       value={value}
       onEdit={onEdit}
-      dynamicColor={adaptiveColor}
+      dynamicColor={adaptiveColor.value}
+      className={`${adaptiveColor.class} ${props.className || ''}`}
       textStyle={textStyle}
       sectionId={sectionId}
       elementKey={elementKey}

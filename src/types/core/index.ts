@@ -545,7 +545,7 @@ export interface BrandColors {
 /**
  * Background selector mode
  */
-export type BackgroundSelectorMode = 'generated' | 'brand' | 'custom';
+export type BackgroundSelectorMode = 'recommended' | 'custom';
 
 /**
  * ===== BACKGROUND VALIDATION TYPES =====

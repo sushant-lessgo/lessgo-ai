@@ -5,6 +5,73 @@ import React from 'react';
 import { BackgroundPreview } from './BackgroundPreview';
 import { getBackgroundPreview } from './backgroundCompatibility';
 
+// Helper function to convert Tailwind classes to inline styles
+const getBackgroundStyle = (bgClass: string) => {
+  // Handle gradients
+  if (bgClass.includes('gradient-to-br')) {
+    if (bgClass.includes('blue-500') && bgClass.includes('purple-600')) {
+      return { background: 'linear-gradient(to bottom right, #3b82f6, #9333ea)' };
+    }
+    if (bgClass.includes('blue-500') && bgClass.includes('blue-600')) {
+      return { background: 'linear-gradient(to bottom right, #3b82f6, #2563eb)' };
+    }
+    if (bgClass.includes('orange-400') && bgClass.includes('pink-400')) {
+      return { background: 'linear-gradient(to bottom right, #fb923c, #f472b6)' };
+    }
+    if (bgClass.includes('green-500') && bgClass.includes('teal-400')) {
+      return { background: 'linear-gradient(to bottom right, #22c55e, #2dd4bf)' };
+    }
+  }
+  
+  if (bgClass.includes('gradient-to-tr')) {
+    if (bgClass.includes('blue-500') && bgClass.includes('sky-300')) {
+      return { background: 'linear-gradient(to top right, #3b82f6, #7dd3fc)' };
+    }
+  }
+  
+  if (bgClass.includes('gradient-to-tl')) {
+    if (bgClass.includes('sky-400') && bgClass.includes('indigo-400')) {
+      return { background: 'linear-gradient(to top left, #38bdf8, #818cf8)' };
+    }
+  }
+  
+  // Handle solid colors
+  const colorMap: Record<string, string> = {
+    'bg-blue-50': '#eff6ff',
+    'bg-blue-100': '#dbeafe',
+    'bg-blue-500': '#3b82f6',
+    'bg-blue-600': '#2563eb',
+    'bg-purple-50': '#faf5ff',
+    'bg-purple-500': '#a855f7',
+    'bg-purple-600': '#9333ea',
+    'bg-green-50': '#f0fdf4',
+    'bg-green-500': '#22c55e',
+    'bg-orange-50': '#fff7ed',
+    'bg-orange-500': '#f97316',
+    'bg-teal-50': '#f0fdfa',
+    'bg-teal-500': '#14b8a6',
+    'bg-amber-50': '#fffbeb',
+    'bg-amber-500': '#f59e0b',
+    'bg-sky-50': '#f0f9ff',
+    'bg-sky-500': '#0ea5e9',
+    'bg-indigo-50': '#eef2ff',
+    'bg-indigo-500': '#6366f1',
+    'bg-white': '#ffffff',
+    'bg-gray-50': '#f9fafb',
+    'bg-gray-100': '#f3f4f6',
+    'bg-gray-500': '#6b7280',
+  };
+  
+  for (const [className, color] of Object.entries(colorMap)) {
+    if (bgClass.includes(className)) {
+      return { backgroundColor: color };
+    }
+  }
+  
+  // Default fallback
+  return { backgroundColor: '#f3f4f6' };
+};
+
 interface BackgroundSystem {
   primary: string;
   secondary: string;
@@ -51,7 +118,7 @@ export function PreviewSection({
         <div className="bg-gray-50 rounded-lg p-4">
           <div className="flex items-center justify-between mb-3">
             <div className="text-xs font-medium text-gray-500">Current Design</div>
-            <div className="text-xs text-gray-400">LessGo Generated</div>
+            <div className="text-xs text-gray-400">Lessgo Generated</div>
           </div>
           
           <BackgroundPreview
@@ -144,13 +211,19 @@ export function PreviewSection({
               <div className="text-xs text-gray-400">• Primary</div>
             </div>
             <div className="flex items-center space-x-2">
-              <div className={`w-4 h-4 rounded ${currentBackground.primary.includes('gradient') ? currentBackground.primary : 'bg-blue-500'}`}></div>
+              <div 
+                className="w-4 h-4 rounded border border-gray-200" 
+                style={getBackgroundStyle(currentBackground.primary)}
+              ></div>
               {backgroundToPreview && (
                 <>
                   <svg className="w-3 h-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                   </svg>
-                  <div className={`w-4 h-4 rounded ${backgroundToPreview.primary.includes('gradient') ? backgroundToPreview.primary : 'bg-purple-500'}`}></div>
+                  <div 
+                    className="w-4 h-4 rounded border border-gray-200" 
+                    style={getBackgroundStyle(backgroundToPreview.primary)}
+                  ></div>
                 </>
               )}
             </div>
@@ -163,13 +236,19 @@ export function PreviewSection({
               <div className="text-xs text-gray-400">• Secondary</div>
             </div>
             <div className="flex items-center space-x-2">
-              <div className={`w-4 h-4 rounded ${currentBackground.secondary.includes('bg-') ? currentBackground.secondary : 'bg-blue-50'}`}></div>
+              <div 
+                className="w-4 h-4 rounded border border-gray-200" 
+                style={getBackgroundStyle(currentBackground.secondary)}
+              ></div>
               {backgroundToPreview && (
                 <>
                   <svg className="w-3 h-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                   </svg>
-                  <div className={`w-4 h-4 rounded ${backgroundToPreview.secondary.includes('bg-') ? backgroundToPreview.secondary : 'bg-purple-50'}`}></div>
+                  <div 
+                    className="w-4 h-4 rounded border border-gray-200" 
+                    style={getBackgroundStyle(backgroundToPreview.secondary)}
+                  ></div>
                 </>
               )}
             </div>
@@ -182,13 +261,19 @@ export function PreviewSection({
               <div className="text-xs text-gray-400">• Primary</div>
             </div>
             <div className="flex items-center space-x-2">
-              <div className={`w-4 h-4 rounded ${currentBackground.primary.includes('gradient') ? currentBackground.primary : 'bg-blue-500'}`}></div>
+              <div 
+                className="w-4 h-4 rounded border border-gray-200" 
+                style={getBackgroundStyle(currentBackground.primary)}
+              ></div>
               {backgroundToPreview && (
                 <>
                   <svg className="w-3 h-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                   </svg>
-                  <div className={`w-4 h-4 rounded ${backgroundToPreview.primary.includes('gradient') ? backgroundToPreview.primary : 'bg-purple-500'}`}></div>
+                  <div 
+                    className="w-4 h-4 rounded border border-gray-200" 
+                    style={getBackgroundStyle(backgroundToPreview.primary)}
+                  ></div>
                 </>
               )}
             </div>
@@ -198,6 +283,75 @@ export function PreviewSection({
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2">
               <div className="text-xs text-gray-600">Testimonials</div>
+              <div className="text-xs text-gray-400">• Neutral</div>
+            </div>
+            <div className="flex items-center space-x-2">
+              <div className="w-4 h-4 rounded bg-white border border-gray-200"></div>
+              {backgroundToPreview && (
+                <>
+                  <svg className="w-3 h-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                  </svg>
+                  <div className="w-4 h-4 rounded bg-white border border-gray-200"></div>
+                </>
+              )}
+            </div>
+          </div>
+
+          {/* Pricing Section */}
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-2">
+              <div className="text-xs text-gray-600">Pricing</div>
+              <div className="text-xs text-gray-400">• Secondary</div>
+            </div>
+            <div className="flex items-center space-x-2">
+              <div 
+                className="w-4 h-4 rounded border border-gray-200" 
+                style={getBackgroundStyle(currentBackground.secondary)}
+              ></div>
+              {backgroundToPreview && (
+                <>
+                  <svg className="w-3 h-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                  </svg>
+                  <div 
+                    className="w-4 h-4 rounded border border-gray-200" 
+                    style={getBackgroundStyle(backgroundToPreview.secondary)}
+                  ></div>
+                </>
+              )}
+            </div>
+          </div>
+
+          {/* FAQ Section */}
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-2">
+              <div className="text-xs text-gray-600">FAQ</div>
+              <div className="text-xs text-gray-400">• Divider</div>
+            </div>
+            <div className="flex items-center space-x-2">
+              <div 
+                className="w-4 h-4 rounded border border-gray-200" 
+                style={getBackgroundStyle(currentBackground.divider)}
+              ></div>
+              {backgroundToPreview && (
+                <>
+                  <svg className="w-3 h-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                  </svg>
+                  <div 
+                    className="w-4 h-4 rounded border border-gray-200" 
+                    style={getBackgroundStyle(backgroundToPreview.divider)}
+                  ></div>
+                </>
+              )}
+            </div>
+          </div>
+
+          {/* Footer */}
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-2">
+              <div className="text-xs text-gray-600">Footer</div>
               <div className="text-xs text-gray-400">• Neutral</div>
             </div>
             <div className="flex items-center space-x-2">

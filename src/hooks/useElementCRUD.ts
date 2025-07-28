@@ -353,8 +353,8 @@ export function useElementCRUD() {
 
     if (elementAbove) {
       // Swap positions
-      elementAbove.metadata.position = currentPosition;
-      element.metadata.position = currentPosition - 1;
+      (elementAbove as any).metadata.position = currentPosition;
+      (element as any).metadata.position = currentPosition - 1;
 
       // Track change
       trackChange({
@@ -388,8 +388,8 @@ export function useElementCRUD() {
 
     if (elementBelow) {
       // Swap positions
-      elementBelow.metadata.position = currentPosition;
-      element.metadata.position = currentPosition + 1;
+      (elementBelow as any).metadata.position = currentPosition;
+      (element as any).metadata.position = currentPosition + 1;
 
       // Track change
       trackChange({
@@ -760,7 +760,7 @@ export function useElementCRUD() {
 
     return Object.values(section.elements).filter((element: any) => 
       types.includes(element.type)
-    );
+    ) as UniversalElementInstance[];
   }, [content]);
 
   // Get element
@@ -782,7 +782,7 @@ export function useElementCRUD() {
         const aPos = a.metadata?.position || 0;
         const bPos = b.metadata?.position || 0;
         return aPos - bPos;
-      });
+      }) as UniversalElementInstance[];
   }, [content]);
 
   // Get elements by type
@@ -799,7 +799,7 @@ export function useElementCRUD() {
         const aPos = a.metadata?.position || 0;
         const bPos = b.metadata?.position || 0;
         return aPos - bPos;
-      });
+      }) as UniversalElementInstance[];
   }, [content]);
 
   // Validate element
@@ -835,10 +835,10 @@ export function useElementCRUD() {
     });
 
     // Check content
-    const hasRequiredContent = element.content && (
+    const hasRequiredContent = !!(element.content && (
       typeof element.content === 'string' ? element.content.trim().length > 0 :
       Array.isArray(element.content) && element.content.length > 0
-    );
+    ));
 
     if (!hasRequiredContent) {
       errors.push({
@@ -905,12 +905,12 @@ export function useElementCRUD() {
   }, [getElement, announceLiveRegion]);
 
   // Load element from template
-  const loadElementFromTemplate = useCallback((
+  const loadElementFromTemplate = useCallback(async (
     sectionId: string, 
     template: ElementTemplate, 
     position?: number
-  ): string => {
-    return addElement(sectionId, template.type, {
+  ): Promise<string> => {
+    return await addElement(sectionId, template.type, {
       content: template.content,
       props: template.props,
       position,
