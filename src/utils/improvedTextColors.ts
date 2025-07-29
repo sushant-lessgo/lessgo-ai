@@ -390,13 +390,13 @@ export function validateWCAGContrast(
 ): { ratio: number; meetsAA: boolean; meetsAAA: boolean } {
   try {
     const validation = validateColorAccessibility(foregroundColor, backgroundColor);
-    console.log('🔍 WCAG validation result:', {
-      foreground: foregroundColor,
-      background: backgroundColor,
-      contrastRatio: validation.contrastRatio,
-      isValid: validation.isValid,
-      level: validation.level
-    });
+    // console.log('🔍 WCAG validation result:', {
+    //   foreground: foregroundColor,
+    //   background: backgroundColor,
+    //   contrastRatio: validation.contrastRatio,
+    //   isValid: validation.isValid,
+    //   level: validation.level
+    // });
     
     return {
       ratio: validation.contrastRatio, // Fixed: use contrastRatio instead of contrast

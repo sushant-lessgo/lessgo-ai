@@ -35,12 +35,12 @@ export function getCompatibleBackgrounds(
   brandColors: BrandColors | null,
   currentBackground: BackgroundSystem
 ): BackgroundVariation[] {
-  console.log('🔍 Finding compatible backgrounds:', { 
-    mode, 
-    brandColors, 
-    currentBackground: currentBackground ? 'BackgroundSystem' : 'null',
-    baseColor: currentBackground?.baseColor 
-  });
+  // console.log('🔍 Finding compatible backgrounds:', { 
+  //   mode, 
+  //   brandColors, 
+  //   currentBackground: currentBackground ? 'BackgroundSystem' : 'null',
+  //   baseColor: currentBackground?.baseColor 
+  // });
 
   try {
     switch (mode) {
@@ -99,17 +99,17 @@ function getGeneratedVariations(currentBackground: BackgroundSystem): Background
     return aOrder - bOrder;
   });
 
-  console.log(`🎨 Found ${variations.length} generated variations for baseColor: ${baseColor}`);
+  // console.log(`🎨 Found ${variations.length} generated variations for baseColor: ${baseColor}`);
   
   // If no variations found with preferred archetypes, expand search
   if (variations.length === 0) {
-    console.log(`🔍 No preferred archetypes found for ${baseColor}, expanding search...`);
+    // console.log(`🔍 No preferred archetypes found for ${baseColor}, expanding search...`);
     
     // Try all variations with the same base color
     const allColorVariations = bgVariations.filter(v => v.baseColor === baseColor);
     
     if (allColorVariations.length > 0) {
-      console.log(`✅ Found ${allColorVariations.length} variations with baseColor: ${baseColor}`);
+      // console.log(`✅ Found ${allColorVariations.length} variations with baseColor: ${baseColor}`);
       return allColorVariations.slice(0, 8);
     }
     
@@ -121,12 +121,12 @@ function getGeneratedVariations(currentBackground: BackgroundSystem): Background
     );
     
     if (harmoniousVariations.length > 0) {
-      console.log(`🎨 Found ${harmoniousVariations.length} harmonious variations`);
+      // console.log(`🎨 Found ${harmoniousVariations.length} harmonious variations`);
       return harmoniousVariations.slice(0, 8);
     }
     
     // Final fallback: return some default professional variations
-    console.log(`⚠️ Using fallback variations for ${baseColor}`);
+    // console.log(`⚠️ Using fallback variations for ${baseColor}`);
     const fallbackVariations = bgVariations.filter(v => 
       ['blue', 'gray', 'slate'].includes(v.baseColor) &&
       ['soft-gradient-blur', 'startup-skybox'].includes(v.archetypeId)
@@ -153,7 +153,7 @@ function getBrandCompatibleBackgrounds(
   try {
     // Extract base color family from brand color
     const brandBaseColor = extractBaseColorFromHex(brandColors.primary);
-    console.log('🎨 Extracted brand base color:', brandBaseColor, 'from', brandColors.primary);
+    // console.log('🎨 Extracted brand base color:', brandBaseColor, 'from', brandColors.primary);
 
     // Find backgrounds that work well with the brand color
     let compatibleVariations = bgVariations.filter(variation => {
@@ -191,7 +191,7 @@ function getBrandCompatibleBackgrounds(
       return bScore - aScore; // Higher score first
     });
 
-    console.log(`🎨 Found ${compatibleVariations.length} brand-compatible backgrounds`);
+    // console.log(`🎨 Found ${compatibleVariations.length} brand-compatible backgrounds`);
     return compatibleVariations.slice(0, 12); // More options for brand mode
 
   } catch (error) {
@@ -255,7 +255,7 @@ function getCustomBackgroundOptions(): BackgroundVariation[] {
     return aOrder - bOrder;
   });
 
-  console.log(`🎨 Found ${customVariations.length} custom background options`);
+  // console.log(`🎨 Found ${customVariations.length} custom background options`);
   return customVariations.slice(0, 20); // More options for custom mode
 }
 

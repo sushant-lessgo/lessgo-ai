@@ -320,11 +320,11 @@ const EnhancedLayoutWrapper: React.FC<{
           const allElements = Object.entries(sectionData.elements);
           const universalElements = allElements.filter(([elementKey, elementData]: [string, any]) => isUniversalElement(elementData));
           
-          console.log(`🎯 Preview mode - Section ${sectionId}:`, {
-            totalElements: allElements.length,
-            universalElements: universalElements.length,
-            elementTypes: allElements.map(([key, data]: [string, any]) => ({ key, type: data.type, isUniversal: isUniversalElement(data) }))
-          });
+          // console.log(`🎯 Preview mode - Section ${sectionId}:`, {
+          //   totalElements: allElements.length,
+          //   universalElements: universalElements.length,
+          //   elementTypes: allElements.map(([key, data]: [string, any]) => ({ key, type: data.type, isUniversal: isUniversalElement(data) }))
+          // });
           
           return universalElements
             .sort(([, a]: [string, any], [, b]: [string, any]) => {
@@ -361,11 +361,11 @@ const EnhancedLayoutWrapper: React.FC<{
         const allElements = Object.entries(sectionData.elements);
         const universalElements = allElements.filter(([elementKey, elementData]: [string, any]) => isUniversalElement(elementData));
         
-        console.log(`🎯 Edit mode - Section ${sectionId}:`, {
-          totalElements: allElements.length,
-          universalElements: universalElements.length,
-          elementTypes: allElements.map(([key, data]: [string, any]) => ({ key, type: data.type, isUniversal: isUniversalElement(data) }))
-        });
+        // console.log(`🎯 Edit mode - Section ${sectionId}:`, {
+        //   totalElements: allElements.length,
+        //   universalElements: universalElements.length,
+        //   elementTypes: allElements.map(([key, data]: [string, any]) => ({ key, type: data.type, isUniversal: isUniversalElement(data) }))
+        // });
         
         return universalElements
           .sort(([, a]: [string, any], [, b]: [string, any]) => {
@@ -384,7 +384,7 @@ const EnhancedLayoutWrapper: React.FC<{
                   onContentChange={(content) => onContentUpdate(elementKey)(Array.isArray(content) ? content.join('\n') : content)}
                   onPropsChange={(props) => {
                     // Handle props changes - would need to be implemented in the store
-                    console.log('Props changed for', elementKey, props);
+                    // console.log('Props changed for', elementKey, props);
                   }}
                 />
               </div>
@@ -447,11 +447,11 @@ const ElementEditingOverlay: React.FC<{
   
   // Debug: Log overlay mount
   React.useEffect(() => {
-    console.log(`🎯 ElementEditingOverlay mounted for ${sectionId}.${elementKey}:`, {
-      type: elementData.type,
-      content: elementData.content,
-      mode
-    });
+    // console.log(`🎯 ElementEditingOverlay mounted for ${sectionId}.${elementKey}:`, {
+    //   type: elementData.type,
+    //   content: elementData.content,
+    //   mode
+    // });
   }, []);
   
   // Find the actual DOM element using cascading selectors with delay
@@ -482,17 +482,17 @@ const ElementEditingOverlay: React.FC<{
         elementKey: el.getAttribute('data-element-key')
       }));
       
-      console.log(`🎯 Element targeting for ${sectionId}.${elementKey}:`, {
-        found: !!element,
-        selector: selectors.find(s => document.querySelector(s)),
-        elementTag: element?.tagName,
-        elementContent: element?.textContent?.slice(0, 50),
-        allSelectorsChecked: selectors.map(s => ({ selector: s, found: !!document.querySelector(s) })),
-        availableElements,
-        searchingFor: elementKey,
-        sectionSelector: `[data-section-id="${sectionId}"]`,
-        elementSelector: `[data-element-key="${elementKey}"]`
-      });
+      // console.log(`🎯 Element targeting for ${sectionId}.${elementKey}:`, {
+      //   found: !!element,
+      //   selector: selectors.find(s => document.querySelector(s)),
+      //   elementTag: element?.tagName,
+      //   elementContent: element?.textContent?.slice(0, 50),
+      //   allSelectorsChecked: selectors.map(s => ({ selector: s, found: !!document.querySelector(s) })),
+      //   availableElements,
+      //   searchingFor: elementKey,
+      //   sectionSelector: `[data-section-id="${sectionId}"]`,
+      //   elementSelector: `[data-element-key="${elementKey}"]`
+      // });
       
       setTargetElement(element);
     }, 100); // 100ms delay to ensure DOM is ready
@@ -502,7 +502,7 @@ const ElementEditingOverlay: React.FC<{
   
   // Handle text selection changes
   const handleSelectionChange = React.useCallback((selection: TextSelection | null) => {
-    console.log('🔤 handleSelectionChange called:', { selection, isCollapsed: selection?.isCollapsed });
+    // console.log('🔤 handleSelectionChange called:', { selection, isCollapsed: selection?.isCollapsed });
     
     if (selection && !selection.isCollapsed) {
       // Calculate position for the text toolbar
@@ -512,7 +512,7 @@ const ElementEditingOverlay: React.FC<{
         y: rect.top - 10
       };
       
-      console.log('🔤 Text selection detected, but using unified toolbar system instead');
+      // console.log('🔤 Text selection detected, but using unified toolbar system instead');
       
       // DISABLED: Using unified toolbar system from useEditor instead
       // showTextToolbar(position);
@@ -521,11 +521,11 @@ const ElementEditingOverlay: React.FC<{
 
   const handleClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-    console.log(`🖱️ Element clicked: ${elementKey}`, { type: elementData.type });
+    // console.log(`🖱️ Element clicked: ${elementKey}`, { type: elementData.type });
     
     // DISABLED: Don't set isEditing here - let useEditor handle all text editing
     // This prevents conflicts between editing systems
-    console.log(`🖱️ Click handled by useEditor system for: ${elementKey}`);
+    // console.log(`🖱️ Click handled by useEditor system for: ${elementKey}`);
     
     onElementClick(e);
   };
@@ -533,7 +533,7 @@ const ElementEditingOverlay: React.FC<{
   const handleSave = () => {
     setIsEditing(false);
     if (editValue !== elementData.content) {
-      console.log(`💾 Saving content for ${elementKey}:`, { old: elementData.content, new: editValue });
+      // console.log(`💾 Saving content for ${elementKey}:`, { old: elementData.content, new: editValue });
       onContentUpdate(editValue);
     }
   };
@@ -580,7 +580,7 @@ const ElementEditingOverlay: React.FC<{
   
   // Don't render the overlay editor - let useEditor system handle it
   if (isEditing && targetElement) {
-    console.log(`📝 Editing disabled for ${elementKey} - using unified useEditor system instead`);
+    // console.log(`📝 Editing disabled for ${elementKey} - using unified useEditor system instead`);
     return null;
   }
   
@@ -598,18 +598,18 @@ const EditableTextContent: React.FC<{
   const [value, setValue] = React.useState(content);
 
   const handleDoubleClick = () => {
-    console.log('🖱️ Double click on text element:', { mode, elementType });
-    if (mode === 'edit') {
-      setIsEditing(true);
-    }
+    // console.log('🖱️ Double click on text element:', { mode, elementType });
+    // if (mode === 'edit') {
+    //   setIsEditing(true);
+    // }
   };
 
   const handleClick = (e: React.MouseEvent) => {
-    console.log('🖱️ Single click on text element:', { mode, elementType });
-    e.stopPropagation();
-    if (mode === 'edit') {
-      setIsEditing(true);
-    }
+    // console.log('🖱️ Single click on text element:', { mode, elementType });
+    // e.stopPropagation();
+    // if (mode === 'edit') {
+    //   setIsEditing(true);
+    // }
   };
 
   const handleBlur = () => {
@@ -635,7 +635,7 @@ const EditableTextContent: React.FC<{
   }
 
   if (isEditing) {
-    console.log('📝 Text editor active for:', { elementType, content, value });
+    // console.log('📝 Text editor active for:', { elementType, content, value });
     return (
       <input
         type="text"

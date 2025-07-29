@@ -1,5 +1,6 @@
 // app/edit/[token]/components/ui/FloatingToolbars.tsx - Complete 5 Toolbar Implementation
 import React, { useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { useStoreState } from '@/components/EditProvider';
 // Removed complex positioning hooks - using simple React-based positioning
 import { calculateArrowPosition } from '@/utils/toolbarPositioning';
@@ -24,29 +25,14 @@ export function FloatingToolbars() {
   // React-only positioning - no DOM manipulation
   // Position is calculated when toolbar is shown and stored in state
 
-  // Debug logging
-  console.log('🎯 FloatingToolbars render check:', {
-    mode,
-    toolbarVisible: toolbar.visible,
-    toolbarType: toolbar.type,
-    toolbarTargetId: toolbar.targetId,
-    fullToolbarState: toolbar
-  });
 
   // Only render toolbars in edit mode
   if (mode !== 'edit') return null;
 
   // Render single adaptive toolbar
   if (!toolbar.visible || !toolbar.type || !toolbar.targetId) {
-    console.log('🚫 Toolbar not rendering - missing conditions:', {
-      visible: toolbar.visible,
-      type: toolbar.type,
-      targetId: toolbar.targetId
-    });
     return null;
   }
-  
-  console.log('✅ Rendering toolbar of type:', toolbar.type);
   
 
   return (
@@ -90,6 +76,7 @@ export function FloatingToolbars() {
           contextActions={toolbar.actions.map((actionId: any) => ({ id: actionId, label: actionId, icon: 'icon', type: 'button' }))}
         />
       )}
+
     </>
   );
 }

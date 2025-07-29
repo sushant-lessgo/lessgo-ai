@@ -33,6 +33,11 @@ export function SimpleImageEditor({ isOpen, onClose, imageUrl, onSave, alt }: Si
   }, [isOpen, imageUrl]);
 
   const loadImage = () => {
+    if (!imageUrl) {
+      setIsLoading(false);
+      return;
+    }
+    
     setIsLoading(true);
     const img = new Image();
     img.onload = () => {

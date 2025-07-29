@@ -25,11 +25,11 @@ export function useLayoutComponent<T = Record<string, any>>({
   contentSchema 
 }: UseLayoutComponentProps) {
   
-  console.log(`🔍 useLayoutComponent DEBUG for ${sectionId}:`, {
-    backgroundType,
-    sectionBackgroundCSS,
-    hasSectionBackgroundCSS: !!sectionBackgroundCSS
-  });
+  // console.log(`🔍 useLayoutComponent DEBUG for ${sectionId}:`, {
+  //   backgroundType,
+  //   sectionBackgroundCSS,
+  //   hasSectionBackgroundCSS: !!sectionBackgroundCSS
+  // });
   
   const { getTextStyle } = useTypography();
   const { 
@@ -78,15 +78,15 @@ export function useLayoutComponent<T = Record<string, any>>({
       const customBackground = sectionContent?.sectionBackground;
       const backgrounds = theme?.colors?.sectionBackgrounds;
       
-      console.log(`🔍 EDIT MODE Background calc for ${sectionId}:`, {
-        sectionContentExists: !!sectionContent,
-        storedBackgroundType: sectionContent?.backgroundType,
-        propsBackgroundType: backgroundType,
-        finalBackgroundType: currentBackgroundType,
-        hasCustomBackground: !!customBackground,
-        customBackgroundType: customBackground?.type,
-        hasSectionBackgrounds: !!backgrounds
-      });
+      // console.log(`🔍 EDIT MODE Background calc for ${sectionId}:`, {
+      //   sectionContentExists: !!sectionContent,
+      //   storedBackgroundType: sectionContent?.backgroundType,
+      //   propsBackgroundType: backgroundType,
+      //   finalBackgroundType: currentBackgroundType,
+      //   hasCustomBackground: !!customBackground,
+      //   customBackgroundType: customBackground?.type,
+      //   hasSectionBackgrounds: !!backgrounds
+      // });
       
       // ✅ NEW: Handle custom backgrounds
       if (currentBackgroundType === 'custom' && customBackground?.type === 'custom' && customBackground.custom) {
@@ -109,10 +109,10 @@ export function useLayoutComponent<T = Record<string, any>>({
           }
         }
         
-        console.log(`🎨 useLayoutComponent CUSTOM: Generated CSS for ${sectionId}:`, {
-          custom,
-          generatedCSS: customCSS
-        });
+        // console.log(`🎨 useLayoutComponent CUSTOM: Generated CSS for ${sectionId}:`, {
+        //   custom,
+        //   generatedCSS: customCSS
+        // });
         return customCSS;
       }
       
@@ -134,16 +134,16 @@ export function useLayoutComponent<T = Record<string, any>>({
         }
       })();
       
-      console.log(`🎨 useLayoutComponent EDIT MODE: Recalculated CSS for ${sectionId}:`, {
-        storedBackgroundType: currentBackgroundType,
-        calculatedCSS: editModeCSS
-      });
+      // console.log(`🎨 useLayoutComponent EDIT MODE: Recalculated CSS for ${sectionId}:`, {
+      //   storedBackgroundType: currentBackgroundType,
+      //   calculatedCSS: editModeCSS
+      // });
       return editModeCSS;
     }
     
     // ✅ In preview mode, use the CSS class from renderer for performance
     if (sectionBackgroundCSS) {
-      console.log(`🎨 useLayoutComponent: Using CSS from renderer for ${sectionId}:`, sectionBackgroundCSS);
+      // console.log(`🎨 useLayoutComponent: Using CSS from renderer for ${sectionId}:`, sectionBackgroundCSS);
       return sectionBackgroundCSS;
     }
     
@@ -170,7 +170,7 @@ export function useLayoutComponent<T = Record<string, any>>({
         }
       }
       
-      console.log(`🎨 useLayoutComponent FALLBACK CUSTOM: Generated CSS for ${sectionId}:`, customCSS);
+      // console.log(`🎨 useLayoutComponent FALLBACK CUSTOM: Generated CSS for ${sectionId}:`, customCSS);
       return customCSS;
     }
     
@@ -193,7 +193,7 @@ export function useLayoutComponent<T = Record<string, any>>({
       }
     })();
     
-    console.log(`🎨 useLayoutComponent: Using fallback CSS for ${sectionId}:`, fallbackCSS);
+    // console.log(`🎨 useLayoutComponent: Using fallback CSS for ${sectionId}:`, fallbackCSS);
     return fallbackCSS;
   };
 
@@ -257,7 +257,7 @@ export function useLayoutComponent<T = Record<string, any>>({
   // ✅ ENHANCED: Use new smart text color system with WCAG validation
   const sectionBackground = getSectionBackground();
   
-  console.log(`🎨 Final sectionBackground for ${sectionId}:`, sectionBackground);
+  // console.log(`🎨 Final sectionBackground for ${sectionId}:`, sectionBackground);
   
   // Get smart text colors that validate contrast automatically
   // ✅ ENHANCED: Check for theme overrides first
@@ -290,12 +290,12 @@ export function useLayoutComponent<T = Record<string, any>>({
   
   // Debug log for text color mode
   if (theme?.textColorMode === 'manual') {
-    console.log(`🎨 Using manual text color overrides for ${sectionId}:`, {
-      mode: theme.textColorMode,
-      overrides: theme.textColorOverrides,
-      contrastLevel: theme.textContrastLevel,
-      effectiveColors: smartTextColors
-    });
+    // console.log(`🎨 Using manual text color overrides for ${sectionId}:`, {
+    //   mode: theme.textColorMode,
+    //   overrides: theme.textColorOverrides,
+    //   contrastLevel: theme.textContrastLevel,
+    //   effectiveColors: smartTextColors
+    // });
   }
   
   // Convert hex colors to Tailwind classes for backwards compatibility

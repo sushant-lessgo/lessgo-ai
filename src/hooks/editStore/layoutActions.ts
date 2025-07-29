@@ -527,11 +527,11 @@ resetTypographyToGenerated: () =>
     
     state.history.redoStack = [];
     
-    console.log('🔄 Reset typography to LessGo-generated fonts', {
-      originalFont,
-      headingFont: originalFont.headingFont,
-      bodyFont: originalFont.bodyFont,
-    });
+    // console.log('🔄 Reset typography to LessGo-generated fonts', {
+    //   originalFont,
+    //   headingFont: originalFont.headingFont,
+    //   bodyFont: originalFont.bodyFont,
+    // });
   }),
 
 getTypographyForSection: (sectionId: string) => {
@@ -602,10 +602,10 @@ getTypographyForSection: (sectionId: string) => {
         
         state.history.redoStack = [];
         
-        console.log('🔄 Reset to original LessGo-generated design', {
-          originalBackgroundSystem,
-          sectionsReset: Object.keys(state.content).length,
-        });
+        // console.log('🔄 Reset to original LessGo-generated design', {
+        //   originalBackgroundSystem,
+        //   sectionsReset: Object.keys(state.content).length,
+        // });
       }),
 
     /**
@@ -646,7 +646,7 @@ getTypographyForSection: (sectionId: string) => {
           accentCSS: theme.colors.accentCSS
         };
 
-        console.log('🎨 Using integrated background system for color tokens:', backgroundSystemData);
+        // console.log('🎨 Using integrated background system for color tokens:', backgroundSystemData);
         return generateColorTokensFromBackgroundSystem(backgroundSystemData);
       } else {
         // Fallback to basic generation
@@ -665,7 +665,7 @@ getTypographyForSection: (sectionId: string) => {
         // Update the theme with the new color tokens
         // This method would integrate the color tokens back into the theme structure
         // For now, we'll add a placeholder that developers can extend
-        console.log('🎨 Updating color tokens:', newTokens);
+        // console.log('🎨 Updating color tokens:', newTokens);
         
         // Track the change for auto-save
         state.queuedChanges.push({

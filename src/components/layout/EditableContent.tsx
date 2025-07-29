@@ -523,13 +523,13 @@ export function EditableAdaptiveHeadline({
 }) {
   
   // Debug logging
-  console.log('🔍 EditableAdaptiveHeadline received props:', {
-    elementKey,
-    sectionId,
-    formatState,
-    textStyle,
-    level
-  });
+  // console.log('🔍 EditableAdaptiveHeadline received props:', {
+  //   elementKey,
+  //   sectionId,
+  //   formatState,
+  //   textStyle,
+  //   level
+  // });
   
   const getAdaptiveTextColor = () => {
     // ✅ ENHANCED: Use new smart text color system with WCAG validation

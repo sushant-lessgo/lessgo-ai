@@ -197,15 +197,16 @@ export function useEditor() {
     // Check if click is on header elements - don't interfere
     const isHeaderClick = target.closest('header') || target.closest('[class*="EditHeader"]');
     if (isHeaderClick) {
-      console.log('useEditor: Ignoring header click');
       return;
     }
 
     // Check if click is on a toolbar - don't hide toolbar when clicking inside it
     const isToolbarClick = 
       target.closest('.fixed.z-50.bg-white.border.border-gray-200.rounded-lg.shadow-lg') || // Section toolbar
+      target.closest('.fixed.bg-white.border.border-gray-200.rounded-lg.shadow-lg') || // Image toolbar and others
       target.closest('[data-toolbar]') ||
       target.closest('.toolbar') ||
+      target.closest('[style*="z-index: 10000"]') || // Image toolbar has z-index 10000
       (target.tagName === 'BUTTON' && target.textContent === '⋯'); // Triple dots button
     
     if (isToolbarClick) {

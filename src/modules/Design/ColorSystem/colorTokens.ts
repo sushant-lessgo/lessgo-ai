@@ -112,16 +112,16 @@ export function generateColorTokens({
       if (workingCandidate) {
         safeCTABg = workingCandidate.tailwindBg;
         safeCTAText = workingCandidate.textColor || getSmartTextColor(workingCandidate.tailwindBg, 'body');
-        console.log('✅ Using brand-safe accent color for CTA:', safeCTABg, 'with text:', safeCTAText);
+        // console.log('✅ Using brand-safe accent color for CTA:', safeCTABg, 'with text:', safeCTAText);
       } else {
         // ✅ IMPROVED: Use branded fallback instead of generic gray
         const brandedFallback = accentColor ? `bg-${accentColor}-600` : smartAccentCSS;
         safeCTABg = brandedFallback;
         safeCTAText = getSmartTextColor(brandedFallback, 'body');
-        console.log('✅ Using branded fallback for CTA:', safeCTABg, 'with text:', safeCTAText);
+        // console.log('✅ Using branded fallback for CTA:', safeCTABg, 'with text:', safeCTAText);
       }
     } else {
-      console.log('✅ Using original accent color for CTA:', safeCTABg, 'with text:', safeCTAText);
+      // console.log('✅ Using original accent color for CTA:', safeCTABg, 'with text:', safeCTAText);
     }
     
     return { safeCTABg, safeCTAText };

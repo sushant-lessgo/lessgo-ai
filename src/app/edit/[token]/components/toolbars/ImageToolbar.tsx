@@ -1,5 +1,6 @@
 // app/edit/[token]/components/toolbars/ImageToolbar.tsx - Complete Image Toolbar
 import React, { useState, useRef, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
 import { useToolbarActions } from '@/hooks/useToolbarActions';
 import { calculateArrowPosition } from '@/utils/toolbarPositioning';
@@ -45,6 +46,7 @@ export function ImageToolbar({ targetId, position, contextActions }: ImageToolba
     targetElement.getBoundingClientRect(),
     { width: 340, height: 48 }
   ) : null;
+
 
   // Close advanced menu when clicking outside
   useEffect(() => {
@@ -262,6 +264,7 @@ export function ImageToolbar({ targetId, position, contextActions }: ImageToolba
   // Removed advanced actions for MVP - keeping toolbar simple
 
 
+
   return (
     <>
       <div 
@@ -301,7 +304,11 @@ export function ImageToolbar({ targetId, position, contextActions }: ImageToolba
             <React.Fragment key={action.id}>
               {index > 0 && <div className="w-px h-6 bg-gray-200 mx-1" />}
               <button
-                onClick={action.handler}
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation(); // Prevent event bubbling
+                  action.handler();
+                }}
                 className="flex items-center space-x-1 px-2 py-1 text-xs rounded transition-colors text-gray-700 hover:bg-gray-100 hover:text-gray-900"
                 title={action.label}
               >
@@ -327,13 +334,15 @@ export function ImageToolbar({ targetId, position, contextActions }: ImageToolba
       {/* Removed advanced actions menu for MVP */}
 
       {/* Stock Photos Panel */}
-      {showStockPhotos && (
+      {showStockPhotos && typeof window !== 'undefined' && createPortal(
         <StockPhotosPanel
           position={{
-            x: Math.max(10, Math.min(position.x, window.innerWidth - 420)), // Ensure it fits on screen
-            y: Math.max(10, position.y + 60),
+            x: Math.max(10, Math.min(position.x, window.innerWidth - 420)),
+            y: Math.max(10, Math.min(position.y + 60, window.innerHeight - 320)),
           }}
-          onClose={() => setShowStockPhotos(false)}
+          onClose={() => {
+            setShowStockPhotos(false);
+          }}
           onSelectImage={(stockPhoto) => {
             updateImageAsset(targetId, {
               id: targetId,
@@ -380,7 +389,8 @@ export function ImageToolbar({ targetId, position, contextActions }: ImageToolba
             setShowStockPhotos(false);
             announceLiveRegion('Stock photo selected');
           }}
-        />
+        />,
+        document.body
       )}
 
       {/* Upload Progress */}
@@ -436,13 +446,13 @@ export function ImageToolbar({ targetId, position, contextActions }: ImageToolba
       />
 
       {/* Image Editor */}
-      {showEditor && targetElement && (
+      {showEditor && (
         <SimpleImageEditor
           isOpen={showEditor}
           onClose={() => setShowEditor(false)}
-          imageUrl={targetElement.getAttribute('src') || ''}
+          imageUrl={targetElement?.getAttribute('src') || ''}
           onSave={handleImageEditorSave}
-          alt={targetElement.getAttribute('alt') || ''}
+          alt={targetElement?.getAttribute('alt') || ''}
         />
       )}
     </>
@@ -474,8 +484,9 @@ function StockPhotosPanel({ position, onClose, onSelectImage }: {
       const photos = await pexelsApi.getFeaturedPhotos(12);
       setSearchResults(photos);
     } catch (err) {
-      setError('Failed to load photos. Please check your API key.');
       console.error('Error loading featured photos:', err);
+      const errorMessage = err instanceof Error ? err.message : 'Failed to load photos. Please check your API key.';
+      setError(errorMessage);
     } finally {
       setIsSearching(false);
     }
@@ -543,6 +554,7 @@ function StockPhotosPanel({ position, onClose, onSelectImage }: {
       setIsSearching(false);
     }
   };
+
 
   return (
     <div
