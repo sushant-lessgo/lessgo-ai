@@ -93,25 +93,25 @@ export function useTextSelection(editorRef: React.RefObject<HTMLElement>) {
           element.style.textDecoration = value ? 'underline' : 'none';
           break;
         case 'color':
-          element.style.color = value;
+          element.style.color = value as string;
           break;
         case 'fontSize':
-          element.style.fontSize = value;
+          element.style.fontSize = value as string;
           break;
         case 'fontFamily':
-          element.style.fontFamily = value;
+          element.style.fontFamily = value as string;
           break;
         case 'textAlign':
-          element.style.textAlign = value;
+          element.style.textAlign = value as string;
           break;
         case 'lineHeight':
-          element.style.lineHeight = value;
+          element.style.lineHeight = value as string;
           break;
         case 'letterSpacing':
-          element.style.letterSpacing = value;
+          element.style.letterSpacing = value as string;
           break;
         case 'textTransform':
-          element.style.textTransform = value;
+          element.style.textTransform = value as string;
           break;
       }
     });
@@ -234,8 +234,7 @@ export function useTextSelection(editorRef: React.RefObject<HTMLElement>) {
     const walker = document.createTreeWalker(
       container,
       NodeFilter.SHOW_TEXT,
-      null,
-      false
+      null
     );
     
     let currentNode = walker.nextNode();
@@ -252,8 +251,7 @@ export function useTextSelection(editorRef: React.RefObject<HTMLElement>) {
     const walker = document.createTreeWalker(
       container,
       NodeFilter.SHOW_TEXT,
-      null,
-      false
+      null
     );
     
     let currentNode = walker.nextNode();

@@ -4,6 +4,7 @@
 import React from 'react';
 import { useLayoutComponent } from '@/hooks/useLayoutComponent';
 import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
+import { useImageToolbar } from '@/hooks/useImageToolbar';
 import { LayoutSection } from '@/components/layout/LayoutSection';
 import { 
   EditableAdaptiveHeadline, 
@@ -234,18 +235,8 @@ export default function LeftCopyRightImage(props: LayoutComponentProps) {
   // ✅ ENHANCED: Get muted text color for trust indicators
   const mutedTextColor = dynamicTextColors?.muted || colorTokens.textMuted;
   
-  // Get showImageToolbar for handling image clicks with error handling
-  const store = useEditStore();
-  const showImageToolbar = store?.showImageToolbar || (() => {
-    console.warn('showImageToolbar not available in store');
-  });
-
-  // Debug: Log store state and mode
-  console.log('🔍 Hero component state:', {
-    showImageToolbarAvailable: !!store?.showImageToolbar,
-    mode,
-    toolbarState: store?.toolbar
-  });
+  // Use robust image toolbar hook
+  const handleImageToolbar = useImageToolbar();
   
 
   // console.log(`🎨 LeftCopyRightImage rendering with dynamic colors:`, {
@@ -412,12 +403,7 @@ export default function LeftCopyRightImage(props: LayoutComponentProps) {
                       e.stopPropagation();
                       e.preventDefault();
                       const rect = e.currentTarget.getBoundingClientRect();
-                      console.log('🖱️ Image clicked! Calling showImageToolbar with:', {
-                        imageId: `${sectionId}-hero-image`,
-                        position: { x: rect.left + rect.width / 2, y: rect.top - 10 },
-                        functionAvailable: !!showImageToolbar
-                      });
-                      showImageToolbar(`${sectionId}-hero-image`, {
+                      handleImageToolbar(`${sectionId}-hero-image`, {
                         x: rect.left + rect.width / 2,
                         y: rect.top - 10
                       });

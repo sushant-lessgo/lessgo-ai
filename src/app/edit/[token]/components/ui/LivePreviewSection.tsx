@@ -5,6 +5,8 @@ import React from 'react';
 import { CTAPreview } from './CTAPreview';
 import { TextHierarchyPreview } from './TextHierarchyPreview';
 import { getTextColorForBackground } from '@/modules/Design/background/enhancedBackgroundLogic';
+import { getSmartTextColor } from '@/utils/improvedTextColors';
+import { analyzeBackground } from '@/utils/backgroundAnalysis';
 import type { ColorTokens, BackgroundSystem } from '@/types/core';
 
 interface LivePreviewSectionProps {
@@ -155,7 +157,7 @@ export function LivePreviewSection({
                     href="#" 
                     className={`
                       ${getTextColorForBackground(bgType.type, previewTokens).body}
-                      text-xs underline hover:no-underline
+                      text-xs underline hover:no-underline transition-colors
                     `}
                     onClick={(e) => e.preventDefault()}
                   >

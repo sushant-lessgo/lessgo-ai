@@ -114,16 +114,15 @@ export function CustomBackgroundPicker({
   const generateBackgroundCSS = (custom: CustomBackground, mode: BackgroundPickerMode): string => {
     if (mode === 'solid' && custom.solid) {
       // Extract color value - handle both string and object formats
-      const colorValue = typeof custom.solid === 'string' 
-        ? custom.solid 
-        : custom.solid?.color || localColors.primary;
+      const colorValue = custom.solid || localColors.primary;
       
       return `bg-[${colorValue}]`;
     } else if (mode === 'gradient' && custom.gradient) {
-      const { type, angle, stops } = custom.gradient;
+      const { type, stops } = custom.gradient;
       const gradientStops = stops.map(s => `${s.color} ${s.position}%`).join(',');
       
       if (type === 'linear') {
+        const angle = (custom.gradient as any).angle || 45; // Type guard with fallback
         return `bg-[linear-gradient(${angle}deg,${gradientStops})]`;
       } else if (type === 'radial') {
         return `bg-[radial-gradient(circle,${gradientStops})]`;
@@ -225,7 +224,6 @@ export function CustomBackgroundPicker({
             <SolidColorPicker
               value={{ color: customBackground.solid || localColors.primary }}
               onChange={(background) => handleSolidColorChange(background.color)}
-              disabled={disabled}
             />
           </div>
         ) : (
@@ -239,7 +237,6 @@ export function CustomBackgroundPicker({
               ]
             }}
             onChange={handleGradientChange}
-            disabled={disabled}
           />
         )}
         

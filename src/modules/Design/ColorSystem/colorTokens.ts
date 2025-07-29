@@ -1,13 +1,17 @@
 // colorTokens.ts - UPDATED to properly integrate with background system
 // Clean separation: backgrounds from backgroundIntegration, interactive elements here
 
+// Import NEW enhanced color utilities
 import { 
-  getReadableTextColor, 
-  validateTextBackgroundContrast, 
+  getSmartTextColor,
+  validateWCAGContrast,
   getSafeTextColorsForBackground,
   isLightBackground,
   hasGoodContrast
-} from '@/utils/textContrastUtils';
+} from '@/utils/improvedTextColors';
+import { generateAccentCandidates } from '@/utils/colorHarmony';
+import { analyzeBackground } from '@/utils/backgroundAnalysis';
+import { calculateLuminance, parseColor } from '@/utils/colorUtils';
 
 export type SectionBackgroundInput = {
   primary?: string;    // From bgVariations (hero sections)
@@ -28,61 +32,96 @@ export function generateColorTokens({
   sectionBackgrounds?: SectionBackgroundInput; // From backgroundIntegration system
 }) {
   
-  // ✅ Smart accent CSS generation with proper fallbacks
-  const smartAccentCSS = accentCSS || `bg-${accentColor}-600`;
+  // ✅ ENHANCED: Smart accent CSS generation using color harmony
+  const businessContext = { industry: 'tech', tone: 'professional' }; // TODO: Extract from onboarding
+  const accentCandidates = generateAccentCandidates(baseColor, businessContext);
+  
+  const smartAccentCSS = accentCSS || accentCandidates[0]?.tailwindBg || `bg-${accentColor}-600`;
   const smartAccentHover = accentCSS ? 
     accentCSS.replace('-600', '-700').replace('-500', '-600') : 
-    `bg-${accentColor}-700`;
+    accentCandidates[0]?.tailwindHover || `bg-${accentColor}-700`;
   const smartAccentBorder = accentCSS ? 
     accentCSS.replace('bg-', 'border-') : 
     `border-${accentColor}-600`;
 
-  // ✅ CONSERVATIVE: Always use neutral grays for light backgrounds, white for dark
+  // ✅ ENHANCED: Smart text color selection with WCAG validation
   const getContrastingTextColor = (backgroundColor: string | undefined) => {
-    if (!backgroundColor) return 'text-gray-900'; // Default to safe gray
+    if (!backgroundColor) return 'text-gray-900';
     
-    // For colored backgrounds (secondary/divider), always use gray for maximum readability
-    if (backgroundColor.includes('bg-') && !backgroundColor.includes('white')) {
-      return 'text-gray-900';
-    }
-    
-    return 'text-gray-900'; // Always use safe gray
+    // Use new smart text color system
+    const backgroundAnalysis = analyzeBackground(backgroundColor);
+    return getSmartTextColor(backgroundAnalysis.dominantColor, 'body');
   };
 
-  // ✅ CONSERVATIVE: Always use neutral gray for secondary text
+  // ✅ ENHANCED: Context-aware secondary and muted text colors
   const getSafeSecondaryTextColor = (backgroundColor: string | undefined) => {
-    // Always use gray for secondary text - no more base color confusion
-    return 'text-gray-700';
+    if (!backgroundColor) return 'text-gray-700';
+    
+    const backgroundAnalysis = analyzeBackground(backgroundColor);
+    return getSmartTextColor(backgroundAnalysis.dominantColor, 'secondary');
   };
 
-  // ✅ CONSERVATIVE: Always use neutral gray for muted text
   const getSafeMutedTextColor = (backgroundColor: string | undefined) => {
-    // Always use gray for muted text - no more base color confusion
-    return 'text-gray-500';
+    if (!backgroundColor) return 'text-gray-500';
+    
+    const backgroundAnalysis = analyzeBackground(backgroundColor);
+    return getSmartTextColor(backgroundAnalysis.dominantColor, 'muted');
   };
 
-  // ✅ NEW: Validate CTA colors against background
+  // ✅ ENHANCED: Smart CTA color selection with proper accent validation and smart text color calculation
   const validateCTAColors = () => {
-    // Ensure CTA has good contrast on all background types
     const backgrounds = [
       sectionBackgrounds.primary,
       sectionBackgrounds.secondary,
       sectionBackgrounds.neutral,
       sectionBackgrounds.divider
-    ];
+    ].filter(Boolean);
     
     let safeCTABg = smartAccentCSS;
-    let safeCTAText = "text-white";
+    // ✅ IMPROVED: Calculate text color based on CTA background instead of hardcoding white
+    let safeCTAText = getSmartTextColor(smartAccentCSS, 'body');
     
-    // Check if accent color works on any background
-    const hasGoodContrastOnAny = backgrounds.some(bg => 
-      bg && hasGoodContrast(smartAccentCSS, bg)
-    );
+    // ✅ IMPROVED: Don't validate CTA against ALL backgrounds since CTAs appear on specific sections
+    // Instead, ensure the CTA works well against the most common backgrounds (neutral/white)
+    const criticalBackgrounds = [
+      sectionBackgrounds.neutral || 'bg-white',  // Most CTAs appear on neutral backgrounds
+      sectionBackgrounds.secondary || 'bg-gray-50'  // Secondary sections
+    ];
     
-    if (!hasGoodContrastOnAny) {
-      // Fallback to high contrast CTA
-      safeCTABg = "bg-gray-900";
-      safeCTAText = "text-white";
+    const isValidOnCriticalBackgrounds = criticalBackgrounds.every(bg => {
+      try {
+        return validateWCAGContrast(smartAccentCSS, bg, 'AA');
+      } catch (error) {
+        console.warn('WCAG validation failed for', smartAccentCSS, 'on', bg, error);
+        return false;
+      }
+    });
+    
+    if (!isValidOnCriticalBackgrounds) {
+      // ✅ IMPROVED: Try accent candidates first before falling back to grays
+      const workingCandidate = accentCandidates.find(candidate => {
+        try {
+          return criticalBackgrounds.every(bg => 
+            validateWCAGContrast(candidate.tailwindBg, bg, 'AA')
+          );
+        } catch (error) {
+          return false;
+        }
+      });
+      
+      if (workingCandidate) {
+        safeCTABg = workingCandidate.tailwindBg;
+        safeCTAText = workingCandidate.textColor || getSmartTextColor(workingCandidate.tailwindBg, 'body');
+        console.log('✅ Using brand-safe accent color for CTA:', safeCTABg, 'with text:', safeCTAText);
+      } else {
+        // ✅ IMPROVED: Use branded fallback instead of generic gray
+        const brandedFallback = accentColor ? `bg-${accentColor}-600` : smartAccentCSS;
+        safeCTABg = brandedFallback;
+        safeCTAText = getSmartTextColor(brandedFallback, 'body');
+        console.log('✅ Using branded fallback for CTA:', safeCTABg, 'with text:', safeCTAText);
+      }
+    } else {
+      console.log('✅ Using original accent color for CTA:', safeCTABg, 'with text:', safeCTAText);
     }
     
     return { safeCTABg, safeCTAText };
@@ -110,20 +149,20 @@ export function generateColorTokens({
     bgNeutral: sectionBackgrounds.neutral || "bg-white",
     bgDivider: sectionBackgrounds.divider || `bg-${baseColor}-100/50`,
 
-    // 📘 Text Colors - CONSERVATIVE: Always use safe grays (no more base color confusion!)
-    textOnLight: "text-gray-900",                                          // Always safe dark gray on light backgrounds
-    textOnDark: "text-white",                                              // White text on dark backgrounds  
-    textOnAccent: "text-white",                                            // White text on accent-colored elements
-    textPrimary: "text-gray-900",                                          // Always safe dark gray for headlines
-    textSecondary: "text-gray-700",                                        // Always safe medium gray for body text
-    textMuted: "text-gray-500",                                            // Always safe light gray for muted text
+    // 📘 Text Colors - ENHANCED: Smart, context-aware text colors with WCAG compliance
+    textOnLight: getSmartTextColor('#ffffff', 'body'),                     // Smart text color for light backgrounds
+    textOnDark: getSmartTextColor('#000000', 'body'),                      // Smart text color for dark backgrounds
+    textOnAccent: getSmartTextColor(smartAccentCSS, 'body'),               // Smart text color for accent backgrounds
+    textPrimary: getContrastingTextColor(sectionBackgrounds.primary),      // Context-aware primary text
+    textSecondary: getSafeSecondaryTextColor(sectionBackgrounds.secondary), // Context-aware secondary text
+    textMuted: getSafeMutedTextColor(sectionBackgrounds.neutral),          // Context-aware muted text
     textInverse: "text-white",                                             // White text for inverse
 
-    // 📘 Background-specific text colors - ALL SAFE GRAYS
-    textOnPrimary: "text-white",                                           // White on primary (gradient) backgrounds
-    textOnSecondary: "text-gray-900",                                      // Dark gray on secondary backgrounds  
-    textOnNeutral: "text-gray-900",                                        // Dark gray on neutral backgrounds
-    textOnDivider: "text-gray-900",                                        // Dark gray on divider backgrounds
+    // 📘 Background-specific text colors - ENHANCED with smart detection
+    textOnPrimary: getSmartTextColor(sectionBackgrounds.primary || `bg-${baseColor}-600`, 'body'),
+    textOnSecondary: getSmartTextColor(sectionBackgrounds.secondary || `bg-${baseColor}-50`, 'body'),
+    textOnNeutral: getSmartTextColor(sectionBackgrounds.neutral || 'bg-white', 'body'),
+    textOnDivider: getSmartTextColor(sectionBackgrounds.divider || `bg-${baseColor}-100`, 'body'),
 
     // 📦 Surface Colors - Based on baseColor
     surfaceCard: "bg-white",                   // Card backgrounds

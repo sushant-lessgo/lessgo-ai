@@ -124,24 +124,24 @@ export default function PersonaUseCaseCompare(props: LayoutComponentProps) {
         {/* Header Section */}
         <div className="text-center mb-12">
           <EditableAdaptiveHeadline
-            content={blockContent.headline}
             mode={mode}
-            onUpdate={(value) => handleContentUpdate('headline', value)}
+            value={blockContent.headline}
+            onEdit={(value) => handleContentUpdate('headline', value)}
             className="mb-4"
-            fonts={fonts}
+            backgroundType={backgroundType as any}
             colorTokens={colorTokens}
-            variant="h1"
+            level="h1"
           />
           
           {(blockContent.subheadline || mode === 'edit') && (
             <EditableAdaptiveText
-              content={blockContent.subheadline || 'Add subheadline...'}
               mode={mode}
-              onUpdate={(value) => handleContentUpdate('subheadline', value)}
+              value={blockContent.subheadline || 'Add subheadline...'}
+              onEdit={(value) => handleContentUpdate('subheadline', value)}
               className={`max-w-3xl mx-auto ${!blockContent.subheadline && mode === 'edit' ? 'opacity-50' : ''}`}
-              fonts={fonts}
+              backgroundType={backgroundType as any}
               colorTokens={colorTokens}
-              variant="body-lg"
+              variant="body"
             />
           )}
         </div>
@@ -206,7 +206,7 @@ export default function PersonaUseCaseCompare(props: LayoutComponentProps) {
         <div className="grid md:grid-cols-2 gap-8">
           {/* Use Cases */}
           <div className={`rounded-lg ${colorTokens.bgNeutral} p-8`}>
-            <h3 className={`text-xl font-semibold mb-6 ${colorTokens.textPrimary}`} style={fonts.h3}>
+            <h3 className={`text-xl font-semibold mb-6 ${colorTokens.textPrimary}`} style={getTextStyle('h3')}>
               Your Use Cases
             </h3>
             <ul className="space-y-4">
@@ -225,7 +225,7 @@ export default function PersonaUseCaseCompare(props: LayoutComponentProps) {
 
           {/* Our Solutions */}
           <div className={`rounded-lg ${colorTokens.bgAccent || 'bg-blue-500'} bg-opacity-10 p-8 border-2 border-${(colorTokens.textAccent || 'text-blue-600').replace('text-', '')}`}>
-            <h3 className={`text-xl font-semibold mb-6 ${colorTokens.textAccent}`} style={fonts.h3}>
+            <h3 className={`text-xl font-semibold mb-6 ${colorTokens.textAccent}`} style={getTextStyle('h3')}>
               Our Solutions
             </h3>
             <ul className="space-y-4">
@@ -246,7 +246,7 @@ export default function PersonaUseCaseCompare(props: LayoutComponentProps) {
         {/* CTA */}
         <div className="text-center mt-12">
           <button className={`${colorTokens.bgAccent} text-white px-8 py-4 rounded-lg font-semibold hover:opacity-90 transition-opacity`}>
-            <span style={fonts.button}>
+            <span style={getTextStyle('button')}>
               See How It Works for {personaLabels[activePersona]}
             </span>
           </button>

@@ -4,6 +4,9 @@ import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
 import { useToolbarActions } from '@/hooks/useToolbarActions';
 import { calculateArrowPosition } from '@/utils/toolbarPositioning';
 import { AdvancedActionsMenu } from './AdvancedActionsMenu';
+import { pexelsApi, type StockPhoto } from '@/services/pexelsApi';
+import { TextInputModal } from '../modals/TextInputModal';
+import { SimpleImageEditor } from '@/components/ui/SimpleImageEditor';
 
 interface ImageToolbarProps {
   targetId: string;
@@ -16,6 +19,10 @@ export function ImageToolbar({ targetId, position, contextActions }: ImageToolba
   const [showUploader, setShowUploader] = useState(false);
   const [showStockPhotos, setShowStockPhotos] = useState(false);
   const [showEditor, setShowEditor] = useState(false);
+  const [showAltTextModal, setShowAltTextModal] = useState(false);
+  const [currentAltText, setCurrentAltText] = useState('');
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
   
   const toolbarRef = useRef<HTMLDivElement>(null);
   const advancedRef = useRef<HTMLDivElement>(null);
@@ -23,8 +30,9 @@ export function ImageToolbar({ targetId, position, contextActions }: ImageToolba
 
   const {
     images,
-    // updateImageAsset,
-    // toggleStockPhotoSearch,
+    updateImageAsset,
+    removeImageAsset,
+    hideElementToolbar,
     announceLiveRegion,
   } = useEditStore();
 
@@ -57,44 +65,87 @@ export function ImageToolbar({ targetId, position, contextActions }: ImageToolba
   }, [showAdvanced]);
 
   // Handle file upload
-  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    if (file) {
+    if (!file) return;
+
+    setUploadError(null);
+    setIsUploading(true);
+
+    try {
       // Validate file type
       if (!file.type.startsWith('image/')) {
-        alert('Please select a valid image file');
-        return;
+        throw new Error('Please select a valid image file (JPEG, PNG, GIF, WebP)');
       }
 
-      // Validate file size (5MB limit)
-      if (file.size > 5 * 1024 * 1024) {
-        alert('Image file must be smaller than 5MB');
-        return;
+      // Validate file size (10MB limit)
+      if (file.size > 10 * 1024 * 1024) {
+        throw new Error('Image file must be smaller than 10MB');
       }
 
       // Create preview URL
       const previewUrl = URL.createObjectURL(file);
       
-      // Update image asset
-      // updateImageAsset(targetId, {
-      //   id: targetId,
-      //   url: previewUrl,
-      //   alt: file.name,
-      //   width: 0, // Will be set after loading
-      //   height: 0,
-      //   format: file.type.split('/')[1] as any,
-      //   size: file.size,
-      //   isOptimized: false,
-      // });
+      // Load image to get dimensions
+      const img = new Image();
+      img.onload = () => {
+        try {
+          // Update image asset with actual dimensions
+          updateImageAsset(targetId, {
+            id: targetId,
+            url: previewUrl,
+            alt: file.name.replace(/\.[^/.]+$/, ''), // Remove extension for alt text
+            source: 'upload' as any,
+            urls: { original: previewUrl },
+            metadata: {
+              file: {
+                name: file.name,
+                size: file.size,
+                type: file.type,
+                uploadedAt: Date.now(),
+              },
+              image: {
+                width: img.width,
+                height: img.height,
+                aspectRatio: img.width / img.height,
+                format: file.type.split('/')[1] as any,
+                colorDepth: 24,
+                hasTransparency: file.type === 'image/png' || file.type === 'image/gif',
+              },
+            },
+            tags: [],
+            timestamps: {
+              createdAt: new Date(),
+              updatedAt: new Date(),
+            },
+          });
 
-      announceLiveRegion('Image uploaded successfully');
-      setShowUploader(false);
+          announceLiveRegion('Image uploaded successfully');
+          setIsUploading(false);
+        } catch (error) {
+          console.error('Error updating image asset:', error);
+          setUploadError('Failed to update image. Please try again.');
+          setIsUploading(false);
+        }
+      };
+
+      img.onerror = () => {
+        setUploadError('Invalid image file. Please select a different image.');
+        setIsUploading(false);
+      };
+
+      img.src = previewUrl;
+    } catch (error) {
+      setUploadError(error instanceof Error ? error.message : 'Upload failed. Please try again.');
+      setIsUploading(false);
     }
+
+    // Reset input
+    event.target.value = '';
   };
 
   // Handle stock photo search
   const handleStockPhotos = () => {
-    // toggleStockPhotoSearch();
     setShowStockPhotos(true);
     announceLiveRegion('Opening stock photo search');
   };
@@ -102,22 +153,61 @@ export function ImageToolbar({ targetId, position, contextActions }: ImageToolba
   // Handle image editing
   const handleImageEditor = () => {
     setShowEditor(true);
-    executeAction('open-image-editor', { imageId: targetId });
     announceLiveRegion('Opening image editor');
+  };
+
+  const handleImageEditorSave = (editedImageUrl: string) => {
+    // Update the image with the edited version
+    const targetElement = document.querySelector(`[data-image-id="${targetId}"]`) as HTMLImageElement;
+    const currentAlt = targetElement?.getAttribute('alt') || '';
+    
+    updateImageAsset(targetId, {
+      id: targetId,
+      url: editedImageUrl,
+      alt: currentAlt,
+      source: 'upload' as any,
+      urls: { original: editedImageUrl },
+      metadata: {
+        file: {
+          name: `edited-${targetId}.jpg`,
+          size: 0, // Size unknown after editing
+          type: 'image/jpeg',
+          uploadedAt: Date.now(),
+        },
+        image: {
+          width: 0, // Will be updated after loading
+          height: 0,
+          aspectRatio: 0,
+          format: 'jpeg',
+          colorDepth: 24,
+          hasTransparency: false,
+        },
+      },
+      tags: ['edited'],
+      timestamps: {
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+    });
+    
+    setShowEditor(false);
+    announceLiveRegion('Image edited successfully');
   };
 
   // Handle alt text editing
   const handleAltText = () => {
     const currentAlt = targetElement?.getAttribute('alt') || '';
-    const newAlt = prompt('Enter alt text for accessibility:', currentAlt);
-    
-    if (newAlt !== null) {
-      executeAction('update-alt-text', { imageId: targetId, altText: newAlt });
-      announceLiveRegion('Alt text updated');
-    }
+    setCurrentAltText(currentAlt);
+    setShowAltTextModal(true);
   };
 
-  // Primary Actions
+  const handleAltTextSave = (newAltText: string) => {
+    executeAction('update-alt-text', { imageId: targetId, altText: newAltText });
+    announceLiveRegion('Alt text updated');
+    setShowAltTextModal(false);
+  };
+
+  // MVP Actions - Essential & Important only
   const primaryActions = [
     {
       id: 'replace-image',
@@ -151,61 +241,26 @@ export function ImageToolbar({ targetId, position, contextActions }: ImageToolba
       icon: 'trash',
       handler: () => {
         if (confirm('Are you sure you want to delete this image?')) {
-          executeAction('delete-image', { imageId: targetId });
+          // Remove from store
+          removeImageAsset(targetId);
+          
+          // Also remove from DOM to provide immediate feedback
+          const targetElement = document.querySelector(`[data-image-id="${targetId}"]`);
+          if (targetElement) {
+            targetElement.remove();
+          }
+          
           announceLiveRegion('Image deleted');
+          
+          // Hide toolbar since image is deleted
+          hideElementToolbar();
         }
       },
     },
   ];
 
-  // Advanced Actions
-  const advancedActions = [
-    {
-      id: 'image-filters',
-      label: 'Filters & Effects',
-      icon: 'filter',
-      handler: () => executeAction('image-filters', { imageId: targetId }),
-    },
-    {
-      id: 'image-optimize',
-      label: 'Optimize Image',
-      icon: 'optimize',
-      handler: () => {
-        executeAction('optimize-image', { imageId: targetId });
-        announceLiveRegion('Optimizing image');
-      },
-    },
-    {
-      id: 'image-lazy-loading',
-      label: 'Lazy Loading',
-      icon: 'lazy',
-      handler: () => executeAction('toggle-lazy-loading', { imageId: targetId }),
-    },
-    {
-      id: 'image-link',
-      label: 'Add Link',
-      icon: 'link',
-      handler: () => executeAction('add-image-link', { imageId: targetId }),
-    },
-    {
-      id: 'image-caption',
-      label: 'Add Caption',
-      icon: 'caption',
-      handler: () => executeAction('add-image-caption', { imageId: targetId }),
-    },
-    {
-      id: 'image-responsive',
-      label: 'Responsive Settings',
-      icon: 'responsive',
-      handler: () => executeAction('image-responsive', { imageId: targetId }),
-    },
-    {
-      id: 'image-seo',
-      label: 'SEO Settings',
-      icon: 'seo',
-      handler: () => executeAction('image-seo', { imageId: targetId }),
-    },
-  ];
+  // Removed advanced actions for MVP - keeping toolbar simple
+
 
   return (
     <>
@@ -256,19 +311,7 @@ export function ImageToolbar({ targetId, position, contextActions }: ImageToolba
             </React.Fragment>
           ))}
           
-          {/* Advanced Actions Trigger */}
-          <div className="w-px h-6 bg-gray-200 mx-1" />
-          <button
-            onClick={() => setShowAdvanced(!showAdvanced)}
-            className={`flex items-center space-x-1 px-2 py-1 text-xs rounded transition-colors ${
-              showAdvanced 
-                ? 'bg-gray-100 text-gray-900' 
-                : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
-            }`}
-            title="More image options"
-          >
-            <span>⋯</span>
-          </button>
+          {/* Removed advanced actions menu for MVP */}
         </div>
       </div>
 
@@ -281,37 +324,59 @@ export function ImageToolbar({ targetId, position, contextActions }: ImageToolba
         className="hidden"
       />
 
-      {/* Advanced Actions Menu */}
-      {showAdvanced && (
-        <AdvancedActionsMenu
-          ref={advancedRef}
-          actions={advancedActions}
-          triggerElement={document.body}
-          toolbarType="image"
-          isVisible={showAdvanced}
-          onClose={() => setShowAdvanced(false)}
-        />
-      )}
+      {/* Removed advanced actions menu for MVP */}
 
       {/* Stock Photos Panel */}
       {showStockPhotos && (
         <StockPhotosPanel
           position={{
-            x: position.x,
-            y: position.y + 60,
+            x: Math.max(10, Math.min(position.x, window.innerWidth - 420)), // Ensure it fits on screen
+            y: Math.max(10, position.y + 60),
           }}
           onClose={() => setShowStockPhotos(false)}
-          onSelectImage={(imageUrl) => {
-            // updateImageAsset(targetId, {
-            //   id: targetId,
-            //   url: imageUrl,
-            //   alt: 'Stock photo',
-            //   width: 0,
-            //   height: 0,
-            //   format: 'jpg',
-            //   size: 0,
-            //   isOptimized: true,
-            // });
+          onSelectImage={(stockPhoto) => {
+            updateImageAsset(targetId, {
+              id: targetId,
+              url: stockPhoto.url,
+              alt: stockPhoto.alt || 'Stock photo',
+              source: 'pexels' as any,
+              urls: { 
+                original: stockPhoto.url,
+                large: stockPhoto.url,
+                medium: stockPhoto.url,
+                small: stockPhoto.url 
+              },
+              metadata: {
+                file: {
+                  name: `pexels-${stockPhoto.id}.jpg`,
+                  size: 0,
+                  type: 'image/jpeg',
+                  uploadedAt: Date.now(),
+                },
+                image: {
+                  width: stockPhoto.width || 0,
+                  height: stockPhoto.height || 0,
+                  aspectRatio: stockPhoto.width && stockPhoto.height ? stockPhoto.width / stockPhoto.height : 0,
+                  format: 'jpeg',
+                  colorDepth: 24,
+                  hasTransparency: false,
+                },
+              },
+              tags: stockPhoto.tags || [],
+              licensing: stockPhoto.licensing || {
+                license: 'pexels' as any,
+                details: {
+                  attribution: stockPhoto.attribution || 'Pexels',
+                  commercialUse: true,
+                  editingAllowed: true,
+                  distributionAllowed: true,
+                },
+              },
+              timestamps: {
+                createdAt: new Date(),
+                updatedAt: new Date(),
+              },
+            });
             setShowStockPhotos(false);
             announceLiveRegion('Stock photo selected');
           }}
@@ -319,7 +384,7 @@ export function ImageToolbar({ targetId, position, contextActions }: ImageToolba
       )}
 
       {/* Upload Progress */}
-      {images.uploadProgress[targetId] && (
+      {isUploading && (
         <div className="fixed z-60 bg-white border border-gray-200 rounded-lg shadow-lg p-3"
           style={{
             left: position.x,
@@ -328,15 +393,57 @@ export function ImageToolbar({ targetId, position, contextActions }: ImageToolba
         >
           <div className="flex items-center space-x-2">
             <div className="w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
-            <span className="text-sm text-gray-700">Uploading...</span>
-          </div>
-          <div className="mt-2 w-40 bg-gray-200 rounded-full h-2">
-            <div 
-              className="bg-blue-600 h-2 rounded-full transition-all duration-300"
-              style={{ width: `${images.uploadProgress[targetId]}%` }}
-            />
+            <span className="text-sm text-gray-700">Uploading image...</span>
           </div>
         </div>
+      )}
+
+      {/* Upload Error */}
+      {uploadError && (
+        <div className="fixed z-60 bg-red-50 border border-red-200 rounded-lg shadow-lg p-3"
+          style={{
+            left: position.x,
+            top: position.y + 60,
+            maxWidth: 280,
+          }}
+        >
+          <div className="flex items-start space-x-2">
+            <svg className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <div className="flex-1">
+              <p className="text-sm text-red-700">{uploadError}</p>
+              <button
+                onClick={() => setUploadError(null)}
+                className="mt-1 text-xs text-red-600 hover:text-red-800 underline"
+              >
+                Dismiss
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Alt Text Modal */}
+      <TextInputModal
+        isOpen={showAltTextModal}
+        onClose={() => setShowAltTextModal(false)}
+        onSelect={handleAltTextSave}
+        currentValue={currentAltText}
+        fieldName="Alt Text"
+        placeholder="Describe this image for screen readers..."
+        description="Alt text helps screen readers describe images to visually impaired users. Be descriptive but concise."
+      />
+
+      {/* Image Editor */}
+      {showEditor && targetElement && (
+        <SimpleImageEditor
+          isOpen={showEditor}
+          onClose={() => setShowEditor(false)}
+          imageUrl={targetElement.getAttribute('src') || ''}
+          onSave={handleImageEditorSave}
+          alt={targetElement.getAttribute('alt') || ''}
+        />
       )}
     </>
   );
@@ -346,45 +453,106 @@ export function ImageToolbar({ targetId, position, contextActions }: ImageToolba
 function StockPhotosPanel({ position, onClose, onSelectImage }: {
   position: { x: number; y: number };
   onClose: () => void;
-  onSelectImage: (imageUrl: string) => void;
+  onSelectImage: (stockPhoto: StockPhoto) => void;
 }) {
+  
   const [searchQuery, setSearchQuery] = useState('');
-  const [searchResults, setSearchResults] = useState<any[]>([]);
+  const [searchResults, setSearchResults] = useState<StockPhoto[]>([]);
   const [isSearching, setIsSearching] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [currentCategory, setCurrentCategory] = useState<'featured' | 'business' | 'tech' | 'people' | 'nature' | 'lifestyle'>('featured');
 
-  // Mock stock photos - in production this would call actual API
-  const mockStockPhotos = [
-    { id: 1, url: 'https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=400', alt: 'Business team' },
-    { id: 2, url: 'https://images.unsplash.com/photo-1551434678-e076c223a692?w=400', alt: 'Office workspace' },
-    { id: 3, url: 'https://images.unsplash.com/photo-1552664730-d307ca884978?w=400', alt: 'Technology' },
-    { id: 4, url: 'https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=400', alt: 'Teamwork' },
-  ];
-
+  // Load featured photos on mount
   useEffect(() => {
-    setSearchResults(mockStockPhotos);
+    loadFeaturedPhotos();
   }, []);
 
-  const handleSearch = (query: string) => {
+  const loadFeaturedPhotos = async () => {
+    setIsSearching(true);
+    setError(null);
+    try {
+      const photos = await pexelsApi.getFeaturedPhotos(12);
+      setSearchResults(photos);
+    } catch (err) {
+      setError('Failed to load photos. Please check your API key.');
+      console.error('Error loading featured photos:', err);
+    } finally {
+      setIsSearching(false);
+    }
+  };
+
+  const handleSearch = async (query: string) => {
+    if (!query.trim()) {
+      loadFeaturedPhotos();
+      return;
+    }
+
     setSearchQuery(query);
     setIsSearching(true);
+    setError(null);
     
-    // Mock search delay
-    setTimeout(() => {
-      setSearchResults(mockStockPhotos.filter(photo => 
-        photo.alt.toLowerCase().includes(query.toLowerCase())
-      ));
+    try {
+      const photos = await pexelsApi.searchPhotos({
+        query: query.trim(),
+        per_page: 12,
+        orientation: 'landscape',
+      });
+      setSearchResults(photos);
+    } catch (err) {
+      setError('Search failed. Please try again.');
+      console.error('Error searching photos:', err);
+    } finally {
       setIsSearching(false);
-    }, 500);
+    }
+  };
+
+  const handleCategorySearch = async (category: typeof currentCategory) => {
+    setCurrentCategory(category);
+    setIsSearching(true);
+    setError(null);
+    setSearchQuery('');
+    
+    try {
+      let photos: StockPhoto[];
+      
+      switch (category) {
+        case 'business':
+          photos = await pexelsApi.searchBusinessPhotos();
+          break;
+        case 'tech':
+          photos = await pexelsApi.searchTechPhotos();
+          break;
+        case 'people':
+          photos = await pexelsApi.searchPeoplePhotos();
+          break;
+        case 'nature':
+          photos = await pexelsApi.searchNaturePhotos();
+          break;
+        case 'lifestyle':
+          photos = await pexelsApi.searchLifestylePhotos();
+          break;
+        default:
+          photos = await pexelsApi.getFeaturedPhotos(12);
+      }
+      
+      setSearchResults(photos);
+    } catch (err) {
+      setError('Failed to load category photos.');
+      console.error('Error loading category photos:', err);
+    } finally {
+      setIsSearching(false);
+    }
   };
 
   return (
     <div
-      className="fixed z-50 bg-white border border-gray-200 rounded-lg shadow-lg"
+      className="fixed bg-white border-2 border-blue-500 rounded-lg shadow-2xl"
       style={{
         left: position.x,
         top: position.y,
         width: 400,
         height: 300,
+        zIndex: 10001, // Higher than toolbar's z-index
       }}
     >
       <div className="p-4 border-b border-gray-200">
@@ -400,7 +568,7 @@ function StockPhotosPanel({ position, onClose, onSelectImage }: {
           </button>
         </div>
         
-        <div className="relative">
+        <div className="relative mb-3">
           <input
             type="text"
             value={searchQuery}
@@ -418,21 +586,70 @@ function StockPhotosPanel({ position, onClose, onSelectImage }: {
             )}
           </div>
         </div>
+        
+        {/* Category buttons */}
+        <div className="flex gap-1 flex-wrap">
+          {[
+            { key: 'featured', label: 'Featured' },
+            { key: 'business', label: 'Business' },
+            { key: 'tech', label: 'Tech' },
+            { key: 'people', label: 'People' },
+            { key: 'nature', label: 'Nature' },
+            { key: 'lifestyle', label: 'Lifestyle' },
+          ].map((category) => (
+            <button
+              key={category.key}
+              onClick={() => handleCategorySearch(category.key as any)}
+              className={`px-2 py-1 text-xs rounded-md transition-colors ${
+                currentCategory === category.key
+                  ? 'bg-blue-100 text-blue-700'
+                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+              }`}
+            >
+              {category.label}
+            </button>
+          ))}
+        </div>
       </div>
       
-      <div className="p-4 overflow-y-auto" style={{ height: 'calc(100% - 100px)' }}>
+      <div className="p-4 overflow-y-auto" style={{ height: 'calc(100% - 140px)' }}>
+        {error && (
+          <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-md">
+            <p className="text-sm text-red-600">{error}</p>
+            <button
+              onClick={() => {
+                setError(null);
+                loadFeaturedPhotos();
+              }}
+              className="mt-2 text-xs text-red-700 underline hover:no-underline"
+            >
+              Try again
+            </button>
+          </div>
+        )}
+        
+        {/* Show loading indicator prominently */}
+        {isSearching && (
+          <div className="mb-4 p-4 text-center">
+            <div className="w-8 h-8 border-2 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-2"></div>
+            <p className="text-sm text-gray-600">Loading stock photos...</p>
+          </div>
+        )}
+        
         <div className="grid grid-cols-2 gap-3">
           {searchResults.map((photo) => (
             <button
               key={photo.id}
-              onClick={() => onSelectImage(photo.url)}
+              onClick={() => onSelectImage(photo)}
               className="relative group overflow-hidden rounded-lg bg-gray-100 hover:bg-gray-200 transition-colors"
               style={{ aspectRatio: '16/9' }}
+              title={`${photo.alt} by ${photo.author}`}
             >
               <img
                 src={photo.url}
                 alt={photo.alt}
                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
+                loading="lazy"
               />
               <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-opacity duration-200 flex items-center justify-center">
                 <div className="text-white opacity-0 group-hover:opacity-100 transition-opacity duration-200">
@@ -441,11 +658,18 @@ function StockPhotosPanel({ position, onClose, onSelectImage }: {
                   </svg>
                 </div>
               </div>
+              
+              {/* Attribution overlay */}
+              <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/50 to-transparent p-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                <p className="text-xs text-white truncate">
+                  by {photo.author}
+                </p>
+              </div>
             </button>
           ))}
         </div>
         
-        {searchResults.length === 0 && !isSearching && (
+        {searchResults.length === 0 && !isSearching && !error && (
           <div className="text-center py-8">
             <svg className="w-12 h-12 mx-auto text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -453,6 +677,27 @@ function StockPhotosPanel({ position, onClose, onSelectImage }: {
             <p className="text-sm text-gray-500">No photos found</p>
           </div>
         )}
+        
+        {isSearching && (
+          <div className="flex justify-center py-8">
+            <div className="w-8 h-8 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+          </div>
+        )}
+      </div>
+      
+      {/* Attribution footer */}
+      <div className="px-4 py-2 bg-gray-50 border-t border-gray-200">
+        <p className="text-xs text-gray-500 text-center">
+          Photos provided by{' '}
+          <a
+            href="https://pexels.com"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-blue-600 hover:underline"
+          >
+            Pexels
+          </a>
+        </p>
       </div>
     </div>
   );

@@ -20,74 +20,45 @@ type UserProfile = Pick<InputVariables, 'landingPageGoals' | 'targetAudience' | 
 type SectionBackgroundType = 'primary' | 'secondary' | 'neutral' | 'divider';
 type BaselineBackgroundType = 'primary-highlight' | 'secondary-highlight' | 'neutral' | 'divider-zone';
 
-// ===== TEXT COLOR HELPER FUNCTIONS (UPDATED WITH SAFE FALLBACKS) =====
+// ===== ENHANCED TEXT COLOR HELPER FUNCTIONS =====
+// Import the new improved text color utilities
+import { getSmartTextColor } from '@/utils/improvedTextColors';
+import { analyzeBackground } from '@/utils/backgroundAnalysis';
+
 export function getTextColorForBackground(
   backgroundType: 'primary' | 'secondary' | 'neutral' | 'divider',
   colorTokens: any
 ): { heading: string; body: string; muted: string } {
+  // Get the background CSS for analysis
+  const backgroundCSS = getBackgroundCSSForType(backgroundType, colorTokens);
+  
+  // Analyze the background using the new smart system
+  const backgroundAnalysis = analyzeBackground(backgroundCSS);
+  
+  // Use smart text color selection
+  return {
+    heading: getSmartTextColor(backgroundAnalysis.dominantColor, 'heading'),
+    body: getSmartTextColor(backgroundAnalysis.dominantColor, 'body'),
+    muted: getSmartTextColor(backgroundAnalysis.dominantColor, 'muted')
+  };
+}
+
+// Helper function to get background CSS for analysis
+function getBackgroundCSSForType(
+  backgroundType: 'primary' | 'secondary' | 'neutral' | 'divider',
+  colorTokens: any
+): string {
   switch(backgroundType) {
     case 'primary':
-      // For radial gradients with blur, ensure high contrast text
-      // Check if this is a radial gradient (which might have blur effects)
-      const isRadialGradient = colorTokens.bgPrimary?.includes('radial-gradient') || colorTokens.bgPrimary?.includes('blur-[');
-      
-      if (isRadialGradient) {
-        // Force high contrast for radial gradients with blur
-        // The blue radial gradient with blur creates a light background effect
-        return {
-          heading: '!text-gray-900 font-bold drop-shadow-sm',  // !important to override other styles
-          body: '!text-gray-800 drop-shadow-sm',               // !important for strong dark text
-          muted: '!text-gray-600 drop-shadow-sm'               // !important for medium gray
-        };
-      }
-      
-      // Check if it's a light gradient (like from-blue-300 to-white)
-      const isLightGradient = colorTokens.bgPrimary?.includes('to-white') || 
-                             colorTokens.bgPrimary?.includes('from-blue-300') ||
-                             colorTokens.bgPrimary?.includes('via-blue-100');
-      
-      if (isLightGradient) {
-        return {
-          heading: 'text-gray-900 font-bold',  // Dark text for light backgrounds
-          body: 'text-gray-800',               // Strong dark text
-          muted: 'text-gray-600'               // Medium gray
-        };
-      }
-      
-      // Dark gradients need white/light text - use safe defaults
-      return {
-        heading: colorTokens.textOnPrimary || colorTokens.textOnDark || 'text-white',
-        body: colorTokens.textOnPrimary || colorTokens.textOnDark || 'text-white', 
-        muted: colorTokens.textInverse || 'text-gray-200'
-      };
+      return colorTokens.bgPrimary || colorTokens.textOnPrimary || 'bg-gradient-to-r from-blue-500 to-blue-600';
     case 'secondary':
-      // Secondary backgrounds may have color tints - ALWAYS use safe gray text
-      return {
-        heading: 'text-gray-900',     // Always safe dark gray for headlines
-        body: 'text-gray-700',        // Always safe medium gray for body
-        muted: 'text-gray-500'        // Always safe light gray for muted
-      };
-    case 'neutral': 
-      // Neutral backgrounds - use safe gray text
-      return {
-        heading: 'text-gray-900',     // Always safe dark gray
-        body: 'text-gray-700',        // Always safe medium gray  
-        muted: 'text-gray-500'        // Always safe light gray
-      };
+      return colorTokens.bgSecondary || colorTokens.textOnSecondary || 'bg-blue-50';
+    case 'neutral':
+      return colorTokens.bgNeutral || colorTokens.textOnNeutral || 'bg-white';
     case 'divider':
-      // Divider backgrounds - use safe gray text
-      return {
-        heading: 'text-gray-900',     // Always safe dark gray
-        body: 'text-gray-700',        // Always safe medium gray
-        muted: 'text-gray-500'        // Always safe light gray
-      };
+      return colorTokens.bgDivider || colorTokens.textOnDivider || 'bg-gray-100/50';
     default:
-      // Safe fallback for any unknown background type
-      return {
-        heading: 'text-gray-900',
-        body: 'text-gray-700',
-        muted: 'text-gray-500'
-      };
+      return 'bg-white';
   }
 }
 
@@ -105,6 +76,15 @@ export function getMutedColorForBackground(
 ): string {
   const textColors = getTextColorForBackground(backgroundType, colorTokens);
   return textColors.muted;
+}
+
+// Enhanced function for heading colors
+export function getHeadingColorForBackground(
+  backgroundType: 'primary' | 'secondary' | 'neutral' | 'divider',
+  colorTokens: any
+): string {
+  const textColors = getTextColorForBackground(backgroundType, colorTokens);
+  return textColors.heading;
 }
 
 // ===== CONVERSION PRIORITY MATRIX =====

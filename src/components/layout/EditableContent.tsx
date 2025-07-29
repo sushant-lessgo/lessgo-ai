@@ -5,6 +5,8 @@ import { useAutoSave } from '@/hooks/useAutoSave';
 import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
 import { generateAccessibleBadgeColors } from '@/utils/textContrastUtils';
 import { getTextColorForBackground } from '@/modules/Design/background/enhancedBackgroundLogic';
+import { getSmartTextColor } from '@/utils/improvedTextColors';
+import { analyzeBackground } from '@/utils/backgroundAnalysis';
 import type { TextFormatState, AutoSaveConfig, InlineEditorConfig, TextSelection } from '@/app/edit/[token]/components/editor/InlineTextEditor';
 
 interface EditableContentProps {
@@ -530,19 +532,29 @@ export function EditableAdaptiveHeadline({
   });
   
   const getAdaptiveTextColor = () => {
-    // ✅ Use enhanced background logic for proper text contrast
-    const textColors = getTextColorForBackground(backgroundType || 'neutral', colorTokens);
+    // ✅ ENHANCED: Use new smart text color system with WCAG validation
+    const sectionBackground = props.sectionBackground || colorTokens?.bgPrimary || 'bg-white';
+    const smartColor = getSmartTextColor(sectionBackground, 'heading');
     
-    // Extract color value for inline styles - convert Tailwind class to hex
-    const colorClass = textColors.heading;
-    let colorValue = '#000000'; // Default fallback
+    // Generate CSS class name from color (simplified mapping)
+    const colorClass = smartColor === '#ffffff' ? 'text-white' : 
+                      smartColor === '#e5e7eb' ? 'text-gray-200' :
+                      smartColor === '#374151' ? 'text-gray-700' : 
+                      smartColor === '#111827' ? 'text-gray-900' : 'text-gray-900';
     
-    if (colorClass.includes('text-gray-900')) colorValue = '#111827';
-    else if (colorClass.includes('text-gray-800')) colorValue = '#1f2937';
-    else if (colorClass.includes('text-white')) colorValue = '#ffffff';
-    else if (colorClass.includes('text-gray-200')) colorValue = '#e5e7eb';
-    
-    return { class: colorClass, value: colorValue };
+    return { class: colorClass, value: smartColor };
+  };
+  
+  // Helper function to extract hex values from Tailwind classes
+  const extractColorValue = (colorClass: string): string => {
+    if (colorClass.includes('text-gray-900')) return '#111827';
+    if (colorClass.includes('text-gray-800')) return '#1f2937';
+    if (colorClass.includes('text-gray-700')) return '#374151';
+    if (colorClass.includes('text-gray-600')) return '#4b5563';
+    if (colorClass.includes('text-gray-500')) return '#6b7280';
+    if (colorClass.includes('text-white')) return '#ffffff';
+    if (colorClass.includes('text-gray-200')) return '#e5e7eb';
+    return '#000000'; // Default fallback
   };
   
   const adaptiveColor = getAdaptiveTextColor();
@@ -596,23 +608,31 @@ export function EditableAdaptiveText({
 }) {
   
   const getAdaptiveTextColor = () => {
-    // ✅ Use enhanced background logic for proper text contrast
-    const textColors = getTextColorForBackground(backgroundType || 'neutral', colorTokens);
+    // ✅ ENHANCED: Use new smart text color system with WCAG validation
+    const sectionBackground = props.sectionBackground || colorTokens?.bgPrimary || 'bg-white';
+    const textType = variant === 'muted' ? 'muted' : 'body';
+    const smartColor = getSmartTextColor(sectionBackground, textType);
     
-    const colorClass = variant === 'muted' ? textColors.muted : textColors.body;
+    // Generate CSS class name from color (simplified mapping)
+    const colorClass = smartColor === '#ffffff' ? 'text-white' : 
+                      smartColor === '#e5e7eb' ? 'text-gray-200' :
+                      smartColor === '#6b7280' ? 'text-gray-500' :
+                      smartColor === '#374151' ? 'text-gray-700' : 
+                      smartColor === '#111827' ? 'text-gray-900' : 'text-gray-700';
     
-    // Extract color value for inline styles - convert Tailwind class to hex
-    let colorValue = '#000000'; // Default fallback
-    
-    if (colorClass.includes('text-gray-900')) colorValue = '#111827';
-    else if (colorClass.includes('text-gray-800')) colorValue = '#1f2937';
-    else if (colorClass.includes('text-gray-700')) colorValue = '#374151';
-    else if (colorClass.includes('text-gray-600')) colorValue = '#4b5563';
-    else if (colorClass.includes('text-gray-500')) colorValue = '#6b7280';
-    else if (colorClass.includes('text-white')) colorValue = '#ffffff';
-    else if (colorClass.includes('text-gray-200')) colorValue = '#e5e7eb';
-    
-    return { class: colorClass, value: colorValue };
+    return { class: colorClass, value: smartColor };
+  };
+  
+  // Helper function to extract hex values from Tailwind classes
+  const extractColorValue = (colorClass: string): string => {
+    if (colorClass.includes('text-gray-900')) return '#111827';
+    if (colorClass.includes('text-gray-800')) return '#1f2937';
+    if (colorClass.includes('text-gray-700')) return '#374151';
+    if (colorClass.includes('text-gray-600')) return '#4b5563';
+    if (colorClass.includes('text-gray-500')) return '#6b7280';
+    if (colorClass.includes('text-white')) return '#ffffff';
+    if (colorClass.includes('text-gray-200')) return '#e5e7eb';
+    return '#000000'; // Default fallback
   };
   
   const adaptiveColor = getAdaptiveTextColor();

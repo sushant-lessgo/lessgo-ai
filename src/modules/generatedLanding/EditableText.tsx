@@ -2,6 +2,7 @@ type Props = {
     value: string
     onChange: (value: string) => void
     className?: string
+    style?: React.CSSProperties
     isEditable: boolean
     sectionId?: string
     elementKey?: string
@@ -21,11 +22,12 @@ type Props = {
   // }
   
 
-  export default function EditableText({ value, onChange, className = "", isEditable, sectionId, elementKey}: Props) {
+  export default function EditableText({ value, onChange, className = "", style, isEditable, sectionId, elementKey}: Props) {
     if (!isEditable) {
       return (
         <div 
           className={className}
+          style={style}
           data-section-id={sectionId}
           data-element-key={elementKey}
         >
@@ -74,7 +76,7 @@ type Props = {
         onBlur={handleBlur}
         onKeyDown={handleKeyDown}
         className={`px-3 py-2 rounded-md outline-none cursor-text focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${className}`}
-        style={{ minHeight: '44px' }}
+        style={{ minHeight: '44px', ...style }}
         data-section-id={sectionId}
         data-element-key={elementKey}
       >

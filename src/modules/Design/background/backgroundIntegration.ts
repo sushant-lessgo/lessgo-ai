@@ -6,10 +6,7 @@ import { selectAccentOption } from '../ColorSystem/selectAccentFromTags';
 import { getSecondaryBackground } from './simpleSecondaryBackgrounds';
 import { 
   assignEnhancedBackgroundsToSections, 
-  getEnhancedSectionBackground,
-  getTextColorForBackground,
-  getBodyColorForBackground,
-  getMutedColorForBackground
+  getEnhancedSectionBackground
 } from './enhancedBackgroundLogic';
 
 // ✅ PHASE 5.2: Import canonical types from central type system
@@ -172,6 +169,32 @@ export function getAccentColor(baseColor: string, onboardingData: OnboardingData
   accentCSS: string;
 } {
   try {
+    // 🎨 NEW: Use smart color harmony system
+    const { getSmartAccentColor } = require('@/utils/colorHarmony');
+    
+    const businessContext = {
+      marketCategory: onboardingData.marketCategory,
+      targetAudience: onboardingData.targetAudience,
+      landingPageGoals: onboardingData.landingPageGoals,
+      toneProfile: onboardingData.toneProfile,
+      awarenessLevel: onboardingData.awarenessLevel,
+      marketSophisticationLevel: onboardingData.marketSophisticationLevel
+    };
+
+    console.log('🎨 Using smart color harmony accent selection system');
+    const smartAccent = getSmartAccentColor(baseColor, businessContext);
+    
+    if (smartAccent && smartAccent.confidence > 0.5) {
+      console.log('✅ Smart accent selection successful:', smartAccent);
+      return {
+        accentColor: smartAccent.accentColor,
+        accentCSS: smartAccent.accentCSS,
+      };
+    }
+    
+    // Fallback to old system if smart selection has low confidence
+    console.log('⚠️ Smart accent had low confidence, trying legacy system');
+    
     // ✅ PHASE 5.2: Map canonical field names to selectAccentOption context
     const userContext = {
       marketCategory: onboardingData.marketCategory || '',
@@ -183,19 +206,16 @@ export function getAccentColor(baseColor: string, onboardingData: OnboardingData
       pricingModels: onboardingData.pricingModel || '',
     };
 
-    console.log('🎨 Using sophisticated accent selection system');
     const selectedAccent = selectAccentOption(userContext, baseColor);
     
     if (selectedAccent) {
-     // console.log('✅ Sophisticated accent selection successful:', selectedAccent);
-      
       return {
         accentColor: selectedAccent.accentColor,
         accentCSS: `bg-${selectedAccent.accentColor}-600`,
       };
     }
   } catch (error) {
-    console.warn('Error in sophisticated accent selection system:', error);
+    console.warn('Error in accent selection systems:', error);
   }
   
   console.warn(`No accent options found for base color ${baseColor}, using fallback`);
@@ -518,9 +538,9 @@ export function validateEnhancedAssignments(
   return { isValid, issues, recommendations };
 }
 
-// ===== EXPORT TEXT COLOR HELPERS =====
+// ===== EXPORT TEXT COLOR HELPERS (Updated to use improved system) =====
 export { 
   getTextColorForBackground,
   getBodyColorForBackground,
   getMutedColorForBackground
-};
+} from '@/utils/improvedTextColors';

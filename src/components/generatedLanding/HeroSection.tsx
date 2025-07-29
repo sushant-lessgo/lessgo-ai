@@ -11,6 +11,7 @@ import type { Action } from "@/modules/generatedLanding/landingPageReducer";
 import type { CtaConfigType } from "@/types";
 import type { GPTOutput } from "@/modules/prompt/types"
 import { Button } from "@/components/ui/button";
+import { useSmartTextColorsForSection, useSmartCTAColors } from "@/hooks/useSmartTextColors";
 
 type Props = {
   headline: string;
@@ -39,6 +40,11 @@ export default function HeroSection({
 }: Props) {
   const [image, setImage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+
+  // Get smart text colors for this section
+  const smartColors = useSmartTextColorsForSection('hero');
+  // Get smart CTA colors that auto-update with accent changes
+  const ctaColors = useSmartCTAColors();
 
   const showImage = isEditable ? image : hero_image;
 
@@ -78,9 +84,10 @@ export default function HeroSection({
                 trackEdit('hero', 'headline', val);
                 dispatch?.({ type: "UPDATE_FIELD", payload: { path: "hero.headline", value: val } });
               }}
-              className={`text-4xl leading-tight md:text-5xl font-extrabold text-landing-textPrimary ${
+              className={`text-4xl leading-tight md:text-5xl font-extrabold ${
                 isTwoColumn ? "max-w-xl text-left" : "max-w-[70rem] text-center mx-auto"
               }`}
+              style={{ color: smartColors.heading }}
               isEditable={isEditable}
               sectionId={sectionId}
               elementKey="headline"
@@ -94,9 +101,10 @@ export default function HeroSection({
                 trackEdit('hero', 'subheadline', val);
                 dispatch?.({ type: "UPDATE_FIELD", payload: { path: "hero.subheadline", value: val } });
               }}
-              className={`text-lg text-landing-textSecondary ${
+              className={`text-lg ${
                 isTwoColumn ? "max-w-xl text-left" : "max-w-[50rem] text-center mx-auto"
               }`}
+              style={{ color: smartColors.body }}
               isEditable={isEditable}
               sectionId={sectionId}
               elementKey="subheadline"
@@ -111,9 +119,10 @@ export default function HeroSection({
                   trackEdit('hero', 'body', val);
                   dispatch?.({ type: "UPDATE_FIELD", payload: { path: "hero.body_text", value: val } });
                 }}
-                className={`text-base text-landing-textSecondary ${
+                className={`text-base ${
                   isTwoColumn ? "max-w-xl text-left" : "max-w-[40rem] text-center mx-auto"
                 }`}
+                style={{ color: smartColors.body }}
                 isEditable={isEditable}
                 sectionId={sectionId}
                 elementKey="body_text"
@@ -147,7 +156,7 @@ export default function HeroSection({
               <>
                 {ctaConfig.type === "link" && (
                   <a href={ctaConfig.url} target="_blank" rel="noopener noreferrer">
-                    <Button className="bg-landing-primary text-white hover:bg-landing-primaryHover transition w-full sm:w-auto text-center">
+                    <Button className={`${ctaColors.background} ${ctaColors.text} hover:${ctaColors.hover} transition w-full sm:w-auto text-center`}>
                       {ctaConfig.cta_text}
                     </Button>
                   </a>
@@ -155,7 +164,7 @@ export default function HeroSection({
 
                 {ctaConfig.type === "email-form" && ctaConfig.placement === "separate-section" && (
                   <a href="#email-form">
-                    <Button className="bg-landing-primary text-white hover:bg-landing-primaryHover transition w-full sm:w-auto text-center">
+                    <Button className={`${ctaColors.background} ${ctaColors.text} hover:${ctaColors.hover} transition w-full sm:w-auto text-center`}>
                       {ctaConfig.cta_text}
                     </Button>
                   </a>
@@ -172,7 +181,7 @@ export default function HeroSection({
                       formId: ctaConfig.formId,
                       behavior: ctaConfig.behavior
                     }}
-                    className="bg-landing-primary text-white hover:bg-landing-primaryHover transition w-full sm:w-auto text-center"
+                    className={`${ctaColors.background} ${ctaColors.text} hover:${ctaColors.hover} transition w-full sm:w-auto text-center`}
                   >
                     {ctaConfig.cta_text}
                   </FormConnectedButton>
@@ -192,7 +201,8 @@ export default function HeroSection({
                   trackEdit('hero', 'urgency_text', val);
                   dispatch?.({ type: "UPDATE_FIELD", payload: { path: "hero.urgency_text", value: val } });
                 }}
-                className="text-sm text-red-600 sm:mt-0"
+                className="text-sm sm:mt-0"
+                style={{ color: smartColors.muted }}
                 isEditable={isEditable}
                 sectionId={sectionId}
                 elementKey="urgency_text"
@@ -205,7 +215,10 @@ export default function HeroSection({
         {/* Right Column: Image */}
         {isEditable ? (
           !image ? (
-            <div className="w-full min-h-[280px] md:min-h-[400px] bg-landing-mutedBg border-2 border-dashed border-landing-border rounded-lg flex flex-col items-center justify-center text-landing-textMuted text-sm shadow-sm p-4 relative hover:border-landing-primary hover:bg-slate-50 transition">
+            <div 
+              className="w-full min-h-[280px] md:min-h-[400px] bg-landing-mutedBg border-2 border-dashed border-landing-border rounded-lg flex flex-col items-center justify-center text-sm shadow-sm p-4 relative hover:border-landing-primary hover:bg-slate-50 transition"
+              style={{ color: smartColors.muted }}
+            >
               <label htmlFor="imageUpload" className="cursor-pointer text-center">
                 <p className="font-medium text-2xl pb-2">Upload Image</p>
                 <p>JPG or PNG — Max size 2MB</p>

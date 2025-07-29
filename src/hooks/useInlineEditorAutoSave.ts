@@ -1,7 +1,7 @@
 // hooks/useInlineEditorAutoSave.ts - Specialized auto-save for inline text editor
 import { useState, useCallback, useMemo, useEffect } from 'react';
 import { debounce } from 'lodash';
-import { useEditStore } from './useEditStore';
+import { useEditStoreLegacy as useEditStore } from './useEditStoreLegacy';
 
 export interface ContentChange {
   id: string;

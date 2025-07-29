@@ -7,6 +7,7 @@ import { Settings } from 'lucide-react';
 import { usePostHog } from 'posthog-js/react';
 import { CTAConfiguratorPopover } from './CTAConfiguratorPopover';
 import { FormConnectedButton } from '@/components/forms/FormConnectedButton';
+import { useSmartCTAColors } from '@/hooks/useSmartTextColors';
 import type { CtaConfigType } from '@/types';
 import type { Action } from '@/modules/generatedLanding/landingPageReducer';
 
@@ -22,6 +23,7 @@ interface EditableCTAProps {
 export function EditableCTA({ ctaConfig, isEditable, dispatch, ctaText, sectionId, elementKey }: EditableCTAProps) {
   const [open, setOpen] = useState(false);
   const posthog = usePostHog();
+  const ctaColors = useSmartCTAColors();
 
   const openConfig = () => {
     setOpen(true);
@@ -46,13 +48,13 @@ export function EditableCTA({ ctaConfig, isEditable, dispatch, ctaText, sectionI
               formId: ctaConfig.formId,
               behavior: ctaConfig.behavior
             }}
-            className="w-full"
+            className={`w-full ${ctaColors.background} ${ctaColors.text} hover:${ctaColors.hover}`}
           >
             {ctaConfig.cta_text}
           </FormConnectedButton>
         ) : (
           <Button 
-            className="w-full"
+            className={`w-full ${ctaColors.background} ${ctaColors.text} hover:${ctaColors.hover}`}
             onClick={() => {
               if (ctaConfig.type === 'link' && ctaConfig.url) {
                 window.open(ctaConfig.url, '_blank');

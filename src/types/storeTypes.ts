@@ -150,6 +150,7 @@ export type Theme = {
   colors: {
     baseColor: string;        // "gray", "slate", "stone"
     accentColor: string;      // "purple", "blue", "emerald"
+    accentCSS?: string;       // "bg-purple-600"
     sectionBackgrounds: SectionBackgroundInput;
   };
   spacing: {
@@ -159,7 +160,18 @@ export type Theme = {
   corners: {
     radius: number;
   };
+  // NEW: Text color override system
+  textColorMode?: 'auto' | 'manual';
+  textColorOverrides?: {
+    heading?: string;
+    body?: string;
+    muted?: string;
+  };
+  textContrastLevel?: number; // 0-100, default 50
 };
+
+// Theme colors subset type for color modal
+export type ThemeColors = Theme['colors'];
 
 // Section background input type (you may need to adjust this)
 export interface SectionBackgroundInput {

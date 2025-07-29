@@ -1,7 +1,7 @@
 // hooks/useOptimizedEditStore.ts - Memoized selectors and actions for better performance
 
 import { useMemo, useCallback } from 'react';
-import { useEditStore } from './useEditStore';
+import { useEditStoreLegacy as useEditStore } from './useEditStoreLegacy';
 import type { EditStore } from '@/types/store';
 
 /**
@@ -10,100 +10,107 @@ import type { EditStore } from '@/types/store';
 
 // Core state selectors
 export function useEditMode() {
-  return useEditStore(useCallback((state: EditStore) => state.mode, []));
+  const { mode } = useEditStore();
+  return mode;
 }
 
 export function useEditingMode() {
-  return useEditStore(useCallback((state: EditStore) => state.editMode, []));
+  const { editMode } = useEditStore();
+  return editMode;
 }
 
 export function useSelectedSection() {
-  return useEditStore(useCallback((state: EditStore) => state.selectedSection, []));
+  const { selectedSection } = useEditStore();
+  return selectedSection;
 }
 
 export function useSelectedElement() {
-  return useEditStore(useCallback((state: EditStore) => state.selectedElement, []));
+  const { selectedElement } = useEditStore();
+  return selectedElement;
 }
 
 // Toolbar state
 export function useToolbarState() {
-  return useEditStore(useCallback((state: EditStore) => state.toolbar, []));
+  const { toolbar } = useEditStore();
+  return toolbar;
 }
 
 // Content selectors with memoization
 export function useSections() {
-  return useEditStore(useCallback((state: EditStore) => state.sections, []));
+  const { sections } = useEditStore();
+  return sections;
 }
 
 export function useSectionLayouts() {
-  return useEditStore(useCallback((state: EditStore) => state.sectionLayouts, []));
+  const { sectionLayouts } = useEditStore();
+  return sectionLayouts;
 }
 
 export function useContent() {
-  return useEditStore(useCallback((state: EditStore) => state.content, []));
+  const { content } = useEditStore();
+  return content;
 }
 
 // Optimized section-specific selectors
 export function useSection(sectionId: string) {
-  return useEditStore(
-    useCallback((state: EditStore) => state.content[sectionId], [sectionId])
-  );
+  const { content } = useEditStore();
+  return content[sectionId];
 }
 
 export function useSectionLayout(sectionId: string) {
-  return useEditStore(
-    useCallback((state: EditStore) => state.sectionLayouts[sectionId], [sectionId])
-  );
+  const { sectionLayouts } = useEditStore();
+  return sectionLayouts[sectionId];
 }
 
 export function useSectionElements(sectionId: string) {
-  return useEditStore(
-    useCallback((state: EditStore) => {
-      const section = state.content[sectionId];
-      return section?.elements || {};
-    }, [sectionId])
-  );
+  const { content } = useEditStore();
+  const section = content[sectionId];
+  return section?.elements || {};
 }
 
 // Element-specific selectors
 export function useElement(sectionId: string, elementKey: string) {
-  return useEditStore(
-    useCallback((state: EditStore) => {
-      const section = state.content[sectionId];
-      return section?.elements[elementKey];
-    }, [sectionId, elementKey])
-  );
+  const { content } = useEditStore();
+  const section = content[sectionId];
+  return section?.elements?.[elementKey] || '';
 }
 
 // Theme and settings
 export function useTheme() {
-  return useEditStore(useCallback((state: EditStore) => state.theme, []));
+  const { theme } = useEditStore();
+  return theme;
 }
 
 export function useGlobalSettings() {
-  return useEditStore(useCallback((state: EditStore) => state.globalSettings, []));
+  const { globalSettings } = useEditStore();
+  return globalSettings;
 }
 
 // UI state selectors
 export function useLeftPanel() {
-  return useEditStore(useCallback((state: EditStore) => state.leftPanel, []));
+  const { leftPanel } = useEditStore();
+  return leftPanel;
 }
 
 export function useAIGeneration() {
-  return useEditStore(useCallback((state: EditStore) => state.aiGeneration, []));
+  const { aiGeneration } = useEditStore();
+  return aiGeneration;
 }
 
 // Persistence state
 export function usePersistenceState() {
-  return useEditStore(useCallback((state: EditStore) => state.persistence, []));
+  const { persistence } = useEditStore();
+  return persistence;
 }
 
 export function useIsSaving() {
-  return useEditStore(useCallback((state: EditStore) => state.persistence.isSaving, []));
+  const { persistence } = useEditStore();
+  return persistence.isSaving;
 }
 
 export function useIsDirty() {
-  return useEditStore(useCallback((state: EditStore) => state.persistence.isDirty, []));
+  const { persistence } = useEditStore();
+  return persistence.isDirty;
 }
 
 /**
@@ -271,7 +278,7 @@ export function usePageCompletion() {
     if (sections.length === 0) return { percentage: 0, completedSections: 0, totalSections: 0 };
     
     let completedSections = 0;
-    sections.forEach(sectionId => {
+    sections.forEach((sectionId: string) => {
       const section = content[sectionId];
       if (section && Object.keys(section.elements || {}).length > 0) {
         completedSections++;

@@ -8,6 +8,7 @@ import {
   getSectionBackgroundTypeWithContext,
   assignEnhancedBackgroundsToAllSections
 } from '@/modules/Design/background/backgroundIntegration';
+import { SmartTextSection } from '@/components/layout/SmartTextSection';
 
 // ... (font loading utility remains the same)
 const loadGoogleFonts = () => {
@@ -356,17 +357,23 @@ const finalSections: OrderedSection[] = processedSections
       );
     }
 
-    // Render the actual component
+    // Render the actual component wrapped in SmartTextSection
     try {
       return (
-        <LayoutComponent
+        <SmartTextSection
           key={sectionId}
-          sectionId={sectionId}
           backgroundType={backgroundType}
           sectionBackgroundCSS={sectionBackgroundCSS}
-          className=""
-          {...(data || {})}
-        />
+          sectionId={sectionId}
+        >
+          <LayoutComponent
+            sectionId={sectionId}
+            backgroundType={backgroundType}
+            sectionBackgroundCSS={sectionBackgroundCSS}
+            className=""
+            {...(data || {})}
+          />
+        </SmartTextSection>
       );
     } catch (error) {
       console.error(`Error rendering section ${sectionId}:`, error);

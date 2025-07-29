@@ -379,22 +379,21 @@ export function useStatePersistence(options: UseStatePersistenceOptions): UseSta
 
   // Subscribe to edit store changes for immediate dirty state sync
   useEffect(() => {
-    // Fix #1: Use the Zustand store's subscribe method properly
-    const unsubscribe = useEditStore.subscribe(
-      // Fix #2: Properly type the state parameter
-      (state: ReturnType<typeof useEditStore.getState>) => {
-        // Update persistence state to reflect edit store dirty state
+    // Legacy store doesn't have subscribe method - use polling instead
+    const interval = setInterval(() => {
+      const state = useEditStore.getState();
+      if (state) {
         setPersistenceState(prev => ({
           ...prev,
-          isDirty: state.isDirty || state.autoSave?.isDirty || false,
-          isSaving: state.isSaving || state.autoSave?.isSaving || false,
-          lastSaved: state.lastSaved || state.autoSave?.lastSaved,
-          saveError: state.autoSave?.error,
+          isDirty: (state as any).isDirty || (state as any).autoSave?.isDirty || false,
+          isSaving: (state as any).isSaving || (state as any).autoSave?.isSaving || false,
+          lastSaved: (state as any).lastSaved || (state as any).autoSave?.lastSaved,
+          saveError: (state as any).autoSave?.error,
         }));
       }
-    );
+    }, 1000);
 
-    return unsubscribe;
+    return () => clearInterval(interval);
   }, []);
 
   // Initial load effect

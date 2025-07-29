@@ -9,8 +9,10 @@ import {
   extractLayoutContent,
   StoreElementTypes 
 } from '@/types/storeTypes';
-import { getTextColorForBackground } from '@/modules/Design/background/backgroundIntegration';
+import { getTextColorForBackground } from '@/modules/Design/background/enhancedBackgroundLogic';
 import { validateTextBackgroundContrast } from '@/utils/textContrastUtils';
+import { getSmartTextColor } from '@/utils/improvedTextColors';
+import { analyzeBackground } from '@/utils/backgroundAnalysis';
 
 export interface UseLayoutComponentProps extends LayoutComponentProps {
   contentSchema: Record<string, { type: 'string' | 'array'; default: string }>;
@@ -98,7 +100,7 @@ export function useLayoutComponent<T = Record<string, any>>({
         } else if (custom.gradient) {
           // Gradient background
           const { type, angle, stops } = custom.gradient;
-          const gradientStops = stops.map(stop => `${stop.color} ${stop.position}%`).join(', ');
+          const gradientStops = stops.map((stop: any) => `${stop.color} ${stop.position}%`).join(', ');
           
           if (type === 'linear') {
             customCSS = `bg-[linear-gradient(${angle}deg, ${gradientStops})]`;
@@ -159,7 +161,7 @@ export function useLayoutComponent<T = Record<string, any>>({
         customCSS = `bg-[${solidColor}]`;
       } else if (custom.gradient) {
         const { type, angle, stops } = custom.gradient;
-        const gradientStops = stops.map(stop => `${stop.color} ${stop.position}%`).join(', ');
+        const gradientStops = stops.map((stop: any) => `${stop.color} ${stop.position}%`).join(', ');
         
         if (type === 'linear') {
           customCSS = `bg-[linear-gradient(${angle}deg, ${gradientStops})]`;
@@ -252,17 +254,76 @@ export function useLayoutComponent<T = Record<string, any>>({
     });
   }
 
-  const dynamicTextColors = getTextColorForBackground(effectiveBackgroundType, colorTokens);
-
-  // ✅ CONSERVATIVE: Always use safe gray text colors for maximum readability
+  // ✅ ENHANCED: Use new smart text color system with WCAG validation
   const sectionBackground = getSectionBackground();
   
   console.log(`🎨 Final sectionBackground for ${sectionId}:`, sectionBackground);
-  const validatedTextColors = {
-    heading: effectiveBackgroundType === 'primary' ? 'text-white' : 'text-gray-900',
-    body: effectiveBackgroundType === 'primary' ? 'text-gray-100' : 'text-gray-700',
-    muted: effectiveBackgroundType === 'primary' ? 'text-gray-300' : 'text-gray-500'
+  
+  // Get smart text colors that validate contrast automatically
+  // ✅ ENHANCED: Check for theme overrides first
+  const getEffectiveTextColor = (type: 'heading' | 'body' | 'muted') => {
+    // Check for manual overrides
+    if (theme?.textColorMode === 'manual' && theme?.textColorOverrides?.[type]) {
+      return theme.textColorOverrides[type];
+    }
+    
+    // Use auto-calculated colors with contrast adjustment
+    const { getSmartTextColor } = require('@/utils/improvedTextColors');
+    const baseColor = getSmartTextColor(sectionBackground, type);
+    
+    // Apply contrast level adjustment if specified
+    const contrastLevel = theme?.textContrastLevel || 50;
+    if (contrastLevel !== 50) {
+      // TODO: Implement contrast adjustment logic
+      // For now, just return the base color
+      return baseColor;
+    }
+    
+    return baseColor;
   };
+
+  const smartTextColors = {
+    heading: getEffectiveTextColor('heading'),
+    body: getEffectiveTextColor('body'),
+    muted: getEffectiveTextColor('muted')
+  };
+  
+  // Debug log for text color mode
+  if (theme?.textColorMode === 'manual') {
+    console.log(`🎨 Using manual text color overrides for ${sectionId}:`, {
+      mode: theme.textColorMode,
+      overrides: theme.textColorOverrides,
+      contrastLevel: theme.textContrastLevel,
+      effectiveColors: smartTextColors
+    });
+  }
+  
+  // Convert hex colors to Tailwind classes for backwards compatibility
+  const hexToTailwindClass = (hexColor: string): string => {
+    switch (hexColor) {
+      case '#ffffff': return 'text-white';
+      case '#f9fafb': return 'text-gray-50';
+      case '#f3f4f6': return 'text-gray-100';
+      case '#e5e7eb': return 'text-gray-200';
+      case '#d1d5db': return 'text-gray-300';
+      case '#9ca3af': return 'text-gray-400';
+      case '#6b7280': return 'text-gray-500';
+      case '#4b5563': return 'text-gray-600';
+      case '#374151': return 'text-gray-700';
+      case '#1f2937': return 'text-gray-800';
+      case '#111827': return 'text-gray-900';
+      default: return 'text-gray-900'; // Safe fallback
+    }
+  };
+  
+  const validatedTextColors = {
+    heading: hexToTailwindClass(smartTextColors.heading),
+    body: hexToTailwindClass(smartTextColors.body),
+    muted: hexToTailwindClass(smartTextColors.muted)
+  };
+
+  // Legacy compatibility - keep old approach as fallback
+  const dynamicTextColors = getTextColorForBackground(effectiveBackgroundType, colorTokens);
 
   // console.log(`🎨 Dynamic text colors for ${sectionId} (${backgroundType}):`, {
   //   backgroundType,

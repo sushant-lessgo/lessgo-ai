@@ -1,6 +1,7 @@
 import React from 'react';
 import { useLayoutComponent } from '@/hooks/useLayoutComponent';
 import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
+import { useImageToolbar } from '@/hooks/useImageToolbar';
 import { LayoutSection } from '@/components/layout/LayoutSection';
 import { 
   EditableAdaptiveHeadline, 
@@ -212,7 +213,8 @@ export default function SplitScreen(props: LayoutComponentProps) {
 
   const mutedTextColor = dynamicTextColors?.muted || colorTokens.textMuted;
   
-  const showImageToolbar = useEditStore((state) => state.showImageToolbar);
+  // Use robust image toolbar hook
+  const handleImageToolbar = useImageToolbar();
 
   return (
     <LayoutSection
@@ -356,7 +358,8 @@ export default function SplitScreen(props: LayoutComponentProps) {
                       e.stopPropagation();
                       e.preventDefault();
                       const rect = e.currentTarget.getBoundingClientRect();
-                      showImageToolbar(`${sectionId}-hero-image`, {
+                      
+                      handleImageToolbar(`${sectionId}-hero-image`, {
                         x: rect.left + rect.width / 2,
                         y: rect.top - 10
                       });

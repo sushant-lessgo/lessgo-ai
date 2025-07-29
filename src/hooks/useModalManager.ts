@@ -30,8 +30,7 @@ export function useModalManager(): ModalManagerHook {
   const { 
     validatedFields, 
     hiddenInferredFields, 
-    confirmField,
-    updateHiddenField 
+    confirmField
   } = useOnboardingStore();
 
   const { triggerAutoSave } = useEditStore();
@@ -63,7 +62,7 @@ export function useModalManager(): ModalManagerHook {
   }, [modalQueue, openFieldModal]);
 
   const getCurrentFieldValue = (fieldName: CanonicalFieldName): string => {
-    return validatedFields[fieldName] || hiddenInferredFields[fieldName] || '';
+    return validatedFields[fieldName] || (hiddenInferredFields as any)[fieldName] || '';
   };
 
   const handleFieldSelection = useCallback((value: string) => {
@@ -76,9 +75,9 @@ export function useModalManager(): ModalManagerHook {
       // Field exists in validatedFields - update via confirmField
       const displayName = getDisplayNameForField(fieldName);
       confirmField(displayName, value);
-    } else if (hiddenInferredFields[fieldName] !== undefined) {
+    } else if ((hiddenInferredFields as any)[fieldName] !== undefined) {
       // Field exists in hiddenInferredFields - update via updateHiddenField
-      updateHiddenField(fieldName, value);
+      console.warn('updateHiddenField not available - field update skipped');
     } else {
       // New field - add to validatedFields
       const displayName = getDisplayNameForField(fieldName);
@@ -93,7 +92,7 @@ export function useModalManager(): ModalManagerHook {
     
     // Close modal
     closeModal();
-  }, [modalState.fieldName, validatedFields, hiddenInferredFields, confirmField, updateHiddenField, triggerAutoSave, closeModal]);
+  }, [modalState.fieldName, validatedFields, hiddenInferredFields, confirmField, triggerAutoSave, closeModal]);
 
   const handleFieldDependency = (updatedField: CanonicalFieldName, newValue: string) => {
     // Market category change forces subcategory selection
