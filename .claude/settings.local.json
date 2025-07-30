@@ -36,7 +36,9 @@
       "Bash(taskkill:*)",
       "Bash(del test_color_fix.js)",
       "Bash(npx eslint:*)",
-      "Bash(rg:*)"
+      "Bash(rg:*)",
+      "Bash(timeout 10s npm run dev:*)",
+      "Bash(timeout 15s npm run dev)"
     ],
     "deny": []
   }

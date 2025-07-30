@@ -55,9 +55,14 @@ export function createContentActions(set: any, get: any): ContentActions {
     
     updateElementContent: (sectionId: string, elementKey: string, content: string | string[]) =>
       set((state: EditStore) => {
-
         if (!state.content[sectionId]) {
           console.warn(`Section ${sectionId} not found`);
+          return;
+        }
+
+        // Check if element exists and handle different content structures
+        if (!state.content[sectionId].elements) {
+          console.warn(`Elements not found in section ${sectionId}`);
           return;
         }
 
@@ -72,10 +77,41 @@ export function createContentActions(set: any, get: any): ContentActions {
           };
         }
 
-        const oldValue = state.content[sectionId].elements[elementKey].content;
+        const element = state.content[sectionId].elements[elementKey];
         
-        // Update the content
-        state.content[sectionId].elements[elementKey].content = content;
+        // CRITICAL FIX: Ensure content is always a primitive string, never an object
+        let stringContent: string;
+        if (Array.isArray(content)) {
+          stringContent = content.join(' ');
+        } else if (typeof content === 'string') {
+          stringContent = content;
+        } else {
+          console.warn('Unexpected content type, converting to string:', typeof content, content);
+          stringContent = String(content);
+        }
+        
+        // CRITICAL: Strip any object properties and ensure pure string
+        if (typeof stringContent === 'object') {
+          console.error('CRITICAL: String content is actually an object! Converting...', stringContent);
+          stringContent = JSON.stringify(stringContent);
+        }
+        
+        // Handle different content structures
+        let oldValue;
+        if (typeof element === 'string') {
+          // Element is directly a string (legacy format)
+          oldValue = element;
+          // Ensure we store a pure string, not an object
+          (state.content[sectionId].elements[elementKey] as any) = stringContent;
+        } else if (element && typeof element === 'object') {
+          // Element is an object with content property
+          oldValue = element.content;
+          // Ensure we store a pure string in the content property
+          element.content = stringContent;
+        } else {
+          console.warn(`Unexpected element structure for ${elementKey}:`, element);
+          return;
+        }
         
         
         // Mark as customized

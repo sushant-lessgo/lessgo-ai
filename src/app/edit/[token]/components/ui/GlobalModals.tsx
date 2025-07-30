@@ -1,6 +1,7 @@
 // Global modal manager that persists independent of toolbar state
 import React, { useState, useEffect } from 'react';
 import { SectionBackgroundModal } from './SectionBackgroundModal';
+import { GlobalButtonConfigModal } from '@/components/layout/GlobalButtonConfigModal';
 
 // Global state for modals (outside React to persist)
 let modalState = {
@@ -49,6 +50,9 @@ export function GlobalModals() {
           sectionId={state.backgroundModal.sectionId}
         />
       )}
+      
+      {/* Button Configuration Modal - uses global Zustand state */}
+      <GlobalButtonConfigModal />
     </>
   );
 }

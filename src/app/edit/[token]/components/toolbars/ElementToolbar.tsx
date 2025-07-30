@@ -283,24 +283,16 @@ export function ElementToolbar({ elementSelection, position, contextActions }: E
                   }
                   action.handler(e);
                 }}
-                onMouseDown={(e) => {
-                  if (action.id === 'button-config') {
-                    e.stopPropagation();
-                    e.preventDefault();
-                    // Call handler directly on mousedown for button-config
-                    action.handler(e);
-                    return;
-                  }
-                }}
                 className={`flex items-center space-x-1 px-2 py-1 text-xs rounded transition-colors ${
                   action.id === 'edit-text' 
                     ? 'bg-blue-500 text-white hover:bg-blue-600' 
                     : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
                 }`}
                 title={action.label}
+                aria-haspopup={action.id === 'button-config' ? 'dialog' : undefined}
               >
                 <ElementIcon icon={action.icon} />
-                <span style={action.id === 'button-config' ? { pointerEvents: 'none' } : {}}>{action.label}</span>
+                <span>{action.label}</span>
               </button>
             </React.Fragment>
           ))}

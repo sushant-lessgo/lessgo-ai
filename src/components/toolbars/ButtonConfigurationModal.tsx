@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -48,21 +49,46 @@ export function ButtonConfigurationModal({
   });
   
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [showSuccess, setShowSuccess] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
 
-  // Initialize with current element content
+  // Initialize with current element content and saved configuration
   useEffect(() => {
     if (elementSelection && content[elementSelection.sectionId]) {
       const element = content[elementSelection.sectionId].elements[elementSelection.elementKey];
       if (element) {
-        setConfig({
-          type: 'link',
-          text: typeof element.content === 'string' ? element.content : 'Button Text',
-        });
+        const buttonText = typeof element.content === 'string' ? element.content : 'Button Text';
+        
+        // Check if there's saved button configuration in metadata
+        const savedConfig = element.metadata?.buttonConfig;
+        
+        if (savedConfig) {
+          // Load saved configuration
+          setConfig({
+            type: savedConfig.type || 'link',
+            text: buttonText,
+            url: savedConfig.url || '',
+            formId: savedConfig.formId || '',
+            behavior: savedConfig.behavior || 'scrollTo',
+            embed_code: savedConfig.embed_code || '',
+            placement: savedConfig.placement || 'hero',
+          });
+          console.log('Loaded saved button config:', savedConfig);
+        } else {
+          // Default configuration
+          setConfig({
+            type: 'link',
+            text: buttonText,
+          });
+        }
       }
     }
+    // Reset success state when modal opens
+    setShowSuccess(false);
   }, [elementSelection, content]);
 
-  const handleSave = () => {
+  const handleSave = async () => {
+    console.log('🔧 handleSave called');
     const newErrors: Record<string, string> = {};
 
     if (!config.text.trim()) {
@@ -83,50 +109,135 @@ export function ButtonConfigurationModal({
 
     setErrors(newErrors);
 
-    if (Object.keys(newErrors).length > 0) return;
-
-    // Update element content with button text
-    updateElementContent(
-      elementSelection.sectionId,
-      elementSelection.elementKey,
-      config.text
-    );
-
-    // Store button configuration in element metadata
-    const currentSection = content[elementSelection.sectionId];
-    if (currentSection?.elements[elementSelection.elementKey]) {
-      const element = currentSection.elements[elementSelection.elementKey];
-      const updatedElement = {
-        ...element,
-        metadata: {
-          ...element.metadata,
-          buttonConfig: {
-            type: config.type,
-            ...(config.type === 'link' && { url: config.url }),
-            ...(config.type === 'form' && { 
-              formId: config.formId, 
-              behavior: config.behavior 
-            }),
-            ...(config.type === 'email-form' && { 
-              embed_code: config.embed_code, 
-              placement: config.placement 
-            }),
-          }
-        }
-      };
-
-      // Update the element in store using setSection
-      setSection(elementSelection.sectionId, {
-        elements: {
-          ...currentSection.elements,
-          [elementSelection.elementKey]: updatedElement
-        }
-      });
-      
-      console.log('Button configuration saved:', config);
+    if (Object.keys(newErrors).length > 0) {
+      console.log('🔧 Validation errors:', newErrors);
+      return;
     }
 
-    onClose();
+    console.log('🔧 Validation passed, updating content');
+    setIsSaving(true);
+
+    try {
+      // Update element content with button text
+      updateElementContent(
+        elementSelection.sectionId,
+        elementSelection.elementKey,
+        config.text
+      );
+
+      // Store button configuration in element metadata
+      const currentSection = content[elementSelection.sectionId];
+      if (currentSection?.elements[elementSelection.elementKey]) {
+        const element = currentSection.elements[elementSelection.elementKey];
+        const updatedElement = {
+          ...element,
+          metadata: {
+            ...element.metadata,
+            buttonConfig: {
+              type: config.type,
+              ...(config.type === 'link' && { url: config.url }),
+              ...(config.type === 'form' && { 
+                formId: config.formId, 
+                behavior: config.behavior 
+              }),
+              ...(config.type === 'email-form' && { 
+                embed_code: config.embed_code, 
+                placement: config.placement 
+              }),
+            }
+          }
+        };
+
+        // Update the element in store using setSection
+        setSection(elementSelection.sectionId, {
+          elements: {
+            ...currentSection.elements,
+            [elementSelection.elementKey]: updatedElement
+          }
+        });
+        
+        console.log('🔧 Button configuration saved:', config);
+      }
+
+      // Clear any existing errors first
+      setErrors({});
+      
+      // Show success message using DOM manipulation
+      console.log('🔧 Setting showSuccess to true');
+      setShowSuccess(true);
+      setIsSaving(false);
+      
+      // Create success notification directly
+      const successDiv = document.createElement('div');
+      successDiv.id = 'button-config-success';
+      successDiv.style.cssText = `
+        position: fixed;
+        top: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: #16a34a;
+        color: white;
+        padding: 16px 24px;
+        border-radius: 8px;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        z-index: 999999;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        animation: slideDown 0.3s ease-out;
+      `;
+      
+      // Add animation keyframes
+      const style = document.createElement('style');
+      style.textContent = `
+        @keyframes slideDown {
+          from { transform: translateX(-50%) translateY(-100%); opacity: 0; }
+          to { transform: translateX(-50%) translateY(0); opacity: 1; }
+        }
+      `;
+      document.head.appendChild(style);
+      
+      // Create checkmark icon
+      const iconSvg = `
+        <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+        </svg>
+      `;
+      
+      // Build success message content
+      let messageHTML = `
+        <div style="display: flex; align-items: center; gap: 12px;">
+          ${iconSvg}
+          <div>
+            <div style="font-weight: 600; font-size: 16px;">Success!</div>
+            <div style="font-size: 14px; margin-top: 2px; opacity: 0.9;">
+              ${config.type === 'link' ? 'External link configured successfully' : 
+                config.type === 'form' ? 'Form connection configured successfully' : 
+                'Email form configured successfully'}
+            </div>
+          </div>
+        </div>
+      `;
+      
+      successDiv.innerHTML = messageHTML;
+      document.body.appendChild(successDiv);
+      
+      // Close after showing the message
+      setTimeout(() => {
+        console.log('🔧 Timeout triggered, closing modal');
+        if (document.getElementById('button-config-success')) {
+          document.body.removeChild(successDiv);
+        }
+        if (style.parentNode) {
+          document.head.removeChild(style);
+        }
+        onClose();
+      }, 2000);
+    } catch (error) {
+      console.error('🔧 Error saving configuration:', error);
+      setIsSaving(false);
+    }
   };
 
   const handleCreateNewForm = () => {
@@ -145,7 +256,7 @@ export function ButtonConfigurationModal({
           <DialogTitle>Button Configuration</DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-4">
+          <div className="space-y-4">
           {/* Button Text */}
           <div>
             <Label htmlFor="button-text">Button Text*</Label>
@@ -312,14 +423,14 @@ export function ButtonConfigurationModal({
 
           {/* Actions */}
           <div className="flex justify-end gap-2 pt-4">
-            <Button variant="outline" onClick={onClose}>
+            <Button variant="outline" onClick={onClose} disabled={isSaving}>
               Cancel
             </Button>
-            <Button onClick={handleSave}>
-              Save Configuration
+            <Button onClick={handleSave} disabled={isSaving}>
+              {isSaving ? 'Saving...' : 'Save Configuration'}
             </Button>
           </div>
-        </div>
+          </div>
       </DialogContent>
     </Dialog>
   );

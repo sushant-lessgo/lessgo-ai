@@ -383,6 +383,27 @@ function UniversalButton({
     ? { href: props.url, target: props.target || '_self' }
     : { type: 'button' as const };
 
+  // CRITICAL FIX: Ensure content is always a string for React rendering
+  const safeContent = useMemo(() => {
+    if (typeof content === 'string') {
+      return content;
+    } else if (typeof content === 'object' && content !== null) {
+      console.warn('Button content is an object, converting to string:', content);
+      // If it's an object with numeric keys (like the error describes), it might be a string-like object
+      if (Array.isArray(content)) {
+        return content.join(' ');
+      } else if (typeof content === 'object' && Object.keys(content).some(key => !isNaN(Number(key)))) {
+        // Object with numeric keys - reconstruct the string
+        const keys = Object.keys(content).filter(key => !isNaN(Number(key))).sort((a, b) => Number(a) - Number(b));
+        return keys.map(key => content[key]).join('');
+      } else {
+        return JSON.stringify(content);
+      }
+    } else {
+      return String(content || 'Button');
+    }
+  }, [content]);
+
   return (
     <ButtonElement
       {...elementProps}
@@ -393,7 +414,7 @@ function UniversalButton({
     >
       <EditableContent
         mode={mode}
-        value={content}
+        value={safeContent}
         onEdit={onEdit}
         element="span"
         placeholder="Button text..."
@@ -438,6 +459,27 @@ function UniversalLink({
     ? { href: props.url || '#', target: props.target || '_self' }
     : {};
 
+  // CRITICAL FIX: Ensure content is always a string for React rendering
+  const safeContent = useMemo(() => {
+    if (typeof content === 'string') {
+      return content;
+    } else if (typeof content === 'object' && content !== null) {
+      console.warn('Link content is an object, converting to string:', content);
+      // If it's an object with numeric keys (like the error describes), it might be a string-like object
+      if (Array.isArray(content)) {
+        return content.join(' ');
+      } else if (typeof content === 'object' && Object.keys(content).some(key => !isNaN(Number(key)))) {
+        // Object with numeric keys - reconstruct the string
+        const keys = Object.keys(content).filter(key => !isNaN(Number(key))).sort((a, b) => Number(a) - Number(b));
+        return keys.map(key => content[key]).join('');
+      } else {
+        return JSON.stringify(content);
+      }
+    } else {
+      return String(content || 'Link');
+    }
+  }, [content]);
+
   return (
     <a
       {...linkProps}
@@ -448,7 +490,7 @@ function UniversalLink({
     >
       <EditableContent
         mode={mode}
-        value={content}
+        value={safeContent}
         onEdit={onEdit}
         element="span"
         placeholder="Link text..."

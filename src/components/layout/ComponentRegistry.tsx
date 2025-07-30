@@ -40,7 +40,7 @@ export function CTAButton({
   sectionId,
   elementKey
 }: {
-  text: string;
+  text: string | any; // Allow any type but we'll convert to string
   colorTokens: any;
   textStyle?: React.CSSProperties;
   onClick?: () => void;
@@ -53,6 +53,27 @@ export function CTAButton({
   sectionId?: string;
   elementKey?: string;
 }) {
+  
+  // CRITICAL FIX: Ensure text is always a string for React rendering
+  const safeText = React.useMemo(() => {
+    if (typeof text === 'string') {
+      return text;
+    } else if (typeof text === 'object' && text !== null) {
+      console.warn('CTAButton text is an object, converting to string:', text);
+      // If it's an object with numeric keys (like the error describes), it might be a string-like object
+      if (Array.isArray(text)) {
+        return text.join(' ');
+      } else if (typeof text === 'object' && Object.keys(text).some(key => !isNaN(Number(key)))) {
+        // Object with numeric keys - reconstruct the string
+        const keys = Object.keys(text).filter(key => !isNaN(Number(key))).sort((a, b) => Number(a) - Number(b));
+        return keys.map(key => text[key]).join('');
+      } else {
+        return JSON.stringify(text);
+      }
+    } else {
+      return String(text || 'Get Started');
+    }
+  }, [text]);
   
   const sizeClasses = {
     small: 'px-4 py-2 text-sm',
@@ -103,7 +124,7 @@ export function CTAButton({
     <button 
       onClick={onClick}
       disabled={disabled || loading}
-      aria-label={ariaLabel || text}
+      aria-label={ariaLabel || safeText}
       data-section-id={sectionId}
       data-element-key={elementKey}
       className={`
@@ -122,7 +143,7 @@ export function CTAButton({
           <path className="opacity-75" fill="currentColor" d="m4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
         </svg>
       )}
-      {text}
+      {safeText}
       {!loading && (
         <svg className="w-5 h-5 ml-2 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />

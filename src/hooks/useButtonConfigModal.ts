@@ -13,11 +13,11 @@ export const useButtonConfigModal = create<ButtonConfigModalState>((set) => ({
   isOpen: false,
   elementSelection: null,
   openModal: (elementSelection) => {
-    console.log('🔧 Global modal opened for:', elementSelection);
+    console.log('🔧 Button config modal opened for:', elementSelection);
     set({ isOpen: true, elementSelection });
   },
   closeModal: () => {
-    console.log('🔧 Global modal closed');
+    console.log('🔧 Button config modal closed');
     set({ isOpen: false, elementSelection: null });
   },
 }));
