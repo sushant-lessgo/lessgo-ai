@@ -234,6 +234,7 @@ export default function LeftCopyRightImage(props: LayoutComponentProps) {
 
   // ✅ ENHANCED: Get muted text color for trust indicators
   const mutedTextColor = dynamicTextColors?.muted || colorTokens.textMuted;
+
   
   // Use robust image toolbar hook
   const handleImageToolbar = useImageToolbar();

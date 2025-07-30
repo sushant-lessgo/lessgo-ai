@@ -21,7 +21,7 @@ interface CenterStackedContent {
   supporting_text?: string;
   badge_text?: string;
   trust_items?: string;
-  hero_image?: string;
+  center_hero_image?: string;
 }
 
 const CONTENT_SCHEMA = {
@@ -49,7 +49,7 @@ const CONTENT_SCHEMA = {
     type: 'string' as const, 
     default: 'Free 14-day trial|No credit card required|Cancel anytime' 
   },
-  hero_image: { 
+  center_hero_image: { 
     type: 'string' as const, 
     default: '/hero-placeholder.jpg' 
   }
@@ -212,6 +212,7 @@ export default function CenterStacked(props: LayoutComponentProps) {
     : ['Free trial', 'No credit card'];
 
   const mutedTextColor = dynamicTextColors?.muted || colorTokens.textMuted;
+
   
   // Use robust image toolbar hook
   const handleImageToolbar = useImageToolbar();
@@ -341,19 +342,19 @@ export default function CenterStacked(props: LayoutComponentProps) {
           </div>
 
           <div className="w-full pt-8">
-            {blockContent.hero_image && blockContent.hero_image !== '' ? (
+            {blockContent.center_hero_image && blockContent.center_hero_image !== '' ? (
               <div className="relative w-full h-full min-h-[400px] max-w-3xl mx-auto">
                 <img
-                  src={blockContent.hero_image}
+                  src={blockContent.center_hero_image}
                   alt="Hero"
                   className="w-full h-full object-cover rounded-2xl shadow-2xl cursor-pointer"
-                  data-image-id={`${sectionId}-hero-image`}
+                  data-image-id={`${sectionId}-center-hero-image`}
                   onMouseUp={(e) => {
                     if (mode === 'edit') {
                       e.stopPropagation();
                       e.preventDefault();
                       const rect = e.currentTarget.getBoundingClientRect();
-                      handleImageToolbar(`${sectionId}-hero-image`, {
+                      handleImageToolbar(`${sectionId}-center-hero-image`, {
                         x: rect.left + rect.width / 2,
                         y: rect.top - 10
                       });

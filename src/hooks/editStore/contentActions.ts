@@ -55,20 +55,28 @@ export function createContentActions(set: any, get: any): ContentActions {
     
     updateElementContent: (sectionId: string, elementKey: string, content: string | string[]) =>
       set((state: EditStore) => {
+
         if (!state.content[sectionId]) {
           console.warn(`Section ${sectionId} not found`);
           return;
         }
 
+        // If element doesn't exist, create it (for cases like hero_image)
         if (!state.content[sectionId].elements[elementKey]) {
-          console.warn(`Element ${elementKey} not found in section ${sectionId}`);
-          return;
+          console.log(`Creating missing element: ${elementKey} in section ${sectionId}`);
+          state.content[sectionId].elements[elementKey] = {
+            content: '',
+            type: elementKey.includes('image') ? 'image' : 'text',
+            isEditable: true,
+            editMode: 'inline',
+          };
         }
 
         const oldValue = state.content[sectionId].elements[elementKey].content;
         
         // Update the content
         state.content[sectionId].elements[elementKey].content = content;
+        
         
         // Mark as customized
         state.content[sectionId].aiMetadata.isCustomized = true;

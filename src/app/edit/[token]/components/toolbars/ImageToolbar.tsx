@@ -1,6 +1,6 @@
 // app/edit/[token]/components/toolbars/ImageToolbar.tsx - Complete Image Toolbar
 import React, { useState, useRef, useEffect } from 'react';
-import { createPortal } from 'react-dom';
+import ReactDOM, { createPortal } from 'react-dom';
 import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
 import { useToolbarActions } from '@/hooks/useToolbarActions';
 import { calculateArrowPosition } from '@/utils/toolbarPositioning';
@@ -30,14 +30,65 @@ export function ImageToolbar({ targetId, position, contextActions }: ImageToolba
   const uploaderRef = useRef<HTMLInputElement>(null);
 
   const {
-    images,
-    updateImageAsset,
-    removeImageAsset,
+    updateElementContent,
     hideElementToolbar,
-    announceLiveRegion,
   } = useEditStore();
 
   const { executeAction } = useToolbarActions();
+
+  // Helper function to parse targetId and extract section/element info
+  const parseTargetId = (targetId: string) => {
+    console.log('🔍 Parsing targetId:', targetId);
+    
+    // Check if targetId follows the "sectionId.elementKey" format (from showToolbar)
+    if (targetId.includes('.')) {
+      const [sectionId, elementKey] = targetId.split('.');
+      const result = { sectionId, elementKey };
+      console.log('🎯 Dot notation parsed:', result);
+      return result;
+    }
+    
+    // For hero images, targetId format is: sectionId-hero-image
+    // For other images, targetId format might be: sectionId-elementKey
+    const parts = targetId.split('-');
+    console.log('🔍 Split parts:', parts);
+    
+    // Check most specific patterns first (longest matches)
+    if (parts.length >= 5 && parts[parts.length - 4] === 'image' && parts[parts.length - 3] === 'first' && parts[parts.length - 2] === 'hero') {
+      // Image first hero case: "section123-image-first-hero-image" -> sectionId: "section123", elementKey: "image_first_hero_image"
+      const sectionId = parts.slice(0, -4).join('-');
+      const result = { sectionId, elementKey: 'image_first_hero_image' };
+      console.log('🎯 Image first hero image parsed:', result);
+      return result;
+    } else if (parts.length >= 4 && parts[parts.length - 3] === 'center' && parts[parts.length - 2] === 'hero') {
+      // Center hero image case: "section123-center-hero-image" -> sectionId: "section123", elementKey: "center_hero_image"
+      const sectionId = parts.slice(0, -3).join('-');
+      const result = { sectionId, elementKey: 'center_hero_image' };
+      console.log('🎯 Center hero image parsed:', result);
+      return result;
+    } else if (parts.length >= 4 && parts[parts.length - 3] === 'split' && parts[parts.length - 2] === 'hero') {
+      // Split hero image case: "section123-split-hero-image" -> sectionId: "section123", elementKey: "split_hero_image"
+      const sectionId = parts.slice(0, -3).join('-');
+      const result = { sectionId, elementKey: 'split_hero_image' };
+      console.log('🎯 Split hero image parsed:', result);
+      return result;
+    } else if (parts.length >= 3 && parts[parts.length - 2] === 'hero') {
+      // Standard hero image case: "section123-hero-image" -> sectionId: "section123", elementKey: "hero_image"
+      const sectionId = parts.slice(0, -2).join('-');
+      const result = { sectionId, elementKey: 'hero_image' };
+      console.log('🎯 Hero image parsed:', result);
+      return result;
+    } else if (parts.length >= 2) {
+      // Other image cases - assume format: "sectionId-elementKey"
+      const sectionId = parts[0];
+      const elementKey = parts.slice(1).join('-');
+      const result = { sectionId, elementKey };
+      console.log('🎯 Other image parsed:', result);
+      return result;
+    }
+    console.log('❌ Failed to parse targetId');
+    return null;
+  };
 
   // Calculate arrow position
   const targetElement = document.querySelector(`[data-image-id="${targetId}"]`);
@@ -46,6 +97,7 @@ export function ImageToolbar({ targetId, position, contextActions }: ImageToolba
     targetElement.getBoundingClientRect(),
     { width: 340, height: 48 }
   ) : null;
+
 
 
   // Close advanced menu when clicking outside
@@ -90,42 +142,21 @@ export function ImageToolbar({ targetId, position, contextActions }: ImageToolba
       
       // Load image to get dimensions
       const img = new Image();
+      
       img.onload = () => {
         try {
-          // Update image asset with actual dimensions
-          updateImageAsset(targetId, {
-            id: targetId,
-            url: previewUrl,
-            alt: file.name.replace(/\.[^/.]+$/, ''), // Remove extension for alt text
-            source: 'upload' as any,
-            urls: { original: previewUrl },
-            metadata: {
-              file: {
-                name: file.name,
-                size: file.size,
-                type: file.type,
-                uploadedAt: Date.now(),
-              },
-              image: {
-                width: img.width,
-                height: img.height,
-                aspectRatio: img.width / img.height,
-                format: file.type.split('/')[1] as any,
-                colorDepth: 24,
-                hasTransparency: file.type === 'image/png' || file.type === 'image/gif',
-              },
-            },
-            tags: [],
-            timestamps: {
-              createdAt: new Date(),
-              updatedAt: new Date(),
-            },
-          });
+          // Update the element content so the image actually displays
+          const targetInfo = parseTargetId(targetId);
+          if (targetInfo) {
+            updateElementContent(targetInfo.sectionId, targetInfo.elementKey, previewUrl);
+            console.log('✅ Image uploaded and updated successfully');
+          } else {
+            console.error('❌ Could not parse targetId:', targetId);
+          }
 
-          announceLiveRegion('Image uploaded successfully');
           setIsUploading(false);
         } catch (error) {
-          console.error('Error updating image asset:', error);
+          console.error('Error updating image:', error);
           setUploadError('Failed to update image. Please try again.');
           setIsUploading(false);
         }
@@ -147,53 +178,33 @@ export function ImageToolbar({ targetId, position, contextActions }: ImageToolba
   };
 
   // Handle stock photo search
-  const handleStockPhotos = () => {
+  const handleStockPhotos = (e?: React.MouseEvent) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    console.log('🔍 Opening stock photos panel');
     setShowStockPhotos(true);
-    announceLiveRegion('Opening stock photo search');
+    console.log('📸 Opening stock photo search');
   };
 
   // Handle image editing
   const handleImageEditor = () => {
     setShowEditor(true);
-    announceLiveRegion('Opening image editor');
+    console.log('✏️ Opening image editor');
   };
 
   const handleImageEditorSave = (editedImageUrl: string) => {
-    // Update the image with the edited version
-    const targetElement = document.querySelector(`[data-image-id="${targetId}"]`) as HTMLImageElement;
-    const currentAlt = targetElement?.getAttribute('alt') || '';
-    
-    updateImageAsset(targetId, {
-      id: targetId,
-      url: editedImageUrl,
-      alt: currentAlt,
-      source: 'upload' as any,
-      urls: { original: editedImageUrl },
-      metadata: {
-        file: {
-          name: `edited-${targetId}.jpg`,
-          size: 0, // Size unknown after editing
-          type: 'image/jpeg',
-          uploadedAt: Date.now(),
-        },
-        image: {
-          width: 0, // Will be updated after loading
-          height: 0,
-          aspectRatio: 0,
-          format: 'jpeg',
-          colorDepth: 24,
-          hasTransparency: false,
-        },
-      },
-      tags: ['edited'],
-      timestamps: {
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      },
-    });
+    // Update the element content so the image actually displays
+    const targetInfo = parseTargetId(targetId);
+    if (targetInfo) {
+      updateElementContent(targetInfo.sectionId, targetInfo.elementKey, editedImageUrl);
+      console.log('✅ Image edited and updated successfully');
+    } else {
+      console.error('❌ Could not parse targetId for edited image:', targetId);
+    }
     
     setShowEditor(false);
-    announceLiveRegion('Image edited successfully');
   };
 
   // Handle alt text editing
@@ -205,7 +216,7 @@ export function ImageToolbar({ targetId, position, contextActions }: ImageToolba
 
   const handleAltTextSave = (newAltText: string) => {
     executeAction('update-alt-text', { imageId: targetId, altText: newAltText });
-    announceLiveRegion('Alt text updated');
+    console.log('💬 Alt text updated');
     setShowAltTextModal(false);
   };
 
@@ -216,7 +227,21 @@ export function ImageToolbar({ targetId, position, contextActions }: ImageToolba
       label: 'Replace',
       icon: 'upload',
       handler: () => {
-        uploaderRef.current?.click();
+        // Always use dynamic approach to avoid positioning issues
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = 'image/*';
+        input.style.display = 'none';
+        
+        input.addEventListener('change', (e) => {
+          handleFileUpload(e as any);
+          // Clean up
+          document.body.removeChild(input);
+        });
+        
+        // Add to body, click, and the change event will handle removal
+        document.body.appendChild(input);
+        input.click();
       },
     },
     {
@@ -243,8 +268,11 @@ export function ImageToolbar({ targetId, position, contextActions }: ImageToolba
       icon: 'trash',
       handler: () => {
         if (confirm('Are you sure you want to delete this image?')) {
-          // Remove from store
-          removeImageAsset(targetId);
+          // Remove image by setting empty content
+          const targetInfo = parseTargetId(targetId);
+          if (targetInfo) {
+            updateElementContent(targetInfo.sectionId, targetInfo.elementKey, '');
+          }
           
           // Also remove from DOM to provide immediate feedback
           const targetElement = document.querySelector(`[data-image-id="${targetId}"]`);
@@ -252,13 +280,13 @@ export function ImageToolbar({ targetId, position, contextActions }: ImageToolba
             targetElement.remove();
           }
           
-          announceLiveRegion('Image deleted');
+          console.log('🗑️ Image deleted');
           
           // Hide toolbar since image is deleted
           hideElementToolbar();
         }
       },
-    },
+    }
   ];
 
   // Removed advanced actions for MVP - keeping toolbar simple
@@ -322,75 +350,39 @@ export function ImageToolbar({ targetId, position, contextActions }: ImageToolba
         </div>
       </div>
 
-      {/* Hidden File Input */}
-      <input
-        ref={uploaderRef}
-        type="file"
-        accept="image/*"
-        onChange={handleFileUpload}
-        className="hidden"
-      />
 
       {/* Removed advanced actions menu for MVP */}
 
       {/* Stock Photos Panel */}
-      {showStockPhotos && typeof window !== 'undefined' && createPortal(
-        <StockPhotosPanel
+      {showStockPhotos && typeof window !== 'undefined' && (
+        <>
+          {console.log('🎨 Rendering stock photos portal, showStockPhotos:', showStockPhotos)}
+          {createPortal(
+            <StockPhotosPanel
           position={{
             x: Math.max(10, Math.min(position.x, window.innerWidth - 420)),
             y: Math.max(10, Math.min(position.y + 60, window.innerHeight - 320)),
           }}
           onClose={() => {
+            console.log('🎯 Closing stock photos panel');
             setShowStockPhotos(false);
           }}
           onSelectImage={(stockPhoto) => {
-            updateImageAsset(targetId, {
-              id: targetId,
-              url: stockPhoto.url,
-              alt: stockPhoto.alt || 'Stock photo',
-              source: 'pexels' as any,
-              urls: { 
-                original: stockPhoto.url,
-                large: stockPhoto.url,
-                medium: stockPhoto.url,
-                small: stockPhoto.url 
-              },
-              metadata: {
-                file: {
-                  name: `pexels-${stockPhoto.id}.jpg`,
-                  size: 0,
-                  type: 'image/jpeg',
-                  uploadedAt: Date.now(),
-                },
-                image: {
-                  width: stockPhoto.width || 0,
-                  height: stockPhoto.height || 0,
-                  aspectRatio: stockPhoto.width && stockPhoto.height ? stockPhoto.width / stockPhoto.height : 0,
-                  format: 'jpeg',
-                  colorDepth: 24,
-                  hasTransparency: false,
-                },
-              },
-              tags: stockPhoto.tags || [],
-              licensing: stockPhoto.licensing || {
-                license: 'pexels' as any,
-                details: {
-                  attribution: stockPhoto.attribution || 'Pexels',
-                  commercialUse: true,
-                  editingAllowed: true,
-                  distributionAllowed: true,
-                },
-              },
-              timestamps: {
-                createdAt: new Date(),
-                updatedAt: new Date(),
-              },
-            });
+            // Update the element content so the image actually displays
+            const targetInfo = parseTargetId(targetId);
+            if (targetInfo) {
+              updateElementContent(targetInfo.sectionId, targetInfo.elementKey, stockPhoto.url);
+              console.log('✅ Stock photo selected and updated successfully');
+            } else {
+              console.error('❌ Could not parse targetId for stock photo:', targetId);
+            }
+            
             setShowStockPhotos(false);
-            announceLiveRegion('Stock photo selected');
           }}
         />,
-        document.body
+            document.body
+          )}
+        </>
       )}
 
       {/* Upload Progress */}
@@ -455,6 +447,7 @@ export function ImageToolbar({ targetId, position, contextActions }: ImageToolba
           alt={targetElement?.getAttribute('alt') || ''}
         />
       )}
+
     </>
   );
 }
@@ -565,6 +558,10 @@ function StockPhotosPanel({ position, onClose, onSelectImage }: {
         width: 400,
         height: 300,
         zIndex: 10001, // Higher than toolbar's z-index
+      }}
+      onClick={(e) => {
+        // Prevent clicks from propagating and potentially closing the toolbar
+        e.stopPropagation();
       }}
     >
       <div className="p-4 border-b border-gray-200">

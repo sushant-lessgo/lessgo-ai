@@ -133,6 +133,12 @@ export interface StoreElementTypes {
   form_labels: ArrayElement;
   form_placeholders: ArrayElement;
   contact_methods: ArrayElement;
+  
+  // Hero image elements (layout-specific to avoid conflicts)
+  hero_image: StringElement;              // For leftCopyRightImage layout
+  center_hero_image: StringElement;       // For centerStacked layout
+  image_first_hero_image: StringElement;  // For imageFirst layout
+  split_hero_image: StringElement;        // For splitScreen layout
 }
 
 // Updated section content interface

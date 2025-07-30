@@ -14,6 +14,7 @@ import type { Theme } from '@/types/core/index';
 
 // Import existing action creators
 import { createCoreActions } from '../hooks/editStore/coreActions';
+import { createContentActions } from '../hooks/editStore/contentActions';
 import { createAIActions } from '../hooks/editStore/aiActions';
 import { createPersistenceActions } from '../hooks/editStore/persistenceActions';
 import { createGenerationActions } from '../hooks/editStore/generationActions';
@@ -306,6 +307,7 @@ export function createEditStore(tokenId: string): EditStoreInstance {
             
             // All existing action creators
             ...createCoreActions(set, get),
+            ...createContentActions(set, get),
             ...createAIActions(set, get),
             ...createPersistenceActions(set, get),
             ...createGenerationActions(set, get),

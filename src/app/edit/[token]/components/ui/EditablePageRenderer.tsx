@@ -318,7 +318,11 @@ const EnhancedLayoutWrapper: React.FC<{
         {/* Render universal elements in preview mode */}
         {sectionData?.elements && (() => {
           const allElements = Object.entries(sectionData.elements);
-          const universalElements = allElements.filter(([elementKey, elementData]: [string, any]) => isUniversalElement(elementData));
+          // Filter out hero image elements that are handled by custom hero components
+          const heroImageElements = ['hero_image', 'center_hero_image', 'image_first_hero_image', 'split_hero_image'];
+          const universalElements = allElements.filter(([elementKey, elementData]: [string, any]) => 
+            isUniversalElement(elementData) && !heroImageElements.includes(elementKey)
+          );
           
           // console.log(`🎯 Preview mode - Section ${sectionId}:`, {
           //   totalElements: allElements.length,
@@ -359,7 +363,11 @@ const EnhancedLayoutWrapper: React.FC<{
       {/* Render universal elements */} 
       {sectionData?.elements && (() => {
         const allElements = Object.entries(sectionData.elements);
-        const universalElements = allElements.filter(([elementKey, elementData]: [string, any]) => isUniversalElement(elementData));
+        // Filter out hero image elements that are handled by custom hero components
+        const heroImageElements = ['hero_image', 'center_hero_image', 'image_first_hero_image', 'split_hero_image'];
+        const universalElements = allElements.filter(([elementKey, elementData]: [string, any]) => 
+          isUniversalElement(elementData) && !heroImageElements.includes(elementKey)
+        );
         
         // console.log(`🎯 Edit mode - Section ${sectionId}:`, {
         //   totalElements: allElements.length,

@@ -34,7 +34,9 @@
       "Bash(python:*)",
       "Bash(del \"C:\\Users\\susha\\lessgo-ai\\count_files.py\")",
       "Bash(taskkill:*)",
-      "Bash(del test_color_fix.js)"
+      "Bash(del test_color_fix.js)",
+      "Bash(npx eslint:*)",
+      "Bash(rg:*)"
     ],
     "deny": []
   }

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { useLayoutComponent } from '@/hooks/useLayoutComponent';
 import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
 import { useImageToolbar } from '@/hooks/useImageToolbar';
@@ -21,7 +21,7 @@ interface SplitScreenContent {
   supporting_text?: string;
   badge_text?: string;
   trust_items?: string;
-  hero_image?: string;
+  split_hero_image?: string;
 }
 
 const CONTENT_SCHEMA = {
@@ -49,7 +49,7 @@ const CONTENT_SCHEMA = {
     type: 'string' as const, 
     default: 'Free 14-day trial|No credit card required|Cancel anytime' 
   },
-  hero_image: { 
+  split_hero_image: { 
     type: 'string' as const, 
     default: '/hero-placeholder.jpg' 
   }
@@ -213,6 +213,16 @@ export default function SplitScreen(props: LayoutComponentProps) {
 
   const mutedTextColor = dynamicTextColors?.muted || colorTokens.textMuted;
   
+  // Get reactive hero image URL directly from store using selector
+  const heroImageUrl = useEditStore((state) => {
+    const url = state.content[sectionId]?.elements?.split_hero_image?.content;
+    console.log('🔄 Store selector called for split hero image:', { sectionId, url, timestamp: Date.now() });
+    return url;
+  });
+  
+  const reactiveHeroImage = heroImageUrl || blockContent.split_hero_image;  
+  console.log('🎨 Final hero image URL:', reactiveHeroImage);
+  
   // Use robust image toolbar hook
   const handleImageToolbar = useImageToolbar();
 
@@ -346,20 +356,20 @@ export default function SplitScreen(props: LayoutComponentProps) {
           </div>
 
           <div className="flex items-center justify-center p-4 lg:p-8">
-            {blockContent.hero_image && blockContent.hero_image !== '' ? (
+            {reactiveHeroImage && reactiveHeroImage !== '' ? (
               <div className="relative w-full h-full min-h-[600px]">
                 <img
-                  src={blockContent.hero_image}
+                  src={reactiveHeroImage}
                   alt="Hero"
                   className="w-full h-full object-cover rounded-2xl shadow-2xl cursor-pointer"
-                  data-image-id={`${sectionId}-hero-image`}
+                  data-image-id={`${sectionId}-split-hero-image`}
                   onMouseUp={(e) => {
                     if (mode === 'edit') {
                       e.stopPropagation();
                       e.preventDefault();
                       const rect = e.currentTarget.getBoundingClientRect();
                       
-                      handleImageToolbar(`${sectionId}-hero-image`, {
+                      handleImageToolbar(`${sectionId}-split-hero-image`, {
                         x: rect.left + rect.width / 2,
                         y: rect.top - 10
                       });
@@ -393,7 +403,7 @@ export const componentMeta = {
     { key: 'cta_text', label: 'CTA Button Text', type: 'text', required: true },
     { key: 'badge_text', label: 'Badge Text (uses accent colors)', type: 'text', required: false },
     { key: 'trust_items', label: 'Trust Indicators (pipe separated)', type: 'text', required: false },
-    { key: 'hero_image', label: 'Hero Image', type: 'image', required: false }
+    { key: 'split_hero_image', label: 'Hero Image', type: 'image', required: false }
   ],
   
   features: [
