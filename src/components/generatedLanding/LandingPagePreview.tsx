@@ -14,9 +14,11 @@ type Props = {
   data: GPTOutput
   dispatch?: React.Dispatch<Action>
   isStaticExport?: boolean
+  userId?: string
+  publishedPageId?: string
 }
 
-export default function LandingPagePreview({ data, dispatch, isStaticExport }: Props) {
+export default function LandingPagePreview({ data, dispatch, isStaticExport, userId, publishedPageId }: Props) {
   const defaultVisibleSections = {
   hero: true,
   before_after: true,
@@ -47,6 +49,8 @@ const visible = {
           ctaConfig={data.hero.ctaConfig}
           dispatch={dispatch}
           isEditable={!isStaticExport}
+          userId={userId}
+          publishedPageId={publishedPageId}
         />
       )}
 
@@ -92,6 +96,8 @@ const visible = {
           dispatch={dispatch}
           isEditable={!isStaticExport}
           ctaConfig={data.hero.ctaConfig}
+          userId={userId}
+          publishedPageId={publishedPageId}
         />
       )}
 

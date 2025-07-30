@@ -345,10 +345,14 @@ export interface PersistenceSlice {
  * ===== FORMS SLICE INTERFACE =====
  */
 export interface FormsSlice {
-  // Form Data
-  forms: Record<string, FormData>;
+  // MVP Forms (native forms feature)
+  forms?: Record<string, import('@/types/core/forms').MVPForm>;
   
-  // Simple Forms (MVP)
+  // Form Builder State (MVP)
+  formBuilderOpen?: boolean;
+  editingFormId?: string | null;
+  
+  // Legacy form data (to be migrated)
   simpleForms?: SimpleFormData[];
   
   // Active Form State

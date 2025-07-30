@@ -22,6 +22,8 @@ type Props = {
   
   ctaConfig: CtaConfigType | null;
   sectionId: keyof GPTOutput["visibleSections"];
+  userId?: string;
+  publishedPageId?: string;
 };
 
 
@@ -34,6 +36,8 @@ export default function OfferSection({
   isEditable,
   ctaConfig,
   sectionId,
+  userId,
+  publishedPageId,
 }: Props) {
   return (
     <section className="w-full bg-landing-primary text-white py-24 px-4" id="email-form">
@@ -145,6 +149,8 @@ export default function OfferSection({
                 behavior: ctaConfig.behavior
               }}
               className="bg-white text-landing-primary font-semibold px-6 py-3 rounded-lg text-base hover:bg-gray-100 transition w-full sm:w-auto text-center"
+              userId={userId}
+              publishedPageId={publishedPageId}
             >
               {ctaConfig.cta_text}
             </FormConnectedButton>
@@ -177,7 +183,12 @@ export default function OfferSection({
 )}
 
         {/* Form Placement for CTA Section */}
-        <FormPlacementRenderer placement="cta-section" className="mt-8 w-full max-w-2xl" />
+        <FormPlacementRenderer 
+          sectionId={sectionId} 
+          className="mt-8 w-full max-w-2xl" 
+          userId={userId}
+          publishedPageId={publishedPageId}
+        />
       </div>
     </section>
   );

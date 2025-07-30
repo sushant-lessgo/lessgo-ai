@@ -9,8 +9,8 @@ import { EditHeader } from './EditHeader';
 import { LeftPanel } from './LeftPanel';
 import { MainContent } from './MainContent';
 import { useAutoSave } from '@/hooks/useAutoSave';
-import { SimpleFormBuilder } from '@/components/forms/SimpleFormBuilder';
 import { GlobalButtonConfigModal } from '@/components/layout/GlobalButtonConfigModal';
+import { GlobalFormBuilder } from '@/components/layout/GlobalFormBuilder';
 import { LayoutChangeModal } from '../ui/LayoutChangeModal';
 import { modalEmergencyReset } from '@/utils/modalEmergencyReset';
 import { ModalDebugPanel } from '@/components/debug/ModalDebugPanel';
@@ -148,8 +148,8 @@ export function EditLayout({ tokenId }: EditLayoutProps) {
         className="absolute -left-[10000px] w-px h-px overflow-hidden"
       />
       
-      {/* Form Builder Modal */}
-      <SimpleFormBuilder />
+      {/* MVP Form Builder Modal */}
+      <GlobalFormBuilder />
       
       {/* Global Button Configuration Modal */}
       <GlobalButtonConfigModal />

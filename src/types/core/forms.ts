@@ -2,6 +2,60 @@
 // Handles simple forms in create/preview + advanced form builder in edit mode
 
 /**
+ * ===== MVP FORM TYPES =====
+ * Simplified types for initial native form implementation
+ */
+
+// MVP Form field types
+export type MVPFormFieldType = 'text' | 'email' | 'tel' | 'textarea' | 'select';
+
+// MVP Form field configuration
+export interface MVPFormField {
+  id: string;
+  type: MVPFormFieldType;
+  label: string;
+  placeholder?: string;
+  required: boolean;
+  options?: string[]; // for select fields
+}
+
+// MVP Form configuration
+export interface MVPForm {
+  id: string;
+  name: string;
+  fields: MVPFormField[];
+  submitButtonText: string;
+  successMessage: string;
+  integrations?: MVPFormIntegration[];
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+// MVP Form submission
+export interface MVPFormSubmission {
+  formId: string;
+  data: Record<string, any>;
+  submittedAt: Date;
+  status: 'pending' | 'success' | 'error';
+  errorMessage?: string;
+}
+
+// MVP Form integration
+export interface MVPFormIntegration {
+  id: string;
+  type: 'dashboard' | 'convertkit';
+  name: string;
+  enabled: boolean;
+  settings?: Record<string, any>;
+}
+
+// MVP Form builder state
+export interface MVPFormBuilderState {
+  isOpen: boolean;
+  editingFormId: string | null;
+}
+
+/**
  * ===== FORM FIELD TYPES =====
  */
 

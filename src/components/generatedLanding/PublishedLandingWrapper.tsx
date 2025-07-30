@@ -12,9 +12,11 @@ type Props = {
     background: string;
     muted: string;
   };
+  userId: string;
+  publishedPageId: string;
 };
 
-export default function PublishedLandingWrapper({ data, themeValues }: Props) {
+export default function PublishedLandingWrapper({ data, themeValues, userId, publishedPageId }: Props) {
   const { setTheme, getFullTheme } = useThemeStore();
 
   useEffect(() => {
@@ -31,6 +33,11 @@ export default function PublishedLandingWrapper({ data, themeValues }: Props) {
   }, [themeValues]);
 
   return (
-    <LandingPagePreview data={data} isStaticExport={true} />
+    <LandingPagePreview 
+      data={data} 
+      isStaticExport={true} 
+      userId={userId}
+      publishedPageId={publishedPageId}
+    />
   );
 }

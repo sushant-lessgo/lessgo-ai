@@ -24,6 +24,8 @@ type Props = {
   isEditable: boolean;
   ctaConfig: CtaConfigType | null;
   sectionId: keyof GPTOutput["visibleSections"];
+  userId?: string;
+  publishedPageId?: string;
 };
 
 export default function HeroSection({
@@ -37,6 +39,8 @@ export default function HeroSection({
   isEditable,
   ctaConfig,
   sectionId,
+  userId,
+  publishedPageId,
 }: Props) {
   const [image, setImage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -182,6 +186,8 @@ export default function HeroSection({
                       behavior: ctaConfig.behavior
                     }}
                     className={`${ctaColors.background} ${ctaColors.text} hover:${ctaColors.hover} transition w-full sm:w-auto text-center`}
+                    userId={userId}
+                    publishedPageId={publishedPageId}
                   >
                     {ctaConfig.cta_text}
                   </FormConnectedButton>
@@ -191,7 +197,12 @@ export default function HeroSection({
           </div>
 
           {/* Form Placement for Hero */}
-          <FormPlacementRenderer placement="hero" className="mt-6" />
+          <FormPlacementRenderer 
+            sectionId={sectionId} 
+            className="mt-6" 
+            userId={userId}
+            publishedPageId={publishedPageId}
+          />
 
           <EditableWrapper isEditable={isEditable} sectionId={sectionId} elementKey="urgency_text">
             {urgency_text && (

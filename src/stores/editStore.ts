@@ -225,7 +225,9 @@ function createInitialState(tokenId: string): EditStore {
     },
 
     // Forms Slice 
-    forms: {} as Record<string, any>,
+    forms: {} as Record<string, import('@/types/core/forms').MVPForm>,
+    formBuilderOpen: false,
+    editingFormId: null as string | null,
     simpleForms: [] as any[],
     activeForm: undefined as string | undefined,
     formBuilder: {

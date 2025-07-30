@@ -1,27 +1,54 @@
 'use client';
 
 import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
-import { SimpleFormRenderer } from './SimpleFormRenderer';
-import type { SimpleFormData } from '@/types/simpleForms';
+import { FormRenderer } from './FormRenderer';
+import type { MVPForm } from '@/types/core/forms';
 
 interface FormPlacementRendererProps {
-  placement: 'hero' | 'cta-section';
+  sectionId: string;
   className?: string;
+  userId?: string;
+  publishedPageId?: string;
 }
 
-export function FormPlacementRenderer({ placement, className }: FormPlacementRendererProps) {
-  const { getFormsByPlacement } = useEditStore();
-  const forms = getFormsByPlacement(placement);
+export function FormPlacementRenderer({ sectionId, className, userId, publishedPageId }: FormPlacementRendererProps) {
+  const { content, getAllForms } = useEditStore();
+  
+  // Get all forms that should be rendered inline in this section
+  const allForms = getAllForms();
+  const section = content[sectionId];
+  
+  // Find forms that are linked to buttons in this section with "scrollTo" behavior
+  const formsToRender: MVPForm[] = [];
+  
+  if (section?.elements) {
+    Object.values(section.elements).forEach((element: any) => {
+      if (element.metadata?.buttonConfig?.type === 'form' && 
+          element.metadata?.buttonConfig?.behavior === 'scrollTo' &&
+          element.metadata?.buttonConfig?.formId) {
+        
+        const form = allForms.find((f: MVPForm) => f.id === element.metadata.buttonConfig.formId);
+        if (form && !formsToRender.find((f: MVPForm) => f.id === form.id)) {
+          formsToRender.push(form);
+        }
+      }
+    });
+  }
 
-  if (forms.length === 0) {
+  if (formsToRender.length === 0) {
     return null;
   }
 
   return (
     <div className={className}>
-      {forms.map((form: any) => (
+      {formsToRender.map((form) => (
         <div key={form.id} id={`form-${form.id}`} className="mb-8">
-          <SimpleFormRenderer form={form} />
+          <FormRenderer 
+            form={form} 
+            userId={userId}
+            publishedPageId={publishedPageId}
+            mode="inline"
+          />
         </div>
       ))}
     </div>

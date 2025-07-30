@@ -1,5 +1,5 @@
 // Form management actions for MVP
-import type { SimpleFormData, SimpleFormField } from '@/types/simpleForms';
+import type { MVPForm, MVPFormField, MVPFormBuilderState } from '@/types/core/forms';
 import type { EditStore } from '@/types/store';
 
 export const createFormActions = (
@@ -7,20 +7,29 @@ export const createFormActions = (
   get: () => EditStore
 ) => ({
   // Form CRUD operations
-  addForm: (form: SimpleFormData) => {
+  createForm: (form: Omit<MVPForm, 'id' | 'createdAt' | 'updatedAt'>) => {
+    const newForm: MVPForm = {
+      ...form,
+      id: `form-${Date.now()}`,
+      createdAt: new Date(),
+      updatedAt: new Date()
+    };
+    
     set((state) => {
-      state.simpleForms = state.simpleForms || [];
-      state.simpleForms.push(form);
+      if (!state.forms) {
+        state.forms = {};
+      }
+      state.forms[newForm.id] = newForm;
     });
+    
+    return newForm.id;
   },
 
-  updateForm: (id: string, updates: Partial<SimpleFormData>) => {
+  updateForm: (id: string, updates: Partial<MVPForm>) => {
     set((state) => {
-      state.simpleForms = state.simpleForms || [];
-      const formIndex = state.simpleForms.findIndex((f: SimpleFormData) => f.id === id);
-      if (formIndex !== -1) {
-        state.simpleForms[formIndex] = {
-          ...state.simpleForms[formIndex],
+      if (state.forms && state.forms[id]) {
+        state.forms[id] = {
+          ...state.forms[id],
           ...updates,
           updatedAt: new Date()
         };
@@ -30,8 +39,9 @@ export const createFormActions = (
 
   deleteForm: (id: string) => {
     set((state) => {
-      state.simpleForms = state.simpleForms || [];
-      state.simpleForms = state.simpleForms.filter((f: SimpleFormData) => f.id !== id);
+      if (state.forms && state.forms[id]) {
+        delete state.forms[id];
+      }
       
       // Also remove any button links to this form
       Object.keys(state.content).forEach(sectionId => {
@@ -48,26 +58,30 @@ export const createFormActions = (
   },
 
   // Form field operations
-  addFormField: (formId: string, field: SimpleFormField) => {
+  addFormField: (formId: string, field: Omit<MVPFormField, 'id'>) => {
+    const newField: MVPFormField = {
+      ...field,
+      id: `field-${Date.now()}`
+    };
+    
     set((state) => {
-      state.simpleForms = state.simpleForms || [];
-      const form = state.simpleForms.find((f: SimpleFormData) => f.id === formId);
-      if (form) {
-        form.fields.push(field);
-        form.updatedAt = new Date();
+      if (state.forms && state.forms[formId]) {
+        state.forms[formId].fields.push(newField);
+        state.forms[formId].updatedAt = new Date();
       }
     });
   },
 
-  updateFormField: (formId: string, fieldId: string, updates: Partial<SimpleFormField>) => {
+  updateFormField: (formId: string, fieldId: string, updates: Partial<MVPFormField>) => {
     set((state) => {
-      state.simpleForms = state.simpleForms || [];
-      const form = state.simpleForms.find((f: SimpleFormData) => f.id === formId);
-      if (form) {
-        const fieldIndex = form.fields.findIndex((f: SimpleFormField) => f.id === fieldId);
+      if (state.forms && state.forms[formId]) {
+        const fieldIndex = state.forms[formId].fields.findIndex(f => f.id === fieldId);
         if (fieldIndex !== -1) {
-          form.fields[fieldIndex] = { ...form.fields[fieldIndex], ...updates };
-          form.updatedAt = new Date();
+          state.forms[formId].fields[fieldIndex] = {
+            ...state.forms[formId].fields[fieldIndex],
+            ...updates
+          };
+          state.forms[formId].updatedAt = new Date();
         }
       }
     });
@@ -75,79 +89,52 @@ export const createFormActions = (
 
   removeFormField: (formId: string, fieldId: string) => {
     set((state) => {
-      state.simpleForms = state.simpleForms || [];
-      const form = state.simpleForms.find((f: SimpleFormData) => f.id === formId);
-      if (form) {
-        form.fields = form.fields.filter((f: SimpleFormField) => f.id !== fieldId);
-        form.updatedAt = new Date();
+      if (state.forms && state.forms[formId]) {
+        state.forms[formId].fields = state.forms[formId].fields.filter(f => f.id !== fieldId);
+        state.forms[formId].updatedAt = new Date();
       }
     });
   },
 
-  reorderFormFields: (formId: string, fieldIds: string[]) => {
+  reorderFormFields: (formId: string, startIndex: number, endIndex: number) => {
     set((state) => {
-      state.simpleForms = state.simpleForms || [];
-      const form = state.simpleForms.find((f: SimpleFormData) => f.id === formId);
-      if (form) {
-        form.fields = fieldIds.map(id => form.fields.find((f: SimpleFormField) => f.id === id)!).filter(Boolean);
-        form.updatedAt = new Date();
+      if (state.forms && state.forms[formId]) {
+        const fields = [...state.forms[formId].fields];
+        const [removed] = fields.splice(startIndex, 1);
+        fields.splice(endIndex, 0, removed);
+        state.forms[formId].fields = fields;
+        state.forms[formId].updatedAt = new Date();
       }
     });
   },
 
-  // Button-to-form linking
-  linkButtonToForm: (sectionId: string, formId: string, behavior: 'scrollTo' | 'openModal') => {
-    set((state) => {
-      const section = state.content[sectionId];
-      if (section?.cta) {
-        section.cta.type = 'form';
-        section.cta.formId = formId;
-        section.cta.behavior = behavior;
-      }
-    });
-  },
-
-  unlinkButtonFromForm: (sectionId: string) => {
-    set((state) => {
-      const section = state.content[sectionId];
-      if (section?.cta) {
-        delete section.cta.formId;
-        delete section.cta.behavior;
-        section.cta.type = 'link';
-      }
-    });
-  },
+  // Note: Button-to-form linking is now handled through element metadata
+  // See ButtonConfigurationModal for implementation
 
   // Form builder UI
   showFormBuilder: (formId?: string) => {
     set((state) => {
-      state.formBuilder.visible = true;
-      state.formBuilder.editingFormId = formId;
+      state.formBuilderOpen = true;
+      state.editingFormId = formId || null;
     });
   },
 
   hideFormBuilder: () => {
     set((state) => {
-      state.formBuilder.visible = false;
-      delete state.formBuilder.editingFormId;
+      state.formBuilderOpen = false;
+      state.editingFormId = null;
     });
   },
 
   // Get form by ID
-  getFormById: (id: string): SimpleFormData | undefined => {
+  getFormById: (id: string): MVPForm | undefined => {
     const state = get();
-    return state.simpleForms?.find((f: SimpleFormData) => f.id === id);
+    return state.forms?.[id];
   },
 
   // Get all forms
-  getAllForms: (): SimpleFormData[] => {
+  getAllForms: (): MVPForm[] => {
     const state = get();
-    return state.simpleForms || [];
-  },
-
-  // Get forms for a specific placement
-  getFormsByPlacement: (placement: 'hero' | 'cta-section'): SimpleFormData[] => {
-    const state = get();
-    return (state.simpleForms || []).filter((f: SimpleFormData) => f.placement === placement);
+    return state.forms ? Object.values(state.forms) : [];
   }
 });

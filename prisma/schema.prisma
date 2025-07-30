@@ -73,3 +73,34 @@ model TaxonomyEmbedding {
   @@unique([fieldType, value])
   @@index([fieldType])
 }
+
+model FormSubmission {
+  id            String   @id @default(cuid())
+  userId        String   // Clerk User ID (owner of the form)
+  publishedPageId String? // Optional - which published page the form was on
+  formId        String   // The MVP form ID from the store
+  formName      String   // Snapshot of form name at time of submission
+  data          Json     // The actual form submission data
+  ipAddress     String?  // Optional - visitor's IP
+  userAgent     String?  // Optional - visitor's browser
+  createdAt     DateTime @default(now())
+
+  @@index([userId])
+  @@index([formId])
+  @@index([publishedPageId])
+}
+
+model UserIntegration {
+  id            String   @id @default(cuid())
+  userId        String   // Clerk User ID
+  type          String   // 'convertkit', 'mailchimp', etc.
+  name          String   // User-friendly name for the integration
+  apiKey        String   // Encrypted API key
+  isActive      Boolean  @default(true)
+  settings      Json?    // Integration-specific settings
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@unique([userId, type, name])
+  @@index([userId])
+}

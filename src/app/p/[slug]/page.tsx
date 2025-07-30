@@ -27,6 +27,8 @@ export default async function PublishedPage({ params }: PageProps) {
           background: string;
           muted: string;
         }}
+        userId={page.userId}
+        publishedPageId={page.id}
       />
     </div>
   );

@@ -13,11 +13,9 @@ import { Plus } from 'lucide-react';
 import type { ElementSelection } from '@/types/store/state';
 
 interface ButtonConfig {
-  type: 'link' | 'email-form' | 'form';
+  type: 'link' | 'form';
   text: string;
   url?: string;
-  embed_code?: string;
-  placement?: 'hero' | 'separate-section';
   formId?: string;
   behavior?: 'scrollTo' | 'openModal';
 }
@@ -70,8 +68,6 @@ export function ButtonConfigurationModal({
             url: savedConfig.url || '',
             formId: savedConfig.formId || '',
             behavior: savedConfig.behavior || 'scrollTo',
-            embed_code: savedConfig.embed_code || '',
-            placement: savedConfig.placement || 'hero',
           });
           console.log('Loaded saved button config:', savedConfig);
         } else {
@@ -99,9 +95,6 @@ export function ButtonConfigurationModal({
       newErrors.url = 'URL is required for external link.';
     }
 
-    if (config.type === 'email-form' && !config.embed_code?.trim()) {
-      newErrors.embedCode = 'Embed code is required for email form.';
-    }
 
     if (config.type === 'form' && !config.formId) {
       newErrors.form = 'Please select a form or create a new one.';
@@ -139,10 +132,6 @@ export function ButtonConfigurationModal({
               ...(config.type === 'form' && { 
                 formId: config.formId, 
                 behavior: config.behavior 
-              }),
-              ...(config.type === 'email-form' && { 
-                embed_code: config.embed_code, 
-                placement: config.placement 
               }),
             }
           }
@@ -213,8 +202,7 @@ export function ButtonConfigurationModal({
             <div style="font-weight: 600; font-size: 16px;">Success!</div>
             <div style="font-size: 14px; margin-top: 2px; opacity: 0.9;">
               ${config.type === 'link' ? 'External link configured successfully' : 
-                config.type === 'form' ? 'Form connection configured successfully' : 
-                'Email form configured successfully'}
+                'Form connection configured successfully'}
             </div>
           </div>
         </div>
@@ -242,7 +230,7 @@ export function ButtonConfigurationModal({
 
   const handleCreateNewForm = () => {
     showFormBuilder();
-    onClose();
+    // Don't close the button config modal yet - let user create the form first
   };
 
   if (!isOpen) {
@@ -291,17 +279,7 @@ export function ButtonConfigurationModal({
                 <div>
                   <Label htmlFor="form">Native Form</Label>
                   <p className="text-sm text-gray-600">
-                    Link to a custom form with scroll or modal behavior.
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex items-start space-x-2 mt-2">
-                <RadioGroupItem value="email-form" id="email-form" />
-                <div>
-                  <Label htmlFor="email-form">Email Form Embed</Label>
-                  <p className="text-sm text-gray-600">
-                    Embed Mailchimp, ConvertKit, etc. form code.
+                    Create a custom form with built-in integrations.
                   </p>
                 </div>
               </div>
@@ -385,41 +363,6 @@ export function ButtonConfigurationModal({
             </div>
           )}
 
-          {/* Email Form Configuration */}
-          {config.type === 'email-form' && (
-            <div className="space-y-3">
-              <div>
-                <Label htmlFor="embed-code">Embed Code*</Label>
-                <Input
-                  id="embed-code"
-                  value={config.embed_code || ''}
-                  onChange={(e) => setConfig(prev => ({ ...prev, embed_code: e.target.value }))}
-                  placeholder="Paste HTML form code here"
-                />
-                {errors.embedCode && <p className="text-sm text-red-500 mt-1">{errors.embedCode}</p>}
-                <p className="text-xs text-gray-600 mt-1">
-                  Only pure HTML embeds are supported. Script-based forms are not supported.
-                </p>
-              </div>
-
-              <div>
-                <Label>Placement</Label>
-                <RadioGroup
-                  value={config.placement || 'hero'}
-                  onValueChange={(val) => setConfig(prev => ({ ...prev, placement: val as 'hero' | 'separate-section' }))}
-                >
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="hero" id="place-hero" />
-                    <Label htmlFor="place-hero">Hero Section</Label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="separate-section" id="place-section" />
-                    <Label htmlFor="place-section">Separate Section</Label>
-                  </div>
-                </RadioGroup>
-              </div>
-            </div>
-          )}
 
           {/* Actions */}
           <div className="flex justify-end gap-2 pt-4">

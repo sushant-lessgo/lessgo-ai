@@ -85,12 +85,20 @@ export default function ProjectCard({ project, onEdit, onPreview }: Props) {
         )}
 
         {project.status === 'Published' && project.slug && (
-          <button
-            onClick={handlePreview}
-            className="border text-sm px-3 py-1 rounded-md hover:bg-gray-50 transition"
-          >
-            Preview
-          </button>
+          <>
+            <button
+              onClick={handlePreview}
+              className="border text-sm px-3 py-1 rounded-md hover:bg-gray-50 transition"
+            >
+              Preview
+            </button>
+            <button
+              onClick={() => router.push(`/dashboard/forms/${project.slug}`)}
+              className="border border-blue-200 bg-blue-50 text-blue-600 text-sm px-3 py-1 rounded-md hover:bg-blue-100 transition"
+            >
+              View Forms
+            </button>
+          </>
         )}
       </div>
     </div>
