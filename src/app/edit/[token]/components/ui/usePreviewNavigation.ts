@@ -22,7 +22,7 @@ export function usePreviewNavigation(tokenId: string) {
       await triggerAutoSave();
       console.log('✅ Auto-save completed');
       
-      const previewUrl = `/preview/${tokenId}?editMode=true`;
+      const previewUrl = `/preview/${tokenId}`;
       console.log('🔗 Opening preview URL:', previewUrl);
       
       const newWindow = window.open(previewUrl, '_blank');

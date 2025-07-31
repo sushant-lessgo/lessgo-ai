@@ -165,8 +165,8 @@ function GeneratePageContent({ tokenId }: { tokenId: string }) {
       
       console.log('✅ Data saved, navigating to edit page...');
       
-      // Navigate to edit page with flag to indicate data is already in store
-      router.push(`/edit/${tokenId}?migrated=true`);
+      // Navigate to edit page
+      router.push(`/edit/${tokenId}`);
     } catch (error) {
       console.error('❌ Failed to prepare for edit mode:', error);
       setError('Failed to save changes. Please try again.');

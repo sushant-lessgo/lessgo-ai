@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useParams, useRouter, useSearchParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { EditProvider } from "@/components/EditProvider";
 import { EditLayout } from "./components/layout/EditLayout";
 import { EditLayoutErrorBoundary } from "@/app/edit/[token]/components/layout/EditLayoutErrorBoundary";
@@ -10,7 +10,6 @@ import { EditLayoutErrorBoundary } from "@/app/edit/[token]/components/layout/Ed
 export default function EditPage() {
   const params = useParams();
   const router = useRouter();
-  const searchParams = useSearchParams();
   const tokenId = params?.token as string;
   
   if (!tokenId) {
@@ -49,22 +48,14 @@ export default function EditPage() {
 // Separate component for the actual page logic
 function EditPageContent({ tokenId }: { tokenId: string }) {
   const router = useRouter();
-  const searchParams = useSearchParams();
   
   const [loadingState, setLoadingState] = useState<'loading' | 'success' | 'error'>('loading');
   const [errorMessage, setErrorMessage] = useState<string>('');
 
-  // Check if this is a migration from generate page
-  const isMigrated = searchParams.get('migrated') === 'true';
-
-  // The EditProvider handles store initialization, so we just need to handle migration logic
+  // The EditProvider handles store initialization
   useEffect(() => {
-    // If coming from migration, we're already set up by the provider
-    if (isMigrated) {
-      console.log('🔄 Edit page initialized from migration');
-    }
     setLoadingState('success');
-  }, [isMigrated]);
+  }, []);
 
   // The EditProvider handles loading and error states, so we just render the layout
   return <EditLayout tokenId={tokenId} />;
