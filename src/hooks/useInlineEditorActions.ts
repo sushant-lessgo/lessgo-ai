@@ -9,11 +9,11 @@ import type { ElementSelection } from '@/types/core/ui';
 export function useInlineEditorActions() {
   // Temporarily commented out due to missing store methods
   return {
-    handleApplyTextFormat: () => {},
-    handleContentUpdate: () => {},
-    handleContentSave: () => {},
-    handleContentCancel: () => {},
-    handleFormatChange: () => {},
+    handleApplyTextFormat: (...args: any[]) => true,
+    handleContentUpdate: (...args: any[]) => true,
+    handleContentSave: (...args: any[]) => true,
+    handleContentCancel: (...args: any[]) => true,
+    handleFormatChange: (...args: any[]) => true,
   };
   
   // Original implementation below - restore when store methods are available

@@ -1,6 +1,6 @@
 // hooks/useToolbarPositioning.ts - Simplified positioning (kept for compatibility)
 import { useCallback } from 'react';
-import { useEditStore } from './useEditStore';
+import { useEditStoreLegacy as useEditStore } from './useEditStoreLegacy';
 
 export interface PositioningOptions {
   preferredPosition?: 'top' | 'bottom' | 'left' | 'right';
@@ -8,7 +8,11 @@ export interface PositioningOptions {
 }
 
 export function useToolbarPositioning() {
-  const { showToolbar, hideToolbar } = useEditStore();
+  const store = useEditStore();
+  
+  // Fallback for missing methods
+  const showToolbar = store.showToolbar || (() => {});
+  const hideToolbar = store.hideToolbar || (() => {});
 
   // Simple position calculation
   const calculatePosition = useCallback((

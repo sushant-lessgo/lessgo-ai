@@ -1,6 +1,6 @@
 // hooks/useTextToolbarIntegration.ts - Toolbar integration system
 import { useState, useCallback, useRef, useEffect } from 'react';
-import { useEditStore } from './useEditStore';
+import { useEditStoreLegacy as useEditStore } from './useEditStoreLegacy';
 import type { TextFormatState, TextSelection } from '@/app/edit/[token]/components/editor/InlineTextEditor';
 
 export interface TextFormatAction {
@@ -302,6 +302,6 @@ export function useTextToolbarIntegration() {
     syncFormatStateFromDOM,
     
     // Internal reference for editor integration
-    executeFormat: executeFormatRef,
+    executeFormatRef,
   };
 }

@@ -368,10 +368,10 @@ export function useUniversalElements() {
         ? Array.isArray((originalElement as any).content)
           ? [...(originalElement as any).content]
           : (originalElement as any).content
-        : UNIVERSAL_ELEMENTS[(originalElement as any).type]?.defaultContent,
+        : UNIVERSAL_ELEMENTS[(originalElement as any).type as UniversalElementType]?.defaultContent,
       props: options.preserveProps !== false
         ? { ...(originalElement as any).props }
-        : { ...UNIVERSAL_ELEMENTS[(originalElement as any).type]?.defaultProps },
+        : { ...UNIVERSAL_ELEMENTS[(originalElement as any).type as UniversalElementType]?.defaultProps },
       metadata: {
         addedManually: true,
         addedAt: Date.now(),

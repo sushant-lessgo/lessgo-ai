@@ -3,7 +3,7 @@ import { notFound } from 'next/navigation';
 import type { GPTOutput } from '@/modules/prompt/types';
 import dynamic from 'next/dynamic';
 
-const PublishedLandingWrapper = dynamic(() => import('@/components/generatedLanding/PublishedLandingWrapper'), {
+const PublishedPageRenderer = dynamic(() => import('@/modules/generatedLanding/PublishedPageRenderer'), {
   ssr: false,
 });
 
@@ -19,17 +19,15 @@ export default async function PublishedPage({ params }: PageProps) {
   if (!page) return notFound();
 
   return (
-    <div className="min-h-screen bg-white">
-      <PublishedLandingWrapper
-        data={page.content as GPTOutput}
-        themeValues={page.themeValues as {
-          primary: string;
-          background: string;
-          muted: string;
-        }}
-        userId={page.userId}
-        publishedPageId={page.id}
-      />
-    </div>
+    <PublishedPageRenderer
+      data={page.content as GPTOutput}
+      themeValues={page.themeValues as {
+        primary: string;
+        background: string;
+        muted: string;
+      }}
+      userId={page.userId}
+      publishedPageId={page.id}
+    />
   );
 }

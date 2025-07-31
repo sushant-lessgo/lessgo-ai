@@ -391,11 +391,11 @@ function UniversalButton({
       console.warn('Button content is an object, converting to string:', content);
       // If it's an object with numeric keys (like the error describes), it might be a string-like object
       if (Array.isArray(content)) {
-        return content.join(' ');
+        return (content as string[]).join(' ');
       } else if (typeof content === 'object' && Object.keys(content).some(key => !isNaN(Number(key)))) {
         // Object with numeric keys - reconstruct the string
         const keys = Object.keys(content).filter(key => !isNaN(Number(key))).sort((a, b) => Number(a) - Number(b));
-        return keys.map(key => content[key]).join('');
+        return keys.map(key => (content as any)[key]).join('');
       } else {
         return JSON.stringify(content);
       }
@@ -467,11 +467,11 @@ function UniversalLink({
       console.warn('Link content is an object, converting to string:', content);
       // If it's an object with numeric keys (like the error describes), it might be a string-like object
       if (Array.isArray(content)) {
-        return content.join(' ');
+        return (content as string[]).join(' ');
       } else if (typeof content === 'object' && Object.keys(content).some(key => !isNaN(Number(key)))) {
         // Object with numeric keys - reconstruct the string
         const keys = Object.keys(content).filter(key => !isNaN(Number(key))).sort((a, b) => Number(a) - Number(b));
-        return keys.map(key => content[key]).join('');
+        return keys.map(key => (content as any)[key]).join('');
       } else {
         return JSON.stringify(content);
       }

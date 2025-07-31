@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import PromptForm from "@/modules/prompt/PromptForm"
-import GeneratedLanding from "@/components/generatedLanding/GeneratedLanding"
+import LandingPageRenderer from "@/modules/generatedLanding/LandingPageRenderer"
 import type { GPTOutput } from "@/modules/prompt/types"
 import Logo from "@/components/shared/Logo"
 import PageIntro from "@/components/shared/PageIntro"
@@ -63,7 +63,7 @@ const [themeValues, setThemeValues] = useState<{
 
         </div>
       ) : (
-        <GeneratedLanding data={gptOutput} input={userInput} themeValues={themeValues!} />
+        <LandingPageRenderer />
 
       )}
     </main>

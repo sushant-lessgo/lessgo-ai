@@ -7,7 +7,7 @@ import posthog from "posthog-js";
 
 
 
-import LandingPagePreview from "@/components/generatedLanding/LandingPagePreview";
+import LandingPageRenderer from "@/modules/generatedLanding/LandingPageRenderer";
 
 import type { GPTOutput } from "@/modules/prompt/types";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
@@ -219,7 +219,7 @@ const htmlContent = previewElement.innerHTML;
   return (
     <div className="min-h-screen bg-white">
       <div id="landing-preview">
-  <LandingPagePreview data={data} dispatch={() => {}} isStaticExport={true} />
+  <LandingPageRenderer />
 </div>
 
 

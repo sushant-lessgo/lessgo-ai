@@ -40,7 +40,11 @@
       "Bash(timeout 10s npm run dev:*)",
       "Bash(timeout 15s npm run dev)",
       "Bash(npx prisma migrate dev:*)",
-      "Bash(npx prisma generate:*)"
+      "Bash(npx prisma generate:*)",
+      "Bash(timeout 60s npm run build)",
+      "Bash(timeout 120s npm run build)",
+      "Bash(timeout 180s npm run build)",
+      "Bash(timeout 300s npm run build)"
     ],
     "deny": []
   }

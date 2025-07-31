@@ -1,4 +1,4 @@
-// /app/start/[token]/components/InputStep.tsx
+// /app/create/[token]/components/InputStep.tsx
 "use client";
 
 import { useState } from "react";

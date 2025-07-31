@@ -7,7 +7,7 @@ import { usePathname } from 'next/navigation';
 export function InjectLandingTheme() {
   const pathname = usePathname();
   const isLandingPage =
-  pathname?.startsWith('/p/') || pathname?.startsWith('/start/')
+  pathname?.startsWith('/p/') || pathname?.startsWith('/create/')
 
   const { getFullTheme } = useThemeStore();
 

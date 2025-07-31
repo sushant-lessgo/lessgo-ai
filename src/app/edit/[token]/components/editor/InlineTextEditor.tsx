@@ -124,7 +124,7 @@ export function InlineTextEditor({
   const editorRef = useRef<HTMLElement>(null);
   const selectionRef = useRef<TextSelection | null>(null);
   
-  const { registerEditor, unregisterEditor, executeFormat } = useTextToolbarIntegration();
+  const { registerEditor, unregisterEditor, executeFormatRef } = useTextToolbarIntegration();
   const { trackContentChange } = useInlineEditorAutoSave(autoSave);
   const { 
     getSelection, 
@@ -552,10 +552,10 @@ export function InlineTextEditor({
 
   // Expose format application function for toolbar integration
   useEffect(() => {
-    if (executeFormat) {
-      executeFormat.current = applyFormat;
+    if (executeFormatRef) {
+      executeFormatRef.current = applyFormat;
     }
-  }, [executeFormat, applyFormat]);
+  }, [executeFormatRef, applyFormat]);
 
   // Dynamic styles based on background type - use CSS custom properties
   const dynamicStyles = {

@@ -30,6 +30,25 @@ export function createFormsImageActions(set: any, get: any): FormsImageActions {
   return {
     // Include all form actions
     ...formActions,
+    
+    // Legacy compatibility methods (will be removed after full migration)
+    addForm: (form: any) => {
+      // Legacy method - delegate to createForm
+      return formActions.createForm(form);
+    },
+    linkButtonToForm: (sectionId: string, formId: string, behavior: 'scrollTo' | 'openModal') => {
+      // Legacy method - stub for now
+      console.warn('linkButtonToForm is legacy, needs migration');
+    },
+    unlinkButtonFromForm: (sectionId: string) => {
+      // Legacy method - stub for now  
+      console.warn('unlinkButtonFromForm is legacy, needs migration');
+    },
+    getFormsByPlacement: (placement: 'hero' | 'cta-section') => {
+      // Legacy method - return empty for now
+      console.warn('getFormsByPlacement is legacy, needs migration');
+      return [];
+    },
     /**
      * ===== FORM MANAGEMENT =====
      */
@@ -1019,5 +1038,5 @@ export function createFormsImageActions(set: any, get: any): FormsImageActions {
         imagesWithAlt,
       };
     },
-  };
+  } as unknown as FormsImageActions;
 }
