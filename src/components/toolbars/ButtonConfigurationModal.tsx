@@ -137,15 +137,26 @@ export function ButtonConfigurationModal({
           }
         };
 
-        // Update the element in store using setSection
+        // Create ctaConfig for compatibility with HeroSection
+        const ctaConfig = {
+          type: config.type === 'link' ? 'link' as const : 'form' as const,
+          cta_text: config.text,
+          url: config.type === 'link' ? config.url : undefined,
+          formId: config.type === 'form' ? config.formId : undefined,
+          behavior: config.type === 'form' ? config.behavior : undefined,
+        };
+
+        // Update the element in store using setSection, including ctaConfig
         setSection(elementSelection.sectionId, {
           elements: {
             ...currentSection.elements,
             [elementSelection.elementKey]: updatedElement
-          }
+          },
+          ctaConfig: ctaConfig // Add ctaConfig to section level
         });
         
         console.log('🔧 Button configuration saved:', config);
+        console.log('🔧 CTA config created:', ctaConfig);
       }
 
       // Clear any existing errors first

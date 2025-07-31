@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState, useMemo } from 'react';
 import { useParams, useRouter } from 'next/navigation';
+import { EditProvider } from '@/components/EditProvider';
 import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
 import LandingPageRenderer from '@/modules/generatedLanding/LandingPageRenderer';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
@@ -10,8 +11,35 @@ import posthog from "posthog-js";
 
 export default function PreviewPage() {
   const params = useParams();
-  const router = useRouter();
   const tokenId = params?.token as string;
+  
+  if (!tokenId) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center max-w-md">
+          <h2 className="text-xl font-semibold text-gray-900 mb-2">Invalid URL</h2>
+          <p className="text-gray-600 mb-6">No token provided in URL</p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <EditProvider 
+      tokenId={tokenId}
+      options={{
+        showLoadingState: true,
+        showErrorBoundary: true,
+        resetOnTokenChange: false,
+      }}
+    >
+      <PreviewPageContent tokenId={tokenId} />
+    </EditProvider>
+  );
+}
+
+function PreviewPageContent({ tokenId }: { tokenId: string }) {
+  const router = useRouter();
 
   // Edit store state (after migration)
   const { 
@@ -19,7 +47,8 @@ export default function PreviewPage() {
     content,
     theme,
     title,
-    onboardingData
+    onboardingData,
+    setMode
   } = useEditStore();
 
   // UI state
@@ -31,6 +60,11 @@ export default function PreviewPage() {
   const [customSlug, setCustomSlug] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // Set mode to preview on mount
+  useEffect(() => {
+    setMode('preview');
+  }, [setMode]);
 
   // Validate publish readiness
   const isPublishReady = useMemo(() => {

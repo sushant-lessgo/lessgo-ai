@@ -25,6 +25,15 @@ export function EditableCTA({ ctaConfig, isEditable, dispatch, ctaText, sectionI
   const posthog = usePostHog();
   const ctaColors = useSmartCTAColors();
 
+  // Debug logging for EditableCTA
+  console.log('🔧 EditableCTA props:', {
+    ctaConfig,
+    isEditable,
+    ctaText,
+    sectionId,
+    elementKey
+  });
+
   const openConfig = () => {
     setOpen(true);
     posthog.capture("cta_config_open", {

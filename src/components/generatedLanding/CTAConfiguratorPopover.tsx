@@ -91,6 +91,7 @@ export function CTAConfiguratorPopover({
         : { embed_code: embedCode.trim(), placement }),
     };
 
+    // Use legacy dispatch for compatibility
     dispatch?.({
       type: 'UPDATE_FIELD',
       payload: {
@@ -98,6 +99,53 @@ export function CTAConfiguratorPopover({
         value: newConfig,
       },
     });
+
+    // Debug: Log the save attempt
+    console.log('🔄 Saving CTA config:', newConfig);
+    
+    // Also use the EditStore to ensure the ctaConfig is properly saved
+    try {
+      const store = useEditStore.getState();
+      console.log('🔍 Current hero data before update:', store.content.hero);
+      
+      const { initializeSection, triggerAutoSave } = useEditStore();
+      
+      // Get current hero section data
+      const currentHeroData = store.content.hero;
+      
+      if (currentHeroData) {
+        // Create updated section data with ctaConfig
+        const updatedHeroData = {
+          ...currentHeroData,
+          ctaConfig: newConfig,
+          cta: {
+            label: ctaText.trim(),
+            url: ctaType === 'link' ? url.trim() : undefined,
+            variant: 'primary' as const,
+            size: 'medium' as const,
+            type: ctaType,
+            formId: ctaType === 'form' ? selectedFormId : undefined,
+            behavior: ctaType === 'form' ? formBehavior : undefined,
+          }
+        };
+        
+        console.log('🔄 Updating hero section with:', updatedHeroData);
+        
+        // Re-initialize the section with updated data
+        initializeSection('hero', updatedHeroData);
+        
+        // Verify the update
+        const verifyData = useEditStore.getState().content.hero;
+        console.log('✅ Hero data after update:', verifyData);
+        
+        // Trigger auto-save
+        triggerAutoSave();
+      } else {
+        console.error('❌ No current hero data found');
+      }
+    } catch (error) {
+      console.error('❌ Failed to update CTA in EditStore:', error);
+    }
 
     posthog.capture('cta_config_saved', newConfig);
     closePopover();

@@ -45,6 +45,14 @@ export default function HeroSection({
   const [image, setImage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
+  // Debug logging
+  console.log('🔍 HeroSection props:', {
+    isEditable,
+    ctaConfig,
+    cta_text,
+    sectionId
+  });
+
   // Get smart text colors for this section
   const smartColors = useSmartTextColorsForSection('hero');
   // Get smart CTA colors that auto-update with accent changes
@@ -159,11 +167,14 @@ export default function HeroSection({
             {ctaConfig?.cta_text && (
               <>
                 {ctaConfig.type === "link" && (
-                  <a href={ctaConfig.url} target="_blank" rel="noopener noreferrer">
-                    <Button className={`${ctaColors.background} ${ctaColors.text} hover:${ctaColors.hover} transition w-full sm:w-auto text-center`}>
-                      {ctaConfig.cta_text}
-                    </Button>
-                  </a>
+                  <>
+                    {console.log('🔗 Rendering link CTA:', { url: ctaConfig.url, text: ctaConfig.cta_text, isEditable })}
+                    <a href={ctaConfig.url} target="_blank" rel="noopener noreferrer">
+                      <Button className={`${ctaColors.background} ${ctaColors.text} hover:${ctaColors.hover} transition w-full sm:w-auto text-center`}>
+                        {ctaConfig.cta_text}
+                      </Button>
+                    </a>
+                  </>
                 )}
 
                 {ctaConfig.type === "email-form" && ctaConfig.placement === "separate-section" && (

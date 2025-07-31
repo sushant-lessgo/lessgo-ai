@@ -359,6 +359,17 @@ const finalSections: OrderedSection[] = processedSections
 
     // Render the actual component wrapped in SmartTextSection
     try {
+      // Debug logging for hero section
+      if (sectionId === 'hero') {
+        console.log('🎯 Rendering hero section with data:', {
+          mode,
+          isEditable: mode === 'edit',
+          data,
+          ctaConfig: data?.ctaConfig,
+          elements: data?.elements
+        });
+      }
+      
       return (
         <SmartTextSection
           key={sectionId}
@@ -371,6 +382,7 @@ const finalSections: OrderedSection[] = processedSections
             backgroundType={backgroundType}
             sectionBackgroundCSS={sectionBackgroundCSS}
             className=""
+            isEditable={mode === 'edit'}
             {...(data || {})}
           />
         </SmartTextSection>

@@ -58,10 +58,6 @@ export function PreviewButton({ tokenId }: PreviewButtonProps) {
     <button
       ref={buttonRef}
       onClick={handleClick}
-      onMouseUp={() => {
-        // Workaround: Manually trigger click handler since click events are blocked
-        handleClick({} as React.MouseEvent);
-      }}
       disabled={isNavigating}
       className={`
         px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200

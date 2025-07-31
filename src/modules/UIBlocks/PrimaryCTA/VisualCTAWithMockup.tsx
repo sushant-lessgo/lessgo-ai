@@ -11,6 +11,7 @@ import {
 } from '@/components/layout/EditableContent';
 import { CTAButton } from '@/components/layout/ComponentRegistry';
 import { LayoutComponentProps } from '@/types/storeTypes';
+import { createCTAClickHandler } from '@/utils/ctaHandler';
 
 // Content interface for type safety
 interface VisualCTAWithMockupContent {
@@ -201,6 +202,7 @@ export default function VisualCTAWithMockup(props: LayoutComponentProps) {
                 size="large"
                 sectionId={sectionId}
                 elementKey="cta_text"
+                onClick={createCTAClickHandler(sectionId)}
               />
               
               {blockContent.secondary_cta && (
@@ -213,6 +215,7 @@ export default function VisualCTAWithMockup(props: LayoutComponentProps) {
                   size="large"
                   sectionId={sectionId}
                   elementKey="secondary_cta"
+                  onClick={createCTAClickHandler(sectionId)}
                 />
               )}
             </div>

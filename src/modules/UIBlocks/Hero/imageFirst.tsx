@@ -13,6 +13,7 @@ import {
   TrustIndicators 
 } from '@/components/layout/ComponentRegistry';
 import { LayoutComponentProps } from '@/types/storeTypes';
+import { createCTAClickHandler } from '@/utils/ctaHandler';
 
 interface ImageFirstContent {
   headline: string;
@@ -314,6 +315,7 @@ export default function ImageFirst(props: LayoutComponentProps) {
                 variant="primary"
                 sectionId={sectionId}
                 elementKey="cta_text"
+                onClick={createCTAClickHandler(sectionId)}
               />
 
               <TrustIndicators 

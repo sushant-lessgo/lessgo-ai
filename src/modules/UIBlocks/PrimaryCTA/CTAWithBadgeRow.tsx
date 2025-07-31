@@ -10,6 +10,7 @@ import {
 } from '@/components/layout/EditableContent';
 import { CTAButton } from '@/components/layout/ComponentRegistry';
 import { LayoutComponentProps } from '@/types/storeTypes';
+import { createCTAClickHandler } from '@/utils/ctaHandler';
 
 // Content interface for type safety
 interface CTAWithBadgeRowContent {
@@ -165,6 +166,7 @@ export default function CTAWithBadgeRow(props: LayoutComponentProps) {
             size="large"
             sectionId={sectionId}
             elementKey="cta_text"
+            onClick={createCTAClickHandler(sectionId)}
           />
         </div>
 

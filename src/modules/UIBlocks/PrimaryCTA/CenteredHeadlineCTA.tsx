@@ -16,6 +16,7 @@ import {
 } from '@/components/layout/ComponentRegistry';
 import { LayoutComponentProps } from '@/types/storeTypes';
 import { parsePipeData } from '@/utils/dataParsingUtils';
+import { createCTAClickHandler } from '@/utils/ctaHandler';
 
 // Content interface for type safety
 interface CenteredHeadlineCTAContent {
@@ -149,6 +150,7 @@ export default function CenteredHeadlineCTA(props: LayoutComponentProps) {
             className="text-xl px-12 py-6 shadow-2xl hover:shadow-3xl"
             sectionId={sectionId}
             elementKey="cta_text"
+            onClick={createCTAClickHandler(sectionId)}
           />
         </div>
 

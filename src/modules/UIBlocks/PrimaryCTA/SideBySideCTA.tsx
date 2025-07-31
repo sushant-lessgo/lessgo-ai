@@ -10,6 +10,7 @@ import {
 } from '@/components/layout/EditableContent';
 import { CTAButton } from '@/components/layout/ComponentRegistry';
 import { LayoutComponentProps } from '@/types/storeTypes';
+import { createCTAClickHandler } from '@/utils/ctaHandler';
 
 // Content interface for type safety
 interface SideBySideCTAContent {
@@ -125,6 +126,7 @@ export default function SideBySideCTA(props: LayoutComponentProps) {
                 variant="primary"
                 sectionId={sectionId}
                 elementKey="left_cta_text"
+                onClick={createCTAClickHandler(sectionId)}
               />
             </div>
           </div>
@@ -178,6 +180,7 @@ export default function SideBySideCTA(props: LayoutComponentProps) {
                 variant="secondary"
                 sectionId={sectionId}
                 elementKey="right_cta_text"
+                onClick={createCTAClickHandler(sectionId)}
               />
             </div>
           </div>

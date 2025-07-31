@@ -286,6 +286,21 @@ export default function CenterStacked(props: LayoutComponentProps) {
               variant="primary"
               sectionId={sectionId}
               elementKey="cta_text"
+              onClick={() => {
+                // Get ctaConfig from section data
+                const { content } = useEditStore.getState();
+                const sectionData = content[sectionId];
+                const ctaConfig = sectionData?.ctaConfig;
+                
+                console.log('🔗 CTA Button clicked:', { ctaConfig, sectionId });
+                
+                if (ctaConfig?.type === 'link' && ctaConfig.url) {
+                  console.log('🔗 Opening external link:', ctaConfig.url);
+                  window.open(ctaConfig.url, '_blank', 'noopener,noreferrer');
+                } else {
+                  console.log('⚠️ No CTA config or URL found:', ctaConfig);
+                }
+              }}
             />
 
             <TrustIndicators 
