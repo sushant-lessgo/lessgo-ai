@@ -8,6 +8,7 @@ import LandingPageRenderer from '@/modules/generatedLanding/LandingPageRenderer'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { SlugModal } from '@/components/SlugModal';
 import posthog from "posthog-js";
+import { getTabManager, cleanupTabManager } from '@/utils/tabManager';
 
 export default function PreviewPage() {
   const params = useParams();
@@ -60,11 +61,20 @@ function PreviewPageContent({ tokenId }: { tokenId: string }) {
   const [customSlug, setCustomSlug] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [tabManager, setTabManager] = useState<ReturnType<typeof getTabManager> | null>(null);
 
-  // Set mode to preview on mount
+  // Set mode to preview on mount and initialize tab manager
   useEffect(() => {
     setMode('preview');
-  }, [setMode]);
+    
+    // Initialize tab manager for preview page
+    const manager = getTabManager('preview', tokenId);
+    setTabManager(manager);
+
+    return () => {
+      cleanupTabManager('preview', tokenId);
+    };
+  }, [setMode, tokenId]);
 
   // Validate publish readiness
   const isPublishReady = useMemo(() => {
@@ -89,8 +99,43 @@ function PreviewPageContent({ tokenId }: { tokenId: string }) {
     setIsLoading(false);
   }, [sections.length]);
 
-  // Handle edit navigation
-  const handleEdit = () => {
+  // Handle edit navigation with smart tab management
+  const handleEdit = async () => {
+    if (!tabManager) {
+      // Fallback to normal navigation
+      router.push(`/edit/${tokenId}`);
+      return;
+    }
+
+    // Check if we have a source tab ID stored
+    const sourceTabId = sessionStorage.getItem(`preview-source-${tokenId}`);
+    
+    if (sourceTabId) {
+      // Try to focus the source tab
+      const focused = await tabManager.focusTab(sourceTabId);
+      
+      if (focused) {
+        // Successfully focused the original tab, close this preview tab
+        window.close();
+        return;
+      }
+    }
+
+    // If no source tab or focus failed, check for any existing edit tab
+    const existingEditTab = tabManager.findExistingEditTab();
+    
+    if (existingEditTab) {
+      // Try to focus the existing edit tab
+      const focused = await tabManager.focusTab(existingEditTab.id);
+      
+      if (focused) {
+        // Successfully focused an existing edit tab, close this preview tab
+        window.close();
+        return;
+      }
+    }
+
+    // If all else fails, navigate in the current tab
     router.push(`/edit/${tokenId}`);
   };
 
@@ -236,9 +281,13 @@ function PreviewPageContent({ tokenId }: { tokenId: string }) {
             {/* Edit Button */}
             <button
               onClick={handleEdit}
-              className="px-5 py-2 rounded-lg font-medium text-sm transition-all duration-200 bg-gray-100 hover:bg-gray-200 text-gray-700 border border-gray-300"
+              className="px-5 py-2 rounded-lg font-medium text-sm transition-all duration-200 bg-gray-100 hover:bg-gray-200 text-gray-700 border border-gray-300 flex items-center space-x-2"
+              title="Return to edit mode (will reuse existing tab if available)"
             >
-              Back to Edit
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 17l-5-5m0 0l5-5m-5 5h12" />
+              </svg>
+              <span>Back to Edit</span>
             </button>
 
             {/* Publish Button */}
