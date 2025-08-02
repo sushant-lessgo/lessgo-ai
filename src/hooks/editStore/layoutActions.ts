@@ -629,10 +629,28 @@ getTypographyForSection: (sectionId: string) => {
     getColorTokens: () => {
       const { theme } = get();
       
+      console.log('🎨 [TOKENS-DEBUG] getColorTokens called with theme:', {
+        baseColor: theme.colors.baseColor,
+        accentColor: theme.colors.accentColor,
+        accentCSS: theme.colors.accentCSS,
+        sectionBackgrounds: theme.colors.sectionBackgrounds,
+        typography: {
+          headingFont: theme.typography.headingFont,
+          bodyFont: theme.typography.bodyFont
+        }
+      });
+      
       // Check if we have a complete background system
       const hasCompleteBackgroundSystem = 
         theme.colors.sectionBackgrounds.primary && 
         theme.colors.sectionBackgrounds.secondary;
+
+      console.log('🎨 [TOKENS-DEBUG] Background system completeness check:', {
+        hasCompleteBackgroundSystem,
+        hasPrimary: !!theme.colors.sectionBackgrounds.primary,
+        hasSecondary: !!theme.colors.sectionBackgrounds.secondary,
+        hasAccentCSS: !!theme.colors.accentCSS
+      });
 
       if (hasCompleteBackgroundSystem && theme.colors.accentCSS) {
         // Properly construct the BackgroundSystem object
@@ -646,17 +664,23 @@ getTypographyForSection: (sectionId: string) => {
           accentCSS: theme.colors.accentCSS
         };
 
-        // console.log('🎨 Using integrated background system for color tokens:', backgroundSystemData);
-        return generateColorTokensFromBackgroundSystem(backgroundSystemData);
+        console.log('🎨 [TOKENS-DEBUG] Using integrated background system for color tokens:', backgroundSystemData);
+        const tokens = generateColorTokensFromBackgroundSystem(backgroundSystemData);
+        console.log('🎨 [TOKENS-DEBUG] Generated integrated tokens:', tokens);
+        return tokens;
       } else {
         // Fallback to basic generation
-        console.warn('Using fallback color token generation - background system not fully integrated');
-        return generateColorTokens({
+        console.warn('🎨 [TOKENS-DEBUG] Using fallback color token generation - background system not fully integrated');
+        const fallbackInput = {
           baseColor: theme.colors.baseColor,
           accentColor: theme.colors.accentColor,
           accentCSS: theme.colors.accentCSS,
           sectionBackgrounds: theme.colors.sectionBackgrounds
-        });
+        };
+        console.log('🎨 [TOKENS-DEBUG] Fallback input:', fallbackInput);
+        const tokens = generateColorTokens(fallbackInput);
+        console.log('🎨 [TOKENS-DEBUG] Generated fallback tokens:', tokens);
+        return tokens;
       }
     },
 

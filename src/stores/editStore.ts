@@ -363,16 +363,34 @@ export function createEditStore(tokenId: string): EditStoreInstance {
             }),
             onRehydrateStorage: () => (state) => {
               if (state) {
-                console.log(`🔄 EditStore rehydrated for token ${tokenId}:`, {
+                console.log(`🔄 [STORE-DEBUG] EditStore rehydrated for token ${tokenId}:`, {
                   sections: state.sections?.length || 0,
                   content: Object.keys(state.content || {}).length,
                   tokenId: state.tokenId,
-                  hasTheme: !!state.theme
+                  hasTheme: !!state.theme,
+                  themeDetails: {
+                    colors: state.theme?.colors,
+                    typography: {
+                      headingFont: state.theme?.typography?.headingFont,
+                      bodyFont: state.theme?.typography?.bodyFont
+                    },
+                    backgroundsFromStorage: {
+                      primary: state.theme?.colors?.sectionBackgrounds?.primary,
+                      secondary: state.theme?.colors?.sectionBackgrounds?.secondary,
+                      neutral: state.theme?.colors?.sectionBackgrounds?.neutral,
+                      divider: state.theme?.colors?.sectionBackgrounds?.divider
+                    }
+                  },
+                  onboardingData: {
+                    hasOneLiner: !!state.onboardingData?.oneLiner,
+                    validatedFieldsCount: Object.keys(state.onboardingData?.validatedFields || {}).length,
+                    hiddenFieldsCount: Object.keys(state.onboardingData?.hiddenInferredFields || {}).length
+                  }
                 });
                 
                 // Ensure tokenId matches (in case of storage corruption)
                 if (state.tokenId !== tokenId) {
-                  console.warn(`⚠️ Token mismatch in storage: expected ${tokenId}, got ${state.tokenId}`);
+                  console.warn(`⚠️ [STORE-DEBUG] Token mismatch in storage: expected ${tokenId}, got ${state.tokenId}`);
                   state.tokenId = tokenId;
                   state.id = tokenId;
                 }
@@ -386,6 +404,8 @@ export function createEditStore(tokenId: string): EditStoreInstance {
                     failedSaves: 0,
                   };
                 }
+              } else {
+                console.log(`🔄 [STORE-DEBUG] No stored data found for token ${tokenId}, using defaults`);
               }
             },
             // Add error handling for corrupted storage

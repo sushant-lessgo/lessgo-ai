@@ -230,6 +230,25 @@ export function ColorSystemModalMVP({ isOpen, onClose, tokenId }: ColorSystemMod
   const handleApply = () => {
     if (!selectedColor) return;
 
+    console.log('🎨 [EDIT-DEBUG] Color update initiated:', {
+      selectedColor: {
+        name: selectedColor.name,
+        value: selectedColor.value,
+        tailwindClass: selectedColor.tailwindClass,
+        hex: selectedColor.hex
+      },
+      currentTheme: {
+        baseColor: theme?.colors?.baseColor,
+        accentColor: theme?.colors?.accentColor,
+        accentCSS: theme?.colors?.accentCSS,
+        sectionBackgrounds: theme?.colors?.sectionBackgrounds
+      },
+      typography: {
+        headingFont: theme?.typography?.headingFont,
+        bodyFont: theme?.typography?.bodyFont
+      }
+    });
+
     // Update the theme with proper structure
     const updatedTheme = {
       ...theme,
@@ -240,13 +259,29 @@ export function ColorSystemModalMVP({ isOpen, onClose, tokenId }: ColorSystemMod
       }
     };
     
-    console.log('🎨 Applying accent color:', {
+    console.log('🎨 [EDIT-DEBUG] Applying accent color update:', {
       selectedColor,
       updatedTheme: updatedTheme.colors,
-      beforeUpdate: theme?.colors
+      beforeUpdate: theme?.colors,
+      backgroundsPreserved: {
+        primary: updatedTheme.colors.sectionBackgrounds?.primary,
+        secondary: updatedTheme.colors.sectionBackgrounds?.secondary,
+        neutral: updatedTheme.colors.sectionBackgrounds?.neutral,
+        divider: updatedTheme.colors.sectionBackgrounds?.divider
+      }
     });
     
     updateTheme(updatedTheme);
+    
+    // Log color tokens after update
+    setTimeout(() => {
+      try {
+        const colorTokens = getColorTokens();
+        console.log('🎨 [EDIT-DEBUG] Color tokens after accent update:', colorTokens);
+      } catch (error) {
+        console.warn('🎨 [EDIT-DEBUG] Failed to get updated color tokens:', error);
+      }
+    }, 100);
     
     // Clear selection so the modal shows the updated current color
     setTimeout(() => {

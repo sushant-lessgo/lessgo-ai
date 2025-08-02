@@ -123,11 +123,24 @@ function GeneratePageContent({ tokenId }: { tokenId: string }) {
     try {
       // Log current state for debugging
       const currentState = store.getState();
-      console.log('📊 Pre-navigation store state:', {
+      console.log('📊 [GENERATE-DEBUG] Pre-navigation store state:', {
         sections: currentState.sections.length,
         content: Object.keys(currentState.content).length,
         sectionsArray: currentState.sections,
-        hasContent: Object.keys(currentState.content).length > 0
+        hasContent: Object.keys(currentState.content).length > 0,
+        theme: {
+          colors: currentState.theme?.colors,
+          typography: {
+            headingFont: currentState.theme?.typography?.headingFont,
+            bodyFont: currentState.theme?.typography?.bodyFont
+          },
+          backgroundsBeforeEdit: {
+            primary: currentState.theme?.colors?.sectionBackgrounds?.primary,
+            secondary: currentState.theme?.colors?.sectionBackgrounds?.secondary,
+            neutral: currentState.theme?.colors?.sectionBackgrounds?.neutral,
+            divider: currentState.theme?.colors?.sectionBackgrounds?.divider
+          }
+        }
       });
       
       // Ensure we have data to save
@@ -148,8 +161,20 @@ function GeneratePageContent({ tokenId }: { tokenId: string }) {
       }
       
       // Force save to database before navigation
-      console.log('💾 Saving data before navigation...');
+      console.log('💾 [GENERATE-DEBUG] Saving data before navigation...');
       await currentState.save();
+      
+      // Log theme after save
+      const stateAfterSave = store.getState();
+      console.log('🎨 [GENERATE-DEBUG] Theme after save:', {
+        colors: stateAfterSave.theme?.colors,
+        backgroundsAfterSave: {
+          primary: stateAfterSave.theme?.colors?.sectionBackgrounds?.primary,
+          secondary: stateAfterSave.theme?.colors?.sectionBackgrounds?.secondary,
+          neutral: stateAfterSave.theme?.colors?.sectionBackgrounds?.neutral,
+          divider: stateAfterSave.theme?.colors?.sectionBackgrounds?.divider
+        }
+      });
       
       // Also ensure the persist middleware has saved to localStorage
       if (store.persist && typeof store.persist.rehydrate === 'function') {
@@ -163,7 +188,7 @@ function GeneratePageContent({ tokenId }: { tokenId: string }) {
       // Small delay to ensure all async operations complete
       await new Promise(resolve => setTimeout(resolve, 200));
       
-      console.log('✅ Data saved, navigating to edit page...');
+      console.log('✅ [GENERATE-DEBUG] Data saved, navigating to edit page...');
       
       // Navigate to edit page
       router.push(`/edit/${tokenId}`);

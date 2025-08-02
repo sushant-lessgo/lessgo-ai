@@ -89,15 +89,48 @@ function PreviewPageContent({ tokenId }: { tokenId: string }) {
 
   // Initialize and validate data
   useEffect(() => {
+    console.log('🎨 [PREVIEW-DEBUG] Preview page initializing with theme:', {
+      sections: sections.length,
+      content: Object.keys(content).length,
+      theme: {
+        colors: theme?.colors,
+        typography: {
+          headingFont: theme?.typography?.headingFont,
+          bodyFont: theme?.typography?.bodyFont
+        }
+      },
+      title: title,
+      onboardingData: {
+        oneLiner: onboardingData?.oneLiner,
+        validatedFields: Object.keys(onboardingData?.validatedFields || {}).length,
+        hiddenInferredFields: Object.keys(onboardingData?.hiddenInferredFields || {}).length
+      }
+    });
+    
     // Check if EditStore has data
     if (sections.length === 0) {
+      console.warn('🎨 [PREVIEW-DEBUG] No sections found in preview');
       setError('No page data found. Please go back to edit mode.');
       setIsLoading(false);
       return;
     }
 
+    console.log('🎨 [PREVIEW-DEBUG] Preview ready with theme data:', {
+      backgroundsAvailable: {
+        primary: theme?.colors?.sectionBackgrounds?.primary,
+        secondary: theme?.colors?.sectionBackgrounds?.secondary,
+        neutral: theme?.colors?.sectionBackgrounds?.neutral,
+        divider: theme?.colors?.sectionBackgrounds?.divider
+      },
+      accentColors: {
+        baseColor: theme?.colors?.baseColor,
+        accentColor: theme?.colors?.accentColor,
+        accentCSS: theme?.colors?.accentCSS
+      }
+    });
+
     setIsLoading(false);
-  }, [sections.length]);
+  }, [sections.length, theme, content, title, onboardingData]);
 
   // Handle edit navigation with smart tab management
   const handleEdit = async () => {

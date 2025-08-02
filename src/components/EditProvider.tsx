@@ -126,8 +126,20 @@ export function EditProvider({ children, tokenId, options = {} }: EditProviderPr
   // Auto-load project data after store initialization
   useEffect(() => {
     if (store && isInitialized && !isHydrating && !hasLoadedDataRef.current.has(tokenId)) {
-      console.log(`📥 EditProvider: Loading project data for token ${tokenId}`);
+      console.log(`📥 [EDIT-DEBUG] EditProvider: Loading project data for token ${tokenId}`);
       hasLoadedDataRef.current.add(tokenId);
+      
+      // Log current theme state before loading
+      const currentState = store.getState();
+      console.log(`🎨 [EDIT-DEBUG] Theme before API load:`, {
+        colors: currentState.theme?.colors,
+        typography: {
+          headingFont: currentState.theme?.typography?.headingFont,
+          bodyFont: currentState.theme?.typography?.bodyFont
+        },
+        sections: currentState.sections?.length || 0,
+        content: Object.keys(currentState.content || {}).length
+      });
       
       // Load project data from API
       fetch(`/api/loadDraft?tokenId=${tokenId}`)
@@ -138,15 +150,38 @@ export function EditProvider({ children, tokenId, options = {} }: EditProviderPr
           return response.json();
         })
         .then(data => {
-          console.log(`✅ EditProvider: Loaded project data for token ${tokenId}`, {
+          console.log(`✅ [EDIT-DEBUG] EditProvider: Loaded project data for token ${tokenId}`, {
             hasFinalContent: !!data.finalContent,
-            sectionsCount: data.finalContent?.sections?.length || 0
+            sectionsCount: data.finalContent?.sections?.length || 0,
+            hasThemeInResponse: !!data.finalContent?.theme,
+            themeColors: data.finalContent?.theme?.colors,
+            themeTypography: data.finalContent?.theme?.typography
           });
           
           // Load data into store using existing loadFromDraft action
           const storeState = store.getState();
           if (typeof storeState.loadFromDraft === 'function') {
             storeState.loadFromDraft(data, tokenId);
+            
+            // Log theme after loading
+            const updatedState = store.getState();
+            console.log(`🎨 [EDIT-DEBUG] Theme after loadFromDraft:`, {
+              colors: updatedState.theme?.colors,
+              typography: {
+                headingFont: updatedState.theme?.typography?.headingFont,
+                bodyFont: updatedState.theme?.typography?.bodyFont
+              },
+              sections: updatedState.sections?.length || 0,
+              content: Object.keys(updatedState.content || {}).length
+            });
+            
+            // Log color tokens if available
+            try {
+              const colorTokens = updatedState.getColorTokens?.();
+              console.log(`🎨 [EDIT-DEBUG] Color tokens after load:`, colorTokens);
+            } catch (error) {
+              console.warn(`🎨 [EDIT-DEBUG] Failed to get color tokens:`, error);
+            }
           } else {
             console.warn('loadFromDraft action not found in store');
           }

@@ -114,32 +114,59 @@ export function usePageGeneration(tokenId: string) {
   errors: string[] 
 }> => {
   try {
+    console.log('🎨 [GENERATE-DEBUG] Starting background generation for sections:', sections);
+    
     // Prepare onboarding data for background generation
+    const onboardingInput = {
+      // Required InputVariables fields with defaults
+      marketCategory: onboardingStore.validatedFields.marketCategory || 'Work & Productivity Tools',
+      marketSubcategory: onboardingStore.validatedFields.marketSubcategory || 'Project & Task Management',
+      targetAudience: onboardingStore.validatedFields.targetAudience || 'early-stage-founders',
+      keyProblem: onboardingStore.validatedFields.keyProblem || '',
+      startupStage: onboardingStore.validatedFields.startupStage || 'mvp-development',
+      landingPageGoals: onboardingStore.validatedFields.landingPageGoals || 'signup',
+      pricingModel: onboardingStore.validatedFields.pricingModel || 'freemium',
+      
+      // Optional HiddenInferredFields (spread as-is since they're optional)
+      ...onboardingStore.hiddenInferredFields
+    };
     
-      const backgroundSystem = generateCompleteBackgroundSystem({
-  // Required InputVariables fields with defaults
-  marketCategory: onboardingStore.validatedFields.marketCategory || 'Work & Productivity Tools',
-  marketSubcategory: onboardingStore.validatedFields.marketSubcategory || 'Project & Task Management',
-  targetAudience: onboardingStore.validatedFields.targetAudience || 'early-stage-founders',
-  keyProblem: onboardingStore.validatedFields.keyProblem || '',
-  startupStage: onboardingStore.validatedFields.startupStage || 'mvp-development',
-  landingPageGoals: onboardingStore.validatedFields.landingPageGoals || 'signup',
-  pricingModel: onboardingStore.validatedFields.pricingModel || 'freemium',
-  
-  // Optional HiddenInferredFields (spread as-is since they're optional)
-  ...onboardingStore.hiddenInferredFields
-});
-    // Generate complete background system
-   
+    console.log('🎨 [GENERATE-DEBUG] Onboarding input for background generation:', {
+      validatedFields: onboardingStore.validatedFields,
+      hiddenInferredFields: onboardingStore.hiddenInferredFields,
+      processedInput: onboardingInput
+    });
     
-    console.log('Generated background system:', backgroundSystem);
+    const backgroundSystem = generateCompleteBackgroundSystem(onboardingInput);
+    
+    console.log('🎨 [GENERATE-DEBUG] Generated background system:', {
+      primary: backgroundSystem.primary,
+      secondary: backgroundSystem.secondary,
+      neutral: backgroundSystem.neutral,
+      divider: backgroundSystem.divider,
+      baseColor: backgroundSystem.baseColor,
+      accentColor: backgroundSystem.accentColor,
+      accentCSS: backgroundSystem.accentCSS
+    });
 
     const editStore = getEditStore();
-    const { updateTheme } = editStore.getState();
+    const { updateTheme, getColorTokens } = editStore.getState();
+    
+    // Log theme before update
+    const themeBefore = editStore.getState().theme;
+    console.log('🎨 [GENERATE-DEBUG] Theme before update:', {
+      colors: themeBefore?.colors,
+      typography: {
+        headingFont: themeBefore?.typography?.headingFont,
+        bodyFont: themeBefore?.typography?.bodyFont
+      }
+    });
+    
     updateTheme({
       colors: {
         baseColor: backgroundSystem.baseColor,
         accentColor: backgroundSystem.accentColor,
+        accentCSS: backgroundSystem.accentCSS,
         sectionBackgrounds: {
           primary: backgroundSystem.primary,
           secondary: backgroundSystem.secondary,
@@ -148,6 +175,24 @@ export function usePageGeneration(tokenId: string) {
         }
       }
     });
+    
+    // Log theme after update
+    const themeAfter = editStore.getState().theme;
+    console.log('🎨 [GENERATE-DEBUG] Theme after update:', {
+      colors: themeAfter?.colors,
+      typography: {
+        headingFont: themeAfter?.typography?.headingFont,
+        bodyFont: themeAfter?.typography?.bodyFont
+      }
+    });
+    
+    // Log color tokens
+    try {
+      const colorTokens = getColorTokens();
+      console.log('🎨 [GENERATE-DEBUG] Generated color tokens:', colorTokens);
+    } catch (error) {
+      console.warn('🎨 [GENERATE-DEBUG] Failed to generate color tokens:', error);
+    }
 
     return { backgroundSystem, errors: [] };
   } catch (error) {
@@ -425,6 +470,15 @@ export function usePageGeneration(tokenId: string) {
 
   // Main generation function with animation
   const handleGeneratePage = async () => {
+    console.log('🚀 [GENERATE-DEBUG] handleGeneratePage called!', {
+      tokenId,
+      timestamp: new Date().toISOString(),
+      onboardingData: {
+        oneLiner: onboardingStore.oneLiner,
+        validatedFieldsCount: Object.keys(onboardingStore.validatedFields).length,
+        featuresCount: onboardingStore.featuresFromAI.length
+      }
+    });
     console.log('Starting page generation for token:', tokenId);
     
     setGenerationState(prev => ({
@@ -496,9 +550,22 @@ export function usePageGeneration(tokenId: string) {
       
       
     
+    console.log('🎨 [GENERATE-DEBUG] About to generate theme and backgrounds...');
     const { backgroundSystem, errors: themeErrors } = await generateThemeAndBackgrounds(sections);
     allErrors.push(...themeErrors);
-    console.log('Generated theme system:', backgroundSystem);
+    console.log('🎨 [GENERATE-DEBUG] Theme generation complete:', {
+      backgroundSystem,
+      themeErrors,
+      hasErrors: themeErrors.length > 0
+    });
+    
+    // Check if theme was actually applied to store
+    const storeAfterTheme = getEditStore().getState();
+    console.log('🎨 [GENERATE-DEBUG] Store theme after generation:', {
+      theme: storeAfterTheme.theme,
+      colors: storeAfterTheme.theme?.colors,
+      backgrounds: storeAfterTheme.theme?.colors?.sectionBackgrounds
+    });
     
     await new Promise(resolve => setTimeout(resolve, 800)); // Short step
 
@@ -537,7 +604,9 @@ export function usePageGeneration(tokenId: string) {
       });
       
       // Transfer data to page store
+      console.log('🎨 [GENERATE-DEBUG] About to transfer data to store...');
       await transferDataToPageStore(result);
+      console.log('🎨 [GENERATE-DEBUG] Data transfer complete');
       
       await new Promise(resolve => setTimeout(resolve, PROGRESS_STEPS[6].duration));
       
@@ -552,10 +621,13 @@ export function usePageGeneration(tokenId: string) {
       // Add debug log right before navigation
       const finalEditStore = getEditStore();
       const finalStoreState = finalEditStore.getState();
-      console.log('About to navigate to preview. Final store state:', {
+      console.log('🎨 [GENERATE-DEBUG] Final store state before navigation:', {
         sections: finalStoreState.sections.length,
         content: Object.keys(finalStoreState.content).length,
-        hasContent: Object.keys(finalStoreState.content).length > 0
+        hasContent: Object.keys(finalStoreState.content).length > 0,
+        theme: finalStoreState.theme,
+        backgrounds: finalStoreState.theme?.colors?.sectionBackgrounds,
+        baseColor: finalStoreState.theme?.colors?.baseColor
       });
       
       // Navigate to generate

@@ -256,7 +256,21 @@ export default function RightPanel() {
                     
                     <div className="flex justify-end mt-8">
                       <Button
-                        onClick={generatePage}
+                        onClick={() => {
+                          console.log('🔴 [GENERATE-BUTTON] Button clicked!', {
+                            generatePage: typeof generatePage,
+                            isGenerating,
+                            tokenId,
+                            featuresCount: featuresFromAI.length,
+                            validatedFieldsCount: Object.keys(validatedFields).length
+                          });
+                          if (generatePage && typeof generatePage === 'function') {
+                            console.log('🔴 [GENERATE-BUTTON] Calling generatePage...');
+                            generatePage();
+                          } else {
+                            console.error('🔴 [GENERATE-BUTTON] generatePage is not a function!', generatePage);
+                          }
+                        }}
                         disabled={isGenerating}
                         className={`
                           text-base font-semibold py-3 px-6 rounded-lg shadow transition-all duration-200

@@ -239,7 +239,7 @@ export const bgVariations = [
     archetypeId: "soft-gradient-blur",
     themeId: "trust-blue-white",
     tailwindClass: "bg-white",
-    baseColor: "unknown",
+    baseColor: "white",
   },
 
 
@@ -439,7 +439,7 @@ export const bgVariations = [
     archetypeId: "frosted-glass-light",
     themeId: "mint-frost",
     tailwindClass: "bg-gradient-to-tl from-white via-mint-100 to-mint-200 backdrop-blur-md",
-    baseColor: "unknown",
+    baseColor: "mint",
   },
   {
     variationId: "frosted-mint-blur-overlay",
@@ -447,7 +447,7 @@ export const bgVariations = [
     archetypeId: "frosted-glass-light",
     themeId: "mint-frost",
     tailwindClass: "bg-white/30 backdrop-blur-lg",
-    baseColor: "unknown",
+    baseColor: "white",
   },
   {
     variationId: "frosted-mint-ring-glow",
@@ -455,7 +455,7 @@ export const bgVariations = [
     archetypeId: "frosted-glass-light",
     themeId: "mint-frost",
     tailwindClass: "bg-white/10 backdrop-blur-xl ring-1 ring-mint-200",
-    baseColor: "unknown",
+    baseColor: "white",
   },
   {
     variationId: "frosted-mint-subtle-halo",
@@ -463,7 +463,7 @@ export const bgVariations = [
     archetypeId: "frosted-glass-light",
     themeId: "mint-frost",
     tailwindClass: "bg-gradient-radial from-white/40 via-mint-100/30 to-transparent backdrop-blur-md",
-    baseColor: "unknown",
+    baseColor: "mint",
   },
 
 
@@ -473,7 +473,7 @@ export const bgVariations = [
     archetypeId: "frosted-glass-light",
     themeId: "trust-blue-white",
     tailwindClass: "bg-white",
-    baseColor: "unknown",
+    baseColor: "white",
   },
   {
     variationId: "frosted-trustblue-gradient-tr",
@@ -489,7 +489,7 @@ export const bgVariations = [
     archetypeId: "frosted-glass-light",
     themeId: "trust-blue-white",
     tailwindClass: "bg-gradient-to-bl from-white via-blue-100 to-blue-200",
-    baseColor: "unknown",
+    baseColor: "blue",
   },
   {
     variationId: "frosted-trustblue-blur-overlay",
@@ -497,7 +497,7 @@ export const bgVariations = [
     archetypeId: "frosted-glass-light",
     themeId: "trust-blue-white",
     tailwindClass: "bg-white/25 backdrop-blur-lg",
-    baseColor: "unknown",
+    baseColor: "white",
   },
   {
     variationId: "frosted-trustblue-soft-halo",
@@ -505,7 +505,7 @@ export const bgVariations = [
     archetypeId: "frosted-glass-light",
     themeId: "trust-blue-white",
     tailwindClass: "bg-gradient-radial from-white/50 via-blue-100/40 to-transparent backdrop-blur-md",
-    baseColor: "unknown",
+    baseColor: "blue",
   },
 
     {
@@ -530,7 +530,7 @@ export const bgVariations = [
     archetypeId: "frosted-glass-light",
     themeId: "modern-blue",
     tailwindClass: "bg-gradient-to-bl from-white via-blue-200 to-blue-300",
-    baseColor: "unknown",
+    baseColor: "blue",
   },
   {
     variationId: "frosted-modernblue-blur-overlay",
@@ -538,7 +538,7 @@ export const bgVariations = [
     archetypeId: "frosted-glass-light",
     themeId: "modern-blue",
     tailwindClass: "bg-white/30 backdrop-blur-md",
-    baseColor: "unknown",
+    baseColor: "white",
   },
   {
     variationId: "frosted-modernblue-soft-halo",
@@ -546,7 +546,7 @@ export const bgVariations = [
     archetypeId: "frosted-glass-light",
     themeId: "modern-blue",
     tailwindClass: "bg-gradient-radial from-white/50 via-blue-300/40 to-transparent backdrop-blur-sm",
-    baseColor: "unknown",
+    baseColor: "blue",
   },
 
   {
@@ -555,7 +555,7 @@ export const bgVariations = [
     archetypeId: "frosted-glass-light",
     themeId: "default-light",
     tailwindClass: "bg-white",
-    baseColor: "unknown",
+    baseColor: "white",
   },
   {
     variationId: "frosted-defaultlight-gradient-tr",
@@ -563,7 +563,7 @@ export const bgVariations = [
     archetypeId: "frosted-glass-light",
     themeId: "default-light",
     tailwindClass: "bg-gradient-to-tr from-white via-gray-100 to-gray-200",
-    baseColor: "unknown",
+    baseColor: "gray",
   },
   {
     variationId: "frosted-defaultlight-gradient-bl",
@@ -579,7 +579,7 @@ export const bgVariations = [
     archetypeId: "frosted-glass-light",
     themeId: "default-light",
     tailwindClass: "bg-white/20 backdrop-blur-md",
-    baseColor: "unknown",
+    baseColor: "white",
   },
   {
     variationId: "frosted-defaultlight-subtle-glow",
@@ -587,7 +587,7 @@ export const bgVariations = [
     archetypeId: "frosted-glass-light",
     themeId: "default-light",
     tailwindClass: "bg-gradient-radial from-white/50 via-gray-100/30 to-transparent backdrop-blur-sm",
-    baseColor: "unknown",
+    baseColor: "gray",
   },
 
   {
@@ -620,7 +620,7 @@ export const bgVariations = [
     archetypeId: "frosted-glass-light",
     themeId: "steel-gray",
     tailwindClass: "bg-white/15 backdrop-blur-md",
-    baseColor: "unknown",
+    baseColor: "white",
   },
   {
     variationId: "frosted-steelgray-soft-halo",
@@ -628,7 +628,7 @@ export const bgVariations = [
     archetypeId: "frosted-glass-light",
     themeId: "steel-gray",
     tailwindClass: "bg-gradient-radial from-white/40 via-gray-200/30 to-transparent backdrop-blur-sm",
-    baseColor: "unknown",
+    baseColor: "gray",
   },
 
   {
@@ -637,7 +637,7 @@ export const bgVariations = [
     archetypeId: "code-matrix-mesh",
     themeId: "neon-tech",
     tailwindClass: "bg-black",
-    baseColor: "unknown",
+    baseColor: "black",
   },
   {
     variationId: "matrix-neontech-gradient-green-to-blue",
@@ -678,7 +678,7 @@ export const bgVariations = [
     archetypeId: "code-matrix-mesh",
     themeId: "midnight-dark",
     tailwindClass: "bg-black",
-    baseColor: "unknown",
+    baseColor: "black",
   },
   {
     variationId: "matrix-midnightdark-gradient-purple-to-black",
@@ -760,7 +760,7 @@ export const bgVariations = [
     archetypeId: "code-matrix-mesh",
     themeId: "retro-terminal",
     tailwindClass: "bg-black",
-    baseColor: "unknown",
+    baseColor: "black",
   },
   {
     variationId: "matrix-retroterminal-green-gradient",
@@ -802,7 +802,7 @@ export const bgVariations = [
     archetypeId: "editorial-split",
     themeId: "default-light",
     tailwindClass: "bg-white",
-    baseColor: "unknown",
+    baseColor: "white",
   },
   {
     variationId: "editorial-defaultlight-gradient-lr",
@@ -810,7 +810,7 @@ export const bgVariations = [
     archetypeId: "editorial-split",
     themeId: "default-light",
     tailwindClass: "bg-gradient-to-r from-white via-gray-100 to-gray-200",
-    baseColor: "unknown",
+    baseColor: "gray",
   },
   {
     variationId: "editorial-defaultlight-gradient-rl",
@@ -826,7 +826,7 @@ export const bgVariations = [
     archetypeId: "editorial-split",
     themeId: "default-light",
     tailwindClass: "bg-gradient-to-r from-white to-gray-100",
-    baseColor: "unknown",
+    baseColor: "gray",
   },
   {
     variationId: "editorial-defaultlight-split-right",
@@ -834,7 +834,7 @@ export const bgVariations = [
     archetypeId: "editorial-split",
     themeId: "default-light",
     tailwindClass: "bg-gradient-to-l from-white to-gray-100",
-    baseColor: "unknown",
+    baseColor: "gray",
   },
 
   {
@@ -1171,7 +1171,7 @@ export const bgVariations = [
     archetypeId: "energetic-diagonals",
     themeId: "neon-tech",
     tailwindClass: "bg-black",
-    baseColor: "unknown",
+    baseColor: "black",
   },
   {
     variationId: "energetic-neontech-gradient-tr",
@@ -1253,7 +1253,7 @@ export const bgVariations = [
     archetypeId: "paper-texture-light",
     themeId: "default-light",
     tailwindClass: "bg-white",
-    baseColor: "unknown",
+    baseColor: "white",
   },
   {
     variationId: "papertexture-defaultlight-gradient-tr",
@@ -1261,7 +1261,7 @@ export const bgVariations = [
     archetypeId: "paper-texture-light",
     themeId: "default-light",
     tailwindClass: "bg-gradient-to-tr from-white via-gray-50 to-gray-100",
-    baseColor: "unknown",
+    baseColor: "gray",
   },
   {
     variationId: "papertexture-defaultlight-gradient-bl",
@@ -1285,7 +1285,7 @@ export const bgVariations = [
     archetypeId: "paper-texture-light",
     themeId: "default-light",
     tailwindClass: "bg-gradient-to-r from-white to-gray-50",
-    baseColor: "unknown",
+    baseColor: "gray",
   },
 
   {
@@ -1310,7 +1310,7 @@ export const bgVariations = [
     archetypeId: "paper-texture-light",
     themeId: "mint-frost",
     tailwindClass: "bg-gradient-to-bl from-white via-mint-100 to-mint-200",
-    baseColor: "unknown",
+    baseColor: "mint",
   },
   {
     variationId: "papertexture-mintfrost-subtle-texture",
@@ -1475,7 +1475,7 @@ export const bgVariations = [
     archetypeId: "startup-skybox",
     themeId: "modern-blue",
     tailwindClass: "bg-gradient-to-tr from-[#dceeff] via-[#b4d8ff] to-[#90c2ff]",
-    baseColor: "unknown",
+    baseColor: "gray",
   },
   {
     variationId: "skybox-modern-blue-radial-center",
@@ -1499,7 +1499,7 @@ export const bgVariations = [
     archetypeId: "startup-skybox",
     themeId: "modern-blue",
     tailwindClass: "bg-gradient-to-bl from-[#e6f0ff] via-[#c6e0ff]/80 to-transparent",
-    baseColor: "unknown",
+    baseColor: "gray",
   },
   {
     variationId: "skybox-modern-blue-glow-stripes",
@@ -1516,7 +1516,7 @@ export const bgVariations = [
     archetypeId: "startup-skybox",
     themeId: "trust-blue-white",
     tailwindClass: "bg-white",
-    baseColor: "unknown",
+    baseColor: "white",
   },
   {
     variationId: "skybox-trust-bluewhite-solid-softblue",
@@ -1532,7 +1532,7 @@ export const bgVariations = [
     archetypeId: "startup-skybox",
     themeId: "trust-blue-white",
     tailwindClass: "bg-gradient-to-tr from-white via-[#e6f1fb] to-[#d0e3fa]",
-    baseColor: "unknown",
+    baseColor: "white",
   },
   {
     variationId: "skybox-trust-bluewhite-radial-top",
@@ -1556,7 +1556,7 @@ export const bgVariations = [
     archetypeId: "startup-skybox",
     themeId: "trust-blue-white",
     tailwindClass: "bg-gradient-to-b from-white via-[#f0f6ff] to-[#d0e3fa]",
-    baseColor: "unknown",
+    baseColor: "white",
   },
 
   {
@@ -1573,7 +1573,7 @@ export const bgVariations = [
     archetypeId: "startup-skybox",
     themeId: "mint-frost",
     tailwindClass: "bg-gradient-to-tr from-[#eafff6] via-[#cbf5e7] to-[#a7e8d6]",
-    baseColor: "unknown",
+    baseColor: "gray",
   },
   {
     variationId: "skybox-mintfrost-radial-soft",
@@ -1597,7 +1597,7 @@ export const bgVariations = [
     archetypeId: "startup-skybox",
     themeId: "mint-frost",
     tailwindClass: "bg-gradient-to-b from-[#eafff6] via-white to-[#cbf5e7]",
-    baseColor: "unknown",
+    baseColor: "gray",
   },
   {
     variationId: "skybox-mintfrost-blur-haze",
@@ -1622,7 +1622,7 @@ export const bgVariations = [
     archetypeId: "startup-skybox",
     themeId: "sunset-ember",
     tailwindClass: "bg-gradient-to-br from-[#fff3e0] via-[#ffd1a0] to-[#ff9a76]",
-    baseColor: "unknown",
+    baseColor: "gray",
   },
   {
     variationId: "skybox-sunsetember-radial-burst",
@@ -1679,7 +1679,7 @@ export const bgVariations = [
     archetypeId: "high-friction-grid",
     themeId: "steel-gray",
     tailwindClass: "bg-gradient-to-br from-[#1e1f24] via-[#2c2d33] to-[#3a3c42]",
-    baseColor: "unknown",
+    baseColor: "gray",
   },
   {
     variationId: "grid-steelgray-radial-core",
@@ -1695,7 +1695,7 @@ export const bgVariations = [
     archetypeId: "high-friction-grid",
     themeId: "steel-gray",
     tailwindClass: "bg-gradient-to-tr from-[#1e1f24] via-[#2c2d33]/70 to-transparent",
-    baseColor: "unknown",
+    baseColor: "gray",
   },
   {
     variationId: "grid-steelgray-grid-deepfade",
@@ -1728,7 +1728,7 @@ export const bgVariations = [
     archetypeId: "high-friction-grid",
     themeId: "midnight-dark",
     tailwindClass: "bg-gradient-to-br from-[#0a0d14] via-[#131822] to-[#1e2733]",
-    baseColor: "unknown",
+    baseColor: "gray",
   },
   {
     variationId: "grid-midnight-radial-core",
@@ -1744,7 +1744,7 @@ export const bgVariations = [
     archetypeId: "high-friction-grid",
     themeId: "midnight-dark",
     tailwindClass: "bg-gradient-to-tr from-[#0a0d14] via-[#131822]/70 to-transparent",
-    baseColor: "unknown",
+    baseColor: "gray",
   },
   {
     variationId: "grid-midnight-grid-deep-fade",
@@ -1777,7 +1777,7 @@ export const bgVariations = [
     archetypeId: "high-friction-grid",
     themeId: "graphite-code",
     tailwindClass: "bg-gradient-to-tr from-[#1c1d1f] via-[#2a2b2e] to-[#393b40]",
-    baseColor: "unknown",
+    baseColor: "gray",
   },
   {
     variationId: "grid-graphite-radial-focus",
@@ -1793,7 +1793,7 @@ export const bgVariations = [
     archetypeId: "high-friction-grid",
     themeId: "graphite-code",
     tailwindClass: "bg-gradient-to-t from-[#1c1d1f] via-[#2a2b2e]/70 to-transparent",
-    baseColor: "unknown",
+    baseColor: "gray",
   },
   {
     variationId: "grid-graphite-grid-vignette",
@@ -1834,7 +1834,7 @@ export const bgVariations = [
     archetypeId: "comic-burst",
     themeId: "vibrant-coral",
     tailwindClass: "bg-gradient-to-tr from-[#ff6b5c] via-[#ff947c] to-[#ffd3c4]",
-    baseColor: "unknown",
+    baseColor: "gray",
   },
   {
     variationId: "comic-coral-halo-bottom",
@@ -1892,7 +1892,7 @@ export const bgVariations = [
     archetypeId: "comic-burst",
     themeId: "sunset-ember",
     tailwindClass: "bg-gradient-to-br from-[#ffb677] via-[#ffc49f] to-[#ffe8dc]",
-    baseColor: "unknown",
+    baseColor: "gray",
   },
   {
     variationId: "comic-sunset-texture-blast",
@@ -1933,7 +1933,7 @@ export const bgVariations = [
     archetypeId: "comic-burst",
     themeId: "soft-peach",
     tailwindClass: "bg-gradient-to-br from-[#ffe8dc] via-[#ffd4c0] to-transparent",
-    baseColor: "unknown",
+    baseColor: "gray",
   },
   {
     variationId: "comic-peach-halo-bottom",
@@ -1966,7 +1966,7 @@ export const bgVariations = [
     archetypeId: "zen-calm-wave",
     themeId: "mint-frost",
     tailwindClass: "bg-gradient-to-b from-[#e6f9f3] via-[#c7eee3] to-white",
-    baseColor: "unknown",
+    baseColor: "gray",
   },
   {
     variationId: "zen-mint-radial-center-glow",
@@ -1990,7 +1990,7 @@ export const bgVariations = [
     archetypeId: "zen-calm-wave",
     themeId: "mint-frost",
     tailwindClass: "bg-gradient-to-br from-[#e6f9f3] via-[#d2f1e8] to-transparent",
-    baseColor: "unknown",
+    baseColor: "gray",
   },
   {
     variationId: "zen-mint-bottom-halo",
@@ -2015,7 +2015,7 @@ export const bgVariations = [
     archetypeId: "zen-calm-wave",
     themeId: "teal-energy",
     tailwindClass: "bg-gradient-to-br from-[#d6f3f1] via-[#b3e4e0] to-[#8fd4d1]",
-    baseColor: "unknown",
+    baseColor: "gray",
   },
   {
     variationId: "zen-teal-radial-center",
@@ -2039,7 +2039,7 @@ export const bgVariations = [
     archetypeId: "zen-calm-wave",
     themeId: "teal-energy",
     tailwindClass: "bg-gradient-to-bl from-[#d6f3f1] via-[#b3e4e0]/80 to-transparent",
-    baseColor: "unknown",
+    baseColor: "gray",
   },
   {
     variationId: "zen-teal-halo-bottom",
@@ -2056,7 +2056,7 @@ export const bgVariations = [
     archetypeId: "zen-calm-wave",
     themeId: "default-light",
     tailwindClass: "bg-white",
-    baseColor: "unknown",
+    baseColor: "white",
   },
   {
     variationId: "zen-defaultlight-gradient-subtle",
@@ -2064,7 +2064,7 @@ export const bgVariations = [
     archetypeId: "zen-calm-wave",
     themeId: "default-light",
     tailwindClass: "bg-gradient-to-b from-white via-[#f9fafb] to-[#f3f4f6]",
-    baseColor: "unknown",
+    baseColor: "white",
   },
   {
     variationId: "zen-defaultlight-radial-center-soft",
@@ -2088,7 +2088,7 @@ export const bgVariations = [
     archetypeId: "zen-calm-wave",
     themeId: "default-light",
     tailwindClass: "bg-gradient-to-t from-[#f3f4f6] via-white to-white",
-    baseColor: "unknown",
+    baseColor: "gray",
   },
   {
     variationId: "zen-defaultlight-halo-soft-bottom",
@@ -2113,7 +2113,7 @@ export const bgVariations = [
     archetypeId: "deep-night-space",
     themeId: "midnight-dark",
     tailwindClass: "bg-gradient-to-tr from-[#0a0d14] via-[#131a25] to-[#1f2b3a]",
-    baseColor: "unknown",
+    baseColor: "gray",
   },
   {
     variationId: "space-midnight-radial-coreglow",
@@ -2145,7 +2145,7 @@ export const bgVariations = [
     archetypeId: "deep-night-space",
     themeId: "midnight-dark",
     tailwindClass: "bg-gradient-to-br from-[#0a0d14] via-[#1b2533]/70 to-transparent",
-    baseColor: "unknown",
+    baseColor: "gray",
   },
 
   {
@@ -2162,7 +2162,7 @@ export const bgVariations = [
     archetypeId: "deep-night-space",
     themeId: "neon-tech",
     tailwindClass: "bg-gradient-to-br from-[#0b0f19] via-[#192a40] to-[#0fffc2]",
-    baseColor: "unknown",
+    baseColor: "gray",
   },
   {
     variationId: "space-neon-radial-glowcenter",
@@ -2194,7 +2194,7 @@ export const bgVariations = [
     archetypeId: "deep-night-space",
     themeId: "neon-tech",
     tailwindClass: "bg-gradient-to-tr from-[#0b0f19] via-[#0fffc2]/30 to-transparent",
-    baseColor: "unknown",
+    baseColor: "gray",
   },
 
   {
@@ -2211,7 +2211,7 @@ export const bgVariations = [
     archetypeId: "deep-night-space",
     themeId: "graphite-code",
     tailwindClass: "bg-gradient-to-tr from-[#1a1c1f] via-[#2a2d31] to-[#3a3d42]",
-    baseColor: "unknown",
+    baseColor: "gray",
   },
   {
     variationId: "space-graphite-radial-glow",
@@ -2243,7 +2243,7 @@ export const bgVariations = [
     archetypeId: "deep-night-space",
     themeId: "graphite-code",
     tailwindClass: "bg-gradient-to-br from-[#1a1c1f] via-[#2a2d31]/70 to-transparent",
-    baseColor: "unknown",
+    baseColor: "gray",
   },
 
   {
@@ -2341,7 +2341,7 @@ export const bgVariations = [
     archetypeId: "trusty-brick-tone",
     themeId: "trust-blue-white",
     tailwindClass: "bg-gradient-to-r from-white via-sky-50 to-white",
-    baseColor: "unknown",
+    baseColor: "sky",
   },
 
   {
@@ -2407,7 +2407,7 @@ export const bgVariations = [
     archetypeId: "wireframe-blueprint",
     themeId: "default-light",
     tailwindClass: "bg-white",
-    baseColor: "unknown",
+    baseColor: "white",
   },
   {
     variationId: "default-light-gradient-b-gray",
@@ -2423,7 +2423,7 @@ export const bgVariations = [
     archetypeId: "wireframe-blueprint",
     themeId: "default-light",
     tailwindClass: "bg-gradient-to-br from-white via-gray-50 to-white",
-    baseColor: "unknown",
+    baseColor: "gray",
   },
   {
     variationId: "default-light-glow-center-white-blue",
@@ -2439,7 +2439,7 @@ export const bgVariations = [
     archetypeId: "wireframe-blueprint",
     themeId: "default-light",
     tailwindClass: "bg-gradient-to-r from-white via-gray-50 to-white",
-    baseColor: "unknown",
+    baseColor: "gray",
   },
   {
     variationId: "default-light-surface-soft-top",
@@ -2447,7 +2447,7 @@ export const bgVariations = [
     archetypeId: "wireframe-blueprint",
     themeId: "default-light",
     tailwindClass: "bg-gradient-to-t from-white via-white to-blue-50",
-    baseColor: "unknown",
+    baseColor: "blue",
   },
   {
     variationId: "default-light-subtle-grid-overlay",
@@ -2464,7 +2464,7 @@ export const bgVariations = [
     archetypeId: "wireframe-blueprint",
     themeId: "trust-blue-white",
     tailwindClass: "bg-white",
-    baseColor: "unknown",
+    baseColor: "white",
   },
   {
     variationId: "trust-blue-white-gradient-tr-blue-sky",
@@ -2504,7 +2504,7 @@ export const bgVariations = [
     archetypeId: "wireframe-blueprint",
     themeId: "trust-blue-white",
     tailwindClass: "bg-gradient-to-r from-white via-blue-50 to-white",
-    baseColor: "unknown",
+    baseColor: "blue",
   },
   {
     variationId: "trust-blue-white-bottom-glow",
@@ -2553,7 +2553,7 @@ export const bgVariations = [
     archetypeId: "glass-morph-with-pop",
     themeId: "mint-frost",
     tailwindClass: "bg-white/60 backdrop-blur-md",
-    baseColor: "unknown",
+    baseColor: "white",
   },
   {
     variationId: "mint-frost-diagonal-glow-lines",
@@ -2569,7 +2569,7 @@ export const bgVariations = [
     archetypeId: "glass-morph-with-pop",
     themeId: "mint-frost",
     tailwindClass: "bg-gradient-to-br from-white/70 via-emerald-100/50 to-white/70 backdrop-blur-xl",
-    baseColor: "unknown",
+    baseColor: "emerald",
   },
 
   {
@@ -2602,7 +2602,7 @@ export const bgVariations = [
     archetypeId: "glass-morph-with-pop",
     themeId: "sunset-ember",
     tailwindClass: "bg-white/60 backdrop-blur-md",
-    baseColor: "unknown",
+    baseColor: "white",
   },
   {
     variationId: "sunset-ember-diagonal-blend-orange-pink",
@@ -2626,7 +2626,7 @@ export const bgVariations = [
     archetypeId: "glass-morph-with-pop",
     themeId: "sunset-ember",
     tailwindClass: "bg-gradient-to-tr from-white/70 via-rose-100/60 to-white/80 backdrop-blur-xl",
-    baseColor: "unknown",
+    baseColor: "rose",
   },
 
   {
@@ -2659,7 +2659,7 @@ export const bgVariations = [
     archetypeId: "glass-morph-with-pop",
     themeId: "soft-peach",
     tailwindClass: "bg-white/60 backdrop-blur-md",
-    baseColor: "unknown",
+    baseColor: "white",
   },
   {
     variationId: "soft-peach-diagonal-honey-gradient",
@@ -2683,7 +2683,7 @@ export const bgVariations = [
     archetypeId: "glass-morph-with-pop",
     themeId: "soft-peach",
     tailwindClass: "bg-gradient-to-tr from-white/70 via-orange-100/60 to-white/80 backdrop-blur-xl",
-    baseColor: "unknown",
+    baseColor: "orange",
   },
 
 
@@ -2717,7 +2717,7 @@ export const bgVariations = [
     archetypeId: "glass-morph-with-pop",
     themeId: "modern-blue",
     tailwindClass: "bg-white/60 backdrop-blur-md",
-    baseColor: "unknown",
+    baseColor: "white",
   },
   {
     variationId: "modern-blue-horizontal-light-fade",
@@ -2725,7 +2725,7 @@ export const bgVariations = [
     archetypeId: "glass-morph-with-pop",
     themeId: "modern-blue",
     tailwindClass: "bg-gradient-to-r from-white via-blue-50 to-white",
-    baseColor: "unknown",
+    baseColor: "blue",
   },
   {
     variationId: "modern-blue-bottom-glow-sky",
@@ -2741,7 +2741,7 @@ export const bgVariations = [
     archetypeId: "glass-morph-with-pop",
     themeId: "modern-blue",
     tailwindClass: "bg-gradient-to-br from-white/70 via-blue-100/60 to-white/80 backdrop-blur-xl",
-    baseColor: "unknown",
+    baseColor: "blue",
   },
 
   {
@@ -2758,7 +2758,7 @@ export const bgVariations = [
     archetypeId: "retro-pixel-noise",
     themeId: "retro-terminal",
     tailwindClass: "bg-gradient-to-br from-[#001F00] via-[#003B00] to-[#004D00]",
-    baseColor: "unknown",
+    baseColor: "gray",
   },
   {
     variationId: "retro-terminal-horizontal-glow-green",
@@ -2766,7 +2766,7 @@ export const bgVariations = [
     archetypeId: "retro-pixel-noise",
     themeId: "retro-terminal",
     tailwindClass: "bg-gradient-to-r from-[#002A00] via-[#00FF41]/20 to-[#002A00]",
-    baseColor: "unknown",
+    baseColor: "gray",
   },
   {
     variationId: "retro-terminal-crt-noise-overlay",
@@ -2782,7 +2782,7 @@ export const bgVariations = [
     archetypeId: "retro-pixel-noise",
     themeId: "retro-terminal",
     tailwindClass: "bg-gradient-to-tr from-[#003B00] via-[#444400] to-[#221100]",
-    baseColor: "unknown",
+    baseColor: "gray",
   },
   {
     variationId: "retro-terminal-pixel-grid-subtle",
@@ -2798,7 +2798,7 @@ export const bgVariations = [
     archetypeId: "retro-pixel-noise",
     themeId: "retro-terminal",
     tailwindClass: "bg-gradient-to-t from-[#00FF41]/20 via-transparent to-transparent",
-    baseColor: "unknown",
+    baseColor: "gray",
   },
 
   {
@@ -2815,7 +2815,7 @@ export const bgVariations = [
     archetypeId: "retro-pixel-noise",
     themeId: "neon-tech",
     tailwindClass: "bg-gradient-to-br from-[#FF00FF] via-[#0A001F] to-[#00FFFF]",
-    baseColor: "unknown",
+    baseColor: "gray",
   },
   {
     variationId: "neon-tech-soft-center-radial-glow",
@@ -2839,7 +2839,7 @@ export const bgVariations = [
     archetypeId: "retro-pixel-noise",
     themeId: "neon-tech",
     tailwindClass: "bg-gradient-to-r from-[#FF00FF]/30 via-transparent to-[#00FFFF]/30",
-    baseColor: "unknown",
+    baseColor: "gray",
   },
   {
     variationId: "neon-tech-grid-overlay-cyber",
@@ -2855,7 +2855,7 @@ export const bgVariations = [
     archetypeId: "retro-pixel-noise",
     themeId: "neon-tech",
     tailwindClass: "bg-gradient-to-t from-[#00FFFF]/20 via-transparent to-transparent",
-    baseColor: "unknown",
+    baseColor: "gray",
   },
 
  {
@@ -3035,7 +3035,7 @@ export const bgVariations = [
     archetypeId: "monochrome-hero-zone",
     themeId: "default-light",
     tailwindClass: "bg-white",
-    baseColor: "unknown",
+    baseColor: "white",
   },
   {
     variationId: "default-light-gradient-b-gray-fade",
@@ -3051,7 +3051,7 @@ export const bgVariations = [
     archetypeId: "monochrome-hero-zone",
     themeId: "default-light",
     tailwindClass: "bg-gradient-to-r from-white via-gray-50 to-white",
-    baseColor: "unknown",
+    baseColor: "gray",
   },
   {
     variationId: "default-light-soft-center-radial",
@@ -3206,7 +3206,7 @@ export const bgVariations = [
     archetypeId: "blurred-spotlight",
     themeId: "midnight-dark",
     tailwindClass: "bg-black",
-    baseColor: "unknown",
+    baseColor: "black",
   },
   {
     variationId: "midnight-dark-radial-spotlight-center",

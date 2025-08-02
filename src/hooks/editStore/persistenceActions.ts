@@ -125,10 +125,33 @@ export function createPersistenceActions(set: any, get: any) {
           
           // Restore theme and settings if available
           if (contentToLoad && contentToLoad.theme) {
-            console.log('🎨 Restoring theme data');
-            state.theme = { ...state.theme, ...contentToLoad.theme };
+            console.log('🎨 [PERSISTENCE-DEBUG] Restoring theme data from draft:', {
+              themeFromAPI: contentToLoad.theme,
+              currentTheme: state.theme,
+              backgroundsFromAPI: contentToLoad.theme?.colors?.sectionBackgrounds,
+              typographyFromAPI: {
+                headingFont: contentToLoad.theme?.typography?.headingFont,
+                bodyFont: contentToLoad.theme?.typography?.bodyFont
+              }
+            });
+            
+            const mergedTheme = { ...state.theme, ...contentToLoad.theme };
+            state.theme = mergedTheme;
+            
+            console.log('🎨 [PERSISTENCE-DEBUG] Theme after merge:', {
+              mergedTheme: mergedTheme,
+              backgroundsAfterMerge: mergedTheme?.colors?.sectionBackgrounds,
+              typographyAfterMerge: {
+                headingFont: mergedTheme?.typography?.headingFont,
+                bodyFont: mergedTheme?.typography?.bodyFont
+              }
+            });
+          } else {
+            console.log('🎨 [PERSISTENCE-DEBUG] No theme data in API response, keeping current theme');
           }
+          
           if (contentToLoad && contentToLoad.globalSettings) {
+            console.log('🎨 [PERSISTENCE-DEBUG] Restoring global settings:', contentToLoad.globalSettings);
             Object.assign(state.globalSettings, contentToLoad.globalSettings);
           }
           
