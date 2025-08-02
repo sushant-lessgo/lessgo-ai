@@ -404,7 +404,7 @@ export const bgVariations = [
     archetypeId: "soft-gradient-blur",
     themeId: "vibrant-coral",
     tailwindClass: "bg-[#ff6f61]",
-    baseColor: "custom",
+    baseColor: "orange",
   },
   {
     variationId: "soft-blur-vibrant-coral-solid-rose",
@@ -653,7 +653,7 @@ export const bgVariations = [
     archetypeId: "code-matrix-mesh",
     themeId: "neon-tech",
     tailwindClass: "bg-black relative before:absolute before:inset-0 before:bg-[repeating-linear-gradient(0deg,rgba(0,255,255,0.1) 0 1px,transparent 1px 10px),repeating-linear-gradient(90deg,rgba(0,255,255,0.1) 0 1px,transparent 1px 10px)] before:pointer-events-none before:z-0",
-    baseColor: "custom",
+    baseColor: "cyan",
   },
   {
     variationId: "matrix-neontech-blur-glow",
@@ -669,7 +669,7 @@ export const bgVariations = [
     archetypeId: "code-matrix-mesh",
     themeId: "neon-tech",
     tailwindClass: "bg-black relative before:absolute before:inset-0 before:bg-[radial-gradient(circle at center,rgba(0,255,255,0.3),transparent 70%)] before:blur-lg before:pointer-events-none before:z-0",
-    baseColor: "custom",
+    baseColor: "cyan",
   },
 
   {
@@ -694,7 +694,7 @@ export const bgVariations = [
     archetypeId: "code-matrix-mesh",
     themeId: "midnight-dark",
     tailwindClass: "bg-black relative before:absolute before:inset-0 before:bg-[repeating-linear-gradient(0deg,rgba(255,255,255,0.05) 0 1px,transparent 1px 8px),repeating-linear-gradient(90deg,rgba(255,255,255,0.05) 0 1px,transparent 1px 8px)] before:pointer-events-none before:z-0",
-    baseColor: "custom",
+    baseColor: "gray",
   },
   {
     variationId: "matrix-midnightdark-faint-glow",
@@ -710,7 +710,7 @@ export const bgVariations = [
     archetypeId: "code-matrix-mesh",
     themeId: "midnight-dark",
     tailwindClass: "bg-black relative before:absolute before:inset-0 before:bg-[radial-gradient(circle at center,rgba(128,0,128,0.3),transparent 80%)] before:blur-lg before:pointer-events-none before:z-0",
-    baseColor: "custom",
+    baseColor: "gray",
   },
 
    {
@@ -776,7 +776,7 @@ export const bgVariations = [
     archetypeId: "code-matrix-mesh",
     themeId: "retro-terminal",
     tailwindClass: "bg-black relative before:absolute before:inset-0 before:bg-[repeating-linear-gradient(0deg,rgba(0,255,0,0.1) 0 1px,transparent 1px 8px),repeating-linear-gradient(90deg,rgba(0,255,0,0.1) 0 1px,transparent 1px 8px)] before:pointer-events-none before:z-0",
-    baseColor: "custom",
+    baseColor: "gray",
   },
   {
     variationId: "matrix-retroterminal-scanline-overlay",
@@ -784,7 +784,7 @@ export const bgVariations = [
     archetypeId: "code-matrix-mesh",
     themeId: "retro-terminal",
     tailwindClass: "bg-black relative before:absolute before:inset-0 before:bg-[repeating-linear-gradient(180deg,rgba(0,255,0,0.05) 0 2px,transparent 2px 4px)] before:pointer-events-none before:z-0",
-    baseColor: "custom",
+    baseColor: "gray",
   },
   {
     variationId: "matrix-retroterminal-green-glow",
@@ -1080,7 +1080,7 @@ export const bgVariations = [
     archetypeId: "energetic-diagonals",
     themeId: "sunset-ember",
     tailwindClass: "bg-[repeating-linear-gradient(45deg,theme(colors.amber.500),theme(colors.amber.500)10px,theme(colors.orange.400)10px,theme(colors.orange.400)20px)]",
-    baseColor: "custom",
+    baseColor: "gray",
   },
 
   {
@@ -1121,7 +1121,7 @@ export const bgVariations = [
     archetypeId: "energetic-diagonals",
     themeId: "vibrant-coral",
     tailwindClass: "bg-[repeating-linear-gradient(45deg,theme(colors.pink.400),theme(colors.pink.400)12px,theme(colors.rose.400)12px,theme(colors.rose.400)24px)]",
-    baseColor: "custom",
+    baseColor: "orange",
   },
 
   {
@@ -1162,7 +1162,7 @@ export const bgVariations = [
     archetypeId: "energetic-diagonals",
     themeId: "modern-blue",
     tailwindClass: "bg-[repeating-linear-gradient(45deg,theme(colors.blue.500),theme(colors.blue.500)10px,theme(colors.sky.400)10px,theme(colors.sky.400)20px)]",
-    baseColor: "custom",
+    baseColor: "blue",
   },
 
   {
@@ -1203,7 +1203,7 @@ export const bgVariations = [
     archetypeId: "energetic-diagonals",
     themeId: "neon-tech",
     tailwindClass: "bg-[repeating-linear-gradient(45deg,theme(colors.green.400),theme(colors.green.400)10px,theme(colors.cyan.400)10px,theme(colors.cyan.400)20px)]",
-    baseColor: "custom",
+    baseColor: "cyan",
   },
 
   {
@@ -1277,7 +1277,7 @@ export const bgVariations = [
     archetypeId: "paper-texture-light",
     themeId: "default-light",
     tailwindClass: "bg-white bg-[url('/textures/linen-subtle.svg')] bg-repeat",
-    baseColor: "custom",
+    baseColor: "gray",
   },
   {
     variationId: "papertexture-defaultlight-split-gradient",
@@ -1336,7 +1336,7 @@ export const bgVariations = [
     archetypeId: "noise-fade-dark",
     themeId: "midnight-dark",
     tailwindClass: "bg-[#0b0f19] bg-[url('/noise.svg')] bg-blend-overlay",
-    baseColor: "custom",
+    baseColor: "gray",
   },
   {
     variationId: "noise-midnight-gradient-bl",
@@ -1344,7 +1344,7 @@ export const bgVariations = [
     archetypeId: "noise-fade-dark",
     themeId: "midnight-dark",
     tailwindClass: "bg-gradient-to-bl from-[#0b0f19] via-[#141a29] to-[#1f2937] bg-[url('/noise.svg')] bg-blend-overlay",
-    baseColor: "custom",
+    baseColor: "gray",
   },
   {
     variationId: "noise-midnight-radial-center",
@@ -1352,7 +1352,7 @@ export const bgVariations = [
     archetypeId: "noise-fade-dark",
     themeId: "midnight-dark",
     tailwindClass: "bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-[#1f2937] via-[#141a29] to-[#0b0f19] bg-[url('/noise.svg')] bg-blend-overlay",
-    baseColor: "custom",
+    baseColor: "gray",
   },
   {
     variationId: "noise-midnight-gradient-tr-fade",
@@ -1360,7 +1360,7 @@ export const bgVariations = [
     archetypeId: "noise-fade-dark",
     themeId: "midnight-dark",
     tailwindClass: "bg-gradient-to-tr from-[#0b0f19] via-[#141a29]/80 to-transparent bg-[url('/noise.svg')] bg-blend-overlay",
-    baseColor: "custom",
+    baseColor: "gray",
   },
   {
     variationId: "noise-midnight-vignette",
@@ -1368,7 +1368,7 @@ export const bgVariations = [
     archetypeId: "noise-fade-dark",
     themeId: "midnight-dark",
     tailwindClass: "bg-[#0b0f19] bg-[radial-gradient(ellipse_at_center,_rgba(11,15,25,0)_40%,_rgba(11,15,25,1)_100%)] bg-[url('/noise.svg')] bg-blend-overlay",
-    baseColor: "custom",
+    baseColor: "gray",
   },
 
   {
@@ -1377,7 +1377,7 @@ export const bgVariations = [
     archetypeId: "noise-fade-dark",
     themeId: "graphite-code",
     tailwindClass: "bg-[#1a1c1f] bg-[url('/noise.svg')] bg-blend-overlay",
-    baseColor: "custom",
+    baseColor: "gray",
   },
   {
     variationId: "noise-graphite-gradient-ltr",
@@ -1385,7 +1385,7 @@ export const bgVariations = [
     archetypeId: "noise-fade-dark",
     themeId: "graphite-code",
     tailwindClass: "bg-gradient-to-r from-[#1a1c1f] via-[#2a2d31] to-[#3a3d42] bg-[url('/noise.svg')] bg-blend-overlay",
-    baseColor: "custom",
+    baseColor: "gray",
   },
   {
     variationId: "noise-graphite-radial-top",
@@ -1393,7 +1393,7 @@ export const bgVariations = [
     archetypeId: "noise-fade-dark",
     themeId: "graphite-code",
     tailwindClass: "bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-[#2a2d31] via-[#1a1c1f] to-[#0f1012] bg-[url('/noise.svg')] bg-blend-overlay",
-    baseColor: "custom",
+    baseColor: "gray",
   },
   {
     variationId: "noise-graphite-angular-glow",
@@ -1401,7 +1401,7 @@ export const bgVariations = [
     archetypeId: "noise-fade-dark",
     themeId: "graphite-code",
     tailwindClass: "bg-gradient-to-br from-[#1a1c1f] via-[#24272b]/80 to-[#000000]/0 bg-[url('/noise.svg')] bg-blend-overlay",
-    baseColor: "custom",
+    baseColor: "gray",
   },
   {
     variationId: "noise-graphite-vignette-fade",
@@ -1409,7 +1409,7 @@ export const bgVariations = [
     archetypeId: "noise-fade-dark",
     themeId: "graphite-code",
     tailwindClass: "bg-[#1a1c1f] bg-[radial-gradient(ellipse_at_center,_rgba(26,28,31,0)_40%,_rgba(26,28,31,1)_100%)] bg-[url('/noise.svg')] bg-blend-overlay",
-    baseColor: "custom",
+    baseColor: "gray",
   },
 
   {
@@ -1418,7 +1418,7 @@ export const bgVariations = [
     archetypeId: "noise-fade-dark",
     themeId: "royal-indigo",
     tailwindClass: "bg-[#1b103f] bg-[url('/noise.svg')] bg-blend-overlay",
-    baseColor: "custom",
+    baseColor: "gray",
   },
   {
     variationId: "noise-indigo-gradient-diagonal",
@@ -1426,7 +1426,7 @@ export const bgVariations = [
     archetypeId: "noise-fade-dark",
     themeId: "royal-indigo",
     tailwindClass: "bg-gradient-to-br from-[#1b103f] via-[#2f1d5e] to-[#4b2a87] bg-[url('/noise.svg')] bg-blend-overlay",
-    baseColor: "custom",
+    baseColor: "gray",
   },
   {
     variationId: "noise-indigo-radial-soft",
@@ -1434,7 +1434,7 @@ export const bgVariations = [
     archetypeId: "noise-fade-dark",
     themeId: "royal-indigo",
     tailwindClass: "bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-[#4b2a87] via-[#2f1d5e] to-[#1b103f] bg-[url('/noise.svg')] bg-blend-overlay",
-    baseColor: "custom",
+    baseColor: "gray",
   },
   {
     variationId: "noise-indigo-fade-top",
@@ -1442,7 +1442,7 @@ export const bgVariations = [
     archetypeId: "noise-fade-dark",
     themeId: "royal-indigo",
     tailwindClass: "bg-gradient-to-b from-[#1b103f] via-[#2f1d5e]/80 to-transparent bg-[url('/noise.svg')] bg-blend-overlay",
-    baseColor: "custom",
+    baseColor: "gray",
   },
   {
     variationId: "noise-indigo-glow-corners",
@@ -1450,7 +1450,7 @@ export const bgVariations = [
     archetypeId: "noise-fade-dark",
     themeId: "royal-indigo",
     tailwindClass: "bg-gradient-to-tr from-[#1b103f] via-[#2f1d5e] to-[#1b103f] bg-[url('/noise.svg')] bg-blend-overlay",
-    baseColor: "custom",
+    baseColor: "gray",
   },
   {
     variationId: "noise-indigo-vignette-soft",
@@ -1458,7 +1458,7 @@ export const bgVariations = [
     archetypeId: "noise-fade-dark",
     themeId: "royal-indigo",
     tailwindClass: "bg-[#1b103f] bg-[radial-gradient(ellipse_at_center,_rgba(27,16,63,0)_40%,_rgba(27,16,63,1)_100%)] bg-[url('/noise.svg')] bg-blend-overlay",
-    baseColor: "custom",
+    baseColor: "gray",
   },
 
   {
@@ -1467,7 +1467,7 @@ export const bgVariations = [
     archetypeId: "startup-skybox",
     themeId: "modern-blue",
     tailwindClass: "bg-[#e6f0ff]",
-    baseColor: "custom",
+    baseColor: "blue",
   },
   {
     variationId: "skybox-modern-blue-gradient-tr",
@@ -1483,7 +1483,7 @@ export const bgVariations = [
     archetypeId: "startup-skybox",
     themeId: "modern-blue",
     tailwindClass: "bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-[#b4d8ff] via-[#dceeff] to-white",
-    baseColor: "custom",
+    baseColor: "blue",
   },
   {
     variationId: "skybox-modern-blue-halo-bottom",
@@ -1491,7 +1491,7 @@ export const bgVariations = [
     archetypeId: "startup-skybox",
     themeId: "modern-blue",
     tailwindClass: "bg-[radial-gradient(ellipse_at_bottom,_#b4d8ff_0%,_transparent_70%)]",
-    baseColor: "custom",
+    baseColor: "blue",
   },
   {
     variationId: "skybox-modern-blue-soft-diagonal",
@@ -1507,7 +1507,7 @@ export const bgVariations = [
     archetypeId: "startup-skybox",
     themeId: "modern-blue",
     tailwindClass: "bg-gradient-to-br from-[#e6f0ff] via-[#b4d8ff] to-[#e6f0ff] bg-[length:200%_200%]",
-    baseColor: "custom",
+    baseColor: "blue",
   },
 
   {
@@ -1524,7 +1524,7 @@ export const bgVariations = [
     archetypeId: "startup-skybox",
     themeId: "trust-blue-white",
     tailwindClass: "bg-[#f0f6ff]",
-    baseColor: "custom",
+    baseColor: "blue",
   },
   {
     variationId: "skybox-trust-bluewhite-gradient-tr",
@@ -1540,7 +1540,7 @@ export const bgVariations = [
     archetypeId: "startup-skybox",
     themeId: "trust-blue-white",
     tailwindClass: "bg-[radial-gradient(circle_at_top,_var(--tw-gradient-stops))] from-[#d0e3fa] via-white to-white",
-    baseColor: "custom",
+    baseColor: "blue",
   },
   {
     variationId: "skybox-trust-bluewhite-halo-bottom-fade",
@@ -1548,7 +1548,7 @@ export const bgVariations = [
     archetypeId: "startup-skybox",
     themeId: "trust-blue-white",
     tailwindClass: "bg-[radial-gradient(ellipse_at_bottom,_#d0e3fa_0%,_transparent_80%)]",
-    baseColor: "custom",
+    baseColor: "blue",
   },
   {
     variationId: "skybox-trust-bluewhite-fade-v",
@@ -1565,7 +1565,7 @@ export const bgVariations = [
     archetypeId: "startup-skybox",
     themeId: "mint-frost",
     tailwindClass: "bg-[#eafff6]",
-    baseColor: "custom",
+    baseColor: "gray",
   },
   {
     variationId: "skybox-mintfrost-gradient-tr",
@@ -1581,7 +1581,7 @@ export const bgVariations = [
     archetypeId: "startup-skybox",
     themeId: "mint-frost",
     tailwindClass: "bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-[#cbf5e7] via-[#eafff6] to-white",
-    baseColor: "custom",
+    baseColor: "gray",
   },
   {
     variationId: "skybox-mintfrost-halo-bottom",
@@ -1589,7 +1589,7 @@ export const bgVariations = [
     archetypeId: "startup-skybox",
     themeId: "mint-frost",
     tailwindClass: "bg-[radial-gradient(ellipse_at_bottom,_#cbf5e7_0%,_transparent_75%)]",
-    baseColor: "custom",
+    baseColor: "gray",
   },
   {
     variationId: "skybox-mintfrost-fade-v",
@@ -1614,7 +1614,7 @@ export const bgVariations = [
     archetypeId: "startup-skybox",
     themeId: "sunset-ember",
     tailwindClass: "bg-[#fff3e0]",
-    baseColor: "custom",
+    baseColor: "gray",
   },
   {
     variationId: "skybox-sunsetember-gradient-diagonal",
@@ -1630,7 +1630,7 @@ export const bgVariations = [
     archetypeId: "startup-skybox",
     themeId: "sunset-ember",
     tailwindClass: "bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-[#ffb184] via-[#fff3e0] to-white",
-    baseColor: "custom",
+    baseColor: "gray",
   },
   {
     variationId: "skybox-sunsetember-halo-top",
@@ -1638,7 +1638,7 @@ export const bgVariations = [
     archetypeId: "startup-skybox",
     themeId: "sunset-ember",
     tailwindClass: "bg-[radial-gradient(ellipse_at_top,_#ffd1a0_0%,_transparent_75%)]",
-    baseColor: "custom",
+    baseColor: "gray",
   },
   {
     variationId: "skybox-sunsetember-soft-stripes",
@@ -1646,7 +1646,7 @@ export const bgVariations = [
     archetypeId: "startup-skybox",
     themeId: "sunset-ember",
     tailwindClass: "bg-gradient-to-r from-[#fff3e0] via-[#ffd1a0] to-[#fff3e0] bg-[length:200%_200%]",
-    baseColor: "custom",
+    baseColor: "gray",
   },
   {
     variationId: "skybox-sunsetember-blur-overlay",
@@ -1663,7 +1663,7 @@ export const bgVariations = [
     archetypeId: "high-friction-grid",
     themeId: "steel-gray",
     tailwindClass: "bg-[#1e1f24]",
-    baseColor: "custom",
+    baseColor: "gray",
   },
   {
     variationId: "grid-steelgray-gridlines-overlay",
@@ -1671,7 +1671,7 @@ export const bgVariations = [
     archetypeId: "high-friction-grid",
     themeId: "steel-gray",
     tailwindClass: "bg-[#1e1f24] bg-[url('/gridlines.svg')] bg-[length:40px_40px] bg-blend-overlay opacity-95",
-    baseColor: "custom",
+    baseColor: "gray",
   },
   {
     variationId: "grid-steelgray-gradient-br",
@@ -1687,7 +1687,7 @@ export const bgVariations = [
     archetypeId: "high-friction-grid",
     themeId: "steel-gray",
     tailwindClass: "bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-[#3a3c42] via-[#2c2d33] to-[#1e1f24]",
-    baseColor: "custom",
+    baseColor: "gray",
   },
   {
     variationId: "grid-steelgray-angular-vignette",
@@ -1703,7 +1703,7 @@ export const bgVariations = [
     archetypeId: "high-friction-grid",
     themeId: "steel-gray",
     tailwindClass: "bg-[#1e1f24] bg-[url('/gridlines.svg')] bg-[length:40px_40px] bg-[radial-gradient(ellipse_at_center,_rgba(30,31,36,0)_40%,_rgba(30,31,36,1)_100%)]",
-    baseColor: "custom",
+    baseColor: "gray",
   },
 
    {
@@ -1712,7 +1712,7 @@ export const bgVariations = [
     archetypeId: "high-friction-grid",
     themeId: "midnight-dark",
     tailwindClass: "bg-[#0a0d14]",
-    baseColor: "custom",
+    baseColor: "gray",
   },
   {
     variationId: "grid-midnight-gridlines-subtle",
@@ -1720,7 +1720,7 @@ export const bgVariations = [
     archetypeId: "high-friction-grid",
     themeId: "midnight-dark",
     tailwindClass: "bg-[#0a0d14] bg-[url('/gridlines.svg')] bg-[length:36px_36px] bg-blend-overlay opacity-90",
-    baseColor: "custom",
+    baseColor: "gray",
   },
   {
     variationId: "grid-midnight-gradient-inset",
@@ -1736,7 +1736,7 @@ export const bgVariations = [
     archetypeId: "high-friction-grid",
     themeId: "midnight-dark",
     tailwindClass: "bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-[#1e2733] via-[#131822] to-[#0a0d14]",
-    baseColor: "custom",
+    baseColor: "gray",
   },
   {
     variationId: "grid-midnight-diagonal-vignette",
@@ -1752,7 +1752,7 @@ export const bgVariations = [
     archetypeId: "high-friction-grid",
     themeId: "midnight-dark",
     tailwindClass: "bg-[#0a0d14] bg-[url('/gridlines.svg')] bg-[length:36px_36px] bg-[radial-gradient(ellipse_at_center,_rgba(10,13,20,0)_30%,_rgba(10,13,20,1)_100%)]",
-    baseColor: "custom",
+    baseColor: "gray",
   },
 
   {
@@ -1761,7 +1761,7 @@ export const bgVariations = [
     archetypeId: "high-friction-grid",
     themeId: "graphite-code",
     tailwindClass: "bg-[#1c1d1f]",
-    baseColor: "custom",
+    baseColor: "gray",
   },
   {
     variationId: "grid-graphite-grid-overlay",
@@ -1769,7 +1769,7 @@ export const bgVariations = [
     archetypeId: "high-friction-grid",
     themeId: "graphite-code",
     tailwindClass: "bg-[#1c1d1f] bg-[url('/grid.svg')] bg-[length:32px_32px] bg-blend-overlay",
-    baseColor: "custom",
+    baseColor: "gray",
   },
   {
     variationId: "grid-graphite-gradient-hl",
@@ -1785,7 +1785,7 @@ export const bgVariations = [
     archetypeId: "high-friction-grid",
     themeId: "graphite-code",
     tailwindClass: "bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-[#393b40] via-[#2a2b2e] to-[#1c1d1f]",
-    baseColor: "custom",
+    baseColor: "gray",
   },
   {
     variationId: "grid-graphite-glow-bottom",
@@ -1801,7 +1801,7 @@ export const bgVariations = [
     archetypeId: "high-friction-grid",
     themeId: "graphite-code",
     tailwindClass: "bg-[#1c1d1f] bg-[url('/grid.svg')] bg-[length:32px_32px] bg-[radial-gradient(ellipse_at_center,_rgba(28,29,31,0)_35%,_rgba(28,29,31,1)_100%)]",
-    baseColor: "custom",
+    baseColor: "gray",
   },
 
   {
@@ -1810,7 +1810,7 @@ export const bgVariations = [
     archetypeId: "comic-burst",
     themeId: "vibrant-coral",
     tailwindClass: "bg-[#ff6b5c]",
-    baseColor: "custom",
+    baseColor: "orange",
   },
   {
     variationId: "comic-coral-radial-explode",
@@ -1818,7 +1818,7 @@ export const bgVariations = [
     archetypeId: "comic-burst",
     themeId: "vibrant-coral",
     tailwindClass: "bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-[#ff947c] via-[#ff6b5c] to-[#ff3e3e]",
-    baseColor: "custom",
+    baseColor: "orange",
   },
   {
     variationId: "comic-coral-burst-lines",
@@ -1826,7 +1826,7 @@ export const bgVariations = [
     archetypeId: "comic-burst",
     themeId: "vibrant-coral",
     tailwindClass: "bg-[#ff6b5c] bg-[url('/burst-lines.svg')] bg-center bg-no-repeat bg-contain",
-    baseColor: "custom",
+    baseColor: "orange",
   },
   {
     variationId: "comic-coral-diagonal-flare",
@@ -1842,7 +1842,7 @@ export const bgVariations = [
     archetypeId: "comic-burst",
     themeId: "vibrant-coral",
     tailwindClass: "bg-[radial-gradient(ellipse_at_bottom,_#ffd3c4_0%,_transparent_80%)]",
-    baseColor: "custom",
+    baseColor: "orange",
   },
   {
     variationId: "comic-coral-splash-fade",
@@ -1850,7 +1850,7 @@ export const bgVariations = [
     archetypeId: "comic-burst",
     themeId: "vibrant-coral",
     tailwindClass: "bg-gradient-to-b from-[#ff6b5c] via-[#ff947c]/80 to-transparent bg-[url('/comic-texture.svg')] bg-blend-overlay",
-    baseColor: "custom",
+    baseColor: "orange",
   },
 
 
@@ -1860,7 +1860,7 @@ export const bgVariations = [
     archetypeId: "comic-burst",
     themeId: "sunset-ember",
     tailwindClass: "bg-[#ffb677]",
-    baseColor: "custom",
+    baseColor: "gray",
   },
   {
     variationId: "comic-sunset-burst-center",
@@ -1868,7 +1868,7 @@ export const bgVariations = [
     archetypeId: "comic-burst",
     themeId: "sunset-ember",
     tailwindClass: "bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-[#ffc49f] via-[#ffb677] to-[#ff8055]",
-    baseColor: "custom",
+    baseColor: "gray",
   },
   {
     variationId: "comic-sunset-lines-overlay",
@@ -1876,7 +1876,7 @@ export const bgVariations = [
     archetypeId: "comic-burst",
     themeId: "sunset-ember",
     tailwindClass: "bg-[#ffb677] bg-[url('/burst-lines.svg')] bg-center bg-no-repeat bg-contain",
-    baseColor: "custom",
+    baseColor: "gray",
   },
   {
     variationId: "comic-sunset-halo-top-glow",
@@ -1884,7 +1884,7 @@ export const bgVariations = [
     archetypeId: "comic-burst",
     themeId: "sunset-ember",
     tailwindClass: "bg-[radial-gradient(ellipse_at_top,_#ffd3b6_0%,_transparent_75%)]",
-    baseColor: "custom",
+    baseColor: "gray",
   },
   {
     variationId: "comic-sunset-explode-diagonal",
@@ -1900,7 +1900,7 @@ export const bgVariations = [
     archetypeId: "comic-burst",
     themeId: "sunset-ember",
     tailwindClass: "bg-[#ffb677] bg-[url('/comic-texture.svg')] bg-blend-soft-light",
-    baseColor: "custom",
+    baseColor: "gray",
   },
 
   {
@@ -1909,7 +1909,7 @@ export const bgVariations = [
     archetypeId: "comic-burst",
     themeId: "soft-peach",
     tailwindClass: "bg-[#ffe8dc]",
-    baseColor: "custom",
+    baseColor: "gray",
   },
   {
     variationId: "comic-peach-radial-burst",
@@ -1917,7 +1917,7 @@ export const bgVariations = [
     archetypeId: "comic-burst",
     themeId: "soft-peach",
     tailwindClass: "bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-[#ffd4c0] via-[#ffe8dc] to-white",
-    baseColor: "custom",
+    baseColor: "gray",
   },
   {
     variationId: "comic-peach-lines-topright",
@@ -1925,7 +1925,7 @@ export const bgVariations = [
     archetypeId: "comic-burst",
     themeId: "soft-peach",
     tailwindClass: "bg-[#ffe8dc] bg-[url('/burst-lines.svg')] bg-top-right bg-no-repeat bg-contain",
-    baseColor: "custom",
+    baseColor: "gray",
   },
   {
     variationId: "comic-peach-diagonal-fade",
@@ -1941,7 +1941,7 @@ export const bgVariations = [
     archetypeId: "comic-burst",
     themeId: "soft-peach",
     tailwindClass: "bg-[radial-gradient(ellipse_at_bottom,_#ffd4c0_0%,_transparent_75%)]",
-    baseColor: "custom",
+    baseColor: "gray",
   },
   {
     variationId: "comic-peach-texture-pop",
@@ -1949,7 +1949,7 @@ export const bgVariations = [
     archetypeId: "comic-burst",
     themeId: "soft-peach",
     tailwindClass: "bg-[#ffe8dc] bg-[url('/comic-texture.svg')] bg-blend-overlay",
-    baseColor: "custom",
+    baseColor: "gray",
   },
 
   {
@@ -1958,7 +1958,7 @@ export const bgVariations = [
     archetypeId: "zen-calm-wave",
     themeId: "mint-frost",
     tailwindClass: "bg-[#e6f9f3]",
-    baseColor: "custom",
+    baseColor: "gray",
   },
   {
     variationId: "zen-mint-gradient-top",
@@ -1974,7 +1974,7 @@ export const bgVariations = [
     archetypeId: "zen-calm-wave",
     themeId: "mint-frost",
     tailwindClass: "bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-[#c7eee3] via-[#e6f9f3] to-white",
-    baseColor: "custom",
+    baseColor: "gray",
   },
   {
     variationId: "zen-mint-wave-overlay",
@@ -1982,7 +1982,7 @@ export const bgVariations = [
     archetypeId: "zen-calm-wave",
     themeId: "mint-frost",
     tailwindClass: "bg-[#e6f9f3] bg-[url('/wave-lines.svg')] bg-repeat-x bg-top bg-[length:200%_auto] opacity-90",
-    baseColor: "custom",
+    baseColor: "gray",
   },
   {
     variationId: "zen-mint-soft-diagonal",
@@ -1998,7 +1998,7 @@ export const bgVariations = [
     archetypeId: "zen-calm-wave",
     themeId: "mint-frost",
     tailwindClass: "bg-[radial-gradient(ellipse_at_bottom,_#d2f1e8_0%,_transparent_75%)]",
-    baseColor: "custom",
+    baseColor: "gray",
   },
 
   {
@@ -2007,7 +2007,7 @@ export const bgVariations = [
     archetypeId: "zen-calm-wave",
     themeId: "teal-energy",
     tailwindClass: "bg-[#d6f3f1]",
-    baseColor: "custom",
+    baseColor: "gray",
   },
   {
     variationId: "zen-teal-gradient-tranquil",
@@ -2023,7 +2023,7 @@ export const bgVariations = [
     archetypeId: "zen-calm-wave",
     themeId: "teal-energy",
     tailwindClass: "bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-[#b3e4e0] via-[#d6f3f1] to-white",
-    baseColor: "custom",
+    baseColor: "gray",
   },
   {
     variationId: "zen-teal-wave-top",
@@ -2031,7 +2031,7 @@ export const bgVariations = [
     archetypeId: "zen-calm-wave",
     themeId: "teal-energy",
     tailwindClass: "bg-[#d6f3f1] bg-[url('/wave-lines.svg')] bg-top bg-repeat-x bg-[length:200%_auto]",
-    baseColor: "custom",
+    baseColor: "gray",
   },
   {
     variationId: "zen-teal-diagonal-wash",
@@ -2047,7 +2047,7 @@ export const bgVariations = [
     archetypeId: "zen-calm-wave",
     themeId: "teal-energy",
     tailwindClass: "bg-[radial-gradient(ellipse_at_bottom,_#b3e4e0_0%,_transparent_75%)]",
-    baseColor: "custom",
+    baseColor: "gray",
   },
 
   {
@@ -2072,7 +2072,7 @@ export const bgVariations = [
     archetypeId: "zen-calm-wave",
     themeId: "default-light",
     tailwindClass: "bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-[#f3f4f6] via-white to-white",
-    baseColor: "custom",
+    baseColor: "gray",
   },
   {
     variationId: "zen-defaultlight-wave-lines-top",
@@ -2080,7 +2080,7 @@ export const bgVariations = [
     archetypeId: "zen-calm-wave",
     themeId: "default-light",
     tailwindClass: "bg-white bg-[url('/wave-lines.svg')] bg-repeat-x bg-top bg-[length:200%_auto] opacity-90",
-    baseColor: "custom",
+    baseColor: "gray",
   },
   {
     variationId: "zen-defaultlight-fade-bottom",
@@ -2096,7 +2096,7 @@ export const bgVariations = [
     archetypeId: "zen-calm-wave",
     themeId: "default-light",
     tailwindClass: "bg-[radial-gradient(ellipse_at_bottom,_#f3f4f6_0%,_transparent_75%)]",
-    baseColor: "custom",
+    baseColor: "gray",
   },
 
   {
@@ -2105,7 +2105,7 @@ export const bgVariations = [
     archetypeId: "deep-night-space",
     themeId: "midnight-dark",
     tailwindClass: "bg-[#0a0d14]",
-    baseColor: "custom",
+    baseColor: "gray",
   },
   {
     variationId: "space-midnight-gradient-galaxy",
@@ -2121,7 +2121,7 @@ export const bgVariations = [
     archetypeId: "deep-night-space",
     themeId: "midnight-dark",
     tailwindClass: "bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-[#1f2b3a] via-[#131a25] to-[#0a0d14]",
-    baseColor: "custom",
+    baseColor: "gray",
   },
   {
     variationId: "space-midnight-starscape",
@@ -2129,7 +2129,7 @@ export const bgVariations = [
     archetypeId: "deep-night-space",
     themeId: "midnight-dark",
     tailwindClass: "bg-[#0a0d14] bg-[url('/starscape.svg')] bg-repeat bg-center bg-[length:240px_240px] bg-blend-overlay",
-    baseColor: "custom",
+    baseColor: "gray",
   },
   {
     variationId: "space-midnight-aurora-halo",
@@ -2137,7 +2137,7 @@ export const bgVariations = [
     archetypeId: "deep-night-space",
     themeId: "midnight-dark",
     tailwindClass: "bg-[radial-gradient(ellipse_at_bottom,_#2b3b52_0%,_transparent_80%)]",
-    baseColor: "custom",
+    baseColor: "gray",
   },
   {
     variationId: "space-midnight-diagonal-fade",
@@ -2154,7 +2154,7 @@ export const bgVariations = [
     archetypeId: "deep-night-space",
     themeId: "neon-tech",
     tailwindClass: "bg-[#0b0f19]",
-    baseColor: "custom",
+    baseColor: "cyan",
   },
   {
     variationId: "space-neon-gradient-cyberglow",
@@ -2170,7 +2170,7 @@ export const bgVariations = [
     archetypeId: "deep-night-space",
     themeId: "neon-tech",
     tailwindClass: "bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-[#0fffc2] via-[#192a40] to-[#0b0f19]",
-    baseColor: "custom",
+    baseColor: "cyan",
   },
   {
     variationId: "space-neon-gridlines-overlay",
@@ -2178,7 +2178,7 @@ export const bgVariations = [
     archetypeId: "deep-night-space",
     themeId: "neon-tech",
     tailwindClass: "bg-[#0b0f19] bg-[url('/gridlines-neon.svg')] bg-[length:40px_40px] bg-blend-overlay",
-    baseColor: "custom",
+    baseColor: "cyan",
   },
   {
     variationId: "space-neon-bottom-aurora",
@@ -2186,7 +2186,7 @@ export const bgVariations = [
     archetypeId: "deep-night-space",
     themeId: "neon-tech",
     tailwindClass: "bg-[radial-gradient(ellipse_at_bottom,_#0fffc2_0%,_transparent_75%)]",
-    baseColor: "custom",
+    baseColor: "cyan",
   },
   {
     variationId: "space-neon-pulse-diagonal",
@@ -2203,7 +2203,7 @@ export const bgVariations = [
     archetypeId: "deep-night-space",
     themeId: "graphite-code",
     tailwindClass: "bg-[#1a1c1f]",
-    baseColor: "custom",
+    baseColor: "gray",
   },
   {
     variationId: "space-graphite-gradient-depth",
@@ -2219,7 +2219,7 @@ export const bgVariations = [
     archetypeId: "deep-night-space",
     themeId: "graphite-code",
     tailwindClass: "bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-[#3a3d42] via-[#2a2d31] to-[#1a1c1f]",
-    baseColor: "custom",
+    baseColor: "gray",
   },
   {
     variationId: "space-graphite-matrix-overlay",
@@ -2227,7 +2227,7 @@ export const bgVariations = [
     archetypeId: "deep-night-space",
     themeId: "graphite-code",
     tailwindClass: "bg-[#1a1c1f] bg-[url('/matrix-code.svg')] bg-[length:180px_180px] bg-blend-overlay",
-    baseColor: "custom",
+    baseColor: "gray",
   },
   {
     variationId: "space-graphite-vignette-bottom",
@@ -2235,7 +2235,7 @@ export const bgVariations = [
     archetypeId: "deep-night-space",
     themeId: "graphite-code",
     tailwindClass: "bg-[radial-gradient(ellipse_at_bottom,_#2a2d31_0%,_transparent_75%)]",
-    baseColor: "custom",
+    baseColor: "gray",
   },
   {
     variationId: "space-graphite-diagonal-fade",
@@ -2455,7 +2455,7 @@ export const bgVariations = [
     archetypeId: "wireframe-blueprint",
     themeId: "default-light",
     tailwindClass: "bg-white bg-[linear-gradient(90deg,_rgba(0,0,0,0.02)_1px,_transparent_1px),_linear-gradient(0deg,_rgba(0,0,0,0.02)_1px,_transparent_1px)] bg-[size:40px_40px]",
-    baseColor: "custom",
+    baseColor: "gray",
   },
 
   {
@@ -2496,7 +2496,7 @@ export const bgVariations = [
     archetypeId: "wireframe-blueprint",
     themeId: "trust-blue-white",
     tailwindClass: "bg-white bg-[linear-gradient(90deg,_rgba(0,0,0,0.015)_1px,_transparent_1px),_linear-gradient(0deg,_rgba(0,0,0,0.015)_1px,_transparent_1px)] bg-[size:36px_36px]",
-    baseColor: "custom",
+    baseColor: "blue",
   },
   {
     variationId: "trust-blue-white-horizontal-soft-blur",
@@ -2750,7 +2750,7 @@ export const bgVariations = [
     archetypeId: "retro-pixel-noise",
     themeId: "retro-terminal",
     tailwindClass: "bg-[#003B00]",
-    baseColor: "custom",
+    baseColor: "gray",
   },
   {
     variationId: "retro-terminal-gradient-vintage-crt",
@@ -2774,7 +2774,7 @@ export const bgVariations = [
     archetypeId: "retro-pixel-noise",
     themeId: "retro-terminal",
     tailwindClass: "bg-[#003B00] bg-[url('/noise/pixel-noise-light.png')] bg-[length:2px_2px] opacity-95",
-    baseColor: "custom",
+    baseColor: "gray",
   },
   {
     variationId: "retro-terminal-diagonal-glow-amber",
@@ -2790,7 +2790,7 @@ export const bgVariations = [
     archetypeId: "retro-pixel-noise",
     themeId: "retro-terminal",
     tailwindClass: "bg-[#001F00] bg-[linear-gradient(90deg,_rgba(0,255,65,0.05)_1px,_transparent_1px),_linear-gradient(0deg,_rgba(0,255,65,0.05)_1px,_transparent_1px)] bg-[size:20px_20px]",
-    baseColor: "custom",
+    baseColor: "gray",
   },
   {
     variationId: "retro-terminal-bottom-glow-crt-green",
@@ -2807,7 +2807,7 @@ export const bgVariations = [
     archetypeId: "retro-pixel-noise",
     themeId: "neon-tech",
     tailwindClass: "bg-[#0A001F]",
-    baseColor: "custom",
+    baseColor: "cyan",
   },
   {
     variationId: "neon-tech-gradient-br-magenta-cyan",
@@ -2823,7 +2823,7 @@ export const bgVariations = [
     archetypeId: "retro-pixel-noise",
     themeId: "neon-tech",
     tailwindClass: "bg-[#0A001F] bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-[#FF00FF]/30 via-[#0A001F] to-[#0A001F]",
-    baseColor: "custom",
+    baseColor: "cyan",
   },
   {
     variationId: "neon-tech-crt-noise-overlay",
@@ -2831,7 +2831,7 @@ export const bgVariations = [
     archetypeId: "retro-pixel-noise",
     themeId: "neon-tech",
     tailwindClass: "bg-[#0A001F] bg-[url('/noise/pixel-noise-dark.png')] bg-[length:2px_2px] opacity-95",
-    baseColor: "custom",
+    baseColor: "cyan",
   },
   {
     variationId: "neon-tech-horizontal-neon-fade",
@@ -2847,7 +2847,7 @@ export const bgVariations = [
     archetypeId: "retro-pixel-noise",
     themeId: "neon-tech",
     tailwindClass: "bg-[#0A001F] bg-[linear-gradient(90deg,_rgba(255,0,255,0.05)_1px,_transparent_1px),_linear-gradient(0deg,_rgba(0,255,255,0.05)_1px,_transparent_1px)] bg-[size:20px_20px]",
-    baseColor: "custom",
+    baseColor: "cyan",
   },
   {
     variationId: "neon-tech-bottom-glow-cyan",
@@ -2896,7 +2896,7 @@ export const bgVariations = [
     archetypeId: "vibrant-rings",
     themeId: "vibrant-coral",
     tailwindClass: "bg-gradient-to-br from-white via-orange-100 to-rose-100 bg-[radial-gradient(circle,_rgba(255,120,120,0.1)_1px,_transparent_1px)] bg-[size:24px_24px]",
-    baseColor: "custom",
+    baseColor: "orange",
   },
   {
     variationId: "vibrant-coral-diagonal-vibrant-fade",
@@ -2912,7 +2912,7 @@ export const bgVariations = [
     archetypeId: "vibrant-rings",
     themeId: "vibrant-coral",
     tailwindClass: "bg-white bg-[radial-gradient(circle,_rgba(255,100,100,0.2)_0%,_transparent_60%)]",
-    baseColor: "custom",
+    baseColor: "orange",
   },
 
   {
@@ -2969,7 +2969,7 @@ export const bgVariations = [
     archetypeId: "vibrant-rings",
     themeId: "sunset-ember",
     tailwindClass: "bg-white bg-[radial-gradient(circle,_rgba(255,100,80,0.2)_0%,_transparent_60%)]",
-    baseColor: "custom",
+    baseColor: "gray",
   },
 
   {
@@ -3026,7 +3026,7 @@ export const bgVariations = [
     archetypeId: "vibrant-rings",
     themeId: "modern-blue",
     tailwindClass: "bg-white bg-[radial-gradient(circle,_rgba(0,172,255,0.2)_0%,_transparent_60%)]",
-    baseColor: "custom",
+    baseColor: "blue",
   },
 
   {
@@ -3067,7 +3067,7 @@ export const bgVariations = [
     archetypeId: "monochrome-hero-zone",
     themeId: "default-light",
     tailwindClass: "bg-white bg-[linear-gradient(90deg,_rgba(0,0,0,0.015)_1px,_transparent_1px),_linear-gradient(0deg,_rgba(0,0,0,0.015)_1px,_transparent_1px)] bg-[size:36px_36px]",
-    baseColor: "custom",
+    baseColor: "gray",
   },
   {
     variationId: "default-light-top-glow-fade",
@@ -3083,7 +3083,7 @@ export const bgVariations = [
     archetypeId: "monochrome-hero-zone",
     themeId: "default-light",
     tailwindClass: "bg-white bg-[radial-gradient(circle,_rgba(0,0,0,0.04)_0%,_transparent_60%)]",
-    baseColor: "custom",
+    baseColor: "gray",
   },
 
   {
@@ -3246,7 +3246,7 @@ export const bgVariations = [
     archetypeId: "blurred-spotlight",
     themeId: "midnight-dark",
     tailwindClass: "bg-black bg-[radial-gradient(circle,_rgba(255,255,255,0.03)_0%,_transparent_60%)]",
-    baseColor: "custom",
+    baseColor: "gray",
   },
   {
     variationId: "midnight-dark-multi-spot-halo-fx",
@@ -3254,7 +3254,7 @@ export const bgVariations = [
     archetypeId: "blurred-spotlight",
     themeId: "midnight-dark",
     tailwindClass: "bg-black bg-[radial-gradient(circle_at_30%_30%,_rgba(255,255,255,0.04)_0%,_transparent_40%),_radial-gradient(circle_at_70%_70%,_rgba(255,255,255,0.03)_0%,_transparent_40%)]",
-    baseColor: "custom",
+    baseColor: "gray",
   },
 
   {
@@ -3303,7 +3303,7 @@ export const bgVariations = [
     archetypeId: "blurred-spotlight",
     themeId: "sunset-ember",
     tailwindClass: "bg-white bg-[radial-gradient(circle,_rgba(255,100,80,0.2)_0%,_transparent_60%)]",
-    baseColor: "custom",
+    baseColor: "gray",
   },
   {
     variationId: "sunset-ember-dual-glow-layers",
@@ -3311,7 +3311,7 @@ export const bgVariations = [
     archetypeId: "blurred-spotlight",
     themeId: "sunset-ember",
     tailwindClass: "bg-white bg-[radial-gradient(circle_at_25%_25%,_rgba(255,90,70,0.15)_0%,_transparent_40%),_radial-gradient(circle_at_75%_75%,_rgba(255,200,150,0.1)_0%,_transparent_40%)]",
-    baseColor: "custom",
+    baseColor: "gray",
   },
 
   {
@@ -3360,7 +3360,7 @@ export const bgVariations = [
     archetypeId: "blurred-spotlight",
     themeId: "modern-blue",
     tailwindClass: "bg-white bg-[radial-gradient(circle,_rgba(0,150,255,0.15)_0%,_transparent_60%)]",
-    baseColor: "custom",
+    baseColor: "blue",
   },
   {
     variationId: "modern-blue-dual-spot-blue-light",
@@ -3368,6 +3368,6 @@ export const bgVariations = [
     archetypeId: "blurred-spotlight",
     themeId: "modern-blue",
     tailwindClass: "bg-white bg-[radial-gradient(circle_at_30%_30%,_rgba(0,172,255,0.12)_0%,_transparent_40%),_radial-gradient(circle_at_70%_70%,_rgba(0,120,255,0.08)_0%,_transparent_40%)]",
-    baseColor: "custom",
+    baseColor: "blue",
   }
 ];

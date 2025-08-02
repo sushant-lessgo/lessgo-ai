@@ -31,9 +31,9 @@ function computeScore(scores: {
   toneProfile: number;
 }): number {
   return (
-    0.4 * (scores.marketCategory / 3) +
-    0.4 * (scores.targetAudience / 3) +
-    0.2 * (
+    0.3 * (scores.marketCategory / 3) +
+    0.3 * (scores.targetAudience / 3) +
+    0.4 * (
       0.4 * (scores.landingPageGoals / 3) +
       0.3 * (scores.startupStage / 3) +
       0.15 * (scores.pricingModel / 3) +
@@ -153,21 +153,36 @@ export function getTopVariationWithFunnel(input: FunnelInput): FunnelResult {
 
     // Allow variations with partial matches - don't skip zero scores
 
-    const score = computeScore(scores);
-    variationScores.push({ key, score });
+    const baseScore = computeScore(scores);
+    // Add larger random variance (±0.3) to break ties and increase variety
+    const randomVariance = (Math.random() - 0.5) * 0.6; // ±0.3 range
+    const finalScore = baseScore + randomVariance;
+    variationScores.push({ key, score: finalScore });
   }
 
   variationScores.sort((a, b) => b.score - a.score);
-  const top5Variations = variationScores.slice(0, 5).map(v => v.key);
-  const randomIndex = Math.floor(Math.random() * top5Variations.length);
+  const top15Variations = variationScores.slice(0, 15).map(v => v.key);
+  const randomIndex = Math.floor(Math.random() * top15Variations.length);
+
+  // Log variety improvements for debugging
+  console.log('🎨 [VARIETY-DEBUG] Background selection improvements:', {
+    totalVariations: variationScores.length,
+    topVariationsCount: top15Variations.length,
+    selectedVariation: top15Variations[randomIndex],
+    scoreRange: {
+      highest: variationScores[0]?.score.toFixed(3),
+      lowest: variationScores[variationScores.length - 1]?.score.toFixed(3),
+      top15Range: `${variationScores[0]?.score.toFixed(3)} - ${variationScores[14]?.score.toFixed(3)}`
+    }
+  });
 
   return {
-    primaryVariation: top5Variations[randomIndex],
-    secondaryOptions: top5Variations.filter((_, i) => i !== randomIndex),
+    primaryVariation: top15Variations[randomIndex],
+    secondaryOptions: top15Variations.filter((_, i) => i !== randomIndex),
     trace: {
       topArchetypes,
       topThemes,
-      topVariations: top5Variations,
+      topVariations: top15Variations,
     },
   };
 }

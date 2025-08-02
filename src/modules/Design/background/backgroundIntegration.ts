@@ -151,8 +151,13 @@ function getSmartFallbackVariation(onboardingData: OnboardingDataInput): {
   
   // Random selection if no matches
   if (!selectedVariation) {
-    const randomIndex = Math.floor(Math.random() * Math.min(bgVariations.length, 10)); // First 10 variations
+    const randomIndex = Math.floor(Math.random() * bgVariations.length); // Use all 412 variations
     selectedVariation = bgVariations[randomIndex];
+    console.log('🎨 [FALLBACK-DEBUG] Using improved fallback selection:', {
+      totalVariationsAvailable: bgVariations.length,
+      selectedIndex: randomIndex,
+      selectedVariation: selectedVariation.variationId
+    });
   }
   
  // console.log('Smart fallback selected:', selectedVariation);
