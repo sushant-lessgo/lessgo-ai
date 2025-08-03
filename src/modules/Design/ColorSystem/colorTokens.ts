@@ -36,13 +36,13 @@ export function generateColorTokens({
   const businessContext = { industry: 'tech', tone: 'professional' }; // TODO: Extract from onboarding
   const accentCandidates = generateAccentCandidates(baseColor, businessContext);
   
-  const smartAccentCSS = accentCSS || accentCandidates[0]?.tailwindBg || `bg-${accentColor}-600`;
+  const smartAccentCSS = accentCSS || accentCandidates[0]?.tailwindBg || `bg-${accentColor}-500`;
   const smartAccentHover = accentCSS ? 
-    accentCSS.replace('-600', '-700').replace('-500', '-600') : 
-    accentCandidates[0]?.tailwindHover || `bg-${accentColor}-700`;
+    accentCSS.replace('-500', '-600').replace('-600', '-700') : 
+    accentCandidates[0]?.tailwindHover || `bg-${accentColor}-600`;
   const smartAccentBorder = accentCSS ? 
     accentCSS.replace('bg-', 'border-') : 
-    `border-${accentColor}-600`;
+    `border-${accentColor}-500`;
 
   // ✅ ENHANCED: Smart text color selection with WCAG validation
   const getContrastingTextColor = (backgroundColor: string | undefined) => {
@@ -52,19 +52,38 @@ export function generateColorTokens({
     return getSmartTextColor(backgroundColor, 'body');
   };
 
+  // ✅ ENHANCED: Convert hex colors to Tailwind classes
+  const hexToTailwindClass = (hex: string): string => {
+    const colorMap: Record<string, string> = {
+      '#ffffff': 'text-white',
+      '#f9fafb': 'text-gray-50',
+      '#f3f4f6': 'text-gray-100', 
+      '#e5e7eb': 'text-gray-200',
+      '#d1d5db': 'text-gray-300',
+      '#9ca3af': 'text-gray-400',
+      '#6b7280': 'text-gray-500',
+      '#4b5563': 'text-gray-600',
+      '#374151': 'text-gray-700',
+      '#1f2937': 'text-gray-800',
+      '#111827': 'text-gray-900',
+      '#000000': 'text-black'
+    };
+    return colorMap[hex] || 'text-gray-900'; // Default to dark text for unknown colors
+  };
+
   // ✅ ENHANCED: Context-aware secondary and muted text colors
   const getSafeSecondaryTextColor = (backgroundColor: string | undefined) => {
     if (!backgroundColor) return 'text-gray-700';
     
-    // ✅ FIX: Pass the original CSS string, not the RGB object
-    return getSmartTextColor(backgroundColor, 'body');
+    const hexColor = getSmartTextColor(backgroundColor, 'body');
+    return hexToTailwindClass(hexColor);
   };
 
   const getSafeMutedTextColor = (backgroundColor: string | undefined) => {
     if (!backgroundColor) return 'text-gray-500';
     
-    // ✅ FIX: Pass the original CSS string, not the RGB object
-    return getSmartTextColor(backgroundColor, 'muted');
+    const hexColor = getSmartTextColor(backgroundColor, 'muted');
+    return hexToTailwindClass(hexColor);
   };
 
   // ✅ ENHANCED: Smart CTA color selection with proper accent validation and smart text color calculation
@@ -77,42 +96,12 @@ export function generateColorTokens({
     ].filter(Boolean);
     
     let safeCTABg = smartAccentCSS;
-    // ✅ IMPROVED: Calculate text color based on CTA background and convert to CSS class
-    const safeCTATextHex = getSmartTextColor(smartAccentCSS, 'body');
+    let safeCTAText = 'text-white'; // Default to white text for all colored CTA backgrounds
     
-    // Convert hex to CSS class for proper styling
-    const hexToTailwindClass = (hex: string): string => {
-      const colorMap: Record<string, string> = {
-        '#ffffff': 'text-white',
-        '#f9fafb': 'text-gray-50',
-        '#f3f4f6': 'text-gray-100', 
-        '#e5e7eb': 'text-gray-200',
-        '#d1d5db': 'text-gray-300',
-        '#9ca3af': 'text-gray-400',
-        '#6b7280': 'text-gray-500',
-        '#4b5563': 'text-gray-600',
-        '#374151': 'text-gray-700',
-        '#1f2937': 'text-gray-800',
-        '#111827': 'text-gray-900',
-        '#000000': 'text-black'
-      };
-      return colorMap[hex] || 'text-white'; // Default to white for unknown colors
-    };
-    
-    let safeCTAText = hexToTailwindClass(safeCTATextHex);
-    
-    // ✅ FIX: Specific handling for problematic accent colors with poor contrast
-    const contrastFixes: Record<string, { bg: string; text: string }> = {
-      'bg-cyan-600': { bg: 'bg-cyan-700', text: 'text-white' },     // 3.68 → 5.36
-      'bg-orange-600': { bg: 'bg-orange-700', text: 'text-white' }, // 3.56 → better contrast
-      'bg-emerald-600': { bg: 'bg-emerald-700', text: 'text-white' } // 3.77 → better contrast
-    };
-    
-    if (contrastFixes[smartAccentCSS]) {
-      const fix = contrastFixes[smartAccentCSS];
-      console.log(`🔧 [CTA-FIX] Detected ${smartAccentCSS} background, using safer ${fix.bg} with ${fix.text}`);
-      safeCTABg = fix.bg;
-      safeCTAText = fix.text;
+    // ✅ IMPROVED: Ensure white text on all colored backgrounds for maximum contrast
+    if (smartAccentCSS.includes('bg-')) {
+      // For any colored background, use white text for optimal contrast
+      safeCTAText = 'text-white';
     }
     
     // ✅ IMPROVED: Don't validate CTA against ALL backgrounds since CTAs appear on specific sections
@@ -150,7 +139,7 @@ export function generateColorTokens({
         // console.log('✅ Using brand-safe accent color for CTA:', safeCTABg, 'with text:', safeCTAText);
       } else {
         // ✅ IMPROVED: Use branded fallback instead of generic gray
-        const brandedFallback = accentColor ? `bg-${accentColor}-600` : smartAccentCSS;
+        const brandedFallback = accentColor ? `bg-${accentColor}-500` : smartAccentCSS;
         safeCTABg = brandedFallback;
         const fallbackTextHex = getSmartTextColor(brandedFallback, 'body');
         safeCTAText = hexToTailwindClass(fallbackTextHex);
@@ -183,25 +172,25 @@ export function generateColorTokens({
     linkHover: `text-${accentColor}-700`,      // ✅ Link hover state
 
     // 🧱 Section Backgrounds - Receives from backgroundIntegration system
-    bgPrimary: sectionBackgrounds.primary || `bg-gradient-to-br from-${baseColor}-500 to-${baseColor}-600`,
+    bgPrimary: sectionBackgrounds.primary || `bg-gradient-to-br from-${baseColor}-400 to-${baseColor}-500`,
     bgSecondary: sectionBackgrounds.secondary || `bg-${baseColor}-50`,  // ✅ This gets sophisticated accent backgrounds
     bgNeutral: sectionBackgrounds.neutral || "bg-white",
     bgDivider: sectionBackgrounds.divider || `bg-${baseColor}-100/50`,
 
     // 📘 Text Colors - ENHANCED: Smart, context-aware text colors with WCAG compliance
-    textOnLight: getSmartTextColor('#ffffff', 'body'),                     // Smart text color for light backgrounds
-    textOnDark: getSmartTextColor('#000000', 'body'),                      // Smart text color for dark backgrounds
-    textOnAccent: getSmartTextColor(smartAccentCSS, 'body'),               // Smart text color for accent backgrounds
+    textOnLight: hexToTailwindClass(getSmartTextColor('#ffffff', 'body')),                     // Smart text color for light backgrounds
+    textOnDark: hexToTailwindClass(getSmartTextColor('#000000', 'body')),                      // Smart text color for dark backgrounds
+    textOnAccent: hexToTailwindClass(getSmartTextColor(smartAccentCSS, 'body')),               // Smart text color for accent backgrounds
     textPrimary: getContrastingTextColor(sectionBackgrounds.primary),      // Context-aware primary text
     textSecondary: getSafeSecondaryTextColor(sectionBackgrounds.secondary), // Context-aware secondary text
     textMuted: getSafeMutedTextColor(sectionBackgrounds.neutral),          // Context-aware muted text
     textInverse: "text-white",                                             // White text for inverse
 
     // 📘 Background-specific text colors - ENHANCED with smart detection
-    textOnPrimary: getSmartTextColor(sectionBackgrounds.primary || `bg-${baseColor}-600`, 'body'),
-    textOnSecondary: getSmartTextColor(sectionBackgrounds.secondary || `bg-${baseColor}-50`, 'body'),
-    textOnNeutral: getSmartTextColor(sectionBackgrounds.neutral || 'bg-white', 'body'),
-    textOnDivider: getSmartTextColor(sectionBackgrounds.divider || `bg-${baseColor}-100`, 'body'),
+    textOnPrimary: hexToTailwindClass(getSmartTextColor(sectionBackgrounds.primary || `bg-${baseColor}-500`, 'body')),
+    textOnSecondary: hexToTailwindClass(getSmartTextColor(sectionBackgrounds.secondary || `bg-${baseColor}-50`, 'body')),
+    textOnNeutral: hexToTailwindClass(getSmartTextColor(sectionBackgrounds.neutral || 'bg-white', 'body')),
+    textOnDivider: hexToTailwindClass(getSmartTextColor(sectionBackgrounds.divider || `bg-${baseColor}-100`, 'body')),
 
     // 📦 Surface Colors - Based on baseColor
     surfaceCard: "bg-white",                   // Card backgrounds

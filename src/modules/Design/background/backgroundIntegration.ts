@@ -216,7 +216,7 @@ export function getAccentColor(baseColor: string, onboardingData: OnboardingData
     if (selectedAccent) {
       return {
         accentColor: selectedAccent.accentColor,
-        accentCSS: `bg-${selectedAccent.accentColor}-600`,
+        accentCSS: selectedAccent.tailwind, // ✅ Use optimized tailwind from accentOptions
       };
     }
   } catch (error) {
@@ -229,13 +229,13 @@ export function getAccentColor(baseColor: string, onboardingData: OnboardingData
     const fallback = fallbackOptions[0];
     return {
       accentColor: fallback.accentColor,
-      accentCSS: `bg-${fallback.accentColor}-600`,
+      accentCSS: fallback.tailwind, // ✅ Use optimized tailwind from accentOptions
     };
   }
   
   return {
     accentColor: "gray",
-    accentCSS: "bg-gray-600",
+    accentCSS: "bg-gray-500", // ✅ Use 500 shade for final fallback
   };
 }
 
@@ -301,7 +301,7 @@ export function generateCompleteBackgroundSystem(onboardingData: OnboardingDataI
       divider: "bg-gray-100/50",
       baseColor: "blue",
       accentColor: "purple",
-      accentCSS: "bg-purple-600",
+      accentCSS: "bg-purple-500", // ✅ Use 500 shade for safe defaults
     };
     
    // console.log('🔧 Using safe default backgrounds:', safeDefaults);

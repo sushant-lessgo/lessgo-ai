@@ -284,8 +284,8 @@ function scoreAccentColor(
         break;
         
       case 'action':
-        // Oranges and reds score higher (call-to-action)
-        if ((accent.h > 0 && accent.h < 60) || (accent.h > 300 && accent.h < 360)) {
+        // Oranges score higher (call-to-action) - red excluded
+        if (accent.h > 15 && accent.h < 60) { // Only orange range, not red
           score += 20;
           reasons.push('action-driving color');
         }
@@ -452,19 +452,50 @@ export function generateAccentPalette(
 }
 
 /**
- * Quick utility function for the existing system
+ * Helper function to get HSL values from color name
  */
-export function getSmartAccentColor(
-  baseColorStr: string,
-  businessContext: {
-    marketCategory?: string;
-    targetAudience?: string;
-    landingPageGoals?: string;
-    toneProfile?: string;
-  } = {}
-): { accentColor: string; accentCSS: string; confidence: number } {
+function getColorHslFromName(colorName: string): HSL | null {
+  const colorHues: Record<string, number> = {
+    red: 0,
+    orange: 30,
+    amber: 45,
+    yellow: 60,
+    lime: 75,
+    green: 120,
+    emerald: 160,
+    teal: 180,
+    cyan: 190,
+    sky: 200,
+    blue: 220,
+    indigo: 240,
+    purple: 280,
+    pink: 330,
+    rose: 345,
+    gray: 0,
+    slate: 220,
+    zinc: 240,
+  };
   
-  // Map business context to color harmony context
+  const hue = colorHues[colorName.toLowerCase()];
+  if (hue === undefined) return null;
+  
+  // Return typical saturation/lightness for Tailwind colors
+  return {
+    h: hue,
+    s: colorName === 'gray' || colorName === 'slate' || colorName === 'zinc' ? 10 : 70,
+    l: 50
+  };
+}
+
+/**
+ * Helper function to map business context
+ */
+function mapBusinessContext(businessContext: {
+  marketCategory?: string;
+  targetAudience?: string;
+  landingPageGoals?: string;
+  toneProfile?: string;
+}): BusinessContext {
   const context: BusinessContext = {};
   
   // Map market category to industry
@@ -533,6 +564,83 @@ export function getSmartAccentColor(
     }
   }
   
+  return context;
+}
+
+/**
+ * Quick utility function for the existing system
+ * Now uses curated accentOptions when available, falls back to dynamic generation
+ */
+export function getSmartAccentColor(
+  baseColorStr: string,
+  businessContext: {
+    marketCategory?: string;
+    targetAudience?: string;
+    landingPageGoals?: string;
+    toneProfile?: string;
+  } = {}
+): { accentColor: string; accentCSS: string; confidence: number } {
+  
+  // ✅ FIRST: Try to use curated accent options
+  try {
+    const { accentOptions } = require('../modules/Design/ColorSystem/accentOptions');
+    
+    // Check if we have curated options for this base color
+    const curatedOptions = accentOptions.filter((opt: any) => 
+      opt.baseColor === baseColorStr || 
+      opt.baseColor === baseColorStr.toLowerCase()
+    );
+    
+    if (curatedOptions.length > 0) {
+      // Score each curated option using our harmony intelligence
+      const scoredOptions = curatedOptions.map((option: any) => {
+        // Parse the accent color to get HSL for scoring
+        const accentHsl = getColorHslFromName(option.accentColor);
+        const baseRgb = parseColor(baseColorStr);
+        
+        if (!accentHsl || !baseRgb) {
+          return { ...option, score: 50 };
+        }
+        
+        // Determine harmony type from tags
+        let harmonyType: HarmonyType = 'analogous';
+        if (option.tags.includes('complementary')) harmonyType = 'complementary';
+        else if (option.tags.includes('triadic')) harmonyType = 'triadic';
+        else if (option.tags.includes('split-complementary')) harmonyType = 'split-complementary';
+        else if (option.tags.includes('monochromatic')) harmonyType = 'monochromatic';
+        
+        // Score using our intelligent system
+        const { score } = scoreAccentColor(accentHsl, baseRgb, mapBusinessContext(businessContext), harmonyType);
+        
+        return { ...option, score };
+      });
+      
+      // Sort by score and select the best
+      scoredOptions.sort((a: any, b: any) => b.score - a.score);
+      const bestOption = scoredOptions[0];
+      
+      console.log('✅ Using curated accent option:', {
+        baseColor: baseColorStr,
+        selectedAccent: bestOption.accentColor,
+        score: bestOption.score,
+        tailwind: bestOption.tailwind
+      });
+      
+      return {
+        accentColor: bestOption.accentColor,
+        accentCSS: bestOption.tailwind, // Use the optimized tailwind class from accentOptions
+        confidence: bestOption.score / 100
+      };
+    }
+  } catch (error) {
+    console.warn('Could not load accent options, falling back to dynamic generation');
+  }
+  
+  // ✅ FALLBACK: Dynamic generation for unknown base colors
+  console.log('⚠️ No curated options for base color:', baseColorStr, '- using dynamic generation');
+  
+  const context = mapBusinessContext(businessContext);
+  
   // Select best accent
   const bestAccent = selectBestAccent(baseColorStr, context, {
     requireAccessible: true,
@@ -544,7 +652,8 @@ export function getSmartAccentColor(
     const hue = bestAccent.hsl.h;
     let colorName = 'purple'; // Default fallback
     
-    if (hue >= 345 || hue < 15) colorName = 'red';
+    // ✅ Red removed for CTA use - use orange instead
+    if (hue >= 345 || hue < 15) colorName = 'orange'; // Red hues → Orange for CTAs
     else if (hue < 45) colorName = 'orange';
     else if (hue < 75) colorName = 'yellow';
     else if (hue < 165) colorName = 'green';
@@ -556,7 +665,7 @@ export function getSmartAccentColor(
     
     return {
       accentColor: colorName,
-      accentCSS: `bg-${colorName}-600`,
+      accentCSS: `bg-${colorName}-500`, // ✅ Use 500 shade for CTAs
       confidence: bestAccent.score / 100
     };
   }
@@ -564,7 +673,7 @@ export function getSmartAccentColor(
   // Fallback to safe default
   return {
     accentColor: 'purple',
-    accentCSS: 'bg-purple-600',
+    accentCSS: 'bg-purple-500', // ✅ Use 500 shade for fallback
     confidence: 0.3
   };
 }
