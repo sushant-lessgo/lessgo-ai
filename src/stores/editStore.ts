@@ -45,12 +45,12 @@ const defaultTheme: Theme = {
   colors: {
     baseColor: 'gray',
     accentColor: 'purple',
-    accentCSS: undefined,
+    accentCSS: 'bg-purple-600',
     sectionBackgrounds: {
-      primary: undefined,
-      secondary: undefined,
-      neutral: undefined,
-      divider: undefined,
+      primary: 'bg-gray-800',
+      secondary: 'bg-gray-50',
+      neutral: 'bg-white',
+      divider: 'bg-gray-100/50',
     },
     semantic: {
       success: 'bg-green-500',
