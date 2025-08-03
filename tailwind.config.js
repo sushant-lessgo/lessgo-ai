@@ -43,6 +43,18 @@ module.exports = {
   'bg-white', 'bg-gray-50', 'bg-gray-100', 'bg-gray-200',
   'to-transparent', 'via-transparent', 'from-transparent',
   
+  // Text color classes for adaptive text
+  'text-gray-50', 'text-gray-100', 'text-gray-200', 'text-gray-300', 'text-gray-400', 
+  'text-gray-500', 'text-gray-600', 'text-gray-700', 'text-gray-800', 'text-gray-900', 
+  'text-white', 'text-black',
+  
+  // Additional text colors for colored backgrounds
+  'text-blue-50', 'text-blue-100', 'text-blue-900', 'text-blue-950',
+  'text-green-50', 'text-green-100', 'text-green-900', 'text-green-950',
+  'text-red-50', 'text-red-100', 'text-red-900', 'text-red-950',
+  'text-purple-50', 'text-purple-100', 'text-purple-900', 'text-purple-950',
+  'text-orange-50', 'text-orange-100', 'text-orange-900', 'text-orange-950',
+  
   // ✅ Opacity variations for custom colors
   'bg-opacity-10', 'bg-opacity-20', 'bg-opacity-30', 'bg-opacity-40', 
   'bg-opacity-50', 'bg-opacity-60', 'bg-opacity-70', 'bg-opacity-80', 'bg-opacity-90',
@@ -73,6 +85,40 @@ module.exports = {
   'from-[#b4d8ff]',
   'via-[#dceeff]',
   'to-[#ffffff]',
+  'from-[#FF00FF]',
+  'via-[#0A001F]',
+  'to-[#0A001F]',
+  
+  // ✅ Dark theme primary backgrounds
+  'bg-[#0b0f19]',
+  'bg-[#0a0e17]',
+  'bg-[#0f1419]',
+  'bg-[#111827]',
+  'bg-[#1a1c1f]',
+  'bg-[#1b103f]',
+  'bg-[#1e1f24]',
+  'bg-[#0a0d14]',
+  'bg-[#1c1d1f]',
+  'bg-[#003B00]',
+  'bg-[#001F00]',
+  'bg-[#0A001F]',
+  
+  // ✅ Light theme backgrounds
+  'bg-[#e6f0ff]',
+  'bg-[#f0f6ff]',
+  'bg-[#eafff6]',
+  'bg-[#fff3e0]',
+  'bg-[#e6f9f3]',
+  'bg-[#d6f3f1]',
+  'bg-[#ffe8dc]',
+  'bg-[#F5F5F5]',
+  
+  // ✅ Accent colors from bgVariations
+  'bg-[#ffe5b4]',
+  'bg-[#ff6f61]',
+  'bg-[#ff6b5c]',
+  'bg-[#ffb677]',
+  'bg-[#FF00FF]',
   
   // ✅ CSS variable usage in gradients  
   'var(--tw-gradient-stops)',

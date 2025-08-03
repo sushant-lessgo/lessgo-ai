@@ -19,14 +19,14 @@ export const accentOptions = [
   },
   {
     baseColor: "amber",
-    accentColor: "mint",
-    tailwind: "bg-mint-600",
+    accentColor: "emerald",
+    tailwind: "bg-emerald-600",
     tags: ["analogous", "high-contrast", "warm", "technical", "friendly", "dramatic", "solid"]
   },
   {
     baseColor: "amber",
-    accentColor: "peach",
-    tailwind: "bg-gradient-to-r from-amber-500 to-peach-500",
+    accentColor: "orange",
+    tailwind: "bg-gradient-to-r from-amber-500 to-orange-500",
     tags: ["split-complementary", "low-contrast", "neutral", "healthcare", "innovative", "subtle", "gradient"]
   },
   {
@@ -133,8 +133,8 @@ export const accentOptions = [
   },
   {
     baseColor: "blue",
-    accentColor: "peach",
-    tailwind: "bg-gradient-to-r from-blue-500 to-peach-500",
+    accentColor: "orange",
+    tailwind: "bg-gradient-to-r from-blue-500 to-orange-500",
     tags: ["monochromatic", "medium-contrast", "cool", "creative", "bold", "strong", "solid"]
   },
   {
@@ -181,8 +181,8 @@ export const accentOptions = [
   },
   {
     baseColor: "cyan",
-    accentColor: "peach",
-    tailwind: "bg-peach-600",
+    accentColor: "orange",
+    tailwind: "bg-orange-600",
     tags: ["monochromatic", "low-contrast", "cool", "fintech", "innovative", "dramatic", "solid"]
   },
   {
@@ -229,8 +229,8 @@ export const accentOptions = [
   },
   {
     baseColor: "emerald",
-    accentColor: "mint",
-    tailwind: "bg-gradient-to-r from-emerald-500 to-mint-500",
+    accentColor: "teal",
+    tailwind: "bg-gradient-to-r from-emerald-500 to-teal-500",
     tags: ["split-complementary", "medium-contrast", "cool", "creative", "trustworthy", "dramatic", "solid"]
   },
   {
@@ -271,8 +271,8 @@ export const accentOptions = [
   },
   {
     baseColor: "emerald",
-    accentColor: "peach",
-    tailwind: "bg-gradient-to-r from-emerald-500 to-peach-500",
+    accentColor: "orange",
+    tailwind: "bg-gradient-to-r from-emerald-500 to-orange-500",
     tags: ["monochromatic", "high-contrast", "neutral", "fintech", "playful", "moderate", "gradient"]
   },
   {
@@ -301,8 +301,8 @@ export const accentOptions = [
   },
   {
     baseColor: "gray",
-    accentColor: "mint",
-    tailwind: "bg-gradient-to-r from-gray-500 to-mint-500",
+    accentColor: "teal",
+    tailwind: "bg-gradient-to-r from-gray-500 to-teal-500",
     tags: ["analogous", "high-contrast", "warm", "ecommerce", "trustworthy", "strong", "solid"]
   },
   {
@@ -337,8 +337,8 @@ export const accentOptions = [
   },
   {
     baseColor: "gray",
-    accentColor: "peach",
-    tailwind: "bg-peach-600",
+    accentColor: "orange",
+    tailwind: "bg-orange-600",
     tags: ["split-complementary", "high-contrast", "warm", "technical", "professional", "strong", "solid"]
   },
   {
@@ -367,8 +367,8 @@ export const accentOptions = [
   },
   {
     baseColor: "green",
-    accentColor: "mint",
-    tailwind: "bg-gradient-to-r from-green-500 to-mint-500",
+    accentColor: "teal",
+    tailwind: "bg-gradient-to-r from-green-500 to-teal-500",
     tags: ["complementary", "high-contrast", "warm", "ecommerce", "playful", "moderate", "solid"]
   },
   {
@@ -415,8 +415,8 @@ export const accentOptions = [
   },
   {
     baseColor: "green",
-    accentColor: "peach",
-    tailwind: "bg-gradient-to-r from-green-500 to-peach-500",
+    accentColor: "orange",
+    tailwind: "bg-gradient-to-r from-green-500 to-orange-500",
     tags: ["split-complementary", "high-contrast", "neutral", "consumer", "professional", "subtle", "solid"]
   },
   {
@@ -457,8 +457,8 @@ export const accentOptions = [
   },
   {
     baseColor: "indigo",
-    accentColor: "mint",
-    tailwind: "bg-mint-600",
+    accentColor: "teal",
+    tailwind: "bg-teal-600",
     tags: ["complementary", "low-contrast", "warm", "ecommerce", "bold", "dramatic", "gradient"]
   },
   {
@@ -487,8 +487,8 @@ export const accentOptions = [
   },
   {
     baseColor: "indigo",
-    accentColor: "peach",
-    tailwind: "bg-gradient-to-r from-indigo-500 to-peach-500",
+    accentColor: "orange",
+    tailwind: "bg-gradient-to-r from-indigo-500 to-orange-500",
     tags: ["monochromatic", "low-contrast", "neutral", "healthcare", "trustworthy", "strong", "dual-tone"]
   },
   {
@@ -504,81 +504,81 @@ export const accentOptions = [
     tags: ["analogous", "low-contrast", "neutral", "ecommerce", "innovative", "moderate", "gradient"]
   },
   {
-    baseColor: "mint",
+    baseColor: "teal",
     accentColor: "zinc",
     tailwind: "bg-zinc-600",
     tags: ["split-complementary", "low-contrast", "neutral", "healthcare", "trustworthy", "dramatic", "solid"]
   },
   {
-    baseColor: "mint",
+    baseColor: "teal",
     accentColor: "teal",
-    tailwind: "bg-gradient-to-r from-mint-500 to-teal-500",
+    tailwind: "bg-gradient-to-r from-teal-500 to-teal-500",
     tags: ["split-complementary", "medium-contrast", "warm", "healthcare", "bold", "dramatic", "dual-tone"]
   },
   {
-    baseColor: "mint",
+    baseColor: "teal",
     accentColor: "blue",
-    tailwind: "bg-gradient-to-r from-mint-500 to-blue-500",
+    tailwind: "bg-gradient-to-r from-teal-500 to-blue-500",
     tags: ["triadic", "low-contrast", "warm", "enterprise", "playful", "moderate", "solid"]
   },
   {
-    baseColor: "mint",
+    baseColor: "teal",
     accentColor: "cyan",
-    tailwind: "bg-gradient-to-r from-mint-500 to-cyan-500",
+    tailwind: "bg-gradient-to-r from-teal-500 to-cyan-500",
     tags: ["complementary", "medium-contrast", "cool", "ecommerce", "bold", "subtle", "solid"]
   },
   {
-    baseColor: "mint",
+    baseColor: "teal",
     accentColor: "purple",
-    tailwind: "bg-gradient-to-r from-mint-500 to-purple-500",
+    tailwind: "bg-gradient-to-r from-teal-500 to-purple-500",
     tags: ["analogous", "high-contrast", "neutral", "ecommerce", "innovative", "subtle", "dual-tone"]
   },
   {
-    baseColor: "mint",
+    baseColor: "teal",
     accentColor: "emerald",
-    tailwind: "bg-gradient-to-r from-mint-500 to-emerald-500",
+    tailwind: "bg-gradient-to-r from-teal-500 to-emerald-500",
     tags: ["complementary", "high-contrast", "cool", "ecommerce", "friendly", "subtle", "solid"]
   },
   {
-    baseColor: "mint",
+    baseColor: "teal",
     accentColor: "rose",
     tailwind: "bg-rose-600",
     tags: ["split-complementary", "medium-contrast", "neutral", "fintech", "innovative", "moderate", "gradient"]
   },
   {
-    baseColor: "mint",
-    accentColor: "peach",
-    tailwind: "bg-gradient-to-r from-mint-500 to-peach-500",
+    baseColor: "teal",
+    accentColor: "orange",
+    tailwind: "bg-gradient-to-r from-teal-500 to-orange-500",
     tags: ["triadic", "low-contrast", "cool", "consumer", "innovative", "dramatic", "dual-tone"]
   },
   {
-    baseColor: "mint",
+    baseColor: "teal",
     accentColor: "pink",
-    tailwind: "bg-gradient-to-r from-mint-500 to-pink-500",
+    tailwind: "bg-gradient-to-r from-teal-500 to-pink-500",
     tags: ["split-complementary", "medium-contrast", "cool", "technical", "bold", "strong", "gradient"]
   },
   {
-    baseColor: "mint",
+    baseColor: "teal",
     accentColor: "indigo",
-    tailwind: "bg-gradient-to-r from-mint-500 to-indigo-500",
+    tailwind: "bg-gradient-to-r from-teal-500 to-indigo-500",
     tags: ["monochromatic", "medium-contrast", "neutral", "consumer", "friendly", "dramatic", "gradient"]
   },
   {
-    baseColor: "mint",
+    baseColor: "teal",
     accentColor: "gray",
-    tailwind: "bg-gradient-to-r from-mint-500 to-gray-500",
+    tailwind: "bg-gradient-to-r from-teal-500 to-gray-500",
     tags: ["monochromatic", "medium-contrast", "warm", "healthcare", "bold", "moderate", "dual-tone"]
   },
   {
-    baseColor: "mint",
+    baseColor: "teal",
     accentColor: "sky",
-    tailwind: "bg-gradient-to-r from-mint-500 to-sky-500",
+    tailwind: "bg-gradient-to-r from-teal-500 to-sky-500",
     tags: ["analogous", "medium-contrast", "cool", "healthcare", "minimal", "moderate", "gradient"]
   },
   {
     baseColor: "orange",
-    accentColor: "peach",
-    tailwind: "bg-gradient-to-r from-orange-500 to-peach-500",
+    accentColor: "orange",
+    tailwind: "bg-gradient-to-r from-orange-500 to-orange-500",
     tags: ["split-complementary", "low-contrast", "cool", "creative", "playful", "strong", "dual-tone"]
   },
   {
@@ -648,75 +648,75 @@ export const accentOptions = [
     tags: ["complementary", "high-contrast", "neutral", "technical", "friendly", "strong", "gradient"]
   },
   {
-    baseColor: "peach",
+    baseColor: "orange",
     accentColor: "amber",
     tailwind: "bg-amber-600",
     tags: ["analogous", "medium-contrast", "warm", "creative", "playful", "subtle", "dual-tone"]
   },
   {
-    baseColor: "peach",
+    baseColor: "orange",
     accentColor: "orange",
-    tailwind: "bg-gradient-to-r from-peach-500 to-orange-500",
+    tailwind: "bg-gradient-to-r from-orange-500 to-orange-500",
     tags: ["monochromatic", "medium-contrast", "neutral", "fintech", "playful", "moderate", "solid"]
   },
   {
-    baseColor: "peach",
+    baseColor: "orange",
     accentColor: "red",
-    tailwind: "bg-gradient-to-r from-peach-500 to-red-500",
+    tailwind: "bg-gradient-to-r from-orange-500 to-red-500",
     tags: ["split-complementary", "high-contrast", "warm", "creative", "minimal", "moderate", "solid"]
   },
   {
-    baseColor: "peach",
-    accentColor: "mint",
-    tailwind: "bg-gradient-to-r from-peach-500 to-mint-500",
+    baseColor: "orange",
+    accentColor: "teal",
+    tailwind: "bg-gradient-to-r from-orange-500 to-teal-500",
     tags: ["monochromatic", "medium-contrast", "cool", "technical", "professional", "dramatic", "dual-tone"]
   },
   {
-    baseColor: "peach",
+    baseColor: "orange",
     accentColor: "teal",
-    tailwind: "bg-gradient-to-r from-peach-500 to-teal-500",
+    tailwind: "bg-gradient-to-r from-orange-500 to-teal-500",
     tags: ["complementary", "medium-contrast", "warm", "healthcare", "bold", "moderate", "dual-tone"]
   },
   {
-    baseColor: "peach",
+    baseColor: "orange",
     accentColor: "zinc",
-    tailwind: "bg-gradient-to-r from-peach-500 to-zinc-500",
+    tailwind: "bg-gradient-to-r from-orange-500 to-zinc-500",
     tags: ["monochromatic", "low-contrast", "neutral", "enterprise", "trustworthy", "strong", "solid"]
   },
   {
-    baseColor: "peach",
+    baseColor: "orange",
     accentColor: "slate",
     tailwind: "bg-slate-600",
     tags: ["complementary", "medium-contrast", "warm", "consumer", "playful", "subtle", "dual-tone"]
   },
   {
-    baseColor: "peach",
+    baseColor: "orange",
     accentColor: "cyan",
-    tailwind: "bg-gradient-to-r from-peach-500 to-cyan-500",
+    tailwind: "bg-gradient-to-r from-orange-500 to-cyan-500",
     tags: ["triadic", "low-contrast", "warm", "ecommerce", "playful", "dramatic", "solid"]
   },
   {
-    baseColor: "peach",
+    baseColor: "orange",
     accentColor: "pink",
-    tailwind: "bg-gradient-to-r from-peach-500 to-pink-500",
+    tailwind: "bg-gradient-to-r from-orange-500 to-pink-500",
     tags: ["triadic", "high-contrast", "warm", "healthcare", "playful", "strong", "dual-tone"]
   },
   {
-    baseColor: "peach",
+    baseColor: "orange",
     accentColor: "blue",
-    tailwind: "bg-gradient-to-r from-peach-500 to-blue-500",
+    tailwind: "bg-gradient-to-r from-orange-500 to-blue-500",
     tags: ["monochromatic", "high-contrast", "neutral", "fintech", "minimal", "dramatic", "solid"]
   },
   {
-    baseColor: "peach",
+    baseColor: "orange",
     accentColor: "emerald",
     tailwind: "bg-emerald-600",
     tags: ["monochromatic", "medium-contrast", "neutral", "technical", "trustworthy", "strong", "gradient"]
   },
   {
-    baseColor: "peach",
+    baseColor: "orange",
     accentColor: "gray",
-    tailwind: "bg-gradient-to-r from-peach-500 to-gray-500",
+    tailwind: "bg-gradient-to-r from-orange-500 to-gray-500",
     tags: ["triadic", "high-contrast", "cool", "technical", "innovative", "subtle", "dual-tone"]
   },
   {
@@ -739,8 +739,8 @@ export const accentOptions = [
   },
   {
     baseColor: "pink",
-    accentColor: "peach",
-    tailwind: "bg-gradient-to-r from-pink-500 to-peach-500",
+    accentColor: "orange",
+    tailwind: "bg-gradient-to-r from-pink-500 to-orange-500",
     tags: ["split-complementary", "low-contrast", "cool", "ecommerce", "minimal", "subtle", "gradient"]
   },
   {
@@ -781,8 +781,8 @@ export const accentOptions = [
   },
   {
     baseColor: "pink",
-    accentColor: "mint",
-    tailwind: "bg-gradient-to-r from-pink-500 to-mint-500",
+    accentColor: "teal",
+    tailwind: "bg-gradient-to-r from-pink-500 to-teal-500",
     tags: ["split-complementary", "low-contrast", "neutral", "enterprise", "innovative", "moderate", "solid"]
   },
   {
@@ -823,8 +823,8 @@ export const accentOptions = [
   },
   {
     baseColor: "purple",
-    accentColor: "mint",
-    tailwind: "bg-gradient-to-r from-purple-500 to-mint-500",
+    accentColor: "teal",
+    tailwind: "bg-gradient-to-r from-purple-500 to-teal-500",
     tags: ["split-complementary", "high-contrast", "neutral", "ecommerce", "innovative", "subtle", "dual-tone"]
   },
   {
@@ -835,8 +835,8 @@ export const accentOptions = [
   },
   {
     baseColor: "purple",
-    accentColor: "peach",
-    tailwind: "bg-gradient-to-r from-purple-500 to-peach-500",
+    accentColor: "orange",
+    tailwind: "bg-gradient-to-r from-purple-500 to-orange-500",
     tags: ["triadic", "medium-contrast", "warm", "ecommerce", "innovative", "dramatic", "solid"]
   },
   {
@@ -877,14 +877,14 @@ export const accentOptions = [
   },
   {
     baseColor: "red",
-    accentColor: "mint",
-    tailwind: "bg-gradient-to-r from-red-500 to-mint-500",
+    accentColor: "teal",
+    tailwind: "bg-gradient-to-r from-red-500 to-teal-500",
     tags: ["complementary", "medium-contrast", "neutral", "healthcare", "trustworthy", "moderate", "dual-tone"]
   },
   {
     baseColor: "red",
-    accentColor: "peach",
-    tailwind: "bg-peach-600",
+    accentColor: "orange",
+    tailwind: "bg-orange-600",
     tags: ["split-complementary", "high-contrast", "warm", "healthcare", "playful", "subtle", "solid"]
   },
   {
@@ -973,8 +973,8 @@ export const accentOptions = [
   },
   {
     baseColor: "rose",
-    accentColor: "peach",
-    tailwind: "bg-gradient-to-r from-rose-500 to-peach-500",
+    accentColor: "orange",
+    tailwind: "bg-gradient-to-r from-rose-500 to-orange-500",
     tags: ["triadic", "medium-contrast", "warm", "fintech", "trustworthy", "strong", "dual-tone"]
   },
   {
@@ -1015,8 +1015,8 @@ export const accentOptions = [
   },
   {
     baseColor: "sky",
-    accentColor: "mint",
-    tailwind: "bg-gradient-to-r from-sky-500 to-mint-500",
+    accentColor: "teal",
+    tailwind: "bg-gradient-to-r from-sky-500 to-teal-500",
     tags: ["triadic", "high-contrast", "neutral", "healthcare", "friendly", "strong", "dual-tone"]
   },
   {
@@ -1045,8 +1045,8 @@ export const accentOptions = [
   },
   {
     baseColor: "sky",
-    accentColor: "peach",
-    tailwind: "bg-gradient-to-r from-sky-500 to-peach-500",
+    accentColor: "orange",
+    tailwind: "bg-gradient-to-r from-sky-500 to-orange-500",
     tags: ["monochromatic", "low-contrast", "warm", "fintech", "trustworthy", "strong", "solid"]
   },
   {
@@ -1087,8 +1087,8 @@ export const accentOptions = [
   },
   {
     baseColor: "slate",
-    accentColor: "mint",
-    tailwind: "bg-gradient-to-r from-slate-500 to-mint-500",
+    accentColor: "teal",
+    tailwind: "bg-gradient-to-r from-slate-500 to-teal-500",
     tags: ["monochromatic", "high-contrast", "cool", "fintech", "playful", "strong", "gradient"]
   },
   {
@@ -1177,8 +1177,8 @@ export const accentOptions = [
   },
   {
     baseColor: "teal",
-    accentColor: "mint",
-    tailwind: "bg-gradient-to-r from-teal-500 to-mint-500",
+    accentColor: "teal",
+    tailwind: "bg-gradient-to-r from-teal-500 to-teal-500",
     tags: ["complementary", "medium-contrast", "neutral", "ecommerce", "professional", "subtle", "solid"]
   },
   {
@@ -1219,8 +1219,8 @@ export const accentOptions = [
   },
   {
     baseColor: "teal",
-    accentColor: "peach",
-    tailwind: "bg-gradient-to-r from-teal-500 to-peach-500",
+    accentColor: "orange",
+    tailwind: "bg-gradient-to-r from-teal-500 to-orange-500",
     tags: ["monochromatic", "low-contrast", "warm", "creative", "bold", "moderate", "solid"]
   },
   {
@@ -1243,8 +1243,8 @@ export const accentOptions = [
   },
   {
     baseColor: "zinc",
-    accentColor: "peach",
-    tailwind: "bg-peach-600",
+    accentColor: "orange",
+    tailwind: "bg-orange-600",
     tags: ["triadic", "medium-contrast", "warm", "technical", "bold", "subtle", "dual-tone"]
   },
   {

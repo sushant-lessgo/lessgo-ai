@@ -83,6 +83,9 @@ export function CTAButton({
 
   // ✅ FIXED: Use actual accent colors from the generated system
   const getVariantClasses = () => {
+    // Debug logging for CTA button colors (reduced)
+    // console.log('🎨 [CTA-DEBUG] CTAButton variant:', variant, { ctaBg: colorTokens.ctaBg, ctaText: colorTokens.ctaText });
+    
     if (variant === 'outline') {
       const borderClass = colorTokens.accentBorder || colorTokens.borderFocus || 'border-blue-600';
       const textClass = colorTokens.dynamicBody || colorTokens.textPrimary || 'text-gray-900';
@@ -104,6 +107,8 @@ export function CTAButton({
     const primaryBg = colorTokens.ctaBg || colorTokens.accent || 'bg-blue-600';
     const primaryText = colorTokens.ctaText || 'text-white';
     const primaryHover = colorTokens.ctaHover || colorTokens.accentHover || 'bg-blue-700';
+    
+    // console.log('🎨 [CTA-DEBUG] Final colors:', { primaryBg, primaryText, primaryHover });
     
     // console.log('🎨 CTA Button using accent colors:', {
     //   bg: primaryBg,

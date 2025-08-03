@@ -55,11 +55,27 @@ export function useSmartTextColors(backgroundType: 'primary' | 'secondary' | 'ne
     const bodyColor = getSmartTextColor(backgroundCSS, 'body');
     const mutedColor = getSmartTextColor(backgroundCSS, 'muted');
     
-    // Determine background lightness and contrast quality
-    const isLightBackground = backgroundCSS.includes('white') || 
-                              backgroundCSS.includes('gray-50') || 
-                              backgroundCSS.includes('gray-100') ||
-                              (!backgroundCSS.includes('gradient') && !backgroundCSS.includes('blue-') && !backgroundCSS.includes('purple-'));
+    // ✅ FIX: Use proper luminance calculation instead of string matching
+    const { isLightBackground: calculatedIsLight } = (() => {
+      // Import the background analysis function
+      const { analyzeBackground } = require('@/utils/backgroundAnalysis');
+      try {
+        const analysis = analyzeBackground(backgroundCSS);
+        return { isLightBackground: analysis.isLight };
+      } catch (error) {
+        console.warn('Failed to analyze background, using fallback detection:', error);
+        // Fallback to improved string matching that includes black
+        const isDark = backgroundCSS.includes('black') || 
+                       backgroundCSS.includes('gray-800') || 
+                       backgroundCSS.includes('gray-900') ||
+                       backgroundCSS.includes('slate-800') ||
+                       backgroundCSS.includes('slate-900') ||
+                       backgroundCSS.includes('zinc-800') ||
+                       backgroundCSS.includes('zinc-900') ||
+                       (backgroundCSS.includes('gradient') && (backgroundCSS.includes('gray-') || backgroundCSS.includes('slate-')));
+        return { isLightBackground: !isDark };
+      }
+    })();
     
     // Check contrast quality with the body text
     const contrastRating = (() => {
@@ -73,7 +89,7 @@ export function useSmartTextColors(backgroundType: 'primary' | 'secondary' | 'ne
       headingColor,
       bodyColor,
       mutedColor,
-      isLightBackground,
+      isLightBackground: calculatedIsLight,
       contrastRating
     });
     
@@ -81,7 +97,7 @@ export function useSmartTextColors(backgroundType: 'primary' | 'secondary' | 'ne
       heading: headingColor,
       body: bodyColor,
       muted: mutedColor,
-      isLightBackground,
+      isLightBackground: calculatedIsLight,
       contrastRating
     };
   }, [theme?.colors?.sectionBackgrounds, backgroundType]);

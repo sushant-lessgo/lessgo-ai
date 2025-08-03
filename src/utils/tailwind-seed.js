@@ -13,6 +13,15 @@ function tailwindSeed() {
   const hexColors = [
     // Basic colors
     'bg-[#000000]', 'bg-[#FFFFFF]', 'bg-[#FF0000]', 'bg-[#00FF00]', 'bg-[#0000FF]',
+    // Dark theme primary colors from bgVariations
+    'bg-[#0b0f19]', 'bg-[#0a0e17]', 'bg-[#0f1419]', 'bg-[#111827]',
+    'bg-[#1a1c1f]', 'bg-[#1b103f]', 'bg-[#1e1f24]', 'bg-[#0a0d14]', 'bg-[#1c1d1f]',
+    'bg-[#003B00]', 'bg-[#001F00]', 'bg-[#0A001F]',
+    // Light theme backgrounds from bgVariations  
+    'bg-[#e6f0ff]', 'bg-[#f0f6ff]', 'bg-[#eafff6]', 'bg-[#fff3e0]',
+    'bg-[#e6f9f3]', 'bg-[#d6f3f1]', 'bg-[#ffe8dc]', 'bg-[#F5F5F5]',
+    // Accent colors from bgVariations
+    'bg-[#ffe5b4]', 'bg-[#ff6f61]', 'bg-[#ff6b5c]', 'bg-[#ffb677]', 'bg-[#FF00FF]',
     // Test colors that were having issues
     'bg-[#16A34A]', 'bg-[#7C3AED]', 'bg-[#B45309]', 'bg-[#DC2626]',
     // Various patterns to help Tailwind understand all hex combinations

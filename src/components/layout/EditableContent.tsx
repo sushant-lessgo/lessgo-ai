@@ -207,6 +207,7 @@ export function EditableHeadline({
   autoSave,
   backgroundType,
   colorTokens,
+  className: propsClassName,
   ...props 
 }: Omit<EditableContentProps, 'element'> & { 
   level?: 'h1' | 'h2' | 'h3' | 'h4',
@@ -223,13 +224,20 @@ export function EditableHeadline({
   
   const finalColorClass = dynamicColor || colorClass || 'text-gray-900';
   
+  // console.log('🎨 [HEADLINE-DEBUG] EditableHeadline:', {
+  //   mode, colorClass, dynamicColor, finalColorClass, level, value: value?.substring(0, 50)
+  // });
+  
   // Enhanced format state for headlines
   const headlineFormatState = useMemo(() => {
+    // ✅ FIX: Don't set inline color if we're using CSS classes for adaptive colors
+    // Only use inline color if explicitly provided in formatState, not for adaptive colors
+    const shouldUseInlineColor = formatState?.color && !colorClass;
     const baseState = {
       bold: true,
       italic: false,
       underline: false,
-      color: dynamicColor || '#000000',
+      color: shouldUseInlineColor ? formatState.color : undefined,
       fontSize: level === 'h1' ? '2rem' : level === 'h2' ? '1.5rem' : level === 'h3' ? '1.25rem' : '1rem',
       fontFamily: 'inherit',
       textAlign: (textStyle?.textAlign as any) || 'left' as const,
@@ -241,7 +249,10 @@ export function EditableHeadline({
     
     
     return baseState;
-  }, [level, dynamicColor, formatState, textStyle?.textAlign]);
+  }, [level, colorClass, formatState, textStyle?.textAlign]);
+  
+  // Debug logging for headline color issues (reduced)
+  // console.log('🎨 [HEADLINE-DEBUG] EditableHeadline state:', { finalColorClass, headlineFormatStateColor: headlineFormatState.color });
   
   const headlineEditorConfig: Partial<InlineEditorConfig> = useMemo(() => ({
     enterKeyBehavior: 'save',
@@ -259,7 +270,7 @@ export function EditableHeadline({
       value={value}
       onEdit={onEdit}
       element={level}
-      className={`font-bold leading-tight ${finalColorClass} ${props.className || ''}`}
+      className={`font-bold leading-tight ${finalColorClass} ${propsClassName || ''}`}
       style={textStyle}
       required
       sectionId={sectionId}
@@ -290,6 +301,7 @@ export function EditableText({
   autoSave,
   backgroundType,
   colorTokens,
+  className: propsClassName,
   ...props 
 }: Omit<EditableContentProps, 'element'> & { 
   colorClass?: string,
@@ -350,7 +362,7 @@ export function EditableText({
       value={value}
       onEdit={onEdit}
       element="p"
-      className={`leading-relaxed ${finalColorClass} ${props.className || ''}`}
+      className={`leading-relaxed ${finalColorClass} ${propsClassName || ''}`}
       style={textStyle}
       multiline
       sectionId={sectionId}
@@ -522,25 +534,23 @@ export function EditableAdaptiveHeadline({
   autoSave?: Partial<AutoSaveConfig>,
 }) {
   
-  // Debug logging
-  // console.log('🔍 EditableAdaptiveHeadline received props:', {
-  //   elementKey,
-  //   sectionId,
-  //   formatState,
-  //   textStyle,
-  //   level
+  // Debug logging (reduced)
+  // console.log('🎨 [HEADLINE-DEBUG] EditableAdaptiveHeadline:', {
+  //   elementKey, sectionId, backgroundType, sectionBackground: props.sectionBackground
   // });
   
   const getAdaptiveTextColor = () => {
     // ✅ ENHANCED: Use new smart text color system with WCAG validation
     const sectionBackground = props.sectionBackground || colorTokens?.bgPrimary || 'bg-white';
+    
     const smartColor = getSmartTextColor(sectionBackground, 'heading');
     
-    // Generate CSS class name from color (simplified mapping)
+    // Generate CSS class name from color (simplified mapping) - ✅ FIX: Added text-gray-50
     const colorClass = smartColor === '#ffffff' ? 'text-white' : 
                       smartColor === '#e5e7eb' ? 'text-gray-200' :
                       smartColor === '#374151' ? 'text-gray-700' : 
-                      smartColor === '#111827' ? 'text-gray-900' : 'text-gray-900';
+                      smartColor === '#111827' ? 'text-gray-900' : 
+                      smartColor === '#f9fafb' ? 'text-gray-50' : 'text-gray-900';
     
     return { class: colorClass, value: smartColor };
   };
@@ -559,14 +569,19 @@ export function EditableAdaptiveHeadline({
   
   const adaptiveColor = getAdaptiveTextColor();
   
+  // console.log('🎨 [HEADLINE-DEBUG] Adaptive color result:', {
+  //   colorClass: adaptiveColor.class,
+  //   colorValue: adaptiveColor.value,
+  //   sectionBackground: props.sectionBackground
+  // });
+  
   return (
     <EditableHeadline
       mode={mode}
       value={value}
       onEdit={onEdit}
       level={level}
-      dynamicColor={adaptiveColor.value}
-      className={`${adaptiveColor.class} ${props.className || ''}`}
+      colorClass={adaptiveColor.class}  // ✅ FIX: Pass colorClass instead of dynamicColor
       textStyle={textStyle}
       sectionId={sectionId}
       elementKey={elementKey}
@@ -642,8 +657,7 @@ export function EditableAdaptiveText({
       mode={mode}
       value={value}
       onEdit={onEdit}
-      dynamicColor={adaptiveColor.value}
-      className={`${adaptiveColor.class} ${props.className || ''}`}
+      colorClass={adaptiveColor.class}  // ✅ FIX: Pass colorClass instead of dynamicColor
       textStyle={textStyle}
       sectionId={sectionId}
       elementKey={elementKey}

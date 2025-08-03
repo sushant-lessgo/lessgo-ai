@@ -189,6 +189,30 @@ const TAILWIND_COLORS: Record<string, string> = {
   'teal-800': '#115e59',
   'teal-900': '#134e4a',
   
+  // Cyan
+  'cyan-50': '#ecfeff',
+  'cyan-100': '#cffafe',
+  'cyan-200': '#a5f3fc',
+  'cyan-300': '#67e8f9',
+  'cyan-400': '#22d3ee',
+  'cyan-500': '#06b6d4',
+  'cyan-600': '#0891b2',
+  'cyan-700': '#0e7490',
+  'cyan-800': '#155e75',
+  'cyan-900': '#164e63',
+  
+  // Orange
+  'orange-50': '#fff7ed',
+  'orange-100': '#ffedd5',
+  'orange-200': '#fed7aa',
+  'orange-300': '#fdba74',
+  'orange-400': '#fb923c',
+  'orange-500': '#f97316',
+  'orange-600': '#ea580c',
+  'orange-700': '#c2410c',
+  'orange-800': '#9a3412',
+  'orange-900': '#7c2d12',
+  
   // Common colors
   'white': '#ffffff',
   'black': '#000000',
@@ -206,7 +230,7 @@ function extractTailwindColors(cssClass: string): string[] {
   // Match patterns like bg-blue-500, from-purple-600, to-white, etc.
   const colorMatches = cssClass.match(/(?:bg-|from-|via-|to-)([a-z]+-\d+|[a-z]+)/g);
   
-  // console.log('🔍 regex matches:', colorMatches);
+  // console.log('🔍 extractTailwindColors regex matches for', cssClass, ':', colorMatches);
   
   if (colorMatches) {
     for (const match of colorMatches) {
@@ -377,7 +401,7 @@ export function analyzeBackground(cssClass: string): BackgroundAnalysis {
   try {
     // Handle empty or invalid input
     if (!cssClass || typeof cssClass !== 'string') {
-      console.warn('🔍 Background analysis: Invalid CSS class:', cssClass);
+      console.warn('🔍 [BG-CYAN-DEBUG] Background analysis: Invalid CSS class:', typeof cssClass, cssClass);
       return createFallbackAnalysis('Invalid CSS class provided');
     }
     

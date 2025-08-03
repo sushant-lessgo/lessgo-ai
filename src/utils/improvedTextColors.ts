@@ -363,11 +363,45 @@ export function getSmartTextColor(
   backgroundColor: string,
   textType: 'heading' | 'body' | 'muted' = 'body'
 ): string {
+  // ✅ FIX: Handle cases where an object is passed instead of a string
+  let cleanBackground = backgroundColor;
+  
+  // Check if an RGB object was passed instead of a CSS string
+  if (typeof backgroundColor === 'object' && backgroundColor !== null) {
+    const rgb = backgroundColor as any;
+    if (rgb.r !== undefined && rgb.g !== undefined && rgb.b !== undefined) {
+      // Convert RGB object to appropriate CSS class
+      if (rgb.r === 0 && rgb.g === 0 && rgb.b === 0) {
+        cleanBackground = 'bg-black';
+      } else if (rgb.r === 255 && rgb.g === 255 && rgb.b === 255) {
+        cleanBackground = 'bg-white';
+      } else {
+        // For other colors, use hex format
+        const toHex = (n: number) => n.toString(16).padStart(2, '0');
+        const hexColor = `#${toHex(rgb.r)}${toHex(rgb.g)}${toHex(rgb.b)}`;
+        cleanBackground = `bg-[${hexColor}]`;
+      }
+      console.warn('🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string:', { 
+        originalRGB: backgroundColor, 
+        convertedCSS: cleanBackground 
+      });
+    }
+  }
+  
+  // Ensure we have a string
+  if (typeof cleanBackground !== 'string') {
+    console.warn('🔧 [SMART-TEXT-FIX] Invalid background type, using fallback:', typeof cleanBackground);
+    cleanBackground = 'bg-white';
+  }
+  
   // Analyze the background
-  const backgroundAnalysis = analyzeBackground(backgroundColor);
+  const backgroundAnalysis = analyzeBackground(cleanBackground);
   
   // Get appropriate text colors
   const textColors = getTextColorsFromBackground(backgroundAnalysis, {});
+  
+  // Debug logging (reduced)
+  // console.log('🎨 [TEXT-COLOR-DEBUG]:', { backgroundColor, textType, selectedColor: textColors[textType] || textColors.body });
   
   // Return the requested text type
   switch (textType) {

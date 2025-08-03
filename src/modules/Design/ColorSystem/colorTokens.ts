@@ -48,24 +48,23 @@ export function generateColorTokens({
   const getContrastingTextColor = (backgroundColor: string | undefined) => {
     if (!backgroundColor) return 'text-gray-900';
     
-    // Use new smart text color system
-    const backgroundAnalysis = analyzeBackground(backgroundColor);
-    return getSmartTextColor(backgroundAnalysis.dominantColor, 'body');
+    // ✅ FIX: Pass the original CSS string, not the RGB object
+    return getSmartTextColor(backgroundColor, 'body');
   };
 
   // ✅ ENHANCED: Context-aware secondary and muted text colors
   const getSafeSecondaryTextColor = (backgroundColor: string | undefined) => {
     if (!backgroundColor) return 'text-gray-700';
     
-    const backgroundAnalysis = analyzeBackground(backgroundColor);
-    return getSmartTextColor(backgroundAnalysis.dominantColor, 'secondary');
+    // ✅ FIX: Pass the original CSS string, not the RGB object
+    return getSmartTextColor(backgroundColor, 'body');
   };
 
   const getSafeMutedTextColor = (backgroundColor: string | undefined) => {
     if (!backgroundColor) return 'text-gray-500';
     
-    const backgroundAnalysis = analyzeBackground(backgroundColor);
-    return getSmartTextColor(backgroundAnalysis.dominantColor, 'muted');
+    // ✅ FIX: Pass the original CSS string, not the RGB object
+    return getSmartTextColor(backgroundColor, 'muted');
   };
 
   // ✅ ENHANCED: Smart CTA color selection with proper accent validation and smart text color calculation
@@ -78,8 +77,43 @@ export function generateColorTokens({
     ].filter(Boolean);
     
     let safeCTABg = smartAccentCSS;
-    // ✅ IMPROVED: Calculate text color based on CTA background instead of hardcoding white
-    let safeCTAText = getSmartTextColor(smartAccentCSS, 'body');
+    // ✅ IMPROVED: Calculate text color based on CTA background and convert to CSS class
+    const safeCTATextHex = getSmartTextColor(smartAccentCSS, 'body');
+    
+    // Convert hex to CSS class for proper styling
+    const hexToTailwindClass = (hex: string): string => {
+      const colorMap: Record<string, string> = {
+        '#ffffff': 'text-white',
+        '#f9fafb': 'text-gray-50',
+        '#f3f4f6': 'text-gray-100', 
+        '#e5e7eb': 'text-gray-200',
+        '#d1d5db': 'text-gray-300',
+        '#9ca3af': 'text-gray-400',
+        '#6b7280': 'text-gray-500',
+        '#4b5563': 'text-gray-600',
+        '#374151': 'text-gray-700',
+        '#1f2937': 'text-gray-800',
+        '#111827': 'text-gray-900',
+        '#000000': 'text-black'
+      };
+      return colorMap[hex] || 'text-white'; // Default to white for unknown colors
+    };
+    
+    let safeCTAText = hexToTailwindClass(safeCTATextHex);
+    
+    // ✅ FIX: Specific handling for problematic accent colors with poor contrast
+    const contrastFixes: Record<string, { bg: string; text: string }> = {
+      'bg-cyan-600': { bg: 'bg-cyan-700', text: 'text-white' },     // 3.68 → 5.36
+      'bg-orange-600': { bg: 'bg-orange-700', text: 'text-white' }, // 3.56 → better contrast
+      'bg-emerald-600': { bg: 'bg-emerald-700', text: 'text-white' } // 3.77 → better contrast
+    };
+    
+    if (contrastFixes[smartAccentCSS]) {
+      const fix = contrastFixes[smartAccentCSS];
+      console.log(`🔧 [CTA-FIX] Detected ${smartAccentCSS} background, using safer ${fix.bg} with ${fix.text}`);
+      safeCTABg = fix.bg;
+      safeCTAText = fix.text;
+    }
     
     // ✅ IMPROVED: Don't validate CTA against ALL backgrounds since CTAs appear on specific sections
     // Instead, ensure the CTA works well against the most common backgrounds (neutral/white)
@@ -111,13 +145,15 @@ export function generateColorTokens({
       
       if (workingCandidate) {
         safeCTABg = workingCandidate.tailwindBg;
-        safeCTAText = workingCandidate.textColor || getSmartTextColor(workingCandidate.tailwindBg, 'body');
+        const candidateTextHex = workingCandidate.textColor || getSmartTextColor(workingCandidate.tailwindBg, 'body');
+        safeCTAText = hexToTailwindClass(candidateTextHex);
         // console.log('✅ Using brand-safe accent color for CTA:', safeCTABg, 'with text:', safeCTAText);
       } else {
         // ✅ IMPROVED: Use branded fallback instead of generic gray
         const brandedFallback = accentColor ? `bg-${accentColor}-600` : smartAccentCSS;
         safeCTABg = brandedFallback;
-        safeCTAText = getSmartTextColor(brandedFallback, 'body');
+        const fallbackTextHex = getSmartTextColor(brandedFallback, 'body');
+        safeCTAText = hexToTailwindClass(fallbackTextHex);
         // console.log('✅ Using branded fallback for CTA:', safeCTABg, 'with text:', safeCTAText);
       }
     } else {
@@ -128,6 +164,9 @@ export function generateColorTokens({
   };
 
   const { safeCTABg, safeCTAText } = validateCTAColors();
+
+  // Debug logging (reduced)
+  // console.log('🎨 [TOKENS-DEBUG] Generated tokens:', { safeCTABg, safeCTAText });
 
   return {
     // 🎨 CTA & Interactive Elements - Uses validated accent colors for clean, consistent buttons
