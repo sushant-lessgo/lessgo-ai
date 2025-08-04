@@ -2,6 +2,8 @@
 // utils/regeneration/fullPageRegeneration.ts - NEW FILE
 // ================================================================
 
+import type { InputVariables, HiddenInferredFields } from '@/types/core';
+
 export interface FullPageRegenerationRequest {
   tokenId: string;
   updatedInputs: InputVariables & HiddenInferredFields;

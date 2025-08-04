@@ -44,7 +44,7 @@ function extractRequestedSections(prompt: string): string[] {
     /Selected sections:\s*\[([^\]]+)\]/,
     /Sections to generate:\s*\[([^\]]+)\]/,
     // Generic pattern last (most likely to match wrong content)
-    /sections.*?\[([^\]]+)\]/s
+    /sections[\s\S]*?\[([^\]]+)\]/
   ]
   
   for (const pattern of pageStoreSectionsPatterns) {

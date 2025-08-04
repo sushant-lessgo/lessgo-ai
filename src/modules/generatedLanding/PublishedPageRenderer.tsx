@@ -10,6 +10,7 @@ import {
 } from '@/modules/Design/background/backgroundIntegration';
 import { SmartTextSection } from '@/components/layout/SmartTextSection';
 import type { GPTOutput } from '@/modules/prompt/types';
+import type { MarketCategory, MarketSubcategory, TargetAudience, StartupStage, LandingGoalType, PricingModel } from '@/modules/inference/taxonomy';
 
 // Load Google Fonts for published pages
 const loadGoogleFonts = () => {
@@ -123,14 +124,14 @@ export default function PublishedPageRenderer({
 
     // Create minimal onboarding data from GPTOutput with required fields
     const onboardingData = {
-      marketCategory: data.meta.marketCategory,
-      marketSubcategory: data.meta.marketSubcategory,
-      targetAudience: data.meta.targetAudience,
+      marketCategory: data.meta.marketCategory as MarketCategory,
+      marketSubcategory: data.meta.marketSubcategory as MarketSubcategory,
+      targetAudience: data.meta.targetAudience as TargetAudience,
       keyProblem: data.meta.problemBeingSolved,
       problemBeingSolved: data.meta.problemBeingSolved,
-      startupStage: 'MVP & Early Customers', // Default value
-      landingPageGoals: 'Generate Leads', // Default value
-      pricingModel: 'subscription', // Default value
+      startupStage: 'MVP & Early Customers' as StartupStage,
+      landingPageGoals: 'Generate Leads' as LandingGoalType,
+      pricingModel: 'subscription' as PricingModel,
       theme: data.theme
     };
     
@@ -143,14 +144,14 @@ export default function PublishedPageRenderer({
 
   // Create onboarding data in component scope
   const onboardingData = React.useMemo(() => ({
-    marketCategory: data?.meta?.marketCategory || 'Work & Productivity Tools',
-    marketSubcategory: data?.meta?.marketSubcategory || 'Project Management',
-    targetAudience: data?.meta?.targetAudience || 'Business Owners',
+    marketCategory: (data?.meta?.marketCategory || 'Work & Productivity Tools') as MarketCategory,
+    marketSubcategory: (data?.meta?.marketSubcategory || 'Project & Task Management') as MarketSubcategory,
+    targetAudience: (data?.meta?.targetAudience || 'Small Business Owners') as TargetAudience,
     keyProblem: data?.meta?.problemBeingSolved || 'Productivity issues',
     problemBeingSolved: data?.meta?.problemBeingSolved || 'Productivity issues',
-    startupStage: 'MVP & Early Customers' as const,
-    landingPageGoals: 'Generate Leads' as const,
-    pricingModel: 'subscription' as const,
+    startupStage: 'MVP & Early Customers' as StartupStage,
+    landingPageGoals: 'Generate Leads' as LandingGoalType,
+    pricingModel: 'subscription' as PricingModel,
     theme: data?.theme || 'modern'
   }), [data]);
 

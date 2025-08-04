@@ -6,6 +6,7 @@ import type {
   HiddenInferredFields,
   FeatureItem
 } from '@/types/core/index';
+import type { EditStore } from '@/types/store';
 
 // ✅ PERMANENT FIX: Use the actual store state interfaces
 // Import the store state getter function to access current types
@@ -14,7 +15,7 @@ import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
 
 // ✅ FIXED: Extract actual store types from Zustand stores
 type OnboardingStore = ReturnType<typeof useOnboardingStore.getState>;
-type EditStore = ReturnType<typeof useEditStore.getState>;
+type PageStore = ReturnType<typeof useEditStore.getState>;
 
 /**
  * Builds business context section for all prompt types

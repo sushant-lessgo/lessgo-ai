@@ -1,6 +1,6 @@
 // utils/sectionValidation.ts - Section validation utilities
-import type { SectionType } from '@/types/store/state';
-import type { ValidationResult } from '@/types/store';
+import type { SectionType } from '@/types/core';
+import type { ValidationResult, ValidationError, ValidationWarning } from '@/types/store';
 
 export interface SectionValidationRule {
   id: string;
@@ -303,7 +303,12 @@ export function validateSection(section: any, sectionId: string): DetailedValida
       sectionType: 'custom',
       valid: false,
       isValid: false,
-      errors: [`Unknown section type: ${sectionType}`],
+      errors: [{
+        elementKey: 'sectionType',
+        code: 'UNKNOWN_SECTION_TYPE',
+        message: `Unknown section type: ${sectionType}`,
+        severity: 'error' as const
+      }],
       warnings: [],
       completionPercentage: 0,
       missingRequired: [],
@@ -315,8 +320,8 @@ export function validateSection(section: any, sectionId: string): DetailedValida
   }
 
   const elements = section.elements || {};
-  const errors: string[] = [];
-  const warnings: string[] = [];
+  const errors: ValidationError[] = [];
+  const warnings: ValidationWarning[] = [];
   const ruleViolations: Array<{ ruleId: string; severity: 'error' | 'warning' | 'info'; message: string }> = [];
   const suggestions: string[] = [];
 
@@ -340,7 +345,12 @@ export function validateSection(section: any, sectionId: string): DetailedValida
 
   // Add errors for missing required elements
   missingRequired.forEach(elementKey => {
-    errors.push(`Missing required element: ${elementKey}`);
+    errors.push({
+      elementKey,
+      code: 'MISSING_REQUIRED_ELEMENT',
+      message: `Missing required element: ${elementKey}`,
+      severity: 'error' as const
+    });
   });
 
   // Run validation rules
@@ -355,9 +365,19 @@ export function validateSection(section: any, sectionId: string): DetailedValida
       });
 
       if (rule.severity === 'error') {
-        errors.push(message);
+        errors.push({
+          elementKey: 'section',
+          code: rule.id,
+          message,
+          severity: 'error' as const
+        });
       } else if (rule.severity === 'warning') {
-        warnings.push(message);
+        warnings.push({
+          elementKey: 'section',
+          code: rule.id,
+          message,
+          autoFixable: false
+        });
       } else if (rule.severity === 'info') {
         suggestions.push(message);
       }
@@ -502,8 +522,8 @@ export function getSectionImprovementSuggestions(
   validation.errors.forEach(error => {
     suggestions.push({
       type: 'error',
-      message: error,
-      action: getActionForError(error),
+      message: error.message,
+      action: getActionForError(error.message),
     });
   });
 
@@ -511,8 +531,8 @@ export function getSectionImprovementSuggestions(
   validation.warnings.forEach(warning => {
     suggestions.push({
       type: 'warning',
-      message: warning,
-      action: getActionForWarning(warning),
+      message: warning.message,
+      action: getActionForWarning(warning.message),
     });
   });
 

@@ -280,13 +280,17 @@ export default function PersonaJourney(props: LayoutComponentProps) {
 
   const mutedTextColor = dynamicTextColors?.muted || colorTokens.textMuted;
   
-  const showImageToolbar = useEditStore((state) => state.showImageToolbar);
+  const store = useEditStore();
+  const showImageToolbar = store.showImageToolbar;
+  
+  // Filter out 'custom' background type as it's not supported by EditableContent components
+  const safeBackgroundType = props.backgroundType === 'custom' ? 'neutral' : (props.backgroundType || 'neutral');
   
   return (
     <LayoutSection
       sectionId={sectionId}
       sectionType="PersonaJourney"
-      backgroundType={props.backgroundType || 'neutral'}
+      backgroundType={safeBackgroundType}
       sectionBackground={sectionBackground}
       mode={mode}
       className={props.className}
@@ -299,7 +303,7 @@ export default function PersonaJourney(props: LayoutComponentProps) {
             value={blockContent.headline}
             onEdit={(value) => handleContentUpdate('headline', value)}
             level="h2"
-            backgroundType={props.backgroundType || 'neutral'}
+            backgroundType={safeBackgroundType}
             colorTokens={colorTokens}
             textStyle={getTextStyle('h2')}
             className="mb-4"
@@ -313,7 +317,7 @@ export default function PersonaJourney(props: LayoutComponentProps) {
               mode={mode}
               value={blockContent.subheadline || ''}
               onEdit={(value) => handleContentUpdate('subheadline', value)}
-              backgroundType={props.backgroundType || 'neutral'}
+              backgroundType={safeBackgroundType}
               colorTokens={colorTokens}
               variant="body"
               textStyle={getTextStyle('body-lg')}
@@ -336,7 +340,7 @@ export default function PersonaJourney(props: LayoutComponentProps) {
                   mode={mode}
                   value={blockContent.persona_name}
                   onEdit={(value) => handleContentUpdate('persona_name', value)}
-                  backgroundType={props.backgroundType || 'neutral'}
+                  backgroundType={safeBackgroundType}
                   colorTokens={colorTokens}
                   variant="body"
                   textStyle={getTextStyle('body')}
@@ -350,7 +354,7 @@ export default function PersonaJourney(props: LayoutComponentProps) {
                   mode={mode}
                   value={blockContent.persona_role}
                   onEdit={(value) => handleContentUpdate('persona_role', value)}
-                  backgroundType={props.backgroundType || 'neutral'}
+                  backgroundType={safeBackgroundType}
                   colorTokens={colorTokens}
                   variant="body"
                   textStyle={getTextStyle('body')}
@@ -364,7 +368,7 @@ export default function PersonaJourney(props: LayoutComponentProps) {
                   mode={mode}
                   value={blockContent.persona_company}
                   onEdit={(value) => handleContentUpdate('persona_company', value)}
-                  backgroundType={props.backgroundType || 'neutral'}
+                  backgroundType={safeBackgroundType}
                   colorTokens={colorTokens}
                   variant="body"
                   textStyle={getTextStyle('body')}
@@ -399,10 +403,10 @@ export default function PersonaJourney(props: LayoutComponentProps) {
                   mode={mode}
                   value={blockContent.before_title}
                   onEdit={(value) => handleContentUpdate('before_title', value)}
-                  backgroundType={props.backgroundType || 'neutral'}
+                  backgroundType={safeBackgroundType}
                   colorTokens={colorTokens}
                   variant="body"
-                  textStyle={getTextStyle('h4')}
+                  textStyle={getTextStyle('h3')}
                   placeholder="Before title"
                   sectionId={sectionId}
                   elementKey="before_title"
@@ -413,7 +417,7 @@ export default function PersonaJourney(props: LayoutComponentProps) {
                   mode={mode}
                   value={blockContent.before_challenges}
                   onEdit={(value) => handleContentUpdate('before_challenges', value)}
-                  backgroundType={props.backgroundType || 'neutral'}
+                  backgroundType={safeBackgroundType}
                   colorTokens={colorTokens}
                   variant="body"
                   textStyle={getTextStyle('body')}
@@ -427,7 +431,7 @@ export default function PersonaJourney(props: LayoutComponentProps) {
                   mode={mode}
                   value={blockContent.before_pain_points}
                   onEdit={(value) => handleContentUpdate('before_pain_points', value)}
-                  backgroundType={props.backgroundType || 'neutral'}
+                  backgroundType={safeBackgroundType}
                   colorTokens={colorTokens}
                   variant="body"
                   textStyle={getTextStyle('body')}
@@ -445,10 +449,10 @@ export default function PersonaJourney(props: LayoutComponentProps) {
                   mode={mode}
                   value={blockContent.journey_title}
                   onEdit={(value) => handleContentUpdate('journey_title', value)}
-                  backgroundType={props.backgroundType || 'neutral'}
+                  backgroundType={safeBackgroundType}
                   colorTokens={colorTokens}
                   variant="body"
-                  textStyle={getTextStyle('h4')}
+                  textStyle={getTextStyle('h3')}
                   placeholder="Journey title"
                   sectionId={sectionId}
                   elementKey="journey_title"
@@ -459,7 +463,7 @@ export default function PersonaJourney(props: LayoutComponentProps) {
                   mode={mode}
                   value={blockContent.journey_steps}
                   onEdit={(value) => handleContentUpdate('journey_steps', value)}
-                  backgroundType={props.backgroundType || 'neutral'}
+                  backgroundType={safeBackgroundType}
                   colorTokens={colorTokens}
                   variant="body"
                   textStyle={getTextStyle('body')}
@@ -477,10 +481,10 @@ export default function PersonaJourney(props: LayoutComponentProps) {
                   mode={mode}
                   value={blockContent.after_title}
                   onEdit={(value) => handleContentUpdate('after_title', value)}
-                  backgroundType={props.backgroundType || 'neutral'}
+                  backgroundType={safeBackgroundType}
                   colorTokens={colorTokens}
                   variant="body"
-                  textStyle={getTextStyle('h4')}
+                  textStyle={getTextStyle('h3')}
                   placeholder="After title"
                   sectionId={sectionId}
                   elementKey="after_title"
@@ -491,7 +495,7 @@ export default function PersonaJourney(props: LayoutComponentProps) {
                   mode={mode}
                   value={blockContent.after_outcomes}
                   onEdit={(value) => handleContentUpdate('after_outcomes', value)}
-                  backgroundType={props.backgroundType || 'neutral'}
+                  backgroundType={safeBackgroundType}
                   colorTokens={colorTokens}
                   variant="body"
                   textStyle={getTextStyle('body')}
@@ -505,7 +509,7 @@ export default function PersonaJourney(props: LayoutComponentProps) {
                   mode={mode}
                   value={blockContent.after_benefits}
                   onEdit={(value) => handleContentUpdate('after_benefits', value)}
-                  backgroundType={props.backgroundType || 'neutral'}
+                  backgroundType={safeBackgroundType}
                   colorTokens={colorTokens}
                   variant="body"
                   textStyle={getTextStyle('body')}
@@ -603,7 +607,7 @@ export default function PersonaJourney(props: LayoutComponentProps) {
                 mode={mode}
                 value={blockContent.supporting_text || ''}
                 onEdit={(value) => handleContentUpdate('supporting_text', value)}
-                backgroundType={props.backgroundType || 'neutral'}
+                backgroundType={safeBackgroundType}
                 colorTokens={colorTokens}
                 variant="body"
                 textStyle={getTextStyle('body-lg')}

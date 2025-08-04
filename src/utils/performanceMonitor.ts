@@ -1,5 +1,7 @@
 // utils/performanceMonitor.ts - Performance monitoring for store operations
 
+import React from 'react';
+
 interface PerformanceMetric {
   operation: string;
   startTime: number;
