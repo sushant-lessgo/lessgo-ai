@@ -150,11 +150,14 @@ export default function BonusStackCTA(props: LayoutComponentProps) {
     </div>
   );
   
+  // Add safe background type to prevent type errors
+  const safeBackgroundType = props.backgroundType === 'custom' ? 'neutral' : (props.backgroundType || 'neutral');
+  
   return (
     <LayoutSection
       sectionId={sectionId}
       sectionType="BonusStackCTA"
-      backgroundType={props.backgroundType || 'neutral'}
+      backgroundType={safeBackgroundType}
       sectionBackground={sectionBackground}
       mode={mode}
       className={props.className}
@@ -167,7 +170,7 @@ export default function BonusStackCTA(props: LayoutComponentProps) {
             value={blockContent.headline}
             onEdit={(value) => handleContentUpdate('headline', value)}
             level="h2"
-            backgroundType={props.backgroundType || 'neutral'}
+            backgroundType={safeBackgroundType}
             colorTokens={colorTokens}
             textStyle={getTextStyle('h2')}
             className="mb-4"
@@ -181,7 +184,7 @@ export default function BonusStackCTA(props: LayoutComponentProps) {
               mode={mode}
               value={blockContent.subheadline || ''}
               onEdit={(value) => handleContentUpdate('subheadline', value)}
-              backgroundType={props.backgroundType || 'neutral'}
+              backgroundType={safeBackgroundType}
               colorTokens={colorTokens}
               variant="body"
               textStyle={getTextStyle('body-lg')}
@@ -210,7 +213,7 @@ export default function BonusStackCTA(props: LayoutComponentProps) {
                   mode={mode}
                   value={blockContent.value_proposition}
                   onEdit={(value) => handleContentUpdate('value_proposition', value)}
-                  backgroundType={props.backgroundType || 'neutral'}
+                  backgroundType={safeBackgroundType}
                   colorTokens={colorTokens}
                   variant="body"
                   textStyle={getTextStyle('body')}
@@ -225,7 +228,7 @@ export default function BonusStackCTA(props: LayoutComponentProps) {
                   mode={mode}
                   value={blockContent.main_offer}
                   onEdit={(value) => handleContentUpdate('main_offer', value)}
-                  backgroundType={props.backgroundType || 'neutral'}
+                  backgroundType={safeBackgroundType}
                   colorTokens={colorTokens}
                   variant="body"
                   textStyle={getTextStyle('body')}
@@ -240,7 +243,7 @@ export default function BonusStackCTA(props: LayoutComponentProps) {
                   mode={mode}
                   value={blockContent.bonus_items}
                   onEdit={(value) => handleContentUpdate('bonus_items', value)}
-                  backgroundType={props.backgroundType || 'neutral'}
+                  backgroundType={safeBackgroundType}
                   colorTokens={colorTokens}
                   variant="body"
                   textStyle={getTextStyle('body')}
@@ -255,7 +258,7 @@ export default function BonusStackCTA(props: LayoutComponentProps) {
                   mode={mode}
                   value={blockContent.bonus_values}
                   onEdit={(value) => handleContentUpdate('bonus_values', value)}
-                  backgroundType={props.backgroundType || 'neutral'}
+                  backgroundType={safeBackgroundType}
                   colorTokens={colorTokens}
                   variant="body"
                   textStyle={getTextStyle('body')}
@@ -398,7 +401,7 @@ export default function BonusStackCTA(props: LayoutComponentProps) {
                 mode={mode}
                 value={blockContent.supporting_text || ''}
                 onEdit={(value) => handleContentUpdate('supporting_text', value)}
-                backgroundType={props.backgroundType || 'neutral'}
+                backgroundType={safeBackgroundType}
                 colorTokens={colorTokens}
                 variant="body"
                 textStyle={getTextStyle('body-lg')}

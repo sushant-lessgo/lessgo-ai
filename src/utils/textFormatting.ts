@@ -75,7 +75,6 @@ export const formatPresets: FormatPreset[] = [
     formats: {
       fontSize: '2rem',
       fontFamily: 'system-ui, sans-serif',
-      fontWeight: 'bold',
       lineHeight: '1.2',
       textTransform: 'none',
     },
@@ -86,7 +85,6 @@ export const formatPresets: FormatPreset[] = [
     formats: {
       fontSize: '1.5rem',
       fontFamily: 'system-ui, sans-serif',
-      fontWeight: 'bold',
       lineHeight: '1.3',
       textTransform: 'none',
     },
@@ -97,7 +95,6 @@ export const formatPresets: FormatPreset[] = [
     formats: {
       fontSize: '1rem',
       fontFamily: 'system-ui, sans-serif',
-      fontWeight: 'normal',
       lineHeight: '1.6',
       textTransform: 'none',
     },
@@ -108,7 +105,6 @@ export const formatPresets: FormatPreset[] = [
     formats: {
       fontSize: '0.875rem',
       fontFamily: 'system-ui, sans-serif',
-      fontWeight: 'normal',
       lineHeight: '1.4',
       color: '#6B7280',
       textTransform: 'none',
@@ -120,7 +116,6 @@ export const formatPresets: FormatPreset[] = [
     formats: {
       fontSize: '1.125rem',
       fontFamily: 'Georgia, serif',
-      fontWeight: 'normal',
       lineHeight: '1.6',
       italic: true,
       color: '#4B5563',
@@ -200,7 +195,7 @@ export function applyFormatToElement(element: HTMLElement, format: Partial<TextF
       }
       
       const cssValue = rule.transform ? rule.transform(value) : value;
-      element.style[rule.cssProperty as any] = cssValue;
+      (element.style as any)[rule.cssProperty] = cssValue;
     }
   });
 }
@@ -248,8 +243,8 @@ export function formatToCSS(format: Partial<TextFormatState>): React.CSSProperti
   Object.entries(format).forEach(([key, value]) => {
     const rule = formatRules[key as keyof TextFormatState];
     if (rule) {
-      const cssValue = rule.transform ? rule.transform(value) : value;
-      styles[rule.cssProperty as any] = cssValue;
+      const cssValue = rule.transform ? rule.transform(value) : String(value);
+      (styles as any)[rule.cssProperty] = cssValue;
     }
   });
   
@@ -269,7 +264,7 @@ export function getFormatDiff(base: TextFormatState, current: TextFormatState): 
   Object.keys(current).forEach(key => {
     const k = key as keyof TextFormatState;
     if (base[k] !== current[k]) {
-      diff[k] = current[k];
+      diff[k] = current[k] as any;
     }
   });
   
@@ -432,10 +427,10 @@ export function formatHistoryToString(history: FormatHistoryItem[]): string {
 
 // Export commonly used combinations
 export const commonFormats = {
-  heading1: { fontSize: '2rem', fontWeight: 'bold', lineHeight: '1.2' },
-  heading2: { fontSize: '1.5rem', fontWeight: 'bold', lineHeight: '1.3' },
-  heading3: { fontSize: '1.25rem', fontWeight: 'bold', lineHeight: '1.4' },
-  body: { fontSize: '1rem', fontWeight: 'normal', lineHeight: '1.6' },
+  heading1: { fontSize: '2rem', lineHeight: '1.2' },
+  heading2: { fontSize: '1.5rem', lineHeight: '1.3' },
+  heading3: { fontSize: '1.25rem', lineHeight: '1.4' },
+  body: { fontSize: '1rem', lineHeight: '1.6' },
   caption: { fontSize: '0.875rem', color: '#6B7280', lineHeight: '1.4' },
   quote: { fontSize: '1.125rem', fontStyle: 'italic', color: '#4B5563' },
   code: { fontFamily: 'ui-monospace, monospace', backgroundColor: '#F3F4F6', padding: '0.25rem' },

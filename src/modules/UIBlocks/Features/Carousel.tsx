@@ -126,7 +126,8 @@ export default function Carousel(props: LayoutComponentProps) {
 
   const mutedTextColor = dynamicTextColors?.muted || colorTokens.textMuted;
   
-  const showImageToolbar = useEditStore((state) => state.showImageToolbar);
+  const store = useEditStore();
+  const showImageToolbar = store.showImageToolbar;
 
   const nextSlide = () => {
     setActiveSlide((prev) => (prev + 1) % features.length);

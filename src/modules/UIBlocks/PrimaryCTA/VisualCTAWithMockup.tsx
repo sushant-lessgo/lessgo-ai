@@ -145,13 +145,17 @@ export default function VisualCTAWithMockup(props: LayoutComponentProps) {
     contentSchema: CONTENT_SCHEMA
   });
 
-  const showImageToolbar = useEditStore((state) => state.showImageToolbar);
+  const store = useEditStore();
+  const showImageToolbar = store.showImageToolbar;
+
+  // Add safe background type to prevent type errors
+  const safeBackgroundType = props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'secondary');
 
   return (
     <LayoutSection
       sectionId={sectionId}
       sectionType="VisualCTAWithMockup"
-      backgroundType={props.backgroundType || 'secondary'}
+      backgroundType={safeBackgroundType}
       sectionBackground={sectionBackground}
       mode={mode}
       className={props.className}
@@ -166,7 +170,7 @@ export default function VisualCTAWithMockup(props: LayoutComponentProps) {
               value={blockContent.headline}
               onEdit={(value) => handleContentUpdate('headline', value)}
               level="h2"
-              backgroundType={props.backgroundType || 'secondary'}
+              backgroundType={safeBackgroundType}
               colorTokens={colorTokens}
               textStyle={getTextStyle('h1')}
               className="mb-6"
@@ -180,7 +184,7 @@ export default function VisualCTAWithMockup(props: LayoutComponentProps) {
                 mode={mode}
                 value={blockContent.subheadline}
                 onEdit={(value) => handleContentUpdate('subheadline', value)}
-                backgroundType={props.backgroundType || 'secondary'}
+                backgroundType={safeBackgroundType}
                 colorTokens={colorTokens}
                 variant="body"
                 textStyle={getTextStyle('body-lg')}

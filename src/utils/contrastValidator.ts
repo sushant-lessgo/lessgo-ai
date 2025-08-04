@@ -32,27 +32,30 @@ export function validateBackgroundAccessibility(
     }
     
     // Check gradient complexity for readability
-    if (background.type === 'custom' && background.custom?.style === 'gradient') {
-      const gradient = background.custom.gradient;
-      if (gradient && gradient.stops.length > 4) {
+    if (background.type === 'custom' && (background.custom as any)?.style === 'gradient') {
+      const gradient = (background.custom as any).gradient;
+      if (gradient && gradient.stops && gradient.stops.length > 4) {
         warnings.push('Complex gradients with many color stops may reduce text readability.');
       }
       
       // Check contrast between gradient stops
-      if (gradient && gradient.stops.length >= 2) {
+      if (gradient && gradient.stops && gradient.stops.length >= 2) {
         const firstStop = gradient.stops[0];
         const lastStop = gradient.stops[gradient.stops.length - 1];
-        const stopContrast = calculateContrastRatio(firstStop.color, lastStop.color);
-        
-        if (stopContrast < 1.5) {
-          warnings.push('Low contrast between gradient colors may create readability issues in some areas.');
+        if (firstStop && lastStop && firstStop.color && lastStop.color) {
+          const stopContrast = calculateContrastRatio(firstStop.color, lastStop.color);
+          
+          if (stopContrast < 1.5) {
+            warnings.push('Low contrast between gradient colors may create readability issues in some areas.');
+          }
         }
       }
     }
     
     // Check for color blindness considerations
-    if (background.type === 'custom' && background.custom?.solid) {
-      const color = background.custom.solid.color.toLowerCase();
+    if (background.type === 'custom' && (background.custom as any)?.solid) {
+      const solid = (background.custom as any).solid;
+      const color = solid?.color ? solid.color.toLowerCase() : '';
       
       // Check for problematic color combinations
       if (color.includes('red') && textColor === 'black') {
@@ -97,7 +100,7 @@ export function getAccessibilityRecommendations(background: SectionBackground): 
   }
   
   // Gradient-specific recommendations
-  if (background.type === 'custom' && background.custom?.style === 'gradient') {
+  if (background.type === 'custom' && (background.custom as any)?.style === 'gradient') {
     recommendations.push('Consider adding a semi-transparent overlay to ensure consistent text readability across the gradient.');
     recommendations.push('Test your content with different text colors to ensure readability in all areas of the gradient.');
   }
@@ -113,7 +116,7 @@ export function getAccessibilityRecommendations(background: SectionBackground): 
  * Check if a background is safe for users with color blindness
  */
 export function isColorBlindnessSafe(background: SectionBackground): boolean {
-  if (background.type === 'custom' && background.custom?.solid) {
+  if (background.type === 'custom' && (background.custom as any)?.solid) {
     const color = extractDominantColor(background);
     
     // Simple check - avoid pure reds and greens without sufficient contrast
@@ -142,14 +145,15 @@ export function suggestAccessibleAlternatives(background: SectionBackground): st
   
   if (!validation.isValid) {
     // Suggest adjustments based on current background
-    if (background.type === 'custom' && background.custom?.solid) {
-      const currentColor = background.custom.solid.color;
+    if (background.type === 'custom' && (background.custom as any)?.solid) {
+      const solid = (background.custom as any).solid;
+      const currentColor = solid?.color || '#ffffff';
       
       // Suggest lighter and darker versions
       suggestions.push('Try a lighter shade of the same color');
       suggestions.push('Try a darker shade of the same color');
       suggestions.push('Add a semi-transparent overlay to improve contrast');
-    } else if (background.type === 'custom' && background.custom?.gradient) {
+    } else if (background.type === 'custom' && (background.custom as any)?.gradient) {
       suggestions.push('Reduce the number of color stops in your gradient');
       suggestions.push('Increase contrast between gradient colors');
       suggestions.push('Consider using a solid color instead of a gradient');

@@ -98,7 +98,7 @@ export const layoutToSectionType: Record<string, string> = {
 
   // Pricing layouts
   'TierCards': 'pricing',
-  'ComparisonTable': 'pricing',
+  'PricingComparisonTable': 'pricing',
   'ToggleableMonthlyYearly': 'pricing',
   'SinglePlanHighlight': 'pricing',
   'ROICalculator': 'pricing',
@@ -162,7 +162,7 @@ export const layoutToSectionType: Record<string, string> = {
   'PillarIcons': 'uniqueMechanism',
   'IllustratedModel': 'uniqueMechanism',
   'ExplainerWithTags': 'uniqueMechanism',
-  'ComparisonTable': 'uniqueMechanism',
+  'UniqueMechanismComparisonTable': 'uniqueMechanism',
   'PatentStrip': 'uniqueMechanism',
   'SingleBigIdea': 'uniqueMechanism',
 

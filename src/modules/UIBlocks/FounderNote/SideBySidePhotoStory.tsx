@@ -208,7 +208,8 @@ export default function SideBySidePhotoStory(props: LayoutComponentProps) {
   const mutedTextColor = dynamicTextColors?.muted || colorTokens.textMuted;
   
   // Get showImageToolbar for handling image clicks
-  const showImageToolbar = useEditStore((state) => state.showImageToolbar);
+  const store = useEditStore();
+  const showImageToolbar = store.showImageToolbar;
 
   return (
     <LayoutSection

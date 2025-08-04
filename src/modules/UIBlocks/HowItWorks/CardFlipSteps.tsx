@@ -260,7 +260,8 @@ export default function CardFlipSteps(props: LayoutComponentProps) {
 
   const mutedTextColor = dynamicTextColors?.muted || colorTokens.textMuted;
   
-  const showImageToolbar = useEditStore((state) => state.showImageToolbar);
+  const store = useEditStore();
+  const showImageToolbar = store.showImageToolbar;
   
   return (
     <LayoutSection

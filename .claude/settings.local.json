@@ -45,7 +45,8 @@
       "Bash(timeout 120s npm run build)",
       "Bash(timeout 180s npm run build)",
       "Bash(timeout 300s npm run build)",
-      "mcp__ide__getDiagnostics"
+      "mcp__ide__getDiagnostics",
+      "Bash(npx next:*)"
     ],
     "deny": []
   }

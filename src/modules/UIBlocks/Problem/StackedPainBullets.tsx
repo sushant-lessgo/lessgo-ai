@@ -147,14 +147,14 @@ const PainPointItem = ({
               suppressContentEditableWarning
               onBlur={(e) => onPointEdit(index, e.currentTarget.textContent || '')}
               className="outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-1 min-h-[24px] cursor-text hover:bg-gray-50 font-semibold text-gray-900 leading-relaxed"
-              style={getTextStyle('h4')}
+              style={getTextStyle('h3')}
             >
               {painPoint.point}
             </div>
           ) : (
             <h3 
               className="font-semibold text-gray-900 leading-relaxed"
-              style={getTextStyle('h4')}
+              style={getTextStyle('h3')}
             >
               {painPoint.point}
             </h3>

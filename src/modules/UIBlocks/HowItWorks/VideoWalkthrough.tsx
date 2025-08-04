@@ -91,7 +91,8 @@ export default function VideoWalkthrough(props: LayoutComponentProps) {
 
   const mutedTextColor = dynamicTextColors?.muted || colorTokens.textMuted;
   
-  const showImageToolbar = useEditStore((state) => state.showImageToolbar);
+  const store = useEditStore();
+  const showImageToolbar = store.showImageToolbar;
 
   const VideoPlayer = () => {
     if (blockContent.video_url && blockContent.video_url.includes('youtube')) {

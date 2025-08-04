@@ -25,8 +25,8 @@ export const modalEmergencyReset = {
     
     // 3. Clear any modal-related timeouts
     const highestTimeoutId = setTimeout(() => {}, 0);
-    for (let i = 0; i < highestTimeoutId; i++) {
-      clearTimeout(i);
+    for (let i = 0; i < Number(highestTimeoutId); i++) {
+      clearTimeout(i as any);
     }
     
     // 4. Reset taxonomy modal manager if it exists

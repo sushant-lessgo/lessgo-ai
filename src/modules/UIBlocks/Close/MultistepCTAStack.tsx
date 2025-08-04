@@ -143,6 +143,9 @@ export default function MultistepCTAStack(props: LayoutComponentProps) {
 
   const mutedTextColor = dynamicTextColors?.muted || colorTokens.textMuted;
 
+  // Filter out 'custom' background type as it's not supported by EditableContent components
+  const safeBackgroundType = props.backgroundType === 'custom' ? 'neutral' : (props.backgroundType || 'neutral');
+
   const getStepIcon = (stepIndex: number) => {
     const icons = [
       // Sign Up
@@ -266,7 +269,7 @@ export default function MultistepCTAStack(props: LayoutComponentProps) {
             value={blockContent.headline}
             onEdit={(value) => handleContentUpdate('headline', value)}
             level="h2"
-            backgroundType={props.backgroundType || 'neutral'}
+            backgroundType={safeBackgroundType}
             colorTokens={colorTokens}
             textStyle={getTextStyle('h2')}
             className="mb-4"
@@ -280,7 +283,7 @@ export default function MultistepCTAStack(props: LayoutComponentProps) {
               mode={mode}
               value={blockContent.subheadline || ''}
               onEdit={(value) => handleContentUpdate('subheadline', value)}
-              backgroundType={props.backgroundType || 'neutral'}
+              backgroundType={safeBackgroundType}
               colorTokens={colorTokens}
               variant="body"
               textStyle={getTextStyle('body-lg')}
@@ -303,7 +306,7 @@ export default function MultistepCTAStack(props: LayoutComponentProps) {
                   mode={mode}
                   value={blockContent.step_titles}
                   onEdit={(value) => handleContentUpdate('step_titles', value)}
-                  backgroundType={props.backgroundType || 'neutral'}
+                  backgroundType={safeBackgroundType}
                   colorTokens={colorTokens}
                   variant="body"
                   textStyle={getTextStyle('body')}
@@ -318,7 +321,7 @@ export default function MultistepCTAStack(props: LayoutComponentProps) {
                   mode={mode}
                   value={blockContent.step_descriptions}
                   onEdit={(value) => handleContentUpdate('step_descriptions', value)}
-                  backgroundType={props.backgroundType || 'neutral'}
+                  backgroundType={safeBackgroundType}
                   colorTokens={colorTokens}
                   variant="body"
                   textStyle={getTextStyle('body')}
@@ -333,7 +336,7 @@ export default function MultistepCTAStack(props: LayoutComponentProps) {
                   mode={mode}
                   value={blockContent.step_details}
                   onEdit={(value) => handleContentUpdate('step_details', value)}
-                  backgroundType={props.backgroundType || 'neutral'}
+                  backgroundType={safeBackgroundType}
                   colorTokens={colorTokens}
                   variant="body"
                   textStyle={getTextStyle('body')}
@@ -348,7 +351,7 @@ export default function MultistepCTAStack(props: LayoutComponentProps) {
                   mode={mode}
                   value={blockContent.step_ctas}
                   onEdit={(value) => handleContentUpdate('step_ctas', value)}
-                  backgroundType={props.backgroundType || 'neutral'}
+                  backgroundType={safeBackgroundType}
                   colorTokens={colorTokens}
                   variant="body"
                   textStyle={getTextStyle('body')}
@@ -500,7 +503,7 @@ export default function MultistepCTAStack(props: LayoutComponentProps) {
                 mode={mode}
                 value={blockContent.supporting_text || ''}
                 onEdit={(value) => handleContentUpdate('supporting_text', value)}
-                backgroundType={props.backgroundType || 'neutral'}
+                backgroundType={safeBackgroundType}
                 colorTokens={colorTokens}
                 variant="body"
                 textStyle={getTextStyle('body-lg')}

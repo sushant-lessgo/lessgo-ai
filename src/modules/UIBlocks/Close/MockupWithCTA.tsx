@@ -136,6 +136,9 @@ export default function MockupWithCTA(props: LayoutComponentProps) {
     contentSchema: CONTENT_SCHEMA
   });
 
+  // Filter out 'custom' background type as it's not supported by EditableContent components
+  const safeBackgroundType = props.backgroundType === 'custom' ? 'neutral' : (props.backgroundType || 'neutral');
+
   return (
     <LayoutSection
       sectionId={sectionId}
@@ -162,7 +165,7 @@ export default function MockupWithCTA(props: LayoutComponentProps) {
               value={blockContent.headline}
               onEdit={(value) => handleContentUpdate('headline', value)}
               level="h1"
-              backgroundType={props.backgroundType || 'neutral'}
+              backgroundType={safeBackgroundType}
               colorTokens={colorTokens}
               textStyle={getTextStyle('h1')}
               className="mb-6"
@@ -177,7 +180,7 @@ export default function MockupWithCTA(props: LayoutComponentProps) {
                 mode={mode}
                 value={blockContent.subheadline || ''}
                 onEdit={(value) => handleContentUpdate('subheadline', value)}
-                backgroundType={props.backgroundType || 'neutral'}
+                backgroundType={safeBackgroundType}
                 colorTokens={colorTokens}
                 variant="body"
                 textStyle={getTextStyle('body-lg')}
@@ -210,7 +213,7 @@ export default function MockupWithCTA(props: LayoutComponentProps) {
                   mode={mode}
                   value={blockContent.urgency_text || ''}
                   onEdit={(value) => handleContentUpdate('urgency_text', value)}
-                  backgroundType={props.backgroundType || 'neutral'}
+                  backgroundType={safeBackgroundType}
                   colorTokens={colorTokens}
                   variant="body"
                   textStyle={getTextStyle('body-sm')}
@@ -228,7 +231,7 @@ export default function MockupWithCTA(props: LayoutComponentProps) {
                   mode={mode}
                   value={blockContent.guarantee_text || ''}
                   onEdit={(value) => handleContentUpdate('guarantee_text', value)}
-                  backgroundType={props.backgroundType || 'neutral'}
+                  backgroundType={safeBackgroundType}
                   colorTokens={colorTokens}
                   variant="body"
                   textStyle={getTextStyle('body-sm')}

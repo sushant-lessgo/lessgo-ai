@@ -141,14 +141,14 @@ const PersonaCard = React.memo(({
             suppressContentEditableWarning
             onBlur={(e) => onNameEdit(persona.index, e.currentTarget.textContent || '')}
             className="outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-1 min-h-[24px] cursor-text hover:bg-gray-50 font-bold"
-            style={getTextStyle('h4')}
+            style={getTextStyle('h3')}
           >
             {persona.name}
           </div>
         ) : (
           <h3 
             className={`font-bold ${colorTokens.textPrimary}`}
-            style={getTextStyle('h4')}
+            style={getTextStyle('h3')}
           >
             {persona.name}
           </h3>

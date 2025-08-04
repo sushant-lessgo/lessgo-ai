@@ -34,7 +34,7 @@ export default function CustomerJourneyFlow(props: LayoutComponentProps) {
                 <div className="relative z-10 w-20 h-20 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center text-white font-bold mx-auto mb-4 shadow-lg">
                   {index + 1}
                 </div>
-                <h3 className="font-bold text-gray-900 mb-2" style={getTextStyle('h4')}>{stage}</h3>
+                <h3 className="font-bold text-gray-900 mb-2" style={getTextStyle('h3')}>{stage}</h3>
                 <p className="text-gray-600 text-sm" style={getTextStyle('body-sm')}>{descriptions[index] || 'Stage description'}</p>
               </div>
             ))}

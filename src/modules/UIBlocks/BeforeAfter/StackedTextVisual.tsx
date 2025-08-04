@@ -146,7 +146,7 @@ export default function StackedTextVisual(props: StackedTextVisualProps) {
                 <div className="flex-1">
                   <h3 
                     className="text-gray-700 font-semibold mb-3 uppercase tracking-wide text-sm"
-                    style={getTextStyle('h4')}
+                    style={getTextStyle('h3')}
                   >
                     Before
                   </h3>
@@ -218,7 +218,7 @@ export default function StackedTextVisual(props: StackedTextVisualProps) {
                 <div className="flex-1">
                   <h3 
                     className="text-green-700 font-semibold mb-3 uppercase tracking-wide text-sm"
-                    style={getTextStyle('h4')}
+                    style={getTextStyle('h3')}
                   >
                     After
                   </h3>

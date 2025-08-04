@@ -99,6 +99,9 @@ export default function SideBySideOfferCards(props: LayoutComponentProps) {
     contentSchema: CONTENT_SCHEMA
   });
 
+  // Filter out 'custom' background type as it's not supported by EditableContent components
+  const safeBackgroundType = props.backgroundType === 'custom' ? 'neutral' : (props.backgroundType || 'neutral');
+
   const offerTitles = blockContent.offer_titles 
     ? blockContent.offer_titles.split('|').map(item => item.trim()).filter(Boolean)
     : [];
@@ -221,7 +224,7 @@ export default function SideBySideOfferCards(props: LayoutComponentProps) {
     <LayoutSection
       sectionId={sectionId}
       sectionType="SideBySideOfferCards"
-      backgroundType={props.backgroundType || 'neutral'}
+      backgroundType={safeBackgroundType}
       sectionBackground={sectionBackground}
       mode={mode}
       className={props.className}
@@ -234,7 +237,7 @@ export default function SideBySideOfferCards(props: LayoutComponentProps) {
             value={blockContent.headline}
             onEdit={(value) => handleContentUpdate('headline', value)}
             level="h2"
-            backgroundType={props.backgroundType || 'neutral'}
+            backgroundType={safeBackgroundType}
             colorTokens={colorTokens}
             textStyle={getTextStyle('h2')}
             className="mb-4"
@@ -248,7 +251,7 @@ export default function SideBySideOfferCards(props: LayoutComponentProps) {
               mode={mode}
               value={blockContent.subheadline || ''}
               onEdit={(value) => handleContentUpdate('subheadline', value)}
-              backgroundType={props.backgroundType || 'neutral'}
+              backgroundType={safeBackgroundType}
               colorTokens={colorTokens}
               variant="body"
               textStyle={getTextStyle('body-lg')}
@@ -271,7 +274,7 @@ export default function SideBySideOfferCards(props: LayoutComponentProps) {
                   mode={mode}
                   value={blockContent.offer_titles}
                   onEdit={(value) => handleContentUpdate('offer_titles', value)}
-                  backgroundType={props.backgroundType || 'neutral'}
+                  backgroundType={safeBackgroundType}
                   colorTokens={colorTokens}
                   variant="body"
                   textStyle={getTextStyle('body')}
@@ -286,7 +289,7 @@ export default function SideBySideOfferCards(props: LayoutComponentProps) {
                   mode={mode}
                   value={blockContent.offer_descriptions}
                   onEdit={(value) => handleContentUpdate('offer_descriptions', value)}
-                  backgroundType={props.backgroundType || 'neutral'}
+                  backgroundType={safeBackgroundType}
                   colorTokens={colorTokens}
                   variant="body"
                   textStyle={getTextStyle('body')}
@@ -301,7 +304,7 @@ export default function SideBySideOfferCards(props: LayoutComponentProps) {
                   mode={mode}
                   value={blockContent.offer_prices}
                   onEdit={(value) => handleContentUpdate('offer_prices', value)}
-                  backgroundType={props.backgroundType || 'neutral'}
+                  backgroundType={safeBackgroundType}
                   colorTokens={colorTokens}
                   variant="body"
                   textStyle={getTextStyle('body')}
@@ -316,7 +319,7 @@ export default function SideBySideOfferCards(props: LayoutComponentProps) {
                   mode={mode}
                   value={blockContent.offer_features}
                   onEdit={(value) => handleContentUpdate('offer_features', value)}
-                  backgroundType={props.backgroundType || 'neutral'}
+                  backgroundType={safeBackgroundType}
                   colorTokens={colorTokens}
                   variant="body"
                   textStyle={getTextStyle('body')}
@@ -483,7 +486,7 @@ export default function SideBySideOfferCards(props: LayoutComponentProps) {
                 mode={mode}
                 value={blockContent.supporting_text || ''}
                 onEdit={(value) => handleContentUpdate('supporting_text', value)}
-                backgroundType={props.backgroundType || 'neutral'}
+                backgroundType={safeBackgroundType}
                 colorTokens={colorTokens}
                 variant="body"
                 textStyle={getTextStyle('body-lg')}

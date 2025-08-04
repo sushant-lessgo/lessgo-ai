@@ -96,7 +96,7 @@ const ComplianceBadgeCard = React.memo(({
       </div>
       
       {/* Badge Name */}
-      <h3 className="font-bold text-gray-900 mb-3" style={getTextStyle('h4')}>
+      <h3 className="font-bold text-gray-900 mb-3" style={getTextStyle('h3')}>
         {badge.name}
       </h3>
       

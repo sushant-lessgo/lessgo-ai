@@ -299,7 +299,7 @@ function buildSectionFlowContext(elementsMap: any, pageStore: PageStore): string
   const sectionOrder = pageStore.layout.sections;
   const flowContext: string[] = [];
   
-  sectionOrder.forEach((sectionId, index) => {
+  sectionOrder.forEach((sectionId: string, index: number) => {
     const section = elementsMap[sectionId];
     if (!section) return;
     
@@ -314,7 +314,7 @@ function buildSectionFlowContext(elementsMap: any, pageStore: PageStore): string
   });
 
   return `SECTION FLOW FOR COHESIVE MESSAGING:
-Selected sections: [${sectionOrder.map(s => `"${s}"`).join(', ')}]
+Selected sections: [${sectionOrder.map((s: string) => `"${s}"`).join(', ')}]
 
 ${flowContext.join('\n')}`;
 }
@@ -761,7 +761,7 @@ Generate optimized copy for this section now.`;
 function buildOtherSectionsContext(pageStore: PageStore, targetSectionId: string): string {
   const otherSections: string[] = [];
   
-  pageStore.layout.sections.forEach(sectionId => {
+  pageStore.layout.sections.forEach((sectionId: string) => {
     if (sectionId === targetSectionId) return;
     
     const sectionContent = pageStore.content[sectionId];

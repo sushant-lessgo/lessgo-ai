@@ -97,14 +97,14 @@ const FAQAccordionItem = React.memo(({
                 suppressContentEditableWarning
                 onBlur={(e) => onQuestionEdit(item.index, e.currentTarget.textContent || '')}
                 className="outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-1 min-h-[24px] cursor-text hover:bg-gray-50"
-                style={getTextStyle('h4')}
+                style={getTextStyle('h3')}
               >
                 {item.question}
               </div>
             ) : (
               <h3 
                 className={`font-semibold ${colorTokens.textOnLight || colorTokens.textPrimary} hover:${colorTokens.link} transition-colors duration-200`}
-                style={getTextStyle('h4')}
+                style={getTextStyle('h3')}
               >
                 {item.question}
               </h3>

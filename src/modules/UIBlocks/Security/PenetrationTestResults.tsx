@@ -94,7 +94,7 @@ export default function PenetrationTestResults(props: LayoutComponentProps) {
                   backgroundType="neutral"
                   colorTokens={colorTokens}
                   variant="body"
-                  textStyle={getTextStyle('h4')}
+                  textStyle={getTextStyle('h3')}
                   className="font-bold text-gray-900 mb-2"
                   sectionId={sectionId}
                   elementKey="test_date"
@@ -111,7 +111,7 @@ export default function PenetrationTestResults(props: LayoutComponentProps) {
                   backgroundType="neutral"
                   colorTokens={colorTokens}
                   variant="body"
-                  textStyle={getTextStyle('h4')}
+                  textStyle={getTextStyle('h3')}
                   className="font-bold text-gray-900 mb-2"
                   sectionId={sectionId}
                   elementKey="test_firm"

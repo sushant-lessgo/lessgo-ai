@@ -152,7 +152,7 @@ export default function AuditResultsPanel(props: LayoutComponentProps) {
                     backgroundType="neutral"
                     colorTokens={colorTokens}
                     variant="body"
-                    textStyle={getTextStyle('h4')}
+                    textStyle={getTextStyle('h3')}
                     className="font-bold text-gray-900"
                     sectionId={sectionId}
                     elementKey="audit_firm"
@@ -171,7 +171,7 @@ export default function AuditResultsPanel(props: LayoutComponentProps) {
                     backgroundType="neutral"
                     colorTokens={colorTokens}
                     variant="body"
-                    textStyle={getTextStyle('h4')}
+                    textStyle={getTextStyle('h3')}
                     className="font-bold text-gray-900"
                     sectionId={sectionId}
                     elementKey="audit_date"

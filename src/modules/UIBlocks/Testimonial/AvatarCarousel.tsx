@@ -149,7 +149,8 @@ export default function AvatarCarousel(props: LayoutComponentProps) {
 
   const mutedTextColor = dynamicTextColors?.muted || colorTokens.textMuted;
   
-  const showImageToolbar = useEditStore((state) => state.showImageToolbar);
+  const store = useEditStore();
+  const showImageToolbar = store.showImageToolbar;
 
   const AvatarItem = ({ testimonial, index, isActive, isAdjacent }: {
     testimonial: typeof testimonials[0];
@@ -211,11 +212,14 @@ export default function AvatarCarousel(props: LayoutComponentProps) {
   
   const activeTestimonial = testimonials[activeIndex];
   
+  // Add safe background type to prevent type errors
+  const safeBackgroundType = props.backgroundType === 'custom' ? 'neutral' : (props.backgroundType || 'neutral');
+  
   return (
     <LayoutSection
       sectionId={sectionId}
       sectionType="AvatarCarousel"
-      backgroundType={props.backgroundType || 'neutral'}
+      backgroundType={safeBackgroundType}
       sectionBackground={sectionBackground}
       mode={mode}
       className={props.className}
@@ -228,7 +232,7 @@ export default function AvatarCarousel(props: LayoutComponentProps) {
             value={blockContent.headline}
             onEdit={(value) => handleContentUpdate('headline', value)}
             level="h2"
-            backgroundType={props.backgroundType || 'neutral'}
+            backgroundType={safeBackgroundType}
             colorTokens={colorTokens}
             textStyle={getTextStyle('h2')}
             className="mb-4"
@@ -242,7 +246,7 @@ export default function AvatarCarousel(props: LayoutComponentProps) {
               mode={mode}
               value={blockContent.subheadline || ''}
               onEdit={(value) => handleContentUpdate('subheadline', value)}
-              backgroundType={props.backgroundType || 'neutral'}
+              backgroundType={safeBackgroundType}
               colorTokens={colorTokens}
               variant="body"
               textStyle={getTextStyle('body-lg')}
@@ -265,7 +269,7 @@ export default function AvatarCarousel(props: LayoutComponentProps) {
                   mode={mode}
                   value={blockContent.testimonial_quotes}
                   onEdit={(value) => handleContentUpdate('testimonial_quotes', value)}
-                  backgroundType={props.backgroundType || 'neutral'}
+                  backgroundType={safeBackgroundType}
                   colorTokens={colorTokens}
                   variant="body"
                   textStyle={getTextStyle('body')}
@@ -280,7 +284,7 @@ export default function AvatarCarousel(props: LayoutComponentProps) {
                   mode={mode}
                   value={blockContent.customer_names}
                   onEdit={(value) => handleContentUpdate('customer_names', value)}
-                  backgroundType={props.backgroundType || 'neutral'}
+                  backgroundType={safeBackgroundType}
                   colorTokens={colorTokens}
                   variant="body"
                   textStyle={getTextStyle('body')}
@@ -295,7 +299,7 @@ export default function AvatarCarousel(props: LayoutComponentProps) {
                   mode={mode}
                   value={blockContent.customer_titles}
                   onEdit={(value) => handleContentUpdate('customer_titles', value)}
-                  backgroundType={props.backgroundType || 'neutral'}
+                  backgroundType={safeBackgroundType}
                   colorTokens={colorTokens}
                   variant="body"
                   textStyle={getTextStyle('body')}
@@ -310,7 +314,7 @@ export default function AvatarCarousel(props: LayoutComponentProps) {
                   mode={mode}
                   value={blockContent.customer_companies || ''}
                   onEdit={(value) => handleContentUpdate('customer_companies', value)}
-                  backgroundType={props.backgroundType || 'neutral'}
+                  backgroundType={safeBackgroundType}
                   colorTokens={colorTokens}
                   variant="body"
                   textStyle={getTextStyle('body')}
@@ -447,7 +451,7 @@ export default function AvatarCarousel(props: LayoutComponentProps) {
                 mode={mode}
                 value={blockContent.supporting_text || ''}
                 onEdit={(value) => handleContentUpdate('supporting_text', value)}
-                backgroundType={props.backgroundType || 'neutral'}
+                backgroundType={safeBackgroundType}
                 colorTokens={colorTokens}
                 variant="body"
                 textStyle={getTextStyle('body-lg')}

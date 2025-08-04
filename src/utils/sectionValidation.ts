@@ -288,6 +288,34 @@ const SECTION_VALIDATION_CONFIGS: Record<SectionType, SectionValidationConfig> =
       },
     ],
   },
+  pricing: {
+    sectionType: 'pricing',
+    requiredElements: ['plans'],
+    optionalElements: ['headline', 'subheadline', 'features'],
+    completionWeights: { plans: 60, headline: 20, features: 20 },
+    validationRules: []
+  },
+  problem: {
+    sectionType: 'problem',
+    requiredElements: ['headline'],
+    optionalElements: ['subheadline', 'description'],
+    completionWeights: { headline: 50, description: 50 },
+    validationRules: []
+  },
+  results: {
+    sectionType: 'results',
+    requiredElements: ['headline'],
+    optionalElements: ['subheadline', 'stats', 'description'],
+    completionWeights: { headline: 40, stats: 40, description: 20 },
+    validationRules: []
+  },
+  logos: {
+    sectionType: 'logos',
+    requiredElements: ['logos'],
+    optionalElements: ['headline', 'subheadline'],
+    completionWeights: { logos: 70, headline: 30 },
+    validationRules: []
+  },
 };
 
 /**
@@ -295,13 +323,12 @@ const SECTION_VALIDATION_CONFIGS: Record<SectionType, SectionValidationConfig> =
  */
 export function validateSection(section: any, sectionId: string): DetailedValidationResult {
   const sectionType = section.type || 'custom';
-  const config = SECTION_VALIDATION_CONFIGS[sectionType];
+  const config = SECTION_VALIDATION_CONFIGS[sectionType as keyof typeof SECTION_VALIDATION_CONFIGS];
   
   if (!config) {
     return {
       sectionId,
       sectionType: 'custom',
-      valid: false,
       isValid: false,
       errors: [{
         elementKey: 'sectionType',
@@ -326,7 +353,7 @@ export function validateSection(section: any, sectionId: string): DetailedValida
   const suggestions: string[] = [];
 
   // Check required elements
-  const missingRequired = config.requiredElements.filter(elementKey => {
+  const missingRequired = config.requiredElements.filter((elementKey: string) => {
     const element = elements[elementKey];
     return !element || !element.content || (
       typeof element.content === 'string' ? element.content.trim().length === 0 :
@@ -335,7 +362,7 @@ export function validateSection(section: any, sectionId: string): DetailedValida
   });
 
   // Check optional elements
-  const missingOptional = config.optionalElements.filter(elementKey => {
+  const missingOptional = config.optionalElements.filter((elementKey: string) => {
     const element = elements[elementKey];
     return !element || !element.content || (
       typeof element.content === 'string' ? element.content.trim().length === 0 :
@@ -344,7 +371,7 @@ export function validateSection(section: any, sectionId: string): DetailedValida
   });
 
   // Add errors for missing required elements
-  missingRequired.forEach(elementKey => {
+  missingRequired.forEach((elementKey: string) => {
     errors.push({
       elementKey,
       code: 'MISSING_REQUIRED_ELEMENT',
@@ -354,7 +381,7 @@ export function validateSection(section: any, sectionId: string): DetailedValida
   });
 
   // Run validation rules
-  config.validationRules.forEach(rule => {
+  config.validationRules.forEach((rule: any) => {
     if (!rule.validate(section)) {
       const message = rule.getMessage(section);
       
@@ -402,13 +429,13 @@ export function validateSection(section: any, sectionId: string): DetailedValida
       let completedWeight = 0;
       
       Object.entries(config.completionWeights).forEach(([elementKey, weight]) => {
-        totalWeight += weight;
+        totalWeight += (weight as number);
         const element = elements[elementKey];
         if (element && element.content && (
           typeof element.content === 'string' ? element.content.trim().length > 0 :
           Array.isArray(element.content) && element.content.length > 0
         )) {
-          completedWeight += weight;
+          completedWeight += (weight as number);
         }
       });
       
@@ -427,7 +454,6 @@ export function validateSection(section: any, sectionId: string): DetailedValida
   return {
     sectionId,
     sectionType,
-    valid: isValid,
     isValid,
     errors,
     warnings,

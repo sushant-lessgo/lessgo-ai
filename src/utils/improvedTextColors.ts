@@ -433,7 +433,7 @@ export function validateWCAGContrast(
     // });
     
     return {
-      ratio: validation.contrastRatio, // Fixed: use contrastRatio instead of contrast
+      ratio: validation.contrastRatio,
       meetsAA: validation.contrastRatio >= 4.5,
       meetsAAA: validation.contrastRatio >= 7.0
     };
@@ -481,5 +481,6 @@ export function hasGoodContrast(
   backgroundColor: string,
   level: 'AA' | 'AAA' = 'AA'
 ): boolean {
-  return validateWCAGContrast(foregroundColor, backgroundColor, level);
+  const result = validateWCAGContrast(foregroundColor, backgroundColor, level);
+  return level === 'AAA' ? result.meetsAAA : result.meetsAA;
 }

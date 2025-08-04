@@ -95,7 +95,7 @@ const ValuePropCard = React.memo(({
       
       {/* Content */}
       <div className="flex-1">
-        <h3 className="font-bold text-gray-900 mb-2" style={getTextStyle('h4')}>
+        <h3 className="font-bold text-gray-900 mb-2" style={getTextStyle('h3')}>
           {valueProp.title}
         </h3>
         <p className="text-gray-600 leading-relaxed" style={getTextStyle('body-sm')}>

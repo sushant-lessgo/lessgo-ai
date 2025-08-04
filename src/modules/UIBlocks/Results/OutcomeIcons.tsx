@@ -129,7 +129,7 @@ const getColorScheme = (iconType: string): { bg: string; icon: string; border: s
     support: { bg: 'bg-pink-50', icon: 'text-pink-600', border: 'border-pink-200' }
   };
   
-  return schemes[iconType.toLowerCase()] || schemes.efficiency;
+  return schemes[iconType.toLowerCase() as keyof typeof schemes] || schemes.efficiency;
 };
 
 // Individual Outcome Card Component
@@ -185,14 +185,14 @@ const OutcomeCard = ({
             suppressContentEditableWarning
             onBlur={(e) => onTitleEdit(index, e.currentTarget.textContent || '')}
             className="outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-1 min-h-[28px] cursor-text hover:bg-gray-50 font-bold text-gray-900"
-            style={getTextStyle('h4')}
+            style={getTextStyle('h3')}
           >
             {outcome.title}
           </div>
         ) : (
           <h3 
             className="font-bold text-gray-900"
-            style={getTextStyle('h4')}
+            style={getTextStyle('h3')}
           >
             {outcome.title}
           </h3>

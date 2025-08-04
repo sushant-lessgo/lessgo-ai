@@ -125,7 +125,8 @@ export default function MissionQuoteOverlay(props: LayoutComponentProps) {
     : ['Certified', 'Trusted'];
 
   // Get showImageToolbar for handling image clicks
-  const showImageToolbar = useEditStore((state) => state.showImageToolbar);
+  const store = useEditStore();
+  const showImageToolbar = store.showImageToolbar;
 
   return (
     <LayoutSection

@@ -77,13 +77,13 @@ function extractJSON(content: string): string | null {
  * Validates and cleans the parsed content
  */
 function validateContent(content: any): {
-  content: Record<string, any>
-  warnings: string[]
-  errors: string[]
-  isPartial: boolean
+  content: Record<string, any>;
+  warnings: string[];
+  errors: string[];
+  isPartial: boolean;
 } {
   const validation = {
-    content: {},
+    content: {} as Record<string, any>,
     warnings: [] as string[],
     errors: [] as string[],
     isPartial: false
@@ -129,15 +129,15 @@ function validateContent(content: any): {
  * Processes and validates individual section content
  */
 function processSectionContent(sectionId: string, content: SectionContent): {
-  content: SectionContent
-  warnings: string[]
-  hasIssues: boolean
+  content: SectionContent;
+  warnings: string[];
+  hasIssues: boolean;
 } {
   const result = {
     content: {} as SectionContent,
     warnings: [] as string[],
     hasIssues: false
-  }
+  };
 
   Object.entries(content).forEach(([elementKey, elementValue]) => {
     const processedElement = processElement(sectionId, elementKey, elementValue)
@@ -159,17 +159,17 @@ function processSectionContent(sectionId: string, content: SectionContent): {
  * Processes individual elements with validation
  */
 function processElement(sectionId: string, elementKey: string, value: any): {
-  isValid: boolean
-  value: string | string[]
-  fallback: string | string[]
-  warnings: string[]
+  isValid: boolean;
+  value: string | string[];
+  fallback: string | string[];
+  warnings: string[];
 } {
   const result = {
     isValid: true,
     value: value,
     fallback: getElementFallback(elementKey),
     warnings: [] as string[]
-  }
+  };
 
   // Type validation
   if (typeof value !== 'string' && !Array.isArray(value)) {
@@ -220,9 +220,9 @@ function processElement(sectionId: string, elementKey: string, value: any): {
  * Validates string length based on element type
  */
 function validateStringLength(elementKey: string, value: string): {
-  isValid: boolean
-  message: string
-  severity: 'warning' | 'error'
+  isValid: boolean;
+  message: string;
+  severity: 'warning' | 'error';
 } {
   const lengthRules: Record<string, { min: number; max: number; severity: 'warning' | 'error' }> = {
     headline: { min: 10, max: 100, severity: 'warning' },
@@ -290,13 +290,13 @@ function getElementFallback(elementKey: string): string | string[] {
 
   // Check for exact match
   if (fallbacks[elementKey]) {
-    return fallbacks[elementKey]
+    return fallbacks[elementKey];
   }
 
   // Check for partial matches
   for (const [key, value] of Object.entries(fallbacks)) {
     if (elementKey.includes(key)) {
-      return value
+      return value;
     }
   }
 
@@ -304,5 +304,5 @@ function getElementFallback(elementKey: string): string | string[] {
   const arrayIndicators = ['titles', 'descriptions', 'quotes', 'questions', 'answers', 'items', 'list']
   const shouldBeArray = arrayIndicators.some(indicator => elementKey.includes(indicator))
 
-  return shouldBeArray ? ["Default content"] : "Default content"
+  return shouldBeArray ? ["Default content"] : "Default content";
 }

@@ -66,7 +66,7 @@ const getCategoryColor = (category?: string): { bg: string; text: string; border
     'analytics': { bg: 'bg-yellow-50', text: 'text-yellow-700', border: 'border-yellow-200' }
   };
   
-  return colors[category.toLowerCase()] || { bg: 'bg-gray-50', text: 'text-gray-600', border: 'border-gray-200' };
+  return colors[category.toLowerCase() as keyof typeof colors] || { bg: 'bg-gray-50', text: 'text-gray-600', border: 'border-gray-200' };
 };
 
 // Individual Win Item Component
@@ -133,14 +133,14 @@ const WinItem = ({
               suppressContentEditableWarning
               onBlur={(e) => onWinEdit(index, e.currentTarget.textContent || '')}
               className="outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-1 min-h-[28px] cursor-text hover:bg-gray-50 font-bold text-gray-900"
-              style={getTextStyle('h4')}
+              style={getTextStyle('h3')}
             >
               {win.win}
             </div>
           ) : (
             <h3 
               className="font-bold text-gray-900"
-              style={getTextStyle('h4')}
+              style={getTextStyle('h3')}
             >
               {win.win}
             </h3>

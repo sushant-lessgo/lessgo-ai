@@ -1,5 +1,5 @@
 // utils/toolbarPositioning.ts - Core positioning utilities and collision detection
-import type { ToolbarPosition, ToolbarType } from '@/types/core/ui';
+import type { ToolbarPosition, ToolbarType, PositionBounds } from '@/types/core/ui';
 
 export interface ToolbarConfig {
   type: ToolbarType;
@@ -7,11 +7,7 @@ export interface ToolbarConfig {
   bounds?: DOMRect;
 }
 
-export interface PositionConstraints {
-  minX: number;
-  maxX: number;
-  minY: number;
-  maxY: number;
+export interface PositionConstraints extends PositionBounds {
   margin: number;
 }
 
@@ -199,7 +195,8 @@ export function resolveCollisions(
     // Check for collision
     if (isColliding(position, newDimensions, existing.position, existingDimensions)) {
       // Resolve collision by offsetting
-      position = resolveCollision(position, newDimensions, existing.position, existingDimensions);
+      const newPos = resolveCollision(position, newDimensions, existing.position, existingDimensions);
+      position = { ...position, x: newPos.x, y: newPos.y };
     }
   }
   
@@ -343,6 +340,7 @@ export function getVisibleToolbars(floatingToolbars: any): ToolbarConfig[] {
         strategy: 'fixed' as const,
         anchor: 'top' as const,
         offset: { x: 0, y: 0 },
+        bounds: getViewportConstraints(),
       },
     }));
 }
@@ -440,7 +438,7 @@ export function createDebouncedPositionUpdate(
   updateFn: () => void,
   delay: number = 16
 ): () => void {
-  let timeoutId: NodeJS.Timeout;
+  let timeoutId: ReturnType<typeof setTimeout>;
   
   return () => {
     clearTimeout(timeoutId);

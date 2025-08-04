@@ -18,7 +18,7 @@ import {
 interface StorageManagerState {
   isCleanupRunning: boolean;
   lastCleanupTime: number;
-  cleanupInterval: NodeJS.Timeout | null;
+  cleanupInterval: ReturnType<typeof setInterval> | null;
   quotaWarningThreshold: number; // KB
   quotaErrorThreshold: number; // KB
 }
@@ -266,7 +266,7 @@ class StorageManager {
     status: 'healthy' | 'warning' | 'critical';
     stats: ReturnType<typeof getStorageStats>;
     recommendations: string[];
-    cleanupStatus: ReturnType<typeof this.getCleanupStatus>;
+    cleanupStatus: ReturnType<StorageManager['getCleanupStatus']>;
   } {
     const stats = getStorageStats();
     const cleanupStatus = this.getCleanupStatus();

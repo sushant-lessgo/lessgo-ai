@@ -148,11 +148,14 @@ export default function LeadMagnetCard(props: LayoutComponentProps) {
     );
   };
   
+  // Add safe background type to prevent type errors
+  const safeBackgroundType = props.backgroundType === 'custom' ? 'neutral' : (props.backgroundType || 'neutral');
+  
   return (
     <LayoutSection
       sectionId={sectionId}
       sectionType="LeadMagnetCard"
-      backgroundType={props.backgroundType || 'neutral'}
+      backgroundType={safeBackgroundType}
       sectionBackground={sectionBackground}
       mode={mode}
       className={props.className}
@@ -165,7 +168,7 @@ export default function LeadMagnetCard(props: LayoutComponentProps) {
             value={blockContent.headline}
             onEdit={(value) => handleContentUpdate('headline', value)}
             level="h2"
-            backgroundType={props.backgroundType || 'neutral'}
+            backgroundType={safeBackgroundType}
             colorTokens={colorTokens}
             textStyle={getTextStyle('h2')}
             className="mb-4"
@@ -179,7 +182,7 @@ export default function LeadMagnetCard(props: LayoutComponentProps) {
               mode={mode}
               value={blockContent.subheadline || ''}
               onEdit={(value) => handleContentUpdate('subheadline', value)}
-              backgroundType={props.backgroundType || 'neutral'}
+              backgroundType={safeBackgroundType}
               colorTokens={colorTokens}
               variant="body"
               textStyle={getTextStyle('body-lg')}
@@ -202,7 +205,7 @@ export default function LeadMagnetCard(props: LayoutComponentProps) {
                   mode={mode}
                   value={blockContent.magnet_title}
                   onEdit={(value) => handleContentUpdate('magnet_title', value)}
-                  backgroundType={props.backgroundType || 'neutral'}
+                  backgroundType={safeBackgroundType}
                   colorTokens={colorTokens}
                   variant="body"
                   textStyle={getTextStyle('body')}
@@ -217,7 +220,7 @@ export default function LeadMagnetCard(props: LayoutComponentProps) {
                   mode={mode}
                   value={blockContent.magnet_description}
                   onEdit={(value) => handleContentUpdate('magnet_description', value)}
-                  backgroundType={props.backgroundType || 'neutral'}
+                  backgroundType={safeBackgroundType}
                   colorTokens={colorTokens}
                   variant="body"
                   textStyle={getTextStyle('body')}
@@ -232,7 +235,7 @@ export default function LeadMagnetCard(props: LayoutComponentProps) {
                   mode={mode}
                   value={blockContent.magnet_benefits}
                   onEdit={(value) => handleContentUpdate('magnet_benefits', value)}
-                  backgroundType={props.backgroundType || 'neutral'}
+                  backgroundType={safeBackgroundType}
                   colorTokens={colorTokens}
                   variant="body"
                   textStyle={getTextStyle('body')}
@@ -247,7 +250,7 @@ export default function LeadMagnetCard(props: LayoutComponentProps) {
                   mode={mode}
                   value={blockContent.magnet_format}
                   onEdit={(value) => handleContentUpdate('magnet_format', value)}
-                  backgroundType={props.backgroundType || 'neutral'}
+                  backgroundType={safeBackgroundType}
                   colorTokens={colorTokens}
                   variant="body"
                   textStyle={getTextStyle('body')}
@@ -420,7 +423,7 @@ export default function LeadMagnetCard(props: LayoutComponentProps) {
                 mode={mode}
                 value={blockContent.supporting_text || ''}
                 onEdit={(value) => handleContentUpdate('supporting_text', value)}
-                backgroundType={props.backgroundType || 'neutral'}
+                backgroundType={safeBackgroundType}
                 colorTokens={colorTokens}
                 variant="body"
                 textStyle={getTextStyle('body-lg')}

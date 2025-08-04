@@ -215,11 +215,9 @@ export default function SplitScreen(props: LayoutComponentProps) {
   const mutedTextColor = dynamicTextColors?.muted || colorTokens.textMuted;
   
   // Get reactive hero image URL directly from store using selector
-  const heroImageUrl = useEditStore((state) => {
-    const url = state.content[sectionId]?.elements?.split_hero_image?.content;
-    console.log('🔄 Store selector called for split hero image:', { sectionId, url, timestamp: Date.now() });
-    return url;
-  });
+  const store = useEditStore();
+  const heroImageUrl = store.content[sectionId]?.elements?.split_hero_image?.content;
+  console.log('🔄 Store selector called for split hero image:', { sectionId, url: heroImageUrl, timestamp: Date.now() });
   
   const reactiveHeroImage = heroImageUrl || blockContent.split_hero_image;  
   console.log('🎨 Final hero image URL:', reactiveHeroImage);

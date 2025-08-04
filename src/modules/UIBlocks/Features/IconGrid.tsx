@@ -132,7 +132,7 @@ const FeatureCard = React.memo(({
         colorTokens={colorTokens}
         variant="heading"
         textStyle={{
-          ...getTextStyle('h4'),
+          ...getTextStyle('h3'),
           fontWeight: 600
         }}
         className="mb-3"

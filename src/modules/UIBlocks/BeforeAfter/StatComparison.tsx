@@ -158,11 +158,14 @@ export default function StatComparison(props: LayoutComponentProps) {
 
   const mutedTextColor = dynamicTextColors?.muted || colorTokens.textMuted;
   
+  // Filter out 'custom' background type as it's not supported by EditableContent components
+  const safeBackgroundType = props.backgroundType === 'custom' ? 'neutral' : (props.backgroundType || 'neutral');
+  
   return (
     <LayoutSection
       sectionId={sectionId}
       sectionType="StatComparison"
-      backgroundType={props.backgroundType || 'neutral'}
+      backgroundType={safeBackgroundType}
       sectionBackground={sectionBackground}
       mode={mode}
       className={props.className}
@@ -175,7 +178,7 @@ export default function StatComparison(props: LayoutComponentProps) {
             value={blockContent.headline}
             onEdit={(value) => handleContentUpdate('headline', value)}
             level="h2"
-            backgroundType={props.backgroundType || 'neutral'}
+            backgroundType={safeBackgroundType}
             colorTokens={colorTokens}
             textStyle={getTextStyle('h2')}
             className="mb-4"
@@ -189,7 +192,7 @@ export default function StatComparison(props: LayoutComponentProps) {
               mode={mode}
               value={blockContent.subheadline || ''}
               onEdit={(value) => handleContentUpdate('subheadline', value)}
-              backgroundType={props.backgroundType || 'neutral'}
+              backgroundType={safeBackgroundType}
               colorTokens={colorTokens}
               variant="body"
               textStyle={getTextStyle('body-lg')}
@@ -212,7 +215,7 @@ export default function StatComparison(props: LayoutComponentProps) {
                   mode={mode}
                   value={blockContent.before_label}
                   onEdit={(value) => handleContentUpdate('before_label', value)}
-                  backgroundType={props.backgroundType || 'neutral'}
+                  backgroundType={safeBackgroundType}
                   colorTokens={colorTokens}
                   variant="body"
                   textStyle={{
@@ -234,7 +237,7 @@ export default function StatComparison(props: LayoutComponentProps) {
                   mode={mode}
                   value={blockContent.before_stats}
                   onEdit={(value) => handleContentUpdate('before_stats', value)}
-                  backgroundType={props.backgroundType || 'neutral'}
+                  backgroundType={safeBackgroundType}
                   colorTokens={colorTokens}
                   variant="body"
                   textStyle={getTextStyle('body')}
@@ -266,7 +269,7 @@ export default function StatComparison(props: LayoutComponentProps) {
                   mode={mode}
                   value={blockContent.after_label}
                   onEdit={(value) => handleContentUpdate('after_label', value)}
-                  backgroundType={props.backgroundType || 'neutral'}
+                  backgroundType={safeBackgroundType}
                   colorTokens={colorTokens}
                   variant="body"
                   textStyle={{
@@ -288,7 +291,7 @@ export default function StatComparison(props: LayoutComponentProps) {
                   mode={mode}
                   value={blockContent.after_stats}
                   onEdit={(value) => handleContentUpdate('after_stats', value)}
-                  backgroundType={props.backgroundType || 'neutral'}
+                  backgroundType={safeBackgroundType}
                   colorTokens={colorTokens}
                   variant="body"
                   textStyle={getTextStyle('body')}
@@ -338,7 +341,7 @@ export default function StatComparison(props: LayoutComponentProps) {
               mode={mode}
               value={blockContent.improvement_text}
               onEdit={(value) => handleContentUpdate('improvement_text', value)}
-              backgroundType={props.backgroundType || 'neutral'}
+              backgroundType={safeBackgroundType}
               colorTokens={colorTokens}
               variant="body"
               textStyle={getTextStyle('body-lg')}
@@ -397,7 +400,7 @@ export default function StatComparison(props: LayoutComponentProps) {
                 mode={mode}
                 value={blockContent.supporting_text || ''}
                 onEdit={(value) => handleContentUpdate('supporting_text', value)}
-                backgroundType={props.backgroundType || 'neutral'}
+                backgroundType={safeBackgroundType}
                 colorTokens={colorTokens}
                 variant="body"
                 textStyle={getTextStyle('body-lg')}

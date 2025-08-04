@@ -110,7 +110,7 @@ export default function ProcessFlowDiagram(props: LayoutComponentProps) {
                 
                 {/* Step Content */}
                 <div className="text-center">
-                  <h3 className="font-bold text-gray-900 mb-3" style={getTextStyle('h4')}>
+                  <h3 className="font-bold text-gray-900 mb-3" style={getTextStyle('h3')}>
                     {step}
                   </h3>
                   <p className="text-gray-600 text-sm" style={getTextStyle('body-sm')}>
