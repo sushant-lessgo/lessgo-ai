@@ -473,6 +473,7 @@ function validateVisualRhythm(
   const highlightCount = sections.filter(s => ['primary', 'secondary'].includes(assignments[s])).length;
   const neutralCount = sections.filter(s => assignments[s] === 'neutral').length;
   const dividerCount = sections.filter(s => assignments[s] === 'divider').length;
+  const highlightRatioPercent = Math.round((highlightCount / sections.length) * 100);
   
   console.log(`📊 Background distribution:`, {
     highlights: highlightCount,
@@ -480,11 +481,11 @@ function validateVisualRhythm(
     dividers: dividerCount,
     maxConsecutive,
     totalSections: sections.length,
-    highlightRatio: Math.round((highlightCount / sections.length) * 100) + '%'
+    highlightRatio: highlightRatioPercent + '%'
   });
   
   // ✅ RECOMMENDATIONS
-  if (highlightRatio > 70) {
+  if (highlightRatioPercent > 70) {
     console.warn('💡 Recommendation: Too many highlights (>70%). Consider making some sections neutral for better visual hierarchy.');
   }
   

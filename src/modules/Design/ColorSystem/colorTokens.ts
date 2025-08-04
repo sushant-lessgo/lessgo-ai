@@ -32,14 +32,24 @@ export function generateColorTokens({
   sectionBackgrounds?: SectionBackgroundInput; // From backgroundIntegration system
 }) {
   
+  // Helper function to convert hex to Tailwind bg class
+  const hexToTailwindBg = (hex: string): string => {
+    // This is a simplified mapping - in production you'd want a more comprehensive solution
+    return `bg-[${hex}]`; // Use arbitrary value syntax for exact hex colors
+  };
+
   // ✅ ENHANCED: Smart accent CSS generation using color harmony
-  const businessContext = { industry: 'tech', tone: 'professional' }; // TODO: Extract from onboarding
+  const businessContext = { industry: 'tech', tone: 'professional' as const }; // TODO: Extract from onboarding
   const accentCandidates = generateAccentCandidates(baseColor, businessContext);
   
-  const smartAccentCSS = accentCSS || accentCandidates[0]?.tailwindBg || `bg-${accentColor}-500`;
+  // Convert accent candidate hex color to Tailwind CSS class
+  const candidateHex = accentCandidates[0]?.hex;
+  const candidateTailwind = candidateHex ? hexToTailwindBg(candidateHex) : undefined;
+  
+  const smartAccentCSS = accentCSS || candidateTailwind || `bg-${accentColor}-500`;
   const smartAccentHover = accentCSS ? 
     accentCSS.replace('-500', '-600').replace('-600', '-700') : 
-    accentCandidates[0]?.tailwindHover || `bg-${accentColor}-600`;
+    candidateTailwind?.replace('-500', '-600').replace('-600', '-700') || `bg-${accentColor}-600`;
   const smartAccentBorder = accentCSS ? 
     accentCSS.replace('bg-', 'border-') : 
     `border-${accentColor}-500`;
@@ -124,8 +134,9 @@ export function generateColorTokens({
       // ✅ IMPROVED: Try accent candidates first before falling back to grays
       const workingCandidate = accentCandidates.find(candidate => {
         try {
+          const candidateBg = hexToTailwindBg(candidate.hex);
           return criticalBackgrounds.every(bg => 
-            validateWCAGContrast(candidate.tailwindBg, bg, 'AA')
+            validateWCAGContrast(candidateBg, bg, 'AA')
           );
         } catch (error) {
           return false;
@@ -133,8 +144,9 @@ export function generateColorTokens({
       });
       
       if (workingCandidate) {
-        safeCTABg = workingCandidate.tailwindBg;
-        const candidateTextHex = workingCandidate.textColor || getSmartTextColor(workingCandidate.tailwindBg, 'body');
+        const workingCandidateBg = hexToTailwindBg(workingCandidate.hex);
+        safeCTABg = workingCandidateBg;
+        const candidateTextHex = getSmartTextColor(workingCandidateBg, 'body');
         safeCTAText = hexToTailwindClass(candidateTextHex);
         // console.log('✅ Using brand-safe accent color for CTA:', safeCTABg, 'with text:', safeCTAText);
       } else {

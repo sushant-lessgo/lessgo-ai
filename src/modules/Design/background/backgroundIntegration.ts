@@ -203,12 +203,12 @@ export function getAccentColor(baseColor: string, onboardingData: OnboardingData
     // ✅ PHASE 5.2: Map canonical field names to selectAccentOption context
     const userContext = {
       marketCategory: onboardingData.marketCategory || '',
-      targetAudienceGroups: onboardingData.targetAudience || '',
-      landingGoalTypes: onboardingData.landingPageGoals || '', // ✅ FIXED: landingPageGoals
-      startupStageGroups: onboardingData.startupStage || '',
-      toneProfiles: onboardingData.toneProfile || 'friendly-helpful', // ✅ FIXED: toneProfile
-      awarenessLevels: onboardingData.awarenessLevel || 'solution-aware',
-      pricingModels: onboardingData.pricingModel || '',
+      targetAudience: onboardingData.targetAudience || '',
+      landingPageGoals: onboardingData.landingPageGoals || '', // ✅ FIXED: landingPageGoals
+      startupStage: onboardingData.startupStage || '',
+      toneProfile: onboardingData.toneProfile || 'friendly-helpful', // ✅ FIXED: toneProfile
+      awarenessLevel: onboardingData.awarenessLevel || 'solution-aware',
+      pricingModel: onboardingData.pricingModel || '',
     };
 
     const selectedAccent = selectAccentOption(userContext, baseColor);

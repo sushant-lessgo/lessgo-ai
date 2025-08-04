@@ -95,30 +95,64 @@ export default function PublishedPageRenderer({
 
   // Generate sections from the published data
   const sections: OrderedSection[] = React.useMemo(() => {
-    if (!data?.sections) return [];
+    if (!data) return [];
 
-    return Object.entries(data.sections)
-      .map(([id, section]) => ({
-        id,
-        order: section.order || 0,
+    // Create sections from GPTOutput structure
+    const sectionMapping = [
+      { id: 'hero', order: 0, visible: data.visibleSections?.hero },
+      { id: 'before_after', order: 1, visible: data.visibleSections?.before_after },
+      { id: 'how_it_works', order: 2, visible: data.visibleSections?.how_it_works },
+      { id: 'testimonials', order: 3, visible: data.visibleSections?.testimonials },
+      { id: 'offer', order: 4, visible: data.visibleSections?.offer },
+      { id: 'faq', order: 5, visible: data.visibleSections?.faq },
+    ];
+
+    return sectionMapping
+      .filter(section => section.visible)
+      .map(section => ({
+        id: section.id,
+        order: section.order,
         background: 'neutral' as SectionBackground,
-        layout: section.layout || 'default',
-      }))
-      .sort((a, b) => a.order - b.order);
+        layout: 'default',
+      }));
   }, [data]);
 
   // Generate enhanced backgrounds
   const enhancedBackgrounds = React.useMemo(() => {
-    if (!data?.meta?.theme || sections.length === 0) return {};
+    if (!data?.theme || sections.length === 0) return {};
 
-    const backgroundSystem = generateCompleteBackgroundSystem(
-      data.meta.theme,
-      data.meta.archetype || 'balanced',
-      sections.length
-    );
+    // Create minimal onboarding data from GPTOutput with required fields
+    const onboardingData = {
+      marketCategory: data.meta.marketCategory,
+      marketSubcategory: data.meta.marketSubcategory,
+      targetAudience: data.meta.targetAudience,
+      keyProblem: data.meta.problemBeingSolved,
+      problemBeingSolved: data.meta.problemBeingSolved,
+      startupStage: 'MVP & Early Customers', // Default value
+      landingPageGoals: 'Generate Leads', // Default value
+      pricingModel: 'subscription', // Default value
+      theme: data.theme
+    };
+    
+    const backgroundSystem = generateCompleteBackgroundSystem(onboardingData);
 
-    return assignEnhancedBackgroundsToAllSections(sections, backgroundSystem);
+    // Map section IDs for the background assignment
+    const sectionIds = sections.map(s => s.id);
+    return assignEnhancedBackgroundsToAllSections(sectionIds, onboardingData);
   }, [data, sections]);
+
+  // Create onboarding data in component scope
+  const onboardingData = React.useMemo(() => ({
+    marketCategory: data?.meta?.marketCategory || 'Work & Productivity Tools',
+    marketSubcategory: data?.meta?.marketSubcategory || 'Project Management',
+    targetAudience: data?.meta?.targetAudience || 'Business Owners',
+    keyProblem: data?.meta?.problemBeingSolved || 'Productivity issues',
+    problemBeingSolved: data?.meta?.problemBeingSolved || 'Productivity issues',
+    startupStage: 'MVP & Early Customers' as const,
+    landingPageGoals: 'Generate Leads' as const,
+    pricingModel: 'subscription' as const,
+    theme: data?.theme || 'modern'
+  }), [data]);
 
   if (!data) {
     return <div>Page not found</div>;
@@ -127,15 +161,19 @@ export default function PublishedPageRenderer({
   return (
     <div className="min-h-screen">
       {sections.map((section) => {
-        const sectionContent = data.sections?.[section.id];
+        // Get section content from the specific GPTOutput properties
+        const sectionContent = (data as any)[section.id];
         if (!sectionContent) return null;
 
+        const sectionIds = sections.map(s => s.id);
         const backgroundType = getSectionBackgroundTypeWithContext(
           section.id,
-          section.order,
-          sections.length,
-          enhancedBackgrounds[section.id]
+          sectionIds,
+          onboardingData
         );
+        
+        // Use simple background for now
+        const sectionBackground = 'bg-white';
 
         // Get the component for this section
         const SectionComponent = getComponent(sectionContent.type, section.layout);
@@ -146,10 +184,11 @@ export default function PublishedPageRenderer({
             <SmartTextSection
               key={section.id}
               sectionId={section.id}
-              background={backgroundType}
-              userId={userId}
-              publishedPageId={publishedPageId}
-            />
+              backgroundType={backgroundType}
+              sectionBackgroundCSS={sectionBackground}
+            >
+              <div>Section: {section.id}</div>
+            </SmartTextSection>
           );
         }
 

@@ -208,8 +208,8 @@ export default function LandingPageRenderer({ className = '' }: LandingPageRende
     });
 
   const processedSections = sections
-  .map(sectionId => {
-    const sectionMeta = sectionList.find(s => s.id === sectionId);
+  .map((sectionId: string) => {
+    const sectionMeta = sectionList.find((s: any) => s.id === sectionId);
     const sectionData = content[sectionId];
     const layout = sectionLayouts[sectionId] || sectionData?.layout;
     
@@ -221,14 +221,14 @@ export default function LandingPageRenderer({ className = '' }: LandingPageRende
       sectionMeta
     };
   })
-  .filter((section): section is typeof section & { layout: string } => {
+  .filter((section: any): section is typeof section & { layout: string } => {
     return section.layout !== undefined && typeof section.layout === 'string';
   })
-  .sort((a, b) => a.order - b.order);
+  .sort((a: any, b: any) => a.order - b.order);
 
     // ✅ NOW APPLY ALTERNATING LOGIC to the sorted sections
     // ✅ Use batch assignment instead of individual calls
-const allSectionIds = processedSections.map(s => s.id);
+const allSectionIds = processedSections.map((s: any) => s.id);
 const backgroundAssignments = assignEnhancedBackgroundsToAllSections(allSectionIds, {
   // Required InputVariables fields with defaults
   marketCategory: validatedFields.marketCategory || 'Work & Productivity Tools',
@@ -244,8 +244,8 @@ const backgroundAssignments = assignEnhancedBackgroundsToAllSections(allSectionI
 });
 
 const finalSections: OrderedSection[] = processedSections
-.filter(section => section.layout !== undefined && typeof section.layout === 'string')
-.map((section, index) => {
+.filter((section: any) => section.layout !== undefined && typeof section.layout === 'string')
+.map((section: any, index: number) => {
   const { id: sectionId, order, layout, data } = section;
   
   const dynamicBackgroundType = backgroundAssignments[sectionId];
