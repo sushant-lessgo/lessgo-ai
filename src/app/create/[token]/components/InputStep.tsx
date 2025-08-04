@@ -33,6 +33,7 @@ interface APIResponse {
 
 interface InputStepProps {
   onSuccess: (input: string, confirmedFields: Record<string, ConfirmedFieldData>) => void;
+  onProcessingStart?: () => void;
 }
 
 // ===== FIELD MAPPING =====
@@ -40,7 +41,7 @@ interface InputStepProps {
 const EXPECTED_DISPLAY_FIELDS = Object.keys(DISPLAY_TO_CANONICAL);
 
 // ===== COMPONENT =====
-export default function InputStep({ onSuccess }: InputStepProps) {
+export default function InputStep({ onSuccess, onProcessingStart }: InputStepProps) {
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -65,6 +66,11 @@ export default function InputStep({ onSuccess }: InputStepProps) {
 
     setLoading(true);
     setError(null);
+    
+    // Notify parent that processing has started
+    if (onProcessingStart) {
+      onProcessingStart();
+    }
 
     try {
       // Analytics tracking
@@ -265,7 +271,7 @@ export default function InputStep({ onSuccess }: InputStepProps) {
       {/* Help text */}
       {!error && (
         <p id="input-help" className="text-sm text-gray-500">
-          Describe your startup idea in 1-2 sentences. Include what problem you're solving and who it's for.
+          Describe your startup idea in 1-2 sentences. We'll analyze it and guide you through building your landing page step by step.
         </p>
       )}
 
@@ -297,7 +303,7 @@ export default function InputStep({ onSuccess }: InputStepProps) {
             <span>Analyzing...</span>
           </div>
         ) : (
-          "Build My Page Now!"
+          "Start Building!"
         )}
       </button>
 

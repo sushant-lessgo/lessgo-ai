@@ -6,6 +6,7 @@ import { EditProvider, useEditStoreContext } from '@/components/EditProvider';
 import LandingPageRenderer from '@/modules/generatedLanding/LandingPageRenderer';
 import { StoreDebugPanel } from '@/app/create/[token]/components/StoreDebugPanel';
 import { OnboardingDebugPanel } from '@/app/create/[token]/components/OnboardingDebugPanel';
+import EditTransitionModal from './components/EditTransitionModal';
 
 export default function GeneratePage() {
   const params = useParams();
@@ -47,6 +48,9 @@ export default function GeneratePage() {
 function GeneratePageContent({ tokenId }: { tokenId: string }) {
   const router = useRouter();
   const { store, sections, content, isInitialized, isHydrating } = useEditStoreContext();
+  const [isTransitioning, setIsTransitioning] = useState(false);
+  const [transitionStep, setTransitionStep] = useState(1);
+  const [transitionProgress, setTransitionProgress] = useState(0);
   
   // UI state
   const [isLoading, setIsLoading] = useState(true);
@@ -121,6 +125,11 @@ function GeneratePageContent({ tokenId }: { tokenId: string }) {
     if (!store) return;
     
     try {
+      // Show transition modal immediately
+      setIsTransitioning(true);
+      setTransitionStep(1);
+      setTransitionProgress(0);
+      
       // Log current state for debugging
       const currentState = store.getState();
       console.log('📊 [GENERATE-DEBUG] Pre-navigation store state:', {
@@ -145,6 +154,7 @@ function GeneratePageContent({ tokenId }: { tokenId: string }) {
       
       // Ensure we have data to save
       if (currentState.sections.length === 0) {
+        setIsTransitioning(false);
         setError('No sections to edit. Please generate content first.');
         return;
       }
@@ -160,7 +170,8 @@ function GeneratePageContent({ tokenId }: { tokenId: string }) {
         // Don't block navigation, but log the issue
       }
       
-      // Force save to database before navigation
+      // Step 1: Saving changes
+      setTransitionProgress(25);
       console.log('💾 [GENERATE-DEBUG] Saving data before navigation...');
       await currentState.save();
       
@@ -176,24 +187,39 @@ function GeneratePageContent({ tokenId }: { tokenId: string }) {
         }
       });
       
+      setTransitionProgress(60);
+      
       // Also ensure the persist middleware has saved to localStorage
       if (store.persist && typeof store.persist.rehydrate === 'function') {
-        // Force a persist cycle
         await new Promise(resolve => setTimeout(resolve, 100));
       }
+      
+      // Step 2: Preparing editor
+      setTransitionStep(2);
+      setTransitionProgress(75);
       
       // Set edit mode in the store
       currentState.setMode('edit');
       
       // Small delay to ensure all async operations complete
-      await new Promise(resolve => setTimeout(resolve, 200));
+      await new Promise(resolve => setTimeout(resolve, 300));
+      
+      // Step 3: Loading components
+      setTransitionStep(3);
+      setTransitionProgress(90);
       
       console.log('✅ [GENERATE-DEBUG] Data saved, navigating to edit page...');
+      
+      // Small delay for animation
+      await new Promise(resolve => setTimeout(resolve, 200));
+      
+      setTransitionProgress(100);
       
       // Navigate to edit page
       router.push(`/edit/${tokenId}`);
     } catch (error) {
       console.error('❌ Failed to prepare for edit mode:', error);
+      setIsTransitioning(false);
       setError('Failed to save changes. Please try again.');
     }
   };
@@ -262,9 +288,23 @@ function GeneratePageContent({ tokenId }: { tokenId: string }) {
             {/* Edit Button */}
             <button
               onClick={handleEdit}
-              className="px-6 py-3 rounded-lg font-medium text-base transition-all duration-200 bg-brand-accentPrimary hover:bg-orange-500 text-white hover:shadow-lg transform hover:scale-105"
+              disabled={isTransitioning}
+              className={`
+                px-6 py-3 rounded-lg font-medium text-base transition-all duration-200 text-white
+                ${isTransitioning 
+                  ? 'bg-gray-400 cursor-not-allowed' 
+                  : 'bg-brand-accentPrimary hover:bg-orange-500 hover:shadow-lg transform hover:scale-105'
+                }
+              `}
             >
-              Edit Page
+              {isTransitioning ? (
+                <div className="flex items-center space-x-2">
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                  <span>Opening Editor...</span>
+                </div>
+              ) : (
+                'Edit Page'
+              )}
             </button>
 
             {/* Info Text */}
@@ -274,6 +314,13 @@ function GeneratePageContent({ tokenId }: { tokenId: string }) {
           </div>
         </div>
       </div>
+
+      {/* Transition Modal */}
+      <EditTransitionModal 
+        isOpen={isTransitioning}
+        currentStep={transitionStep}
+        progress={transitionProgress}
+      />
 
       {/* Development Debug Panels */}
       {process.env.NODE_ENV === 'development' && <StoreDebugPanel />}

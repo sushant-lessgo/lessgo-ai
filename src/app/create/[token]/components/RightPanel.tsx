@@ -14,6 +14,7 @@ import { Button } from "@/components/ui/button";
 import { usePageGeneration } from '@/hooks/usePageGeneration';
 import GenerationAnimation from './GenerationAnimation';
 import { CANONICAL_FIELD_NAMES, FIELD_DISPLAY_NAMES, type CanonicalFieldName } from "@/types/core/index";
+import LoadingState from './LoadingState';
 
 // ===== TYPE DEFINITIONS =====
 interface ConfirmedFieldData {
@@ -63,6 +64,7 @@ export default function RightPanel() {
   const alternatives = currentFieldData?.alternatives || [];
   
   const [showFeatureEditor, setShowFeatureEditor] = useState(false);
+  const [isProcessingInput, setIsProcessingInput] = useState(false);
 
   // ✅ UPDATED: Auto-advance logic for high confidence fields
   useEffect(() => {
@@ -107,6 +109,7 @@ export default function RightPanel() {
     setOneLiner(input);
     setConfirmedFields(confirmedFieldsData); // Store AI guesses (with canonical names as keys)
     setStepIndex(0); // Start field confirmation process
+    setIsProcessingInput(false); // Hide loading state
     
     await autoSaveDraft({
       tokenId,
@@ -206,9 +209,12 @@ export default function RightPanel() {
             <PageIntro />
 
             <section className="w-full bg-[#F5F5F5] p-6 md:p-8 rounded-lg shadow-sm mt-4">
-              <InputStep onSuccess={handleInputSuccess} />
+              <InputStep onSuccess={handleInputSuccess} onProcessingStart={() => setIsProcessingInput(true)} />
             </section>
           </>
+        ) : isProcessingInput ? (
+          // Show loading state while processing input
+          <LoadingState />
         ) : (
           // Step 2: Field-by-field confirmation
           <div className="w-full space-y-6">
