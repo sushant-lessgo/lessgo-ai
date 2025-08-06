@@ -60,6 +60,7 @@ export default function RightPanel() {
   const currentDisplayField = currentCanonicalField ? FIELD_DISPLAY_NAMES[currentCanonicalField] : undefined;
   const currentFieldData = currentCanonicalField ? confirmedFields[currentCanonicalField] : undefined;
   
+  // ✅ BUG FIX: aiGuess should always be the original AI prediction, not the current validated value
   const aiGuess = currentFieldData?.value || "";
   const confidence = currentFieldData?.confidence || 0;
   const alternatives = currentFieldData?.alternatives || [];
@@ -372,7 +373,7 @@ export default function RightPanel() {
                       if (isForceManual || confidence < 0.85) {
                         return (
                           <FieldConfirmationCard
-                            key={stepIndex}  
+                            key={`${stepIndex}-${currentCanonicalField}-${isForceManual}`}
                             fieldName={currentDisplayField}
                             aiGuess={aiGuess}
                             confidence={confidence}

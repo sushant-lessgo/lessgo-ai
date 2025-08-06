@@ -10,6 +10,7 @@ export default function LeftPanel() {
   const validatedFields = useOnboardingStore((s) => s.validatedFields); // ✅ Only user-confirmed fields
   const confirmedFields = useOnboardingStore((s) => s.confirmedFields); // AI guesses with confidence
   const reopenFieldForEditing = useOnboardingStore((s) => s.reopenFieldForEditing);
+  const isFieldForceManual = useOnboardingStore((s) => s.isFieldForceManual); // ✅ Check if field was manually edited
 
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
@@ -27,9 +28,10 @@ export default function LeftPanel() {
     // Get display name from canonical mapping
     const displayName = FIELD_DISPLAY_NAMES[canonicalFieldName] || canonicalField;
     
-    // Check if this field was auto-confirmed (high confidence) or user-confirmed
+    // ✅ BUG FIX 1: Check if field was manually edited - if so, it's NOT auto-confirmed anymore
     const originalFieldData = confirmedFields[canonicalFieldName];
-    const isAutoConfirmed = originalFieldData && originalFieldData.confidence >= 0.85;
+    const wasManuallyEdited = isFieldForceManual(canonicalFieldName);
+    const isAutoConfirmed = originalFieldData && originalFieldData.confidence >= 0.85 && !wasManuallyEdited;
     
     return {
       canonicalField: canonicalFieldName,

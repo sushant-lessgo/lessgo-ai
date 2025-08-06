@@ -28,6 +28,7 @@ export default function FieldConfirmationCard({
   const stepIndex = onboardingStore.stepIndex;
   const setStepIndex = onboardingStore.setStepIndex;
   const isFieldForceManual = onboardingStore.isFieldForceManual;
+  const validatedFields = onboardingStore.validatedFields; // ✅ Get current validated values
 
   useEffect(() => {
     // ✅ BUG FIX 1: Check if field is force manual (user clicked edit) - go directly to edit mode
@@ -35,9 +36,11 @@ export default function FieldConfirmationCard({
     const isForceManual = canonicalField ? isFieldForceManual(canonicalField) : false;
     
     if (isForceManual) {
-      // User explicitly clicked edit - go directly to edit mode with full options
+      // ✅ BUG FIX 2: User explicitly clicked edit - use current validated value if available, otherwise use AI guess
       setMode("edit");
-      setSelected(aiGuess || "");
+      const currentValidatedValue = canonicalField ? validatedFields[canonicalField] : null;
+      // For force manual fields, start with the previously validated value if it exists
+      setSelected(currentValidatedValue || aiGuess || "");
       return;
     }
     
@@ -53,7 +56,32 @@ export default function FieldConfirmationCard({
       setMode("confirm"); // High confidence, show confirm flow
     }
     setSelected(aiGuess || "");
-  }, [aiGuess, stepIndex, confidence, alternatives.length, fieldName, isFieldForceManual]);
+  }, [aiGuess, stepIndex, confidence, alternatives.length, fieldName, isFieldForceManual, validatedFields]);
+
+  // ✅ Additional useEffect to handle aiGuess prop changes for force manual fields
+  useEffect(() => {
+    const canonicalField = getCanonicalFieldForDisplayName(fieldName);
+    const isForceManual = canonicalField ? isFieldForceManual(canonicalField) : false;
+    
+    if (isForceManual && mode === "edit") {
+      // For force manual fields in edit mode, use validated value if available
+      const currentValidatedValue = canonicalField ? validatedFields[canonicalField] : null;
+      setSelected(currentValidatedValue || aiGuess || "");
+    }
+  }, [aiGuess, fieldName, isFieldForceManual, validatedFields, mode]);
+
+  // ✅ ADDITIONAL FIX: Ensure selected value updates when aiGuess prop changes
+  useEffect(() => {
+    const canonicalField = getCanonicalFieldForDisplayName(fieldName);
+    const isForceManual = canonicalField ? isFieldForceManual(canonicalField) : false;
+    
+    if (isForceManual) {
+      const currentValidatedValue = canonicalField ? validatedFields[canonicalField] : null;
+      setSelected(currentValidatedValue || aiGuess || "");
+    } else {
+      setSelected(aiGuess || "");
+    }
+  }, [aiGuess, fieldName, isFieldForceManual, validatedFields]);
 
   const handleConfirmAIGuess = () => {
     onConfirm(aiGuess);

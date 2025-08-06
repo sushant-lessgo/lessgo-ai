@@ -106,11 +106,8 @@ export const useOnboardingStore = create<OnboardingStore>((set, get) => ({
     
     const fieldIndex = CANONICAL_FIELD_ORDER.indexOf(canonicalField);
     if (fieldIndex !== -1) {
-      // Remove from validated fields so user can re-confirm
+      // ✅ FIXED: Don't remove from validatedFields - keep the current value so user sees it when editing
       set((state) => {
-        const newValidatedFields = { ...state.validatedFields };
-        delete newValidatedFields[canonicalField];
-        
         // ✅ Add to force manual fields to bypass auto-confirmation
         const newForceManualFields = [...state.forceManualFields];
         if (!newForceManualFields.includes(canonicalField)) {
@@ -118,9 +115,9 @@ export const useOnboardingStore = create<OnboardingStore>((set, get) => ({
         }
         
         return {
-          validatedFields: newValidatedFields,
           stepIndex: fieldIndex,
           forceManualFields: newForceManualFields,
+          // Keep validatedFields intact so current value is preserved
         };
       });
       
