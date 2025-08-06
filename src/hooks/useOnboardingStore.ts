@@ -26,6 +26,7 @@ type OnboardingStore = {
   hiddenInferredFields: HiddenInferredFields; // ✅ Already properly typed
   stepIndex: number;
   featuresFromAI: FeatureItem[]; // ✅ Already properly typed
+  forceManualFields: CanonicalFieldName[]; // ✅ Track fields that should bypass auto-confirmation
 
   setOneLiner: (input: string) => void;
   setConfirmedFields: (fields: Partial<Record<CanonicalFieldName, ConfirmedFieldData>>) => void; // ✅ Type-safe
@@ -35,6 +36,8 @@ type OnboardingStore = {
   setStepIndex: (index: number) => void;
   setFeaturesFromAI: (features: FeatureItem[]) => void;
   reopenFieldForEditing: (canonicalField: CanonicalFieldName) => void; // ✅ Type-safe parameter
+  addForceManualField: (canonicalField: CanonicalFieldName) => void; // ✅ Add field to force manual list
+  isFieldForceManual: (canonicalField: CanonicalFieldName) => boolean; // ✅ Check if field should be forced manual
   reset: () => void;
 };
 
@@ -56,6 +59,7 @@ export const useOnboardingStore = create<OnboardingStore>((set, get) => ({
   hiddenInferredFields: {},
   stepIndex: 0,
   featuresFromAI: [],
+  forceManualFields: [], // ✅ Initialize empty array for force manual fields
 
   setOneLiner: (input) => set({ oneLiner: input }),
   
@@ -106,16 +110,40 @@ export const useOnboardingStore = create<OnboardingStore>((set, get) => ({
       set((state) => {
         const newValidatedFields = { ...state.validatedFields };
         delete newValidatedFields[canonicalField];
+        
+        // ✅ Add to force manual fields to bypass auto-confirmation
+        const newForceManualFields = [...state.forceManualFields];
+        if (!newForceManualFields.includes(canonicalField)) {
+          newForceManualFields.push(canonicalField);
+        }
+        
         return {
           validatedFields: newValidatedFields,
           stepIndex: fieldIndex,
+          forceManualFields: newForceManualFields,
         };
       });
       
-      console.log(`Reopened field "${canonicalField}" for editing at step ${fieldIndex}`);
+      console.log(`Reopened field "${canonicalField}" for editing at step ${fieldIndex} (forced manual)`);
     } else {
       console.error(`Field "${canonicalField}" not found in field order`);
     }
+  },
+
+  // ✅ Add field to force manual confirmation list
+  addForceManualField: (canonicalField) => {
+    set((state) => {
+      const newForceManualFields = [...state.forceManualFields];
+      if (!newForceManualFields.includes(canonicalField)) {
+        newForceManualFields.push(canonicalField);
+      }
+      return { forceManualFields: newForceManualFields };
+    });
+  },
+
+  // ✅ Check if field should be forced to manual confirmation
+  isFieldForceManual: (canonicalField) => {
+    return get().forceManualFields.includes(canonicalField);
   },
 
   setStepIndex: (index) => set({ stepIndex: index }),
@@ -129,6 +157,7 @@ export const useOnboardingStore = create<OnboardingStore>((set, get) => ({
       hiddenInferredFields: {},
       stepIndex: 0,
       featuresFromAI: [],
+      forceManualFields: [], // ✅ Reset force manual fields
     }),
 }));
 

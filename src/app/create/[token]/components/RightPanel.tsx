@@ -43,6 +43,7 @@ export default function RightPanel() {
     featuresFromAI,
     setFeaturesFromAI,
     setHiddenInferredFields, // ✅ ADD: Store hidden inferred fields
+    isFieldForceManual, // ✅ ADD: Check if field should be forced manual
   } = useOnboardingStore();
 
   const params = useParams();
@@ -66,12 +67,15 @@ export default function RightPanel() {
   const [showFeatureEditor, setShowFeatureEditor] = useState(false);
   const [isProcessingInput, setIsProcessingInput] = useState(false);
 
-  // ✅ UPDATED: Auto-advance logic for high confidence fields
+  // ✅ UPDATED: Auto-advance logic for high confidence fields (with force manual check)
   useEffect(() => {
     if (!currentCanonicalField || isFinalStep || !currentFieldData) return;
 
-    // Auto-confirm and advance if confidence >= 0.85 and not already validated
-    if (currentFieldData.confidence >= 0.85 && !validatedFields[currentCanonicalField]) {
+    // ✅ Check if field is forced manual - if so, skip auto-confirmation
+    const isForceManual = isFieldForceManual(currentCanonicalField);
+    
+    // Auto-confirm and advance if confidence >= 0.85 and not already validated and NOT forced manual
+    if (currentFieldData.confidence >= 0.85 && !validatedFields[currentCanonicalField] && !isForceManual) {
      // console.log(`Auto-confirming ${currentDisplayField} with confidence ${currentFieldData.confidence}`);
       
       // Move from confirmedFields → validatedFields
@@ -82,7 +86,7 @@ export default function RightPanel() {
         setStepIndex(stepIndex + 1);
       }, 1500); // Slightly longer delay so user can see what was auto-confirmed
     }
-  }, [stepIndex, currentCanonicalField, currentDisplayField, currentFieldData, confirmField, setStepIndex, isFinalStep, validatedFields]);
+  }, [stepIndex, currentCanonicalField, currentDisplayField, currentFieldData, confirmField, setStepIndex, isFinalStep, validatedFields, isFieldForceManual]);
 
   // ✅ UPDATED: Handle user confirmation
   const handleConfirm = async (value: string) => {
@@ -360,37 +364,48 @@ export default function RightPanel() {
                 // ✅ UPDATED: Current field confirmation with confidence-based logic
                 currentCanonicalField && currentDisplayField && (
                   <>
-                    {/* Show auto-confirmation message for high confidence */}
-                    {confidence >= 0.85 && (
-                      <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-4">
-                        <div className="flex items-center">
-                          <div className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center mr-3">
-                            <span className="text-white text-sm">🤖</span>
+                    {/* ✅ Check if field is forced manual */}
+                    {(() => {
+                      const isForceManual = isFieldForceManual(currentCanonicalField);
+                      
+                      // Always show confirmation card if forced manual OR confidence < 0.85
+                      if (isForceManual || confidence < 0.85) {
+                        return (
+                          <FieldConfirmationCard
+                            key={stepIndex}  
+                            fieldName={currentDisplayField}
+                            aiGuess={aiGuess}
+                            confidence={confidence}
+                            alternatives={alternatives}
+                            options={getOptionsForField(currentDisplayField)}
+                            onConfirm={handleConfirm}
+                          />
+                        );
+                      }
+                      
+                      // Show auto-confirmation message for high confidence (non-forced manual)
+                      if (confidence >= 0.85) {
+                        return (
+                          <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-4">
+                            <div className="flex items-center">
+                              <div className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center mr-3">
+                                <span className="text-white text-sm">🤖</span>
+                              </div>
+                              <div>
+                                <p className="text-blue-800 font-medium">
+                                  Auto-confirming {currentDisplayField}: "{aiGuess}"
+                                </p>
+                                <p className="text-blue-600 text-sm">
+                                  High confidence ({(confidence * 100).toFixed(0)}%) - advancing automatically
+                                </p>
+                              </div>
+                            </div>
                           </div>
-                          <div>
-                            <p className="text-blue-800 font-medium">
-                              Auto-confirming {currentDisplayField}: "{aiGuess}"
-                            </p>
-                            <p className="text-blue-600 text-sm">
-                              High confidence ({(confidence * 100).toFixed(0)}%) - advancing automatically
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Show field confirmation card for medium/low confidence */}
-                    {confidence < 0.85 && (
-                      <FieldConfirmationCard
-                        key={stepIndex}  
-                        fieldName={currentDisplayField}
-                        aiGuess={aiGuess}
-                        confidence={confidence}
-                        alternatives={alternatives}
-                        options={getOptionsForField(currentDisplayField)}
-                        onConfirm={handleConfirm}
-                      />
-                    )}
+                        );
+                      }
+                      
+                      return null;
+                    })()}
                   </>
                 )
               )}

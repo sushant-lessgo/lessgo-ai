@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useOnboardingStore } from "@/hooks/useOnboardingStore";
+import { useOnboardingStore, getCanonicalFieldOrder, getCanonicalFieldForDisplayName } from "@/hooks/useOnboardingStore";
 import { getOptionsForField, getGroupedOptionsForField } from "@/utils/getOptionsForField";
 
 type FieldConfirmationCardProps = {
@@ -27,9 +27,21 @@ export default function FieldConfirmationCard({
   const onboardingStore = useOnboardingStore();
   const stepIndex = onboardingStore.stepIndex;
   const setStepIndex = onboardingStore.setStepIndex;
+  const isFieldForceManual = onboardingStore.isFieldForceManual;
 
   useEffect(() => {
-    // Reset mode and selection when aiGuess or stepIndex changes
+    // ✅ BUG FIX 1: Check if field is force manual (user clicked edit) - go directly to edit mode
+    const canonicalField = getCanonicalFieldForDisplayName(fieldName);
+    const isForceManual = canonicalField ? isFieldForceManual(canonicalField) : false;
+    
+    if (isForceManual) {
+      // User explicitly clicked edit - go directly to edit mode with full options
+      setMode("edit");
+      setSelected(aiGuess || "");
+      return;
+    }
+    
+    // Original logic for non-force-manual fields
     if (!aiGuess || confidence < 0.7) {
       // Low confidence - check if we have alternatives
       if (alternatives.length > 0) {
@@ -41,7 +53,7 @@ export default function FieldConfirmationCard({
       setMode("confirm"); // High confidence, show confirm flow
     }
     setSelected(aiGuess || "");
-  }, [aiGuess, stepIndex, confidence, alternatives.length]);
+  }, [aiGuess, stepIndex, confidence, alternatives.length, fieldName, isFieldForceManual]);
 
   const handleConfirmAIGuess = () => {
     onConfirm(aiGuess);
@@ -56,7 +68,15 @@ export default function FieldConfirmationCard({
 
   const handleBack = () => {
     if (stepIndex > 0) {
-      setStepIndex(stepIndex - 1);
+      const newStepIndex = stepIndex - 1;
+      setStepIndex(newStepIndex);
+      
+      // ✅ Force manual confirmation for any field we navigate back to
+      const canonicalFieldOrder = getCanonicalFieldOrder();
+      const targetCanonicalField = canonicalFieldOrder[newStepIndex];
+      if (targetCanonicalField) {
+        onboardingStore.addForceManualField(targetCanonicalField);
+      }
     }
   };
 
@@ -86,8 +106,8 @@ export default function FieldConfirmationCard({
         </span>
       </div>
 
-      {/* HIGH CONFIDENCE: Standard confirm flow */}
-      {mode === "confirm" && isMediumConfidence && (
+      {/* HIGH & MEDIUM CONFIDENCE: Standard confirm flow */}
+      {mode === "confirm" && (isMediumConfidence || isHighConfidence) && (
         <>
           <p className="text-base text-gray-800">
             Our AI suggests:&nbsp;
@@ -159,8 +179,8 @@ export default function FieldConfirmationCard({
         </>
       )}
 
-      {/* MEDIUM CONFIDENCE EDIT MODE: Standard options */}
-      {mode === "edit" && isMediumConfidence && (
+      {/* EDIT MODE: Standard options (any confidence level when explicitly editing) */}
+      {mode === "edit" && !isLowConfidence && (
         <>
           <p className="text-sm text-gray-500">Choose the most accurate option:</p>
           
