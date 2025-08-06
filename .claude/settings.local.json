@@ -50,7 +50,10 @@
       "Bash(git checkout:*)",
       "Bash(npm install:*)",
       "Bash(del fix-undefined-values.js fix-more-issues.js)",
-      "Bash(del fix-color-tokens.js)"
+      "Bash(del fix-color-tokens.js)",
+      "Bash(timeout 30s npx tsc --noEmit)",
+      "Bash(del \"C:\\Users\\susha\\lessgo-ai\\src\\modules\\generatedLanding\\PublishedPageRenderer.tsx\")",
+      "Bash(timeout 30s npm run build)"
     ],
     "deny": []
   }

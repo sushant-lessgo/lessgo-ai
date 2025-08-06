@@ -27,6 +27,12 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
+    // 🔍 Get the project to link to published page
+    const project = await prisma.project.findUnique({
+      where: { tokenId },
+      select: { id: true }
+    });
+
     // 🔍 Check for existing published page
     const existing = await prisma.publishedPage.findUnique({ where: { slug } });
 
@@ -38,12 +44,27 @@ export async function POST(req: NextRequest) {
       // 🔁 Update PublishedPage
       await prisma.publishedPage.update({
         where: { slug },
-        data: { htmlContent, title, content, themeValues, updatedAt: new Date() }
+        data: { 
+          htmlContent, 
+          title, 
+          content, 
+          themeValues, 
+          projectId: project?.id || null,
+          updatedAt: new Date() 
+        }
       });
     } else {
       // 🆕 Create PublishedPage
       await prisma.publishedPage.create({
-        data: { userId, slug, htmlContent, title, content, themeValues }
+        data: { 
+          userId, 
+          slug, 
+          htmlContent, 
+          title, 
+          content, 
+          themeValues,
+          projectId: project?.id || null
+        }
       });
     }
 
