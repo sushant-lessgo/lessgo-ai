@@ -127,15 +127,7 @@ const VideoTestimonial = React.memo(({
             className="w-full h-full object-cover"
             data-image-id={`${sectionId}-video${index}-thumbnail`}
             onMouseUp={(e) => {
-              if (mode === 'edit') {
-                e.stopPropagation();
-                e.preventDefault();
-                const rect = e.currentTarget.getBoundingClientRect();
-                showImageToolbar(`${sectionId}-video${index}-thumbnail`, {
-                  x: rect.left + rect.width / 2,
-                  y: rect.top - 10
-                });
-              }
+              // Image toolbar is only available in edit mode
             }}
           />
         ) : (
@@ -285,12 +277,11 @@ export default function VideoTestimonials(props: LayoutComponentProps) {
         <div className="text-center mb-16">
           <EditableAdaptiveHeadline
             mode={mode}
-            value={blockContent.headline}
+            value={blockContent.headline || ''}
             onEdit={(value) => handleContentUpdate('headline', value)}
             level="h2"
             backgroundType={safeBackgroundType}
             colorTokens={colorTokens}
-            textStyle={getTextStyle('h2')}
             className="mb-4"
             sectionId={sectionId}
             elementKey="headline"
@@ -305,7 +296,6 @@ export default function VideoTestimonials(props: LayoutComponentProps) {
               backgroundType={safeBackgroundType}
               colorTokens={colorTokens}
               variant="body"
-              textStyle={getTextStyle('body-lg')}
               className="text-lg mb-6 max-w-3xl mx-auto"
               placeholder="Add optional subheadline to introduce your video testimonials..."
               sectionId={sectionId}
@@ -323,12 +313,11 @@ export default function VideoTestimonials(props: LayoutComponentProps) {
               <div className="space-y-4">
                 <EditableAdaptiveText
                   mode={mode}
-                  value={blockContent.video_titles}
+                  value={blockContent.video_titles || ''}
                   onEdit={(value) => handleContentUpdate('video_titles', value)}
                   backgroundType={safeBackgroundType}
                   colorTokens={colorTokens}
                   variant="body"
-                  textStyle={getTextStyle('body')}
                   className="mb-2"
                   placeholder="Video titles (pipe separated)"
                   sectionId={sectionId}
@@ -338,12 +327,11 @@ export default function VideoTestimonials(props: LayoutComponentProps) {
                 
                 <EditableAdaptiveText
                   mode={mode}
-                  value={blockContent.video_descriptions}
+                  value={blockContent.video_descriptions || ''}
                   onEdit={(value) => handleContentUpdate('video_descriptions', value)}
                   backgroundType={safeBackgroundType}
                   colorTokens={colorTokens}
                   variant="body"
-                  textStyle={getTextStyle('body')}
                   className="mb-2"
                   placeholder="Video descriptions (pipe separated)"
                   sectionId={sectionId}
@@ -353,12 +341,11 @@ export default function VideoTestimonials(props: LayoutComponentProps) {
                 
                 <EditableAdaptiveText
                   mode={mode}
-                  value={blockContent.customer_names}
+                  value={blockContent.customer_names || ''}
                   onEdit={(value) => handleContentUpdate('customer_names', value)}
                   backgroundType={safeBackgroundType}
                   colorTokens={colorTokens}
                   variant="body"
-                  textStyle={getTextStyle('body')}
                   className="mb-2"
                   placeholder="Customer names (pipe separated)"
                   sectionId={sectionId}
@@ -368,12 +355,11 @@ export default function VideoTestimonials(props: LayoutComponentProps) {
                 
                 <EditableAdaptiveText
                   mode={mode}
-                  value={blockContent.customer_titles}
+                  value={blockContent.customer_titles || ''}
                   onEdit={(value) => handleContentUpdate('customer_titles', value)}
                   backgroundType={safeBackgroundType}
                   colorTokens={colorTokens}
                   variant="body"
-                  textStyle={getTextStyle('body')}
                   className="mb-2"
                   placeholder="Customer titles (pipe separated)"
                   sectionId={sectionId}
@@ -383,12 +369,11 @@ export default function VideoTestimonials(props: LayoutComponentProps) {
                 
                 <EditableAdaptiveText
                   mode={mode}
-                  value={blockContent.customer_companies}
+                  value={blockContent.customer_companies || ''}
                   onEdit={(value) => handleContentUpdate('customer_companies', value)}
                   backgroundType={safeBackgroundType}
                   colorTokens={colorTokens}
                   variant="body"
-                  textStyle={getTextStyle('body')}
                   placeholder="Customer companies (pipe separated)"
                   sectionId={sectionId}
                   elementKey="customer_companies"
@@ -450,7 +435,6 @@ export default function VideoTestimonials(props: LayoutComponentProps) {
                 backgroundType={safeBackgroundType}
                 colorTokens={colorTokens}
                 variant="body"
-                textStyle={getTextStyle('body-lg')}
                 className="max-w-3xl mx-auto mb-8"
                 placeholder="Add optional supporting text to reinforce video testimonials..."
                 sectionId={sectionId}
@@ -465,7 +449,6 @@ export default function VideoTestimonials(props: LayoutComponentProps) {
                   <CTAButton
                     text={blockContent.cta_text}
                     colorTokens={colorTokens}
-                    textStyle={getTextStyle('body-lg')}
                     className="shadow-xl hover:shadow-2xl transform hover:-translate-y-0.5 transition-all duration-200"
                     variant="primary"
                     sectionId={sectionId}

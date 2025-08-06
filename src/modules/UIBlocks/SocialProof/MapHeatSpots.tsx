@@ -225,8 +225,8 @@ const GlobalStatDisplay = React.memo(({
   return (
     <div className="text-center">
       <SocialProofNumber
-        value={stat.value}
-        style={getTextStyle('h2')}
+        number={stat.value}
+        label=""
         className={`text-3xl md:text-4xl font-bold mb-2 ${dynamicTextColors?.heading || 'text-gray-900'}`}
       />
       <p className={`text-sm font-medium ${dynamicTextColors?.muted || 'text-gray-600'}`}>
@@ -268,7 +268,7 @@ export default function MapHeatSpots(props: LayoutComponentProps) {
     <LayoutSection
       sectionId={sectionId}
       sectionType="MapHeatSpots"
-      backgroundType={props.backgroundType || 'primary'}
+      backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
       sectionBackground={sectionBackground}
       mode={mode}
       className={props.className}
@@ -279,12 +279,11 @@ export default function MapHeatSpots(props: LayoutComponentProps) {
         <div className="text-center mb-12">
           <EditableAdaptiveHeadline
             mode={mode}
-            value={blockContent.headline}
+            value={blockContent.headline || ''}
             onEdit={(value) => handleContentUpdate('headline', value)}
             level="h2"
-            backgroundType={props.backgroundType || 'primary'}
+            backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
             colorTokens={colorTokens}
-            textStyle={getTextStyle('h2')}
             className="mb-6"
             sectionId={sectionId}
             elementKey="headline"
@@ -296,10 +295,9 @@ export default function MapHeatSpots(props: LayoutComponentProps) {
               mode={mode}
               value={blockContent.subheadline || ''}
               onEdit={(value) => handleContentUpdate('subheadline', value)}
-              backgroundType={props.backgroundType || 'primary'}
+              backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
               colorTokens={colorTokens}
               variant="body"
-              textStyle={getTextStyle('body-lg')}
               className="text-lg max-w-3xl mx-auto"
               placeholder="Add a compelling subheadline about your global reach..."
               sectionId={sectionId}

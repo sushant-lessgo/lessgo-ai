@@ -480,10 +480,10 @@ const getSerializationStatus = useCallback((): SerializationStatus => {
 
     switch (strategy) {
       case 'local':
-        store.resolveConflict('latest-wins');
+        store.resolveConflict('latest-wins', 'local');
         break;
       case 'server':
-        store.resolveConflict('auto-merge');
+        store.resolveConflict('auto-merge', 'server');
         break;
       case 'merge':
         if (resolutions) {

@@ -167,12 +167,11 @@ export default function VisualCTAWithMockup(props: LayoutComponentProps) {
           <div className="space-y-8">
             <EditableAdaptiveHeadline
               mode={mode}
-              value={blockContent.headline}
+              value={blockContent.headline || ''}
               onEdit={(value) => handleContentUpdate('headline', value)}
               level="h2"
               backgroundType={safeBackgroundType}
               colorTokens={colorTokens}
-              textStyle={getTextStyle('h1')}
               className="mb-6"
               sectionId={sectionId}
               elementKey="headline"
@@ -182,12 +181,11 @@ export default function VisualCTAWithMockup(props: LayoutComponentProps) {
             {blockContent.subheadline && (
               <EditableAdaptiveText
                 mode={mode}
-                value={blockContent.subheadline}
+                value={blockContent.subheadline || ''}
                 onEdit={(value) => handleContentUpdate('subheadline', value)}
                 backgroundType={safeBackgroundType}
                 colorTokens={colorTokens}
                 variant="body"
-                textStyle={getTextStyle('body-lg')}
                 className="text-lg mb-8"
                 sectionId={sectionId}
                 elementKey="subheadline"
@@ -200,7 +198,6 @@ export default function VisualCTAWithMockup(props: LayoutComponentProps) {
               <CTAButton
                 text={blockContent.cta_text}
                 colorTokens={colorTokens}
-                textStyle={getTextStyle('body-lg')}
                 className="shadow-xl hover:shadow-2xl transform hover:-translate-y-0.5 transition-all duration-200"
                 variant="primary"
                 size="large"
@@ -213,7 +210,6 @@ export default function VisualCTAWithMockup(props: LayoutComponentProps) {
                 <CTAButton
                   text={blockContent.secondary_cta}
                   colorTokens={colorTokens}
-                  textStyle={getTextStyle('body-lg')}
                   className="border-2 hover:shadow-lg transition-all duration-200"
                   variant="secondary"
                   size="large"
@@ -255,16 +251,8 @@ export default function VisualCTAWithMockup(props: LayoutComponentProps) {
                   className="w-full h-auto rounded-2xl shadow-2xl cursor-pointer"
                   data-image-id={`${sectionId}-mockup-image`}
                   onMouseUp={(e) => {
-                    if (mode === 'edit') {
-                      e.stopPropagation();
-                      e.preventDefault();
-                      const rect = e.currentTarget.getBoundingClientRect();
-                      showImageToolbar(`${sectionId}-mockup-image`, {
-                        x: rect.left + rect.width / 2,
-                        y: rect.top - 10
-                      });
-                    }
-                  }}
+                        // Image toolbar is only available in edit mode
+                      }}
                 />
               </div>
             ) : (

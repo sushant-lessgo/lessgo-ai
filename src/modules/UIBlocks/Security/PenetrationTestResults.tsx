@@ -55,7 +55,7 @@ export default function PenetrationTestResults(props: LayoutComponentProps) {
     <LayoutSection
       sectionId={sectionId}
       sectionType="PenetrationTestResults"
-      backgroundType={props.backgroundType || 'neutral'}
+      backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
       sectionBackground={sectionBackground}
       mode={mode}
       className={props.className}
@@ -67,12 +67,11 @@ export default function PenetrationTestResults(props: LayoutComponentProps) {
               <div>
                 <EditableAdaptiveHeadline
                   mode={mode}
-                  value={blockContent.headline}
+                  value={blockContent.headline || ''}
                   onEdit={(value) => handleContentUpdate('headline', value)}
                   level="h2"
                   backgroundType="primary"
                   colorTokens={{ ...colorTokens, textPrimary: 'text-white' }}
-                  textStyle={getTextStyle('h2')}
                   className="text-white mb-2"
                   sectionId={sectionId}
                   elementKey="headline"
@@ -89,12 +88,11 @@ export default function PenetrationTestResults(props: LayoutComponentProps) {
               <div className="text-center p-4 bg-gray-50 rounded-lg">
                 <EditableAdaptiveText
                   mode={mode}
-                  value={blockContent.test_date}
+                  value={blockContent.test_date || ''}
                   onEdit={(value) => handleContentUpdate('test_date', value)}
                   backgroundType="neutral"
                   colorTokens={colorTokens}
                   variant="body"
-                  textStyle={getTextStyle('h3')}
                   className="font-bold text-gray-900 mb-2"
                   sectionId={sectionId}
                   elementKey="test_date"
@@ -106,12 +104,11 @@ export default function PenetrationTestResults(props: LayoutComponentProps) {
               <div className="text-center p-4 bg-gray-50 rounded-lg">
                 <EditableAdaptiveText
                   mode={mode}
-                  value={blockContent.test_firm}
+                  value={blockContent.test_firm || ''}
                   onEdit={(value) => handleContentUpdate('test_firm', value)}
                   backgroundType="neutral"
                   colorTokens={colorTokens}
                   variant="body"
-                  textStyle={getTextStyle('h3')}
                   className="font-bold text-gray-900 mb-2"
                   sectionId={sectionId}
                   elementKey="test_firm"

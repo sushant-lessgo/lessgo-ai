@@ -137,12 +137,12 @@ const SecurityFeatureCard = React.memo(({
       </div>
       
       {/* Title */}
-      <h3 className="font-bold text-gray-900 mb-4" style={getTextStyle('h3')}>
+      <h3 className="font-bold text-gray-900 mb-4">
         {feature.title}
       </h3>
       
       {/* Description */}
-      <p className="text-gray-600 leading-relaxed mb-6" style={getTextStyle('body')}>
+      <p className="text-gray-600 leading-relaxed mb-6">
         {feature.description}
       </p>
       
@@ -181,7 +181,7 @@ export default function SecurityFeatureCards(props: LayoutComponentProps) {
     <LayoutSection
       sectionId={sectionId}
       sectionType="SecurityFeatureCards"
-      backgroundType={props.backgroundType || 'neutral'}
+      backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
       sectionBackground={sectionBackground}
       mode={mode}
       className={props.className}
@@ -192,12 +192,11 @@ export default function SecurityFeatureCards(props: LayoutComponentProps) {
         <div className="text-center mb-16">
           <EditableAdaptiveHeadline
             mode={mode}
-            value={blockContent.headline}
+            value={blockContent.headline || ''}
             onEdit={(value) => handleContentUpdate('headline', value)}
             level="h2"
-            backgroundType={props.backgroundType || 'neutral'}
+            backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
             colorTokens={colorTokens}
-            textStyle={getTextStyle('h1')}
             className="mb-6"
             sectionId={sectionId}
             elementKey="headline"
@@ -207,12 +206,11 @@ export default function SecurityFeatureCards(props: LayoutComponentProps) {
           {blockContent.subheadline && (
             <EditableAdaptiveText
               mode={mode}
-              value={blockContent.subheadline}
+              value={blockContent.subheadline || ''}
               onEdit={(value) => handleContentUpdate('subheadline', value)}
-              backgroundType={props.backgroundType || 'neutral'}
+              backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
               colorTokens={colorTokens}
               variant="body"
-              textStyle={getTextStyle('body-lg')}
               className="text-lg max-w-3xl mx-auto"
               sectionId={sectionId}
               elementKey="subheadline"
@@ -235,7 +233,7 @@ export default function SecurityFeatureCards(props: LayoutComponentProps) {
 
         {/* Security Stats */}
         <div className="bg-gradient-to-r from-gray-900 to-gray-800 rounded-2xl p-12 text-white text-center">
-          <h3 className="text-2xl lg:text-3xl font-bold mb-8" style={getTextStyle('h2')}>
+          <h3 className="text-2xl lg:text-3xl font-bold mb-8">
             Security by the Numbers
           </h3>
           

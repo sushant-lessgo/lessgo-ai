@@ -88,7 +88,7 @@ export default function TestimonialFAQs(props: LayoutComponentProps) {
     <LayoutSection
       sectionId={sectionId}
       sectionType="TestimonialFAQs"
-      backgroundType={props.backgroundType || 'primary'}
+      backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
       sectionBackground={sectionBackground}
       mode={mode}
       className={props.className}
@@ -98,12 +98,11 @@ export default function TestimonialFAQs(props: LayoutComponentProps) {
         <div className="text-center mb-12">
           <EditableAdaptiveHeadline
             mode={mode}
-            value={blockContent.headline}
+            value={blockContent.headline || ''}
             onEdit={(value) => handleContentUpdate('headline', value)}
             level="h2"
-            backgroundType={props.backgroundType || 'primary'}
+            backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
             colorTokens={colorTokens}
-            textStyle={getTextStyle('h2')}
             className="mb-4"
             sectionId={sectionId}
             elementKey="headline"
@@ -115,10 +114,9 @@ export default function TestimonialFAQs(props: LayoutComponentProps) {
               mode={mode}
               value={blockContent.subheadline || ''}
               onEdit={(value) => handleContentUpdate('subheadline', value)}
-              backgroundType={props.backgroundType || 'primary'}
+              backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
               colorTokens={colorTokens}
               variant="body"
-              textStyle={getTextStyle('body-lg')}
               className="text-lg max-w-3xl mx-auto"
               placeholder="Add a description highlighting customer success..."
               sectionId={sectionId}
@@ -133,7 +131,7 @@ export default function TestimonialFAQs(props: LayoutComponentProps) {
           {questions.map((question, index) => (
             <div key={index} className="bg-white dark:bg-gray-800/50 rounded-2xl p-8 shadow-lg">
               {/* Question */}
-              <h3 className={`text-xl font-semibold mb-6 ${dynamicTextColors?.heading || colorTokens.text}`}>
+              <h3 className={`text-xl font-semibold mb-6 ${dynamicTextColors?.heading || colorTokens.textPrimary}`}>
                 "{question}"
               </h3>
               
@@ -158,7 +156,7 @@ export default function TestimonialFAQs(props: LayoutComponentProps) {
                 
                 {/* Customer Info */}
                 <div>
-                  <div className={`font-semibold text-lg ${dynamicTextColors?.heading || colorTokens.text}`}>
+                  <div className={`font-semibold text-lg ${dynamicTextColors?.heading || colorTokens.textPrimary}`}>
                     {customerNames[index] || 'Customer'}
                   </div>
                   <div className={`text-sm ${mutedTextColor}`}>

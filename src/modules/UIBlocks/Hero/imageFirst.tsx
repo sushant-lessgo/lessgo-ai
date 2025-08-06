@@ -222,7 +222,7 @@ export default function ImageFirst(props: LayoutComponentProps) {
     <LayoutSection
       sectionId={sectionId}
       sectionType="ImageFirst"
-      backgroundType={props.backgroundType || 'primary'}
+      backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
       sectionBackground={sectionBackground}
       mode={mode}
       className={props.className}
@@ -265,7 +265,6 @@ export default function ImageFirst(props: LayoutComponentProps) {
                   value={blockContent.badge_text || ''}
                   onEdit={(value) => handleContentUpdate('badge_text', value)}
                   colorTokens={colorTokens}
-                  textStyle={getTextStyle('body-sm')}
                   placeholder="🎉 New Feature Launch"
                   sectionId={sectionId}
                   elementKey="badge_text"
@@ -276,12 +275,11 @@ export default function ImageFirst(props: LayoutComponentProps) {
 
             <EditableAdaptiveHeadline
               mode={mode}
-              value={blockContent.headline}
+              value={blockContent.headline || ''}
               onEdit={(value) => handleContentUpdate('headline', value)}
               level="h1"
-              backgroundType={props.backgroundType || 'primary'}
+              backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
               colorTokens={colorTokens}
-              textStyle={getTextStyle('h1')}
               className="leading-tight max-w-3xl mx-auto"
               sectionId={sectionId}
               elementKey="headline"
@@ -293,10 +291,9 @@ export default function ImageFirst(props: LayoutComponentProps) {
                 mode={mode}
                 value={blockContent.subheadline || ''}
                 onEdit={(value) => handleContentUpdate('subheadline', value)}
-                backgroundType={props.backgroundType || 'primary'}
+                backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
                 colorTokens={colorTokens}
                 variant="body"
-                textStyle={getTextStyle('body-lg')}
                 className="text-lg lg:text-xl leading-relaxed max-w-2xl mx-auto"
                 placeholder="Add a compelling subheadline that supports your main message and explains the key benefit..."
                 sectionId={sectionId}
@@ -310,7 +307,6 @@ export default function ImageFirst(props: LayoutComponentProps) {
               <CTAButton
                 text={blockContent.cta_text}
                 colorTokens={colorTokens}
-                textStyle={getTextStyle('body-lg')}
                 className="shadow-xl hover:shadow-2xl transform hover:-translate-y-0.5 transition-all duration-200"
                 variant="primary"
                 sectionId={sectionId}
@@ -330,10 +326,9 @@ export default function ImageFirst(props: LayoutComponentProps) {
                 mode={mode}
                 value={blockContent.supporting_text || ''}
                 onEdit={(value) => handleContentUpdate('supporting_text', value)}
-                backgroundType={props.backgroundType || 'primary'}
+                backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
                 colorTokens={colorTokens}
                 variant="body"
-                textStyle={getTextStyle('body')}
                 className="leading-relaxed max-w-xl mx-auto"
                 placeholder="Add supporting text with social proof, customer count, or key metrics..."
                 sectionId={sectionId}

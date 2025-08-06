@@ -100,7 +100,6 @@ export default function StackedTextVisual(props: StackedTextVisualProps) {
           >
             <h2 
               className={`mb-4 ${colorTokens.textPrimary}`}
-              style={getTextStyle('h1')}
             >
               {blockContent.headline}
             </h2>
@@ -116,7 +115,6 @@ export default function StackedTextVisual(props: StackedTextVisualProps) {
             >
               <p 
                 className={`mb-6 max-w-2xl mx-auto ${colorTokens.textSecondary} ${!blockContent.subheadline && mode === 'edit' ? 'opacity-50' : ''}`}
-                style={getTextStyle('body-lg')}
               >
                 {blockContent.subheadline || (mode === 'edit' ? 'Add optional subheadline...' : '')}
               </p>
@@ -146,7 +144,6 @@ export default function StackedTextVisual(props: StackedTextVisualProps) {
                 <div className="flex-1">
                   <h3 
                     className="text-gray-700 font-semibold mb-3 uppercase tracking-wide text-sm"
-                    style={getTextStyle('h3')}
                   >
                     Before
                   </h3>
@@ -159,7 +156,6 @@ export default function StackedTextVisual(props: StackedTextVisualProps) {
                   >
                     <p 
                       className="text-gray-700 leading-relaxed"
-                      style={getTextStyle('body')}
                     >
                       {blockContent.before_text}
                     </p>
@@ -189,7 +185,6 @@ export default function StackedTextVisual(props: StackedTextVisualProps) {
                 >
                   <p 
                     className={`text-sm font-medium ${colorTokens.textSecondary} text-center px-4 py-2 bg-blue-50 rounded-full ${!blockContent.transition_text && mode === 'edit' ? 'opacity-50' : ''}`}
-                    style={getTextStyle('body-sm')}
                   >
                     {blockContent.transition_text || (mode === 'edit' ? 'Add transition text...' : '')}
                   </p>
@@ -218,7 +213,6 @@ export default function StackedTextVisual(props: StackedTextVisualProps) {
                 <div className="flex-1">
                   <h3 
                     className="text-green-700 font-semibold mb-3 uppercase tracking-wide text-sm"
-                    style={getTextStyle('h3')}
                   >
                     After
                   </h3>
@@ -231,7 +225,6 @@ export default function StackedTextVisual(props: StackedTextVisualProps) {
                   >
                     <p 
                       className="text-green-700 leading-relaxed"
-                      style={getTextStyle('body')}
                     >
                       {blockContent.after_text}
                     </p>

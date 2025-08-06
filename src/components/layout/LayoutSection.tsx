@@ -1,9 +1,10 @@
 import React, { forwardRef } from 'react';
+import type { BackgroundType } from '@/types/sectionBackground';
 
 interface LayoutSectionProps {
   sectionId: string;
   sectionType: string;
-  backgroundType: 'primary' | 'secondary' | 'neutral' | 'divider' | 'custom';
+  backgroundType: BackgroundType;
   sectionBackground: string;
   mode: 'edit' | 'preview';
   className?: string;

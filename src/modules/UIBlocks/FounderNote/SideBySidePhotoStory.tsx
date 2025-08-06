@@ -215,7 +215,7 @@ export default function SideBySidePhotoStory(props: LayoutComponentProps) {
     <LayoutSection
       sectionId={sectionId}
       sectionType="SideBySidePhotoStory"
-      backgroundType={props.backgroundType || 'primary'}
+      backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
       sectionBackground={sectionBackground}
       mode={mode}
       className={props.className}
@@ -231,7 +231,6 @@ export default function SideBySidePhotoStory(props: LayoutComponentProps) {
                 value={blockContent.badge_text || ''}
                 onEdit={(value) => handleContentUpdate('badge_text', value)}
                 colorTokens={colorTokens}
-                textStyle={getTextStyle('body-sm')}
                 placeholder="✨ Creator Story"
                 sectionId={sectionId}
                 elementKey="badge_text"
@@ -242,12 +241,11 @@ export default function SideBySidePhotoStory(props: LayoutComponentProps) {
 
           <EditableAdaptiveHeadline
             mode={mode}
-            value={blockContent.story_headline}
+            value={blockContent.story_headline || ''}
             onEdit={(value) => handleContentUpdate('story_headline', value)}
             level="h2"
-            backgroundType={props.backgroundType || 'primary'}
+            backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
             colorTokens={colorTokens}
-            textStyle={getTextStyle('h2')}
             className="leading-tight max-w-4xl mx-auto"
             sectionId={sectionId}
             elementKey="story_headline"
@@ -264,12 +262,12 @@ export default function SideBySidePhotoStory(props: LayoutComponentProps) {
             {/* Story Text */}
             <EditableAdaptiveText
               mode={mode}
-              value={blockContent.story_text}
+              value={blockContent.story_text || ''}
               onEdit={(value) => handleContentUpdate('story_text', value)}
-              backgroundType={props.backgroundType || 'primary'}
+              backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
               colorTokens={colorTokens}
               variant="body"
-              textStyle={`${getTextStyle('body-lg')} leading-relaxed whitespace-pre-line`}
+              textStyle={{ ...getTextStyle('body-lg'), lineHeight: '1.625', whiteSpace: 'pre-line' }}
               placeholder="Tell your personal story - the struggle, the solution, and the impact..."
               sectionId={sectionId}
               elementKey="story_text"
@@ -280,12 +278,12 @@ export default function SideBySidePhotoStory(props: LayoutComponentProps) {
             <div className="bg-gray-50 border-l-4 border-blue-500 rounded-r-lg p-6">
               <EditableAdaptiveText
                 mode={mode}
-                value={blockContent.story_quote}
+                value={blockContent.story_quote || ''}
                 onEdit={(value) => handleContentUpdate('story_quote', value)}
-                backgroundType="white"
+                backgroundType="neutral"
                 colorTokens={colorTokens}
                 variant="body"
-                textStyle="text-lg italic text-gray-700 leading-relaxed"
+                textStyle={{ fontSize: '1.125rem', fontStyle: 'italic', color: '#374151', lineHeight: '1.625' }}
                 placeholder="Add a powerful quote that captures your motivation..."
                 sectionId={sectionId}
                 elementKey="story_quote"
@@ -300,10 +298,10 @@ export default function SideBySidePhotoStory(props: LayoutComponentProps) {
                   mode={mode}
                   value={blockContent.founder_name || ''}
                   onEdit={(value) => handleContentUpdate('founder_name', value)}
-                  backgroundType="white"
+                  backgroundType="neutral"
                   colorTokens={colorTokens}
                   variant="body"
-                  textStyle="font-semibold text-gray-900"
+                  textStyle={{ fontWeight: '600', color: '#111827' }}
                   placeholder="Your Name"
                   sectionId={sectionId}
                   elementKey="founder_name"
@@ -316,7 +314,6 @@ export default function SideBySidePhotoStory(props: LayoutComponentProps) {
             <CTAButton
               text={blockContent.cta_text}
               colorTokens={colorTokens}
-              textStyle={getTextStyle('body-lg')}
               className="shadow-xl hover:shadow-2xl transform hover:-translate-y-0.5 transition-all duration-200"
               variant="primary"
               sectionId={sectionId}
@@ -343,16 +340,8 @@ export default function SideBySidePhotoStory(props: LayoutComponentProps) {
                   className="w-full h-96 object-cover rounded-2xl shadow-lg cursor-pointer"
                   data-image-id={`${sectionId}-story-image`}
                   onMouseUp={(e) => {
-                    if (mode === 'edit') {
-                      e.stopPropagation();
-                      e.preventDefault();
-                      const rect = e.currentTarget.getBoundingClientRect();
-                      showImageToolbar(`${sectionId}-story-image`, {
-                        x: rect.left + rect.width / 2,
-                        y: rect.top - 10
-                      });
-                    }
-                  }}
+                        // Image toolbar is only available in edit mode
+                      }}
                 />
               ) : (
                 <PhotoStoryPlaceholder type="primary" />
@@ -369,16 +358,8 @@ export default function SideBySidePhotoStory(props: LayoutComponentProps) {
                     className="w-full h-48 object-cover rounded-lg shadow-md cursor-pointer"
                     data-image-id={`${sectionId}-secondary-image`}
                     onMouseUp={(e) => {
-                      if (mode === 'edit') {
-                        e.stopPropagation();
-                        e.preventDefault();
-                        const rect = e.currentTarget.getBoundingClientRect();
-                        showImageToolbar(`${sectionId}-secondary-image`, {
-                          x: rect.left + rect.width / 2,
-                          y: rect.top - 10
-                        });
-                      }
-                    }}
+                        // Image toolbar is only available in edit mode
+                      }}
                   />
                 ) : (
                   <PhotoStoryPlaceholder type="secondary" />

@@ -89,14 +89,12 @@ const StatComparisonCard = ({
             suppressContentEditableWarning
             onBlur={(e) => onMetricEdit(index, e.currentTarget.textContent || '')}
             className="outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-1 min-h-[24px] cursor-text hover:bg-gray-50 font-semibold text-gray-900"
-            style={getTextStyle('h3')}
           >
             {stat.metric}
           </div>
         ) : (
           <h3 
             className="font-semibold text-gray-900"
-            style={getTextStyle('h3')}
           >
             {stat.metric}
           </h3>
@@ -123,14 +121,12 @@ const StatComparisonCard = ({
               suppressContentEditableWarning
               onBlur={(e) => onBeforeEdit(index, e.currentTarget.textContent || '')}
               className="outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-1 min-h-[24px] cursor-text hover:bg-gray-50 font-bold text-red-900"
-              style={getTextStyle('h3')}
             >
               {stat.before}
             </div>
           ) : (
             <span 
               className="font-bold text-red-900 text-xl"
-              style={getTextStyle('h3')}
             >
               {stat.before}
             </span>
@@ -163,14 +159,12 @@ const StatComparisonCard = ({
               suppressContentEditableWarning
               onBlur={(e) => onAfterEdit(index, e.currentTarget.textContent || '')}
               className="outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-1 min-h-[24px] cursor-text hover:bg-gray-50 font-bold text-green-900"
-              style={getTextStyle('h3')}
             >
               {stat.after}
             </div>
           ) : (
             <span 
               className="font-bold text-green-900 text-xl"
-              style={getTextStyle('h3')}
             >
               {stat.after}
             </span>
@@ -263,12 +257,11 @@ export default function BeforeAfterStats(props: BeforeAfterStatsProps) {
         <div className="text-center mb-16">
           <EditableAdaptiveHeadline
             mode={mode}
-            value={blockContent.headline}
+            value={blockContent.headline || ''}
             onEdit={(value) => handleContentUpdate('headline', value)}
             level="h2"
-            backgroundType={backgroundType}
+            backgroundType={backgroundType === 'custom' ? 'secondary' : backgroundType}
             colorTokens={colorTokens}
-            textStyle={getTextStyle('h1')}
             className="mb-4"
             sectionId={sectionId}
             elementKey="headline"
@@ -279,11 +272,10 @@ export default function BeforeAfterStats(props: BeforeAfterStatsProps) {
           {(blockContent.subheadline || mode === 'edit') && (
             <EditableAdaptiveText
               mode={mode}
-              value={blockContent.subheadline}
+              value={blockContent.subheadline || ''}
               onEdit={(value) => handleContentUpdate('subheadline', value)}
-              backgroundType={backgroundType}
+              backgroundType={backgroundType === 'custom' ? 'secondary' : backgroundType}
               colorTokens={colorTokens}
-              textStyle={getTextStyle('body-lg')}
               className="mb-6 max-w-3xl mx-auto"
               placeholder="Add optional subheadline describing the transformation results..."
               sectionId={sectionId}

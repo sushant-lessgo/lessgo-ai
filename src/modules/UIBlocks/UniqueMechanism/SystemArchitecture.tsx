@@ -20,9 +20,9 @@ export default function SystemArchitecture(props: LayoutComponentProps) {
   const components = blockContent.architecture_components.split('|').map(c => c.trim()).filter(Boolean);
 
   return (
-    <LayoutSection sectionId={sectionId} sectionType="SystemArchitecture" backgroundType={props.backgroundType || 'neutral'} sectionBackground={sectionBackground} mode={mode} className={props.className}>
+    <LayoutSection sectionId={sectionId} sectionType="SystemArchitecture" backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')} sectionBackground={sectionBackground} mode={mode} className={props.className}>
       <div className="max-w-6xl mx-auto text-center">
-        <EditableAdaptiveHeadline mode={mode} value={blockContent.headline} onEdit={(value) => handleContentUpdate('headline', value)} level="h2" backgroundType={props.backgroundType || 'neutral'} colorTokens={colorTokens} textStyle={getTextStyle('h1')} className="mb-12" sectionId={sectionId} elementKey="headline" sectionBackground={sectionBackground} />
+        <EditableAdaptiveHeadline mode={mode} value={blockContent.headline || ''} onEdit={(value) => handleContentUpdate('headline', value)} level="h2" backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')} colorTokens={colorTokens} className="mb-12" sectionId={sectionId} elementKey="headline" sectionBackground={sectionBackground} />
         <div className="grid grid-cols-2 md:grid-cols-3 gap-8">
           {components.map((component, index) => (
             <div key={index} className="bg-white p-6 rounded-xl border border-gray-200 hover:shadow-lg transition-all duration-300">

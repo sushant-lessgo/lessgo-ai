@@ -128,7 +128,7 @@ const TestimonialCard = React.memo(({
   testimonial: Testimonial;
   mode: 'edit' | 'preview';
   colorTokens: any;
-  getTextStyle: (variant: 'display' | 'hero' | 'h1' | 'h2' | 'h3' | 'h4' | 'body-lg' | 'body' | 'body-sm' | 'caption') => React.CSSProperties;
+  getTextStyle: (variant: 'display' | 'hero' | 'h1' | 'h2' | 'h3' | 'body-lg' | 'body' | 'body-sm' | 'caption') => React.CSSProperties;
   onQuoteEdit: (index: number, value: string) => void;
   onNameEdit: (index: number, value: string) => void;
   onTitleEdit: (index: number, value: string) => void;
@@ -153,14 +153,12 @@ const TestimonialCard = React.memo(({
             suppressContentEditableWarning
             onBlur={(e) => onQuoteEdit(testimonial.index, e.currentTarget.textContent?.replace(/^"|"$/g, '') || '')}
             className="outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-1 min-h-[60px] cursor-text hover:bg-gray-50 leading-relaxed italic"
-            style={getTextStyle('body-lg')}
           >
             "{testimonial.quote}"
           </div>
         ) : (
           <blockquote 
             className={`${colorTokens.textSecondary} leading-relaxed italic`}
-            style={getTextStyle('body-lg')}
           >
             "{testimonial.quote}"
           </blockquote>
@@ -182,14 +180,12 @@ const TestimonialCard = React.memo(({
                 suppressContentEditableWarning
                 onBlur={(e) => onNameEdit(testimonial.index, e.currentTarget.textContent || '')}
                 className="outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-1 min-h-[20px] cursor-text hover:bg-gray-50 font-semibold"
-                style={getTextStyle('body')}
               >
                 {testimonial.customerName}
               </div>
             ) : (
               <div 
                 className={`font-semibold ${colorTokens.textPrimary}`}
-                style={getTextStyle('body')}
               >
                 {testimonial.customerName}
               </div>
@@ -205,15 +201,12 @@ const TestimonialCard = React.memo(({
                   suppressContentEditableWarning
                   onBlur={(e) => onTitleEdit(testimonial.index, e.currentTarget.textContent || '')}
                   className="outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-1 min-h-[16px] cursor-text hover:bg-gray-50 text-sm"
-                  style={getTextStyle('body-sm')}
-                  placeholder="Add title..."
                 >
                   {testimonial.customerTitle || 'Add title...'}
                 </div>
               ) : testimonial.customerTitle && (
                 <div 
                   className={`${colorTokens.textSecondary} text-sm`}
-                  style={getTextStyle('body-sm')}
                 >
                   {testimonial.customerTitle}
                 </div>
@@ -230,15 +223,12 @@ const TestimonialCard = React.memo(({
                   suppressContentEditableWarning
                   onBlur={(e) => onCompanyEdit(testimonial.index, e.currentTarget.textContent || '')}
                   className="outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-1 min-h-[16px] cursor-text hover:bg-gray-50 text-sm font-medium"
-                  style={getTextStyle('body-sm')}
-                  placeholder="Add company..."
                 >
                   {testimonial.customerCompany || 'Add company...'}
                 </div>
               ) : testimonial.customerCompany && (
                 <div 
                   className={`${colorTokens.link} text-sm font-medium`}
-                  style={getTextStyle('body-sm')}
                 >
                   {testimonial.customerCompany}
                 </div>
@@ -307,7 +297,7 @@ export default function QuoteGrid(props: LayoutComponentProps) {
     <LayoutSection
       sectionId={sectionId}
       sectionType="QuoteGrid"
-      backgroundType={props.backgroundType || 'neutral'}
+      backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
       sectionBackground={sectionBackground}
       mode={mode}
       className={props.className}
@@ -317,16 +307,14 @@ export default function QuoteGrid(props: LayoutComponentProps) {
         <div className="text-center mb-16">
           <EditableAdaptiveHeadline
             mode={mode}
-            value={blockContent.headline}
+            value={blockContent.headline || ''}
             onEdit={(value) => handleContentUpdate('headline', value)}
             level="h2"
-            backgroundType={props.backgroundType || 'neutral'}
+            backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
             colorTokens={colorTokens}
             sectionId={sectionId}
             elementKey="headline"
             sectionBackground={sectionBackground}
-            textStyle={getTextStyle('h1')}
-            textAlign="center"
             className="mb-4"
           />
         </div>

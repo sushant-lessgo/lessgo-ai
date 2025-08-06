@@ -186,7 +186,7 @@ export default function CardWithTestimonial(props: LayoutComponentProps) {
   }) => (
     <div className={`bg-white rounded-2xl shadow-lg border-2 transition-all duration-300 hover:shadow-xl ${
       tier.isPopular 
-        ? `${colorTokens.ctaBorder} scale-105` 
+        ? `border-primary scale-105` 
         : 'border-gray-200 hover:border-gray-300'
     }`}>
       
@@ -226,7 +226,6 @@ export default function CardWithTestimonial(props: LayoutComponentProps) {
           <CTAButton
             text={tier.ctaText}
             colorTokens={colorTokens}
-            textStyle={getTextStyle('body-lg')}
             className="w-full shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200"
             variant={tier.isPopular ? "primary" : "secondary"}
             sectionId={sectionId}
@@ -258,7 +257,7 @@ export default function CardWithTestimonial(props: LayoutComponentProps) {
                     <StarRating 
                       rating={tier.testimonial.rating}
                       maxRating={5}
-                      size="sm"
+                      size="small"
                       showNumber={false}
                     />
                   </div>
@@ -288,7 +287,7 @@ export default function CardWithTestimonial(props: LayoutComponentProps) {
     <LayoutSection
       sectionId={sectionId}
       sectionType="CardWithTestimonial"
-      backgroundType={props.backgroundType || 'neutral'}
+      backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
       sectionBackground={sectionBackground}
       mode={mode}
       className={props.className}
@@ -298,12 +297,11 @@ export default function CardWithTestimonial(props: LayoutComponentProps) {
         <div className="text-center mb-16">
           <EditableAdaptiveHeadline
             mode={mode}
-            value={blockContent.headline}
+            value={blockContent.headline || ''}
             onEdit={(value) => handleContentUpdate('headline', value)}
             level="h2"
-            backgroundType={props.backgroundType || 'neutral'}
+            backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
             colorTokens={colorTokens}
-            textStyle={getTextStyle('h2')}
             className="mb-4"
             sectionId={sectionId}
             elementKey="headline"
@@ -315,10 +313,9 @@ export default function CardWithTestimonial(props: LayoutComponentProps) {
               mode={mode}
               value={blockContent.subheadline || ''}
               onEdit={(value) => handleContentUpdate('subheadline', value)}
-              backgroundType={props.backgroundType || 'neutral'}
+              backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
               colorTokens={colorTokens}
               variant="body"
-              textStyle={getTextStyle('body-lg')}
               className="text-lg mb-8 max-w-3xl mx-auto"
               placeholder="Add optional subheadline to introduce pricing with testimonials..."
               sectionId={sectionId}
@@ -336,12 +333,11 @@ export default function CardWithTestimonial(props: LayoutComponentProps) {
               <div className="space-y-4">
                 <EditableAdaptiveText
                   mode={mode}
-                  value={blockContent.tier_names}
+                  value={blockContent.tier_names || ''}
                   onEdit={(value) => handleContentUpdate('tier_names', value)}
-                  backgroundType={props.backgroundType || 'neutral'}
+                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
                   colorTokens={colorTokens}
                   variant="body"
-                  textStyle={getTextStyle('body')}
                   className="mb-2"
                   placeholder="Tier names (pipe separated)"
                   sectionId={sectionId}
@@ -351,12 +347,11 @@ export default function CardWithTestimonial(props: LayoutComponentProps) {
                 
                 <EditableAdaptiveText
                   mode={mode}
-                  value={blockContent.tier_prices}
+                  value={blockContent.tier_prices || ''}
                   onEdit={(value) => handleContentUpdate('tier_prices', value)}
-                  backgroundType={props.backgroundType || 'neutral'}
+                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
                   colorTokens={colorTokens}
                   variant="body"
-                  textStyle={getTextStyle('body')}
                   className="mb-2"
                   placeholder="Tier prices (pipe separated)"
                   sectionId={sectionId}
@@ -366,12 +361,11 @@ export default function CardWithTestimonial(props: LayoutComponentProps) {
                 
                 <EditableAdaptiveText
                   mode={mode}
-                  value={blockContent.testimonial_quotes}
+                  value={blockContent.testimonial_quotes || ''}
                   onEdit={(value) => handleContentUpdate('testimonial_quotes', value)}
-                  backgroundType={props.backgroundType || 'neutral'}
+                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
                   colorTokens={colorTokens}
                   variant="body"
-                  textStyle={getTextStyle('body')}
                   className="mb-2"
                   placeholder="Testimonial quotes (pipe separated)"
                   sectionId={sectionId}
@@ -381,12 +375,11 @@ export default function CardWithTestimonial(props: LayoutComponentProps) {
                 
                 <EditableAdaptiveText
                   mode={mode}
-                  value={blockContent.testimonial_names}
+                  value={blockContent.testimonial_names || ''}
                   onEdit={(value) => handleContentUpdate('testimonial_names', value)}
-                  backgroundType={props.backgroundType || 'neutral'}
+                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
                   colorTokens={colorTokens}
                   variant="body"
-                  textStyle={getTextStyle('body')}
                   className="mb-2"
                   placeholder="Testimonial names (pipe separated)"
                   sectionId={sectionId}
@@ -396,12 +389,11 @@ export default function CardWithTestimonial(props: LayoutComponentProps) {
                 
                 <EditableAdaptiveText
                   mode={mode}
-                  value={blockContent.feature_lists}
+                  value={blockContent.feature_lists || ''}
                   onEdit={(value) => handleContentUpdate('feature_lists', value)}
-                  backgroundType={props.backgroundType || 'neutral'}
+                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
                   colorTokens={colorTokens}
                   variant="body"
-                  textStyle={getTextStyle('body')}
                   className="mb-2"
                   placeholder="Feature lists (pipe separated tiers, comma separated features)"
                   sectionId={sectionId}
@@ -477,10 +469,9 @@ export default function CardWithTestimonial(props: LayoutComponentProps) {
                 mode={mode}
                 value={blockContent.supporting_text || ''}
                 onEdit={(value) => handleContentUpdate('supporting_text', value)}
-                backgroundType={props.backgroundType || 'neutral'}
+                backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
                 colorTokens={colorTokens}
                 variant="body"
-                textStyle={getTextStyle('body-lg')}
                 className="max-w-3xl mx-auto mb-8"
                 placeholder="Add optional supporting text to reinforce pricing with social proof..."
                 sectionId={sectionId}

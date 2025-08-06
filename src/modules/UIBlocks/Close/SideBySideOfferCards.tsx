@@ -162,7 +162,7 @@ export default function SideBySideOfferCards(props: LayoutComponentProps) {
   }) => (
     <div className={`relative bg-white rounded-2xl border-2 transition-all duration-300 hover:shadow-xl ${
       offer.isPopular 
-        ? `${colorTokens.ctaBorder} shadow-lg scale-105` 
+        ? `border-primary shadow-lg scale-105` 
         : 'border-gray-200 hover:border-gray-300'
     }`}>
       
@@ -208,7 +208,6 @@ export default function SideBySideOfferCards(props: LayoutComponentProps) {
         <CTAButton
           text={offer.cta}
           colorTokens={colorTokens}
-          textStyle={getTextStyle('body-lg')}
           className={`w-full shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-300 ${
             offer.isPopular ? '' : 'opacity-90'
           }`}
@@ -234,12 +233,11 @@ export default function SideBySideOfferCards(props: LayoutComponentProps) {
         <div className="text-center mb-16">
           <EditableAdaptiveHeadline
             mode={mode}
-            value={blockContent.headline}
+            value={blockContent.headline || ''}
             onEdit={(value) => handleContentUpdate('headline', value)}
             level="h2"
             backgroundType={safeBackgroundType}
             colorTokens={colorTokens}
-            textStyle={getTextStyle('h2')}
             className="mb-4"
             sectionId={sectionId}
             elementKey="headline"
@@ -254,7 +252,6 @@ export default function SideBySideOfferCards(props: LayoutComponentProps) {
               backgroundType={safeBackgroundType}
               colorTokens={colorTokens}
               variant="body"
-              textStyle={getTextStyle('body-lg')}
               className="text-lg mb-8 max-w-3xl mx-auto"
               placeholder="Add optional subheadline to introduce offer comparison..."
               sectionId={sectionId}
@@ -272,12 +269,11 @@ export default function SideBySideOfferCards(props: LayoutComponentProps) {
               <div className="space-y-4">
                 <EditableAdaptiveText
                   mode={mode}
-                  value={blockContent.offer_titles}
+                  value={blockContent.offer_titles || ''}
                   onEdit={(value) => handleContentUpdate('offer_titles', value)}
                   backgroundType={safeBackgroundType}
                   colorTokens={colorTokens}
                   variant="body"
-                  textStyle={getTextStyle('body')}
                   className="mb-2"
                   placeholder="Offer titles (pipe separated)"
                   sectionId={sectionId}
@@ -287,12 +283,11 @@ export default function SideBySideOfferCards(props: LayoutComponentProps) {
                 
                 <EditableAdaptiveText
                   mode={mode}
-                  value={blockContent.offer_descriptions}
+                  value={blockContent.offer_descriptions || ''}
                   onEdit={(value) => handleContentUpdate('offer_descriptions', value)}
                   backgroundType={safeBackgroundType}
                   colorTokens={colorTokens}
                   variant="body"
-                  textStyle={getTextStyle('body')}
                   className="mb-2"
                   placeholder="Offer descriptions (pipe separated)"
                   sectionId={sectionId}
@@ -302,12 +297,11 @@ export default function SideBySideOfferCards(props: LayoutComponentProps) {
                 
                 <EditableAdaptiveText
                   mode={mode}
-                  value={blockContent.offer_prices}
+                  value={blockContent.offer_prices || ''}
                   onEdit={(value) => handleContentUpdate('offer_prices', value)}
                   backgroundType={safeBackgroundType}
                   colorTokens={colorTokens}
                   variant="body"
-                  textStyle={getTextStyle('body')}
                   className="mb-2"
                   placeholder="Offer prices (pipe separated)"
                   sectionId={sectionId}
@@ -317,12 +311,11 @@ export default function SideBySideOfferCards(props: LayoutComponentProps) {
                 
                 <EditableAdaptiveText
                   mode={mode}
-                  value={blockContent.offer_features}
+                  value={blockContent.offer_features || ''}
                   onEdit={(value) => handleContentUpdate('offer_features', value)}
                   backgroundType={safeBackgroundType}
                   colorTokens={colorTokens}
                   variant="body"
-                  textStyle={getTextStyle('body')}
                   className="mb-2"
                   placeholder="Offer features (pipe separated offers, comma separated features)"
                   sectionId={sectionId}
@@ -489,7 +482,6 @@ export default function SideBySideOfferCards(props: LayoutComponentProps) {
                 backgroundType={safeBackgroundType}
                 colorTokens={colorTokens}
                 variant="body"
-                textStyle={getTextStyle('body-lg')}
                 className="max-w-3xl mx-auto mb-8"
                 placeholder="Add optional supporting text to reinforce offer comparison..."
                 sectionId={sectionId}

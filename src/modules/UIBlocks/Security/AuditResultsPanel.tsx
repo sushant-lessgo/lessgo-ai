@@ -77,7 +77,7 @@ export default function AuditResultsPanel(props: LayoutComponentProps) {
     <LayoutSection
       sectionId={sectionId}
       sectionType="AuditResultsPanel"
-      backgroundType={props.backgroundType || 'neutral'}
+      backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
       sectionBackground={sectionBackground}
       mode={mode}
       className={props.className}
@@ -88,12 +88,11 @@ export default function AuditResultsPanel(props: LayoutComponentProps) {
         <div className="text-center mb-12">
           <EditableAdaptiveHeadline
             mode={mode}
-            value={blockContent.headline}
+            value={blockContent.headline || ''}
             onEdit={(value) => handleContentUpdate('headline', value)}
             level="h2"
-            backgroundType={props.backgroundType || 'neutral'}
+            backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
             colorTokens={colorTokens}
-            textStyle={getTextStyle('h1')}
             className="mb-6"
             sectionId={sectionId}
             elementKey="headline"
@@ -103,12 +102,11 @@ export default function AuditResultsPanel(props: LayoutComponentProps) {
           {blockContent.subheadline && (
             <EditableAdaptiveText
               mode={mode}
-              value={blockContent.subheadline}
+              value={blockContent.subheadline || ''}
               onEdit={(value) => handleContentUpdate('subheadline', value)}
-              backgroundType={props.backgroundType || 'neutral'}
+              backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
               colorTokens={colorTokens}
               variant="body"
-              textStyle={getTextStyle('body-lg')}
               className="text-lg max-w-3xl mx-auto"
               sectionId={sectionId}
               elementKey="subheadline"
@@ -147,12 +145,11 @@ export default function AuditResultsPanel(props: LayoutComponentProps) {
                 <div className="text-2xl font-bold text-gray-900 mb-2">
                   <EditableAdaptiveText
                     mode={mode}
-                    value={blockContent.audit_firm}
+                    value={blockContent.audit_firm || ''}
                     onEdit={(value) => handleContentUpdate('audit_firm', value)}
                     backgroundType="neutral"
                     colorTokens={colorTokens}
                     variant="body"
-                    textStyle={getTextStyle('h3')}
                     className="font-bold text-gray-900"
                     sectionId={sectionId}
                     elementKey="audit_firm"
@@ -166,12 +163,11 @@ export default function AuditResultsPanel(props: LayoutComponentProps) {
                 <div className="text-2xl font-bold text-gray-900 mb-2">
                   <EditableAdaptiveText
                     mode={mode}
-                    value={blockContent.audit_date}
+                    value={blockContent.audit_date || ''}
                     onEdit={(value) => handleContentUpdate('audit_date', value)}
                     backgroundType="neutral"
                     colorTokens={colorTokens}
                     variant="body"
-                    textStyle={getTextStyle('h3')}
                     className="font-bold text-gray-900"
                     sectionId={sectionId}
                     elementKey="audit_date"
@@ -185,12 +181,11 @@ export default function AuditResultsPanel(props: LayoutComponentProps) {
                 <div className="text-2xl font-bold text-gray-900 mb-2">
                   <EditableAdaptiveText
                     mode={mode}
-                    value={blockContent.audit_type}
+                    value={blockContent.audit_type || ''}
                     onEdit={(value) => handleContentUpdate('audit_type', value)}
                     backgroundType="neutral"
                     colorTokens={colorTokens}
                     variant="body"
-                    textStyle={getTextStyle('body')}
                     className="font-bold text-gray-900"
                     sectionId={sectionId}
                     elementKey="audit_type"
@@ -203,7 +198,7 @@ export default function AuditResultsPanel(props: LayoutComponentProps) {
 
             {/* Audit Results */}
             <div className="space-y-4 mb-8">
-              <h4 className="font-bold text-gray-900 mb-4" style={getTextStyle('h3')}>
+              <h4 className="font-bold text-gray-900 mb-4">
                 Key Findings & Results
               </h4>
               

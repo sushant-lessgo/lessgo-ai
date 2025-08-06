@@ -50,13 +50,13 @@ export function EditLayout({ tokenId }: EditLayoutProps) {
   // Handle responsive viewport changes
   useEffect(() => {
     const handleResize = () => {
-      updateViewportInfo();
+      updateViewportInfo?.();
     };
 
     window.addEventListener('resize', handleResize);
     
     // Initial viewport setup
-    updateViewportInfo();
+    updateViewportInfo?.();
 
     return () => {
       window.removeEventListener('resize', handleResize);
@@ -66,7 +66,7 @@ export function EditLayout({ tokenId }: EditLayoutProps) {
   // Handle keyboard shortcuts
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
-      handleKeyboardShortcut(event);
+      handleKeyboardShortcut?.(event);
     };
 
     document.addEventListener('keydown', handleKeyDown);

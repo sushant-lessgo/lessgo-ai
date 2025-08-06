@@ -173,7 +173,7 @@ export function usePageGeneration(tokenId: string) {
           neutral: backgroundSystem.neutral,
           divider: backgroundSystem.divider,
         }
-      }
+      } as any
     });
     
     // Log theme after update
@@ -412,13 +412,10 @@ export function usePageGeneration(tokenId: string) {
       // Set AI generation status
       storeState.setAIGenerationStatus({
         isGenerating: false,
-        success: result.success,
-        isPartial: result.isPartial,
         warnings: result.warnings,
         errors: result.errors,
-        sectionsGenerated: result.sections,
         lastGenerated: Date.now()
-      });
+      } as any);
 
       // CRITICAL: Update content using the store's updateFromAIResponse method
       if (result.generatedContent) {

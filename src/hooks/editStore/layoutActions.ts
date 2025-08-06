@@ -426,16 +426,9 @@ moveSection: (sectionId: string, direction: 'up' | 'down') =>
         // When global background changes, reset all sections to use the new global theme
         Object.keys(state.content).forEach(sectionId => {
           const section = state.content[sectionId];
-          if (section && section.backgroundType && section.backgroundType !== 'primary' && section.backgroundType !== 'secondary' && section.backgroundType !== 'neutral' && section.backgroundType !== 'divider') {
-            // Reset custom colors back to theme-based backgrounds
-            const sectionType = sectionId.toLowerCase();
-            if (sectionType.includes('hero') || sectionType.includes('cta')) {
-              section.backgroundType = 'primary';
-            } else if (sectionType.includes('faq')) {
-              section.backgroundType = 'divider';
-            } else {
-              section.backgroundType = 'secondary';
-            }
+          if (section && section.backgroundType === 'custom') {
+            // Reset custom backgrounds back to theme-based backgrounds
+            section.backgroundType = 'theme';
             // Clear custom background data
             if (section.sectionBackground) {
               delete section.sectionBackground;

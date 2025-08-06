@@ -19,7 +19,7 @@ import { createAIActions } from '../hooks/editStore/aiActions';
 import { createPersistenceActions } from '../hooks/editStore/persistenceActions';
 import { createGenerationActions } from '../hooks/editStore/generationActions';
 import { createUIActions } from '../hooks/editStore/uiActions';
-import { createFormActions } from '../hooks/editStore/formActions';
+import { createFormsImageActions } from '../hooks/editStore/formsImageActions';
 import { createLayoutActions } from '../hooks/editStore/layoutActions';
 
 // Import storage utilities
@@ -285,7 +285,7 @@ function createInitialState(tokenId: string): EditStore {
 /**
  * Create a new EditStore instance for a specific token
  */
-export function createEditStore(tokenId: string): EditStoreInstance {
+export function createEditStore(tokenId: string) {
   if (!tokenId || typeof tokenId !== 'string') {
     throw new Error('Token ID is required to create EditStore');
   }
@@ -314,7 +314,7 @@ export function createEditStore(tokenId: string): EditStoreInstance {
             ...createPersistenceActions(set, get),
             ...createGenerationActions(set, get),
             ...createUIActions(set, get),
-            ...createFormActions(set, get),
+            ...createFormsImageActions(set, get),
             ...createLayoutActions(set, get),
 
             // Token-specific actions

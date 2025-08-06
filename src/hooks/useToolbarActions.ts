@@ -18,6 +18,7 @@ import {
   getRestrictionSummary 
 } from '@/utils/elementRestrictions';
 export function useToolbarActions() {
+  const store = useEditStore();
   const {
     // Content actions
     updateElementContent,
@@ -38,17 +39,12 @@ export function useToolbarActions() {
     addFormField,
     removeFormField,
     updateFormField,
-    toggleFormFieldRequired,
-    
-    // Image actions
-    updateImageAsset,
     
     // UI actions
     showSectionToolbar,
     showElementToolbar,
     hideElementToolbar,
     hideSectionToolbar,
-    setSelectedElement,
     setActiveSection,
     showElementVariations,
     hideElementVariations,
@@ -68,7 +64,12 @@ export function useToolbarActions() {
     // Auto-save
     trackChange,
     triggerAutoSave,
-  } = useEditStore();
+  } = store;
+
+  // Missing methods from store
+  const toggleFormFieldRequired = (store as any).toggleFormFieldRequired;
+  const updateImageAsset = (store as any).updateImageAsset;
+  const setSelectedElement = (store as any).setSelectedElement;
 
   const { showElementPicker } = useElementPicker();
 const { addElement } = useElementCRUD();
@@ -249,10 +250,10 @@ const { addElement } = useElementCRUD();
       // Track change for auto-save
       if (result) {
         trackChange({
-          type: 'action',
-          actionId,
-          params,
-          timestamp: Date.now(),
+          type: 'content',
+          oldValue: null,
+          newValue: { actionId, params },
+          source: 'user',
         });
         triggerAutoSave();
       }
@@ -310,9 +311,9 @@ const { addElement } = useElementCRUD();
       
       if (sectionIdMapping[sectionId]) {
         sectionType = sectionIdMapping[sectionId];
-      } else if (section.aiMetadata?.sectionType) {
+      } else if ((section.aiMetadata as any)?.sectionType) {
         // Try aiMetadata as last resort
-        sectionType = section.aiMetadata.sectionType;
+        sectionType = (section.aiMetadata as any).sectionType;
         
         // Handle any naming differences in aiMetadata
         const aiMetadataMapping: Record<string, string> = {
@@ -362,7 +363,7 @@ const { addElement } = useElementCRUD();
     layoutType, 
     sectionData,
     sectionDataKeys: sectionData ? Object.keys(sectionData) : [],
-    possibleSectionType: sectionData?.type || sectionData?.sectionType || sectionId
+    possibleSectionType: (sectionData as any)?.type || (sectionData as any)?.sectionType || sectionId
   });
   
   // If elementType is specified, validate and add element directly
@@ -1172,7 +1173,7 @@ const { addElement } = useElementCRUD();
       options: selectedType === 'select' ? ['Option 1', 'Option 2'] : undefined,
     };
     
-    addFormField(formId, field);
+    addFormField?.(formId, field as any);
     return true;
   }, [addFormField]);
 

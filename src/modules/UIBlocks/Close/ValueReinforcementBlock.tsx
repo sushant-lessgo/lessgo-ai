@@ -238,12 +238,11 @@ export default function ValueReinforcementBlock(props: LayoutComponentProps) {
         <div className="text-center mb-16">
           <EditableAdaptiveHeadline
             mode={mode}
-            value={blockContent.headline}
+            value={blockContent.headline || ''}
             onEdit={(value) => handleContentUpdate('headline', value)}
             level="h2"
             backgroundType={safeBackgroundType}
             colorTokens={colorTokens}
-            textStyle={getTextStyle('h2')}
             className="mb-4"
             sectionId={sectionId}
             elementKey="headline"
@@ -258,7 +257,6 @@ export default function ValueReinforcementBlock(props: LayoutComponentProps) {
               backgroundType={safeBackgroundType}
               colorTokens={colorTokens}
               variant="body"
-              textStyle={getTextStyle('body-lg')}
               className="text-lg mb-8 max-w-3xl mx-auto"
               placeholder="Add optional subheadline to introduce value reinforcement..."
               sectionId={sectionId}
@@ -282,12 +280,11 @@ export default function ValueReinforcementBlock(props: LayoutComponentProps) {
               <div className="space-y-4">
                 <EditableAdaptiveText
                   mode={mode}
-                  value={blockContent.primary_value}
+                  value={blockContent.primary_value || ''}
                   onEdit={(value) => handleContentUpdate('primary_value', value)}
                   backgroundType={safeBackgroundType}
                   colorTokens={colorTokens}
                   variant="body"
-                  textStyle={getTextStyle('body')}
                   className="mb-2"
                   placeholder="Primary value proposition"
                   sectionId={sectionId}
@@ -297,12 +294,11 @@ export default function ValueReinforcementBlock(props: LayoutComponentProps) {
                 
                 <EditableAdaptiveText
                   mode={mode}
-                  value={blockContent.value_points}
+                  value={blockContent.value_points || ''}
                   onEdit={(value) => handleContentUpdate('value_points', value)}
                   backgroundType={safeBackgroundType}
                   colorTokens={colorTokens}
                   variant="body"
-                  textStyle={getTextStyle('body')}
                   className="mb-2"
                   placeholder="Value points (pipe separated)"
                   sectionId={sectionId}
@@ -312,12 +308,11 @@ export default function ValueReinforcementBlock(props: LayoutComponentProps) {
                 
                 <EditableAdaptiveText
                   mode={mode}
-                  value={blockContent.transformation_before}
+                  value={blockContent.transformation_before || ''}
                   onEdit={(value) => handleContentUpdate('transformation_before', value)}
                   backgroundType={safeBackgroundType}
                   colorTokens={colorTokens}
                   variant="body"
-                  textStyle={getTextStyle('body')}
                   className="mb-2"
                   placeholder="Before transformation (pipe separated)"
                   sectionId={sectionId}
@@ -327,12 +322,11 @@ export default function ValueReinforcementBlock(props: LayoutComponentProps) {
                 
                 <EditableAdaptiveText
                   mode={mode}
-                  value={blockContent.transformation_after}
+                  value={blockContent.transformation_after || ''}
                   onEdit={(value) => handleContentUpdate('transformation_after', value)}
                   backgroundType={safeBackgroundType}
                   colorTokens={colorTokens}
                   variant="body"
-                  textStyle={getTextStyle('body')}
                   className="mb-2"
                   placeholder="After transformation (pipe separated)"
                   sectionId={sectionId}
@@ -405,7 +399,6 @@ export default function ValueReinforcementBlock(props: LayoutComponentProps) {
                 <CTAButton
                   text={blockContent.cta_text}
                   colorTokens={colorTokens}
-                  textStyle={getTextStyle('body-lg')}
                   className="shadow-xl hover:shadow-2xl transform hover:-translate-y-1 transition-all duration-300 text-lg py-4 px-8"
                   variant="primary"
                   sectionId={sectionId}
@@ -447,7 +440,6 @@ export default function ValueReinforcementBlock(props: LayoutComponentProps) {
                 backgroundType={safeBackgroundType}
                 colorTokens={colorTokens}
                 variant="body"
-                textStyle={getTextStyle('body-lg')}
                 className="max-w-3xl mx-auto mb-8"
                 placeholder="Add optional supporting text to reinforce value proposition..."
                 sectionId={sectionId}

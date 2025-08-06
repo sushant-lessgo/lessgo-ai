@@ -144,15 +144,7 @@ const FeatureCard = React.memo(({
               className="w-12 h-12 rounded-full object-cover cursor-pointer border-2 border-gray-200"
               data-image-id={`${sectionId}-testimonial${index}-avatar`}
               onMouseUp={(e) => {
-                if (mode === 'edit') {
-                  e.stopPropagation();
-                  e.preventDefault();
-                  const rect = e.currentTarget.getBoundingClientRect();
-                  showImageToolbar(`${sectionId}-testimonial${index}-avatar`, {
-                    x: rect.left + rect.width / 2,
-                    y: rect.top - 10
-                  });
-                }
+                // Image toolbar is only available in edit mode
               }}
             />
           ) : (
@@ -233,7 +225,7 @@ export default function FeatureTestimonial(props: LayoutComponentProps) {
     <LayoutSection
       sectionId={sectionId}
       sectionType="FeatureTestimonial"
-      backgroundType={props.backgroundType || 'neutral'}
+      backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
       sectionBackground={sectionBackground}
       mode={mode}
       className={props.className}
@@ -243,12 +235,11 @@ export default function FeatureTestimonial(props: LayoutComponentProps) {
         <div className="text-center mb-12">
           <EditableAdaptiveHeadline
             mode={mode}
-            value={blockContent.headline}
+            value={blockContent.headline || ''}
             onEdit={(value) => handleContentUpdate('headline', value)}
             level="h2"
-            backgroundType={props.backgroundType || 'neutral'}
+            backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
             colorTokens={colorTokens}
-            textStyle={getTextStyle('h2')}
             className="mb-4"
             sectionId={sectionId}
             elementKey="headline"
@@ -260,10 +251,9 @@ export default function FeatureTestimonial(props: LayoutComponentProps) {
               mode={mode}
               value={blockContent.subheadline || ''}
               onEdit={(value) => handleContentUpdate('subheadline', value)}
-              backgroundType={props.backgroundType || 'neutral'}
+              backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
               colorTokens={colorTokens}
               variant="body"
-              textStyle={getTextStyle('body-lg')}
               className="text-lg mb-6 max-w-3xl mx-auto"
               placeholder="Add optional subheadline to introduce your enterprise features..."
               sectionId={sectionId}
@@ -281,12 +271,11 @@ export default function FeatureTestimonial(props: LayoutComponentProps) {
               <div className="space-y-4">
                 <EditableAdaptiveText
                   mode={mode}
-                  value={blockContent.feature_titles}
+                  value={blockContent.feature_titles || ''}
                   onEdit={(value) => handleContentUpdate('feature_titles', value)}
-                  backgroundType={props.backgroundType || 'neutral'}
+                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
                   colorTokens={colorTokens}
                   variant="body"
-                  textStyle={getTextStyle('body')}
                   className="mb-2"
                   placeholder="Feature titles (pipe separated)"
                   sectionId={sectionId}
@@ -296,12 +285,11 @@ export default function FeatureTestimonial(props: LayoutComponentProps) {
                 
                 <EditableAdaptiveText
                   mode={mode}
-                  value={blockContent.feature_descriptions}
+                  value={blockContent.feature_descriptions || ''}
                   onEdit={(value) => handleContentUpdate('feature_descriptions', value)}
-                  backgroundType={props.backgroundType || 'neutral'}
+                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
                   colorTokens={colorTokens}
                   variant="body"
-                  textStyle={getTextStyle('body')}
                   className="mb-2"
                   placeholder="Feature descriptions (pipe separated)"
                   sectionId={sectionId}
@@ -311,12 +299,11 @@ export default function FeatureTestimonial(props: LayoutComponentProps) {
                 
                 <EditableAdaptiveText
                   mode={mode}
-                  value={blockContent.testimonial_quotes}
+                  value={blockContent.testimonial_quotes || ''}
                   onEdit={(value) => handleContentUpdate('testimonial_quotes', value)}
-                  backgroundType={props.backgroundType || 'neutral'}
+                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
                   colorTokens={colorTokens}
                   variant="body"
-                  textStyle={getTextStyle('body')}
                   className="mb-2"
                   placeholder="Testimonial quotes (pipe separated)"
                   sectionId={sectionId}
@@ -326,12 +313,11 @@ export default function FeatureTestimonial(props: LayoutComponentProps) {
                 
                 <EditableAdaptiveText
                   mode={mode}
-                  value={blockContent.testimonial_names}
+                  value={blockContent.testimonial_names || ''}
                   onEdit={(value) => handleContentUpdate('testimonial_names', value)}
-                  backgroundType={props.backgroundType || 'neutral'}
+                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
                   colorTokens={colorTokens}
                   variant="body"
-                  textStyle={getTextStyle('body')}
                   className="mb-2"
                   placeholder="Testimonial names (pipe separated)"
                   sectionId={sectionId}
@@ -341,12 +327,11 @@ export default function FeatureTestimonial(props: LayoutComponentProps) {
                 
                 <EditableAdaptiveText
                   mode={mode}
-                  value={blockContent.testimonial_roles}
+                  value={blockContent.testimonial_roles || ''}
                   onEdit={(value) => handleContentUpdate('testimonial_roles', value)}
-                  backgroundType={props.backgroundType || 'neutral'}
+                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
                   colorTokens={colorTokens}
                   variant="body"
-                  textStyle={getTextStyle('body')}
                   placeholder="Testimonial roles (pipe separated)"
                   sectionId={sectionId}
                   elementKey="testimonial_roles"
@@ -412,10 +397,9 @@ export default function FeatureTestimonial(props: LayoutComponentProps) {
                 mode={mode}
                 value={blockContent.supporting_text || ''}
                 onEdit={(value) => handleContentUpdate('supporting_text', value)}
-                backgroundType={props.backgroundType || 'neutral'}
+                backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
                 colorTokens={colorTokens}
                 variant="body"
-                textStyle={getTextStyle('body-lg')}
                 className="max-w-3xl mx-auto mb-8"
                 placeholder="Add optional supporting text to reinforce enterprise trust..."
                 sectionId={sectionId}
@@ -430,7 +414,6 @@ export default function FeatureTestimonial(props: LayoutComponentProps) {
                   <CTAButton
                     text={blockContent.cta_text}
                     colorTokens={colorTokens}
-                    textStyle={getTextStyle('body-lg')}
                     className="shadow-xl hover:shadow-2xl transform hover:-translate-y-0.5 transition-all duration-200"
                     variant="primary"
                     sectionId={sectionId}

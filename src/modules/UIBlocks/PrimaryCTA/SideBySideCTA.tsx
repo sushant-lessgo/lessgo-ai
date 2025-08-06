@@ -69,7 +69,7 @@ export default function SideBySideCTA(props: LayoutComponentProps) {
     <LayoutSection
       sectionId={sectionId}
       sectionType="SideBySideCTA"
-      backgroundType={props.backgroundType || 'neutral'}
+      backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
       sectionBackground={sectionBackground}
       mode={mode}
       className={props.className}
@@ -92,12 +92,11 @@ export default function SideBySideCTA(props: LayoutComponentProps) {
               
               <EditableAdaptiveHeadline
                 mode={mode}
-                value={blockContent.left_headline}
+                value={blockContent.left_headline || ''}
                 onEdit={(value) => handleContentUpdate('left_headline', value)}
                 level="h3"
                 backgroundType="neutral"
                 colorTokens={colorTokens}
-                textStyle={getTextStyle('h2')}
                 className="mb-4 text-gray-900"
                 sectionId={sectionId}
                 elementKey="left_headline"
@@ -106,12 +105,11 @@ export default function SideBySideCTA(props: LayoutComponentProps) {
               
               <EditableAdaptiveText
                 mode={mode}
-                value={blockContent.left_description}
+                value={blockContent.left_description || ''}
                 onEdit={(value) => handleContentUpdate('left_description', value)}
                 backgroundType="neutral"
                 colorTokens={colorTokens}
                 variant="body"
-                textStyle={getTextStyle('body')}
                 className="text-gray-600 mb-6"
                 sectionId={sectionId}
                 elementKey="left_description"
@@ -121,7 +119,6 @@ export default function SideBySideCTA(props: LayoutComponentProps) {
               <CTAButton
                 text={blockContent.left_cta_text}
                 colorTokens={colorTokens}
-                textStyle={getTextStyle('body-lg')}
                 className="w-full shadow-lg hover:shadow-xl transition-all duration-200"
                 variant="primary"
                 sectionId={sectionId}
@@ -146,12 +143,11 @@ export default function SideBySideCTA(props: LayoutComponentProps) {
               
               <EditableAdaptiveHeadline
                 mode={mode}
-                value={blockContent.right_headline}
+                value={blockContent.right_headline || ''}
                 onEdit={(value) => handleContentUpdate('right_headline', value)}
                 level="h3"
                 backgroundType="neutral"
                 colorTokens={colorTokens}
-                textStyle={getTextStyle('h2')}
                 className="mb-4 text-gray-900"
                 sectionId={sectionId}
                 elementKey="right_headline"
@@ -160,12 +156,11 @@ export default function SideBySideCTA(props: LayoutComponentProps) {
               
               <EditableAdaptiveText
                 mode={mode}
-                value={blockContent.right_description}
+                value={blockContent.right_description || ''}
                 onEdit={(value) => handleContentUpdate('right_description', value)}
                 backgroundType="neutral"
                 colorTokens={colorTokens}
                 variant="body"
-                textStyle={getTextStyle('body')}
                 className="text-gray-600 mb-6"
                 sectionId={sectionId}
                 elementKey="right_description"
@@ -175,7 +170,6 @@ export default function SideBySideCTA(props: LayoutComponentProps) {
               <CTAButton
                 text={blockContent.right_cta_text}
                 colorTokens={colorTokens}
-                textStyle={getTextStyle('body-lg')}
                 className="w-full shadow-lg hover:shadow-xl transition-all duration-200"
                 variant="secondary"
                 sectionId={sectionId}

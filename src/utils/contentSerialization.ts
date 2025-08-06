@@ -80,7 +80,7 @@ export function serializeUniversalElements(elements: Record<string, UniversalEle
       id: element.id,
       type: element.type,
       props: element.props,
-      meta: element.meta,
+      meta: element.metadata,
     };
   });
   
@@ -94,9 +94,29 @@ export function deserializeUniversalElements(serialized: Record<string, any>): R
     if (data && typeof data === 'object' && data.id && data.type) {
       elements[key] = {
         id: data.id,
+        elementKey: key,
+        sectionId: data.sectionId || '',
         type: data.type,
+        content: data.content || '',
         props: data.props || {},
-        meta: data.meta || { createdAt: Date.now() },
+        metadata: data.meta || { 
+          addedManually: true,
+          addedAt: Date.now(),
+          lastModified: Date.now(),
+          position: 0,
+          version: 1
+        },
+        editState: {
+          isSelected: false,
+          isEditing: false,
+          isDirty: false,
+          hasErrors: false
+        },
+        validation: {
+          isValid: true,
+          errors: [],
+          warnings: []
+        }
       };
     }
   });

@@ -45,7 +45,7 @@ export default function PrivacyCommitmentBlock(props: LayoutComponentProps) {
     <LayoutSection
       sectionId={sectionId}
       sectionType="PrivacyCommitmentBlock"
-      backgroundType={props.backgroundType || 'primary'}
+      backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
       sectionBackground={sectionBackground}
       mode={mode}
       className={props.className}
@@ -60,12 +60,11 @@ export default function PrivacyCommitmentBlock(props: LayoutComponentProps) {
             </div>
             <EditableAdaptiveHeadline
               mode={mode}
-              value={blockContent.headline}
+              value={blockContent.headline || ''}
               onEdit={(value) => handleContentUpdate('headline', value)}
               level="h2"
               backgroundType="neutral"
               colorTokens={colorTokens}
-              textStyle={getTextStyle('h1')}
               className="text-blue-900 mb-4"
               sectionId={sectionId}
               elementKey="headline"

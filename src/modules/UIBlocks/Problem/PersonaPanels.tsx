@@ -296,7 +296,6 @@ export default function PersonaPanels(props: LayoutComponentProps) {
         <CTAButton
           text={`Solutions for ${persona.name}`}
           colorTokens={colorTokens}
-          textStyle={getTextStyle('body-lg')}
           className="shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-300"
           variant="primary"
           sectionId={sectionId}
@@ -310,7 +309,7 @@ export default function PersonaPanels(props: LayoutComponentProps) {
     <LayoutSection
       sectionId={sectionId}
       sectionType="PersonaPanels"
-      backgroundType={props.backgroundType || 'neutral'}
+      backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
       sectionBackground={sectionBackground}
       mode={mode}
       className={props.className}
@@ -320,12 +319,11 @@ export default function PersonaPanels(props: LayoutComponentProps) {
         <div className="text-center mb-16">
           <EditableAdaptiveHeadline
             mode={mode}
-            value={blockContent.headline}
+            value={blockContent.headline || ''}
             onEdit={(value) => handleContentUpdate('headline', value)}
             level="h2"
-            backgroundType={props.backgroundType || 'neutral'}
+            backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
             colorTokens={colorTokens}
-            textStyle={getTextStyle('h2')}
             className="mb-4"
             sectionId={sectionId}
             elementKey="headline"
@@ -337,10 +335,9 @@ export default function PersonaPanels(props: LayoutComponentProps) {
               mode={mode}
               value={blockContent.subheadline || ''}
               onEdit={(value) => handleContentUpdate('subheadline', value)}
-              backgroundType={props.backgroundType || 'neutral'}
+              backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
               colorTokens={colorTokens}
               variant="body"
-              textStyle={getTextStyle('body-lg')}
               className="text-lg mb-8 max-w-3xl mx-auto"
               placeholder="Add optional subheadline to introduce the persona panels..."
               sectionId={sectionId}
@@ -366,12 +363,11 @@ export default function PersonaPanels(props: LayoutComponentProps) {
               <div className="space-y-4">
                 <EditableAdaptiveText
                   mode={mode}
-                  value={blockContent.persona_names}
+                  value={blockContent.persona_names || ''}
                   onEdit={(value) => handleContentUpdate('persona_names', value)}
-                  backgroundType={props.backgroundType || 'neutral'}
+                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
                   colorTokens={colorTokens}
                   variant="body"
-                  textStyle={getTextStyle('body')}
                   className="mb-2"
                   placeholder="Persona names (pipe separated)"
                   sectionId={sectionId}
@@ -381,12 +377,11 @@ export default function PersonaPanels(props: LayoutComponentProps) {
                 
                 <EditableAdaptiveText
                   mode={mode}
-                  value={blockContent.persona_problems}
+                  value={blockContent.persona_problems || ''}
                   onEdit={(value) => handleContentUpdate('persona_problems', value)}
-                  backgroundType={props.backgroundType || 'neutral'}
+                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
                   colorTokens={colorTokens}
                   variant="body"
-                  textStyle={getTextStyle('body')}
                   className="mb-2"
                   placeholder="Persona problems (pipe separated)"
                   sectionId={sectionId}
@@ -398,10 +393,9 @@ export default function PersonaPanels(props: LayoutComponentProps) {
                   mode={mode}
                   value={blockContent.persona_titles || ''}
                   onEdit={(value) => handleContentUpdate('persona_titles', value)}
-                  backgroundType={props.backgroundType || 'neutral'}
+                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
                   colorTokens={colorTokens}
                   variant="body"
-                  textStyle={getTextStyle('body')}
                   className="mb-2"
                   placeholder="Persona titles (pipe separated)"
                   sectionId={sectionId}
@@ -413,10 +407,9 @@ export default function PersonaPanels(props: LayoutComponentProps) {
                   mode={mode}
                   value={blockContent.persona_pain_points || ''}
                   onEdit={(value) => handleContentUpdate('persona_pain_points', value)}
-                  backgroundType={props.backgroundType || 'neutral'}
+                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
                   colorTokens={colorTokens}
                   variant="body"
-                  textStyle={getTextStyle('body')}
                   className="mb-2"
                   placeholder="Persona pain points (pipe separated personas, comma separated points)"
                   sectionId={sectionId}
@@ -505,10 +498,9 @@ export default function PersonaPanels(props: LayoutComponentProps) {
                 mode={mode}
                 value={blockContent.supporting_text || ''}
                 onEdit={(value) => handleContentUpdate('supporting_text', value)}
-                backgroundType={props.backgroundType || 'neutral'}
+                backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
                 colorTokens={colorTokens}
                 variant="body"
-                textStyle={getTextStyle('body-lg')}
                 className="max-w-3xl mx-auto mb-8"
                 placeholder="Add optional supporting text to reinforce persona identification..."
                 sectionId={sectionId}

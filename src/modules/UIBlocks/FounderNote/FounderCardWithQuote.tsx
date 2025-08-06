@@ -80,7 +80,7 @@ export default function FounderCardWithQuote(props: LayoutComponentProps) {
     <LayoutSection
       sectionId={sectionId}
       sectionType="FounderCardWithQuote"
-      backgroundType={props.backgroundType || 'neutral'}
+      backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
       sectionBackground={sectionBackground}
       mode={mode}
       className={props.className}
@@ -110,14 +110,13 @@ export default function FounderCardWithQuote(props: LayoutComponentProps) {
                   
                   <EditableAdaptiveText
                     mode={mode}
-                    value={blockContent.founder_quote}
+                    value={blockContent.founder_quote || ''}
                     onEdit={(value) => handleContentUpdate('founder_quote', value)}
-                    backgroundType={props.backgroundType || 'neutral'}
+                    backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
                     colorTokens={colorTokens}
                     sectionId={sectionId}
                     elementKey="founder_quote"
                     sectionBackground={sectionBackground}
-                    textStyle={getTextStyle('body-lg')}
                     className="text-lg md:text-xl leading-relaxed italic mb-6"
                     placeholder="Add an authentic, personal quote from the founder..."
                   />
@@ -127,27 +126,25 @@ export default function FounderCardWithQuote(props: LayoutComponentProps) {
                 <div className="space-y-2">
                   <EditableAdaptiveHeadline
                     mode={mode}
-                    value={blockContent.founder_name}
+                    value={blockContent.founder_name || ''}
                     onEdit={(value) => handleContentUpdate('founder_name', value)}
                     level="h3"
-                    backgroundType={props.backgroundType || 'neutral'}
+                    backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
                     colorTokens={colorTokens}
                     sectionId={sectionId}
                     elementKey="founder_name"
                     sectionBackground={sectionBackground}
-                    textStyle={getTextStyle('h3')}
                   />
 
                   <EditableAdaptiveText
                     mode={mode}
-                    value={blockContent.founder_title}
+                    value={blockContent.founder_title || ''}
                     onEdit={(value) => handleContentUpdate('founder_title', value)}
-                    backgroundType={props.backgroundType || 'neutral'}
+                    backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
                     colorTokens={colorTokens}
                     sectionId={sectionId}
                     elementKey="founder_title"
                     sectionBackground={sectionBackground}
-                    textStyle={getTextStyle('body')}
                     className="font-medium"
                     placeholder="CEO & Co-Founder"
                   />
@@ -162,12 +159,11 @@ export default function FounderCardWithQuote(props: LayoutComponentProps) {
                   mode={mode}
                   value={blockContent.founder_bio || ''}
                   onEdit={(value) => handleContentUpdate('founder_bio', value)}
-                  backgroundType={props.backgroundType || 'neutral'}
+                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
                   colorTokens={colorTokens}
                   sectionId={sectionId}
                   elementKey="founder_bio"
                   sectionBackground={sectionBackground}
-                  textStyle={getTextStyle('body')}
                   className="leading-relaxed text-center md:text-left"
                   placeholder="Add optional founder bio to share background and experience..."
                 />

@@ -98,7 +98,6 @@ const ObjectionAccordionItem = React.memo(({
   onToggle, 
   mode, 
   colorTokens,
-  getTextStyle,
   onTitleEdit,
   onResponseEdit 
 }: {
@@ -107,7 +106,6 @@ const ObjectionAccordionItem = React.memo(({
   onToggle: () => void;
   mode: 'edit' | 'preview';
   colorTokens: any;
-  getTextStyle: (variant: 'display' | 'hero' | 'h1' | 'h2' | 'h3' | 'h4' | 'body-lg' | 'body' | 'body-sm' | 'caption') => React.CSSProperties;
   onTitleEdit: (index: number, value: string) => void;
   onResponseEdit: (index: number, value: string) => void;
 }) => {
@@ -135,7 +133,6 @@ const ObjectionAccordionItem = React.memo(({
                   suppressContentEditableWarning
                   onBlur={(e) => onTitleEdit(item.index, e.currentTarget.textContent || '')}
                   className="outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-1 min-h-[24px] cursor-text hover:bg-gray-50 font-semibold text-gray-900"
-                  style={getTextStyle('h3')}
                   onClick={(e) => e.stopPropagation()}
                 >
                   {item.title}
@@ -143,7 +140,6 @@ const ObjectionAccordionItem = React.memo(({
               ) : (
                 <h3 
                   className="font-semibold text-gray-900"
-                  style={getTextStyle('h3')}
                 >
                   {item.title}
                 </h3>
@@ -188,14 +184,12 @@ const ObjectionAccordionItem = React.memo(({
                   suppressContentEditableWarning
                   onBlur={(e) => onResponseEdit(item.index, e.currentTarget.textContent || '')}
                   className="outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-1 min-h-[24px] cursor-text hover:bg-green-100 text-green-800 leading-relaxed"
-                  style={getTextStyle('body')}
                 >
                   {item.response}
                 </div>
               ) : (
                 <p 
                   className="text-green-800 leading-relaxed"
-                  style={getTextStyle('body')}
                 >
                   {item.response}
                 </p>
@@ -258,7 +252,7 @@ export default function ObjectionAccordion(props: LayoutComponentProps) {
     <LayoutSection
       sectionId={sectionId}
       sectionType="ObjectionAccordion"
-      backgroundType={props.backgroundType || 'neutral'}
+      backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
       sectionBackground={sectionBackground}
       mode={mode}
       className={props.className}
@@ -268,13 +262,12 @@ export default function ObjectionAccordion(props: LayoutComponentProps) {
         <div className="text-center mb-12">
           <EditableAdaptiveHeadline
             mode={mode}
-            value={blockContent.headline}
+            value={blockContent.headline || ''}
             onEdit={(value) => handleContentUpdate('headline', value)}
             level="h2"
-            backgroundType={props.backgroundType || 'neutral'}
+            backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
             colorTokens={colorTokens}
             textStyle={{
-              ...getTextStyle('h1'),
               textAlign: 'center'
             }}
             className="mb-4"
@@ -289,11 +282,10 @@ export default function ObjectionAccordion(props: LayoutComponentProps) {
               mode={mode}
               value={blockContent.subheadline || ''}
               onEdit={(value) => handleContentUpdate('subheadline', value)}
-              backgroundType={props.backgroundType || 'neutral'}
+              backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
               colorTokens={colorTokens}
               variant="body"
               textStyle={{
-                ...getTextStyle('body-lg'),
                 textAlign: 'center'
               }}
               className="max-w-2xl mx-auto"
@@ -315,7 +307,6 @@ export default function ObjectionAccordion(props: LayoutComponentProps) {
               onToggle={() => toggleItem(item.id)}
               mode={mode}
               colorTokens={colorTokens}
-              getTextStyle={getTextStyle}
               onTitleEdit={handleTitleEdit}
               onResponseEdit={handleResponseEdit}
             />

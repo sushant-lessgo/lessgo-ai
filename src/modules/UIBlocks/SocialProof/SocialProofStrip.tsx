@@ -176,7 +176,7 @@ export default function SocialProofStrip(props: LayoutComponentProps) {
     <LayoutSection
       sectionId={sectionId}
       sectionType="SocialProofStrip"
-      backgroundType={props.backgroundType || 'primary'}
+      backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
       sectionBackground={sectionBackground}
       mode={mode}
       className={props.className}
@@ -187,12 +187,11 @@ export default function SocialProofStrip(props: LayoutComponentProps) {
         <div className="text-center mb-12">
           <EditableAdaptiveHeadline
             mode={mode}
-            value={blockContent.headline}
+            value={blockContent.headline || ''}
             onEdit={(value) => handleContentUpdate('headline', value)}
             level="h2"
-            backgroundType={props.backgroundType || 'primary'}
+            backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
             colorTokens={colorTokens}
-            textStyle={getTextStyle('h2')}
             className="mb-8"
             sectionId={sectionId}
             elementKey="headline"

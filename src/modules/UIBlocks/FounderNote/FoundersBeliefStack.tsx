@@ -196,7 +196,7 @@ export default function FoundersBeliefStack(props: LayoutComponentProps) {
     <LayoutSection
       sectionId={sectionId}
       sectionType="FoundersBeliefStack"
-      backgroundType={props.backgroundType || 'primary'}
+      backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
       sectionBackground={sectionBackground}
       mode={mode}
       className={props.className}
@@ -207,12 +207,11 @@ export default function FoundersBeliefStack(props: LayoutComponentProps) {
         <div className="text-center mb-12">
           <EditableAdaptiveHeadline
             mode={mode}
-            value={blockContent.beliefs_headline}
+            value={blockContent.beliefs_headline || ''}
             onEdit={(value) => handleContentUpdate('beliefs_headline', value)}
             level="h2"
-            backgroundType={props.backgroundType || 'primary'}
+            backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
             colorTokens={colorTokens}
-            textStyle={getTextStyle('h2')}
             className="leading-tight mb-6"
             sectionId={sectionId}
             elementKey="beliefs_headline"
@@ -221,12 +220,11 @@ export default function FoundersBeliefStack(props: LayoutComponentProps) {
 
           <EditableAdaptiveText
             mode={mode}
-            value={blockContent.beliefs_intro}
+            value={blockContent.beliefs_intro || ''}
             onEdit={(value) => handleContentUpdate('beliefs_intro', value)}
-            backgroundType={props.backgroundType || 'primary'}
+            backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
             colorTokens={colorTokens}
             variant="body"
-            textStyle={getTextStyle('body-lg')}
             className="leading-relaxed max-w-3xl mx-auto"
             placeholder="Introduce your beliefs and why they matter..."
             sectionId={sectionId}
@@ -245,12 +243,12 @@ export default function FoundersBeliefStack(props: LayoutComponentProps) {
               </p>
               <EditableAdaptiveText
                 mode={mode}
-                value={blockContent.belief_items}
+                value={blockContent.belief_items || ''}
                 onEdit={(value) => handleContentUpdate('belief_items', value)}
-                backgroundType="white"
+                backgroundType="neutral"
                 colorTokens={colorTokens}
                 variant="body"
-                textStyle="text-gray-700 text-sm"
+                textStyle={{ color: '#374151', fontSize: '0.875rem' }}
                 placeholder="🎯 First Belief|Description here|🚀 Second Belief|Description here..."
                 sectionId={sectionId}
                 elementKey="belief_items"
@@ -287,16 +285,8 @@ export default function FoundersBeliefStack(props: LayoutComponentProps) {
                   className="w-24 h-24 rounded-full object-cover cursor-pointer border-4 border-white shadow-lg mx-auto lg:mx-0"
                   data-image-id={`${sectionId}-founder-image`}
                   onMouseUp={(e) => {
-                    if (mode === 'edit') {
-                      e.stopPropagation();
-                      e.preventDefault();
-                      const rect = e.currentTarget.getBoundingClientRect();
-                      showImageToolbar(`${sectionId}-founder-image`, {
-                        x: rect.left + rect.width / 2,
-                        y: rect.top - 10
-                      });
-                    }
-                  }}
+                        // Image toolbar is only available in edit mode
+                      }}
                 />
               ) : (
                 <div className="mx-auto lg:mx-0 w-24">
@@ -309,10 +299,10 @@ export default function FoundersBeliefStack(props: LayoutComponentProps) {
                   mode={mode}
                   value={blockContent.founder_name || ''}
                   onEdit={(value) => handleContentUpdate('founder_name', value)}
-                  backgroundType="white"
+                  backgroundType="neutral"
                   colorTokens={colorTokens}
                   variant="body"
-                  textStyle="font-semibold text-gray-900"
+                  textStyle={{ fontWeight: '600', color: '#111827' }}
                   placeholder="Founder Name"
                   sectionId={sectionId}
                   elementKey="founder_name"
@@ -322,10 +312,10 @@ export default function FoundersBeliefStack(props: LayoutComponentProps) {
                   mode={mode}
                   value={blockContent.founder_title || ''}
                   onEdit={(value) => handleContentUpdate('founder_title', value)}
-                  backgroundType="white"
+                  backgroundType="neutral"
                   colorTokens={colorTokens}
                   variant="body"
-                  textStyle="text-sm text-gray-600"
+                  textStyle={{ fontSize: '0.875rem', color: '#4B5563' }}
                   placeholder="Title"
                   sectionId={sectionId}
                   elementKey="founder_title"
@@ -338,12 +328,12 @@ export default function FoundersBeliefStack(props: LayoutComponentProps) {
             <div className="lg:col-span-2">
               <EditableAdaptiveText
                 mode={mode}
-                value={blockContent.commitment_text}
+                value={blockContent.commitment_text || ''}
                 onEdit={(value) => handleContentUpdate('commitment_text', value)}
-                backgroundType="white"
+                backgroundType="neutral"
                 colorTokens={colorTokens}
                 variant="body"
-                textStyle="text-lg leading-relaxed text-gray-700"
+                textStyle={{ fontSize: '1.125rem', lineHeight: '1.75', color: '#374151' }}
                 placeholder="Share your personal commitment to these beliefs..."
                 sectionId={sectionId}
                 elementKey="commitment_text"
@@ -370,7 +360,6 @@ export default function FoundersBeliefStack(props: LayoutComponentProps) {
           <CTAButton
             text={blockContent.cta_text}
             colorTokens={colorTokens}
-            textStyle={getTextStyle('body-lg')}
             className="shadow-xl hover:shadow-2xl transform hover:-translate-y-0.5 transition-all duration-200 mb-8"
             variant="primary"
             sectionId={sectionId}

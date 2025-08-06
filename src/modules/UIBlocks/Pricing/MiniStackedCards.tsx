@@ -159,7 +159,7 @@ export default function MiniStackedCards(props: LayoutComponentProps) {
   }) => (
     <div className={`relative bg-white rounded-xl border p-6 transition-all duration-300 hover:shadow-lg hover:-translate-y-1 ${
       tier.isPopular 
-        ? `${colorTokens.ctaBorder} shadow-lg` 
+        ? `border-primary shadow-lg` 
         : 'border-gray-200 hover:border-gray-300'
     }`}>
       
@@ -222,7 +222,6 @@ export default function MiniStackedCards(props: LayoutComponentProps) {
       <CTAButton
         text={tier.ctaText}
         colorTokens={colorTokens}
-        textStyle={getTextStyle('body')}
         className="w-full text-sm py-2"
         variant={tier.isPopular ? "primary" : "secondary"}
         sectionId={sectionId}
@@ -235,7 +234,7 @@ export default function MiniStackedCards(props: LayoutComponentProps) {
     <LayoutSection
       sectionId={sectionId}
       sectionType="MiniStackedCards"
-      backgroundType={props.backgroundType || 'neutral'}
+      backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
       sectionBackground={sectionBackground}
       mode={mode}
       className={props.className}
@@ -245,12 +244,11 @@ export default function MiniStackedCards(props: LayoutComponentProps) {
         <div className="text-center mb-12">
           <EditableAdaptiveHeadline
             mode={mode}
-            value={blockContent.headline}
+            value={blockContent.headline || ''}
             onEdit={(value) => handleContentUpdate('headline', value)}
             level="h2"
-            backgroundType={props.backgroundType || 'neutral'}
+            backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
             colorTokens={colorTokens}
-            textStyle={getTextStyle('h2')}
             className="mb-4"
             sectionId={sectionId}
             elementKey="headline"
@@ -262,10 +260,9 @@ export default function MiniStackedCards(props: LayoutComponentProps) {
               mode={mode}
               value={blockContent.subheadline || ''}
               onEdit={(value) => handleContentUpdate('subheadline', value)}
-              backgroundType={props.backgroundType || 'neutral'}
+              backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
               colorTokens={colorTokens}
               variant="body"
-              textStyle={getTextStyle('body-lg')}
               className="text-lg mb-8 max-w-3xl mx-auto"
               placeholder="Add optional subheadline to introduce mini pricing cards..."
               sectionId={sectionId}
@@ -283,12 +280,11 @@ export default function MiniStackedCards(props: LayoutComponentProps) {
               <div className="space-y-4">
                 <EditableAdaptiveText
                   mode={mode}
-                  value={blockContent.tier_names}
+                  value={blockContent.tier_names || ''}
                   onEdit={(value) => handleContentUpdate('tier_names', value)}
-                  backgroundType={props.backgroundType || 'neutral'}
+                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
                   colorTokens={colorTokens}
                   variant="body"
-                  textStyle={getTextStyle('body')}
                   className="mb-2"
                   placeholder="Tier names (pipe separated)"
                   sectionId={sectionId}
@@ -298,12 +294,11 @@ export default function MiniStackedCards(props: LayoutComponentProps) {
                 
                 <EditableAdaptiveText
                   mode={mode}
-                  value={blockContent.tier_prices}
+                  value={blockContent.tier_prices || ''}
                   onEdit={(value) => handleContentUpdate('tier_prices', value)}
-                  backgroundType={props.backgroundType || 'neutral'}
+                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
                   colorTokens={colorTokens}
                   variant="body"
-                  textStyle={getTextStyle('body')}
                   className="mb-2"
                   placeholder="Tier prices (pipe separated)"
                   sectionId={sectionId}
@@ -313,12 +308,11 @@ export default function MiniStackedCards(props: LayoutComponentProps) {
                 
                 <EditableAdaptiveText
                   mode={mode}
-                  value={blockContent.key_features}
+                  value={blockContent.key_features || ''}
                   onEdit={(value) => handleContentUpdate('key_features', value)}
-                  backgroundType={props.backgroundType || 'neutral'}
+                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
                   colorTokens={colorTokens}
                   variant="body"
-                  textStyle={getTextStyle('body')}
                   className="mb-2"
                   placeholder="Key features (pipe separated tiers, comma separated features)"
                   sectionId={sectionId}
@@ -328,12 +322,11 @@ export default function MiniStackedCards(props: LayoutComponentProps) {
                 
                 <EditableAdaptiveText
                   mode={mode}
-                  value={blockContent.feature_highlights}
+                  value={blockContent.feature_highlights || ''}
                   onEdit={(value) => handleContentUpdate('feature_highlights', value)}
-                  backgroundType={props.backgroundType || 'neutral'}
+                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
                   colorTokens={colorTokens}
                   variant="body"
-                  textStyle={getTextStyle('body')}
                   className="mb-2"
                   placeholder="Feature highlights (pipe separated)"
                   sectionId={sectionId}
@@ -476,10 +469,9 @@ export default function MiniStackedCards(props: LayoutComponentProps) {
                 mode={mode}
                 value={blockContent.supporting_text || ''}
                 onEdit={(value) => handleContentUpdate('supporting_text', value)}
-                backgroundType={props.backgroundType || 'neutral'}
+                backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
                 colorTokens={colorTokens}
                 variant="body"
-                textStyle={getTextStyle('body-lg')}
                 className="max-w-3xl mx-auto mb-8"
                 placeholder="Add optional supporting text to reinforce simple pricing..."
                 sectionId={sectionId}

@@ -79,7 +79,6 @@ export interface ContentActions {
   regenerateElement: (sectionId: string, elementKey: string, variationCount?: number) => Promise<void>;
   regenerateAllContent: () => Promise<void>;
   updateFromAIResponse: (aiResponse: any) => void;
-  setAIGenerationStatus: (status: Partial<UISlice['aiGeneration']>) => void;
   clearAIErrors: () => void;
   
   // Element Variations
@@ -133,7 +132,7 @@ export interface UIActions {
   // Auto-Save UI
   triggerAutoSave: () => void;
   clearAutoSaveError: () => void;
-  trackChange: (change: any) => void;
+  trackUIChange: (change: any) => void;
   
   // Forms UI
   setActiveForm: (formId?: string) => void;
@@ -250,14 +249,23 @@ export interface PersistenceActions {
 /**
  * ===== FORMS & IMAGE ACTIONS INTERFACE =====
  */
-export interface FormsImageActions extends FormActions {
-  // Form Management (Legacy)
+export interface FormsImageActions {
+  // Form Management (Legacy - simplified for MVP)
   createForm: (sectionId: string, elementKey: string) => string;
+  updateForm: (id: string, updates: any) => void;
+  deleteForm: (id: string) => void;
   addFormField: (formId: string, fieldType: string) => void;
   updateFormField: (formId: string, fieldId: string, properties: any) => void;
   deleteFormField: (formId: string, fieldId: string) => void;
+  removeFormField: (formId: string, fieldId: string) => void;
+  reorderFormFields: (formId: string, fieldIds: string[]) => void;
   updateFormSettings: (formId: string, settings: any) => void;
   connectFormIntegration: (formId: string, integration: any) => void;
+  
+  // Form getters
+  getFormById: (id: string) => any;
+  getAllForms: () => any[];
+  getFormsByPlacement: (placement: 'hero' | 'cta-section') => any[];
   
   // Image Management
   uploadImage: (file: File, targetElement?: { sectionId: string; elementKey: string }) => Promise<string>;
@@ -386,7 +394,7 @@ export interface AutoSaveActions {
   clearAutoSaveError: () => void;
   
   // Change Tracking
-  trackChange: (change: any) => void;
+  trackAutoSaveChange: (change: any) => void;
   clearQueuedChanges: () => void;
   
   // Performance Monitoring

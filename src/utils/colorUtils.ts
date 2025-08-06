@@ -369,7 +369,7 @@ export const SAFE_COLOR_COMBINATIONS = {
 /**
  * Get safe fallback colors when calculation fails
  */
-export function getSafeColorFallback(backgroundLuminance?: number): typeof SAFE_COLOR_COMBINATIONS.light {
+export function getSafeColorFallback(backgroundLuminance?: number): typeof SAFE_COLOR_COMBINATIONS.light | typeof SAFE_COLOR_COMBINATIONS.dark | typeof SAFE_COLOR_COMBINATIONS.medium {
   if (backgroundLuminance === undefined) {
     return SAFE_COLOR_COMBINATIONS.light;
   }

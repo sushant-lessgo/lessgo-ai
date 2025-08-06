@@ -168,14 +168,12 @@ const StepCard = ({
               suppressContentEditableWarning
               onBlur={(e) => onTitleEdit(index, e.currentTarget.textContent || '')}
               className="outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-1 min-h-[24px] cursor-text hover:bg-gray-50 font-semibold text-gray-900"
-              style={getTextStyle('h3')}
             >
               {item.title}
             </div>
           ) : (
             <h3 
               className="font-semibold text-gray-900 mb-3"
-              style={getTextStyle('h3')}
             >
               {item.title}
             </h3>
@@ -190,14 +188,12 @@ const StepCard = ({
               suppressContentEditableWarning
               onBlur={(e) => onDescriptionEdit(index, e.currentTarget.textContent || '')}
               className="outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-1 min-h-[24px] cursor-text hover:bg-gray-50 text-gray-600 leading-relaxed"
-              style={getTextStyle('body')}
             >
               {item.description}
             </div>
           ) : (
             <p 
               className="text-gray-600 leading-relaxed"
-              style={getTextStyle('body')}
             >
               {item.description}
             </p>
@@ -279,7 +275,6 @@ export default function ThreeStepHorizontal(props: ThreeStepHorizontalProps) {
           >
             <h2 
               className={`mb-4 ${colorTokens.textPrimary}`}
-              style={getTextStyle('h1')}
             >
               {blockContent.headline}
             </h2>
@@ -313,7 +308,6 @@ export default function ThreeStepHorizontal(props: ThreeStepHorizontalProps) {
             >
               <p 
                 className={`max-w-2xl mx-auto ${colorTokens.textSecondary} ${!blockContent.conclusion_text && mode === 'edit' ? 'opacity-50' : ''}`}
-                style={getTextStyle('body-lg')}
               >
                 {blockContent.conclusion_text || (mode === 'edit' ? 'Add optional conclusion text to summarize the process...' : '')}
               </p>

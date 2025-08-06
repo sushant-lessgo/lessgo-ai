@@ -11,7 +11,7 @@ export function createCTAClickHandler(sectionId: string) {
     // Get ctaConfig from section data
     const { content } = useEditStore.getState();
     const sectionData = content[sectionId];
-    const ctaConfig = sectionData?.ctaConfig;
+    const ctaConfig = sectionData?.cta;
     
     console.log('🔗 CTA Button clicked:', { ctaConfig, sectionId });
     

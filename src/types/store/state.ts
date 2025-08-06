@@ -11,11 +11,10 @@ import type {
   ElementEditMode,
   CanonicalFieldName,
   TypographyState,
-  ContentEditingState,
-  FormField
+  ContentEditingState
 } from '@/types/core/index';
 
-import type { SimpleFormData } from '@/types/simpleForms';
+import type { MVPForm as SimpleFormData } from '@/types/core/forms';
 
 /**
  * ===== ENHANCED INTERFACE DEFINITIONS =====

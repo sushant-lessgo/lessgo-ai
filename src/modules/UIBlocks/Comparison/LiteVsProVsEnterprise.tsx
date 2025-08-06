@@ -133,24 +133,26 @@ export default function LiteVsProVsEnterprise(props: LayoutComponentProps) {
         {/* Header Section */}
         <div className="text-center mb-12">
           <EditableAdaptiveHeadline
-            content={blockContent.headline}
+            value={blockContent.headline || ''}
+            onEdit={(value) => handleContentUpdate('headline', value)}
             mode={mode}
-            onUpdate={(value) => handleContentUpdate('headline', value)}
-            className="mb-4"
-            fonts={fonts}
+            level="h1"
+            backgroundType={backgroundType === 'custom' ? 'secondary' : (backgroundType || 'secondary')}
+            sectionBackground={sectionBackground}
             colorTokens={colorTokens}
-            variant="h1"
+            className="mb-4"
           />
           
           {(blockContent.subheadline || mode === 'edit') && (
             <EditableAdaptiveText
-              content={blockContent.subheadline || 'Add subheadline...'}
+              value={blockContent.subheadline || 'Add subheadline...'}
+              onEdit={(value) => handleContentUpdate('subheadline', value)}
               mode={mode}
-              onUpdate={(value) => handleContentUpdate('subheadline', value)}
-              className={`max-w-2xl mx-auto ${!blockContent.subheadline && mode === 'edit' ? 'opacity-50' : ''}`}
-              fonts={fonts}
+              backgroundType={backgroundType === 'custom' ? 'secondary' : (backgroundType || 'secondary')}
+              variant="body"
+              sectionBackground={sectionBackground}
               colorTokens={colorTokens}
-              variant="body-lg"
+              className={`max-w-2xl mx-auto ${!blockContent.subheadline && mode === 'edit' ? 'opacity-50' : ''}`}
             />
           )}
         </div>
@@ -162,13 +164,13 @@ export default function LiteVsProVsEnterprise(props: LayoutComponentProps) {
               key={tierIndex} 
               className={`rounded-lg ${
                 isRecommended(tierIndex) 
-                  ? `ring-2 ring-${(colorTokens.textAccent || 'text-blue-600').replace('text-', '')} shadow-xl` 
+                  ? `ring-2 ring-primary shadow-xl` 
                   : 'shadow-lg'
               } ${colorTokens.bgNeutral} overflow-hidden`}
             >
               {/* Recommended Badge */}
               {isRecommended(tierIndex) && (
-                <div className={`${colorTokens.bgAccent} text-white text-center py-2 text-sm font-semibold`}>
+                <div className={`bg-primary text-white text-center py-2 text-sm font-semibold`}>
                   MOST POPULAR
                 </div>
               )}
@@ -181,10 +183,9 @@ export default function LiteVsProVsEnterprise(props: LayoutComponentProps) {
                     value={name}
                     onChange={(e) => handleTierNameUpdate(tierIndex, e.target.value)}
                     className={`text-2xl font-bold bg-transparent outline-none focus:ring-2 focus:ring-blue-500 rounded px-2 mb-2 ${colorTokens.textPrimary}`}
-                    style={fonts.h2}
                   />
                 ) : (
-                  <h3 className={`text-2xl font-bold mb-2 ${colorTokens.textPrimary}`} style={fonts.h2}>
+                  <h3 className={`text-2xl font-bold mb-2 ${colorTokens.textPrimary}`}>
                     {name}
                   </h3>
                 )}
@@ -196,12 +197,12 @@ export default function LiteVsProVsEnterprise(props: LayoutComponentProps) {
                     value={tierPrices[tierIndex]}
                     onChange={(e) => handleTierPriceUpdate(tierIndex, e.target.value)}
                     className={`text-4xl font-bold bg-transparent outline-none focus:ring-2 focus:ring-blue-500 rounded px-2 mb-4 ${
-                      isRecommended(tierIndex) ? colorTokens.textAccent : colorTokens.textPrimary
+                      isRecommended(tierIndex) ? 'text-primary' : colorTokens.textPrimary
                     }`}
                   />
                 ) : (
                   <div className={`text-4xl font-bold mb-4 ${
-                    isRecommended(tierIndex) ? colorTokens.textAccent : colorTokens.textPrimary
+                    isRecommended(tierIndex) ? 'text-primary' : colorTokens.textPrimary
                   }`}>
                     {tierPrices[tierIndex]}
                   </div>
@@ -213,11 +214,10 @@ export default function LiteVsProVsEnterprise(props: LayoutComponentProps) {
                     value={tierDescriptions[tierIndex]}
                     onChange={(e) => handleTierDescriptionUpdate(tierIndex, e.target.value)}
                     className={`w-full bg-transparent outline-none focus:ring-2 focus:ring-blue-500 rounded px-2 mb-6 resize-none ${colorTokens.textSecondary}`}
-                    style={getTextStyle('body')}
                     rows={2}
                   />
                 ) : (
-                  <p className={`mb-6 ${colorTokens.textSecondary}`} style={getTextStyle('body')}>
+                  <p className={`mb-6 ${colorTokens.textSecondary}`}>
                     {tierDescriptions[tierIndex]}
                   </p>
                 )}
@@ -230,7 +230,7 @@ export default function LiteVsProVsEnterprise(props: LayoutComponentProps) {
                     return (
                       <div key={featureIndex} className="flex items-start">
                         {hasFeature ? (
-                          <svg className={`w-5 h-5 ${colorTokens.textAccent} mr-3 mt-0.5 flex-shrink-0`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <svg className={`w-5 h-5 text-primary mr-3 mt-0.5 flex-shrink-0`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                           </svg>
                         ) : (
@@ -238,7 +238,7 @@ export default function LiteVsProVsEnterprise(props: LayoutComponentProps) {
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" />
                           </svg>
                         )}
-                        <span className={`text-sm ${hasFeature ? colorTokens.textPrimary : 'text-gray-400'}`} style={getTextStyle('body')}>
+                        <span className={`text-sm ${hasFeature ? colorTokens.textPrimary : 'text-gray-400'}`}>
                           {feature}
                         </span>
                       </div>
@@ -249,8 +249,8 @@ export default function LiteVsProVsEnterprise(props: LayoutComponentProps) {
                 {/* CTA Button */}
                 <button className={`w-full py-3 rounded-lg font-semibold transition-all ${
                   isRecommended(tierIndex)
-                    ? `${colorTokens.bgAccent} text-white hover:opacity-90`
-                    : `${colorTokens.bgNeutral || 'bg-gray-50'} border-2 ${colorTokens.borderColor || 'border-gray-200'} ${colorTokens.textPrimary || 'text-gray-900'} hover:border-${(colorTokens.textAccent || 'text-blue-600').replace('text-', '')}`
+                    ? `bg-primary text-white hover:opacity-90`
+                    : `${colorTokens.bgNeutral || 'bg-gray-50'} border-2 border-gray-200 ${colorTokens.textPrimary || 'text-gray-900'} hover:border-primary`
                 }`}>
                   {mode === 'edit' ? (
                     <input
@@ -262,10 +262,9 @@ export default function LiteVsProVsEnterprise(props: LayoutComponentProps) {
                       }}
                       onClick={(e) => e.stopPropagation()}
                       className="bg-transparent outline-none focus:ring-2 focus:ring-blue-500 rounded px-2 text-center w-full"
-                      style={fonts.button}
                     />
                   ) : (
-                    <span style={fonts.button}>{tierCtas[tierIndex]}</span>
+                    <span>{tierCtas[tierIndex]}</span>
                   )}
                 </button>
               </div>

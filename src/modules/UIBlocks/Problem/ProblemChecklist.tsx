@@ -200,7 +200,7 @@ export default function ProblemChecklist(props: LayoutComponentProps) {
     <LayoutSection
       sectionId={sectionId}
       sectionType="ProblemChecklist"
-      backgroundType={props.backgroundType || 'neutral'}
+      backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
       sectionBackground={sectionBackground}
       mode={mode}
       className={props.className}
@@ -210,12 +210,11 @@ export default function ProblemChecklist(props: LayoutComponentProps) {
         <div className="text-center mb-16">
           <EditableAdaptiveHeadline
             mode={mode}
-            value={blockContent.headline}
+            value={blockContent.headline || ''}
             onEdit={(value) => handleContentUpdate('headline', value)}
             level="h2"
-            backgroundType={props.backgroundType || 'neutral'}
+            backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
             colorTokens={colorTokens}
-            textStyle={getTextStyle('h2')}
             className="mb-4"
             sectionId={sectionId}
             elementKey="headline"
@@ -227,10 +226,9 @@ export default function ProblemChecklist(props: LayoutComponentProps) {
               mode={mode}
               value={blockContent.subheadline || ''}
               onEdit={(value) => handleContentUpdate('subheadline', value)}
-              backgroundType={props.backgroundType || 'neutral'}
+              backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
               colorTokens={colorTokens}
               variant="body"
-              textStyle={getTextStyle('body-lg')}
               className="text-lg mb-8 max-w-3xl mx-auto"
               placeholder="Add optional subheadline to introduce the problem checklist..."
               sectionId={sectionId}
@@ -256,12 +254,11 @@ export default function ProblemChecklist(props: LayoutComponentProps) {
               <div className="space-y-4">
                 <EditableAdaptiveText
                   mode={mode}
-                  value={blockContent.problem_statements}
+                  value={blockContent.problem_statements || ''}
                   onEdit={(value) => handleContentUpdate('problem_statements', value)}
-                  backgroundType={props.backgroundType || 'neutral'}
+                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
                   colorTokens={colorTokens}
                   variant="body"
-                  textStyle={getTextStyle('body')}
                   className="mb-2"
                   placeholder="Problem statements (pipe separated)"
                   sectionId={sectionId}
@@ -271,12 +268,11 @@ export default function ProblemChecklist(props: LayoutComponentProps) {
                 
                 <EditableAdaptiveText
                   mode={mode}
-                  value={blockContent.checklist_items}
+                  value={blockContent.checklist_items || ''}
                   onEdit={(value) => handleContentUpdate('checklist_items', value)}
-                  backgroundType={props.backgroundType || 'neutral'}
+                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
                   colorTokens={colorTokens}
                   variant="body"
-                  textStyle={getTextStyle('body')}
                   className="mb-2"
                   placeholder="Checklist item labels (pipe separated)"
                   sectionId={sectionId}
@@ -288,10 +284,9 @@ export default function ProblemChecklist(props: LayoutComponentProps) {
                   mode={mode}
                   value={blockContent.conclusion_text || ''}
                   onEdit={(value) => handleContentUpdate('conclusion_text', value)}
-                  backgroundType={props.backgroundType || 'neutral'}
+                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
                   colorTokens={colorTokens}
                   variant="body"
-                  textStyle={getTextStyle('body')}
                   className="mb-2"
                   placeholder="Conclusion text"
                   sectionId={sectionId}
@@ -303,10 +298,9 @@ export default function ProblemChecklist(props: LayoutComponentProps) {
                   mode={mode}
                   value={blockContent.scoring_labels || ''}
                   onEdit={(value) => handleContentUpdate('scoring_labels', value)}
-                  backgroundType={props.backgroundType || 'neutral'}
+                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
                   colorTokens={colorTokens}
                   variant="body"
-                  textStyle={getTextStyle('body')}
                   className="mb-2"
                   placeholder="Scoring labels (pipe separated)"
                   sectionId={sectionId}
@@ -402,7 +396,6 @@ export default function ProblemChecklist(props: LayoutComponentProps) {
                   <CTAButton
                     text={blockContent.cta_text || 'Get Solutions for My Challenges'}
                     colorTokens={colorTokens}
-                    textStyle={getTextStyle('body-lg')}
                     className="shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-300"
                     variant="primary"
                     sectionId={sectionId}
@@ -459,10 +452,9 @@ export default function ProblemChecklist(props: LayoutComponentProps) {
                 mode={mode}
                 value={blockContent.supporting_text || ''}
                 onEdit={(value) => handleContentUpdate('supporting_text', value)}
-                backgroundType={props.backgroundType || 'neutral'}
+                backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
                 colorTokens={colorTokens}
                 variant="body"
-                textStyle={getTextStyle('body-lg')}
                 className="max-w-3xl mx-auto mb-8"
                 placeholder="Add optional supporting text to reinforce the assessment results..."
                 sectionId={sectionId}

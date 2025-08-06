@@ -23,9 +23,9 @@ export default function BeforeAfterWorkflow(props: LayoutComponentProps) {
   const afterSteps = blockContent.after_steps.split('|').map(s => s.trim()).filter(Boolean);
 
   return (
-    <LayoutSection sectionId={sectionId} sectionType="BeforeAfterWorkflow" backgroundType={props.backgroundType || 'primary'} sectionBackground={sectionBackground} mode={mode} className={props.className}>
+    <LayoutSection sectionId={sectionId} sectionType="BeforeAfterWorkflow" backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')} sectionBackground={sectionBackground} mode={mode} className={props.className}>
       <div className="max-w-6xl mx-auto">
-        <EditableAdaptiveHeadline mode={mode} value={blockContent.headline} onEdit={(value) => handleContentUpdate('headline', value)} level="h2" backgroundType={props.backgroundType || 'primary'} colorTokens={colorTokens} textStyle={getTextStyle('h1')} className="text-center mb-16" sectionId={sectionId} elementKey="headline" sectionBackground={sectionBackground} />
+        <EditableAdaptiveHeadline mode={mode} value={blockContent.headline || ''} onEdit={(value) => handleContentUpdate('headline', value)} level="h2" backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')} colorTokens={colorTokens} className="text-center mb-16" sectionId={sectionId} elementKey="headline" sectionBackground={sectionBackground} />
         <div className="grid lg:grid-cols-2 gap-12">
           <div className="bg-red-50 p-8 rounded-xl border border-red-200">
             <h3 className="font-bold text-red-900 mb-6 text-center text-xl">Before (Manual Process)</h3>

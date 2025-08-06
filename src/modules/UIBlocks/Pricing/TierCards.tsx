@@ -192,14 +192,12 @@ const PricingCard = ({
               suppressContentEditableWarning
               onBlur={(e) => onNameEdit(index, e.currentTarget.textContent || '')}
               className="outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-1 min-h-[24px] cursor-text hover:bg-gray-50 font-bold text-gray-900"
-              style={getTextStyle('h3')}
             >
               {tier.name}
             </div>
           ) : (
             <h3 
               className="font-bold text-gray-900"
-              style={getTextStyle('h3')}
             >
               {tier.name}
             </h3>
@@ -214,14 +212,12 @@ const PricingCard = ({
               suppressContentEditableWarning
               onBlur={(e) => onPriceEdit(index, e.currentTarget.textContent || '')}
               className="outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-1 min-h-[24px] cursor-text hover:bg-gray-50 text-4xl font-bold text-gray-900"
-              style={getTextStyle('h1')}
             >
               {tier.price}
             </div>
           ) : (
             <div 
               className="text-4xl font-bold text-gray-900"
-              style={getTextStyle('h1')}
             >
               {tier.price}
             </div>
@@ -236,14 +232,12 @@ const PricingCard = ({
               suppressContentEditableWarning
               onBlur={(e) => onDescriptionEdit(index, e.currentTarget.textContent || '')}
               className="outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-1 min-h-[24px] cursor-text hover:bg-gray-50 text-gray-600"
-              style={getTextStyle('body')}
             >
               {tier.description}
             </div>
           ) : (
             <p 
               className="text-gray-600"
-              style={getTextStyle('body')}
             >
               {tier.description}
             </p>
@@ -260,7 +254,6 @@ const PricingCard = ({
                 </svg>
                 <span 
                   className="text-gray-700"
-                  style={getTextStyle('body-sm')}
                 >
                   {feature}
                 </span>
@@ -281,7 +274,6 @@ const PricingCard = ({
                   ? 'bg-blue-600 text-white hover:bg-blue-700'
                   : 'bg-gray-900 text-white hover:bg-gray-800'
               }`}
-              style={getTextStyle('body')}
             >
               {tier.ctaText}
             </div>
@@ -292,7 +284,6 @@ const PricingCard = ({
                   ? 'bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-300 shadow-lg'
                   : 'bg-gray-900 text-white hover:bg-gray-800 focus:ring-gray-300'
               }`}
-              style={getTextStyle('body')}
             >
               {tier.ctaText}
             </button>
@@ -377,7 +368,6 @@ export default function TierCards(props: TierCardsProps) {
           >
             <h2 
               className={`mb-4 ${colorTokens.textPrimary}`}
-              style={getTextStyle('h1')}
             >
               {blockContent.headline}
             </h2>

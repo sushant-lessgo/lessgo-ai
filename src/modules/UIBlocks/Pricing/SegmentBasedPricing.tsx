@@ -279,7 +279,6 @@ export default function SegmentBasedPricing(props: LayoutComponentProps) {
       <CTAButton
         text={tier.ctaText}
         colorTokens={colorTokens}
-        textStyle={getTextStyle('body')}
         className="w-full"
         variant={isRecommended ? "primary" : "secondary"}
         sectionId={sectionId}
@@ -292,7 +291,7 @@ export default function SegmentBasedPricing(props: LayoutComponentProps) {
     <LayoutSection
       sectionId={sectionId}
       sectionType="SegmentBasedPricing"
-      backgroundType={props.backgroundType || 'neutral'}
+      backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
       sectionBackground={sectionBackground}
       mode={mode}
       className={props.className}
@@ -302,12 +301,11 @@ export default function SegmentBasedPricing(props: LayoutComponentProps) {
         <div className="text-center mb-16">
           <EditableAdaptiveHeadline
             mode={mode}
-            value={blockContent.headline}
+            value={blockContent.headline || ''}
             onEdit={(value) => handleContentUpdate('headline', value)}
             level="h2"
-            backgroundType={props.backgroundType || 'neutral'}
+            backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
             colorTokens={colorTokens}
-            textStyle={getTextStyle('h2')}
             className="mb-4"
             sectionId={sectionId}
             elementKey="headline"
@@ -319,10 +317,9 @@ export default function SegmentBasedPricing(props: LayoutComponentProps) {
               mode={mode}
               value={blockContent.subheadline || ''}
               onEdit={(value) => handleContentUpdate('subheadline', value)}
-              backgroundType={props.backgroundType || 'neutral'}
+              backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
               colorTokens={colorTokens}
               variant="body"
-              textStyle={getTextStyle('body-lg')}
               className="text-lg mb-8 max-w-3xl mx-auto"
               placeholder="Add optional subheadline to introduce segment-based pricing..."
               sectionId={sectionId}
@@ -340,12 +337,11 @@ export default function SegmentBasedPricing(props: LayoutComponentProps) {
               <div className="space-y-4">
                 <EditableAdaptiveText
                   mode={mode}
-                  value={blockContent.segment_names}
+                  value={blockContent.segment_names || ''}
                   onEdit={(value) => handleContentUpdate('segment_names', value)}
-                  backgroundType={props.backgroundType || 'neutral'}
+                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
                   colorTokens={colorTokens}
                   variant="body"
-                  textStyle={getTextStyle('body')}
                   className="mb-2"
                   placeholder="Segment names (pipe separated)"
                   sectionId={sectionId}
@@ -355,12 +351,11 @@ export default function SegmentBasedPricing(props: LayoutComponentProps) {
                 
                 <EditableAdaptiveText
                   mode={mode}
-                  value={blockContent.tier_names}
+                  value={blockContent.tier_names || ''}
                   onEdit={(value) => handleContentUpdate('tier_names', value)}
-                  backgroundType={props.backgroundType || 'neutral'}
+                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
                   colorTokens={colorTokens}
                   variant="body"
-                  textStyle={getTextStyle('body')}
                   className="mb-2"
                   placeholder="Tier names by segment (semicolon for segments, pipe for tiers)"
                   sectionId={sectionId}
@@ -370,12 +365,11 @@ export default function SegmentBasedPricing(props: LayoutComponentProps) {
                 
                 <EditableAdaptiveText
                   mode={mode}
-                  value={blockContent.tier_prices}
+                  value={blockContent.tier_prices || ''}
                   onEdit={(value) => handleContentUpdate('tier_prices', value)}
-                  backgroundType={props.backgroundType || 'neutral'}
+                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
                   colorTokens={colorTokens}
                   variant="body"
-                  textStyle={getTextStyle('body')}
                   className="mb-2"
                   placeholder="Tier prices by segment (semicolon for segments, pipe for tiers)"
                   sectionId={sectionId}
@@ -385,12 +379,11 @@ export default function SegmentBasedPricing(props: LayoutComponentProps) {
                 
                 <EditableAdaptiveText
                   mode={mode}
-                  value={blockContent.tier_features}
+                  value={blockContent.tier_features || ''}
                   onEdit={(value) => handleContentUpdate('tier_features', value)}
-                  backgroundType={props.backgroundType || 'neutral'}
+                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
                   colorTokens={colorTokens}
                   variant="body"
-                  textStyle={getTextStyle('body')}
                   className="mb-2"
                   placeholder="Tier features by segment (semicolon for segments, pipe for tiers, comma for features)"
                   sectionId={sectionId}
@@ -472,10 +465,9 @@ export default function SegmentBasedPricing(props: LayoutComponentProps) {
                 mode={mode}
                 value={blockContent.supporting_text || ''}
                 onEdit={(value) => handleContentUpdate('supporting_text', value)}
-                backgroundType={props.backgroundType || 'neutral'}
+                backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
                 colorTokens={colorTokens}
                 variant="body"
-                textStyle={getTextStyle('body-lg')}
                 className="max-w-3xl mx-auto mb-8"
                 placeholder="Add optional supporting text to reinforce segment-based value..."
                 sectionId={sectionId}

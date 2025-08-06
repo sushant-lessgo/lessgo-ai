@@ -193,7 +193,7 @@ export default function FeatureMatrix(props: LayoutComponentProps) {
     <LayoutSection
       sectionId={sectionId}
       sectionType="FeatureMatrix"
-      backgroundType={props.backgroundType || 'neutral'}
+      backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
       sectionBackground={sectionBackground}
       mode={mode}
       className={props.className}
@@ -203,12 +203,11 @@ export default function FeatureMatrix(props: LayoutComponentProps) {
         <div className="text-center mb-12">
           <EditableAdaptiveHeadline
             mode={mode}
-            value={blockContent.headline}
+            value={blockContent.headline || ''}
             onEdit={(value) => handleContentUpdate('headline', value)}
             level="h2"
-            backgroundType={props.backgroundType || 'neutral'}
+            backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
             colorTokens={colorTokens}
-            textStyle={getTextStyle('h2')}
             className="mb-4"
             sectionId={sectionId}
             elementKey="headline"
@@ -220,10 +219,9 @@ export default function FeatureMatrix(props: LayoutComponentProps) {
               mode={mode}
               value={blockContent.subheadline || ''}
               onEdit={(value) => handleContentUpdate('subheadline', value)}
-              backgroundType={props.backgroundType || 'neutral'}
+              backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
               colorTokens={colorTokens}
               variant="body"
-              textStyle={getTextStyle('body-lg')}
               className="text-lg mb-8 max-w-3xl mx-auto"
               placeholder="Add optional subheadline to introduce feature comparison..."
               sectionId={sectionId}
@@ -241,12 +239,11 @@ export default function FeatureMatrix(props: LayoutComponentProps) {
               <div className="space-y-4">
                 <EditableAdaptiveText
                   mode={mode}
-                  value={blockContent.tier_names}
+                  value={blockContent.tier_names || ''}
                   onEdit={(value) => handleContentUpdate('tier_names', value)}
-                  backgroundType={props.backgroundType || 'neutral'}
+                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
                   colorTokens={colorTokens}
                   variant="body"
-                  textStyle={getTextStyle('body')}
                   className="mb-2"
                   placeholder="Tier names (pipe separated)"
                   sectionId={sectionId}
@@ -256,12 +253,11 @@ export default function FeatureMatrix(props: LayoutComponentProps) {
                 
                 <EditableAdaptiveText
                   mode={mode}
-                  value={blockContent.feature_categories}
+                  value={blockContent.feature_categories || ''}
                   onEdit={(value) => handleContentUpdate('feature_categories', value)}
-                  backgroundType={props.backgroundType || 'neutral'}
+                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
                   colorTokens={colorTokens}
                   variant="body"
-                  textStyle={getTextStyle('body')}
                   className="mb-2"
                   placeholder="Feature categories (pipe separated)"
                   sectionId={sectionId}
@@ -271,12 +267,11 @@ export default function FeatureMatrix(props: LayoutComponentProps) {
                 
                 <EditableAdaptiveText
                   mode={mode}
-                  value={blockContent.feature_names}
+                  value={blockContent.feature_names || ''}
                   onEdit={(value) => handleContentUpdate('feature_names', value)}
-                  backgroundType={props.backgroundType || 'neutral'}
+                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
                   colorTokens={colorTokens}
                   variant="body"
-                  textStyle={getTextStyle('body')}
                   className="mb-2"
                   placeholder="Feature names (pipe separated)"
                   sectionId={sectionId}
@@ -286,12 +281,11 @@ export default function FeatureMatrix(props: LayoutComponentProps) {
                 
                 <EditableAdaptiveText
                   mode={mode}
-                  value={blockContent.feature_availability}
+                  value={blockContent.feature_availability || ''}
                   onEdit={(value) => handleContentUpdate('feature_availability', value)}
-                  backgroundType={props.backgroundType || 'neutral'}
+                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
                   colorTokens={colorTokens}
                   variant="body"
-                  textStyle={getTextStyle('body')}
                   className="mb-2"
                   placeholder="Feature availability matrix (tiers separated by semicolon, features by pipe)"
                   sectionId={sectionId}
@@ -309,7 +303,7 @@ export default function FeatureMatrix(props: LayoutComponentProps) {
               {tiers.map((tier, index) => (
                 <div key={index} className={`bg-white rounded-xl border-2 p-6 text-center ${
                   tier.isPopular 
-                    ? `${colorTokens.ctaBorder} relative` 
+                    ? `border-primary relative` 
                     : 'border-gray-200'
                 }`}>
                   {tier.isPopular && (
@@ -325,7 +319,6 @@ export default function FeatureMatrix(props: LayoutComponentProps) {
                   <CTAButton
                     text={tier.ctaText}
                     colorTokens={colorTokens}
-                    textStyle={getTextStyle('body')}
                     className="w-full"
                     variant={tier.isPopular ? "primary" : "secondary"}
                     sectionId={sectionId}
@@ -451,10 +444,9 @@ export default function FeatureMatrix(props: LayoutComponentProps) {
                 mode={mode}
                 value={blockContent.supporting_text || ''}
                 onEdit={(value) => handleContentUpdate('supporting_text', value)}
-                backgroundType={props.backgroundType || 'neutral'}
+                backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
                 colorTokens={colorTokens}
                 variant="body"
-                textStyle={getTextStyle('body-lg')}
                 className="max-w-3xl mx-auto mb-8"
                 placeholder="Add optional supporting text to reinforce feature comparison..."
                 sectionId={sectionId}

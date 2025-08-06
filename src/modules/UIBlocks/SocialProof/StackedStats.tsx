@@ -184,8 +184,8 @@ const MetricCard = React.memo(({
         <div className="flex-1 space-y-3">
           <div className="flex items-baseline justify-between">
             <SocialProofNumber
-              value={metric.value}
-              style={getTextStyle('h3')}
+              number={metric.value}
+              label=""
               className={`text-2xl md:text-3xl font-bold ${dynamicTextColors?.heading || 'text-gray-900'}`}
             />
             <span className={`text-sm font-medium ${dynamicTextColors?.muted || 'text-gray-600'}`}>
@@ -248,7 +248,7 @@ export default function StackedStats(props: LayoutComponentProps) {
     <LayoutSection
       sectionId={sectionId}
       sectionType="StackedStats"
-      backgroundType={props.backgroundType || 'primary'}
+      backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
       sectionBackground={sectionBackground}
       mode={mode}
       className={props.className}
@@ -259,12 +259,11 @@ export default function StackedStats(props: LayoutComponentProps) {
         <div className="text-center mb-16">
           <EditableAdaptiveHeadline
             mode={mode}
-            value={blockContent.headline}
+            value={blockContent.headline || ''}
             onEdit={(value) => handleContentUpdate('headline', value)}
             level="h2"
-            backgroundType={props.backgroundType || 'primary'}
+            backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
             colorTokens={colorTokens}
-            textStyle={getTextStyle('h2')}
             className="mb-6"
             sectionId={sectionId}
             elementKey="headline"
@@ -276,10 +275,9 @@ export default function StackedStats(props: LayoutComponentProps) {
               mode={mode}
               value={blockContent.subheadline || ''}
               onEdit={(value) => handleContentUpdate('subheadline', value)}
-              backgroundType={props.backgroundType || 'primary'}
+              backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
               colorTokens={colorTokens}
               variant="body"
-              textStyle={getTextStyle('body-lg')}
               className="text-lg max-w-3xl mx-auto"
               placeholder="Add a compelling subheadline about your key metrics..."
               sectionId={sectionId}

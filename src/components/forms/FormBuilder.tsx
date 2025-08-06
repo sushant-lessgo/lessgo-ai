@@ -108,7 +108,7 @@ export function FormBuilder({ isOpen, onClose, editingFormId }: FormBuilderProps
         updateForm(editingFormId, formData as Partial<MVPForm>);
       } else {
         // Create new form
-        createForm(formData as Omit<MVPForm, 'id' | 'createdAt' | 'updatedAt'>);
+        createForm?.(`form-${Date.now()}`, formData.name || 'Untitled Form');
       }
       onClose();
     } catch (error) {

@@ -165,12 +165,11 @@ export default function LeadMagnetCard(props: LayoutComponentProps) {
         <div className="text-center mb-12">
           <EditableAdaptiveHeadline
             mode={mode}
-            value={blockContent.headline}
+            value={blockContent.headline || ''}
             onEdit={(value) => handleContentUpdate('headline', value)}
             level="h2"
             backgroundType={safeBackgroundType}
             colorTokens={colorTokens}
-            textStyle={getTextStyle('h2')}
             className="mb-4"
             sectionId={sectionId}
             elementKey="headline"
@@ -185,7 +184,6 @@ export default function LeadMagnetCard(props: LayoutComponentProps) {
               backgroundType={safeBackgroundType}
               colorTokens={colorTokens}
               variant="body"
-              textStyle={getTextStyle('body-lg')}
               className="text-lg mb-8 max-w-3xl mx-auto"
               placeholder="Add optional subheadline to introduce the lead magnet..."
               sectionId={sectionId}
@@ -203,12 +201,11 @@ export default function LeadMagnetCard(props: LayoutComponentProps) {
               <div className="space-y-4">
                 <EditableAdaptiveText
                   mode={mode}
-                  value={blockContent.magnet_title}
+                  value={blockContent.magnet_title || ''}
                   onEdit={(value) => handleContentUpdate('magnet_title', value)}
                   backgroundType={safeBackgroundType}
                   colorTokens={colorTokens}
                   variant="body"
-                  textStyle={getTextStyle('body')}
                   className="mb-2"
                   placeholder="Lead magnet title"
                   sectionId={sectionId}
@@ -218,12 +215,11 @@ export default function LeadMagnetCard(props: LayoutComponentProps) {
                 
                 <EditableAdaptiveText
                   mode={mode}
-                  value={blockContent.magnet_description}
+                  value={blockContent.magnet_description || ''}
                   onEdit={(value) => handleContentUpdate('magnet_description', value)}
                   backgroundType={safeBackgroundType}
                   colorTokens={colorTokens}
                   variant="body"
-                  textStyle={getTextStyle('body')}
                   className="mb-2"
                   placeholder="Lead magnet description"
                   sectionId={sectionId}
@@ -233,12 +229,11 @@ export default function LeadMagnetCard(props: LayoutComponentProps) {
                 
                 <EditableAdaptiveText
                   mode={mode}
-                  value={blockContent.magnet_benefits}
+                  value={blockContent.magnet_benefits || ''}
                   onEdit={(value) => handleContentUpdate('magnet_benefits', value)}
                   backgroundType={safeBackgroundType}
                   colorTokens={colorTokens}
                   variant="body"
-                  textStyle={getTextStyle('body')}
                   className="mb-2"
                   placeholder="Benefits (pipe separated)"
                   sectionId={sectionId}
@@ -248,12 +243,11 @@ export default function LeadMagnetCard(props: LayoutComponentProps) {
                 
                 <EditableAdaptiveText
                   mode={mode}
-                  value={blockContent.magnet_format}
+                  value={blockContent.magnet_format || ''}
                   onEdit={(value) => handleContentUpdate('magnet_format', value)}
                   backgroundType={safeBackgroundType}
                   colorTokens={colorTokens}
                   variant="body"
-                  textStyle={getTextStyle('body')}
                   className="mb-2"
                   placeholder="Format (e.g., PDF, Video, Template)"
                   sectionId={sectionId}
@@ -352,7 +346,6 @@ export default function LeadMagnetCard(props: LayoutComponentProps) {
                   <CTAButton
                     text={blockContent.cta_text}
                     colorTokens={colorTokens}
-                    textStyle={getTextStyle('body-lg')}
                     className="w-full shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-300"
                     variant="primary"
                     sectionId={sectionId}
@@ -426,7 +419,6 @@ export default function LeadMagnetCard(props: LayoutComponentProps) {
                 backgroundType={safeBackgroundType}
                 colorTokens={colorTokens}
                 variant="body"
-                textStyle={getTextStyle('body-lg')}
                 className="max-w-3xl mx-auto mb-8"
                 placeholder="Add optional supporting text to reinforce the lead magnet value..."
                 sectionId={sectionId}

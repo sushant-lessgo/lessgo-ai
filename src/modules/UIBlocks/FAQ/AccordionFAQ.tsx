@@ -76,7 +76,7 @@ const FAQAccordionItem = React.memo(({
   onToggle: () => void;
   mode: 'edit' | 'preview';
   colorTokens: any;
-  getTextStyle: (variant: 'display' | 'hero' | 'h1' | 'h2' | 'h3' | 'h4' | 'body-lg' | 'body' | 'body-sm' | 'caption') => React.CSSProperties;
+  getTextStyle: (variant: 'display' | 'hero' | 'h1' | 'h2' | 'h3' | 'body-lg' | 'body' | 'body-sm' | 'caption') => React.CSSProperties;
   onQuestionEdit: (index: number, value: string) => void;
   onAnswerEdit: (index: number, value: string) => void;
 }) => {
@@ -97,14 +97,12 @@ const FAQAccordionItem = React.memo(({
                 suppressContentEditableWarning
                 onBlur={(e) => onQuestionEdit(item.index, e.currentTarget.textContent || '')}
                 className="outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-1 min-h-[24px] cursor-text hover:bg-gray-50"
-                style={getTextStyle('h3')}
               >
                 {item.question}
               </div>
             ) : (
               <h3 
                 className={`font-semibold ${colorTokens.textOnLight || colorTokens.textPrimary} hover:${colorTokens.link} transition-colors duration-200`}
-                style={getTextStyle('h3')}
               >
                 {item.question}
               </h3>
@@ -138,14 +136,12 @@ const FAQAccordionItem = React.memo(({
               suppressContentEditableWarning
               onBlur={(e) => onAnswerEdit(item.index, e.currentTarget.textContent || '')}
               className="outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-1 min-h-[24px] cursor-text hover:bg-gray-100 leading-relaxed"
-              style={getTextStyle('body')}
             >
               {item.answer}
             </div>
           ) : (
             <p 
               className={`${colorTokens.textSecondary} leading-relaxed`}
-              style={getTextStyle('body')}
             >
               {item.answer}
             </p>
@@ -206,7 +202,7 @@ export default function AccordionFAQ(props: LayoutComponentProps) {
     <LayoutSection
       sectionId={sectionId}
       sectionType="AccordionFAQ"
-      backgroundType={props.backgroundType || 'neutral'}
+      backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
       sectionBackground={sectionBackground}
       mode={mode}
       className={props.className}
@@ -216,10 +212,10 @@ export default function AccordionFAQ(props: LayoutComponentProps) {
         <div className="text-center mb-12">
           <EditableAdaptiveHeadline
             mode={mode}
-            value={blockContent.headline}
+            value={blockContent.headline || ''}
             onEdit={(value) => handleContentUpdate('headline', value)}
             level="h2"
-            backgroundType={props.backgroundType || 'neutral'}
+            backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
             colorTokens={colorTokens}
             textStyle={{
               ...getTextStyle('h1'),
@@ -237,7 +233,7 @@ export default function AccordionFAQ(props: LayoutComponentProps) {
               mode={mode}
               value={blockContent.subheadline || ''}
               onEdit={(value) => handleContentUpdate('subheadline', value)}
-              backgroundType={props.backgroundType || 'neutral'}
+              backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
               colorTokens={colorTokens}
               variant="body"
               textStyle={{

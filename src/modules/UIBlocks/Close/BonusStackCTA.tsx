@@ -167,12 +167,11 @@ export default function BonusStackCTA(props: LayoutComponentProps) {
         <div className="text-center mb-12">
           <EditableAdaptiveHeadline
             mode={mode}
-            value={blockContent.headline}
+            value={blockContent.headline || ''}
             onEdit={(value) => handleContentUpdate('headline', value)}
             level="h2"
             backgroundType={safeBackgroundType}
             colorTokens={colorTokens}
-            textStyle={getTextStyle('h2')}
             className="mb-4"
             sectionId={sectionId}
             elementKey="headline"
@@ -187,7 +186,6 @@ export default function BonusStackCTA(props: LayoutComponentProps) {
               backgroundType={safeBackgroundType}
               colorTokens={colorTokens}
               variant="body"
-              textStyle={getTextStyle('body-lg')}
               className="text-lg mb-6 max-w-3xl mx-auto"
               placeholder="Add optional subheadline to introduce the bonus offer..."
               sectionId={sectionId}
@@ -211,12 +209,11 @@ export default function BonusStackCTA(props: LayoutComponentProps) {
               <div className="space-y-4">
                 <EditableAdaptiveText
                   mode={mode}
-                  value={blockContent.value_proposition}
+                  value={blockContent.value_proposition || ''}
                   onEdit={(value) => handleContentUpdate('value_proposition', value)}
                   backgroundType={safeBackgroundType}
                   colorTokens={colorTokens}
                   variant="body"
-                  textStyle={getTextStyle('body')}
                   className="mb-2"
                   placeholder="Value proposition"
                   sectionId={sectionId}
@@ -226,12 +223,11 @@ export default function BonusStackCTA(props: LayoutComponentProps) {
                 
                 <EditableAdaptiveText
                   mode={mode}
-                  value={blockContent.main_offer}
+                  value={blockContent.main_offer || ''}
                   onEdit={(value) => handleContentUpdate('main_offer', value)}
                   backgroundType={safeBackgroundType}
                   colorTokens={colorTokens}
                   variant="body"
-                  textStyle={getTextStyle('body')}
                   className="mb-2"
                   placeholder="Main offer name"
                   sectionId={sectionId}
@@ -241,12 +237,11 @@ export default function BonusStackCTA(props: LayoutComponentProps) {
                 
                 <EditableAdaptiveText
                   mode={mode}
-                  value={blockContent.bonus_items}
+                  value={blockContent.bonus_items || ''}
                   onEdit={(value) => handleContentUpdate('bonus_items', value)}
                   backgroundType={safeBackgroundType}
                   colorTokens={colorTokens}
                   variant="body"
-                  textStyle={getTextStyle('body')}
                   className="mb-2"
                   placeholder="Bonus items (pipe separated)"
                   sectionId={sectionId}
@@ -256,12 +251,11 @@ export default function BonusStackCTA(props: LayoutComponentProps) {
                 
                 <EditableAdaptiveText
                   mode={mode}
-                  value={blockContent.bonus_values}
+                  value={blockContent.bonus_values || ''}
                   onEdit={(value) => handleContentUpdate('bonus_values', value)}
                   backgroundType={safeBackgroundType}
                   colorTokens={colorTokens}
                   variant="body"
-                  textStyle={getTextStyle('body')}
                   className="mb-2"
                   placeholder="Bonus values (pipe separated)"
                   sectionId={sectionId}
@@ -353,7 +347,6 @@ export default function BonusStackCTA(props: LayoutComponentProps) {
                 <CTAButton
                   text={blockContent.cta_text}
                   colorTokens={colorTokens}
-                  textStyle={getTextStyle('body-lg')}
                   className="shadow-2xl hover:shadow-3xl transform hover:-translate-y-1 transition-all duration-300 text-lg py-4 px-8"
                   variant="primary"
                   sectionId={sectionId}
@@ -404,7 +397,6 @@ export default function BonusStackCTA(props: LayoutComponentProps) {
                 backgroundType={safeBackgroundType}
                 colorTokens={colorTokens}
                 variant="body"
-                textStyle={getTextStyle('body-lg')}
                 className="max-w-3xl mx-auto mb-8"
                 placeholder="Add optional supporting text to reinforce the bonus offer..."
                 sectionId={sectionId}

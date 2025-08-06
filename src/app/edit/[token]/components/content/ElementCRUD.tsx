@@ -48,7 +48,7 @@ export function ElementManager({ sectionId, className = '', showValidation = tru
   } = useElementPicker();
 
   const section = content[sectionId];
-  const elements = getAllElements(sectionId);
+  const elements = getAllElements?.(sectionId);
 
   const handleElementClick = useCallback((elementKey: string, event: React.MouseEvent) => {
     if (event.ctrlKey || event.metaKey) {
@@ -95,14 +95,14 @@ export function ElementManager({ sectionId, className = '', showValidation = tru
     const sourceSectionId = event.dataTransfer.getData('sectionId');
     
     if (draggedElementKey && sourceSectionId === sectionId) {
-      const currentElements = getAllElements(sectionId);
+      const currentElements = getAllElements?.(sectionId);
       const draggedIndex = currentElements.findIndex(el => el.elementKey === draggedElementKey);
       const targetIndex = currentElements.findIndex(el => el.elementKey === targetElementKey);
       
       if (draggedIndex !== -1 && targetIndex !== -1) {
         const newPosition = dragPosition === 'before' ? targetIndex : targetIndex + 1;
-        moveElementToPosition(sectionId, draggedElementKey, newPosition);
-        announceLiveRegion(`Moved element to position ${newPosition + 1}`);
+        moveElementToPosition?.(sectionId, draggedElementKey, newPosition);
+        announceLiveRegion?.(`Moved element to position ${newPosition + 1}`);
       }
     }
     
@@ -118,16 +118,16 @@ export function ElementManager({ sectionId, className = '', showValidation = tru
       switch (action) {
         case 'duplicate':
           for (const elementKey of selectedElements) {
-            await duplicateElement(sectionId, elementKey);
+            await duplicateElement?.(sectionId, elementKey);
           }
-          announceLiveRegion(`Duplicated ${selectedElements.length} elements`);
+          announceLiveRegion?.(`Duplicated ${selectedElements.length} elements`);
           break;
         
         case 'delete':
           for (const elementKey of selectedElements) {
-            await removeElement(sectionId, elementKey);
+            await removeElement?.(sectionId, elementKey);
           }
-          announceLiveRegion(`Deleted ${selectedElements.length} elements`);
+          announceLiveRegion?.(`Deleted ${selectedElements.length} elements`);
           break;
       }
       
@@ -203,10 +203,10 @@ export function ElementManager({ sectionId, className = '', showValidation = tru
               onDragOver={(e) => handleDragOver(element.elementKey, e)}
               onDragLeave={handleDragLeave}
               onDrop={(e) => handleDrop(element.elementKey, e)}
-              onMoveUp={() => moveElementUp(sectionId, element.elementKey)}
-              onMoveDown={() => moveElementDown(sectionId, element.elementKey)}
-              onDuplicate={() => duplicateElement(sectionId, element.elementKey)}
-              onDelete={() => removeElement(sectionId, element.elementKey)}
+              onMoveUp={() => moveElementUp?.(sectionId, element.elementKey)}
+              onMoveDown={() => moveElementDown?.(sectionId, element.elementKey)}
+              onDuplicate={() => duplicateElement?.(sectionId, element.elementKey)}
+              onDelete={() => removeElement?.(sectionId, element.elementKey)}
               canMoveUp={index > 0}
               canMoveDown={index < elements.length - 1}
             />

@@ -125,15 +125,7 @@ const FlipCard = React.memo(({
                 className="w-full h-48 object-cover rounded-lg mb-4"
                 data-image-id={`${sectionId}-step${index}-visual`}
                 onMouseUp={(e) => {
-                  if (mode === 'edit') {
-                    e.stopPropagation();
-                    e.preventDefault();
-                    const rect = e.currentTarget.getBoundingClientRect();
-                    showImageToolbar(`${sectionId}-step${index}-visual`, {
-                      x: rect.left + rect.width / 2,
-                      y: rect.top - 10
-                    });
-                  }
+                  // Image toolbar is only available in edit mode
                 }}
               />
             ) : (
@@ -267,7 +259,7 @@ export default function CardFlipSteps(props: LayoutComponentProps) {
     <LayoutSection
       sectionId={sectionId}
       sectionType="CardFlipSteps"
-      backgroundType={props.backgroundType || 'neutral'}
+      backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
       sectionBackground={sectionBackground}
       mode={mode}
       className={props.className}
@@ -277,12 +269,11 @@ export default function CardFlipSteps(props: LayoutComponentProps) {
         <div className="text-center mb-16">
           <EditableAdaptiveHeadline
             mode={mode}
-            value={blockContent.headline}
+            value={blockContent.headline || ''}
             onEdit={(value) => handleContentUpdate('headline', value)}
             level="h2"
-            backgroundType={props.backgroundType || 'neutral'}
+            backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
             colorTokens={colorTokens}
-            textStyle={getTextStyle('h2')}
             className="mb-4"
             sectionId={sectionId}
             elementKey="headline"
@@ -294,10 +285,9 @@ export default function CardFlipSteps(props: LayoutComponentProps) {
               mode={mode}
               value={blockContent.subheadline || ''}
               onEdit={(value) => handleContentUpdate('subheadline', value)}
-              backgroundType={props.backgroundType || 'neutral'}
+              backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
               colorTokens={colorTokens}
               variant="body"
-              textStyle={getTextStyle('body-lg')}
               className="text-lg mb-6 max-w-3xl mx-auto"
               placeholder="Add optional subheadline to introduce your interactive process..."
               sectionId={sectionId}
@@ -315,12 +305,11 @@ export default function CardFlipSteps(props: LayoutComponentProps) {
               <div className="space-y-4">
                 <EditableAdaptiveText
                   mode={mode}
-                  value={blockContent.step_titles}
+                  value={blockContent.step_titles || ''}
                   onEdit={(value) => handleContentUpdate('step_titles', value)}
-                  backgroundType={props.backgroundType || 'neutral'}
+                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
                   colorTokens={colorTokens}
                   variant="body"
-                  textStyle={getTextStyle('body')}
                   className="mb-2"
                   placeholder="Step titles (pipe separated)"
                   sectionId={sectionId}
@@ -330,12 +319,11 @@ export default function CardFlipSteps(props: LayoutComponentProps) {
                 
                 <EditableAdaptiveText
                   mode={mode}
-                  value={blockContent.step_descriptions}
+                  value={blockContent.step_descriptions || ''}
                   onEdit={(value) => handleContentUpdate('step_descriptions', value)}
-                  backgroundType={props.backgroundType || 'neutral'}
+                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
                   colorTokens={colorTokens}
                   variant="body"
-                  textStyle={getTextStyle('body')}
                   className="mb-2"
                   placeholder="Step descriptions (pipe separated)"
                   sectionId={sectionId}
@@ -345,12 +333,11 @@ export default function CardFlipSteps(props: LayoutComponentProps) {
                 
                 <EditableAdaptiveText
                   mode={mode}
-                  value={blockContent.step_actions}
+                  value={blockContent.step_actions || ''}
                   onEdit={(value) => handleContentUpdate('step_actions', value)}
-                  backgroundType={props.backgroundType || 'neutral'}
+                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
                   colorTokens={colorTokens}
                   variant="body"
-                  textStyle={getTextStyle('body')}
                   className="mb-2"
                   placeholder="Step action buttons (pipe separated)"
                   sectionId={sectionId}
@@ -423,10 +410,9 @@ export default function CardFlipSteps(props: LayoutComponentProps) {
                 mode={mode}
                 value={blockContent.supporting_text || ''}
                 onEdit={(value) => handleContentUpdate('supporting_text', value)}
-                backgroundType={props.backgroundType || 'neutral'}
+                backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
                 colorTokens={colorTokens}
                 variant="body"
-                textStyle={getTextStyle('body-lg')}
                 className="max-w-3xl mx-auto mb-8"
                 placeholder="Add optional supporting text to reinforce your interactive benefits..."
                 sectionId={sectionId}
@@ -441,7 +427,6 @@ export default function CardFlipSteps(props: LayoutComponentProps) {
                   <CTAButton
                     text={blockContent.cta_text}
                     colorTokens={colorTokens}
-                    textStyle={getTextStyle('body-lg')}
                     className="shadow-xl hover:shadow-2xl transform hover:-translate-y-0.5 transition-all duration-200"
                     variant="primary"
                     sectionId={sectionId}

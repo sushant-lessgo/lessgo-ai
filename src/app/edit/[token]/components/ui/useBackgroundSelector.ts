@@ -297,7 +297,7 @@ export function useBackgroundSelector(tokenId: string) {
       // Trigger auto-save with timeout protection
       console.log('🔄 Starting auto-save...');
       try {
-        const savePromise = triggerAutoSave().then(() => {
+        const savePromise = Promise.resolve(triggerAutoSave()).then(() => {
           console.log('✅ Auto-save completed');
         });
         const saveTimeoutPromise = new Promise<never>((_, reject) => {

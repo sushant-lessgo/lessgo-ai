@@ -113,12 +113,11 @@ export default function SideBySideBlocks(props: LayoutComponentProps) {
           {/* ✅ ENHANCED: Main Headline with Dynamic Text Color */}
           <EditableAdaptiveHeadline
             mode={mode}
-            value={blockContent.headline}
+            value={blockContent.headline || ''}
             onEdit={(value) => handleContentUpdate('headline', value)}
             level="h2"
             backgroundType={safeBackgroundType}
             colorTokens={colorTokens}
-            textStyle={getTextStyle('h2')}
             className="mb-4"
             sectionId={sectionId}
             elementKey="headline"
@@ -134,7 +133,6 @@ export default function SideBySideBlocks(props: LayoutComponentProps) {
               backgroundType={safeBackgroundType}
               colorTokens={colorTokens}
               variant="body"
-              textStyle={getTextStyle('body-lg')}
               className="text-lg mb-6 max-w-3xl mx-auto"
               placeholder="Add optional subheadline to introduce the comparison..."
               sectionId={sectionId}
@@ -153,7 +151,7 @@ export default function SideBySideBlocks(props: LayoutComponentProps) {
                 <div className="w-3 h-3 rounded-full mr-3 bg-red-500 ring-4 ring-red-100" />
                 <EditableAdaptiveText
                   mode={mode}
-                  value={blockContent.before_label}
+                  value={blockContent.before_label || ''}
                   onEdit={(value) => handleContentUpdate('before_label', value)}
                   backgroundType={safeBackgroundType}
                   colorTokens={colorTokens}
@@ -174,12 +172,11 @@ export default function SideBySideBlocks(props: LayoutComponentProps) {
 
               <EditableAdaptiveText
                 mode={mode}
-                value={blockContent.before_description}
+                value={blockContent.before_description || ''}
                 onEdit={(value) => handleContentUpdate('before_description', value)}
                 backgroundType={safeBackgroundType}
                 colorTokens={colorTokens}
                 variant="body"
-                textStyle={getTextStyle('body')}
                 className="leading-relaxed"
                 sectionId={sectionId}
                 elementKey="before_description"
@@ -195,7 +192,7 @@ export default function SideBySideBlocks(props: LayoutComponentProps) {
                 <div className="w-3 h-3 rounded-full mr-3 bg-green-500 ring-4 ring-green-100" />
                 <EditableAdaptiveText
                   mode={mode}
-                  value={blockContent.after_label}
+                  value={blockContent.after_label || ''}
                   onEdit={(value) => handleContentUpdate('after_label', value)}
                   backgroundType={safeBackgroundType}
                   colorTokens={colorTokens}
@@ -216,12 +213,11 @@ export default function SideBySideBlocks(props: LayoutComponentProps) {
 
               <EditableAdaptiveText
                 mode={mode}
-                value={blockContent.after_description}
+                value={blockContent.after_description || ''}
                 onEdit={(value) => handleContentUpdate('after_description', value)}
                 backgroundType={safeBackgroundType}
                 colorTokens={colorTokens}
                 variant="body"
-                textStyle={getTextStyle('body')}
                 className="leading-relaxed"
                 sectionId={sectionId}
                 elementKey="after_description"
@@ -243,7 +239,6 @@ export default function SideBySideBlocks(props: LayoutComponentProps) {
                 backgroundType={safeBackgroundType}
                 colorTokens={colorTokens}
                 variant="body"
-                textStyle={getTextStyle('body-lg')}
                 className="max-w-3xl mx-auto mb-8"
                 placeholder="Add optional supporting text to reinforce your message..."
                 sectionId={sectionId}
@@ -259,7 +254,6 @@ export default function SideBySideBlocks(props: LayoutComponentProps) {
                   <CTAButton
                     text={blockContent.cta_text}
                     colorTokens={colorTokens}
-                    textStyle={getTextStyle('body-lg')}
                     className="shadow-xl hover:shadow-2xl transform hover:-translate-y-0.5 transition-all duration-200"
                     variant="primary"
                     sectionId={sectionId}

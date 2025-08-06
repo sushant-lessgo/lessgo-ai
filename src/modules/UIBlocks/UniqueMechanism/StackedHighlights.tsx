@@ -185,14 +185,12 @@ const HighlightCard = ({
                 suppressContentEditableWarning
                 onBlur={(e) => onTitleEdit(index, e.currentTarget.textContent || '')}
                 className="outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-1 min-h-[28px] cursor-text hover:bg-gray-50 font-bold text-gray-900 text-xl"
-                style={getTextStyle('h3')}
               >
                 {highlight.title}
               </div>
             ) : (
               <h3 
                 className="font-bold text-gray-900 text-xl mb-2"
-                style={getTextStyle('h3')}
               >
                 {highlight.title}
               </h3>
@@ -207,14 +205,12 @@ const HighlightCard = ({
                 suppressContentEditableWarning
                 onBlur={(e) => onDescriptionEdit(index, e.currentTarget.textContent || '')}
                 className="outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-1 min-h-[60px] cursor-text hover:bg-gray-50 text-gray-600 leading-relaxed"
-                style={getTextStyle('body')}
               >
                 {highlight.description}
               </div>
             ) : (
               <p 
                 className="text-gray-600 leading-relaxed"
-                style={getTextStyle('body')}
               >
                 {highlight.description}
               </p>
@@ -274,7 +270,7 @@ export default function StackedHighlights(props: StackedHighlightsProps) {
     <LayoutSection
       sectionId={sectionId}
       sectionType="StackedHighlights"
-      backgroundType={backgroundType}
+      backgroundType={backgroundType === 'custom' ? 'secondary' : backgroundType}
       sectionBackground={sectionBackground}
       mode={mode}
       className={props.className}
@@ -290,7 +286,6 @@ export default function StackedHighlights(props: StackedHighlightsProps) {
           >
             <h2 
               className={`mb-6 ${colorTokens.textPrimary}`}
-              style={getTextStyle('h1')}
             >
               {blockContent.headline}
             </h2>
@@ -306,7 +301,6 @@ export default function StackedHighlights(props: StackedHighlightsProps) {
             >
               <div 
                 className={`inline-flex items-center px-4 py-2 bg-blue-100 border border-blue-300 rounded-full text-blue-800 font-semibold ${!blockContent.mechanism_name && mode === 'edit' ? 'opacity-50' : ''}`}
-                style={getTextStyle('body-sm')}
               >
                 {blockContent.mechanism_name && (
                   <svg className="w-4 h-4 mr-2 text-blue-600" fill="currentColor" viewBox="0 0 20 20">

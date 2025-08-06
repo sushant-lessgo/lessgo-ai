@@ -23,9 +23,9 @@ export default function CustomerJourneyFlow(props: LayoutComponentProps) {
   const descriptions = blockContent.stage_descriptions.split('|').map(d => d.trim()).filter(Boolean);
 
   return (
-    <LayoutSection sectionId={sectionId} sectionType="CustomerJourneyFlow" backgroundType={props.backgroundType || 'primary'} sectionBackground={sectionBackground} mode={mode} className={props.className}>
+    <LayoutSection sectionId={sectionId} sectionType="CustomerJourneyFlow" backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')} sectionBackground={sectionBackground} mode={mode} className={props.className}>
       <div className="max-w-7xl mx-auto">
-        <EditableAdaptiveHeadline mode={mode} value={blockContent.headline} onEdit={(value) => handleContentUpdate('headline', value)} level="h2" backgroundType={props.backgroundType || 'primary'} colorTokens={colorTokens} textStyle={getTextStyle('h1')} className="text-center mb-16" sectionId={sectionId} elementKey="headline" sectionBackground={sectionBackground} />
+        <EditableAdaptiveHeadline mode={mode} value={blockContent.headline || ''} onEdit={(value) => handleContentUpdate('headline', value)} level="h2" backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')} colorTokens={colorTokens} className="text-center mb-16" sectionId={sectionId} elementKey="headline" sectionBackground={sectionBackground} />
         <div className="relative">
           <div className="hidden lg:block absolute top-1/2 left-0 right-0 h-1 bg-blue-200 transform -translate-y-1/2"></div>
           <div className="grid lg:grid-cols-6 gap-8">
@@ -34,8 +34,8 @@ export default function CustomerJourneyFlow(props: LayoutComponentProps) {
                 <div className="relative z-10 w-20 h-20 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center text-white font-bold mx-auto mb-4 shadow-lg">
                   {index + 1}
                 </div>
-                <h3 className="font-bold text-gray-900 mb-2" style={getTextStyle('h3')}>{stage}</h3>
-                <p className="text-gray-600 text-sm" style={getTextStyle('body-sm')}>{descriptions[index] || 'Stage description'}</p>
+                <h3 className="font-bold text-gray-900 mb-2">{stage}</h3>
+                <p className="text-gray-600 text-sm">{descriptions[index] || 'Stage description'}</p>
               </div>
             ))}
           </div>

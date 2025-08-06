@@ -222,7 +222,7 @@ export default function PainMeterChart(props: LayoutComponentProps) {
     <LayoutSection
       sectionId={sectionId}
       sectionType="PainMeterChart"
-      backgroundType={props.backgroundType || 'neutral'}
+      backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
       sectionBackground={sectionBackground}
       mode={mode}
       className={props.className}
@@ -232,12 +232,11 @@ export default function PainMeterChart(props: LayoutComponentProps) {
         <div className="text-center mb-16">
           <EditableAdaptiveHeadline
             mode={mode}
-            value={blockContent.headline}
+            value={blockContent.headline || ''}
             onEdit={(value) => handleContentUpdate('headline', value)}
             level="h2"
-            backgroundType={props.backgroundType || 'neutral'}
+            backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
             colorTokens={colorTokens}
-            textStyle={getTextStyle('h2')}
             className="mb-4"
             sectionId={sectionId}
             elementKey="headline"
@@ -249,10 +248,9 @@ export default function PainMeterChart(props: LayoutComponentProps) {
               mode={mode}
               value={blockContent.subheadline || ''}
               onEdit={(value) => handleContentUpdate('subheadline', value)}
-              backgroundType={props.backgroundType || 'neutral'}
+              backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
               colorTokens={colorTokens}
               variant="body"
-              textStyle={getTextStyle('body-lg')}
               className="text-lg mb-8 max-w-3xl mx-auto"
               placeholder="Add optional subheadline to introduce the pain meter chart..."
               sectionId={sectionId}
@@ -278,12 +276,11 @@ export default function PainMeterChart(props: LayoutComponentProps) {
               <div className="space-y-4">
                 <EditableAdaptiveText
                   mode={mode}
-                  value={blockContent.pain_categories}
+                  value={blockContent.pain_categories || ''}
                   onEdit={(value) => handleContentUpdate('pain_categories', value)}
-                  backgroundType={props.backgroundType || 'neutral'}
+                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
                   colorTokens={colorTokens}
                   variant="body"
-                  textStyle={getTextStyle('body')}
                   className="mb-2"
                   placeholder="Pain categories (pipe separated)"
                   sectionId={sectionId}
@@ -293,12 +290,11 @@ export default function PainMeterChart(props: LayoutComponentProps) {
                 
                 <EditableAdaptiveText
                   mode={mode}
-                  value={blockContent.pain_levels}
+                  value={blockContent.pain_levels || ''}
                   onEdit={(value) => handleContentUpdate('pain_levels', value)}
-                  backgroundType={props.backgroundType || 'neutral'}
+                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
                   colorTokens={colorTokens}
                   variant="body"
-                  textStyle={getTextStyle('body')}
                   className="mb-2"
                   placeholder="Pain levels (pipe separated numbers 0-100)"
                   sectionId={sectionId}
@@ -310,10 +306,9 @@ export default function PainMeterChart(props: LayoutComponentProps) {
                   mode={mode}
                   value={blockContent.category_descriptions || ''}
                   onEdit={(value) => handleContentUpdate('category_descriptions', value)}
-                  backgroundType={props.backgroundType || 'neutral'}
+                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
                   colorTokens={colorTokens}
                   variant="body"
-                  textStyle={getTextStyle('body')}
                   className="mb-2"
                   placeholder="Category descriptions (pipe separated)"
                   sectionId={sectionId}
@@ -325,10 +320,9 @@ export default function PainMeterChart(props: LayoutComponentProps) {
                   mode={mode}
                   value={blockContent.total_score_text || ''}
                   onEdit={(value) => handleContentUpdate('total_score_text', value)}
-                  backgroundType={props.backgroundType || 'neutral'}
+                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
                   colorTokens={colorTokens}
                   variant="body"
-                  textStyle={getTextStyle('body')}
                   className="mb-2"
                   placeholder="Total score text"
                   sectionId={sectionId}
@@ -465,10 +459,9 @@ export default function PainMeterChart(props: LayoutComponentProps) {
                 mode={mode}
                 value={blockContent.supporting_text || ''}
                 onEdit={(value) => handleContentUpdate('supporting_text', value)}
-                backgroundType={props.backgroundType || 'neutral'}
+                backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
                 colorTokens={colorTokens}
                 variant="body"
-                textStyle={getTextStyle('body-lg')}
                 className="max-w-3xl mx-auto mb-8"
                 placeholder="Add optional supporting text to reinforce the pain measurement..."
                 sectionId={sectionId}

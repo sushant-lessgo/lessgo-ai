@@ -248,7 +248,7 @@ export function useEditor() {
       // Clicked on section
       const position = calculateToolbarPosition(clickTarget.element, 'section');
       
-      setActiveSection(clickTarget.sectionId);
+      setActiveSection(clickTarget.sectionId || undefined);
       selectElement(null);
       showToolbar('section', clickTarget.sectionId!, position);
       
@@ -263,7 +263,7 @@ export function useEditor() {
       const position = calculateToolbarPosition(clickTarget.element, elementType);
       
       // Update selection
-      setActiveSection(clickTarget.sectionId);
+      setActiveSection(clickTarget.sectionId || undefined);
       selectElement({
         sectionId: clickTarget.sectionId!,
         elementKey: clickTarget.elementKey!,

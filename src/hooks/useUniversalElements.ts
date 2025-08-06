@@ -18,6 +18,7 @@ import type {
   ValidationWarning,
 } from '@/types/universalElements';
 import { UNIVERSAL_ELEMENTS } from '@/types/universalElements';
+import type { EditableElement } from '@/types/core/content';
 
 const generateElementKey = (type: UniversalElementType): string => {
   return `${type}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
@@ -166,14 +167,14 @@ export function useUniversalElements() {
       };
     }
 
-    setSection(sectionId, { elements: updatedElements });
+    setSection(sectionId, { elements: updatedElements as Record<string, EditableElement> });
     trackChange({
       type: 'content',
-      action: 'update-element-position',
       sectionId,
       elementKey,
-      newPosition,
-      timestamp: Date.now(),
+      oldValue: null,
+      newValue: { position: newPosition },
+      source: 'user',
     });
   }, [content, setSection, trackChange]);
 
@@ -199,14 +200,14 @@ export function useUniversalElements() {
       };
     }
 
-    setSection(sectionId, { elements: updatedElements });
+    setSection(sectionId, { elements: updatedElements as Record<string, EditableElement> });
     trackChange({
       type: 'content',
-      action: 'update-element-props',
+      oldValue: (element as any).props,
+      newValue: { ...(element as any).props, ...props },
+      source: 'user',
       sectionId,
       elementKey,
-      props,
-      timestamp: Date.now(),
     });
   }, [content, setSection, trackChange]);
 
@@ -242,15 +243,15 @@ export function useUniversalElements() {
       [elementKey]: newElement,
     };
 
-    setSection(sectionId, { elements: updatedElements });
+    setSection(sectionId, { elements: updatedElements as Record<string, EditableElement> });
 
     trackChange({
       type: 'content',
-      action: 'add-element',
+      oldValue: null,
+      newValue: newElement,
+      source: 'user',
       sectionId,
       elementKey,
-      elementType,
-      timestamp: Date.now(),
     });
 
     triggerAutoSave();
@@ -308,11 +309,11 @@ export function useUniversalElements() {
 
     trackChange({
       type: 'content',
-      action: 'remove-element',
+      oldValue: removed,
+      newValue: null,
+      source: 'user',
       sectionId,
       elementKey,
-      removedElement: removed,
-      timestamp: Date.now(),
     });
 
     triggerAutoSave();
@@ -339,9 +340,10 @@ export function useUniversalElements() {
 
     trackChange({
       type: 'content',
-      action: 'remove-all-elements',
+      oldValue: section.elements,
+      newValue: {},
+      source: 'user',
       sectionId,
-      timestamp: Date.now(),
     });
 
     triggerAutoSave();
@@ -386,15 +388,15 @@ export function useUniversalElements() {
       [newElementKey]: duplicatedElement,
     };
 
-    setSection(sectionId, { elements: updatedElements });
+    setSection(sectionId, { elements: updatedElements as Record<string, EditableElement> });
 
     trackChange({
       type: 'content',
-      action: 'duplicate-element',
+      oldValue: null,
+      newValue: duplicatedElement,
+      source: 'user',
       sectionId,
-      originalElementKey: elementKey,
-      newElementKey,
-      timestamp: Date.now(),
+      elementKey: newElementKey,
     });
 
     triggerAutoSave();
@@ -433,14 +435,15 @@ export function useUniversalElements() {
       }
     });
 
-    setSection(sectionId, { elements: updatedElements });
+    setSection(sectionId, { elements: updatedElements as Record<string, EditableElement> });
 
     trackChange({
       type: 'content',
-      action: 'reorder-elements',
+      oldValue: Object.keys(section.elements),
+      newValue: newOrder,
+      source: 'user',
       sectionId,
-      newOrder,
-      timestamp: Date.now(),
+      field: 'elementOrder',
     });
 
     triggerAutoSave();
@@ -537,12 +540,11 @@ export function useUniversalElements() {
 
     trackChange({
       type: 'content',
-      action: 'move-element-to-section',
-      fromSectionId,
-      toSectionId,
-      elementKey,
-      newElementKey,
-      timestamp: Date.now(),
+      oldValue: { sectionId: fromSectionId, elementKey },
+      newValue: { sectionId: toSectionId, elementKey: newElementKey },
+      source: 'user',
+      sectionId: toSectionId,
+      elementKey: newElementKey,
     });
 
     triggerAutoSave();
@@ -590,12 +592,11 @@ export function useUniversalElements() {
 
     trackChange({
       type: 'content',
-      action: 'copy-element-to-section',
-      fromSectionId,
-      toSectionId,
-      elementKey,
-      newElementKey,
-      timestamp: Date.now(),
+      oldValue: null,
+      newValue: copiedElement,
+      source: 'user',
+      sectionId: toSectionId,
+      elementKey: newElementKey,
     });
 
     triggerAutoSave();
@@ -786,14 +787,14 @@ export function useUniversalElements() {
       }
     });
 
-    setSection(sectionId, { elements: updatedElements });
+    setSection(sectionId, { elements: updatedElements as Record<string, EditableElement> });
 
     trackChange({
       type: 'content',
-      action: 'batch-update-elements',
+      oldValue: section.elements,
+      newValue: updatedElements,
+      source: 'user',
       sectionId,
-      updates,
-      timestamp: Date.now(),
     });
 
     triggerAutoSave();
@@ -816,10 +817,10 @@ export function useUniversalElements() {
 
     trackChange({
       type: 'content',
-      action: 'batch-delete-elements',
+      oldValue: section.elements,
+      newValue: remainingElements,
+      source: 'user',
       sectionId,
-      elementKeys,
-      timestamp: Date.now(),
     });
 
     triggerAutoSave();
@@ -858,16 +859,16 @@ export function useUniversalElements() {
       [elementKey]: updatedElement,
     };
 
-    setSection(sectionId, { elements: updatedElements });
+    setSection(sectionId, { elements: updatedElements as Record<string, EditableElement> });
 
     trackChange({
       type: 'content',
-      action: 'convert-element-type',
+      oldValue: { type: element.type },
+      newValue: { type: newType },
+      source: 'user',
       sectionId,
       elementKey,
-      oldType: element.type,
-      newType,
-      timestamp: Date.now(),
+      field: 'type',
     });
 
     triggerAutoSave();

@@ -2,6 +2,7 @@
 import { useCallback } from 'react';
 import { useEditStoreLegacy as useEditStore } from './useEditStoreLegacy';
 import type { ValidationResult } from '@/types/store';
+import type { BackgroundType } from '@/types/sectionBackground';
 // import type { SectionType } from '@/types/store/state';
 type SectionType = string; // Temporary fix
 
@@ -12,7 +13,7 @@ export interface AddSectionOptions {
   initialElements?: Record<string, any>;
   copyFromSection?: string;
   templateId?: string;
-  backgroundType?: 'primary' | 'secondary' | 'neutral' | 'divider';
+  backgroundType?: BackgroundType;
 }
 
 export interface RemoveSectionOptions {
@@ -59,6 +60,7 @@ export interface SectionTemplate {
 }
 
 export function useSectionCRUD() {
+  const store = useEditStore();
   const {
     sections,
     content,
@@ -67,14 +69,15 @@ export function useSectionCRUD() {
     removeSection: storeRemoveSection,
     duplicateSection: storeDuplicateSection,
     reorderSections,
-    moveSectionUp,
-    moveSectionDown,
     setSection,
-    validateSection,
     trackChange,
     triggerAutoSave,
     announceLiveRegion,
-  } = useEditStore();
+  } = store;
+  
+  const moveSectionUp = (store as any).moveSectionUp;
+  const moveSectionDown = (store as any).moveSectionDown;
+  const validateSection = (store as any).validateSection;
 
 
   // Generate unique section ID
@@ -85,14 +88,14 @@ export function useSectionCRUD() {
   }, []);
 
   // Create default section data
-  const createDefaultSection = useCallback((sectionId: string, options: AddSectionOptions) => {
+  const createDefaultSection = useCallback((sectionId: string, options: AddSectionOptions): Partial<import('@/types/store').SectionData> => {
     const { sectionType, layoutType, initialElements, backgroundType } = options;
     
     return {
       id: sectionId,
       layout: layoutType || getDefaultLayout(sectionType),
       elements: initialElements || getDefaultElements(sectionType),
-      backgroundType: backgroundType || 'neutral',
+      backgroundType: (backgroundType || 'theme') as BackgroundType,
       aiMetadata: {
         aiGenerated: false,
         lastGenerated: Date.now(),
@@ -173,7 +176,7 @@ export function useSectionCRUD() {
         ...createDefaultSection(newSectionId, options),
         layout: sourceSection.layout,
         elements: JSON.parse(JSON.stringify(sourceSection.elements)),
-        backgroundType: sourceSection.backgroundType,
+        backgroundType: (sourceSection.backgroundType === 'theme' || sourceSection.backgroundType === 'custom') ? sourceSection.backgroundType : 'theme' as BackgroundType,
       };
     } else if (templateId) {
       // Load from template
@@ -183,7 +186,7 @@ export function useSectionCRUD() {
           ...createDefaultSection(newSectionId, options),
           layout: template.layout,
           elements: template.elements,
-          backgroundType: template.backgroundType,
+          backgroundType: (template.backgroundType === 'theme' || template.backgroundType === 'custom') ? template.backgroundType : 'theme' as BackgroundType,
         };
       } else {
         sectionData = createDefaultSection(newSectionId, options);
@@ -199,12 +202,11 @@ export function useSectionCRUD() {
 
     // Track change
     trackChange({
-      type: 'section',
-      action: 'add',
+      type: 'layout',
       sectionId: newSectionId,
       oldValue: null,
       newValue: sectionData,
-      timestamp: Date.now(),
+      source: 'user',
     });
 
     triggerAutoSave();
@@ -253,12 +255,11 @@ export function useSectionCRUD() {
 
     // Track change
     trackChange({
-      type: 'section',
-      action: 'remove',
+      type: 'layout',
       sectionId,
       oldValue: sectionData,
       newValue: null,
-      timestamp: Date.now(),
+      source: 'user',
     });
 
     triggerAutoSave();
@@ -277,13 +278,13 @@ export function useSectionCRUD() {
     const sourceSection = content[sectionId];
     if (!sourceSection) throw new Error(`Section ${sectionId} not found`);
 
-    const newSectionId = options.newSectionId || generateSectionId(sourceSection.type || 'custom');
+    const newSectionId = options.newSectionId || generateSectionId((sourceSection as any).type || 'custom');
     
     const duplicatedData = {
       ...sourceSection,
       id: newSectionId,
       elements: includeElements ? JSON.parse(JSON.stringify(sourceSection.elements)) : {},
-      layout: preserveLayouts ? sourceSection.layout : getDefaultLayout(sourceSection.type || 'custom'),
+      layout: preserveLayouts ? sourceSection.layout : getDefaultLayout((sourceSection as any).type || 'custom'),
       aiMetadata: {
         ...sourceSection.aiMetadata,
         isCustomized: true,
@@ -297,18 +298,16 @@ export function useSectionCRUD() {
     };
 
     // Add to store
-    storeDuplicateSection(sectionId, newSectionId, targetPosition);
+    storeDuplicateSection(sectionId);
     setSection(newSectionId, duplicatedData);
 
     // Track change
     trackChange({
-      type: 'section',
-      action: 'duplicate',
+      type: 'layout',
       sectionId: newSectionId,
       oldValue: null,
       newValue: duplicatedData,
-      metadata: { originalSectionId: sectionId },
-      timestamp: Date.now(),
+      source: 'user',
     });
 
     triggerAutoSave();
@@ -332,12 +331,11 @@ export function useSectionCRUD() {
     reorderSections(newSections);
 
     trackChange({
-      type: 'section',
-      action: 'reorder',
+      type: 'layout',
       sectionId,
       oldValue: { position: currentIndex },
       newValue: { position: targetPosition },
-      timestamp: Date.now(),
+      source: 'user',
     });
 
     triggerAutoSave();
@@ -352,14 +350,12 @@ export function useSectionCRUD() {
         setSection(sectionId, { [field]: value });
         
         trackChange({
-          type: 'section',
-          action: 'batch-update',
+          type: 'content',
           sectionId,
           field,
           oldValue: content[sectionId][field as keyof typeof content[typeof sectionId]],
           newValue: value,
-          metadata,
-          timestamp: Date.now(),
+          source: 'user',
         });
       }
     });
@@ -409,7 +405,7 @@ export function useSectionCRUD() {
     const elementKeys = Object.keys(elements);
     
     // Calculate completion percentage
-    const requiredElements = getRequiredElements(sectionData.type || 'custom');
+    const requiredElements = getRequiredElements((sectionData as any).type || 'custom');
     const completedElements = requiredElements.filter(key => {
       const element = elements[key];
       return element && element.content && (
@@ -473,7 +469,7 @@ export function useSectionCRUD() {
     const template: SectionTemplate = {
       id: `template-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`,
       name: templateName,
-      sectionType: sectionData.type || 'custom',
+      sectionType: (sectionData as any).type || 'custom',
       layout: sectionData.layout,
       elements: JSON.parse(JSON.stringify(sectionData.elements)),
       backgroundType: sectionData.backgroundType,
@@ -581,7 +577,7 @@ export function useSectionCRUD() {
     },
     
     getSectionsByType: (sectionType: SectionType) => {
-      return sections.filter((sectionId: string) => content[sectionId]?.type === sectionType);
+      return sections.filter((sectionId: string) => (content[sectionId] as any)?.type === sectionType);
     },
     
     getIncompleteSections: () => {

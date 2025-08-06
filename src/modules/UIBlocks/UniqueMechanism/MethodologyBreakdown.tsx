@@ -59,7 +59,7 @@ export default function MethodologyBreakdown(props: LayoutComponentProps) {
     <LayoutSection
       sectionId={sectionId}
       sectionType="MethodologyBreakdown"
-      backgroundType={props.backgroundType || 'secondary'}
+      backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'secondary')}
       sectionBackground={sectionBackground}
       mode={mode}
       className={props.className}
@@ -68,12 +68,11 @@ export default function MethodologyBreakdown(props: LayoutComponentProps) {
         <div className="text-center mb-16">
           <EditableAdaptiveHeadline
             mode={mode}
-            value={blockContent.headline}
+            value={blockContent.headline || ''}
             onEdit={(value) => handleContentUpdate('headline', value)}
             level="h2"
-            backgroundType={props.backgroundType || 'secondary'}
+            backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'secondary')}
             colorTokens={colorTokens}
-            textStyle={getTextStyle('h1')}
             className="mb-6"
             sectionId={sectionId}
             elementKey="headline"
@@ -88,12 +87,11 @@ export default function MethodologyBreakdown(props: LayoutComponentProps) {
           </div>
           <EditableAdaptiveHeadline
             mode={mode}
-            value={blockContent.methodology_name}
+            value={blockContent.methodology_name || ''}
             onEdit={(value) => handleContentUpdate('methodology_name', value)}
             level="h2"
             backgroundType="primary"
             colorTokens={{ ...colorTokens, textPrimary: 'text-white' }}
-            textStyle={getTextStyle('h1')}
             className="text-white mb-4"
             sectionId={sectionId}
             elementKey="methodology_name"
@@ -101,12 +99,11 @@ export default function MethodologyBreakdown(props: LayoutComponentProps) {
           />
           <EditableAdaptiveText
             mode={mode}
-            value={blockContent.methodology_description}
+            value={blockContent.methodology_description || ''}
             onEdit={(value) => handleContentUpdate('methodology_description', value)}
             backgroundType="primary"
             colorTokens={{ ...colorTokens, textSecondary: 'text-purple-100' }}
             variant="body"
-            textStyle={getTextStyle('body-lg')}
             className="text-purple-100 text-lg max-w-3xl mx-auto"
             sectionId={sectionId}
             elementKey="methodology_description"
@@ -121,10 +118,10 @@ export default function MethodologyBreakdown(props: LayoutComponentProps) {
               <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-lg flex items-center justify-center text-white font-bold text-lg mb-4">
                 {index + 1}
               </div>
-              <h3 className="font-bold text-gray-900 mb-4" style={getTextStyle('h3')}>
+              <h3 className="font-bold text-gray-900 mb-4">
                 {principle}
               </h3>
-              <p className="text-gray-600 leading-relaxed" style={getTextStyle('body')}>
+              <p className="text-gray-600 leading-relaxed">
                 {details[index] || 'Principle description'}
               </p>
             </div>
@@ -133,7 +130,7 @@ export default function MethodologyBreakdown(props: LayoutComponentProps) {
 
         {/* Results Section */}
         <div className="mt-16 text-center">
-          <h3 className="font-bold text-gray-900 mb-8" style={getTextStyle('h2')}>
+          <h3 className="font-bold text-gray-900 mb-8">
             Proven Results
           </h3>
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">

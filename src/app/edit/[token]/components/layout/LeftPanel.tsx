@@ -94,7 +94,7 @@ export function LeftPanel({ tokenId }: LeftPanelProps) {
     if (!isResizing) return;
     const newWidth = e.clientX;
     if (newWidth >= 250 && newWidth <= 500) {
-      setLeftPanelWidth(newWidth);
+      setLeftPanelWidth?.(newWidth);
     }
   };
 
@@ -136,10 +136,10 @@ export function LeftPanel({ tokenId }: LeftPanelProps) {
     try {
       if (includeDesignRegeneration) {
         // Full regeneration: design + copy
-        await regenerateAllContent();
+        await regenerateAllContent?.();
       } else {
         // Copy-only regeneration
-        await regenerateContentOnly();
+        await regenerateContentOnly?.();
       }
       
       // Reset states after successful regeneration
@@ -185,7 +185,7 @@ export function LeftPanel({ tokenId }: LeftPanelProps) {
     } catch (error) {
       console.error('Content-only regeneration failed:', error);
       // Fallback to full regeneration if content-only fails
-      await regenerateAllContent();
+      await regenerateAllContent?.();
     }
   };
 
@@ -214,7 +214,7 @@ export function LeftPanel({ tokenId }: LeftPanelProps) {
     // If onboarding store has data but edit store doesn't, sync onboarding → edit
     if (onboardingStoreHasData && !editStoreHasData) {
      // console.log('📤 Syncing from onboarding store to edit store');
-      updateOnboardingData({
+      updateOnboardingData?.({
         oneLiner: onboardingStoreState.oneLiner || onboardingData.oneLiner,
         validatedFields: { ...onboardingData.validatedFields, ...onboardingStoreState.validatedFields },
         hiddenInferredFields: { ...onboardingData.hiddenInferredFields, ...onboardingStoreState.hiddenInferredFields },

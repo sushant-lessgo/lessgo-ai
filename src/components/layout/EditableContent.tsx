@@ -8,6 +8,7 @@ import { getTextColorForBackground } from '@/modules/Design/background/enhancedB
 import { getSmartTextColor } from '@/utils/improvedTextColors';
 import { analyzeBackground } from '@/utils/backgroundAnalysis';
 import type { TextFormatState, AutoSaveConfig, InlineEditorConfig, TextSelection } from '@/app/edit/[token]/components/editor/InlineTextEditor';
+import type { BackgroundType } from '@/types/sectionBackground';
 
 interface EditableContentProps {
   mode: 'edit' | 'preview';
@@ -525,7 +526,7 @@ export function EditableAdaptiveHeadline({
   ...props
 }: Omit<EditableContentProps, 'element'> & {
   level?: 'h1' | 'h2' | 'h3' | 'h4',
-  backgroundType: 'primary' | 'secondary' | 'neutral' | 'divider',
+  backgroundType: BackgroundType,
   colorTokens: any,
   textStyle?: React.CSSProperties,
   formatState?: TextFormatState,
@@ -612,7 +613,7 @@ export function EditableAdaptiveText({
   autoSave,
   ...props
 }: Omit<EditableContentProps, 'element'> & {
-  backgroundType: 'primary' | 'secondary' | 'neutral' | 'divider',
+  backgroundType: BackgroundType,
   colorTokens: any,
   textStyle?: React.CSSProperties,
   variant?: 'body' | 'muted',

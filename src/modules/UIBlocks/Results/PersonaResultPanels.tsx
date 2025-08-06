@@ -168,7 +168,6 @@ const PersonaPanel = ({
                 suppressContentEditableWarning
                 onBlur={(e) => onPersonaEdit(index, e.currentTarget.textContent || '')}
                 className="outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-1 min-h-[28px] cursor-text hover:bg-gray-50 font-bold text-gray-900"
-                style={getTextStyle('h3')}
               >
                 {panel.persona}
               </div>
@@ -177,7 +176,6 @@ const PersonaPanel = ({
                 suppressContentEditableWarning
                 onBlur={(e) => onRoleEdit(index, e.currentTarget.textContent || '')}
                 className={`outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-1 min-h-[20px] cursor-text hover:bg-gray-50 text-sm font-medium ${colors.icon}`}
-                style={getTextStyle('body-sm')}
               >
                 {panel.role}
               </div>
@@ -186,13 +184,11 @@ const PersonaPanel = ({
             <>
               <h3 
                 className="font-bold text-gray-900"
-                style={getTextStyle('h3')}
               >
                 {panel.persona}
               </h3>
               <p 
                 className={`text-sm font-medium ${colors.icon}`}
-                style={getTextStyle('body-sm')}
               >
                 {panel.role}
               </p>
@@ -230,14 +226,12 @@ const PersonaPanel = ({
             suppressContentEditableWarning
             onBlur={(e) => onDescriptionEdit(index, e.currentTarget.textContent || '')}
             className="outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-1 min-h-[60px] cursor-text hover:bg-gray-50 text-gray-700 leading-relaxed"
-            style={getTextStyle('body')}
           >
             {panel.result_description}
           </div>
         ) : (
           <p 
             className="text-gray-700 leading-relaxed"
-            style={getTextStyle('body')}
           >
             {panel.result_description}
           </p>
@@ -253,7 +247,6 @@ const PersonaPanel = ({
             suppressContentEditableWarning
             onBlur={(e) => onBenefitsEdit(index, e.currentTarget.textContent || '')}
             className="outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-1 min-h-[40px] cursor-text hover:bg-gray-50"
-            style={getTextStyle('body-sm')}
           >
             {panel.key_benefits}
           </div>
@@ -266,7 +259,6 @@ const PersonaPanel = ({
                 </svg>
                 <span 
                   className="text-gray-600"
-                  style={getTextStyle('body-sm')}
                 >
                   {benefit}
                 </span>
@@ -347,12 +339,11 @@ export default function PersonaResultPanels(props: PersonaResultPanelsProps) {
         <div className="text-center mb-16">
           <EditableAdaptiveHeadline
             mode={mode}
-            value={blockContent.headline}
+            value={blockContent.headline || ''}
             onEdit={(value) => handleContentUpdate('headline', value)}
             level="h2"
-            backgroundType={backgroundType}
+            backgroundType={backgroundType === 'custom' ? 'secondary' : backgroundType}
             colorTokens={colorTokens}
-            textStyle={getTextStyle('h1')}
             className="mb-4"
             sectionId={sectionId}
             elementKey="headline"
@@ -363,11 +354,10 @@ export default function PersonaResultPanels(props: PersonaResultPanelsProps) {
           {(blockContent.subheadline || mode === 'edit') && (
             <EditableAdaptiveText
               mode={mode}
-              value={blockContent.subheadline}
+              value={blockContent.subheadline || ''}
               onEdit={(value) => handleContentUpdate('subheadline', value)}
-              backgroundType={backgroundType}
+              backgroundType={backgroundType === 'custom' ? 'secondary' : backgroundType}
               colorTokens={colorTokens}
-              textStyle={getTextStyle('body-lg')}
               className="mb-6 max-w-3xl mx-auto"
               placeholder="Add optional subheadline describing role-specific results..."
               sectionId={sectionId}

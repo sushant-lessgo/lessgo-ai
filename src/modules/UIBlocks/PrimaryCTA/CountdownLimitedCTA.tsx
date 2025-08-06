@@ -131,7 +131,7 @@ export default function CountdownLimitedCTA(props: LayoutComponentProps) {
     <LayoutSection
       sectionId={sectionId}
       sectionType="CountdownLimitedCTA"
-      backgroundType={props.backgroundType || 'primary'}
+      backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
       sectionBackground={sectionBackground}
       mode={mode}
       className={props.className}
@@ -149,12 +149,11 @@ export default function CountdownLimitedCTA(props: LayoutComponentProps) {
         {/* Main Headlines */}
         <EditableAdaptiveHeadline
           mode={mode}
-          value={blockContent.headline}
+          value={blockContent.headline || ''}
           onEdit={(value) => handleContentUpdate('headline', value)}
           level="h2"
-          backgroundType={props.backgroundType || 'primary'}
+          backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
           colorTokens={colorTokens}
-          textStyle={getTextStyle('h1')}
           className="mb-4"
           sectionId={sectionId}
           elementKey="headline"
@@ -164,12 +163,11 @@ export default function CountdownLimitedCTA(props: LayoutComponentProps) {
         {blockContent.subheadline && (
           <EditableAdaptiveText
             mode={mode}
-            value={blockContent.subheadline}
+            value={blockContent.subheadline || ''}
             onEdit={(value) => handleContentUpdate('subheadline', value)}
-            backgroundType={props.backgroundType || 'primary'}
+            backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
             colorTokens={colorTokens}
             variant="body"
-            textStyle={getTextStyle('body-lg')}
             className="text-lg mb-8 max-w-2xl mx-auto"
             sectionId={sectionId}
             elementKey="subheadline"
@@ -182,12 +180,11 @@ export default function CountdownLimitedCTA(props: LayoutComponentProps) {
           <div className="mb-6">
             <EditableAdaptiveText
               mode={mode}
-              value={blockContent.urgency_text}
+              value={blockContent.urgency_text || ''}
               onEdit={(value) => handleContentUpdate('urgency_text', value)}
               backgroundType="neutral"
               colorTokens={colorTokens}
               variant="body"
-              textStyle={getTextStyle('body-lg')}
               className="text-gray-700 font-semibold mb-4"
               sectionId={sectionId}
               elementKey="urgency_text"
@@ -203,7 +200,6 @@ export default function CountdownLimitedCTA(props: LayoutComponentProps) {
           <CTAButton
             text={blockContent.cta_text}
             colorTokens={colorTokens}
-            textStyle={getTextStyle('body-lg')}
             className="shadow-xl hover:shadow-2xl transform hover:-translate-y-0.5 transition-all duration-200 bg-red-600 hover:bg-red-700 text-white px-8 py-4 text-lg"
             variant="primary"
             size="large"

@@ -41,7 +41,7 @@ export function useInlineEditorAutoSave(config: AutoSaveConfig) {
       elementKey: change.elementKey,
       oldValue: change.oldContent,
       newValue: change.newContent,
-      timestamp: change.timestamp,
+      source: 'user',
     });
     
     // Call the provided onSave callback

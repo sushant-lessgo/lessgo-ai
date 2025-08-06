@@ -99,24 +99,26 @@ export default function CompetitorCallouts(props: LayoutComponentProps) {
         {/* Header Section */}
         <div className="text-center mb-12">
           <EditableAdaptiveHeadline
-            content={blockContent.headline}
+            value={blockContent.headline || ''}
+            onEdit={(value) => handleContentUpdate('headline', value)}
             mode={mode}
-            onUpdate={(value) => handleContentUpdate('headline', value)}
-            className="mb-4"
-            fonts={fonts}
+            level="h1"
+            backgroundType={backgroundType === 'custom' ? 'secondary' : (backgroundType || 'secondary')}
+            sectionBackground={sectionBackground}
             colorTokens={colorTokens}
-            variant="h1"
+            className="mb-4"
           />
           
           {(blockContent.subheadline || mode === 'edit') && (
             <EditableAdaptiveText
-              content={blockContent.subheadline || 'Add subheadline...'}
+              value={blockContent.subheadline || 'Add subheadline...'}
+              onEdit={(value) => handleContentUpdate('subheadline', value)}
               mode={mode}
-              onUpdate={(value) => handleContentUpdate('subheadline', value)}
-              className={`max-w-3xl mx-auto ${!blockContent.subheadline && mode === 'edit' ? 'opacity-50' : ''}`}
-              fonts={fonts}
+              backgroundType={backgroundType === 'custom' ? 'secondary' : (backgroundType || 'secondary')}
+              variant="body"
+              sectionBackground={sectionBackground}
               colorTokens={colorTokens}
-              variant="body-lg"
+              className={`max-w-3xl mx-auto ${!blockContent.subheadline && mode === 'edit' ? 'opacity-50' : ''}`}
             />
           )}
         </div>
@@ -126,7 +128,7 @@ export default function CompetitorCallouts(props: LayoutComponentProps) {
           {competitorNames.map((name, index) => (
             <div 
               key={index} 
-              className={`rounded-lg ${colorTokens.bgNeutral} border ${colorTokens.borderColor} p-8 hover:shadow-lg transition-shadow`}
+              className={`rounded-lg ${colorTokens.bgNeutral} border border-gray-200 p-8 hover:shadow-lg transition-shadow`}
             >
               <div className="grid md:grid-cols-3 gap-6 items-center">
                 {/* Competitor Info */}
@@ -137,10 +139,9 @@ export default function CompetitorCallouts(props: LayoutComponentProps) {
                       value={name}
                       onChange={(e) => handleCompetitorNameUpdate(index, e.target.value)}
                       className={`text-xl font-semibold bg-transparent outline-none focus:ring-2 focus:ring-blue-500 rounded px-2 mb-2 ${colorTokens.textPrimary}`}
-                      style={fonts.h3}
                     />
                   ) : (
-                    <h3 className={`text-xl font-semibold mb-2 ${colorTokens.textPrimary}`} style={fonts.h3}>
+                    <h3 className={`text-xl font-semibold mb-2 ${colorTokens.textPrimary}`}>
                       {name}
                     </h3>
                   )}
@@ -154,11 +155,10 @@ export default function CompetitorCallouts(props: LayoutComponentProps) {
                         value={competitorIssues[index]}
                         onChange={(e) => handleCompetitorIssueUpdate(index, e.target.value)}
                         className={`flex-1 bg-transparent outline-none focus:ring-2 focus:ring-blue-500 rounded px-2 resize-none ${colorTokens.textSecondary}`}
-                        style={getTextStyle('body')}
                         rows={2}
                       />
                     ) : (
-                      <p className={`text-sm ${colorTokens.textSecondary}`} style={getTextStyle('body')}>
+                      <p className={`text-sm ${colorTokens.textSecondary}`}>
                         {competitorIssues[index]}
                       </p>
                     )}
@@ -167,19 +167,19 @@ export default function CompetitorCallouts(props: LayoutComponentProps) {
 
                 {/* Arrow */}
                 <div className="md:col-span-1 flex justify-center">
-                  <svg className={`w-12 h-12 ${colorTokens.textAccent} transform rotate-0 md:rotate-0`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className={`w-12 h-12 text-primary transform rotate-0 md:rotate-0`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
                   </svg>
                 </div>
 
                 {/* Our Solution */}
                 <div className="md:col-span-1">
-                  <h4 className={`font-semibold mb-2 ${colorTokens.textAccent}`} style={fonts.h4}>
+                  <h4 className={`font-semibold mb-2 text-primary`}>
                     Our Solution
                   </h4>
                   
                   <div className="flex items-start">
-                    <svg className={`w-5 h-5 ${colorTokens.textAccent} mr-2 mt-0.5 flex-shrink-0`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className={`w-5 h-5 text-primary mr-2 mt-0.5 flex-shrink-0`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                     </svg>
                     {mode === 'edit' ? (
@@ -187,11 +187,10 @@ export default function CompetitorCallouts(props: LayoutComponentProps) {
                         value={ourSolutions[index]}
                         onChange={(e) => handleOurSolutionUpdate(index, e.target.value)}
                         className={`flex-1 bg-transparent outline-none focus:ring-2 focus:ring-blue-500 rounded px-2 resize-none ${colorTokens.textPrimary}`}
-                        style={getTextStyle('body')}
                         rows={2}
                       />
                     ) : (
-                      <p className={`text-sm font-medium ${colorTokens.textPrimary}`} style={getTextStyle('body')}>
+                      <p className={`text-sm font-medium ${colorTokens.textPrimary}`}>
                         {ourSolutions[index]}
                       </p>
                     )}
@@ -205,18 +204,19 @@ export default function CompetitorCallouts(props: LayoutComponentProps) {
         {/* Trust Badge */}
         {(blockContent.trust_badge || mode === 'edit') && (
           <div className="text-center mt-12">
-            <div className={`inline-flex items-center ${colorTokens.bgAccent} bg-opacity-10 px-6 py-3 rounded-full`}>
-              <svg className={`w-5 h-5 ${colorTokens.textAccent} mr-2`} fill="currentColor" viewBox="0 0 20 20">
+            <div className={`inline-flex items-center bg-primary bg-opacity-10 px-6 py-3 rounded-full`}>
+              <svg className={`w-5 h-5 text-primary mr-2`} fill="currentColor" viewBox="0 0 20 20">
                 <path fillRule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
               </svg>
               <EditableAdaptiveText
-                content={blockContent.trust_badge || 'Add trust badge...'}
+                value={blockContent.trust_badge || 'Add trust badge...'}
+                onEdit={(value) => handleContentUpdate('trust_badge', value)}
                 mode={mode}
-                onUpdate={(value) => handleContentUpdate('trust_badge', value)}
-                className={`font-medium ${!blockContent.trust_badge && mode === 'edit' ? 'opacity-50' : ''}`}
-                fonts={fonts}
-                colorTokens={colorTokens}
+                backgroundType={backgroundType === 'custom' ? 'secondary' : (backgroundType || 'secondary')}
                 variant="body"
+                sectionBackground={sectionBackground}
+                colorTokens={colorTokens}
+                className={`font-medium ${!blockContent.trust_badge && mode === 'edit' ? 'opacity-50' : ''}`}
               />
             </div>
           </div>

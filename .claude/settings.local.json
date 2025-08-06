@@ -46,7 +46,11 @@
       "Bash(timeout 180s npm run build)",
       "Bash(timeout 300s npm run build)",
       "mcp__ide__getDiagnostics",
-      "Bash(npx next:*)"
+      "Bash(npx next:*)",
+      "Bash(git checkout:*)",
+      "Bash(npm install:*)",
+      "Bash(del fix-undefined-values.js fix-more-issues.js)",
+      "Bash(del fix-color-tokens.js)"
     ],
     "deny": []
   }

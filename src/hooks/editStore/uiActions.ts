@@ -305,8 +305,8 @@ export function createUIActions(set: any, get: any): UIActions {
         state.persistence.saveError = undefined;
       }),
 
-    // Simplified trackChange for toolbar actions
-    trackChange: (change: any) => {
+    // Simplified trackUIChange for toolbar actions
+    trackUIChange: (change: any) => {
       set((state: EditStore) => {
         state.persistence.isDirty = true;
         state.lastUpdated = Date.now();

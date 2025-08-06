@@ -98,7 +98,7 @@ const IntegrationCard = React.memo(({
     <div 
       className={`p-4 rounded-xl border transition-all duration-300 cursor-pointer ${
         isHovered 
-          ? `${colorTokens.bgSecondary} ${colorTokens.borderPrimary} shadow-lg scale-105` 
+          ? `${colorTokens.bgSecondary} border-gray-200 shadow-lg scale-105` 
           : `${colorTokens.bgPrimary} ${colorTokens.borderSecondary} hover:${colorTokens.bgSecondary}`
       }`}
       onMouseEnter={onHover}
@@ -112,7 +112,7 @@ const IntegrationCard = React.memo(({
       </div>
 
       {/* Integration Name */}
-      <h4 className={`font-semibold mb-2 ${colorTokens.textHeading}`}>
+      <h4 className={`font-semibold mb-2 ${colorTokens.textPrimary}`}>
         {name}
       </h4>
 
@@ -129,7 +129,7 @@ const IntegrationCard = React.memo(({
 
       {/* Connect Button (appears on hover) */}
       {isHovered && (
-        <button className={`mt-3 w-full py-2 px-3 rounded-lg text-sm font-medium transition-all duration-200 ${colorTokens.accent} ${colorTokens.accentText} hover:opacity-90`}>
+        <button className={`mt-3 w-full py-2 px-3 rounded-lg text-sm font-medium transition-all duration-200 ${colorTokens.ctaBg} ${colorTokens.ctaBgText} hover:opacity-90`}>
           Connect
         </button>
       )}
@@ -143,21 +143,19 @@ const TabButton = React.memo(({
   title, 
   isActive, 
   onClick, 
-  colorTokens, 
-  textStyle 
+  colorTokens
 }: { 
   title: string; 
   isActive: boolean; 
   onClick: () => void;
   colorTokens: any;
-  textStyle: string;
 }) => (
   <button
     onClick={onClick}
-    className={`px-6 py-3 rounded-lg font-medium transition-all duration-300 ${textStyle} ${
+    className={`px-6 py-3 rounded-lg font-medium transition-all duration-300 ${
       isActive 
-        ? `${colorTokens.accent} ${colorTokens.accentText} shadow-md` 
-        : `${colorTokens.bgSecondary} ${colorTokens.textBody} ${colorTokens.borderPrimary} border hover:${colorTokens.bgTertiary}`
+        ? `${colorTokens.ctaBg} ${colorTokens.ctaBgText} shadow-md` 
+        : `${colorTokens.bgSecondary} ${colorTokens.textSecondary} border-gray-200 border hover:${colorTokens.bgSecondary}`
     }`}
   >
     {title}
@@ -210,7 +208,7 @@ export default function TabbyIntegrationCards(props: LayoutComponentProps) {
     <LayoutSection
       sectionId={sectionId}
       sectionType="TabbyIntegrationCards"
-      backgroundType={props.backgroundType || 'primary'}
+      backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
       sectionBackground={sectionBackground}
       mode={mode}
       className={props.className}
@@ -221,12 +219,11 @@ export default function TabbyIntegrationCards(props: LayoutComponentProps) {
         <div className="text-center mb-12">
           <EditableAdaptiveHeadline
             mode={mode}
-            value={blockContent.headline}
+            value={blockContent.headline || ''}
             onEdit={(value) => handleContentUpdate('headline', value)}
             level="h2"
-            backgroundType={props.backgroundType || 'primary'}
+            backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
             colorTokens={colorTokens}
-            textStyle={getTextStyle('h2')}
             className="mb-4"
             sectionId={sectionId}
             elementKey="headline"
@@ -238,10 +235,9 @@ export default function TabbyIntegrationCards(props: LayoutComponentProps) {
               mode={mode}
               value={blockContent.subheadline || ''}
               onEdit={(value) => handleContentUpdate('subheadline', value)}
-              backgroundType={props.backgroundType || 'primary'}
+              backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
               colorTokens={colorTokens}
               variant="body"
-              textStyle={getTextStyle('body-lg')}
               className="text-lg leading-relaxed max-w-3xl mx-auto"
               placeholder="Add a description of your integration ecosystem..."
               sectionId={sectionId}
@@ -260,7 +256,6 @@ export default function TabbyIntegrationCards(props: LayoutComponentProps) {
               isActive={activeTab === index}
               onClick={() => setActiveTab(index)}
               colorTokens={colorTokens}
-              textStyle={getTextStyle('body')}
             />
           ))}
         </div>
@@ -280,8 +275,8 @@ export default function TabbyIntegrationCards(props: LayoutComponentProps) {
         </div>
 
         {/* Tab Summary */}
-        <div className={`text-center p-6 rounded-xl ${colorTokens.bgSecondary} ${colorTokens.borderPrimary} border`}>
-          <h3 className={`font-semibold mb-2 ${colorTokens.textHeading} ${getTextStyle('body-lg')}`}>
+        <div className={`text-center p-6 rounded-xl ${colorTokens.bgSecondary} border-gray-200 border`}>
+          <h3 className={`font-semibold mb-2 ${colorTokens.textPrimary} ${getTextStyle('body-lg')}`}>
             {currentTab.title} Tools ({currentTab.integrations.length} available)
           </h3>
           <p className={`text-sm ${dynamicTextColors?.muted || colorTokens.textMuted}`}>
@@ -291,10 +286,10 @@ export default function TabbyIntegrationCards(props: LayoutComponentProps) {
 
         {/* Footer Actions */}
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mt-12">
-          <button className={`px-6 py-3 rounded-lg font-medium ${colorTokens.accent} ${colorTokens.accentText} hover:opacity-90 transition-opacity`}>
+          <button className={`px-6 py-3 rounded-lg font-medium ${colorTokens.ctaBg} ${colorTokens.ctaText} hover:opacity-90 transition-opacity`}>
             View All Integrations
           </button>
-          <button className={`px-6 py-3 rounded-lg font-medium border ${colorTokens.borderPrimary} ${colorTokens.textBody} hover:${colorTokens.bgSecondary} transition-colors`}>
+          <button className={`px-6 py-3 rounded-lg font-medium border border-gray-200 ${colorTokens.textSecondary} hover:${colorTokens.bgSecondary} transition-colors`}>
             Request Custom Integration
           </button>
         </div>

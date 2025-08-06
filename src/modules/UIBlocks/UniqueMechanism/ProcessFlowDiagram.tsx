@@ -54,7 +54,7 @@ export default function ProcessFlowDiagram(props: LayoutComponentProps) {
     <LayoutSection
       sectionId={sectionId}
       sectionType="ProcessFlowDiagram"
-      backgroundType={props.backgroundType || 'neutral'}
+      backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
       sectionBackground={sectionBackground}
       mode={mode}
       className={props.className}
@@ -63,12 +63,11 @@ export default function ProcessFlowDiagram(props: LayoutComponentProps) {
         <div className="text-center mb-16">
           <EditableAdaptiveHeadline
             mode={mode}
-            value={blockContent.headline}
+            value={blockContent.headline || ''}
             onEdit={(value) => handleContentUpdate('headline', value)}
             level="h2"
-            backgroundType={props.backgroundType || 'neutral'}
+            backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
             colorTokens={colorTokens}
-            textStyle={getTextStyle('h1')}
             className="mb-6"
             sectionId={sectionId}
             elementKey="headline"
@@ -77,12 +76,11 @@ export default function ProcessFlowDiagram(props: LayoutComponentProps) {
           {blockContent.subheadline && (
             <EditableAdaptiveText
               mode={mode}
-              value={blockContent.subheadline}
+              value={blockContent.subheadline || ''}
               onEdit={(value) => handleContentUpdate('subheadline', value)}
-              backgroundType={props.backgroundType || 'neutral'}
+              backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
               colorTokens={colorTokens}
               variant="body"
-              textStyle={getTextStyle('body-lg')}
               className="text-lg max-w-3xl mx-auto"
               sectionId={sectionId}
               elementKey="subheadline"
@@ -110,10 +108,10 @@ export default function ProcessFlowDiagram(props: LayoutComponentProps) {
                 
                 {/* Step Content */}
                 <div className="text-center">
-                  <h3 className="font-bold text-gray-900 mb-3" style={getTextStyle('h3')}>
+                  <h3 className="font-bold text-gray-900 mb-3">
                     {step}
                   </h3>
-                  <p className="text-gray-600 text-sm" style={getTextStyle('body-sm')}>
+                  <p className="text-gray-600 text-sm">
                     {descriptions[index] || 'Step description'}
                   </p>
                 </div>
@@ -124,7 +122,7 @@ export default function ProcessFlowDiagram(props: LayoutComponentProps) {
 
         {/* Key Benefits */}
         <div className="mt-16 bg-blue-50 rounded-2xl p-8 border border-blue-200">
-          <h3 className="text-center font-bold text-blue-900 mb-6" style={getTextStyle('h2')}>
+          <h3 className="text-center font-bold text-blue-900 mb-6">
             Why Our Process is Different
           </h3>
           <div className="grid md:grid-cols-3 gap-6">

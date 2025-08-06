@@ -131,7 +131,7 @@ export default function StoryBlockWithPullquote(props: LayoutComponentProps) {
     <LayoutSection
       sectionId={sectionId}
       sectionType="StoryBlockWithPullquote"
-      backgroundType={props.backgroundType || 'primary'}
+      backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
       sectionBackground={sectionBackground}
       mode={mode}
       className={props.className}
@@ -144,12 +144,11 @@ export default function StoryBlockWithPullquote(props: LayoutComponentProps) {
           {/* Headline */}
           <EditableAdaptiveHeadline
             mode={mode}
-            value={blockContent.story_headline}
+            value={blockContent.story_headline || ''}
             onEdit={(value) => handleContentUpdate('story_headline', value)}
             level="h1"
-            backgroundType={props.backgroundType || 'primary'}
+            backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
             colorTokens={colorTokens}
-            textStyle={getTextStyle('h1')}
             className="leading-tight mb-6"
             sectionId={sectionId}
             elementKey="story_headline"
@@ -167,16 +166,8 @@ export default function StoryBlockWithPullquote(props: LayoutComponentProps) {
                   className="w-16 h-16 rounded-full object-cover cursor-pointer border-2 border-gray-200"
                   data-image-id={`${sectionId}-founder-image`}
                   onMouseUp={(e) => {
-                    if (mode === 'edit') {
-                      e.stopPropagation();
-                      e.preventDefault();
-                      const rect = e.currentTarget.getBoundingClientRect();
-                      showImageToolbar(`${sectionId}-founder-image`, {
-                        x: rect.left + rect.width / 2,
-                        y: rect.top - 10
-                      });
-                    }
-                  }}
+                        // Image toolbar is only available in edit mode
+                      }}
                 />
               ) : (
                 <FounderImagePlaceholder />
@@ -188,10 +179,10 @@ export default function StoryBlockWithPullquote(props: LayoutComponentProps) {
                 mode={mode}
                 value={blockContent.founder_name || ''}
                 onEdit={(value) => handleContentUpdate('founder_name', value)}
-                backgroundType={props.backgroundType || 'primary'}
+                backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
                 colorTokens={colorTokens}
                 variant="body"
-                textStyle="font-semibold text-gray-900"
+                textStyle={{ fontWeight: '600', color: '#111827' }}
                 placeholder="Author Name"
                 sectionId={sectionId}
                 elementKey="founder_name"
@@ -202,10 +193,10 @@ export default function StoryBlockWithPullquote(props: LayoutComponentProps) {
                   mode={mode}
                   value={blockContent.founder_title || ''}
                   onEdit={(value) => handleContentUpdate('founder_title', value)}
-                  backgroundType={props.backgroundType || 'primary'}
+                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
                   colorTokens={colorTokens}
                   variant="body"
-                  textStyle={mutedTextColor}
+                  className={mutedTextColor}
                   placeholder="Title"
                   sectionId={sectionId}
                   elementKey="founder_title"
@@ -216,10 +207,10 @@ export default function StoryBlockWithPullquote(props: LayoutComponentProps) {
                   mode={mode}
                   value={blockContent.reading_time || ''}
                   onEdit={(value) => handleContentUpdate('reading_time', value)}
-                  backgroundType={props.backgroundType || 'primary'}
+                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
                   colorTokens={colorTokens}
                   variant="body"
-                  textStyle={mutedTextColor}
+                  className={mutedTextColor}
                   placeholder="Reading time"
                   sectionId={sectionId}
                   elementKey="reading_time"
@@ -237,12 +228,12 @@ export default function StoryBlockWithPullquote(props: LayoutComponentProps) {
           <div className="mb-8">
             <EditableAdaptiveText
               mode={mode}
-              value={blockContent.story_intro}
+              value={blockContent.story_intro || ''}
               onEdit={(value) => handleContentUpdate('story_intro', value)}
-              backgroundType={props.backgroundType || 'primary'}
+              backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
               colorTokens={colorTokens}
               variant="body"
-              textStyle="text-xl leading-relaxed text-gray-700 font-medium"
+              textStyle={{ fontSize: '1.25rem', lineHeight: '1.625', color: '#374151', fontWeight: '500' }}
               placeholder="Start with a compelling opening that hooks the reader..."
               sectionId={sectionId}
               elementKey="story_intro"
@@ -254,12 +245,12 @@ export default function StoryBlockWithPullquote(props: LayoutComponentProps) {
           <div className="mb-12">
             <EditableAdaptiveText
               mode={mode}
-              value={blockContent.story_body}
+              value={blockContent.story_body || ''}
               onEdit={(value) => handleContentUpdate('story_body', value)}
-              backgroundType={props.backgroundType || 'primary'}
+              backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
               colorTokens={colorTokens}
               variant="body"
-              textStyle="text-lg leading-relaxed text-gray-700 whitespace-pre-line"
+              textStyle={{ fontSize: '1.125rem', lineHeight: '1.625', color: '#374151', whiteSpace: 'pre-line' }}
               placeholder="Continue your story with the main narrative, challenges, and discoveries..."
               sectionId={sectionId}
               elementKey="story_body"
@@ -279,12 +270,12 @@ export default function StoryBlockWithPullquote(props: LayoutComponentProps) {
               {/* Quote text */}
               <EditableAdaptiveText
                 mode={mode}
-                value={blockContent.pullquote_text}
+                value={blockContent.pullquote_text || ''}
                 onEdit={(value) => handleContentUpdate('pullquote_text', value)}
-                backgroundType="white"
+                backgroundType="neutral"
                 colorTokens={colorTokens}
                 variant="body"
-                textStyle="text-2xl lg:text-3xl font-medium text-gray-900 leading-relaxed italic"
+                textStyle={{ fontSize: '1.5rem', fontWeight: '500', color: '#111827', lineHeight: '1.625', fontStyle: 'italic' }}
                 placeholder="Add a powerful quote that captures the key insight..."
                 sectionId={sectionId}
                 elementKey="pullquote_text"
@@ -310,12 +301,12 @@ export default function StoryBlockWithPullquote(props: LayoutComponentProps) {
           <div className="mb-12">
             <EditableAdaptiveText
               mode={mode}
-              value={blockContent.story_conclusion}
+              value={blockContent.story_conclusion || ''}
               onEdit={(value) => handleContentUpdate('story_conclusion', value)}
-              backgroundType={props.backgroundType || 'primary'}
+              backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
               colorTokens={colorTokens}
               variant="body"
-              textStyle="text-lg leading-relaxed text-gray-700 whitespace-pre-line"
+              textStyle={{ fontSize: '1.125rem', lineHeight: '1.625', color: '#374151', whiteSpace: 'pre-line' }}
               placeholder="Conclude with the outcome, current state, and future vision..."
               sectionId={sectionId}
               elementKey="story_conclusion"
@@ -336,7 +327,6 @@ export default function StoryBlockWithPullquote(props: LayoutComponentProps) {
           <CTAButton
             text={blockContent.cta_text}
             colorTokens={colorTokens}
-            textStyle={getTextStyle('body-lg')}
             className="shadow-xl hover:shadow-2xl transform hover:-translate-y-0.5 transition-all duration-200 mb-6"
             variant="primary"
             sectionId={sectionId}

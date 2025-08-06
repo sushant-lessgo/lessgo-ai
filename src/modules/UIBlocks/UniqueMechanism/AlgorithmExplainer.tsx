@@ -22,11 +22,11 @@ export default function AlgorithmExplainer(props: LayoutComponentProps) {
   const steps = blockContent.algorithm_steps.split('|').map(s => s.trim()).filter(Boolean);
 
   return (
-    <LayoutSection sectionId={sectionId} sectionType="AlgorithmExplainer" backgroundType={props.backgroundType || 'primary'} sectionBackground={sectionBackground} mode={mode} className={props.className}>
+    <LayoutSection sectionId={sectionId} sectionType="AlgorithmExplainer" backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')} sectionBackground={sectionBackground} mode={mode} className={props.className}>
       <div className="max-w-5xl mx-auto">
         <div className="text-center mb-12">
-          <EditableAdaptiveHeadline mode={mode} value={blockContent.headline} onEdit={(value) => handleContentUpdate('headline', value)} level="h2" backgroundType={props.backgroundType || 'primary'} colorTokens={colorTokens} textStyle={getTextStyle('h1')} className="mb-4" sectionId={sectionId} elementKey="headline" sectionBackground={sectionBackground} />
-          <EditableAdaptiveText mode={mode} value={blockContent.algorithm_name} onEdit={(value) => handleContentUpdate('algorithm_name', value)} backgroundType={props.backgroundType || 'primary'} colorTokens={colorTokens} variant="body" textStyle={getTextStyle('h2')} className="text-blue-600 font-bold" sectionId={sectionId} elementKey="algorithm_name" sectionBackground={sectionBackground} />
+          <EditableAdaptiveHeadline mode={mode} value={blockContent.headline || ''} onEdit={(value) => handleContentUpdate('headline', value)} level="h2" backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')} colorTokens={colorTokens} className="mb-4" sectionId={sectionId} elementKey="headline" sectionBackground={sectionBackground} />
+          <EditableAdaptiveText mode={mode} value={blockContent.algorithm_name || ''} onEdit={(value) => handleContentUpdate('algorithm_name', value)} backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')} colorTokens={colorTokens} variant="body" className="text-blue-600 font-bold" sectionId={sectionId} elementKey="algorithm_name" sectionBackground={sectionBackground} />
         </div>
         <div className="bg-gradient-to-r from-blue-600 to-indigo-700 rounded-2xl p-8 text-white">
           <div className="grid grid-cols-2 md:grid-cols-3 gap-6">

@@ -1,10 +1,11 @@
 // components/layout/SmartTextSection.tsx - Auto-applies smart text colors
 import React from 'react';
 import { useSmartTextColors } from '@/hooks/useSmartTextColors';
+import type { BackgroundType } from '@/types/sectionBackground';
 
 interface SmartTextSectionProps {
   children: React.ReactNode;
-  backgroundType: 'primary' | 'secondary' | 'neutral' | 'divider';
+  backgroundType: BackgroundType;
   sectionBackgroundCSS: string;
   className?: string;
   sectionId?: string;
@@ -20,7 +21,12 @@ export function SmartTextSection({
   className = '',
   sectionId = ''
 }: SmartTextSectionProps) {
-  const smartColors = useSmartTextColors(backgroundType);
+  // Convert new BackgroundType to the expected theme color type
+  const themeColorType = (backgroundType === 'theme' || backgroundType === 'custom') 
+    ? 'primary' 
+    : backgroundType as 'primary' | 'secondary' | 'neutral' | 'divider';
+  
+  const smartColors = useSmartTextColors(themeColorType);
   
   // Debug logging
   console.log(`🎨 SmartTextSection for ${sectionId}:`, {

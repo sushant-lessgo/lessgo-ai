@@ -62,7 +62,7 @@ const CompanyLogoPlaceholder = React.memo(({
 }: { 
   company: CompanyLogo;
   mode: 'edit' | 'preview';
-  getTextStyle: (variant: 'display' | 'hero' | 'h1' | 'h2' | 'h3' | 'h4' | 'body-lg' | 'body' | 'body-sm' | 'caption') => React.CSSProperties;
+  getTextStyle: (variant: 'display' | 'hero' | 'h1' | 'h2' | 'h3' | 'body-lg' | 'body' | 'body-sm' | 'caption') => React.CSSProperties;
   onNameEdit: (index: number, value: string) => void;
 }) => {
   
@@ -115,14 +115,12 @@ const CompanyLogoPlaceholder = React.memo(({
             suppressContentEditableWarning
             onBlur={(e) => onNameEdit(company.index, e.currentTarget.textContent || '')}
             className="outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-1 min-h-[20px] cursor-text hover:bg-gray-50 font-medium text-gray-700 text-sm text-center"
-            style={getTextStyle('body-sm')}
           >
             {company.name}
           </div>
         ) : (
           <span 
             className="font-medium text-gray-700 text-sm group-hover:text-gray-900 transition-colors duration-300"
-            style={getTextStyle('body-sm')}
           >
             {company.name}
           </span>
@@ -163,7 +161,7 @@ export default function LogoWall(props: LayoutComponentProps) {
     <LayoutSection
       sectionId={sectionId}
       sectionType="LogoWall"
-      backgroundType={props.backgroundType || 'neutral'}
+      backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
       sectionBackground={sectionBackground}
       mode={mode}
       className={props.className}
@@ -173,16 +171,14 @@ export default function LogoWall(props: LayoutComponentProps) {
         <div className="text-center mb-12">
           <EditableAdaptiveHeadline
             mode={mode}
-            value={blockContent.headline}
+            value={blockContent.headline || ''}
             onEdit={(value) => handleContentUpdate('headline', value)}
             level="h2"
-            backgroundType={props.backgroundType || 'neutral'}
+            backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
             colorTokens={colorTokens}
             sectionId={sectionId}
             elementKey="headline"
             sectionBackground={sectionBackground}
-            textStyle={getTextStyle('h1')}
-            textAlign="center"
             className="mb-4"
           />
 
@@ -192,14 +188,12 @@ export default function LogoWall(props: LayoutComponentProps) {
               mode={mode}
               value={blockContent.subheadline || ''}
               onEdit={(value) => handleContentUpdate('subheadline', value)}
-              backgroundType={props.backgroundType || 'neutral'}
+              backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
               colorTokens={colorTokens}
               sectionId={sectionId}
               elementKey="subheadline"
               sectionBackground={sectionBackground}
-              textStyle={getTextStyle('body-lg')}
-              textAlign="center"
-              className="max-w-2xl mx-auto"
+                className="max-w-2xl mx-auto"
               placeholder="Add optional subheadline to provide context..."
             />
           )}

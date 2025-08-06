@@ -70,7 +70,7 @@ const CONTENT_SCHEMA = {
 
 // Integration Badge Component
 const IntegrationBadge = React.memo(({ name, colorTokens }: { name: string; colorTokens: any }) => (
-  <div className={`inline-flex items-center px-3 py-1.5 rounded-lg text-sm font-medium border ${colorTokens.borderPrimary} ${colorTokens.bgSecondary} ${colorTokens.textBody} hover:scale-105 transition-transform duration-200`}>
+  <div className={`inline-flex items-center px-3 py-1.5 rounded-lg text-sm font-medium border border-gray-200 ${colorTokens.bgSecondary} ${colorTokens.textSecondary} hover:scale-105 transition-transform duration-200`}>
     <div className="w-2 h-2 rounded-full bg-green-400 mr-2"></div>
     {name}
   </div>
@@ -83,22 +83,20 @@ const AccordionItem = React.memo(({
   integrations, 
   isOpen, 
   onToggle, 
-  colorTokens, 
-  textStyle 
+  colorTokens
 }: { 
   title: string; 
   integrations: string[]; 
   isOpen: boolean; 
   onToggle: () => void;
   colorTokens: any;
-  textStyle: string;
 }) => (
-  <div className={`border rounded-xl ${colorTokens.borderPrimary} ${colorTokens.bgSecondary} overflow-hidden`}>
+  <div className={`border rounded-xl border-gray-200 ${colorTokens.bgSecondary} overflow-hidden`}>
     <button
       onClick={onToggle}
-      className={`w-full px-6 py-4 text-left flex items-center justify-between ${colorTokens.textHeading} hover:${colorTokens.bgTertiary} transition-colors duration-200`}
+      className={`w-full px-6 py-4 text-left flex items-center justify-between ${colorTokens.textPrimary} hover:${colorTokens.bgSecondary} transition-colors duration-200`}
     >
-      <h3 className={`font-semibold ${textStyle}`}>{title}</h3>
+      <h3 className="font-semibold">{title}</h3>
       <svg 
         className={`w-5 h-5 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} 
         fill="none" 
@@ -178,7 +176,7 @@ export default function CategoryAccordion(props: LayoutComponentProps) {
     <LayoutSection
       sectionId={sectionId}
       sectionType="CategoryAccordion"
-      backgroundType={props.backgroundType || 'primary'}
+      backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
       sectionBackground={sectionBackground}
       mode={mode}
       className={props.className}
@@ -189,12 +187,11 @@ export default function CategoryAccordion(props: LayoutComponentProps) {
         <div className="text-center mb-12">
           <EditableAdaptiveHeadline
             mode={mode}
-            value={blockContent.headline}
+            value={blockContent.headline || ''}
             onEdit={(value) => handleContentUpdate('headline', value)}
             level="h2"
-            backgroundType={props.backgroundType || 'primary'}
+            backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
             colorTokens={colorTokens}
-            textStyle={getTextStyle('h2')}
             className="mb-4"
             sectionId={sectionId}
             elementKey="headline"
@@ -206,10 +203,9 @@ export default function CategoryAccordion(props: LayoutComponentProps) {
               mode={mode}
               value={blockContent.subheadline || ''}
               onEdit={(value) => handleContentUpdate('subheadline', value)}
-              backgroundType={props.backgroundType || 'primary'}
+              backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
               colorTokens={colorTokens}
               variant="body"
-              textStyle={getTextStyle('body-lg')}
               className="text-lg leading-relaxed max-w-3xl mx-auto"
               placeholder="Add a description of your integration ecosystem..."
               sectionId={sectionId}
@@ -229,7 +225,6 @@ export default function CategoryAccordion(props: LayoutComponentProps) {
               isOpen={openItems.has(index)}
               onToggle={() => toggleItem(index)}
               colorTokens={colorTokens}
-              textStyle={getTextStyle('body')}
             />
           ))}
         </div>
@@ -237,7 +232,7 @@ export default function CategoryAccordion(props: LayoutComponentProps) {
         {/* Footer CTA */}
         <div className="text-center mt-12">
           <p className={`${dynamicTextColors?.muted || colorTokens.textMuted} text-sm`}>
-            Can't find your tool? <span className={`${colorTokens.accent} hover:underline cursor-pointer`}>Request an integration</span>
+            Can't find your tool? <span className={`${colorTokens.ctaBg} hover:underline cursor-pointer`}>Request an integration</span>
           </p>
         </div>
       </div>

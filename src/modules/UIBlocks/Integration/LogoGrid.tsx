@@ -76,7 +76,7 @@ const LogoPlaceholder = React.memo(({ name }: { name: string }) => {
   const { letter, colorClass } = getLogoPlaceholder(name);
   
   return (
-    <div className="group p-6 bg-white rounded-lg border border-gray-200 hover:border-blue-300 hover:shadow-md transition-all duration-300 text-center">
+    <div className="group p-6 bg-white rounded-lg border border-border-gray-200 hover:border-blue-300 hover:shadow-md transition-all duration-300 text-center">
       {/* Logo Circle */}
       <div className="mb-3">
         <div className={`w-12 h-12 bg-gradient-to-br ${colorClass} rounded-lg flex items-center justify-center text-white font-bold text-lg mx-auto group-hover:scale-110 transition-transform duration-300`}>
@@ -102,7 +102,7 @@ const EditableLogoItem = React.memo(({
 }: {
   item: IntegrationItem;
   mode: 'edit' | 'preview';
-  getTextStyle: (variant: 'display' | 'hero' | 'h1' | 'h2' | 'h3' | 'h4' | 'body-lg' | 'body' | 'body-sm' | 'caption') => React.CSSProperties;
+  getTextStyle: (variant: 'display' | 'hero' | 'h1' | 'h2' | 'h3' | 'body-lg' | 'body' | 'body-sm' | 'caption') => React.CSSProperties;
   onNameEdit: (index: number, value: string) => void;
 }) => {
   
@@ -125,7 +125,7 @@ const EditableLogoItem = React.memo(({
     })();
     
     return (
-      <div className="group p-6 bg-white rounded-lg border border-gray-200 hover:border-blue-300 hover:shadow-md transition-all duration-300 text-center">
+      <div className="group p-6 bg-white rounded-lg border border-border-gray-200 hover:border-blue-300 hover:shadow-md transition-all duration-300 text-center">
         <div className="mb-3">
           <div className={`w-12 h-12 bg-gradient-to-br ${colorClass} rounded-lg flex items-center justify-center text-white font-bold text-lg mx-auto group-hover:scale-110 transition-transform duration-300`}>
             {letter}
@@ -137,7 +137,6 @@ const EditableLogoItem = React.memo(({
           suppressContentEditableWarning
           onBlur={(e) => onNameEdit(item.index, e.currentTarget.textContent || '')}
           className="outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-1 min-h-[20px] cursor-text hover:bg-gray-50 font-medium text-gray-900 text-sm"
-          style={getTextStyle('body-sm')}
         >
           {item.name}
         </div>
@@ -179,7 +178,7 @@ export default function LogoGrid(props: LayoutComponentProps) {
     <LayoutSection
       sectionId={sectionId}
       sectionType="LogoGrid"
-      backgroundType={props.backgroundType || 'neutral'}
+      backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
       sectionBackground={sectionBackground}
       mode={mode}
       className={props.className}
@@ -189,16 +188,15 @@ export default function LogoGrid(props: LayoutComponentProps) {
         <div className="text-center mb-12">
           <EditableAdaptiveHeadline
             mode={mode}
-            value={blockContent.headline}
+            value={blockContent.headline || ''}
             onEdit={(value) => handleContentUpdate('headline', value)}
             level="h2"
-            backgroundType={props.backgroundType || 'neutral'}
+            backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
             colorTokens={colorTokens}
             sectionId={sectionId}
             elementKey="headline"
             sectionBackground={sectionBackground}
-            textStyle={getTextStyle('h1')}
-            textAlign="center"
+            textStyle={{ ...getTextStyle('h1'), textAlign: 'center' }}
             className="mb-4"
           />
 
@@ -208,13 +206,12 @@ export default function LogoGrid(props: LayoutComponentProps) {
               mode={mode}
               value={blockContent.subheadline || ''}
               onEdit={(value) => handleContentUpdate('subheadline', value)}
-              backgroundType={props.backgroundType || 'neutral'}
+              backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
               colorTokens={colorTokens}
               sectionId={sectionId}
               elementKey="subheadline"
               sectionBackground={sectionBackground}
-              textStyle={getTextStyle('body-lg')}
-              textAlign="center"
+              textStyle={{ ...getTextStyle('body-lg'), textAlign: 'center' }}
               className="max-w-2xl mx-auto"
               placeholder="Add optional subheadline..."
             />

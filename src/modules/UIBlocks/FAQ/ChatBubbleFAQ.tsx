@@ -74,7 +74,7 @@ export default function ChatBubbleFAQ(props: LayoutComponentProps) {
     <LayoutSection
       sectionId={sectionId}
       sectionType="ChatBubbleFAQ"
-      backgroundType={props.backgroundType || 'primary'}
+      backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
       sectionBackground={sectionBackground}
       mode={mode}
       className={props.className}
@@ -84,12 +84,11 @@ export default function ChatBubbleFAQ(props: LayoutComponentProps) {
         <div className="text-center mb-12">
           <EditableAdaptiveHeadline
             mode={mode}
-            value={blockContent.headline}
+            value={blockContent.headline || ''}
             onEdit={(value) => handleContentUpdate('headline', value)}
             level="h2"
-            backgroundType={props.backgroundType || 'primary'}
+            backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
             colorTokens={colorTokens}
-            textStyle={getTextStyle('h2')}
             className="mb-4"
             sectionId={sectionId}
             elementKey="headline"
@@ -101,10 +100,9 @@ export default function ChatBubbleFAQ(props: LayoutComponentProps) {
               mode={mode}
               value={blockContent.subheadline || ''}
               onEdit={(value) => handleContentUpdate('subheadline', value)}
-              backgroundType={props.backgroundType || 'primary'}
+              backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
               colorTokens={colorTokens}
               variant="body"
-              textStyle={getTextStyle('body-lg')}
               className="text-lg max-w-3xl mx-auto"
               placeholder="Add a friendly introduction to your chat..."
               sectionId={sectionId}
@@ -125,7 +123,7 @@ export default function ChatBubbleFAQ(props: LayoutComponentProps) {
               A
             </div>
             <div>
-              <div className={`font-semibold ${dynamicTextColors?.heading || colorTokens.text}`}>
+              <div className={`font-semibold ${dynamicTextColors?.heading || colorTokens.textPrimary}`}>
                 {blockContent.support_name || 'Alex from Support'}
               </div>
               <div className="flex items-center gap-2 text-sm text-green-500">
@@ -156,7 +154,7 @@ export default function ChatBubbleFAQ(props: LayoutComponentProps) {
                   <div className="flex justify-start">
                     <div className="max-w-[85%]">
                       <div className="bg-gray-100 dark:bg-gray-700 rounded-2xl rounded-bl-md px-4 py-3">
-                        <p className={`text-sm ${dynamicTextColors?.body || colorTokens.text}`}>
+                        <p className={`text-sm ${dynamicTextColors?.body || colorTokens.textPrimary}`}>
                           {answers[index]}
                         </p>
                       </div>

@@ -92,7 +92,7 @@ const FeatureCard = React.memo(({
   mode: 'edit' | 'preview';
   colorTokens: any;
   dynamicTextColors: any;
-  getTextStyle: (variant: string) => React.CSSProperties;
+  getTextStyle: (variant: 'display' | 'hero' | 'h1' | 'h2' | 'h3' | 'body-lg' | 'body' | 'body-sm' | 'caption') => React.CSSProperties;
   onTitleEdit: (index: number, value: string) => void;
   onDescriptionEdit: (index: number, value: string) => void;
   sectionId: string;
@@ -128,9 +128,9 @@ const FeatureCard = React.memo(({
         mode={mode}
         value={item.title}
         onEdit={(value) => onTitleEdit(item.index, value)}
-        backgroundType={backgroundType}
+        backgroundType={(backgroundType === 'custom' ? 'secondary' : (backgroundType || 'secondary')) as 'neutral' | 'primary' | 'secondary' | 'divider'}
         colorTokens={colorTokens}
-        variant="heading"
+        variant="body"
         textStyle={{
           ...getTextStyle('h3'),
           fontWeight: 600
@@ -147,10 +147,9 @@ const FeatureCard = React.memo(({
         mode={mode}
         value={item.description}
         onEdit={(value) => onDescriptionEdit(item.index, value)}
-        backgroundType={backgroundType}
+        backgroundType={(backgroundType === 'custom' ? 'secondary' : (backgroundType || 'secondary')) as 'neutral' | 'primary' | 'secondary' | 'divider'}
         colorTokens={colorTokens}
         variant="body"
-        textStyle={getTextStyle('body')}
         className="leading-relaxed opacity-90"
         placeholder="Describe this feature..."
         sectionId={sectionId}
@@ -228,7 +227,7 @@ export default function IconGrid(props: LayoutComponentProps) {
     <LayoutSection
       sectionId={sectionId}
       sectionType="IconGrid"
-      backgroundType={props.backgroundType || 'neutral'}
+      backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
       sectionBackground={sectionBackground}
       mode={mode}
       className={props.className}
@@ -240,10 +239,10 @@ export default function IconGrid(props: LayoutComponentProps) {
           <div className="text-center">
             <EditableAdaptiveHeadline
               mode={mode}
-              value={blockContent.headline}
+              value={blockContent.headline || ''}
               onEdit={(value) => handleContentUpdate('headline', value)}
               level="h2"
-              backgroundType={props.backgroundType || 'neutral'}
+              backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
               colorTokens={colorTokens}
               textStyle={{
                 ...getTextStyle('h2'),
@@ -263,7 +262,7 @@ export default function IconGrid(props: LayoutComponentProps) {
                 mode={mode}
                 value={blockContent.subheadline || ''}
                 onEdit={(value) => handleContentUpdate('subheadline', value)}
-                backgroundType={props.backgroundType || 'neutral'}
+                backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
                 colorTokens={colorTokens}
                 variant="body"
                 textStyle={{
@@ -275,9 +274,6 @@ export default function IconGrid(props: LayoutComponentProps) {
                 sectionId={sectionId}
                 elementKey="subheadline"
                 sectionBackground={sectionBackground}
-                formatState={{
-                  textAlign: 'center'
-                }}
               />
             </div>
           )}
@@ -296,7 +292,7 @@ export default function IconGrid(props: LayoutComponentProps) {
               onTitleEdit={handleTitleEdit}
               onDescriptionEdit={handleDescriptionEdit}
               sectionId={sectionId}
-              backgroundType={props.backgroundType || 'neutral'}
+              backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
               sectionBackground={sectionBackground}
             />
           ))}

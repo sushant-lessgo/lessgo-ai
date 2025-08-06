@@ -197,7 +197,7 @@ export default function InteractiveTestimonialMap(props: LayoutComponentProps) {
     <LayoutSection
       sectionId={sectionId}
       sectionType="InteractiveTestimonialMap"
-      backgroundType={props.backgroundType || 'neutral'}
+      backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
       sectionBackground={sectionBackground}
       mode={mode}
       className={props.className}
@@ -207,12 +207,11 @@ export default function InteractiveTestimonialMap(props: LayoutComponentProps) {
         <div className="text-center mb-16">
           <EditableAdaptiveHeadline
             mode={mode}
-            value={blockContent.headline}
+            value={blockContent.headline || ''}
             onEdit={(value) => handleContentUpdate('headline', value)}
             level="h2"
-            backgroundType={props.backgroundType || 'neutral'}
+            backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
             colorTokens={colorTokens}
-            textStyle={getTextStyle('h2')}
             className="mb-4"
             sectionId={sectionId}
             elementKey="headline"
@@ -224,10 +223,9 @@ export default function InteractiveTestimonialMap(props: LayoutComponentProps) {
               mode={mode}
               value={blockContent.subheadline || ''}
               onEdit={(value) => handleContentUpdate('subheadline', value)}
-              backgroundType={props.backgroundType || 'neutral'}
+              backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
               colorTokens={colorTokens}
               variant="body"
-              textStyle={getTextStyle('body-lg')}
               className="text-lg mb-6 max-w-3xl mx-auto"
               placeholder="Add optional subheadline to introduce global testimonials..."
               sectionId={sectionId}
@@ -245,12 +243,11 @@ export default function InteractiveTestimonialMap(props: LayoutComponentProps) {
               <div className="space-y-4">
                 <EditableAdaptiveText
                   mode={mode}
-                  value={blockContent.testimonial_quotes}
+                  value={blockContent.testimonial_quotes || ''}
                   onEdit={(value) => handleContentUpdate('testimonial_quotes', value)}
-                  backgroundType={props.backgroundType || 'neutral'}
+                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
                   colorTokens={colorTokens}
                   variant="body"
-                  textStyle={getTextStyle('body')}
                   className="mb-2"
                   placeholder="Testimonial quotes (pipe separated)"
                   sectionId={sectionId}
@@ -260,12 +257,11 @@ export default function InteractiveTestimonialMap(props: LayoutComponentProps) {
                 
                 <EditableAdaptiveText
                   mode={mode}
-                  value={blockContent.customer_names}
+                  value={blockContent.customer_names || ''}
                   onEdit={(value) => handleContentUpdate('customer_names', value)}
-                  backgroundType={props.backgroundType || 'neutral'}
+                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
                   colorTokens={colorTokens}
                   variant="body"
-                  textStyle={getTextStyle('body')}
                   className="mb-2"
                   placeholder="Customer names (pipe separated)"
                   sectionId={sectionId}
@@ -275,12 +271,11 @@ export default function InteractiveTestimonialMap(props: LayoutComponentProps) {
                 
                 <EditableAdaptiveText
                   mode={mode}
-                  value={blockContent.customer_locations}
+                  value={blockContent.customer_locations || ''}
                   onEdit={(value) => handleContentUpdate('customer_locations', value)}
-                  backgroundType={props.backgroundType || 'neutral'}
+                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
                   colorTokens={colorTokens}
                   variant="body"
-                  textStyle={getTextStyle('body')}
                   className="mb-2"
                   placeholder="Customer locations (pipe separated)"
                   sectionId={sectionId}
@@ -290,12 +285,11 @@ export default function InteractiveTestimonialMap(props: LayoutComponentProps) {
                 
                 <EditableAdaptiveText
                   mode={mode}
-                  value={blockContent.customer_countries}
+                  value={blockContent.customer_countries || ''}
                   onEdit={(value) => handleContentUpdate('customer_countries', value)}
-                  backgroundType={props.backgroundType || 'neutral'}
+                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
                   colorTokens={colorTokens}
                   variant="body"
-                  textStyle={getTextStyle('body')}
                   className="mb-2"
                   placeholder="Customer countries (pipe separated)"
                   sectionId={sectionId}
@@ -389,7 +383,7 @@ export default function InteractiveTestimonialMap(props: LayoutComponentProps) {
                       </div>
                       
                       <div className="text-right">
-                        <StarRating rating={activeTestimonialData.rating} size="sm" />
+                        <StarRating rating={activeTestimonialData.rating} size="small" />
                         <div className="text-xs text-gray-500 mt-1">{activeTestimonialData.category}</div>
                       </div>
                     </div>
@@ -500,10 +494,9 @@ export default function InteractiveTestimonialMap(props: LayoutComponentProps) {
                 mode={mode}
                 value={blockContent.supporting_text || ''}
                 onEdit={(value) => handleContentUpdate('supporting_text', value)}
-                backgroundType={props.backgroundType || 'neutral'}
+                backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
                 colorTokens={colorTokens}
                 variant="body"
-                textStyle={getTextStyle('body-lg')}
                 className="max-w-3xl mx-auto mb-8"
                 placeholder="Add optional supporting text to reinforce global community..."
                 sectionId={sectionId}
@@ -518,7 +511,6 @@ export default function InteractiveTestimonialMap(props: LayoutComponentProps) {
                   <CTAButton
                     text={blockContent.cta_text}
                     colorTokens={colorTokens}
-                    textStyle={getTextStyle('body-lg')}
                     className="shadow-xl hover:shadow-2xl transform hover:-translate-y-0.5 transition-all duration-200"
                     variant="primary"
                     sectionId={sectionId}

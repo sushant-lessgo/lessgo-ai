@@ -30,8 +30,7 @@ export function useElementCRUD() {
     trackChange, 
     announceLiveRegion,
     triggerAutoSave,
-    history,
-    autoSave 
+    history
   } = useEditStore();
 
   // Create element instance
@@ -117,7 +116,7 @@ export function useElementCRUD() {
           ...existingElement,
           metadata: {
             ...existingElement.metadata,
-            position: (existingElement.metadata.position || 0) + 1,
+            position: (existingElement.metadata?.position || 0) + 1,
             lastModified: Date.now(),
           }
         };
@@ -125,18 +124,18 @@ export function useElementCRUD() {
     });
     
     // Add the new element
-    updatedElements[element.elementKey] = newElement;
+    updatedElements[element.elementKey] = newElement as any;
     
     setSection(sectionId, { elements: updatedElements });
     
     // Track change and trigger auto-save
     trackChange({
-      type: 'element-add',
+      type: 'content',
       sectionId,
       elementKey: element.elementKey,
-      elementType,
       oldValue: null,
       newValue: element,
+      source: 'user',
     });
 
     triggerAutoSave();
@@ -197,7 +196,7 @@ export function useElementCRUD() {
             ...el,
             metadata: {
               ...el.metadata,
-              position: (el.metadata.position || 0) - 1,
+              position: (el.metadata?.position || 0) - 1,
               lastModified: Date.now(),
             }
           };
@@ -210,11 +209,12 @@ export function useElementCRUD() {
 
     // Track change
     trackChange({
-      type: 'element-remove',
+      type: 'content',
       sectionId,
       elementKey,
       oldValue: element,
       newValue: null,
+      source: 'user',
     });
 
     announceLiveRegion(`Deleted ${element.type} element`);
@@ -266,7 +266,7 @@ export function useElementCRUD() {
     
     if (!options?.preserveProps) {
       const config = UNIVERSAL_ELEMENTS[originalElement.type as UniversalElementType];
-      duplicate.props = { ...config.defaultProps };
+      duplicate.uiProps = { ...config.defaultProps };
     }
 
     // Create updated elements object with position adjustments
@@ -280,7 +280,7 @@ export function useElementCRUD() {
           ...existingElement,
           metadata: {
             ...existingElement.metadata,
-            position: (existingElement.metadata.position || 0) + 1,
+            position: (existingElement.metadata?.position || 0) + 1,
             lastModified: Date.now(),
           }
         };
@@ -294,12 +294,12 @@ export function useElementCRUD() {
 
     // Track change
     trackChange({
-      type: 'element-duplicate',
+      type: 'content',
       sectionId,
       elementKey: newElementKey,
-      sourceElementKey: elementKey,
       oldValue: null,
       newValue: duplicate,
+      source: 'user',
     });
 
     announceLiveRegion(`Duplicated ${originalElement.type} element`);
@@ -320,16 +320,19 @@ export function useElementCRUD() {
     // Update positions
     newOrder.forEach((elementKey, index) => {
       if (section.elements[elementKey]) {
-        section.elements[elementKey].metadata.position = index;
+        if (section.elements[elementKey].metadata) {
+          section.elements[elementKey].metadata.position = index;
+        }
       }
     });
 
     // Track change
     trackChange({
-      type: 'element-reorder',
+      type: 'layout',
       sectionId,
       oldValue: oldOrder,
       newValue: newOrder,
+      source: 'user',
     });
 
     announceLiveRegion(`Reordered ${newOrder.length} elements`);
@@ -358,11 +361,12 @@ export function useElementCRUD() {
 
       // Track change
       trackChange({
-        type: 'element-move',
+        type: 'layout',
         sectionId,
         elementKey,
         oldValue: { position: currentPosition },
         newValue: { position: currentPosition - 1 },
+        source: 'user',
       });
 
       announceLiveRegion(`Moved ${element.type} element up`);
@@ -393,11 +397,12 @@ export function useElementCRUD() {
 
       // Track change
       trackChange({
-        type: 'element-move',
+        type: 'layout',
         sectionId,
         elementKey,
         oldValue: { position: currentPosition },
         newValue: { position: currentPosition + 1 },
+        source: 'user',
       });
 
       announceLiveRegion(`Moved ${element.type} element down`);
@@ -473,11 +478,12 @@ export function useElementCRUD() {
 
     // Track change
     trackChange({
-      type: 'element-move',
+      type: 'layout',
       sectionId,
       elementKey,
       oldValue: { position: currentPosition },
       newValue: { position: targetPosition },
+      source: 'user',
     });
 
     announceLiveRegion(`Moved ${element.type} element to position ${targetPosition + 1}`);
@@ -505,18 +511,21 @@ export function useElementCRUD() {
     delete fromSection.elements[elementKey];
 
     // Update element's section reference
-    element.sectionId = toSectionId;
-    element.metadata.position = newPosition;
-    element.metadata.lastModified = Date.now();
+    (element as any).sectionId = toSectionId;
+    if (element.metadata) {
+      element.metadata.position = newPosition;
+      element.metadata.lastModified = Date.now();
+    }
 
     // Add to target section
     toSection.elements[elementKey] = element;
 
     // Track change
     trackChange({
-      type: 'element-move-section',
+      type: 'layout',
       oldValue: { sectionId: fromSectionId, elementKey },
       newValue: { sectionId: toSectionId, elementKey, position: newPosition },
+      source: 'user',
     });
 
     announceLiveRegion(`Moved ${element.type} element to different section`);
@@ -569,9 +578,10 @@ export function useElementCRUD() {
 
     // Track change
     trackChange({
-      type: 'element-copy-section',
+      type: 'content',
       oldValue: { sectionId: fromSectionId, elementKey },
       newValue: { sectionId: toSectionId, elementKey: newElementKey },
+      source: 'user',
     });
 
     announceLiveRegion(`Copied ${copy.type} element to different section`);
@@ -592,10 +602,12 @@ export function useElementCRUD() {
     const newConfig = UNIVERSAL_ELEMENTS[newType];
 
     // Update element
-    element.type = newType;
-    element.props = { ...newConfig.defaultProps };
-    element.metadata.lastModified = Date.now();
-    element.metadata.version += 1;
+    element.type = newType as any;
+    element.uiProps = { ...newConfig.defaultProps };
+    if (element.metadata) {
+      element.metadata.lastModified = Date.now();
+      element.metadata.version += 1;
+    }
 
     // Try to preserve content if compatible
     if (typeof element.content === 'string' && typeof newConfig.defaultContent === 'string') {
@@ -609,11 +621,12 @@ export function useElementCRUD() {
 
     // Track change
     trackChange({
-      type: 'element-convert',
+      type: 'content',
       sectionId,
       elementKey,
       oldValue: { type: oldType },
       newValue: { type: newType },
+      source: 'user',
     });
 
     announceLiveRegion(`Converted ${oldType} to ${newType}`);
@@ -635,7 +648,9 @@ export function useElementCRUD() {
       if (element) {
         const oldValue = element[update.field as keyof typeof element];
         (element as any)[update.field] = update.value;
-        element.metadata.lastModified = Date.now();
+        if (element.metadata) {
+          element.metadata.lastModified = Date.now();
+        }
         
         changes.push({
           elementKey: update.elementKey,
@@ -649,10 +664,11 @@ export function useElementCRUD() {
     if (changes.length > 0) {
       // Track change
       trackChange({
-        type: 'element-batch-update',
+        type: 'content',
         sectionId,
         oldValue: null,
         newValue: changes,
+        source: 'user',
       });
 
       announceLiveRegion(`Updated ${changes.length} elements`);
@@ -683,10 +699,11 @@ export function useElementCRUD() {
     if (deletedElements.length > 0) {
       // Track change
       trackChange({
-        type: 'element-batch-delete',
+        type: 'content',
         sectionId,
         oldValue: deletedElements,
         newValue: null,
+        source: 'user',
       });
 
       announceLiveRegion(`Deleted ${deletedElements.length} elements`);
@@ -760,7 +777,7 @@ export function useElementCRUD() {
 
     return Object.values(section.elements).filter((element: any) => 
       types.includes(element.type)
-    ) as UniversalElementInstance[];
+    ) as unknown as UniversalElementInstance[];
   }, [content]);
 
   // Get element
@@ -769,7 +786,7 @@ export function useElementCRUD() {
     elementKey: string
   ): UniversalElementInstance | null => {
     const section = content[sectionId];
-    return section?.elements[elementKey] || null;
+    return (section?.elements[elementKey] as unknown as UniversalElementInstance) || null;
   }, [content]);
 
   // Get all elements in section
@@ -782,7 +799,7 @@ export function useElementCRUD() {
         const aPos = a.metadata?.position || 0;
         const bPos = b.metadata?.position || 0;
         return aPos - bPos;
-      }) as UniversalElementInstance[];
+      }) as unknown as UniversalElementInstance[];
   }, [content]);
 
   // Get elements by type
@@ -799,7 +816,7 @@ export function useElementCRUD() {
         const aPos = a.metadata?.position || 0;
         const bPos = b.metadata?.position || 0;
         return aPos - bPos;
-      }) as UniversalElementInstance[];
+      }) as unknown as UniversalElementInstance[];
   }, [content]);
 
   // Validate element

@@ -63,7 +63,7 @@ export default function InlineQnAList(props: LayoutComponentProps) {
     <LayoutSection
       sectionId={sectionId}
       sectionType="InlineQnAList"
-      backgroundType={props.backgroundType || 'primary'}
+      backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
       sectionBackground={sectionBackground}
       mode={mode}
       className={props.className}
@@ -73,12 +73,11 @@ export default function InlineQnAList(props: LayoutComponentProps) {
         <div className="text-center mb-10">
           <EditableAdaptiveHeadline
             mode={mode}
-            value={blockContent.headline}
+            value={blockContent.headline || ''}
             onEdit={(value) => handleContentUpdate('headline', value)}
             level="h2"
-            backgroundType={props.backgroundType || 'primary'}
+            backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
             colorTokens={colorTokens}
-            textStyle={getTextStyle('h2')}
             className="mb-3"
             sectionId={sectionId}
             elementKey="headline"
@@ -90,10 +89,9 @@ export default function InlineQnAList(props: LayoutComponentProps) {
               mode={mode}
               value={blockContent.subheadline || ''}
               onEdit={(value) => handleContentUpdate('subheadline', value)}
-              backgroundType={props.backgroundType || 'primary'}
+              backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
               colorTokens={colorTokens}
               variant="body"
-              textStyle={getTextStyle('body-lg')}
               className="text-lg"
               placeholder="Add a brief description..."
               sectionId={sectionId}
@@ -107,7 +105,7 @@ export default function InlineQnAList(props: LayoutComponentProps) {
         <div className="space-y-6">
           {questions.map((question, index) => (
             <div key={index} className="border-b border-gray-200 dark:border-gray-700 pb-6 last:border-0">
-              <h3 className={`text-lg font-medium mb-2 ${dynamicTextColors?.heading || colorTokens.text}`}>
+              <h3 className={`text-lg font-medium mb-2 ${dynamicTextColors?.heading || colorTokens.textPrimary}`}>
                 {question}
               </h3>
               {answers[index] && (

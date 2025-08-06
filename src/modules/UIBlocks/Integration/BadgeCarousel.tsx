@@ -63,8 +63,8 @@ const IntegrationBadge = React.memo(({ name, colorTokens, isHighlighted = false 
   return (
     <div className={`inline-flex items-center px-4 py-2 rounded-full text-sm font-medium border transition-all duration-300 hover:scale-105 ${
       isHighlighted 
-        ? `${colorTokens.accent} ${colorTokens.accentText} border-current shadow-md` 
-        : `${colorTokens.bgSecondary} ${colorTokens.textBody} ${colorTokens.borderPrimary} hover:${colorTokens.bgTertiary}`
+        ? `${colorTokens.ctaBg} ${colorTokens.ctaBgText} border-current shadow-md` 
+        : `${colorTokens.bgSecondary} ${colorTokens.textSecondary} border-gray-200 hover:${colorTokens.bgSecondary}`
     }`}>
       {emoji && <span className="mr-2">{emoji}</span>}
       <span>{displayName}</span>
@@ -197,7 +197,7 @@ export default function BadgeCarousel(props: LayoutComponentProps) {
     <LayoutSection
       sectionId={sectionId}
       sectionType="BadgeCarousel"
-      backgroundType={props.backgroundType || 'primary'}
+      backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
       sectionBackground={sectionBackground}
       mode={mode}
       className={props.className}
@@ -208,12 +208,11 @@ export default function BadgeCarousel(props: LayoutComponentProps) {
         <div className="text-center mb-12">
           <EditableAdaptiveHeadline
             mode={mode}
-            value={blockContent.headline}
+            value={blockContent.headline || ''}
             onEdit={(value) => handleContentUpdate('headline', value)}
             level="h2"
-            backgroundType={props.backgroundType || 'primary'}
+            backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
             colorTokens={colorTokens}
-            textStyle={getTextStyle('h2')}
             className="mb-4"
             sectionId={sectionId}
             elementKey="headline"
@@ -225,10 +224,9 @@ export default function BadgeCarousel(props: LayoutComponentProps) {
               mode={mode}
               value={blockContent.subheadline || ''}
               onEdit={(value) => handleContentUpdate('subheadline', value)}
-              backgroundType={props.backgroundType || 'primary'}
+              backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
               colorTokens={colorTokens}
               variant="body"
-              textStyle={getTextStyle('body-lg')}
               className="text-lg leading-relaxed max-w-3xl mx-auto"
               placeholder="Add a description of your integration capabilities..."
               sectionId={sectionId}
@@ -255,19 +253,19 @@ export default function BadgeCarousel(props: LayoutComponentProps) {
         {/* Stats Section */}
         <div className="mt-16 grid grid-cols-2 lg:grid-cols-4 gap-8 text-center">
           <div>
-            <div className={`text-3xl font-bold ${colorTokens.textHeading} mb-2`}>500+</div>
+            <div className={`text-3xl font-bold ${colorTokens.textPrimary} mb-2`}>500+</div>
             <div className={`text-sm ${dynamicTextColors?.muted || colorTokens.textMuted}`}>Integrations</div>
           </div>
           <div>
-            <div className={`text-3xl font-bold ${colorTokens.textHeading} mb-2`}>99.9%</div>
+            <div className={`text-3xl font-bold ${colorTokens.textPrimary} mb-2`}>99.9%</div>
             <div className={`text-sm ${dynamicTextColors?.muted || colorTokens.textMuted}`}>Uptime</div>
           </div>
           <div>
-            <div className={`text-3xl font-bold ${colorTokens.textHeading} mb-2`}>5min</div>
+            <div className={`text-3xl font-bold ${colorTokens.textPrimary} mb-2`}>5min</div>
             <div className={`text-sm ${dynamicTextColors?.muted || colorTokens.textMuted}`}>Setup Time</div>
           </div>
           <div>
-            <div className={`text-3xl font-bold ${colorTokens.textHeading} mb-2`}>24/7</div>
+            <div className={`text-3xl font-bold ${colorTokens.textPrimary} mb-2`}>24/7</div>
             <div className={`text-sm ${dynamicTextColors?.muted || colorTokens.textMuted}`}>Support</div>
           </div>
         </div>
@@ -277,7 +275,7 @@ export default function BadgeCarousel(props: LayoutComponentProps) {
           <p className={`${dynamicTextColors?.muted || colorTokens.textMuted} text-sm mb-4`}>
             Don't see your tool? We add new integrations every week.
           </p>
-          <button className={`${colorTokens.accent} ${colorTokens.accentText} px-6 py-3 rounded-lg font-medium hover:opacity-90 transition-opacity`}>
+          <button className={`${colorTokens.ctaBg} text-white px-6 py-3 rounded-lg font-medium hover:opacity-90 transition-opacity`}>
             Request Integration
           </button>
         </div>

@@ -18,7 +18,7 @@ interface CarouselContent {
   feature_descriptions: string;
   feature_visuals?: string;
   feature_tags?: string;
-  auto_play?: boolean;
+  auto_play?: string;
   subheadline?: string;
   supporting_text?: string;
   cta_text?: string;
@@ -47,8 +47,8 @@ const CONTENT_SCHEMA = {
     default: 'No-Code|Professional|1000+ Templates|Real-Time|All Formats|Auto-Save' 
   },
   auto_play: { 
-    type: 'boolean' as const, 
-    default: false 
+    type: 'string' as const, 
+    default: 'false' 
   },
   subheadline: { 
     type: 'string' as const, 
@@ -112,7 +112,7 @@ export default function Carousel(props: LayoutComponentProps) {
 
   // Auto-play functionality
   useEffect(() => {
-    if (blockContent.auto_play && features.length > 1) {
+    if (blockContent.auto_play === 'true' && features.length > 1) {
       const interval = setInterval(() => {
         setActiveSlide((prev) => (prev + 1) % features.length);
       }, 4000);
@@ -164,7 +164,7 @@ export default function Carousel(props: LayoutComponentProps) {
     <LayoutSection
       sectionId={sectionId}
       sectionType="Carousel"
-      backgroundType={props.backgroundType || 'neutral'}
+      backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
       sectionBackground={sectionBackground}
       mode={mode}
       className={props.className}
@@ -174,12 +174,11 @@ export default function Carousel(props: LayoutComponentProps) {
         <div className="text-center mb-12">
           <EditableAdaptiveHeadline
             mode={mode}
-            value={blockContent.headline}
+            value={blockContent.headline || ''}
             onEdit={(value) => handleContentUpdate('headline', value)}
             level="h2"
-            backgroundType={props.backgroundType || 'neutral'}
+            backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
             colorTokens={colorTokens}
-            textStyle={getTextStyle('h2')}
             className="mb-4"
             sectionId={sectionId}
             elementKey="headline"
@@ -191,10 +190,9 @@ export default function Carousel(props: LayoutComponentProps) {
               mode={mode}
               value={blockContent.subheadline || ''}
               onEdit={(value) => handleContentUpdate('subheadline', value)}
-              backgroundType={props.backgroundType || 'neutral'}
+              backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
               colorTokens={colorTokens}
               variant="body"
-              textStyle={getTextStyle('body-lg')}
               className="text-lg mb-6 max-w-3xl mx-auto"
               placeholder="Add optional subheadline to introduce your feature showcase..."
               sectionId={sectionId}
@@ -212,12 +210,11 @@ export default function Carousel(props: LayoutComponentProps) {
               <div className="space-y-4">
                 <EditableAdaptiveText
                   mode={mode}
-                  value={blockContent.feature_titles}
+                  value={blockContent.feature_titles || ''}
                   onEdit={(value) => handleContentUpdate('feature_titles', value)}
-                  backgroundType={props.backgroundType || 'neutral'}
+                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
                   colorTokens={colorTokens}
                   variant="body"
-                  textStyle={getTextStyle('body')}
                   className="mb-2"
                   placeholder="Feature titles (pipe separated)"
                   sectionId={sectionId}
@@ -227,12 +224,11 @@ export default function Carousel(props: LayoutComponentProps) {
                 
                 <EditableAdaptiveText
                   mode={mode}
-                  value={blockContent.feature_descriptions}
+                  value={blockContent.feature_descriptions || ''}
                   onEdit={(value) => handleContentUpdate('feature_descriptions', value)}
-                  backgroundType={props.backgroundType || 'neutral'}
+                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
                   colorTokens={colorTokens}
                   variant="body"
-                  textStyle={getTextStyle('body')}
                   className="mb-2"
                   placeholder="Feature descriptions (pipe separated)"
                   sectionId={sectionId}
@@ -244,10 +240,9 @@ export default function Carousel(props: LayoutComponentProps) {
                   mode={mode}
                   value={blockContent.feature_tags || ''}
                   onEdit={(value) => handleContentUpdate('feature_tags', value)}
-                  backgroundType={props.backgroundType || 'neutral'}
+                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
                   colorTokens={colorTokens}
                   variant="body"
-                  textStyle={getTextStyle('body')}
                   placeholder="Feature tags/badges (pipe separated) - optional"
                   sectionId={sectionId}
                   elementKey="feature_tags"
@@ -303,15 +298,7 @@ export default function Carousel(props: LayoutComponentProps) {
                       className="w-full h-auto rounded-xl shadow-lg cursor-pointer hover:shadow-xl transition-shadow duration-300"
                       data-image-id={`${sectionId}-carousel${activeSlide}-visual`}
                       onMouseUp={(e) => {
-                        if (mode === 'edit') {
-                          e.stopPropagation();
-                          e.preventDefault();
-                          const rect = e.currentTarget.getBoundingClientRect();
-                          showImageToolbar(`${sectionId}-carousel${activeSlide}-visual`, {
-                            x: rect.left + rect.width / 2,
-                            y: rect.top - 10
-                          });
-                        }
+                        // Image toolbar is only available in edit mode
                       }}
                     />
                   ) : (
@@ -392,10 +379,9 @@ export default function Carousel(props: LayoutComponentProps) {
                 mode={mode}
                 value={blockContent.supporting_text || ''}
                 onEdit={(value) => handleContentUpdate('supporting_text', value)}
-                backgroundType={props.backgroundType || 'neutral'}
+                backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
                 colorTokens={colorTokens}
                 variant="body"
-                textStyle={getTextStyle('body-lg')}
                 className="max-w-3xl mx-auto mb-8"
                 placeholder="Add optional supporting text to reinforce your creative features..."
                 sectionId={sectionId}
@@ -410,7 +396,6 @@ export default function Carousel(props: LayoutComponentProps) {
                   <CTAButton
                     text={blockContent.cta_text}
                     colorTokens={colorTokens}
-                    textStyle={getTextStyle('body-lg')}
                     className="shadow-xl hover:shadow-2xl transform hover:-translate-y-0.5 transition-all duration-200"
                     variant="primary"
                     sectionId={sectionId}

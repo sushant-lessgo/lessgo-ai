@@ -98,12 +98,11 @@ export default function YouVsThemHighlight(props: LayoutComponentProps) {
         <div className="text-center mb-12">
           <EditableAdaptiveHeadline
             mode={mode}
-            value={blockContent.headline}
+            value={blockContent.headline || ''}
             onEdit={(value) => handleContentUpdate('headline', value)}
             level="h1"
-            backgroundType={backgroundType}
+            backgroundType={backgroundType === 'custom' ? 'secondary' : backgroundType}
             colorTokens={colorTokens}
-            textStyle={getTextStyle('h1')}
             className="mb-4"
             sectionId={sectionId}
             elementKey="headline"
@@ -115,9 +114,8 @@ export default function YouVsThemHighlight(props: LayoutComponentProps) {
               mode={mode}
               value={blockContent.subheadline || 'Add subheadline...'}
               onEdit={(value) => handleContentUpdate('subheadline', value)}
-              backgroundType={backgroundType}
+              backgroundType={backgroundType === 'custom' ? 'secondary' : backgroundType}
               colorTokens={colorTokens}
-              textStyle={getTextStyle('body-lg')}
               className={`max-w-2xl mx-auto ${!blockContent.subheadline && mode === 'edit' ? 'opacity-50' : ''}`}
               sectionId={sectionId}
               elementKey="subheadline"
@@ -129,7 +127,7 @@ export default function YouVsThemHighlight(props: LayoutComponentProps) {
         {/* Comparison Grid */}
         <div className="grid md:grid-cols-2 gap-8 mb-12">
           {/* Them Column - Pain Points */}
-          <div className={`rounded-lg p-8 ${colorTokens.bgNeutral || 'bg-gray-50'} border ${colorTokens.borderColor || 'border-gray-200'}`}>
+          <div className={`rounded-lg p-8 ${colorTokens.bgNeutral || 'bg-gray-50'} border border-gray-200`}>
             <div className="flex items-center mb-6">
               <div className="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center mr-4">
                 <svg className="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -138,12 +136,11 @@ export default function YouVsThemHighlight(props: LayoutComponentProps) {
               </div>
               <EditableAdaptiveHeadline
                 mode={mode}
-                value={blockContent.them_headline}
+                value={blockContent.them_headline || ''}
                 onEdit={(value) => handleContentUpdate('them_headline', value)}
                 level="h3"
-                backgroundType={backgroundType}
+                backgroundType={backgroundType === 'custom' ? 'secondary' : backgroundType}
                 colorTokens={colorTokens}
-                textStyle={getTextStyle('h3')}
                 sectionId={sectionId}
                 elementKey="them_headline"
                 sectionBackground={sectionBackground}
@@ -160,10 +157,9 @@ export default function YouVsThemHighlight(props: LayoutComponentProps) {
                       value={point}
                       onChange={(e) => handleThemPointUpdate(index, e.target.value)}
                       className={`flex-1 bg-transparent outline-none focus:ring-2 focus:ring-blue-500 rounded px-2 ${colorTokens.textSecondary}`}
-                      style={getTextStyle('body')}
                     />
                   ) : (
-                    <span className={colorTokens.textSecondary} style={getTextStyle('body')}>
+                    <span className={colorTokens.textSecondary}>
                       {point}
                     </span>
                   )}
@@ -173,21 +169,20 @@ export default function YouVsThemHighlight(props: LayoutComponentProps) {
           </div>
 
           {/* You Column - Benefits */}
-          <div className={`rounded-lg p-8 ${colorTokens.bgAccent || 'bg-blue-500'} bg-opacity-10 border-2 border-${(colorTokens.textAccent || 'text-blue-600').replace('text-', '')}`}>
+          <div className={`rounded-lg p-8 ${'bg-primary'} bg-opacity-10 border-2 border-${'primary'}`}>
             <div className="flex items-center mb-6">
-              <div className={`w-12 h-12 rounded-full ${colorTokens.bgAccent || 'bg-blue-500'} flex items-center justify-center mr-4`}>
+              <div className={`w-12 h-12 rounded-full ${'bg-primary'} flex items-center justify-center mr-4`}>
                 <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                 </svg>
               </div>
               <EditableAdaptiveHeadline
                 mode={mode}
-                value={blockContent.you_headline}
+                value={blockContent.you_headline || ''}
                 onEdit={(value) => handleContentUpdate('you_headline', value)}
                 level="h3"
-                backgroundType={backgroundType}
+                backgroundType={backgroundType === 'custom' ? 'secondary' : backgroundType}
                 colorTokens={colorTokens}
-                textStyle={getTextStyle('h3')}
                 sectionId={sectionId}
                 elementKey="you_headline"
                 sectionBackground={sectionBackground}
@@ -197,17 +192,16 @@ export default function YouVsThemHighlight(props: LayoutComponentProps) {
             <ul className="space-y-4">
               {youPoints.map((point, index) => (
                 <li key={index} className="flex items-start">
-                  <span className={`${colorTokens.textAccent || 'text-blue-600'} mr-3 mt-1 flex-shrink-0`}>✓</span>
+                  <span className={`text-primary mr-3 mt-1 flex-shrink-0`}>✓</span>
                   {mode === 'edit' ? (
                     <input
                       type="text"
                       value={point}
                       onChange={(e) => handleYouPointUpdate(index, e.target.value)}
                       className={`flex-1 bg-transparent outline-none focus:ring-2 focus:ring-blue-500 rounded px-2 ${colorTokens.textPrimary}`}
-                      style={getTextStyle('body')}
                     />
                   ) : (
-                    <span className={colorTokens.textPrimary} style={getTextStyle('body')}>
+                    <span className={colorTokens.textPrimary}>
                       {point}
                     </span>
                   )}
@@ -220,14 +214,13 @@ export default function YouVsThemHighlight(props: LayoutComponentProps) {
         {/* CTA Section */}
         {(blockContent.cta_text || mode === 'edit') && (
           <div className="text-center">
-            <button className={`${colorTokens.bgAccent || 'bg-blue-500'} text-white px-8 py-4 rounded-lg font-semibold hover:opacity-90 transition-opacity`}>
+            <button className={`${'bg-primary'} text-white px-8 py-4 rounded-lg font-semibold hover:opacity-90 transition-opacity`}>
               <EditableAdaptiveText
                 mode={mode}
                 value={blockContent.cta_text || 'Add CTA text...'}
                 onEdit={(value) => handleContentUpdate('cta_text', value)}
-                backgroundType={backgroundType}
+                backgroundType={backgroundType === 'custom' ? 'secondary' : backgroundType}
                 colorTokens={{ ...colorTokens, textPrimary: 'text-white' }}
-                textStyle={getTextStyle('body')}
                 className={!blockContent.cta_text && mode === 'edit' ? 'opacity-75' : ''}
                 sectionId={sectionId}
                 elementKey="cta_text"

@@ -147,14 +147,12 @@ const PainPointItem = ({
               suppressContentEditableWarning
               onBlur={(e) => onPointEdit(index, e.currentTarget.textContent || '')}
               className="outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-1 min-h-[24px] cursor-text hover:bg-gray-50 font-semibold text-gray-900 leading-relaxed"
-              style={getTextStyle('h3')}
             >
               {painPoint.point}
             </div>
           ) : (
             <h3 
               className="font-semibold text-gray-900 leading-relaxed"
-              style={getTextStyle('h3')}
             >
               {painPoint.point}
             </h3>
@@ -170,14 +168,12 @@ const PainPointItem = ({
                 suppressContentEditableWarning
                 onBlur={(e) => onDescriptionEdit(index, e.currentTarget.textContent || '')}
                 className={`outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-1 min-h-[20px] cursor-text hover:bg-gray-50 text-gray-600 leading-relaxed ${!painPoint.description ? 'opacity-50 italic' : ''}`}
-                style={getTextStyle('body-sm')}
               >
                 {painPoint.description || 'Add optional description to elaborate on this pain point...'}
               </div>
             ) : painPoint.description && (
               <p 
                 className="text-gray-600 leading-relaxed"
-                style={getTextStyle('body-sm')}
               >
                 {painPoint.description}
               </p>
@@ -230,7 +226,7 @@ export default function StackedPainBullets(props: StackedPainBulletsProps) {
     <LayoutSection
       sectionId={sectionId}
       sectionType="StackedPainBullets"
-      backgroundType={backgroundType}
+      backgroundType={backgroundType === 'custom' ? 'secondary' : backgroundType}
       sectionBackground={sectionBackground}
       mode={mode}
       className={props.className}
@@ -246,7 +242,6 @@ export default function StackedPainBullets(props: StackedPainBulletsProps) {
           >
             <h2 
               className={`mb-6 ${colorTokens.textPrimary}`}
-              style={getTextStyle('h1')}
             >
               {blockContent.headline}
             </h2>
@@ -262,7 +257,6 @@ export default function StackedPainBullets(props: StackedPainBulletsProps) {
             >
               <p 
                 className={`max-w-2xl mx-auto ${colorTokens.textSecondary} ${!blockContent.subheadline && mode === 'edit' ? 'opacity-50' : ''}`}
-                style={getTextStyle('body-lg')}
               >
                 {blockContent.subheadline || (mode === 'edit' ? 'Add optional subheadline to provide context...' : '')}
               </p>

@@ -173,7 +173,7 @@ export default function MultistepCTAStack(props: LayoutComponentProps) {
     <div 
       className={`relative bg-white rounded-2xl border-2 p-8 transition-all duration-300 cursor-pointer ${
         isActive 
-          ? `${colorTokens.ctaBorder} shadow-xl scale-105` 
+          ? `border-primary shadow-xl scale-105` 
           : 'border-gray-200 hover:border-gray-300 hover:shadow-lg'
       }`}
       onClick={() => setActiveStep(index)}
@@ -240,7 +240,6 @@ export default function MultistepCTAStack(props: LayoutComponentProps) {
         <CTAButton
           text={step.cta}
           colorTokens={colorTokens}
-          textStyle={getTextStyle('body')}
           className={`w-full transition-all duration-300 ${
             isActive ? 'shadow-lg hover:shadow-xl' : 'opacity-75'
           }`}
@@ -256,7 +255,7 @@ export default function MultistepCTAStack(props: LayoutComponentProps) {
     <LayoutSection
       sectionId={sectionId}
       sectionType="MultistepCTAStack"
-      backgroundType={props.backgroundType || 'neutral'}
+      backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
       sectionBackground={sectionBackground}
       mode={mode}
       className={props.className}
@@ -266,12 +265,11 @@ export default function MultistepCTAStack(props: LayoutComponentProps) {
         <div className="text-center mb-16">
           <EditableAdaptiveHeadline
             mode={mode}
-            value={blockContent.headline}
+            value={blockContent.headline || ''}
             onEdit={(value) => handleContentUpdate('headline', value)}
             level="h2"
             backgroundType={safeBackgroundType}
             colorTokens={colorTokens}
-            textStyle={getTextStyle('h2')}
             className="mb-4"
             sectionId={sectionId}
             elementKey="headline"
@@ -286,7 +284,6 @@ export default function MultistepCTAStack(props: LayoutComponentProps) {
               backgroundType={safeBackgroundType}
               colorTokens={colorTokens}
               variant="body"
-              textStyle={getTextStyle('body-lg')}
               className="text-lg mb-8 max-w-3xl mx-auto"
               placeholder="Add optional subheadline to introduce the signup process..."
               sectionId={sectionId}
@@ -304,12 +301,11 @@ export default function MultistepCTAStack(props: LayoutComponentProps) {
               <div className="space-y-4">
                 <EditableAdaptiveText
                   mode={mode}
-                  value={blockContent.step_titles}
+                  value={blockContent.step_titles || ''}
                   onEdit={(value) => handleContentUpdate('step_titles', value)}
                   backgroundType={safeBackgroundType}
                   colorTokens={colorTokens}
                   variant="body"
-                  textStyle={getTextStyle('body')}
                   className="mb-2"
                   placeholder="Step titles (pipe separated)"
                   sectionId={sectionId}
@@ -319,12 +315,11 @@ export default function MultistepCTAStack(props: LayoutComponentProps) {
                 
                 <EditableAdaptiveText
                   mode={mode}
-                  value={blockContent.step_descriptions}
+                  value={blockContent.step_descriptions || ''}
                   onEdit={(value) => handleContentUpdate('step_descriptions', value)}
                   backgroundType={safeBackgroundType}
                   colorTokens={colorTokens}
                   variant="body"
-                  textStyle={getTextStyle('body')}
                   className="mb-2"
                   placeholder="Step descriptions (pipe separated)"
                   sectionId={sectionId}
@@ -334,12 +329,11 @@ export default function MultistepCTAStack(props: LayoutComponentProps) {
                 
                 <EditableAdaptiveText
                   mode={mode}
-                  value={blockContent.step_details}
+                  value={blockContent.step_details || ''}
                   onEdit={(value) => handleContentUpdate('step_details', value)}
                   backgroundType={safeBackgroundType}
                   colorTokens={colorTokens}
                   variant="body"
-                  textStyle={getTextStyle('body')}
                   className="mb-2"
                   placeholder="Step details (pipe separated steps, comma separated details)"
                   sectionId={sectionId}
@@ -349,12 +343,11 @@ export default function MultistepCTAStack(props: LayoutComponentProps) {
                 
                 <EditableAdaptiveText
                   mode={mode}
-                  value={blockContent.step_ctas}
+                  value={blockContent.step_ctas || ''}
                   onEdit={(value) => handleContentUpdate('step_ctas', value)}
                   backgroundType={safeBackgroundType}
                   colorTokens={colorTokens}
                   variant="body"
-                  textStyle={getTextStyle('body')}
                   className="mb-2"
                   placeholder="Step CTAs (pipe separated)"
                   sectionId={sectionId}
@@ -428,7 +421,6 @@ export default function MultistepCTAStack(props: LayoutComponentProps) {
               <CTAButton
                 text={blockContent.final_cta}
                 colorTokens={{...colorTokens, ctaBg: 'bg-white', ctaText: 'text-blue-600'}}
-                textStyle={getTextStyle('body-lg')}
                 className="shadow-xl hover:shadow-2xl transform hover:-translate-y-1 transition-all duration-300"
                 variant="primary"
                 sectionId={sectionId}
@@ -506,7 +498,6 @@ export default function MultistepCTAStack(props: LayoutComponentProps) {
                 backgroundType={safeBackgroundType}
                 colorTokens={colorTokens}
                 variant="body"
-                textStyle={getTextStyle('body-lg')}
                 className="max-w-3xl mx-auto mb-8"
                 placeholder="Add optional supporting text to reinforce the signup process..."
                 sectionId={sectionId}

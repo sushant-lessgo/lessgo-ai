@@ -186,7 +186,7 @@ export function useAIActions() {
     showElementVariations: store.showElementVariations,
     hideElementVariations: store.hideElementVariations,
     applyVariation: store.applyVariation,
-    setGenerationMode: store.setGenerationMode,
+    setGenerationMode: (store as any).setGenerationMode,
   }), [
     store.regenerateSection,
     store.regenerateElement,
@@ -194,7 +194,7 @@ export function useAIActions() {
     store.showElementVariations,
     store.hideElementVariations,
     store.applyVariation,
-    store.setGenerationMode,
+    (store as any).setGenerationMode,
   ]);
 }
 
@@ -322,8 +322,8 @@ export function useStorePerformance() {
   
   return useMemo(() => ({
     getPerformanceStats: store.getPerformanceStats,
-    resetPerformanceStats: store.resetPerformanceStats,
-  }), [store.getPerformanceStats, store.resetPerformanceStats]);
+    resetPerformanceStats: (store as any).resetPerformanceStats,
+  }), [store.getPerformanceStats, (store as any).resetPerformanceStats]);
 }
 
 /**
@@ -353,7 +353,7 @@ export function useElementEditor(sectionId: string, elementKey: string) {
   }, [updateElementContent, sectionId, elementKey]);
   
   const selectThisElement = useCallback(() => {
-    selectElement({ sectionId, elementKey });
+    selectElement({ sectionId, elementKey, type: 'text', editMode: 'inline' });
   }, [selectElement, sectionId, elementKey]);
   
   return useMemo(() => ({

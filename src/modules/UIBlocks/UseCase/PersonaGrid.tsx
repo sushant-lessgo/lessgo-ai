@@ -122,7 +122,7 @@ const PersonaCard = React.memo(({
   persona: Persona;
   mode: 'edit' | 'preview';
   colorTokens: any;
-  getTextStyle: (variant: 'display' | 'hero' | 'h1' | 'h2' | 'h3' | 'h4' | 'body-lg' | 'body' | 'body-sm' | 'caption') => React.CSSProperties;
+  getTextStyle: (variant: 'display' | 'hero' | 'h1' | 'h2' | 'h3' | 'body-lg' | 'body' | 'body-sm' | 'caption') => React.CSSProperties;
   onNameEdit: (index: number, value: string) => void;
   onDescriptionEdit: (index: number, value: string) => void;
 }) => {
@@ -141,14 +141,12 @@ const PersonaCard = React.memo(({
             suppressContentEditableWarning
             onBlur={(e) => onNameEdit(persona.index, e.currentTarget.textContent || '')}
             className="outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-1 min-h-[24px] cursor-text hover:bg-gray-50 font-bold"
-            style={getTextStyle('h3')}
           >
             {persona.name}
           </div>
         ) : (
           <h3 
             className={`font-bold ${colorTokens.textPrimary}`}
-            style={getTextStyle('h3')}
           >
             {persona.name}
           </h3>
@@ -163,14 +161,12 @@ const PersonaCard = React.memo(({
             suppressContentEditableWarning
             onBlur={(e) => onDescriptionEdit(persona.index, e.currentTarget.textContent || '')}
             className="outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-1 min-h-[60px] cursor-text hover:bg-gray-50 leading-relaxed text-left"
-            style={getTextStyle('body-sm')}
           >
             {persona.description}
           </div>
         ) : (
           <p 
             className={`${colorTokens.textSecondary} leading-relaxed text-left`}
-            style={getTextStyle('body-sm')}
           >
             {persona.description}
           </p>
@@ -224,7 +220,7 @@ export default function PersonaGrid(props: LayoutComponentProps) {
     <LayoutSection
       sectionId={sectionId}
       sectionType="PersonaGrid"
-      backgroundType={props.backgroundType || 'neutral'}
+      backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
       sectionBackground={sectionBackground}
       mode={mode}
       className={props.className}
@@ -234,16 +230,14 @@ export default function PersonaGrid(props: LayoutComponentProps) {
         <div className="text-center mb-16">
           <EditableAdaptiveHeadline
             mode={mode}
-            value={blockContent.headline}
+            value={blockContent.headline || ''}
             onEdit={(value) => handleContentUpdate('headline', value)}
             level="h2"
-            backgroundType={props.backgroundType || 'neutral'}
+            backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
             colorTokens={colorTokens}
             sectionId={sectionId}
             elementKey="headline"
             sectionBackground={sectionBackground}
-            textStyle={getTextStyle('h1')}
-            textAlign="center"
             className="mb-4"
           />
         </div>

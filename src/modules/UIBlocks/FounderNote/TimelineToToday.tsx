@@ -168,7 +168,7 @@ export default function TimelineToToday(props: LayoutComponentProps) {
     <LayoutSection
       sectionId={sectionId}
       sectionType="TimelineToToday"
-      backgroundType={props.backgroundType || 'primary'}
+      backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
       sectionBackground={sectionBackground}
       mode={mode}
       className={props.className}
@@ -179,12 +179,11 @@ export default function TimelineToToday(props: LayoutComponentProps) {
         <div className="text-center mb-12">
           <EditableAdaptiveHeadline
             mode={mode}
-            value={blockContent.headline}
+            value={blockContent.headline || ''}
             onEdit={(value) => handleContentUpdate('headline', value)}
             level="h2"
-            backgroundType={props.backgroundType || 'primary'}
+            backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
             colorTokens={colorTokens}
-            textStyle={getTextStyle('h2')}
             className="leading-tight mb-6"
             sectionId={sectionId}
             elementKey="headline"
@@ -193,12 +192,11 @@ export default function TimelineToToday(props: LayoutComponentProps) {
 
           <EditableAdaptiveText
             mode={mode}
-            value={blockContent.intro_text}
+            value={blockContent.intro_text || ''}
             onEdit={(value) => handleContentUpdate('intro_text', value)}
-            backgroundType={props.backgroundType || 'primary'}
+            backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
             colorTokens={colorTokens}
             variant="body"
-            textStyle={getTextStyle('body-lg')}
             className="leading-relaxed max-w-2xl mx-auto"
             placeholder="Introduce your company's journey and growth story..."
             sectionId={sectionId}
@@ -217,12 +215,12 @@ export default function TimelineToToday(props: LayoutComponentProps) {
               </p>
               <EditableAdaptiveText
                 mode={mode}
-                value={blockContent.timeline_items}
+                value={blockContent.timeline_items || ''}
                 onEdit={(value) => handleContentUpdate('timeline_items', value)}
-                backgroundType="white"
+                backgroundType="neutral"
                 colorTokens={colorTokens}
                 variant="body"
-                textStyle="text-gray-700 text-sm"
+                textStyle={{ color: '#374151', fontSize: '0.875rem' }}
                 placeholder="2020|💡 The Idea|Started with a problem|First prototype|2021|🚀 Launch|Released to users|1000 users..."
                 sectionId={sectionId}
                 elementKey="timeline_items"
@@ -259,12 +257,12 @@ export default function TimelineToToday(props: LayoutComponentProps) {
             
             <EditableAdaptiveText
               mode={mode}
-              value={blockContent.current_milestone}
+              value={blockContent.current_milestone || ''}
               onEdit={(value) => handleContentUpdate('current_milestone', value)}
-              backgroundType="white"
+              backgroundType="neutral"
               colorTokens={colorTokens}
               variant="body"
-              textStyle="text-gray-700 leading-relaxed mb-6"
+              textStyle={{ color: '#374151', lineHeight: '1.625', marginBottom: '1.5rem' }}
               placeholder="Describe your current achievements and future vision..."
               sectionId={sectionId}
               elementKey="current_milestone"
@@ -289,7 +287,6 @@ export default function TimelineToToday(props: LayoutComponentProps) {
             <CTAButton
               text={blockContent.cta_text}
               colorTokens={colorTokens}
-              textStyle={getTextStyle('body-lg')}
               className="shadow-xl hover:shadow-2xl transform hover:-translate-y-0.5 transition-all duration-200"
               variant="primary"
               sectionId={sectionId}
@@ -307,10 +304,10 @@ export default function TimelineToToday(props: LayoutComponentProps) {
                     mode={mode}
                     value={blockContent.founder_name || ''}
                     onEdit={(value) => handleContentUpdate('founder_name', value)}
-                    backgroundType="white"
+                    backgroundType="neutral"
                     colorTokens={colorTokens}
                     variant="body"
-                    textStyle="font-semibold text-gray-900"
+                    textStyle={{ fontWeight: '600', color: '#111827' }}
                     placeholder="Founder Name"
                     sectionId={sectionId}
                     elementKey="founder_name"
@@ -323,10 +320,10 @@ export default function TimelineToToday(props: LayoutComponentProps) {
                       const name = value.replace('Founder, ', '');
                       handleContentUpdate('company_name', name);
                     }}
-                    backgroundType="white"
+                    backgroundType="neutral"
                     colorTokens={colorTokens}
                     variant="body"
-                    textStyle="text-sm text-gray-600"
+                    textStyle={{ fontSize: '0.875rem', color: '#4B5563' }}
                     placeholder="Company Name"
                     sectionId={sectionId}
                     elementKey="company_name"

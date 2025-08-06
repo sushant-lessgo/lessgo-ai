@@ -151,7 +151,7 @@ export type Theme = {
   typography: {
     headingFont: string;
     bodyFont: string;
-    scale: keyof typeof typographyScales;
+    scale: 'small' | 'normal' | 'large' | 'xl';
   };
   colors: {
     baseColor: string;        // "gray", "slate", "stone"

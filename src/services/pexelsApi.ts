@@ -196,7 +196,7 @@ class PexelsApiService {
   };
 
   // Convert StockPhoto to ImageAsset for store
-  convertToImageAsset(stockPhoto: StockPhoto, targetId: string): ImageAsset {
+  convertToImageAsset(stockPhoto: StockPhoto, targetId: string): any {
     return {
       id: targetId,
       url: stockPhoto.url,
@@ -210,18 +210,18 @@ class PexelsApiService {
       },
       metadata: {
         file: {
-          name: `pexels-${stockPhoto.id}.jpg`,
+          originalName: `pexels-${stockPhoto.id}.jpg`,
           size: 0, // Unknown from API
-          type: 'image/jpeg',
-          uploadedAt: Date.now(),
+          mimeType: 'image/jpeg',
+          extension: 'jpg',
         },
         image: {
           width: stockPhoto.width,
           height: stockPhoto.height,
           aspectRatio: stockPhoto.width / stockPhoto.height,
-          format: 'jpeg',
-          colorDepth: 24,
-          hasTransparency: false,
+          orientation: stockPhoto.width > stockPhoto.height ? 'landscape' : stockPhoto.height > stockPhoto.width ? 'portrait' : 'square',
+          hasAlpha: false,
+          isAnimated: false,
         },
       },
       tags: stockPhoto.tags,

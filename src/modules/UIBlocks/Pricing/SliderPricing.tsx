@@ -233,7 +233,7 @@ export default function SliderPricing(props: LayoutComponentProps) {
     <LayoutSection
       sectionId={sectionId}
       sectionType="SliderPricing"
-      backgroundType={props.backgroundType || 'neutral'}
+      backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
       sectionBackground={sectionBackground}
       mode={mode}
       className={props.className}
@@ -243,12 +243,11 @@ export default function SliderPricing(props: LayoutComponentProps) {
         <div className="text-center mb-12">
           <EditableAdaptiveHeadline
             mode={mode}
-            value={blockContent.headline}
+            value={blockContent.headline || ''}
             onEdit={(value) => handleContentUpdate('headline', value)}
             level="h2"
-            backgroundType={props.backgroundType || 'neutral'}
+            backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
             colorTokens={colorTokens}
-            textStyle={getTextStyle('h2')}
             className="mb-4"
             sectionId={sectionId}
             elementKey="headline"
@@ -260,10 +259,9 @@ export default function SliderPricing(props: LayoutComponentProps) {
               mode={mode}
               value={blockContent.subheadline || ''}
               onEdit={(value) => handleContentUpdate('subheadline', value)}
-              backgroundType={props.backgroundType || 'neutral'}
+              backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
               colorTokens={colorTokens}
               variant="body"
-              textStyle={getTextStyle('body-lg')}
               className="text-lg mb-8 max-w-3xl mx-auto"
               placeholder="Add optional subheadline to introduce flexible pricing..."
               sectionId={sectionId}
@@ -281,12 +279,11 @@ export default function SliderPricing(props: LayoutComponentProps) {
               <div className="space-y-4">
                 <EditableAdaptiveText
                   mode={mode}
-                  value={blockContent.pricing_type}
+                  value={blockContent.pricing_type || ''}
                   onEdit={(value) => handleContentUpdate('pricing_type', value)}
-                  backgroundType={props.backgroundType || 'neutral'}
+                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
                   colorTokens={colorTokens}
                   variant="body"
-                  textStyle={getTextStyle('body')}
                   className="mb-2"
                   placeholder="Pricing type (per-seat, usage-based, etc.)"
                   sectionId={sectionId}
@@ -296,12 +293,11 @@ export default function SliderPricing(props: LayoutComponentProps) {
                 
                 <EditableAdaptiveText
                   mode={mode}
-                  value={blockContent.unit_price}
+                  value={blockContent.unit_price || ''}
                   onEdit={(value) => handleContentUpdate('unit_price', value)}
-                  backgroundType={props.backgroundType || 'neutral'}
+                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
                   colorTokens={colorTokens}
                   variant="body"
-                  textStyle={getTextStyle('body')}
                   className="mb-2"
                   placeholder="Price per unit"
                   sectionId={sectionId}
@@ -311,12 +307,11 @@ export default function SliderPricing(props: LayoutComponentProps) {
                 
                 <EditableAdaptiveText
                   mode={mode}
-                  value={blockContent.unit_label}
+                  value={blockContent.unit_label || ''}
                   onEdit={(value) => handleContentUpdate('unit_label', value)}
-                  backgroundType={props.backgroundType || 'neutral'}
+                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
                   colorTokens={colorTokens}
                   variant="body"
-                  textStyle={getTextStyle('body')}
                   className="mb-2"
                   placeholder="Unit label (team members, API calls, etc.)"
                   sectionId={sectionId}
@@ -326,12 +321,11 @@ export default function SliderPricing(props: LayoutComponentProps) {
                 
                 <EditableAdaptiveText
                   mode={mode}
-                  value={blockContent.tier_breakpoints}
+                  value={blockContent.tier_breakpoints || ''}
                   onEdit={(value) => handleContentUpdate('tier_breakpoints', value)}
-                  backgroundType={props.backgroundType || 'neutral'}
+                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
                   colorTokens={colorTokens}
                   variant="body"
-                  textStyle={getTextStyle('body')}
                   className="mb-2"
                   placeholder="Volume discount breakpoints (pipe separated)"
                   sectionId={sectionId}
@@ -341,12 +335,11 @@ export default function SliderPricing(props: LayoutComponentProps) {
                 
                 <EditableAdaptiveText
                   mode={mode}
-                  value={blockContent.tier_discounts}
+                  value={blockContent.tier_discounts || ''}
                   onEdit={(value) => handleContentUpdate('tier_discounts', value)}
-                  backgroundType={props.backgroundType || 'neutral'}
+                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
                   colorTokens={colorTokens}
                   variant="body"
-                  textStyle={getTextStyle('body')}
                   className="mb-2"
                   placeholder="Volume discount percentages (pipe separated)"
                   sectionId={sectionId}
@@ -444,7 +437,6 @@ export default function SliderPricing(props: LayoutComponentProps) {
                 <CTAButton
                   text={blockContent.cta_text}
                   colorTokens={colorTokens}
-                  textStyle={getTextStyle('body-lg')}
                   className="w-full shadow-xl hover:shadow-2xl transform hover:-translate-y-0.5 transition-all duration-200"
                   variant="primary"
                   sectionId={sectionId}
@@ -471,7 +463,7 @@ export default function SliderPricing(props: LayoutComponentProps) {
               return (
                 <div key={index} className={`text-center p-4 rounded-lg border-2 transition-all duration-300 ${
                   units >= breakpoint 
-                    ? `${colorTokens.ctaBorder} ${colorTokens.ctaBg.replace('bg-', 'bg-opacity-10 bg-')}` 
+                    ? `border-primary ${colorTokens.ctaBg.replace('bg-', 'bg-opacity-10 bg-')}` 
                     : 'border-gray-200 hover:border-gray-300'
                 }`}>
                   <div className="text-lg font-bold text-gray-900">
@@ -498,10 +490,9 @@ export default function SliderPricing(props: LayoutComponentProps) {
                 mode={mode}
                 value={blockContent.supporting_text || ''}
                 onEdit={(value) => handleContentUpdate('supporting_text', value)}
-                backgroundType={props.backgroundType || 'neutral'}
+                backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
                 colorTokens={colorTokens}
                 variant="body"
-                textStyle={getTextStyle('body-lg')}
                 className="max-w-3xl mx-auto mb-8"
                 placeholder="Add optional supporting text to reinforce flexible pricing..."
                 sectionId={sectionId}

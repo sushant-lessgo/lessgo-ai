@@ -139,16 +139,8 @@ const PersonaCard = React.memo(({
             className="w-20 h-20 rounded-full object-cover cursor-pointer border-4 border-white shadow-lg"
             data-image-id={`${sectionId}-persona-avatar`}
             onMouseUp={(e) => {
-              if (mode === 'edit') {
-                e.stopPropagation();
-                e.preventDefault();
-                const rect = e.currentTarget.getBoundingClientRect();
-                showImageToolbar(`${sectionId}-persona-avatar`, {
-                  x: rect.left + rect.width / 2,
-                  y: rect.top - 10
-                });
-              }
-            }}
+                        // Image toolbar is only available in edit mode
+                      }}
           />
         ) : (
           <AvatarPlaceholder />
@@ -300,12 +292,11 @@ export default function PersonaJourney(props: LayoutComponentProps) {
         <div className="text-center mb-12">
           <EditableAdaptiveHeadline
             mode={mode}
-            value={blockContent.headline}
+            value={blockContent.headline || ''}
             onEdit={(value) => handleContentUpdate('headline', value)}
             level="h2"
             backgroundType={safeBackgroundType}
             colorTokens={colorTokens}
-            textStyle={getTextStyle('h2')}
             className="mb-4"
             sectionId={sectionId}
             elementKey="headline"
@@ -320,7 +311,6 @@ export default function PersonaJourney(props: LayoutComponentProps) {
               backgroundType={safeBackgroundType}
               colorTokens={colorTokens}
               variant="body"
-              textStyle={getTextStyle('body-lg')}
               className="text-lg mb-6 max-w-3xl mx-auto"
               placeholder="Add optional subheadline to introduce the persona journey..."
               sectionId={sectionId}
@@ -338,12 +328,11 @@ export default function PersonaJourney(props: LayoutComponentProps) {
               <div className="grid md:grid-cols-3 gap-4">
                 <EditableAdaptiveText
                   mode={mode}
-                  value={blockContent.persona_name}
+                  value={blockContent.persona_name || ''}
                   onEdit={(value) => handleContentUpdate('persona_name', value)}
                   backgroundType={safeBackgroundType}
                   colorTokens={colorTokens}
                   variant="body"
-                  textStyle={getTextStyle('body')}
                   placeholder="Persona name"
                   sectionId={sectionId}
                   elementKey="persona_name"
@@ -352,12 +341,11 @@ export default function PersonaJourney(props: LayoutComponentProps) {
                 
                 <EditableAdaptiveText
                   mode={mode}
-                  value={blockContent.persona_role}
+                  value={blockContent.persona_role || ''}
                   onEdit={(value) => handleContentUpdate('persona_role', value)}
                   backgroundType={safeBackgroundType}
                   colorTokens={colorTokens}
                   variant="body"
-                  textStyle={getTextStyle('body')}
                   placeholder="Persona role"
                   sectionId={sectionId}
                   elementKey="persona_role"
@@ -366,12 +354,11 @@ export default function PersonaJourney(props: LayoutComponentProps) {
                 
                 <EditableAdaptiveText
                   mode={mode}
-                  value={blockContent.persona_company}
+                  value={blockContent.persona_company || ''}
                   onEdit={(value) => handleContentUpdate('persona_company', value)}
                   backgroundType={safeBackgroundType}
                   colorTokens={colorTokens}
                   variant="body"
-                  textStyle={getTextStyle('body')}
                   placeholder="Company name"
                   sectionId={sectionId}
                   elementKey="persona_company"
@@ -401,12 +388,11 @@ export default function PersonaJourney(props: LayoutComponentProps) {
                 
                 <EditableAdaptiveText
                   mode={mode}
-                  value={blockContent.before_title}
+                  value={blockContent.before_title || ''}
                   onEdit={(value) => handleContentUpdate('before_title', value)}
                   backgroundType={safeBackgroundType}
                   colorTokens={colorTokens}
                   variant="body"
-                  textStyle={getTextStyle('h3')}
                   placeholder="Before title"
                   sectionId={sectionId}
                   elementKey="before_title"
@@ -415,12 +401,11 @@ export default function PersonaJourney(props: LayoutComponentProps) {
                 
                 <EditableAdaptiveText
                   mode={mode}
-                  value={blockContent.before_challenges}
+                  value={blockContent.before_challenges || ''}
                   onEdit={(value) => handleContentUpdate('before_challenges', value)}
                   backgroundType={safeBackgroundType}
                   colorTokens={colorTokens}
                   variant="body"
-                  textStyle={getTextStyle('body')}
                   placeholder="Before challenges description"
                   sectionId={sectionId}
                   elementKey="before_challenges"
@@ -429,12 +414,11 @@ export default function PersonaJourney(props: LayoutComponentProps) {
                 
                 <EditableAdaptiveText
                   mode={mode}
-                  value={blockContent.before_pain_points}
+                  value={blockContent.before_pain_points || ''}
                   onEdit={(value) => handleContentUpdate('before_pain_points', value)}
                   backgroundType={safeBackgroundType}
                   colorTokens={colorTokens}
                   variant="body"
-                  textStyle={getTextStyle('body')}
                   placeholder="Before pain points (pipe separated)"
                   sectionId={sectionId}
                   elementKey="before_pain_points"
@@ -447,12 +431,11 @@ export default function PersonaJourney(props: LayoutComponentProps) {
                 
                 <EditableAdaptiveText
                   mode={mode}
-                  value={blockContent.journey_title}
+                  value={blockContent.journey_title || ''}
                   onEdit={(value) => handleContentUpdate('journey_title', value)}
                   backgroundType={safeBackgroundType}
                   colorTokens={colorTokens}
                   variant="body"
-                  textStyle={getTextStyle('h3')}
                   placeholder="Journey title"
                   sectionId={sectionId}
                   elementKey="journey_title"
@@ -461,12 +444,11 @@ export default function PersonaJourney(props: LayoutComponentProps) {
                 
                 <EditableAdaptiveText
                   mode={mode}
-                  value={blockContent.journey_steps}
+                  value={blockContent.journey_steps || ''}
                   onEdit={(value) => handleContentUpdate('journey_steps', value)}
                   backgroundType={safeBackgroundType}
                   colorTokens={colorTokens}
                   variant="body"
-                  textStyle={getTextStyle('body')}
                   placeholder="Journey steps (pipe separated)"
                   sectionId={sectionId}
                   elementKey="journey_steps"
@@ -479,12 +461,11 @@ export default function PersonaJourney(props: LayoutComponentProps) {
                 
                 <EditableAdaptiveText
                   mode={mode}
-                  value={blockContent.after_title}
+                  value={blockContent.after_title || ''}
                   onEdit={(value) => handleContentUpdate('after_title', value)}
                   backgroundType={safeBackgroundType}
                   colorTokens={colorTokens}
                   variant="body"
-                  textStyle={getTextStyle('h3')}
                   placeholder="After title"
                   sectionId={sectionId}
                   elementKey="after_title"
@@ -493,12 +474,11 @@ export default function PersonaJourney(props: LayoutComponentProps) {
                 
                 <EditableAdaptiveText
                   mode={mode}
-                  value={blockContent.after_outcomes}
+                  value={blockContent.after_outcomes || ''}
                   onEdit={(value) => handleContentUpdate('after_outcomes', value)}
                   backgroundType={safeBackgroundType}
                   colorTokens={colorTokens}
                   variant="body"
-                  textStyle={getTextStyle('body')}
                   placeholder="After outcomes description"
                   sectionId={sectionId}
                   elementKey="after_outcomes"
@@ -507,12 +487,11 @@ export default function PersonaJourney(props: LayoutComponentProps) {
                 
                 <EditableAdaptiveText
                   mode={mode}
-                  value={blockContent.after_benefits}
+                  value={blockContent.after_benefits || ''}
                   onEdit={(value) => handleContentUpdate('after_benefits', value)}
                   backgroundType={safeBackgroundType}
                   colorTokens={colorTokens}
                   variant="body"
-                  textStyle={getTextStyle('body')}
                   placeholder="After benefits (pipe separated)"
                   sectionId={sectionId}
                   elementKey="after_benefits"
@@ -610,7 +589,6 @@ export default function PersonaJourney(props: LayoutComponentProps) {
                 backgroundType={safeBackgroundType}
                 colorTokens={colorTokens}
                 variant="body"
-                textStyle={getTextStyle('body-lg')}
                 className="max-w-3xl mx-auto mb-8"
                 placeholder="Add optional supporting text to reinforce your enterprise success story..."
                 sectionId={sectionId}
@@ -625,7 +603,6 @@ export default function PersonaJourney(props: LayoutComponentProps) {
                   <CTAButton
                     text={blockContent.cta_text}
                     colorTokens={colorTokens}
-                    textStyle={getTextStyle('body-lg')}
                     className="shadow-xl hover:shadow-2xl transform hover:-translate-y-0.5 transition-all duration-200"
                     variant="primary"
                     sectionId={sectionId}

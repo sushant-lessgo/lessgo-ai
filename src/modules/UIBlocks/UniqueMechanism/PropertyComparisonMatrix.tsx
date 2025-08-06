@@ -26,9 +26,9 @@ export default function PropertyComparisonMatrix(props: LayoutComponentProps) {
   const competitorValues = blockContent.competitors_values.split('|').map(v => v.trim()).filter(Boolean);
 
   return (
-    <LayoutSection sectionId={sectionId} sectionType="PropertyComparisonMatrix" backgroundType={props.backgroundType || 'neutral'} sectionBackground={sectionBackground} mode={mode} className={props.className}>
+    <LayoutSection sectionId={sectionId} sectionType="PropertyComparisonMatrix" backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')} sectionBackground={sectionBackground} mode={mode} className={props.className}>
       <div className="max-w-4xl mx-auto">
-        <EditableAdaptiveHeadline mode={mode} value={blockContent.headline} onEdit={(value) => handleContentUpdate('headline', value)} level="h2" backgroundType={props.backgroundType || 'neutral'} colorTokens={colorTokens} textStyle={getTextStyle('h1')} className="text-center mb-12" sectionId={sectionId} elementKey="headline" sectionBackground={sectionBackground} />
+        <EditableAdaptiveHeadline mode={mode} value={blockContent.headline || ''} onEdit={(value) => handleContentUpdate('headline', value)} level="h2" backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')} colorTokens={colorTokens} className="text-center mb-12" sectionId={sectionId} elementKey="headline" sectionBackground={sectionBackground} />
         <div className="bg-white rounded-xl shadow-lg overflow-hidden border border-gray-200">
           <div className="grid grid-cols-3 bg-gray-50 border-b border-gray-200">
             <div className="p-4 font-bold text-gray-900">Feature</div>

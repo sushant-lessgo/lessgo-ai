@@ -77,7 +77,7 @@ export default function CenteredHeadlineCTA(props: LayoutComponentProps) {
     <LayoutSection
       sectionId={sectionId}
       sectionType="CenteredHeadlineCTA"
-      backgroundType={props.backgroundType || 'primary'}
+      backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
       sectionBackground={sectionBackground}
       mode={mode}
       className={props.className}
@@ -92,7 +92,6 @@ export default function CenteredHeadlineCTA(props: LayoutComponentProps) {
               value={blockContent.urgency_text || ''}
               onEdit={(value) => handleContentUpdate('urgency_text', value)}
               colorTokens={{ accent: 'bg-orange-100 text-orange-800 border-orange-300' }}
-              textStyle={getTextStyle('body-sm')}
               placeholder="🔥 Limited Time: 50% Off First Month"
               className="animate-pulse"
               sectionId={sectionId}
@@ -104,10 +103,10 @@ export default function CenteredHeadlineCTA(props: LayoutComponentProps) {
         {/* Main Headline */}
         <EditableAdaptiveHeadline
           mode={mode}
-          value={blockContent.headline}
+          value={blockContent.headline || ''}
           onEdit={(value) => handleContentUpdate('headline', value)}
           level="h1"
-          backgroundType={props.backgroundType || 'primary'}
+          backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
           colorTokens={colorTokens}
           textStyle={{
             ...getTextStyle('hero'),
@@ -125,7 +124,7 @@ export default function CenteredHeadlineCTA(props: LayoutComponentProps) {
             mode={mode}
             value={blockContent.subheadline || ''}
             onEdit={(value) => handleContentUpdate('subheadline', value)}
-            backgroundType={props.backgroundType || 'primary'}
+            backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
             colorTokens={colorTokens}
             variant="body"
             textStyle={{
@@ -145,7 +144,6 @@ export default function CenteredHeadlineCTA(props: LayoutComponentProps) {
           <CTAButton
             text={blockContent.cta_text}
             colorTokens={colorTokens}
-            textStyle={getTextStyle('h3')}
             size="large"
             className="text-xl px-12 py-6 shadow-2xl hover:shadow-3xl"
             sectionId={sectionId}

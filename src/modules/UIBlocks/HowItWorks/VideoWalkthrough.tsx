@@ -117,16 +117,8 @@ export default function VideoWalkthrough(props: LayoutComponentProps) {
             className="w-full h-full object-cover"
             data-image-id={`${sectionId}-video-thumbnail`}
             onMouseUp={(e) => {
-              if (mode === 'edit') {
-                e.stopPropagation();
-                e.preventDefault();
-                const rect = e.currentTarget.getBoundingClientRect();
-                showImageToolbar(`${sectionId}-video-thumbnail`, {
-                  x: rect.left + rect.width / 2,
-                  y: rect.top - 10
-                });
-              }
-            }}
+                        // Image toolbar is only available in edit mode
+                      }}
           />
         ) : (
           <div className="w-full h-full flex items-center justify-center">
@@ -164,7 +156,7 @@ export default function VideoWalkthrough(props: LayoutComponentProps) {
     <LayoutSection
       sectionId={sectionId}
       sectionType="VideoWalkthrough"
-      backgroundType={props.backgroundType || 'neutral'}
+      backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
       sectionBackground={sectionBackground}
       mode={mode}
       className={props.className}
@@ -174,12 +166,11 @@ export default function VideoWalkthrough(props: LayoutComponentProps) {
         <div className="text-center mb-12">
           <EditableAdaptiveHeadline
             mode={mode}
-            value={blockContent.headline}
+            value={blockContent.headline || ''}
             onEdit={(value) => handleContentUpdate('headline', value)}
             level="h2"
-            backgroundType={props.backgroundType || 'neutral'}
+            backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
             colorTokens={colorTokens}
-            textStyle={getTextStyle('h2')}
             className="mb-4"
             sectionId={sectionId}
             elementKey="headline"
@@ -191,10 +182,9 @@ export default function VideoWalkthrough(props: LayoutComponentProps) {
               mode={mode}
               value={blockContent.subheadline || ''}
               onEdit={(value) => handleContentUpdate('subheadline', value)}
-              backgroundType={props.backgroundType || 'neutral'}
+              backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
               colorTokens={colorTokens}
               variant="body"
-              textStyle={getTextStyle('body-lg')}
               className="text-lg mb-6 max-w-3xl mx-auto"
               placeholder="Add optional subheadline to introduce your video demonstration..."
               sectionId={sectionId}
@@ -212,12 +202,11 @@ export default function VideoWalkthrough(props: LayoutComponentProps) {
               <div className="space-y-4">
                 <EditableAdaptiveText
                   mode={mode}
-                  value={blockContent.video_title}
+                  value={blockContent.video_title || ''}
                   onEdit={(value) => handleContentUpdate('video_title', value)}
-                  backgroundType={props.backgroundType || 'neutral'}
+                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
                   colorTokens={colorTokens}
                   variant="body"
-                  textStyle={getTextStyle('body')}
                   className="mb-2"
                   placeholder="Video title"
                   sectionId={sectionId}
@@ -227,12 +216,11 @@ export default function VideoWalkthrough(props: LayoutComponentProps) {
                 
                 <EditableAdaptiveText
                   mode={mode}
-                  value={blockContent.video_description}
+                  value={blockContent.video_description || ''}
                   onEdit={(value) => handleContentUpdate('video_description', value)}
-                  backgroundType={props.backgroundType || 'neutral'}
+                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
                   colorTokens={colorTokens}
                   variant="body"
-                  textStyle={getTextStyle('body')}
                   className="mb-2"
                   placeholder="Video description"
                   sectionId={sectionId}
@@ -244,10 +232,9 @@ export default function VideoWalkthrough(props: LayoutComponentProps) {
                   mode={mode}
                   value={blockContent.video_url || ''}
                   onEdit={(value) => handleContentUpdate('video_url', value)}
-                  backgroundType={props.backgroundType || 'neutral'}
+                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
                   colorTokens={colorTokens}
                   variant="body"
-                  textStyle={getTextStyle('body')}
                   className="mb-2"
                   placeholder="Video URL (YouTube embed link)"
                   sectionId={sectionId}
@@ -259,10 +246,9 @@ export default function VideoWalkthrough(props: LayoutComponentProps) {
                   mode={mode}
                   value={blockContent.video_duration || ''}
                   onEdit={(value) => handleContentUpdate('video_duration', value)}
-                  backgroundType={props.backgroundType || 'neutral'}
+                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
                   colorTokens={colorTokens}
                   variant="body"
-                  textStyle={getTextStyle('body')}
                   placeholder="Video duration (e.g., 4:32)"
                   sectionId={sectionId}
                   elementKey="video_duration"
@@ -352,10 +338,9 @@ export default function VideoWalkthrough(props: LayoutComponentProps) {
                 mode={mode}
                 value={blockContent.supporting_text || ''}
                 onEdit={(value) => handleContentUpdate('supporting_text', value)}
-                backgroundType={props.backgroundType || 'neutral'}
+                backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
                 colorTokens={colorTokens}
                 variant="body"
-                textStyle={getTextStyle('body-lg')}
                 className="max-w-3xl mx-auto mb-8"
                 placeholder="Add optional supporting text to reinforce your video content..."
                 sectionId={sectionId}
@@ -370,7 +355,6 @@ export default function VideoWalkthrough(props: LayoutComponentProps) {
                   <CTAButton
                     text={blockContent.cta_text}
                     colorTokens={colorTokens}
-                    textStyle={getTextStyle('body-lg')}
                     className="shadow-xl hover:shadow-2xl transform hover:-translate-y-0.5 transition-all duration-200"
                     variant="primary"
                     sectionId={sectionId}

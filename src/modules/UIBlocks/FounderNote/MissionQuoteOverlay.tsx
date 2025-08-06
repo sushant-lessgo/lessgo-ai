@@ -132,7 +132,7 @@ export default function MissionQuoteOverlay(props: LayoutComponentProps) {
     <LayoutSection
       sectionId={sectionId}
       sectionType="MissionQuoteOverlay"
-      backgroundType={props.backgroundType || 'primary'}
+      backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
       sectionBackground={sectionBackground}
       mode={mode}
       className={props.className}
@@ -148,16 +148,8 @@ export default function MissionQuoteOverlay(props: LayoutComponentProps) {
               className="w-full h-full object-cover cursor-pointer"
               data-image-id={`${sectionId}-background-image`}
               onMouseUp={(e) => {
-                if (mode === 'edit') {
-                  e.stopPropagation();
-                  e.preventDefault();
-                  const rect = e.currentTarget.getBoundingClientRect();
-                  showImageToolbar(`${sectionId}-background-image`, {
-                    x: rect.left + rect.width / 2,
-                    y: rect.top - 10
-                  });
-                }
-              }}
+                        // Image toolbar is only available in edit mode
+                      }}
             />
             <div className="absolute inset-0 bg-black bg-opacity-50"></div>
           </div>
@@ -177,7 +169,7 @@ export default function MissionQuoteOverlay(props: LayoutComponentProps) {
                   value={blockContent.badge_text || ''}
                   onEdit={(value) => handleContentUpdate('badge_text', value)}
                   colorTokens={colorTokens}
-                  textStyle="text-sm font-medium text-white"
+                  textStyle={{ fontSize: '0.875rem', fontWeight: '500', color: '#ffffff' }}
                   placeholder="🌟 Our Mission"
                   sectionId={sectionId}
                   elementKey="badge_text"
@@ -190,12 +182,12 @@ export default function MissionQuoteOverlay(props: LayoutComponentProps) {
             <div className="max-w-4xl mx-auto">
               <EditableAdaptiveHeadline
                 mode={mode}
-                value={blockContent.mission_quote}
+                value={blockContent.mission_quote || ''}
                 onEdit={(value) => handleContentUpdate('mission_quote', value)}
                 level="h1"
-                backgroundType="dark"
+                backgroundType="primary"
                 colorTokens={colorTokens}
-                textStyle="text-3xl lg:text-5xl font-bold text-white leading-tight"
+                textStyle={{ fontSize: '1.875rem', fontWeight: '700', color: '#ffffff', lineHeight: '1.25' }}
                 className="italic"
                 sectionId={sectionId}
                 elementKey="mission_quote"
@@ -213,12 +205,12 @@ export default function MissionQuoteOverlay(props: LayoutComponentProps) {
               <div className="text-left">
                 <EditableAdaptiveText
                   mode={mode}
-                  value={blockContent.founder_name}
+                  value={blockContent.founder_name || ''}
                   onEdit={(value) => handleContentUpdate('founder_name', value)}
-                  backgroundType="dark"
+                  backgroundType="primary"
                   colorTokens={colorTokens}
                   variant="body"
-                  textStyle="text-white font-semibold"
+                  textStyle={{ color: '#ffffff', fontWeight: '600' }}
                   placeholder="Founder Name"
                   sectionId={sectionId}
                   elementKey="founder_name"
@@ -229,10 +221,10 @@ export default function MissionQuoteOverlay(props: LayoutComponentProps) {
                     mode={mode}
                     value={blockContent.founder_title || ''}
                     onEdit={(value) => handleContentUpdate('founder_title', value)}
-                    backgroundType="dark"
+                    backgroundType="primary"
                     colorTokens={colorTokens}
                     variant="body"
-                    textStyle="text-white text-opacity-80 text-sm"
+                    textStyle={{ color: 'rgba(255, 255, 255, 0.8)', fontSize: '0.875rem' }}
                     placeholder="Title"
                     sectionId={sectionId}
                     elementKey="founder_title"
@@ -245,10 +237,10 @@ export default function MissionQuoteOverlay(props: LayoutComponentProps) {
                         mode={mode}
                         value={blockContent.mission_year || ''}
                         onEdit={(value) => handleContentUpdate('mission_year', value)}
-                        backgroundType="dark"
+                        backgroundType="primary"
                         colorTokens={colorTokens}
                         variant="body"
-                        textStyle="text-white text-opacity-80 text-sm"
+                        textStyle={{ color: 'rgba(255, 255, 255, 0.8)', fontSize: '0.875rem' }}
                         placeholder="Est. Year"
                         sectionId={sectionId}
                         elementKey="mission_year"
@@ -279,7 +271,7 @@ export default function MissionQuoteOverlay(props: LayoutComponentProps) {
               <CTAButton
                 text={blockContent.cta_text}
                 colorTokens={colorTokens}
-                textStyle="text-lg font-semibold"
+                textStyle={{ fontSize: '1.125rem', fontWeight: '600' }}
                 className="bg-white text-gray-900 hover:bg-gray-100 shadow-2xl hover:shadow-3xl transform hover:-translate-y-1 transition-all duration-300 px-8 py-4"
                 variant="secondary"
                 sectionId={sectionId}
@@ -298,12 +290,12 @@ export default function MissionQuoteOverlay(props: LayoutComponentProps) {
               <div>
                 <EditableAdaptiveText
                   mode={mode}
-                  value={blockContent.mission_context}
+                  value={blockContent.mission_context || ''}
                   onEdit={(value) => handleContentUpdate('mission_context', value)}
-                  backgroundType="dark"
+                  backgroundType="primary"
                   colorTokens={colorTokens}
                   variant="body"
-                  textStyle="text-white text-opacity-90 leading-relaxed"
+                  textStyle={{ color: 'rgba(255, 255, 255, 0.9)', lineHeight: '1.625' }}
                   placeholder="Add context about your mission and why it matters..."
                   sectionId={sectionId}
                   elementKey="mission_context"

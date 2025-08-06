@@ -23,9 +23,9 @@ export default function RoleBasedScenarios(props: LayoutComponentProps) {
   const scenarios = blockContent.scenarios.split('|').map(s => s.trim()).filter(Boolean);
 
   return (
-    <LayoutSection sectionId={sectionId} sectionType="RoleBasedScenarios" backgroundType={props.backgroundType || 'secondary'} sectionBackground={sectionBackground} mode={mode} className={props.className}>
+    <LayoutSection sectionId={sectionId} sectionType="RoleBasedScenarios" backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'secondary')} sectionBackground={sectionBackground} mode={mode} className={props.className}>
       <div className="max-w-6xl mx-auto">
-        <EditableAdaptiveHeadline mode={mode} value={blockContent.headline} onEdit={(value) => handleContentUpdate('headline', value)} level="h2" backgroundType={props.backgroundType || 'secondary'} colorTokens={colorTokens} textStyle={getTextStyle('h1')} className="text-center mb-16" sectionId={sectionId} elementKey="headline" sectionBackground={sectionBackground} />
+        <EditableAdaptiveHeadline mode={mode} value={blockContent.headline || ''} onEdit={(value) => handleContentUpdate('headline', value)} level="h2" backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'secondary')} colorTokens={colorTokens} className="text-center mb-16" sectionId={sectionId} elementKey="headline" sectionBackground={sectionBackground} />
         <div className="space-y-8">
           {roles.map((role, index) => (
             <div key={index} className="bg-white p-8 rounded-xl border border-gray-200 flex items-center space-x-8">
@@ -33,8 +33,8 @@ export default function RoleBasedScenarios(props: LayoutComponentProps) {
                 <span className="font-bold text-lg">{role.split(' ').map(w => w[0]).join('')}</span>
               </div>
               <div className="flex-1">
-                <h3 className="font-bold text-gray-900 mb-3" style={getTextStyle('h3')}>{role}</h3>
-                <p className="text-gray-600" style={getTextStyle('body')}>{scenarios[index] || 'Role-specific scenario'}</p>
+                <h3 className="font-bold text-gray-900 mb-3">{role}</h3>
+                <p className="text-gray-600">{scenarios[index] || 'Role-specific scenario'}</p>
               </div>
               <div className="text-blue-600 font-medium">View Details →</div>
             </div>

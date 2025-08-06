@@ -143,7 +143,7 @@ export default function MockupWithCTA(props: LayoutComponentProps) {
     <LayoutSection
       sectionId={sectionId}
       sectionType="MockupWithCTA"
-      backgroundType={props.backgroundType || 'neutral'}
+      backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
       sectionBackground={sectionBackground}
       mode={mode}
       className={props.className}
@@ -162,12 +162,11 @@ export default function MockupWithCTA(props: LayoutComponentProps) {
             {/* Headline */}
             <EditableAdaptiveHeadline
               mode={mode}
-              value={blockContent.headline}
+              value={blockContent.headline || ''}
               onEdit={(value) => handleContentUpdate('headline', value)}
               level="h1"
               backgroundType={safeBackgroundType}
               colorTokens={colorTokens}
-              textStyle={getTextStyle('h1')}
               className="mb-6"
               sectionId={sectionId}
               elementKey="headline"
@@ -183,7 +182,6 @@ export default function MockupWithCTA(props: LayoutComponentProps) {
                 backgroundType={safeBackgroundType}
                 colorTokens={colorTokens}
                 variant="body"
-                textStyle={getTextStyle('body-lg')}
                 className="mb-8"
                 placeholder="Add optional subheadline to provide more context..."
                 sectionId={sectionId}
@@ -197,7 +195,6 @@ export default function MockupWithCTA(props: LayoutComponentProps) {
               <CTAButton
                 text={blockContent.cta_text}
                 colorTokens={colorTokens}
-                textStyle={getTextStyle('body-lg')}
                 size="large"
                 className="shadow-lg hover:shadow-xl"
                 sectionId={sectionId}
@@ -216,7 +213,6 @@ export default function MockupWithCTA(props: LayoutComponentProps) {
                   backgroundType={safeBackgroundType}
                   colorTokens={colorTokens}
                   variant="body"
-                  textStyle={getTextStyle('body-sm')}
                   className="flex items-center justify-center lg:justify-start text-sm"
                   placeholder="Add urgency text (e.g., Limited time offer...)"
                   sectionId={sectionId}
@@ -234,7 +230,6 @@ export default function MockupWithCTA(props: LayoutComponentProps) {
                   backgroundType={safeBackgroundType}
                   colorTokens={colorTokens}
                   variant="body"
-                  textStyle={getTextStyle('body-sm')}
                   className="flex items-center justify-center lg:justify-start text-sm"
                   placeholder="Add guarantee text (e.g., 30-day money back guarantee)"
                   sectionId={sectionId}

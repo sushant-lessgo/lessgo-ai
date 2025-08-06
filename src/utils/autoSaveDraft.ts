@@ -182,7 +182,7 @@ if (includePageData) {
         // Using content serializer for structured save
       } else {
         // Use standard export
-        pageData = editStoreState.exportForSerialization ? editStoreState.exportForSerialization() : editStoreState.export();
+        pageData = editStoreState.export();
       }
     } else {
       // Fallback to onboarding - use token-based store
@@ -686,11 +686,7 @@ export async function loadDraftWithDeserialization(tokenId: string): Promise<{
       const editStore = storeManager.getEditStore(tokenId);
       const editStoreState = editStore.getState();
       
-      if (editStoreState.loadFromSerialized) {
-        editStoreState.loadFromSerialized(data);
-      } else {
-        await editStoreState.loadFromDraft(data, tokenId);
-      }
+      await editStoreState.loadFromDraft(data, tokenId);
       
       console.log('✅ Successfully loaded content (fallback method)');
       return { success: true, data };
@@ -850,8 +846,10 @@ if (process.env.NODE_ENV === 'development' && typeof window !== 'undefined') {
           description: 'Conflict simulation',
           source: 'user',
         },
+      });
+    },
 
-         // Serialization functions
+    // Serialization functions
     serializedSaveDraft,
     loadDraftWithDeserialization,
     
@@ -890,11 +888,6 @@ if (process.env.NODE_ENV === 'development' && typeof window !== 'undefined') {
       }
       
       return validation;
-    },
- 
-
-
-      });
     },
   };
   

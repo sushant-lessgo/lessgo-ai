@@ -402,7 +402,7 @@ export function selectBestAccent(
   }
   
   if (options.minContrast) {
-    filteredCandidates = filteredCandidates.filter(c => c.contrastRatio >= options.minContrast);
+    filteredCandidates = filteredCandidates.filter(c => c.contrastRatio >= options.minContrast!);
   }
   
   if (options.preferredHarmony) {

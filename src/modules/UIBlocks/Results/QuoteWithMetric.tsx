@@ -136,14 +136,12 @@ const QuoteCard = ({
             suppressContentEditableWarning
             onBlur={(e) => onQuoteEdit(index, e.currentTarget.textContent || '')}
             className="outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-2 py-1 min-h-[80px] cursor-text hover:bg-gray-50 text-gray-900 leading-relaxed mb-6"
-            style={getTextStyle('body-lg')}
           >
             {quote.quote}
           </div>
         ) : (
           <blockquote 
             className="text-gray-900 leading-relaxed mb-6"
-            style={getTextStyle('body-lg')}
           >
             "{quote.quote}"
           </blockquote>
@@ -165,7 +163,6 @@ const QuoteCard = ({
                   suppressContentEditableWarning
                   onBlur={(e) => onAuthorEdit(index, e.currentTarget.textContent || '')}
                   className="outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-1 min-h-[20px] cursor-text hover:bg-gray-50 font-semibold text-gray-900"
-                  style={getTextStyle('body')}
                 >
                   {quote.author}
                 </div>
@@ -174,7 +171,6 @@ const QuoteCard = ({
                   suppressContentEditableWarning
                   onBlur={(e) => onRoleEdit(index, e.currentTarget.textContent || '')}
                   className="outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-1 min-h-[18px] cursor-text hover:bg-gray-50 text-gray-600"
-                  style={getTextStyle('body-sm')}
                 >
                   {quote.role}
                 </div>
@@ -183,7 +179,6 @@ const QuoteCard = ({
                   suppressContentEditableWarning
                   onBlur={(e) => onCompanyEdit(index, e.currentTarget.textContent || '')}
                   className="outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-1 min-h-[18px] cursor-text hover:bg-gray-50 text-gray-500"
-                  style={getTextStyle('body-sm')}
                 >
                   {quote.company}
                 </div>
@@ -192,19 +187,16 @@ const QuoteCard = ({
               <>
                 <div 
                   className="font-semibold text-gray-900"
-                  style={getTextStyle('body')}
                 >
                   {quote.author}
                 </div>
                 <div 
                   className="text-gray-600"
-                  style={getTextStyle('body-sm')}
                 >
                   {quote.role}
                 </div>
                 <div 
                   className="text-gray-500"
-                  style={getTextStyle('body-sm')}
                 >
                   {quote.company}
                 </div>
@@ -224,14 +216,12 @@ const QuoteCard = ({
               suppressContentEditableWarning
               onBlur={(e) => onMetricValueEdit(index, e.currentTarget.textContent || '')}
               className="outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-1 min-h-[40px] cursor-text hover:bg-gray-50 font-bold text-blue-900 mb-2"
-              style={getTextStyle('h2')}
             >
               {quote.metric_value}
             </div>
           ) : (
             <div 
               className="font-bold text-blue-900 mb-2 text-3xl"
-              style={getTextStyle('h2')}
             >
               {quote.metric_value}
             </div>
@@ -244,14 +234,12 @@ const QuoteCard = ({
               suppressContentEditableWarning
               onBlur={(e) => onMetricLabelEdit(index, e.currentTarget.textContent || '')}
               className="outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-1 min-h-[20px] cursor-text hover:bg-gray-50 font-medium text-blue-700"
-              style={getTextStyle('body-sm')}
             >
               {quote.metric_label}
             </div>
           ) : (
             <div 
               className="font-medium text-blue-700"
-              style={getTextStyle('body-sm')}
             >
               {quote.metric_label}
             </div>
@@ -337,12 +325,11 @@ export default function QuoteWithMetric(props: QuoteWithMetricProps) {
         <div className="text-center mb-16">
           <EditableAdaptiveHeadline
             mode={mode}
-            value={blockContent.headline}
+            value={blockContent.headline || ''}
             onEdit={(value) => handleContentUpdate('headline', value)}
             level="h2"
-            backgroundType={backgroundType}
+            backgroundType={backgroundType === 'custom' ? 'secondary' : backgroundType}
             colorTokens={colorTokens}
-            textStyle={getTextStyle('h1')}
             className="mb-4"
             sectionId={sectionId}
             elementKey="headline"
@@ -353,11 +340,10 @@ export default function QuoteWithMetric(props: QuoteWithMetricProps) {
           {(blockContent.subheadline || mode === 'edit') && (
             <EditableAdaptiveText
               mode={mode}
-              value={blockContent.subheadline}
+              value={blockContent.subheadline || ''}
               onEdit={(value) => handleContentUpdate('subheadline', value)}
-              backgroundType={backgroundType}
+              backgroundType={backgroundType === 'custom' ? 'secondary' : backgroundType}
               colorTokens={colorTokens}
-              textStyle={getTextStyle('body-lg')}
               className="mb-6 max-w-3xl mx-auto"
               placeholder="Add optional subheadline describing customer success stories..."
               sectionId={sectionId}

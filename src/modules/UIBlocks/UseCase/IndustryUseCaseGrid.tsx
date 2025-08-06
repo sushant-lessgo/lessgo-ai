@@ -34,15 +34,15 @@ export default function IndustryUseCaseGrid(props: LayoutComponentProps) {
   };
 
   return (
-    <LayoutSection sectionId={sectionId} sectionType="IndustryUseCaseGrid" backgroundType={props.backgroundType || 'neutral'} sectionBackground={sectionBackground} mode={mode} className={props.className}>
+    <LayoutSection sectionId={sectionId} sectionType="IndustryUseCaseGrid" backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')} sectionBackground={sectionBackground} mode={mode} className={props.className}>
       <div className="max-w-7xl mx-auto">
-        <EditableAdaptiveHeadline mode={mode} value={blockContent.headline} onEdit={(value) => handleContentUpdate('headline', value)} level="h2" backgroundType={props.backgroundType || 'neutral'} colorTokens={colorTokens} textStyle={getTextStyle('h1')} className="text-center mb-16" sectionId={sectionId} elementKey="headline" sectionBackground={sectionBackground} />
+        <EditableAdaptiveHeadline mode={mode} value={blockContent.headline || ''} onEdit={(value) => handleContentUpdate('headline', value)} level="h2" backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')} colorTokens={colorTokens} className="text-center mb-16" sectionId={sectionId} elementKey="headline" sectionBackground={sectionBackground} />
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
           {industries.map((industry, index) => (
             <div key={index} className="bg-white p-8 rounded-xl border border-gray-200 hover:shadow-lg transition-all duration-300">
               <div className="text-6xl mb-6 text-center">{getIndustryIcon(industry)}</div>
-              <h3 className="font-bold text-gray-900 mb-4 text-center" style={getTextStyle('h3')}>{industry}</h3>
-              <p className="text-gray-600 text-center" style={getTextStyle('body-sm')}>{useCases[index] || 'Industry-specific use case'}</p>
+              <h3 className="font-bold text-gray-900 mb-4 text-center">{industry}</h3>
+              <p className="text-gray-600 text-center">{useCases[index] || 'Industry-specific use case'}</p>
               <div className="mt-6 text-center">
                 <div className="inline-flex items-center text-blue-600 text-sm font-medium">
                   Learn More →

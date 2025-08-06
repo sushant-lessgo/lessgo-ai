@@ -96,41 +96,42 @@ export default function ToggleableComparison(props: LayoutComponentProps) {
         {/* Header Section */}
         <div className="text-center mb-12">
           <EditableAdaptiveHeadline
-            content={blockContent.headline}
+            value={blockContent.headline || ''}
+            onEdit={(value) => handleContentUpdate('headline', value)}
             mode={mode}
-            onUpdate={(value) => handleContentUpdate('headline', value)}
-            className="mb-4"
-            fonts={fonts}
+            level="h1"
+            backgroundType={backgroundType === 'custom' ? 'secondary' : (backgroundType || 'secondary')}
+            sectionBackground={sectionBackground}
             colorTokens={colorTokens}
-            variant="h1"
+            className="mb-4"
           />
           
           {(blockContent.subheadline || mode === 'edit') && (
             <EditableAdaptiveText
-              content={blockContent.subheadline || 'Add subheadline...'}
+              value={blockContent.subheadline || 'Add subheadline...'}
+              onEdit={(value) => handleContentUpdate('subheadline', value)}
               mode={mode}
-              onUpdate={(value) => handleContentUpdate('subheadline', value)}
-              className={`max-w-2xl mx-auto ${!blockContent.subheadline && mode === 'edit' ? 'opacity-50' : ''}`}
-              fonts={fonts}
+              backgroundType={backgroundType === 'custom' ? 'secondary' : (backgroundType || 'secondary')}
+              variant="body"
+              sectionBackground={sectionBackground}
               colorTokens={colorTokens}
-              variant="body-lg"
+              className={`max-w-2xl mx-auto ${!blockContent.subheadline && mode === 'edit' ? 'opacity-50' : ''}`}
             />
           )}
         </div>
 
         {/* Toggle Options */}
         <div className="flex justify-center mb-8">
-          <div className={`inline-flex rounded-lg p-1 ${colorTokens.bgNeutral} border ${colorTokens.borderColor}`}>
+          <div className={`inline-flex rounded-lg p-1 ${colorTokens.bgNeutral} border border-gray-200`}>
             {optionLabels.map((label, index) => (
               <button
                 key={index}
                 onClick={() => setActiveOption(index)}
                 className={`px-6 py-3 rounded-md transition-all ${
                   activeOption === index
-                    ? `${colorTokens.bgAccent} text-white`
+                    ? `bg-primary text-white`
                     : `${colorTokens.textSecondary} hover:${colorTokens.textPrimary}`
                 }`}
-                style={getTextStyle('body')}
               >
                 {mode === 'edit' ? (
                   <input
@@ -163,7 +164,6 @@ export default function ToggleableComparison(props: LayoutComponentProps) {
               <div key={categoryIndex}>
                 <h3 
                   className={`font-semibold mb-4 ${colorTokens.textPrimary}`}
-                  style={fonts.h3}
                 >
                   {category.category}
                 </h3>
@@ -176,21 +176,21 @@ export default function ToggleableComparison(props: LayoutComponentProps) {
                       
                       return (
                         <div key={itemIndex} className="flex items-center justify-between">
-                          <span className={colorTokens.textSecondary} style={getTextStyle('body')}>
+                          <span className={colorTokens.textSecondary}>
                             {item}
                           </span>
                           
                           {hasFeature ? (
                             <div className="flex items-center">
-                              <svg className={`w-5 h-5 ${colorTokens.textAccent} mr-2`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <svg className={`w-5 h-5 text-primary mr-2`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                               </svg>
-                              <span className={`${colorTokens.textAccent} font-medium`} style={getTextStyle('body')}>
+                              <span className={`text-primary font-medium`}>
                                 Included
                               </span>
                             </div>
                           ) : (
-                            <span className="text-gray-400" style={getTextStyle('body')}>
+                            <span className="text-gray-400">
                               Not available
                             </span>
                           )}
@@ -206,8 +206,8 @@ export default function ToggleableComparison(props: LayoutComponentProps) {
 
         {/* CTA for active option */}
         <div className="text-center mt-12">
-          <button className={`${colorTokens.bgAccent} text-white px-8 py-4 rounded-lg font-semibold hover:opacity-90 transition-opacity`}>
-            <span style={fonts.button}>
+          <button className={`bg-primary text-white px-8 py-4 rounded-lg font-semibold hover:opacity-90 transition-opacity`}>
+            <span>
               Get Started with {optionLabels[activeOption]}
             </span>
           </button>

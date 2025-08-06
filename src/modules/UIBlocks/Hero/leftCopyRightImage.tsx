@@ -258,7 +258,7 @@ export default function LeftCopyRightImage(props: LayoutComponentProps) {
     <LayoutSection
       sectionId={sectionId}
       sectionType="LeftCopyRightImage"
-      backgroundType={props.backgroundType || 'primary'}
+      backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
       sectionBackground={sectionBackground}
       mode={mode}
       className={props.className}
@@ -277,7 +277,6 @@ export default function LeftCopyRightImage(props: LayoutComponentProps) {
                   value={blockContent.badge_text || ''}
                   onEdit={(value) => handleContentUpdate('badge_text', value)}
                   colorTokens={colorTokens}
-                  textStyle={getTextStyle('body-sm')}
                   placeholder="🎉 New Feature Launch"
                   sectionId={sectionId}
                   elementKey="badge_text"
@@ -289,12 +288,11 @@ export default function LeftCopyRightImage(props: LayoutComponentProps) {
             {/* ✅ ENHANCED: Main Headline with Dynamic Text Color */}
             <EditableAdaptiveHeadline
               mode={mode}
-              value={blockContent.headline}
+              value={blockContent.headline || ''}
               onEdit={(value) => handleContentUpdate('headline', value)}
               level="h1"
-              backgroundType={props.backgroundType || 'primary'}
+              backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
               colorTokens={colorTokens}
-              textStyle={getTextStyle('h1')}
               className="leading-tight"
               sectionId={sectionId}
               elementKey="headline"
@@ -307,10 +305,9 @@ export default function LeftCopyRightImage(props: LayoutComponentProps) {
                 mode={mode}
                 value={blockContent.subheadline || ''}
                 onEdit={(value) => handleContentUpdate('subheadline', value)}
-                backgroundType={props.backgroundType || 'primary'}
+                backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
                 colorTokens={colorTokens}
                 variant="body"
-                textStyle={getTextStyle('body-lg')}
                 className="text-lg lg:text-xl leading-relaxed"
                 placeholder="Add a compelling subheadline that supports your main message and explains the key benefit..."
                 sectionId={sectionId}
@@ -325,10 +322,9 @@ export default function LeftCopyRightImage(props: LayoutComponentProps) {
                 mode={mode}
                 value={blockContent.supporting_text || ''}
                 onEdit={(value) => handleContentUpdate('supporting_text', value)}
-                backgroundType={props.backgroundType || 'primary'}
+                backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
                 colorTokens={colorTokens}
                 variant="body"
-                textStyle={getTextStyle('body')}
                 className="leading-relaxed"
                 placeholder="Add supporting text with social proof, customer count, or key metrics..."
                 sectionId={sectionId}
@@ -344,7 +340,6 @@ export default function LeftCopyRightImage(props: LayoutComponentProps) {
               <CTAButton
                 text={blockContent.cta_text}
                 colorTokens={colorTokens} // ✅ Now includes proper accent colors
-                textStyle={getTextStyle('body-lg')}
                 className="shadow-xl hover:shadow-2xl transform hover:-translate-y-0.5 transition-all duration-200"
                 variant="primary"
                 sectionId={sectionId}

@@ -84,8 +84,8 @@ const MetricDisplay = React.memo(({
     <div className="text-center p-6 rounded-xl bg-white/5 backdrop-blur-sm border border-white/10 hover:bg-white/10 transition-all duration-300">
       <div className="space-y-2">
         <SocialProofNumber
-          value={metric.value}
-          style={getTextStyle('h2')}
+          number={metric.value}
+          label=""
           className={`text-3xl md:text-4xl font-bold ${dynamicTextColors?.heading || 'text-gray-900'}`}
         />
         
@@ -185,7 +185,7 @@ export default function UserCountBar(props: LayoutComponentProps) {
     <LayoutSection
       sectionId={sectionId}
       sectionType="UserCountBar"
-      backgroundType={props.backgroundType || 'primary'}
+      backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
       sectionBackground={sectionBackground}
       mode={mode}
       className={props.className}
@@ -196,12 +196,11 @@ export default function UserCountBar(props: LayoutComponentProps) {
         <div className="text-center mb-12">
           <EditableAdaptiveHeadline
             mode={mode}
-            value={blockContent.headline}
+            value={blockContent.headline || ''}
             onEdit={(value) => handleContentUpdate('headline', value)}
             level="h2"
-            backgroundType={props.backgroundType || 'primary'}
+            backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
             colorTokens={colorTokens}
-            textStyle={getTextStyle('h2')}
             className="mb-6"
             sectionId={sectionId}
             elementKey="headline"
@@ -213,10 +212,9 @@ export default function UserCountBar(props: LayoutComponentProps) {
               mode={mode}
               value={blockContent.subheadline || ''}
               onEdit={(value) => handleContentUpdate('subheadline', value)}
-              backgroundType={props.backgroundType || 'primary'}
+              backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
               colorTokens={colorTokens}
               variant="body"
-              textStyle={getTextStyle('body-lg')}
               className="text-lg max-w-3xl mx-auto mb-8"
               placeholder="Add a compelling subheadline about your user growth..."
               sectionId={sectionId}

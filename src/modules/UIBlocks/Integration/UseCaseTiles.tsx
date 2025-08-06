@@ -110,7 +110,7 @@ const CONTENT_SCHEMA = {
 
 // Integration Badge Component
 const IntegrationBadge = React.memo(({ name, colorTokens }: { name: string; colorTokens: any }) => (
-  <span className={`inline-flex items-center px-2 py-1 rounded-md text-xs font-medium ${colorTokens.bgTertiary} ${colorTokens.textMuted} border ${colorTokens.borderPrimary}`}>
+  <span className={`inline-flex items-center px-2 py-1 rounded-md text-xs font-medium ${colorTokens.bgSecondary} ${colorTokens.textMuted} border border-gray-200`}>
     <div className="w-1.5 h-1.5 rounded-full bg-green-400 mr-1.5"></div>
     {name}
   </span>
@@ -123,20 +123,18 @@ const UseCaseTile = React.memo(({
   isHovered, 
   onHover, 
   onLeave, 
-  colorTokens, 
-  textStyle 
+  colorTokens
 }: { 
   useCase: any; 
   isHovered: boolean; 
   onHover: () => void;
   onLeave: () => void;
   colorTokens: any;
-  textStyle: string;
 }) => (
   <div 
     className={`relative p-6 rounded-xl border transition-all duration-300 cursor-pointer group ${
       isHovered 
-        ? `${colorTokens.bgSecondary} ${colorTokens.borderPrimary} shadow-lg scale-105` 
+        ? `${colorTokens.bgSecondary} border-gray-200 shadow-lg scale-105` 
         : `${colorTokens.bgPrimary} ${colorTokens.borderSecondary} hover:${colorTokens.bgSecondary} hover:shadow-md`
     }`}
     onMouseEnter={onHover}
@@ -148,12 +146,12 @@ const UseCaseTile = React.memo(({
     </div>
 
     {/* Title */}
-    <h3 className={`font-semibold mb-3 ${colorTokens.textHeading} ${textStyle}`}>
+    <h3 className={`font-semibold mb-3 ${colorTokens.textPrimary}`}>
       {useCase.title}
     </h3>
 
     {/* Description */}
-    <p className={`text-sm leading-relaxed mb-4 ${colorTokens.textBody}`}>
+    <p className={`text-sm leading-relaxed mb-4 ${colorTokens.textSecondary}`}>
       {useCase.description}
     </p>
 
@@ -170,7 +168,7 @@ const UseCaseTile = React.memo(({
 
     {/* Hover Arrow */}
     {isHovered && (
-      <div className={`absolute top-6 right-6 w-8 h-8 rounded-full ${colorTokens.accent} flex items-center justify-center transition-all duration-300`}>
+      <div className={`absolute top-6 right-6 w-8 h-8 rounded-full ${colorTokens.ctaBg} flex items-center justify-center transition-all duration-300`}>
         <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
         </svg>
@@ -230,7 +228,7 @@ export default function UseCaseTiles(props: LayoutComponentProps) {
     <LayoutSection
       sectionId={sectionId}
       sectionType="UseCaseTiles"
-      backgroundType={props.backgroundType || 'primary'}
+      backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
       sectionBackground={sectionBackground}
       mode={mode}
       className={props.className}
@@ -241,12 +239,11 @@ export default function UseCaseTiles(props: LayoutComponentProps) {
         <div className="text-center mb-12">
           <EditableAdaptiveHeadline
             mode={mode}
-            value={blockContent.headline}
+            value={blockContent.headline || ''}
             onEdit={(value) => handleContentUpdate('headline', value)}
             level="h2"
-            backgroundType={props.backgroundType || 'primary'}
+            backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
             colorTokens={colorTokens}
-            textStyle={getTextStyle('h2')}
             className="mb-4"
             sectionId={sectionId}
             elementKey="headline"
@@ -258,10 +255,9 @@ export default function UseCaseTiles(props: LayoutComponentProps) {
               mode={mode}
               value={blockContent.subheadline || ''}
               onEdit={(value) => handleContentUpdate('subheadline', value)}
-              backgroundType={props.backgroundType || 'primary'}
+              backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
               colorTokens={colorTokens}
               variant="body"
-              textStyle={getTextStyle('body-lg')}
               className="text-lg leading-relaxed max-w-3xl mx-auto"
               placeholder="Add a description of your integration use cases..."
               sectionId={sectionId}
@@ -281,18 +277,17 @@ export default function UseCaseTiles(props: LayoutComponentProps) {
               onHover={() => setHoveredIndex(index)}
               onLeave={() => setHoveredIndex(null)}
               colorTokens={colorTokens}
-              textStyle={getTextStyle('body-lg')}
             />
           ))}
         </div>
 
         {/* Footer CTA */}
         <div className="text-center mt-12">
-          <div className={`inline-flex items-center space-x-2 px-6 py-3 rounded-lg ${colorTokens.bgSecondary} ${colorTokens.borderPrimary} border`}>
-            <span className={`${colorTokens.textBody} text-sm`}>
+          <div className={`inline-flex items-center space-x-2 px-6 py-3 rounded-lg ${colorTokens.bgSecondary} border-gray-200 border`}>
+            <span className={`${colorTokens.textSecondary} text-sm`}>
               Ready to build your integration?
             </span>
-            <button className={`${colorTokens.accent} ${colorTokens.accentText} px-4 py-2 rounded-lg text-sm font-medium hover:opacity-90 transition-opacity`}>
+            <button className={`${colorTokens.ctaBg} ${colorTokens.ctaText} px-4 py-2 rounded-lg text-sm font-medium hover:opacity-90 transition-opacity`}>
               View Documentation
             </button>
           </div>

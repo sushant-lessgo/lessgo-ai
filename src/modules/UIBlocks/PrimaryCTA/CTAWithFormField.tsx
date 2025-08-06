@@ -95,7 +95,7 @@ export default function CTAWithFormField(props: LayoutComponentProps) {
     <LayoutSection
       sectionId={sectionId}
       sectionType="CTAWithFormField"
-      backgroundType={props.backgroundType || 'secondary'}
+      backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'secondary')}
       sectionBackground={sectionBackground}
       mode={mode}
       className={props.className}
@@ -107,12 +107,11 @@ export default function CTAWithFormField(props: LayoutComponentProps) {
           <div>
             <EditableAdaptiveHeadline
               mode={mode}
-              value={blockContent.headline}
+              value={blockContent.headline || ''}
               onEdit={(value) => handleContentUpdate('headline', value)}
               level="h2"
-              backgroundType={props.backgroundType || 'secondary'}
+              backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'secondary')}
               colorTokens={colorTokens}
-              textStyle={getTextStyle('h1')}
               className="mb-6"
               sectionId={sectionId}
               elementKey="headline"
@@ -122,12 +121,11 @@ export default function CTAWithFormField(props: LayoutComponentProps) {
             {blockContent.subheadline && (
               <EditableAdaptiveText
                 mode={mode}
-                value={blockContent.subheadline}
+                value={blockContent.subheadline || ''}
                 onEdit={(value) => handleContentUpdate('subheadline', value)}
-                backgroundType={props.backgroundType || 'secondary'}
+                backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'secondary')}
                 colorTokens={colorTokens}
                 variant="body"
-                textStyle={getTextStyle('body-lg')}
                 className="text-lg mb-8"
                 sectionId={sectionId}
                 elementKey="subheadline"
@@ -160,12 +158,11 @@ export default function CTAWithFormField(props: LayoutComponentProps) {
               <div>
                 <EditableAdaptiveText
                   mode={mode}
-                  value={blockContent.form_label}
+                  value={blockContent.form_label || ''}
                   onEdit={(value) => handleContentUpdate('form_label', value)}
                   backgroundType="neutral"
                   colorTokens={colorTokens}
                   variant="body"
-                  textStyle={getTextStyle('body')}
                   className="text-gray-700 font-semibold mb-2 block"
                   sectionId={sectionId}
                   elementKey="form_label"
@@ -192,7 +189,6 @@ export default function CTAWithFormField(props: LayoutComponentProps) {
               <button
                 type="submit"
                 className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors duration-200 shadow-lg hover:shadow-xl"
-                style={getTextStyle('body-lg')}
               >
                 {blockContent.cta_text}
               </button>
@@ -200,12 +196,11 @@ export default function CTAWithFormField(props: LayoutComponentProps) {
               {/* Privacy Text */}
               <EditableAdaptiveText
                 mode={mode}
-                value={blockContent.privacy_text}
+                value={blockContent.privacy_text || ''}
                 onEdit={(value) => handleContentUpdate('privacy_text', value)}
                 backgroundType="neutral"
                 colorTokens={colorTokens}
                 variant="body"
-                textStyle={getTextStyle('body-sm')}
                 className="text-gray-500 text-center text-sm"
                 sectionId={sectionId}
                 elementKey="privacy_text"

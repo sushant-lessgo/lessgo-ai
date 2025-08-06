@@ -184,14 +184,12 @@ const SecurityChecklistItem = ({
               suppressContentEditableWarning
               onBlur={(e) => onItemEdit(index, e.currentTarget.textContent || '')}
               className="outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-1 min-h-[24px] cursor-text hover:bg-gray-50 font-semibold text-gray-900 leading-relaxed"
-              style={getTextStyle('h3')}
             >
               {securityItem.item}
             </div>
           ) : (
             <h3 
               className="font-semibold text-gray-900 leading-relaxed"
-              style={getTextStyle('h3')}
             >
               {securityItem.item}
             </h3>
@@ -207,14 +205,12 @@ const SecurityChecklistItem = ({
                 suppressContentEditableWarning
                 onBlur={(e) => onDescriptionEdit(index, e.currentTarget.textContent || '')}
                 className={`outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-1 min-h-[20px] cursor-text hover:bg-gray-50 text-gray-600 leading-relaxed ${!securityItem.description ? 'opacity-50 italic' : ''}`}
-                style={getTextStyle('body-sm')}
               >
                 {securityItem.description || 'Add optional description to explain this security measure...'}
               </div>
             ) : securityItem.description && (
               <p 
                 className="text-gray-600 leading-relaxed"
-                style={getTextStyle('body-sm')}
               >
                 {securityItem.description}
               </p>
@@ -265,7 +261,7 @@ export default function SecurityChecklist(props: SecurityChecklistProps) {
     <LayoutSection
       sectionId={sectionId}
       sectionType="SecurityChecklist"
-      backgroundType={backgroundType}
+      backgroundType={backgroundType === 'custom' ? 'secondary' : backgroundType}
       sectionBackground={sectionBackground}
       mode={mode}
       className={props.className}
@@ -281,7 +277,6 @@ export default function SecurityChecklist(props: SecurityChecklistProps) {
           >
             <h2 
               className={`mb-6 ${colorTokens.textPrimary}`}
-              style={getTextStyle('h1')}
             >
               {blockContent.headline}
             </h2>
@@ -313,7 +308,7 @@ export default function SecurityChecklist(props: SecurityChecklistProps) {
                 </svg>
               </div>
               <div className="flex-1">
-                <h3 className="font-semibold text-blue-900 mb-2" style={getTextStyle('h3')}>
+                <h3 className="font-semibold text-blue-900 mb-2">
                   Compliance & Certifications
                 </h3>
                 <ModeWrapper
@@ -324,7 +319,6 @@ export default function SecurityChecklist(props: SecurityChecklistProps) {
                 >
                   <p 
                     className={`text-blue-800 leading-relaxed ${!blockContent.compliance_note && mode === 'edit' ? 'opacity-50 italic' : ''}`}
-                    style={getTextStyle('body')}
                   >
                     {blockContent.compliance_note || (mode === 'edit' ? 'Add compliance note (e.g., We maintain SOC 2 Type II compliance and undergo annual security audits...)' : '')}
                   </p>

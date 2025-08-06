@@ -1,5 +1,6 @@
 // types/content.ts - Core content structure types with taxonomy constraints
 import type { ImageAsset, VideoData, IconData } from './images';
+import type { BackgroundType, SectionBackground } from '../sectionBackground';
 import type {
   MarketCategory,
   MarketSubcategory,

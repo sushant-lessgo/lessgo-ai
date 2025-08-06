@@ -95,10 +95,10 @@ const ValuePropCard = React.memo(({
       
       {/* Content */}
       <div className="flex-1">
-        <h3 className="font-bold text-gray-900 mb-2" style={getTextStyle('h3')}>
+        <h3 className="font-bold text-gray-900 mb-2">
           {valueProp.title}
         </h3>
-        <p className="text-gray-600 leading-relaxed" style={getTextStyle('body-sm')}>
+        <p className="text-gray-600 leading-relaxed">
           {valueProp.description}
         </p>
       </div>
@@ -136,7 +136,7 @@ export default function ValueStackCTA(props: LayoutComponentProps) {
     <LayoutSection
       sectionId={sectionId}
       sectionType="ValueStackCTA"
-      backgroundType={props.backgroundType || 'neutral'}
+      backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
       sectionBackground={sectionBackground}
       mode={mode}
       className={props.className}
@@ -147,12 +147,11 @@ export default function ValueStackCTA(props: LayoutComponentProps) {
         <div className="text-center mb-16">
           <EditableAdaptiveHeadline
             mode={mode}
-            value={blockContent.headline}
+            value={blockContent.headline || ''}
             onEdit={(value) => handleContentUpdate('headline', value)}
             level="h2"
-            backgroundType={props.backgroundType || 'neutral'}
+            backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
             colorTokens={colorTokens}
-            textStyle={getTextStyle('h1')}
             className="mb-6"
             sectionId={sectionId}
             elementKey="headline"
@@ -162,12 +161,11 @@ export default function ValueStackCTA(props: LayoutComponentProps) {
           {blockContent.subheadline && (
             <EditableAdaptiveText
               mode={mode}
-              value={blockContent.subheadline}
+              value={blockContent.subheadline || ''}
               onEdit={(value) => handleContentUpdate('subheadline', value)}
-              backgroundType={props.backgroundType || 'neutral'}
+              backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
               colorTokens={colorTokens}
               variant="body"
-              textStyle={getTextStyle('body-lg')}
               className="text-lg max-w-3xl mx-auto"
               sectionId={sectionId}
               elementKey="subheadline"
@@ -191,10 +189,10 @@ export default function ValueStackCTA(props: LayoutComponentProps) {
 
         {/* CTA Section */}
         <div className="bg-gradient-to-r from-blue-600 to-indigo-700 rounded-2xl p-12 text-center text-white">
-          <h3 className="text-2xl lg:text-3xl font-bold mb-4" style={getTextStyle('h2')}>
+          <h3 className="text-2xl lg:text-3xl font-bold mb-4">
             Ready to Get Started?
           </h3>
-          <p className="text-blue-100 mb-8 text-lg max-w-2xl mx-auto" style={getTextStyle('body-lg')}>
+          <p className="text-blue-100 mb-8 text-lg max-w-2xl mx-auto">
             Join thousands of businesses already transforming their operations with our platform.
           </p>
           
@@ -202,7 +200,6 @@ export default function ValueStackCTA(props: LayoutComponentProps) {
             <CTAButton
               text={blockContent.cta_text}
               colorTokens={{ ...colorTokens, ctaBg: 'bg-white', ctaText: 'text-blue-600', ctaHover: 'hover:bg-gray-100' }}
-              textStyle={getTextStyle('body-lg')}
               className="shadow-xl hover:shadow-2xl transform hover:-translate-y-0.5 transition-all duration-200"
               variant="primary"
               size="large"
@@ -218,12 +215,11 @@ export default function ValueStackCTA(props: LayoutComponentProps) {
                 </svg>
                 <EditableAdaptiveText
                   mode={mode}
-                  value={blockContent.guarantee_text}
+                  value={blockContent.guarantee_text || ''}
                   onEdit={(value) => handleContentUpdate('guarantee_text', value)}
                   backgroundType="primary"
                   colorTokens={{ ...colorTokens, textSecondary: 'text-blue-100' }}
                   variant="body"
-                  textStyle={getTextStyle('body-sm')}
                   className="text-sm font-medium"
                   sectionId={sectionId}
                   elementKey="guarantee_text"

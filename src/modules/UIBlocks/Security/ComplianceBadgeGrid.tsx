@@ -96,12 +96,12 @@ const ComplianceBadgeCard = React.memo(({
       </div>
       
       {/* Badge Name */}
-      <h3 className="font-bold text-gray-900 mb-3" style={getTextStyle('h3')}>
+      <h3 className="font-bold text-gray-900 mb-3">
         {badge.name}
       </h3>
       
       {/* Badge Description */}
-      <p className="text-gray-600 text-sm leading-relaxed" style={getTextStyle('body-sm')}>
+      <p className="text-gray-600 text-sm leading-relaxed">
         {badge.description}
       </p>
       
@@ -140,7 +140,7 @@ export default function ComplianceBadgeGrid(props: LayoutComponentProps) {
     <LayoutSection
       sectionId={sectionId}
       sectionType="ComplianceBadgeGrid"
-      backgroundType={props.backgroundType || 'neutral'}
+      backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
       sectionBackground={sectionBackground}
       mode={mode}
       className={props.className}
@@ -151,12 +151,11 @@ export default function ComplianceBadgeGrid(props: LayoutComponentProps) {
         <div className="text-center mb-16">
           <EditableAdaptiveHeadline
             mode={mode}
-            value={blockContent.headline}
+            value={blockContent.headline || ''}
             onEdit={(value) => handleContentUpdate('headline', value)}
             level="h2"
-            backgroundType={props.backgroundType || 'neutral'}
+            backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
             colorTokens={colorTokens}
-            textStyle={getTextStyle('h1')}
             className="mb-6"
             sectionId={sectionId}
             elementKey="headline"
@@ -166,12 +165,11 @@ export default function ComplianceBadgeGrid(props: LayoutComponentProps) {
           {blockContent.subheadline && (
             <EditableAdaptiveText
               mode={mode}
-              value={blockContent.subheadline}
+              value={blockContent.subheadline || ''}
               onEdit={(value) => handleContentUpdate('subheadline', value)}
-              backgroundType={props.backgroundType || 'neutral'}
+              backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
               colorTokens={colorTokens}
               variant="body"
-              textStyle={getTextStyle('body-lg')}
               className="text-lg max-w-3xl mx-auto"
               sectionId={sectionId}
               elementKey="subheadline"
@@ -201,10 +199,10 @@ export default function ComplianceBadgeGrid(props: LayoutComponentProps) {
               </svg>
             </div>
           </div>
-          <h3 className="font-bold text-blue-900 mb-3" style={getTextStyle('h3')}>
+          <h3 className="font-bold text-blue-900 mb-3">
             Your Data is Protected
           </h3>
-          <p className="text-blue-800 max-w-2xl mx-auto" style={getTextStyle('body')}>
+          <p className="text-blue-800 max-w-2xl mx-auto">
             We maintain the highest security standards through continuous monitoring, 
             regular audits, and strict compliance with international regulations.
           </p>

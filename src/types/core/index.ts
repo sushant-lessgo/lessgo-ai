@@ -59,12 +59,6 @@ export type {
   EditableElement,
   ElementType,
   ElementEditMode,
-  BackgroundType,
-  ThemeColorType,
-  SectionBackground,
-  CustomBackground,
-  BackgroundValidation,
-  BackgroundCSS,
   SectionType,
   SectionMedia,
   SectionCTA,
@@ -82,6 +76,15 @@ export type {
   FontTheme,
   TypographyState,
 } from './content';
+
+export type {
+  BackgroundType,
+  ThemeColorType,
+  SectionBackground,
+  CustomBackground,
+  BackgroundValidation,
+  BackgroundCSS,
+} from '../sectionBackground';
 
 /**
  * ===== AI GENERATION TYPES =====

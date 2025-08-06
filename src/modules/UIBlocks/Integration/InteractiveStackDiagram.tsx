@@ -99,8 +99,8 @@ const TechBadge = React.memo(({ name, isActive, onClick, colorTokens }: {
     onClick={onClick}
     className={`px-3 py-1.5 rounded-lg text-sm font-medium border transition-all duration-300 ${
       isActive 
-        ? `${colorTokens.accent} ${colorTokens.accentText} border-current shadow-md scale-105` 
-        : `${colorTokens.bgSecondary} ${colorTokens.textBody} ${colorTokens.borderPrimary} hover:${colorTokens.bgTertiary} hover:scale-102`
+        ? `${colorTokens.ctaBg} ${colorTokens.ctaBgText} border-current shadow-md scale-105` 
+        : `${colorTokens.bgSecondary} ${colorTokens.textSecondary} border-gray-200 hover:${colorTokens.bgSecondary} hover:scale-102`
     }`}
   >
     {name}
@@ -125,7 +125,7 @@ const StackLayer = React.memo(({
   onHover: () => void;
   onTechClick: (tech: string) => void;
   colorTokens: any;
-  textStyle: string;
+  textStyle: React.CSSProperties;
   activeTech: string | null;
 }) => {
   const layerColors = [
@@ -236,7 +236,7 @@ export default function InteractiveStackDiagram(props: LayoutComponentProps) {
     <LayoutSection
       sectionId={sectionId}
       sectionType="InteractiveStackDiagram"
-      backgroundType={props.backgroundType || 'primary'}
+      backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
       sectionBackground={sectionBackground}
       mode={mode}
       className={props.className}
@@ -247,12 +247,11 @@ export default function InteractiveStackDiagram(props: LayoutComponentProps) {
         <div className="text-center mb-16">
           <EditableAdaptiveHeadline
             mode={mode}
-            value={blockContent.headline}
+            value={blockContent.headline || ''}
             onEdit={(value) => handleContentUpdate('headline', value)}
             level="h2"
-            backgroundType={props.backgroundType || 'primary'}
+            backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
             colorTokens={colorTokens}
-            textStyle={getTextStyle('h2')}
             className="mb-4"
             sectionId={sectionId}
             elementKey="headline"
@@ -264,10 +263,9 @@ export default function InteractiveStackDiagram(props: LayoutComponentProps) {
               mode={mode}
               value={blockContent.subheadline || ''}
               onEdit={(value) => handleContentUpdate('subheadline', value)}
-              backgroundType={props.backgroundType || 'primary'}
+              backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
               colorTokens={colorTokens}
               variant="body"
-              textStyle={getTextStyle('body-lg')}
               className="text-lg leading-relaxed max-w-3xl mx-auto"
               placeholder="Add a description of your technical architecture..."
               sectionId={sectionId}
@@ -289,7 +287,7 @@ export default function InteractiveStackDiagram(props: LayoutComponentProps) {
                 onHover={() => setActiveLayer(index)}
                 onTechClick={handleTechClick}
                 colorTokens={colorTokens}
-                textStyle={getTextStyle('body')}
+                textStyle={{}}
                 activeTech={activeTech}
               />
             ))}
@@ -297,10 +295,10 @@ export default function InteractiveStackDiagram(props: LayoutComponentProps) {
 
           {/* Active Technology Info */}
           {activeTech && (
-            <div className={`mt-8 p-6 rounded-xl ${colorTokens.bgSecondary} ${colorTokens.borderPrimary} border`}>
+            <div className={`mt-8 p-6 rounded-xl ${colorTokens.bgSecondary} border border-gray-200`}>
               <div className="flex items-center justify-between">
                 <div>
-                  <h4 className={`font-semibold ${colorTokens.textHeading} ${getTextStyle('body-lg')}`}>
+                  <h4 className={`font-semibold ${colorTokens.textPrimary} ${getTextStyle('body-lg')}`}>
                     {activeTech}
                   </h4>
                   <p className={`${dynamicTextColors?.muted || colorTokens.textMuted} text-sm mt-1`}>
@@ -309,7 +307,7 @@ export default function InteractiveStackDiagram(props: LayoutComponentProps) {
                 </div>
                 <button
                   onClick={() => setActiveTech(null)}
-                  className={`p-2 rounded-lg ${colorTokens.bgTertiary} ${colorTokens.textBody} hover:${colorTokens.bgPrimary} transition-colors`}
+                  className={`p-2 rounded-lg ${colorTokens.bgSecondary} ${colorTokens.textPrimary} hover:opacity-80 transition-colors`}
                 >
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -323,7 +321,7 @@ export default function InteractiveStackDiagram(props: LayoutComponentProps) {
         {/* Footer */}
         <div className="text-center mt-12">
           <p className={`${dynamicTextColors?.muted || colorTokens.textMuted} text-sm`}>
-            Need a custom integration? <span className={`${colorTokens.accent} hover:underline cursor-pointer`}>Contact our technical team</span>
+            Need a custom integration? <span className={`${colorTokens.ctaBg} hover:underline cursor-pointer`}>Contact our technical team</span>
           </p>
         </div>
       </div>

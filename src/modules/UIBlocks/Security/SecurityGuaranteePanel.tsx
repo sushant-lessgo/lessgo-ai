@@ -50,7 +50,7 @@ export default function SecurityGuaranteePanel(props: LayoutComponentProps) {
     <LayoutSection
       sectionId={sectionId}
       sectionType="SecurityGuaranteePanel"
-      backgroundType={props.backgroundType || 'primary'}
+      backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
       sectionBackground={sectionBackground}
       mode={mode}
       className={props.className}
@@ -69,12 +69,11 @@ export default function SecurityGuaranteePanel(props: LayoutComponentProps) {
               
               <EditableAdaptiveHeadline
                 mode={mode}
-                value={blockContent.headline}
+                value={blockContent.headline || ''}
                 onEdit={(value) => handleContentUpdate('headline', value)}
                 level="h2"
                 backgroundType="primary"
                 colorTokens={{ ...colorTokens, textPrimary: 'text-white' }}
-                textStyle={getTextStyle('h1')}
                 className="text-white mb-4"
                 sectionId={sectionId}
                 elementKey="headline"
@@ -83,12 +82,11 @@ export default function SecurityGuaranteePanel(props: LayoutComponentProps) {
               
               <EditableAdaptiveText
                 mode={mode}
-                value={blockContent.guarantee_text}
+                value={blockContent.guarantee_text || ''}
                 onEdit={(value) => handleContentUpdate('guarantee_text', value)}
                 backgroundType="primary"
                 colorTokens={{ ...colorTokens, textSecondary: 'text-blue-100' }}
                 variant="body"
-                textStyle={getTextStyle('body-lg')}
                 className="text-blue-100 text-lg max-w-2xl mx-auto"
                 sectionId={sectionId}
                 elementKey="guarantee_text"

@@ -111,7 +111,7 @@ export default function AnimatedUpgradePath(props: LayoutComponentProps) {
   const getStageColor = (index: number) => {
     if (index === 0) return 'text-red-500 bg-red-100';
     if (index === 1) return 'text-yellow-500 bg-yellow-100';
-    return `${colorTokens.textAccent} ${colorTokens.bgAccent} bg-opacity-20`;
+    return `text-primary bg-primary bg-opacity-20`;
   };
 
   return (
@@ -127,24 +127,26 @@ export default function AnimatedUpgradePath(props: LayoutComponentProps) {
         {/* Header Section */}
         <div className="text-center mb-12">
           <EditableAdaptiveHeadline
-            content={blockContent.headline}
+            value={blockContent.headline || ''}
             mode={mode}
-            onUpdate={(value) => handleContentUpdate('headline', value)}
+            onEdit={(value) => handleContentUpdate('headline', value)}
             className="mb-4"
-            fonts={fonts}
+            level="h1"
+            backgroundType={backgroundType === 'custom' ? 'secondary' : (backgroundType || 'secondary')}
             colorTokens={colorTokens}
-            variant="h1"
+            sectionBackground={sectionBackground}
           />
           
           {(blockContent.subheadline || mode === 'edit') && (
             <EditableAdaptiveText
-              content={blockContent.subheadline || 'Add subheadline...'}
+              value={blockContent.subheadline || 'Add subheadline...'}
               mode={mode}
-              onUpdate={(value) => handleContentUpdate('subheadline', value)}
+              onEdit={(value) => handleContentUpdate('subheadline', value)}
               className={`max-w-2xl mx-auto ${!blockContent.subheadline && mode === 'edit' ? 'opacity-50' : ''}`}
-              fonts={fonts}
+              backgroundType={backgroundType === 'custom' ? 'secondary' : (backgroundType || 'secondary')}
               colorTokens={colorTokens}
-              variant="body-lg"
+              variant="body"
+              sectionBackground={sectionBackground}
             />
           )}
         </div>
@@ -160,8 +162,8 @@ export default function AnimatedUpgradePath(props: LayoutComponentProps) {
                 {/* Stage Card */}
                 <div className={`rounded-lg p-6 text-center ${
                   index === stageTitles.length - 1 
-                    ? `${colorTokens.bgAccent || 'bg-blue-500'} bg-opacity-5 border-2 border-${(colorTokens.textAccent || 'text-blue-600').replace('text-', '')}` 
-                    : `${colorTokens.bgNeutral} border ${colorTokens.borderColor}`
+                    ? `bg-primary bg-opacity-5 border-2 border-primary` 
+                    : `${colorTokens.bgNeutral} border border-gray-200`
                 }`}>
                   {/* Icon */}
                   <div className={`w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 ${getStageColor(index)}`}>
@@ -175,14 +177,13 @@ export default function AnimatedUpgradePath(props: LayoutComponentProps) {
                       value={title}
                       onChange={(e) => handleStageTitleUpdate(index, e.target.value)}
                       className={`w-full text-center text-xl font-semibold bg-transparent outline-none focus:ring-2 focus:ring-blue-500 rounded px-2 mb-3 ${
-                        index === stageTitles.length - 1 ? colorTokens.textAccent : colorTokens.textPrimary
+                        index === stageTitles.length - 1 ? 'text-primary' : colorTokens.textPrimary
                       }`}
-                      style={fonts.h3}
                     />
                   ) : (
                     <h3 className={`text-xl font-semibold mb-3 ${
-                      index === stageTitles.length - 1 ? colorTokens.textAccent : colorTokens.textPrimary
-                    }`} style={fonts.h3}>
+                      index === stageTitles.length - 1 ? 'text-primary' : colorTokens.textPrimary
+                    }`}>
                       {title}
                     </h3>
                   )}
@@ -193,11 +194,10 @@ export default function AnimatedUpgradePath(props: LayoutComponentProps) {
                       value={stageDescriptions[index]}
                       onChange={(e) => handleStageDescriptionUpdate(index, e.target.value)}
                       className={`w-full text-center bg-transparent outline-none focus:ring-2 focus:ring-blue-500 rounded px-2 resize-none ${colorTokens.textSecondary}`}
-                      style={getTextStyle('body')}
                       rows={3}
                     />
                   ) : (
-                    <p className={colorTokens.textSecondary} style={getTextStyle('body')}>
+                    <p className={colorTokens.textSecondary}>
                       {stageDescriptions[index]}
                     </p>
                   )}
@@ -228,15 +228,16 @@ export default function AnimatedUpgradePath(props: LayoutComponentProps) {
         {/* CTA Section */}
         {(blockContent.cta_text || mode === 'edit') && (
           <div className="text-center mt-12">
-            <button className={`${colorTokens.bgAccent} text-white px-8 py-4 rounded-lg font-semibold hover:opacity-90 transition-opacity inline-flex items-center`}>
+            <button className={`bg-primary text-white px-8 py-4 rounded-lg font-semibold hover:opacity-90 transition-opacity inline-flex items-center`}>
               <EditableAdaptiveText
-                content={blockContent.cta_text || 'Add CTA text...'}
+                value={blockContent.cta_text || 'Add CTA text...'}
                 mode={mode}
-                onUpdate={(value) => handleContentUpdate('cta_text', value)}
+                onEdit={(value) => handleContentUpdate('cta_text', value)}
                 className={!blockContent.cta_text && mode === 'edit' ? 'opacity-75' : ''}
-                fonts={fonts}
+                backgroundType="secondary"
                 colorTokens={{ ...colorTokens, textPrimary: 'text-white' }}
-                variant="button"
+                variant="body"
+                sectionBackground={sectionBackground}
               />
               <svg className="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />

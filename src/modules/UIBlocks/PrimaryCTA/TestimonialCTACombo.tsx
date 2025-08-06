@@ -136,7 +136,7 @@ export default function TestimonialCTACombo(props: LayoutComponentProps) {
     <LayoutSection
       sectionId={sectionId}
       sectionType="TestimonialCTACombo"
-      backgroundType={props.backgroundType || 'primary'}
+      backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
       sectionBackground={sectionBackground}
       mode={mode}
       className={props.className}
@@ -148,12 +148,11 @@ export default function TestimonialCTACombo(props: LayoutComponentProps) {
           <div className="space-y-8">
             <EditableAdaptiveHeadline
               mode={mode}
-              value={blockContent.headline}
+              value={blockContent.headline || ''}
               onEdit={(value) => handleContentUpdate('headline', value)}
               level="h2"
-              backgroundType={props.backgroundType || 'primary'}
+              backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
               colorTokens={colorTokens}
-              textStyle={getTextStyle('h1')}
               className="mb-6"
               sectionId={sectionId}
               elementKey="headline"
@@ -163,12 +162,11 @@ export default function TestimonialCTACombo(props: LayoutComponentProps) {
             {blockContent.subheadline && (
               <EditableAdaptiveText
                 mode={mode}
-                value={blockContent.subheadline}
+                value={blockContent.subheadline || ''}
                 onEdit={(value) => handleContentUpdate('subheadline', value)}
-                backgroundType={props.backgroundType || 'primary'}
+                backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
                 colorTokens={colorTokens}
                 variant="body"
-                textStyle={getTextStyle('body-lg')}
                 className="text-lg mb-8"
                 sectionId={sectionId}
                 elementKey="subheadline"
@@ -179,7 +177,6 @@ export default function TestimonialCTACombo(props: LayoutComponentProps) {
             <CTAButton
               text={blockContent.cta_text}
               colorTokens={colorTokens}
-              textStyle={getTextStyle('body-lg')}
               className="shadow-xl hover:shadow-2xl transform hover:-translate-y-0.5 transition-all duration-200"
               variant="primary"
               size="large"
@@ -234,12 +231,11 @@ export default function TestimonialCTACombo(props: LayoutComponentProps) {
             {/* Testimonial Quote */}
             <EditableAdaptiveText
               mode={mode}
-              value={blockContent.testimonial_quote}
+              value={blockContent.testimonial_quote || ''}
               onEdit={(value) => handleContentUpdate('testimonial_quote', value)}
               backgroundType="neutral"
               colorTokens={colorTokens}
               variant="body"
-              textStyle={getTextStyle('body-lg')}
               className="text-gray-700 leading-relaxed mb-6 italic"
               sectionId={sectionId}
               elementKey="testimonial_quote"
@@ -256,12 +252,11 @@ export default function TestimonialCTACombo(props: LayoutComponentProps) {
               <div>
                 <EditableAdaptiveText
                   mode={mode}
-                  value={blockContent.testimonial_author}
+                  value={blockContent.testimonial_author || ''}
                   onEdit={(value) => handleContentUpdate('testimonial_author', value)}
                   backgroundType="neutral"
                   colorTokens={colorTokens}
                   variant="body"
-                  textStyle={getTextStyle('body')}
                   className="font-semibold text-gray-900"
                   sectionId={sectionId}
                   elementKey="testimonial_author"
@@ -271,12 +266,11 @@ export default function TestimonialCTACombo(props: LayoutComponentProps) {
                 <div className="flex items-center space-x-1 text-sm text-gray-500">
                   <EditableAdaptiveText
                     mode={mode}
-                    value={blockContent.testimonial_title}
+                    value={blockContent.testimonial_title || ''}
                     onEdit={(value) => handleContentUpdate('testimonial_title', value)}
                     backgroundType="neutral"
                     colorTokens={colorTokens}
                     variant="body"
-                    textStyle={getTextStyle('body-sm')}
                     className="text-gray-500"
                     sectionId={sectionId}
                     elementKey="testimonial_title"
@@ -285,12 +279,11 @@ export default function TestimonialCTACombo(props: LayoutComponentProps) {
                   <span>at</span>
                   <EditableAdaptiveText
                     mode={mode}
-                    value={blockContent.testimonial_company}
+                    value={blockContent.testimonial_company || ''}
                     onEdit={(value) => handleContentUpdate('testimonial_company', value)}
                     backgroundType="neutral"
                     colorTokens={colorTokens}
                     variant="body"
-                    textStyle={getTextStyle('body-sm')}
                     className="text-gray-500 font-medium"
                     sectionId={sectionId}
                     elementKey="testimonial_company"

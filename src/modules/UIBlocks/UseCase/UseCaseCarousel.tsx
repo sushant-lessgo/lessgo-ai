@@ -20,9 +20,9 @@ export default function UseCaseCarousel(props: LayoutComponentProps) {
   const useCases = blockContent.use_cases.split('|').map(u => u.trim()).filter(Boolean);
 
   return (
-    <LayoutSection sectionId={sectionId} sectionType="UseCaseCarousel" backgroundType={props.backgroundType || 'secondary'} sectionBackground={sectionBackground} mode={mode} className={props.className}>
+    <LayoutSection sectionId={sectionId} sectionType="UseCaseCarousel" backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'secondary')} sectionBackground={sectionBackground} mode={mode} className={props.className}>
       <div className="max-w-7xl mx-auto">
-        <EditableAdaptiveHeadline mode={mode} value={blockContent.headline} onEdit={(value) => handleContentUpdate('headline', value)} level="h2" backgroundType={props.backgroundType || 'secondary'} colorTokens={colorTokens} textStyle={getTextStyle('h1')} className="text-center mb-16" sectionId={sectionId} elementKey="headline" sectionBackground={sectionBackground} />
+        <EditableAdaptiveHeadline mode={mode} value={blockContent.headline || ''} onEdit={(value) => handleContentUpdate('headline', value)} level="h2" backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'secondary')} colorTokens={colorTokens} className="text-center mb-16" sectionId={sectionId} elementKey="headline" sectionBackground={sectionBackground} />
         <div className="flex overflow-x-auto space-x-6 pb-6">
           {useCases.map((useCase, index) => (
             <div key={index} className="bg-white p-6 rounded-xl border border-gray-200 min-w-[300px] flex-shrink-0">

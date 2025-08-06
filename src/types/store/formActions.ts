@@ -1,5 +1,5 @@
 // Form actions interface for MVP
-import type { SimpleFormData, SimpleFormField } from '@/types/simpleForms';
+import type { MVPForm as SimpleFormData, MVPFormField as SimpleFormField } from '@/types/core/forms';
 
 export interface FormActions {
   // Form CRUD operations

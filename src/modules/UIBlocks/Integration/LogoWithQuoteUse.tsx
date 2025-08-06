@@ -125,13 +125,13 @@ const IntegrationCard = React.memo(({
   isActive: boolean; 
   onClick: () => void;
   colorTokens: any;
-  textStyle: string;
+  textStyle: React.CSSProperties;
 }) => (
   <div 
     className={`p-6 rounded-xl border cursor-pointer transition-all duration-300 ${
       isActive 
-        ? `${colorTokens.accent} ${colorTokens.accentText} border-current shadow-lg scale-105` 
-        : `${colorTokens.bgSecondary} ${colorTokens.borderPrimary} hover:${colorTokens.bgTertiary} hover:shadow-md`
+        ? `${colorTokens.ctaBg} ${colorTokens.ctaBgText} border-current shadow-lg scale-105` 
+        : `${colorTokens.bgSecondary} border-gray-200 hover:${colorTokens.bgSecondary} hover:shadow-md`
     }`}
     onClick={onClick}
   >
@@ -144,21 +144,21 @@ const IntegrationCard = React.memo(({
           {integration.name.substring(0, 2).toUpperCase()}
         </span>
       </div>
-      <h3 className={`font-semibold ${isActive ? 'text-current' : colorTokens.textHeading} ${textStyle}`}>
+      <h3 className={`font-semibold ${isActive ? 'text-current' : colorTokens.textPrimary} ${textStyle}`}>
         {integration.name}
       </h3>
     </div>
 
     {/* Quote Preview */}
     <p className={`text-sm leading-relaxed ${
-      isActive ? 'text-current opacity-90' : colorTokens.textBody
+      isActive ? 'text-current opacity-90' : colorTokens.textSecondary
     } line-clamp-3`}>
       "{integration.quote.substring(0, 100)}..."
     </p>
 
     {/* Author */}
     <div className="mt-4 pt-4 border-t border-current border-opacity-20">
-      <p className={`font-medium text-sm ${isActive ? 'text-current' : colorTokens.textHeading}`}>
+      <p className={`font-medium text-sm ${isActive ? 'text-current' : colorTokens.textPrimary}`}>
         {integration.author}
       </p>
       <p className={`text-xs ${isActive ? 'text-current opacity-75' : colorTokens.textMuted}`}>
@@ -177,11 +177,11 @@ const FeaturedQuote = React.memo(({
 }: { 
   integration: any; 
   colorTokens: any;
-  textStyle: string;
+  textStyle: React.CSSProperties;
 }) => (
-  <div className={`p-8 rounded-2xl ${colorTokens.bgSecondary} ${colorTokens.borderPrimary} border`}>
+  <div className={`p-8 rounded-2xl ${colorTokens.bgSecondary} border-gray-200 border`}>
     {/* Quote */}
-    <blockquote className={`text-xl lg:text-2xl leading-relaxed mb-6 ${colorTokens.textHeading} ${textStyle}`}>
+    <blockquote className={`text-xl lg:text-2xl leading-relaxed mb-6 ${colorTokens.textPrimary} ${textStyle}`}>
       "{integration.quote}"
     </blockquote>
 
@@ -193,14 +193,14 @@ const FeaturedQuote = React.memo(({
         </span>
       </div>
       <div>
-        <p className={`font-semibold ${colorTokens.textHeading}`}>{integration.author}</p>
+        <p className={`font-semibold ${colorTokens.textPrimary}`}>{integration.author}</p>
         <p className={`text-sm ${colorTokens.textMuted}`}>{integration.company}</p>
       </div>
     </div>
 
     {/* Integration Badge */}
-    <div className="mt-6 pt-6 border-t border-gray-200">
-      <div className={`inline-flex items-center px-3 py-1.5 rounded-lg text-sm font-medium ${colorTokens.accent} ${colorTokens.accentText}`}>
+    <div className="mt-6 pt-6 border-t border-border-gray-200">
+      <div className={`inline-flex items-center px-3 py-1.5 rounded-lg text-sm font-medium ${colorTokens.ctaBg} ${colorTokens.ctaBgText}`}>
         <div className="w-2 h-2 rounded-full bg-current mr-2"></div>
         {integration.name}
       </div>
@@ -211,8 +211,8 @@ FeaturedQuote.displayName = 'FeaturedQuote';
 
 // Company Logo Component
 const CompanyLogo = React.memo(({ name, colorTokens }: { name: string; colorTokens: any }) => (
-  <div className={`flex items-center justify-center p-4 rounded-lg ${colorTokens.bgSecondary} ${colorTokens.borderPrimary} border hover:${colorTokens.bgTertiary} transition-colors duration-200`}>
-    <span className={`font-semibold text-lg ${colorTokens.textBody}`}>
+  <div className={`flex items-center justify-center p-4 rounded-lg ${colorTokens.bgSecondary} border-gray-200 border hover:${colorTokens.bgSecondary} transition-colors duration-200`}>
+    <span className={`font-semibold text-lg ${colorTokens.textSecondary}`}>
       {name}
     </span>
   </div>
@@ -274,7 +274,7 @@ export default function LogoWithQuoteUse(props: LayoutComponentProps) {
     <LayoutSection
       sectionId={sectionId}
       sectionType="LogoWithQuoteUse"
-      backgroundType={props.backgroundType || 'primary'}
+      backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
       sectionBackground={sectionBackground}
       mode={mode}
       className={props.className}
@@ -285,12 +285,11 @@ export default function LogoWithQuoteUse(props: LayoutComponentProps) {
         <div className="text-center mb-16">
           <EditableAdaptiveHeadline
             mode={mode}
-            value={blockContent.headline}
+            value={blockContent.headline || ''}
             onEdit={(value) => handleContentUpdate('headline', value)}
             level="h2"
-            backgroundType={props.backgroundType || 'primary'}
+            backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
             colorTokens={colorTokens}
-            textStyle={getTextStyle('h2')}
             className="mb-4"
             sectionId={sectionId}
             elementKey="headline"
@@ -302,10 +301,9 @@ export default function LogoWithQuoteUse(props: LayoutComponentProps) {
               mode={mode}
               value={blockContent.subheadline || ''}
               onEdit={(value) => handleContentUpdate('subheadline', value)}
-              backgroundType={props.backgroundType || 'primary'}
+              backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
               colorTokens={colorTokens}
               variant="body"
-              textStyle={getTextStyle('body-lg')}
               className="text-lg leading-relaxed max-w-4xl mx-auto"
               placeholder="Add a description of customer success stories..."
               sectionId={sectionId}
@@ -327,7 +325,7 @@ export default function LogoWithQuoteUse(props: LayoutComponentProps) {
                 isActive={selectedIntegration === index}
                 onClick={() => setSelectedIntegration(index)}
                 colorTokens={colorTokens}
-                textStyle={getTextStyle('body')}
+                textStyle={{}}
               />
             ))}
           </div>
@@ -337,14 +335,14 @@ export default function LogoWithQuoteUse(props: LayoutComponentProps) {
             <FeaturedQuote
               integration={integrations[selectedIntegration]}
               colorTokens={colorTokens}
-              textStyle={getTextStyle('body-lg')}
+              textStyle={{}}
             />
           </div>
         </div>
 
         {/* Trusted Companies Section */}
         <div className="text-center">
-          <h3 className={`text-lg font-semibold mb-8 ${colorTokens.textHeading}`}>
+          <h3 className={`text-lg font-semibold mb-8 ${colorTokens.textPrimary}`}>
             Trusted by leading companies worldwide
           </h3>
           
@@ -359,21 +357,21 @@ export default function LogoWithQuoteUse(props: LayoutComponentProps) {
           </div>
 
           {/* Stats */}
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 pt-8 border-t border-gray-200">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 pt-8 border-t border-border-gray-200">
             <div className="text-center">
-              <div className={`text-3xl font-bold ${colorTokens.textHeading} mb-2`}>500+</div>
+              <div className={`text-3xl font-bold ${colorTokens.textPrimary} mb-2`}>500+</div>
               <div className={`text-sm ${dynamicTextColors?.muted || colorTokens.textMuted}`}>Enterprise Customers</div>
             </div>
             <div className="text-center">
-              <div className={`text-3xl font-bold ${colorTokens.textHeading} mb-2`}>99.99%</div>
+              <div className={`text-3xl font-bold ${colorTokens.textPrimary} mb-2`}>99.99%</div>
               <div className={`text-sm ${dynamicTextColors?.muted || colorTokens.textMuted}`}>Uptime SLA</div>
             </div>
             <div className="text-center">
-              <div className={`text-3xl font-bold ${colorTokens.textHeading} mb-2`}>2M+</div>
+              <div className={`text-3xl font-bold ${colorTokens.textPrimary} mb-2`}>2M+</div>
               <div className={`text-sm ${dynamicTextColors?.muted || colorTokens.textMuted}`}>API Calls/Day</div>
             </div>
             <div className="text-center">
-              <div className={`text-3xl font-bold ${colorTokens.textHeading} mb-2`}>150+</div>
+              <div className={`text-3xl font-bold ${colorTokens.textPrimary} mb-2`}>150+</div>
               <div className={`text-sm ${dynamicTextColors?.muted || colorTokens.textMuted}`}>Countries</div>
             </div>
           </div>

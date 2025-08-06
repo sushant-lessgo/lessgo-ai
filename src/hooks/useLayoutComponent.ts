@@ -95,11 +95,11 @@ export function useLayoutComponent<T = Record<string, any>>({
         
         if (custom.solid) {
           // Solid color background - handle both {color: '#hex'} and '#hex' formats
-          const solidColor = typeof custom.solid === 'string' ? custom.solid : custom.solid.color;
+          const solidColor = typeof custom.solid === 'string' ? custom.solid : (custom.solid as any).color;
           customCSS = `bg-[${solidColor}]`;
         } else if (custom.gradient) {
           // Gradient background
-          const { type, angle, stops } = custom.gradient;
+          const { type, angle, stops } = custom.gradient as any;
           const gradientStops = stops.map((stop: any) => `${stop.color} ${stop.position}%`).join(', ');
           
           if (type === 'linear') {
@@ -157,10 +157,10 @@ export function useLayoutComponent<T = Record<string, any>>({
       
       if (custom.solid) {
         // Handle both {color: '#hex'} and '#hex' formats
-        const solidColor = typeof custom.solid === 'string' ? custom.solid : custom.solid.color;
+        const solidColor = typeof custom.solid === 'string' ? custom.solid : (custom.solid as any).color;
         customCSS = `bg-[${solidColor}]`;
       } else if (custom.gradient) {
-        const { type, angle, stops } = custom.gradient;
+        const { type, angle, stops } = custom.gradient as any;
         const gradientStops = stops.map((stop: any) => `${stop.color} ${stop.position}%`).join(', ');
         
         if (type === 'linear') {
@@ -213,10 +213,10 @@ export function useLayoutComponent<T = Record<string, any>>({
     
     if (custom.solid) {
       // Handle both {color: '#hex'} and '#hex' formats
-      primaryColor = typeof custom.solid === 'string' ? custom.solid : custom.solid.color;
-    } else if (custom.gradient && custom.gradient.stops.length > 0) {
+      primaryColor = typeof custom.solid === 'string' ? custom.solid : (custom.solid as any).color;
+    } else if (custom.gradient && (custom.gradient as any).stops?.length > 0) {
       // Use the first color stop as primary color
-      primaryColor = custom.gradient.stops[0].color;
+      primaryColor = (custom.gradient as any).stops[0].color;
     }
     
     // Convert hex to RGB and calculate luminance
@@ -263,8 +263,8 @@ export function useLayoutComponent<T = Record<string, any>>({
   // ✅ ENHANCED: Check for theme overrides first
   const getEffectiveTextColor = (type: 'heading' | 'body' | 'muted') => {
     // Check for manual overrides
-    if (theme?.textColorMode === 'manual' && theme?.textColorOverrides?.[type]) {
-      return theme.textColorOverrides[type];
+    if ((theme as any)?.textColorMode === 'manual' && (theme as any)?.textColorOverrides?.[type]) {
+      return (theme as any).textColorOverrides[type];
     }
     
     // Use auto-calculated colors with contrast adjustment
@@ -272,7 +272,7 @@ export function useLayoutComponent<T = Record<string, any>>({
     const baseColor = getSmartTextColor(sectionBackground, type);
     
     // Apply contrast level adjustment if specified
-    const contrastLevel = theme?.textContrastLevel || 50;
+    const contrastLevel = (theme as any)?.textContrastLevel || 50;
     if (contrastLevel !== 50) {
       // TODO: Implement contrast adjustment logic
       // For now, just return the base color
@@ -289,11 +289,11 @@ export function useLayoutComponent<T = Record<string, any>>({
   };
   
   // Debug log for text color mode
-  if (theme?.textColorMode === 'manual') {
+  if ((theme as any)?.textColorMode === 'manual') {
     // console.log(`🎨 Using manual text color overrides for ${sectionId}:`, {
-    //   mode: theme.textColorMode,
-    //   overrides: theme.textColorOverrides,
-    //   contrastLevel: theme.textContrastLevel,
+    //   mode: (theme as any).textColorMode,
+    //   overrides: (theme as any).textColorOverrides,
+    //   contrastLevel: (theme as any).textContrastLevel,
     //   effectiveColors: smartTextColors
     // });
   }
@@ -323,7 +323,11 @@ export function useLayoutComponent<T = Record<string, any>>({
   };
 
   // Legacy compatibility - keep old approach as fallback
-  const dynamicTextColors = getTextColorForBackground(effectiveBackgroundType, colorTokens);
+  // Map BackgroundType to ThemeColorType for the legacy function
+  const legacyBackgroundType = effectiveBackgroundType === 'theme' ? 'primary' : 
+                               effectiveBackgroundType === 'custom' ? 'neutral' : 
+                               effectiveBackgroundType;
+  const dynamicTextColors = getTextColorForBackground(legacyBackgroundType, colorTokens);
 
   // console.log(`🎨 Dynamic text colors for ${sectionId} (${backgroundType}):`, {
   //   backgroundType,

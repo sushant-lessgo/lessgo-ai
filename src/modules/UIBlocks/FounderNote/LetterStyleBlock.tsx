@@ -126,7 +126,7 @@ export default function LetterStyleBlock(props: LayoutComponentProps) {
     <LayoutSection
       sectionId={sectionId}
       sectionType="LetterStyleBlock"
-      backgroundType={props.backgroundType || 'primary'}
+      backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
       sectionBackground={sectionBackground}
       mode={mode}
       className={props.className}
@@ -139,12 +139,12 @@ export default function LetterStyleBlock(props: LayoutComponentProps) {
           <div className="bg-gray-50 px-8 py-6 border-b border-gray-200">
             <EditableAdaptiveHeadline
               mode={mode}
-              value={blockContent.letter_header}
+              value={blockContent.letter_header || ''}
               onEdit={(value) => handleContentUpdate('letter_header', value)}
               level="h2"
-              backgroundType="white"
+              backgroundType="neutral"
               colorTokens={colorTokens}
-              textStyle="text-2xl font-bold text-gray-900"
+              textStyle={{ fontSize: '1.5rem', fontWeight: '700', color: '#111827' }}
               className="text-center"
               sectionId={sectionId}
               elementKey="letter_header"
@@ -157,10 +157,10 @@ export default function LetterStyleBlock(props: LayoutComponentProps) {
                 mode={mode}
                 value={blockContent.date_text || ''}
                 onEdit={(value) => handleContentUpdate('date_text', value)}
-                backgroundType="white"
+                backgroundType="neutral"
                 colorTokens={colorTokens}
                 variant="body"
-                textStyle="text-sm text-gray-500"
+                textStyle={{ fontSize: '0.875rem', color: '#6B7280' }}
                 placeholder="Add date..."
                 sectionId={sectionId}
                 elementKey="date_text"
@@ -175,12 +175,12 @@ export default function LetterStyleBlock(props: LayoutComponentProps) {
             {/* Greeting */}
             <EditableAdaptiveText
               mode={mode}
-              value={blockContent.letter_greeting}
+              value={blockContent.letter_greeting || ''}
               onEdit={(value) => handleContentUpdate('letter_greeting', value)}
-              backgroundType="white"
+              backgroundType="neutral"
               colorTokens={colorTokens}
               variant="body"
-              textStyle="text-lg text-gray-900 mb-6"
+              textStyle={{ fontSize: '1.125rem', color: '#111827', marginBottom: '1.5rem' }}
               placeholder="Dear [Audience],"
               sectionId={sectionId}
               elementKey="letter_greeting"
@@ -191,12 +191,12 @@ export default function LetterStyleBlock(props: LayoutComponentProps) {
             <div className="prose prose-lg max-w-none mb-8">
               <EditableAdaptiveText
                 mode={mode}
-                value={blockContent.letter_body}
+                value={blockContent.letter_body || ''}
                 onEdit={(value) => handleContentUpdate('letter_body', value)}
-                backgroundType="white"
+                backgroundType="neutral"
                 colorTokens={colorTokens}
                 variant="body"
-                textStyle="text-gray-700 leading-relaxed whitespace-pre-line"
+                textStyle={{ color: '#374151', lineHeight: '1.625', whiteSpace: 'pre-line' }}
                 placeholder="Write your personal story and connection with the audience..."
                 sectionId={sectionId}
                 elementKey="letter_body"
@@ -215,16 +215,8 @@ export default function LetterStyleBlock(props: LayoutComponentProps) {
                     className="w-16 h-16 rounded-full object-cover cursor-pointer border-2 border-gray-200"
                     data-image-id={`${sectionId}-founder-image`}
                     onMouseUp={(e) => {
-                      if (mode === 'edit') {
-                        e.stopPropagation();
-                        e.preventDefault();
-                        const rect = e.currentTarget.getBoundingClientRect();
-                        showImageToolbar(`${sectionId}-founder-image`, {
-                          x: rect.left + rect.width / 2,
-                          y: rect.top - 10
-                        });
-                      }
-                    }}
+                        // Image toolbar is only available in edit mode
+                      }}
                   />
                 ) : (
                   <div className="w-16 h-16">
@@ -235,12 +227,12 @@ export default function LetterStyleBlock(props: LayoutComponentProps) {
                 <div>
                   <EditableAdaptiveText
                     mode={mode}
-                    value={blockContent.letter_signature}
+                    value={blockContent.letter_signature || ''}
                     onEdit={(value) => handleContentUpdate('letter_signature', value)}
-                    backgroundType="white"
+                    backgroundType="neutral"
                     colorTokens={colorTokens}
                     variant="body"
-                    textStyle="text-xl font-semibold text-gray-900"
+                    textStyle={{ fontSize: '1.25rem', fontWeight: '600', color: '#111827' }}
                     placeholder="Your Name"
                     sectionId={sectionId}
                     elementKey="letter_signature"
@@ -250,10 +242,10 @@ export default function LetterStyleBlock(props: LayoutComponentProps) {
                     mode={mode}
                     value={blockContent.founder_title || ''}
                     onEdit={(value) => handleContentUpdate('founder_title', value)}
-                    backgroundType="white"
+                    backgroundType="neutral"
                     colorTokens={colorTokens}
                     variant="body"
-                    textStyle="text-gray-600"
+                    textStyle={{ color: '#4B5563' }}
                     placeholder="Your Title"
                     sectionId={sectionId}
                     elementKey="founder_title"
@@ -263,10 +255,10 @@ export default function LetterStyleBlock(props: LayoutComponentProps) {
                     mode={mode}
                     value={blockContent.company_name || ''}
                     onEdit={(value) => handleContentUpdate('company_name', value)}
-                    backgroundType="white"
+                    backgroundType="neutral"
                     colorTokens={colorTokens}
                     variant="body"
-                    textStyle="text-gray-600"
+                    textStyle={{ color: '#4B5563' }}
                     placeholder="Company Name"
                     sectionId={sectionId}
                     elementKey="company_name"
@@ -279,7 +271,6 @@ export default function LetterStyleBlock(props: LayoutComponentProps) {
               <CTAButton
                 text={blockContent.cta_text}
                 colorTokens={colorTokens}
-                textStyle={getTextStyle('body-lg')}
                 className="shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200"
                 variant="primary"
                 sectionId={sectionId}
@@ -294,10 +285,10 @@ export default function LetterStyleBlock(props: LayoutComponentProps) {
                   mode={mode}
                   value={blockContent.ps_text || ''}
                   onEdit={(value) => handleContentUpdate('ps_text', value)}
-                  backgroundType="white"
+                  backgroundType="neutral"
                   colorTokens={colorTokens}
                   variant="body"
-                  textStyle="text-gray-600 italic"
+                  textStyle={{ color: '#4B5563', fontStyle: 'italic' }}
                   placeholder="P.S. Add a personal note or special offer..."
                   sectionId={sectionId}
                   elementKey="ps_text"

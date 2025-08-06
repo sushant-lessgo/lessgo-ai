@@ -150,7 +150,7 @@ export default function VideoNoteWithTranscript(props: LayoutComponentProps) {
     <LayoutSection
       sectionId={sectionId}
       sectionType="VideoNoteWithTranscript"
-      backgroundType={props.backgroundType || 'primary'}
+      backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
       sectionBackground={sectionBackground}
       mode={mode}
       className={props.className}
@@ -164,12 +164,11 @@ export default function VideoNoteWithTranscript(props: LayoutComponentProps) {
             {/* Headline */}
             <EditableAdaptiveHeadline
               mode={mode}
-              value={blockContent.headline}
+              value={blockContent.headline || ''}
               onEdit={(value) => handleContentUpdate('headline', value)}
               level="h2"
-              backgroundType={props.backgroundType || 'primary'}
+              backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
               colorTokens={colorTokens}
-              textStyle={getTextStyle('h2')}
               className="leading-tight"
               sectionId={sectionId}
               elementKey="headline"
@@ -179,12 +178,11 @@ export default function VideoNoteWithTranscript(props: LayoutComponentProps) {
             {/* Video Intro */}
             <EditableAdaptiveText
               mode={mode}
-              value={blockContent.video_intro}
+              value={blockContent.video_intro || ''}
               onEdit={(value) => handleContentUpdate('video_intro', value)}
-              backgroundType={props.backgroundType || 'primary'}
+              backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
               colorTokens={colorTokens}
               variant="body"
-              textStyle={getTextStyle('body-lg')}
               className="leading-relaxed"
               placeholder="Introduce the video and explain why you're sharing this personal message..."
               sectionId={sectionId}
@@ -221,10 +219,10 @@ export default function VideoNoteWithTranscript(props: LayoutComponentProps) {
                         mode={mode}
                         value={blockContent.founder_name || ''}
                         onEdit={(value) => handleContentUpdate('founder_name', value)}
-                        backgroundType={props.backgroundType || 'primary'}
+                        backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
                         colorTokens={colorTokens}
                         variant="body"
-                        textStyle="font-medium"
+                        textStyle={{ fontWeight: '500' }}
                         placeholder="Founder Name"
                         sectionId={sectionId}
                         elementKey="founder_name"
@@ -234,10 +232,11 @@ export default function VideoNoteWithTranscript(props: LayoutComponentProps) {
                         mode={mode}
                         value={blockContent.founder_title || ''}
                         onEdit={(value) => handleContentUpdate('founder_title', value)}
-                        backgroundType={props.backgroundType || 'primary'}
+                        backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
                         colorTokens={colorTokens}
                         variant="body"
-                        textStyle={`text-xs ${mutedTextColor}`}
+                        textStyle={{ fontSize: '0.75rem' }}
+                        className={mutedTextColor}
                         placeholder="Title"
                         sectionId={sectionId}
                         elementKey="founder_title"
@@ -254,10 +253,11 @@ export default function VideoNoteWithTranscript(props: LayoutComponentProps) {
                       mode={mode}
                       value={blockContent.video_duration || ''}
                       onEdit={(value) => handleContentUpdate('video_duration', value)}
-                      backgroundType={props.backgroundType || 'primary'}
+                      backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
                       colorTokens={colorTokens}
                       variant="body"
-                      textStyle={`text-xs ${mutedTextColor}`}
+                      textStyle={{ fontSize: '0.75rem' }}
+                      className={mutedTextColor}
                       placeholder="0:00"
                       sectionId={sectionId}
                       elementKey="video_duration"
@@ -269,7 +269,6 @@ export default function VideoNoteWithTranscript(props: LayoutComponentProps) {
                 <CTAButton
                   text={blockContent.cta_text}
                   colorTokens={colorTokens}
-                  textStyle={getTextStyle('body')}
                   className="shadow-lg hover:shadow-xl transition-all duration-200"
                   variant="primary"
                   sectionId={sectionId}
@@ -296,12 +295,12 @@ export default function VideoNoteWithTranscript(props: LayoutComponentProps) {
             <div className="bg-gray-50 rounded-lg p-6 max-h-96 overflow-y-auto">
               <EditableAdaptiveText
                 mode={mode}
-                value={blockContent.transcript_text}
+                value={blockContent.transcript_text || ''}
                 onEdit={(value) => handleContentUpdate('transcript_text', value)}
-                backgroundType="white"
+                backgroundType="neutral"
                 colorTokens={colorTokens}
                 variant="body"
-                textStyle="text-gray-700 leading-relaxed whitespace-pre-line"
+                textStyle={{ color: '#374151', lineHeight: '1.625', whiteSpace: 'pre-line' }}
                 placeholder="Add the video transcript here for accessibility and SEO benefits..."
                 sectionId={sectionId}
                 elementKey="transcript_text"
@@ -329,7 +328,6 @@ export default function VideoNoteWithTranscript(props: LayoutComponentProps) {
               <CTAButton
                 text="Book Your Demo"
                 colorTokens={colorTokens}
-                textStyle={getTextStyle('body')}
                 className="w-full shadow-lg hover:shadow-xl transition-all duration-200"
                 variant="primary"
                 sectionId={sectionId}

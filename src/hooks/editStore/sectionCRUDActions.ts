@@ -20,7 +20,7 @@ const createDefaultSectionData = (sectionId: string, sectionType: string) => ({
   layout: getDefaultLayout(sectionType),
   elements: {},
   isVisible: true,
-  backgroundType: 'neutral' as const,
+  backgroundType: 'theme' as const,
   aiMetadata: {
     aiGenerated: false,
     lastGenerated: Date.now(),

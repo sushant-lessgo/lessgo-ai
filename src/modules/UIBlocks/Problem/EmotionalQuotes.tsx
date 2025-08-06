@@ -199,7 +199,7 @@ export default function EmotionalQuotes(props: LayoutComponentProps) {
     <LayoutSection
       sectionId={sectionId}
       sectionType="EmotionalQuotes"
-      backgroundType={props.backgroundType || 'neutral'}
+      backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
       sectionBackground={sectionBackground}
       mode={mode}
       className={props.className}
@@ -209,12 +209,11 @@ export default function EmotionalQuotes(props: LayoutComponentProps) {
         <div className="text-center mb-16">
           <EditableAdaptiveHeadline
             mode={mode}
-            value={blockContent.headline}
+            value={blockContent.headline || ''}
             onEdit={(value) => handleContentUpdate('headline', value)}
             level="h2"
-            backgroundType={props.backgroundType || 'neutral'}
+            backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
             colorTokens={colorTokens}
-            textStyle={getTextStyle('h2')}
             className="mb-4"
             sectionId={sectionId}
             elementKey="headline"
@@ -226,10 +225,9 @@ export default function EmotionalQuotes(props: LayoutComponentProps) {
               mode={mode}
               value={blockContent.subheadline || ''}
               onEdit={(value) => handleContentUpdate('subheadline', value)}
-              backgroundType={props.backgroundType || 'neutral'}
+              backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
               colorTokens={colorTokens}
               variant="body"
-              textStyle={getTextStyle('body-lg')}
               className="text-lg mb-8 max-w-3xl mx-auto"
               placeholder="Add optional subheadline to introduce the emotional quotes..."
               sectionId={sectionId}
@@ -255,12 +253,11 @@ export default function EmotionalQuotes(props: LayoutComponentProps) {
               <div className="space-y-4">
                 <EditableAdaptiveText
                   mode={mode}
-                  value={blockContent.emotional_quotes}
+                  value={blockContent.emotional_quotes || ''}
                   onEdit={(value) => handleContentUpdate('emotional_quotes', value)}
-                  backgroundType={props.backgroundType || 'neutral'}
+                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
                   colorTokens={colorTokens}
                   variant="body"
-                  textStyle={getTextStyle('body')}
                   className="mb-2"
                   placeholder="Emotional quotes (pipe separated)"
                   sectionId={sectionId}
@@ -270,12 +267,11 @@ export default function EmotionalQuotes(props: LayoutComponentProps) {
                 
                 <EditableAdaptiveText
                   mode={mode}
-                  value={blockContent.quote_attributions}
+                  value={blockContent.quote_attributions || ''}
                   onEdit={(value) => handleContentUpdate('quote_attributions', value)}
-                  backgroundType={props.backgroundType || 'neutral'}
+                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
                   colorTokens={colorTokens}
                   variant="body"
-                  textStyle={getTextStyle('body')}
                   className="mb-2"
                   placeholder="Quote attributions (pipe separated)"
                   sectionId={sectionId}
@@ -287,10 +283,9 @@ export default function EmotionalQuotes(props: LayoutComponentProps) {
                   mode={mode}
                   value={blockContent.quote_categories || ''}
                   onEdit={(value) => handleContentUpdate('quote_categories', value)}
-                  backgroundType={props.backgroundType || 'neutral'}
+                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
                   colorTokens={colorTokens}
                   variant="body"
-                  textStyle={getTextStyle('body')}
                   className="mb-2"
                   placeholder="Quote categories (pipe separated)"
                   sectionId={sectionId}
@@ -302,10 +297,9 @@ export default function EmotionalQuotes(props: LayoutComponentProps) {
                   mode={mode}
                   value={blockContent.context_text || ''}
                   onEdit={(value) => handleContentUpdate('context_text', value)}
-                  backgroundType={props.backgroundType || 'neutral'}
+                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
                   colorTokens={colorTokens}
                   variant="body"
-                  textStyle={getTextStyle('body')}
                   className="mb-2"
                   placeholder="Context text"
                   sectionId={sectionId}
@@ -432,10 +426,9 @@ export default function EmotionalQuotes(props: LayoutComponentProps) {
                 mode={mode}
                 value={blockContent.supporting_text || ''}
                 onEdit={(value) => handleContentUpdate('supporting_text', value)}
-                backgroundType={props.backgroundType || 'neutral'}
+                backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
                 colorTokens={colorTokens}
                 variant="body"
-                textStyle={getTextStyle('body-lg')}
                 className="max-w-3xl mx-auto mb-8"
                 placeholder="Add optional supporting text to reinforce the emotional connection..."
                 sectionId={sectionId}

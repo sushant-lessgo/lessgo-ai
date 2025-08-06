@@ -246,7 +246,7 @@ export default function CollapsedCards(props: LayoutComponentProps) {
     <LayoutSection
       sectionId={sectionId}
       sectionType="CollapsedCards"
-      backgroundType={props.backgroundType || 'neutral'}
+      backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
       sectionBackground={sectionBackground}
       mode={mode}
       className={props.className}
@@ -256,12 +256,11 @@ export default function CollapsedCards(props: LayoutComponentProps) {
         <div className="text-center mb-16">
           <EditableAdaptiveHeadline
             mode={mode}
-            value={blockContent.headline}
+            value={blockContent.headline || ''}
             onEdit={(value) => handleContentUpdate('headline', value)}
             level="h2"
-            backgroundType={props.backgroundType || 'neutral'}
+            backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
             colorTokens={colorTokens}
-            textStyle={getTextStyle('h2')}
             className="mb-4"
             sectionId={sectionId}
             elementKey="headline"
@@ -273,10 +272,9 @@ export default function CollapsedCards(props: LayoutComponentProps) {
               mode={mode}
               value={blockContent.subheadline || ''}
               onEdit={(value) => handleContentUpdate('subheadline', value)}
-              backgroundType={props.backgroundType || 'neutral'}
+              backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
               colorTokens={colorTokens}
               variant="body"
-              textStyle={getTextStyle('body-lg')}
               className="text-lg mb-8 max-w-3xl mx-auto"
               placeholder="Add optional subheadline to introduce the problem cards..."
               sectionId={sectionId}
@@ -302,12 +300,11 @@ export default function CollapsedCards(props: LayoutComponentProps) {
               <div className="space-y-4">
                 <EditableAdaptiveText
                   mode={mode}
-                  value={blockContent.problem_titles}
+                  value={blockContent.problem_titles || ''}
                   onEdit={(value) => handleContentUpdate('problem_titles', value)}
-                  backgroundType={props.backgroundType || 'neutral'}
+                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
                   colorTokens={colorTokens}
                   variant="body"
-                  textStyle={getTextStyle('body')}
                   className="mb-2"
                   placeholder="Problem titles (pipe separated)"
                   sectionId={sectionId}
@@ -317,12 +314,11 @@ export default function CollapsedCards(props: LayoutComponentProps) {
                 
                 <EditableAdaptiveText
                   mode={mode}
-                  value={blockContent.problem_descriptions}
+                  value={blockContent.problem_descriptions || ''}
                   onEdit={(value) => handleContentUpdate('problem_descriptions', value)}
-                  backgroundType={props.backgroundType || 'neutral'}
+                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
                   colorTokens={colorTokens}
                   variant="body"
-                  textStyle={getTextStyle('body')}
                   className="mb-2"
                   placeholder="Problem descriptions (pipe separated)"
                   sectionId={sectionId}
@@ -334,10 +330,9 @@ export default function CollapsedCards(props: LayoutComponentProps) {
                   mode={mode}
                   value={blockContent.problem_impacts || ''}
                   onEdit={(value) => handleContentUpdate('problem_impacts', value)}
-                  backgroundType={props.backgroundType || 'neutral'}
+                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
                   colorTokens={colorTokens}
                   variant="body"
-                  textStyle={getTextStyle('body')}
                   className="mb-2"
                   placeholder="Problem impacts (pipe separated)"
                   sectionId={sectionId}
@@ -349,10 +344,9 @@ export default function CollapsedCards(props: LayoutComponentProps) {
                   mode={mode}
                   value={blockContent.solution_hints || ''}
                   onEdit={(value) => handleContentUpdate('solution_hints', value)}
-                  backgroundType={props.backgroundType || 'neutral'}
+                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
                   colorTokens={colorTokens}
                   variant="body"
-                  textStyle={getTextStyle('body')}
                   className="mb-2"
                   placeholder="Solution hints (pipe separated)"
                   sectionId={sectionId}
@@ -465,10 +459,9 @@ export default function CollapsedCards(props: LayoutComponentProps) {
                 mode={mode}
                 value={blockContent.supporting_text || ''}
                 onEdit={(value) => handleContentUpdate('supporting_text', value)}
-                backgroundType={props.backgroundType || 'neutral'}
+                backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
                 colorTokens={colorTokens}
                 variant="body"
-                textStyle={getTextStyle('body-lg')}
                 className="max-w-3xl mx-auto mb-8"
                 placeholder="Add optional supporting text to reinforce the problem identification..."
                 sectionId={sectionId}

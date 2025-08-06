@@ -6,15 +6,15 @@ import { SectionBackground, BackgroundCSS, GradientConfig } from '@/types/core';
  */
 export function generateBackgroundCSS(background: SectionBackground): BackgroundCSS {
   if (background.type === 'custom' && background.custom) {
-    if (background.custom.style === 'solid' && background.custom.solid) {
+    if (background.custom.solid) {
       return {
         className: '',
         inlineStyles: {
-          backgroundColor: background.custom.solid.color,
+          backgroundColor: background.custom.solid,
         },
-        cssText: `background-color: ${background.custom.solid.color};`,
+        cssText: `background-color: ${background.custom.solid};`,
       };
-    } else if (background.custom.style === 'gradient' && background.custom.gradient) {
+    } else if (background.custom.gradient) {
       const gradientCSS = generateGradientCSS(background.custom.gradient);
       return {
         className: '',
@@ -41,7 +41,7 @@ export function generateGradientCSS(gradient: GradientConfig): string {
   const stopStrings = sortedStops.map(stop => `${stop.color} ${stop.position}%`);
   
   if (gradient.type === 'linear') {
-    return `linear-gradient(${gradient.direction}deg, ${stopStrings.join(', ')})`;
+    return `linear-gradient(${gradient.angle}deg, ${stopStrings.join(', ')})`;
   } else {
     const radialGradient = gradient;
     const centerX = radialGradient.centerX || 50;
@@ -63,14 +63,14 @@ export function isCustomBackground(background: SectionBackground): boolean {
  * Check if a background is a solid color
  */
 export function isSolidBackground(background: SectionBackground): boolean {
-  return isCustomBackground(background) && background.custom?.style === 'solid';
+  return isCustomBackground(background) && background.custom?.solid !== undefined;
 }
 
 /**
  * Check if a background is a gradient
  */
 export function isGradientBackground(background: SectionBackground): boolean {
-  return isCustomBackground(background) && background.custom?.style === 'gradient';
+  return isCustomBackground(background) && background.custom?.gradient !== undefined;
 }
 
 /**
@@ -78,7 +78,7 @@ export function isGradientBackground(background: SectionBackground): boolean {
  */
 export function extractDominantColor(background: SectionBackground): string {
   if (isSolidBackground(background) && background.custom?.solid) {
-    return background.custom.solid.color;
+    return background.custom.solid;
   } else if (isGradientBackground(background) && background.custom?.gradient) {
     // Return the first stop color as the dominant color
     const firstStop = background.custom.gradient.stops.find(stop => stop.position === 0);

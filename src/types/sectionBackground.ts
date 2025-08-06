@@ -1,14 +1,17 @@
 // types/sectionBackground.ts - Enhanced section background types with custom support
 
 /**
- * Enhanced background type including theme and custom options
- */
-export type BackgroundType = 'theme' | 'custom';
-
-/**
  * Theme color options for background
  */
 export type ThemeColorType = 'primary' | 'secondary' | 'neutral' | 'divider';
+
+/**
+ * Enhanced background type including both legacy theme colors and new custom option
+ * During transition period, backgroundType can be either:
+ * - Legacy: theme color directly ('primary', 'secondary', 'neutral', 'divider')
+ * - New: 'theme' (uses sectionBackground.themeColor) or 'custom' (uses sectionBackground.custom)
+ */
+export type BackgroundType = ThemeColorType | 'theme' | 'custom';
 
 /**
  * Custom background style types

@@ -22,7 +22,7 @@ type PageStore = ReturnType<typeof useEditStore.getState>;
  */
 function buildBusinessContext(onboardingStore: OnboardingStore, pageStore: PageStore): string {
   const { oneLiner, validatedFields, featuresFromAI } = onboardingStore;
-  const { targetAudience, businessType } = pageStore.meta.onboardingData;
+  const { targetAudience, businessType } = (pageStore as any).meta?.onboardingData || {};
 
   const features = featuresFromAI.map(f => `• ${f.feature}: ${f.benefit}`).join('\n');
   
@@ -296,7 +296,7 @@ function getSectionLayoutGuidance(sectionType: string, layout: string): string {
  * Builds section flow context for cohesive messaging
  */
 function buildSectionFlowContext(elementsMap: any, pageStore: PageStore): string {
-  const sectionOrder = pageStore.layout.sections;
+  const sectionOrder = (pageStore as any).layout?.sections || [];
   const flowContext: string[] = [];
   
   sectionOrder.forEach((sectionId: string, index: number) => {
@@ -669,7 +669,7 @@ function getElementFormatGuidance(element: string): string {
  */
 export function buildFullPrompt(
   onboardingStore: OnboardingStore, 
-  pageStore: PageStore
+  pageStore: PageStore | any
 ): string {
   const elementsMap = getCompleteElementsMap(onboardingStore, pageStore);
   
@@ -708,12 +708,12 @@ Generate complete, conversion-optimized copy for all sections now.`;
  */
 export function buildSectionPrompt(
   onboardingStore: OnboardingStore,
-  pageStore: PageStore,
+  pageStore: PageStore | any,
   sectionId: string,
   userPrompt?: string
 ): string {
   const variables = mapStoreToVariables(onboardingStore, pageStore);
-  const layout = pageStore.layout.sectionLayouts[sectionId];
+  const layout = pageStore.layout?.sectionLayouts?.[sectionId];
   
   if (!layout) {
     throw new Error(`No layout found for section "${sectionId}"`);
@@ -758,10 +758,10 @@ Generate optimized copy for this section now.`;
 /**
  * Builds context from other sections for cohesive regeneration
  */
-function buildOtherSectionsContext(pageStore: PageStore, targetSectionId: string): string {
+function buildOtherSectionsContext(pageStore: PageStore | any, targetSectionId: string): string {
   const otherSections: string[] = [];
   
-  pageStore.layout.sections.forEach((sectionId: string) => {
+  ((pageStore as any).layout?.sections || []).forEach((sectionId: string) => {
     if (sectionId === targetSectionId) return;
     
     const sectionContent = pageStore.content[sectionId];
@@ -804,13 +804,13 @@ Return a valid JSON object with this exact structure:
  */
 export function buildElementPrompt(
   onboardingStore: OnboardingStore,
-  pageStore: PageStore,
+  pageStore: PageStore | any,
   sectionId: string,
   elementName: string,
   variationCount: number = 5
 ): string {
   const variables = mapStoreToVariables(onboardingStore, pageStore);
-  const layout = pageStore.layout.sectionLayouts[sectionId];
+  const layout = pageStore.layout?.sectionLayouts?.[sectionId];
   
   if (!layout) {
     throw new Error(`No layout found for section "${sectionId}"`);
@@ -872,7 +872,11 @@ function getExistingElementContext(pageStore: PageStore, sectionId: string, elem
     return 'No existing content';
   }
   
-  return sectionContent.elements[elementName];
+  const element = sectionContent.elements[elementName];
+  if (typeof element === 'string') return element;
+  if (typeof element.content === 'string') return element.content;
+  if (Array.isArray(element.content)) return element.content.join('\n');
+  return String(element.content || 'No content');
 }
 
 /**

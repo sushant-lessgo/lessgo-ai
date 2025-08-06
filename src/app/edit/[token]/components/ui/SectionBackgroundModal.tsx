@@ -33,7 +33,7 @@ export function SectionBackgroundModal({ isOpen, onClose, sectionId }: SectionBa
   const section = content[sectionId];
   
   // Calculate what the background SHOULD be based on current rules
-  const calculatedBackgroundType = getSectionBackgroundType(sectionId, sections, undefined, onboardingData);
+  const calculatedBackgroundType = getSectionBackgroundType(sectionId, sections, undefined, onboardingData as any);
   
   // Get current stored background type (might be manually changed by user)
   const storedBackgroundType = section?.backgroundType;
@@ -112,7 +112,7 @@ export function SectionBackgroundModal({ isOpen, onClose, sectionId }: SectionBa
   
   // Validate background contrast
   useEffect(() => {
-    if (localBackground.type === 'custom' && localBackground.custom && theme?.colors?.text) {
+    if (localBackground.type === 'custom' && localBackground.custom && theme?.colors) {
       const validationResult = validateBackgroundAccessibility(
         localBackground,
         'black'
@@ -475,10 +475,10 @@ export function SectionBackgroundModal({ isOpen, onClose, sectionId }: SectionBa
                 }}
               >
                 <div className="p-4">
-                  <p className="text-sm" style={{ color: theme?.colors?.text?.primary || '#000000' }}>
+                  <p className="text-sm" style={{ color: '#000000' }}>
                     Primary text example
                   </p>
-                  <p className="text-xs mt-2" style={{ color: theme?.colors?.text?.secondary || '#666666' }}>
+                  <p className="text-xs mt-2" style={{ color: '#666666' }}>
                     Secondary text example
                   </p>
                 </div>

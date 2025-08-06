@@ -95,12 +95,11 @@ export default function CheckmarkComparison(props: LayoutComponentProps) {
         <div className="text-center mb-12">
           <EditableAdaptiveHeadline
             mode={mode}
-            value={blockContent.headline}
+            value={blockContent.headline || ''}
             onEdit={(value) => handleContentUpdate('headline', value)}
             level="h1"
-            backgroundType={backgroundType}
+            backgroundType={backgroundType === 'custom' ? 'secondary' : backgroundType}
             colorTokens={colorTokens}
-            textStyle={getTextStyle('h1')}
             className="mb-4"
             sectionId={sectionId}
             elementKey="headline"
@@ -112,9 +111,8 @@ export default function CheckmarkComparison(props: LayoutComponentProps) {
               mode={mode}
               value={blockContent.subheadline || 'Add subheadline...'}
               onEdit={(value) => handleContentUpdate('subheadline', value)}
-              backgroundType={backgroundType}
+              backgroundType={backgroundType === 'custom' ? 'secondary' : backgroundType}
               colorTokens={colorTokens}
-              textStyle={getTextStyle('body-lg')}
               className={`max-w-3xl mx-auto ${!blockContent.subheadline && mode === 'edit' ? 'opacity-50' : ''}`}
               sectionId={sectionId}
               elementKey="subheadline"
@@ -128,14 +126,14 @@ export default function CheckmarkComparison(props: LayoutComponentProps) {
           <table className="w-full border-collapse">
             <thead>
               <tr>
-                <th className={`text-left p-4 border-b ${colorTokens.borderColor}`}>
-                  <span className={colorTokens.textPrimary} style={getTextStyle('body')}>Features</span>
+                <th className={`text-left p-4 border-b border-gray-200`}>
+                  <span className={colorTokens.textPrimary}>Features</span>
                 </th>
                 {columnHeaders.map((header, index) => (
                   <th 
                     key={index} 
-                    className={`text-center p-4 border-b ${colorTokens.borderColor} ${
-                      index === highlightIndex ? `${colorTokens.bgAccent} rounded-t-lg` : ''
+                    className={`text-center p-4 border-b border-gray-200 ${
+                      index === highlightIndex ? `bg-primary rounded-t-lg` : ''
                     }`}
                   >
                     {mode === 'edit' ? (
@@ -146,12 +144,10 @@ export default function CheckmarkComparison(props: LayoutComponentProps) {
                         className={`w-full text-center bg-transparent outline-none focus:ring-2 focus:ring-blue-500 rounded px-2 ${
                           index === highlightIndex ? 'text-white font-semibold' : colorTokens.textPrimary
                         }`}
-                        style={getTextStyle('body')}
                       />
                     ) : (
                       <span 
                         className={index === highlightIndex ? 'text-white font-semibold' : colorTokens.textPrimary}
-                        style={getTextStyle('body')}
                       >
                         {header}
                       </span>
@@ -162,7 +158,7 @@ export default function CheckmarkComparison(props: LayoutComponentProps) {
             </thead>
             <tbody>
               {featureLabels.map((label, rowIndex) => (
-                <tr key={rowIndex} className={`border-b ${colorTokens.borderColor}`}>
+                <tr key={rowIndex} className={`border-b border-gray-200`}>
                   <td className="p-4">
                     {mode === 'edit' ? (
                       <input
@@ -170,10 +166,9 @@ export default function CheckmarkComparison(props: LayoutComponentProps) {
                         value={label}
                         onChange={(e) => handleFeatureLabelUpdate(rowIndex, e.target.value)}
                         className={`w-full bg-transparent outline-none focus:ring-2 focus:ring-blue-500 rounded px-2 ${colorTokens.textSecondary}`}
-                        style={getTextStyle('body')}
                       />
                     ) : (
-                      <span className={colorTokens.textSecondary} style={getTextStyle('body')}>
+                      <span className={colorTokens.textSecondary}>
                         {label}
                       </span>
                     )}
@@ -184,11 +179,11 @@ export default function CheckmarkComparison(props: LayoutComponentProps) {
                       <td 
                         key={colIndex} 
                         className={`text-center p-4 ${
-                          colIndex === highlightIndex ? `${colorTokens.bgAccent} bg-opacity-10` : ''
+                          colIndex === highlightIndex ? `bg-primary bg-opacity-10` : ''
                         }`}
                       >
                         {hasFeature ? (
-                          <svg className={`w-6 h-6 mx-auto ${colIndex === highlightIndex ? colorTokens.textAccent : 'text-green-500'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <svg className={`w-6 h-6 mx-auto ${colIndex === highlightIndex ? 'text-primary' : 'text-green-500'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                           </svg>
                         ) : (

@@ -87,7 +87,7 @@ export default function BoldGuaranteePanel(props: LayoutComponentProps) {
     <LayoutSection
       sectionId={sectionId}
       sectionType="BoldGuaranteePanel"
-      backgroundType={props.backgroundType || 'primary'}
+      backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
       sectionBackground={sectionBackground}
       mode={mode}
       className={props.className}
@@ -98,12 +98,11 @@ export default function BoldGuaranteePanel(props: LayoutComponentProps) {
         <div className="text-center mb-12">
           <EditableAdaptiveHeadline
             mode={mode}
-            value={blockContent.headline}
+            value={blockContent.headline || ''}
             onEdit={(value) => handleContentUpdate('headline', value)}
             level="h2"
-            backgroundType={props.backgroundType || 'primary'}
+            backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
             colorTokens={colorTokens}
-            textStyle={getTextStyle('h2')}
             className="mb-6"
             sectionId={sectionId}
             elementKey="headline"
@@ -115,10 +114,9 @@ export default function BoldGuaranteePanel(props: LayoutComponentProps) {
               mode={mode}
               value={blockContent.subheadline || ''}
               onEdit={(value) => handleContentUpdate('subheadline', value)}
-              backgroundType={props.backgroundType || 'primary'}
+              backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
               colorTokens={colorTokens}
               variant="body"
-              textStyle={getTextStyle('body-lg')}
               className="text-lg max-w-3xl mx-auto"
               placeholder="Add a subheadline that builds confidence in the guarantee..."
               sectionId={sectionId}
@@ -165,7 +163,6 @@ export default function BoldGuaranteePanel(props: LayoutComponentProps) {
                 ctaHover: 'hover:bg-gray-100',
                 ctaText: 'text-green-600'
               }}
-              textStyle={getTextStyle('body-lg')}
               className="px-12 py-4 text-lg font-bold shadow-xl hover:shadow-2xl transform hover:-translate-y-1 transition-all duration-200"
               variant="primary"
               sectionId={sectionId}
@@ -219,10 +216,9 @@ export default function BoldGuaranteePanel(props: LayoutComponentProps) {
                 mode={mode}
                 value={blockContent.risk_reversal_text || ''}
                 onEdit={(value) => handleContentUpdate('risk_reversal_text', value)}
-                backgroundType={props.backgroundType || 'primary'}
+                backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
                 colorTokens={colorTokens}
                 variant="body"
-                textStyle={getTextStyle('body-lg')}
                 className="text-lg text-gray-700 leading-relaxed"
                 placeholder="Add text about where the real risk lies..."
                 sectionId={sectionId}

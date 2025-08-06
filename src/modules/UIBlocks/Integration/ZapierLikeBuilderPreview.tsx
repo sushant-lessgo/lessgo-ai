@@ -79,15 +79,13 @@ const WorkflowNode = React.memo(({
   action, 
   type, 
   isActive, 
-  colorTokens, 
-  textStyle 
+  colorTokens
 }: { 
   app: string; 
   action: string; 
   type: 'trigger' | 'action';
   isActive: boolean;
   colorTokens: any;
-  textStyle: string;
 }) => {
   const nodeColors = {
     trigger: 'bg-gradient-to-br from-green-500 to-green-600',
@@ -232,7 +230,7 @@ export default function ZapierLikeBuilderPreview(props: LayoutComponentProps) {
     <LayoutSection
       sectionId={sectionId}
       sectionType="ZapierLikeBuilderPreview"
-      backgroundType={props.backgroundType || 'primary'}
+      backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
       sectionBackground={sectionBackground}
       mode={mode}
       className={props.className}
@@ -243,12 +241,11 @@ export default function ZapierLikeBuilderPreview(props: LayoutComponentProps) {
         <div className="text-center mb-12">
           <EditableAdaptiveHeadline
             mode={mode}
-            value={blockContent.headline}
+            value={blockContent.headline || ''}
             onEdit={(value) => handleContentUpdate('headline', value)}
             level="h2"
-            backgroundType={props.backgroundType || 'primary'}
+            backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
             colorTokens={colorTokens}
-            textStyle={getTextStyle('h2')}
             className="mb-4"
             sectionId={sectionId}
             elementKey="headline"
@@ -260,10 +257,9 @@ export default function ZapierLikeBuilderPreview(props: LayoutComponentProps) {
               mode={mode}
               value={blockContent.subheadline || ''}
               onEdit={(value) => handleContentUpdate('subheadline', value)}
-              backgroundType={props.backgroundType || 'primary'}
+              backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
               colorTokens={colorTokens}
               variant="body"
-              textStyle={getTextStyle('body-lg')}
               className="text-lg leading-relaxed max-w-3xl mx-auto"
               placeholder="Add a description of your workflow builder..."
               sectionId={sectionId}
@@ -274,11 +270,11 @@ export default function ZapierLikeBuilderPreview(props: LayoutComponentProps) {
         </div>
 
         {/* Workflow Builder Interface */}
-        <div className={`p-8 rounded-2xl ${colorTokens.bgSecondary} ${colorTokens.borderPrimary} border shadow-lg`}>
+        <div className={`p-8 rounded-2xl ${colorTokens.bgSecondary} border-gray-200 border shadow-lg`}>
           
           {/* Workflow Title */}
           <div className="flex items-center justify-between mb-8">
-            <h3 className={`text-xl font-semibold ${colorTokens.textHeading}`}>
+            <h3 className={`text-xl font-semibold ${colorTokens.textPrimary}`}>
               {blockContent.workflow_title}
             </h3>
             <button
@@ -287,7 +283,7 @@ export default function ZapierLikeBuilderPreview(props: LayoutComponentProps) {
               className={`px-6 py-2 rounded-lg font-medium transition-all duration-200 ${
                 isRunning 
                   ? 'bg-gray-300 text-gray-500 cursor-not-allowed' 
-                  : `${colorTokens.accent} ${colorTokens.accentText} hover:opacity-90`
+                  : `${colorTokens.ctaBg} ${colorTokens.ctaText} hover:opacity-90`
               }`}
             >
               {isRunning ? 'Running...' : 'Test Workflow'}
@@ -305,7 +301,6 @@ export default function ZapierLikeBuilderPreview(props: LayoutComponentProps) {
                     type={step.type}
                     isActive={isRunning && activeStep === index}
                     colorTokens={colorTokens}
-                    textStyle={getTextStyle('body')}
                   />
                   {index < workflowSteps.length - 1 && (
                     <ConnectionArrow isAnimated={isRunning && activeStep === index} />
@@ -318,19 +313,19 @@ export default function ZapierLikeBuilderPreview(props: LayoutComponentProps) {
           {/* Workflow Stats */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-8 pt-6 border-t border-gray-200">
             <div className="text-center">
-              <div className={`text-2xl font-bold ${colorTokens.textHeading} mb-1`}>2.3s</div>
+              <div className={`text-2xl font-bold ${colorTokens.textPrimary} mb-1`}>2.3s</div>
               <div className={`text-sm ${dynamicTextColors?.muted || colorTokens.textMuted}`}>Avg. Runtime</div>
             </div>
             <div className="text-center">
-              <div className={`text-2xl font-bold ${colorTokens.textHeading} mb-1`}>99.9%</div>
+              <div className={`text-2xl font-bold ${colorTokens.textPrimary} mb-1`}>99.9%</div>
               <div className={`text-sm ${dynamicTextColors?.muted || colorTokens.textMuted}`}>Success Rate</div>
             </div>
             <div className="text-center">
-              <div className={`text-2xl font-bold ${colorTokens.textHeading} mb-1`}>1.2k</div>
+              <div className={`text-2xl font-bold ${colorTokens.textPrimary} mb-1`}>1.2k</div>
               <div className={`text-sm ${dynamicTextColors?.muted || colorTokens.textMuted}`}>Runs/Month</div>
             </div>
             <div className="text-center">
-              <div className={`text-2xl font-bold ${colorTokens.textHeading} mb-1`}>4</div>
+              <div className={`text-2xl font-bold ${colorTokens.textPrimary} mb-1`}>4</div>
               <div className={`text-sm ${dynamicTextColors?.muted || colorTokens.textMuted}`}>Steps</div>
             </div>
           </div>
@@ -344,8 +339,8 @@ export default function ZapierLikeBuilderPreview(props: LayoutComponentProps) {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
               </svg>
             </div>
-            <h4 className={`font-semibold mb-2 ${colorTokens.textHeading}`}>Lightning Fast</h4>
-            <p className={`text-sm ${colorTokens.textBody}`}>Execute workflows in milliseconds with our optimized runtime</p>
+            <h4 className={`font-semibold mb-2 ${colorTokens.textPrimary}`}>Lightning Fast</h4>
+            <p className={`text-sm ${colorTokens.textSecondary}`}>Execute workflows in milliseconds with our optimized runtime</p>
           </div>
 
           <div className="text-center">
@@ -354,8 +349,8 @@ export default function ZapierLikeBuilderPreview(props: LayoutComponentProps) {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
             </div>
-            <h4 className={`font-semibold mb-2 ${colorTokens.textHeading}`}>Reliable</h4>
-            <p className={`text-sm ${colorTokens.textBody}`}>99.9% uptime with automatic retries and error handling</p>
+            <h4 className={`font-semibold mb-2 ${colorTokens.textPrimary}`}>Reliable</h4>
+            <p className={`text-sm ${colorTokens.textSecondary}`}>99.9% uptime with automatic retries and error handling</p>
           </div>
 
           <div className="text-center">
@@ -364,14 +359,14 @@ export default function ZapierLikeBuilderPreview(props: LayoutComponentProps) {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17v4a2 2 0 002 2h4M11 7V5a2 2 0 012-2m0 0V2a2 2 0 012-2h4a2 2 0 012 2v2m-6 0h6" />
               </svg>
             </div>
-            <h4 className={`font-semibold mb-2 ${colorTokens.textHeading}`}>No Code Required</h4>
-            <p className={`text-sm ${colorTokens.textBody}`}>Visual builder makes automation accessible to everyone</p>
+            <h4 className={`font-semibold mb-2 ${colorTokens.textPrimary}`}>No Code Required</h4>
+            <p className={`text-sm ${colorTokens.textSecondary}`}>Visual builder makes automation accessible to everyone</p>
           </div>
         </div>
 
         {/* CTA */}
         <div className="text-center mt-12">
-          <button className={`px-8 py-4 rounded-lg font-semibold text-lg ${colorTokens.accent} ${colorTokens.accentText} hover:opacity-90 transition-opacity shadow-lg`}>
+          <button className={`px-8 py-4 rounded-lg font-semibold text-lg ${colorTokens.ctaBg} ${colorTokens.ctaText} hover:opacity-90 transition-opacity shadow-lg`}>
             Start Building Workflows
           </button>
           <p className={`mt-4 text-sm ${dynamicTextColors?.muted || colorTokens.textMuted}`}>

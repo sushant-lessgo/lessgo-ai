@@ -125,10 +125,11 @@ export default function PersonaUseCaseCompare(props: LayoutComponentProps) {
         <div className="text-center mb-12">
           <EditableAdaptiveHeadline
             mode={mode}
-            value={blockContent.headline}
+            value={blockContent.headline || ''}
             onEdit={(value) => handleContentUpdate('headline', value)}
             className="mb-4"
-            backgroundType={backgroundType as any}
+            backgroundType={backgroundType === 'custom' ? 'secondary' : backgroundType}
+            sectionBackground={sectionBackground}
             colorTokens={colorTokens}
             level="h1"
           />
@@ -139,7 +140,8 @@ export default function PersonaUseCaseCompare(props: LayoutComponentProps) {
               value={blockContent.subheadline || 'Add subheadline...'}
               onEdit={(value) => handleContentUpdate('subheadline', value)}
               className={`max-w-3xl mx-auto ${!blockContent.subheadline && mode === 'edit' ? 'opacity-50' : ''}`}
-              backgroundType={backgroundType as any}
+              backgroundType={backgroundType === 'custom' ? 'secondary' : backgroundType}
+              sectionBackground={sectionBackground}
               colorTokens={colorTokens}
               variant="body"
             />
@@ -154,12 +156,12 @@ export default function PersonaUseCaseCompare(props: LayoutComponentProps) {
               onClick={() => setActivePersona(index)}
               className={`p-4 rounded-lg border-2 transition-all ${
                 activePersona === index 
-                  ? `border-${(colorTokens.textAccent || 'text-blue-600').replace('text-', '')} ${colorTokens.bgAccent || 'bg-blue-500'} bg-opacity-10` 
-                  : `${colorTokens.borderColor} hover:border-gray-400`
+                  ? `border-${'primary'} ${'bg-primary'} bg-opacity-10` 
+                  : `border-gray-200 hover:border-gray-400`
               }`}
             >
               <div className={`flex flex-col items-center ${
-                activePersona === index ? colorTokens.textAccent : colorTokens.textSecondary
+                activePersona === index ? 'text-primary' : colorTokens.textSecondary
               }`}>
                 {getPersonaIcon(index)}
                 {mode === 'edit' ? (
@@ -172,10 +174,9 @@ export default function PersonaUseCaseCompare(props: LayoutComponentProps) {
                     }}
                     onClick={(e) => e.stopPropagation()}
                     className="mt-2 text-center bg-transparent outline-none focus:ring-2 focus:ring-blue-500 rounded px-1 font-medium"
-                    style={getTextStyle('body')}
                   />
                 ) : (
-                  <span className="mt-2 font-medium" style={getTextStyle('body')}>{label}</span>
+                  <span className="mt-2 font-medium">{label}</span>
                 )}
               </div>
               {mode === 'edit' ? (
@@ -206,16 +207,16 @@ export default function PersonaUseCaseCompare(props: LayoutComponentProps) {
         <div className="grid md:grid-cols-2 gap-8">
           {/* Use Cases */}
           <div className={`rounded-lg ${colorTokens.bgNeutral} p-8`}>
-            <h3 className={`text-xl font-semibold mb-6 ${colorTokens.textPrimary}`} style={getTextStyle('h3')}>
+            <h3 className={`text-xl font-semibold mb-6 ${colorTokens.textPrimary}`}>
               Your Use Cases
             </h3>
             <ul className="space-y-4">
               {activeUseCases.map((useCase, index) => (
                 <li key={index} className="flex items-start">
-                  <svg className={`w-5 h-5 ${colorTokens.textAccent} mr-3 mt-0.5 flex-shrink-0`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className={`w-5 h-5 text-primary mr-3 mt-0.5 flex-shrink-0`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
-                  <span className={colorTokens.textSecondary} style={getTextStyle('body')}>
+                  <span className={colorTokens.textSecondary}>
                     {useCase.trim()}
                   </span>
                 </li>
@@ -224,17 +225,17 @@ export default function PersonaUseCaseCompare(props: LayoutComponentProps) {
           </div>
 
           {/* Our Solutions */}
-          <div className={`rounded-lg ${colorTokens.bgAccent || 'bg-blue-500'} bg-opacity-10 p-8 border-2 border-${(colorTokens.textAccent || 'text-blue-600').replace('text-', '')}`}>
-            <h3 className={`text-xl font-semibold mb-6 ${colorTokens.textAccent}`} style={getTextStyle('h3')}>
+          <div className={`rounded-lg ${'bg-primary'} bg-opacity-10 p-8 border-2 border-${'primary'}`}>
+            <h3 className={`text-xl font-semibold mb-6 text-primary`}>
               Our Solutions
             </h3>
             <ul className="space-y-4">
               {activeSolutions.map((solution, index) => (
                 <li key={index} className="flex items-start">
-                  <svg className={`w-5 h-5 ${colorTokens.textAccent} mr-3 mt-0.5 flex-shrink-0`} fill="currentColor" viewBox="0 0 20 20">
+                  <svg className={`w-5 h-5 text-primary mr-3 mt-0.5 flex-shrink-0`} fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                   </svg>
-                  <span className={`font-medium ${colorTokens.textPrimary}`} style={getTextStyle('body')}>
+                  <span className={`font-medium ${colorTokens.textPrimary}`}>
                     {solution.trim()}
                   </span>
                 </li>
@@ -245,8 +246,8 @@ export default function PersonaUseCaseCompare(props: LayoutComponentProps) {
 
         {/* CTA */}
         <div className="text-center mt-12">
-          <button className={`${colorTokens.bgAccent} text-white px-8 py-4 rounded-lg font-semibold hover:opacity-90 transition-opacity`}>
-            <span style={getTextStyle('button')}>
+          <button className={`bg-primary text-white px-8 py-4 rounded-lg font-semibold hover:opacity-90 transition-opacity`}>
+            <span>
               See How It Works for {personaLabels[activePersona]}
             </span>
           </button>

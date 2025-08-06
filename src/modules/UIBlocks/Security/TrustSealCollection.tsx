@@ -45,7 +45,7 @@ export default function TrustSealCollection(props: LayoutComponentProps) {
     <LayoutSection
       sectionId={sectionId}
       sectionType="TrustSealCollection"
-      backgroundType={props.backgroundType || 'neutral'}
+      backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
       sectionBackground={sectionBackground}
       mode={mode}
       className={props.className}
@@ -53,12 +53,11 @@ export default function TrustSealCollection(props: LayoutComponentProps) {
       <div className="max-w-6xl mx-auto text-center">
         <EditableAdaptiveHeadline
           mode={mode}
-          value={blockContent.headline}
+          value={blockContent.headline || ''}
           onEdit={(value) => handleContentUpdate('headline', value)}
           level="h2"
-          backgroundType={props.backgroundType || 'neutral'}
+          backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
           colorTokens={colorTokens}
-          textStyle={getTextStyle('h2')}
           className="mb-12"
           sectionId={sectionId}
           elementKey="headline"

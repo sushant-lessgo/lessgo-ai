@@ -1,6 +1,7 @@
 // hooks/editStore/generationActions.ts - Generation-specific actions for EditStore
 import type { StateCreator } from 'zustand';
 import type { EditStore, SectionData } from '@/types/store';
+import type { BackgroundType } from '@/types/sectionBackground';
 import { getSectionBackgroundType } from '@/modules/Design/background/backgroundIntegration';
 import { 
   generateColorTokens, 
@@ -52,13 +53,15 @@ export function createGenerationActions(set: any, get: any) {
       // ✅ CRITICAL: Initialize content for ALL sections
       sectionIds.forEach(sectionId => {
         const layout = sectionLayouts[sectionId] || 'default';
-        const backgroundType = getSectionBackgroundType(sectionId, sectionIds, undefined, state.onboardingData as any);
+        const themeColor = getSectionBackgroundType(sectionId, sectionIds, undefined, state.onboardingData as any);
+        const backgroundType: BackgroundType = themeColor;
         
         console.log(`🔧 Processing section ${sectionId}:`, {
           availableLayout: sectionLayouts[sectionId],
           finalLayout: layout,
           isDefault: layout === 'default',
           backgroundType: backgroundType,
+          themeColor: themeColor,
           hasOnboardingData: !!state.onboardingData,
           sectionCount: sectionIds.length
         });
@@ -179,7 +182,7 @@ export function createGenerationActions(set: any, get: any) {
               id: sectionId,
               layout: state.sectionLayouts[sectionId] || 'default',
               elements: {},
-              backgroundType: getSectionBackgroundType(sectionId, state.sections, undefined, state.onboardingData as any),
+              backgroundType: getSectionBackgroundType(sectionId, state.sections, undefined, state.onboardingData as any) as BackgroundType,
               aiMetadata: {
                 lastGenerated: Date.now(),
                 aiGenerated: false,
@@ -233,7 +236,7 @@ export function createGenerationActions(set: any, get: any) {
           
           // Ensure background type is set
           if (!section.backgroundType) {
-            section.backgroundType = getSectionBackgroundType(sectionId, get().sections, undefined, get().onboardingData);
+            section.backgroundType = getSectionBackgroundType(sectionId, state.sections, undefined, state.onboardingData as any) as BackgroundType;
           }
 
           console.log(`✅ Section ${sectionId} updated with ${generatedElements.length} elements`);

@@ -107,7 +107,7 @@ export default function SideBySideSplit(props: LayoutComponentProps) {
     <LayoutSection
       sectionId={sectionId}
       sectionType="SideBySideSplit"
-      backgroundType={props.backgroundType || 'neutral'}
+      backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
       sectionBackground={sectionBackground}
       mode={mode}
       className={props.className}
@@ -117,12 +117,11 @@ export default function SideBySideSplit(props: LayoutComponentProps) {
         <div className="text-center mb-16">
           <EditableAdaptiveHeadline
             mode={mode}
-            value={blockContent.headline}
+            value={blockContent.headline || ''}
             onEdit={(value) => handleContentUpdate('headline', value)}
             level="h2"
-            backgroundType={props.backgroundType || 'neutral'}
+            backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
             colorTokens={colorTokens}
-            textStyle={getTextStyle('h2')}
             className="mb-4"
             sectionId={sectionId}
             elementKey="headline"
@@ -134,10 +133,9 @@ export default function SideBySideSplit(props: LayoutComponentProps) {
               mode={mode}
               value={blockContent.subheadline || ''}
               onEdit={(value) => handleContentUpdate('subheadline', value)}
-              backgroundType={props.backgroundType || 'neutral'}
+              backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
               colorTokens={colorTokens}
               variant="body"
-              textStyle={getTextStyle('body-lg')}
               className="text-lg mb-8 max-w-3xl mx-auto"
               placeholder="Add optional subheadline to introduce the path comparison..."
               sectionId={sectionId}
@@ -155,12 +153,11 @@ export default function SideBySideSplit(props: LayoutComponentProps) {
               <div className="space-y-4">
                 <EditableAdaptiveText
                   mode={mode}
-                  value={blockContent.problem_title}
+                  value={blockContent.problem_title || ''}
                   onEdit={(value) => handleContentUpdate('problem_title', value)}
-                  backgroundType={props.backgroundType || 'neutral'}
+                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
                   colorTokens={colorTokens}
                   variant="body"
-                  textStyle={getTextStyle('body')}
                   className="mb-2"
                   placeholder="Problem section title"
                   sectionId={sectionId}
@@ -170,12 +167,11 @@ export default function SideBySideSplit(props: LayoutComponentProps) {
                 
                 <EditableAdaptiveText
                   mode={mode}
-                  value={blockContent.problem_description}
+                  value={blockContent.problem_description || ''}
                   onEdit={(value) => handleContentUpdate('problem_description', value)}
-                  backgroundType={props.backgroundType || 'neutral'}
+                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
                   colorTokens={colorTokens}
                   variant="body"
-                  textStyle={getTextStyle('body')}
                   className="mb-2"
                   placeholder="Problem description"
                   sectionId={sectionId}
@@ -185,12 +181,11 @@ export default function SideBySideSplit(props: LayoutComponentProps) {
                 
                 <EditableAdaptiveText
                   mode={mode}
-                  value={blockContent.solution_preview}
+                  value={blockContent.solution_preview || ''}
                   onEdit={(value) => handleContentUpdate('solution_preview', value)}
-                  backgroundType={props.backgroundType || 'neutral'}
+                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
                   colorTokens={colorTokens}
                   variant="body"
-                  textStyle={getTextStyle('body')}
                   className="mb-2"
                   placeholder="Solution preview description"
                   sectionId={sectionId}
@@ -202,10 +197,9 @@ export default function SideBySideSplit(props: LayoutComponentProps) {
                   mode={mode}
                   value={blockContent.problem_points || ''}
                   onEdit={(value) => handleContentUpdate('problem_points', value)}
-                  backgroundType={props.backgroundType || 'neutral'}
+                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
                   colorTokens={colorTokens}
                   variant="body"
-                  textStyle={getTextStyle('body')}
                   className="mb-2"
                   placeholder="Problem points (pipe separated)"
                   sectionId={sectionId}
@@ -217,10 +211,9 @@ export default function SideBySideSplit(props: LayoutComponentProps) {
                   mode={mode}
                   value={blockContent.solution_points || ''}
                   onEdit={(value) => handleContentUpdate('solution_points', value)}
-                  backgroundType={props.backgroundType || 'neutral'}
+                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
                   colorTokens={colorTokens}
                   variant="body"
-                  textStyle={getTextStyle('body')}
                   className="mb-2"
                   placeholder="Solution points (pipe separated)"
                   sectionId={sectionId}
@@ -370,7 +363,6 @@ export default function SideBySideSplit(props: LayoutComponentProps) {
                     <CTAButton
                       text="Choose the Better Path"
                       colorTokens={{...colorTokens, ctaBg: 'bg-white', ctaText: 'text-blue-600'}}
-                      textStyle={getTextStyle('body-lg')}
                       className="shadow-xl hover:shadow-2xl transform hover:-translate-y-1 transition-all duration-300"
                       variant="primary"
                       sectionId={sectionId}
@@ -417,10 +409,9 @@ export default function SideBySideSplit(props: LayoutComponentProps) {
                 mode={mode}
                 value={blockContent.supporting_text || ''}
                 onEdit={(value) => handleContentUpdate('supporting_text', value)}
-                backgroundType={props.backgroundType || 'neutral'}
+                backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
                 colorTokens={colorTokens}
                 variant="body"
-                textStyle={getTextStyle('body-lg')}
                 className="max-w-3xl mx-auto mb-8"
                 placeholder="Add optional supporting text to reinforce the path choice..."
                 sectionId={sectionId}

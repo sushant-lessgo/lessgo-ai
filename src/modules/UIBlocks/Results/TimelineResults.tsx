@@ -130,14 +130,12 @@ const TimelineMilestone = ({
               suppressContentEditableWarning
               onBlur={(e) => onTitleEdit(index, e.currentTarget.textContent || '')}
               className="outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-1 min-h-[28px] cursor-text hover:bg-gray-50 font-bold text-gray-900"
-              style={getTextStyle('h3')}
             >
               {milestone.title}
             </div>
           ) : (
             <h3 
               className="font-bold text-gray-900"
-              style={getTextStyle('h3')}
             >
               {milestone.title}
             </h3>
@@ -152,14 +150,12 @@ const TimelineMilestone = ({
               suppressContentEditableWarning
               onBlur={(e) => onDescriptionEdit(index, e.currentTarget.textContent || '')}
               className="outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-1 min-h-[60px] cursor-text hover:bg-gray-50 text-gray-600 leading-relaxed"
-              style={getTextStyle('body')}
             >
               {milestone.description}
             </div>
           ) : (
             <p 
               className="text-gray-600 leading-relaxed"
-              style={getTextStyle('body')}
             >
               {milestone.description}
             </p>
@@ -178,14 +174,12 @@ const TimelineMilestone = ({
                 suppressContentEditableWarning
                 onBlur={(e) => onMetricEdit(index, e.currentTarget.textContent || '')}
                 className={`outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-1 min-h-[20px] cursor-text font-semibold text-green-800 ${!milestone.metric ? 'opacity-50 italic' : ''}`}
-                style={getTextStyle('body-sm')}
               >
                 {milestone.metric || 'Add metric...'}
               </div>
             ) : milestone.metric && (
               <span 
                 className="font-semibold text-green-800"
-                style={getTextStyle('body-sm')}
               >
                 {milestone.metric}
               </span>
@@ -258,12 +252,11 @@ export default function TimelineResults(props: TimelineResultsProps) {
         <div className="text-center mb-16">
           <EditableAdaptiveHeadline
             mode={mode}
-            value={blockContent.headline}
+            value={blockContent.headline || ''}
             onEdit={(value) => handleContentUpdate('headline', value)}
             level="h2"
-            backgroundType={backgroundType}
+            backgroundType={backgroundType === 'custom' ? 'secondary' : backgroundType}
             colorTokens={colorTokens}
-            textStyle={getTextStyle('h1')}
             className="mb-4"
             sectionId={sectionId}
             elementKey="headline"
@@ -274,11 +267,10 @@ export default function TimelineResults(props: TimelineResultsProps) {
           {(blockContent.subheadline || mode === 'edit') && (
             <EditableAdaptiveText
               mode={mode}
-              value={blockContent.subheadline}
+              value={blockContent.subheadline || ''}
               onEdit={(value) => handleContentUpdate('subheadline', value)}
-              backgroundType={backgroundType}
+              backgroundType={backgroundType === 'custom' ? 'secondary' : backgroundType}
               colorTokens={colorTokens}
-              textStyle={getTextStyle('body-lg')}
               className="mb-6 max-w-3xl mx-auto"
               placeholder="Add optional subheadline describing the transformation timeline..."
               sectionId={sectionId}

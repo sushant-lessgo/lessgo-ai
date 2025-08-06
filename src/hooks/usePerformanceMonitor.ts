@@ -102,12 +102,12 @@ export function usePerformanceMonitor(options: UsePerformanceMonitorOptions = {}
     ];
 
     methodsToTrack.forEach(methodName => {
-      if (typeof storeState[methodName] === 'function') {
-        const originalMethod = storeState[methodName];
+      if (typeof (storeState as any)[methodName] === 'function') {
+        const originalMethod = (storeState as any)[methodName];
         originalMethods.set(methodName, originalMethod);
 
         // Replace with wrapped version
-        storeState[methodName] = function(...args: any[]) {
+        (storeState as any)[methodName] = function(...args: any[]) {
           const startTime = performance.now();
           
           try {
@@ -153,7 +153,7 @@ export function usePerformanceMonitor(options: UsePerformanceMonitorOptions = {}
     // Cleanup function to restore original methods
     return () => {
       originalMethods.forEach((originalMethod, methodName) => {
-        storeState[methodName] = originalMethod;
+        (storeState as any)[methodName] = originalMethod;
       });
     };
   }, [enabled, trackStore, store, tokenId]);

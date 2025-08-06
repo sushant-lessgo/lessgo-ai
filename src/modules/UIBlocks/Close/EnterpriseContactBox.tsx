@@ -194,12 +194,11 @@ export default function EnterpriseContactBox(props: LayoutComponentProps) {
         <div className="text-center mb-16">
           <EditableAdaptiveHeadline
             mode={mode}
-            value={blockContent.headline}
+            value={blockContent.headline || ''}
             onEdit={(value) => handleContentUpdate('headline', value)}
             level="h2"
             backgroundType={safeBackgroundType}
             colorTokens={colorTokens}
-            textStyle={getTextStyle('h2')}
             className="mb-4"
             sectionId={sectionId}
             elementKey="headline"
@@ -214,7 +213,6 @@ export default function EnterpriseContactBox(props: LayoutComponentProps) {
               backgroundType={safeBackgroundType}
               colorTokens={colorTokens}
               variant="body"
-              textStyle={getTextStyle('body-lg')}
               className="text-lg mb-8 max-w-3xl mx-auto"
               placeholder="Add optional subheadline to introduce enterprise contact..."
               sectionId={sectionId}
@@ -238,12 +236,11 @@ export default function EnterpriseContactBox(props: LayoutComponentProps) {
               <div className="space-y-4">
                 <EditableAdaptiveText
                   mode={mode}
-                  value={blockContent.value_proposition}
+                  value={blockContent.value_proposition || ''}
                   onEdit={(value) => handleContentUpdate('value_proposition', value)}
                   backgroundType={safeBackgroundType}
                   colorTokens={colorTokens}
                   variant="body"
-                  textStyle={getTextStyle('body')}
                   className="mb-2"
                   placeholder="Value proposition"
                   sectionId={sectionId}
@@ -253,12 +250,11 @@ export default function EnterpriseContactBox(props: LayoutComponentProps) {
                 
                 <EditableAdaptiveText
                   mode={mode}
-                  value={blockContent.contact_options}
+                  value={blockContent.contact_options || ''}
                   onEdit={(value) => handleContentUpdate('contact_options', value)}
                   backgroundType={safeBackgroundType}
                   colorTokens={colorTokens}
                   variant="body"
-                  textStyle={getTextStyle('body')}
                   className="mb-2"
                   placeholder="Contact options (pipe separated)"
                   sectionId={sectionId}
@@ -268,12 +264,11 @@ export default function EnterpriseContactBox(props: LayoutComponentProps) {
                 
                 <EditableAdaptiveText
                   mode={mode}
-                  value={blockContent.contact_descriptions}
+                  value={blockContent.contact_descriptions || ''}
                   onEdit={(value) => handleContentUpdate('contact_descriptions', value)}
                   backgroundType={safeBackgroundType}
                   colorTokens={colorTokens}
                   variant="body"
-                  textStyle={getTextStyle('body')}
                   className="mb-2"
                   placeholder="Contact descriptions (pipe separated)"
                   sectionId={sectionId}
@@ -283,12 +278,11 @@ export default function EnterpriseContactBox(props: LayoutComponentProps) {
                 
                 <EditableAdaptiveText
                   mode={mode}
-                  value={blockContent.enterprise_features}
+                  value={blockContent.enterprise_features || ''}
                   onEdit={(value) => handleContentUpdate('enterprise_features', value)}
                   backgroundType={safeBackgroundType}
                   colorTokens={colorTokens}
                   variant="body"
-                  textStyle={getTextStyle('body')}
                   className="mb-2"
                   placeholder="Enterprise features (pipe separated)"
                   sectionId={sectionId}
@@ -324,7 +318,6 @@ export default function EnterpriseContactBox(props: LayoutComponentProps) {
                 <CTAButton
                   text={blockContent.cta_primary}
                   colorTokens={{...colorTokens, ctaBg: 'bg-white', ctaText: 'text-blue-600'}}
-                  textStyle={getTextStyle('body-lg')}
                   className="shadow-lg hover:shadow-xl"
                   variant="primary"
                   sectionId={sectionId}
@@ -335,7 +328,6 @@ export default function EnterpriseContactBox(props: LayoutComponentProps) {
                   <CTAButton
                     text={blockContent.cta_secondary}
                     colorTokens={{...colorTokens, ctaBg: 'bg-transparent border-2 border-white', ctaText: 'text-white'}}
-                    textStyle={getTextStyle('body-lg')}
                     className="hover:bg-white hover:text-blue-600 transition-all duration-300"
                     variant="secondary"
                     sectionId={sectionId}
@@ -425,7 +417,6 @@ export default function EnterpriseContactBox(props: LayoutComponentProps) {
                 backgroundType={safeBackgroundType}
                 colorTokens={colorTokens}
                 variant="body"
-                textStyle={getTextStyle('body-lg')}
                 className="max-w-3xl mx-auto mb-8"
                 placeholder="Add optional supporting text to reinforce enterprise value..."
                 sectionId={sectionId}

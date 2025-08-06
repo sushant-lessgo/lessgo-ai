@@ -87,23 +87,25 @@ export function MainContent({ tokenId }: MainContentProps) {
     elements: Record<string, EditableElement>,
     position?: number
   ) => {
-    const newSectionId = addSection(sectionType, position);
+    const newSectionId = addSection?.(sectionType, position);
     
     // Set the section with layout and elements
-    storeState?.setSection?.(newSectionId, {
-      layout: layoutId,
-      elements: elements,
-    });
-    
-    // Update section layout mapping
-    storeState?.setSectionLayouts?.({
-      ...sectionLayouts,
-      [newSectionId]: layoutId,
-    });
-    
-    // Auto-select the new section
-    setActiveSection(newSectionId);
-    announceLiveRegion(`Added ${sectionType} section`);
+    if (newSectionId) {
+      storeState?.setSection?.(newSectionId, {
+        layout: layoutId,
+        elements: elements,
+      });
+      
+      // Update section layout mapping
+      storeState?.setSectionLayouts?.({
+        ...sectionLayouts,
+        [newSectionId]: layoutId,
+      });
+      
+      // Auto-select the new section
+      setActiveSection?.(newSectionId);
+      announceLiveRegion?.(`Added ${sectionType} section`);
+    }
   }, [addSection, sectionLayouts, setActiveSection, announceLiveRegion, storeState]);
   
   // Debug: check if functions exist
@@ -154,7 +156,7 @@ React.useEffect(() => {
   });
 }, [isPickerVisible, pickerSectionId, pickerPosition, pickerOptions]);
 
-  const colorTokens = getColorTokens();
+  const colorTokens = getColorTokens?.() || {};
 
   // Debug logging for sections rendering (throttled)
   React.useEffect(() => {
@@ -202,7 +204,7 @@ React.useEffect(() => {
     
     // MULTI-SELECTION DISABLED FOR MVP - Only single selection
     // Single selection with context-aware toolbar
-    setActiveSection(sectionId);
+    setActiveSection?.(sectionId);
     
     // Calculate position for section toolbar
     const sectionElement = document.querySelector(`[data-section-id="${sectionId}"]`);
@@ -217,7 +219,7 @@ React.useEffect(() => {
       console.log('🎪 Showing section toolbar for:', sectionId, 'at position:', position);
       
       if (typeof showSectionToolbar === 'function') {
-        showSectionToolbar(sectionId, position);
+        showSectionToolbar?.(sectionId, position);
       } else {
         console.error('❌ showSectionToolbar is not a function:', typeof showSectionToolbar);
         // Fallback: use direct store access
@@ -228,8 +230,8 @@ React.useEffect(() => {
       }
     }
 
-    trackPerformance('section-selection', startTime);
-    announceLiveRegion(`Selected section ${sectionId}`);
+    trackPerformance?.('section-selection', startTime);
+    announceLiveRegion?.(`Selected section ${sectionId}`);
   };
 
 // Enhanced element click handler with smart positioning
@@ -258,7 +260,7 @@ React.useEffect(() => {
     };
 
     // Update store with element selection
-    selectElement({
+    selectElement?.({
       sectionId,
       elementKey,
       type: elementContext.elementType as any,
@@ -271,26 +273,22 @@ React.useEffect(() => {
     const elementId = `${sectionId}.${elementKey}`;
     setTimeout(() => {
       if (typeof showElementToolbar === 'function') {
-        showElementToolbar(elementId, position);
+        showElementToolbar?.(elementId, position);
       } else {
         console.error('❌ showElementToolbar is not a function:', typeof showElementToolbar);
-        // Fallback: use direct store access
-        if (typeof store.showToolbar === 'function') {
-          store.showToolbar('element', elementId, position);
-        }
       }
     }, 0);
 
     console.log('🎯 Element selected, toolbar should show:', { elementId, position });
 
-    trackPerformance('element-selection', startTime);
+    trackPerformance?.('element-selection', startTime);
     
     // Enhanced announcement with context information
     const toolbarInfo = elementContext.toolbarType;
     const capabilityCount = elementContext.capabilities.length;
     const multiToolbarInfo = isMultiToolbarMode ? ' (multi-toolbar)' : '';
     
-    announceLiveRegion(
+    announceLiveRegion?.(
       `Selected ${elementKey} - ${toolbarInfo} toolbar with ${capabilityCount} actions${multiToolbarInfo}`
     );
   };
@@ -382,18 +380,18 @@ React.useEffect(() => {
   }
   
   // Announce action execution
-  announceLiveRegion(`Executed ${action.name}`);
+  announceLiveRegion?.(`Executed ${action.name}`);
 };
 
   // Enhanced content update handler
   const handleContentUpdate = (sectionId: string, elementKey: string, value: string) => {
     const startTime = performance.now();
     
-    updateElementContent(sectionId, elementKey, value);
-    trackPerformance('content-update', startTime);
+    updateElementContent?.(sectionId, elementKey, value);
+    trackPerformance?.('content-update', startTime);
     
     // Announce change for screen readers
-    announceLiveRegion(`Updated ${elementKey} content`);
+    announceLiveRegion?.(`Updated ${elementKey} content`);
   };
 
   // Handle add section
@@ -409,7 +407,7 @@ const handleAddSection = (afterSectionId?: string) => {
 
   // Fix: Use the correct addSection signature (type, position)
   const position = afterSectionId ? sections.indexOf(afterSectionId) + 1 : undefined;
-  const newSectionId = addSection('hero', position);
+  const newSectionId = addSection?.('hero', position);
 
   // Then update the section content separately using updateElementContent
   const storeState = store?.getState();
@@ -418,7 +416,8 @@ const handleAddSection = (afterSectionId?: string) => {
   const heroLayout = getSectionFallbackLayout('hero'); // Returns 'leftCopyRightImage'
   
   // Set the section layout and initialize elements with proper structure
-  storeState?.setSection?.(newSectionId, {
+  if (newSectionId) {
+    storeState?.setSection?.(newSectionId, {
     layout: heroLayout,
     elements: {
       headline: {
@@ -440,17 +439,18 @@ const handleAddSection = (afterSectionId?: string) => {
         editMode: 'inline',
       },
     },
-  });
-  
-  // Also update the section layout in sectionLayouts
-  storeState?.setSectionLayouts?.({
-    ...sectionLayouts,
-    [newSectionId]: heroLayout,
-  });
-
-  // Auto-select the new section
-  setActiveSection(newSectionId);
-  announceLiveRegion(`Added new section`);
+    });
+    
+    // Also update the section layout in sectionLayouts
+    storeState?.setSectionLayouts?.({
+      ...sectionLayouts,
+      [newSectionId]: heroLayout,
+    });
+    
+    // Auto-select the new section
+    setActiveSection?.(newSectionId);
+    announceLiveRegion?.(`Added new section`);
+  }
 };
 
   // Handle section drag and drop
@@ -460,7 +460,7 @@ const handleAddSection = (afterSectionId?: string) => {
       event.dataTransfer.effectAllowed = 'move';
     }
     
-    setActiveSection(sectionId);
+    setActiveSection?.(sectionId);
   };
 
   const handleSectionDragOver = (event: React.DragEvent) => {
@@ -492,8 +492,8 @@ const handleAddSection = (afterSectionId?: string) => {
     // Insert at new position
     currentSections.splice(newIndex, 0, draggedSectionId);
     
-    reorderSections(currentSections);
-    announceLiveRegion(`Moved section ${draggedSectionId} ${position} ${targetSectionId}`);
+    reorderSections?.(currentSections);
+    announceLiveRegion?.(`Moved section ${draggedSectionId} ${position} ${targetSectionId}`);
   };
 
   // Clear selection on background click
@@ -502,7 +502,7 @@ const handleAddSection = (afterSectionId?: string) => {
   if (event.target === event.currentTarget) {
     clearSelection();
     hideElementPicker(); // ADD THIS LINE
-    announceLiveRegion('Cleared selection');
+    announceLiveRegion?.('Cleared selection');
   }
 };
 
@@ -512,7 +512,7 @@ const handleAddSection = (afterSectionId?: string) => {
     if (event.key === 'Escape' && mode === 'edit') {
       clearSelection();
       hideElementPicker(); // ADD THIS LINE
-      announceLiveRegion('Cleared selection');
+      announceLiveRegion?.('Cleared selection');
     }
   };
 
