@@ -88,12 +88,29 @@ export const useOnboardingStore = create<OnboardingStore>((set, get) => ({
     
     console.log(`Confirming field: ${displayField} → ${canonicalField} = "${value}"`);
     
-    set((state) => ({
-      validatedFields: {
+    set((state) => {
+      const newValidatedFields = {
         ...state.validatedFields,
         [canonicalField]: value, // ✅ Add to validated fields with canonical name
-      },
-    }));
+      };
+
+      // ✅ BUG FIX: Handle field dependencies - invalidate dependent fields
+      let newForceManualFields = [...state.forceManualFields];
+      
+      if (canonicalField === 'marketCategory') {
+        // Market Category changed - invalidate Market Subcategory
+        delete newValidatedFields['marketSubcategory'];
+        if (!newForceManualFields.includes('marketSubcategory')) {
+          newForceManualFields.push('marketSubcategory');
+        }
+        console.log(`Market Category changed to "${value}" - invalidated Market Subcategory`);
+      }
+
+      return {
+        validatedFields: newValidatedFields,
+        forceManualFields: newForceManualFields,
+      };
+    });
   },
 
   // ✅ FIXED: Reopen field for editing using canonical names

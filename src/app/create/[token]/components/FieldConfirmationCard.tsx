@@ -208,7 +208,7 @@ export default function FieldConfirmationCard({
       )}
 
       {/* EDIT MODE: Standard options (any confidence level when explicitly editing) */}
-      {mode === "edit" && !isLowConfidence && (
+      {mode === "edit" && !isLowConfidence && fieldName !== "Key Problem Getting Solved" && (
         <>
           <p className="text-sm text-gray-500">Choose the most accurate option:</p>
           
@@ -274,7 +274,7 @@ export default function FieldConfirmationCard({
       )}
 
       {/* SHOW ALL OPTIONS (expanded from low confidence) */}
-      {mode === "show-all" && (
+      {mode === "show-all" && fieldName !== "Key Problem Getting Solved" && (
         <>
           <div className="flex items-center justify-between mb-3">
             <p className="text-sm text-gray-500">All available options:</p>
