@@ -297,6 +297,8 @@ export interface ColorSystem {
   sectionBackgrounds: SectionBackgrounds;
   semantic: SemanticColors;
   states: StateColors;
+  // Text colors for each background type - calculated once during generation
+  textColors?: TextColorsForBackgrounds;
 }
 
 export interface SectionBackgrounds {
@@ -319,6 +321,21 @@ export interface StateColors {
   focus: Record<string, string>;
   active: Record<string, string>;
   disabled: Record<string, string>;
+}
+
+export interface TextColorSet {
+  heading: string;  // Hex color for headings
+  body: string;     // Hex color for body text
+  muted: string;    // Hex color for muted/secondary text
+}
+
+export interface TextColorsForBackgrounds {
+  primary: TextColorSet;
+  secondary: TextColorSet;
+  neutral: TextColorSet;
+  divider: TextColorSet;
+  // For custom backgrounds
+  custom?: TextColorSet;
 }
 
 export interface SpacingSystem {

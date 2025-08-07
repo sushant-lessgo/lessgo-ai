@@ -59,6 +59,7 @@ getTypographyForSection: (sectionId: string) => FontTheme;
   // Color System Integration
   getColorTokens: () => ReturnType<typeof import('@/modules/Design/ColorSystem/colorTokens').generateColorTokens>;
   updateColorTokens: (newTokens: ColorTokens) => void;
+  recalculateTextColors: () => void; // NEW: Recalculate text colors when backgrounds change
   initializeSections: (sectionIds: string[], sectionLayouts: Record<string, string>) => void;
 }
 

@@ -24,12 +24,14 @@ export function generateColorTokens({
   baseColor = "gray",
   accentColor = "purple",
   accentCSS,  // ✅ Now properly used for CTAs
-  sectionBackgrounds = {}
+  sectionBackgrounds = {},
+  storedTextColors  // ✅ NEW: Use stored text colors if available
 }: {
   baseColor?: string;         // From bgVariations (e.g., "blue", "sky")
   accentColor?: string;       // From accentOptions (e.g., "purple", "indigo") - for CTAs
   accentCSS?: string;         // From accentOptions - for CTAs (e.g., "bg-purple-600")
   sectionBackgrounds?: SectionBackgroundInput; // From backgroundIntegration system
+  storedTextColors?: import('@/types/core/content').TextColorsForBackgrounds; // ✅ NEW: Stored text colors from theme
 }) {
   
   // Helper function to convert hex to Tailwind bg class
@@ -232,6 +234,31 @@ export function generateColorTokens({
     
     ctaGhost: `text-${accentColor}-600`,       // Ghost CTA (text only)
     ctaGhostHover: `bg-${accentColor}-50`,     // Ghost CTA hover background
+    
+    // ✅ NEW: Return stored text colors or calculate them
+    textColors: storedTextColors || calculateTextColorsForBackgrounds(sectionBackgrounds),
+  };
+}
+
+// ✅ NEW: Calculate text colors for each background type
+function calculateTextColorsForBackgrounds(
+  sectionBackgrounds: SectionBackgroundInput
+): import('@/types/core/content').TextColorsForBackgrounds {
+  
+  const calculateForBackground = (bg: string | undefined, fallback: string) => {
+    const background = bg || fallback;
+    return {
+      heading: getSmartTextColor(background, 'heading'),
+      body: getSmartTextColor(background, 'body'),
+      muted: getSmartTextColor(background, 'muted')
+    };
+  };
+  
+  return {
+    primary: calculateForBackground(sectionBackgrounds.primary, 'bg-gradient-to-br from-blue-500 to-blue-600'),
+    secondary: calculateForBackground(sectionBackgrounds.secondary, 'bg-gray-50'),
+    neutral: calculateForBackground(sectionBackgrounds.neutral, 'bg-white'),
+    divider: calculateForBackground(sectionBackgrounds.divider, 'bg-gray-100/50'),
   };
 }
 

@@ -339,10 +339,30 @@ moveSection: (sectionId: string, direction: 'up' | 'down') =>
      * ===== THEME MANAGEMENT =====
      */
     
-    updateTheme: (theme: Partial<Theme>) =>
+    updateTheme: (theme: Partial<Theme>) => {
       set((state: EditStore) => {
         const oldTheme = { ...state.theme };
-        Object.assign(state.theme, theme);
+        
+        // Deep merge for nested properties like colors
+        if (theme.colors) {
+          state.theme.colors = {
+            ...state.theme.colors,
+            ...theme.colors,
+            // Deep merge sectionBackgrounds if provided
+            sectionBackgrounds: theme.colors.sectionBackgrounds ? {
+              ...state.theme.colors.sectionBackgrounds,
+              ...theme.colors.sectionBackgrounds
+            } : state.theme.colors.sectionBackgrounds,
+            // Preserve textColors unless explicitly updated
+            textColors: theme.colors.textColors || state.theme.colors.textColors
+          };
+          // Remove colors from theme object to avoid overwriting
+          const { colors, ...otherThemeUpdates } = theme;
+          Object.assign(state.theme, otherThemeUpdates);
+        } else {
+          Object.assign(state.theme, theme);
+        }
+        
         state.persistence.isDirty = true;
         
         state.history.undoStack.push({
@@ -354,7 +374,14 @@ moveSection: (sectionId: string, direction: 'up' | 'down') =>
         });
         
         state.history.redoStack = [];
-      }),
+      });
+      
+      // If background colors changed, recalculate text colors
+      if (theme.colors?.sectionBackgrounds) {
+        const { recalculateTextColors } = get();
+        recalculateTextColors();
+      }
+    },
     
     updateBaseColor: (baseColor: string) =>
       set((state: EditStore) => {
@@ -658,8 +685,22 @@ getTypographyForSection: (sectionId: string) => {
         };
 
         console.log('🎨 [TOKENS-DEBUG] Using integrated background system for color tokens:', backgroundSystemData);
-        const tokens = generateColorTokensFromBackgroundSystem(backgroundSystemData);
-        console.log('🎨 [TOKENS-DEBUG] Generated integrated tokens:', tokens);
+        
+        // Pass stored text colors to avoid recalculation
+        const tokens = generateColorTokens({
+          baseColor: backgroundSystemData.baseColor,
+          accentColor: backgroundSystemData.accentColor,
+          accentCSS: backgroundSystemData.accentCSS,
+          sectionBackgrounds: {
+            primary: backgroundSystemData.primary,
+            secondary: backgroundSystemData.secondary,
+            neutral: backgroundSystemData.neutral,
+            divider: backgroundSystemData.divider
+          },
+          storedTextColors: theme.colors.textColors // Use stored text colors
+        });
+        
+        console.log('🎨 [TOKENS-DEBUG] Generated integrated tokens with stored text colors:', tokens);
         return tokens;
       } else {
         // Fallback to basic generation
@@ -668,7 +709,8 @@ getTypographyForSection: (sectionId: string) => {
           baseColor: theme.colors.baseColor,
           accentColor: theme.colors.accentColor,
           accentCSS: theme.colors.accentCSS,
-          sectionBackgrounds: theme.colors.sectionBackgrounds
+          sectionBackgrounds: theme.colors.sectionBackgrounds,
+          storedTextColors: theme.colors.textColors // Use stored text colors even in fallback
         };
         console.log('🎨 [TOKENS-DEBUG] Fallback input:', fallbackInput);
         const tokens = generateColorTokens(fallbackInput);
@@ -697,6 +739,33 @@ getTypographyForSection: (sectionId: string) => {
         state.persistence.isDirty = true;
         state.lastUpdated = Date.now();
       }),
+
+    // ✅ NEW: Update stored text colors when backgrounds change
+    recalculateTextColors: () => {
+      const { theme } = get();
+      const { getSmartTextColor } = require('@/utils/improvedTextColors');
+      
+      const calculateForBackground = (bg: string) => ({
+        heading: getSmartTextColor(bg, 'heading'),
+        body: getSmartTextColor(bg, 'body'),
+        muted: getSmartTextColor(bg, 'muted')
+      });
+      
+      const newTextColors = {
+        primary: calculateForBackground(theme.colors.sectionBackgrounds.primary || 'bg-gradient-to-br from-blue-500 to-blue-600'),
+        secondary: calculateForBackground(theme.colors.sectionBackgrounds.secondary || 'bg-gray-50'),
+        neutral: calculateForBackground(theme.colors.sectionBackgrounds.neutral || 'bg-white'),
+        divider: calculateForBackground(theme.colors.sectionBackgrounds.divider || 'bg-gray-100/50'),
+      };
+      
+      set((state: EditStore) => {
+        state.theme.colors.textColors = newTextColors;
+        state.persistence.isDirty = true;
+        state.lastUpdated = Date.now();
+      });
+      
+      console.log('🎨 [EDIT-DEBUG] Recalculated text colors:', newTextColors);
+    },
 
     initializeSections: (sectionIds: string[], sectionLayouts: Record<string, string>) =>
       set((state: EditStore) => {

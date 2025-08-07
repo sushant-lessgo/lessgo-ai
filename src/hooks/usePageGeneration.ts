@@ -162,6 +162,27 @@ export function usePageGeneration(tokenId: string) {
       }
     });
     
+    // Calculate text colors for each background type
+    const calculateTextColors = () => {
+      const { getSmartTextColor } = require('@/utils/improvedTextColors');
+      
+      const calculateForBackground = (bg: string) => ({
+        heading: getSmartTextColor(bg, 'heading'),
+        body: getSmartTextColor(bg, 'body'),
+        muted: getSmartTextColor(bg, 'muted')
+      });
+      
+      return {
+        primary: calculateForBackground(backgroundSystem.primary),
+        secondary: calculateForBackground(backgroundSystem.secondary),
+        neutral: calculateForBackground(backgroundSystem.neutral),
+        divider: calculateForBackground(backgroundSystem.divider),
+      };
+    };
+    
+    const textColors = calculateTextColors();
+    console.log('🎨 [GENERATE-DEBUG] Calculated text colors:', textColors);
+    
     updateTheme({
       colors: {
         baseColor: backgroundSystem.baseColor,
@@ -172,7 +193,8 @@ export function usePageGeneration(tokenId: string) {
           secondary: backgroundSystem.secondary,
           neutral: backgroundSystem.neutral,
           divider: backgroundSystem.divider,
-        }
+        },
+        textColors // Store calculated text colors
       } as any
     });
     

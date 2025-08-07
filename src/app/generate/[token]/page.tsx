@@ -198,9 +198,14 @@ function GeneratePageContent({ tokenId }: { tokenId: string }) {
       setTransitionStep(2);
       setTransitionProgress(75);
       
+      const beforeModeSet = store.getState();
+console.log('🎯 Theme before setMode:', beforeModeSet.theme);
+
       // Set edit mode in the store
       currentState.setMode('edit');
-      
+      const afterModeSet = store.getState();
+console.log('🎯 Theme after setMode:', afterModeSet.theme);
+
       // Small delay to ensure all async operations complete
       await new Promise(resolve => setTimeout(resolve, 300));
       

@@ -259,15 +259,41 @@ export function useLayoutComponent<T = Record<string, any>>({
   
   // console.log(`🎨 Final sectionBackground for ${sectionId}:`, sectionBackground);
   
-  // Get smart text colors that validate contrast automatically
-  // ✅ ENHANCED: Check for theme overrides first
+  // Map background types to storage keys
+  const mapBackgroundTypeToStorageKey = (bgType: string): string => {
+    const mapping: Record<string, string> = {
+      'primary-highlight': 'primary',
+      'secondary-highlight': 'secondary',
+      'divider-zone': 'divider',
+      'neutral': 'neutral',
+      // Direct mappings
+      'primary': 'primary',
+      'secondary': 'secondary',
+      'divider': 'divider'
+    };
+    return mapping[bgType] || bgType;
+  };
+
+  // Get smart text colors - prioritize stored colors over recalculation
+  // ✅ ENHANCED: Check stored text colors first, then theme overrides, finally calculate
   const getEffectiveTextColor = (type: 'heading' | 'body' | 'muted') => {
-    // Check for manual overrides
+    // First priority: Check for stored text colors from generation
+    if (theme?.colors?.textColors && currentBackgroundType !== 'custom') {
+      // Map the background type to the storage key
+      const storageKey = mapBackgroundTypeToStorageKey(currentBackgroundType);
+      const storedColors = theme.colors.textColors[storageKey as keyof typeof theme.colors.textColors];
+      if (storedColors && storedColors[type]) {
+        console.log(`🎨 Using stored text color for ${type} on ${currentBackgroundType} (mapped to ${storageKey}):`, storedColors[type]);
+        return storedColors[type];
+      }
+    }
+    
+    // Second priority: Check for manual overrides
     if ((theme as any)?.textColorMode === 'manual' && (theme as any)?.textColorOverrides?.[type]) {
       return (theme as any).textColorOverrides[type];
     }
     
-    // Use auto-calculated colors with contrast adjustment
+    // Last resort: Calculate colors (for custom backgrounds or missing stored colors)
     const { getSmartTextColor } = require('@/utils/improvedTextColors');
     const baseColor = getSmartTextColor(sectionBackground, type);
     
