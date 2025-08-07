@@ -2,6 +2,7 @@ import React, { useMemo } from 'react';
 import { useLayoutComponent } from '@/hooks/useLayoutComponent';
 import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
 import { useImageToolbar } from '@/hooks/useImageToolbar';
+import { useTypography } from '@/hooks/useTypography';
 import { LayoutSection } from '@/components/layout/LayoutSection';
 import { 
   EditableAdaptiveHeadline, 
@@ -192,6 +193,7 @@ const HeroImagePlaceholder = React.memo(() => (
 HeroImagePlaceholder.displayName = 'HeroImagePlaceholder';
 
 export default function SplitScreen(props: LayoutComponentProps) {
+  const { getTextStyle: getTypographyStyle } = useTypography();
   
   const {
     sectionId,
@@ -211,6 +213,18 @@ export default function SplitScreen(props: LayoutComponentProps) {
   const trustItems = blockContent.trust_items 
     ? blockContent.trust_items.split('|').map(item => item.trim()).filter(Boolean)
     : ['Free trial', 'No credit card'];
+
+  // Create hero typography styles using landingTypography system
+  const heroTypographyStyle = useMemo(() => {
+    const heroStyle = getTypographyStyle('hero');
+    return {
+      fontSize: heroStyle.fontSize,
+      fontWeight: heroStyle.fontWeight,
+      lineHeight: heroStyle.lineHeight,
+      letterSpacing: heroStyle.letterSpacing,
+      fontFamily: heroStyle.fontFamily
+    };
+  }, [getTypographyStyle]);
 
   const mutedTextColor = dynamicTextColors?.muted || colorTokens.textMuted;
   
@@ -262,7 +276,7 @@ export default function SplitScreen(props: LayoutComponentProps) {
                 level="h1"
                 backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
                 colorTokens={colorTokens}
-                className="leading-tight text-4xl lg:text-5xl xl:text-6xl"
+                style={heroTypographyStyle}
                 sectionId={sectionId}
                 elementKey="headline"
                 sectionBackground={sectionBackground}

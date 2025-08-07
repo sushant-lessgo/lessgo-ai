@@ -11,7 +11,7 @@ export function useTypography() {
     
     return {
       ...baseStyle,
-      fontFamily: variant.startsWith('h') || variant === 'display' || variant === 'hero' 
+      fontFamily: variant.startsWith('h') || variant === 'display' || variant === 'hero' || variant === 'button' || variant === 'label'
         ? `${theme.typography.headingFont}, 'Inter', sans-serif`
         : `${theme.typography.bodyFont}, 'Inter', sans-serif`
     };

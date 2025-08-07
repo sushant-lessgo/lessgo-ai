@@ -29,6 +29,36 @@ export const landingTypography = {
     lineHeight: '1.4',
     letterSpacing: '0',
   },
+  h4: {
+    fontSize: 'clamp(1.125rem, 2vw, 1.25rem)',
+    fontWeight: '600',
+    lineHeight: '1.4',
+    letterSpacing: '0',
+  },
+  h5: {
+    fontSize: 'clamp(1rem, 1.5vw, 1.125rem)',
+    fontWeight: '500',
+    lineHeight: '1.5',
+    letterSpacing: '0',
+  },
+  h6: {
+    fontSize: 'clamp(0.875rem, 1vw, 1rem)',
+    fontWeight: '500',
+    lineHeight: '1.5',
+    letterSpacing: '0',
+  },
+  button: {
+    fontSize: 'clamp(0.875rem, 1vw, 1rem)',
+    fontWeight: '600',
+    lineHeight: '1.5',
+    letterSpacing: '0.01em',
+  },
+  label: {
+    fontSize: 'clamp(0.75rem, 0.8vw, 0.875rem)',
+    fontWeight: '500',
+    lineHeight: '1.4',
+    letterSpacing: '0.01em',
+  },
   'body-lg': {
     fontSize: 'clamp(1.125rem, 2vw, 1.25rem)',
     fontWeight: '400',

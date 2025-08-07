@@ -3,6 +3,7 @@ import { InlineTextEditor, defaultEditorConfig } from '@/app/edit/[token]/compon
 import { useTextToolbarIntegration } from '@/hooks/useTextToolbarIntegration';
 import { useAutoSave } from '@/hooks/useAutoSave';
 import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
+import { useTypography } from '@/hooks/useTypography';
 import { generateAccessibleBadgeColors } from '@/utils/textContrastUtils';
 import { getTextColorForBackground } from '@/modules/Design/background/enhancedBackgroundLogic';
 import { getSmartTextColor } from '@/utils/improvedTextColors';
@@ -122,6 +123,27 @@ export function EditableContent({
     }
   }, [showTextToolbar]);
   
+  // Preview mode styles - merge formatState styles with style prop
+  const previewStyle = useMemo(() => {
+    if (!formatState || formatState === defaultFormatState) {
+      return style;
+    }
+    
+    return {
+      fontSize: formatState.fontSize,
+      fontWeight: formatState.bold ? 'bold' : 'normal',
+      fontStyle: formatState.italic ? 'italic' : 'normal',
+      textDecoration: formatState.underline ? 'underline' : 'none',
+      color: formatState.color,
+      fontFamily: formatState.fontFamily,
+      textAlign: formatState.textAlign,
+      lineHeight: formatState.lineHeight,
+      letterSpacing: formatState.letterSpacing,
+      textTransform: formatState.textTransform,
+      ...style, // Allow style prop to override formatState
+    };
+  }, [formatState, style]);
+  
   if (!shouldShow) return null;
 
   // Use inline editor in edit mode if enabled and required props are provided
@@ -183,9 +205,8 @@ export function EditableContent({
     return editableElement;
   }
 
-  // Preview mode
   return (
-    <Element className={className} style={style}>
+    <Element className={className} style={previewStyle}>
       {children || value}
     </Element>
   );
@@ -222,7 +243,7 @@ export function EditableHeadline({
   backgroundType?: string,
   colorTokens?: any,
 }) {
-  
+  const { getTextStyle } = useTypography();
   const finalColorClass = dynamicColor || colorClass || 'text-gray-900';
   
   // console.log('🎨 [HEADLINE-DEBUG] EditableHeadline:', {
@@ -234,23 +255,27 @@ export function EditableHeadline({
     // ✅ FIX: Don't set inline color if we're using CSS classes for adaptive colors
     // Only use inline color if explicitly provided in formatState, not for adaptive colors
     const shouldUseInlineColor = formatState?.color && !colorClass;
+    
+    // Get typography styles from landingTypography system
+    const typographyStyle = getTextStyle(level);
+    
     const baseState = {
-      bold: true,
+      bold: typographyStyle.fontWeight === '700',
       italic: false,
       underline: false,
       color: shouldUseInlineColor ? formatState.color : undefined,
-      fontSize: level === 'h1' ? '2rem' : level === 'h2' ? '1.5rem' : level === 'h3' ? '1.25rem' : '1rem',
-      fontFamily: 'inherit',
+      fontSize: typographyStyle.fontSize,
+      fontFamily: typographyStyle.fontFamily || 'inherit',
       textAlign: (textStyle?.textAlign as any) || 'left' as const,
-      lineHeight: level === 'h1' ? '1.2' : '1.3',
-      letterSpacing: 'normal',
+      lineHeight: typographyStyle.lineHeight,
+      letterSpacing: typographyStyle.letterSpacing,
       textTransform: 'none' as const,
       ...formatState,
     };
     
     
     return baseState;
-  }, [level, colorClass, formatState, textStyle?.textAlign]);
+  }, [level, colorClass, formatState, textStyle?.textAlign, getTextStyle]);
   
   // Debug logging for headline color issues (reduced)
   // console.log('🎨 [HEADLINE-DEBUG] EditableHeadline state:', { finalColorClass, headlineFormatStateColor: headlineFormatState.color });
