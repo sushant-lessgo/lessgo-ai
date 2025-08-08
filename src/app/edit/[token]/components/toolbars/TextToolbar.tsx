@@ -1,8 +1,9 @@
-// app/edit/[token]/components/toolbars/TextToolbar.tsx - Complete Text Toolbar
+// app/edit/[token]/components/toolbars/TextToolbar.tsx - Priority-Resolved Text Toolbar
 import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
 import { useEditor } from '@/hooks/useEditor';
 import { useToolbarActions } from '@/hooks/useToolbarActions';
+import { useToolbarVisibility } from '@/hooks/useSelectionPriority';
 import { calculateArrowPosition } from '@/utils/toolbarPositioning';
 import { AdvancedActionsMenu } from './AdvancedActionsMenu';
 
@@ -13,6 +14,18 @@ interface TextToolbarProps {
 }
 
 export function TextToolbar({ elementSelection, position, contextActions }: TextToolbarProps) {
+  // STEP 3: Check toolbar visibility with global anchor positioning
+  const { 
+    isVisible, 
+    reason, 
+    isTransitionLocked, 
+    lockReason,
+    naturalActiveToolbar,
+    anchor,
+    position: anchorPosition,
+    hasValidPosition 
+  } = useToolbarVisibility('text', { width: 400, height: 60 }); // Specify toolbar size
+  
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [activeFormats, setActiveFormats] = useState<Set<string>>(new Set());
   const [currentColor, setCurrentColor] = useState('#000000');
@@ -21,10 +34,18 @@ export function TextToolbar({ elementSelection, position, contextActions }: Text
   const [isRegenerating, setIsRegenerating] = useState(false);
   const [isGeneratingVariations, setIsGeneratingVariations] = useState(false);
   
-  // Component lifecycle tracking (removed console logs for production)
+  // Component lifecycle tracking with anchor info
   React.useEffect(() => {
-    // Component mounted with new selection
-  }, [elementSelection, position, contextActions]);
+    console.log('📝 TextToolbar state (Step 3):', { 
+      isVisible, 
+      reason, 
+      isTransitionLocked,
+      lockReason: lockReason || 'none',
+      hasValidPosition,
+      anchorPosition: anchorPosition ? { x: anchorPosition.x, y: anchorPosition.y, placement: anchorPosition.placement } : null,
+      elementSelection: elementSelection?.elementKey 
+    });
+  }, [elementSelection, position, contextActions, isVisible, reason, isTransitionLocked, lockReason, hasValidPosition, anchorPosition]);
   
   const toolbarRef = useRef<HTMLDivElement>(null);
   const advancedRef = useRef<HTMLDivElement>(null);
@@ -52,6 +73,12 @@ export function TextToolbar({ elementSelection, position, contextActions }: Text
 
   const { executeAction } = useToolbarActions();
   const { exitTextEditMode } = useEditor();
+
+  // STEP 1: Priority-based early returns
+  if (!isVisible) {
+    console.log('📝 TextToolbar hidden by priority system:', reason);
+    return null;
+  }
 
   // Early return if elementSelection is invalid
   if (!elementSelection || !elementSelection.sectionId || !elementSelection.elementKey) {
@@ -698,19 +725,28 @@ export function TextToolbar({ elementSelection, position, contextActions }: Text
     },
   ];
 
+  // STEP 3: Use global anchor positioning or fallback to legacy
+  const finalPosition = hasValidPosition && anchorPosition ? anchorPosition : position;
+  const showArrow = hasValidPosition && anchorPosition?.arrow;
+
   return (
     <>
       <div 
         ref={toolbarRef}
         className="fixed z-50 bg-white border-2 border-blue-500 rounded-lg shadow-xl transition-all duration-200"
         style={{
-          left: Math.max(10, Math.min(position.x, window.innerWidth - 400)), // Constrain to viewport
-          top: Math.max(10, Math.min(position.y, window.innerHeight - 100)), // Constrain to viewport
+          left: finalPosition.x,
+          top: finalPosition.y,
+          width: hasValidPosition ? `${finalPosition.width}px` : 'auto',
           minWidth: '300px',
           maxWidth: '400px',
-          maxHeight: '80px', // Limit height to ensure visibility
+          maxHeight: '80px',
+          opacity: isVisible ? 1 : 0,
+          pointerEvents: isVisible ? 'auto' : 'none',
         }}
         data-toolbar-type="text"
+        data-anchor-positioned={hasValidPosition}
+        data-placement={anchorPosition?.placement}
         onMouseDown={(e) => {
           // Prevent toolbar clicks from blurring the text element
           e.preventDefault();
@@ -722,18 +758,18 @@ export function TextToolbar({ elementSelection, position, contextActions }: Text
           e.stopPropagation();
         }}
       >
-        {/* Arrow */}
-        {arrowInfo && (
+        {/* STEP 3: Global anchor arrow */}
+        {showArrow && anchorPosition.arrow && (
           <div 
             className={`absolute w-2 h-2 bg-white border transform rotate-45 ${
-              arrowInfo.direction === 'up' ? 'border-t-0 border-l-0 -bottom-1' :
-              arrowInfo.direction === 'down' ? 'border-b-0 border-r-0 -top-1' :
-              arrowInfo.direction === 'left' ? 'border-l-0 border-b-0 -right-1' :
+              anchorPosition.arrow.direction === 'down' ? 'border-t-0 border-l-0 -bottom-1' :
+              anchorPosition.arrow.direction === 'up' ? 'border-b-0 border-r-0 -top-1' :
+              anchorPosition.arrow.direction === 'right' ? 'border-l-0 border-b-0 -right-1' :
               'border-r-0 border-t-0 -left-1'
             }`}
             style={{
-              left: arrowInfo.direction === 'up' || arrowInfo.direction === 'down' ? arrowInfo.x - 4 : undefined,
-              top: arrowInfo.direction === 'left' || arrowInfo.direction === 'right' ? arrowInfo.y - 4 : undefined,
+              left: anchorPosition.arrow.direction === 'up' || anchorPosition.arrow.direction === 'down' ? anchorPosition.arrow.x - 4 : undefined,
+              top: anchorPosition.arrow.direction === 'left' || anchorPosition.arrow.direction === 'right' ? anchorPosition.arrow.y - 4 : undefined,
             }}
           />
         )}

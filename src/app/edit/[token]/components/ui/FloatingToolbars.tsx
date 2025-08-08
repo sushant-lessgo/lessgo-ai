@@ -1,23 +1,45 @@
-// app/edit/[token]/components/ui/FloatingToolbars.tsx - Complete 5 Toolbar Implementation
+// app/edit/[token]/components/ui/FloatingToolbars.tsx - Priority-Resolved Toolbar System
 import React, { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useStoreState } from '@/components/EditProvider';
+import { useSelectionPriority } from '@/hooks/useSelectionPriority';
 // Removed complex positioning hooks - using simple React-based positioning
 import { calculateArrowPosition } from '@/utils/toolbarPositioning';
 
 // Import action handlers
 import { SectionToolbar } from '../toolbars/SectionToolbar';
 import { TextToolbar } from '../toolbars/TextToolbar';
+import { TextToolbarMVP } from '../toolbars/TextToolbarMVP'; // Step 4: MVP Implementation
 import { ElementToolbar } from '../toolbars/ElementToolbar';
 import { ImageToolbar } from '../toolbars/ImageToolbar';
 import { FormToolbar } from '../toolbars/FormToolbar';
 import { AdvancedActionsMenu } from '../toolbars/AdvancedActionsMenu';
 
 export function FloatingToolbars() {
-  const selectedSection = useStoreState((state) => state.selectedSection);
-  const selectedElement = useStoreState((state) => state.selectedElement);
-  const mode = useStoreState((state) => state.mode);
+  // STEP 3: Use Priority Resolver with Global Anchor Management
+  const {
+    activeToolbar,
+    toolbarTarget,
+    editorSelection,
+    shouldShowToolbar,
+    hasActiveToolbar,
+    globalAnchor,
+  } = useSelectionPriority();
+  
+  // Keep legacy toolbar state for fallback compatibility
   const toolbar = useStoreState((state) => state.toolbar);
+  
+  // Debug logging
+  if (process.env.NODE_ENV === 'development') {
+    console.log('🎪 FloatingToolbars render (Step 3):', {
+      activeToolbar,
+      toolbarTarget,
+      hasActiveToolbar,
+      anchorCount: globalAnchor.anchorCount,
+      legacyToolbarVisible: toolbar.visible,
+      legacyToolbarType: toolbar.type,
+    });
+  }
 
 
   // No longer need these hooks - they were removed
@@ -26,54 +48,61 @@ export function FloatingToolbars() {
   // Position is calculated when toolbar is shown and stored in state
 
 
-  // Only render toolbars in edit mode
-  if (mode !== 'edit') return null;
-
-  // Render single adaptive toolbar
-  if (!toolbar.visible || !toolbar.type || !toolbar.targetId) {
+  // STEP 1: Use priority resolver instead of manual checks
+  if (editorSelection.mode !== 'edit' || !hasActiveToolbar) {
     return null;
   }
   
+  // Use priority-resolved toolbar visibility instead of legacy state
+  // Keep toolbar.position for backward compatibility until Step 3
+  const position = toolbar.position || { x: 0, y: 0 };
+  const contextActions = toolbar.actions?.map((actionId: any) => ({ 
+    id: actionId, 
+    label: actionId, 
+    icon: 'icon', 
+    type: 'button' 
+  })) || [];
 
   return (
     <>
-      {toolbar.type === 'section' && selectedSection && (
+      {/* STEP 1: Priority-resolved toolbar rendering */}
+      {shouldShowToolbar('section') && editorSelection.selectedSection && (
         <SectionToolbar
-          sectionId={selectedSection}
-          position={toolbar.position}
-          contextActions={toolbar.actions.map((actionId: any) => ({ id: actionId, label: actionId, icon: 'icon', type: 'button' }))}
+          sectionId={editorSelection.selectedSection}
+          position={position}
+          contextActions={contextActions}
         />
       )}
 
-      {toolbar.type === 'element' && selectedElement && (
+      {shouldShowToolbar('element') && editorSelection.selectedElement && (
         <ElementToolbar
-          elementSelection={selectedElement}
-          position={toolbar.position}
-          contextActions={toolbar.actions.map((actionId: any) => ({ id: actionId, label: actionId, icon: 'icon', type: 'button' }))}
+          elementSelection={editorSelection.selectedElement}
+          position={position}
+          contextActions={contextActions}
         />
       )}
 
-      {toolbar.type === 'text' && selectedElement && (
-        <TextToolbar
-          elementSelection={selectedElement}
-          position={toolbar.position}
-          contextActions={toolbar.actions.map((actionId: any) => ({ id: actionId, label: actionId, icon: 'icon', type: 'button' }))}
+      {shouldShowToolbar('text') && editorSelection.textEditingElement && editorSelection.selectedElement && (
+        <TextToolbarMVP
+          elementSelection={editorSelection.selectedElement}
+          position={position}
+          contextActions={contextActions}
         />
       )}
 
-      {toolbar.type === 'image' && (
+      {shouldShowToolbar('image') && toolbarTarget.targetId && activeToolbar === 'image' && (
         <ImageToolbar
-          targetId={toolbar.targetId}
-          position={toolbar.position}
-          contextActions={toolbar.actions.map((actionId: any) => ({ id: actionId, label: actionId, icon: 'icon', type: 'button' }))}
+          targetId={toolbarTarget.targetId}
+          position={position}
+          contextActions={contextActions}
         />
       )}
 
-      {toolbar.type === 'form' && (
+      {shouldShowToolbar('form') && toolbarTarget.targetId && activeToolbar === 'form' && (
         <FormToolbar
-          targetId={toolbar.targetId}
-          position={toolbar.position}
-          contextActions={toolbar.actions.map((actionId: any) => ({ id: actionId, label: actionId, icon: 'icon', type: 'button' }))}
+          targetId={toolbarTarget.targetId}
+          position={position}
+          contextActions={contextActions}
         />
       )}
 

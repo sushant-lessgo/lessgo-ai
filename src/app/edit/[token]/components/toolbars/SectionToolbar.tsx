@@ -1,9 +1,10 @@
-// app/edit/[token]/components/toolbars/SectionToolbar.tsx - Enhanced with ElementPicker Integration
+// app/edit/[token]/components/toolbars/SectionToolbar.tsx - Priority-Resolved Section Toolbar
 import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
 import { useToolbarActions } from '@/hooks/useToolbarActions';
 import { useElementPicker } from '@/hooks/useElementPicker';
 import { useSectionCRUD } from '@/hooks/useSectionCRUD';
+import { useToolbarVisibility } from '@/hooks/useSelectionPriority';
 import { calculateArrowPosition } from '@/utils/toolbarPositioning';
 import { AdvancedActionsMenu } from './AdvancedActionsMenu';
 import { AddSectionButton } from '../content/SectionCRUD';
@@ -18,6 +19,9 @@ interface SectionToolbarProps {
 }
 
 export function SectionToolbar({ sectionId, position, contextActions }: SectionToolbarProps) {
+  // STEP 1: Check toolbar visibility priority
+  const { isVisible, reason } = useToolbarVisibility('section');
+  
   const [showAdvanced, setShowAdvanced] = useState(false);
   const toolbarRef = useRef<HTMLDivElement>(null);
   const advancedRef = useRef<HTMLDivElement>(null);
@@ -25,6 +29,12 @@ export function SectionToolbar({ sectionId, position, contextActions }: SectionT
   
   // Debug instance
   const instanceId = useRef(Math.random().toString(36).substr(2, 9));
+
+  // STEP 1: Priority-based early returns
+  if (!isVisible) {
+    console.log('🏗️ SectionToolbar hidden by priority system:', reason);
+    return null;
+  }
   
   // Debug mounting/unmounting
   useEffect(() => {

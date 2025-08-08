@@ -1,9 +1,10 @@
-// app/edit/[token]/components/toolbars/ElementToolbar.tsx - Complete Element Toolbar
+// app/edit/[token]/components/toolbars/ElementToolbar.tsx - Priority-Resolved Element Toolbar
 import React, { useState, useRef, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
 import { useEditor } from '@/hooks/useEditor';
 import { useToolbarActions } from '@/hooks/useToolbarActions';
+import { useToolbarVisibility } from '@/hooks/useSelectionPriority';
 import { calculateArrowPosition } from '@/utils/toolbarPositioning';
 import { AdvancedActionsMenu } from './AdvancedActionsMenu';
 import { useButtonConfigModal } from '@/hooks/useButtonConfigModal';
@@ -15,8 +16,17 @@ interface ElementToolbarProps {
 }
 
 export function ElementToolbar({ elementSelection, position, contextActions }: ElementToolbarProps) {
+  // STEP 1: Check toolbar visibility priority
+  const { isVisible, reason } = useToolbarVisibility('element');
+  
   const [showAdvanced, setShowAdvanced] = useState(false);
   const { openModal } = useButtonConfigModal();
+
+  // STEP 1: Priority-based early returns
+  if (!isVisible) {
+    console.log('🔧 ElementToolbar hidden by priority system:', reason);
+    return null;
+  }
   
   const toolbarRef = useRef<HTMLDivElement>(null);
   const advancedRef = useRef<HTMLDivElement>(null);
