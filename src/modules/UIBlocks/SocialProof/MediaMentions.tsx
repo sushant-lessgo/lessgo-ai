@@ -3,6 +3,7 @@
 
 import React from 'react';
 import { useLayoutComponent } from '@/hooks/useLayoutComponent';
+import { useTypography } from '@/hooks/useTypography';
 import { LayoutSection } from '@/components/layout/LayoutSection';
 import { 
   EditableAdaptiveHeadline, 
@@ -60,10 +61,12 @@ const parseMediaData = (outlets: string): MediaOutlet[] => {
 // Media Outlet Logo Component
 const MediaOutletLogo = React.memo(({ 
   outlet, 
-  dynamicTextColors 
+  dynamicTextColors,
+  bodyStyle
 }: { 
   outlet: MediaOutlet;
   dynamicTextColors: any;
+  bodyStyle: any;
 }) => {
   
   // Generate professional logo placeholder
@@ -89,11 +92,11 @@ const MediaOutletLogo = React.memo(({
   return (
     <div className="flex flex-col items-center space-y-3 p-6 bg-white/5 backdrop-blur-sm rounded-xl border border-white/10 hover:bg-white/10 transition-all duration-300">
       <div className="w-16 h-16 bg-gradient-to-br from-gray-100 to-gray-200 rounded-lg flex items-center justify-center shadow-sm">
-        <span className="text-gray-700 font-bold text-sm">
+        <span style={{...bodyStyle, fontSize: '0.875rem', fontWeight: 'bold'}} className="text-gray-700">
           {initials}
         </span>
       </div>
-      <span className={`text-sm font-medium text-center ${dynamicTextColors?.body || 'text-gray-700'}`}>
+      <span style={{...bodyStyle, fontSize: '0.875rem'}} className={`text-center ${dynamicTextColors?.body || 'text-gray-700'}`}>
         {outlet.name}
       </span>
     </div>
@@ -117,6 +120,13 @@ export default function MediaMentions(props: LayoutComponentProps) {
     ...props,
     contentSchema: CONTENT_SCHEMA
   });
+
+  // Typography hook
+  const { getTextStyle: getTypographyStyle } = useTypography();
+  const h2Style = getTypographyStyle('h2');
+  const h3Style = getTypographyStyle('h3');
+  const bodyLgStyle = getTypographyStyle('body-lg');
+  const bodyStyle = getTypographyStyle('body');
 
   // Parse media outlets from pipe-separated string
   const mediaOutlets = parseMediaData(blockContent.media_outlets || '');
@@ -160,7 +170,7 @@ export default function MediaMentions(props: LayoutComponentProps) {
               backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
               colorTokens={colorTokens}
               variant="body"
-              className="text-lg max-w-3xl mx-auto"
+              style={{...bodyLgStyle}} className="max-w-3xl mx-auto"
               placeholder="Add a compelling subheadline about your media coverage..."
               sectionId={sectionId}
               elementKey="subheadline"
@@ -176,6 +186,7 @@ export default function MediaMentions(props: LayoutComponentProps) {
               key={outlet.id}
               outlet={outlet}
               dynamicTextColors={dynamicTextColors}
+              bodyStyle={bodyStyle}
             />
           ))}
         </div>
@@ -190,7 +201,7 @@ export default function MediaMentions(props: LayoutComponentProps) {
                     <path d="M10 8c-3.3 0-6 2.7-6 6v10h10V14H8c0-1.1.9-2 2-2V8zm16 0c-3.3 0-6 2.7-6 6v10h10V14h-6c0-1.1.9-2 2-2V8z"/>
                   </svg>
                 </div>
-                <blockquote className={`text-lg font-medium ${dynamicTextColors?.body || 'text-gray-700'} leading-relaxed`}>
+                <blockquote style={{...bodyLgStyle}} className={`${dynamicTextColors?.body || 'text-gray-700'} leading-relaxed`}>
                   {quote.trim()}
                 </blockquote>
               </div>

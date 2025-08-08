@@ -1,5 +1,6 @@
 import React from 'react';
 import { useLayoutComponent } from '@/hooks/useLayoutComponent';
+import { useTypography } from '@/hooks/useTypography';
 import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
 import { LayoutSection } from '@/components/layout/LayoutSection';
 import { 
@@ -85,7 +86,8 @@ const FeatureCard = React.memo(({
   sectionId,
   mode,
   colorTokens,
-  mutedTextColor
+  mutedTextColor,
+  h3Style
 }: {
   title: string;
   description: string;
@@ -99,6 +101,7 @@ const FeatureCard = React.memo(({
   mode: string;
   colorTokens: any;
   mutedTextColor: string;
+  h3Style: React.CSSProperties;
 }) => {
   
   const AvatarPlaceholder = () => (
@@ -120,7 +123,7 @@ const FeatureCard = React.memo(({
             </svg>
           </div>
           <div>
-            <h3 className="text-xl font-bold text-gray-900">{title}</h3>
+            <h3 style={h3Style} className="font-bold text-gray-900">{title}</h3>
           </div>
         </div>
         
@@ -163,6 +166,7 @@ const FeatureCard = React.memo(({
 FeatureCard.displayName = 'FeatureCard';
 
 export default function FeatureTestimonial(props: LayoutComponentProps) {
+  const { getTextStyle: getTypographyStyle } = useTypography();
   
   const {
     sectionId,
@@ -178,6 +182,11 @@ export default function FeatureTestimonial(props: LayoutComponentProps) {
     ...props,
     contentSchema: CONTENT_SCHEMA
   });
+  
+  // Create typography styles
+  const h2Style = getTypographyStyle('h2');
+  const h3Style = getTypographyStyle('h3');
+  const bodyLgStyle = getTypographyStyle('body-lg');
 
   const featureTitles = blockContent.feature_titles 
     ? blockContent.feature_titles.split('|').map(item => item.trim()).filter(Boolean)
@@ -254,7 +263,8 @@ export default function FeatureTestimonial(props: LayoutComponentProps) {
               backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
               colorTokens={colorTokens}
               variant="body"
-              className="text-lg mb-6 max-w-3xl mx-auto"
+              style={bodyLgStyle}
+              className="mb-6 max-w-3xl mx-auto"
               placeholder="Add optional subheadline to introduce your enterprise features..."
               sectionId={sectionId}
               elementKey="subheadline"
@@ -357,6 +367,7 @@ export default function FeatureTestimonial(props: LayoutComponentProps) {
                 mode={mode}
                 colorTokens={colorTokens}
                 mutedTextColor={mutedTextColor}
+                h3Style={h3Style}
               />
             ))}
           </div>
@@ -365,7 +376,7 @@ export default function FeatureTestimonial(props: LayoutComponentProps) {
         {/* Trust Banner */}
         <div className="mt-12 bg-gradient-to-r from-gray-50 to-gray-100 rounded-2xl p-8 border border-gray-200">
           <div className="text-center">
-            <h3 className="text-xl font-semibold text-gray-900 mb-4">
+            <h3 style={h3Style} className="font-semibold text-gray-900 mb-4">
               Trusted by 10,000+ Enterprise Teams
             </h3>
             

@@ -1,5 +1,6 @@
 import React from 'react';
 import { useLayoutComponent } from '@/hooks/useLayoutComponent';
+import { useTypography } from '@/hooks/useTypography';
 import { LayoutSection } from '@/components/layout/LayoutSection';
 import { 
   EditableAdaptiveHeadline, 
@@ -66,10 +67,15 @@ export default function YouVsThemHighlight(props: LayoutComponentProps) {
     ...props, 
     contentSchema: CONTENT_SCHEMA 
   });
+  
+  const { getTextStyle: getTypographyStyle } = useTypography();
 
   // Parse list data
   const themPoints = parsePipeData(blockContent.them_points);
   const youPoints = parsePipeData(blockContent.you_points);
+  
+  // Typography styles
+  const bodyStyle = getTypographyStyle('body-lg');
 
   // Update handlers for lists
   const handleThemPointUpdate = (index: number, value: string) => {
@@ -156,10 +162,11 @@ export default function YouVsThemHighlight(props: LayoutComponentProps) {
                       type="text"
                       value={point}
                       onChange={(e) => handleThemPointUpdate(index, e.target.value)}
+                      style={bodyStyle}
                       className={`flex-1 bg-transparent outline-none focus:ring-2 focus:ring-blue-500 rounded px-2 ${colorTokens.textSecondary}`}
                     />
                   ) : (
-                    <span className={colorTokens.textSecondary}>
+                    <span style={bodyStyle} className={colorTokens.textSecondary}>
                       {point}
                     </span>
                   )}
@@ -198,10 +205,11 @@ export default function YouVsThemHighlight(props: LayoutComponentProps) {
                       type="text"
                       value={point}
                       onChange={(e) => handleYouPointUpdate(index, e.target.value)}
+                      style={bodyStyle}
                       className={`flex-1 bg-transparent outline-none focus:ring-2 focus:ring-blue-500 rounded px-2 ${colorTokens.textPrimary}`}
                     />
                   ) : (
-                    <span className={colorTokens.textPrimary}>
+                    <span style={bodyStyle} className={colorTokens.textPrimary}>
                       {point}
                     </span>
                   )}

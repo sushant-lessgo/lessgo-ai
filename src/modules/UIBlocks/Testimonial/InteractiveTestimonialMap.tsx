@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useLayoutComponent } from '@/hooks/useLayoutComponent';
+import { useTypography } from '@/hooks/useTypography';
 import { LayoutSection } from '@/components/layout/LayoutSection';
 import { 
   EditableAdaptiveHeadline, 
@@ -79,6 +80,7 @@ const CONTENT_SCHEMA = {
 };
 
 export default function InteractiveTestimonialMap(props: LayoutComponentProps) {
+  const { getTextStyle: getTypographyStyle } = useTypography();
   
   const {
     sectionId,
@@ -94,6 +96,11 @@ export default function InteractiveTestimonialMap(props: LayoutComponentProps) {
     ...props,
     contentSchema: CONTENT_SCHEMA
   });
+
+  // Create typography styles
+  const h2Style = getTypographyStyle('h2');
+  const h3Style = getTypographyStyle('h3');
+  const bodyLgStyle = getTypographyStyle('body-lg');
 
   const testimonialQuotes = blockContent.testimonial_quotes 
     ? blockContent.testimonial_quotes.split('|').map(item => item.trim()).filter(Boolean)
@@ -226,7 +233,8 @@ export default function InteractiveTestimonialMap(props: LayoutComponentProps) {
               backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
               colorTokens={colorTokens}
               variant="body"
-              className="text-lg mb-6 max-w-3xl mx-auto"
+              style={bodyLgStyle}
+              className="mb-6 max-w-3xl mx-auto"
               placeholder="Add optional subheadline to introduce global testimonials..."
               sectionId={sectionId}
               elementKey="subheadline"
@@ -336,7 +344,7 @@ export default function InteractiveTestimonialMap(props: LayoutComponentProps) {
                   </div>
                   
                   <div className="relative z-10">
-                    <h3 className="text-2xl font-bold mb-4">Global Creator Community</h3>
+                    <h3 style={h2Style} className="font-bold mb-4">Global Creator Community</h3>
                     <div className="space-y-4">
                       {filteredTestimonials.slice(0, 4).map((testimonial, index) => (
                         <button
@@ -389,7 +397,7 @@ export default function InteractiveTestimonialMap(props: LayoutComponentProps) {
                     </div>
                     
                     {/* Quote */}
-                    <blockquote className="text-xl text-gray-800 leading-relaxed mb-6">
+                    <blockquote style={h3Style} className="text-gray-800 leading-relaxed mb-6">
                       "{activeTestimonialData.quote}"
                     </blockquote>
                     
@@ -441,7 +449,7 @@ export default function InteractiveTestimonialMap(props: LayoutComponentProps) {
         {/* Global Community Features */}
         <div className="bg-gradient-to-r from-purple-50 via-pink-50 to-orange-50 rounded-2xl p-8 border border-purple-100 mb-12">
           <div className="text-center">
-            <h3 className="text-xl font-semibold text-gray-900 mb-6">Built for a Global Creative Community</h3>
+            <h3 style={h3Style} className="font-semibold text-gray-900 mb-6">Built for a Global Creative Community</h3>
             
             <div className="grid md:grid-cols-4 gap-6">
               <div className="text-center">

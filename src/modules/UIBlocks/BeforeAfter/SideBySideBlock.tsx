@@ -1,6 +1,7 @@
 import React from 'react';
 import { useLayoutComponent } from '@/hooks/useLayoutComponent';
 import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
+import { useTypography } from '@/hooks/useTypography';
 import { LayoutSection } from '@/components/layout/LayoutSection';
 import { 
   EditableAdaptiveHeadline, 
@@ -66,6 +67,7 @@ const CONTENT_SCHEMA = {
 };
 
 export default function SideBySideBlocks(props: LayoutComponentProps) {
+  const { getTextStyle: getTypographyStyle } = useTypography();
   
   // ✅ ENHANCED: Use the abstraction hook with background type support
   const {
@@ -82,6 +84,9 @@ export default function SideBySideBlocks(props: LayoutComponentProps) {
     ...props,
     contentSchema: CONTENT_SCHEMA
   });
+  
+  // Create typography styles
+  const bodyLgStyle = getTypographyStyle('body-lg');
 
   // Parse trust indicators from pipe-separated string
   const trustItems = blockContent.trust_items 
@@ -133,7 +138,8 @@ export default function SideBySideBlocks(props: LayoutComponentProps) {
               backgroundType={safeBackgroundType}
               colorTokens={colorTokens}
               variant="body"
-              className="text-lg mb-6 max-w-3xl mx-auto"
+              className="mb-6 max-w-3xl mx-auto"
+              style={bodyLgStyle}
               placeholder="Add optional subheadline to introduce the comparison..."
               sectionId={sectionId}
               elementKey="subheadline"

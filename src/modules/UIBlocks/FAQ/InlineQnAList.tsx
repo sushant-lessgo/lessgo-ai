@@ -92,7 +92,11 @@ export default function InlineQnAList(props: LayoutComponentProps) {
               backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
               colorTokens={colorTokens}
               variant="body"
-              className="text-lg"
+              style={{
+                ...getTextStyle('body-lg'),
+                textAlign: 'center'
+              }}
+              className=""
               placeholder="Add a brief description..."
               sectionId={sectionId}
               elementKey="subheadline"
@@ -105,7 +109,10 @@ export default function InlineQnAList(props: LayoutComponentProps) {
         <div className="space-y-6">
           {questions.map((question, index) => (
             <div key={index} className="border-b border-gray-200 dark:border-gray-700 pb-6 last:border-0">
-              <h3 className={`text-lg font-medium mb-2 ${dynamicTextColors?.heading || colorTokens.textPrimary}`}>
+              <h3 
+                className={`font-medium mb-2 ${dynamicTextColors?.heading || colorTokens.textPrimary}`}
+                style={getTextStyle('h3')}
+              >
                 {question}
               </h3>
               {answers[index] && (

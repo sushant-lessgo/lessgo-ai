@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useLayoutComponent } from '@/hooks/useLayoutComponent';
+import { useTypography } from '@/hooks/useTypography';
 import { LayoutSection } from '@/components/layout/LayoutSection';
 import { 
   EditableAdaptiveHeadline, 
@@ -83,6 +84,7 @@ const CONTENT_SCHEMA = {
 };
 
 export default function LivePreviewEmbed(props: LayoutComponentProps) {
+  const { getTextStyle: getTypographyStyle } = useTypography();
   
   const {
     sectionId,
@@ -98,6 +100,11 @@ export default function LivePreviewEmbed(props: LayoutComponentProps) {
     ...props,
     contentSchema: CONTENT_SCHEMA
   });
+  
+  // Create typography styles
+  const h2Style = getTypographyStyle('h2');
+  const h3Style = getTypographyStyle('h3');
+  const bodyLgStyle = getTypographyStyle('body-lg');
 
   const [activeDemo, setActiveDemo] = useState(0);
 
@@ -145,7 +152,7 @@ export default function LivePreviewEmbed(props: LayoutComponentProps) {
         
         {/* Header */}
         <div className="flex items-center justify-between mb-6 pb-4 border-b">
-          <h3 className="text-xl font-semibold text-gray-900">{blockContent.preview_type}</h3>
+          <h3 className="font-semibold text-gray-900" style={h3Style}>{blockContent.preview_type}</h3>
           <div className="flex items-center space-x-2">
             <span className="w-2 h-2 bg-green-500 rounded-full"></span>
             <span className="text-sm text-gray-600">Live</span>
@@ -179,7 +186,7 @@ export default function LivePreviewEmbed(props: LayoutComponentProps) {
                 <span className="text-sm font-medium text-gray-700">Active Users</span>
                 <span className="text-xs text-green-600">+12%</span>
               </div>
-              <div className="text-2xl font-bold text-blue-600">2,847</div>
+              <div className="font-bold text-blue-600" style={h2Style}>2,847</div>
               <div className="w-full h-2 bg-blue-200 rounded mt-2">
                 <div className="w-3/4 h-2 bg-blue-500 rounded"></div>
               </div>
@@ -190,7 +197,7 @@ export default function LivePreviewEmbed(props: LayoutComponentProps) {
                 <span className="text-sm font-medium text-gray-700">Revenue</span>
                 <span className="text-xs text-green-600">+24%</span>
               </div>
-              <div className="text-2xl font-bold text-green-600">$52,840</div>
+              <div className="font-bold text-green-600" style={h2Style}>$52,840</div>
               <div className="w-full h-2 bg-green-200 rounded mt-2">
                 <div className="w-4/5 h-2 bg-green-500 rounded"></div>
               </div>
@@ -201,7 +208,7 @@ export default function LivePreviewEmbed(props: LayoutComponentProps) {
                 <span className="text-sm font-medium text-gray-700">Efficiency</span>
                 <span className="text-xs text-green-600">+8%</span>
               </div>
-              <div className="text-2xl font-bold text-purple-600">94%</div>
+              <div className="font-bold text-purple-600" style={h2Style}>94%</div>
               <div className="w-full h-2 bg-purple-200 rounded mt-2">
                 <div className="w-11/12 h-2 bg-purple-500 rounded"></div>
               </div>
@@ -282,7 +289,7 @@ export default function LivePreviewEmbed(props: LayoutComponentProps) {
           )}
 
           <div className="max-w-4xl mx-auto">
-            <p className="text-xl text-gray-700 leading-relaxed">
+            <p className="text-gray-700 leading-relaxed" style={bodyLgStyle}>
               {blockContent.preview_description}
             </p>
           </div>

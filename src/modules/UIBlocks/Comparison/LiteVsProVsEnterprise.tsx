@@ -1,5 +1,6 @@
 import React from 'react';
 import { useLayoutComponent } from '@/hooks/useLayoutComponent';
+import { useTypography } from '@/hooks/useTypography';
 import { LayoutSection } from '@/components/layout/LayoutSection';
 import { 
   EditableAdaptiveHeadline, 
@@ -64,6 +65,7 @@ const CONTENT_SCHEMA = {
 // LiteVsProVsEnterprise component - Tiered product comparison
 export default function LiteVsProVsEnterprise(props: LayoutComponentProps) {
   const { sectionId, className = '', backgroundType = 'secondary' } = props;
+  const { getTextStyle: getTypographyStyle } = useTypography();
   
   const { 
     mode, 
@@ -76,6 +78,10 @@ export default function LiteVsProVsEnterprise(props: LayoutComponentProps) {
     ...props, 
     contentSchema: CONTENT_SCHEMA 
   });
+
+  // Create typography styles
+  const h2Style = getTypographyStyle('h2');
+  const largePriceStyle = {...h2Style, fontSize: 'clamp(2rem, 4vw, 2.5rem)'};
 
   // Parse data
   const tierNames = parsePipeData(blockContent.tier_names);
@@ -182,10 +188,11 @@ export default function LiteVsProVsEnterprise(props: LayoutComponentProps) {
                     type="text"
                     value={name}
                     onChange={(e) => handleTierNameUpdate(tierIndex, e.target.value)}
-                    className={`text-2xl font-bold bg-transparent outline-none focus:ring-2 focus:ring-blue-500 rounded px-2 mb-2 ${colorTokens.textPrimary}`}
+                    style={h2Style}
+                    className={`bg-transparent outline-none focus:ring-2 focus:ring-blue-500 rounded px-2 mb-2 ${colorTokens.textPrimary}`}
                   />
                 ) : (
-                  <h3 className={`text-2xl font-bold mb-2 ${colorTokens.textPrimary}`}>
+                  <h3 style={h2Style} className={`mb-2 ${colorTokens.textPrimary}`}>
                     {name}
                   </h3>
                 )}
@@ -196,12 +203,13 @@ export default function LiteVsProVsEnterprise(props: LayoutComponentProps) {
                     type="text"
                     value={tierPrices[tierIndex]}
                     onChange={(e) => handleTierPriceUpdate(tierIndex, e.target.value)}
-                    className={`text-4xl font-bold bg-transparent outline-none focus:ring-2 focus:ring-blue-500 rounded px-2 mb-4 ${
+                    style={largePriceStyle}
+                    className={`bg-transparent outline-none focus:ring-2 focus:ring-blue-500 rounded px-2 mb-4 ${
                       isRecommended(tierIndex) ? 'text-primary' : colorTokens.textPrimary
                     }`}
                   />
                 ) : (
-                  <div className={`text-4xl font-bold mb-4 ${
+                  <div style={largePriceStyle} className={`mb-4 ${
                     isRecommended(tierIndex) ? 'text-primary' : colorTokens.textPrimary
                   }`}>
                     {tierPrices[tierIndex]}

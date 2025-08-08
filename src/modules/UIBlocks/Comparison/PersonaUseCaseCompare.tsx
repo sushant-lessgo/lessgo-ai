@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useLayoutComponent } from '@/hooks/useLayoutComponent';
+import { useTypography } from '@/hooks/useTypography';
 import { LayoutSection } from '@/components/layout/LayoutSection';
 import { 
   EditableAdaptiveHeadline, 
@@ -49,6 +50,7 @@ const CONTENT_SCHEMA = {
 // PersonaUseCaseCompare component - Role-based comparison showing different use cases
 export default function PersonaUseCaseCompare(props: LayoutComponentProps) {
   const { sectionId, className = '', backgroundType = 'secondary' } = props;
+  const { getTextStyle: getTypographyStyle } = useTypography();
   
   const { 
     mode, 
@@ -61,6 +63,9 @@ export default function PersonaUseCaseCompare(props: LayoutComponentProps) {
     ...props, 
     contentSchema: CONTENT_SCHEMA 
   });
+
+  // Create typography styles
+  const h3Style = getTypographyStyle('h3');
 
   const [activePersona, setActivePersona] = useState(0);
 
@@ -207,7 +212,7 @@ export default function PersonaUseCaseCompare(props: LayoutComponentProps) {
         <div className="grid md:grid-cols-2 gap-8">
           {/* Use Cases */}
           <div className={`rounded-lg ${colorTokens.bgNeutral} p-8`}>
-            <h3 className={`text-xl font-semibold mb-6 ${colorTokens.textPrimary}`}>
+            <h3 style={h3Style} className={`mb-6 ${colorTokens.textPrimary}`}>
               Your Use Cases
             </h3>
             <ul className="space-y-4">
@@ -226,7 +231,7 @@ export default function PersonaUseCaseCompare(props: LayoutComponentProps) {
 
           {/* Our Solutions */}
           <div className={`rounded-lg ${'bg-primary'} bg-opacity-10 p-8 border-2 border-${'primary'}`}>
-            <h3 className={`text-xl font-semibold mb-6 text-primary`}>
+            <h3 style={h3Style} className={`mb-6 text-primary`}>
               Our Solutions
             </h3>
             <ul className="space-y-4">

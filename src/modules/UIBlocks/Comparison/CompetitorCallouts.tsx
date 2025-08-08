@@ -1,5 +1,6 @@
 import React from 'react';
 import { useLayoutComponent } from '@/hooks/useLayoutComponent';
+import { useTypography } from '@/hooks/useTypography';
 import { LayoutSection } from '@/components/layout/LayoutSection';
 import { 
   EditableAdaptiveHeadline, 
@@ -49,6 +50,7 @@ const CONTENT_SCHEMA = {
 // CompetitorCallouts component - Direct competitor comparison with issues/solutions
 export default function CompetitorCallouts(props: LayoutComponentProps) {
   const { sectionId, className = '', backgroundType = 'secondary' } = props;
+  const { getTextStyle: getTypographyStyle } = useTypography();
   
   const { 
     mode, 
@@ -61,6 +63,9 @@ export default function CompetitorCallouts(props: LayoutComponentProps) {
     ...props, 
     contentSchema: CONTENT_SCHEMA 
   });
+
+  // Create typography styles
+  const h3Style = getTypographyStyle('h3');
 
   // Parse data
   const competitorNames = parsePipeData(blockContent.competitor_names);
@@ -138,10 +143,11 @@ export default function CompetitorCallouts(props: LayoutComponentProps) {
                       type="text"
                       value={name}
                       onChange={(e) => handleCompetitorNameUpdate(index, e.target.value)}
-                      className={`text-xl font-semibold bg-transparent outline-none focus:ring-2 focus:ring-blue-500 rounded px-2 mb-2 ${colorTokens.textPrimary}`}
+                      style={h3Style}
+                      className={`bg-transparent outline-none focus:ring-2 focus:ring-blue-500 rounded px-2 mb-2 ${colorTokens.textPrimary}`}
                     />
                   ) : (
-                    <h3 className={`text-xl font-semibold mb-2 ${colorTokens.textPrimary}`}>
+                    <h3 style={h3Style} className={`mb-2 ${colorTokens.textPrimary}`}>
                       {name}
                     </h3>
                   )}

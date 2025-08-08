@@ -1,5 +1,6 @@
 import React from 'react';
 import { useLayoutComponent } from '@/hooks/useLayoutComponent';
+import { useTypography } from '@/hooks/useTypography';
 import { LayoutSection } from '@/components/layout/LayoutSection';
 import { 
   EditableAdaptiveHeadline, 
@@ -62,13 +63,15 @@ const MiniCard = React.memo(({
   description, 
   keyword,
   index,
-  colorTokens
+  colorTokens,
+  h3Style
 }: {
   title: string;
   description: string;
   keyword: string;
   index: number;
   colorTokens: any;
+  h3Style: React.CSSProperties;
 }) => {
   
   const getIconForIndex = (index: number) => {
@@ -122,7 +125,7 @@ const MiniCard = React.memo(({
         </div>
         
         <div className="flex-1 min-w-0">
-          <h3 className="text-lg font-semibold text-gray-900 mb-1 group-hover:text-gray-700 transition-colors duration-300">
+          <h3 style={h3Style} className="font-semibold text-gray-900 mb-1 group-hover:text-gray-700 transition-colors duration-300">
             {title}
           </h3>
           {keyword && (
@@ -149,6 +152,7 @@ const MiniCard = React.memo(({
 MiniCard.displayName = 'MiniCard';
 
 export default function MiniCards(props: LayoutComponentProps) {
+  const { getTextStyle: getTypographyStyle } = useTypography();
   
   const {
     sectionId,
@@ -164,6 +168,10 @@ export default function MiniCards(props: LayoutComponentProps) {
     ...props,
     contentSchema: CONTENT_SCHEMA
   });
+  
+  // Create typography styles
+  const h3Style = getTypographyStyle('h3');
+  const bodyLgStyle = getTypographyStyle('body-lg');
 
   const featureTitles = blockContent.feature_titles 
     ? blockContent.feature_titles.split('|').map(item => item.trim()).filter(Boolean)
@@ -222,7 +230,8 @@ export default function MiniCards(props: LayoutComponentProps) {
               backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
               colorTokens={colorTokens}
               variant="body"
-              className="text-lg mb-6 max-w-3xl mx-auto"
+              style={bodyLgStyle}
+              className="mb-6 max-w-3xl mx-auto"
               placeholder="Add optional subheadline to introduce your essential features..."
               sectionId={sectionId}
               elementKey="subheadline"
@@ -291,6 +300,7 @@ export default function MiniCards(props: LayoutComponentProps) {
                 keyword={feature.keyword}
                 index={index}
                 colorTokens={colorTokens}
+                h3Style={h3Style}
               />
             ))}
           </div>

@@ -1,5 +1,6 @@
 import React from 'react';
 import { useLayoutComponent } from '@/hooks/useLayoutComponent';
+import { useTypography } from '@/hooks/useTypography';
 import { LayoutSection } from '@/components/layout/LayoutSection';
 import { 
   EditableAdaptiveHeadline, 
@@ -49,6 +50,7 @@ const CONTENT_SCHEMA = {
 // AnimatedUpgradePath component - Visual journey from current state to ideal state
 export default function AnimatedUpgradePath(props: LayoutComponentProps) {
   const { sectionId, className = '', backgroundType = 'secondary' } = props;
+  const { getTextStyle: getTypographyStyle } = useTypography();
   
   const { 
     mode, 
@@ -61,6 +63,9 @@ export default function AnimatedUpgradePath(props: LayoutComponentProps) {
     ...props, 
     contentSchema: CONTENT_SCHEMA 
   });
+
+  // Create typography styles
+  const h3Style = getTypographyStyle('h3');
 
   // Parse data
   const stageTitles = parsePipeData(blockContent.stage_titles);
@@ -176,12 +181,13 @@ export default function AnimatedUpgradePath(props: LayoutComponentProps) {
                       type="text"
                       value={title}
                       onChange={(e) => handleStageTitleUpdate(index, e.target.value)}
-                      className={`w-full text-center text-xl font-semibold bg-transparent outline-none focus:ring-2 focus:ring-blue-500 rounded px-2 mb-3 ${
+                      style={h3Style}
+                      className={`w-full text-center bg-transparent outline-none focus:ring-2 focus:ring-blue-500 rounded px-2 mb-3 ${
                         index === stageTitles.length - 1 ? 'text-primary' : colorTokens.textPrimary
                       }`}
                     />
                   ) : (
-                    <h3 className={`text-xl font-semibold mb-3 ${
+                    <h3 style={h3Style} className={`mb-3 ${
                       index === stageTitles.length - 1 ? 'text-primary' : colorTokens.textPrimary
                     }`}>
                       {title}

@@ -1,6 +1,7 @@
 // components/layout/SystemArchitecture.tsx
 import React from 'react';
 import { useLayoutComponent } from '@/hooks/useLayoutComponent';
+import { useTypography } from '@/hooks/useTypography';
 import { LayoutSection } from '@/components/layout/LayoutSection';
 import { EditableAdaptiveHeadline } from '@/components/layout/EditableContent';
 import { LayoutComponentProps } from '@/types/storeTypes';
@@ -17,7 +18,11 @@ const CONTENT_SCHEMA = {
 
 export default function SystemArchitecture(props: LayoutComponentProps) {
   const { sectionId, mode, blockContent, colorTokens, getTextStyle, sectionBackground, handleContentUpdate } = useLayoutComponent<SystemArchitectureContent>({ ...props, contentSchema: CONTENT_SCHEMA });
+  const { getTextStyle: getTypographyStyle } = useTypography();
   const components = blockContent.architecture_components.split('|').map(c => c.trim()).filter(Boolean);
+  
+  // Typography styles
+  const h3Style = getTypographyStyle('h3');
 
   return (
     <LayoutSection sectionId={sectionId} sectionType="SystemArchitecture" backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')} sectionBackground={sectionBackground} mode={mode} className={props.className}>
@@ -27,7 +32,7 @@ export default function SystemArchitecture(props: LayoutComponentProps) {
           {components.map((component, index) => (
             <div key={index} className="bg-white p-6 rounded-xl border border-gray-200 hover:shadow-lg transition-all duration-300">
               <div className="w-16 h-16 bg-blue-100 rounded-lg mx-auto mb-4 flex items-center justify-center text-2xl">🏗️</div>
-              <h3 className="font-bold text-gray-900">{component}</h3>
+              <h3 style={h3Style} className="font-bold text-gray-900">{component}</h3>
             </div>
           ))}
         </div>

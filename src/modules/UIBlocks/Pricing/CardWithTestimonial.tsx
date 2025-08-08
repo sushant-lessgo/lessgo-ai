@@ -1,5 +1,6 @@
 import React from 'react';
 import { useLayoutComponent } from '@/hooks/useLayoutComponent';
+import { useTypography } from '@/hooks/useTypography';
 import { LayoutSection } from '@/components/layout/LayoutSection';
 import { 
   EditableAdaptiveHeadline, 
@@ -110,6 +111,12 @@ export default function CardWithTestimonial(props: LayoutComponentProps) {
     contentSchema: CONTENT_SCHEMA
   });
 
+  const { getTextStyle: getTypographyStyle } = useTypography();
+  
+  // Create typography styles
+  const h3Style = getTypographyStyle('h3');
+  const bodyLgStyle = getTypographyStyle('body-lg');
+
   const tierNames = blockContent.tier_names 
     ? blockContent.tier_names.split('|').map(item => item.trim()).filter(Boolean)
     : [];
@@ -200,12 +207,12 @@ export default function CardWithTestimonial(props: LayoutComponentProps) {
       <div className="p-8">
         {/* Tier Header */}
         <div className="text-center mb-6">
-          <h3 className="text-xl font-bold text-gray-900 mb-2">{tier.name}</h3>
+          <h3 style={h3Style} className="font-bold text-gray-900 mb-2">{tier.name}</h3>
           <p className={`text-sm ${mutedTextColor} mb-4`}>{tier.description}</p>
           
           {/* Price Display */}
           <div className="mb-6">
-            <div className="text-4xl font-bold text-gray-900 mb-2">{tier.price}</div>
+            <div style={{...getTypographyStyle('h2'), fontSize: 'clamp(2rem, 4vw, 2.5rem)'}} className="font-bold text-gray-900 mb-2">{tier.price}</div>
           </div>
         </div>
 
@@ -316,7 +323,8 @@ export default function CardWithTestimonial(props: LayoutComponentProps) {
               backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
               colorTokens={colorTokens}
               variant="body"
-              className="text-lg mb-8 max-w-3xl mx-auto"
+              style={bodyLgStyle}
+              className="mb-8 max-w-3xl mx-auto"
               placeholder="Add optional subheadline to introduce pricing with testimonials..."
               sectionId={sectionId}
               elementKey="subheadline"
@@ -328,7 +336,7 @@ export default function CardWithTestimonial(props: LayoutComponentProps) {
         {mode === 'edit' ? (
           <div className="space-y-8">
             <div className="p-6 border border-gray-200 rounded-lg bg-gray-50">
-              <h4 className="font-semibold text-gray-700 mb-4">Pricing with Testimonials Content</h4>
+              <h4 style={getTypographyStyle('h4')} className="font-semibold text-gray-700 mb-4">Pricing with Testimonials Content</h4>
               
               <div className="space-y-4">
                 <EditableAdaptiveText
@@ -419,26 +427,26 @@ export default function CardWithTestimonial(props: LayoutComponentProps) {
         {/* Social Proof Section */}
         <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl p-8 border border-blue-100 mb-12">
           <div className="text-center">
-            <h3 className="text-xl font-semibold text-gray-900 mb-6">Trusted by thousands of businesses</h3>
+            <h3 style={h3Style} className="font-semibold text-gray-900 mb-6">Trusted by thousands of businesses</h3>
             
             <div className="grid md:grid-cols-4 gap-8">
               <div className="text-center">
-                <div className="text-3xl font-bold text-blue-600 mb-2">10,000+</div>
+                <div style={{...getTypographyStyle('h2'), fontSize: 'clamp(1.8rem, 3vw, 2rem)'}} className="font-bold text-blue-600 mb-2">10,000+</div>
                 <div className={`text-sm ${mutedTextColor}`}>Happy customers</div>
               </div>
               
               <div className="text-center">
-                <div className="text-3xl font-bold text-green-600 mb-2">99.9%</div>
+                <div style={{...getTypographyStyle('h2'), fontSize: 'clamp(1.8rem, 3vw, 2rem)'}} className="font-bold text-green-600 mb-2">99.9%</div>
                 <div className={`text-sm ${mutedTextColor}`}>Uptime guaranteed</div>
               </div>
               
               <div className="text-center">
-                <div className="text-3xl font-bold text-purple-600 mb-2">4.9/5</div>
+                <div style={{...getTypographyStyle('h2'), fontSize: 'clamp(1.8rem, 3vw, 2rem)'}} className="font-bold text-purple-600 mb-2">4.9/5</div>
                 <div className={`text-sm ${mutedTextColor}`}>Customer satisfaction</div>
               </div>
               
               <div className="text-center">
-                <div className="text-3xl font-bold text-orange-600 mb-2">24/7</div>
+                <div style={{...getTypographyStyle('h2'), fontSize: 'clamp(1.8rem, 3vw, 2rem)'}} className="font-bold text-orange-600 mb-2">24/7</div>
                 <div className={`text-sm ${mutedTextColor}`}>Expert support</div>
               </div>
             </div>
@@ -454,7 +462,7 @@ export default function CardWithTestimonial(props: LayoutComponentProps) {
               </svg>
             </div>
             <div className="text-center">
-              <div className="font-semibold text-gray-900 text-lg">30-Day Money-Back Guarantee</div>
+              <div style={bodyLgStyle} className="font-semibold text-gray-900">30-Day Money-Back Guarantee</div>
               <div className={`text-sm ${mutedTextColor}`}>
                 Try risk-free. If you're not completely satisfied, we'll refund every penny.
               </div>

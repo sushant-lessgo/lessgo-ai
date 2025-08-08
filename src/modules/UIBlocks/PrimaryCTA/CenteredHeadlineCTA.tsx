@@ -3,6 +3,7 @@
 
 import React from 'react';
 import { useLayoutComponent } from '@/hooks/useLayoutComponent';
+import { useTypography } from '@/hooks/useTypography';
 import { LayoutSection } from '@/components/layout/LayoutSection';
 import { 
   EditableAdaptiveHeadline, 
@@ -67,6 +68,8 @@ export default function CenteredHeadlineCTA(props: LayoutComponentProps) {
     ...props,
     contentSchema: CONTENT_SCHEMA
   });
+  
+  const { getTextStyle: getTypographyStyle } = useTypography();
 
   // Parse trust indicators from pipe-separated string
   const trustItems = blockContent.trust_items 

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useLayoutComponent } from '@/hooks/useLayoutComponent';
 import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
+import { useTypography } from '@/hooks/useTypography';
 import { LayoutSection } from '@/components/layout/LayoutSection';
 import { 
   EditableAdaptiveHeadline, 
@@ -64,6 +65,7 @@ const CONTENT_SCHEMA = {
 };
 
 export default function Tabbed(props: LayoutComponentProps) {
+  const { getTextStyle: getTypographyStyle } = useTypography();
   
   const {
     sectionId,
@@ -79,6 +81,9 @@ export default function Tabbed(props: LayoutComponentProps) {
     ...props,
     contentSchema: CONTENT_SCHEMA
   });
+  
+  // Create typography styles
+  const h3Style = getTypographyStyle('h3');
 
   const tabLabels = blockContent.tab_labels 
     ? blockContent.tab_labels.split('|').map(item => item.trim()).filter(Boolean)
@@ -248,7 +253,16 @@ export default function Tabbed(props: LayoutComponentProps) {
               <div className="grid lg:grid-cols-2 gap-12 items-center">
                 
                 <div className="space-y-6">
-                  <h3 className="text-3xl font-bold text-gray-900">
+                  <h3 
+                    className="text-gray-900"
+                    style={{
+                      fontSize: h3Style.fontSize,
+                      fontWeight: h3Style.fontWeight,
+                      lineHeight: h3Style.lineHeight,
+                      letterSpacing: h3Style.letterSpacing,
+                      fontFamily: h3Style.fontFamily
+                    }}
+                  >
                     {tabs[activeTab]?.title}
                   </h3>
                   

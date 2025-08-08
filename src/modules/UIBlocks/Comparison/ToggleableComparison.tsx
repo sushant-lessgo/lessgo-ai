@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useLayoutComponent } from '@/hooks/useLayoutComponent';
+import { useTypography } from '@/hooks/useTypography';
 import { LayoutSection } from '@/components/layout/LayoutSection';
 import { 
   EditableAdaptiveHeadline, 
@@ -61,8 +62,13 @@ export default function ToggleableComparison(props: LayoutComponentProps) {
     ...props, 
     contentSchema: CONTENT_SCHEMA 
   });
-
+  
+  const { getTextStyle: getTypographyStyle } = useTypography();
   const [activeOption, setActiveOption] = useState(0);
+  
+  // Typography styles
+  const h3Style = getTypographyStyle('h3');
+  const bodyStyle = getTypographyStyle('body-lg');
 
   // Parse data
   const optionLabels = parsePipeData(blockContent.option_labels);
@@ -163,6 +169,7 @@ export default function ToggleableComparison(props: LayoutComponentProps) {
             return (
               <div key={categoryIndex}>
                 <h3 
+                  style={h3Style}
                   className={`font-semibold mb-4 ${colorTokens.textPrimary}`}
                 >
                   {category.category}
@@ -176,7 +183,7 @@ export default function ToggleableComparison(props: LayoutComponentProps) {
                       
                       return (
                         <div key={itemIndex} className="flex items-center justify-between">
-                          <span className={colorTokens.textSecondary}>
+                          <span style={bodyStyle} className={colorTokens.textSecondary}>
                             {item}
                           </span>
                           
@@ -185,12 +192,12 @@ export default function ToggleableComparison(props: LayoutComponentProps) {
                               <svg className={`w-5 h-5 text-primary mr-2`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                               </svg>
-                              <span className={`text-primary font-medium`}>
+                              <span style={bodyStyle} className={`text-primary font-medium`}>
                                 Included
                               </span>
                             </div>
                           ) : (
-                            <span className="text-gray-400">
+                            <span style={bodyStyle} className="text-gray-400">
                               Not available
                             </span>
                           )}
@@ -207,7 +214,7 @@ export default function ToggleableComparison(props: LayoutComponentProps) {
         {/* CTA for active option */}
         <div className="text-center mt-12">
           <button className={`bg-primary text-white px-8 py-4 rounded-lg font-semibold hover:opacity-90 transition-opacity`}>
-            <span>
+            <span style={bodyStyle}>
               Get Started with {optionLabels[activeOption]}
             </span>
           </button>

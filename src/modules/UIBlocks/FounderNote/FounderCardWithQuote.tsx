@@ -3,6 +3,7 @@
 
 import React from 'react';
 import { useLayoutComponent } from '@/hooks/useLayoutComponent';
+import { useTypography } from '@/hooks/useTypography';
 import { LayoutSection } from '@/components/layout/LayoutSection';
 import { 
   EditableAdaptiveHeadline, 
@@ -39,7 +40,7 @@ const CONTENT_SCHEMA = {
 };
 
 // Simple founder avatar component
-const FounderAvatar = React.memo(({ name }: { name: string }) => {
+const FounderAvatar = React.memo(({ name, textStyle }: { name: string; textStyle: React.CSSProperties }) => {
   const getInitials = (fullName: string) => {
     return fullName
       .split(' ')
@@ -51,7 +52,7 @@ const FounderAvatar = React.memo(({ name }: { name: string }) => {
 
   return (
     <div className="w-24 h-24 md:w-32 md:h-32 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center shadow-lg">
-      <span className="text-white font-bold text-lg md:text-xl">
+      <span style={textStyle} className="text-white font-bold">
         {getInitials(name)}
       </span>
     </div>
@@ -60,6 +61,8 @@ const FounderAvatar = React.memo(({ name }: { name: string }) => {
 FounderAvatar.displayName = 'FounderAvatar';
 
 export default function FounderCardWithQuote(props: LayoutComponentProps) {
+  const { getTextStyle: getTypographyStyle } = useTypography();
+  
   // Use the abstraction hook for all common functionality
   const {
     sectionId,
@@ -75,6 +78,10 @@ export default function FounderCardWithQuote(props: LayoutComponentProps) {
     ...props,
     contentSchema: CONTENT_SCHEMA
   });
+
+  // Create typography styles
+  const bodyLgStyle = getTypographyStyle('body-lg');
+  const h3Style = getTypographyStyle('h3');
 
   return (
     <LayoutSection
@@ -93,7 +100,7 @@ export default function FounderCardWithQuote(props: LayoutComponentProps) {
               
               {/* Founder Avatar */}
               <div className="flex-shrink-0 mx-auto md:mx-0">
-                <FounderAvatar name={blockContent.founder_name} />
+                <FounderAvatar name={blockContent.founder_name} textStyle={h3Style} />
               </div>
 
               {/* Quote and Details */}
@@ -117,7 +124,8 @@ export default function FounderCardWithQuote(props: LayoutComponentProps) {
                     sectionId={sectionId}
                     elementKey="founder_quote"
                     sectionBackground={sectionBackground}
-                    className="text-lg md:text-xl leading-relaxed italic mb-6"
+                    style={bodyLgStyle}
+                    className="leading-relaxed italic mb-6"
                     placeholder="Add an authentic, personal quote from the founder..."
                   />
                 </div>

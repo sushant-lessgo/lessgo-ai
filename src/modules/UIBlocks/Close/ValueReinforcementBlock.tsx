@@ -1,5 +1,6 @@
 import React from 'react';
 import { useLayoutComponent } from '@/hooks/useLayoutComponent';
+import { useTypography } from '@/hooks/useTypography';
 import { LayoutSection } from '@/components/layout/LayoutSection';
 import { 
   EditableAdaptiveHeadline, 
@@ -88,6 +89,7 @@ const CONTENT_SCHEMA = {
 };
 
 export default function ValueReinforcementBlock(props: LayoutComponentProps) {
+  const { getTextStyle: getTypographyStyle } = useTypography();
   
   const {
     sectionId,
@@ -103,6 +105,12 @@ export default function ValueReinforcementBlock(props: LayoutComponentProps) {
     ...props,
     contentSchema: CONTENT_SCHEMA
   });
+  
+  // Create typography styles
+  const h2Style = getTypographyStyle('h2');
+  const h3Style = getTypographyStyle('h3');
+  const bodyLgStyle = getTypographyStyle('body-lg');
+  const labelStyle = getTypographyStyle('label');
 
   // Filter out 'custom' background type as it's not supported by EditableContent components
   const safeBackgroundType = props.backgroundType === 'custom' ? 'neutral' : (props.backgroundType || 'neutral');
@@ -257,7 +265,8 @@ export default function ValueReinforcementBlock(props: LayoutComponentProps) {
               backgroundType={safeBackgroundType}
               colorTokens={colorTokens}
               variant="body"
-              className="text-lg mb-8 max-w-3xl mx-auto"
+              className="mb-8 max-w-3xl mx-auto"
+              style={bodyLgStyle}
               placeholder="Add optional subheadline to introduce value reinforcement..."
               sectionId={sectionId}
               elementKey="subheadline"
@@ -266,7 +275,7 @@ export default function ValueReinforcementBlock(props: LayoutComponentProps) {
           )}
 
           <div className="max-w-4xl mx-auto">
-            <p className="text-xl text-gray-700 leading-relaxed">
+            <p className="text-gray-700 leading-relaxed" style={h3Style}>
               {blockContent.primary_value}
             </p>
           </div>
@@ -353,10 +362,10 @@ export default function ValueReinforcementBlock(props: LayoutComponentProps) {
             {/* Transformation Section */}
             <div className="bg-gradient-to-r from-gray-50 to-blue-50 rounded-2xl p-8 border border-gray-100 mb-16">
               <div className="text-center mb-12">
-                <h3 className="text-2xl font-bold text-gray-900 mb-4">
+                <h3 className="text-gray-900 mb-4" style={h2Style}>
                   See the Transformation
                 </h3>
-                <p className={`text-lg ${mutedTextColor} max-w-2xl mx-auto`}>
+                <p className={`${mutedTextColor} max-w-2xl mx-auto`} style={bodyLgStyle}>
                   Watch how businesses like yours have transformed their operations
                 </p>
               </div>
@@ -377,12 +386,12 @@ export default function ValueReinforcementBlock(props: LayoutComponentProps) {
 
             {/* Social Proof Stats */}
             <div className="bg-gradient-to-r from-blue-600 to-blue-700 rounded-2xl p-8 text-white text-center mb-16">
-              <h3 className="text-2xl font-bold mb-8">Trusted by Businesses Worldwide</h3>
+              <h3 className="mb-8" style={h2Style}>Trusted by Businesses Worldwide</h3>
               
               <div className="grid md:grid-cols-4 gap-8">
                 {socialProofStats.map((stat, index) => (
                   <div key={index} className="text-center">
-                    <div className="text-4xl font-bold mb-2">{stat}</div>
+                    <div className="mb-2" style={{...h2Style, fontSize: 'clamp(2rem, 4vw, 3rem)'}}>{stat}</div>
                     <div className="text-blue-100">{socialProofLabels[index] || 'Metric'}</div>
                   </div>
                 ))}
@@ -399,7 +408,8 @@ export default function ValueReinforcementBlock(props: LayoutComponentProps) {
                 <CTAButton
                   text={blockContent.cta_text}
                   colorTokens={colorTokens}
-                  className="shadow-xl hover:shadow-2xl transform hover:-translate-y-1 transition-all duration-300 text-lg py-4 px-8"
+                  className="shadow-xl hover:shadow-2xl transform hover:-translate-y-1 transition-all duration-300 py-4 px-8"
+                  style={bodyLgStyle}
                   variant="primary"
                   sectionId={sectionId}
                   elementKey="cta_text"

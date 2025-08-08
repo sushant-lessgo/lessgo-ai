@@ -3,6 +3,7 @@
 
 import React, { useState } from 'react';
 import { useLayoutComponent } from '@/hooks/useLayoutComponent';
+import { useTypography } from '@/hooks/useTypography';
 import { LayoutSection } from '@/components/layout/LayoutSection';
 import { 
   EditableAdaptiveHeadline, 
@@ -140,25 +141,25 @@ const IntegrationCard = React.memo(({
       <div className={`w-12 h-12 rounded-lg flex items-center justify-center mr-4 ${
         isActive ? 'bg-white bg-opacity-20' : 'bg-gradient-to-br from-blue-500 to-purple-600'
       }`}>
-        <span className={`font-bold text-lg ${isActive ? 'text-white' : 'text-white'}`}>
+        <span className={`${isActive ? 'text-white' : 'text-white'}`} style={labelStyle}>
           {integration.name.substring(0, 2).toUpperCase()}
         </span>
       </div>
-      <h3 className={`font-semibold ${isActive ? 'text-current' : colorTokens.textPrimary} ${textStyle}`}>
+      <h3 className={`${isActive ? 'text-current' : colorTokens.textPrimary}`} style={h3Style}>
         {integration.name}
       </h3>
     </div>
 
     {/* Quote Preview */}
-    <p className={`text-sm leading-relaxed ${
+    <p className={`leading-relaxed ${
       isActive ? 'text-current opacity-90' : colorTokens.textSecondary
-    } line-clamp-3`}>
+    } line-clamp-3`} style={bodySmStyle}>
       "{integration.quote.substring(0, 100)}..."
     </p>
 
     {/* Author */}
     <div className="mt-4 pt-4 border-t border-current border-opacity-20">
-      <p className={`font-medium text-sm ${isActive ? 'text-current' : colorTokens.textPrimary}`}>
+      <p className={`${isActive ? 'text-current' : colorTokens.textPrimary}`} style={labelStyle}>
         {integration.author}
       </p>
       <p className={`text-xs ${isActive ? 'text-current opacity-75' : colorTokens.textMuted}`}>
@@ -220,6 +221,7 @@ const CompanyLogo = React.memo(({ name, colorTokens }: { name: string; colorToke
 CompanyLogo.displayName = 'CompanyLogo';
 
 export default function LogoWithQuoteUse(props: LayoutComponentProps) {
+  const { getTextStyle: getTypographyStyle } = useTypography();
   
   const {
     sectionId,
@@ -236,6 +238,12 @@ export default function LogoWithQuoteUse(props: LayoutComponentProps) {
   });
 
   const [selectedIntegration, setSelectedIntegration] = useState(0);
+  
+  // Create typography styles
+  const h3Style = getTypographyStyle('h3');
+  const bodyStyle = getTypographyStyle('body');
+  const bodySmStyle = getTypographyStyle('body-sm');
+  const labelStyle = getTypographyStyle('label');
 
   // Parse integrations
   const integrations = [

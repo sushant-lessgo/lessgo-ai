@@ -1,5 +1,6 @@
 import React from 'react';
 import { useLayoutComponent } from '@/hooks/useLayoutComponent';
+import { useTypography } from '@/hooks/useTypography';
 import { LayoutSection } from '@/components/layout/LayoutSection';
 import { 
   EditableAdaptiveHeadline, 
@@ -71,12 +72,14 @@ const StatCard = React.memo(({
   value, 
   label, 
   type, 
-  index 
+  index,
+  valueStyle
 }: { 
   value: string; 
   label: string; 
   type: 'before' | 'after';
   index: number;
+  valueStyle: React.CSSProperties;
 }) => {
   const isImprovement = type === 'after';
   
@@ -98,7 +101,10 @@ const StatCard = React.memo(({
       )}
       
       <div className="text-center space-y-3">
-        <div className={`text-4xl font-bold ${isImprovement ? 'text-green-600' : 'text-red-600'}`}>
+        <div 
+          className={isImprovement ? 'text-green-600' : 'text-red-600'}
+          style={valueStyle}
+        >
           {value}
         </div>
         
@@ -118,6 +124,7 @@ const StatCard = React.memo(({
 StatCard.displayName = 'StatCard';
 
 export default function StatComparison(props: LayoutComponentProps) {
+  const { getTextStyle: getTypographyStyle } = useTypography();
   
   const {
     sectionId,
@@ -134,6 +141,10 @@ export default function StatComparison(props: LayoutComponentProps) {
     contentSchema: CONTENT_SCHEMA
   });
 
+  // Create typography styles using landingTypography system
+  const h2Style = getTypographyStyle('h2');
+  const h3Style = getTypographyStyle('h3');
+  
   // Parse stats from pipe-separated format: value|label|value|label...
   const parseStats = (statsString: string) => {
     const parts = statsString.split('|').map(part => part.trim());
@@ -252,6 +263,13 @@ export default function StatComparison(props: LayoutComponentProps) {
                     label={stat.label}
                     type="before"
                     index={index}
+                    valueStyle={{
+                      fontSize: h2Style.fontSize,
+                      fontWeight: h2Style.fontWeight,
+                      lineHeight: h2Style.lineHeight,
+                      letterSpacing: h2Style.letterSpacing,
+                      fontFamily: h2Style.fontFamily
+                    }}
                   />
                 ))
               )}
@@ -305,6 +323,13 @@ export default function StatComparison(props: LayoutComponentProps) {
                     label={stat.label}
                     type="after"
                     index={index}
+                    valueStyle={{
+                      fontSize: h2Style.fontSize,
+                      fontWeight: h2Style.fontWeight,
+                      lineHeight: h2Style.lineHeight,
+                      letterSpacing: h2Style.letterSpacing,
+                      fontFamily: h2Style.fontFamily
+                    }}
                   />
                 ))
               )}
@@ -317,7 +342,16 @@ export default function StatComparison(props: LayoutComponentProps) {
             
             <div className="flex justify-center space-x-8">
               <div className="text-center">
-                <div className="text-3xl font-bold text-red-600 mb-2">BEFORE</div>
+                <div 
+                  className="text-red-600 mb-2"
+                  style={{
+                    fontSize: h3Style.fontSize,
+                    fontWeight: h3Style.fontWeight,
+                    lineHeight: h3Style.lineHeight,
+                    letterSpacing: h3Style.letterSpacing,
+                    fontFamily: h3Style.fontFamily
+                  }}
+                >BEFORE</div>
                 <div className="w-16 h-1 bg-red-500 rounded-full mx-auto" />
               </div>
               
@@ -328,7 +362,16 @@ export default function StatComparison(props: LayoutComponentProps) {
               </div>
               
               <div className="text-center">
-                <div className="text-3xl font-bold text-green-600 mb-2">AFTER</div>
+                <div 
+                  className="text-green-600 mb-2"
+                  style={{
+                    fontSize: h3Style.fontSize,
+                    fontWeight: h3Style.fontWeight,
+                    lineHeight: h3Style.lineHeight,
+                    letterSpacing: h3Style.letterSpacing,
+                    fontFamily: h3Style.fontFamily
+                  }}
+                >AFTER</div>
                 <div className="w-16 h-1 bg-green-500 rounded-full mx-auto" />
               </div>
             </div>

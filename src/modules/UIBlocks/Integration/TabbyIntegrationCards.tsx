@@ -2,6 +2,7 @@
 // Production-ready integration component using abstraction system with background-aware text colors
 
 import React, { useState } from 'react';
+import { useTypography } from '@/hooks/useTypography';
 import { useLayoutComponent } from '@/hooks/useLayoutComponent';
 import { LayoutSection } from '@/components/layout/LayoutSection';
 import { 
@@ -74,13 +75,19 @@ const IntegrationCard = React.memo(({
   colorTokens, 
   isHovered, 
   onHover, 
-  onLeave 
+  onLeave,
+  h4Style,
+  bodySmStyle,
+  labelStyle
 }: { 
   name: string; 
   colorTokens: any;
   isHovered: boolean;
   onHover: () => void;
   onLeave: () => void;
+  h4Style: React.CSSProperties;
+  bodySmStyle: React.CSSProperties;
+  labelStyle: React.CSSProperties;
 }) => {
   // Generate random status and setup time for demo
   const statuses = ['Connected', 'Available', 'Popular'];
@@ -106,30 +113,30 @@ const IntegrationCard = React.memo(({
     >
       {/* Logo Placeholder */}
       <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center mb-3">
-        <span className="text-white font-bold text-lg">
+        <span className="text-white" style={labelStyle}>
           {name.substring(0, 2).toUpperCase()}
         </span>
       </div>
 
       {/* Integration Name */}
-      <h4 className={`font-semibold mb-2 ${colorTokens.textPrimary}`}>
+      <h4 className={`mb-2 ${colorTokens.textPrimary}`} style={h4Style}>
         {name}
       </h4>
 
       {/* Status Badge */}
-      <div className={`inline-flex items-center px-2 py-1 rounded-md text-xs font-medium border mb-2 ${statusColors[status as keyof typeof statusColors]}`}>
+      <div className={`inline-flex items-center px-2 py-1 rounded-md border mb-2 ${statusColors[status as keyof typeof statusColors]}`} style={bodySmStyle}>
         <div className="w-1.5 h-1.5 rounded-full bg-current mr-1"></div>
         {status}
       </div>
 
       {/* Setup Time */}
-      <p className={`text-xs ${colorTokens.textMuted}`}>
+      <p className={`${colorTokens.textMuted}`} style={bodySmStyle}>
         Setup time: {setupTime}
       </p>
 
       {/* Connect Button (appears on hover) */}
       {isHovered && (
-        <button className={`mt-3 w-full py-2 px-3 rounded-lg text-sm font-medium transition-all duration-200 ${colorTokens.ctaBg} ${colorTokens.ctaBgText} hover:opacity-90`}>
+        <button className={`mt-3 w-full py-2 px-3 rounded-lg transition-all duration-200 ${colorTokens.ctaBg} ${colorTokens.ctaBgText} hover:opacity-90`} style={labelStyle}>
           Connect
         </button>
       )}
@@ -164,6 +171,7 @@ const TabButton = React.memo(({
 TabButton.displayName = 'TabButton';
 
 export default function TabbyIntegrationCards(props: LayoutComponentProps) {
+  const { getTextStyle: getTypographyStyle } = useTypography();
   
   const {
     sectionId,
@@ -180,6 +188,11 @@ export default function TabbyIntegrationCards(props: LayoutComponentProps) {
   });
 
   const [activeTab, setActiveTab] = useState(0);
+  
+  // Create typography styles
+  const h4Style = getTypographyStyle('h4');
+  const bodySmStyle = getTypographyStyle('body-sm');
+  const labelStyle = getTypographyStyle('label');
   const [hoveredCard, setHoveredCard] = useState<string | null>(null);
 
   // Parse integration tabs
@@ -270,6 +283,9 @@ export default function TabbyIntegrationCards(props: LayoutComponentProps) {
               isHovered={hoveredCard === integration.trim()}
               onHover={() => setHoveredCard(integration.trim())}
               onLeave={() => setHoveredCard(null)}
+              h4Style={h4Style}
+              bodySmStyle={bodySmStyle}
+              labelStyle={labelStyle}
             />
           ))}
         </div>

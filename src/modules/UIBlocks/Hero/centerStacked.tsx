@@ -2,6 +2,7 @@ import React from 'react';
 import { useLayoutComponent } from '@/hooks/useLayoutComponent';
 import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
 import { useImageToolbar } from '@/hooks/useImageToolbar';
+import { useTypography } from '@/hooks/useTypography';
 import { LayoutSection } from '@/components/layout/LayoutSection';
 import { 
   EditableAdaptiveHeadline, 
@@ -191,6 +192,7 @@ const HeroImagePlaceholder = React.memo(() => (
 HeroImagePlaceholder.displayName = 'HeroImagePlaceholder';
 
 export default function CenterStacked(props: LayoutComponentProps) {
+  const { getTextStyle: getTypographyStyle } = useTypography();
   
   const {
     sectionId,
@@ -206,6 +208,9 @@ export default function CenterStacked(props: LayoutComponentProps) {
     ...props,
     contentSchema: CONTENT_SCHEMA
   });
+  
+  // Create typography styles
+  const bodyLgStyle = getTypographyStyle('body-lg');
 
   const trustItems = blockContent.trust_items 
     ? blockContent.trust_items.split('|').map(item => item.trim()).filter(Boolean)
@@ -265,7 +270,8 @@ export default function CenterStacked(props: LayoutComponentProps) {
               backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
               colorTokens={colorTokens}
               variant="body"
-              className="text-lg lg:text-xl leading-relaxed max-w-2xl"
+              className="leading-relaxed max-w-2xl"
+              style={bodyLgStyle}
               placeholder="Add a compelling subheadline that supports your main message and explains the key benefit..."
               sectionId={sectionId}
               elementKey="subheadline"

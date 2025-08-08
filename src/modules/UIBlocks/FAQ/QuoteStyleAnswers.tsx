@@ -109,7 +109,11 @@ export default function QuoteStyleAnswers(props: LayoutComponentProps) {
               backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
               colorTokens={colorTokens}
               variant="body"
-              className="text-lg max-w-3xl mx-auto"
+              style={{
+                ...getTextStyle('body-lg'),
+                textAlign: 'center'
+              }}
+              className="max-w-3xl mx-auto"
               placeholder="Add a supporting description..."
               sectionId={sectionId}
               elementKey="subheadline"
@@ -123,7 +127,10 @@ export default function QuoteStyleAnswers(props: LayoutComponentProps) {
           {questions.map((question, index) => (
             <div key={index} className="relative">
               {/* Question */}
-              <h3 className={`text-xl font-semibold mb-4 ${dynamicTextColors?.heading || colorTokens.textPrimary}`}>
+              <h3 
+                className={`font-semibold mb-4 ${dynamicTextColors?.heading || colorTokens.textPrimary}`}
+                style={getTextStyle('h2')}
+              >
                 {question}
               </h3>
               
@@ -139,7 +146,10 @@ export default function QuoteStyleAnswers(props: LayoutComponentProps) {
                 
                 {/* Answer */}
                 {answers[index] && (
-                  <blockquote className={`text-lg leading-relaxed italic mb-4 ${mutedTextColor}`}>
+                  <blockquote 
+                    className={`leading-relaxed italic mb-4 ${mutedTextColor}`}
+                    style={getTextStyle('body-lg')}
+                  >
                     {answers[index]}
                   </blockquote>
                 )}

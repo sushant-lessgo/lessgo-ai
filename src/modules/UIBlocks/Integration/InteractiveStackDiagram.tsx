@@ -3,6 +3,7 @@
 
 import React, { useState } from 'react';
 import { useLayoutComponent } from '@/hooks/useLayoutComponent';
+import { useTypography } from '@/hooks/useTypography';
 import { LayoutSection } from '@/components/layout/LayoutSection';
 import { 
   EditableAdaptiveHeadline, 
@@ -97,7 +98,7 @@ const TechBadge = React.memo(({ name, isActive, onClick, colorTokens }: {
 }) => (
   <button
     onClick={onClick}
-    className={`px-3 py-1.5 rounded-lg text-sm font-medium border transition-all duration-300 ${
+    className={`px-3 py-1.5 rounded-lg border transition-all duration-300 ${
       isActive 
         ? `${colorTokens.ctaBg} ${colorTokens.ctaBgText} border-current shadow-md scale-105` 
         : `${colorTokens.bgSecondary} ${colorTokens.textSecondary} border-gray-200 hover:${colorTokens.bgSecondary} hover:scale-102`
@@ -117,7 +118,10 @@ const StackLayer = React.memo(({
   onTechClick, 
   colorTokens, 
   textStyle,
-  activeTech 
+  activeTech,
+  h3Style,
+  labelStyle,
+  bodySmStyle
 }: { 
   layer: any; 
   index: number; 
@@ -127,6 +131,9 @@ const StackLayer = React.memo(({
   colorTokens: any;
   textStyle: React.CSSProperties;
   activeTech: string | null;
+  h3Style: React.CSSProperties;
+  labelStyle: React.CSSProperties;
+  bodySmStyle: React.CSSProperties;
 }) => {
   const layerColors = [
     'bg-gradient-to-r from-blue-500 to-blue-600',
@@ -147,12 +154,12 @@ const StackLayer = React.memo(({
         isActive ? 'shadow-2xl' : ''
       }`}>
         <div className="flex items-center justify-between mb-3">
-          <h3 className="text-lg font-bold">{layer.title}</h3>
+          <h3 style={h3Style}>{layer.title}</h3>
           <div className="w-8 h-8 bg-white bg-opacity-20 rounded-lg flex items-center justify-center">
-            <span className="text-sm font-bold">{index + 1}</span>
+            <span style={labelStyle}>{index + 1}</span>
           </div>
         </div>
-        <p className="text-sm opacity-90 mb-4">{layer.description}</p>
+        <p className="opacity-90 mb-4" style={bodySmStyle}>{layer.description}</p>
         
         {/* Technology Grid */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-2">
@@ -186,6 +193,7 @@ const StackLayer = React.memo(({
 StackLayer.displayName = 'StackLayer';
 
 export default function InteractiveStackDiagram(props: LayoutComponentProps) {
+  const { getTextStyle: getTypographyStyle } = useTypography();
   
   const {
     sectionId,
@@ -203,6 +211,13 @@ export default function InteractiveStackDiagram(props: LayoutComponentProps) {
 
   const [activeLayer, setActiveLayer] = useState<number | null>(null);
   const [activeTech, setActiveTech] = useState<string | null>(null);
+  
+  // Create typography styles
+  const h3Style = getTypographyStyle('h3');
+  const h4Style = getTypographyStyle('h4');
+  const bodyLgStyle = getTypographyStyle('body-lg');
+  const bodySmStyle = getTypographyStyle('body-sm');
+  const labelStyle = getTypographyStyle('label');
 
   // Parse technology lists
   const layers = [
@@ -266,7 +281,8 @@ export default function InteractiveStackDiagram(props: LayoutComponentProps) {
               backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
               colorTokens={colorTokens}
               variant="body"
-              className="text-lg leading-relaxed max-w-3xl mx-auto"
+              className="leading-relaxed max-w-3xl mx-auto"
+              style={bodyLgStyle}
               placeholder="Add a description of your technical architecture..."
               sectionId={sectionId}
               elementKey="subheadline"
@@ -289,6 +305,9 @@ export default function InteractiveStackDiagram(props: LayoutComponentProps) {
                 colorTokens={colorTokens}
                 textStyle={{}}
                 activeTech={activeTech}
+                h3Style={h3Style}
+                labelStyle={labelStyle}
+                bodySmStyle={bodySmStyle}
               />
             ))}
           </div>
@@ -298,10 +317,10 @@ export default function InteractiveStackDiagram(props: LayoutComponentProps) {
             <div className={`mt-8 p-6 rounded-xl ${colorTokens.bgSecondary} border border-gray-200`}>
               <div className="flex items-center justify-between">
                 <div>
-                  <h4 className={`font-semibold ${colorTokens.textPrimary} ${getTextStyle('body-lg')}`}>
+                  <h4 className={`${colorTokens.textPrimary}`} style={h4Style}>
                     {activeTech}
                   </h4>
-                  <p className={`${dynamicTextColors?.muted || colorTokens.textMuted} text-sm mt-1`}>
+                  <p className={`${dynamicTextColors?.muted || colorTokens.textMuted} mt-1`} style={bodySmStyle}>
                     Click any technology to learn more about integration possibilities
                   </p>
                 </div>
@@ -320,7 +339,7 @@ export default function InteractiveStackDiagram(props: LayoutComponentProps) {
 
         {/* Footer */}
         <div className="text-center mt-12">
-          <p className={`${dynamicTextColors?.muted || colorTokens.textMuted} text-sm`}>
+          <p className={`${dynamicTextColors?.muted || colorTokens.textMuted}`} style={bodySmStyle}>
             Need a custom integration? <span className={`${colorTokens.ctaBg} hover:underline cursor-pointer`}>Contact our technical team</span>
           </p>
         </div>

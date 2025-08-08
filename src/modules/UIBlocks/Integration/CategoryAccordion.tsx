@@ -3,6 +3,7 @@
 
 import React, { useState } from 'react';
 import { useLayoutComponent } from '@/hooks/useLayoutComponent';
+import { useTypography } from '@/hooks/useTypography';
 import { LayoutSection } from '@/components/layout/LayoutSection';
 import { 
   EditableAdaptiveHeadline, 
@@ -69,8 +70,8 @@ const CONTENT_SCHEMA = {
 };
 
 // Integration Badge Component
-const IntegrationBadge = React.memo(({ name, colorTokens }: { name: string; colorTokens: any }) => (
-  <div className={`inline-flex items-center px-3 py-1.5 rounded-lg text-sm font-medium border border-gray-200 ${colorTokens.bgSecondary} ${colorTokens.textSecondary} hover:scale-105 transition-transform duration-200`}>
+const IntegrationBadge = React.memo(({ name, colorTokens, labelStyle }: { name: string; colorTokens: any; labelStyle: React.CSSProperties }) => (
+  <div className={`inline-flex items-center px-3 py-1.5 rounded-lg border border-gray-200 ${colorTokens.bgSecondary} ${colorTokens.textSecondary} hover:scale-105 transition-transform duration-200`} style={labelStyle}>
     <div className="w-2 h-2 rounded-full bg-green-400 mr-2"></div>
     {name}
   </div>
@@ -83,20 +84,24 @@ const AccordionItem = React.memo(({
   integrations, 
   isOpen, 
   onToggle, 
-  colorTokens
+  colorTokens,
+  h3Style,
+  labelStyle
 }: { 
   title: string; 
   integrations: string[]; 
   isOpen: boolean; 
   onToggle: () => void;
   colorTokens: any;
+  h3Style: React.CSSProperties;
+  labelStyle: React.CSSProperties;
 }) => (
   <div className={`border rounded-xl border-gray-200 ${colorTokens.bgSecondary} overflow-hidden`}>
     <button
       onClick={onToggle}
       className={`w-full px-6 py-4 text-left flex items-center justify-between ${colorTokens.textPrimary} hover:${colorTokens.bgSecondary} transition-colors duration-200`}
     >
-      <h3 className="font-semibold">{title}</h3>
+      <h3 style={h3Style}>{title}</h3>
       <svg 
         className={`w-5 h-5 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} 
         fill="none" 
@@ -115,6 +120,7 @@ const AccordionItem = React.memo(({
               key={index} 
               name={integration.trim()} 
               colorTokens={colorTokens}
+              labelStyle={labelStyle}
             />
           ))}
         </div>
@@ -125,6 +131,7 @@ const AccordionItem = React.memo(({
 AccordionItem.displayName = 'AccordionItem';
 
 export default function CategoryAccordion(props: LayoutComponentProps) {
+  const { getTextStyle: getTypographyStyle } = useTypography();
   
   const {
     sectionId,
@@ -141,6 +148,12 @@ export default function CategoryAccordion(props: LayoutComponentProps) {
   });
 
   const [openItems, setOpenItems] = useState<Set<number>>(new Set([0])); // First item open by default
+  
+  // Create typography styles
+  const h3Style = getTypographyStyle('h3');
+  const labelStyle = getTypographyStyle('label');
+  const bodySmStyle = getTypographyStyle('body-sm');
+  const bodyLgStyle = getTypographyStyle('body-lg');
 
   const toggleItem = (index: number) => {
     const newOpenItems = new Set(openItems);
@@ -206,7 +219,8 @@ export default function CategoryAccordion(props: LayoutComponentProps) {
               backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
               colorTokens={colorTokens}
               variant="body"
-              className="text-lg leading-relaxed max-w-3xl mx-auto"
+              className="leading-relaxed max-w-3xl mx-auto"
+              style={bodyLgStyle}
               placeholder="Add a description of your integration ecosystem..."
               sectionId={sectionId}
               elementKey="subheadline"
@@ -225,13 +239,15 @@ export default function CategoryAccordion(props: LayoutComponentProps) {
               isOpen={openItems.has(index)}
               onToggle={() => toggleItem(index)}
               colorTokens={colorTokens}
+              h3Style={h3Style}
+              labelStyle={labelStyle}
             />
           ))}
         </div>
 
         {/* Footer CTA */}
         <div className="text-center mt-12">
-          <p className={`${dynamicTextColors?.muted || colorTokens.textMuted} text-sm`}>
+          <p className={`${dynamicTextColors?.muted || colorTokens.textMuted}`} style={bodySmStyle}>
             Can't find your tool? <span className={`${colorTokens.ctaBg} hover:underline cursor-pointer`}>Request an integration</span>
           </p>
         </div>

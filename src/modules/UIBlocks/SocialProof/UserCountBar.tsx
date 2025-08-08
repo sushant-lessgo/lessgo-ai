@@ -3,6 +3,7 @@
 
 import React from 'react';
 import { useLayoutComponent } from '@/hooks/useLayoutComponent';
+import { useTypography } from '@/hooks/useTypography';
 import { LayoutSection } from '@/components/layout/LayoutSection';
 import { 
   EditableAdaptiveHeadline, 
@@ -86,7 +87,8 @@ const MetricDisplay = React.memo(({
         <SocialProofNumber
           number={metric.value}
           label=""
-          className={`text-3xl md:text-4xl font-bold ${dynamicTextColors?.heading || 'text-gray-900'}`}
+          className={`font-bold ${dynamicTextColors?.heading || 'text-gray-900'}`}
+          style={{...getTextStyle('h1'), fontSize: 'clamp(2rem, 4vw, 3rem)'}}
         />
         
         {metric.growth && (
@@ -158,6 +160,7 @@ const UserAvatarGroup = React.memo(({
 UserAvatarGroup.displayName = 'UserAvatarGroup';
 
 export default function UserCountBar(props: LayoutComponentProps) {
+  const { getTextStyle: getTypographyStyle } = useTypography();
   
   // Use the abstraction hook with background type support
   const {
@@ -173,6 +176,10 @@ export default function UserCountBar(props: LayoutComponentProps) {
     ...props,
     contentSchema: CONTENT_SCHEMA
   });
+
+  // Create typography styles
+  const h1Style = getTypographyStyle('h1');
+  const bodyLgStyle = getTypographyStyle('body-lg');
 
   // Parse metrics from pipe-separated strings
   const userMetrics = parseMetricData(
@@ -215,7 +222,8 @@ export default function UserCountBar(props: LayoutComponentProps) {
               backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
               colorTokens={colorTokens}
               variant="body"
-              className="text-lg max-w-3xl mx-auto mb-8"
+              className="max-w-3xl mx-auto mb-8"
+              style={bodyLgStyle}
               placeholder="Add a compelling subheadline about your user growth..."
               sectionId={sectionId}
               elementKey="subheadline"

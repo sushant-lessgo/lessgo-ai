@@ -1,5 +1,6 @@
 import React from 'react';
 import { useLayoutComponent } from '@/hooks/useLayoutComponent';
+import { useTypography } from '@/hooks/useTypography';
 import { LayoutSection } from '@/components/layout/LayoutSection';
 import { 
   EditableAdaptiveHeadline, 
@@ -88,6 +89,7 @@ const CONTENT_SCHEMA = {
 };
 
 export default function EnterpriseContactBox(props: LayoutComponentProps) {
+  const { getTextStyle: getTypographyStyle } = useTypography();
   
   const {
     sectionId,
@@ -103,6 +105,11 @@ export default function EnterpriseContactBox(props: LayoutComponentProps) {
     ...props,
     contentSchema: CONTENT_SCHEMA
   });
+  
+  // Create typography styles
+  const h2Style = getTypographyStyle('h2');
+  const h3Style = getTypographyStyle('h3');
+  const bodyLgStyle = getTypographyStyle('body-lg');
 
   const contactOptions = blockContent.contact_options 
     ? blockContent.contact_options.split('|').map(item => item.trim()).filter(Boolean)
@@ -213,7 +220,8 @@ export default function EnterpriseContactBox(props: LayoutComponentProps) {
               backgroundType={safeBackgroundType}
               colorTokens={colorTokens}
               variant="body"
-              className="text-lg mb-8 max-w-3xl mx-auto"
+              className="mb-8 max-w-3xl mx-auto"
+              style={bodyLgStyle}
               placeholder="Add optional subheadline to introduce enterprise contact..."
               sectionId={sectionId}
               elementKey="subheadline"
@@ -222,7 +230,7 @@ export default function EnterpriseContactBox(props: LayoutComponentProps) {
           )}
 
           <div className="max-w-4xl mx-auto">
-            <p className="text-xl text-gray-700 leading-relaxed">
+            <p className="text-gray-700 leading-relaxed" style={bodyLgStyle}>
               {blockContent.value_proposition}
             </p>
           </div>
@@ -309,7 +317,7 @@ export default function EnterpriseContactBox(props: LayoutComponentProps) {
 
             {/* Primary CTA Section */}
             <div className="bg-gradient-to-r from-blue-600 to-blue-700 rounded-2xl p-8 text-white text-center mb-16">
-              <h3 className="text-2xl font-bold mb-4">Start Your Enterprise Journey Today</h3>
+              <h3 className="font-bold mb-4" style={h2Style}>Start Your Enterprise Journey Today</h3>
               <p className="text-blue-100 mb-8 max-w-2xl mx-auto">
                 Join hundreds of enterprise customers who trust us with their mission-critical operations.
               </p>
@@ -345,7 +353,7 @@ export default function EnterpriseContactBox(props: LayoutComponentProps) {
 
             {/* Enterprise Features */}
             <div className="bg-gray-50 rounded-2xl p-8 border border-gray-100 mb-16">
-              <h3 className="text-xl font-semibold text-gray-900 text-center mb-8">
+              <h3 className="font-semibold text-gray-900 text-center mb-8" style={h3Style}>
                 Enterprise Features Included
               </h3>
               
@@ -364,7 +372,7 @@ export default function EnterpriseContactBox(props: LayoutComponentProps) {
             {/* Qualification Section */}
             <div className="bg-white rounded-2xl border border-gray-200 p-8 mb-16">
               <div className="text-center mb-8">
-                <h3 className="text-xl font-semibold text-gray-900 mb-4">
+                <h3 className="font-semibold text-gray-900 mb-4" style={h3Style}>
                   Is Enterprise Right for You?
                 </h3>
                 <p className={`${mutedTextColor} max-w-2xl mx-auto`}>

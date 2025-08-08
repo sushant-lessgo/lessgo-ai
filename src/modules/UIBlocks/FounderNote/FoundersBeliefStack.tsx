@@ -4,6 +4,7 @@
 
 import React from 'react';
 import { useLayoutComponent } from '@/hooks/useLayoutComponent';
+import { useTypography } from '@/hooks/useTypography';
 import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
 import { LayoutSection } from '@/components/layout/LayoutSection';
 import { 
@@ -82,7 +83,8 @@ const BeliefCard = React.memo(({
   description, 
   index,
   colorTokens,
-  dynamicTextColors 
+  dynamicTextColors,
+  h3Style
 }: {
   icon: string;
   title: string;
@@ -90,6 +92,7 @@ const BeliefCard = React.memo(({
   index: number;
   colorTokens: any;
   dynamicTextColors: any;
+  h3Style: React.CSSProperties;
 }) => {
   const cardColors = [
     'from-blue-500 to-indigo-600',
@@ -118,7 +121,7 @@ const BeliefCard = React.memo(({
       </div>
       
       {/* Content */}
-      <h3 className="text-lg font-semibold text-gray-900 mb-3">{title}</h3>
+      <h3 style={h3Style} className="text-gray-900 mb-3">{title}</h3>
       <p className="text-gray-600 leading-relaxed">{description}</p>
       
       {/* Decorative element */}
@@ -141,6 +144,7 @@ const FounderImagePlaceholder = React.memo(() => (
 FounderImagePlaceholder.displayName = 'FounderImagePlaceholder';
 
 export default function FoundersBeliefStack(props: LayoutComponentProps) {
+  const { getTextStyle: getTypographyStyle } = useTypography();
   
   // Use the abstraction hook with background type support
   const {
@@ -157,6 +161,9 @@ export default function FoundersBeliefStack(props: LayoutComponentProps) {
     ...props,
     contentSchema: CONTENT_SCHEMA
   });
+
+  // Create typography styles
+  const h3Style = getTypographyStyle('h3');
 
   // Parse belief items from pipe-separated string
   const beliefData = blockContent.belief_items 
@@ -266,6 +273,7 @@ export default function FoundersBeliefStack(props: LayoutComponentProps) {
                   index={index}
                   colorTokens={colorTokens}
                   dynamicTextColors={dynamicTextColors}
+                  h3Style={h3Style}
                 />
               ))}
             </div>
@@ -345,7 +353,7 @@ export default function FoundersBeliefStack(props: LayoutComponentProps) {
 
         {/* Company Values */}
         <div className="text-center mb-12">
-          <h3 className="text-xl font-semibold text-gray-900 mb-6">Our Core Values</h3>
+          <h3 style={h3Style} className="text-gray-900 mb-6">Our Core Values</h3>
           <div className="flex flex-wrap justify-center gap-4">
             {companyValues.map((value, index) => (
               <div key={index} className="bg-white rounded-full px-6 py-3 shadow-md border border-gray-100">

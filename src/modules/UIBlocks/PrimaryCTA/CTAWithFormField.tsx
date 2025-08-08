@@ -3,6 +3,7 @@
 
 import React, { useState } from 'react';
 import { useLayoutComponent } from '@/hooks/useLayoutComponent';
+import { useTypography } from '@/hooks/useTypography';
 import { LayoutSection } from '@/components/layout/LayoutSection';
 import { 
   EditableAdaptiveHeadline, 
@@ -67,7 +68,8 @@ export default function CTAWithFormField(props: LayoutComponentProps) {
     ...props,
     contentSchema: CONTENT_SCHEMA
   });
-
+  
+  const { getTextStyle: getTypographyStyle } = useTypography();
   const [email, setEmail] = useState('');
   const [isValid, setIsValid] = useState(true);
 

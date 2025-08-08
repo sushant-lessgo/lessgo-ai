@@ -4,6 +4,7 @@
 
 import React from 'react';
 import { useLayoutComponent } from '@/hooks/useLayoutComponent';
+import { useTypography } from '@/hooks/useTypography';
 import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
 import { LayoutSection } from '@/components/layout/LayoutSection';
 import { 
@@ -193,6 +194,8 @@ export default function SideBySidePhotoStory(props: LayoutComponentProps) {
     ...props,
     contentSchema: CONTENT_SCHEMA
   });
+  
+  const { getTextStyle: getTypographyStyle } = useTypography();
 
   // Parse story stats from pipe-separated string
   const storyStats = blockContent.story_stats 

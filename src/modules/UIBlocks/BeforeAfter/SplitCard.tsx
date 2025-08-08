@@ -1,6 +1,7 @@
 import React from 'react';
 import { useLayoutComponent } from '@/hooks/useLayoutComponent';
 import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
+import { useTypography } from '@/hooks/useTypography';
 import { LayoutSection } from '@/components/layout/LayoutSection';
 import { 
   EditableAdaptiveHeadline, 
@@ -80,7 +81,8 @@ const PremiumCard = React.memo(({
   visual, 
   showImageToolbar, 
   sectionId, 
-  mode 
+  mode,
+  bodyLgStyle
 }: {
   type: 'before' | 'after';
   label: string;
@@ -89,6 +91,7 @@ const PremiumCard = React.memo(({
   showImageToolbar: any;
   sectionId: string;
   mode: string;
+  bodyLgStyle: React.CSSProperties;
 }) => {
   
   const VisualPlaceholder = () => (
@@ -148,7 +151,7 @@ const PremiumCard = React.memo(({
       <div className="p-8">
         <div className="flex items-center mb-4">
           <div className={`w-3 h-3 rounded-full mr-3 ${type === 'before' ? 'bg-slate-500' : 'bg-amber-500'} ring-4 ${type === 'before' ? 'ring-slate-100' : 'ring-amber-100'}`} />
-          <h3 className={`text-lg font-semibold ${type === 'before' ? 'text-slate-700' : 'text-amber-700'}`}>
+          <h3 className={type === 'before' ? 'text-slate-700' : 'text-amber-700'} style={bodyLgStyle}>
             {label}
           </h3>
         </div>
@@ -174,6 +177,7 @@ const PremiumCard = React.memo(({
 PremiumCard.displayName = 'PremiumCard';
 
 export default function SplitCard(props: LayoutComponentProps) {
+  const { getTextStyle: getTypographyStyle } = useTypography();
   
   const {
     sectionId,
@@ -189,6 +193,9 @@ export default function SplitCard(props: LayoutComponentProps) {
     ...props,
     contentSchema: CONTENT_SCHEMA
   });
+  
+  // Create typography styles
+  const bodyLgStyle = getTypographyStyle('body-lg');
 
   const trustItems = blockContent.trust_items 
     ? blockContent.trust_items.split('|').map(item => item.trim()).filter(Boolean)
@@ -235,7 +242,8 @@ export default function SplitCard(props: LayoutComponentProps) {
               backgroundType={safeBackgroundType}
               colorTokens={colorTokens}
               variant="body"
-              className="text-lg mb-6 max-w-3xl mx-auto"
+              className="mb-6 max-w-3xl mx-auto"
+              style={bodyLgStyle}
               placeholder="Add optional subheadline to introduce your premium transformation..."
               sectionId={sectionId}
               elementKey="subheadline"
@@ -255,6 +263,7 @@ export default function SplitCard(props: LayoutComponentProps) {
               showImageToolbar={showImageToolbar}
               sectionId={sectionId}
               mode={mode}
+              bodyLgStyle={bodyLgStyle}
             />
             
             <div className="text-center lg:hidden">
@@ -287,6 +296,7 @@ export default function SplitCard(props: LayoutComponentProps) {
               showImageToolbar={showImageToolbar}
               sectionId={sectionId}
               mode={mode}
+              bodyLgStyle={bodyLgStyle}
             />
           </div>
         </div>

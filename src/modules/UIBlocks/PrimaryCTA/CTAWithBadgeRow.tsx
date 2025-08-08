@@ -3,6 +3,7 @@
 
 import React from 'react';
 import { useLayoutComponent } from '@/hooks/useLayoutComponent';
+import { useTypography } from '@/hooks/useTypography';
 import { LayoutSection } from '@/components/layout/LayoutSection';
 import { 
   EditableAdaptiveHeadline, 
@@ -108,6 +109,8 @@ export default function CTAWithBadgeRow(props: LayoutComponentProps) {
     ...props,
     contentSchema: CONTENT_SCHEMA
   });
+  
+  const { getTextStyle: getTypographyStyle } = useTypography();
 
   // Parse trust badges from pipe-separated string
   const trustBadges = blockContent.trust_badges 

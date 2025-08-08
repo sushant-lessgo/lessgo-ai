@@ -1,5 +1,6 @@
 import React from 'react';
 import { useLayoutComponent } from '@/hooks/useLayoutComponent';
+import { useTypography } from '@/hooks/useTypography';
 import { LayoutSection } from '@/components/layout/LayoutSection';
 import { 
   EditableAdaptiveHeadline, 
@@ -98,6 +99,7 @@ const ListItem = React.memo(({
 ListItem.displayName = 'ListItem';
 
 export default function TextListTransformation(props: LayoutComponentProps) {
+  const { getTextStyle: getTypographyStyle } = useTypography();
   
   const {
     sectionId,
@@ -113,6 +115,10 @@ export default function TextListTransformation(props: LayoutComponentProps) {
     ...props,
     contentSchema: CONTENT_SCHEMA
   });
+  
+  // Create typography styles
+  const h3Style = getTypographyStyle('h3');
+  const bodyLgStyle = getTypographyStyle('body-lg');
 
   const beforeItems = blockContent.before_list 
     ? blockContent.before_list.split('|').map(item => item.trim()).filter(Boolean)
@@ -164,7 +170,8 @@ export default function TextListTransformation(props: LayoutComponentProps) {
               backgroundType={safeBackgroundType}
               colorTokens={colorTokens}
               variant="body"
-              className="text-lg mb-6 max-w-3xl mx-auto"
+              className="mb-6 max-w-3xl mx-auto"
+              style={bodyLgStyle}
               placeholder="Add optional subheadline to introduce the transformation..."
               sectionId={sectionId}
               elementKey="subheadline"
@@ -191,7 +198,8 @@ export default function TextListTransformation(props: LayoutComponentProps) {
                     fontWeight: 600,
                     color: '#ef4444'
                   }}
-                  className="text-red-500 text-xl"
+                  className="text-red-500"
+                  style={h3Style}
                   sectionId={sectionId}
                   elementKey="before_label"
                   sectionBackground={sectionBackground}
@@ -261,7 +269,8 @@ export default function TextListTransformation(props: LayoutComponentProps) {
                     fontWeight: 600,
                     color: '#10b981'
                   }}
-                  className="text-green-500 text-xl"
+                  className="text-green-500"
+                  style={h3Style}
                   sectionId={sectionId}
                   elementKey="after_label"
                   sectionBackground={sectionBackground}
@@ -308,7 +317,8 @@ export default function TextListTransformation(props: LayoutComponentProps) {
               backgroundType={safeBackgroundType}
               colorTokens={colorTokens}
               variant="body"
-              className="text-lg font-medium max-w-2xl mx-auto"
+              className="font-medium max-w-2xl mx-auto"
+              style={bodyLgStyle}
               sectionId={sectionId}
               elementKey="transformation_text"
               sectionBackground={sectionBackground}

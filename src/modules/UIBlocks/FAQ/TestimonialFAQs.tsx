@@ -117,7 +117,11 @@ export default function TestimonialFAQs(props: LayoutComponentProps) {
               backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
               colorTokens={colorTokens}
               variant="body"
-              className="text-lg max-w-3xl mx-auto"
+              style={{
+                ...getTextStyle('body-lg'),
+                textAlign: 'center'
+              }}
+              className="max-w-3xl mx-auto"
               placeholder="Add a description highlighting customer success..."
               sectionId={sectionId}
               elementKey="subheadline"
@@ -131,14 +135,20 @@ export default function TestimonialFAQs(props: LayoutComponentProps) {
           {questions.map((question, index) => (
             <div key={index} className="bg-white dark:bg-gray-800/50 rounded-2xl p-8 shadow-lg">
               {/* Question */}
-              <h3 className={`text-xl font-semibold mb-6 ${dynamicTextColors?.heading || colorTokens.textPrimary}`}>
+              <h3 
+                className={`font-semibold mb-6 ${dynamicTextColors?.heading || colorTokens.textPrimary}`}
+                style={getTextStyle('h2')}
+              >
                 "{question}"
               </h3>
               
               {/* Testimonial Answer */}
               {answers[index] && (
                 <div className="mb-6">
-                  <p className={`text-lg leading-relaxed italic ${mutedTextColor}`}>
+                  <p 
+                    className={`leading-relaxed italic ${mutedTextColor}`}
+                    style={getTextStyle('body-lg')}
+                  >
                     "{answers[index]}"
                   </p>
                 </div>
@@ -156,7 +166,10 @@ export default function TestimonialFAQs(props: LayoutComponentProps) {
                 
                 {/* Customer Info */}
                 <div>
-                  <div className={`font-semibold text-lg ${dynamicTextColors?.heading || colorTokens.textPrimary}`}>
+                  <div 
+                    className={`font-semibold ${dynamicTextColors?.heading || colorTokens.textPrimary}`}
+                    style={getTextStyle('h3')}
+                  >
                     {customerNames[index] || 'Customer'}
                   </div>
                   <div className={`text-sm ${mutedTextColor}`}>

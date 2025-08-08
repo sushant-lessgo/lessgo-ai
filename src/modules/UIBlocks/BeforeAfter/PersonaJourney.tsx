@@ -1,6 +1,7 @@
 import React from 'react';
 import { useLayoutComponent } from '@/hooks/useLayoutComponent';
 import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
+import { useTypography } from '@/hooks/useTypography';
 import { LayoutSection } from '@/components/layout/LayoutSection';
 import { 
   EditableAdaptiveHeadline, 
@@ -110,7 +111,9 @@ const PersonaCard = React.memo(({
   avatar, 
   showImageToolbar, 
   sectionId, 
-  mode 
+  mode,
+  h2Style,
+  h3Style
 }: {
   name: string;
   role: string;
@@ -119,11 +122,13 @@ const PersonaCard = React.memo(({
   showImageToolbar: any;
   sectionId: string;
   mode: string;
+  h2Style: React.CSSProperties;
+  h3Style: React.CSSProperties;
 }) => {
   
   const AvatarPlaceholder = () => (
     <div className="w-20 h-20 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center">
-      <span className="text-white font-bold text-2xl">
+      <span className="text-white font-bold" style={h2Style}>
         {name.split(' ').map(n => n[0]).join('')}
       </span>
     </div>
@@ -147,7 +152,7 @@ const PersonaCard = React.memo(({
         )}
         
         <div>
-          <h3 className="text-xl font-bold text-gray-900">{name}</h3>
+          <h3 className="text-gray-900" style={h3Style}>{name}</h3>
           <p className="text-blue-600 font-semibold">{role}</p>
           <p className="text-gray-600 text-sm">{company}</p>
         </div>
@@ -162,13 +167,15 @@ const JourneyPhase = React.memo(({
   description, 
   items, 
   type, 
-  isJourney = false 
+  isJourney = false,
+  h3Style
 }: {
   title: string;
   description: string;
   items: string[];
   type: 'before' | 'journey' | 'after';
   isJourney?: boolean;
+  h3Style: React.CSSProperties;
 }) => {
   
   const getPhaseColor = () => {
@@ -211,7 +218,7 @@ const JourneyPhase = React.memo(({
         <div className={`w-12 h-12 rounded-full ${colors.bg} ${colors.ring} ring-4 flex items-center justify-center shadow-lg mr-4`}>
           {getIcon()}
         </div>
-        <h3 className={`text-xl font-bold ${colors.text}`}>{title}</h3>
+        <h3 className={colors.text} style={h3Style}>{title}</h3>
       </div>
       
       <p className="text-gray-600 leading-relaxed mb-6">
@@ -238,6 +245,7 @@ const JourneyPhase = React.memo(({
 JourneyPhase.displayName = 'JourneyPhase';
 
 export default function PersonaJourney(props: LayoutComponentProps) {
+  const { getTextStyle: getTypographyStyle } = useTypography();
   
   const {
     sectionId,
@@ -253,6 +261,11 @@ export default function PersonaJourney(props: LayoutComponentProps) {
     ...props,
     contentSchema: CONTENT_SCHEMA
   });
+  
+  // Create typography styles
+  const h3Style = getTypographyStyle('h3');
+  const h2Style = getTypographyStyle('h2');
+  const bodyLgStyle = getTypographyStyle('body-lg');
 
   const beforePainPoints = blockContent.before_pain_points 
     ? blockContent.before_pain_points.split('|').map(item => item.trim()).filter(Boolean)
@@ -311,7 +324,8 @@ export default function PersonaJourney(props: LayoutComponentProps) {
               backgroundType={safeBackgroundType}
               colorTokens={colorTokens}
               variant="body"
-              className="text-lg mb-6 max-w-3xl mx-auto"
+              className="mb-6 max-w-3xl mx-auto"
+              style={bodyLgStyle}
               placeholder="Add optional subheadline to introduce the persona journey..."
               sectionId={sectionId}
               elementKey="subheadline"
@@ -375,6 +389,8 @@ export default function PersonaJourney(props: LayoutComponentProps) {
               showImageToolbar={showImageToolbar}
               sectionId={sectionId}
               mode={mode}
+              h2Style={h2Style}
+              h3Style={h3Style}
             />
           )}
         </div>
@@ -506,6 +522,7 @@ export default function PersonaJourney(props: LayoutComponentProps) {
                 description={blockContent.before_challenges}
                 items={beforePainPoints}
                 type="before"
+                h3Style={h3Style}
               />
               
               <JourneyPhase
@@ -514,6 +531,7 @@ export default function PersonaJourney(props: LayoutComponentProps) {
                 items={journeySteps}
                 type="journey"
                 isJourney={true}
+                h3Style={h3Style}
               />
               
               <JourneyPhase
@@ -521,6 +539,7 @@ export default function PersonaJourney(props: LayoutComponentProps) {
                 description={blockContent.after_outcomes}
                 items={afterBenefits}
                 type="after"
+                h3Style={h3Style}
               />
             </>
           )}
@@ -569,7 +588,7 @@ export default function PersonaJourney(props: LayoutComponentProps) {
               </div>
             </div>
             
-            <h3 className="text-xl font-semibold text-gray-900 mb-4">
+            <h3 className="text-gray-900 mb-4" style={h3Style}>
               Complete Enterprise Transformation
             </h3>
             

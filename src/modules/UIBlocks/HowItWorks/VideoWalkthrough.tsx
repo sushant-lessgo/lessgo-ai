@@ -1,6 +1,7 @@
 import React from 'react';
 import { useLayoutComponent } from '@/hooks/useLayoutComponent';
 import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
+import { useTypography } from '@/hooks/useTypography';
 import { LayoutSection } from '@/components/layout/LayoutSection';
 import { 
   EditableAdaptiveHeadline, 
@@ -69,6 +70,7 @@ const CONTENT_SCHEMA = {
 };
 
 export default function VideoWalkthrough(props: LayoutComponentProps) {
+  const { getTextStyle: getTypographyStyle } = useTypography();
   
   const {
     sectionId,
@@ -84,6 +86,9 @@ export default function VideoWalkthrough(props: LayoutComponentProps) {
     ...props,
     contentSchema: CONTENT_SCHEMA
   });
+  
+  // Create typography styles
+  const h3Style = getTypographyStyle('h3');
 
   const trustItems = blockContent.trust_items 
     ? blockContent.trust_items.split('|').map(item => item.trim()).filter(Boolean)
@@ -316,15 +321,42 @@ export default function VideoWalkthrough(props: LayoutComponentProps) {
             
             <div className="grid md:grid-cols-3 gap-8">
               <div className="text-center">
-                <div className="text-3xl font-bold text-blue-600 mb-2">Real Data</div>
+                <div 
+                  className="text-blue-600 mb-2"
+                  style={{
+                    fontSize: h3Style.fontSize,
+                    fontWeight: h3Style.fontWeight,
+                    lineHeight: h3Style.lineHeight,
+                    letterSpacing: h3Style.letterSpacing,
+                    fontFamily: h3Style.fontFamily
+                  }}
+                >Real Data</div>
                 <div className={`text-sm ${mutedTextColor}`}>Actual customer implementation</div>
               </div>
               <div className="text-center">
-                <div className="text-3xl font-bold text-green-600 mb-2">Live Demo</div>
+                <div 
+                  className="text-green-600 mb-2"
+                  style={{
+                    fontSize: h3Style.fontSize,
+                    fontWeight: h3Style.fontWeight,
+                    lineHeight: h3Style.lineHeight,
+                    letterSpacing: h3Style.letterSpacing,
+                    fontFamily: h3Style.fontFamily
+                  }}
+                >Live Demo</div>
                 <div className={`text-sm ${mutedTextColor}`}>Interactive walkthrough</div>
               </div>
               <div className="text-center">
-                <div className="text-3xl font-bold text-purple-600 mb-2">Q&A</div>
+                <div 
+                  className="text-purple-600 mb-2"
+                  style={{
+                    fontSize: h3Style.fontSize,
+                    fontWeight: h3Style.fontWeight,
+                    lineHeight: h3Style.lineHeight,
+                    letterSpacing: h3Style.letterSpacing,
+                    fontFamily: h3Style.fontFamily
+                  }}
+                >Q&A</div>
                 <div className={`text-sm ${mutedTextColor}`}>Expert consultation included</div>
               </div>
             </div>

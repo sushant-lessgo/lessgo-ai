@@ -1,5 +1,6 @@
 import React from 'react';
 import { useLayoutComponent } from '@/hooks/useLayoutComponent';
+import { useTypography } from '@/hooks/useTypography';
 import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
 import { LayoutSection } from '@/components/layout/LayoutSection';
 import { 
@@ -65,7 +66,9 @@ const FeatureRow = React.memo(({
   index,
   showImageToolbar,
   sectionId,
-  mode
+  mode,
+  h2Style,
+  bodyLgStyle
 }: {
   title: string;
   description: string;
@@ -74,6 +77,8 @@ const FeatureRow = React.memo(({
   showImageToolbar: any;
   sectionId: string;
   mode: string;
+  h2Style: React.CSSProperties;
+  bodyLgStyle: React.CSSProperties;
 }) => {
   const isEven = index % 2 === 0;
   
@@ -104,8 +109,8 @@ const FeatureRow = React.memo(({
               <span className="text-white font-bold text-lg">{index + 1}</span>
             </div>
             <div className="flex-1">
-              <h3 className="text-2xl font-bold text-gray-900 mb-4">{title}</h3>
-              <p className="text-gray-600 leading-relaxed text-lg">
+              <h3 style={h2Style} className="font-bold text-gray-900 mb-4">{title}</h3>
+              <p style={bodyLgStyle} className="text-gray-600 leading-relaxed">
                 {description}
               </p>
             </div>
@@ -149,6 +154,7 @@ const FeatureRow = React.memo(({
 FeatureRow.displayName = 'FeatureRow';
 
 export default function SplitAlternating(props: LayoutComponentProps) {
+  const { getTextStyle: getTypographyStyle } = useTypography();
   
   const {
     sectionId,
@@ -164,6 +170,10 @@ export default function SplitAlternating(props: LayoutComponentProps) {
     ...props,
     contentSchema: CONTENT_SCHEMA
   });
+  
+  // Create typography styles
+  const h2Style = getTypographyStyle('h2');
+  const bodyLgStyle = getTypographyStyle('body-lg');
 
   const featureTitles = blockContent.feature_titles 
     ? blockContent.feature_titles.split('|').map(item => item.trim()).filter(Boolean)
@@ -225,7 +235,8 @@ export default function SplitAlternating(props: LayoutComponentProps) {
               backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
               colorTokens={colorTokens}
               variant="body"
-              className="text-lg mb-6 max-w-3xl mx-auto"
+              style={bodyLgStyle}
+              className="mb-6 max-w-3xl mx-auto"
               placeholder="Add optional subheadline to introduce your advanced features..."
               sectionId={sectionId}
               elementKey="subheadline"
@@ -281,6 +292,8 @@ export default function SplitAlternating(props: LayoutComponentProps) {
                 showImageToolbar={showImageToolbar}
                 sectionId={sectionId}
                 mode={mode}
+                h2Style={h2Style}
+                bodyLgStyle={bodyLgStyle}
               />
             ))
           )}

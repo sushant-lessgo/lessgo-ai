@@ -101,7 +101,11 @@ export default function IconWithAnswers(props: LayoutComponentProps) {
               backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
               colorTokens={colorTokens}
               variant="body"
-              className="text-lg max-w-3xl mx-auto"
+              style={{
+                ...getTextStyle('body-lg'),
+                textAlign: 'center'
+              }}
+              className="max-w-3xl mx-auto"
               placeholder="Add a description with visual elements..."
               sectionId={sectionId}
               elementKey="subheadline"
@@ -126,7 +130,10 @@ export default function IconWithAnswers(props: LayoutComponentProps) {
               
               {/* Content */}
               <div className="flex-1">
-                <h3 className={`text-lg font-semibold mb-2 ${dynamicTextColors?.heading || colorTokens.textPrimary}`}>
+                <h3 
+                  className={`font-semibold mb-2 ${dynamicTextColors?.heading || colorTokens.textPrimary}`}
+                  style={getTextStyle('h3')}
+                >
                   {question}
                 </h3>
                 {answers[index] && (

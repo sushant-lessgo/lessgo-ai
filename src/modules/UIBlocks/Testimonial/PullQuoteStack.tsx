@@ -1,5 +1,6 @@
 import React from 'react';
 import { useLayoutComponent } from '@/hooks/useLayoutComponent';
+import { useTypography } from '@/hooks/useTypography';
 import { LayoutSection } from '@/components/layout/LayoutSection';
 import { 
   EditableAdaptiveHeadline, 
@@ -73,6 +74,7 @@ const CONTENT_SCHEMA = {
 };
 
 export default function PullQuoteStack(props: LayoutComponentProps) {
+  const { getTextStyle: getTypographyStyle } = useTypography();
   
   const {
     sectionId,
@@ -88,6 +90,11 @@ export default function PullQuoteStack(props: LayoutComponentProps) {
     ...props,
     contentSchema: CONTENT_SCHEMA
   });
+
+  // Create typography styles
+  const h2Style = getTypographyStyle('h2');
+  const h3Style = getTypographyStyle('h3');
+  const bodyLgStyle = getTypographyStyle('body-lg');
 
   const testimonialQuotes = blockContent.testimonial_quotes 
     ? blockContent.testimonial_quotes.split('|').map(item => item.trim()).filter(Boolean)
@@ -140,9 +147,11 @@ export default function PullQuoteStack(props: LayoutComponentProps) {
     return colors[index % colors.length];
   };
 
-  const QuoteCard = ({ testimonial, index }: {
+  const QuoteCard = ({ testimonial, index, h3Style, bodyLgStyle }: {
     testimonial: typeof testimonials[0];
     index: number;
+    h3Style: React.CSSProperties;
+    bodyLgStyle: React.CSSProperties;
   }) => {
     const color = getEmotionalColor(index);
     const isLarge = index % 3 === 0; // Every third quote is larger
@@ -165,7 +174,7 @@ export default function PullQuoteStack(props: LayoutComponentProps) {
           </div>
           
           {/* Quote */}
-          <blockquote className={`${isLarge ? 'text-xl' : 'text-lg'} text-gray-800 leading-relaxed mb-6 font-medium`}>
+          <blockquote style={isLarge ? h3Style : bodyLgStyle} className="text-gray-800 leading-relaxed mb-6 font-medium">
             <svg className="w-8 h-8 text-gray-400 mb-2" fill="currentColor" viewBox="0 0 24 24">
               <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h4v10h-10z"/>
             </svg>
@@ -223,7 +232,8 @@ export default function PullQuoteStack(props: LayoutComponentProps) {
               backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
               colorTokens={colorTokens}
               variant="body"
-              className="text-lg mb-6 max-w-3xl mx-auto"
+              style={bodyLgStyle}
+              className="mb-6 max-w-3xl mx-auto"
               placeholder="Add optional subheadline to introduce emotional testimonials..."
               sectionId={sectionId}
               elementKey="subheadline"
@@ -305,6 +315,8 @@ export default function PullQuoteStack(props: LayoutComponentProps) {
                   key={index}
                   testimonial={testimonial}
                   index={index}
+                  h3Style={h3Style}
+                  bodyLgStyle={bodyLgStyle}
                 />
               ))}
             </div>
@@ -312,7 +324,7 @@ export default function PullQuoteStack(props: LayoutComponentProps) {
             {/* Emotional Connection Summary */}
             <div className="bg-gradient-to-r from-gray-900 to-gray-800 rounded-2xl p-8 text-white mb-12">
               <div className="text-center">
-                <h3 className="text-2xl font-bold mb-6">You're Not Alone in This Struggle</h3>
+                <h3 style={h2Style} className="font-bold mb-6">You're Not Alone in This Struggle</h3>
                 
                 <div className="grid md:grid-cols-3 gap-8 mb-8">
                   <div className="text-center">

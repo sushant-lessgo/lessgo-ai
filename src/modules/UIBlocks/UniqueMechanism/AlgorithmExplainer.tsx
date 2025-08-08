@@ -1,6 +1,7 @@
 // components/layout/AlgorithmExplainer.tsx
 import React from 'react';
 import { useLayoutComponent } from '@/hooks/useLayoutComponent';
+import { useTypography } from '@/hooks/useTypography';
 import { LayoutSection } from '@/components/layout/LayoutSection';
 import { EditableAdaptiveHeadline, EditableAdaptiveText } from '@/components/layout/EditableContent';
 import { LayoutComponentProps } from '@/types/storeTypes';
@@ -19,7 +20,11 @@ const CONTENT_SCHEMA = {
 
 export default function AlgorithmExplainer(props: LayoutComponentProps) {
   const { sectionId, mode, blockContent, colorTokens, getTextStyle, sectionBackground, handleContentUpdate } = useLayoutComponent<AlgorithmExplainerContent>({ ...props, contentSchema: CONTENT_SCHEMA });
+  const { getTextStyle: getTypographyStyle } = useTypography();
   const steps = blockContent.algorithm_steps.split('|').map(s => s.trim()).filter(Boolean);
+  
+  // Typography styles
+  const h3Style = getTypographyStyle('h3');
 
   return (
     <LayoutSection sectionId={sectionId} sectionType="AlgorithmExplainer" backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')} sectionBackground={sectionBackground} mode={mode} className={props.className}>
@@ -33,7 +38,7 @@ export default function AlgorithmExplainer(props: LayoutComponentProps) {
             {steps.map((step, index) => (
               <div key={index} className="text-center">
                 <div className="w-12 h-12 bg-white bg-opacity-20 rounded-full flex items-center justify-center mx-auto mb-4 font-bold">{index + 1}</div>
-                <h3 className="font-semibold mb-2">{step}</h3>
+                <h3 style={h3Style} className="font-semibold mb-2">{step}</h3>
               </div>
             ))}
           </div>

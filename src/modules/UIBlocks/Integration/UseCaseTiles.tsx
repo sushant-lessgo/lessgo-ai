@@ -2,6 +2,7 @@
 // Production-ready integration component using abstraction system with background-aware text colors
 
 import React, { useState } from 'react';
+import { useTypography } from '@/hooks/useTypography';
 import { useLayoutComponent } from '@/hooks/useLayoutComponent';
 import { LayoutSection } from '@/components/layout/LayoutSection';
 import { 
@@ -109,8 +110,8 @@ const CONTENT_SCHEMA = {
 };
 
 // Integration Badge Component
-const IntegrationBadge = React.memo(({ name, colorTokens }: { name: string; colorTokens: any }) => (
-  <span className={`inline-flex items-center px-2 py-1 rounded-md text-xs font-medium ${colorTokens.bgSecondary} ${colorTokens.textMuted} border border-gray-200`}>
+const IntegrationBadge = React.memo(({ name, colorTokens, labelStyle }: { name: string; colorTokens: any; labelStyle: React.CSSProperties }) => (
+  <span className={`inline-flex items-center px-2 py-1 rounded-md ${colorTokens.bgSecondary} ${colorTokens.textMuted} border border-gray-200`} style={labelStyle}>
     <div className="w-1.5 h-1.5 rounded-full bg-green-400 mr-1.5"></div>
     {name}
   </span>
@@ -123,13 +124,19 @@ const UseCaseTile = React.memo(({
   isHovered, 
   onHover, 
   onLeave, 
-  colorTokens
+  colorTokens,
+  h3Style,
+  bodySmStyle,
+  labelStyle
 }: { 
   useCase: any; 
   isHovered: boolean; 
   onHover: () => void;
   onLeave: () => void;
   colorTokens: any;
+  h3Style: React.CSSProperties;
+  bodySmStyle: React.CSSProperties;
+  labelStyle: React.CSSProperties;
 }) => (
   <div 
     className={`relative p-6 rounded-xl border transition-all duration-300 cursor-pointer group ${
@@ -146,12 +153,12 @@ const UseCaseTile = React.memo(({
     </div>
 
     {/* Title */}
-    <h3 className={`font-semibold mb-3 ${colorTokens.textPrimary}`}>
+    <h3 className={`mb-3 ${colorTokens.textPrimary}`} style={h3Style}>
       {useCase.title}
     </h3>
 
     {/* Description */}
-    <p className={`text-sm leading-relaxed mb-4 ${colorTokens.textSecondary}`}>
+    <p className={`leading-relaxed mb-4 ${colorTokens.textSecondary}`} style={bodySmStyle}>
       {useCase.description}
     </p>
 
@@ -162,6 +169,7 @@ const UseCaseTile = React.memo(({
           key={index} 
           name={integration.trim()} 
           colorTokens={colorTokens}
+          labelStyle={labelStyle}
         />
       ))}
     </div>
@@ -179,6 +187,7 @@ const UseCaseTile = React.memo(({
 UseCaseTile.displayName = 'UseCaseTile';
 
 export default function UseCaseTiles(props: LayoutComponentProps) {
+  const { getTextStyle: getTypographyStyle } = useTypography();
   
   const {
     sectionId,
@@ -195,6 +204,11 @@ export default function UseCaseTiles(props: LayoutComponentProps) {
   });
 
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
+  
+  // Create typography styles
+  const h3Style = getTypographyStyle('h3');
+  const bodySmStyle = getTypographyStyle('body-sm');
+  const labelStyle = getTypographyStyle('label');
 
   // Parse use cases
   const useCases = [
@@ -277,6 +291,9 @@ export default function UseCaseTiles(props: LayoutComponentProps) {
               onHover={() => setHoveredIndex(index)}
               onLeave={() => setHoveredIndex(null)}
               colorTokens={colorTokens}
+              h3Style={h3Style}
+              bodySmStyle={bodySmStyle}
+              labelStyle={labelStyle}
             />
           ))}
         </div>

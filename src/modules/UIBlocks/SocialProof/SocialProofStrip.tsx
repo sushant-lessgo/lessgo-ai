@@ -3,6 +3,7 @@
 
 import React from 'react';
 import { useLayoutComponent } from '@/hooks/useLayoutComponent';
+import { useTypography } from '@/hooks/useTypography';
 import { LayoutSection } from '@/components/layout/LayoutSection';
 import { 
   EditableAdaptiveHeadline, 
@@ -86,17 +87,21 @@ const parseCompanyData = (names: string): Company[] => {
 // Stat Display Component
 const StatDisplay = React.memo(({ 
   stat, 
-  dynamicTextColors 
+  dynamicTextColors,
+  h2Style,
+  bodyStyle
 }: { 
   stat: ProofStat;
   dynamicTextColors: any;
+  h2Style: React.CSSProperties;
+  bodyStyle: React.CSSProperties;
 }) => {
   return (
     <div className="text-center">
-      <div className={`text-2xl lg:text-3xl font-bold ${dynamicTextColors?.heading || 'text-gray-900'} mb-1`}>
+      <div style={{...h2Style, fontSize: 'clamp(1.5rem, 3vw, 2rem)'}} className={`${dynamicTextColors?.heading || 'text-gray-900'} mb-1`}>
         {stat.value}
       </div>
-      <div className={`text-sm ${dynamicTextColors?.muted || 'text-gray-600'}`}>
+      <div style={{...bodyStyle, fontSize: '0.875rem'}} className={`${dynamicTextColors?.muted || 'text-gray-600'}`}>
         {stat.label}
       </div>
     </div>
@@ -107,10 +112,12 @@ StatDisplay.displayName = 'StatDisplay';
 // Company Logo Component
 const CompanyLogo = React.memo(({ 
   company, 
-  dynamicTextColors 
+  dynamicTextColors,
+  bodyStyle
 }: { 
   company: Company;
   dynamicTextColors: any;
+  bodyStyle: React.CSSProperties;
 }) => {
   
   // Generate simple logo placeholder
@@ -133,11 +140,11 @@ const CompanyLogo = React.memo(({
     <div className="flex items-center justify-center px-4 py-2 bg-white/5 backdrop-blur-sm rounded-lg border border-white/10 hover:bg-white/10 transition-all duration-300">
       <div className="flex items-center space-x-2">
         <div className="w-6 h-6 bg-gradient-to-br from-gray-200 to-gray-300 rounded flex items-center justify-center">
-          <span className="text-gray-700 font-bold text-xs">
+          <span style={{...bodyStyle, fontSize: '0.75rem', fontWeight: 'bold'}} className="text-gray-700">
             {initials}
           </span>
         </div>
-        <span className={`text-sm font-medium ${dynamicTextColors?.body || 'text-gray-700'}`}>
+        <span style={{...bodyStyle, fontSize: '0.875rem'}} className={`${dynamicTextColors?.body || 'text-gray-700'}`}>
           {company.name}
         </span>
       </div>
@@ -162,6 +169,11 @@ export default function SocialProofStrip(props: LayoutComponentProps) {
     ...props,
     contentSchema: CONTENT_SCHEMA
   });
+
+  // Typography hook
+  const { getTextStyle: getTypographyStyle } = useTypography();
+  const h2Style = getTypographyStyle('h2');
+  const bodyStyle = getTypographyStyle('body');
 
   // Parse proof stats from pipe-separated strings
   const proofStats = parseProofData(
@@ -207,6 +219,8 @@ export default function SocialProofStrip(props: LayoutComponentProps) {
                 key={stat.id}
                 stat={stat}
                 dynamicTextColors={dynamicTextColors}
+                h2Style={h2Style}
+                bodyStyle={bodyStyle}
               />
             ))}
           </div>
@@ -218,7 +232,7 @@ export default function SocialProofStrip(props: LayoutComponentProps) {
         {/* Company Logos */}
         {companies.length > 0 && (
           <div>
-            <div className={`text-center text-sm ${dynamicTextColors?.muted || 'text-gray-600'} mb-6`}>
+            <div style={{...bodyStyle, fontSize: '0.875rem'}} className={`text-center ${dynamicTextColors?.muted || 'text-gray-600'} mb-6`}>
               Trusted by industry leaders
             </div>
             <div className="flex flex-wrap items-center justify-center gap-4">
@@ -227,6 +241,7 @@ export default function SocialProofStrip(props: LayoutComponentProps) {
                   key={company.id}
                   company={company}
                   dynamicTextColors={dynamicTextColors}
+                  bodyStyle={bodyStyle}
                 />
               ))}
             </div>
@@ -239,7 +254,7 @@ export default function SocialProofStrip(props: LayoutComponentProps) {
             <svg className="w-4 h-4 text-green-500" fill="currentColor" viewBox="0 0 20 20">
               <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
             </svg>
-            <span className={`text-xs ${dynamicTextColors?.muted || 'text-gray-600'}`}>
+            <span style={{...bodyStyle, fontSize: '0.75rem'}} className={`${dynamicTextColors?.muted || 'text-gray-600'}`}>
               SOC 2 Certified
             </span>
           </div>
@@ -248,7 +263,7 @@ export default function SocialProofStrip(props: LayoutComponentProps) {
             <svg className="w-4 h-4 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
               <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
             </svg>
-            <span className={`text-xs ${dynamicTextColors?.muted || 'text-gray-600'}`}>
+            <span style={{...bodyStyle, fontSize: '0.75rem'}} className={`${dynamicTextColors?.muted || 'text-gray-600'}`}>
               Enterprise Security
             </span>
           </div>
@@ -257,7 +272,7 @@ export default function SocialProofStrip(props: LayoutComponentProps) {
             <svg className="w-4 h-4 text-purple-500" fill="currentColor" viewBox="0 0 20 20">
               <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
-            <span className={`text-xs ${dynamicTextColors?.muted || 'text-gray-600'}`}>
+            <span style={{...bodyStyle, fontSize: '0.75rem'}} className={`${dynamicTextColors?.muted || 'text-gray-600'}`}>
               GDPR Compliant
             </span>
           </div>

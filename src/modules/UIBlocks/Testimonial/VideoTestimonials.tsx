@@ -1,5 +1,6 @@
 import React from 'react';
 import { useLayoutComponent } from '@/hooks/useLayoutComponent';
+import { useTypography } from '@/hooks/useTypography';
 import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
 import { LayoutSection } from '@/components/layout/LayoutSection';
 import { 
@@ -89,7 +90,8 @@ const VideoTestimonial = React.memo(({
   index,
   showImageToolbar,
   sectionId,
-  mode
+  mode,
+  h4Style
 }: {
   title: string;
   description: string;
@@ -102,6 +104,7 @@ const VideoTestimonial = React.memo(({
   showImageToolbar: any;
   sectionId: string;
   mode: string;
+  h4Style: any;
 }) => {
   
   const VideoPlayer = () => {
@@ -176,7 +179,7 @@ const VideoTestimonial = React.memo(({
           </div>
         </div>
         
-        <h4 className="font-bold text-lg text-gray-900 mb-3">{title}</h4>
+        <h4 style={h4Style} className="font-bold text-gray-900 mb-3">{title}</h4>
         <p className="text-gray-600 leading-relaxed text-sm">{description}</p>
         
         <div className="mt-4 pt-4 border-t border-gray-100 flex items-center justify-between">
@@ -197,6 +200,7 @@ const VideoTestimonial = React.memo(({
 VideoTestimonial.displayName = 'VideoTestimonial';
 
 export default function VideoTestimonials(props: LayoutComponentProps) {
+  const { getTextStyle: getTypographyStyle } = useTypography();
   
   const {
     sectionId,
@@ -212,6 +216,11 @@ export default function VideoTestimonials(props: LayoutComponentProps) {
     ...props,
     contentSchema: CONTENT_SCHEMA
   });
+
+  // Create typography styles
+  const h3Style = getTypographyStyle('h3');
+  const h4Style = getTypographyStyle('h4');
+  const bodyLgStyle = getTypographyStyle('body-lg');
 
   const videoTitles = blockContent.video_titles 
     ? blockContent.video_titles.split('|').map(item => item.trim()).filter(Boolean)
@@ -296,7 +305,8 @@ export default function VideoTestimonials(props: LayoutComponentProps) {
               backgroundType={safeBackgroundType}
               colorTokens={colorTokens}
               variant="body"
-              className="text-lg mb-6 max-w-3xl mx-auto"
+              style={bodyLgStyle}
+              className="mb-6 max-w-3xl mx-auto"
               placeholder="Add optional subheadline to introduce your video testimonials..."
               sectionId={sectionId}
               elementKey="subheadline"
@@ -398,6 +408,7 @@ export default function VideoTestimonials(props: LayoutComponentProps) {
                 showImageToolbar={showImageToolbar}
                 sectionId={sectionId}
                 mode={mode}
+                h4Style={h4Style}
               />
             ))}
           </div>
@@ -406,7 +417,7 @@ export default function VideoTestimonials(props: LayoutComponentProps) {
         {/* Enterprise Trust Indicators */}
         <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl p-8 border border-blue-100 mb-12">
           <div className="text-center">
-            <h3 className="text-xl font-semibold text-gray-900 mb-6">Trusted by Industry Leaders</h3>
+            <h3 style={h3Style} className="font-semibold text-gray-900 mb-6">Trusted by Industry Leaders</h3>
             
             <div className="grid md:grid-cols-3 gap-6">
               <div className="text-center">

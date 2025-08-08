@@ -3,6 +3,7 @@
 
 import React from 'react';
 import { useLayoutComponent } from '@/hooks/useLayoutComponent';
+import { useTypography } from '@/hooks/useTypography';
 import { LayoutSection } from '@/components/layout/LayoutSection';
 import { 
   EditableAdaptiveHeadline, 
@@ -51,6 +52,8 @@ const CONTENT_SCHEMA = {
 };
 
 export default function SideBySideCTA(props: LayoutComponentProps) {
+  const { getTextStyle: getTypographyStyle } = useTypography();
+  
   const {
     sectionId,
     mode,
@@ -64,6 +67,10 @@ export default function SideBySideCTA(props: LayoutComponentProps) {
     ...props,
     contentSchema: CONTENT_SCHEMA
   });
+
+  // Create typography styles
+  const h3Style = getTypographyStyle('h3');
+  const bodyLgStyle = getTypographyStyle('body-lg');
 
   return (
     <LayoutSection
@@ -111,6 +118,7 @@ export default function SideBySideCTA(props: LayoutComponentProps) {
                 colorTokens={colorTokens}
                 variant="body"
                 className="text-gray-600 mb-6"
+                style={bodyLgStyle}
                 sectionId={sectionId}
                 elementKey="left_description"
                 sectionBackground="bg-white"
@@ -162,6 +170,7 @@ export default function SideBySideCTA(props: LayoutComponentProps) {
                 colorTokens={colorTokens}
                 variant="body"
                 className="text-gray-600 mb-6"
+                style={bodyLgStyle}
                 sectionId={sectionId}
                 elementKey="right_description"
                 sectionBackground="bg-white"

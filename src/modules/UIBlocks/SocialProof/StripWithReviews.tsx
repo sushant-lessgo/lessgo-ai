@@ -3,6 +3,7 @@
 
 import React from 'react';
 import { useLayoutComponent } from '@/hooks/useLayoutComponent';
+import { useTypography } from '@/hooks/useTypography';
 import { LayoutSection } from '@/components/layout/LayoutSection';
 import { 
   EditableAdaptiveHeadline, 
@@ -104,10 +105,12 @@ StarRating.displayName = 'StarRating';
 // Review Card Component
 const ReviewCard = React.memo(({ 
   review, 
-  dynamicTextColors 
+  dynamicTextColors,
+  bodyStyle
 }: { 
   review: Review;
   dynamicTextColors: any;
+  bodyStyle: React.CSSProperties;
 }) => {
   return (
     <div className="bg-white/5 backdrop-blur-sm rounded-xl border border-white/10 p-6 hover:bg-white/10 transition-all duration-300">
@@ -117,22 +120,22 @@ const ReviewCard = React.memo(({
       </div>
       
       {/* Review Text */}
-      <blockquote className={`text-base ${dynamicTextColors?.body || 'text-gray-700'} leading-relaxed mb-4`}>
+      <blockquote style={{...bodyStyle}} className={`${dynamicTextColors?.body || 'text-gray-700'} leading-relaxed mb-4`}>
         "{review.text}"
       </blockquote>
       
       {/* Reviewer Info */}
       <div className="flex items-center space-x-3">
         <div className="w-10 h-10 bg-gradient-to-br from-blue-400 to-indigo-500 rounded-full flex items-center justify-center">
-          <span className="text-white font-semibold text-sm">
+          <span style={{...bodyStyle, fontSize: '0.875rem', fontWeight: '600'}} className="text-white">
             {review.reviewer.split(' ').map(n => n[0]).join('').toUpperCase()}
           </span>
         </div>
         <div>
-          <div className={`font-medium ${dynamicTextColors?.heading || 'text-gray-900'}`}>
+          <div style={{...bodyStyle, fontWeight: '500'}} className={`${dynamicTextColors?.heading || 'text-gray-900'}`}>
             {review.reviewer}
           </div>
-          <div className={`text-sm ${dynamicTextColors?.muted || 'text-gray-600'}`}>
+          <div style={{...bodyStyle, fontSize: '0.875rem'}} className={`${dynamicTextColors?.muted || 'text-gray-600'}`}>
             {review.title}
           </div>
         </div>
@@ -158,6 +161,12 @@ export default function StripWithReviews(props: LayoutComponentProps) {
     ...props,
     contentSchema: CONTENT_SCHEMA
   });
+
+  // Typography hook
+  const { getTextStyle: getTypographyStyle } = useTypography();
+  const h3Style = getTypographyStyle('h3');
+  const bodyLgStyle = getTypographyStyle('body-lg');
+  const bodyStyle = getTypographyStyle('body');
 
   // Parse review data from pipe-separated strings
   const reviews = parseReviewData(
@@ -206,7 +215,7 @@ export default function StripWithReviews(props: LayoutComponentProps) {
               backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
               colorTokens={colorTokens}
               variant="body"
-              className="text-lg max-w-3xl mx-auto mb-8"
+              style={{...bodyLgStyle}} className="max-w-3xl mx-auto mb-8"
               placeholder="Add a compelling subheadline about your customer reviews..."
               sectionId={sectionId}
               elementKey="subheadline"
@@ -217,10 +226,10 @@ export default function StripWithReviews(props: LayoutComponentProps) {
           {/* Overall Rating Summary */}
           <div className="flex items-center justify-center space-x-4 mb-8">
             <StarRating rating={Math.round(averageRating)} />
-            <span className={`text-lg font-semibold ${dynamicTextColors?.heading || 'text-gray-900'}`}>
+            <span style={{...h3Style}} className={`${dynamicTextColors?.heading || 'text-gray-900'}`}>
               {averageRating.toFixed(1)} out of 5
             </span>
-            <span className={`text-sm ${dynamicTextColors?.muted || 'text-gray-600'}`}>
+            <span style={{...bodyStyle, fontSize: '0.875rem'}} className={`${dynamicTextColors?.muted || 'text-gray-600'}`}>
               ({reviews.length} reviews)
             </span>
           </div>
@@ -233,6 +242,7 @@ export default function StripWithReviews(props: LayoutComponentProps) {
               key={review.id}
               review={review}
               dynamicTextColors={dynamicTextColors}
+              bodyStyle={bodyStyle}
             />
           ))}
         </div>
@@ -243,7 +253,7 @@ export default function StripWithReviews(props: LayoutComponentProps) {
             <svg className="w-5 h-5 text-green-500" fill="currentColor" viewBox="0 0 20 20">
               <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
             </svg>
-            <span className={`text-sm ${dynamicTextColors?.muted || 'text-gray-600'}`}>
+            <span style={{...bodyStyle, fontSize: '0.875rem'}} className={`${dynamicTextColors?.muted || 'text-gray-600'}`}>
               Verified Reviews
             </span>
           </div>
@@ -252,7 +262,7 @@ export default function StripWithReviews(props: LayoutComponentProps) {
             <svg className="w-5 h-5 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
               <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
             </svg>
-            <span className={`text-sm ${dynamicTextColors?.muted || 'text-gray-600'}`}>
+            <span style={{...bodyStyle, fontSize: '0.875rem'}} className={`${dynamicTextColors?.muted || 'text-gray-600'}`}>
               Real Customers
             </span>
           </div>
@@ -261,7 +271,7 @@ export default function StripWithReviews(props: LayoutComponentProps) {
             <svg className="w-5 h-5 text-purple-500" fill="currentColor" viewBox="0 0 20 20">
               <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
-            <span className={`text-sm ${dynamicTextColors?.muted || 'text-gray-600'}`}>
+            <span style={{...bodyStyle, fontSize: '0.875rem'}} className={`${dynamicTextColors?.muted || 'text-gray-600'}`}>
               Authentic Feedback
             </span>
           </div>

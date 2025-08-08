@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useLayoutComponent } from '@/hooks/useLayoutComponent';
+import { useTypography } from '@/hooks/useTypography';
 import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
 import { LayoutSection } from '@/components/layout/LayoutSection';
 import { 
@@ -69,6 +70,7 @@ const CONTENT_SCHEMA = {
 };
 
 export default function Carousel(props: LayoutComponentProps) {
+  const { getTextStyle: getTypographyStyle } = useTypography();
   
   const {
     sectionId,
@@ -84,6 +86,11 @@ export default function Carousel(props: LayoutComponentProps) {
     ...props,
     contentSchema: CONTENT_SCHEMA
   });
+  
+  // Create typography styles
+  const h2Style = getTypographyStyle('h2');
+  const h3Style = getTypographyStyle('h3');
+  const bodyLgStyle = getTypographyStyle('body-lg');
 
   const featureTitles = blockContent.feature_titles 
     ? blockContent.feature_titles.split('|').map(item => item.trim()).filter(Boolean)
@@ -193,7 +200,8 @@ export default function Carousel(props: LayoutComponentProps) {
               backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
               colorTokens={colorTokens}
               variant="body"
-              className="text-lg mb-6 max-w-3xl mx-auto"
+              style={bodyLgStyle}
+              className="mb-6 max-w-3xl mx-auto"
               placeholder="Add optional subheadline to introduce your feature showcase..."
               sectionId={sectionId}
               elementKey="subheadline"
@@ -265,11 +273,11 @@ export default function Carousel(props: LayoutComponentProps) {
                     </span>
                   )}
                   
-                  <h3 className="text-3xl font-bold text-gray-900">
+                  <h3 style={h2Style} className="font-bold text-gray-900">
                     {features[activeSlide]?.title}
                   </h3>
                   
-                  <p className="text-gray-600 leading-relaxed text-lg">
+                  <p style={bodyLgStyle} className="text-gray-600 leading-relaxed">
                     {features[activeSlide]?.description}
                   </p>
                   

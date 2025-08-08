@@ -103,7 +103,11 @@ export default function ChatBubbleFAQ(props: LayoutComponentProps) {
               backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
               colorTokens={colorTokens}
               variant="body"
-              className="text-lg max-w-3xl mx-auto"
+              style={{
+                ...getTextStyle('body-lg'),
+                textAlign: 'center'
+              }}
+              className="max-w-3xl mx-auto"
               placeholder="Add a friendly introduction to your chat..."
               sectionId={sectionId}
               elementKey="subheadline"

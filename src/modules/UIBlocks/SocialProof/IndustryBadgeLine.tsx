@@ -3,6 +3,7 @@
 
 import React from 'react';
 import { useLayoutComponent } from '@/hooks/useLayoutComponent';
+import { useTypography } from '@/hooks/useTypography';
 import { LayoutSection } from '@/components/layout/LayoutSection';
 import { 
   EditableAdaptiveHeadline, 
@@ -174,6 +175,7 @@ const SecurityFeature = React.memo(({
 SecurityFeature.displayName = 'SecurityFeature';
 
 export default function IndustryBadgeLine(props: LayoutComponentProps) {
+  const { getTextStyle: getTypographyStyle } = useTypography();
   
   // Use the abstraction hook with background type support
   const {
@@ -189,6 +191,10 @@ export default function IndustryBadgeLine(props: LayoutComponentProps) {
     ...props,
     contentSchema: CONTENT_SCHEMA
   });
+
+  // Create typography styles
+  const h3Style = getTypographyStyle('h3');
+  const bodyLgStyle = getTypographyStyle('body-lg');
 
   // Parse badges from pipe-separated strings
   const badges = parseBadgeData(
@@ -236,7 +242,8 @@ export default function IndustryBadgeLine(props: LayoutComponentProps) {
               backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
               colorTokens={colorTokens}
               variant="body"
-              className="text-lg max-w-3xl mx-auto"
+              className="max-w-3xl mx-auto"
+              style={bodyLgStyle}
               placeholder="Add a compelling subheadline about your certifications..."
               sectionId={sectionId}
               elementKey="subheadline"
@@ -248,7 +255,7 @@ export default function IndustryBadgeLine(props: LayoutComponentProps) {
         {/* Certification Badges */}
         {certifications.length > 0 && (
           <div className="mb-12">
-            <h3 className={`text-lg font-semibold text-center mb-8 ${dynamicTextColors?.heading || 'text-gray-900'}`}>
+            <h3 className={`font-semibold text-center mb-8 ${dynamicTextColors?.heading || 'text-gray-900'}`} style={h3Style}>
               Security & Compliance Certifications
             </h3>
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
@@ -266,7 +273,7 @@ export default function IndustryBadgeLine(props: LayoutComponentProps) {
         {/* Industry Awards */}
         {awards.length > 0 && (
           <div className="mb-12">
-            <h3 className={`text-lg font-semibold text-center mb-8 ${dynamicTextColors?.heading || 'text-gray-900'}`}>
+            <h3 className={`font-semibold text-center mb-8 ${dynamicTextColors?.heading || 'text-gray-900'}`} style={h3Style}>
               Industry Recognition
             </h3>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
@@ -284,7 +291,7 @@ export default function IndustryBadgeLine(props: LayoutComponentProps) {
         {/* Compliance Standards */}
         {compliance.length > 0 && (
           <div>
-            <h3 className={`text-lg font-semibold text-center mb-8 ${dynamicTextColors?.heading || 'text-gray-900'}`}>
+            <h3 className={`font-semibold text-center mb-8 ${dynamicTextColors?.heading || 'text-gray-900'}`} style={h3Style}>
               Security Standards
             </h3>
             <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -305,11 +312,11 @@ export default function IndustryBadgeLine(props: LayoutComponentProps) {
             <svg className="w-8 h-8 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.602-4.777a4.5 4.5 0 010 9.554A2.25 2.25 0 0118 15.75h.007v.008H18v-.008zm-6 0a4.5 4.5 0 00-4.5 4.5 2.25 2.25 0 002.25 2.25h.007v.008H9.75v-.008z" />
             </svg>
-            <span className={`text-xl font-semibold ${dynamicTextColors?.heading || 'text-gray-900'}`}>
+            <span className={`font-semibold ${dynamicTextColors?.heading || 'text-gray-900'}`} style={h3Style}>
               Enterprise-Grade Security
             </span>
           </div>
-          <p className={`text-lg ${dynamicTextColors?.body || 'text-gray-700'} max-w-2xl mx-auto`}>
+          <p className={`${dynamicTextColors?.body || 'text-gray-700'} max-w-2xl mx-auto`} style={bodyLgStyle}>
             Your data is protected by the highest industry standards, ensuring complete security and compliance for your business.
           </p>
         </div>

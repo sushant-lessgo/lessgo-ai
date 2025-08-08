@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useLayoutComponent } from '@/hooks/useLayoutComponent';
+import { useTypography } from '@/hooks/useTypography';
 import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
 import { LayoutSection } from '@/components/layout/LayoutSection';
 import { 
@@ -80,6 +81,7 @@ const CONTENT_SCHEMA = {
 };
 
 export default function AvatarCarousel(props: LayoutComponentProps) {
+  const { getTextStyle: getTypographyStyle } = useTypography();
   
   const {
     sectionId,
@@ -95,6 +97,10 @@ export default function AvatarCarousel(props: LayoutComponentProps) {
     ...props,
     contentSchema: CONTENT_SCHEMA
   });
+
+  // Create typography styles
+  const h3Style = getTypographyStyle('h3');
+  const bodyLgStyle = getTypographyStyle('body-lg');
 
   const testimonialQuotes = blockContent.testimonial_quotes 
     ? blockContent.testimonial_quotes.split('|').map(item => item.trim()).filter(Boolean)
@@ -240,7 +246,8 @@ export default function AvatarCarousel(props: LayoutComponentProps) {
               backgroundType={safeBackgroundType}
               colorTokens={colorTokens}
               variant="body"
-              className="text-lg mb-6 max-w-3xl mx-auto"
+              style={bodyLgStyle}
+              className="mb-6 max-w-3xl mx-auto"
               placeholder="Add optional subheadline to introduce your creator testimonials..."
               sectionId={sectionId}
               elementKey="subheadline"
@@ -345,7 +352,7 @@ export default function AvatarCarousel(props: LayoutComponentProps) {
                     <StarRating rating={activeTestimonial.rating} size="large" />
                   </div>
                   
-                  <blockquote className="text-xl text-gray-800 leading-relaxed mb-6 max-w-3xl mx-auto">
+                  <blockquote style={h3Style} className="text-gray-800 leading-relaxed mb-6 max-w-3xl mx-auto">
                     "{activeTestimonial.quote}"
                   </blockquote>
                   
@@ -411,7 +418,7 @@ export default function AvatarCarousel(props: LayoutComponentProps) {
         {/* Creator Community Stats */}
         <div className="bg-gradient-to-r from-pink-50 via-purple-50 to-indigo-50 rounded-2xl p-8 border border-pink-100 mb-12">
           <div className="text-center">
-            <h3 className="text-xl font-semibold text-gray-900 mb-6">Join the Creator Community</h3>
+            <h3 style={h3Style} className="font-semibold text-gray-900 mb-6">Join the Creator Community</h3>
             
             <div className="grid md:grid-cols-3 gap-6">
               <div className="text-center">

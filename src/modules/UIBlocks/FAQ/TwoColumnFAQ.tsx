@@ -108,7 +108,11 @@ export default function TwoColumnFAQ(props: LayoutComponentProps) {
               backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
               colorTokens={colorTokens}
               variant="body"
-              className="text-lg max-w-3xl mx-auto"
+              style={{
+                ...getTextStyle('body-lg'),
+                textAlign: 'center'
+              }}
+              className="max-w-3xl mx-auto"
               placeholder="Add a supporting description for your FAQ section..."
               sectionId={sectionId}
               elementKey="subheadline"
@@ -123,7 +127,10 @@ export default function TwoColumnFAQ(props: LayoutComponentProps) {
           <div className="space-y-6">
             {questionsLeft.map((question, index) => (
               <div key={index} className="space-y-3">
-                <h3 className={`text-lg font-semibold ${dynamicTextColors?.heading || colorTokens.textPrimary}`}>
+                <h3 
+                  className={`font-semibold ${dynamicTextColors?.heading || colorTokens.textPrimary}`}
+                  style={getTextStyle('h3')}
+                >
                   {question}
                 </h3>
                 {answersLeft[index] && (
@@ -139,7 +146,10 @@ export default function TwoColumnFAQ(props: LayoutComponentProps) {
           <div className="space-y-6">
             {questionsRight.map((question, index) => (
               <div key={index} className="space-y-3">
-                <h3 className={`text-lg font-semibold ${dynamicTextColors?.heading || colorTokens.textPrimary}`}>
+                <h3 
+                  className={`font-semibold ${dynamicTextColors?.heading || colorTokens.textPrimary}`}
+                  style={getTextStyle('h3')}
+                >
                   {question}
                 </h3>
                 {answersRight[index] && (

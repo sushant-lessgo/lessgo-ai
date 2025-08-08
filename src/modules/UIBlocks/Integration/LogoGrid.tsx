@@ -3,6 +3,7 @@
 
 import React from 'react';
 import { useLayoutComponent } from '@/hooks/useLayoutComponent';
+import { useTypography } from '@/hooks/useTypography';
 import { LayoutSection } from '@/components/layout/LayoutSection';
 import { 
   EditableAdaptiveHeadline, 
@@ -85,7 +86,7 @@ const LogoPlaceholder = React.memo(({ name }: { name: string }) => {
       </div>
       
       {/* Integration Name */}
-      <h3 className="font-medium text-gray-900 text-sm group-hover:text-blue-600 transition-colors duration-300">
+      <h3 className="text-gray-900 group-hover:text-blue-600 transition-colors duration-300" style={labelStyle}>
         {name}
       </h3>
     </div>
@@ -136,7 +137,8 @@ const EditableLogoItem = React.memo(({
           contentEditable
           suppressContentEditableWarning
           onBlur={(e) => onNameEdit(item.index, e.currentTarget.textContent || '')}
-          className="outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-1 min-h-[20px] cursor-text hover:bg-gray-50 font-medium text-gray-900 text-sm"
+          className="outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-1 min-h-[20px] cursor-text hover:bg-gray-50 text-gray-900"
+          style={labelStyle}
         >
           {item.name}
         </div>
@@ -149,6 +151,8 @@ const EditableLogoItem = React.memo(({
 EditableLogoItem.displayName = 'EditableLogoItem';
 
 export default function LogoGrid(props: LayoutComponentProps) {
+  const { getTextStyle: getTypographyStyle } = useTypography();
+  
   // Use the abstraction hook for all common functionality
   const {
     sectionId,
@@ -167,6 +171,11 @@ export default function LogoGrid(props: LayoutComponentProps) {
 
   // Parse integration data
   const integrationItems = parseIntegrationData(blockContent.integration_names);
+  
+  // Create typography styles
+  const h3Style = getTypographyStyle('h3');
+  const bodySmStyle = getTypographyStyle('body-sm');
+  const labelStyle = getTypographyStyle('label');
 
   // Handle individual name editing
   const handleNameEdit = (index: number, value: string) => {
@@ -234,7 +243,7 @@ export default function LogoGrid(props: LayoutComponentProps) {
         {/* Additional Integration Info */}
         {integrationItems.length > 0 && (
           <div className="mt-12 text-center">
-            <p className={`text-sm ${colorTokens.textSecondary} mb-4`}>
+            <p className={`${colorTokens.textSecondary} mb-4`} style={bodySmStyle}>
               and {integrationItems.length}+ more integrations available
             </p>
             

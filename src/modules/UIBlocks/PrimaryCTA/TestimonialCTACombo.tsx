@@ -3,6 +3,7 @@
 
 import React from 'react';
 import { useLayoutComponent } from '@/hooks/useLayoutComponent';
+import { useTypography } from '@/hooks/useTypography';
 import { LayoutSection } from '@/components/layout/LayoutSection';
 import { 
   EditableAdaptiveHeadline, 
@@ -116,6 +117,8 @@ const TestimonialAvatar = React.memo(({ name, company }: { name: string, company
 TestimonialAvatar.displayName = 'TestimonialAvatar';
 
 export default function TestimonialCTACombo(props: LayoutComponentProps) {
+  const { getTextStyle: getTypographyStyle } = useTypography();
+  
   const {
     sectionId,
     mode,
@@ -129,6 +132,10 @@ export default function TestimonialCTACombo(props: LayoutComponentProps) {
     ...props,
     contentSchema: CONTENT_SCHEMA
   });
+
+  // Create typography styles
+  const h2Style = getTypographyStyle('h2');
+  const bodyLgStyle = getTypographyStyle('body-lg');
 
   const rating = parseInt(blockContent.rating || '5');
 
@@ -167,7 +174,8 @@ export default function TestimonialCTACombo(props: LayoutComponentProps) {
                 backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
                 colorTokens={colorTokens}
                 variant="body"
-                className="text-lg mb-8"
+                className="mb-8"
+                style={bodyLgStyle}
                 sectionId={sectionId}
                 elementKey="subheadline"
                 sectionBackground={sectionBackground}
@@ -188,7 +196,7 @@ export default function TestimonialCTACombo(props: LayoutComponentProps) {
             {/* Social Proof Stats */}
             <div className="flex items-center space-x-8">
               <div className="text-center">
-                <div className={`text-2xl font-bold ${dynamicTextColors?.heading || colorTokens.textPrimary}`}>
+                <div className={`font-bold ${dynamicTextColors?.heading || colorTokens.textPrimary}`} style={h2Style}>
                   10,000+
                 </div>
                 <div className={`text-sm ${dynamicTextColors?.muted || colorTokens.textMuted}`}>
@@ -196,7 +204,7 @@ export default function TestimonialCTACombo(props: LayoutComponentProps) {
                 </div>
               </div>
               <div className="text-center">
-                <div className={`text-2xl font-bold ${dynamicTextColors?.heading || colorTokens.textPrimary}`}>
+                <div className={`font-bold ${dynamicTextColors?.heading || colorTokens.textPrimary}`} style={h2Style}>
                   4.9/5
                 </div>
                 <div className={`text-sm ${dynamicTextColors?.muted || colorTokens.textMuted}`}>
@@ -204,7 +212,7 @@ export default function TestimonialCTACombo(props: LayoutComponentProps) {
                 </div>
               </div>
               <div className="text-center">
-                <div className={`text-2xl font-bold ${dynamicTextColors?.heading || colorTokens.textPrimary}`}>
+                <div className={`font-bold ${dynamicTextColors?.heading || colorTokens.textPrimary}`} style={h2Style}>
                   99.9%
                 </div>
                 <div className={`text-sm ${dynamicTextColors?.muted || colorTokens.textMuted}`}>

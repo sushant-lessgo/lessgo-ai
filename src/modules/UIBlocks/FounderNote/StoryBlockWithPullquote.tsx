@@ -4,6 +4,7 @@
 
 import React from 'react';
 import { useLayoutComponent } from '@/hooks/useLayoutComponent';
+import { useTypography } from '@/hooks/useTypography';
 import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
 import { LayoutSection } from '@/components/layout/LayoutSection';
 import { 
@@ -114,6 +115,8 @@ export default function StoryBlockWithPullquote(props: LayoutComponentProps) {
     ...props,
     contentSchema: CONTENT_SCHEMA
   });
+  
+  const { getTextStyle: getTypographyStyle } = useTypography();
 
   // Parse trust indicators from pipe-separated string
   const trustItems = blockContent.trust_items 

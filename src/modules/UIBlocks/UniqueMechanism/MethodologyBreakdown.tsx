@@ -3,6 +3,7 @@
 
 import React from 'react';
 import { useLayoutComponent } from '@/hooks/useLayoutComponent';
+import { useTypography } from '@/hooks/useTypography';
 import { LayoutSection } from '@/components/layout/LayoutSection';
 import { EditableAdaptiveHeadline, EditableAdaptiveText } from '@/components/layout/EditableContent';
 import { LayoutComponentProps } from '@/types/storeTypes';
@@ -51,9 +52,14 @@ export default function MethodologyBreakdown(props: LayoutComponentProps) {
     ...props,
     contentSchema: CONTENT_SCHEMA
   });
-
+  
+  const { getTextStyle: getTypographyStyle } = useTypography();
   const principles = blockContent.key_principles.split('|').map(p => p.trim()).filter(Boolean);
   const details = blockContent.principle_details.split('|').map(d => d.trim()).filter(Boolean);
+  
+  // Typography styles
+  const h3Style = getTypographyStyle('h3');
+  const bodyStyle = getTypographyStyle('body-lg');
 
   return (
     <LayoutSection
@@ -118,10 +124,10 @@ export default function MethodologyBreakdown(props: LayoutComponentProps) {
               <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-lg flex items-center justify-center text-white font-bold text-lg mb-4">
                 {index + 1}
               </div>
-              <h3 className="font-bold text-gray-900 mb-4">
+              <h3 style={h3Style} className="font-bold text-gray-900 mb-4">
                 {principle}
               </h3>
-              <p className="text-gray-600 leading-relaxed">
+              <p style={bodyStyle} className="text-gray-600 leading-relaxed">
                 {details[index] || 'Principle description'}
               </p>
             </div>
@@ -130,7 +136,7 @@ export default function MethodologyBreakdown(props: LayoutComponentProps) {
 
         {/* Results Section */}
         <div className="mt-16 text-center">
-          <h3 className="font-bold text-gray-900 mb-8">
+          <h3 style={h3Style} className="font-bold text-gray-900 mb-8">
             Proven Results
           </h3>
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">

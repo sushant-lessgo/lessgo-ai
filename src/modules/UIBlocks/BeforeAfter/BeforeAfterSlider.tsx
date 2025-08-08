@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useLayoutComponent } from '@/hooks/useLayoutComponent';
 import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
+import { useTypography } from '@/hooks/useTypography';
 import { LayoutSection } from '@/components/layout/LayoutSection';
 import { 
   EditableAdaptiveHeadline, 
@@ -78,13 +79,17 @@ const InteractiveSlider = React.memo(({
   afterContent, 
   showImageToolbar, 
   sectionId, 
-  mode 
+  mode,
+  h3Style,
+  bodyLgStyle
 }: {
   beforeContent: { label: string; description: string; visual?: string };
   afterContent: { label: string; description: string; visual?: string };
   showImageToolbar: any;
   sectionId: string;
   mode: string;
+  h3Style: React.CSSProperties;
+  bodyLgStyle: React.CSSProperties;
 }) => {
   const [isAfter, setIsAfter] = useState(false);
 
@@ -104,7 +109,7 @@ const InteractiveSlider = React.memo(({
         </div>
       </div>
       <div className="absolute bottom-4 left-4 right-4">
-        <div className={`text-center text-lg font-semibold ${type === 'before' ? 'text-red-700' : 'text-green-700'}`}>
+        <div className={`text-center ${type === 'before' ? 'text-red-700' : 'text-green-700'}`} style={bodyLgStyle}>
           {type === 'before' ? 'Current Process' : 'Optimized Solution'}
         </div>
       </div>
@@ -182,7 +187,7 @@ const InteractiveSlider = React.memo(({
 
         <div className="p-8">
           <div className="text-center">
-            <h3 className={`text-xl font-semibold mb-4 ${isAfter ? 'text-green-600' : 'text-red-600'}`}>
+            <h3 className={`mb-4 ${isAfter ? 'text-green-600' : 'text-red-600'}`} style={h3Style}>
               {isAfter ? afterContent.label : beforeContent.label}
             </h3>
             <p className="text-gray-600 leading-relaxed">
@@ -206,6 +211,7 @@ const InteractiveSlider = React.memo(({
 InteractiveSlider.displayName = 'InteractiveSlider';
 
 export default function BeforeAfterSlider(props: LayoutComponentProps) {
+  const { getTextStyle: getTypographyStyle } = useTypography();
   
   const {
     sectionId,
@@ -227,6 +233,10 @@ export default function BeforeAfterSlider(props: LayoutComponentProps) {
     : [];
 
   const mutedTextColor = dynamicTextColors?.muted || colorTokens.textMuted;
+  
+  // Create typography styles
+  const h3Style = getTypographyStyle('h3');
+  const bodyLgStyle = getTypographyStyle('body-lg');
   
   // Filter out 'custom' background type as it's not supported by EditableContent components
   const safeBackgroundType = props.backgroundType === 'custom' ? 'neutral' : (props.backgroundType || 'neutral');
@@ -267,7 +277,8 @@ export default function BeforeAfterSlider(props: LayoutComponentProps) {
               backgroundType={safeBackgroundType}
               colorTokens={colorTokens}
               variant="body"
-              className="text-lg mb-6 max-w-3xl mx-auto"
+              className="mb-6 max-w-3xl mx-auto"
+              style={bodyLgStyle}
               placeholder="Add optional subheadline to introduce the interactive comparison..."
               sectionId={sectionId}
               elementKey="subheadline"
@@ -291,6 +302,8 @@ export default function BeforeAfterSlider(props: LayoutComponentProps) {
             showImageToolbar={showImageToolbar}
             sectionId={sectionId}
             mode={mode}
+            h3Style={h3Style}
+            bodyLgStyle={bodyLgStyle}
           />
         </div>
 

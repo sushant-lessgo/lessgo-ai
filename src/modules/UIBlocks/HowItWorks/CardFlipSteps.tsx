@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useLayoutComponent } from '@/hooks/useLayoutComponent';
+import { useTypography } from '@/hooks/useTypography';
 import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
 import { LayoutSection } from '@/components/layout/LayoutSection';
 import { 
@@ -208,6 +209,8 @@ export default function CardFlipSteps(props: LayoutComponentProps) {
     ...props,
     contentSchema: CONTENT_SCHEMA
   });
+  
+  const { getTextStyle: getTypographyStyle } = useTypography();
 
   const stepTitles = blockContent.step_titles 
     ? blockContent.step_titles.split('|').map(item => item.trim()).filter(Boolean)

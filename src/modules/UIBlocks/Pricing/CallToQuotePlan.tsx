@@ -1,5 +1,6 @@
 import React from 'react';
 import { useLayoutComponent } from '@/hooks/useLayoutComponent';
+import { useTypography } from '@/hooks/useTypography';
 import { LayoutSection } from '@/components/layout/LayoutSection';
 import { 
   EditableAdaptiveHeadline, 
@@ -99,6 +100,13 @@ export default function CallToQuotePlan(props: LayoutComponentProps) {
     contentSchema: CONTENT_SCHEMA
   });
 
+  const { getTextStyle: getTypographyStyle } = useTypography();
+  
+  // Create typography styles
+  const h3Style = getTypographyStyle('h3');
+  const h4Style = getTypographyStyle('h4');
+  const bodyLgStyle = getTypographyStyle('body-lg');
+
   const enterpriseFeatures = blockContent.enterprise_features 
     ? blockContent.enterprise_features.split('|').map(item => item.trim()).filter(Boolean)
     : [];
@@ -173,7 +181,7 @@ export default function CallToQuotePlan(props: LayoutComponentProps) {
         <div className={`w-16 h-16 mx-auto mb-4 rounded-full ${colorTokens.ctaBg} flex items-center justify-center text-white`}>
           {getContactIcon(index)}
         </div>
-        <h3 className="text-lg font-semibold text-gray-900 mb-3">{option.title}</h3>
+        <h3 style={h3Style} className="font-semibold text-gray-900 mb-3">{option.title}</h3>
         <CTAButton
           text={option.cta}
           colorTokens={colorTokens}
@@ -219,7 +227,8 @@ export default function CallToQuotePlan(props: LayoutComponentProps) {
               backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
               colorTokens={colorTokens}
               variant="body"
-              className="text-lg mb-8 max-w-3xl mx-auto"
+              style={bodyLgStyle}
+              className="mb-8 max-w-3xl mx-auto"
               placeholder="Add optional subheadline to introduce enterprise solutions..."
               sectionId={sectionId}
               elementKey="subheadline"
@@ -228,7 +237,7 @@ export default function CallToQuotePlan(props: LayoutComponentProps) {
           )}
 
           <div className="max-w-4xl mx-auto">
-            <p className="text-xl text-gray-700 leading-relaxed">
+            <p style={bodyLgStyle} className="text-gray-700 leading-relaxed">
               {blockContent.value_proposition}
             </p>
           </div>
@@ -237,7 +246,7 @@ export default function CallToQuotePlan(props: LayoutComponentProps) {
         {mode === 'edit' ? (
           <div className="space-y-8">
             <div className="p-6 border border-gray-200 rounded-lg bg-gray-50">
-              <h4 className="font-semibold text-gray-700 mb-4">Enterprise Pricing Content</h4>
+              <h4 style={h4Style} className="font-semibold text-gray-700 mb-4">Enterprise Pricing Content</h4>
               
               <div className="space-y-4">
                 <EditableAdaptiveText
@@ -314,7 +323,7 @@ export default function CallToQuotePlan(props: LayoutComponentProps) {
             {/* Enterprise Features */}
             <div className="bg-gradient-to-r from-gray-900 to-gray-800 rounded-2xl p-8 text-white mb-16">
               <div className="text-center mb-8">
-                <h3 className="text-2xl font-bold mb-4">Enterprise Features Included</h3>
+                <h3 style={{...getTypographyStyle('h2'), fontSize: 'clamp(1.5rem, 3vw, 2rem)'}} className="font-bold mb-4">Enterprise Features Included</h3>
                 <p className="text-gray-300 max-w-3xl mx-auto">
                   Every enterprise solution comes with premium features designed for large-scale operations
                 </p>
@@ -335,7 +344,7 @@ export default function CallToQuotePlan(props: LayoutComponentProps) {
             {/* Implementation Process */}
             {implementationTimeline.length > 0 && (
               <div className="bg-blue-50 rounded-2xl p-8 border border-blue-200 mb-16">
-                <h3 className="text-xl font-semibold text-gray-900 text-center mb-8">Implementation Timeline</h3>
+                <h3 style={h3Style} className="font-semibold text-gray-900 text-center mb-8">Implementation Timeline</h3>
                 
                 <div className="grid md:grid-cols-4 gap-6">
                   {implementationTimeline.map((phase, index) => (
@@ -353,23 +362,23 @@ export default function CallToQuotePlan(props: LayoutComponentProps) {
             {/* Success Metrics */}
             {successMetrics.length >= 4 && (
               <div className="bg-white rounded-2xl border border-gray-200 p-8 mb-16">
-                <h3 className="text-xl font-semibold text-gray-900 text-center mb-8">Enterprise Success Metrics</h3>
+                <h3 style={h3Style} className="font-semibold text-gray-900 text-center mb-8">Enterprise Success Metrics</h3>
                 
                 <div className="grid md:grid-cols-4 gap-8">
                   <div className="text-center">
-                    <div className="text-4xl font-bold text-blue-600 mb-2">{successMetrics[0]}</div>
+                    <div style={{...getTypographyStyle('h2'), fontSize: 'clamp(2rem, 4vw, 2.5rem)'}} className="font-bold text-blue-600 mb-2">{successMetrics[0]}</div>
                     <div className={`text-sm ${mutedTextColor}`}>Uptime SLA</div>
                   </div>
                   <div className="text-center">
-                    <div className="text-4xl font-bold text-green-600 mb-2">{successMetrics[1]}</div>
+                    <div style={{...getTypographyStyle('h2'), fontSize: 'clamp(2rem, 4vw, 2.5rem)'}} className="font-bold text-green-600 mb-2">{successMetrics[1]}</div>
                     <div className={`text-sm ${mutedTextColor}`}>Enterprise customers</div>
                   </div>
                   <div className="text-center">
-                    <div className="text-4xl font-bold text-purple-600 mb-2">{successMetrics[2]}</div>
+                    <div style={{...getTypographyStyle('h2'), fontSize: 'clamp(2rem, 4vw, 2.5rem)'}} className="font-bold text-purple-600 mb-2">{successMetrics[2]}</div>
                     <div className={`text-sm ${mutedTextColor}`}>Support availability</div>
                   </div>
                   <div className="text-center">
-                    <div className="text-4xl font-bold text-orange-600 mb-2">{successMetrics[3]}</div>
+                    <div style={{...getTypographyStyle('h2'), fontSize: 'clamp(2rem, 4vw, 2.5rem)'}} className="font-bold text-orange-600 mb-2">{successMetrics[3]}</div>
                     <div className={`text-sm ${mutedTextColor}`}>Customer satisfaction</div>
                   </div>
                 </div>
@@ -379,7 +388,7 @@ export default function CallToQuotePlan(props: LayoutComponentProps) {
             {/* Compliance & Security */}
             <div className="bg-gradient-to-r from-green-50 to-blue-50 rounded-2xl p-8 border border-green-200 mb-16">
               <div className="text-center">
-                <h3 className="text-xl font-semibold text-gray-900 mb-6">Enterprise Security & Compliance</h3>
+                <h3 style={h3Style} className="font-semibold text-gray-900 mb-6">Enterprise Security & Compliance</h3>
                 
                 <div className="flex flex-wrap justify-center gap-4 mb-6">
                   {complianceBadges.map((badge, index) => (
@@ -397,7 +406,7 @@ export default function CallToQuotePlan(props: LayoutComponentProps) {
 
             {/* Sales Benefits */}
             <div className="bg-white rounded-2xl border border-gray-200 p-8 mb-16">
-              <h3 className="text-xl font-semibold text-gray-900 text-center mb-8">What's Included in Your Consultation</h3>
+              <h3 style={h3Style} className="font-semibold text-gray-900 text-center mb-8">What's Included in Your Consultation</h3>
               
               <div className="grid md:grid-cols-2 gap-6">
                 {salesBenefits.map((benefit, index) => (
@@ -414,7 +423,7 @@ export default function CallToQuotePlan(props: LayoutComponentProps) {
             {/* Pricing Factors */}
             {pricingFactors.length > 0 && (
               <div className="bg-gray-50 rounded-2xl p-8 border border-gray-200 mb-16">
-                <h3 className="text-xl font-semibold text-gray-900 text-center mb-6">Pricing Based On</h3>
+                <h3 style={h3Style} className="font-semibold text-gray-900 text-center mb-6">Pricing Based On</h3>
                 
                 <div className="grid md:grid-cols-3 gap-4">
                   {pricingFactors.map((factor, index) => (

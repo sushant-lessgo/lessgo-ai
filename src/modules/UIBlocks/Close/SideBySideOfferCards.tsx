@@ -1,5 +1,6 @@
 import React from 'react';
 import { useLayoutComponent } from '@/hooks/useLayoutComponent';
+import { useTypography } from '@/hooks/useTypography';
 import { LayoutSection } from '@/components/layout/LayoutSection';
 import { 
   EditableAdaptiveHeadline, 
@@ -83,6 +84,7 @@ const CONTENT_SCHEMA = {
 };
 
 export default function SideBySideOfferCards(props: LayoutComponentProps) {
+  const { getTextStyle: getTypographyStyle } = useTypography();
   
   const {
     sectionId,
@@ -98,6 +100,12 @@ export default function SideBySideOfferCards(props: LayoutComponentProps) {
     ...props,
     contentSchema: CONTENT_SCHEMA
   });
+  
+  // Create typography styles
+  const h2Style = getTypographyStyle('h2');
+  const h3Style = getTypographyStyle('h3');
+  const h4Style = getTypographyStyle('h4');
+  const bodyLgStyle = getTypographyStyle('body-lg');
 
   // Filter out 'custom' background type as it's not supported by EditableContent components
   const safeBackgroundType = props.backgroundType === 'custom' ? 'neutral' : (props.backgroundType || 'neutral');
@@ -176,12 +184,12 @@ export default function SideBySideOfferCards(props: LayoutComponentProps) {
       <div className="p-8">
         {/* Header */}
         <div className="text-center mb-8">
-          <h3 className="text-2xl font-bold text-gray-900 mb-3">{offer.title}</h3>
+          <h3 className="font-bold text-gray-900 mb-3" style={h2Style}>{offer.title}</h3>
           <p className={`text-sm ${mutedTextColor} mb-6`}>{offer.description}</p>
           
           {/* Price */}
           <div className="mb-4">
-            <div className="text-4xl font-bold text-gray-900 mb-2">
+            <div className="font-bold text-gray-900 mb-2" style={{...h2Style, fontSize: 'clamp(2rem, 4vw, 2.5rem)'}}>
               {offer.price.includes('$') ? offer.price : `$${offer.price}`}
             </div>
             {offer.highlight && (
@@ -252,7 +260,8 @@ export default function SideBySideOfferCards(props: LayoutComponentProps) {
               backgroundType={safeBackgroundType}
               colorTokens={colorTokens}
               variant="body"
-              className="text-lg mb-8 max-w-3xl mx-auto"
+              className="mb-8 max-w-3xl mx-auto"
+              style={bodyLgStyle}
               placeholder="Add optional subheadline to introduce offer comparison..."
               sectionId={sectionId}
               elementKey="subheadline"
@@ -360,7 +369,7 @@ export default function SideBySideOfferCards(props: LayoutComponentProps) {
             {/* Features Comparison Table */}
             <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden shadow-lg mb-16">
               <div className="bg-gray-50 px-8 py-6 border-b border-gray-200">
-                <h3 className="text-xl font-semibold text-gray-900 text-center">
+                <h3 className="font-semibold text-gray-900 text-center" style={h3Style}>
                   Feature Comparison
                 </h3>
               </div>
@@ -423,7 +432,7 @@ export default function SideBySideOfferCards(props: LayoutComponentProps) {
 
             {/* Trust Indicators */}
             <div className="text-center bg-gray-50 rounded-xl p-8 border border-gray-100">
-              <h3 className="text-lg font-semibold text-gray-900 mb-6">
+              <h3 className="font-semibold text-gray-900 mb-6" style={h3Style}>
                 Why Choose Our Platform?
               </h3>
               

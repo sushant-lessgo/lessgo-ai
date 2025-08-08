@@ -1,5 +1,6 @@
 import React from 'react';
 import { useLayoutComponent } from '@/hooks/useLayoutComponent';
+import { useTypography } from '@/hooks/useTypography';
 import { LayoutSection } from '@/components/layout/LayoutSection';
 import { 
   EditableAdaptiveHeadline, 
@@ -84,6 +85,7 @@ const CONTENT_SCHEMA = {
 };
 
 export default function RatingCards(props: LayoutComponentProps) {
+  const { getTextStyle: getTypographyStyle } = useTypography();
   
   const {
     sectionId,
@@ -99,6 +101,10 @@ export default function RatingCards(props: LayoutComponentProps) {
     ...props,
     contentSchema: CONTENT_SCHEMA
   });
+
+  // Create typography styles
+  const h3Style = getTypographyStyle('h3');
+  const bodyLgStyle = getTypographyStyle('body-lg');
 
   const testimonialQuotes = blockContent.testimonial_quotes 
     ? blockContent.testimonial_quotes.split('|').map(item => item.trim()).filter(Boolean)
@@ -282,7 +288,8 @@ export default function RatingCards(props: LayoutComponentProps) {
               backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
               colorTokens={colorTokens}
               variant="body"
-              className="text-lg mb-6 max-w-3xl mx-auto"
+              style={bodyLgStyle}
+              className="mb-6 max-w-3xl mx-auto"
               placeholder="Add optional subheadline to introduce rating cards..."
               sectionId={sectionId}
               elementKey="subheadline"
@@ -381,7 +388,7 @@ export default function RatingCards(props: LayoutComponentProps) {
         {/* Platform Statistics */}
         <div className="bg-gradient-to-r from-orange-50 via-blue-50 to-green-50 rounded-2xl p-8 border border-orange-100 mb-12">
           <div className="text-center">
-            <h3 className="text-xl font-semibold text-gray-900 mb-6">Consistently High Ratings Across Platforms</h3>
+            <h3 style={h3Style} className="font-semibold text-gray-900 mb-6">Consistently High Ratings Across Platforms</h3>
             
             <div className="grid md:grid-cols-4 gap-6">
               <div className="text-center">

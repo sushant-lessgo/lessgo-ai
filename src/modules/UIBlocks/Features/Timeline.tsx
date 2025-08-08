@@ -1,5 +1,6 @@
 import React from 'react';
 import { useLayoutComponent } from '@/hooks/useLayoutComponent';
+import { useTypography } from '@/hooks/useTypography';
 import { LayoutSection } from '@/components/layout/LayoutSection';
 import { 
   EditableAdaptiveHeadline, 
@@ -69,7 +70,8 @@ const TimelineStep = React.memo(({
   duration,
   isLast,
   colorTokens,
-  mutedTextColor
+  mutedTextColor,
+  h3Style
 }: {
   number: string;
   title: string;
@@ -78,6 +80,7 @@ const TimelineStep = React.memo(({
   isLast: boolean;
   colorTokens: any;
   mutedTextColor: string;
+  h3Style: React.CSSProperties;
 }) => {
   
   return (
@@ -107,7 +110,7 @@ const TimelineStep = React.memo(({
         <div className="flex-1 pb-12">
           <div className="bg-white rounded-xl p-6 shadow-lg border border-gray-100 hover:shadow-xl transition-shadow duration-300">
             <div className="flex items-start justify-between mb-4">
-              <h3 className="text-xl font-bold text-gray-900">{title}</h3>
+              <h3 style={h3Style} className="font-bold text-gray-900">{title}</h3>
               {duration && (
                 <span className={`text-sm font-medium ${mutedTextColor} bg-gray-100 px-3 py-1 rounded-full`}>
                   {duration}
@@ -142,6 +145,7 @@ const TimelineStep = React.memo(({
 TimelineStep.displayName = 'TimelineStep';
 
 export default function Timeline(props: LayoutComponentProps) {
+  const { getTextStyle: getTypographyStyle } = useTypography();
   
   const {
     sectionId,
@@ -157,6 +161,10 @@ export default function Timeline(props: LayoutComponentProps) {
     ...props,
     contentSchema: CONTENT_SCHEMA
   });
+  
+  // Create typography styles
+  const h3Style = getTypographyStyle('h3');
+  const bodyLgStyle = getTypographyStyle('body-lg');
 
   const stepNumbers = blockContent.step_numbers 
     ? blockContent.step_numbers.split('|').map(item => item.trim()).filter(Boolean)
@@ -220,7 +228,8 @@ export default function Timeline(props: LayoutComponentProps) {
               backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
               colorTokens={colorTokens}
               variant="body"
-              className="text-lg mb-6 max-w-3xl mx-auto"
+              style={bodyLgStyle}
+              className="mb-6 max-w-3xl mx-auto"
               placeholder="Add optional subheadline to introduce your workflow process..."
               sectionId={sectionId}
               elementKey="subheadline"
@@ -304,6 +313,7 @@ export default function Timeline(props: LayoutComponentProps) {
                 isLast={index === steps.length - 1}
                 colorTokens={colorTokens}
                 mutedTextColor={mutedTextColor}
+                h3Style={h3Style}
               />
             ))}
           </div>

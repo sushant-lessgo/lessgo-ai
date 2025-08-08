@@ -2,6 +2,7 @@
 // Production-ready integration component using abstraction system with background-aware text colors
 
 import React, { useState, useEffect } from 'react';
+import { useTypography } from '@/hooks/useTypography';
 import { useLayoutComponent } from '@/hooks/useLayoutComponent';
 import { LayoutSection } from '@/components/layout/LayoutSection';
 import { 

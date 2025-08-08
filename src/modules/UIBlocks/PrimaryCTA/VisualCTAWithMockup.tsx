@@ -3,6 +3,7 @@
 
 import React from 'react';
 import { useLayoutComponent } from '@/hooks/useLayoutComponent';
+import { useTypography } from '@/hooks/useTypography';
 import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
 import { LayoutSection } from '@/components/layout/LayoutSection';
 import { 
@@ -131,6 +132,8 @@ const ProductMockup = React.memo(() => (
 ProductMockup.displayName = 'ProductMockup';
 
 export default function VisualCTAWithMockup(props: LayoutComponentProps) {
+  const { getTextStyle: getTypographyStyle } = useTypography();
+  
   const {
     sectionId,
     mode,
@@ -144,6 +147,9 @@ export default function VisualCTAWithMockup(props: LayoutComponentProps) {
     ...props,
     contentSchema: CONTENT_SCHEMA
   });
+
+  // Create typography styles
+  const bodyLgStyle = getTypographyStyle('body-lg');
 
   const store = useEditStore();
   const showImageToolbar = store.showImageToolbar;
@@ -186,7 +192,8 @@ export default function VisualCTAWithMockup(props: LayoutComponentProps) {
                 backgroundType={safeBackgroundType}
                 colorTokens={colorTokens}
                 variant="body"
-                className="text-lg mb-8"
+                className="mb-8"
+                style={bodyLgStyle}
                 sectionId={sectionId}
                 elementKey="subheadline"
                 sectionBackground={sectionBackground}

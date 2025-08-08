@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useLayoutComponent } from '@/hooks/useLayoutComponent';
+import { useTypography } from '@/hooks/useTypography';
 import { LayoutSection } from '@/components/layout/LayoutSection';
 import { 
   EditableAdaptiveHeadline, 
@@ -98,6 +99,14 @@ export default function SegmentBasedPricing(props: LayoutComponentProps) {
     ...props,
     contentSchema: CONTENT_SCHEMA
   });
+
+  const { getTextStyle: getTypographyStyle } = useTypography();
+  
+  // Create typography styles
+  const h2Style = getTypographyStyle('h2');
+  const h3Style = getTypographyStyle('h3');
+  const h4Style = getTypographyStyle('h4');
+  const bodyLgStyle = getTypographyStyle('body-lg');
 
   const [activeSegment, setActiveSegment] = useState(0);
 
@@ -228,7 +237,7 @@ export default function SegmentBasedPricing(props: LayoutComponentProps) {
             {getSegmentIcon(segment.icon)}
           </div>
           <div className="flex-1">
-            <h3 className={`font-bold text-lg ${isActive ? color.text : 'text-gray-900'}`}>
+            <h3 style={h3Style} className={`font-bold ${isActive ? color.text : 'text-gray-900'}`}>
               {segment.name}
             </h3>
             <p className={`text-sm mt-2 ${isActive ? 'text-gray-700' : 'text-gray-600'}`}>
@@ -261,8 +270,8 @@ export default function SegmentBasedPricing(props: LayoutComponentProps) {
       )}
 
       <div className="text-center mb-6">
-        <h4 className="text-xl font-bold text-gray-900 mb-2">{tier.name}</h4>
-        <div className="text-3xl font-bold text-gray-900 mb-4">{tier.price}</div>
+        <h4 style={h3Style} className="font-bold text-gray-900 mb-2">{tier.name}</h4>
+        <div style={{...getTypographyStyle('h2'), fontSize: 'clamp(1.8rem, 3vw, 2rem)'}} className="font-bold text-gray-900 mb-4">{tier.price}</div>
       </div>
 
       <div className="space-y-3 mb-8">
@@ -320,7 +329,8 @@ export default function SegmentBasedPricing(props: LayoutComponentProps) {
               backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
               colorTokens={colorTokens}
               variant="body"
-              className="text-lg mb-8 max-w-3xl mx-auto"
+              style={bodyLgStyle}
+              className="mb-8 max-w-3xl mx-auto"
               placeholder="Add optional subheadline to introduce segment-based pricing..."
               sectionId={sectionId}
               elementKey="subheadline"
@@ -332,7 +342,7 @@ export default function SegmentBasedPricing(props: LayoutComponentProps) {
         {mode === 'edit' ? (
           <div className="space-y-8">
             <div className="p-6 border border-gray-200 rounded-lg bg-gray-50">
-              <h4 className="font-semibold text-gray-700 mb-4">Segment-Based Pricing Content</h4>
+              <h4 style={h4Style} className="font-semibold text-gray-700 mb-4">Segment-Based Pricing Content</h4>
               
               <div className="space-y-4">
                 <EditableAdaptiveText
@@ -398,7 +408,7 @@ export default function SegmentBasedPricing(props: LayoutComponentProps) {
             
             {/* Segment Selection */}
             <div className="space-y-6">
-              <h3 className="text-xl font-semibold text-gray-900 mb-6">Choose Your Business Type</h3>
+              <h3 style={h3Style} className="font-semibold text-gray-900 mb-6">Choose Your Business Type</h3>
               {segments.map((segment, index) => (
                 <SegmentTab
                   key={index}
@@ -412,7 +422,7 @@ export default function SegmentBasedPricing(props: LayoutComponentProps) {
             {/* Pricing for Active Segment */}
             <div className="lg:sticky lg:top-8">
               <div className={`p-6 rounded-2xl ${activeColor.light} border-2 ${activeColor.border} mb-8`}>
-                <h3 className={`text-2xl font-bold ${activeColor.text} mb-4`}>
+                <h3 style={{...h2Style, fontSize: 'clamp(1.5rem, 3vw, 2rem)'}} className={`font-bold ${activeColor.text} mb-4`}>
                   {activeSegmentData.name} Pricing
                 </h3>
                 <p className="text-gray-700">
@@ -437,7 +447,7 @@ export default function SegmentBasedPricing(props: LayoutComponentProps) {
         {/* Segment Comparison Summary */}
         <div className="bg-gradient-to-r from-gray-50 to-white rounded-2xl p-8 border border-gray-100 mb-12">
           <div className="text-center">
-            <h3 className="text-xl font-semibold text-gray-900 mb-8">Why Segment-Specific Pricing?</h3>
+            <h3 style={h3Style} className="font-semibold text-gray-900 mb-8">Why Segment-Specific Pricing?</h3>
             
             <div className="grid md:grid-cols-4 gap-8">
               {segments.map((segment, index) => {

@@ -133,7 +133,11 @@ export default function SegmentedFAQTabs(props: LayoutComponentProps) {
               backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
               colorTokens={colorTokens}
               variant="body"
-              className="text-lg max-w-3xl mx-auto"
+              style={{
+                ...getTextStyle('body-lg'),
+                textAlign: 'center'
+              }}
+              className="max-w-3xl mx-auto"
               placeholder="Add a description for your segmented FAQ..."
               sectionId={sectionId}
               elementKey="subheadline"
@@ -167,7 +171,10 @@ export default function SegmentedFAQTabs(props: LayoutComponentProps) {
         <div className="space-y-6">
           {tabs[activeTab].questions.map((question, index) => (
             <div key={index} className="bg-gray-50 dark:bg-gray-800/50 rounded-lg p-6">
-              <h3 className={`text-lg font-semibold mb-3 ${dynamicTextColors?.heading || colorTokens.textPrimary}`}>
+              <h3 
+                className={`font-semibold mb-3 ${dynamicTextColors?.heading || colorTokens.textPrimary}`}
+                style={getTextStyle('h3')}
+              >
                 {question}
               </h3>
               {tabs[activeTab].answers[index] && (

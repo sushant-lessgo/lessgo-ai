@@ -3,6 +3,7 @@
 
 import React from 'react';
 import { useLayoutComponent } from '@/hooks/useLayoutComponent';
+import { useTypography } from '@/hooks/useTypography';
 import { LayoutSection } from '@/components/layout/LayoutSection';
 import { 
   EditableAdaptiveHeadline, 
@@ -120,6 +121,8 @@ const DeviceMockup = React.memo(({ type = 'laptop' }: { type?: 'laptop' | 'phone
 DeviceMockup.displayName = 'DeviceMockup';
 
 export default function MockupWithCTA(props: LayoutComponentProps) {
+  const { getTextStyle: getTypographyStyle } = useTypography();
+  
   // Use the abstraction hook for all common functionality
   const {
     sectionId,
@@ -136,6 +139,10 @@ export default function MockupWithCTA(props: LayoutComponentProps) {
     contentSchema: CONTENT_SCHEMA
   });
 
+  // Create typography styles
+  const bodyStyle = getTypographyStyle('body');
+  const labelStyle = getTypographyStyle('label');
+  
   // Filter out 'custom' background type as it's not supported by EditableContent components
   const safeBackgroundType = props.backgroundType === 'custom' ? 'neutral' : (props.backgroundType || 'neutral');
 
@@ -213,7 +220,8 @@ export default function MockupWithCTA(props: LayoutComponentProps) {
                   backgroundType={safeBackgroundType}
                   colorTokens={colorTokens}
                   variant="body"
-                  className="flex items-center justify-center lg:justify-start text-sm"
+                  className="flex items-center justify-center lg:justify-start"
+                  style={labelStyle}
                   placeholder="Add urgency text (e.g., Limited time offer...)"
                   sectionId={sectionId}
                   elementKey="urgency_text"
@@ -230,7 +238,8 @@ export default function MockupWithCTA(props: LayoutComponentProps) {
                   backgroundType={safeBackgroundType}
                   colorTokens={colorTokens}
                   variant="body"
-                  className="flex items-center justify-center lg:justify-start text-sm"
+                  className="flex items-center justify-center lg:justify-start"
+                  style={labelStyle}
                   placeholder="Add guarantee text (e.g., 30-day money back guarantee)"
                   sectionId={sectionId}
                   elementKey="guarantee_text"

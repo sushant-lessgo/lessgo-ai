@@ -4,6 +4,7 @@
 
 import React from 'react';
 import { useLayoutComponent } from '@/hooks/useLayoutComponent';
+import { useTypography } from '@/hooks/useTypography';
 import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
 import { LayoutSection } from '@/components/layout/LayoutSection';
 import { 
@@ -113,11 +114,17 @@ export default function MissionQuoteOverlay(props: LayoutComponentProps) {
     ...props,
     contentSchema: CONTENT_SCHEMA
   });
+  
+  const { getTextStyle: getTypographyStyle } = useTypography();
 
   // Parse mission stats from pipe-separated string
   const missionStats = blockContent.mission_stats 
     ? blockContent.mission_stats.split('|').map(item => item.trim()).filter(Boolean)
     : ['Growing community', 'Positive impact'];
+    
+  // Typography styles
+  const h2Style = getTypographyStyle('h2');
+  const bodyStyle = getTypographyStyle('body-lg');
 
   // Parse trust indicators from pipe-separated string
   const trustItems = blockContent.trust_items 
@@ -256,10 +263,10 @@ export default function MissionQuoteOverlay(props: LayoutComponentProps) {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-3xl mx-auto">
               {missionStats.map((stat, index) => (
                 <div key={index} className="text-center">
-                  <div className="text-2xl lg:text-3xl font-bold text-white mb-1">
+                  <div style={h2Style} className="text-2xl lg:text-3xl font-bold text-white mb-1">
                     {stat.split(' ')[0]}
                   </div>
-                  <div className="text-white text-opacity-80 text-sm">
+                  <div style={bodyStyle} className="text-white text-opacity-80 text-sm">
                     {stat.split(' ').slice(1).join(' ')}
                   </div>
                 </div>

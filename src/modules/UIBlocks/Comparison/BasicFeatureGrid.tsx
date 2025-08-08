@@ -3,6 +3,7 @@
 
 import React from 'react';
 import { useLayoutComponent } from '@/hooks/useLayoutComponent';
+import { useTypography } from '@/hooks/useTypography';
 import { LayoutSection } from '@/components/layout/LayoutSection';
 import { 
   EditableAdaptiveHeadline, 
@@ -142,13 +143,18 @@ export default function BasicFeatureGrid(props: LayoutComponentProps) {
     ...props,
     contentSchema: CONTENT_SCHEMA
   });
-
+  
+  const { getTextStyle: getTypographyStyle } = useTypography();
+  
   // Parse feature data
   const { features, competitors } = parseFeatureData(
     blockContent.feature_names,
     blockContent.competitor_names,
     blockContent.your_product_name
   );
+  
+  // Typography styles
+  const bodyStyle = getTypographyStyle('body-lg');
 
   return (
     <LayoutSection
@@ -208,7 +214,7 @@ export default function BasicFeatureGrid(props: LayoutComponentProps) {
               {/* Table Header */}
               <thead className={colorTokens.surfaceElevated + ' border-b border-gray-200'}>
                 <tr>
-                  <th className={`px-6 py-4 text-left text-sm font-semibold ${colorTokens.textPrimary} w-1/3`}>
+                  <th style={bodyStyle} className={`px-6 py-4 text-left text-sm font-semibold ${colorTokens.textPrimary} w-1/3`}>
                     Features
                   </th>
                   {competitors.map((competitor) => (
@@ -227,9 +233,10 @@ export default function BasicFeatureGrid(props: LayoutComponentProps) {
                           </span>
                         </div>
                       )}
-                      <div className="font-semibold">
+                      <div style={bodyStyle} className="font-semibold">
                         {mode === 'edit' && competitor.isPrimary ? (
                           <div 
+                            style={bodyStyle}
                             contentEditable
                             suppressContentEditableWarning
                             onBlur={(e) => handleContentUpdate('your_product_name', e.currentTarget.textContent || '')}
@@ -256,7 +263,7 @@ export default function BasicFeatureGrid(props: LayoutComponentProps) {
                     }`}
                   >
                     <td className="px-6 py-4">
-                      <div className={`font-medium ${colorTokens.textPrimary}`}>
+                      <div style={bodyStyle} className={`font-medium ${colorTokens.textPrimary}`}>
                         {feature.name}
                       </div>
                     </td>
@@ -284,7 +291,7 @@ export default function BasicFeatureGrid(props: LayoutComponentProps) {
         {/* Summary */}
         <div className="mt-8 text-center">
           <div className={`inline-flex items-center space-x-4 px-6 py-3 ${colorTokens.surfaceElevated} rounded-lg`}>
-            <span className={`text-sm ${colorTokens.textSecondary}`}>
+            <span style={bodyStyle} className={`text-sm ${colorTokens.textSecondary}`}>
               Comparing {features.length} features across {competitors.length} solutions
             </span>
           </div>

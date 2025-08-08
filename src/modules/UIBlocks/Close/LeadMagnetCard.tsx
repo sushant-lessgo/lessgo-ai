@@ -1,5 +1,6 @@
 import React from 'react';
 import { useLayoutComponent } from '@/hooks/useLayoutComponent';
+import { useTypography } from '@/hooks/useTypography';
 import { LayoutSection } from '@/components/layout/LayoutSection';
 import { 
   EditableAdaptiveHeadline, 
@@ -83,6 +84,7 @@ const CONTENT_SCHEMA = {
 };
 
 export default function LeadMagnetCard(props: LayoutComponentProps) {
+  const { getTextStyle: getTypographyStyle } = useTypography();
   
   const {
     sectionId,
@@ -98,6 +100,11 @@ export default function LeadMagnetCard(props: LayoutComponentProps) {
     ...props,
     contentSchema: CONTENT_SCHEMA
   });
+  
+  // Create typography styles
+  const h2Style = getTypographyStyle('h2');
+  const h3Style = getTypographyStyle('h3');
+  const bodyLgStyle = getTypographyStyle('body-lg');
 
   const benefits = blockContent.magnet_benefits 
     ? blockContent.magnet_benefits.split('|').map(item => item.trim()).filter(Boolean)
@@ -184,7 +191,8 @@ export default function LeadMagnetCard(props: LayoutComponentProps) {
               backgroundType={safeBackgroundType}
               colorTokens={colorTokens}
               variant="body"
-              className="text-lg mb-8 max-w-3xl mx-auto"
+              className="mb-8 max-w-3xl mx-auto"
+              style={bodyLgStyle}
               placeholder="Add optional subheadline to introduce the lead magnet..."
               sectionId={sectionId}
               elementKey="subheadline"
@@ -317,12 +325,12 @@ export default function LeadMagnetCard(props: LayoutComponentProps) {
               <div className="p-8 lg:p-12">
                 
                 {/* Title */}
-                <h3 className="text-2xl font-bold text-gray-900 mb-4">
+                <h3 className="font-bold text-gray-900 mb-4" style={h2Style}>
                   {blockContent.magnet_title}
                 </h3>
                 
                 {/* Description */}
-                <p className="text-gray-600 text-lg leading-relaxed mb-6">
+                <p className="text-gray-600 leading-relaxed mb-6" style={bodyLgStyle}>
                   {blockContent.magnet_description}
                 </p>
                 

@@ -3,6 +3,7 @@
 
 import React from 'react';
 import { useLayoutComponent } from '@/hooks/useLayoutComponent';
+import { useTypography } from '@/hooks/useTypography';
 import { LayoutSection } from '@/components/layout/LayoutSection';
 import { 
   EditableAdaptiveHeadline, 
@@ -227,9 +228,9 @@ const GlobalStatDisplay = React.memo(({
       <SocialProofNumber
         number={stat.value}
         label=""
-        className={`text-3xl md:text-4xl font-bold mb-2 ${dynamicTextColors?.heading || 'text-gray-900'}`}
+        style={{...h2Style, fontSize: 'clamp(1.8rem, 4vw, 2.5rem)'}} className={`mb-2 ${dynamicTextColors?.heading || 'text-gray-900'}`}
       />
-      <p className={`text-sm font-medium ${dynamicTextColors?.muted || 'text-gray-600'}`}>
+      <p style={{...bodyStyle, fontSize: '0.875rem'}} className={`${dynamicTextColors?.muted || 'text-gray-600'}`}>
         {stat.label}
       </p>
     </div>
@@ -253,6 +254,14 @@ export default function MapHeatSpots(props: LayoutComponentProps) {
     ...props,
     contentSchema: CONTENT_SCHEMA
   });
+
+  // Typography hook
+  const { getTextStyle: getTypographyStyle } = useTypography();
+  const h2Style = getTypographyStyle('h2');
+  const h3Style = getTypographyStyle('h3');
+  const h4Style = getTypographyStyle('h4');
+  const bodyLgStyle = getTypographyStyle('body-lg');
+  const bodyStyle = getTypographyStyle('body');
 
   // Parse stats from pipe-separated strings
   const globalStats = parseStatData(
@@ -298,7 +307,7 @@ export default function MapHeatSpots(props: LayoutComponentProps) {
               backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
               colorTokens={colorTokens}
               variant="body"
-              className="text-lg max-w-3xl mx-auto"
+              style={{...bodyLgStyle}} className="max-w-3xl mx-auto"
               placeholder="Add a compelling subheadline about your global reach..."
               sectionId={sectionId}
               elementKey="subheadline"
@@ -329,20 +338,20 @@ export default function MapHeatSpots(props: LayoutComponentProps) {
 
         {/* Country List */}
         <div className="text-center">
-          <h3 className={`text-lg font-semibold mb-6 ${dynamicTextColors?.heading || 'text-gray-900'}`}>
+          <h3 style={{...h3Style}} className={`mb-6 ${dynamicTextColors?.heading || 'text-gray-900'}`}>
             Active in These Countries
           </h3>
           <div className="flex flex-wrap justify-center gap-3">
             {countries.slice(0, 8).map((country, index) => (
               <span
                 key={index}
-                className={`px-4 py-2 bg-white/10 backdrop-blur-sm rounded-full text-sm font-medium border border-white/20 ${dynamicTextColors?.body || 'text-gray-700'} hover:bg-white/20 transition-colors duration-300`}
+                style={{...bodyStyle, fontSize: '0.875rem'}} className={`px-4 py-2 bg-white/10 backdrop-blur-sm rounded-full border border-white/20 ${dynamicTextColors?.body || 'text-gray-700'} hover:bg-white/20 transition-colors duration-300`}
               >
                 {country.trim()}
               </span>
             ))}
             {countries.length > 8 && (
-              <span className={`px-4 py-2 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-full text-sm font-medium`}>
+              <span style={{...bodyStyle, fontSize: '0.875rem'}} className={`px-4 py-2 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-full`}>
                 +{countries.length - 8} more
               </span>
             )}

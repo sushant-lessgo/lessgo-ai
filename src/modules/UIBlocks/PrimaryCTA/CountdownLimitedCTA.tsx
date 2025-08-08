@@ -3,6 +3,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useLayoutComponent } from '@/hooks/useLayoutComponent';
+import { useTypography } from '@/hooks/useTypography';
 import { LayoutSection } from '@/components/layout/LayoutSection';
 import { 
   EditableAdaptiveHeadline, 
@@ -121,6 +122,8 @@ export default function CountdownLimitedCTA(props: LayoutComponentProps) {
     ...props,
     contentSchema: CONTENT_SCHEMA
   });
+  
+  const { getTextStyle: getTypographyStyle } = useTypography();
 
   // Parse offer details from pipe-separated string
   const offerDetails = blockContent.offer_details 

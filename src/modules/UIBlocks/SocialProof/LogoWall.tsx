@@ -3,6 +3,7 @@
 
 import React from 'react';
 import { useLayoutComponent } from '@/hooks/useLayoutComponent';
+import { useTypography } from '@/hooks/useTypography';
 import { LayoutSection } from '@/components/layout/LayoutSection';
 import { 
   EditableAdaptiveHeadline, 
@@ -103,7 +104,7 @@ const CompanyLogoPlaceholder = React.memo(({
     <div className="group p-6 bg-white rounded-lg border border-gray-200 hover:border-gray-300 hover:shadow-md transition-all duration-300 flex flex-col items-center justify-center min-h-[120px]">
       
       {/* Logo Placeholder */}
-      <div className={`w-16 h-16 bg-gradient-to-br ${colorScheme} rounded-xl flex items-center justify-center text-white font-bold text-lg mb-3 group-hover:scale-110 transition-transform duration-300 shadow-lg`}>
+      <div className={`w-16 h-16 bg-gradient-to-br ${colorScheme} rounded-xl flex items-center justify-center text-white font-bold mb-3 group-hover:scale-110 transition-transform duration-300 shadow-lg`} style={getTextStyle('body-lg')}>
         {initials}
       </div>
       
@@ -132,6 +133,8 @@ const CompanyLogoPlaceholder = React.memo(({
 CompanyLogoPlaceholder.displayName = 'CompanyLogoPlaceholder';
 
 export default function LogoWall(props: LayoutComponentProps) {
+  const { getTextStyle: getTypographyStyle } = useTypography();
+  
   // Use the abstraction hook for all common functionality
   const {
     sectionId,
@@ -147,6 +150,9 @@ export default function LogoWall(props: LayoutComponentProps) {
     ...props,
     contentSchema: CONTENT_SCHEMA
   });
+
+  // Create typography styles
+  const bodyLgStyle = getTypographyStyle('body-lg');
 
   // Parse company data
   const companyLogos = parseCompanyData(blockContent.company_names);

@@ -1,5 +1,6 @@
 import React from 'react';
 import { useLayoutComponent } from '@/hooks/useLayoutComponent';
+import { useTypography } from '@/hooks/useTypography';
 import { LayoutSection } from '@/components/layout/LayoutSection';
 import { 
   EditableAdaptiveHeadline, 
@@ -61,12 +62,17 @@ export default function CheckmarkComparison(props: LayoutComponentProps) {
     ...props, 
     contentSchema: CONTENT_SCHEMA 
   });
+  
+  const { getTextStyle: getTypographyStyle } = useTypography();
 
   // Parse comparison data
   const columnHeaders = parsePipeData(blockContent.column_headers);
   const featureLabels = parsePipeData(blockContent.feature_labels);
   const columnFeatures = blockContent.column_features.split('|').map(col => col.split(','));
   const highlightIndex = parseInt(blockContent.highlight_column || '3');
+  
+  // Typography styles
+  const bodyStyle = getTypographyStyle('body-lg');
 
   // Update handlers for lists
   const handleColumnHeaderUpdate = (index: number, value: string) => {
@@ -127,7 +133,7 @@ export default function CheckmarkComparison(props: LayoutComponentProps) {
             <thead>
               <tr>
                 <th className={`text-left p-4 border-b border-gray-200`}>
-                  <span className={colorTokens.textPrimary}>Features</span>
+                  <span style={bodyStyle} className={colorTokens.textPrimary}>Features</span>
                 </th>
                 {columnHeaders.map((header, index) => (
                   <th 
@@ -141,12 +147,14 @@ export default function CheckmarkComparison(props: LayoutComponentProps) {
                         type="text"
                         value={header}
                         onChange={(e) => handleColumnHeaderUpdate(index, e.target.value)}
+                        style={bodyStyle}
                         className={`w-full text-center bg-transparent outline-none focus:ring-2 focus:ring-blue-500 rounded px-2 ${
                           index === highlightIndex ? 'text-white font-semibold' : colorTokens.textPrimary
                         }`}
                       />
                     ) : (
                       <span 
+                        style={bodyStyle}
                         className={index === highlightIndex ? 'text-white font-semibold' : colorTokens.textPrimary}
                       >
                         {header}
@@ -165,10 +173,11 @@ export default function CheckmarkComparison(props: LayoutComponentProps) {
                         type="text"
                         value={label}
                         onChange={(e) => handleFeatureLabelUpdate(rowIndex, e.target.value)}
+                        style={bodyStyle}
                         className={`w-full bg-transparent outline-none focus:ring-2 focus:ring-blue-500 rounded px-2 ${colorTokens.textSecondary}`}
                       />
                     ) : (
-                      <span className={colorTokens.textSecondary}>
+                      <span style={bodyStyle} className={colorTokens.textSecondary}>
                         {label}
                       </span>
                     )}

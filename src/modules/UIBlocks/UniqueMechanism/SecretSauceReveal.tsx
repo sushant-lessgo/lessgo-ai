@@ -1,6 +1,7 @@
 // components/layout/SecretSauceReveal.tsx
 import React from 'react';
 import { useLayoutComponent } from '@/hooks/useLayoutComponent';
+import { useTypography } from '@/hooks/useTypography';
 import { LayoutSection } from '@/components/layout/LayoutSection';
 import { EditableAdaptiveHeadline, EditableAdaptiveText } from '@/components/layout/EditableContent';
 import { LayoutComponentProps } from '@/types/storeTypes';
@@ -19,6 +20,7 @@ const CONTENT_SCHEMA = {
 
 export default function SecretSauceReveal(props: LayoutComponentProps) {
   const { sectionId, mode, blockContent, colorTokens, getTextStyle, sectionBackground, handleContentUpdate } = useLayoutComponent<SecretSauceRevealContent>({ ...props, contentSchema: CONTENT_SCHEMA });
+  const { getTextStyle: getTypographyStyle } = useTypography();
 
   return (
     <LayoutSection sectionId={sectionId} sectionType="SecretSauceReveal" backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')} sectionBackground={sectionBackground} mode={mode} className={props.className}>

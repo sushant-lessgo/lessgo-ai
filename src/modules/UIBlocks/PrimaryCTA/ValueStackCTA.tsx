@@ -3,6 +3,7 @@
 
 import React from 'react';
 import { useLayoutComponent } from '@/hooks/useLayoutComponent';
+import { useTypography } from '@/hooks/useTypography';
 import { LayoutSection } from '@/components/layout/LayoutSection';
 import { 
   EditableAdaptiveHeadline, 
@@ -115,6 +116,8 @@ const ValuePropCard = React.memo(({
 ValuePropCard.displayName = 'ValuePropCard';
 
 export default function ValueStackCTA(props: LayoutComponentProps) {
+  const { getTextStyle: getTypographyStyle } = useTypography();
+  
   const {
     sectionId,
     mode,
@@ -128,6 +131,10 @@ export default function ValueStackCTA(props: LayoutComponentProps) {
     ...props,
     contentSchema: CONTENT_SCHEMA
   });
+
+  // Create typography styles
+  const h2Style = getTypographyStyle('h2');
+  const bodyLgStyle = getTypographyStyle('body-lg');
 
   // Parse value propositions
   const valueProps = parseValueProps(blockContent.value_propositions, blockContent.value_descriptions);
@@ -166,7 +173,8 @@ export default function ValueStackCTA(props: LayoutComponentProps) {
               backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
               colorTokens={colorTokens}
               variant="body"
-              className="text-lg max-w-3xl mx-auto"
+              className="max-w-3xl mx-auto"
+              style={bodyLgStyle}
               sectionId={sectionId}
               elementKey="subheadline"
               sectionBackground={sectionBackground}
@@ -189,10 +197,10 @@ export default function ValueStackCTA(props: LayoutComponentProps) {
 
         {/* CTA Section */}
         <div className="bg-gradient-to-r from-blue-600 to-indigo-700 rounded-2xl p-12 text-center text-white">
-          <h3 className="text-2xl lg:text-3xl font-bold mb-4">
+          <h3 className="font-bold mb-4" style={{...h2Style, fontSize: 'clamp(1.8rem, 3vw, 2rem)'}}>
             Ready to Get Started?
           </h3>
-          <p className="text-blue-100 mb-8 text-lg max-w-2xl mx-auto">
+          <p className="text-blue-100 mb-8 max-w-2xl mx-auto" style={bodyLgStyle}>
             Join thousands of businesses already transforming their operations with our platform.
           </p>
           

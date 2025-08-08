@@ -1,5 +1,6 @@
 import React from 'react';
 import { useLayoutComponent } from '@/hooks/useLayoutComponent';
+import { useTypography } from '@/hooks/useTypography';
 import { LayoutSection } from '@/components/layout/LayoutSection';
 import { 
   EditableAdaptiveHeadline, 
@@ -88,6 +89,7 @@ const CONTENT_SCHEMA = {
 };
 
 export default function BonusStackCTA(props: LayoutComponentProps) {
+  const { getTextStyle: getTypographyStyle } = useTypography();
   
   const {
     sectionId,
@@ -103,6 +105,11 @@ export default function BonusStackCTA(props: LayoutComponentProps) {
     ...props,
     contentSchema: CONTENT_SCHEMA
   });
+  
+  // Create typography styles
+  const h2Style = getTypographyStyle('h2');
+  const h3Style = getTypographyStyle('h3');
+  const bodyLgStyle = getTypographyStyle('body-lg');
 
   const bonusItems = blockContent.bonus_items 
     ? blockContent.bonus_items.split('|').map(item => item.trim()).filter(Boolean)
@@ -186,7 +193,8 @@ export default function BonusStackCTA(props: LayoutComponentProps) {
               backgroundType={safeBackgroundType}
               colorTokens={colorTokens}
               variant="body"
-              className="text-lg mb-6 max-w-3xl mx-auto"
+              className="mb-6 max-w-3xl mx-auto"
+              style={bodyLgStyle}
               placeholder="Add optional subheadline to introduce the bonus offer..."
               sectionId={sectionId}
               elementKey="subheadline"
@@ -195,7 +203,7 @@ export default function BonusStackCTA(props: LayoutComponentProps) {
           )}
 
           <div className="max-w-2xl mx-auto">
-            <p className="text-xl text-gray-700 leading-relaxed">
+            <p className="text-gray-700 leading-relaxed" style={bodyLgStyle}>
               {blockContent.value_proposition}
             </p>
           </div>
@@ -273,7 +281,7 @@ export default function BonusStackCTA(props: LayoutComponentProps) {
                 <div className="inline-block bg-yellow-400 text-blue-900 px-4 py-2 rounded-full text-sm font-bold mb-4">
                   🎯 MAIN OFFER
                 </div>
-                <h3 className="text-2xl font-bold mb-6">{blockContent.main_offer}</h3>
+                <h3 className="font-bold mb-6" style={h2Style}>{blockContent.main_offer}</h3>
                 
                 {/* Pricing */}
                 <div className="flex items-center justify-center space-x-4 mb-6">
@@ -287,7 +295,7 @@ export default function BonusStackCTA(props: LayoutComponentProps) {
                   )}
                   
                   <div className="text-center">
-                    <div className="text-4xl font-bold">
+                    <div className="font-bold" style={{...h2Style, fontSize: 'clamp(2rem, 4vw, 2.5rem)'}}>
                       ${finalPrice.toLocaleString()}
                     </div>
                     <div className="text-sm text-blue-200">Today Only</div>
@@ -329,7 +337,7 @@ export default function BonusStackCTA(props: LayoutComponentProps) {
               <div className="bg-white rounded-xl p-6 border-2 border-green-300">
                 <div className="text-center">
                   <div className="text-lg text-gray-600 mb-2">Total Package Value:</div>
-                  <div className="text-3xl font-bold text-green-600 mb-4">
+                  <div className="font-bold text-green-600 mb-4" style={{...h2Style, fontSize: 'clamp(1.5rem, 3vw, 2rem)'}}>
                     {blockContent.total_value}
                   </div>
                   {discountAmount > 0 && (

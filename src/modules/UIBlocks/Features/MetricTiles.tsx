@@ -1,5 +1,6 @@
 import React from 'react';
 import { useLayoutComponent } from '@/hooks/useLayoutComponent';
+import { useTypography } from '@/hooks/useTypography';
 import { LayoutSection } from '@/components/layout/LayoutSection';
 import { 
   EditableAdaptiveHeadline, 
@@ -69,7 +70,8 @@ const MetricTile = React.memo(({
   description,
   index,
   colorTokens,
-  mutedTextColor
+  mutedTextColor,
+  h3Style
 }: {
   title: string;
   metric: string;
@@ -78,6 +80,7 @@ const MetricTile = React.memo(({
   index: number;
   colorTokens: any;
   mutedTextColor: string;
+  h3Style: any;
 }) => {
   
   const getIconForIndex = (index: number) => {
@@ -120,7 +123,7 @@ const MetricTile = React.memo(({
           {getIconForIndex(index)}
         </div>
         
-        <h3 className="text-xl font-bold text-gray-900 mb-2">{title}</h3>
+        <h3 style={h3Style} className="font-bold text-gray-900 mb-2">{title}</h3>
         
         <div className="text-center bg-gray-50 rounded-lg p-4 mb-4">
           <div className={`text-4xl font-bold bg-gradient-to-r ${getGradientForIndex(index)} bg-clip-text text-transparent`}>
@@ -148,6 +151,7 @@ const MetricTile = React.memo(({
 MetricTile.displayName = 'MetricTile';
 
 export default function MetricTiles(props: LayoutComponentProps) {
+  const { getTextStyle: getTypographyStyle } = useTypography();
   
   const {
     sectionId,
@@ -163,6 +167,11 @@ export default function MetricTiles(props: LayoutComponentProps) {
     ...props,
     contentSchema: CONTENT_SCHEMA
   });
+  
+  // Create typography styles
+  const h2Style = getTypographyStyle('h2');
+  const h3Style = getTypographyStyle('h3');
+  const bodyLgStyle = getTypographyStyle('body-lg');
 
   const featureTitles = blockContent.feature_titles 
     ? blockContent.feature_titles.split('|').map(item => item.trim()).filter(Boolean)
@@ -226,7 +235,8 @@ export default function MetricTiles(props: LayoutComponentProps) {
               backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
               colorTokens={colorTokens}
               variant="body"
-              className="text-lg mb-6 max-w-3xl mx-auto"
+              style={bodyLgStyle}
+              className="mb-6 max-w-3xl mx-auto"
               placeholder="Add optional subheadline to introduce your quantifiable benefits..."
               sectionId={sectionId}
               elementKey="subheadline"
@@ -310,6 +320,7 @@ export default function MetricTiles(props: LayoutComponentProps) {
                 index={index}
                 colorTokens={colorTokens}
                 mutedTextColor={mutedTextColor}
+                h3Style={h3Style}
               />
             ))}
           </div>
@@ -318,7 +329,7 @@ export default function MetricTiles(props: LayoutComponentProps) {
         {/* ROI Summary */}
         <div className="mt-12 bg-gradient-to-r from-blue-50 via-indigo-50 to-purple-50 rounded-2xl p-8 border border-blue-100">
           <div className="text-center">
-            <h3 className="text-2xl font-bold text-gray-900 mb-4">
+            <h3 style={h2Style} className="font-bold text-gray-900 mb-4">
               Proven Return on Investment
             </h3>
             

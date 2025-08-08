@@ -1,6 +1,7 @@
 // components/layout/InnovationTimeline.tsx
 import React from 'react';
 import { useLayoutComponent } from '@/hooks/useLayoutComponent';
+import { useTypography } from '@/hooks/useTypography';
 import { LayoutSection } from '@/components/layout/LayoutSection';
 import { EditableAdaptiveHeadline } from '@/components/layout/EditableContent';
 import { LayoutComponentProps } from '@/types/storeTypes';
@@ -17,7 +18,11 @@ const CONTENT_SCHEMA = {
 
 export default function InnovationTimeline(props: LayoutComponentProps) {
   const { sectionId, mode, blockContent, colorTokens, getTextStyle, sectionBackground, handleContentUpdate } = useLayoutComponent<InnovationTimelineContent>({ ...props, contentSchema: CONTENT_SCHEMA });
+  const { getTextStyle: getTypographyStyle } = useTypography();
   const items = blockContent.timeline_items.split('|').map(i => i.trim()).filter(Boolean);
+  
+  // Typography styles
+  const h3Style = getTypographyStyle('h3');
 
   return (
     <LayoutSection sectionId={sectionId} sectionType="InnovationTimeline" backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')} sectionBackground={sectionBackground} mode={mode} className={props.className}>
@@ -28,7 +33,7 @@ export default function InnovationTimeline(props: LayoutComponentProps) {
             <div key={index} className="flex items-center space-x-6">
               <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center text-white font-bold flex-shrink-0">{index + 1}</div>
               <div className="bg-white p-6 rounded-lg border border-gray-200 flex-1">
-                <h3 className="font-bold text-gray-900">{item}</h3>
+                <h3 style={h3Style} className="font-bold text-gray-900">{item}</h3>
               </div>
             </div>
           ))}

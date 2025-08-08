@@ -3,6 +3,7 @@
 
 import React from 'react';
 import { useLayoutComponent } from '@/hooks/useLayoutComponent';
+import { useTypography } from '@/hooks/useTypography';
 import { LayoutSection } from '@/components/layout/LayoutSection';
 import { 
   EditableAdaptiveHeadline, 
@@ -121,12 +122,16 @@ const MetricCard = React.memo(({
   metric, 
   dynamicTextColors,
   getTextStyle,
-  index 
+  index,
+  h2Style,
+  bodyStyle
 }: { 
   metric: StackedMetric;
   dynamicTextColors: any;
   getTextStyle: any;
   index: number;
+  h2Style: any;
+  bodyStyle: any;
 }) => {
   
   // Color scheme for each metric
@@ -186,15 +191,15 @@ const MetricCard = React.memo(({
             <SocialProofNumber
               number={metric.value}
               label=""
-              className={`text-2xl md:text-3xl font-bold ${dynamicTextColors?.heading || 'text-gray-900'}`}
+              style={{...h2Style, fontSize: 'clamp(1.5rem, 3vw, 2rem)'}} className={`${dynamicTextColors?.heading || 'text-gray-900'}`}
             />
-            <span className={`text-sm font-medium ${dynamicTextColors?.muted || 'text-gray-600'}`}>
+            <span style={{...bodyStyle, fontSize: '0.875rem'}} className={`${dynamicTextColors?.muted || 'text-gray-600'}`}>
               {metric.label}
             </span>
           </div>
           
           {metric.description && (
-            <p className={`text-sm ${dynamicTextColors?.body || 'text-gray-700'} leading-relaxed`}>
+            <p style={{...bodyStyle, fontSize: '0.875rem'}} className={`${dynamicTextColors?.body || 'text-gray-700'} leading-relaxed`}>
               {metric.description}
             </p>
           )}
@@ -202,10 +207,10 @@ const MetricCard = React.memo(({
           {metric.progress !== undefined && (
             <div className="space-y-2">
               <div className="flex justify-between items-center">
-                <span className={`text-xs font-medium ${dynamicTextColors?.muted || 'text-gray-600'}`}>
+                <span style={{...bodyStyle, fontSize: '0.75rem'}} className={`${dynamicTextColors?.muted || 'text-gray-600'}`}>
                   Progress
                 </span>
-                <span className={`text-xs font-bold ${dynamicTextColors?.body || 'text-gray-700'}`}>
+                <span style={{...bodyStyle, fontSize: '0.75rem', fontWeight: 'bold'}} className={`${dynamicTextColors?.body || 'text-gray-700'}`}>
                   {metric.progress}%
                 </span>
               </div>
@@ -235,6 +240,13 @@ export default function StackedStats(props: LayoutComponentProps) {
     ...props,
     contentSchema: CONTENT_SCHEMA
   });
+
+  // Typography hook
+  const { getTextStyle: getTypographyStyle } = useTypography();
+  const h2Style = getTypographyStyle('h2');
+  const h3Style = getTypographyStyle('h3');
+  const bodyLgStyle = getTypographyStyle('body-lg');
+  const bodyStyle = getTypographyStyle('body');
 
   // Parse metrics from pipe-separated strings
   const metrics = parseMetricData(
@@ -278,7 +290,7 @@ export default function StackedStats(props: LayoutComponentProps) {
               backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
               colorTokens={colorTokens}
               variant="body"
-              className="text-lg max-w-3xl mx-auto"
+              style={{...bodyLgStyle}} className="max-w-3xl mx-auto"
               placeholder="Add a compelling subheadline about your key metrics..."
               sectionId={sectionId}
               elementKey="subheadline"
@@ -296,6 +308,8 @@ export default function StackedStats(props: LayoutComponentProps) {
               dynamicTextColors={dynamicTextColors}
               getTextStyle={getTextStyle}
               index={index}
+              h2Style={h2Style}
+              bodyStyle={bodyStyle}
             />
           ))}
         </div>
@@ -307,28 +321,28 @@ export default function StackedStats(props: LayoutComponentProps) {
               <svg className="w-8 h-8 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
-              <span className={`text-xl font-semibold ${dynamicTextColors?.heading || 'text-gray-900'}`}>
+              <span style={{...h3Style}} className={`${dynamicTextColors?.heading || 'text-gray-900'}`}>
                 Trusted by Industry Leaders
               </span>
             </div>
-            <p className={`text-lg ${dynamicTextColors?.body || 'text-gray-700'} max-w-2xl mx-auto`}>
+            <p style={{...bodyLgStyle}} className={`${dynamicTextColors?.body || 'text-gray-700'} max-w-2xl mx-auto`}>
               Join thousands of companies that have already transformed their business with our proven platform.
             </p>
             <div className="flex items-center justify-center space-x-6 pt-4">
               <div className="text-center">
-                <div className={`text-2xl font-bold ${dynamicTextColors?.heading || 'text-gray-900'}`}>
+                <div style={{...h2Style, fontSize: 'clamp(1.5rem, 3vw, 2rem)'}} className={`${dynamicTextColors?.heading || 'text-gray-900'}`}>
                   98%
                 </div>
-                <div className={`text-sm ${dynamicTextColors?.muted || 'text-gray-600'}`}>
+                <div style={{...bodyStyle, fontSize: '0.875rem'}} className={`${dynamicTextColors?.muted || 'text-gray-600'}`}>
                   Customer Satisfaction
                 </div>
               </div>
               <div className="w-px h-12 bg-gray-300"></div>
               <div className="text-center">
-                <div className={`text-2xl font-bold ${dynamicTextColors?.heading || 'text-gray-900'}`}>
+                <div style={{...h2Style, fontSize: 'clamp(1.5rem, 3vw, 2rem)'}} className={`${dynamicTextColors?.heading || 'text-gray-900'}`}>
                   {"<3min"}
                 </div>
-                <div className={`text-sm ${dynamicTextColors?.muted || 'text-gray-600'}`}>
+                <div style={{...bodyStyle, fontSize: '0.875rem'}} className={`${dynamicTextColors?.muted || 'text-gray-600'}`}>
                   Average Response Time
                 </div>
               </div>

@@ -3,6 +3,7 @@
 
 import React from 'react';
 import { useLayoutComponent } from '@/hooks/useLayoutComponent';
+import { useTypography } from '@/hooks/useTypography';
 import { LayoutSection } from '@/components/layout/LayoutSection';
 import { 
   EditableAdaptiveHeadline, 
@@ -50,6 +51,11 @@ export default function MythVsRealityGrid(props: LayoutComponentProps) {
     contentSchema: CONTENT_SCHEMA
   });
 
+  // Typography hook
+  const { getTextStyle: getTypographyStyle } = useTypography();
+  const bodyLgStyle = getTypographyStyle('body-lg');
+  const bodyStyle = getTypographyStyle('body');
+
   // Parse myth/reality pairs from pipe-separated string
   const mythRealityPairs = blockContent.myth_reality_pairs 
     ? blockContent.myth_reality_pairs.split('|').reduce((pairs, item, index) => {
@@ -96,7 +102,7 @@ export default function MythVsRealityGrid(props: LayoutComponentProps) {
               backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
               colorTokens={colorTokens}
               variant="body"
-              className="text-lg max-w-3xl mx-auto"
+              style={{...bodyLgStyle}} className="max-w-3xl mx-auto"
               placeholder="Add a subheadline that sets up the myth vs reality comparison..."
               sectionId={sectionId}
               elementKey="subheadline"
@@ -113,7 +119,7 @@ export default function MythVsRealityGrid(props: LayoutComponentProps) {
               {/* Myth Card */}
               <div className="bg-red-50 border border-red-200 rounded-xl p-6 relative">
                 <div className="absolute -top-3 left-6">
-                  <span className="bg-red-500 text-white px-3 py-1 rounded-full text-sm font-medium">
+                  <span style={{...bodyStyle, fontSize: '0.875rem', fontWeight: '500'}} className="bg-red-500 text-white px-3 py-1 rounded-full">
                     Myth
                   </span>
                 </div>
@@ -124,7 +130,7 @@ export default function MythVsRealityGrid(props: LayoutComponentProps) {
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                       </svg>
                     </div>
-                    <p className="text-red-900 leading-relaxed">{pair.myth}</p>
+                    <p style={{...bodyStyle}} className="text-red-900 leading-relaxed">{pair.myth}</p>
                   </div>
                 </div>
               </div>
@@ -132,7 +138,7 @@ export default function MythVsRealityGrid(props: LayoutComponentProps) {
               {/* Reality Card */}
               <div className="bg-green-50 border border-green-200 rounded-xl p-6 relative">
                 <div className="absolute -top-3 left-6">
-                  <span className="bg-green-500 text-white px-3 py-1 rounded-full text-sm font-medium">
+                  <span style={{...bodyStyle, fontSize: '0.875rem', fontWeight: '500'}} className="bg-green-500 text-white px-3 py-1 rounded-full">
                     Reality
                   </span>
                 </div>
@@ -143,7 +149,7 @@ export default function MythVsRealityGrid(props: LayoutComponentProps) {
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                       </svg>
                     </div>
-                    <p className="text-green-900 leading-relaxed">{pair.reality}</p>
+                    <p style={{...bodyStyle}} className="text-green-900 leading-relaxed">{pair.reality}</p>
                   </div>
                 </div>
               </div>
@@ -154,7 +160,7 @@ export default function MythVsRealityGrid(props: LayoutComponentProps) {
         {/* Edit Mode: Instructions */}
         {mode === 'edit' && (
           <div className="mt-8 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-            <p className="text-blue-800 text-sm">
+            <p style={{...bodyStyle, fontSize: '0.875rem'}} className="text-blue-800">
               <strong>Edit Myth vs Reality Pairs:</strong> Use format "Myth: [misconception]|Reality: [truth]|Myth: [next misconception]|Reality: [next truth]"
             </p>
           </div>

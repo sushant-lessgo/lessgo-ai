@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useLayoutComponent } from '@/hooks/useLayoutComponent';
+import { useTypography } from '@/hooks/useTypography';
 import { LayoutSection } from '@/components/layout/LayoutSection';
 import { 
   EditableAdaptiveHeadline, 
@@ -73,10 +74,16 @@ export default function AccordionSteps(props: LayoutComponentProps) {
     ...props,
     contentSchema: CONTENT_SCHEMA
   });
+  
+  const { getTextStyle: getTypographyStyle } = useTypography();
 
   const stepTitles = blockContent.step_titles 
     ? blockContent.step_titles.split('|').map(item => item.trim()).filter(Boolean)
     : [];
+    
+  // Typography styles
+  const h3Style = getTypographyStyle('h3');
+  const bodyStyle = getTypographyStyle('body-lg');
 
   const stepDescriptions = blockContent.step_descriptions 
     ? blockContent.step_descriptions.split('|').map(item => item.trim()).filter(Boolean)
@@ -129,7 +136,7 @@ export default function AccordionSteps(props: LayoutComponentProps) {
               {index + 1}
             </div>
             <div>
-              <h3 className="text-lg font-semibold">{step.title}</h3>
+              <h3 style={h3Style} className="text-lg font-semibold">{step.title}</h3>
               {!isOpen && (
                 <p className={`text-sm mt-1 ${isOpen ? 'text-white/80' : mutedTextColor}`}>
                   {step.description.substring(0, 80)}...

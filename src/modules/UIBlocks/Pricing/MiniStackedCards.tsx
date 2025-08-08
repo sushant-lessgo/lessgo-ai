@@ -1,5 +1,6 @@
 import React from 'react';
 import { useLayoutComponent } from '@/hooks/useLayoutComponent';
+import { useTypography } from '@/hooks/useTypography';
 import { LayoutSection } from '@/components/layout/LayoutSection';
 import { 
   EditableAdaptiveHeadline, 
@@ -99,6 +100,13 @@ export default function MiniStackedCards(props: LayoutComponentProps) {
     contentSchema: CONTENT_SCHEMA
   });
 
+  const { getTextStyle: getTypographyStyle } = useTypography();
+  
+  // Create typography styles
+  const h3Style = getTypographyStyle('h3');
+  const h4Style = getTypographyStyle('h4');
+  const bodyLgStyle = getTypographyStyle('body-lg');
+
   const tierNames = blockContent.tier_names 
     ? blockContent.tier_names.split('|').map(item => item.trim()).filter(Boolean)
     : [];
@@ -153,9 +161,11 @@ export default function MiniStackedCards(props: LayoutComponentProps) {
 
   const mutedTextColor = dynamicTextColors?.muted || colorTokens.textMuted;
 
-  const MiniPricingCard = ({ tier, index }: {
+  const MiniPricingCard = ({ tier, index, h3Style, getTypographyStyle }: {
     tier: typeof pricingTiers[0];
     index: number;
+    h3Style: React.CSSProperties;
+    getTypographyStyle: (variant: string) => React.CSSProperties;
   }) => (
     <div className={`relative bg-white rounded-xl border p-6 transition-all duration-300 hover:shadow-lg hover:-translate-y-1 ${
       tier.isPopular 
@@ -179,12 +189,12 @@ export default function MiniStackedCards(props: LayoutComponentProps) {
 
       {/* Header */}
       <div className="text-center mb-4">
-        <h3 className="text-lg font-bold text-gray-900 mb-1">{tier.name}</h3>
+        <h3 style={h3Style} className="font-bold text-gray-900 mb-1">{tier.name}</h3>
         <p className={`text-xs ${mutedTextColor} mb-3`}>{tier.description}</p>
         
         {/* Price */}
         <div className="mb-3">
-          <span className="text-2xl font-bold text-gray-900">
+          <span style={getTypographyStyle('h2')} className="font-bold text-gray-900">
             {tier.price.includes('$') ? tier.price : `$${tier.price}`}
           </span>
           {tier.billingCycle && !tier.price.toLowerCase().includes('contact') && (
@@ -263,7 +273,8 @@ export default function MiniStackedCards(props: LayoutComponentProps) {
               backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
               colorTokens={colorTokens}
               variant="body"
-              className="text-lg mb-8 max-w-3xl mx-auto"
+              style={bodyLgStyle}
+              className="mb-8 max-w-3xl mx-auto"
               placeholder="Add optional subheadline to introduce mini pricing cards..."
               sectionId={sectionId}
               elementKey="subheadline"
@@ -275,7 +286,7 @@ export default function MiniStackedCards(props: LayoutComponentProps) {
         {mode === 'edit' ? (
           <div className="space-y-8">
             <div className="p-6 border border-gray-200 rounded-lg bg-gray-50">
-              <h4 className="font-semibold text-gray-700 mb-4">Mini Stacked Cards Content</h4>
+              <h4 style={h4Style} className="font-semibold text-gray-700 mb-4">Mini Stacked Cards Content</h4>
               
               <div className="space-y-4">
                 <EditableAdaptiveText
@@ -345,13 +356,15 @@ export default function MiniStackedCards(props: LayoutComponentProps) {
                   key={index}
                   tier={tier}
                   index={index}
+                  h3Style={h3Style}
+                  getTypographyStyle={getTypographyStyle}
                 />
               ))}
             </div>
 
             {/* Additional Features Comparison */}
             <div className="bg-white rounded-xl border border-gray-200 p-8 mb-12">
-              <h3 className="text-lg font-semibold text-gray-900 text-center mb-8">All plans include</h3>
+              <h3 style={h3Style} className="font-semibold text-gray-900 text-center mb-8">All plans include</h3>
               
               <div className="grid md:grid-cols-3 gap-8">
                 <div className="text-center">
@@ -360,7 +373,7 @@ export default function MiniStackedCards(props: LayoutComponentProps) {
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                     </svg>
                   </div>
-                  <h4 className="font-semibold text-gray-900 mb-2">Secure & Reliable</h4>
+                  <h4 style={h4Style} className="font-semibold text-gray-900 mb-2">Secure & Reliable</h4>
                   <p className={`text-sm ${mutedTextColor}`}>
                     Enterprise-grade security with 99.9% uptime guarantee
                   </p>
@@ -372,7 +385,7 @@ export default function MiniStackedCards(props: LayoutComponentProps) {
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z" />
                     </svg>
                   </div>
-                  <h4 className="font-semibold text-gray-900 mb-2">Expert Support</h4>
+                  <h4 style={h4Style} className="font-semibold text-gray-900 mb-2">Expert Support</h4>
                   <p className={`text-sm ${mutedTextColor}`}>
                     Get help when you need it from our expert support team
                   </p>
@@ -384,7 +397,7 @@ export default function MiniStackedCards(props: LayoutComponentProps) {
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                     </svg>
                   </div>
-                  <h4 className="font-semibold text-gray-900 mb-2">Easy Migration</h4>
+                  <h4 style={h4Style} className="font-semibold text-gray-900 mb-2">Easy Migration</h4>
                   <p className={`text-sm ${mutedTextColor}`}>
                     Upgrade or downgrade your plan anytime without hassle
                   </p>
@@ -394,32 +407,32 @@ export default function MiniStackedCards(props: LayoutComponentProps) {
 
             {/* FAQ Section */}
             <div className="bg-gray-50 rounded-xl p-8 border border-gray-100 mb-12">
-              <h3 className="text-lg font-semibold text-gray-900 text-center mb-8">Frequently Asked Questions</h3>
+              <h3 style={h3Style} className="font-semibold text-gray-900 text-center mb-8">Frequently Asked Questions</h3>
               
               <div className="grid md:grid-cols-2 gap-8">
                 <div>
-                  <h4 className="font-semibold text-gray-900 mb-2">Can I change plans later?</h4>
+                  <h4 style={h4Style} className="font-semibold text-gray-900 mb-2">Can I change plans later?</h4>
                   <p className={`text-sm ${mutedTextColor}`}>
                     Yes, you can upgrade or downgrade your plan at any time. Changes take effect immediately.
                   </p>
                 </div>
                 
                 <div>
-                  <h4 className="font-semibold text-gray-900 mb-2">Is there a free trial?</h4>
+                  <h4 style={h4Style} className="font-semibold text-gray-900 mb-2">Is there a free trial?</h4>
                   <p className={`text-sm ${mutedTextColor}`}>
                     Yes, all paid plans come with a 14-day free trial. No credit card required.
                   </p>
                 </div>
                 
                 <div>
-                  <h4 className="font-semibold text-gray-900 mb-2">What payment methods do you accept?</h4>
+                  <h4 style={h4Style} className="font-semibold text-gray-900 mb-2">What payment methods do you accept?</h4>
                   <p className={`text-sm ${mutedTextColor}`}>
                     We accept all major credit cards, PayPal, and bank transfers for enterprise plans.
                   </p>
                 </div>
                 
                 <div>
-                  <h4 className="font-semibold text-gray-900 mb-2">Do you offer refunds?</h4>
+                  <h4 style={h4Style} className="font-semibold text-gray-900 mb-2">Do you offer refunds?</h4>
                   <p className={`text-sm ${mutedTextColor}`}>
                     Yes, we offer a 30-day money-back guarantee on all plans. No questions asked.
                   </p>

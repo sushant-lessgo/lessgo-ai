@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useLayoutComponent } from '@/hooks/useLayoutComponent';
+import { useTypography } from '@/hooks/useTypography';
 import { LayoutSection } from '@/components/layout/LayoutSection';
 import { 
   EditableAdaptiveHeadline, 
@@ -84,6 +85,7 @@ const CONTENT_SCHEMA = {
 };
 
 export default function SegmentedTestimonials(props: LayoutComponentProps) {
+  const { getTextStyle: getTypographyStyle } = useTypography();
   
   const {
     sectionId,
@@ -99,6 +101,10 @@ export default function SegmentedTestimonials(props: LayoutComponentProps) {
     ...props,
     contentSchema: CONTENT_SCHEMA
   });
+
+  // Create typography styles
+  const h3Style = getTypographyStyle('h3');
+  const bodyLgStyle = getTypographyStyle('body-lg');
 
   const segmentNames = blockContent.segment_names 
     ? blockContent.segment_names.split('|').map(item => item.trim()).filter(Boolean)
@@ -253,7 +259,8 @@ export default function SegmentedTestimonials(props: LayoutComponentProps) {
               backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
               colorTokens={colorTokens}
               variant="body"
-              className="text-lg mb-6 max-w-3xl mx-auto"
+              style={bodyLgStyle}
+              className="mb-6 max-w-3xl mx-auto"
               placeholder="Add optional subheadline to introduce segmented testimonials..."
               sectionId={sectionId}
               elementKey="subheadline"
@@ -345,7 +352,7 @@ export default function SegmentedTestimonials(props: LayoutComponentProps) {
             
             {/* Segment Tabs */}
             <div className="space-y-4">
-              <h3 className="text-xl font-semibold text-gray-900 mb-6">Choose Your Industry</h3>
+              <h3 style={h3Style} className="font-semibold text-gray-900 mb-6">Choose Your Industry</h3>
               {segments.map((segment, index) => (
                 <SegmentTab
                   key={index}
@@ -377,7 +384,7 @@ export default function SegmentedTestimonials(props: LayoutComponentProps) {
                   
                   {/* Testimonial Content */}
                   <div className="p-6">
-                    <blockquote className="text-gray-800 text-lg leading-relaxed mb-6">
+                    <blockquote style={bodyLgStyle} className="text-gray-800 leading-relaxed mb-6">
                       "{activeSegmentData.quote}"
                     </blockquote>
                     
@@ -411,7 +418,7 @@ export default function SegmentedTestimonials(props: LayoutComponentProps) {
         {/* Industry Trust Indicators */}
         <div className="bg-gradient-to-r from-gray-50 to-white rounded-2xl p-8 border border-gray-100 mb-12">
           <div className="text-center">
-            <h3 className="text-xl font-semibold text-gray-900 mb-6">Trusted Across All Segments</h3>
+            <h3 style={h3Style} className="font-semibold text-gray-900 mb-6">Trusted Across All Segments</h3>
             
             <div className="grid md:grid-cols-4 gap-6">
               <div className="text-center">

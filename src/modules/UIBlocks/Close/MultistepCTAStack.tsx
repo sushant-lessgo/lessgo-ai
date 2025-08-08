@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useLayoutComponent } from '@/hooks/useLayoutComponent';
+import { useTypography } from '@/hooks/useTypography';
 import { LayoutSection } from '@/components/layout/LayoutSection';
 import { 
   EditableAdaptiveHeadline, 
@@ -83,6 +84,7 @@ const CONTENT_SCHEMA = {
 };
 
 export default function MultistepCTAStack(props: LayoutComponentProps) {
+  const { getTextStyle: getTypographyStyle } = useTypography();
   
   const {
     sectionId,
@@ -98,6 +100,11 @@ export default function MultistepCTAStack(props: LayoutComponentProps) {
     ...props,
     contentSchema: CONTENT_SCHEMA
   });
+  
+  // Create typography styles
+  const h2Style = getTypographyStyle('h2');
+  const h3Style = getTypographyStyle('h3');
+  const bodyLgStyle = getTypographyStyle('body-lg');
 
   const [activeStep, setActiveStep] = useState(0);
 
@@ -190,7 +197,7 @@ export default function MultistepCTAStack(props: LayoutComponentProps) {
         {/* Header */}
         <div className="flex items-start justify-between mb-6">
           <div className="flex-1">
-            <h3 className="text-xl font-bold text-gray-900 mb-2">{step.title}</h3>
+            <h3 className="font-bold text-gray-900 mb-2" style={h3Style}>{step.title}</h3>
             <p className={`text-sm ${mutedTextColor} mb-4`}>{step.description}</p>
             
             {/* Time Estimate */}
@@ -284,7 +291,8 @@ export default function MultistepCTAStack(props: LayoutComponentProps) {
               backgroundType={safeBackgroundType}
               colorTokens={colorTokens}
               variant="body"
-              className="text-lg mb-8 max-w-3xl mx-auto"
+              className="mb-8 max-w-3xl mx-auto"
+              style={bodyLgStyle}
               placeholder="Add optional subheadline to introduce the signup process..."
               sectionId={sectionId}
               elementKey="subheadline"
@@ -413,7 +421,7 @@ export default function MultistepCTAStack(props: LayoutComponentProps) {
 
             {/* Final CTA Section */}
             <div className="text-center bg-gradient-to-r from-blue-600 to-blue-700 rounded-2xl p-8 text-white mb-16">
-              <h3 className="text-2xl font-bold mb-4">Ready to Get Started?</h3>
+              <h3 className="font-bold mb-4" style={h2Style}>Ready to Get Started?</h3>
               <p className="text-blue-100 mb-8 max-w-2xl mx-auto">
                 Join thousands of users who have transformed their workflow with our simple 3-step process.
               </p>
@@ -439,7 +447,7 @@ export default function MultistepCTAStack(props: LayoutComponentProps) {
 
             {/* Trust Elements */}
             <div className="bg-gray-50 rounded-2xl p-8 border border-gray-100">
-              <h3 className="text-lg font-semibold text-gray-900 text-center mb-8">
+              <h3 className="font-semibold text-gray-900 text-center mb-8" style={h3Style}>
                 Why Our Process Works
               </h3>
               

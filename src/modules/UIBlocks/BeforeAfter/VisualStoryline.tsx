@@ -1,6 +1,7 @@
 import React from 'react';
 import { useLayoutComponent } from '@/hooks/useLayoutComponent';
 import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
+import { useTypography } from '@/hooks/useTypography';
 import { LayoutSection } from '@/components/layout/LayoutSection';
 import { 
   EditableAdaptiveHeadline, 
@@ -96,7 +97,10 @@ const StorylineStep = React.memo(({
   isLast,
   showImageToolbar,
   sectionId,
-  mode
+  mode,
+  h3Style,
+  bodyLgStyle,
+  labelStyle
 }: {
   stepNumber: number;
   title: string;
@@ -106,6 +110,9 @@ const StorylineStep = React.memo(({
   showImageToolbar: any;
   sectionId: string;
   mode: string;
+  h3Style: React.CSSProperties;
+  bodyLgStyle: React.CSSProperties;
+  labelStyle: React.CSSProperties;
 }) => {
   
   const getStepColor = (step: number) => {
@@ -124,7 +131,7 @@ const StorylineStep = React.memo(({
       <div className="absolute inset-0 flex items-center justify-center">
         <div className={`w-16 h-16 rounded-full ${colors.bg.replace('bg-', 'bg-opacity-20 bg-')} flex items-center justify-center`}>
           <div className={`w-8 h-8 rounded-full ${colors.bg} flex items-center justify-center`}>
-            <span className="text-white font-bold text-lg">{stepNumber}</span>
+            <span className="text-white font-bold" style={labelStyle}>{stepNumber}</span>
           </div>
         </div>
       </div>
@@ -143,12 +150,12 @@ const StorylineStep = React.memo(({
         <div className="flex-1 space-y-6">
           <div className="flex items-center space-x-4">
             <div className={`w-12 h-12 rounded-full ${colors.bg} ${colors.ring} ring-4 flex items-center justify-center shadow-lg`}>
-              <span className="text-white font-bold text-lg">{stepNumber}</span>
+              <span className="text-white font-bold" style={labelStyle}>{stepNumber}</span>
             </div>
-            <h3 className="text-2xl font-semibold text-gray-900">{title}</h3>
+            <h3 className="text-gray-900" style={h3Style}>{title}</h3>
           </div>
           
-          <p className="text-gray-600 leading-relaxed text-lg pl-16">
+          <p className="text-gray-600 leading-relaxed pl-16" style={bodyLgStyle}>
             {description}
           </p>
         </div>
@@ -186,6 +193,7 @@ const StorylineStep = React.memo(({
 StorylineStep.displayName = 'StorylineStep';
 
 export default function VisualStoryline(props: LayoutComponentProps) {
+  const { getTextStyle: getTypographyStyle } = useTypography();
   
   const {
     sectionId,
@@ -201,6 +209,11 @@ export default function VisualStoryline(props: LayoutComponentProps) {
     ...props,
     contentSchema: CONTENT_SCHEMA
   });
+  
+  // Create typography styles
+  const h3Style = getTypographyStyle('h3');
+  const bodyLgStyle = getTypographyStyle('body-lg');
+  const labelStyle = getTypographyStyle('label');
 
   const trustItems = blockContent.trust_items 
     ? blockContent.trust_items.split('|').map(item => item.trim()).filter(Boolean)
@@ -268,7 +281,8 @@ export default function VisualStoryline(props: LayoutComponentProps) {
               backgroundType={safeBackgroundType}
               colorTokens={colorTokens}
               variant="body"
-              className="text-lg mb-6 max-w-3xl mx-auto"
+              className="mb-6 max-w-3xl mx-auto"
+              style={bodyLgStyle}
               placeholder="Add optional subheadline to introduce your visual journey..."
               sectionId={sectionId}
               elementKey="subheadline"
@@ -322,6 +336,9 @@ export default function VisualStoryline(props: LayoutComponentProps) {
                   showImageToolbar={showImageToolbar}
                   sectionId={sectionId}
                   mode={mode}
+                  h3Style={h3Style}
+                  bodyLgStyle={bodyLgStyle}
+                  labelStyle={labelStyle}
                 />
               )}
             </div>
@@ -336,7 +353,7 @@ export default function VisualStoryline(props: LayoutComponentProps) {
               <div className="w-3 h-3 rounded-full bg-green-400" />
             </div>
             
-            <h3 className="text-xl font-semibold text-gray-900 mb-4">
+            <h3 className="text-gray-900 mb-4" style={h3Style}>
               Your Complete Transformation Journey
             </h3>
             

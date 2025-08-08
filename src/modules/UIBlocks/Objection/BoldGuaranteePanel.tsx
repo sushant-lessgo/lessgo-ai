@@ -3,6 +3,7 @@
 
 import React from 'react';
 import { useLayoutComponent } from '@/hooks/useLayoutComponent';
+import { useTypography } from '@/hooks/useTypography';
 import { LayoutSection } from '@/components/layout/LayoutSection';
 import { 
   EditableAdaptiveHeadline, 
@@ -71,6 +72,14 @@ export default function BoldGuaranteePanel(props: LayoutComponentProps) {
     contentSchema: CONTENT_SCHEMA
   });
 
+  // Typography hook
+  const { getTextStyle: getTypographyStyle } = useTypography();
+  const h1Style = getTypographyStyle('h1');
+  const h2Style = getTypographyStyle('h2');
+  const h3Style = getTypographyStyle('h3');
+  const bodyLgStyle = getTypographyStyle('body-lg');
+  const bodyStyle = getTypographyStyle('body');
+
   // Parse additional guarantees from pipe-separated string
   const additionalGuarantees = blockContent.additional_guarantees 
     ? blockContent.additional_guarantees.split('|').reduce((guarantees, item, index) => {
@@ -117,7 +126,7 @@ export default function BoldGuaranteePanel(props: LayoutComponentProps) {
               backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
               colorTokens={colorTokens}
               variant="body"
-              className="text-lg max-w-3xl mx-auto"
+              style={{...bodyLgStyle}} className="max-w-3xl mx-auto"
               placeholder="Add a subheadline that builds confidence in the guarantee..."
               sectionId={sectionId}
               elementKey="subheadline"
@@ -145,12 +154,12 @@ export default function BoldGuaranteePanel(props: LayoutComponentProps) {
             </div>
 
             {/* Main Guarantee */}
-            <h3 className="text-4xl font-bold mb-4">
+            <h3 style={{...h1Style, fontSize: 'clamp(2rem, 5vw, 2.5rem)'}} className="mb-4">
               {blockContent.main_guarantee}
             </h3>
 
             {/* Guarantee Details */}
-            <p className="text-xl leading-relaxed max-w-3xl mx-auto mb-8 text-green-50">
+            <p style={{...bodyLgStyle, fontSize: 'clamp(1.1rem, 2.5vw, 1.25rem)'}} className="leading-relaxed max-w-3xl mx-auto mb-8 text-green-50">
               {blockContent.guarantee_details}
             </p>
 
@@ -183,13 +192,13 @@ export default function BoldGuaranteePanel(props: LayoutComponentProps) {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                   </svg>
                 </div>
-                <h4 className="text-xl font-bold text-gray-900">
+                <h4 style={{...h3Style}} className="text-gray-900">
                   {guarantee.title}
                 </h4>
               </div>
 
               {/* Guarantee Description */}
-              <p className="text-gray-700 leading-relaxed">
+              <p style={{...bodyStyle}} className="text-gray-700 leading-relaxed">
                 {guarantee.description}
               </p>
             </div>
@@ -207,7 +216,7 @@ export default function BoldGuaranteePanel(props: LayoutComponentProps) {
               </svg>
             </div>
 
-            <h3 className="text-2xl font-bold text-gray-900 mb-4">
+            <h3 style={{...h2Style}} className="text-gray-900 mb-4">
               Let's Talk About Risk
             </h3>
 
@@ -219,7 +228,7 @@ export default function BoldGuaranteePanel(props: LayoutComponentProps) {
                 backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
                 colorTokens={colorTokens}
                 variant="body"
-                className="text-lg text-gray-700 leading-relaxed"
+                style={{...bodyLgStyle}} className="text-gray-700 leading-relaxed"
                 placeholder="Add text about where the real risk lies..."
                 sectionId={sectionId}
                 elementKey="risk_reversal_text"
@@ -233,20 +242,20 @@ export default function BoldGuaranteePanel(props: LayoutComponentProps) {
                 <svg className="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                 </svg>
-                <span className="text-sm font-medium">Secure Payment</span>
+                <span style={{...bodyStyle, fontSize: '0.875rem'}} className="">Secure Payment</span>
               </div>
               <div className="flex items-center space-x-2 text-gray-600">
                 <svg className="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                 </svg>
-                <span className="text-sm font-medium">100% Protected</span>
+                <span style={{...bodyStyle, fontSize: '0.875rem'}} className="">100% Protected</span>
               </div>
               <div className="flex items-center space-x-2 text-gray-600">
                 <svg className="w-5 h-5 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                 </svg>
-                <span className="text-sm font-medium">Instant Access</span>
+                <span style={{...bodyStyle, fontSize: '0.875rem'}} className="">Instant Access</span>
               </div>
             </div>
           </div>
@@ -255,7 +264,7 @@ export default function BoldGuaranteePanel(props: LayoutComponentProps) {
         {/* Edit Mode: Instructions */}
         {mode === 'edit' && (
           <div className="mt-8 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-            <p className="text-blue-800 text-sm">
+            <p style={{...bodyStyle, fontSize: '0.875rem'}} className="text-blue-800">
               <strong>Edit Additional Guarantees:</strong> Use format "[guarantee title]|[guarantee description]|[next title]|[next description]"
             </p>
           </div>

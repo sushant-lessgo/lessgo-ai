@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useLayoutComponent } from '@/hooks/useLayoutComponent';
+import { useTypography } from '@/hooks/useTypography';
 import { LayoutSection } from '@/components/layout/LayoutSection';
 import { 
   EditableAdaptiveHeadline, 
@@ -98,6 +99,13 @@ export default function FeatureMatrix(props: LayoutComponentProps) {
     ...props,
     contentSchema: CONTENT_SCHEMA
   });
+
+  const { getTextStyle: getTypographyStyle } = useTypography();
+  
+  // Create typography styles
+  const h3Style = getTypographyStyle('h3');
+  const h4Style = getTypographyStyle('h4');
+  const bodyLgStyle = getTypographyStyle('body-lg');
 
   const [activeCategory, setActiveCategory] = useState(0);
 
@@ -222,7 +230,8 @@ export default function FeatureMatrix(props: LayoutComponentProps) {
               backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
               colorTokens={colorTokens}
               variant="body"
-              className="text-lg mb-8 max-w-3xl mx-auto"
+              style={bodyLgStyle}
+              className="mb-8 max-w-3xl mx-auto"
               placeholder="Add optional subheadline to introduce feature comparison..."
               sectionId={sectionId}
               elementKey="subheadline"
@@ -234,7 +243,7 @@ export default function FeatureMatrix(props: LayoutComponentProps) {
         {mode === 'edit' ? (
           <div className="space-y-8">
             <div className="p-6 border border-gray-200 rounded-lg bg-gray-50">
-              <h4 className="font-semibold text-gray-700 mb-4">Feature Matrix Content</h4>
+              <h4 style={h4Style} className="font-semibold text-gray-700 mb-4">Feature Matrix Content</h4>
               
               <div className="space-y-4">
                 <EditableAdaptiveText
@@ -312,8 +321,8 @@ export default function FeatureMatrix(props: LayoutComponentProps) {
                     </div>
                   )}
                   
-                  <h3 className="text-xl font-bold text-gray-900 mb-2">{tier.name}</h3>
-                  <div className="text-2xl font-bold text-gray-900 mb-2">{tier.price}</div>
+                  <h3 style={h3Style} className="font-bold text-gray-900 mb-2">{tier.name}</h3>
+                  <div style={getTypographyStyle('h2')} className="font-bold text-gray-900 mb-2">{tier.price}</div>
                   <p className={`text-sm ${mutedTextColor} mb-4`}>{tier.description}</p>
                   
                   <CTAButton
@@ -391,7 +400,7 @@ export default function FeatureMatrix(props: LayoutComponentProps) {
         {/* Enterprise Features Highlight */}
         <div className="bg-gradient-to-r from-gray-900 to-gray-800 rounded-2xl p-8 text-white mt-12 mb-12">
           <div className="text-center">
-            <h3 className="text-xl font-semibold mb-6">Enterprise-Grade Features</h3>
+            <h3 style={h3Style} className="font-semibold mb-6">Enterprise-Grade Features</h3>
             
             <div className="grid md:grid-cols-4 gap-6">
               <div className="text-center">
