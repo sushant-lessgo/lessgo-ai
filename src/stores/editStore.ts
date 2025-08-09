@@ -132,6 +132,7 @@ function createInitialState(tokenId: string): EditStore {
     multiSelection: [] as string[],
     isTextEditing: false,
     textEditingElement: undefined as { sectionId: string; elementKey: string } | undefined,
+    formattingInProgress: false,
     leftPanel: {
       width: 300,
       collapsed: false,

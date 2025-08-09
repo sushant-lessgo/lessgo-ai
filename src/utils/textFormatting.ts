@@ -435,3 +435,276 @@ export const commonFormats = {
   quote: { fontSize: '1.125rem', fontStyle: 'italic', color: '#4B5563' },
   code: { fontFamily: 'ui-monospace, monospace', backgroundColor: '#F3F4F6', padding: '0.25rem' },
 } as const;
+
+// ===== PARTIAL TEXT SELECTION FORMATTING =====
+// Implementation from selection.md for applying formats to selected text only
+
+import { sanitizeHTML, isValidFormattingHTML } from './htmlSanitization';
+
+export interface PartialFormatResult {
+  success: boolean;
+  error?: string;
+  formattedHTML?: string;
+  affectedRange?: Range;
+}
+
+/**
+ * Apply formatting to currently selected text using Range API
+ * Implements the selection.md approach with surroundContents()
+ */
+export function formatSelectedText(options: Partial<TextFormatState>): PartialFormatResult {
+  const selection = window.getSelection();
+  
+  if (!selection || !selection.rangeCount) {
+    return { success: false, error: 'No text selection found' };
+  }
+
+  const range = selection.getRangeAt(0);
+  
+  if (range.collapsed) {
+    return { success: false, error: 'Selection is collapsed (no text selected)' };
+  }
+
+  try {
+    // Create wrapper span element
+    const span = document.createElement('span');
+    
+    // Apply styles based on format options using existing formatRules
+    Object.entries(options).forEach(([key, value]) => {
+      const rule = formatRules[key as keyof TextFormatState];
+      if (rule && value !== undefined) {
+        const cssValue = rule.transform ? rule.transform(value) : String(value);
+        (span.style as any)[rule.cssProperty] = cssValue;
+      }
+    });
+
+    // Extract selected content
+    const selectedContent = range.extractContents();
+    
+    // Wrap the content in our formatted span
+    span.appendChild(selectedContent);
+    
+    // Insert the formatted span at the selection point
+    range.insertNode(span);
+    
+    // Clear the selection to avoid confusion
+    selection.removeAllRanges();
+    
+    console.log('✨ Applied partial text formatting:', {
+      text: span.textContent?.substring(0, 50),
+      appliedFormats: options,
+    });
+
+    // Get the containing element's HTML for storage
+    const containingElement = span.closest('[data-element-key]') as HTMLElement;
+    const rawHTML = containingElement?.innerHTML || '';
+    
+    // Sanitize the HTML before returning
+    const sanitizedHTML = sanitizeHTML(rawHTML);
+    
+    console.log('✨ Partial text formatting complete:', {
+      rawHTML: rawHTML.substring(0, 100),
+      sanitizedHTML: sanitizedHTML.substring(0, 100),
+      isValid: isValidFormattingHTML(sanitizedHTML),
+    });
+
+    return {
+      success: true,
+      formattedHTML: sanitizedHTML,
+      affectedRange: range,
+    };
+  } catch (error) {
+    console.error('❌ Failed to format selected text:', error);
+    return { 
+      success: false, 
+      error: error instanceof Error ? error.message : 'Unknown formatting error' 
+    };
+  }
+}
+
+/**
+ * Toggle specific format on selected text
+ * Combines current formatting with new format intelligently
+ */
+export function toggleFormatOnSelection(formatKey: keyof TextFormatState, value?: any): PartialFormatResult {
+  const currentFormat = getSelectionFormatting();
+  const newFormat: Partial<TextFormatState> = {};
+
+  // Toggle or set the specific format
+  switch (formatKey) {
+    case 'bold':
+      newFormat.bold = !currentFormat.bold;
+      break;
+    case 'italic':
+      newFormat.italic = !currentFormat.italic;
+      break;
+    case 'underline':
+      newFormat.underline = !currentFormat.underline;
+      break;
+    case 'color':
+      newFormat.color = value || '#000000';
+      break;
+    case 'fontSize':
+      newFormat.fontSize = value || '16px';
+      break;
+    case 'fontFamily':
+      newFormat.fontFamily = value || 'inherit';
+      break;
+    case 'textAlign':
+      newFormat.textAlign = value || 'left';
+      break;
+    default:
+      (newFormat as any)[formatKey] = value;
+  }
+
+  return formatSelectedText(newFormat);
+}
+
+/**
+ * Get current formatting state of selected text
+ * Returns the combined formatting properties of the selection
+ */
+export function getSelectionFormatting(): Partial<TextFormatState> {
+  const selection = window.getSelection();
+  
+  if (!selection || !selection.rangeCount) {
+    return {};
+  }
+
+  const range = selection.getRangeAt(0);
+  
+  if (range.collapsed) {
+    return {};
+  }
+
+  // Get the computed style of the range's start container
+  const startElement = range.startContainer.nodeType === Node.TEXT_NODE
+    ? range.startContainer.parentElement
+    : range.startContainer as HTMLElement;
+
+  if (!startElement) {
+    return {};
+  }
+
+  const computedStyle = window.getComputedStyle(startElement);
+
+  return {
+    bold: computedStyle.fontWeight === 'bold' || parseInt(computedStyle.fontWeight) >= 600,
+    italic: computedStyle.fontStyle === 'italic',
+    underline: computedStyle.textDecoration.includes('underline'),
+    color: computedStyle.color,
+    fontSize: computedStyle.fontSize,
+    fontFamily: computedStyle.fontFamily,
+    textAlign: computedStyle.textAlign as any,
+    lineHeight: computedStyle.lineHeight,
+    letterSpacing: computedStyle.letterSpacing,
+    textTransform: computedStyle.textTransform as any,
+  };
+}
+
+/**
+ * Remove formatting from selected text
+ * Unwraps formatting spans while preserving text content
+ */
+export function removeFormattingFromSelection(): PartialFormatResult {
+  const selection = window.getSelection();
+  
+  if (!selection || !selection.rangeCount) {
+    return { success: false, error: 'No text selection found' };
+  }
+
+  const range = selection.getRangeAt(0);
+  
+  if (range.collapsed) {
+    return { success: false, error: 'Selection is collapsed (no text selected)' };
+  }
+
+  try {
+    // Find all formatted spans within the selection
+    const container = range.commonAncestorContainer;
+    const walker = document.createTreeWalker(
+      container,
+      NodeFilter.SHOW_ELEMENT,
+      {
+        acceptNode: (node: Node) => {
+          const element = node as HTMLElement;
+          return element.tagName === 'SPAN' && element.hasAttribute('style')
+            ? NodeFilter.FILTER_ACCEPT
+            : NodeFilter.FILTER_SKIP;
+        }
+      }
+    );
+
+    const spansToUnwrap: HTMLSpanElement[] = [];
+    let currentNode = walker.nextNode();
+    
+    while (currentNode) {
+      spansToUnwrap.push(currentNode as HTMLSpanElement);
+      currentNode = walker.nextNode();
+    }
+
+    // Unwrap each formatting span
+    spansToUnwrap.forEach(span => {
+      const parent = span.parentNode;
+      if (parent) {
+        while (span.firstChild) {
+          parent.insertBefore(span.firstChild, span);
+        }
+        parent.removeChild(span);
+      }
+    });
+
+    console.log('🧹 Removed formatting from selection:', {
+      spansRemoved: spansToUnwrap.length,
+    });
+
+    // Get the containing element's HTML for storage
+    const containingElement = range.startContainer.parentElement?.closest('[data-element-key]') as HTMLElement;
+    const rawHTML = containingElement?.innerHTML || '';
+    
+    // Sanitize the HTML before returning
+    const sanitizedHTML = sanitizeHTML(rawHTML);
+
+    return {
+      success: true,
+      formattedHTML: sanitizedHTML,
+      affectedRange: range,
+    };
+  } catch (error) {
+    console.error('❌ Failed to remove formatting:', error);
+    return { 
+      success: false, 
+      error: error instanceof Error ? error.message : 'Unknown error removing formatting' 
+    };
+  }
+}
+
+/**
+ * Utility to check if current selection has any formatting
+ */
+export function selectionHasFormatting(): boolean {
+  const selection = window.getSelection();
+  
+  if (!selection || !selection.rangeCount) {
+    return false;
+  }
+
+  const range = selection.getRangeAt(0);
+  const container = range.commonAncestorContainer;
+  
+  // Check if selection contains any formatted spans
+  const walker = document.createTreeWalker(
+    container,
+    NodeFilter.SHOW_ELEMENT,
+    {
+      acceptNode: (node: Node) => {
+        const element = node as HTMLElement;
+        return element.tagName === 'SPAN' && element.hasAttribute('style')
+          ? NodeFilter.FILTER_ACCEPT
+          : NodeFilter.FILTER_SKIP;
+      }
+    }
+  );
+
+  return walker.nextNode() !== null;
+}

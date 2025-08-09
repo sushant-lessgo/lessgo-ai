@@ -5,6 +5,17 @@ import { useTextToolbarIntegration } from '@/hooks/useTextToolbarIntegration';
 import { useInlineEditorAutoSave } from '@/hooks/useInlineEditorAutoSave';
 import { useTextSelection } from '@/hooks/useTextSelection';
 import { getEditingIndicatorColors } from '@/utils/textContrastUtils';
+import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
+import { sanitizeHTML, isValidFormattingHTML } from '@/utils/htmlSanitization';
+import { 
+  getInteractionSource, 
+  isInEditorContext, 
+  shouldIgnoreSelectionChange,
+  shouldIgnoreFocusChange,
+  setComposing,
+  logInteractionTimeline 
+} from '@/utils/interactionTracking';
+import { useGlobalSelectionHandler } from '@/hooks/useGlobalSelectionHandler';
 
 export interface TextFormatState {
   bold: boolean;
@@ -133,6 +144,9 @@ export function InlineTextEditor({
     applyFormatToSelection,
     handleSelectionChange 
   } = useTextSelection(editorRef);
+  
+  // Get store actions for text editing mode management
+  const { setTextEditingMode, formattingInProgress } = useEditStore();
 
   // Get dynamic editing indicator colors based on background type and actual background
   const editingColors = getEditingIndicatorColors(backgroundType, colorTokens, sectionBackground);
@@ -189,11 +203,15 @@ export function InlineTextEditor({
     setFormatHistory(prev => [...prev, newFormatState].slice(-10));
   }, [formatState, onFormatChange]);
 
-  // Content change handling
+  // Content change handling - Enhanced to support HTML storage
   const handleContentChange = useCallback(() => {
     if (!editorRef.current) return;
     
-    const newContent = editorRef.current.textContent || '';
+    // Check if element contains formatted spans - if so, use HTML
+    const hasFormattedContent = editorRef.current.querySelector('span[style]');
+    const newContent = hasFormattedContent 
+      ? editorRef.current.innerHTML 
+      : editorRef.current.textContent || '';
     
     if (newContent !== currentContent) {
       // Store cursor position before any state updates
@@ -202,6 +220,12 @@ export function InlineTextEditor({
       const cursorPosition = range?.startOffset || 0;
       
       setCurrentContent(newContent);
+      
+      console.log('📝 Content changed:', {
+        hasFormattedContent,
+        contentType: hasFormattedContent ? 'HTML' : 'TEXT',
+        content: newContent.substring(0, 100),
+      });
       
       // Only call onContentChange if not actively typing to prevent re-renders
       // Store the content locally and defer the store update
@@ -249,6 +273,78 @@ export function InlineTextEditor({
     }
   }, [currentContent, onContentChange, autoSave.enabled, debouncedSave, trackContentChange, sectionId, elementKey, formatState]);
 
+  // Text editing exit handler - consolidates all exit logic
+  const exitTextEditingMode = useCallback(() => {
+    // Don't exit if formatting is in progress (Fix #2: Split User Intent)
+    if (formattingInProgress) {
+      console.log('📝 Skipping exit - formatting in progress');
+      return;
+    }
+    
+    // Don't exit if interaction is from toolbar
+    if (shouldIgnoreFocusChange()) {
+      console.log('📝 Skipping exit - toolbar interaction');
+      return;
+    }
+    
+    console.log('📝 Exiting text editing mode with hard cleanup');
+    setIsEditing(false);
+    setTextEditingMode(false); // Exit text editing mode in store
+    
+    // Hard cleanup on mode switch (Fix #4)
+    // Clear selection events and force restore if needed
+    try {
+      const { restoreSelectionEvents } = require('@/utils/selectionGuard');
+      restoreSelectionEvents();
+    } catch (error) {
+      console.warn('📝 Selection guard cleanup failed:', error);
+    }
+    
+    // Clear any active selections
+    const selection = window.getSelection();
+    if (selection) {
+      selection.removeAllRanges();
+    }
+    
+    // Clear actively typing flag and save any pending content
+    if (editorRef.current) {
+      editorRef.current.dataset.activelyTyping = 'false';
+      
+      // Clear safety timeout
+      const timeoutId = editorRef.current.dataset.safetyClearTimeout;
+      if (timeoutId) {
+        clearTimeout(parseInt(timeoutId));
+        delete editorRef.current.dataset.safetyClearTimeout;
+      }
+      
+      // Save any pending content
+      const pendingContent = editorRef.current.dataset.pendingContent;
+      if (pendingContent) {
+        console.log('📝 Saving pending content on exit:', pendingContent);
+        editorRef.current.dataset.lastSaveTime = Date.now().toString();
+        onContentChange(pendingContent);
+        delete editorRef.current.dataset.pendingContent;
+      }
+      
+      // Remove editing attributes
+      editorRef.current.removeAttribute('data-editing');
+      
+      // Blur the element to ensure it loses focus
+      editorRef.current.blur();
+    }
+    
+    // Trigger auto-save flush if enabled
+    if (autoSave.enabled) {
+      debouncedSave.flush();
+    }
+    
+    // Reset local selection state
+    setCurrentSelection(null);
+    selectionRef.current = null;
+    
+    console.log('🧹 Hard cleanup completed on text editing mode exit');
+  }, [formattingInProgress, setTextEditingMode, onContentChange, autoSave.enabled, debouncedSave]);
+
   // Event handlers
   const handleFocus = useCallback(() => {
     console.log('📝 InlineTextEditor handleFocus called');
@@ -270,50 +366,32 @@ export function InlineTextEditor({
     onFocus();
   }, [onFocus]);
 
-  const handleBlur = useCallback(() => {
+  const handleBlur = useCallback((e: React.FocusEvent) => {
     console.log('📝 InlineTextEditor handleBlur called');
-    setIsEditing(false);
+    logInteractionTimeline('focusout', { 
+      relatedTarget: e.relatedTarget?.nodeName,
+      interactionSource: getInteractionSource()
+    });
     
-    // Clear actively typing flag and save any pending content
-    if (editorRef.current) {
-      editorRef.current.dataset.activelyTyping = 'false';
-      
-      // Clear safety timeout
-      const timeoutId = editorRef.current.dataset.safetyClearTimeout;
-      if (timeoutId) {
-        clearTimeout(parseInt(timeoutId));
-        delete editorRef.current.dataset.safetyClearTimeout;
-      }
-      
-      // Get the current content directly from the element
-      const currentElementContent = editorRef.current.textContent || '';
-      console.log('📝 Current element content on blur:', currentElementContent);
-      console.log('📝 Stored current content:', currentContent);
-      
-      // Save any pending content that was deferred during typing
-      if (editorRef.current.dataset.pendingContent) {
-        const pendingContent = editorRef.current.dataset.pendingContent;
-        console.log('📝 Saving pending content:', pendingContent);
-        editorRef.current.dataset.lastSaveTime = Date.now().toString();
-        onContentChange(pendingContent);
-        delete editorRef.current.dataset.pendingContent;
-      } else if (currentElementContent !== currentContent) {
-        // If no pending content but element content differs, save the current element content
-        console.log('📝 Saving current element content (no pending):', currentElementContent);
-        editorRef.current.dataset.lastSaveTime = Date.now().toString();
-        onContentChange(currentElementContent);
-      }
+    // Check if focus moved to toolbar (portal-safe)
+    const editorId = `editor-${sectionId}-${elementKey}`;
+    if (e.relatedTarget && isInEditorContext(e.relatedTarget, editorId)) {
+      console.log('📝 Focus moved to toolbar - not exiting');
+      return;
     }
     
+    // Enhanced blur: Exit text editing mode and save content
+    exitTextEditingMode();
     onBlur();
-    
-    // Final save on blur
-    if (autoSave.enabled) {
-      debouncedSave.flush();
-    }
-  }, [onBlur, autoSave.enabled, debouncedSave, onContentChange, currentContent]);
+  }, [exitTextEditingMode, onBlur, sectionId, elementKey]);
 
   const handleInternalSelectionChange = useCallback(() => {
+    // Check if we should ignore this selection change
+    if (shouldIgnoreSelectionChange()) {
+      console.log('📝 Ignoring selection change per interaction tracking');
+      return;
+    }
+    
     // Check if element is in text editing mode or actively typing - if so, don't interfere
     if (editorRef.current?.hasAttribute('data-editing') || 
         editorRef.current?.dataset.activelyTyping === 'true') {
@@ -343,40 +421,28 @@ export function InlineTextEditor({
       case 'Enter':
         if (config.enterKeyBehavior === 'save') {
           e.preventDefault();
-          // Save any pending content before blur
-          if (editorRef.current?.dataset.pendingContent) {
-            const pendingContent = editorRef.current.dataset.pendingContent;
-            editorRef.current.dataset.lastSaveTime = Date.now().toString();
-            onContentChange(pendingContent);
-            delete editorRef.current.dataset.pendingContent;
-          }
-          editorRef.current?.blur();
+          exitTextEditingMode();
         } else if (config.enterKeyBehavior === 'ignore') {
           e.preventDefault();
         }
         break;
         
       case 'Escape':
+        // Enhanced ESC key handling: Always exit text editing mode
+        e.preventDefault();
+        
         if (config.escapeKeyBehavior === 'cancel') {
-          e.preventDefault();
+          // Cancel changes - restore original content
           setCurrentContent(content);
           if (editorRef.current) {
             editorRef.current.textContent = content;
             // Clear any pending content since we're canceling
             delete editorRef.current.dataset.pendingContent;
           }
-          editorRef.current?.blur();
-        } else if (config.escapeKeyBehavior === 'save') {
-          e.preventDefault();
-          // Save any pending content before blur
-          if (editorRef.current?.dataset.pendingContent) {
-            const pendingContent = editorRef.current.dataset.pendingContent;
-            editorRef.current.dataset.lastSaveTime = Date.now().toString();
-            onContentChange(pendingContent);
-            delete editorRef.current.dataset.pendingContent;
-          }
-          editorRef.current?.blur();
         }
+        
+        // Always exit text editing mode on ESC
+        exitTextEditingMode();
         break;
         
       // Format shortcuts
@@ -401,7 +467,7 @@ export function InlineTextEditor({
         }
         break;
     }
-  }, [config, content, formatState, applyFormat]);
+  }, [config, content, formatState, applyFormat, exitTextEditingMode]);
 
   // Auto-formatting
   useEffect(() => {
@@ -456,6 +522,48 @@ export function InlineTextEditor({
     }
   }, [currentContent, isEditing, elementKey, config.accessibility.announceChanges]);
 
+  // Click outside detection - exit text editing mode when clicking outside
+  useEffect(() => {
+    if (!isEditing) return;
+    
+    const handleClickOutside = (event: MouseEvent) => {
+      if (editorRef.current && !editorRef.current.contains(event.target as Node)) {
+        console.log('📝 Click outside detected - exiting text editing mode');
+        exitTextEditingMode();
+      }
+    };
+    
+    // Add listener with slight delay to avoid immediate trigger
+    const timeoutId = setTimeout(() => {
+      document.addEventListener('mousedown', handleClickOutside);
+    }, 100);
+    
+    return () => {
+      clearTimeout(timeoutId);
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isEditing, exitTextEditingMode]);
+
+  // ESC key global handler - exit text editing mode from anywhere
+  useEffect(() => {
+    if (!isEditing) return;
+    
+    const handleGlobalKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        console.log('📝 Global ESC key detected - exiting text editing mode');
+        event.preventDefault();
+        exitTextEditingMode();
+      }
+    };
+    
+    // Add global ESC handler
+    window.addEventListener('keydown', handleGlobalKeyDown);
+    
+    return () => {
+      window.removeEventListener('keydown', handleGlobalKeyDown);
+    };
+  }, [isEditing, exitTextEditingMode]);
+
   // Register editor on mount
   useEffect(() => {
     if (editorRef.current) {
@@ -500,12 +608,37 @@ export function InlineTextEditor({
       if (shouldSync && !mightBeUserContentEcho) {
         console.log('📝 Syncing external content change:', content);
         setCurrentContent(content);
-        editorRef.current.textContent = content;
+        
+        // Check if incoming content is HTML (contains tags) or plain text
+        const isHtmlContent = /<[^>]*>/g.test(content);
+        
+        if (isHtmlContent) {
+          // Sanitize HTML content before setting
+          const sanitizedContent = sanitizeHTML(content);
+          
+          if (isValidFormattingHTML(sanitizedContent)) {
+            editorRef.current.innerHTML = sanitizedContent;
+            console.log('📝 Applied sanitized HTML content:', sanitizedContent.substring(0, 100));
+          } else {
+            // Fallback to plain text if HTML is invalid
+            console.warn('📝 Invalid HTML content, falling back to plain text');
+            editorRef.current.textContent = content.replace(/<[^>]*>/g, '');
+          }
+        } else {
+          // Set as plain text
+          editorRef.current.textContent = content;
+          console.log('📝 Applied plain text content:', content.substring(0, 100));
+        }
       } else {
         console.log('📝 Skipping content sync - likely user content echo or user is editing');
         // Just update our internal state to match the current DOM content
-        if (currentElementContent !== currentContent) {
-          setCurrentContent(currentElementContent);
+        const hasFormattedContent = editorRef.current.querySelector('span[style]');
+        const actualContent = hasFormattedContent 
+          ? editorRef.current.innerHTML 
+          : editorRef.current.textContent || '';
+          
+        if (actualContent !== currentContent) {
+          setCurrentContent(actualContent);
         }
       }
     }
@@ -556,6 +689,20 @@ export function InlineTextEditor({
       executeFormatRef.current = applyFormat;
     }
   }, [executeFormatRef, applyFormat]);
+  
+  // Global selection and focus handlers with AbortController
+  const editorId = `editor-${sectionId}-${elementKey}`;
+  useGlobalSelectionHandler({
+    editorId,
+    enabled: isEditing,
+    onFocusOut: (e) => {
+      // Additional focus out handling if needed
+      if (!isInEditorContext(e.target, editorId)) {
+        console.log('📝 Focus left editor context completely');
+        exitTextEditingMode();
+      }
+    }
+  });
 
   // Dynamic styles based on background type - use CSS custom properties
   const dynamicStyles = {
@@ -583,6 +730,14 @@ export function InlineTextEditor({
       onKeyDown={handleKeyDown}
       onMouseUp={handleInternalSelectionChange}
       onKeyUp={handleInternalSelectionChange}
+      onCompositionStart={() => {
+        setComposing(true);
+        logInteractionTimeline('compositionstart');
+      }}
+      onCompositionEnd={() => {
+        setComposing(false);
+        logInteractionTimeline('compositionend');
+      }}
       onClick={(e) => {
         console.log('📝 InlineTextEditor clicked');
         // Don't prevent default - we want normal click behavior
@@ -596,6 +751,7 @@ export function InlineTextEditor({
       style={dynamicStyles}
       data-section-id={sectionId}
       data-element-key={elementKey}
+      data-editor-id={`editor-${sectionId}-${elementKey}`}
       data-editing={isEditing}
       data-valid={isValid}
       data-background-type={backgroundType}
@@ -605,7 +761,17 @@ export function InlineTextEditor({
       aria-invalid={!isValid}
       tabIndex={0}
     >
-      {currentContent || placeholder}
+      {/* Render HTML content if it contains formatting, otherwise plain text */}
+      {(() => {
+        const isHtmlContent = /<[^>]*>/g.test(currentContent);
+        if (isHtmlContent && isValidFormattingHTML(currentContent)) {
+          // Sanitize before rendering
+          const sanitizedContent = sanitizeHTML(currentContent);
+          return <span dangerouslySetInnerHTML={{ __html: sanitizedContent }} />;
+        } else {
+          return currentContent || placeholder;
+        }
+      })()}
     </Element>
   );
 }

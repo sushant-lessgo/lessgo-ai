@@ -111,6 +111,9 @@ export interface UIActions {
   // Text Editing Management
   setTextEditingMode: (isEditing: boolean, element?: { sectionId: string; elementKey: string }) => void;
   
+  // Formatting State Management
+  setFormattingInProgress: (isInProgress: boolean) => void;
+  
   // Panel Management
   setLeftPanelWidth: (width: number) => void;
   toggleLeftPanel: () => void;

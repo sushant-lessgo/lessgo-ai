@@ -1,8 +1,24 @@
 // TextToolbarMVP.tsx - Step 4: MVP Text Toolbar Implementation
-// Clean, focused toolbar with only essential features
+// Clean, focused toolbar with only essential features + partial selection support
 import React, { useState, useRef, useEffect, useMemo } from 'react';
+import { debounce } from 'lodash';
 import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
 import { useToolbarVisibility } from '@/hooks/useSelectionPriority';
+import { useSelectionPreserver } from '@/hooks/useSelectionPreserver';
+import { withSelectionGuard } from '@/utils/selectionGuard';
+import { 
+  formatSelectedText, 
+  toggleFormatOnSelection, 
+  getSelectionFormatting, 
+  removeFormattingFromSelection,
+  type PartialFormatResult 
+} from '@/utils/textFormatting';
+import { 
+  setInteractionSource, 
+  clearInteractionSource, 
+  withInteractionSource,
+  logInteractionTimeline 
+} from '@/utils/interactionTracking';
 
 interface TextToolbarMVPProps {
   elementSelection: any;
@@ -74,7 +90,11 @@ export function TextToolbarMVP({ elementSelection, position, contextActions }: T
   const colorPickerRef = useRef<HTMLDivElement>(null);
   const fontSizePickerRef = useRef<HTMLDivElement>(null);
 
-  const { updateElementContent } = useEditStore();
+  const { updateElementContent, setFormattingInProgress } = useEditStore();
+  const { saveSelection, restoreSelection, hasSelection, cleanup: cleanupSelection } = useSelectionPreserver();
+
+  // Track if user has text selected within the element
+  const [hasTextSelection, setHasTextSelection] = useState(false);
 
   // Debug logging
   useEffect(() => {
@@ -120,65 +140,254 @@ export function TextToolbarMVP({ elementSelection, position, contextActions }: T
     });
   }, [elementSelection]);
 
-  // Apply formatting to element
-  const applyFormat = (newFormat: Partial<MVPFormatState>) => {
+  // Check for active text selection within the element
+  useEffect(() => {
+    const checkSelection = () => {
+      const selection = window.getSelection();
+      if (!selection || !selection.rangeCount || selection.isCollapsed) {
+        setHasTextSelection(false);
+        return;
+      }
+
+      const range = selection.getRangeAt(0);
+      const targetElement = document.querySelector(
+        `[data-section-id="${elementSelection?.sectionId}"] [data-element-key="${elementSelection?.elementKey}"]`
+      ) as HTMLElement;
+
+      if (targetElement && targetElement.contains(range.commonAncestorContainer)) {
+        setHasTextSelection(true);
+        console.log('📝 Text selection detected in element:', range.toString().substring(0, 50));
+      } else {
+        setHasTextSelection(false);
+      }
+    };
+
+    // Check on mount and selection changes
+    checkSelection();
+    document.addEventListener('selectionchange', checkSelection);
+    
+    return () => {
+      document.removeEventListener('selectionchange', checkSelection);
+    };
+  }, [elementSelection]);
+
+  // Enhanced format application with leading debounce and state management
+  const applyFormatInternal = (newFormat: Partial<MVPFormatState>) => {
     if (!elementSelection) return;
 
-    const targetElement = document.querySelector(
-      `[data-section-id="${elementSelection.sectionId}"] [data-element-key="${elementSelection.elementKey}"]`
-    ) as HTMLElement;
+    try {
+      // Set formatting in progress flag (Fix #2: Split User Intent)
+      setFormattingInProgress(true);
 
-    if (!targetElement) return;
+      // Check if user has text selected
+      const selection = window.getSelection();
+      const hasActiveSelection = selection && selection.rangeCount > 0 && !selection.isCollapsed;
 
-    const updatedFormat = { ...formatState, ...newFormat };
+      if (hasActiveSelection && hasTextSelection) {
+        // PARTIAL SELECTION FORMATTING - Apply to selected text only
+        console.log('✨ Applying format to selected text:', newFormat);
+        
+        // Convert MVPFormatState to TextFormatState for compatibility
+        const textFormatState = {
+          bold: newFormat.bold,
+          italic: newFormat.italic,
+          underline: newFormat.underline,
+          color: newFormat.color,
+          fontSize: newFormat.fontSize,
+          textAlign: newFormat.textAlign,
+        };
+
+        const result = formatSelectedText(textFormatState);
+        
+        if (result.success && result.formattedHTML) {
+          // Update store with HTML content instead of plain text
+          updateElementContent(
+            elementSelection.sectionId, 
+            elementSelection.elementKey, 
+            result.formattedHTML
+          );
+          console.log('✨ Partial formatting applied successfully');
+        } else {
+          console.error('❌ Partial formatting failed:', result.error);
+        }
+      } else {
+        // WHOLE ELEMENT FORMATTING - Apply to entire element
+        console.log('📝 Applying format to whole element:', newFormat);
+        
+        const targetElement = document.querySelector(
+          `[data-section-id="${elementSelection.sectionId}"] [data-element-key="${elementSelection.elementKey}"]`
+        ) as HTMLElement;
+
+        if (!targetElement) return;
+
+        const updatedFormat = { ...formatState, ...newFormat };
+        
+        // Apply styles directly to DOM element
+        if (newFormat.bold !== undefined) {
+          targetElement.style.fontWeight = newFormat.bold ? '600' : 'normal';
+        }
+        if (newFormat.italic !== undefined) {
+          targetElement.style.fontStyle = newFormat.italic ? 'italic' : 'normal';
+        }
+        if (newFormat.underline !== undefined) {
+          targetElement.style.textDecoration = newFormat.underline ? 'underline' : 'none';
+        }
+        if (newFormat.textAlign) {
+          targetElement.style.textAlign = newFormat.textAlign;
+        }
+        if (newFormat.fontSize) {
+          targetElement.style.fontSize = newFormat.fontSize;
+        }
+        if (newFormat.color) {
+          targetElement.style.color = newFormat.color;
+        }
+
+        setFormatState(updatedFormat);
+        
+        // Update store for persistence - use HTML if element contains formatted spans
+        const hasFormattedContent = targetElement.querySelector('span[style]');
+        const contentToSave = hasFormattedContent ? targetElement.innerHTML : targetElement.textContent || '';
+        
+        updateElementContent(
+          elementSelection.sectionId, 
+          elementSelection.elementKey, 
+          contentToSave
+        );
+      }
+    } finally {
+      // Always clear formatting flag after a delay
+      setTimeout(() => {
+        setFormattingInProgress(false);
+      }, 50);
+    }
+  };
+
+  // Leading debounce wrapper (Fix from suggestions: leading: true, trailing: false)
+  const debouncedFormat = useMemo(
+    () => debounce(applyFormatInternal, 100, { 
+      leading: true, 
+      trailing: false 
+    }),
+    [elementSelection, formatState, hasTextSelection, setFormattingInProgress, updateElementContent]
+  );
+
+  // Apply format with interaction tracking (for pointerDown)
+  const applyFormatImmediate = (formatOptions: Partial<MVPFormatState>) => {
+    logInteractionTimeline('format:start', { formatOptions });
     
-    // Apply styles directly to DOM element
-    if (newFormat.bold !== undefined) {
-      targetElement.style.fontWeight = newFormat.bold ? '600' : 'normal';
-    }
-    if (newFormat.italic !== undefined) {
-      targetElement.style.fontStyle = newFormat.italic ? 'italic' : 'normal';
-    }
-    if (newFormat.underline !== undefined) {
-      targetElement.style.textDecoration = newFormat.underline ? 'underline' : 'none';
-    }
-    if (newFormat.textAlign) {
-      targetElement.style.textAlign = newFormat.textAlign;
-    }
-    if (newFormat.fontSize) {
-      targetElement.style.fontSize = newFormat.fontSize;
-    }
-    if (newFormat.color) {
-      targetElement.style.color = newFormat.color;
-    }
-
-    setFormatState(updatedFormat);
+    // Set formatting in progress
+    setFormattingInProgress(true);
     
-    // Update store for persistence
-    updateElementContent(
-      elementSelection.sectionId, 
-      elementSelection.elementKey, 
-      targetElement.textContent || ''
-    );
+    // Apply format immediately
+    applyFormatInternal(formatOptions);
+    
+    // Clear formatting flag after a delay
+    setTimeout(() => {
+      setFormattingInProgress(false);
+      logInteractionTimeline('format:end');
+    }, 100);
   };
+  
+  // Keep debounced version for backward compatibility
+  const applyFormat = withSelectionGuard(debouncedFormat, 75);
 
-  // Toggle format functions
-  const toggleBold = () => applyFormat({ bold: !formatState.bold });
-  const toggleItalic = () => applyFormat({ italic: !formatState.italic });
-  const toggleUnderline = () => applyFormat({ underline: !formatState.underline });
-  
-  const setAlignment = (align: 'left' | 'center' | 'right') => {
-    applyFormat({ textAlign: align });
+  // Enhanced format functions with selection preservation
+  const toggleBold = (e?: React.PointerEvent) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    
+    withInteractionSource('toolbar', () => {
+      withSelectionGuard(() => {
+        if (hasTextSelection) {
+          restoreSelection();
+        }
+        applyFormatImmediate({ bold: !formatState.bold });
+      });
+    });
   };
   
-  const setFontSize = (size: string) => {
-    applyFormat({ fontSize: size });
-    setShowFontSizePicker(false);
+  const toggleItalic = (e?: React.PointerEvent) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    
+    withInteractionSource('toolbar', () => {
+      withSelectionGuard(() => {
+        if (hasTextSelection) {
+          restoreSelection();
+        }
+        applyFormatImmediate({ italic: !formatState.italic });
+      });
+    });
   };
   
-  const setColor = (color: string) => {
-    applyFormat({ color });
-    setShowColorPicker(false);
+  const toggleUnderline = (e?: React.PointerEvent) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    
+    withInteractionSource('toolbar', () => {
+      withSelectionGuard(() => {
+        if (hasTextSelection) {
+          restoreSelection();
+        }
+        applyFormatImmediate({ underline: !formatState.underline });
+      });
+    });
+  };
+  
+  const setAlignment = (align: 'left' | 'center' | 'right', e?: React.PointerEvent) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    
+    withInteractionSource('toolbar', () => {
+      withSelectionGuard(() => {
+        if (hasTextSelection) {
+          restoreSelection();
+        }
+        applyFormatImmediate({ textAlign: align });
+      });
+    });
+  };
+  
+  const setFontSize = (size: string, e?: React.PointerEvent) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    
+    withInteractionSource('toolbar', () => {
+      withSelectionGuard(() => {
+        if (hasTextSelection) {
+          restoreSelection();
+        }
+        applyFormatImmediate({ fontSize: size });
+        setShowFontSizePicker(false);
+      });
+    });
+  };
+  
+  const setColor = (color: string, e?: React.PointerEvent) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    
+    withInteractionSource('toolbar', () => {
+      withSelectionGuard(() => {
+        if (hasTextSelection) {
+          restoreSelection();
+        }
+        applyFormatImmediate({ color });
+        setShowColorPicker(false);
+      });
+    });
   };
 
   // Close dropdowns when clicking outside
@@ -205,6 +414,17 @@ export function TextToolbarMVP({ elementSelection, position, contextActions }: T
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  // Cleanup on unmount (Fix #4: Hard Cleanup)
+  useEffect(() => {
+    return () => {
+      // Cancel any pending debounced operations
+      debouncedFormat.cancel();
+      // Perform hard cleanup of selection state
+      cleanupSelection();
+      console.log('🧹 TextToolbarMVP cleanup completed');
+    };
+  }, [debouncedFormat, cleanupSelection]);
+
   // Use anchor positioning or fallback
   const finalPosition = hasValidPosition && anchorPosition ? anchorPosition : position;
   const showArrow = hasValidPosition && anchorPosition?.arrow;
@@ -221,9 +441,11 @@ export function TextToolbarMVP({ elementSelection, position, contextActions }: T
           height: '52px', // Fixed MVP height
           opacity: isVisible ? 1 : 0,
           pointerEvents: isVisible ? 'auto' : 'none',
+          userSelect: 'none', // Prevent text selection on toolbar
         }}
         data-toolbar-type="text-mvp"
         data-anchor-positioned={hasValidPosition}
+        data-editor-id={elementSelection ? `editor-${elementSelection.sectionId}-${elementSelection.elementKey}` : ''}
         onMouseDown={(e) => {
           e.preventDefault();
           e.stopPropagation();
@@ -254,37 +476,49 @@ export function TextToolbarMVP({ elementSelection, position, contextActions }: T
           <div className="flex items-center space-x-1">
             {/* Bold, Italic, Underline */}
             <button
-              onClick={toggleBold}
-              className={`p-1.5 rounded transition-colors ${
+              onMouseDown={(e) => {
+                e.preventDefault();
+                saveSelection();
+              }}
+              onPointerDown={toggleBold}
+              className={`p-1.5 rounded transition-colors select-none ${
                 formatState.bold 
                   ? 'bg-blue-100 text-blue-700 border border-blue-200' 
                   : 'text-gray-600 hover:bg-gray-100'
               }`}
-              title="Bold"
+              title={`Bold${hasTextSelection ? ' (selected text)' : ' (whole element)'}`}
             >
               <BoldIcon />
             </button>
             
             <button
-              onClick={toggleItalic}
-              className={`p-1.5 rounded transition-colors ${
+              onMouseDown={(e) => {
+                e.preventDefault();
+                saveSelection();
+              }}
+              onPointerDown={toggleItalic}
+              className={`p-1.5 rounded transition-colors select-none ${
                 formatState.italic 
                   ? 'bg-blue-100 text-blue-700 border border-blue-200' 
                   : 'text-gray-600 hover:bg-gray-100'
               }`}
-              title="Italic"
+              title={`Italic${hasTextSelection ? ' (selected text)' : ' (whole element)'}`}
             >
               <ItalicIcon />
             </button>
             
             <button
-              onClick={toggleUnderline}
-              className={`p-1.5 rounded transition-colors ${
+              onMouseDown={(e) => {
+                e.preventDefault();
+                saveSelection();
+              }}
+              onPointerDown={toggleUnderline}
+              className={`p-1.5 rounded transition-colors select-none ${
                 formatState.underline 
                   ? 'bg-blue-100 text-blue-700 border border-blue-200' 
                   : 'text-gray-600 hover:bg-gray-100'
               }`}
-              title="Underline"
+              title={`Underline${hasTextSelection ? ' (selected text)' : ' (whole element)'}`}
             >
               <UnderlineIcon />
             </button>
@@ -293,37 +527,49 @@ export function TextToolbarMVP({ elementSelection, position, contextActions }: T
             
             {/* Text Alignment */}
             <button
-              onClick={() => setAlignment('left')}
-              className={`p-1.5 rounded transition-colors ${
+              onMouseDown={(e) => {
+                e.preventDefault();
+                saveSelection();
+              }}
+              onPointerDown={(e) => setAlignment('left', e)}
+              className={`p-1.5 rounded transition-colors select-none ${
                 formatState.textAlign === 'left' 
                   ? 'bg-blue-100 text-blue-700 border border-blue-200' 
                   : 'text-gray-600 hover:bg-gray-100'
               }`}
-              title="Align Left"
+              title="Align Left (Note: alignment applies to whole element)"
             >
               <AlignLeftIcon />
             </button>
             
             <button
-              onClick={() => setAlignment('center')}
-              className={`p-1.5 rounded transition-colors ${
+              onMouseDown={(e) => {
+                e.preventDefault();
+                saveSelection();
+              }}
+              onPointerDown={(e) => setAlignment('center', e)}
+              className={`p-1.5 rounded transition-colors select-none ${
                 formatState.textAlign === 'center' 
                   ? 'bg-blue-100 text-blue-700 border border-blue-200' 
                   : 'text-gray-600 hover:bg-gray-100'
               }`}
-              title="Align Center"
+              title="Align Center (Note: alignment applies to whole element)"
             >
               <AlignCenterIcon />
             </button>
             
             <button
-              onClick={() => setAlignment('right')}
-              className={`p-1.5 rounded transition-colors ${
+              onMouseDown={(e) => {
+                e.preventDefault();
+                saveSelection();
+              }}
+              onPointerDown={(e) => setAlignment('right', e)}
+              className={`p-1.5 rounded transition-colors select-none ${
                 formatState.textAlign === 'right' 
                   ? 'bg-blue-100 text-blue-700 border border-blue-200' 
                   : 'text-gray-600 hover:bg-gray-100'
               }`}
-              title="Align Right"
+              title="Align Right (Note: alignment applies to whole element)"
             >
               <AlignRightIcon />
             </button>
@@ -336,9 +582,17 @@ export function TextToolbarMVP({ elementSelection, position, contextActions }: T
             {/* Font Size */}
             <div className="relative">
               <button
-                onClick={() => setShowFontSizePicker(!showFontSizePicker)}
-                className="flex items-center space-x-1 px-2 py-1.5 text-sm rounded text-gray-600 hover:bg-gray-100 transition-colors"
-                title="Font Size"
+                onMouseDown={(e) => {
+                  e.preventDefault();
+                  saveSelection();
+                }}
+                onPointerDown={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  setShowFontSizePicker(!showFontSizePicker);
+                }}
+                className="flex items-center space-x-1 px-2 py-1.5 text-sm rounded text-gray-600 hover:bg-gray-100 transition-colors select-none"
+                title={`Font Size${hasTextSelection ? ' (selected text)' : ' (whole element)'}`}
               >
                 <FontSizeIcon />
                 <span className="text-xs font-medium">
@@ -355,8 +609,12 @@ export function TextToolbarMVP({ elementSelection, position, contextActions }: T
                   {FONT_SIZE_PRESETS.map((preset) => (
                     <button
                       key={preset.value}
-                      onClick={() => setFontSize(preset.value)}
-                      className={`flex items-center justify-between w-full px-3 py-2 text-sm text-left transition-colors ${
+                      onMouseDown={(e) => {
+                        e.preventDefault();
+                        saveSelection();
+                      }}
+                      onPointerDown={(e) => setFontSize(preset.value, e)}
+                      className={`flex items-center justify-between w-full px-3 py-2 text-sm text-left transition-colors select-none ${
                         formatState.fontSize === preset.value 
                           ? 'bg-blue-50 text-blue-700 font-medium' 
                           : 'text-gray-700 hover:bg-gray-50'
@@ -373,9 +631,17 @@ export function TextToolbarMVP({ elementSelection, position, contextActions }: T
             {/* Color Picker */}
             <div className="relative">
               <button
-                onClick={() => setShowColorPicker(!showColorPicker)}
-                className="flex items-center space-x-1 px-2 py-1.5 text-sm rounded text-gray-600 hover:bg-gray-100 transition-colors"
-                title="Text Color"
+                onMouseDown={(e) => {
+                  e.preventDefault();
+                  saveSelection();
+                }}
+                onPointerDown={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  setShowColorPicker(!showColorPicker);
+                }}
+                className="flex items-center space-x-1 px-2 py-1.5 text-sm rounded text-gray-600 hover:bg-gray-100 transition-colors select-none"
+                title={`Text Color${hasTextSelection ? ' (selected text)' : ' (whole element)'}`}
               >
                 <div className="flex items-center space-x-1">
                   <ColorIcon />
@@ -393,6 +659,13 @@ export function TextToolbarMVP({ elementSelection, position, contextActions }: T
                   className="absolute top-full right-0 mt-1 bg-white border border-gray-200 rounded-md shadow-lg z-50 w-48 p-3"
                 >
                   <div className="space-y-3">
+                    {/* Selection Mode Indicator */}
+                    {hasTextSelection && (
+                      <div className="text-xs text-blue-600 bg-blue-50 px-2 py-1 rounded">
+                        💡 Color will be applied to selected text only
+                      </div>
+                    )}
+                    
                     {/* Basic Colors */}
                     <div>
                       <div className="text-xs font-medium text-gray-700 mb-2">Basic</div>
@@ -400,8 +673,12 @@ export function TextToolbarMVP({ elementSelection, position, contextActions }: T
                         {COLOR_PALETTE.filter(c => c.group === 'basic').map((color) => (
                           <button
                             key={color.value}
-                            onClick={() => setColor(color.value)}
-                            className={`w-6 h-6 rounded border-2 transition-all hover:scale-110 ${
+                            onMouseDown={(e) => {
+                              e.preventDefault();
+                              saveSelection();
+                            }}
+                            onPointerDown={(e) => setColor(color.value, e)}
+                            className={`w-6 h-6 rounded border-2 transition-all hover:scale-110 select-none ${
                               formatState.color === color.value 
                                 ? 'border-blue-500 shadow-sm' 
                                 : 'border-gray-300 hover:border-gray-400'
@@ -420,8 +697,12 @@ export function TextToolbarMVP({ elementSelection, position, contextActions }: T
                         {COLOR_PALETTE.filter(c => c.group === 'accent').map((color) => (
                           <button
                             key={color.value}
-                            onClick={() => setColor(color.value)}
-                            className={`w-6 h-6 rounded border-2 transition-all hover:scale-110 ${
+                            onMouseDown={(e) => {
+                              e.preventDefault();
+                              saveSelection();
+                            }}
+                            onPointerDown={(e) => setColor(color.value, e)}
+                            className={`w-6 h-6 rounded border-2 transition-all hover:scale-110 select-none ${
                               formatState.color === color.value 
                                 ? 'border-blue-500 shadow-sm' 
                                 : 'border-gray-300 hover:border-gray-400'

@@ -176,6 +176,20 @@ export function createUIActions(set: any, get: any): UIActions {
       }),
 
     /**
+     * ===== FORMATTING STATE MANAGEMENT =====
+     */
+    
+    setFormattingInProgress: (isInProgress: boolean) =>
+      set((state: EditStore) => {
+        state.formattingInProgress = isInProgress;
+        
+        console.log('✨ Formatting in progress changed:', { 
+          isInProgress,
+          timestamp: Date.now()
+        });
+      }),
+
+    /**
      * ===== PANEL MANAGEMENT =====
      */
     

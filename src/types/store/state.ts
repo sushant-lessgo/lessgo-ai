@@ -154,6 +154,9 @@ export interface UISlice {
     elementKey: string;
   };
   
+  // Formatting State
+  formattingInProgress: boolean;
+  
   // Panel State
   leftPanel: {
     width: number;

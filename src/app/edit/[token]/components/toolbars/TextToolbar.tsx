@@ -737,7 +737,7 @@ export function TextToolbar({ elementSelection, position, contextActions }: Text
         style={{
           left: finalPosition.x,
           top: finalPosition.y,
-          width: hasValidPosition ? `${finalPosition.width}px` : 'auto',
+          width: hasValidPosition && anchorPosition?.width ? `${anchorPosition.width}px` : '400px',
           minWidth: '300px',
           maxWidth: '400px',
           maxHeight: '80px',
