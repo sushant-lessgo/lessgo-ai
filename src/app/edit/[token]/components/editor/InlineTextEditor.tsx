@@ -6,7 +6,8 @@ import { useInlineEditorAutoSave } from '@/hooks/useInlineEditorAutoSave';
 import { useTextSelection } from '@/hooks/useTextSelection';
 import { getEditingIndicatorColors } from '@/utils/textContrastUtils';
 import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
-import { sanitizeHTML, isValidFormattingHTML } from '@/utils/htmlSanitization';
+// Removed problematic sanitizeHTML import that was causing infinite loops
+// import { sanitizeHTML, isValidFormattingHTML } from '@/utils/htmlSanitization';
 import { 
   getInteractionSource, 
   isInEditorContext, 
@@ -15,6 +16,7 @@ import {
   setComposing,
   logInteractionTimeline 
 } from '@/utils/interactionTracking';
+import { restoreSelectionEvents } from '@/utils/selectionGuard';
 import { useGlobalSelectionHandler } from '@/hooks/useGlobalSelectionHandler';
 
 export interface TextFormatState {
@@ -146,7 +148,7 @@ export function InlineTextEditor({
   } = useTextSelection(editorRef);
   
   // Get store actions for text editing mode management
-  const { setTextEditingMode, formattingInProgress } = useEditStore();
+  const { setTextEditingMode, formattingInProgress, isTextEditing } = useEditStore();
 
   // Get dynamic editing indicator colors based on background type and actual background
   const editingColors = getEditingIndicatorColors(backgroundType, colorTokens, sectionBackground);
@@ -275,26 +277,49 @@ export function InlineTextEditor({
 
   // Text editing exit handler - consolidates all exit logic
   const exitTextEditingMode = useCallback(() => {
+    const exitTime = Date.now();
+    console.log(`📝 [${exitTime}] exitTextEditingMode CALLED:`, {
+      isEditing,
+      isTextEditing,
+      formattingInProgress,
+      elementKey,
+      sectionId,
+      callStack: new Error().stack?.split('\n').slice(1, 3).join(' -> ')
+    });
+    
+    // Prevent recursive calls
+    if (editorRef.current?.dataset.exiting === 'true') {
+      console.log(`📝 [${exitTime}] BLOCKED: Already exiting, preventing recursion`);
+      return;
+    }
+    
     // Don't exit if formatting is in progress (Fix #2: Split User Intent)
     if (formattingInProgress) {
-      console.log('📝 Skipping exit - formatting in progress');
+      console.log(`📝 [${exitTime}] Skipping exit - formatting in progress`);
       return;
     }
     
     // Don't exit if interaction is from toolbar
     if (shouldIgnoreFocusChange()) {
-      console.log('📝 Skipping exit - toolbar interaction');
+      console.log(`📝 [${exitTime}] Skipping exit - toolbar interaction`);
       return;
     }
     
-    console.log('📝 Exiting text editing mode with hard cleanup');
-    setIsEditing(false);
-    setTextEditingMode(false); // Exit text editing mode in store
+    console.log(`📝 [${exitTime}] Exiting text editing mode with hard cleanup`);
+    
+    try {
+      // Set flag to prevent recursive calls
+      if (editorRef.current) {
+        editorRef.current.dataset.exiting = 'true';
+      }
+      
+      setIsEditing(false);
+      setTextEditingMode(false); // Exit text editing mode in store
+      console.log(`📝 [${exitTime}] State updates triggered`);
     
     // Hard cleanup on mode switch (Fix #4)
     // Clear selection events and force restore if needed
     try {
-      const { restoreSelectionEvents } = require('@/utils/selectionGuard');
       restoreSelectionEvents();
     } catch (error) {
       console.warn('📝 Selection guard cleanup failed:', error);
@@ -342,7 +367,19 @@ export function InlineTextEditor({
     setCurrentSelection(null);
     selectionRef.current = null;
     
-    console.log('🧹 Hard cleanup completed on text editing mode exit');
+    console.log(`📝 [${exitTime}] Hard cleanup completed on text editing mode exit`);
+    } catch (error) {
+      console.error(`📝 [${exitTime}] ERROR in exitTextEditingMode:`, error);
+      // Don't throw error to prevent cascading failures
+      console.error(`📝 [${exitTime}] Continuing with cleanup despite error`);
+    } finally {
+      // Always clear the exiting flag to prevent permanent lock
+      setTimeout(() => {
+        if (editorRef.current) {
+          editorRef.current.dataset.exiting = 'false';
+        }
+      }, 100); // Small delay to prevent immediate re-entry
+    }
   }, [formattingInProgress, setTextEditingMode, onContentChange, autoSave.enabled, debouncedSave]);
 
   // Event handlers
@@ -428,21 +465,53 @@ export function InlineTextEditor({
         break;
         
       case 'Escape':
-        // Enhanced ESC key handling: Always exit text editing mode
-        e.preventDefault();
+        // Enhanced ESC key handling with comprehensive debugging
+        const escTime = Date.now();
+        console.log(`🔑 [${escTime}] ESC KEY PRESSED in handleKeyDown:`, {
+          escapeKeyBehavior: config.escapeKeyBehavior,
+          currentContent: currentContent?.substring(0, 50),
+          originalContent: content?.substring(0, 50),
+          hasEditorRef: !!editorRef.current,
+          isTextEditing: isTextEditing
+        });
         
-        if (config.escapeKeyBehavior === 'cancel') {
-          // Cancel changes - restore original content
-          setCurrentContent(content);
+        e.preventDefault();
+        e.stopPropagation(); // Prevent event bubbling
+        
+        try {
+          if (config.escapeKeyBehavior === 'cancel') {
+            console.log(`🔑 [${escTime}] Canceling changes - restoring original content`);
+            // Cancel changes - restore original content
+            setCurrentContent(content);
+            if (editorRef.current) {
+              editorRef.current.textContent = content;
+              // Clear any pending content since we're canceling
+              delete editorRef.current.dataset.pendingContent;
+            }
+          }
+          
+          console.log(`🔑 [${escTime}] Calling exitTextEditingMode from ESC handler`);
+          
+          // Add timeout safety net
+          const timeoutId = setTimeout(() => {
+            console.error(`🔑 [${escTime}] TIMEOUT: Local ESC handler taking too long, forcing cleanup`);
+            if (editorRef.current) {
+              editorRef.current.dataset.exiting = 'false';
+            }
+          }, 2000); // 2 second timeout
+          
+          // Always exit text editing mode on ESC
+          exitTextEditingMode();
+          
+          clearTimeout(timeoutId);
+          console.log(`🔑 [${escTime}] ESC handler completed successfully`);
+        } catch (error) {
+          console.error(`🔑 [${escTime}] ERROR in ESC handler:`, error);
+          // Force clear exiting flag on error
           if (editorRef.current) {
-            editorRef.current.textContent = content;
-            // Clear any pending content since we're canceling
-            delete editorRef.current.dataset.pendingContent;
+            editorRef.current.dataset.exiting = 'false';
           }
         }
-        
-        // Always exit text editing mode on ESC
-        exitTextEditingMode();
         break;
         
       // Format shortcuts
@@ -550,9 +619,39 @@ export function InlineTextEditor({
     
     const handleGlobalKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
-        console.log('📝 Global ESC key detected - exiting text editing mode');
+        const globalEscTime = Date.now();
+        console.log(`📝 [${globalEscTime}] GLOBAL ESC key detected - exiting text editing mode:`, {
+          isEditing,
+          target: event.target,
+          currentTarget: event.currentTarget,
+          bubbles: event.bubbles,
+          defaultPrevented: event.defaultPrevented
+        });
         event.preventDefault();
-        exitTextEditingMode();
+        event.stopPropagation();
+        
+        try {
+          console.log(`📝 [${globalEscTime}] Calling exitTextEditingMode from global handler`);
+          
+          // Add timeout safety net
+          const timeoutId = setTimeout(() => {
+            console.error(`📝 [${globalEscTime}] TIMEOUT: ESC handler taking too long, forcing cleanup`);
+            if (editorRef.current) {
+              editorRef.current.dataset.exiting = 'false';
+            }
+          }, 2000); // 2 second timeout
+          
+          exitTextEditingMode();
+          
+          clearTimeout(timeoutId);
+          console.log(`📝 [${globalEscTime}] Global ESC handler completed`);
+        } catch (error) {
+          console.error(`📝 [${globalEscTime}] ERROR in global ESC handler:`, error);
+          // Force clear exiting flag on error
+          if (editorRef.current) {
+            editorRef.current.dataset.exiting = 'false';
+          }
+        }
       }
     };
     
@@ -613,17 +712,9 @@ export function InlineTextEditor({
         const isHtmlContent = /<[^>]*>/g.test(content);
         
         if (isHtmlContent) {
-          // Sanitize HTML content before setting
-          const sanitizedContent = sanitizeHTML(content);
-          
-          if (isValidFormattingHTML(sanitizedContent)) {
-            editorRef.current.innerHTML = sanitizedContent;
-            console.log('📝 Applied sanitized HTML content:', sanitizedContent.substring(0, 100));
-          } else {
-            // Fallback to plain text if HTML is invalid
-            console.warn('📝 Invalid HTML content, falling back to plain text');
-            editorRef.current.textContent = content.replace(/<[^>]*>/g, '');
-          }
+          // Apply HTML content directly - will be sanitized on save
+          editorRef.current.innerHTML = content;
+          console.log('📝 Applied HTML content directly:', content.substring(0, 100));
         } else {
           // Set as plain text
           editorRef.current.textContent = content;
@@ -764,10 +855,10 @@ export function InlineTextEditor({
       {/* Render HTML content if it contains formatting, otherwise plain text */}
       {(() => {
         const isHtmlContent = /<[^>]*>/g.test(currentContent);
-        if (isHtmlContent && isValidFormattingHTML(currentContent)) {
-          // Sanitize before rendering
-          const sanitizedContent = sanitizeHTML(currentContent);
-          return <span dangerouslySetInnerHTML={{ __html: sanitizedContent }} />;
+        if (isHtmlContent) {
+          // Directly render HTML content - already sanitized on save
+          console.log('📝 Rendering HTML content:', currentContent.substring(0, 100));
+          return <span dangerouslySetInnerHTML={{ __html: currentContent }} />;
         } else {
           return currentContent || placeholder;
         }
