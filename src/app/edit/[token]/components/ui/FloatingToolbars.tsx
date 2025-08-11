@@ -1,5 +1,5 @@
 // app/edit/[token]/components/ui/FloatingToolbars.tsx - Priority-Resolved Toolbar System
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { useStoreState } from '@/components/EditProvider';
 import { useSelectionPriority } from '@/hooks/useSelectionPriority';
@@ -29,17 +29,15 @@ export function FloatingToolbars() {
   // Keep legacy toolbar state for fallback compatibility
   const toolbar = useStoreState((state) => state.toolbar);
   
-  // Debug logging
-  if (process.env.NODE_ENV === 'development') {
-    console.log('🎪 FloatingToolbars render (Step 3):', {
-      activeToolbar,
-      toolbarTarget,
-      hasActiveToolbar,
-      anchorCount: globalAnchor.anchorCount,
-      legacyToolbarVisible: toolbar.visible,
-      legacyToolbarType: toolbar.type,
-    });
-  }
+  // Debug logging - only on actual changes
+  useEffect(() => {
+    if (process.env.NODE_ENV === 'development') {
+      console.log('🎪 FloatingToolbars state changed:', {
+        activeToolbar,
+        hasActiveToolbar,
+      });
+    }
+  }, [activeToolbar, hasActiveToolbar]);
 
 
   // No longer need these hooks - they were removed

@@ -120,13 +120,19 @@ const IntegrationCard = React.memo(({
   isActive, 
   onClick, 
   colorTokens, 
-  textStyle 
+  textStyle,
+  labelStyle,
+  h3Style,
+  bodySmStyle
 }: { 
   integration: any; 
   isActive: boolean; 
   onClick: () => void;
   colorTokens: any;
   textStyle: React.CSSProperties;
+  labelStyle: React.CSSProperties;
+  h3Style: React.CSSProperties;
+  bodySmStyle: React.CSSProperties;
 }) => (
   <div 
     className={`p-6 rounded-xl border cursor-pointer transition-all duration-300 ${
@@ -334,6 +340,9 @@ export default function LogoWithQuoteUse(props: LayoutComponentProps) {
                 onClick={() => setSelectedIntegration(index)}
                 colorTokens={colorTokens}
                 textStyle={{}}
+                labelStyle={labelStyle}
+                h3Style={h3Style}
+                bodySmStyle={bodySmStyle}
               />
             ))}
           </div>

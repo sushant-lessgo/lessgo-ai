@@ -1,0 +1,110 @@
+/* Phase 4.2: Enhanced drag handle CSS - proper scoping and touch handling */
+
+.section-drag-handle {
+  /* Phase 4.2: Default hidden state */
+  opacity: 0;
+  pointer-events: none;
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 10; /* Below toolbars (z-50) but above content */
+  
+  /* Phase 4.3: Prevent unwanted drag behavior */
+  -webkit-user-drag: none;
+  -khtml-user-drag: none;
+  -moz-user-drag: none;
+  -o-user-drag: none;
+  user-drag: none;
+}
+
+/* Phase 4.2: More specific scoping - only show on section hover */
+.section-container:hover .section-drag-handle,
+.section-container:focus-within .section-drag-handle {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* Phase 4.3: Ensure proper touch handling only on handle element */
+.section-drag-handle .drag-handle-icon {
+  touch-action: manipulation !important;
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  
+  /* Prevent default drag behavior */
+  draggable: false;
+  -webkit-user-drag: none;
+  -khtml-user-drag: none;
+  -moz-user-drag: none;
+  -o-user-drag: none;
+  user-drag: none;
+}
+
+/* Phase 4.3: Never apply touch-action to containers */
+.section-container,
+.section-wrapper,
+.main-content {
+  /* Allow normal scroll behavior on containers */
+  touch-action: auto;
+}
+
+/* Phase 4.3: Prevent cursor leakage to ancestors */
+.section-drag-handle * {
+  cursor: move;
+}
+
+.section-container {
+  cursor: default; /* Reset container cursor */
+}
+
+/* Phase 4.3: Enhanced visual feedback for drag handles */
+.section-drag-handle:hover .drag-handle-icon {
+  transform: scale(1.05);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.section-drag-handle:active .drag-handle-icon {
+  transform: scale(0.95);
+}
+
+/* Phase 4.2: Responsive behavior - always visible on touch devices */
+@media (hover: none) and (pointer: coarse) {
+  .section-drag-handle {
+    opacity: 0.7; /* Slightly visible on touch devices */
+  }
+  
+  .section-container:hover .section-drag-handle,
+  .section-container:focus-within .section-drag-handle {
+    opacity: 1;
+  }
+  
+  /* Phase 4.3: Larger touch target for mobile */
+  .section-drag-handle .drag-handle-icon {
+    padding: 12px; /* Larger touch area */
+    min-width: 44px; /* iOS recommended minimum */
+    min-height: 44px;
+  }
+}
+
+/* Phase 4.3: High contrast mode support */
+@media (prefers-contrast: high) {
+  .section-drag-handle .drag-handle-icon {
+    border: 2px solid currentColor;
+    background-color: Canvas;
+    color: CanvasText;
+  }
+}
+
+/* Phase 4.3: Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .section-drag-handle,
+  .section-drag-handle .drag-handle-icon {
+    transition: none;
+  }
+  
+  .section-drag-handle:hover .drag-handle-icon,
+  .section-drag-handle:active .drag-handle-icon {
+    transform: none;
+  }
+}

@@ -114,24 +114,26 @@ export function useSelectionPriority() {
     return shouldRender;
   };
   
-  // Debug logging with transition info
-  if (process.env.NODE_ENV === 'development') {
-    const selectionKey = `${mode}-${isTextEditing}-${selectedElement?.elementKey}-${selectedSection}-${transitionLock.isLocked}`;
-    if (useSelectionPriority.lastSelectionKey !== selectionKey) {
-      useSelectionPriority.lastSelectionKey = selectionKey;
-      debugSelection(editorSelection, 'useSelectionPriority');
-      
-      if (transitionLock.isLocked) {
-        console.log('🔒 Transition lock active:', {
-          lockedToolbar: transitionLock.lockedToolbar,
-          reason: transitionLock.lockReason,
-          timeRemaining: transitionLock.timeRemaining,
-        });
-      }
-    }
-  }
+  // Debug logging with transition info - DISABLED to prevent infinite loops
+  // The timeRemaining property changes every millisecond, causing render loops
+  // if (process.env.NODE_ENV === 'development') {
+  //   const selectionKey = `${mode}-${isTextEditing}-${selectedElement?.elementKey}-${selectedSection}-${transitionLock.isLocked}`;
+  //   if (useSelectionPriority.lastSelectionKey !== selectionKey) {
+  //     useSelectionPriority.lastSelectionKey = selectionKey;
+  //     debugSelection(editorSelection, 'useSelectionPriority');
+  //     
+  //     if (transitionLock.isLocked) {
+  //       console.log('🔒 Transition lock active:', {
+  //         lockedToolbar: transitionLock.lockedToolbar,
+  //         reason: transitionLock.lockReason,
+  //         timeRemaining: transitionLock.timeRemaining,
+  //       });
+  //     }
+  //   }
+  // }
   
-  return {
+  // Memoize the return value to prevent object identity churn
+  return useMemo(() => ({
     // Raw selection state
     editorSelection,
     
@@ -159,10 +161,22 @@ export function useSelectionPriority() {
     hasActiveToolbar: activeToolbar !== null,
     
     // State checks (unchanged)
-    canShowTextToolbar: isTextEditing && textEditingElement,
-    canShowElementToolbar: selectedElement && !isTextEditing,
-    canShowSectionToolbar: selectedSection && !selectedElement && !isTextEditing,
-  };
+    canShowTextToolbar: isTextEditing && !!textEditingElement,
+    canShowElementToolbar: !!selectedElement && !isTextEditing,
+    canShowSectionToolbar: !!selectedSection && !selectedElement && !isTextEditing,
+  }), [
+    editorSelection,
+    activeToolbar,
+    naturalActiveToolbar,
+    toolbarTarget,
+    transitionLock,
+    globalAnchor,
+    shouldShowToolbarWithLock,
+    isTextEditing,
+    textEditingElement,
+    selectedElement,
+    selectedSection
+  ]);
 }
 
 // Add static property for debug tracking

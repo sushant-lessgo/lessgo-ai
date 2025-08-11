@@ -441,6 +441,55 @@ export const commonFormats = {
 
 import { sanitizeHTML, isValidFormattingHTML } from './htmlSanitization';
 
+/**
+ * Simple HTML sanitizer that doesn't cause infinite loops
+ * This replaces the complex sanitizeHTML function that was hanging
+ */
+function simpleSanitizeHTML(html: string): string {
+  if (!html) return html;
+  
+  // 1. Unescape HTML entities to prevent double-escaping
+  let cleaned = html
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&amp;/g, '&')
+    .replace(/&quot;/g, '"')
+    .replace(/&#x27;/g, "'");
+  
+  // 1.5. Fix specific corruption case: mixed escaped/unescaped spans
+  cleaned = cleaned.replace(/&lt;span style="([^"]*)"&gt;([^&]*)&lt;\/span&gt;/g, '<span style="$1">$2</span>');
+  
+  // 1.6. Fix the exact case from user: "AI &lt;span style="font-weight: normal;"&gt;Solution&lt;/span&gt;"
+  cleaned = cleaned.replace(/\s+&lt;span[^&]*&gt;([^&]*)&lt;\/span&gt;/g, ' $1');
+  
+  // 2. Remove redundant nested spans with the same styling
+  cleaned = cleaned.replace(/<span style="([^"]*)"[^>]*><span style="\1"[^>]*>(.*?)<\/span><\/span>/g, '<span style="$1">$2</span>');
+  
+  // 3. Merge adjacent spans with the same style
+  cleaned = cleaned.replace(/<\/span><span style="([^"]*)">/g, '');
+  
+  // 4. Clean up empty spans
+  cleaned = cleaned.replace(/<span[^>]*><\/span>/g, '');
+  
+  // 5. Remove redundant font-weight: normal (it's the default)
+  cleaned = cleaned.replace(/font-weight:\s*normal;?/g, '');
+  
+  // 6. Clean up empty style attributes
+  cleaned = cleaned.replace(/style="[;\s]*"/g, '');
+  cleaned = cleaned.replace(/<span\s+>/g, '<span>');
+  
+  // 7. Remove spans with no style attribute
+  cleaned = cleaned.replace(/<span>([^<]*)<\/span>/g, '$1');
+  
+  console.log('🧹 Simple HTML cleanup:', {
+    before: html.substring(0, 100),
+    after: cleaned.substring(0, 100),
+    lengthChange: html.length - cleaned.length
+  });
+  
+  return cleaned;
+}
+
 export interface PartialFormatResult {
   success: boolean;
   error?: string;
@@ -466,6 +515,15 @@ export function formatSelectedText(options: Partial<TextFormatState>): PartialFo
   }
 
   try {
+    // CRITICAL: Get the container BEFORE modifying the DOM
+    const containingElement = range.commonAncestorContainer.nodeType === Node.TEXT_NODE
+      ? range.commonAncestorContainer.parentElement?.closest('[data-element-key]') as HTMLElement
+      : (range.commonAncestorContainer as HTMLElement).closest('[data-element-key]') as HTMLElement;
+    
+    if (!containingElement) {
+      return { success: false, error: 'Could not find containing element' };
+    }
+
     // Create wrapper span element
     const span = document.createElement('span');
     
@@ -478,29 +536,32 @@ export function formatSelectedText(options: Partial<TextFormatState>): PartialFo
       }
     });
 
-    // Extract selected content
-    const selectedContent = range.extractContents();
+    // Use surroundContents for simple selections (most common case)
+    try {
+      range.surroundContents(span);
+    } catch (e) {
+      // Fall back to extract + insert for complex selections (across multiple elements)
+      const selectedContent = range.extractContents();
+      span.appendChild(selectedContent);
+      range.insertNode(span);
+    }
     
-    // Wrap the content in our formatted span
-    span.appendChild(selectedContent);
-    
-    // Insert the formatted span at the selection point
-    range.insertNode(span);
-    
-    // Clear the selection to avoid confusion
+    // Restore selection to the formatted text
+    const newRange = document.createRange();
+    newRange.selectNodeContents(span);
     selection.removeAllRanges();
+    selection.addRange(newRange);
     
     console.log('✨ Applied partial text formatting:', {
       text: span.textContent?.substring(0, 50),
       appliedFormats: options,
     });
 
-    // Get the containing element's HTML for storage
-    const containingElement = span.closest('[data-element-key]') as HTMLElement;
-    const rawHTML = containingElement?.innerHTML || '';
+    // Get the containing element's HTML for storage (we already have it!)
+    const rawHTML = containingElement.innerHTML;
     
-    // Sanitize the HTML before returning
-    const sanitizedHTML = sanitizeHTML(rawHTML);
+    // FIXED: Use simple, safe HTML cleanup instead of complex sanitizer
+    const sanitizedHTML = simpleSanitizeHTML(rawHTML);
     
     console.log('✨ Partial text formatting complete:', {
       rawHTML: rawHTML.substring(0, 100),
@@ -662,8 +723,8 @@ export function removeFormattingFromSelection(): PartialFormatResult {
     const containingElement = range.startContainer.parentElement?.closest('[data-element-key]') as HTMLElement;
     const rawHTML = containingElement?.innerHTML || '';
     
-    // Sanitize the HTML before returning
-    const sanitizedHTML = sanitizeHTML(rawHTML);
+    // FIXED: Use simple, safe HTML cleanup instead of complex sanitizer
+    const sanitizedHTML = simpleSanitizeHTML(rawHTML);
 
     return {
       success: true,

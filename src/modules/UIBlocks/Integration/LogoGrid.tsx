@@ -86,7 +86,7 @@ const LogoPlaceholder = React.memo(({ name }: { name: string }) => {
       </div>
       
       {/* Integration Name */}
-      <h3 className="text-gray-900 group-hover:text-blue-600 transition-colors duration-300" style={labelStyle}>
+      <h3 className="text-gray-900 group-hover:text-blue-600 transition-colors duration-300">
         {name}
       </h3>
     </div>
@@ -138,7 +138,7 @@ const EditableLogoItem = React.memo(({
           suppressContentEditableWarning
           onBlur={(e) => onNameEdit(item.index, e.currentTarget.textContent || '')}
           className="outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-1 min-h-[20px] cursor-text hover:bg-gray-50 text-gray-900"
-          style={labelStyle}
+          style={getTextStyle('body-sm')}
         >
           {item.name}
         </div>

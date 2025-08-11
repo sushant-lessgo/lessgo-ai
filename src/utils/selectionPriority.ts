@@ -32,35 +32,55 @@ export type ToolbarType = 'text' | 'element' | 'section' | 'image' | 'form' | nu
  * 3. Section selection (when section is selected)
  * 4. None (fallback)
  */
+// Cache for getActiveToolbar to prevent excessive logging
+const toolbarCache = new Map<string, { result: ToolbarType; timestamp: number }>();
+const CACHE_TTL = 100; // 100ms cache
+
 export function getActiveToolbar(selection: EditorSelection): ToolbarType {
+  // Create cache key from selection state
+  const cacheKey = `${selection.mode}-${selection.isTextEditing}-${selection.textEditingElement?.elementKey}-${selection.selectedElement?.elementKey}-${selection.selectedSection}`;
+  
+  // Check cache
+  const cached = toolbarCache.get(cacheKey);
+  if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
+    return cached.result;
+  }
+  
   // Not in edit mode - no toolbar
   if (selection.mode !== 'edit') {
+    toolbarCache.set(cacheKey, { result: null, timestamp: Date.now() });
     return null;
   }
   
+  let result: ToolbarType = null;
+  
   // Priority 1: Text editing always wins
   if (selection.isTextEditing && selection.textEditingElement) {
-    console.log('🎯 Priority resolver: TEXT EDITING wins', selection.textEditingElement);
-    return 'text';
+    result = 'text';
   }
-  
   // Priority 2: Element selection - detect element type
-  if (selection.selectedElement) {
-    // For now, assume all element selections are 'element' type
-    // TODO: Add image/form detection logic here based on element type
-    console.log('🎯 Priority resolver: ELEMENT selection', selection.selectedElement);
-    return 'element';
+  else if (selection.selectedElement) {
+    result = 'element';
   }
-  
   // Priority 3: Section selection
-  if (selection.selectedSection) {
-    console.log('🎯 Priority resolver: SECTION selection', selection.selectedSection);
-    return 'section';
+  else if (selection.selectedSection) {
+    result = 'section';
   }
   
-  // Priority 4: Nothing selected
-  console.log('🎯 Priority resolver: NO SELECTION');
-  return null;
+  // Cache result
+  toolbarCache.set(cacheKey, { result, timestamp: Date.now() });
+  
+  // Clean old cache entries periodically
+  if (toolbarCache.size > 50) {
+    const now = Date.now();
+    for (const [key, value] of toolbarCache.entries()) {
+      if (now - value.timestamp > CACHE_TTL * 10) {
+        toolbarCache.delete(key);
+      }
+    }
+  }
+  
+  return result;
 }
 
 /**
@@ -85,22 +105,36 @@ export function createEditorSelection(storeState: {
 /**
  * Helper to determine if a toolbar should be visible
  */
+// Cache for shouldShowToolbar
+const showCache = new Map<string, { result: boolean; timestamp: number }>();
+
 export function shouldShowToolbar(
   targetType: ToolbarType, 
   currentSelection: EditorSelection
 ): boolean {
+  const cacheKey = `${targetType}-${currentSelection.mode}-${currentSelection.isTextEditing}-${currentSelection.textEditingElement?.elementKey}-${currentSelection.selectedElement?.elementKey}-${currentSelection.selectedSection}`;
+  
+  // Check cache
+  const cached = showCache.get(cacheKey);
+  if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
+    return cached.result;
+  }
+  
   const activeToolbar = getActiveToolbar(currentSelection);
   const shouldShow = activeToolbar === targetType;
   
-  console.log(`🔍 shouldShowToolbar(${targetType}):`, {
-    activeToolbar,
-    shouldShow,
-    selectionState: {
-      isTextEditing: currentSelection.isTextEditing,
-      hasElement: !!currentSelection.selectedElement,
-      hasSection: !!currentSelection.selectedSection,
+  // Cache result
+  showCache.set(cacheKey, { result: shouldShow, timestamp: Date.now() });
+  
+  // Clean cache periodically
+  if (showCache.size > 50) {
+    const now = Date.now();
+    for (const [key, value] of showCache.entries()) {
+      if (now - value.timestamp > CACHE_TTL * 10) {
+        showCache.delete(key);
+      }
     }
-  });
+  }
   
   return shouldShow;
 }
@@ -157,13 +191,14 @@ export function getToolbarTarget(selection: EditorSelection): {
  * Debug helper to log current selection state
  */
 export function debugSelection(selection: EditorSelection, context: string = '') {
-  if (process.env.NODE_ENV === 'development') {
-    console.group(`🎯 Selection Debug ${context}`);
-    console.log('Mode:', selection.mode);
-    console.log('Text Editing:', selection.isTextEditing, selection.textEditingElement);
-    console.log('Selected Element:', selection.selectedElement);
-    console.log('Selected Section:', selection.selectedSection);
-    console.log('Active Toolbar:', getActiveToolbar(selection));
-    console.groupEnd();
-  }
+  // DISABLED - This function was causing infinite render loops
+  // if (process.env.NODE_ENV === 'development') {
+  //   console.group(`🎯 Selection Debug ${context}`);
+  //   console.log('Mode:', selection.mode);
+  //   console.log('Text Editing:', selection.isTextEditing, selection.textEditingElement);
+  //   console.log('Selected Element:', selection.selectedElement);
+  //   console.log('Selected Section:', selection.selectedSection);
+  //   console.log('Active Toolbar:', getActiveToolbar(selection));
+  //   console.groupEnd();
+  // }
 }

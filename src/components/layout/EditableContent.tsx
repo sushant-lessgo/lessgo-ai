@@ -583,7 +583,7 @@ export function EditableAdaptiveHeadline({
       if (storedTextColors && storedTextColors.heading) {
         const smartColor = storedTextColors.heading;
         const colorClass = hexToTailwindClass(smartColor);
-        console.log(`🎨 Using stored headline color for ${backgroundType} (mapped to ${storageKey}):`, { smartColor, colorClass });
+        // console.log(`🎨 Using stored headline color for ${backgroundType} (mapped to ${storageKey}):`, { smartColor, colorClass }); // Disabled to prevent log spam
         return { class: colorClass, value: smartColor };
       }
     }
@@ -708,7 +708,7 @@ export function EditableAdaptiveText({
       if (storedTextColors && storedTextColors[textType]) {
         const smartColor = storedTextColors[textType];
         const colorClass = hexToTailwindClass(smartColor);
-        console.log(`🎨 Using stored ${textType} color for ${backgroundType} (mapped to ${storageKey}):`, { smartColor, colorClass });
+        // console.log(`🎨 Using stored ${textType} color for ${backgroundType} (mapped to ${storageKey}):`, { smartColor, colorClass }); // Disabled to prevent log spam
         return { class: colorClass, value: smartColor };
       }
     }

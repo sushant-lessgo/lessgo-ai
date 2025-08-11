@@ -466,7 +466,7 @@ export default function SliderPricing(props: LayoutComponentProps) {
                     ? `border-primary ${colorTokens.ctaBg.replace('bg-', 'bg-opacity-10 bg-')}` 
                     : 'border-gray-200 hover:border-gray-300'
                 }`}>
-                  <div style={bodyLgStyle} className="font-bold text-gray-900">
+                  <div style={getTextStyle('body-lg')} className="font-bold text-gray-900">
                     {breakpoint}+ {blockContent.unit_label}
                   </div>
                   <div className={`text-sm mt-1 ${

@@ -1,0 +1,105 @@
+/* Editor Baseline CSS - Defensive pointer-events protection
+ * Ensures editor containers can never lose interactivity due to CSS cascade
+ * Phase 1: Critical fix for hit-testing issue
+ */
+
+/* PHASE 1: Defensive baseline - never allow editor to lose pointer events */
+.EditorShell,
+.EditLayout, 
+main[data-editor],
+[data-editor-container],
+.editor-content,
+.main-content,
+.editable-wrapper,
+.editable-text,
+.inline-text-editor {
+  pointer-events: auto !important;
+}
+
+/* Ensure section containers are always interactive */
+.section-container,
+.section-wrapper,
+.editable-section {
+  pointer-events: auto !important;
+}
+
+/* Headlines and text elements must be clickable */
+.headline,
+.subheadline,
+.body-text,
+.editable-element,
+[data-editable],
+[contenteditable="true"] {
+  pointer-events: auto !important;
+}
+
+/* Layout containers that wrap editor content */
+.page-container,
+.content-wrapper,
+.editor-viewport {
+  pointer-events: auto !important;
+}
+
+/* Dev debugging - visual indicator when defensive CSS is active */
+@media screen and (min-width: 1px) {
+  body[data-env="development"] .EditorShell::before {
+    content: "🛡️ Editor baseline CSS active";
+    position: fixed;
+    top: 50px;
+    right: 10px;
+    background: #10b981;
+    color: white;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    z-index: 9999;
+    pointer-events: none;
+    opacity: 0.8;
+  }
+}
+
+/* PHASE 5: Hit-test sentinel for dev debugging
+ * Helps detect when editor content becomes non-hit-testable
+ * Only active in development mode
+ */
+@media screen and (min-width: 1px) {
+  body[data-env="development"] .EditorShell::after {
+    content: "🎯 Click test";
+    position: fixed;
+    bottom: 50px;
+    right: 10px;
+    background: #f59e0b;
+    color: white;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    z-index: 9999;
+    cursor: pointer;
+    opacity: 0.7;
+    transition: all 0.2s ease;
+  }
+  
+  body[data-env="development"] .EditorShell::after:hover {
+    opacity: 1;
+    background: #d97706;
+    transform: scale(1.05);
+  }
+  
+  /* Test failed state - turns red when editor is non-interactive */
+  body[data-env="development"][data-hittest-failed="true"] .EditorShell::after {
+    content: "❌ Click blocked";
+    background: #ef4444;
+    animation: pulse 2s ease-in-out infinite;
+  }
+  
+  @keyframes pulse {
+    0%, 100% {
+      opacity: 0.7;
+      transform: scale(1);
+    }
+    50% {
+      opacity: 1;
+      transform: scale(1.02);
+    }
+  }
+}

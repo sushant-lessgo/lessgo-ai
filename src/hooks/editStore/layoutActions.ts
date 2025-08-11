@@ -646,31 +646,39 @@ getTypographyForSection: (sectionId: string) => {
      * ===== COLOR TOKENS INTEGRATION =====
      */
     
-    getColorTokens: () => {
-      const { theme } = get();
+    getColorTokens: (() => {
+      let cache: any = null;
+      let cacheKey = '';
       
-      console.log('🎨 [TOKENS-DEBUG] getColorTokens called with theme:', {
-        baseColor: theme.colors.baseColor,
-        accentColor: theme.colors.accentColor,
-        accentCSS: theme.colors.accentCSS,
-        sectionBackgrounds: theme.colors.sectionBackgrounds,
-        typography: {
-          headingFont: theme.typography.headingFont,
-          bodyFont: theme.typography.bodyFont
+      return () => {
+        const { theme } = get();
+        
+        // Create cache key from essential theme properties
+        const newCacheKey = `${theme.colors.baseColor}-${theme.colors.accentColor}-${theme.colors.accentCSS}`;
+        
+        // Return cached result if key hasn't changed
+        if (cache && cacheKey === newCacheKey) {
+          return cache;
         }
-      });
+        
+        console.log('🎨 [TOKENS-DEBUG] getColorTokens called with theme:', {
+          baseColor: theme.colors.baseColor,
+          accentColor: theme.colors.accentColor,
+          accentCSS: theme.colors.accentCSS,
+          cacheKey: newCacheKey
+        });
       
       // Check if we have a complete background system
       const hasCompleteBackgroundSystem = 
         theme.colors.sectionBackgrounds.primary && 
         theme.colors.sectionBackgrounds.secondary;
 
-      console.log('🎨 [TOKENS-DEBUG] Background system completeness check:', {
-        hasCompleteBackgroundSystem,
-        hasPrimary: !!theme.colors.sectionBackgrounds.primary,
-        hasSecondary: !!theme.colors.sectionBackgrounds.secondary,
-        hasAccentCSS: !!theme.colors.accentCSS
-      });
+      // console.log('🎨 [TOKENS-DEBUG] Background system completeness check:', {
+      //   hasCompleteBackgroundSystem,
+      //   hasPrimary: !!theme.colors.sectionBackgrounds.primary,
+      //   hasSecondary: !!theme.colors.sectionBackgrounds.secondary,
+      //   hasAccentCSS: !!theme.colors.accentCSS
+      // }); // Disabled to prevent log spam
 
       if (hasCompleteBackgroundSystem && theme.colors.accentCSS) {
         // Properly construct the BackgroundSystem object
@@ -684,7 +692,7 @@ getTypographyForSection: (sectionId: string) => {
           accentCSS: theme.colors.accentCSS
         };
 
-        console.log('🎨 [TOKENS-DEBUG] Using integrated background system for color tokens:', backgroundSystemData);
+        // console.log('🎨 [TOKENS-DEBUG] Using integrated background system for color tokens:', backgroundSystemData); // Disabled
         
         // Pass stored text colors to avoid recalculation
         const tokens = generateColorTokens({
@@ -700,7 +708,11 @@ getTypographyForSection: (sectionId: string) => {
           storedTextColors: theme.colors.textColors // Use stored text colors
         });
         
-        console.log('🎨 [TOKENS-DEBUG] Generated integrated tokens with stored text colors:', tokens);
+        // console.log('🎨 [TOKENS-DEBUG] Generated integrated tokens with stored text colors:', tokens); // Disabled
+        
+        // Cache the result
+        cache = tokens;
+        cacheKey = newCacheKey;
         return tokens;
       } else {
         // Fallback to basic generation
@@ -715,9 +727,14 @@ getTypographyForSection: (sectionId: string) => {
         console.log('🎨 [TOKENS-DEBUG] Fallback input:', fallbackInput);
         const tokens = generateColorTokens(fallbackInput);
         console.log('🎨 [TOKENS-DEBUG] Generated fallback tokens:', tokens);
+        
+        // Cache the result
+        cache = tokens;
+        cacheKey = newCacheKey;
         return tokens;
       }
-    },
+      };
+    })(),
 
     updateColorTokens: (newTokens: ColorTokens) =>
       set((state: EditStore) => {

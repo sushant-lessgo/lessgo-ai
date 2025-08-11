@@ -409,7 +409,7 @@ export default function ValueReinforcementBlock(props: LayoutComponentProps) {
                   text={blockContent.cta_text}
                   colorTokens={colorTokens}
                   className="shadow-xl hover:shadow-2xl transform hover:-translate-y-1 transition-all duration-300 py-4 px-8"
-                  style={bodyLgStyle}
+                  textStyle={bodyLgStyle}
                   variant="primary"
                   sectionId={sectionId}
                   elementKey="cta_text"

@@ -55,8 +55,18 @@ export function createContentActions(set: any, get: any): ContentActions {
     
     updateElementContent: (sectionId: string, elementKey: string, content: string | string[]) =>
       set((state: EditStore) => {
+        const updateTime = Date.now();
+        console.log(`🔄 [${updateTime}] updateElementContent CALLED:`, {
+          sectionId,
+          elementKey,
+          contentType: typeof content,
+          contentLength: Array.isArray(content) ? content.length : content?.length,
+          contentPreview: Array.isArray(content) ? content[0]?.substring(0, 50) : content?.toString().substring(0, 50),
+          callStack: new Error().stack?.split('\n')[2]?.trim()
+        });
+        
         if (!state.content[sectionId]) {
-          console.warn(`Section ${sectionId} not found`);
+          console.warn(`🔄 [${updateTime}] Section ${sectionId} not found`);
           return;
         }
 
@@ -131,6 +141,15 @@ export function createContentActions(set: any, get: any): ContentActions {
         });
         
         state.lastUpdated = Date.now();
+        
+        console.log(`🔄 [${updateTime}] updateElementContent COMPLETED:`, {
+          sectionId,
+          elementKey,
+          oldValue: oldValue?.substring(0, 50) + '...',
+          newValue: (Array.isArray(content) ? content[0] : content)?.toString().substring(0, 50) + '...',
+          isDirty: state.persistence.isDirty,
+          queuedChangesCount: state.queuedChanges.length
+        });
       }),
 
     // Include all section CRUD actions

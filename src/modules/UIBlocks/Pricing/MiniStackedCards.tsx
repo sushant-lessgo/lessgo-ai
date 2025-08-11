@@ -357,7 +357,7 @@ export default function MiniStackedCards(props: LayoutComponentProps) {
                   tier={tier}
                   index={index}
                   h3Style={h3Style}
-                  getTypographyStyle={getTypographyStyle}
+                  getTypographyStyle={getTypographyStyle as (variant: string) => React.CSSProperties}
                 />
               ))}
             </div>
