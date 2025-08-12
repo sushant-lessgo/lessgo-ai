@@ -637,7 +637,7 @@ export function usePageGeneration(tokenId: string) {
         isGenerating: false,
         isNavigating: true,
         currentStep: 8, // Add a new step for navigation
-        currentLabel: 'Redirecting to preview...',
+        currentLabel: 'Almost Done!',
         warnings: allWarnings
       }));
       

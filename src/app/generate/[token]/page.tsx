@@ -7,6 +7,7 @@ import LandingPageRenderer from '@/modules/generatedLanding/LandingPageRenderer'
 import { StoreDebugPanel } from '@/app/create/[token]/components/StoreDebugPanel';
 import { OnboardingDebugPanel } from '@/app/create/[token]/components/OnboardingDebugPanel';
 import EditTransitionModal from './components/EditTransitionModal';
+import PageRevealAnimation from './components/PageRevealAnimation';
 
 export default function GeneratePage() {
   const params = useParams();
@@ -275,10 +276,12 @@ console.log('🎯 Theme after setMode:', afterModeSet.theme);
 
   return (
     <div className="min-h-screen bg-white">
-      {/* Rendered Landing Page */}
-      <div id="landing-preview">
-        <LandingPageRenderer />
-      </div>
+      {/* Rendered Landing Page with Magical Reveal */}
+      <PageRevealAnimation sectionsCount={sections.length}>
+        <div id="landing-preview">
+          <LandingPageRenderer />
+        </div>
+      </PageRevealAnimation>
 
       {/* Fixed Action Bar */}
       <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 px-6 py-4 shadow-lg z-50">

@@ -198,7 +198,7 @@ export default function GenerationAnimation({
           {(currentStep >= 7 || isNavigating) && (
             <div className="mt-4 text-green-600 font-medium">
               {isNavigating 
-                ? '🚀 Redirecting to your preview page...' 
+                ? '🚀 Almost Done!' 
                 : '🎉 Your landing page is ready! Preparing preview...'}
             </div>
           )}
