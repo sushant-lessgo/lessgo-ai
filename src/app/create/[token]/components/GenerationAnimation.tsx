@@ -69,10 +69,10 @@ export default function GenerationAnimation({
   }
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
-      <div className="bg-white rounded-lg shadow-2xl p-8 max-w-4xl w-full mx-4 max-h-[90vh] overflow-hidden">
+    <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+      <div className="bg-white rounded-lg shadow-2xl p-6 max-w-4xl w-full max-h-[90vh] overflow-y-auto">
         {/* Header */}
-        <div className="text-center mb-8">
+        <div className="text-center mb-6">
           <div className="inline-flex items-center space-x-2 bg-blue-50 px-4 py-2 rounded-full">
             <div className="w-3 h-3 bg-blue-500 rounded-full animate-pulse"></div>
             <span className="text-blue-700 font-medium">{currentLabel}</span>
@@ -83,7 +83,7 @@ export default function GenerationAnimation({
         </div>
 
         {/* Progress Bar */}
-        <div className="w-full h-2 bg-gray-200 rounded-full mb-8">
+        <div className="w-full h-2 bg-gray-200 rounded-full mb-6">
           <div 
             className="h-full bg-gradient-to-r from-blue-500 to-purple-500 rounded-full transition-all duration-1000 ease-out"
             style={{ width: `${Math.min((currentStep / 7) * 100, 100)}%` }}
@@ -91,7 +91,7 @@ export default function GenerationAnimation({
         </div>
 
         {/* Wireframe Animation */}
-        <div className="relative bg-gray-50 rounded-lg p-6 min-h-[400px] border-2 border-dashed border-gray-300">
+        <div className="relative bg-gray-50 rounded-lg p-6 min-h-[300px] border-2 border-dashed border-gray-300">
           {/* Browser Chrome */}
           <div className="absolute top-2 left-2 flex space-x-1">
             <div className="w-3 h-3 bg-red-400 rounded-full"></div>
@@ -101,7 +101,7 @@ export default function GenerationAnimation({
 
           {/* Wireframe Sections */}
           {wireframeVisible && (
-            <div className="mt-8 space-y-4">
+            <div className="mt-6 space-y-3">
               {visibleSections.map((sectionId, index) => {
                 const position = SECTION_POSITIONS[sectionId as keyof typeof SECTION_POSITIONS];
                 const isActive = sectionsGenerated.includes(sectionId);
@@ -116,7 +116,7 @@ export default function GenerationAnimation({
                     `}
                     style={{
                       animationDelay: `${index * 300}ms`,
-                      minHeight: '80px'
+                      minHeight: '60px'
                     }}
                   >
                     {/* Section Label */}
@@ -198,8 +198,8 @@ export default function GenerationAnimation({
           {(currentStep >= 7 || isNavigating) && (
             <div className="mt-4 text-green-600 font-medium">
               {isNavigating 
-                ? '🚀 Almost Done!' 
-                : '🎉 Your landing page is ready! Preparing preview...'}
+                ? '✨ Almost done... preparing your preview' 
+                : '🎉 Your high-converting page is ready!'}
             </div>
           )}
         </div>

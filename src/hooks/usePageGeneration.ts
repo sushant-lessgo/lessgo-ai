@@ -10,15 +10,15 @@ import { buildFullPrompt } from '@/modules/prompt/buildPrompt';
 import { parseAiResponse } from '@/modules/prompt/parseAiResponse';
 import { autoSaveDraft } from '@/utils/autoSaveDraft';
 import { generateCompleteBackgroundSystem } from '@/modules/Design/background/backgroundIntegration';
-// Progress steps for UX
+// Progress steps for UX - Customer psychology focused
 const PROGRESS_STEPS = [
-  { id: 1, label: "Analyzing your business...", duration: 800 },
-  { id: 2, label: "Selecting optimal sections...", duration: 1000 },
-  { id: 3, label: "Choosing layouts...", duration: 1200 },
-  { id: 4, label: "Writing your hero section...", duration: 2000 },
-  { id: 5, label: "Generating features & benefits...", duration: 2500 },
-  { id: 6, label: "Adding testimonials & proof...", duration: 2000 },
-  { id: 7, label: "Finalizing your page...", duration: 1500 }
+  { id: 1, label: "Getting into your customer's mind...", duration: 800 },
+  { id: 2, label: "Uncovering their pains, desires, and hidden objections...", duration: 1000 },
+  { id: 3, label: "Selecting sections to guide them from curiosity to conversion...", duration: 1200 },
+  { id: 4, label: "Choosing backgrounds and colors to spark emotion...", duration: 2000 },
+  { id: 5, label: "Writing persuasive copy for every section...", duration: 2500 },
+  { id: 6, label: "Assembling your high-converting landing page...", duration: 1500 },
+  { id: 7, label: "Finalizing touches for maximum impact...", duration: 1000 }
 ];
 
 interface GenerationState {
@@ -563,7 +563,7 @@ export function usePageGeneration(tokenId: string) {
           ...prev,
           currentStep: i + 1,
           currentLabel: PROGRESS_STEPS[i].label,
-          copyStreaming: i === 3
+          copyStreaming: i === 4 // Show streaming on step 5 (writing copy)
         }));
         
         await new Promise(resolve => setTimeout(resolve, PROGRESS_STEPS[i].duration));
@@ -637,7 +637,7 @@ export function usePageGeneration(tokenId: string) {
         isGenerating: false,
         isNavigating: true,
         currentStep: 8, // Add a new step for navigation
-        currentLabel: 'Almost Done!',
+        currentLabel: 'Almost done... preparing your preview',
         warnings: allWarnings
       }));
       
