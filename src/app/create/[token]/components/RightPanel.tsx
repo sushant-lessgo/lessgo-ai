@@ -50,7 +50,7 @@ export default function RightPanel() {
   const tokenId = params?.token as string;
 
   // Page generation hook
-  const { generationState, handleGeneratePage: generatePage, isGenerating } = usePageGeneration(tokenId);
+  const { generationState, handleGeneratePage: generatePage, isGenerating, isNavigating } = usePageGeneration(tokenId);
 
   const isStep1 = !oneLiner;
   const isFinalStep = stepIndex >= CANONICAL_FIELD_NAMES.length;
@@ -311,6 +311,7 @@ export default function RightPanel() {
                       layoutsVisible={generationState.layoutsVisible}
                       copyStreaming={generationState.copyStreaming}
                       isGenerating={generationState.isGenerating}
+                      isNavigating={generationState.isNavigating}
                     />
 
                     {/* Error Display */}

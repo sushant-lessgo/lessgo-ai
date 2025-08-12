@@ -8,6 +8,7 @@ interface GenerationAnimationProps {
   layoutsVisible: boolean;
   copyStreaming: boolean;
   isGenerating: boolean;
+  isNavigating: boolean;
 }
 
 const SECTION_POSITIONS = {
@@ -26,7 +27,8 @@ export default function GenerationAnimation({
   sectionsGenerated,
   layoutsVisible,
   copyStreaming,
-  isGenerating
+  isGenerating,
+  isNavigating
 }: GenerationAnimationProps) {
   const [typingText, setTypingText] = useState('');
   const [visibleSections, setVisibleSections] = useState<string[]>([]);
@@ -61,7 +63,8 @@ export default function GenerationAnimation({
     }
   }, [copyStreaming]);
 
-  if (!isGenerating) {
+  // Show modal when either generating or navigating
+  if (!isGenerating && !isNavigating) {
     return null;
   }
 
@@ -75,7 +78,7 @@ export default function GenerationAnimation({
             <span className="text-blue-700 font-medium">{currentLabel}</span>
           </div>
           <div className="mt-4 text-sm text-gray-500">
-            Step {currentStep} of 7
+            {currentStep <= 7 ? `Step ${currentStep} of 7` : ''}
           </div>
         </div>
 
@@ -83,7 +86,7 @@ export default function GenerationAnimation({
         <div className="w-full h-2 bg-gray-200 rounded-full mb-8">
           <div 
             className="h-full bg-gradient-to-r from-blue-500 to-purple-500 rounded-full transition-all duration-1000 ease-out"
-            style={{ width: `${(currentStep / 7) * 100}%` }}
+            style={{ width: `${Math.min((currentStep / 7) * 100, 100)}%` }}
           />
         </div>
 
@@ -192,9 +195,11 @@ export default function GenerationAnimation({
             </div>
           </div>
           
-          {currentStep >= 7 && (
+          {(currentStep >= 7 || isNavigating) && (
             <div className="mt-4 text-green-600 font-medium">
-              🎉 Your landing page is ready! Redirecting to preview...
+              {isNavigating 
+                ? '🚀 Redirecting to your preview page...' 
+                : '🎉 Your landing page is ready! Preparing preview...'}
             </div>
           )}
         </div>

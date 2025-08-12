@@ -23,6 +23,7 @@ const PROGRESS_STEPS = [
 
 interface GenerationState {
   isGenerating: boolean;
+  isNavigating: boolean;
   currentStep: number;
   currentLabel: string;
   wireframeVisible: boolean;
@@ -57,6 +58,7 @@ export function usePageGeneration(tokenId: string) {
   
   const [generationState, setGenerationState] = useState<GenerationState>({
     isGenerating: false,
+    isNavigating: false,
     currentStep: 0,
     currentLabel: '',
     wireframeVisible: false,
@@ -629,11 +631,13 @@ export function usePageGeneration(tokenId: string) {
       
       await new Promise(resolve => setTimeout(resolve, PROGRESS_STEPS[6].duration));
       
-      // Success - navigate to preview
+      // Success - keep modal open during navigation
       setGenerationState(prev => ({
         ...prev,
         isGenerating: false,
-        currentStep: 0,
+        isNavigating: true,
+        currentStep: 8, // Add a new step for navigation
+        currentLabel: 'Redirecting to preview...',
         warnings: allWarnings
       }));
       
@@ -652,12 +656,22 @@ export function usePageGeneration(tokenId: string) {
       // Navigate to generate
       router.push(`/generate/${tokenId}`);
       
+      // Fallback timeout to hide modal after 5 seconds
+      setTimeout(() => {
+        setGenerationState(prev => ({
+          ...prev,
+          isNavigating: false,
+          currentStep: 0
+        }));
+      }, 5000);
+      
     } catch (error) {
       console.error('Page generation failed:', error);
       
       setGenerationState(prev => ({
         ...prev,
         isGenerating: false,
+        isNavigating: false,
         currentStep: 0,
         error: error instanceof Error ? error.message : 'Generation failed',
         warnings: allWarnings
@@ -673,6 +687,7 @@ export function usePageGeneration(tokenId: string) {
   return {
     generationState,
     handleGeneratePage,
-    isGenerating: generationState.isGenerating
+    isGenerating: generationState.isGenerating,
+    isNavigating: generationState.isNavigating
   };
 }
