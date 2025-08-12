@@ -1,0 +1,283 @@
+/* Structural Classes for Lessgo CSS Variable System
+ * These classes provide the patterns and structures while colors are injected via CSS variables
+ * Replaces hardcoded Tailwind classes with flexible, variable-based equivalents
+ */
+
+/* ===== COMPLEX BACKGROUND PATTERNS ===== */
+/* These patterns were identified from bgVariations analysis */
+
+/* Soft Gradient Blur Archetype */
+.bg-soft-gradient-blur {
+  background: radial-gradient(ellipse at center, var(--gradient-from), var(--gradient-via), transparent);
+  filter: blur(var(--blur-extreme));
+}
+
+.bg-soft-gradient-blur-top {
+  background: radial-gradient(ellipse at top, var(--gradient-from), var(--gradient-via), transparent);
+  filter: blur(var(--blur-strong));
+}
+
+.bg-soft-gradient-blur-subtle {
+  background: linear-gradient(135deg, var(--gradient-from), var(--gradient-via), var(--bg-neutral-base));
+}
+
+/* Startup Skybox Archetype */
+.bg-startup-skybox {
+  background: 
+    radial-gradient(circle at top, var(--gradient-from), transparent 70%),
+    var(--bg-neutral-base);
+}
+
+.bg-startup-skybox-bottom {
+  background: 
+    radial-gradient(ellipse at bottom, var(--gradient-from), transparent 75%),
+    var(--bg-neutral-base);
+}
+
+/* Glass Morph Archetype */
+.bg-glass-morph {
+  background: var(--bg-neutral-base);
+  backdrop-filter: blur(var(--blur-medium));
+  opacity: var(--opacity-80);
+}
+
+.bg-glass-morph-with-pop {
+  background: 
+    var(--bg-neutral-base),
+    radial-gradient(circle at center, var(--gradient-from), transparent 60%);
+  backdrop-filter: blur(var(--blur-medium));
+  opacity: var(--opacity-90);
+}
+
+/* Code Matrix Mesh Archetype */
+.bg-code-matrix {
+  background: 
+    var(--bg-neutral-base),
+    repeating-linear-gradient(
+      0deg,
+      rgba(var(--accent-primary), var(--opacity-10)) 0 1px,
+      transparent 1px 10px
+    ),
+    repeating-linear-gradient(
+      90deg,
+      rgba(var(--accent-primary), var(--opacity-10)) 0 1px,
+      transparent 1px 10px
+    );
+}
+
+.bg-code-matrix-dark {
+  background: 
+    var(--bg-divider-base),
+    repeating-linear-gradient(
+      0deg,
+      rgba(var(--accent-primary), var(--opacity-20)) 0 1px,
+      transparent 1px 8px
+    ),
+    repeating-linear-gradient(
+      90deg,
+      rgba(var(--accent-primary), var(--opacity-20)) 0 1px,
+      transparent 1px 8px
+    );
+}
+
+/* Editorial Split Archetype */
+.bg-editorial-split {
+  background: linear-gradient(
+    45deg,
+    var(--gradient-from) 0%,
+    var(--gradient-from) 10px,
+    var(--gradient-via) 10px,
+    var(--gradient-via) 20px
+  );
+  background-size: 28px 28px;
+}
+
+/* Luxury Blur Archetype */
+.bg-luxury-blur {
+  background: 
+    radial-gradient(circle at center, var(--gradient-from), var(--gradient-via), var(--gradient-to)),
+    var(--bg-neutral-base);
+  filter: blur(var(--blur-medium));
+}
+
+/* Energetic Diagonals Archetype */
+.bg-energetic-diagonals {
+  background: repeating-linear-gradient(
+    45deg,
+    var(--gradient-from),
+    var(--gradient-from) 10px,
+    var(--gradient-via) 10px,
+    var(--gradient-via) 20px
+  );
+}
+
+/* Paper Texture Light Archetype */
+.bg-paper-texture {
+  background: 
+    var(--bg-neutral-base),
+    radial-gradient(circle, rgba(var(--text-muted), var(--opacity-10)) 1px, transparent 1px);
+  background-size: 32px 32px;
+}
+
+/* Noise Fade Dark Archetype */
+.bg-noise-fade {
+  background: 
+    linear-gradient(135deg, var(--gradient-from), var(--gradient-via), var(--gradient-to)),
+    radial-gradient(ellipse at center, transparent 40%, var(--gradient-from) 100%);
+}
+
+/* High Friction Grid Archetype */
+.bg-friction-grid {
+  background: 
+    var(--bg-neutral-base),
+    linear-gradient(90deg, rgba(var(--text-muted), var(--opacity-10)) 1px, transparent 1px),
+    linear-gradient(0deg, rgba(var(--text-muted), var(--opacity-10)) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+
+/* Comic Burst Archetype */
+.bg-comic-burst {
+  background: 
+    radial-gradient(circle at center, var(--gradient-from), var(--gradient-via), var(--gradient-to)),
+    var(--bg-neutral-base);
+  background-blend-mode: overlay;
+}
+
+/* Zen Calm Wave Archetype */
+.bg-zen-wave {
+  background: 
+    var(--bg-neutral-base),
+    repeating-linear-gradient(
+      0deg,
+      transparent 0px,
+      rgba(var(--gradient-from), var(--opacity-10)) 1px,
+      rgba(var(--gradient-from), var(--opacity-10)) 2px,
+      transparent 3px
+    );
+  background-size: 100% 20px;
+}
+
+/* Deep Night Space Archetype */
+.bg-deep-space {
+  background: 
+    radial-gradient(circle at center, var(--gradient-from), var(--gradient-via), var(--gradient-to)),
+    radial-gradient(circle at 30% 30%, rgba(var(--accent-primary), var(--opacity-20)) 0%, transparent 40%),
+    radial-gradient(circle at 70% 70%, rgba(var(--accent-secondary), var(--opacity-10)) 0%, transparent 40%);
+}
+
+/* Vibrant Rings Archetype */
+.bg-vibrant-rings {
+  background: 
+    radial-gradient(circle, rgba(var(--gradient-from), var(--opacity-30)) 1px, transparent 1px),
+    var(--bg-neutral-base);
+  background-size: 32px 32px;
+}
+
+/* Monochrome Hero Zone Archetype */
+.bg-monochrome-hero {
+  background: 
+    radial-gradient(ellipse at center, var(--gradient-from), var(--bg-neutral-base)),
+    var(--bg-neutral-base);
+}
+
+/* Blurred Spotlight Archetype */
+.bg-blurred-spotlight {
+  background: 
+    radial-gradient(circle at 25% 25%, rgba(var(--gradient-from), var(--opacity-30)) 0%, transparent 40%),
+    radial-gradient(circle at 75% 75%, rgba(var(--gradient-via), var(--opacity-20)) 0%, transparent 40%),
+    var(--bg-neutral-base);
+}
+
+/* ===== ANIMATION UTILITIES ===== */
+/* Background animations using CSS variables */
+
+@keyframes gradient-shift {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.bg-animated-gradient {
+  background: linear-gradient(270deg, var(--gradient-from), var(--gradient-via), var(--gradient-to));
+  background-size: 200% 200%;
+  animation: gradient-shift 10s ease infinite;
+}
+
+@keyframes pulse-vars {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: var(--opacity-70);
+  }
+}
+
+.animate-pulse-vars {
+  animation: pulse-vars 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* ===== RESPONSIVE MODIFIERS ===== */
+/* Responsive versions of key patterns */
+
+@media (max-width: 768px) {
+  /* Simplify complex patterns on mobile */
+  .bg-soft-gradient-blur {
+    background: linear-gradient(135deg, var(--gradient-from), var(--gradient-via));
+    filter: blur(var(--blur-medium));
+  }
+  
+  .bg-code-matrix {
+    background: var(--bg-neutral-base);
+  }
+  
+  .bg-energetic-diagonals {
+    background: linear-gradient(45deg, var(--gradient-from), var(--gradient-via));
+  }
+}
+
+/* ===== DARK MODE ADAPTATIONS ===== */
+@media (prefers-color-scheme: dark) {
+  .bg-paper-texture {
+    background: 
+      var(--bg-divider-base),
+      radial-gradient(circle, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+  }
+  
+  .bg-friction-grid {
+    background: 
+      var(--bg-divider-base),
+      linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+      linear-gradient(0deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+  }
+}
+
+/* ===== PRINT OPTIMIZATIONS ===== */
+@media print {
+  /* Simplify all patterns for print */
+  .bg-soft-gradient-blur,
+  .bg-startup-skybox,
+  .bg-glass-morph,
+  .bg-code-matrix,
+  .bg-editorial-split,
+  .bg-luxury-blur,
+  .bg-energetic-diagonals,
+  .bg-paper-texture,
+  .bg-noise-fade,
+  .bg-friction-grid,
+  .bg-comic-burst,
+  .bg-zen-wave,
+  .bg-deep-space,
+  .bg-vibrant-rings,
+  .bg-monochrome-hero,
+  .bg-blurred-spotlight {
+    background: var(--bg-neutral-base) !important;
+    filter: none !important;
+    backdrop-filter: none !important;
+  }
+}

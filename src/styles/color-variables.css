@@ -1,0 +1,356 @@
+/* CSS Variable Architecture for Lessgo Color System
+ * This file defines the structural CSS variables that enable infinite color customization
+ * while maintaining design intelligence and accessibility standards.
+ */
+
+:root {
+  /* ===== BACKGROUND SYSTEM VARIABLES ===== */
+  /* These variables define the structural patterns while colors are injected dynamically */
+  
+  /* Primary background patterns (Hero, CTA sections) */
+  --bg-primary-from: #3b82f6;
+  --bg-primary-via: #60a5fa;
+  --bg-primary-to: #0ea5e9;
+  --bg-primary-pattern: radial-gradient(ellipse at center, var(--bg-primary-from), var(--bg-primary-via), var(--bg-primary-to));
+  
+  /* Secondary background patterns (Features, testimonials) */
+  --bg-secondary-from: #eff6ff;
+  --bg-secondary-to: #dbeafe;
+  --bg-secondary-pattern: linear-gradient(135deg, var(--bg-secondary-from), var(--bg-secondary-to));
+  
+  /* Neutral backgrounds (Clean sections) */
+  --bg-neutral-base: #ffffff;
+  --bg-neutral-pattern: var(--bg-neutral-base);
+  
+  /* Divider backgrounds (FAQ, footer) */
+  --bg-divider-base: #f8fafc;
+  --bg-divider-pattern: var(--bg-divider-base);
+  
+  /* ===== GRADIENT DIRECTION VARIABLES ===== */
+  --gradient-from: var(--bg-primary-from);
+  --gradient-via: var(--bg-primary-via);
+  --gradient-to: var(--bg-primary-to);
+  
+  /* ===== ACCENT COLOR SYSTEM ===== */
+  /* Interactive elements and CTAs */
+  --accent-primary: #8b5cf6;
+  --accent-primary-hover: #7c3aed;
+  --accent-primary-active: #6d28d9;
+  --accent-primary-border: #8b5cf6;
+  --accent-primary-text: #ffffff;
+  
+  /* Secondary accent for variety */
+  --accent-secondary: #06b6d4;
+  --accent-secondary-hover: #0891b2;
+  --accent-secondary-active: #0e7490;
+  
+  /* ===== ADAPTIVE TEXT COLOR SYSTEM ===== */
+  /* Text colors that adapt based on background context */
+  --text-primary: #1f2937;
+  --text-secondary: #6b7280;
+  --text-muted: #9ca3af;
+  
+  /* Text colors for dark backgrounds */
+  --text-primary-dark: #f9fafb;
+  --text-secondary-dark: #d1d5db;
+  --text-muted-dark: #9ca3af;
+  
+  /* Text colors for colored backgrounds */
+  --text-on-accent: #ffffff;
+  --text-on-accent-muted: rgba(255, 255, 255, 0.8);
+  
+  /* ===== SEMANTIC COLOR SYSTEM ===== */
+  --color-success: #10b981;
+  --color-success-hover: #059669;
+  --color-success-bg: #d1fae5;
+  --color-success-text: #065f46;
+  
+  --color-warning: #f59e0b;
+  --color-warning-hover: #d97706;
+  --color-warning-bg: #fef3c7;
+  --color-warning-text: #92400e;
+  
+  --color-error: #ef4444;
+  --color-error-hover: #dc2626;
+  --color-error-bg: #fee2e2;
+  --color-error-text: #991b1b;
+  
+  --color-info: var(--accent-primary);
+  --color-info-hover: var(--accent-primary-hover);
+  --color-info-bg: #ede9fe;
+  --color-info-text: #5b21b6;
+  
+  /* ===== BLUR AND EFFECT VARIABLES ===== */
+  --blur-subtle: 2px;
+  --blur-medium: 8px;
+  --blur-strong: 16px;
+  --blur-extreme: 160px;
+  
+  /* ===== OPACITY SYSTEM ===== */
+  --opacity-10: 0.1;
+  --opacity-20: 0.2;
+  --opacity-30: 0.3;
+  --opacity-40: 0.4;
+  --opacity-50: 0.5;
+  --opacity-60: 0.6;
+  --opacity-70: 0.7;
+  --opacity-80: 0.8;
+  --opacity-90: 0.9;
+  --opacity-95: 0.95;
+}
+
+/* ===== STRUCTURAL PATTERN CLASSES ===== */
+/* These classes use the CSS variables above for infinite customization */
+
+/* Background Patterns */
+.bg-pattern-primary {
+  background: var(--bg-primary-pattern);
+}
+
+.bg-pattern-secondary {
+  background: var(--bg-secondary-pattern);
+}
+
+.bg-pattern-neutral {
+  background: var(--bg-neutral-pattern);
+}
+
+.bg-pattern-divider {
+  background: var(--bg-divider-pattern);
+}
+
+/* Gradient Utilities */
+.bg-gradient-vars-tr {
+  background: linear-gradient(to top right, var(--gradient-from), var(--gradient-via), var(--gradient-to));
+}
+
+.bg-gradient-vars-tl {
+  background: linear-gradient(to top left, var(--gradient-from), var(--gradient-via), var(--gradient-to));
+}
+
+.bg-gradient-vars-br {
+  background: linear-gradient(to bottom right, var(--gradient-from), var(--gradient-via), var(--gradient-to));
+}
+
+.bg-gradient-vars-bl {
+  background: linear-gradient(to bottom left, var(--gradient-from), var(--gradient-via), var(--gradient-to));
+}
+
+.bg-gradient-vars-t {
+  background: linear-gradient(to top, var(--gradient-from), var(--gradient-to));
+}
+
+.bg-gradient-vars-b {
+  background: linear-gradient(to bottom, var(--gradient-from), var(--gradient-to));
+}
+
+.bg-gradient-vars-l {
+  background: linear-gradient(to left, var(--gradient-from), var(--gradient-to));
+}
+
+.bg-gradient-vars-r {
+  background: linear-gradient(to right, var(--gradient-from), var(--gradient-to));
+}
+
+/* Radial Gradient Utilities */
+.bg-radial-vars-center {
+  background: radial-gradient(ellipse at center, var(--gradient-from), var(--gradient-via), var(--gradient-to));
+}
+
+.bg-radial-vars-top {
+  background: radial-gradient(ellipse at top, var(--gradient-from), var(--gradient-via), var(--gradient-to));
+}
+
+.bg-radial-vars-bottom {
+  background: radial-gradient(ellipse at bottom, var(--gradient-from), var(--gradient-via), var(--gradient-to));
+}
+
+.bg-radial-circle-vars {
+  background: radial-gradient(circle at center, var(--gradient-from), var(--gradient-via), var(--gradient-to));
+}
+
+/* Interactive Elements */
+.btn-primary-var {
+  background: var(--accent-primary);
+  color: var(--accent-primary-text);
+  border: 1px solid var(--accent-primary-border);
+}
+
+.btn-primary-var:hover {
+  background: var(--accent-primary-hover);
+}
+
+.btn-primary-var:active {
+  background: var(--accent-primary-active);
+}
+
+.btn-secondary-var {
+  background: transparent;
+  color: var(--accent-primary);
+  border: 1px solid var(--accent-primary-border);
+}
+
+.btn-secondary-var:hover {
+  background: var(--accent-primary);
+  color: var(--accent-primary-text);
+}
+
+/* Text Utilities */
+.text-adaptive-primary {
+  color: var(--text-primary);
+}
+
+.text-adaptive-secondary {
+  color: var(--text-secondary);
+}
+
+.text-adaptive-muted {
+  color: var(--text-muted);
+}
+
+.text-on-accent-var {
+  color: var(--text-on-accent);
+}
+
+.text-on-accent-muted-var {
+  color: var(--text-on-accent-muted);
+}
+
+/* Form Elements */
+.input-var {
+  background: var(--bg-neutral-base);
+  border: 1px solid var(--text-muted);
+  color: var(--text-primary);
+}
+
+.input-var:focus {
+  border-color: var(--accent-primary);
+  box-shadow: 0 0 0 3px rgba(var(--accent-primary), var(--opacity-20));
+}
+
+/* Semantic Color Utilities */
+.text-success-var {
+  color: var(--color-success-text);
+}
+
+.bg-success-var {
+  background: var(--color-success-bg);
+}
+
+.text-warning-var {
+  color: var(--color-warning-text);
+}
+
+.bg-warning-var {
+  background: var(--color-warning-bg);
+}
+
+.text-error-var {
+  color: var(--color-error-text);
+}
+
+.bg-error-var {
+  background: var(--color-error-bg);
+}
+
+.text-info-var {
+  color: var(--color-info-text);
+}
+
+.bg-info-var {
+  background: var(--color-info-bg);
+}
+
+/* Blur Effect Utilities */
+.blur-var-subtle {
+  filter: blur(var(--blur-subtle));
+}
+
+.blur-var-medium {
+  filter: blur(var(--blur-medium));
+}
+
+.blur-var-strong {
+  filter: blur(var(--blur-strong));
+}
+
+.blur-var-extreme {
+  filter: blur(var(--blur-extreme));
+}
+
+/* Backdrop Blur Utilities */
+.backdrop-blur-var-sm {
+  backdrop-filter: blur(4px);
+}
+
+.backdrop-blur-var-md {
+  backdrop-filter: blur(12px);
+}
+
+.backdrop-blur-var-lg {
+  backdrop-filter: blur(24px);
+}
+
+/* Opacity Utilities */
+.opacity-var-10 {
+  opacity: var(--opacity-10);
+}
+
+.opacity-var-20 {
+  opacity: var(--opacity-20);
+}
+
+.opacity-var-30 {
+  opacity: var(--opacity-30);
+}
+
+.opacity-var-40 {
+  opacity: var(--opacity-40);
+}
+
+.opacity-var-50 {
+  opacity: var(--opacity-50);
+}
+
+.opacity-var-60 {
+  opacity: var(--opacity-60);
+}
+
+.opacity-var-70 {
+  opacity: var(--opacity-70);
+}
+
+.opacity-var-80 {
+  opacity: var(--opacity-80);
+}
+
+.opacity-var-90 {
+  opacity: var(--opacity-90);
+}
+
+.opacity-var-95 {
+  opacity: var(--opacity-95);
+}
+
+/* ===== RESPONSIVE UTILITIES ===== */
+/* These ensure variables work across all breakpoints */
+@media (prefers-color-scheme: dark) {
+  :root {
+    /* Auto-adjust for dark mode preferences */
+    --text-primary: var(--text-primary-dark);
+    --text-secondary: var(--text-secondary-dark);
+    --bg-neutral-base: #1f2937;
+    --bg-divider-base: #374151;
+  }
+}
+
+/* ===== PRINT STYLES ===== */
+@media print {
+  :root {
+    /* Optimize variables for print */
+    --bg-primary-pattern: var(--bg-neutral-base);
+    --bg-secondary-pattern: var(--bg-neutral-base);
+    --accent-primary: #000000;
+    --text-primary: #000000;
+  }
+}

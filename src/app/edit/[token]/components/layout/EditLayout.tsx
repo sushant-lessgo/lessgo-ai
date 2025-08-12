@@ -14,6 +14,7 @@ import { GlobalFormBuilder } from '@/components/layout/GlobalFormBuilder';
 import { LayoutChangeModal } from '../ui/LayoutChangeModal';
 import { modalEmergencyReset } from '@/utils/modalEmergencyReset';
 import { ModalDebugPanel } from '@/components/debug/ModalDebugPanel';
+import { VariableThemeInjector } from '@/modules/Design/ColorSystem/VariableThemeInjector';
 
 interface EditLayoutProps {
   tokenId: string;
@@ -36,6 +37,9 @@ export function EditLayout({ tokenId }: EditLayoutProps) {
     getColorTokens,
   } = storeState || {};
   
+  // Get theme and background system for variable integration
+  const theme = useStoreState(state => state.theme);
+  const onboardingData = useStoreState(state => state.onboardingData);
 
   // Initialize unified editor system
   const editor = useEditor();
@@ -46,6 +50,21 @@ export function EditLayout({ tokenId }: EditLayoutProps) {
 });
 
   const colorTokens = getColorTokens ? getColorTokens() : {};
+  
+  // Prepare background system for variable theme injector
+  const backgroundSystem = React.useMemo(() => {
+    if (!theme?.colors?.sectionBackgrounds) return undefined;
+    
+    return {
+      primary: theme.colors.sectionBackgrounds.primary || 'bg-gray-800',
+      secondary: theme.colors.sectionBackgrounds.secondary || 'bg-gray-50',
+      neutral: theme.colors.sectionBackgrounds.neutral || 'bg-white',
+      divider: theme.colors.sectionBackgrounds.divider || 'bg-gray-100/50',
+      baseColor: theme.colors.baseColor,
+      accentColor: theme.colors.accentColor,
+      accentCSS: theme.colors.accentCSS || 'bg-purple-600',
+    };
+  }, [theme]);
 
   // Handle responsive viewport changes
   useEffect(() => {
@@ -90,13 +109,18 @@ export function EditLayout({ tokenId }: EditLayoutProps) {
   }, [mode]);
 
   return (
-    <div 
-      className="h-screen flex flex-col bg-gray-50 font-inter"
-      onContextMenu={handleContextMenu}
-      style={{
-        fontFamily: 'Inter, system-ui, -apple-system, sans-serif',
-      }}
+    <VariableThemeInjector
+      tokenId={tokenId}
+      backgroundSystem={backgroundSystem}
+      businessContext={onboardingData}
     >
+      <div 
+        className="h-screen flex flex-col bg-gray-50 font-inter"
+        onContextMenu={handleContextMenu}
+        style={{
+          fontFamily: 'Inter, system-ui, -apple-system, sans-serif',
+        }}
+      >
       {/* Global App Header */}
       <GlobalAppHeader tokenId={tokenId} />
       
@@ -159,6 +183,7 @@ export function EditLayout({ tokenId }: EditLayoutProps) {
       
       {/* Modal Debug Panel - Only in development */}
       {process.env.NODE_ENV === 'development' && <ModalDebugPanel />}
-    </div>
+      </div>
+    </VariableThemeInjector>
   );
 }

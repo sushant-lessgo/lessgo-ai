@@ -30,6 +30,17 @@ export type {
 } from './actions';
 
 /**
+ * ===== CSS VARIABLE TYPES =====
+ */
+export type {
+  CSSVariableState,
+  CSSVariableActions,
+  CSSVariableSlice,
+  CSSVariablePhase,
+  CSSVariableActionCreator,
+} from './cssVariables';
+
+/**
  * ===== STATE INTERFACES =====
  */
 export type {
@@ -166,6 +177,10 @@ import type {
   AutoSaveMiddlewareState,
 } from './middleware';
 
+import type {
+  CSSVariableSlice,
+} from './cssVariables';
+
 // Complete EditStore interface combining all slices and actions
 export interface EditStore extends 
   StoreState,
@@ -177,6 +192,7 @@ export interface EditStore extends
   ValidationActions,
   MetaActions,
   GenerationActions,
+  CSSVariableSlice,
   AutoSaveMiddlewareState {
   
   // Any additional store-specific properties can be added here

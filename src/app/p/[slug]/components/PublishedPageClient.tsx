@@ -142,7 +142,7 @@ function PublishedPageContent({ pageData }: { pageData: PublishedPageData }) {
   // Render with LandingPageRenderer
   return (
     <div className="min-h-screen bg-white">
-      <LandingPageRenderer />
+      <LandingPageRenderer tokenId={`published-${pageData.slug}`} />
     </div>
   );
 }

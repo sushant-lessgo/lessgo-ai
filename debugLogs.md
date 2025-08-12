@@ -1,1592 +1,1385 @@
- Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
- 🔧 Storage debug utilities available at window.__storageDebug
- 🔧 Storage Manager debug utilities available at window.__storageManagerDebug
- 🔧 Edit Store Factory debug utilities available at window.__editStoreFactory
- 🔧 Store Manager debug utilities available at window.__storeManagerDebug
- 🔧 useEditStore debug utilities available at window.__useEditStoreDebug
- 🔧 EditProvider debug utilities available at window.__editProviderDebug
- 🔧 Version Manager debug utilities available at window.__versionDebug
- 🎯 useEditStore: Initializing store for token MewsKj7LXqaq
- 📝 Store Manager: Switching from none to MewsKj7LXqaq
- 🔄 Switching token: none → MewsKj7LXqaq
- 🧹 Storage Manager: Starting maintenance cleanup
- 📊 Storage stats: Object
- ✅ Storage maintenance cleanup completed
- 🏗️ Store Manager: Creating new store for token MewsKj7LXqaq
- 🏭 Creating EditStore factory for token: MewsKj7LXqaq
- 🔄 [STORE-DEBUG] EditStore rehydrated for token MewsKj7LXqaq: Object
- 🎯 useEditStore: Initializing store for token MewsKj7LXqaq
- ♻️ Store Manager: Using cached store for token MewsKj7LXqaq
- ✅ Store Manager: Store MewsKj7LXqaq marked as initialized
- 🎨 [TOKENS-DEBUG] getColorTokens called with theme: Object
- 🎨 Current color tokens from getColorTokens(): Object
- 🎨 Current color tokens from getColorTokens(): Object
- 🎨 Primary background for validation: bg-black
- 🎨 Primary background for validation: bg-black
- 🎨 Using theme accent color: Object
- 🎨 Using theme accent color: Object
- 🎨 Theme colors: Object
- 🎨 Theme colors: Object
- 🎨 Using stored text color for heading on primary (mapped to primary): #f9fafb
- 🎨 Using stored text color for body on primary (mapped to primary): #e5e7eb
- 🎨 Using stored text color for muted on primary (mapped to primary): #9ca3af
- 🎨 Using stored text color for heading on primary (mapped to primary): #f9fafb
- 🎨 Using stored text color for body on primary (mapped to primary): #e5e7eb
- 🎨 Using stored text color for muted on primary (mapped to primary): #9ca3af
- 🎯 IconGrid component rendering with props: Object
- 🎨 Using stored text color for heading on secondary (mapped to secondary): #111827
- 🎨 Using stored text color for body on secondary (mapped to secondary): #374151
- 🎨 Using stored text color for muted on secondary (mapped to secondary): #6b7280
- 🎯 IconGrid hook result: Object
- 🎯 IconGrid component rendering with props: Object
- 🎨 Using stored text color for heading on secondary (mapped to secondary): #111827
- 🎨 Using stored text color for body on secondary (mapped to secondary): #374151
- 🎨 Using stored text color for muted on secondary (mapped to secondary): #6b7280
- 🎯 IconGrid hook result: Object
- 🎨 Using stored text color for heading on neutral (mapped to neutral): #111827
- 🎨 Using stored text color for body on neutral (mapped to neutral): #374151
- 🎨 Using stored text color for muted on neutral (mapped to neutral): #6b7280
- 🎨 Using stored text color for heading on neutral (mapped to neutral): #111827
- 🎨 Using stored text color for body on neutral (mapped to neutral): #374151
- 🎨 Using stored text color for muted on neutral (mapped to neutral): #6b7280
- 🎨 Using stored text color for heading on neutral (mapped to neutral): #111827
- 🎨 Using stored text color for body on neutral (mapped to neutral): #374151
- 🎨 Using stored text color for muted on neutral (mapped to neutral): #6b7280
- 🎨 Using stored text color for heading on neutral (mapped to neutral): #111827
- 🎨 Using stored text color for body on neutral (mapped to neutral): #374151
- 🎨 Using stored text color for muted on neutral (mapped to neutral): #6b7280
- 🎨 Using stored text color for heading on neutral (mapped to neutral): #111827
- 🎨 Using stored text color for body on neutral (mapped to neutral): #374151
- 🎨 Using stored text color for muted on neutral (mapped to neutral): #6b7280
- 🎨 Using stored text color for heading on neutral (mapped to neutral): #111827
- 🎨 Using stored text color for body on neutral (mapped to neutral): #374151
- 🎨 Using stored text color for muted on neutral (mapped to neutral): #6b7280
- 🎨 Using stored text color for heading on divider (mapped to divider): #111827
- 🎨 Using stored text color for body on divider (mapped to divider): #374151
- 🎨 Using stored text color for muted on divider (mapped to divider): #6b7280
- 🎨 Using stored text color for heading on divider (mapped to divider): #111827
- 🎨 Using stored text color for body on divider (mapped to divider): #374151
- 🎨 Using stored text color for muted on divider (mapped to divider): #6b7280
- 🎨 Using stored text color for heading on neutral (mapped to neutral): #111827
- 🎨 Using stored text color for body on neutral (mapped to neutral): #374151
- 🎨 Using stored text color for muted on neutral (mapped to neutral): #6b7280
- 🎨 Using stored text color for heading on neutral (mapped to neutral): #111827
- 🎨 Using stored text color for body on neutral (mapped to neutral): #374151
- 🎨 Using stored text color for muted on neutral (mapped to neutral): #6b7280
- 🎨 Using stored text color for heading on primary (mapped to primary): #f9fafb
- 🎨 Using stored text color for body on primary (mapped to primary): #e5e7eb
- 🎨 Using stored text color for muted on primary (mapped to primary): #9ca3af
- 🎨 Using stored text color for heading on primary (mapped to primary): #f9fafb
- 🎨 Using stored text color for body on primary (mapped to primary): #e5e7eb
- 🎨 Using stored text color for muted on primary (mapped to primary): #9ca3af
- 📊 getActiveToolbar called with selection: Object
- 📊 No active selection, result: null
- 📊 Final getActiveToolbar result: null
- 📊 getActiveToolbar called with selection: Object
- 📊 Returning cached result: null
- 📊 getActiveToolbar called with selection: Object
- 📊 Returning cached result: null
- 📊 getActiveToolbar called with selection: Object
- 📊 Returning cached result: null
- 🎯 GlobalModals rendering with state: Object
- 🎯 GlobalModals rendering with state: Object
- 🎪🎪🎪 FloatingToolbars state changed: Object
- 📊 getActiveToolbar called with selection: Object
- 📊 Returning cached result: null
- 📊 getActiveToolbar called with selection: Object
- 📊 Returning cached result: null
- 📊 getActiveToolbar called with selection: Object
- 📊 Returning cached result: null
- 📊 getActiveToolbar called with selection: Object
- 📊 Returning cached result: null
- 📊 getActiveToolbar called with selection: Object
- 📊 Returning cached result: null
- 🎪 shouldShowToolbar results: Object
- 🎯 MainContent mode: edit
- 🎯 ElementPicker state changed: Object
- 🔍 Modal diagnostic mode enabled
- 📥 [EDIT-DEBUG] EditProvider: Loading project data for token MewsKj7LXqaq
- 🎨 [EDIT-DEBUG] Theme before API load: Object
- 🎪🎪🎪 FloatingToolbars state changed: Object
- 🎪 shouldShowToolbar results: Object
- 🎯 MainContent mode: edit
- 🎯 ElementPicker state changed: Object
- 🔍 Modal diagnostic mode enabled
- 🎨 Theme colors: Object
- 🎨 Theme colors: Object
- 🎨 Using stored text color for heading on primary (mapped to primary): #f9fafb
- 🎨 Using stored text color for body on primary (mapped to primary): #e5e7eb
- 🎨 Using stored text color for muted on primary (mapped to primary): #9ca3af
- 🎨 Using stored text color for heading on primary (mapped to primary): #f9fafb
- 🎨 Using stored text color for body on primary (mapped to primary): #e5e7eb
- 🎨 Using stored text color for muted on primary (mapped to primary): #9ca3af
- 🎯 IconGrid component rendering with props: Object
- 🎨 Using stored text color for heading on secondary (mapped to secondary): #111827
- 🎨 Using stored text color for body on secondary (mapped to secondary): #374151
- 🎨 Using stored text color for muted on secondary (mapped to secondary): #6b7280
- 🎯 IconGrid hook result: Object
- 🎯 IconGrid component rendering with props: Object
- 🎨 Using stored text color for heading on secondary (mapped to secondary): #111827
- 🎨 Using stored text color for body on secondary (mapped to secondary): #374151
- 🎨 Using stored text color for muted on secondary (mapped to secondary): #6b7280
- 🎯 IconGrid hook result: Object
- 🎨 Using stored text color for heading on neutral (mapped to neutral): #111827
- 🎨 Using stored text color for body on neutral (mapped to neutral): #374151
- 🎨 Using stored text color for muted on neutral (mapped to neutral): #6b7280
- 🎨 Using stored text color for heading on neutral (mapped to neutral): #111827
- 🎨 Using stored text color for body on neutral (mapped to neutral): #374151
- 🎨 Using stored text color for muted on neutral (mapped to neutral): #6b7280
- 🎨 Using stored text color for heading on neutral (mapped to neutral): #111827
- 🎨 Using stored text color for body on neutral (mapped to neutral): #374151
- 🎨 Using stored text color for muted on neutral (mapped to neutral): #6b7280
- 🎨 Using stored text color for heading on neutral (mapped to neutral): #111827
- 🎨 Using stored text color for body on neutral (mapped to neutral): #374151
- 🎨 Using stored text color for muted on neutral (mapped to neutral): #6b7280
- 🎨 Using stored text color for heading on neutral (mapped to neutral): #111827
- 🎨 Using stored text color for body on neutral (mapped to neutral): #374151
- 🎨 Using stored text color for muted on neutral (mapped to neutral): #6b7280
- 🎨 Using stored text color for heading on neutral (mapped to neutral): #111827
- 🎨 Using stored text color for body on neutral (mapped to neutral): #374151
- 🎨 Using stored text color for muted on neutral (mapped to neutral): #6b7280
- 🎨 Using stored text color for heading on divider (mapped to divider): #111827
- 🎨 Using stored text color for body on divider (mapped to divider): #374151
- 🎨 Using stored text color for muted on divider (mapped to divider): #6b7280
- 🎨 Using stored text color for heading on divider (mapped to divider): #111827
- 🎨 Using stored text color for body on divider (mapped to divider): #374151
- 🎨 Using stored text color for muted on divider (mapped to divider): #6b7280
- 🎨 Using stored text color for heading on neutral (mapped to neutral): #111827
- 🎨 Using stored text color for body on neutral (mapped to neutral): #374151
- 🎨 Using stored text color for muted on neutral (mapped to neutral): #6b7280
- 🎨 Using stored text color for heading on neutral (mapped to neutral): #111827
- 🎨 Using stored text color for body on neutral (mapped to neutral): #374151
- 🎨 Using stored text color for muted on neutral (mapped to neutral): #6b7280
- 🎨 Using stored text color for heading on primary (mapped to primary): #f9fafb
- 🎨 Using stored text color for body on primary (mapped to primary): #e5e7eb
- 🎨 Using stored text color for muted on primary (mapped to primary): #9ca3af
- 🎨 Using stored text color for heading on primary (mapped to primary): #f9fafb
- 🎨 Using stored text color for body on primary (mapped to primary): #e5e7eb
- 🎨 Using stored text color for muted on primary (mapped to primary): #9ca3af
- 🎯 GlobalModals rendering with state: Object
- 🎯 GlobalModals rendering with state: Object
- 🎪🎪🎪 FloatingToolbars state changed: Object
- 🎪 shouldShowToolbar results: Object
- ✅ Store Manager: Store MewsKj7LXqaq marked as initialized
- 🎨 Theme colors: Object
- 🎨 Theme colors: Object
- 🎨 Using stored text color for heading on primary (mapped to primary): #f9fafb
- 🎨 Using stored text color for body on primary (mapped to primary): #e5e7eb
- 🎨 Using stored text color for muted on primary (mapped to primary): #9ca3af
- 🎨 Using stored text color for heading on primary (mapped to primary): #f9fafb
- 🎨 Using stored text color for body on primary (mapped to primary): #e5e7eb
- 🎨 Using stored text color for muted on primary (mapped to primary): #9ca3af
- 🎯 IconGrid component rendering with props: Object
- 🎨 Using stored text color for heading on secondary (mapped to secondary): #111827
- 🎨 Using stored text color for body on secondary (mapped to secondary): #374151
- 🎨 Using stored text color for muted on secondary (mapped to secondary): #6b7280
- 🎯 IconGrid hook result: Object
- 🎯 IconGrid component rendering with props: Object
- 🎨 Using stored text color for heading on secondary (mapped to secondary): #111827
- 🎨 Using stored text color for body on secondary (mapped to secondary): #374151
- 🎨 Using stored text color for muted on secondary (mapped to secondary): #6b7280
- 🎯 IconGrid hook result: Object
- 🎨 Using stored text color for heading on neutral (mapped to neutral): #111827
- 🎨 Using stored text color for body on neutral (mapped to neutral): #374151
- 🎨 Using stored text color for muted on neutral (mapped to neutral): #6b7280
- 🎨 Using stored text color for heading on neutral (mapped to neutral): #111827
- 🎨 Using stored text color for body on neutral (mapped to neutral): #374151
- 🎨 Using stored text color for muted on neutral (mapped to neutral): #6b7280
- 🎨 Using stored text color for heading on neutral (mapped to neutral): #111827
- 🎨 Using stored text color for body on neutral (mapped to neutral): #374151
- 🎨 Using stored text color for muted on neutral (mapped to neutral): #6b7280
- 🎨 Using stored text color for heading on neutral (mapped to neutral): #111827
- 🎨 Using stored text color for body on neutral (mapped to neutral): #374151
- 🎨 Using stored text color for muted on neutral (mapped to neutral): #6b7280
- 🎨 Using stored text color for heading on neutral (mapped to neutral): #111827
- 🎨 Using stored text color for body on neutral (mapped to neutral): #374151
- 🎨 Using stored text color for muted on neutral (mapped to neutral): #6b7280
- 🎨 Using stored text color for heading on neutral (mapped to neutral): #111827
- 🎨 Using stored text color for body on neutral (mapped to neutral): #374151
- 🎨 Using stored text color for muted on neutral (mapped to neutral): #6b7280
- 🎨 Using stored text color for heading on divider (mapped to divider): #111827
- 🎨 Using stored text color for body on divider (mapped to divider): #374151
- 🎨 Using stored text color for muted on divider (mapped to divider): #6b7280
- 🎨 Using stored text color for heading on divider (mapped to divider): #111827
- 🎨 Using stored text color for body on divider (mapped to divider): #374151
- 🎨 Using stored text color for muted on divider (mapped to divider): #6b7280
- 🎨 Using stored text color for heading on neutral (mapped to neutral): #111827
- 🎨 Using stored text color for body on neutral (mapped to neutral): #374151
- 🎨 Using stored text color for muted on neutral (mapped to neutral): #6b7280
- 🎨 Using stored text color for heading on neutral (mapped to neutral): #111827
- 🎨 Using stored text color for body on neutral (mapped to neutral): #374151
- 🎨 Using stored text color for muted on neutral (mapped to neutral): #6b7280
- 🎨 Using stored text color for heading on primary (mapped to primary): #f9fafb
- 🎨 Using stored text color for body on primary (mapped to primary): #e5e7eb
- 🎨 Using stored text color for muted on primary (mapped to primary): #9ca3af
- 🎨 Using stored text color for heading on primary (mapped to primary): #f9fafb
- 🎨 Using stored text color for body on primary (mapped to primary): #e5e7eb
- 🎨 Using stored text color for muted on primary (mapped to primary): #9ca3af
- 🎯 GlobalModals rendering with state: Object
- 🎯 GlobalModals rendering with state: Object
- 🎪🎪🎪 FloatingToolbars state changed: Object
- 📊 getActiveToolbar called with selection: Object
- 📊 No active selection, result: null
- 📊 Final getActiveToolbar result: null
- 📊 getActiveToolbar called with selection: Object
- 📊 Returning cached result: null
- 📊 getActiveToolbar called with selection: Object
- 📊 Returning cached result: null
- 📊 getActiveToolbar called with selection: Object
- 📊 Returning cached result: null
- 📊 getActiveToolbar called with selection: Object
- 📊 Returning cached result: null
- 🎪 shouldShowToolbar results: Object
- 🖼️ MainContent render: Object
- 🎪🎪🎪 FloatingToolbars state changed: Object
- 🎪 shouldShowToolbar results: Object
- 🔍 Validating CTA stand-out: Object
- ✅ Stand-out result: Object
- 🎨 Theme colors: Object
- 🎨 Theme colors: Object
- 🎪🎪🎪 FloatingToolbars state changed: Object
- 📊 getActiveToolbar called with selection: Object
- 📊 No active selection, result: null
- 📊 Final getActiveToolbar result: null
- 📊 getActiveToolbar called with selection: Object
- 📊 Returning cached result: null
- 📊 getActiveToolbar called with selection: Object
- 📊 Returning cached result: null
- 📊 getActiveToolbar called with selection: Object
- 📊 Returning cached result: null
- 📊 getActiveToolbar called with selection: Object
- 📊 Returning cached result: null
- 🎪 shouldShowToolbar results: Object
- ✅ [EDIT-DEBUG] EditProvider: Loaded project data for token MewsKj7LXqaq Object
- 🔄 Loading draft data: Object
- 📥 Restoring sections and content: Object
- ✅ Section/Content match confirmed: Object
- 🎨 [PERSISTENCE-DEBUG] Restoring theme data from draft: Object
- 🎨 [PERSISTENCE-DEBUG] Theme after merge: Object
- 🎨 [PERSISTENCE-DEBUG] Restoring global settings: Object
- ✅ Draft loading complete: Object
- 🎨 [EDIT-DEBUG] Theme after loadFromDraft: Object
- 🎨 [EDIT-DEBUG] Color tokens after load: Object
- 🎨 Theme colors: Object
- 🎨 Theme colors: Object
- 🎨 Using stored text color for heading on primary (mapped to primary): #f9fafb
- 🎨 Using stored text color for body on primary (mapped to primary): #e5e7eb
- 🎨 Using stored text color for muted on primary (mapped to primary): #9ca3af
- 🎨 Using stored text color for heading on primary (mapped to primary): #f9fafb
- 🎨 Using stored text color for body on primary (mapped to primary): #e5e7eb
- 🎨 Using stored text color for muted on primary (mapped to primary): #9ca3af
- 🎯 IconGrid component rendering with props: Object
- 🎨 Using stored text color for heading on secondary (mapped to secondary): #111827
- 🎨 Using stored text color for body on secondary (mapped to secondary): #374151
- 🎨 Using stored text color for muted on secondary (mapped to secondary): #6b7280
- 🎯 IconGrid hook result: Object
- 🎯 IconGrid component rendering with props: Object
- 🎨 Using stored text color for heading on secondary (mapped to secondary): #111827
- 🎨 Using stored text color for body on secondary (mapped to secondary): #374151
- 🎨 Using stored text color for muted on secondary (mapped to secondary): #6b7280
- 🎯 IconGrid hook result: Object
- 🎨 Using stored text color for heading on neutral (mapped to neutral): #111827
- 🎨 Using stored text color for body on neutral (mapped to neutral): #374151
- 🎨 Using stored text color for muted on neutral (mapped to neutral): #6b7280
- 🎨 Using stored text color for heading on neutral (mapped to neutral): #111827
- 🎨 Using stored text color for body on neutral (mapped to neutral): #374151
- 🎨 Using stored text color for muted on neutral (mapped to neutral): #6b7280
- 🎨 Using stored text color for heading on neutral (mapped to neutral): #111827
- 🎨 Using stored text color for body on neutral (mapped to neutral): #374151
- 🎨 Using stored text color for muted on neutral (mapped to neutral): #6b7280
- 🎨 Using stored text color for heading on neutral (mapped to neutral): #111827
- 🎨 Using stored text color for body on neutral (mapped to neutral): #374151
- 🎨 Using stored text color for muted on neutral (mapped to neutral): #6b7280
- 🎨 Using stored text color for heading on neutral (mapped to neutral): #111827
- 🎨 Using stored text color for body on neutral (mapped to neutral): #374151
- 🎨 Using stored text color for muted on neutral (mapped to neutral): #6b7280
- 🎨 Using stored text color for heading on neutral (mapped to neutral): #111827
- 🎨 Using stored text color for body on neutral (mapped to neutral): #374151
- 🎨 Using stored text color for muted on neutral (mapped to neutral): #6b7280
- 🎨 Using stored text color for heading on divider (mapped to divider): #111827
- 🎨 Using stored text color for body on divider (mapped to divider): #374151
- 🎨 Using stored text color for muted on divider (mapped to divider): #6b7280
- 🎨 Using stored text color for heading on divider (mapped to divider): #111827
- 🎨 Using stored text color for body on divider (mapped to divider): #374151
- 🎨 Using stored text color for muted on divider (mapped to divider): #6b7280
- 🎨 Using stored text color for heading on neutral (mapped to neutral): #111827
- 🎨 Using stored text color for body on neutral (mapped to neutral): #374151
- 🎨 Using stored text color for muted on neutral (mapped to neutral): #6b7280
- 🎨 Using stored text color for heading on neutral (mapped to neutral): #111827
- 🎨 Using stored text color for body on neutral (mapped to neutral): #374151
- 🎨 Using stored text color for muted on neutral (mapped to neutral): #6b7280
- 🎨 Using stored text color for heading on primary (mapped to primary): #f9fafb
- 🎨 Using stored text color for body on primary (mapped to primary): #e5e7eb
- 🎨 Using stored text color for muted on primary (mapped to primary): #9ca3af
- 🎨 Using stored text color for heading on primary (mapped to primary): #f9fafb
- 🎨 Using stored text color for body on primary (mapped to primary): #e5e7eb
- 🎨 Using stored text color for muted on primary (mapped to primary): #9ca3af
- 🎯 GlobalModals rendering with state: Object
- 🎯 GlobalModals rendering with state: Object
- 🎪🎪🎪 FloatingToolbars state changed: Object
- 🎪 shouldShowToolbar results: Object
- 🎪🎪🎪 FloatingToolbars state changed: Object
- 📊 getActiveToolbar called with selection: Object
- 📊 No active selection, result: null
- 📊 Final getActiveToolbar result: null
- 📊 getActiveToolbar called with selection: Object
- 📊 Returning cached result: null
- 📊 getActiveToolbar called with selection: Object
- 📊 Returning cached result: null
- 📊 getActiveToolbar called with selection: Object
- 📊 Returning cached result: null
- 📊 getActiveToolbar called with selection: Object
- 📊 Returning cached result: null
- 🎪 shouldShowToolbar results: Object
- 🎪🎪🎪 FloatingToolbars state changed: Object
- 📊 getActiveToolbar called with selection: Object
- 📊 No active selection, result: null
- 📊 Final getActiveToolbar result: null
- 📊 getActiveToolbar called with selection: Object
- 📊 Returning cached result: null
- 📊 getActiveToolbar called with selection: Object
- 📊 Returning cached result: null
- 📊 getActiveToolbar called with selection: Object
- 📊 Returning cached result: null
- 📊 getActiveToolbar called with selection: Object
- 📊 Returning cached result: null
- 🎪 shouldShowToolbar results: Object
- 🎪🎪🎪 FloatingToolbars state changed: Object
- 📊 getActiveToolbar called with selection: Object
- 📊 No active selection, result: null
- 📊 Final getActiveToolbar result: null
- 📊 getActiveToolbar called with selection: Object
- 📊 Returning cached result: null
- 📊 getActiveToolbar called with selection: Object
-rrweb-plugin-console-record.js:2447 📊 Returning cached result: null
-rrweb-plugin-console-record.js:2447 📊 getActiveToolbar called with selection: Object
-rrweb-plugin-console-record.js:2447 📊 Returning cached result: null
-rrweb-plugin-console-record.js:2447 📊 getActiveToolbar called with selection: Object
-rrweb-plugin-console-record.js:2447 📊 Returning cached result: null
-rrweb-plugin-console-record.js:2447 🎪 shouldShowToolbar results: Object
-rrweb-plugin-console-record.js:2447 🎪🎪🎪 FloatingToolbars state changed: Object
-rrweb-plugin-console-record.js:2447 📊 getActiveToolbar called with selection: Object
-rrweb-plugin-console-record.js:2447 📊 No active selection, result: null
-rrweb-plugin-console-record.js:2447 📊 Final getActiveToolbar result: null
-rrweb-plugin-console-record.js:2447 📊 getActiveToolbar called with selection: Object
-rrweb-plugin-console-record.js:2447 📊 Returning cached result: null
-rrweb-plugin-console-record.js:2447 📊 getActiveToolbar called with selection: Object
-rrweb-plugin-console-record.js:2447 📊 Returning cached result: null
-rrweb-plugin-console-record.js:2447 📊 getActiveToolbar called with selection: Object
-rrweb-plugin-console-record.js:2447 📊 Returning cached result: null
-rrweb-plugin-console-record.js:2447 📊 getActiveToolbar called with selection: Object
-rrweb-plugin-console-record.js:2447 📊 Returning cached result: null
-rrweb-plugin-console-record.js:2447 🎪 shouldShowToolbar results: Object
-rrweb-plugin-console-record.js:2447 ✅ FORCED HEADLINE TO CENTER via direct DOM targeting
-rrweb-plugin-console-record.js:2447 🎪🎪🎪 FloatingToolbars state changed: Object
-rrweb-plugin-console-record.js:2447 📊 getActiveToolbar called with selection: Object
-rrweb-plugin-console-record.js:2447 📊 No active selection, result: null
-rrweb-plugin-console-record.js:2447 📊 Final getActiveToolbar result: null
-rrweb-plugin-console-record.js:2447 📊 getActiveToolbar called with selection: Object
-rrweb-plugin-console-record.js:2447 📊 Returning cached result: null
-rrweb-plugin-console-record.js:2447 📊 getActiveToolbar called with selection: Object
-rrweb-plugin-console-record.js:2447 📊 Returning cached result: null
-rrweb-plugin-console-record.js:2447 📊 getActiveToolbar called with selection: Object
-rrweb-plugin-console-record.js:2447 📊 Returning cached result: null
-rrweb-plugin-console-record.js:2447 📊 getActiveToolbar called with selection: Object
-rrweb-plugin-console-record.js:2447 📊 Returning cached result: null
-rrweb-plugin-console-record.js:2447 🎪 shouldShowToolbar results: Object
-rrweb-plugin-console-record.js:2447 🎪🎪🎪 FloatingToolbars state changed: Object
-rrweb-plugin-console-record.js:2447 📊 getActiveToolbar called with selection: Object
-rrweb-plugin-console-record.js:2447 📊 No active selection, result: null
-rrweb-plugin-console-record.js:2447 📊 Final getActiveToolbar result: null
-rrweb-plugin-console-record.js:2447 📊 getActiveToolbar called with selection: Object
-rrweb-plugin-console-record.js:2447 📊 Returning cached result: null
-rrweb-plugin-console-record.js:2447 📊 getActiveToolbar called with selection: Object
-rrweb-plugin-console-record.js:2447 📊 Returning cached result: null
-rrweb-plugin-console-record.js:2447 📊 getActiveToolbar called with selection: Object
-rrweb-plugin-console-record.js:2447 📊 Returning cached result: null
-rrweb-plugin-console-record.js:2447 📊 getActiveToolbar called with selection: Object
-rrweb-plugin-console-record.js:2447 📊 Returning cached result: null
-rrweb-plugin-console-record.js:2447 🎪 shouldShowToolbar results: Object
-rrweb-plugin-console-record.js:2447 🎪🎪🎪 FloatingToolbars state changed: Object
-rrweb-plugin-console-record.js:2447 📊 getActiveToolbar called with selection: Object
-rrweb-plugin-console-record.js:2447 📊 No active selection, result: null
-rrweb-plugin-console-record.js:2447 📊 Final getActiveToolbar result: null
-rrweb-plugin-console-record.js:2447 📊 getActiveToolbar called with selection: Object
-rrweb-plugin-console-record.js:2447 📊 Returning cached result: null
-rrweb-plugin-console-record.js:2447 📊 getActiveToolbar called with selection: Object
-rrweb-plugin-console-record.js:2447 📊 Returning cached result: null
-rrweb-plugin-console-record.js:2447 📊 getActiveToolbar called with selection: Object
-rrweb-plugin-console-record.js:2447 📊 Returning cached result: null
-rrweb-plugin-console-record.js:2447 📊 getActiveToolbar called with selection: Object
-rrweb-plugin-console-record.js:2447 📊 Returning cached result: null
-rrweb-plugin-console-record.js:2447 🎪 shouldShowToolbar results: Object
-rrweb-plugin-console-record.js:2447 🎪🎪🎪 FloatingToolbars state changed: Object
-rrweb-plugin-console-record.js:2447 📊 getActiveToolbar called with selection: Object
-rrweb-plugin-console-record.js:2447 📊 No active selection, result: null
-rrweb-plugin-console-record.js:2447 📊 Final getActiveToolbar result: null
-rrweb-plugin-console-record.js:2447 📊 getActiveToolbar called with selection: Object
-rrweb-plugin-console-record.js:2447 📊 Returning cached result: null
-rrweb-plugin-console-record.js:2447 📊 getActiveToolbar called with selection: Object
-rrweb-plugin-console-record.js:2447 📊 Returning cached result: null
-rrweb-plugin-console-record.js:2447 📊 getActiveToolbar called with selection: Object
-rrweb-plugin-console-record.js:2447 📊 Returning cached result: null
-rrweb-plugin-console-record.js:2447 📊 getActiveToolbar called with selection: Object
-rrweb-plugin-console-record.js:2447 📊 Returning cached result: null
-rrweb-plugin-console-record.js:2447 🎪 shouldShowToolbar results: Object
-rrweb-plugin-console-record.js:2447 🎪🎪🎪 FloatingToolbars state changed: Object
-rrweb-plugin-console-record.js:2447 📊 getActiveToolbar called with selection: Object
-rrweb-plugin-console-record.js:2447 📊 No active selection, result: null
-rrweb-plugin-console-record.js:2447 📊 Final getActiveToolbar result: null
-rrweb-plugin-console-record.js:2447 📊 getActiveToolbar called with selection: Object
-rrweb-plugin-console-record.js:2447 📊 Returning cached result: null
-rrweb-plugin-console-record.js:2447 📊 getActiveToolbar called with selection: Object
-rrweb-plugin-console-record.js:2447 📊 Returning cached result: null
-rrweb-plugin-console-record.js:2447 📊 getActiveToolbar called with selection: Object
-rrweb-plugin-console-record.js:2447 📊 Returning cached result: null
-rrweb-plugin-console-record.js:2447 📊 getActiveToolbar called with selection: Object
-rrweb-plugin-console-record.js:2447 📊 Returning cached result: null
-rrweb-plugin-console-record.js:2447 🎪 shouldShowToolbar results: Object
-rrweb-plugin-console-record.js:2447 🎪🎪🎪 FloatingToolbars state changed: Object
-rrweb-plugin-console-record.js:2447 📊 getActiveToolbar called with selection: Object
-rrweb-plugin-console-record.js:2447 📊 No active selection, result: null
-rrweb-plugin-console-record.js:2447 📊 Final getActiveToolbar result: null
-rrweb-plugin-console-record.js:2447 📊 getActiveToolbar called with selection: Object
-rrweb-plugin-console-record.js:2447 📊 Returning cached result: null
-rrweb-plugin-console-record.js:2447 📊 getActiveToolbar called with selection: Object
-rrweb-plugin-console-record.js:2447 📊 Returning cached result: null
-rrweb-plugin-console-record.js:2447 📊 getActiveToolbar called with selection: Object
-rrweb-plugin-console-record.js:2447 📊 Returning cached result: null
-rrweb-plugin-console-record.js:2447 📊 getActiveToolbar called with selection: Object
-rrweb-plugin-console-record.js:2447 📊 Returning cached result: null
-rrweb-plugin-console-record.js:2447 🎪 shouldShowToolbar results: Object
-FloatingToolbars.tsx:34 🎪🎪🎪 FloatingToolbars state changed: {activeToolbar: null, hasActiveToolbar: false, toolbarTarget: {…}, editorSelection: {…}, toolbar: {…}}
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: undefined, selectedSection: undefined, …}
-selectionPriority.ts:92 📊 No active selection, result: null
-selectionPriority.ts:95 📊 Final getActiveToolbar result: null
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: undefined, selectedSection: undefined, …}
-selectionPriority.ts:58 📊 Returning cached result: null
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: undefined, selectedSection: undefined, …}
-selectionPriority.ts:58 📊 Returning cached result: null
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: undefined, selectedSection: undefined, …}
-selectionPriority.ts:58 📊 Returning cached result: null
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: undefined, selectedSection: undefined, …}
-selectionPriority.ts:58 📊 Returning cached result: null
-FloatingToolbars.tsx:41 🎪 shouldShowToolbar results: {section: false, element: false, text: false, image: false, form: false}
-FloatingToolbars.tsx:34 🎪🎪🎪 FloatingToolbars state changed: {activeToolbar: null, hasActiveToolbar: false, toolbarTarget: {…}, editorSelection: {…}, toolbar: {…}}
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: undefined, selectedSection: undefined, …}
-selectionPriority.ts:92 📊 No active selection, result: null
-selectionPriority.ts:95 📊 Final getActiveToolbar result: null
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: undefined, selectedSection: undefined, …}
-selectionPriority.ts:58 📊 Returning cached result: null
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: undefined, selectedSection: undefined, …}
-selectionPriority.ts:58 📊 Returning cached result: null
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: undefined, selectedSection: undefined, …}
-selectionPriority.ts:58 📊 Returning cached result: null
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: undefined, selectedSection: undefined, …}
-selectionPriority.ts:58 📊 Returning cached result: null
-FloatingToolbars.tsx:41 🎪 shouldShowToolbar results: {section: false, element: false, text: false, image: false, form: false}
-FloatingToolbars.tsx:34 🎪🎪🎪 FloatingToolbars state changed: {activeToolbar: null, hasActiveToolbar: false, toolbarTarget: {…}, editorSelection: {…}, toolbar: {…}}
-FloatingToolbars.tsx:41 🎪 shouldShowToolbar results: {section: false, element: false, text: false, image: false, form: false}
-FloatingToolbars.tsx:34 🎪🎪🎪 FloatingToolbars state changed: {activeToolbar: null, hasActiveToolbar: false, toolbarTarget: {…}, editorSelection: {…}, toolbar: {…}}
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: undefined, selectedSection: undefined, …}
-selectionPriority.ts:92 📊 No active selection, result: null
-selectionPriority.ts:95 📊 Final getActiveToolbar result: null
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: undefined, selectedSection: undefined, …}
-selectionPriority.ts:58 📊 Returning cached result: null
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: undefined, selectedSection: undefined, …}
-selectionPriority.ts:58 📊 Returning cached result: null
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: undefined, selectedSection: undefined, …}
-selectionPriority.ts:58 📊 Returning cached result: null
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: undefined, selectedSection: undefined, …}
-selectionPriority.ts:58 📊 Returning cached result: null
-FloatingToolbars.tsx:41 🎪 shouldShowToolbar results: {section: false, element: false, text: false, image: false, form: false}
-FloatingToolbars.tsx:34 🎪🎪🎪 FloatingToolbars state changed: {activeToolbar: null, hasActiveToolbar: false, toolbarTarget: {…}, editorSelection: {…}, toolbar: {…}}
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: undefined, selectedSection: undefined, …}
-selectionPriority.ts:92 📊 No active selection, result: null
-selectionPriority.ts:95 📊 Final getActiveToolbar result: null
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: undefined, selectedSection: undefined, …}
-selectionPriority.ts:58 📊 Returning cached result: null
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: undefined, selectedSection: undefined, …}
-selectionPriority.ts:58 📊 Returning cached result: null
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: undefined, selectedSection: undefined, …}
-selectionPriority.ts:58 📊 Returning cached result: null
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: undefined, selectedSection: undefined, …}
-selectionPriority.ts:58 📊 Returning cached result: null
-FloatingToolbars.tsx:41 🎪 shouldShowToolbar results: {section: false, element: false, text: false, image: false, form: false}
-FloatingToolbars.tsx:34 🎪🎪🎪 FloatingToolbars state changed: {activeToolbar: null, hasActiveToolbar: false, toolbarTarget: {…}, editorSelection: {…}, toolbar: {…}}
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: undefined, selectedSection: undefined, …}
-selectionPriority.ts:92 📊 No active selection, result: null
-selectionPriority.ts:95 📊 Final getActiveToolbar result: null
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: undefined, selectedSection: undefined, …}
-selectionPriority.ts:58 📊 Returning cached result: null
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: undefined, selectedSection: undefined, …}
-selectionPriority.ts:58 📊 Returning cached result: null
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: undefined, selectedSection: undefined, …}
-selectionPriority.ts:58 📊 Returning cached result: null
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: undefined, selectedSection: undefined, …}
-selectionPriority.ts:58 📊 Returning cached result: null
-FloatingToolbars.tsx:41 🎪 shouldShowToolbar results: {section: false, element: false, text: false, image: false, form: false}
-FloatingToolbars.tsx:34 🎪🎪🎪 FloatingToolbars state changed: {activeToolbar: null, hasActiveToolbar: false, toolbarTarget: {…}, editorSelection: {…}, toolbar: {…}}
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: undefined, selectedSection: undefined, …}
-selectionPriority.ts:92 📊 No active selection, result: null
-selectionPriority.ts:95 📊 Final getActiveToolbar result: null
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: undefined, selectedSection: undefined, …}
-selectionPriority.ts:58 📊 Returning cached result: null
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: undefined, selectedSection: undefined, …}
-selectionPriority.ts:58 📊 Returning cached result: null
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: undefined, selectedSection: undefined, …}
-selectionPriority.ts:58 📊 Returning cached result: null
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: undefined, selectedSection: undefined, …}
-selectionPriority.ts:58 📊 Returning cached result: null
-FloatingToolbars.tsx:41 🎪 shouldShowToolbar results: {section: false, element: false, text: false, image: false, form: false}
-FloatingToolbars.tsx:34 🎪🎪🎪 FloatingToolbars state changed: {activeToolbar: null, hasActiveToolbar: false, toolbarTarget: {…}, editorSelection: {…}, toolbar: {…}}
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: undefined, selectedSection: undefined, …}
-selectionPriority.ts:92 📊 No active selection, result: null
-selectionPriority.ts:95 📊 Final getActiveToolbar result: null
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: undefined, selectedSection: undefined, …}
-selectionPriority.ts:58 📊 Returning cached result: null
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: undefined, selectedSection: undefined, …}
-selectionPriority.ts:58 📊 Returning cached result: null
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: undefined, selectedSection: undefined, …}
-selectionPriority.ts:58 📊 Returning cached result: null
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: undefined, selectedSection: undefined, …}
-selectionPriority.ts:58 📊 Returning cached result: null
-FloatingToolbars.tsx:41 🎪 shouldShowToolbar results: {section: false, element: false, text: false, image: false, form: false}
-FloatingToolbars.tsx:34 🎪🎪🎪 FloatingToolbars state changed: {activeToolbar: null, hasActiveToolbar: false, toolbarTarget: {…}, editorSelection: {…}, toolbar: {…}}
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: undefined, selectedSection: undefined, …}
-selectionPriority.ts:92 📊 No active selection, result: null
-selectionPriority.ts:95 📊 Final getActiveToolbar result: null
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: undefined, selectedSection: undefined, …}
-selectionPriority.ts:58 📊 Returning cached result: null
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: undefined, selectedSection: undefined, …}
-selectionPriority.ts:58 📊 Returning cached result: null
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: undefined, selectedSection: undefined, …}
-selectionPriority.ts:58 📊 Returning cached result: null
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: undefined, selectedSection: undefined, …}
-selectionPriority.ts:58 📊 Returning cached result: null
-FloatingToolbars.tsx:41 🎪 shouldShowToolbar results: {section: false, element: false, text: false, image: false, form: false}
-storageManager.ts:84 🧹 Storage Manager: Starting maintenance cleanup
-storageManager.ts:88 📊 Storage stats: {totalProjects: 8, currentSizeKB: 171, availableSlots: 2, oldestProject: 'e7LgRh66gjxa', newestProject: 'MewsKj7LXqaq'}
-storageManager.ts:108 ✅ Storage maintenance cleanup completed
-FloatingToolbars.tsx:34 🎪🎪🎪 FloatingToolbars state changed: {activeToolbar: null, hasActiveToolbar: false, toolbarTarget: {…}, editorSelection: {…}, toolbar: {…}}
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: undefined, selectedSection: undefined, …}
-selectionPriority.ts:92 📊 No active selection, result: null
-selectionPriority.ts:95 📊 Final getActiveToolbar result: null
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: undefined, selectedSection: undefined, …}
-selectionPriority.ts:58 📊 Returning cached result: null
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: undefined, selectedSection: undefined, …}
-selectionPriority.ts:58 📊 Returning cached result: null
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: undefined, selectedSection: undefined, …}
-selectionPriority.ts:58 📊 Returning cached result: null
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: undefined, selectedSection: undefined, …}
-selectionPriority.ts:58 📊 Returning cached result: null
-FloatingToolbars.tsx:41 🎪 shouldShowToolbar results: {section: false, element: false, text: false, image: false, form: false}
-FloatingToolbars.tsx:34 🎪🎪🎪 FloatingToolbars state changed: {activeToolbar: null, hasActiveToolbar: false, toolbarTarget: {…}, editorSelection: {…}, toolbar: {…}}
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: undefined, selectedSection: undefined, …}
-selectionPriority.ts:92 📊 No active selection, result: null
-selectionPriority.ts:95 📊 Final getActiveToolbar result: null
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: undefined, selectedSection: undefined, …}
-selectionPriority.ts:58 📊 Returning cached result: null
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: undefined, selectedSection: undefined, …}
-selectionPriority.ts:58 📊 Returning cached result: null
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: undefined, selectedSection: undefined, …}
-selectionPriority.ts:58 📊 Returning cached result: null
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: undefined, selectedSection: undefined, …}
-selectionPriority.ts:58 📊 Returning cached result: null
-FloatingToolbars.tsx:41 🎪 shouldShowToolbar results: {section: false, element: false, text: false, image: false, form: false}
-FloatingToolbars.tsx:34 🎪🎪🎪 FloatingToolbars state changed: {activeToolbar: null, hasActiveToolbar: false, toolbarTarget: {…}, editorSelection: {…}, toolbar: {…}}
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: undefined, selectedSection: undefined, …}
-selectionPriority.ts:92 📊 No active selection, result: null
-selectionPriority.ts:95 📊 Final getActiveToolbar result: null
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: undefined, selectedSection: undefined, …}
-selectionPriority.ts:58 📊 Returning cached result: null
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: undefined, selectedSection: undefined, …}
-selectionPriority.ts:58 📊 Returning cached result: null
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: undefined, selectedSection: undefined, …}
-selectionPriority.ts:58 📊 Returning cached result: null
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: undefined, selectedSection: undefined, …}
-selectionPriority.ts:58 📊 Returning cached result: null
-FloatingToolbars.tsx:41 🎪 shouldShowToolbar results: {section: false, element: false, text: false, image: false, form: false}
-FloatingToolbars.tsx:34 🎪🎪🎪 FloatingToolbars state changed: {activeToolbar: null, hasActiveToolbar: false, toolbarTarget: {…}, editorSelection: {…}, toolbar: {…}}
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: undefined, selectedSection: undefined, …}
-selectionPriority.ts:92 📊 No active selection, result: null
-selectionPriority.ts:95 📊 Final getActiveToolbar result: null
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: undefined, selectedSection: undefined, …}
-selectionPriority.ts:58 📊 Returning cached result: null
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: undefined, selectedSection: undefined, …}
-selectionPriority.ts:58 📊 Returning cached result: null
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: undefined, selectedSection: undefined, …}
-selectionPriority.ts:58 📊 Returning cached result: null
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: undefined, selectedSection: undefined, …}
-selectionPriority.ts:58 📊 Returning cached result: null
-FloatingToolbars.tsx:41 🎪 shouldShowToolbar results: {section: false, element: false, text: false, image: false, form: false}
-FloatingToolbars.tsx:34 🎪🎪🎪 FloatingToolbars state changed: {activeToolbar: null, hasActiveToolbar: false, toolbarTarget: {…}, editorSelection: {…}, toolbar: {…}}
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: undefined, selectedSection: undefined, …}
-selectionPriority.ts:92 📊 No active selection, result: null
-selectionPriority.ts:95 📊 Final getActiveToolbar result: null
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: undefined, selectedSection: undefined, …}
-selectionPriority.ts:58 📊 Returning cached result: null
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: undefined, selectedSection: undefined, …}
-selectionPriority.ts:58 📊 Returning cached result: null
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: undefined, selectedSection: undefined, …}
-selectionPriority.ts:58 📊 Returning cached result: null
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: undefined, selectedSection: undefined, …}
-selectionPriority.ts:58 📊 Returning cached result: null
-FloatingToolbars.tsx:41 🎪 shouldShowToolbar results: {section: false, element: false, text: false, image: false, form: false}
-FloatingToolbars.tsx:34 🎪🎪🎪 FloatingToolbars state changed: {activeToolbar: null, hasActiveToolbar: false, toolbarTarget: {…}, editorSelection: {…}, toolbar: {…}}
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: undefined, selectedSection: undefined, …}
-selectionPriority.ts:92 📊 No active selection, result: null
-selectionPriority.ts:95 📊 Final getActiveToolbar result: null
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: undefined, selectedSection: undefined, …}
-selectionPriority.ts:58 📊 Returning cached result: null
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: undefined, selectedSection: undefined, …}
-selectionPriority.ts:58 📊 Returning cached result: null
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: undefined, selectedSection: undefined, …}
-selectionPriority.ts:58 📊 Returning cached result: null
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: undefined, selectedSection: undefined, …}
-selectionPriority.ts:58 📊 Returning cached result: null
-FloatingToolbars.tsx:41 🎪 shouldShowToolbar results: {section: false, element: false, text: false, image: false, form: false}
-FloatingToolbars.tsx:34 🎪🎪🎪 FloatingToolbars state changed: {activeToolbar: null, hasActiveToolbar: false, toolbarTarget: {…}, editorSelection: {…}, toolbar: {…}}
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: undefined, selectedSection: undefined, …}
-selectionPriority.ts:92 📊 No active selection, result: null
-selectionPriority.ts:95 📊 Final getActiveToolbar result: null
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: undefined, selectedSection: undefined, …}
-selectionPriority.ts:58 📊 Returning cached result: null
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: undefined, selectedSection: undefined, …}
-selectionPriority.ts:58 📊 Returning cached result: null
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: undefined, selectedSection: undefined, …}
-selectionPriority.ts:58 📊 Returning cached result: null
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: undefined, selectedSection: undefined, …}
-selectionPriority.ts:58 📊 Returning cached result: null
-FloatingToolbars.tsx:41 🎪 shouldShowToolbar results: {section: false, element: false, text: false, image: false, form: false}
-uiActions.ts:274 🎯🎯🎯 showToolbar called with: {type: 'image', targetId: 'hero-hero-image', position: {…}}
-uiActions.ts:275 🎯 Current toolbar state BEFORE update: Proxy(Object) {type_: 0, scope_: {…}, modified_: false, finalized_: false, assigned_: {…}, …}
-uiActions.ts:283 🎯 Setting NEW toolbar state: {type: 'image', visible: true, position: {…}, targetId: 'hero-hero-image', actions: Array(5)}
-uiActions.ts:294 🎯 Toolbar state AFTER update: {type: 'image', visible: true, position: {…}, targetId: 'hero-hero-image', actions: Array(5)}
-uiActions.ts:15 🔍 Parsing image targetId: hero-hero-image
-uiActions.ts:28 🔍 Split parts: (3) ['hero', 'hero', 'image']
-uiActions.ts:53 🎯 Hero image parsed: {sectionId: 'hero', elementKey: 'hero_image'}
-uiActions.ts:333 🎯 Image selection state set: {sectionId: 'hero', elementKey: 'hero_image'}
-ColorSystemModalMVP.tsx:136 🎨 Theme colors: {accentColor: 'cyan', accentCSS: 'bg-cyan-500', themeColors: {…}, hasThemeAccent: true, getCurrentColorResult: {…}, …}
-ColorSystemModalMVP.tsx:136 🎨 Theme colors: {accentColor: 'cyan', accentCSS: 'bg-cyan-500', themeColors: {…}, hasThemeAccent: true, getCurrentColorResult: {…}, …}
-useLayoutComponent.ts:286 🎨 Using stored text color for heading on primary (mapped to primary): #f9fafb
-useLayoutComponent.ts:286 🎨 Using stored text color for body on primary (mapped to primary): #e5e7eb
-useLayoutComponent.ts:286 🎨 Using stored text color for muted on primary (mapped to primary): #9ca3af
-useLayoutComponent.ts:286 🎨 Using stored text color for heading on primary (mapped to primary): #f9fafb
-useLayoutComponent.ts:286 🎨 Using stored text color for body on primary (mapped to primary): #e5e7eb
-useLayoutComponent.ts:286 🎨 Using stored text color for muted on primary (mapped to primary): #9ca3af
-IconGrid.tsx:166 🎯 IconGrid component rendering with props: {sectionId: 'features', backgroundType: 'secondary', className: ''}
-useLayoutComponent.ts:286 🎨 Using stored text color for heading on secondary (mapped to secondary): #111827
-useLayoutComponent.ts:286 🎨 Using stored text color for body on secondary (mapped to secondary): #374151
-useLayoutComponent.ts:286 🎨 Using stored text color for muted on secondary (mapped to secondary): #6b7280
-IconGrid.tsx:184 🎯 IconGrid hook result: {sectionId: 'features', mode: 'edit'}
-IconGrid.tsx:166 🎯 IconGrid component rendering with props: {sectionId: 'features', backgroundType: 'secondary', className: ''}
-useLayoutComponent.ts:286 🎨 Using stored text color for heading on secondary (mapped to secondary): #111827
-useLayoutComponent.ts:286 🎨 Using stored text color for body on secondary (mapped to secondary): #374151
-useLayoutComponent.ts:286 🎨 Using stored text color for muted on secondary (mapped to secondary): #6b7280
-IconGrid.tsx:184 🎯 IconGrid hook result: {sectionId: 'features', mode: 'edit'}
-useLayoutComponent.ts:286 🎨 Using stored text color for heading on neutral (mapped to neutral): #111827
-useLayoutComponent.ts:286 🎨 Using stored text color for body on neutral (mapped to neutral): #374151
-useLayoutComponent.ts:286 🎨 Using stored text color for muted on neutral (mapped to neutral): #6b7280
-useLayoutComponent.ts:286 🎨 Using stored text color for heading on neutral (mapped to neutral): #111827
-useLayoutComponent.ts:286 🎨 Using stored text color for body on neutral (mapped to neutral): #374151
-useLayoutComponent.ts:286 🎨 Using stored text color for muted on neutral (mapped to neutral): #6b7280
-useLayoutComponent.ts:286 🎨 Using stored text color for heading on neutral (mapped to neutral): #111827
-useLayoutComponent.ts:286 🎨 Using stored text color for body on neutral (mapped to neutral): #374151
-useLayoutComponent.ts:286 🎨 Using stored text color for muted on neutral (mapped to neutral): #6b7280
-useLayoutComponent.ts:286 🎨 Using stored text color for heading on neutral (mapped to neutral): #111827
-useLayoutComponent.ts:286 🎨 Using stored text color for body on neutral (mapped to neutral): #374151
-useLayoutComponent.ts:286 🎨 Using stored text color for muted on neutral (mapped to neutral): #6b7280
-useLayoutComponent.ts:286 🎨 Using stored text color for heading on neutral (mapped to neutral): #111827
-useLayoutComponent.ts:286 🎨 Using stored text color for body on neutral (mapped to neutral): #374151
-useLayoutComponent.ts:286 🎨 Using stored text color for muted on neutral (mapped to neutral): #6b7280
-useLayoutComponent.ts:286 🎨 Using stored text color for heading on neutral (mapped to neutral): #111827
-useLayoutComponent.ts:286 🎨 Using stored text color for body on neutral (mapped to neutral): #374151
-useLayoutComponent.ts:286 🎨 Using stored text color for muted on neutral (mapped to neutral): #6b7280
-useLayoutComponent.ts:286 🎨 Using stored text color for heading on divider (mapped to divider): #111827
-useLayoutComponent.ts:286 🎨 Using stored text color for body on divider (mapped to divider): #374151
-useLayoutComponent.ts:286 🎨 Using stored text color for muted on divider (mapped to divider): #6b7280
-useLayoutComponent.ts:286 🎨 Using stored text color for heading on divider (mapped to divider): #111827
-useLayoutComponent.ts:286 🎨 Using stored text color for body on divider (mapped to divider): #374151
-useLayoutComponent.ts:286 🎨 Using stored text color for muted on divider (mapped to divider): #6b7280
-useLayoutComponent.ts:286 🎨 Using stored text color for heading on neutral (mapped to neutral): #111827
-useLayoutComponent.ts:286 🎨 Using stored text color for body on neutral (mapped to neutral): #374151
-useLayoutComponent.ts:286 🎨 Using stored text color for muted on neutral (mapped to neutral): #6b7280
-useLayoutComponent.ts:286 🎨 Using stored text color for heading on neutral (mapped to neutral): #111827
-useLayoutComponent.ts:286 🎨 Using stored text color for body on neutral (mapped to neutral): #374151
-useLayoutComponent.ts:286 🎨 Using stored text color for muted on neutral (mapped to neutral): #6b7280
-useLayoutComponent.ts:286 🎨 Using stored text color for heading on primary (mapped to primary): #f9fafb
-useLayoutComponent.ts:286 🎨 Using stored text color for body on primary (mapped to primary): #e5e7eb
-useLayoutComponent.ts:286 🎨 Using stored text color for muted on primary (mapped to primary): #9ca3af
-useLayoutComponent.ts:286 🎨 Using stored text color for heading on primary (mapped to primary): #f9fafb
-useLayoutComponent.ts:286 🎨 Using stored text color for body on primary (mapped to primary): #e5e7eb
-useLayoutComponent.ts:286 🎨 Using stored text color for muted on primary (mapped to primary): #9ca3af
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
-selectionPriority.ts:79 📊 Priority 2: Explicit toolbar type found, result: image
-selectionPriority.ts:95 📊 Final getActiveToolbar result: image
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
-selectionPriority.ts:58 📊 Returning cached result: image
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
-selectionPriority.ts:58 📊 Returning cached result: image
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
-selectionPriority.ts:58 📊 Returning cached result: image
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
-selectionPriority.ts:58 📊 Returning cached result: image
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
-selectionPriority.ts:58 📊 Returning cached result: image
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
-selectionPriority.ts:58 📊 Returning cached result: image
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
-selectionPriority.ts:58 📊 Returning cached result: image
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
-selectionPriority.ts:58 📊 Returning cached result: image
-GlobalModals.tsx:42 🎯 GlobalModals rendering with state: {backgroundModal: {…}}
-GlobalModals.tsx:42 🎯 GlobalModals rendering with state: {backgroundModal: {…}}
-useSelectionPriority.ts:92 🔒 Locking transition for element change: {elementKey: 'hero_image', toolbarType: 'image', explicitType: 'image'}
-useTransitionLock.ts:88 🔒 Transition locked: {toolbarType: 'image', reason: 'element selected: hero_image', duration: 350, lockUntil: '2025-08-12T10:13:35.417Z'}
-FloatingToolbars.tsx:34 🎪🎪🎪 FloatingToolbars state changed: {activeToolbar: 'image', hasActiveToolbar: true, toolbarTarget: {…}, editorSelection: {…}, toolbar: {…}}
-FloatingToolbars.tsx:41 🎪 shouldShowToolbar results: {section: false, element: false, text: false, image: true, form: false}
-leftCopyRightImage.tsx:420 🖼️ Image onClick - prevented bubbling
-useEditor.ts:219 🖼️ handleEditorClick: Detected image click, allowing image handlers to work
-FloatingToolbars.tsx:34 🎪🎪🎪 FloatingToolbars state changed: {activeToolbar: 'image', hasActiveToolbar: true, toolbarTarget: {…}, editorSelection: {…}, toolbar: {…}}
-FloatingToolbars.tsx:41 🎪 shouldShowToolbar results: {section: false, element: false, text: false, image: true, form: false}
-FloatingToolbars.tsx:34 🎪🎪🎪 FloatingToolbars state changed: {activeToolbar: 'image', hasActiveToolbar: true, toolbarTarget: {…}, editorSelection: {…}, toolbar: {…}}
-FloatingToolbars.tsx:41 🎪 shouldShowToolbar results: {section: false, element: false, text: false, image: true, form: false}
-MainContent.tsx:164 🖼️ MainContent render: {sectionsLength: 8, sections: Array(8), contentKeys: Array(8), mode: 'edit', selectedSection: 'hero'}
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
-selectionPriority.ts:79 📊 Priority 2: Explicit toolbar type found, result: image
-selectionPriority.ts:95 📊 Final getActiveToolbar result: image
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
-selectionPriority.ts:58 📊 Returning cached result: image
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
-selectionPriority.ts:58 📊 Returning cached result: image
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
-selectionPriority.ts:58 📊 Returning cached result: image
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
-selectionPriority.ts:58 📊 Returning cached result: image
-FloatingToolbars.tsx:34 🎪🎪🎪 FloatingToolbars state changed: {activeToolbar: 'image', hasActiveToolbar: true, toolbarTarget: {…}, editorSelection: {…}, toolbar: {…}}
-FloatingToolbars.tsx:41 🎪 shouldShowToolbar results: {section: false, element: false, text: false, image: true, form: false}
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
-selectionPriority.ts:79 📊 Priority 2: Explicit toolbar type found, result: image
-selectionPriority.ts:95 📊 Final getActiveToolbar result: image
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
-selectionPriority.ts:58 📊 Returning cached result: image
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
-selectionPriority.ts:58 📊 Returning cached result: image
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
-selectionPriority.ts:58 📊 Returning cached result: image
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
-selectionPriority.ts:58 📊 Returning cached result: image
-FloatingToolbars.tsx:34 🎪🎪🎪 FloatingToolbars state changed: {activeToolbar: 'image', hasActiveToolbar: true, toolbarTarget: {…}, editorSelection: {…}, toolbar: {…}}
-FloatingToolbars.tsx:41 🎪 shouldShowToolbar results: {section: false, element: false, text: false, image: true, form: false}
-useTransitionLock.ts:66 🔓 Transition unlocked: timeout
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
-selectionPriority.ts:79 📊 Priority 2: Explicit toolbar type found, result: image
-selectionPriority.ts:95 📊 Final getActiveToolbar result: image
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
-selectionPriority.ts:58 📊 Returning cached result: image
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
-selectionPriority.ts:58 📊 Returning cached result: image
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
-selectionPriority.ts:58 📊 Returning cached result: image
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
-selectionPriority.ts:58 📊 Returning cached result: image
-FloatingToolbars.tsx:34 🎪🎪🎪 FloatingToolbars state changed: {activeToolbar: 'image', hasActiveToolbar: true, toolbarTarget: {…}, editorSelection: {…}, toolbar: {…}}
-FloatingToolbars.tsx:41 🎪 shouldShowToolbar results: {section: false, element: false, text: false, image: true, form: false}
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
-selectionPriority.ts:79 📊 Priority 2: Explicit toolbar type found, result: image
-selectionPriority.ts:95 📊 Final getActiveToolbar result: image
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
-selectionPriority.ts:58 📊 Returning cached result: image
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
-selectionPriority.ts:58 📊 Returning cached result: image
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
-selectionPriority.ts:58 📊 Returning cached result: image
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
-selectionPriority.ts:58 📊 Returning cached result: image
-FloatingToolbars.tsx:34 🎪🎪🎪 FloatingToolbars state changed: {activeToolbar: 'image', hasActiveToolbar: true, toolbarTarget: {…}, editorSelection: {…}, toolbar: {…}}
-FloatingToolbars.tsx:41 🎪 shouldShowToolbar results: {section: false, element: false, text: false, image: true, form: false}
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
-selectionPriority.ts:79 📊 Priority 2: Explicit toolbar type found, result: image
-selectionPriority.ts:95 📊 Final getActiveToolbar result: image
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
-selectionPriority.ts:58 📊 Returning cached result: image
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
-selectionPriority.ts:58 📊 Returning cached result: image
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
-selectionPriority.ts:58 📊 Returning cached result: image
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
-selectionPriority.ts:58 📊 Returning cached result: image
-FloatingToolbars.tsx:34 🎪🎪🎪 FloatingToolbars state changed: {activeToolbar: 'image', hasActiveToolbar: true, toolbarTarget: {…}, editorSelection: {…}, toolbar: {…}}
-FloatingToolbars.tsx:41 🎪 shouldShowToolbar results: {section: false, element: false, text: false, image: true, form: false}
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
-selectionPriority.ts:79 📊 Priority 2: Explicit toolbar type found, result: image
-selectionPriority.ts:95 📊 Final getActiveToolbar result: image
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
-selectionPriority.ts:58 📊 Returning cached result: image
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
-selectionPriority.ts:58 📊 Returning cached result: image
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
-selectionPriority.ts:58 📊 Returning cached result: image
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
-selectionPriority.ts:58 📊 Returning cached result: image
-FloatingToolbars.tsx:34 🎪🎪🎪 FloatingToolbars state changed: {activeToolbar: 'image', hasActiveToolbar: true, toolbarTarget: {…}, editorSelection: {…}, toolbar: {…}}
-FloatingToolbars.tsx:41 🎪 shouldShowToolbar results: {section: false, element: false, text: false, image: true, form: false}
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
-selectionPriority.ts:79 📊 Priority 2: Explicit toolbar type found, result: image
-selectionPriority.ts:95 📊 Final getActiveToolbar result: image
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
-selectionPriority.ts:58 📊 Returning cached result: image
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
-selectionPriority.ts:58 📊 Returning cached result: image
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
-selectionPriority.ts:58 📊 Returning cached result: image
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
-selectionPriority.ts:58 📊 Returning cached result: image
-FloatingToolbars.tsx:34 🎪🎪🎪 FloatingToolbars state changed: {activeToolbar: 'image', hasActiveToolbar: true, toolbarTarget: {…}, editorSelection: {…}, toolbar: {…}}
-FloatingToolbars.tsx:41 🎪 shouldShowToolbar results: {section: false, element: false, text: false, image: true, form: false}
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
-selectionPriority.ts:79 📊 Priority 2: Explicit toolbar type found, result: image
-selectionPriority.ts:95 📊 Final getActiveToolbar result: image
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
-selectionPriority.ts:58 📊 Returning cached result: image
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
-selectionPriority.ts:58 📊 Returning cached result: image
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
-selectionPriority.ts:58 📊 Returning cached result: image
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
-selectionPriority.ts:58 📊 Returning cached result: image
-FloatingToolbars.tsx:34 🎪🎪🎪 FloatingToolbars state changed: {activeToolbar: 'image', hasActiveToolbar: true, toolbarTarget: {…}, editorSelection: {…}, toolbar: {…}}
-FloatingToolbars.tsx:41 🎪 shouldShowToolbar results: {section: false, element: false, text: false, image: true, form: false}
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
-selectionPriority.ts:79 📊 Priority 2: Explicit toolbar type found, result: image
-selectionPriority.ts:95 📊 Final getActiveToolbar result: image
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
-selectionPriority.ts:58 📊 Returning cached result: image
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
-selectionPriority.ts:58 📊 Returning cached result: image
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
-selectionPriority.ts:58 📊 Returning cached result: image
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
-selectionPriority.ts:58 📊 Returning cached result: image
-FloatingToolbars.tsx:34 🎪🎪🎪 FloatingToolbars state changed: {activeToolbar: 'image', hasActiveToolbar: true, toolbarTarget: {…}, editorSelection: {…}, toolbar: {…}}
-FloatingToolbars.tsx:41 🎪 shouldShowToolbar results: {section: false, element: false, text: false, image: true, form: false}
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
-selectionPriority.ts:79 📊 Priority 2: Explicit toolbar type found, result: image
-selectionPriority.ts:95 📊 Final getActiveToolbar result: image
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
-selectionPriority.ts:58 📊 Returning cached result: image
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
-selectionPriority.ts:58 📊 Returning cached result: image
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
-selectionPriority.ts:58 📊 Returning cached result: image
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
-selectionPriority.ts:58 📊 Returning cached result: image
-FloatingToolbars.tsx:34 🎪🎪🎪 FloatingToolbars state changed: {activeToolbar: 'image', hasActiveToolbar: true, toolbarTarget: {…}, editorSelection: {…}, toolbar: {…}}
-FloatingToolbars.tsx:41 🎪 shouldShowToolbar results: {section: false, element: false, text: false, image: true, form: false}
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
-selectionPriority.ts:79 📊 Priority 2: Explicit toolbar type found, result: image
-selectionPriority.ts:95 📊 Final getActiveToolbar result: image
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
-selectionPriority.ts:58 📊 Returning cached result: image
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
-selectionPriority.ts:58 📊 Returning cached result: image
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
-selectionPriority.ts:58 📊 Returning cached result: image
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
-selectionPriority.ts:58 📊 Returning cached result: image
-FloatingToolbars.tsx:34 🎪🎪🎪 FloatingToolbars state changed: {activeToolbar: 'image', hasActiveToolbar: true, toolbarTarget: {…}, editorSelection: {…}, toolbar: {…}}
-FloatingToolbars.tsx:41 🎪 shouldShowToolbar results: {section: false, element: false, text: false, image: true, form: false}
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
-selectionPriority.ts:79 📊 Priority 2: Explicit toolbar type found, result: image
-selectionPriority.ts:95 📊 Final getActiveToolbar result: image
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
-selectionPriority.ts:58 📊 Returning cached result: image
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
-selectionPriority.ts:58 📊 Returning cached result: image
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
-selectionPriority.ts:58 📊 Returning cached result: image
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
-selectionPriority.ts:58 📊 Returning cached result: image
-FloatingToolbars.tsx:34 🎪🎪🎪 FloatingToolbars state changed: {activeToolbar: 'image', hasActiveToolbar: true, toolbarTarget: {…}, editorSelection: {…}, toolbar: {…}}
-FloatingToolbars.tsx:41 🎪 shouldShowToolbar results: {section: false, element: false, text: false, image: true, form: false}
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
-selectionPriority.ts:79 📊 Priority 2: Explicit toolbar type found, result: image
-selectionPriority.ts:95 📊 Final getActiveToolbar result: image
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
-selectionPriority.ts:58 📊 Returning cached result: image
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
-selectionPriority.ts:58 📊 Returning cached result: image
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
-selectionPriority.ts:58 📊 Returning cached result: image
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
-selectionPriority.ts:58 📊 Returning cached result: image
-FloatingToolbars.tsx:34 🎪🎪🎪 FloatingToolbars state changed: {activeToolbar: 'image', hasActiveToolbar: true, toolbarTarget: {…}, editorSelection: {…}, toolbar: {…}}
-FloatingToolbars.tsx:41 🎪 shouldShowToolbar results: {section: false, element: false, text: false, image: true, form: false}
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
-selectionPriority.ts:79 📊 Priority 2: Explicit toolbar type found, result: image
-selectionPriority.ts:95 📊 Final getActiveToolbar result: image
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
-selectionPriority.ts:58 📊 Returning cached result: image
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
-selectionPriority.ts:58 📊 Returning cached result: image
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
-selectionPriority.ts:58 📊 Returning cached result: image
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
-selectionPriority.ts:58 📊 Returning cached result: image
-FloatingToolbars.tsx:34 🎪🎪🎪 FloatingToolbars state changed: {activeToolbar: 'image', hasActiveToolbar: true, toolbarTarget: {…}, editorSelection: {…}, toolbar: {…}}
-FloatingToolbars.tsx:41 🎪 shouldShowToolbar results: {section: false, element: false, text: false, image: true, form: false}
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
-selectionPriority.ts:79 📊 Priority 2: Explicit toolbar type found, result: image
-selectionPriority.ts:95 📊 Final getActiveToolbar result: image
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
-selectionPriority.ts:58 📊 Returning cached result: image
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
-selectionPriority.ts:58 📊 Returning cached result: image
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
-selectionPriority.ts:58 📊 Returning cached result: image
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
-selectionPriority.ts:58 📊 Returning cached result: image
-FloatingToolbars.tsx:34 🎪🎪🎪 FloatingToolbars state changed: {activeToolbar: 'image', hasActiveToolbar: true, toolbarTarget: {…}, editorSelection: {…}, toolbar: {…}}
-FloatingToolbars.tsx:41 🎪 shouldShowToolbar results: {section: false, element: false, text: false, image: true, form: false}
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
-selectionPriority.ts:79 📊 Priority 2: Explicit toolbar type found, result: image
-selectionPriority.ts:95 📊 Final getActiveToolbar result: image
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
-selectionPriority.ts:58 📊 Returning cached result: image
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
-selectionPriority.ts:58 📊 Returning cached result: image
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
-selectionPriority.ts:58 📊 Returning cached result: image
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
-selectionPriority.ts:58 📊 Returning cached result: image
-FloatingToolbars.tsx:34 🎪🎪🎪 FloatingToolbars state changed: {activeToolbar: 'image', hasActiveToolbar: true, toolbarTarget: {…}, editorSelection: {…}, toolbar: {…}}
-FloatingToolbars.tsx:41 🎪 shouldShowToolbar results: {section: false, element: false, text: false, image: true, form: false}
-InlineTextEditor.tsx:387 📝 InlineTextEditor handleFocus called
-useGlobalSelectionHandler.ts:81 🎯 Global selection handler attached {editorId: 'editor-hero-headline'}
-interactionTracking.ts:142 📊 [2025-08-12T10:13:37.094Z] selectionchange:global {interactionSource: null, isComposing: false}
-InlineTextEditor.tsx:435 📝 InlineTextEditor: Skipping selection change - element in text editing mode or actively typing
-MainContent.tsx:240 🎯 Element clicked: hero headline mode: edit
-MainContent.tsx:282 🎯 Element selected, toolbar should show: {elementId: 'hero.headline', position: {…}}
-ColorSystemModalMVP.tsx:136 🎨 Theme colors: {accentColor: 'cyan', accentCSS: 'bg-cyan-500', themeColors: {…}, hasThemeAccent: true, getCurrentColorResult: {…}, …}
-ColorSystemModalMVP.tsx:136 🎨 Theme colors: {accentColor: 'cyan', accentCSS: 'bg-cyan-500', themeColors: {…}, hasThemeAccent: true, getCurrentColorResult: {…}, …}
-useLayoutComponent.ts:286 🎨 Using stored text color for heading on primary (mapped to primary): #f9fafb
-useLayoutComponent.ts:286 🎨 Using stored text color for body on primary (mapped to primary): #e5e7eb
-useLayoutComponent.ts:286 🎨 Using stored text color for muted on primary (mapped to primary): #9ca3af
-useLayoutComponent.ts:286 🎨 Using stored text color for heading on primary (mapped to primary): #f9fafb
-useLayoutComponent.ts:286 🎨 Using stored text color for body on primary (mapped to primary): #e5e7eb
-useLayoutComponent.ts:286 🎨 Using stored text color for muted on primary (mapped to primary): #9ca3af
-IconGrid.tsx:166 🎯 IconGrid component rendering with props: {sectionId: 'features', backgroundType: 'secondary', className: ''}
-useLayoutComponent.ts:286 🎨 Using stored text color for heading on secondary (mapped to secondary): #111827
-useLayoutComponent.ts:286 🎨 Using stored text color for body on secondary (mapped to secondary): #374151
-useLayoutComponent.ts:286 🎨 Using stored text color for muted on secondary (mapped to secondary): #6b7280
-IconGrid.tsx:184 🎯 IconGrid hook result: {sectionId: 'features', mode: 'edit'}
-IconGrid.tsx:166 🎯 IconGrid component rendering with props: {sectionId: 'features', backgroundType: 'secondary', className: ''}
-useLayoutComponent.ts:286 🎨 Using stored text color for heading on secondary (mapped to secondary): #111827
-useLayoutComponent.ts:286 🎨 Using stored text color for body on secondary (mapped to secondary): #374151
-useLayoutComponent.ts:286 🎨 Using stored text color for muted on secondary (mapped to secondary): #6b7280
-IconGrid.tsx:184 🎯 IconGrid hook result: {sectionId: 'features', mode: 'edit'}
-useLayoutComponent.ts:286 🎨 Using stored text color for heading on neutral (mapped to neutral): #111827
-useLayoutComponent.ts:286 🎨 Using stored text color for body on neutral (mapped to neutral): #374151
-useLayoutComponent.ts:286 🎨 Using stored text color for muted on neutral (mapped to neutral): #6b7280
-useLayoutComponent.ts:286 🎨 Using stored text color for heading on neutral (mapped to neutral): #111827
-useLayoutComponent.ts:286 🎨 Using stored text color for body on neutral (mapped to neutral): #374151
-useLayoutComponent.ts:286 🎨 Using stored text color for muted on neutral (mapped to neutral): #6b7280
-useLayoutComponent.ts:286 🎨 Using stored text color for heading on neutral (mapped to neutral): #111827
-useLayoutComponent.ts:286 🎨 Using stored text color for body on neutral (mapped to neutral): #374151
-useLayoutComponent.ts:286 🎨 Using stored text color for muted on neutral (mapped to neutral): #6b7280
-useLayoutComponent.ts:286 🎨 Using stored text color for heading on neutral (mapped to neutral): #111827
-useLayoutComponent.ts:286 🎨 Using stored text color for body on neutral (mapped to neutral): #374151
-useLayoutComponent.ts:286 🎨 Using stored text color for muted on neutral (mapped to neutral): #6b7280
-useLayoutComponent.ts:286 🎨 Using stored text color for heading on neutral (mapped to neutral): #111827
-useLayoutComponent.ts:286 🎨 Using stored text color for body on neutral (mapped to neutral): #374151
-useLayoutComponent.ts:286 🎨 Using stored text color for muted on neutral (mapped to neutral): #6b7280
-useLayoutComponent.ts:286 🎨 Using stored text color for heading on neutral (mapped to neutral): #111827
-useLayoutComponent.ts:286 🎨 Using stored text color for body on neutral (mapped to neutral): #374151
-useLayoutComponent.ts:286 🎨 Using stored text color for muted on neutral (mapped to neutral): #6b7280
-useLayoutComponent.ts:286 🎨 Using stored text color for heading on divider (mapped to divider): #111827
-useLayoutComponent.ts:286 🎨 Using stored text color for body on divider (mapped to divider): #374151
-useLayoutComponent.ts:286 🎨 Using stored text color for muted on divider (mapped to divider): #6b7280
-useLayoutComponent.ts:286 🎨 Using stored text color for heading on divider (mapped to divider): #111827
-useLayoutComponent.ts:286 🎨 Using stored text color for body on divider (mapped to divider): #374151
-useLayoutComponent.ts:286 🎨 Using stored text color for muted on divider (mapped to divider): #6b7280
-useLayoutComponent.ts:286 🎨 Using stored text color for heading on neutral (mapped to neutral): #111827
-useLayoutComponent.ts:286 🎨 Using stored text color for body on neutral (mapped to neutral): #374151
-useLayoutComponent.ts:286 🎨 Using stored text color for muted on neutral (mapped to neutral): #6b7280
-useLayoutComponent.ts:286 🎨 Using stored text color for heading on neutral (mapped to neutral): #111827
-useLayoutComponent.ts:286 🎨 Using stored text color for body on neutral (mapped to neutral): #374151
-useLayoutComponent.ts:286 🎨 Using stored text color for muted on neutral (mapped to neutral): #6b7280
-useLayoutComponent.ts:286 🎨 Using stored text color for heading on primary (mapped to primary): #f9fafb
-useLayoutComponent.ts:286 🎨 Using stored text color for body on primary (mapped to primary): #e5e7eb
-useLayoutComponent.ts:286 🎨 Using stored text color for muted on primary (mapped to primary): #9ca3af
-useLayoutComponent.ts:286 🎨 Using stored text color for heading on primary (mapped to primary): #f9fafb
-useLayoutComponent.ts:286 🎨 Using stored text color for body on primary (mapped to primary): #e5e7eb
-useLayoutComponent.ts:286 🎨 Using stored text color for muted on primary (mapped to primary): #9ca3af
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
-selectionPriority.ts:79 📊 Priority 2: Explicit toolbar type found, result: image
-selectionPriority.ts:95 📊 Final getActiveToolbar result: image
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
-selectionPriority.ts:58 📊 Returning cached result: image
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
-selectionPriority.ts:58 📊 Returning cached result: image
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
-selectionPriority.ts:58 📊 Returning cached result: image
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
-selectionPriority.ts:58 📊 Returning cached result: image
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
-selectionPriority.ts:58 📊 Returning cached result: image
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
-selectionPriority.ts:58 📊 Returning cached result: image
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
-selectionPriority.ts:58 📊 Returning cached result: image
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
-selectionPriority.ts:58 📊 Returning cached result: image
-GlobalModals.tsx:42 🎯 GlobalModals rendering with state: {backgroundModal: {…}}
-GlobalModals.tsx:42 🎯 GlobalModals rendering with state: {backgroundModal: {…}}
-useGlobalSelectionHandler.ts:87 🧹 Global selection handler cleaned up {editorId: 'editor-hero-headline'}
-useGlobalSelectionHandler.ts:81 🎯 Global selection handler attached {editorId: 'editor-hero-headline'}
-useSelectionPriority.ts:92 🔒 Locking transition for element change: {elementKey: 'headline', toolbarType: 'image', explicitType: 'image'}
-useTransitionLock.ts:88 🔒 Transition locked: {toolbarType: 'image', reason: 'element selected: headline', duration: 350, lockUntil: '2025-08-12T10:13:37.510Z'}
-FloatingToolbars.tsx:34 🎪🎪🎪 FloatingToolbars state changed: {activeToolbar: 'image', hasActiveToolbar: true, toolbarTarget: {…}, editorSelection: {…}, toolbar: {…}}
-FloatingToolbars.tsx:41 🎪 shouldShowToolbar results: {section: false, element: false, text: false, image: true, form: false}
-uiActions.ts:274 🎯🎯🎯 showToolbar called with: {type: 'element', targetId: 'hero.headline', position: {…}}
-uiActions.ts:275 🎯 Current toolbar state BEFORE update: Proxy(Object) {type_: 0, scope_: {…}, modified_: false, finalized_: false, assigned_: {…}, …}
-uiActions.ts:283 🎯 Setting NEW toolbar state: {type: 'element', visible: true, position: {…}, targetId: 'hero.headline', actions: Array(4)}
-uiActions.ts:294 🎯 Toolbar state AFTER update: {type: 'element', visible: true, position: {…}, targetId: 'hero.headline', actions: Array(4)}
-ColorSystemModalMVP.tsx:136 🎨 Theme colors: {accentColor: 'cyan', accentCSS: 'bg-cyan-500', themeColors: {…}, hasThemeAccent: true, getCurrentColorResult: {…}, …}
-ColorSystemModalMVP.tsx:136 🎨 Theme colors: {accentColor: 'cyan', accentCSS: 'bg-cyan-500', themeColors: {…}, hasThemeAccent: true, getCurrentColorResult: {…}, …}
-useLayoutComponent.ts:286 🎨 Using stored text color for heading on primary (mapped to primary): #f9fafb
-useLayoutComponent.ts:286 🎨 Using stored text color for body on primary (mapped to primary): #e5e7eb
-useLayoutComponent.ts:286 🎨 Using stored text color for muted on primary (mapped to primary): #9ca3af
-useLayoutComponent.ts:286 🎨 Using stored text color for heading on primary (mapped to primary): #f9fafb
-useLayoutComponent.ts:286 🎨 Using stored text color for body on primary (mapped to primary): #e5e7eb
-useLayoutComponent.ts:286 🎨 Using stored text color for muted on primary (mapped to primary): #9ca3af
-IconGrid.tsx:166 🎯 IconGrid component rendering with props: {sectionId: 'features', backgroundType: 'secondary', className: ''}
-useLayoutComponent.ts:286 🎨 Using stored text color for heading on secondary (mapped to secondary): #111827
-useLayoutComponent.ts:286 🎨 Using stored text color for body on secondary (mapped to secondary): #374151
-useLayoutComponent.ts:286 🎨 Using stored text color for muted on secondary (mapped to secondary): #6b7280
-IconGrid.tsx:184 🎯 IconGrid hook result: {sectionId: 'features', mode: 'edit'}
-IconGrid.tsx:166 🎯 IconGrid component rendering with props: {sectionId: 'features', backgroundType: 'secondary', className: ''}
-useLayoutComponent.ts:286 🎨 Using stored text color for heading on secondary (mapped to secondary): #111827
-useLayoutComponent.ts:286 🎨 Using stored text color for body on secondary (mapped to secondary): #374151
-useLayoutComponent.ts:286 🎨 Using stored text color for muted on secondary (mapped to secondary): #6b7280
-IconGrid.tsx:184 🎯 IconGrid hook result: {sectionId: 'features', mode: 'edit'}
-useLayoutComponent.ts:286 🎨 Using stored text color for heading on neutral (mapped to neutral): #111827
-useLayoutComponent.ts:286 🎨 Using stored text color for body on neutral (mapped to neutral): #374151
-useLayoutComponent.ts:286 🎨 Using stored text color for muted on neutral (mapped to neutral): #6b7280
-useLayoutComponent.ts:286 🎨 Using stored text color for heading on neutral (mapped to neutral): #111827
-useLayoutComponent.ts:286 🎨 Using stored text color for body on neutral (mapped to neutral): #374151
-useLayoutComponent.ts:286 🎨 Using stored text color for muted on neutral (mapped to neutral): #6b7280
-useLayoutComponent.ts:286 🎨 Using stored text color for heading on neutral (mapped to neutral): #111827
-useLayoutComponent.ts:286 🎨 Using stored text color for body on neutral (mapped to neutral): #374151
-useLayoutComponent.ts:286 🎨 Using stored text color for muted on neutral (mapped to neutral): #6b7280
-useLayoutComponent.ts:286 🎨 Using stored text color for heading on neutral (mapped to neutral): #111827
-useLayoutComponent.ts:286 🎨 Using stored text color for body on neutral (mapped to neutral): #374151
-useLayoutComponent.ts:286 🎨 Using stored text color for muted on neutral (mapped to neutral): #6b7280
-useLayoutComponent.ts:286 🎨 Using stored text color for heading on neutral (mapped to neutral): #111827
-useLayoutComponent.ts:286 🎨 Using stored text color for body on neutral (mapped to neutral): #374151
-useLayoutComponent.ts:286 🎨 Using stored text color for muted on neutral (mapped to neutral): #6b7280
-useLayoutComponent.ts:286 🎨 Using stored text color for heading on neutral (mapped to neutral): #111827
-useLayoutComponent.ts:286 🎨 Using stored text color for body on neutral (mapped to neutral): #374151
-useLayoutComponent.ts:286 🎨 Using stored text color for muted on neutral (mapped to neutral): #6b7280
-useLayoutComponent.ts:286 🎨 Using stored text color for heading on divider (mapped to divider): #111827
-useLayoutComponent.ts:286 🎨 Using stored text color for body on divider (mapped to divider): #374151
-useLayoutComponent.ts:286 🎨 Using stored text color for muted on divider (mapped to divider): #6b7280
-useLayoutComponent.ts:286 🎨 Using stored text color for heading on divider (mapped to divider): #111827
-useLayoutComponent.ts:286 🎨 Using stored text color for body on divider (mapped to divider): #374151
-useLayoutComponent.ts:286 🎨 Using stored text color for muted on divider (mapped to divider): #6b7280
-useLayoutComponent.ts:286 🎨 Using stored text color for heading on neutral (mapped to neutral): #111827
-useLayoutComponent.ts:286 🎨 Using stored text color for body on neutral (mapped to neutral): #374151
-useLayoutComponent.ts:286 🎨 Using stored text color for muted on neutral (mapped to neutral): #6b7280
-useLayoutComponent.ts:286 🎨 Using stored text color for heading on neutral (mapped to neutral): #111827
-useLayoutComponent.ts:286 🎨 Using stored text color for body on neutral (mapped to neutral): #374151
-useLayoutComponent.ts:286 🎨 Using stored text color for muted on neutral (mapped to neutral): #6b7280
-useLayoutComponent.ts:286 🎨 Using stored text color for heading on primary (mapped to primary): #f9fafb
-useLayoutComponent.ts:286 🎨 Using stored text color for body on primary (mapped to primary): #e5e7eb
-useLayoutComponent.ts:286 🎨 Using stored text color for muted on primary (mapped to primary): #9ca3af
-useLayoutComponent.ts:286 🎨 Using stored text color for heading on primary (mapped to primary): #f9fafb
-useLayoutComponent.ts:286 🎨 Using stored text color for body on primary (mapped to primary): #e5e7eb
-useLayoutComponent.ts:286 🎨 Using stored text color for muted on primary (mapped to primary): #9ca3af
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
-selectionPriority.ts:84 📊 Priority 3: Element selection active, result: element
-selectionPriority.ts:95 📊 Final getActiveToolbar result: element
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
-selectionPriority.ts:58 📊 Returning cached result: element
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
-selectionPriority.ts:58 📊 Returning cached result: element
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
-selectionPriority.ts:58 📊 Returning cached result: element
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
-selectionPriority.ts:58 📊 Returning cached result: element
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
-selectionPriority.ts:58 📊 Returning cached result: element
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
-selectionPriority.ts:58 📊 Returning cached result: element
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
-selectionPriority.ts:58 📊 Returning cached result: element
-FloatingToolbars.tsx:101 🖼️ ImageToolbar rendering with: {shouldShowImage: true, targetId: 'hero.headline', activeToolbar: 'image', position: {…}, contextActions: Array(4)}
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
-selectionPriority.ts:58 📊 Returning cached result: element
-FloatingToolbars.tsx:101 🖼️ ImageToolbar rendering with: {shouldShowImage: true, targetId: 'hero.headline', activeToolbar: 'image', position: {…}, contextActions: Array(4)}
-ImageToolbar.tsx:19 🖼️🖼️🖼️ ImageToolbar component initialized with props: {targetId: 'hero.headline', position: {…}, contextActions: Array(4)}
-ImageToolbar.tsx:101 🖼️ Looking for target element with selector: [data-image-id="hero.headline"]
-ImageToolbar.tsx:102 🖼️ Found target element: null
-ImageToolbar.tsx:110 🖼️ Arrow info calculated: null
-ImageToolbar.tsx:307 🖼️ ImageToolbar about to render with position: {x: 572, y: 246.6875}
-ImageToolbar.tsx:311 🖼️ ImageToolbar JSX rendering now!
-ImageToolbar.tsx:19 🖼️🖼️🖼️ ImageToolbar component initialized with props: {targetId: 'hero.headline', position: {…}, contextActions: Array(4)}
-ImageToolbar.tsx:101 🖼️ Looking for target element with selector: [data-image-id="hero.headline"]
-ImageToolbar.tsx:102 🖼️ Found target element: null
-ImageToolbar.tsx:110 🖼️ Arrow info calculated: null
-ImageToolbar.tsx:307 🖼️ ImageToolbar about to render with position: {x: 572, y: 246.6875}
-ImageToolbar.tsx:311 🖼️ ImageToolbar JSX rendering now!
-GlobalModals.tsx:42 🎯 GlobalModals rendering with state: {backgroundModal: {…}}
-GlobalModals.tsx:42 🎯 GlobalModals rendering with state: {backgroundModal: {…}}
-useGlobalSelectionHandler.ts:87 🧹 Global selection handler cleaned up {editorId: 'editor-hero-headline'}
-useGlobalSelectionHandler.ts:81 🎯 Global selection handler attached {editorId: 'editor-hero-headline'}
-FloatingToolbars.tsx:34 🎪🎪🎪 FloatingToolbars state changed: {activeToolbar: 'image', hasActiveToolbar: true, toolbarTarget: {…}, editorSelection: {…}, toolbar: {…}}
-FloatingToolbars.tsx:41 🎪 shouldShowToolbar results: {section: false, element: false, text: false, image: true, form: false}
-FloatingToolbars.tsx:101 🖼️ ImageToolbar rendering with: {shouldShowImage: true, targetId: 'hero.headline', activeToolbar: 'image', position: {…}, contextActions: Array(4)}
-FloatingToolbars.tsx:101 🖼️ ImageToolbar rendering with: {shouldShowImage: true, targetId: 'hero.headline', activeToolbar: 'image', position: {…}, contextActions: Array(4)}
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
-selectionPriority.ts:84 📊 Priority 3: Element selection active, result: element
-selectionPriority.ts:95 📊 Final getActiveToolbar result: element
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
-selectionPriority.ts:58 📊 Returning cached result: element
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
-selectionPriority.ts:58 📊 Returning cached result: element
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
-selectionPriority.ts:58 📊 Returning cached result: element
-FloatingToolbars.tsx:101 🖼️ ImageToolbar rendering with: {shouldShowImage: true, targetId: 'hero.headline', activeToolbar: 'image', position: {…}, contextActions: Array(4)}
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
-selectionPriority.ts:58 📊 Returning cached result: element
-FloatingToolbars.tsx:101 🖼️ ImageToolbar rendering with: {shouldShowImage: true, targetId: 'hero.headline', activeToolbar: 'image', position: {…}, contextActions: Array(4)}
-ImageToolbar.tsx:19 🖼️🖼️🖼️ ImageToolbar component initialized with props: {targetId: 'hero.headline', position: {…}, contextActions: Array(4)}
-ImageToolbar.tsx:101 🖼️ Looking for target element with selector: [data-image-id="hero.headline"]
-ImageToolbar.tsx:102 🖼️ Found target element: null
-ImageToolbar.tsx:110 🖼️ Arrow info calculated: null
-ImageToolbar.tsx:307 🖼️ ImageToolbar about to render with position: {x: 572, y: 246.6875}
-ImageToolbar.tsx:311 🖼️ ImageToolbar JSX rendering now!
-ImageToolbar.tsx:19 🖼️🖼️🖼️ ImageToolbar component initialized with props: {targetId: 'hero.headline', position: {…}, contextActions: Array(4)}
-ImageToolbar.tsx:101 🖼️ Looking for target element with selector: [data-image-id="hero.headline"]
-ImageToolbar.tsx:102 🖼️ Found target element: null
-ImageToolbar.tsx:110 🖼️ Arrow info calculated: null
-ImageToolbar.tsx:307 🖼️ ImageToolbar about to render with position: {x: 572, y: 246.6875}
-ImageToolbar.tsx:311 🖼️ ImageToolbar JSX rendering now!
-FloatingToolbars.tsx:34 🎪🎪🎪 FloatingToolbars state changed: {activeToolbar: 'image', hasActiveToolbar: true, toolbarTarget: {…}, editorSelection: {…}, toolbar: {…}}
-FloatingToolbars.tsx:41 🎪 shouldShowToolbar results: {section: false, element: false, text: false, image: true, form: false}
-FloatingToolbars.tsx:101 🖼️ ImageToolbar rendering with: {shouldShowImage: true, targetId: 'hero.headline', activeToolbar: 'image', position: {…}, contextActions: Array(4)}
-FloatingToolbars.tsx:101 🖼️ ImageToolbar rendering with: {shouldShowImage: true, targetId: 'hero.headline', activeToolbar: 'image', position: {…}, contextActions: Array(4)}
-useTransitionLock.ts:66 🔓 Transition unlocked: timeout
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
-selectionPriority.ts:84 📊 Priority 3: Element selection active, result: element
-selectionPriority.ts:95 📊 Final getActiveToolbar result: element
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
-selectionPriority.ts:58 📊 Returning cached result: element
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
-selectionPriority.ts:58 📊 Returning cached result: element
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
-selectionPriority.ts:58 📊 Returning cached result: element
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
-selectionPriority.ts:58 📊 Returning cached result: element
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
-selectionPriority.ts:58 📊 Returning cached result: element
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
-selectionPriority.ts:58 📊 Returning cached result: element
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
-selectionPriority.ts:58 📊 Returning cached result: element
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
-selectionPriority.ts:58 📊 Returning cached result: element
-ElementToolbar.tsx:67 🔧 ElementToolbar priority check: {isVisible: true, reason: 'element toolbar naturally active (no anchor registered)', condition: false}
-ElementToolbar.tsx:79 🔧 ElementToolbar toolbar state check: {toolbarType: undefined, toolbarVisible: undefined, toolbarTargetId: undefined, fullToolbarState: {…}}
-ElementToolbar.tsx:91 🔧 ElementToolbar proceeding to render with toolbar type: undefined
-ElementToolbar.tsx:67 🔧 ElementToolbar priority check: {isVisible: true, reason: 'element toolbar naturally active (no anchor registered)', condition: false}
-ElementToolbar.tsx:79 🔧 ElementToolbar toolbar state check: {toolbarType: undefined, toolbarVisible: undefined, toolbarTargetId: undefined, fullToolbarState: {…}}
-ElementToolbar.tsx:91 🔧 ElementToolbar proceeding to render with toolbar type: undefined
-useSelectionPriority.ts:92 🔒 Locking transition for element change: {elementKey: 'headline', toolbarType: 'element', explicitType: 'element'}
-useTransitionLock.ts:88 🔒 Transition locked: {toolbarType: 'element', reason: 'element selected: headline', duration: 350, lockUntil: '2025-08-12T10:13:37.877Z'}
-FloatingToolbars.tsx:34 🎪🎪🎪 FloatingToolbars state changed: {activeToolbar: 'element', hasActiveToolbar: true, toolbarTarget: {…}, editorSelection: {…}, toolbar: {…}}
-FloatingToolbars.tsx:41 🎪 shouldShowToolbar results: {section: false, element: true, text: false, image: false, form: false}
-ElementToolbar.tsx:67 🔧 ElementToolbar priority check: {isVisible: true, reason: 'element toolbar locked visible (element selected: headline) (no anchor registered)', condition: false}
-ElementToolbar.tsx:79 🔧 ElementToolbar toolbar state check: {toolbarType: undefined, toolbarVisible: undefined, toolbarTargetId: undefined, fullToolbarState: {…}}
-ElementToolbar.tsx:91 🔧 ElementToolbar proceeding to render with toolbar type: undefined
-ElementToolbar.tsx:67 🔧 ElementToolbar priority check: {isVisible: true, reason: 'element toolbar locked visible (element selected: headline) (no anchor registered)', condition: false}
-ElementToolbar.tsx:79 🔧 ElementToolbar toolbar state check: {toolbarType: undefined, toolbarVisible: undefined, toolbarTargetId: undefined, fullToolbarState: {…}}
-ElementToolbar.tsx:91 🔧 ElementToolbar proceeding to render with toolbar type: undefined
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
-selectionPriority.ts:84 📊 Priority 3: Element selection active, result: element
-selectionPriority.ts:95 📊 Final getActiveToolbar result: element
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
-selectionPriority.ts:58 📊 Returning cached result: element
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
-selectionPriority.ts:58 📊 Returning cached result: element
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
-selectionPriority.ts:58 📊 Returning cached result: element
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
-selectionPriority.ts:58 📊 Returning cached result: element
-ElementToolbar.tsx:67 🔧 ElementToolbar priority check: {isVisible: true, reason: 'element toolbar locked visible (element selected: headline) (no anchor registered)', condition: false}
-ElementToolbar.tsx:79 🔧 ElementToolbar toolbar state check: {toolbarType: undefined, toolbarVisible: undefined, toolbarTargetId: undefined, fullToolbarState: {…}}
-ElementToolbar.tsx:91 🔧 ElementToolbar proceeding to render with toolbar type: undefined
-ElementToolbar.tsx:67 🔧 ElementToolbar priority check: {isVisible: true, reason: 'element toolbar locked visible (element selected: headline) (no anchor registered)', condition: false}
-ElementToolbar.tsx:79 🔧 ElementToolbar toolbar state check: {toolbarType: undefined, toolbarVisible: undefined, toolbarTargetId: undefined, fullToolbarState: {…}}
-ElementToolbar.tsx:91 🔧 ElementToolbar proceeding to render with toolbar type: undefined
-FloatingToolbars.tsx:34 🎪🎪🎪 FloatingToolbars state changed: {activeToolbar: 'element', hasActiveToolbar: true, toolbarTarget: {…}, editorSelection: {…}, toolbar: {…}}
-FloatingToolbars.tsx:41 🎪 shouldShowToolbar results: {section: false, element: true, text: false, image: false, form: false}
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
-selectionPriority.ts:84 📊 Priority 3: Element selection active, result: element
-selectionPriority.ts:95 📊 Final getActiveToolbar result: element
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
-selectionPriority.ts:58 📊 Returning cached result: element
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
-selectionPriority.ts:58 📊 Returning cached result: element
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
-selectionPriority.ts:58 📊 Returning cached result: element
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
-selectionPriority.ts:58 📊 Returning cached result: element
-ElementToolbar.tsx:67 🔧 ElementToolbar priority check: {isVisible: true, reason: 'element toolbar locked visible (element selected: headline) (no anchor registered)', condition: false}
-ElementToolbar.tsx:79 🔧 ElementToolbar toolbar state check: {toolbarType: undefined, toolbarVisible: undefined, toolbarTargetId: undefined, fullToolbarState: {…}}
-ElementToolbar.tsx:91 🔧 ElementToolbar proceeding to render with toolbar type: undefined
-ElementToolbar.tsx:67 🔧 ElementToolbar priority check: {isVisible: true, reason: 'element toolbar locked visible (element selected: headline) (no anchor registered)', condition: false}
-ElementToolbar.tsx:79 🔧 ElementToolbar toolbar state check: {toolbarType: undefined, toolbarVisible: undefined, toolbarTargetId: undefined, fullToolbarState: {…}}
-ElementToolbar.tsx:91 🔧 ElementToolbar proceeding to render with toolbar type: undefined
-FloatingToolbars.tsx:34 🎪🎪🎪 FloatingToolbars state changed: {activeToolbar: 'element', hasActiveToolbar: true, toolbarTarget: {…}, editorSelection: {…}, toolbar: {…}}
-FloatingToolbars.tsx:41 🎪 shouldShowToolbar results: {section: false, element: true, text: false, image: false, form: false}
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
-selectionPriority.ts:84 📊 Priority 3: Element selection active, result: element
-selectionPriority.ts:95 📊 Final getActiveToolbar result: element
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
-selectionPriority.ts:58 📊 Returning cached result: element
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
-selectionPriority.ts:58 📊 Returning cached result: element
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
-selectionPriority.ts:58 📊 Returning cached result: element
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
-selectionPriority.ts:58 📊 Returning cached result: element
-ElementToolbar.tsx:67 🔧 ElementToolbar priority check: {isVisible: true, reason: 'element toolbar locked visible (element selected: headline) (no anchor registered)', condition: false}
-ElementToolbar.tsx:79 🔧 ElementToolbar toolbar state check: {toolbarType: undefined, toolbarVisible: undefined, toolbarTargetId: undefined, fullToolbarState: {…}}
-ElementToolbar.tsx:91 🔧 ElementToolbar proceeding to render with toolbar type: undefined
-ElementToolbar.tsx:67 🔧 ElementToolbar priority check: {isVisible: true, reason: 'element toolbar locked visible (element selected: headline) (no anchor registered)', condition: false}
-ElementToolbar.tsx:79 🔧 ElementToolbar toolbar state check: {toolbarType: undefined, toolbarVisible: undefined, toolbarTargetId: undefined, fullToolbarState: {…}}
-ElementToolbar.tsx:91 🔧 ElementToolbar proceeding to render with toolbar type: undefined
-FloatingToolbars.tsx:34 🎪🎪🎪 FloatingToolbars state changed: {activeToolbar: 'element', hasActiveToolbar: true, toolbarTarget: {…}, editorSelection: {…}, toolbar: {…}}
-FloatingToolbars.tsx:41 🎪 shouldShowToolbar results: {section: false, element: true, text: false, image: false, form: false}
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
-selectionPriority.ts:84 📊 Priority 3: Element selection active, result: element
-selectionPriority.ts:95 📊 Final getActiveToolbar result: element
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
-selectionPriority.ts:58 📊 Returning cached result: element
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
-selectionPriority.ts:58 📊 Returning cached result: element
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
-selectionPriority.ts:58 📊 Returning cached result: element
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
-selectionPriority.ts:58 📊 Returning cached result: element
-ElementToolbar.tsx:67 🔧 ElementToolbar priority check: {isVisible: true, reason: 'element toolbar locked visible (element selected: headline) (no anchor registered)', condition: false}
-ElementToolbar.tsx:79 🔧 ElementToolbar toolbar state check: {toolbarType: undefined, toolbarVisible: undefined, toolbarTargetId: undefined, fullToolbarState: {…}}
-ElementToolbar.tsx:91 🔧 ElementToolbar proceeding to render with toolbar type: undefined
-ElementToolbar.tsx:67 🔧 ElementToolbar priority check: {isVisible: true, reason: 'element toolbar locked visible (element selected: headline) (no anchor registered)', condition: false}
-ElementToolbar.tsx:79 🔧 ElementToolbar toolbar state check: {toolbarType: undefined, toolbarVisible: undefined, toolbarTargetId: undefined, fullToolbarState: {…}}
-ElementToolbar.tsx:91 🔧 ElementToolbar proceeding to render with toolbar type: undefined
-FloatingToolbars.tsx:34 🎪🎪🎪 FloatingToolbars state changed: {activeToolbar: 'element', hasActiveToolbar: true, toolbarTarget: {…}, editorSelection: {…}, toolbar: {…}}
-FloatingToolbars.tsx:41 🎪 shouldShowToolbar results: {section: false, element: true, text: false, image: false, form: false}
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
-selectionPriority.ts:84 📊 Priority 3: Element selection active, result: element
-selectionPriority.ts:95 📊 Final getActiveToolbar result: element
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
-selectionPriority.ts:58 📊 Returning cached result: element
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
-selectionPriority.ts:58 📊 Returning cached result: element
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
-selectionPriority.ts:58 📊 Returning cached result: element
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
-selectionPriority.ts:58 📊 Returning cached result: element
-ElementToolbar.tsx:67 🔧 ElementToolbar priority check: {isVisible: true, reason: 'element toolbar locked visible (element selected: headline) (no anchor registered)', condition: false}
-ElementToolbar.tsx:79 🔧 ElementToolbar toolbar state check: {toolbarType: undefined, toolbarVisible: undefined, toolbarTargetId: undefined, fullToolbarState: {…}}
-ElementToolbar.tsx:91 🔧 ElementToolbar proceeding to render with toolbar type: undefined
-ElementToolbar.tsx:67 🔧 ElementToolbar priority check: {isVisible: true, reason: 'element toolbar locked visible (element selected: headline) (no anchor registered)', condition: false}
-ElementToolbar.tsx:79 🔧 ElementToolbar toolbar state check: {toolbarType: undefined, toolbarVisible: undefined, toolbarTargetId: undefined, fullToolbarState: {…}}
-ElementToolbar.tsx:91 🔧 ElementToolbar proceeding to render with toolbar type: undefined
-FloatingToolbars.tsx:34 🎪🎪🎪 FloatingToolbars state changed: {activeToolbar: 'element', hasActiveToolbar: true, toolbarTarget: {…}, editorSelection: {…}, toolbar: {…}}
-FloatingToolbars.tsx:41 🎪 shouldShowToolbar results: {section: false, element: true, text: false, image: false, form: false}
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
-selectionPriority.ts:84 📊 Priority 3: Element selection active, result: element
-selectionPriority.ts:95 📊 Final getActiveToolbar result: element
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
-selectionPriority.ts:58 📊 Returning cached result: element
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
-selectionPriority.ts:58 📊 Returning cached result: element
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
-selectionPriority.ts:58 📊 Returning cached result: element
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
-selectionPriority.ts:58 📊 Returning cached result: element
-ElementToolbar.tsx:67 🔧 ElementToolbar priority check: {isVisible: true, reason: 'element toolbar locked visible (element selected: headline) (no anchor registered)', condition: false}
-ElementToolbar.tsx:79 🔧 ElementToolbar toolbar state check: {toolbarType: undefined, toolbarVisible: undefined, toolbarTargetId: undefined, fullToolbarState: {…}}
-ElementToolbar.tsx:91 🔧 ElementToolbar proceeding to render with toolbar type: undefined
-ElementToolbar.tsx:67 🔧 ElementToolbar priority check: {isVisible: true, reason: 'element toolbar locked visible (element selected: headline) (no anchor registered)', condition: false}
-ElementToolbar.tsx:79 🔧 ElementToolbar toolbar state check: {toolbarType: undefined, toolbarVisible: undefined, toolbarTargetId: undefined, fullToolbarState: {…}}
-ElementToolbar.tsx:91 🔧 ElementToolbar proceeding to render with toolbar type: undefined
-FloatingToolbars.tsx:34 🎪🎪🎪 FloatingToolbars state changed: {activeToolbar: 'element', hasActiveToolbar: true, toolbarTarget: {…}, editorSelection: {…}, toolbar: {…}}
-FloatingToolbars.tsx:41 🎪 shouldShowToolbar results: {section: false, element: true, text: false, image: false, form: false}
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
-selectionPriority.ts:84 📊 Priority 3: Element selection active, result: element
-selectionPriority.ts:95 📊 Final getActiveToolbar result: element
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
-selectionPriority.ts:58 📊 Returning cached result: element
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
-selectionPriority.ts:58 📊 Returning cached result: element
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
-selectionPriority.ts:58 📊 Returning cached result: element
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
-selectionPriority.ts:58 📊 Returning cached result: element
-ElementToolbar.tsx:67 🔧 ElementToolbar priority check: {isVisible: true, reason: 'element toolbar locked visible (element selected: headline) (no anchor registered)', condition: false}
-ElementToolbar.tsx:79 🔧 ElementToolbar toolbar state check: {toolbarType: undefined, toolbarVisible: undefined, toolbarTargetId: undefined, fullToolbarState: {…}}
-ElementToolbar.tsx:91 🔧 ElementToolbar proceeding to render with toolbar type: undefined
-ElementToolbar.tsx:67 🔧 ElementToolbar priority check: {isVisible: true, reason: 'element toolbar locked visible (element selected: headline) (no anchor registered)', condition: false}
-ElementToolbar.tsx:79 🔧 ElementToolbar toolbar state check: {toolbarType: undefined, toolbarVisible: undefined, toolbarTargetId: undefined, fullToolbarState: {…}}
-ElementToolbar.tsx:91 🔧 ElementToolbar proceeding to render with toolbar type: undefined
-FloatingToolbars.tsx:34 🎪🎪🎪 FloatingToolbars state changed: {activeToolbar: 'element', hasActiveToolbar: true, toolbarTarget: {…}, editorSelection: {…}, toolbar: {…}}
-FloatingToolbars.tsx:41 🎪 shouldShowToolbar results: {section: false, element: true, text: false, image: false, form: false}
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
-selectionPriority.ts:84 📊 Priority 3: Element selection active, result: element
-selectionPriority.ts:95 📊 Final getActiveToolbar result: element
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
-selectionPriority.ts:58 📊 Returning cached result: element
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
-selectionPriority.ts:58 📊 Returning cached result: element
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
-selectionPriority.ts:58 📊 Returning cached result: element
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
-selectionPriority.ts:58 📊 Returning cached result: element
-ElementToolbar.tsx:67 🔧 ElementToolbar priority check: {isVisible: true, reason: 'element toolbar locked visible (element selected: headline) (no anchor registered)', condition: false}
-ElementToolbar.tsx:79 🔧 ElementToolbar toolbar state check: {toolbarType: undefined, toolbarVisible: undefined, toolbarTargetId: undefined, fullToolbarState: {…}}
-ElementToolbar.tsx:91 🔧 ElementToolbar proceeding to render with toolbar type: undefined
-ElementToolbar.tsx:67 🔧 ElementToolbar priority check: {isVisible: true, reason: 'element toolbar locked visible (element selected: headline) (no anchor registered)', condition: false}
-ElementToolbar.tsx:79 🔧 ElementToolbar toolbar state check: {toolbarType: undefined, toolbarVisible: undefined, toolbarTargetId: undefined, fullToolbarState: {…}}
-ElementToolbar.tsx:91 🔧 ElementToolbar proceeding to render with toolbar type: undefined
-FloatingToolbars.tsx:34 🎪🎪🎪 FloatingToolbars state changed: {activeToolbar: 'element', hasActiveToolbar: true, toolbarTarget: {…}, editorSelection: {…}, toolbar: {…}}
-FloatingToolbars.tsx:41 🎪 shouldShowToolbar results: {section: false, element: true, text: false, image: false, form: false}
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
-selectionPriority.ts:84 📊 Priority 3: Element selection active, result: element
-selectionPriority.ts:95 📊 Final getActiveToolbar result: element
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
-selectionPriority.ts:58 📊 Returning cached result: element
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
-selectionPriority.ts:58 📊 Returning cached result: element
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
-selectionPriority.ts:58 📊 Returning cached result: element
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
-selectionPriority.ts:58 📊 Returning cached result: element
-ElementToolbar.tsx:67 🔧 ElementToolbar priority check: {isVisible: true, reason: 'element toolbar locked visible (element selected: headline) (no anchor registered)', condition: false}
-ElementToolbar.tsx:79 🔧 ElementToolbar toolbar state check: {toolbarType: undefined, toolbarVisible: undefined, toolbarTargetId: undefined, fullToolbarState: {…}}
-ElementToolbar.tsx:91 🔧 ElementToolbar proceeding to render with toolbar type: undefined
-ElementToolbar.tsx:67 🔧 ElementToolbar priority check: {isVisible: true, reason: 'element toolbar locked visible (element selected: headline) (no anchor registered)', condition: false}
-ElementToolbar.tsx:79 🔧 ElementToolbar toolbar state check: {toolbarType: undefined, toolbarVisible: undefined, toolbarTargetId: undefined, fullToolbarState: {…}}
-ElementToolbar.tsx:91 🔧 ElementToolbar proceeding to render with toolbar type: undefined
-FloatingToolbars.tsx:34 🎪🎪🎪 FloatingToolbars state changed: {activeToolbar: 'element', hasActiveToolbar: true, toolbarTarget: {…}, editorSelection: {…}, toolbar: {…}}
-FloatingToolbars.tsx:41 🎪 shouldShowToolbar results: {section: false, element: true, text: false, image: false, form: false}
-interactionTracking.ts:142 📊 [2025-08-12T10:13:38.870Z] focusout:global {interactionSource: null, isComposing: false, target: 'H1', relatedTarget: undefined}
-InlineTextEditor.tsx:407 📝 InlineTextEditor handleBlur called
-interactionTracking.ts:142 📊 [2025-08-12T10:13:38.871Z] focusout {interactionSource: null, isComposing: false, relatedTarget: undefined}
-InlineTextEditor.tsx:281 📝 [1754993618871] exitTextEditingMode CALLED: {isEditing: true, isTextEditing: false, formattingInProgress: false, elementKey: 'headline', sectionId: 'hero', …}
-InlineTextEditor.tsx:308 📝 [1754993618871] Exiting text editing mode with hard cleanup
-uiActions.ts:227 📝 Text editing mode changed: {isEditing: false, element: undefined, currentToolbar: 'element'}
-InlineTextEditor.tsx:318 📝 [1754993618871] State updates triggered
-selectionGuard.ts:50 🛡️ Selection events force-restored
-InlineTextEditor.tsx:370 📝 [1754993618871] Hard cleanup completed on text editing mode exit
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
-selectionPriority.ts:84 📊 Priority 3: Element selection active, result: element
-selectionPriority.ts:95 📊 Final getActiveToolbar result: element
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
-selectionPriority.ts:58 📊 Returning cached result: element
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
-selectionPriority.ts:58 📊 Returning cached result: element
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
-selectionPriority.ts:58 📊 Returning cached result: element
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
-selectionPriority.ts:58 📊 Returning cached result: element
-ElementToolbar.tsx:67 🔧 ElementToolbar priority check: {isVisible: true, reason: 'element toolbar locked visible (element selected: headline) (no anchor registered)', condition: false}
-ElementToolbar.tsx:79 🔧 ElementToolbar toolbar state check: {toolbarType: undefined, toolbarVisible: undefined, toolbarTargetId: undefined, fullToolbarState: {…}}
-ElementToolbar.tsx:91 🔧 ElementToolbar proceeding to render with toolbar type: undefined
-ElementToolbar.tsx:67 🔧 ElementToolbar priority check: {isVisible: true, reason: 'element toolbar locked visible (element selected: headline) (no anchor registered)', condition: false}
-ElementToolbar.tsx:79 🔧 ElementToolbar toolbar state check: {toolbarType: undefined, toolbarVisible: undefined, toolbarTargetId: undefined, fullToolbarState: {…}}
-ElementToolbar.tsx:91 🔧 ElementToolbar proceeding to render with toolbar type: undefined
-useGlobalSelectionHandler.ts:87 🧹 Global selection handler cleaned up {editorId: 'editor-hero-headline'}
-FloatingToolbars.tsx:34 🎪🎪🎪 FloatingToolbars state changed: {activeToolbar: 'element', hasActiveToolbar: true, toolbarTarget: {…}, editorSelection: {…}, toolbar: {…}}
-FloatingToolbars.tsx:41 🎪 shouldShowToolbar results: {section: false, element: true, text: false, image: false, form: false}
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
-selectionPriority.ts:84 📊 Priority 3: Element selection active, result: element
-selectionPriority.ts:95 📊 Final getActiveToolbar result: element
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
-selectionPriority.ts:58 📊 Returning cached result: element
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
-selectionPriority.ts:58 📊 Returning cached result: element
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
-selectionPriority.ts:58 📊 Returning cached result: element
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
-selectionPriority.ts:58 📊 Returning cached result: element
-ElementToolbar.tsx:67 🔧 ElementToolbar priority check: {isVisible: true, reason: 'element toolbar locked visible (element selected: headline) (no anchor registered)', condition: false}
-ElementToolbar.tsx:79 🔧 ElementToolbar toolbar state check: {toolbarType: undefined, toolbarVisible: undefined, toolbarTargetId: undefined, fullToolbarState: {…}}
-ElementToolbar.tsx:91 🔧 ElementToolbar proceeding to render with toolbar type: undefined
-ElementToolbar.tsx:67 🔧 ElementToolbar priority check: {isVisible: true, reason: 'element toolbar locked visible (element selected: headline) (no anchor registered)', condition: false}
-ElementToolbar.tsx:79 🔧 ElementToolbar toolbar state check: {toolbarType: undefined, toolbarVisible: undefined, toolbarTargetId: undefined, fullToolbarState: {…}}
-ElementToolbar.tsx:91 🔧 ElementToolbar proceeding to render with toolbar type: undefined
-FloatingToolbars.tsx:34 🎪🎪🎪 FloatingToolbars state changed: {activeToolbar: 'element', hasActiveToolbar: true, toolbarTarget: {…}, editorSelection: {…}, toolbar: {…}}
-FloatingToolbars.tsx:41 🎪 shouldShowToolbar results: {section: false, element: true, text: false, image: false, form: false}
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
-selectionPriority.ts:84 📊 Priority 3: Element selection active, result: element
-selectionPriority.ts:95 📊 Final getActiveToolbar result: element
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
-selectionPriority.ts:58 📊 Returning cached result: element
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
-selectionPriority.ts:58 📊 Returning cached result: element
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
-selectionPriority.ts:58 📊 Returning cached result: element
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
-selectionPriority.ts:58 📊 Returning cached result: element
-ElementToolbar.tsx:67 🔧 ElementToolbar priority check: {isVisible: true, reason: 'element toolbar locked visible (element selected: headline) (no anchor registered)', condition: false}
-ElementToolbar.tsx:79 🔧 ElementToolbar toolbar state check: {toolbarType: undefined, toolbarVisible: undefined, toolbarTargetId: undefined, fullToolbarState: {…}}
-ElementToolbar.tsx:91 🔧 ElementToolbar proceeding to render with toolbar type: undefined
-ElementToolbar.tsx:67 🔧 ElementToolbar priority check: {isVisible: true, reason: 'element toolbar locked visible (element selected: headline) (no anchor registered)', condition: false}
-ElementToolbar.tsx:79 🔧 ElementToolbar toolbar state check: {toolbarType: undefined, toolbarVisible: undefined, toolbarTargetId: undefined, fullToolbarState: {…}}
-ElementToolbar.tsx:91 🔧 ElementToolbar proceeding to render with toolbar type: undefined
-FloatingToolbars.tsx:34 🎪🎪🎪 FloatingToolbars state changed: {activeToolbar: 'element', hasActiveToolbar: true, toolbarTarget: {…}, editorSelection: {…}, toolbar: {…}}
-FloatingToolbars.tsx:41 🎪 shouldShowToolbar results: {section: false, element: true, text: false, image: false, form: false}
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
-selectionPriority.ts:84 📊 Priority 3: Element selection active, result: element
-selectionPriority.ts:95 📊 Final getActiveToolbar result: element
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
-selectionPriority.ts:58 📊 Returning cached result: element
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
-selectionPriority.ts:58 📊 Returning cached result: element
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
-selectionPriority.ts:58 📊 Returning cached result: element
-selectionPriority.ts:43 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
-selectionPriority.ts:58 📊 Returning cached result: element
-ElementToolbar.tsx:67 🔧 ElementToolbar priority check: {isVisible: true, reason: 'element toolbar locked visible (element selected: headline) (no anchor registered)', condition: false}
-ElementToolbar.tsx:79 🔧 ElementToolbar toolbar state check: {toolbarType: undefined, toolbarVisible: undefined, toolbarTargetId: undefined, fullToolbarState: {…}}
- 🔧 ElementToolbar proceeding to render with toolbar type: undefined
- 🔧 ElementToolbar priority check: {isVisible: true, reason: 'element toolbar locked visible (element selected: headline) (no anchor registered)', condition: false}
- 🔧 ElementToolbar toolbar state check: {toolbarType: undefined, toolbarVisible: undefined, toolbarTargetId: undefined, fullToolbarState: {…}}
- 🔧 ElementToolbar proceeding to render with toolbar type: undefined
- 🎪🎪🎪 FloatingToolbars state changed: {activeToolbar: 'element', hasActiveToolbar: true, toolbarTarget: {…}, editorSelection: {…}, toolbar: {…}}
- 🎪 shouldShowToolbar results: {section: false, element: true, text: false, image: false, form: false}
- 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
- 📊 Priority 3: Element selection active, result: element
- 📊 Final getActiveToolbar result: element
- 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
- 📊 Returning cached result: element
- 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
- 📊 Returning cached result: element
- 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
- 📊 Returning cached result: element
- 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
- 📊 Returning cached result: element
- 🔧 ElementToolbar priority check: {isVisible: true, reason: 'element toolbar locked visible (element selected: headline) (no anchor registered)', condition: false}
- 🔧 ElementToolbar toolbar state check: {toolbarType: undefined, toolbarVisible: undefined, toolbarTargetId: undefined, fullToolbarState: {…}}
- 🔧 ElementToolbar proceeding to render with toolbar type: undefined
- 🔧 ElementToolbar priority check: {isVisible: true, reason: 'element toolbar locked visible (element selected: headline) (no anchor registered)', condition: false}
- 🔧 ElementToolbar toolbar state check: {toolbarType: undefined, toolbarVisible: undefined, toolbarTargetId: undefined, fullToolbarState: {…}}
- 🔧 ElementToolbar proceeding to render with toolbar type: undefined
- 🎪🎪🎪 FloatingToolbars state changed: {activeToolbar: 'element', hasActiveToolbar: true, toolbarTarget: {…}, editorSelection: {…}, toolbar: {…}}
- 🎪 shouldShowToolbar results: {section: false, element: true, text: false, image: false, form: false}
- 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
- 📊 Priority 3: Element selection active, result: element
- 📊 Final getActiveToolbar result: element
- 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
- 📊 Returning cached result: element
- 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
- 📊 Returning cached result: element
- 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
- 📊 Returning cached result: element
- 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
- 📊 Returning cached result: element
- 🔧 ElementToolbar priority check: {isVisible: true, reason: 'element toolbar locked visible (element selected: headline) (no anchor registered)', condition: false}
- 🔧 ElementToolbar toolbar state check: {toolbarType: undefined, toolbarVisible: undefined, toolbarTargetId: undefined, fullToolbarState: {…}}
- 🔧 ElementToolbar proceeding to render with toolbar type: undefined
- 🔧 ElementToolbar priority check: {isVisible: true, reason: 'element toolbar locked visible (element selected: headline) (no anchor registered)', condition: false}
- 🔧 ElementToolbar toolbar state check: {toolbarType: undefined, toolbarVisible: undefined, toolbarTargetId: undefined, fullToolbarState: {…}}
- 🔧 ElementToolbar proceeding to render with toolbar type: undefined
- 🎪🎪🎪 FloatingToolbars state changed: {activeToolbar: 'element', hasActiveToolbar: true, toolbarTarget: {…}, editorSelection: {…}, toolbar: {…}}
- 🎪 shouldShowToolbar results: {section: false, element: true, text: false, image: false, form: false}
- 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
- 📊 Priority 3: Element selection active, result: element
- 📊 Final getActiveToolbar result: element
- 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
- 📊 Returning cached result: element
- 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
- 📊 Returning cached result: element
- 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
- 📊 Returning cached result: element
- 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
- 📊 Returning cached result: element
- 🔧 ElementToolbar priority check: {isVisible: true, reason: 'element toolbar locked visible (element selected: headline) (no anchor registered)', condition: false}
- 🔧 ElementToolbar toolbar state check: {toolbarType: undefined, toolbarVisible: undefined, toolbarTargetId: undefined, fullToolbarState: {…}}
- 🔧 ElementToolbar proceeding to render with toolbar type: undefined
- 🔧 ElementToolbar priority check: {isVisible: true, reason: 'element toolbar locked visible (element selected: headline) (no anchor registered)', condition: false}
- 🔧 ElementToolbar toolbar state check: {toolbarType: undefined, toolbarVisible: undefined, toolbarTargetId: undefined, fullToolbarState: {…}}
- 🔧 ElementToolbar proceeding to render with toolbar type: undefined
- 🎪🎪🎪 FloatingToolbars state changed: {activeToolbar: 'element', hasActiveToolbar: true, toolbarTarget: {…}, editorSelection: {…}, toolbar: {…}}
- 🎪 shouldShowToolbar results: {section: false, element: true, text: false, image: false, form: false}
- 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
- 📊 Priority 3: Element selection active, result: element
- 📊 Final getActiveToolbar result: element
- 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
- 📊 Returning cached result: element
- 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
- 📊 Returning cached result: element
- 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
- 📊 Returning cached result: element
- 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
- 📊 Returning cached result: element
- 🔧 ElementToolbar priority check: {isVisible: true, reason: 'element toolbar locked visible (element selected: headline) (no anchor registered)', condition: false}
- 🔧 ElementToolbar toolbar state check: {toolbarType: undefined, toolbarVisible: undefined, toolbarTargetId: undefined, fullToolbarState: {…}}
- 🔧 ElementToolbar proceeding to render with toolbar type: undefined
- 🔧 ElementToolbar priority check: {isVisible: true, reason: 'element toolbar locked visible (element selected: headline) (no anchor registered)', condition: false}
- 🔧 ElementToolbar toolbar state check: {toolbarType: undefined, toolbarVisible: undefined, toolbarTargetId: undefined, fullToolbarState: {…}}
- 🔧 ElementToolbar proceeding to render with toolbar type: undefined
- 🎪🎪🎪 FloatingToolbars state changed: {activeToolbar: 'element', hasActiveToolbar: true, toolbarTarget: {…}, editorSelection: {…}, toolbar: {…}}
- 🎪 shouldShowToolbar results: {section: false, element: true, text: false, image: false, form: false}
- 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
- 📊 Priority 3: Element selection active, result: element
- 📊 Final getActiveToolbar result: element
- 🔧 ElementToolbar priority check: {isVisible: true, reason: 'element toolbar locked visible (element selected: headline) (no anchor registered)', condition: false}
- 🔧 ElementToolbar toolbar state check: {toolbarType: undefined, toolbarVisible: undefined, toolbarTargetId: undefined, fullToolbarState: {…}}
- 🔧 ElementToolbar proceeding to render with toolbar type: undefined
- 🔧 ElementToolbar priority check: {isVisible: true, reason: 'element toolbar locked visible (element selected: headline) (no anchor registered)', condition: false}
- 🔧 ElementToolbar toolbar state check: {toolbarType: undefined, toolbarVisible: undefined, toolbarTargetId: undefined, fullToolbarState: {…}}
- 🔧 ElementToolbar proceeding to render with toolbar type: undefined
- 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
- 📊 Returning cached result: element
- 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
- 📊 Returning cached result: element
- 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
- 📊 Returning cached result: element
- 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
- 📊 Returning cached result: element
- 🔧 ElementToolbar priority check: {isVisible: true, reason: 'element toolbar locked visible (element selected: headline) (no anchor registered)', condition: false}
- 🔧 ElementToolbar toolbar state check: {toolbarType: undefined, toolbarVisible: undefined, toolbarTargetId: undefined, fullToolbarState: {…}}
- 🔧 ElementToolbar proceeding to render with toolbar type: undefined
- 🔧 ElementToolbar priority check: {isVisible: true, reason: 'element toolbar locked visible (element selected: headline) (no anchor registered)', condition: false}
- 🔧 ElementToolbar toolbar state check: {toolbarType: undefined, toolbarVisible: undefined, toolbarTargetId: undefined, fullToolbarState: {…}}
- 🔧 ElementToolbar proceeding to render with toolbar type: undefined
- 🎪🎪🎪 FloatingToolbars state changed: {activeToolbar: 'element', hasActiveToolbar: true, toolbarTarget: {…}, editorSelection: {…}, toolbar: {…}}
- 🎪 shouldShowToolbar results: {section: false, element: true, text: false, image: false, form: false}
- 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
- 📊 Priority 3: Element selection active, result: element
- 📊 Final getActiveToolbar result: element
- 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
- 📊 Returning cached result: element
- 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
- 📊 Returning cached result: element
- 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
- 📊 Returning cached result: element
- 📊 getActiveToolbar called with selection: {mode: 'edit', isTextEditing: false, textEditingElement: undefined, selectedElement: {…}, selectedSection: 'hero', …}
- 📊 Returning cached result: element
- 🔧 ElementToolbar priority check: {isVisible: true, reason: 'element toolbar locked visible (element selected: headline) (no anchor registered)', condition: false}
- 🔧 ElementToolbar toolbar state check: {toolbarType: undefined, toolbarVisible: undefined, toolbarTargetId: undefined, fullToolbarState: {…}}
- 🔧 ElementToolbar proceeding to render with toolbar type: undefined
- 🔧 ElementToolbar priority check: {isVisible: true, reason: 'element toolbar locked visible (element selected: headline) (no anchor registered)', condition: false}
- 🔧 ElementToolbar toolbar state check: {toolbarType: undefined, toolbarVisible: undefined, toolbarTargetId: undefined, fullToolbarState: {…}}
- 🔧 ElementToolbar proceeding to render with toolbar type: undefined
- 🎪🎪🎪 FloatingToolbars state changed: {activeToolbar: 'element', hasActiveToolbar: true, toolbarTarget: {…}, editorSelection: {…}, toolbar: {…}}
- 🎪 shouldShowToolbar results: {section: false, element: true, text: false, image: false, form: false}
+app-index.js:33 ❌ CRITICAL: Section hero not found in content store! This should not happen.
+window.console.error @ app-index.js:33
+app-index.js:33 ❌ CRITICAL: Section problem not found in content store! This should not happen.
+window.console.error @ app-index.js:33
+app-index.js:33 ❌ CRITICAL: Section uniqueMechanism not found in content store! This should not happen.
+window.console.error @ app-index.js:33
+app-index.js:33 ❌ CRITICAL: Section results not found in content store! This should not happen.
+window.console.error @ app-index.js:33
+app-index.js:33 ❌ CRITICAL: Section testimonials not found in content store! This should not happen.
+window.console.error @ app-index.js:33
+app-index.js:33 ❌ CRITICAL: Section objectionHandling not found in content store! This should not happen.
+window.console.error @ app-index.js:33
+app-index.js:33 ❌ CRITICAL: Section security not found in content store! This should not happen.
+window.console.error @ app-index.js:33
+app-index.js:33 ❌ CRITICAL: Section cta not found in content store! This should not happen.
+window.console.error @ app-index.js:33
+app-index.js:33 Warning: Cannot update a component (`HotReload`) while rendering a different component (`VariableBackgroundRenderer`). To locate the bad setState() call inside `VariableBackgroundRenderer`, follow the stack trace as described in https://reactjs.org/link/setstate-in-render
+    at VariableBackgroundRenderer (webpack-internal:///(app-pages-browser)/./src/modules/Design/ColorSystem/VariableBackgroundRenderer.tsx:33:11)
+    at main
+    at div
+    at VariableThemeInjector (webpack-internal:///(app-pages-browser)/./src/modules/Design/ColorSystem/VariableThemeInjector.tsx:34:11)
+    at CSSVariableErrorBoundary (webpack-internal:///(app-pages-browser)/./src/components/CSSVariableErrorBoundary.tsx:259:9)
+    at LandingPageRenderer (webpack-internal:///(app-pages-browser)/./src/modules/generatedLanding/LandingPageRenderer.tsx:137:11)
+    at div
+    at div
+    at PageRevealAnimation (webpack-internal:///(app-pages-browser)/./src/app/generate/[token]/components/PageRevealAnimation.tsx:17:11)
+    at div
+    at GeneratePageContent (webpack-internal:///(app-pages-browser)/./src/app/generate/[token]/page.tsx:102:11)
+    at EditErrorBoundary (webpack-internal:///(app-pages-browser)/./src/components/EditErrorBoundary.tsx:85:9)
+    at EditProvider (webpack-internal:///(app-pages-browser)/./src/components/EditProvider.tsx:133:11)
+    at GeneratePage (webpack-internal:///(app-pages-browser)/./src/app/generate/[token]/page.tsx:27:78)
+    at ClientPageRoot (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/client-page.js:14:11)
+    at InnerLayoutRouter (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:243:11)
+    at RedirectErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/redirect-boundary.js:74:9)
+    at RedirectBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/redirect-boundary.js:82:11)
+    at NotFoundBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/not-found-boundary.js:84:11)
+    at LoadingBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:349:11)
+    at ErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/error-boundary.js:160:11)
+    at InnerScrollAndFocusHandler (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:153:9)
+    at ScrollAndFocusHandler (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:228:11)
+    at RenderFromTemplateContext (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/render-from-template-context.js:16:44)
+    at OuterLayoutRouter (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:370:11)
+    at InnerLayoutRouter (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:243:11)
+    at RedirectErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/redirect-boundary.js:74:9)
+    at RedirectBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/redirect-boundary.js:82:11)
+    at NotFoundBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/not-found-boundary.js:84:11)
+    at LoadingBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:349:11)
+    at ErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/error-boundary.js:160:11)
+    at InnerScrollAndFocusHandler (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:153:9)
+    at ScrollAndFocusHandler (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:228:11)
+    at RenderFromTemplateContext (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/render-from-template-context.js:16:44)
+    at OuterLayoutRouter (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:370:11)
+    at InnerLayoutRouter (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:243:11)
+    at RedirectErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/redirect-boundary.js:74:9)
+    at RedirectBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/redirect-boundary.js:82:11)
+    at NotFoundErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/not-found-boundary.js:76:9)
+    at NotFoundBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/not-found-boundary.js:84:11)
+    at LoadingBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:349:11)
+    at ErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/error-boundary.js:160:11)
+    at InnerScrollAndFocusHandler (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:153:9)
+    at ScrollAndFocusHandler (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:228:11)
+    at RenderFromTemplateContext (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/render-from-template-context.js:16:44)
+    at OuterLayoutRouter (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:370:11)
+    at PostHogProvider (webpack-internal:///(app-pages-browser)/./node_modules/posthog-js/react/dist/esm/index.js:51:23)
+    at PostHogProvider (webpack-internal:///(app-pages-browser)/./src/providers/ph-provider.tsx:20:11)
+    at Provider (webpack-internal:///(app-pages-browser)/./node_modules/@radix-ui/react-context/dist/index.mjs:34:15)
+    at TooltipProvider (webpack-internal:///(app-pages-browser)/./node_modules/@radix-ui/react-tooltip/dist/index.mjs:58:13)
+    at body
+    at html
+    at SWRConfig (webpack-internal:///(app-pages-browser)/./node_modules/swr/dist/_internal/config-context-client-v7VOFo66.mjs:549:13)
+    at OrganizationProvider (webpack-internal:///(app-pages-browser)/./node_modules/@clerk/shared/dist/react/index.mjs:114:3)
+    at ClerkContextProvider (webpack-internal:///(app-pages-browser)/./node_modules/@clerk/clerk-react/dist/index.mjs:2207:11)
+    at ClerkProviderBase (webpack-internal:///(app-pages-browser)/./node_modules/@clerk/clerk-react/dist/index.mjs:2293:11)
+    at Hoc (webpack-internal:///(app-pages-browser)/./node_modules/@clerk/clerk-react/dist/index.mjs:118:5)
+    at ClerkNextOptionsProvider (webpack-internal:///(app-pages-browser)/./node_modules/@clerk/nextjs/dist/esm/client-boundary/NextOptionsContext.js:17:11)
+    at NextClientClerkProvider (webpack-internal:///(app-pages-browser)/./node_modules/@clerk/nextjs/dist/esm/app-router/client/ClerkProvider.js:60:13)
+    at ClientClerkProvider (webpack-internal:///(app-pages-browser)/./node_modules/@clerk/nextjs/dist/esm/app-router/client/ClerkProvider.js:127:13)
+    at ClerkProvider (Server)
+    at RootLayout (Server)
+    at RedirectErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/redirect-boundary.js:74:9)
+    at RedirectBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/redirect-boundary.js:82:11)
+    at NotFoundErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/not-found-boundary.js:76:9)
+    at NotFoundBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/not-found-boundary.js:84:11)
+    at DevRootNotFoundBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/dev-root-not-found-boundary.js:33:11)
+    at ReactDevOverlay (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/react-dev-overlay/app/ReactDevOverlay.js:87:9)
+    at HotReload (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/react-dev-overlay/app/hot-reloader-client.js:321:11)
+    at Router (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/app-router.js:207:11)
+    at ErrorBoundaryHandler (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/error-boundary.js:113:9)
+    at ErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/error-boundary.js:160:11)
+    at AppRouter (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/app-router.js:585:13)
+    at ServerRoot (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/app-index.js:112:27)
+    at Root (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/app-index.js:117:11)
+    at ReactDevOverlay (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/react-dev-overlay/app/ReactDevOverlay.js:87:9)
+window.console.error @ app-index.js:33
+VariableThemeInjector.tsx:292 Uncaught ReferenceError: useMigrationFeatureFlags is not defined
+    at useVariableTheme (VariableThemeInjector.tsx:292:17)
+    at VariableBackgroundRenderer (VariableBackgroundRenderer.tsx:50:67)
+    at renderWithHooks (react-dom.development.js:11121:18)
+    at mountIndeterminateComponent (react-dom.development.js:16869:13)
+    at beginWork$1 (react-dom.development.js:18458:16)
+    at HTMLUnknownElement.callCallback (react-dom.development.js:20565:14)
+    at Object.invokeGuardedCallbackImpl (react-dom.development.js:20614:16)
+    at invokeGuardedCallback (react-dom.development.js:20689:29)
+    at beginWork (react-dom.development.js:26949:7)
+    at performUnitOfWork (react-dom.development.js:25748:12)
+    at workLoopSync (react-dom.development.js:25464:5)
+    at renderRootSync (react-dom.development.js:25419:7)
+    at performConcurrentWorkOnRoot (react-dom.development.js:24504:74)
+    at workLoop (scheduler.development.js:256:34)
+    at flushWork (scheduler.development.js:225:14)
+    at MessagePort.performWorkUntilDeadline (scheduler.development.js:534:21)
+VariableThemeInjector.tsx:292 Uncaught ReferenceError: useMigrationFeatureFlags is not defined
+    at useVariableTheme (VariableThemeInjector.tsx:292:17)
+    at VariableBackgroundRenderer (VariableBackgroundRenderer.tsx:50:67)
+    at renderWithHooks (react-dom.development.js:11121:18)
+    at mountIndeterminateComponent (react-dom.development.js:16869:13)
+    at beginWork$1 (react-dom.development.js:18458:16)
+    at HTMLUnknownElement.callCallback (react-dom.development.js:20565:14)
+    at Object.invokeGuardedCallbackImpl (react-dom.development.js:20614:16)
+    at invokeGuardedCallback (react-dom.development.js:20689:29)
+    at beginWork (react-dom.development.js:26949:7)
+    at performUnitOfWork (react-dom.development.js:25748:12)
+    at workLoopSync (react-dom.development.js:25464:5)
+    at renderRootSync (react-dom.development.js:25419:7)
+    at performConcurrentWorkOnRoot (react-dom.development.js:24504:74)
+    at workLoop (scheduler.development.js:256:34)
+    at flushWork (scheduler.development.js:225:14)
+    at MessagePort.performWorkUntilDeadline (scheduler.development.js:534:21)
+VariableThemeInjector.tsx:292 Uncaught ReferenceError: useMigrationFeatureFlags is not defined
+    at useVariableTheme (VariableThemeInjector.tsx:292:17)
+    at VariableBackgroundRenderer (VariableBackgroundRenderer.tsx:50:67)
+    at renderWithHooks (react-dom.development.js:11121:18)
+    at mountIndeterminateComponent (react-dom.development.js:16869:13)
+    at beginWork$1 (react-dom.development.js:18458:16)
+    at HTMLUnknownElement.callCallback (react-dom.development.js:20565:14)
+    at Object.invokeGuardedCallbackImpl (react-dom.development.js:20614:16)
+    at invokeGuardedCallback (react-dom.development.js:20689:29)
+    at beginWork (react-dom.development.js:26949:7)
+    at performUnitOfWork (react-dom.development.js:25748:12)
+    at workLoopSync (react-dom.development.js:25464:5)
+    at renderRootSync (react-dom.development.js:25419:7)
+    at recoverFromConcurrentError (react-dom.development.js:24597:20)
+    at performConcurrentWorkOnRoot (react-dom.development.js:24542:26)
+    at workLoop (scheduler.development.js:256:34)
+    at flushWork (scheduler.development.js:225:14)
+    at MessagePort.performWorkUntilDeadline (scheduler.development.js:534:21)
+VariableThemeInjector.tsx:292 Uncaught ReferenceError: useMigrationFeatureFlags is not defined
+    at useVariableTheme (VariableThemeInjector.tsx:292:17)
+    at VariableBackgroundRenderer (VariableBackgroundRenderer.tsx:50:67)
+    at renderWithHooks (react-dom.development.js:11121:18)
+    at mountIndeterminateComponent (react-dom.development.js:16869:13)
+    at beginWork$1 (react-dom.development.js:18458:16)
+    at HTMLUnknownElement.callCallback (react-dom.development.js:20565:14)
+    at Object.invokeGuardedCallbackImpl (react-dom.development.js:20614:16)
+    at invokeGuardedCallback (react-dom.development.js:20689:29)
+    at beginWork (react-dom.development.js:26949:7)
+    at performUnitOfWork (react-dom.development.js:25748:12)
+    at workLoopSync (react-dom.development.js:25464:5)
+    at renderRootSync (react-dom.development.js:25419:7)
+    at recoverFromConcurrentError (react-dom.development.js:24597:20)
+    at performConcurrentWorkOnRoot (react-dom.development.js:24542:26)
+    at workLoop (scheduler.development.js:256:34)
+    at flushWork (scheduler.development.js:225:14)
+    at MessagePort.performWorkUntilDeadline (scheduler.development.js:534:21)
+app-index.js:33 The above error occurred in the <VariableBackgroundRenderer> component:
+
+    at VariableBackgroundRenderer (webpack-internal:///(app-pages-browser)/./src/modules/Design/ColorSystem/VariableBackgroundRenderer.tsx:33:11)
+    at main
+    at div
+    at VariableThemeInjector (webpack-internal:///(app-pages-browser)/./src/modules/Design/ColorSystem/VariableThemeInjector.tsx:34:11)
+    at div
+    at div
+    at CSSVariableErrorBoundary (webpack-internal:///(app-pages-browser)/./src/components/CSSVariableErrorBoundary.tsx:259:9)
+    at LandingPageRenderer (webpack-internal:///(app-pages-browser)/./src/modules/generatedLanding/LandingPageRenderer.tsx:137:11)
+    at div
+    at div
+    at PageRevealAnimation (webpack-internal:///(app-pages-browser)/./src/app/generate/[token]/components/PageRevealAnimation.tsx:17:11)
+    at div
+    at GeneratePageContent (webpack-internal:///(app-pages-browser)/./src/app/generate/[token]/page.tsx:102:11)
+    at EditErrorBoundary (webpack-internal:///(app-pages-browser)/./src/components/EditErrorBoundary.tsx:85:9)
+    at EditProvider (webpack-internal:///(app-pages-browser)/./src/components/EditProvider.tsx:133:11)
+    at GeneratePage (webpack-internal:///(app-pages-browser)/./src/app/generate/[token]/page.tsx:27:78)
+    at ClientPageRoot (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/client-page.js:14:11)
+    at InnerLayoutRouter (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:243:11)
+    at RedirectErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/redirect-boundary.js:74:9)
+    at RedirectBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/redirect-boundary.js:82:11)
+    at NotFoundBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/not-found-boundary.js:84:11)
+    at LoadingBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:349:11)
+    at ErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/error-boundary.js:160:11)
+    at InnerScrollAndFocusHandler (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:153:9)
+    at ScrollAndFocusHandler (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:228:11)
+    at RenderFromTemplateContext (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/render-from-template-context.js:16:44)
+    at OuterLayoutRouter (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:370:11)
+    at InnerLayoutRouter (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:243:11)
+    at RedirectErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/redirect-boundary.js:74:9)
+    at RedirectBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/redirect-boundary.js:82:11)
+    at NotFoundBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/not-found-boundary.js:84:11)
+    at LoadingBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:349:11)
+    at ErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/error-boundary.js:160:11)
+    at InnerScrollAndFocusHandler (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:153:9)
+    at ScrollAndFocusHandler (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:228:11)
+    at RenderFromTemplateContext (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/render-from-template-context.js:16:44)
+    at OuterLayoutRouter (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:370:11)
+    at InnerLayoutRouter (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:243:11)
+    at RedirectErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/redirect-boundary.js:74:9)
+    at RedirectBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/redirect-boundary.js:82:11)
+    at NotFoundErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/not-found-boundary.js:76:9)
+    at NotFoundBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/not-found-boundary.js:84:11)
+    at LoadingBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:349:11)
+    at ErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/error-boundary.js:160:11)
+    at InnerScrollAndFocusHandler (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:153:9)
+    at ScrollAndFocusHandler (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:228:11)
+    at RenderFromTemplateContext (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/render-from-template-context.js:16:44)
+    at OuterLayoutRouter (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:370:11)
+    at PostHogProvider (webpack-internal:///(app-pages-browser)/./node_modules/posthog-js/react/dist/esm/index.js:51:23)
+    at PostHogProvider (webpack-internal:///(app-pages-browser)/./src/providers/ph-provider.tsx:20:11)
+    at Provider (webpack-internal:///(app-pages-browser)/./node_modules/@radix-ui/react-context/dist/index.mjs:34:15)
+    at TooltipProvider (webpack-internal:///(app-pages-browser)/./node_modules/@radix-ui/react-tooltip/dist/index.mjs:58:13)
+    at body
+    at html
+    at SWRConfig (webpack-internal:///(app-pages-browser)/./node_modules/swr/dist/_internal/config-context-client-v7VOFo66.mjs:549:13)
+    at OrganizationProvider (webpack-internal:///(app-pages-browser)/./node_modules/@clerk/shared/dist/react/index.mjs:114:3)
+    at ClerkContextProvider (webpack-internal:///(app-pages-browser)/./node_modules/@clerk/clerk-react/dist/index.mjs:2207:11)
+    at ClerkProviderBase (webpack-internal:///(app-pages-browser)/./node_modules/@clerk/clerk-react/dist/index.mjs:2293:11)
+    at Hoc (webpack-internal:///(app-pages-browser)/./node_modules/@clerk/clerk-react/dist/index.mjs:118:5)
+    at ClerkNextOptionsProvider (webpack-internal:///(app-pages-browser)/./node_modules/@clerk/nextjs/dist/esm/client-boundary/NextOptionsContext.js:17:11)
+    at NextClientClerkProvider (webpack-internal:///(app-pages-browser)/./node_modules/@clerk/nextjs/dist/esm/app-router/client/ClerkProvider.js:60:13)
+    at ClientClerkProvider (webpack-internal:///(app-pages-browser)/./node_modules/@clerk/nextjs/dist/esm/app-router/client/ClerkProvider.js:127:13)
+    at ClerkProvider (Server)
+    at RootLayout (Server)
+    at RedirectErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/redirect-boundary.js:74:9)
+    at RedirectBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/redirect-boundary.js:82:11)
+    at NotFoundErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/not-found-boundary.js:76:9)
+    at NotFoundBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/not-found-boundary.js:84:11)
+    at DevRootNotFoundBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/dev-root-not-found-boundary.js:33:11)
+    at ReactDevOverlay (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/react-dev-overlay/app/ReactDevOverlay.js:87:9)
+    at HotReload (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/react-dev-overlay/app/hot-reloader-client.js:321:11)
+    at Router (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/app-router.js:207:11)
+    at ErrorBoundaryHandler (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/error-boundary.js:113:9)
+    at ErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/error-boundary.js:160:11)
+    at AppRouter (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/app-router.js:585:13)
+    at ServerRoot (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/app-index.js:112:27)
+    at Root (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/app-index.js:117:11)
+    at ReactDevOverlay (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/react-dev-overlay/app/ReactDevOverlay.js:87:9)
+
+React will try to recreate this component tree from scratch using the error boundary you provided, EditErrorBoundary.
+window.console.error @ app-index.js:33
+app-index.js:33 🚨 EditErrorBoundary caught an error: Object
+window.console.error @ app-index.js:33
+app-index.js:33 🚨 EditProvider error boundary caught: Object
+window.console.error @ app-index.js:33
+VariableThemeInjector.tsx:292 Uncaught ReferenceError: useMigrationFeatureFlags is not defined
+    at useVariableTheme (VariableThemeInjector.tsx:292:17)
+    at VariableBackgroundRenderer (VariableBackgroundRenderer.tsx:50:67)
+    at renderWithHooks (react-dom.development.js:11121:18)
+    at mountIndeterminateComponent (react-dom.development.js:16869:13)
+    at beginWork$1 (react-dom.development.js:18458:16)
+    at HTMLUnknownElement.callCallback (react-dom.development.js:20565:14)
+    at Object.invokeGuardedCallbackImpl (react-dom.development.js:20614:16)
+    at invokeGuardedCallback (react-dom.development.js:20689:29)
+    at beginWork (react-dom.development.js:26949:7)
+    at performUnitOfWork (react-dom.development.js:25748:12)
+    at workLoopSync (react-dom.development.js:25464:5)
+    at renderRootSync (react-dom.development.js:25419:7)
+    at performConcurrentWorkOnRoot (react-dom.development.js:24504:74)
+    at workLoop (scheduler.development.js:256:34)
+    at flushWork (scheduler.development.js:225:14)
+    at MessagePort.performWorkUntilDeadline (scheduler.development.js:534:21)
+VariableThemeInjector.tsx:292 Uncaught ReferenceError: useMigrationFeatureFlags is not defined
+    at useVariableTheme (VariableThemeInjector.tsx:292:17)
+    at VariableBackgroundRenderer (VariableBackgroundRenderer.tsx:50:67)
+    at renderWithHooks (react-dom.development.js:11121:18)
+    at mountIndeterminateComponent (react-dom.development.js:16869:13)
+    at beginWork$1 (react-dom.development.js:18458:16)
+    at HTMLUnknownElement.callCallback (react-dom.development.js:20565:14)
+    at Object.invokeGuardedCallbackImpl (react-dom.development.js:20614:16)
+    at invokeGuardedCallback (react-dom.development.js:20689:29)
+    at beginWork (react-dom.development.js:26949:7)
+    at performUnitOfWork (react-dom.development.js:25748:12)
+    at workLoopSync (react-dom.development.js:25464:5)
+    at renderRootSync (react-dom.development.js:25419:7)
+    at performConcurrentWorkOnRoot (react-dom.development.js:24504:74)
+    at workLoop (scheduler.development.js:256:34)
+    at flushWork (scheduler.development.js:225:14)
+    at MessagePort.performWorkUntilDeadline (scheduler.development.js:534:21)
+VariableThemeInjector.tsx:292 Uncaught ReferenceError: useMigrationFeatureFlags is not defined
+    at useVariableTheme (VariableThemeInjector.tsx:292:17)
+    at VariableBackgroundRenderer (VariableBackgroundRenderer.tsx:50:67)
+    at renderWithHooks (react-dom.development.js:11121:18)
+    at mountIndeterminateComponent (react-dom.development.js:16869:13)
+    at beginWork$1 (react-dom.development.js:18458:16)
+    at HTMLUnknownElement.callCallback (react-dom.development.js:20565:14)
+    at Object.invokeGuardedCallbackImpl (react-dom.development.js:20614:16)
+    at invokeGuardedCallback (react-dom.development.js:20689:29)
+    at beginWork (react-dom.development.js:26949:7)
+    at performUnitOfWork (react-dom.development.js:25748:12)
+    at workLoopSync (react-dom.development.js:25464:5)
+    at renderRootSync (react-dom.development.js:25419:7)
+    at recoverFromConcurrentError (react-dom.development.js:24597:20)
+    at performConcurrentWorkOnRoot (react-dom.development.js:24542:26)
+    at workLoop (scheduler.development.js:256:34)
+    at flushWork (scheduler.development.js:225:14)
+    at MessagePort.performWorkUntilDeadline (scheduler.development.js:534:21)
+VariableThemeInjector.tsx:292 Uncaught ReferenceError: useMigrationFeatureFlags is not defined
+    at useVariableTheme (VariableThemeInjector.tsx:292:17)
+    at VariableBackgroundRenderer (VariableBackgroundRenderer.tsx:50:67)
+    at renderWithHooks (react-dom.development.js:11121:18)
+    at mountIndeterminateComponent (react-dom.development.js:16869:13)
+    at beginWork$1 (react-dom.development.js:18458:16)
+    at HTMLUnknownElement.callCallback (react-dom.development.js:20565:14)
+    at Object.invokeGuardedCallbackImpl (react-dom.development.js:20614:16)
+    at invokeGuardedCallback (react-dom.development.js:20689:29)
+    at beginWork (react-dom.development.js:26949:7)
+    at performUnitOfWork (react-dom.development.js:25748:12)
+    at workLoopSync (react-dom.development.js:25464:5)
+    at renderRootSync (react-dom.development.js:25419:7)
+    at recoverFromConcurrentError (react-dom.development.js:24597:20)
+    at performConcurrentWorkOnRoot (react-dom.development.js:24542:26)
+    at workLoop (scheduler.development.js:256:34)
+    at flushWork (scheduler.development.js:225:14)
+    at MessagePort.performWorkUntilDeadline (scheduler.development.js:534:21)
+app-index.js:33 The above error occurred in the <VariableBackgroundRenderer> component:
+
+    at VariableBackgroundRenderer (webpack-internal:///(app-pages-browser)/./src/modules/Design/ColorSystem/VariableBackgroundRenderer.tsx:33:11)
+    at main
+    at div
+    at VariableThemeInjector (webpack-internal:///(app-pages-browser)/./src/modules/Design/ColorSystem/VariableThemeInjector.tsx:34:11)
+    at div
+    at div
+    at CSSVariableErrorBoundary (webpack-internal:///(app-pages-browser)/./src/components/CSSVariableErrorBoundary.tsx:259:9)
+    at LandingPageRenderer (webpack-internal:///(app-pages-browser)/./src/modules/generatedLanding/LandingPageRenderer.tsx:137:11)
+    at div
+    at div
+    at PageRevealAnimation (webpack-internal:///(app-pages-browser)/./src/app/generate/[token]/components/PageRevealAnimation.tsx:17:11)
+    at div
+    at GeneratePageContent (webpack-internal:///(app-pages-browser)/./src/app/generate/[token]/page.tsx:102:11)
+    at EditErrorBoundary (webpack-internal:///(app-pages-browser)/./src/components/EditErrorBoundary.tsx:85:9)
+    at EditProvider (webpack-internal:///(app-pages-browser)/./src/components/EditProvider.tsx:133:11)
+    at GeneratePage (webpack-internal:///(app-pages-browser)/./src/app/generate/[token]/page.tsx:27:78)
+    at ClientPageRoot (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/client-page.js:14:11)
+    at InnerLayoutRouter (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:243:11)
+    at RedirectErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/redirect-boundary.js:74:9)
+    at RedirectBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/redirect-boundary.js:82:11)
+    at NotFoundBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/not-found-boundary.js:84:11)
+    at LoadingBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:349:11)
+    at ErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/error-boundary.js:160:11)
+    at InnerScrollAndFocusHandler (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:153:9)
+    at ScrollAndFocusHandler (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:228:11)
+    at RenderFromTemplateContext (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/render-from-template-context.js:16:44)
+    at OuterLayoutRouter (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:370:11)
+    at InnerLayoutRouter (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:243:11)
+    at RedirectErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/redirect-boundary.js:74:9)
+    at RedirectBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/redirect-boundary.js:82:11)
+    at NotFoundBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/not-found-boundary.js:84:11)
+    at LoadingBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:349:11)
+    at ErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/error-boundary.js:160:11)
+    at InnerScrollAndFocusHandler (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:153:9)
+    at ScrollAndFocusHandler (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:228:11)
+    at RenderFromTemplateContext (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/render-from-template-context.js:16:44)
+    at OuterLayoutRouter (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:370:11)
+    at InnerLayoutRouter (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:243:11)
+    at RedirectErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/redirect-boundary.js:74:9)
+    at RedirectBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/redirect-boundary.js:82:11)
+    at NotFoundErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/not-found-boundary.js:76:9)
+    at NotFoundBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/not-found-boundary.js:84:11)
+    at LoadingBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:349:11)
+    at ErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/error-boundary.js:160:11)
+    at InnerScrollAndFocusHandler (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:153:9)
+    at ScrollAndFocusHandler (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:228:11)
+    at RenderFromTemplateContext (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/render-from-template-context.js:16:44)
+    at OuterLayoutRouter (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:370:11)
+    at PostHogProvider (webpack-internal:///(app-pages-browser)/./node_modules/posthog-js/react/dist/esm/index.js:51:23)
+    at PostHogProvider (webpack-internal:///(app-pages-browser)/./src/providers/ph-provider.tsx:20:11)
+    at Provider (webpack-internal:///(app-pages-browser)/./node_modules/@radix-ui/react-context/dist/index.mjs:34:15)
+    at TooltipProvider (webpack-internal:///(app-pages-browser)/./node_modules/@radix-ui/react-tooltip/dist/index.mjs:58:13)
+    at body
+    at html
+    at SWRConfig (webpack-internal:///(app-pages-browser)/./node_modules/swr/dist/_internal/config-context-client-v7VOFo66.mjs:549:13)
+    at OrganizationProvider (webpack-internal:///(app-pages-browser)/./node_modules/@clerk/shared/dist/react/index.mjs:114:3)
+    at ClerkContextProvider (webpack-internal:///(app-pages-browser)/./node_modules/@clerk/clerk-react/dist/index.mjs:2207:11)
+    at ClerkProviderBase (webpack-internal:///(app-pages-browser)/./node_modules/@clerk/clerk-react/dist/index.mjs:2293:11)
+    at Hoc (webpack-internal:///(app-pages-browser)/./node_modules/@clerk/clerk-react/dist/index.mjs:118:5)
+    at ClerkNextOptionsProvider (webpack-internal:///(app-pages-browser)/./node_modules/@clerk/nextjs/dist/esm/client-boundary/NextOptionsContext.js:17:11)
+    at NextClientClerkProvider (webpack-internal:///(app-pages-browser)/./node_modules/@clerk/nextjs/dist/esm/app-router/client/ClerkProvider.js:60:13)
+    at ClientClerkProvider (webpack-internal:///(app-pages-browser)/./node_modules/@clerk/nextjs/dist/esm/app-router/client/ClerkProvider.js:127:13)
+    at ClerkProvider (Server)
+    at RootLayout (Server)
+    at RedirectErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/redirect-boundary.js:74:9)
+    at RedirectBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/redirect-boundary.js:82:11)
+    at NotFoundErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/not-found-boundary.js:76:9)
+    at NotFoundBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/not-found-boundary.js:84:11)
+    at DevRootNotFoundBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/dev-root-not-found-boundary.js:33:11)
+    at ReactDevOverlay (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/react-dev-overlay/app/ReactDevOverlay.js:87:9)
+    at HotReload (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/react-dev-overlay/app/hot-reloader-client.js:321:11)
+    at Router (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/app-router.js:207:11)
+    at ErrorBoundaryHandler (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/error-boundary.js:113:9)
+    at ErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/error-boundary.js:160:11)
+    at AppRouter (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/app-router.js:585:13)
+    at ServerRoot (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/app-index.js:112:27)
+    at Root (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/app-index.js:117:11)
+    at ReactDevOverlay (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/react-dev-overlay/app/ReactDevOverlay.js:87:9)
+
+React will try to recreate this component tree from scratch using the error boundary you provided, EditErrorBoundary.
+window.console.error @ app-index.js:33
+app-index.js:33 🚨 EditErrorBoundary caught an error: Object
+window.console.error @ app-index.js:33
+app-index.js:33 🚨 EditProvider error boundary caught: Object
+window.console.error @ app-index.js:33
+VariableThemeInjector.tsx:292 Uncaught ReferenceError: useMigrationFeatureFlags is not defined
+    at useVariableTheme (VariableThemeInjector.tsx:292:17)
+    at VariableBackgroundRenderer (VariableBackgroundRenderer.tsx:50:67)
+    at renderWithHooks (react-dom.development.js:11121:18)
+    at mountIndeterminateComponent (react-dom.development.js:16869:13)
+    at beginWork$1 (react-dom.development.js:18458:16)
+    at HTMLUnknownElement.callCallback (react-dom.development.js:20565:14)
+    at Object.invokeGuardedCallbackImpl (react-dom.development.js:20614:16)
+    at invokeGuardedCallback (react-dom.development.js:20689:29)
+    at beginWork (react-dom.development.js:26949:7)
+    at performUnitOfWork (react-dom.development.js:25748:12)
+    at workLoopSync (react-dom.development.js:25464:5)
+    at renderRootSync (react-dom.development.js:25419:7)
+    at performConcurrentWorkOnRoot (react-dom.development.js:24504:74)
+    at workLoop (scheduler.development.js:256:34)
+    at flushWork (scheduler.development.js:225:14)
+    at MessagePort.performWorkUntilDeadline (scheduler.development.js:534:21)
+VariableThemeInjector.tsx:292 Uncaught ReferenceError: useMigrationFeatureFlags is not defined
+    at useVariableTheme (VariableThemeInjector.tsx:292:17)
+    at VariableBackgroundRenderer (VariableBackgroundRenderer.tsx:50:67)
+    at renderWithHooks (react-dom.development.js:11121:18)
+    at mountIndeterminateComponent (react-dom.development.js:16869:13)
+    at beginWork$1 (react-dom.development.js:18458:16)
+    at HTMLUnknownElement.callCallback (react-dom.development.js:20565:14)
+    at Object.invokeGuardedCallbackImpl (react-dom.development.js:20614:16)
+    at invokeGuardedCallback (react-dom.development.js:20689:29)
+    at beginWork (react-dom.development.js:26949:7)
+    at performUnitOfWork (react-dom.development.js:25748:12)
+    at workLoopSync (react-dom.development.js:25464:5)
+    at renderRootSync (react-dom.development.js:25419:7)
+    at performConcurrentWorkOnRoot (react-dom.development.js:24504:74)
+    at workLoop (scheduler.development.js:256:34)
+    at flushWork (scheduler.development.js:225:14)
+    at MessagePort.performWorkUntilDeadline (scheduler.development.js:534:21)
+VariableThemeInjector.tsx:292 Uncaught ReferenceError: useMigrationFeatureFlags is not defined
+    at useVariableTheme (VariableThemeInjector.tsx:292:17)
+    at VariableBackgroundRenderer (VariableBackgroundRenderer.tsx:50:67)
+    at renderWithHooks (react-dom.development.js:11121:18)
+    at mountIndeterminateComponent (react-dom.development.js:16869:13)
+    at beginWork$1 (react-dom.development.js:18458:16)
+    at HTMLUnknownElement.callCallback (react-dom.development.js:20565:14)
+    at Object.invokeGuardedCallbackImpl (react-dom.development.js:20614:16)
+    at invokeGuardedCallback (react-dom.development.js:20689:29)
+    at beginWork (react-dom.development.js:26949:7)
+    at performUnitOfWork (react-dom.development.js:25748:12)
+    at workLoopSync (react-dom.development.js:25464:5)
+    at renderRootSync (react-dom.development.js:25419:7)
+    at recoverFromConcurrentError (react-dom.development.js:24597:20)
+    at performConcurrentWorkOnRoot (react-dom.development.js:24542:26)
+    at workLoop (scheduler.development.js:256:34)
+    at flushWork (scheduler.development.js:225:14)
+    at MessagePort.performWorkUntilDeadline (scheduler.development.js:534:21)
+VariableThemeInjector.tsx:292 Uncaught ReferenceError: useMigrationFeatureFlags is not defined
+    at useVariableTheme (VariableThemeInjector.tsx:292:17)
+    at VariableBackgroundRenderer (VariableBackgroundRenderer.tsx:50:67)
+    at renderWithHooks (react-dom.development.js:11121:18)
+    at mountIndeterminateComponent (react-dom.development.js:16869:13)
+    at beginWork$1 (react-dom.development.js:18458:16)
+    at HTMLUnknownElement.callCallback (react-dom.development.js:20565:14)
+    at Object.invokeGuardedCallbackImpl (react-dom.development.js:20614:16)
+    at invokeGuardedCallback (react-dom.development.js:20689:29)
+    at beginWork (react-dom.development.js:26949:7)
+    at performUnitOfWork (react-dom.development.js:25748:12)
+    at workLoopSync (react-dom.development.js:25464:5)
+    at renderRootSync (react-dom.development.js:25419:7)
+    at recoverFromConcurrentError (react-dom.development.js:24597:20)
+    at performConcurrentWorkOnRoot (react-dom.development.js:24542:26)
+    at workLoop (scheduler.development.js:256:34)
+    at flushWork (scheduler.development.js:225:14)
+    at MessagePort.performWorkUntilDeadline (scheduler.development.js:534:21)
+app-index.js:33 The above error occurred in the <VariableBackgroundRenderer> component:
+
+    at VariableBackgroundRenderer (webpack-internal:///(app-pages-browser)/./src/modules/Design/ColorSystem/VariableBackgroundRenderer.tsx:33:11)
+    at main
+    at div
+    at VariableThemeInjector (webpack-internal:///(app-pages-browser)/./src/modules/Design/ColorSystem/VariableThemeInjector.tsx:34:11)
+    at div
+    at div
+    at CSSVariableErrorBoundary (webpack-internal:///(app-pages-browser)/./src/components/CSSVariableErrorBoundary.tsx:259:9)
+    at LandingPageRenderer (webpack-internal:///(app-pages-browser)/./src/modules/generatedLanding/LandingPageRenderer.tsx:137:11)
+    at div
+    at div
+    at PageRevealAnimation (webpack-internal:///(app-pages-browser)/./src/app/generate/[token]/components/PageRevealAnimation.tsx:17:11)
+    at div
+    at GeneratePageContent (webpack-internal:///(app-pages-browser)/./src/app/generate/[token]/page.tsx:102:11)
+    at EditErrorBoundary (webpack-internal:///(app-pages-browser)/./src/components/EditErrorBoundary.tsx:85:9)
+    at EditProvider (webpack-internal:///(app-pages-browser)/./src/components/EditProvider.tsx:133:11)
+    at GeneratePage (webpack-internal:///(app-pages-browser)/./src/app/generate/[token]/page.tsx:27:78)
+    at ClientPageRoot (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/client-page.js:14:11)
+    at InnerLayoutRouter (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:243:11)
+    at RedirectErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/redirect-boundary.js:74:9)
+    at RedirectBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/redirect-boundary.js:82:11)
+    at NotFoundBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/not-found-boundary.js:84:11)
+    at LoadingBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:349:11)
+    at ErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/error-boundary.js:160:11)
+    at InnerScrollAndFocusHandler (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:153:9)
+    at ScrollAndFocusHandler (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:228:11)
+    at RenderFromTemplateContext (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/render-from-template-context.js:16:44)
+    at OuterLayoutRouter (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:370:11)
+    at InnerLayoutRouter (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:243:11)
+    at RedirectErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/redirect-boundary.js:74:9)
+    at RedirectBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/redirect-boundary.js:82:11)
+    at NotFoundBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/not-found-boundary.js:84:11)
+    at LoadingBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:349:11)
+    at ErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/error-boundary.js:160:11)
+    at InnerScrollAndFocusHandler (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:153:9)
+    at ScrollAndFocusHandler (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:228:11)
+    at RenderFromTemplateContext (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/render-from-template-context.js:16:44)
+    at OuterLayoutRouter (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:370:11)
+    at InnerLayoutRouter (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:243:11)
+    at RedirectErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/redirect-boundary.js:74:9)
+    at RedirectBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/redirect-boundary.js:82:11)
+    at NotFoundErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/not-found-boundary.js:76:9)
+    at NotFoundBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/not-found-boundary.js:84:11)
+    at LoadingBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:349:11)
+    at ErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/error-boundary.js:160:11)
+    at InnerScrollAndFocusHandler (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:153:9)
+    at ScrollAndFocusHandler (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:228:11)
+    at RenderFromTemplateContext (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/render-from-template-context.js:16:44)
+    at OuterLayoutRouter (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:370:11)
+    at PostHogProvider (webpack-internal:///(app-pages-browser)/./node_modules/posthog-js/react/dist/esm/index.js:51:23)
+    at PostHogProvider (webpack-internal:///(app-pages-browser)/./src/providers/ph-provider.tsx:20:11)
+    at Provider (webpack-internal:///(app-pages-browser)/./node_modules/@radix-ui/react-context/dist/index.mjs:34:15)
+    at TooltipProvider (webpack-internal:///(app-pages-browser)/./node_modules/@radix-ui/react-tooltip/dist/index.mjs:58:13)
+    at body
+    at html
+    at SWRConfig (webpack-internal:///(app-pages-browser)/./node_modules/swr/dist/_internal/config-context-client-v7VOFo66.mjs:549:13)
+    at OrganizationProvider (webpack-internal:///(app-pages-browser)/./node_modules/@clerk/shared/dist/react/index.mjs:114:3)
+    at ClerkContextProvider (webpack-internal:///(app-pages-browser)/./node_modules/@clerk/clerk-react/dist/index.mjs:2207:11)
+    at ClerkProviderBase (webpack-internal:///(app-pages-browser)/./node_modules/@clerk/clerk-react/dist/index.mjs:2293:11)
+    at Hoc (webpack-internal:///(app-pages-browser)/./node_modules/@clerk/clerk-react/dist/index.mjs:118:5)
+    at ClerkNextOptionsProvider (webpack-internal:///(app-pages-browser)/./node_modules/@clerk/nextjs/dist/esm/client-boundary/NextOptionsContext.js:17:11)
+    at NextClientClerkProvider (webpack-internal:///(app-pages-browser)/./node_modules/@clerk/nextjs/dist/esm/app-router/client/ClerkProvider.js:60:13)
+    at ClientClerkProvider (webpack-internal:///(app-pages-browser)/./node_modules/@clerk/nextjs/dist/esm/app-router/client/ClerkProvider.js:127:13)
+    at ClerkProvider (Server)
+    at RootLayout (Server)
+    at RedirectErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/redirect-boundary.js:74:9)
+    at RedirectBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/redirect-boundary.js:82:11)
+    at NotFoundErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/not-found-boundary.js:76:9)
+    at NotFoundBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/not-found-boundary.js:84:11)
+    at DevRootNotFoundBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/dev-root-not-found-boundary.js:33:11)
+    at ReactDevOverlay (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/react-dev-overlay/app/ReactDevOverlay.js:87:9)
+    at HotReload (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/react-dev-overlay/app/hot-reloader-client.js:321:11)
+    at Router (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/app-router.js:207:11)
+    at ErrorBoundaryHandler (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/error-boundary.js:113:9)
+    at ErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/error-boundary.js:160:11)
+    at AppRouter (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/app-router.js:585:13)
+    at ServerRoot (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/app-index.js:112:27)
+    at Root (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/app-index.js:117:11)
+    at ReactDevOverlay (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/react-dev-overlay/app/ReactDevOverlay.js:87:9)
+
+React will try to recreate this component tree from scratch using the error boundary you provided, EditErrorBoundary.
+window.console.error @ app-index.js:33
+app-index.js:33 🚨 EditErrorBoundary caught an error: Object
+window.console.error @ app-index.js:33
+app-index.js:33 🚨 EditProvider error boundary caught: Object
+window.console.error @ app-index.js:33
+VariableThemeInjector.tsx:292 Uncaught ReferenceError: useMigrationFeatureFlags is not defined
+    at useVariableTheme (VariableThemeInjector.tsx:292:17)
+    at VariableBackgroundRenderer (VariableBackgroundRenderer.tsx:50:67)
+    at renderWithHooks (react-dom.development.js:11121:18)
+    at mountIndeterminateComponent (react-dom.development.js:16869:13)
+    at beginWork$1 (react-dom.development.js:18458:16)
+    at HTMLUnknownElement.callCallback (react-dom.development.js:20565:14)
+    at Object.invokeGuardedCallbackImpl (react-dom.development.js:20614:16)
+    at invokeGuardedCallback (react-dom.development.js:20689:29)
+    at beginWork (react-dom.development.js:26949:7)
+    at performUnitOfWork (react-dom.development.js:25748:12)
+    at workLoopSync (react-dom.development.js:25464:5)
+    at renderRootSync (react-dom.development.js:25419:7)
+    at performConcurrentWorkOnRoot (react-dom.development.js:24504:74)
+    at workLoop (scheduler.development.js:256:34)
+    at flushWork (scheduler.development.js:225:14)
+    at MessagePort.performWorkUntilDeadline (scheduler.development.js:534:21)
+useVariableTheme @ VariableThemeInjector.tsx:292
+VariableBackgroundRenderer @ VariableBackgroundRenderer.tsx:50
+renderWithHooks @ react-dom.development.js:11121
+mountIndeterminateComponent @ react-dom.development.js:16869
+beginWork$1 @ react-dom.development.js:18458
+callCallback @ react-dom.development.js:20565
+invokeGuardedCallbackImpl @ react-dom.development.js:20614
+invokeGuardedCallback @ react-dom.development.js:20689
+beginWork @ react-dom.development.js:26949
+performUnitOfWork @ react-dom.development.js:25748
+workLoopSync @ react-dom.development.js:25464
+renderRootSync @ react-dom.development.js:25419
+performConcurrentWorkOnRoot @ react-dom.development.js:24504
+workLoop @ scheduler.development.js:256
+flushWork @ scheduler.development.js:225
+performWorkUntilDeadline @ scheduler.development.js:534
+VariableThemeInjector.tsx:292 Uncaught ReferenceError: useMigrationFeatureFlags is not defined
+    at useVariableTheme (VariableThemeInjector.tsx:292:17)
+    at VariableBackgroundRenderer (VariableBackgroundRenderer.tsx:50:67)
+    at renderWithHooks (react-dom.development.js:11121:18)
+    at mountIndeterminateComponent (react-dom.development.js:16869:13)
+    at beginWork$1 (react-dom.development.js:18458:16)
+    at HTMLUnknownElement.callCallback (react-dom.development.js:20565:14)
+    at Object.invokeGuardedCallbackImpl (react-dom.development.js:20614:16)
+    at invokeGuardedCallback (react-dom.development.js:20689:29)
+    at beginWork (react-dom.development.js:26949:7)
+    at performUnitOfWork (react-dom.development.js:25748:12)
+    at workLoopSync (react-dom.development.js:25464:5)
+    at renderRootSync (react-dom.development.js:25419:7)
+    at performConcurrentWorkOnRoot (react-dom.development.js:24504:74)
+    at workLoop (scheduler.development.js:256:34)
+    at flushWork (scheduler.development.js:225:14)
+    at MessagePort.performWorkUntilDeadline (scheduler.development.js:534:21)
+useVariableTheme @ VariableThemeInjector.tsx:292
+VariableBackgroundRenderer @ VariableBackgroundRenderer.tsx:50
+renderWithHooks @ react-dom.development.js:11121
+mountIndeterminateComponent @ react-dom.development.js:16869
+beginWork$1 @ react-dom.development.js:18458
+callCallback @ react-dom.development.js:20565
+invokeGuardedCallbackImpl @ react-dom.development.js:20614
+invokeGuardedCallback @ react-dom.development.js:20689
+beginWork @ react-dom.development.js:26949
+performUnitOfWork @ react-dom.development.js:25748
+workLoopSync @ react-dom.development.js:25464
+renderRootSync @ react-dom.development.js:25419
+performConcurrentWorkOnRoot @ react-dom.development.js:24504
+workLoop @ scheduler.development.js:256
+flushWork @ scheduler.development.js:225
+performWorkUntilDeadline @ scheduler.development.js:534
+VariableThemeInjector.tsx:292 Uncaught ReferenceError: useMigrationFeatureFlags is not defined
+    at useVariableTheme (VariableThemeInjector.tsx:292:17)
+    at VariableBackgroundRenderer (VariableBackgroundRenderer.tsx:50:67)
+    at renderWithHooks (react-dom.development.js:11121:18)
+    at mountIndeterminateComponent (react-dom.development.js:16869:13)
+    at beginWork$1 (react-dom.development.js:18458:16)
+    at HTMLUnknownElement.callCallback (react-dom.development.js:20565:14)
+    at Object.invokeGuardedCallbackImpl (react-dom.development.js:20614:16)
+    at invokeGuardedCallback (react-dom.development.js:20689:29)
+    at beginWork (react-dom.development.js:26949:7)
+    at performUnitOfWork (react-dom.development.js:25748:12)
+    at workLoopSync (react-dom.development.js:25464:5)
+    at renderRootSync (react-dom.development.js:25419:7)
+    at recoverFromConcurrentError (react-dom.development.js:24597:20)
+    at performConcurrentWorkOnRoot (react-dom.development.js:24542:26)
+    at workLoop (scheduler.development.js:256:34)
+    at flushWork (scheduler.development.js:225:14)
+    at MessagePort.performWorkUntilDeadline (scheduler.development.js:534:21)
+useVariableTheme @ VariableThemeInjector.tsx:292
+VariableBackgroundRenderer @ VariableBackgroundRenderer.tsx:50
+renderWithHooks @ react-dom.development.js:11121
+mountIndeterminateComponent @ react-dom.development.js:16869
+beginWork$1 @ react-dom.development.js:18458
+callCallback @ react-dom.development.js:20565
+invokeGuardedCallbackImpl @ react-dom.development.js:20614
+invokeGuardedCallback @ react-dom.development.js:20689
+beginWork @ react-dom.development.js:26949
+performUnitOfWork @ react-dom.development.js:25748
+workLoopSync @ react-dom.development.js:25464
+renderRootSync @ react-dom.development.js:25419
+recoverFromConcurrentError @ react-dom.development.js:24597
+performConcurrentWorkOnRoot @ react-dom.development.js:24542
+workLoop @ scheduler.development.js:256
+flushWork @ scheduler.development.js:225
+performWorkUntilDeadline @ scheduler.development.js:534
+VariableThemeInjector.tsx:292 Uncaught ReferenceError: useMigrationFeatureFlags is not defined
+    at useVariableTheme (VariableThemeInjector.tsx:292:17)
+    at VariableBackgroundRenderer (VariableBackgroundRenderer.tsx:50:67)
+    at renderWithHooks (react-dom.development.js:11121:18)
+    at mountIndeterminateComponent (react-dom.development.js:16869:13)
+    at beginWork$1 (react-dom.development.js:18458:16)
+    at HTMLUnknownElement.callCallback (react-dom.development.js:20565:14)
+    at Object.invokeGuardedCallbackImpl (react-dom.development.js:20614:16)
+    at invokeGuardedCallback (react-dom.development.js:20689:29)
+    at beginWork (react-dom.development.js:26949:7)
+    at performUnitOfWork (react-dom.development.js:25748:12)
+    at workLoopSync (react-dom.development.js:25464:5)
+    at renderRootSync (react-dom.development.js:25419:7)
+    at recoverFromConcurrentError (react-dom.development.js:24597:20)
+    at performConcurrentWorkOnRoot (react-dom.development.js:24542:26)
+    at workLoop (scheduler.development.js:256:34)
+    at flushWork (scheduler.development.js:225:14)
+    at MessagePort.performWorkUntilDeadline (scheduler.development.js:534:21)
+useVariableTheme @ VariableThemeInjector.tsx:292
+VariableBackgroundRenderer @ VariableBackgroundRenderer.tsx:50
+renderWithHooks @ react-dom.development.js:11121
+mountIndeterminateComponent @ react-dom.development.js:16869
+beginWork$1 @ react-dom.development.js:18458
+callCallback @ react-dom.development.js:20565
+invokeGuardedCallbackImpl @ react-dom.development.js:20614
+invokeGuardedCallback @ react-dom.development.js:20689
+beginWork @ react-dom.development.js:26949
+performUnitOfWork @ react-dom.development.js:25748
+workLoopSync @ react-dom.development.js:25464
+renderRootSync @ react-dom.development.js:25419
+recoverFromConcurrentError @ react-dom.development.js:24597
+performConcurrentWorkOnRoot @ react-dom.development.js:24542
+workLoop @ scheduler.development.js:256
+flushWork @ scheduler.development.js:225
+performWorkUntilDeadline @ scheduler.development.js:534
+app-index.js:33 The above error occurred in the <VariableBackgroundRenderer> component:
+
+    at VariableBackgroundRenderer (webpack-internal:///(app-pages-browser)/./src/modules/Design/ColorSystem/VariableBackgroundRenderer.tsx:33:11)
+    at main
+    at div
+    at VariableThemeInjector (webpack-internal:///(app-pages-browser)/./src/modules/Design/ColorSystem/VariableThemeInjector.tsx:34:11)
+    at div
+    at div
+    at CSSVariableErrorBoundary (webpack-internal:///(app-pages-browser)/./src/components/CSSVariableErrorBoundary.tsx:259:9)
+    at LandingPageRenderer (webpack-internal:///(app-pages-browser)/./src/modules/generatedLanding/LandingPageRenderer.tsx:137:11)
+    at div
+    at div
+    at PageRevealAnimation (webpack-internal:///(app-pages-browser)/./src/app/generate/[token]/components/PageRevealAnimation.tsx:17:11)
+    at div
+    at GeneratePageContent (webpack-internal:///(app-pages-browser)/./src/app/generate/[token]/page.tsx:102:11)
+    at EditErrorBoundary (webpack-internal:///(app-pages-browser)/./src/components/EditErrorBoundary.tsx:85:9)
+    at EditProvider (webpack-internal:///(app-pages-browser)/./src/components/EditProvider.tsx:133:11)
+    at GeneratePage (webpack-internal:///(app-pages-browser)/./src/app/generate/[token]/page.tsx:27:78)
+    at ClientPageRoot (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/client-page.js:14:11)
+    at InnerLayoutRouter (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:243:11)
+    at RedirectErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/redirect-boundary.js:74:9)
+    at RedirectBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/redirect-boundary.js:82:11)
+    at NotFoundBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/not-found-boundary.js:84:11)
+    at LoadingBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:349:11)
+    at ErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/error-boundary.js:160:11)
+    at InnerScrollAndFocusHandler (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:153:9)
+    at ScrollAndFocusHandler (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:228:11)
+    at RenderFromTemplateContext (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/render-from-template-context.js:16:44)
+    at OuterLayoutRouter (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:370:11)
+    at InnerLayoutRouter (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:243:11)
+    at RedirectErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/redirect-boundary.js:74:9)
+    at RedirectBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/redirect-boundary.js:82:11)
+    at NotFoundBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/not-found-boundary.js:84:11)
+    at LoadingBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:349:11)
+    at ErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/error-boundary.js:160:11)
+    at InnerScrollAndFocusHandler (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:153:9)
+    at ScrollAndFocusHandler (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:228:11)
+    at RenderFromTemplateContext (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/render-from-template-context.js:16:44)
+    at OuterLayoutRouter (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:370:11)
+    at InnerLayoutRouter (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:243:11)
+    at RedirectErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/redirect-boundary.js:74:9)
+    at RedirectBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/redirect-boundary.js:82:11)
+    at NotFoundErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/not-found-boundary.js:76:9)
+    at NotFoundBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/not-found-boundary.js:84:11)
+    at LoadingBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:349:11)
+    at ErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/error-boundary.js:160:11)
+    at InnerScrollAndFocusHandler (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:153:9)
+    at ScrollAndFocusHandler (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:228:11)
+    at RenderFromTemplateContext (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/render-from-template-context.js:16:44)
+    at OuterLayoutRouter (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:370:11)
+    at PostHogProvider (webpack-internal:///(app-pages-browser)/./node_modules/posthog-js/react/dist/esm/index.js:51:23)
+    at PostHogProvider (webpack-internal:///(app-pages-browser)/./src/providers/ph-provider.tsx:20:11)
+    at Provider (webpack-internal:///(app-pages-browser)/./node_modules/@radix-ui/react-context/dist/index.mjs:34:15)
+    at TooltipProvider (webpack-internal:///(app-pages-browser)/./node_modules/@radix-ui/react-tooltip/dist/index.mjs:58:13)
+    at body
+    at html
+    at SWRConfig (webpack-internal:///(app-pages-browser)/./node_modules/swr/dist/_internal/config-context-client-v7VOFo66.mjs:549:13)
+    at OrganizationProvider (webpack-internal:///(app-pages-browser)/./node_modules/@clerk/shared/dist/react/index.mjs:114:3)
+    at ClerkContextProvider (webpack-internal:///(app-pages-browser)/./node_modules/@clerk/clerk-react/dist/index.mjs:2207:11)
+    at ClerkProviderBase (webpack-internal:///(app-pages-browser)/./node_modules/@clerk/clerk-react/dist/index.mjs:2293:11)
+    at Hoc (webpack-internal:///(app-pages-browser)/./node_modules/@clerk/clerk-react/dist/index.mjs:118:5)
+    at ClerkNextOptionsProvider (webpack-internal:///(app-pages-browser)/./node_modules/@clerk/nextjs/dist/esm/client-boundary/NextOptionsContext.js:17:11)
+    at NextClientClerkProvider (webpack-internal:///(app-pages-browser)/./node_modules/@clerk/nextjs/dist/esm/app-router/client/ClerkProvider.js:60:13)
+    at ClientClerkProvider (webpack-internal:///(app-pages-browser)/./node_modules/@clerk/nextjs/dist/esm/app-router/client/ClerkProvider.js:127:13)
+    at ClerkProvider (Server)
+    at RootLayout (Server)
+    at RedirectErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/redirect-boundary.js:74:9)
+    at RedirectBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/redirect-boundary.js:82:11)
+    at NotFoundErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/not-found-boundary.js:76:9)
+    at NotFoundBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/not-found-boundary.js:84:11)
+    at DevRootNotFoundBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/dev-root-not-found-boundary.js:33:11)
+    at ReactDevOverlay (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/react-dev-overlay/app/ReactDevOverlay.js:87:9)
+    at HotReload (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/react-dev-overlay/app/hot-reloader-client.js:321:11)
+    at Router (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/app-router.js:207:11)
+    at ErrorBoundaryHandler (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/error-boundary.js:113:9)
+    at ErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/error-boundary.js:160:11)
+    at AppRouter (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/app-router.js:585:13)
+    at ServerRoot (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/app-index.js:112:27)
+    at Root (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/app-index.js:117:11)
+    at ReactDevOverlay (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/react-dev-overlay/app/ReactDevOverlay.js:87:9)
+
+React will try to recreate this component tree from scratch using the error boundary you provided, EditErrorBoundary.
+window.console.error @ app-index.js:33
+(anonymous) @ rrweb-plugin-console-record.js:2447
+logCapturedError @ react-dom.development.js:15295
+callback @ react-dom.development.js:15357
+callCallback @ react-dom.development.js:8696
+commitCallbacks @ react-dom.development.js:8743
+commitClassCallbacks @ react-dom.development.js:21323
+commitLayoutEffectOnFiber @ react-dom.development.js:21425
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21407
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21407
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21407
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21577
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21577
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21407
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21418
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21407
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21407
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21407
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21407
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21418
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21407
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21407
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21577
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21407
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21577
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21407
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21418
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21407
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21407
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21407
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21407
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21418
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21407
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21407
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21577
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21407
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21577
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21407
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21418
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21407
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21418
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21407
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21407
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21407
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21418
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21407
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21407
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21577
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21407
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21577
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21407
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21407
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21577
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21407
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21407
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21488
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21488
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21577
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21577
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21577
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21577
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21407
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21407
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21577
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21577
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21577
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21407
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21407
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21407
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21577
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21407
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21407
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21407
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21577
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21577
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21418
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21407
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21577
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21418
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21407
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21407
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21418
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21407
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21577
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21577
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21577
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21577
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21577
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21577
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21407
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21418
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21407
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21407
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21407
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21407
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21577
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21577
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21577
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21418
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21437
+commitLayoutEffects @ react-dom.development.js:22912
+commitRootImpl @ react-dom.development.js:26226
+commitRoot @ react-dom.development.js:26077
+commitRootWhenReady @ react-dom.development.js:24749
+finishConcurrentRender @ react-dom.development.js:24714
+performConcurrentWorkOnRoot @ react-dom.development.js:24559
+workLoop @ scheduler.development.js:256
+flushWork @ scheduler.development.js:225
+EditErrorBoundary.tsx:67 🚨 EditErrorBoundary caught an error: {error: 'useMigrationFeatureFlags is not defined', stack: 'ReferenceError: useMigrationFeatureFlags is not de…ed/scheduler/cjs/scheduler.development.js:534:21)', componentStack: '\n    at VariableBackgroundRenderer (webpack-intern…ts/react-dev-overlay/app/ReactDevOverlay.js:87:9)', tokenId: 'K84lKNKoFPmT', errorType: 'unknown'}
+window.console.error @ app-index.js:33
+(anonymous) @ rrweb-plugin-console-record.js:2447
+componentDidCatch @ EditErrorBoundary.tsx:67
+callback @ react-dom.development.js:15370
+callCallback @ react-dom.development.js:8696
+commitCallbacks @ react-dom.development.js:8743
+commitClassCallbacks @ react-dom.development.js:21323
+commitLayoutEffectOnFiber @ react-dom.development.js:21425
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21407
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21407
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21407
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21577
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21577
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21407
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21418
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21407
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21407
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21407
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21407
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21418
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21407
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21407
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21577
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21407
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21577
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21407
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21418
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21407
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21407
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21407
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21407
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21418
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21407
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21407
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21577
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21407
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21577
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21407
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21418
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21407
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21418
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21407
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21407
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21407
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21418
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21407
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21407
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21577
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21407
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21577
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21407
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21407
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21577
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21407
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21407
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21488
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21488
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21577
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21577
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21577
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21577
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21407
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21407
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21577
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21577
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21577
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21407
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21407
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21407
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21577
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21407
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21407
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21407
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21577
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21577
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21418
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21407
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21577
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21418
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21407
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21407
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21418
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21407
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21577
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21577
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21577
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21577
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21577
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21577
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21407
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21418
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21407
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21407
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21407
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21407
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21577
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21577
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21577
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21418
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21437
+commitLayoutEffects @ react-dom.development.js:22912
+commitRootImpl @ react-dom.development.js:26226
+commitRoot @ react-dom.development.js:26077
+commitRootWhenReady @ react-dom.development.js:24749
+finishConcurrentRender @ react-dom.development.js:24714
+performConcurrentWorkOnRoot @ react-dom.development.js:24559
+workLoop @ scheduler.development.js:256
+flushWork @ scheduler.development.js:225
+EditProvider.tsx:230 🚨 EditProvider error boundary caught: {error: 'useMigrationFeatureFlags is not defined', tokenId: 'K84lKNKoFPmT', componentStack: '\n    at VariableBackgroundRenderer (webpack-intern…ts/react-dev-overlay/app/ReactDevOverlay.js:87:9)'}
+window.console.error @ app-index.js:33
+(anonymous) @ rrweb-plugin-console-record.js:2447
+onError @ EditProvider.tsx:230
+componentDidCatch @ EditErrorBoundary.tsx:79
+callback @ react-dom.development.js:15370
+callCallback @ react-dom.development.js:8696
+commitCallbacks @ react-dom.development.js:8743
+commitClassCallbacks @ react-dom.development.js:21323
+commitLayoutEffectOnFiber @ react-dom.development.js:21425
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21407
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21407
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21407
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21577
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21577
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21407
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21418
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21407
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21407
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21407
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21407
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21418
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21407
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21407
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21577
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21407
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21577
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21407
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21418
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21407
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21407
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21407
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21407
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21418
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21407
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21407
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21577
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21407
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21577
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21407
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21418
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21407
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21418
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21407
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21407
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21407
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21418
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21407
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21407
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21577
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21407
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21577
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21407
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21407
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21577
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21407
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21407
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21488
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21488
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21577
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21577
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21577
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21577
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21407
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21407
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21577
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21577
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21577
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21407
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21407
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21407
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21577
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21407
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21407
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21407
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21577
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21577
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21418
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21407
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21577
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21418
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21407
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21407
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21418
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21407
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21577
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21577
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21577
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21577
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21577
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21577
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21407
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21418
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21407
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21407
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21407
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21407
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21577
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21577
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21577
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21418
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21437
+commitLayoutEffects @ react-dom.development.js:22912
+commitRootImpl @ react-dom.development.js:26226
+commitRoot @ react-dom.development.js:26077
+commitRootWhenReady @ react-dom.development.js:24749
+finishConcurrentRender @ react-dom.development.js:24714
+performConcurrentWorkOnRoot @ react-dom.development.js:24559
+workLoop @ scheduler.development.js:256

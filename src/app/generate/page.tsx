@@ -219,7 +219,7 @@ const htmlContent = previewElement.innerHTML;
   return (
     <div className="min-h-screen bg-white">
       <div id="landing-preview">
-  <LandingPageRenderer />
+  <LandingPageRenderer tokenId={tokenId || 'default'} />
 </div>
 
 

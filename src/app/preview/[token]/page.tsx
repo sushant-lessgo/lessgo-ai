@@ -298,7 +298,7 @@ function PreviewPageContent({ tokenId }: { tokenId: string }) {
     <div className="min-h-screen bg-white">
       {/* Rendered Landing Page */}
       <div id="landing-preview">
-        <LandingPageRenderer />
+        <LandingPageRenderer tokenId={tokenId} />
       </div>
 
       {/* Fixed Action Bar */}

@@ -11,6 +11,7 @@ import { persist } from "zustand/middleware";
 import type { FormField } from "@/types/core/index";
 import type { EditStore, SectionData } from '@/types/store';
 import type { Theme } from '@/types/core/index';
+import { defaultCSSVariableState } from '@/types/store/cssVariables';
 
 // Import existing action creators
 import { createCoreActions } from '../hooks/editStore/coreActions';
@@ -21,6 +22,7 @@ import { createGenerationActions } from '../hooks/editStore/generationActions';
 import { createUIActions } from '../hooks/editStore/uiActions';
 import { createFormsImageActions } from '../hooks/editStore/formsImageActions';
 import { createLayoutActions } from '../hooks/editStore/layoutActions';
+import { createCSSVariableActions } from '../hooks/editStore/cssVariableActions';
 
 // Import storage utilities
 import { getStorageKey, trackProjectAccess, isStorageAvailable } from '@/utils/storage';
@@ -280,6 +282,16 @@ function createInitialState(tokenId: string): EditStore {
       lastSaveTime: 0,
       failedSaves: 0,
     },
+
+    // CSS Variable Slice
+    cssVariables: {
+      ...defaultCSSVariableState,
+      _cssVariableSlice: {
+        version: '1.0.0',
+        initialized: false,
+        lastMigration: Date.now(),
+      },
+    },
   } as unknown as EditStore;
 }
 
@@ -317,6 +329,7 @@ export function createEditStore(tokenId: string) {
             ...createUIActions(set, get),
             ...createFormsImageActions(set, get),
             ...createLayoutActions(set, get),
+            ...createCSSVariableActions(set, get),
 
             // Token-specific actions
             loadFromOnboarding: () => {
@@ -361,6 +374,7 @@ export function createEditStore(tokenId: string) {
               lastUpdated: state.lastUpdated,
               version: state.version,
               performance: state.performance,
+              cssVariables: state.cssVariables,
             }),
             onRehydrateStorage: () => (state) => {
               if (state) {

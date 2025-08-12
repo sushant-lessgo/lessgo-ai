@@ -11,6 +11,7 @@ module.exports = {
     "./src/utils/tailwind-seed.js", // Include seed file for arbitrary patterns
   ],
   safelist: [
+  // ✅ Editor UI classes
   'hover:bg-editable-bg',
   'hover:bg-editable-primaryBg',
   'hover:text-black',
@@ -29,98 +30,69 @@ module.exports = {
   'duration-200',
   'ease-in-out',
   
-  // Dynamic gradient backgrounds for background system
+  // ✅ Variable-based structural classes (NEW - replaces massive color patterns)
+  'bg-pattern-primary',
+  'bg-pattern-secondary', 
+  'bg-pattern-neutral',
+  'bg-pattern-divider',
+  'bg-gradient-vars-tr',
+  'bg-gradient-vars-tl', 
+  'bg-gradient-vars-br',
+  'bg-gradient-vars-bl',
+  'bg-gradient-vars-r',
+  'bg-gradient-vars-l',
+  'bg-radial-vars-center',
+  'bg-radial-vars-top',
+  'bg-radial-vars-bottom',
+  'bg-radial-circle-vars',
+  'bg-soft-gradient-blur',
+  'bg-startup-skybox',
+  'bg-glass-morph',
+  
+  // ✅ Variable-based effect classes
+  'blur-var-subtle',
+  'blur-var-medium', 
+  'blur-var-strong',
+  'blur-var-extreme',
+  'backdrop-blur-var-md',
+  'opacity-var-10',
+  'opacity-var-20',
+  'opacity-var-30', 
+  'opacity-var-50',
+  'opacity-var-70',
+  'opacity-var-80',
+  'opacity-var-90',
+  
+  // ✅ Legacy fallback support (REDUCED - only essential patterns)
   'bg-gradient-to-tr', 'bg-gradient-to-tl', 'bg-gradient-to-br', 'bg-gradient-to-bl',
   'bg-gradient-to-t', 'bg-gradient-to-b', 'bg-gradient-to-l', 'bg-gradient-to-r',
   
-  // Dynamic color variations for background system
-  { pattern: /bg-(blue|sky|indigo|purple|pink|red|orange|amber|yellow|lime|green|emerald|teal|cyan|gray|slate|zinc|neutral|stone)-(50|100|200|300|400|500|600|700|800|900)/ },
-  { pattern: /from-(blue|sky|indigo|purple|pink|red|orange|amber|yellow|lime|green|emerald|teal|cyan|gray|slate|zinc|neutral|stone)-(50|100|200|300|400|500|600|700|800|900)/ },
-  { pattern: /via-(blue|sky|indigo|purple|pink|red|orange|amber|yellow|lime|green|emerald|teal|cyan|gray|slate|zinc|neutral|stone)-(50|100|200|300|400|500|600|700|800|900)/ },
-  { pattern: /to-(blue|sky|indigo|purple|pink|red|orange|amber|yellow|lime|green|emerald|teal|cyan|gray|slate|zinc|neutral|stone)-(50|100|200|300|400|500|600|700|800|900)/ },
+  // ✅ Essential legacy color patterns (DRAMATICALLY REDUCED from 125+ to ~20)
+  { pattern: /bg-(blue|purple|gray)-(50|100|500|600|900)/ },
+  { pattern: /from-(blue|purple|gray)-(50|100|500|600|900)/ },
+  { pattern: /to-(blue|purple|gray)-(50|100|500|600|900)/ },
+  { pattern: /via-(blue|purple|gray)-(50|100|500|600|900)/ },
   
-  // Static background utilities that might be used
-  'bg-white', 'bg-gray-50', 'bg-gray-100', 'bg-gray-200',
+  // ✅ Critical static backgrounds 
+  'bg-white', 'bg-gray-50', 'bg-gray-100',
   'to-transparent', 'via-transparent', 'from-transparent',
   
-  // Text color classes for adaptive text
-  'text-gray-50', 'text-gray-100', 'text-gray-200', 'text-gray-300', 'text-gray-400', 
-  'text-gray-500', 'text-gray-600', 'text-gray-700', 'text-gray-800', 'text-gray-900', 
+  // ✅ Essential text colors (REDUCED)
+  'text-gray-500', 'text-gray-600', 'text-gray-700', 'text-gray-800', 'text-gray-900',
   'text-white', 'text-black',
+  '!text-gray-900', '!text-gray-800',
   
-  // Additional text colors for colored backgrounds
-  'text-blue-50', 'text-blue-100', 'text-blue-900', 'text-blue-950',
-  'text-green-50', 'text-green-100', 'text-green-900', 'text-green-950',
-  'text-red-50', 'text-red-100', 'text-red-900', 'text-red-950',
-  'text-purple-50', 'text-purple-100', 'text-purple-900', 'text-purple-950',
-  'text-orange-50', 'text-orange-100', 'text-orange-900', 'text-orange-950',
-  
-  // ✅ Opacity variations for custom colors
-  'bg-opacity-10', 'bg-opacity-20', 'bg-opacity-30', 'bg-opacity-40', 
-  'bg-opacity-50', 'bg-opacity-60', 'bg-opacity-70', 'bg-opacity-80', 'bg-opacity-90',
-  
-  // ✅ NEW: Opacity slash notation for background colors (bg-blue-50/70)
-  { pattern: /bg-(blue|sky|indigo|purple|pink|red|orange|amber|yellow|lime|green|emerald|teal|cyan|gray|slate|zinc|neutral|stone)-(50|100|200|300|400|500|600|700|800|900)\/(10|20|30|40|50|60|70|80|90|95)/ },
-  { pattern: /bg-white\/(10|20|30|40|50|60|70|80|90|95)/ },
-  { pattern: /bg-black\/(10|20|30|40|50|60|70|80|90|95)/ },
-  
-  // ✅ Backdrop blur effects used in variations
-  'backdrop-blur-sm', 'backdrop-blur-md', 'backdrop-blur-lg',
-  
-  // ✅ Text shadow effects for radial gradient backgrounds
-  'drop-shadow-sm', 'drop-shadow', 'drop-shadow-md',
-  
-  // ✅ Important text colors for radial gradients (force override)
-  '!text-gray-900', '!text-gray-800', '!text-gray-600',
-  
-  // ✅ Specific radial gradient backgrounds from bgVariations  
+  // ✅ Critical legacy patterns that can't be migrated yet
   'bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))]',
   'bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))]',
   'bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))]',
   'blur-[160px]',
   'blur-[120px]',
   'blur-[100px]',
+  'backdrop-blur-sm', 'backdrop-blur-md', 'backdrop-blur-lg',
+  'drop-shadow-sm', 'drop-shadow', 'drop-shadow-md',
   
-  // ✅ Specific hex color classes from bgVariations
-  'from-[#b4d8ff]',
-  'via-[#dceeff]',
-  'to-[#ffffff]',
-  'from-[#FF00FF]',
-  'via-[#0A001F]',
-  'to-[#0A001F]',
-  
-  // ✅ Dark theme primary backgrounds
-  'bg-[#0b0f19]',
-  'bg-[#0a0e17]',
-  'bg-[#0f1419]',
-  'bg-[#111827]',
-  'bg-[#1a1c1f]',
-  'bg-[#1b103f]',
-  'bg-[#1e1f24]',
-  'bg-[#0a0d14]',
-  'bg-[#1c1d1f]',
-  'bg-[#003B00]',
-  'bg-[#001F00]',
-  'bg-[#0A001F]',
-  
-  // ✅ Light theme backgrounds
-  'bg-[#e6f0ff]',
-  'bg-[#f0f6ff]',
-  'bg-[#eafff6]',
-  'bg-[#fff3e0]',
-  'bg-[#e6f9f3]',
-  'bg-[#d6f3f1]',
-  'bg-[#ffe8dc]',
-  'bg-[#F5F5F5]',
-  
-  // ✅ Accent colors from bgVariations
-  'bg-[#ffe5b4]',
-  'bg-[#ff6f61]',
-  'bg-[#ff6b5c]',
-  'bg-[#ffb677]',
-  'bg-[#FF00FF]',
-  
-  // ✅ CSS variable usage in gradients  
+  // ✅ CSS variable usage
   'var(--tw-gradient-stops)',
 ],
   theme: {
@@ -172,6 +144,30 @@ module.exports = {
 				textSecondary: 'var(--landing-text-secondary)',
 				textMuted: 'var(--landing-text-muted)'
 				},
+			// ✅ CSS Variable-based color system for migration
+			'bg-vars': {
+				primary: 'var(--bg-primary-base)',
+				secondary: 'var(--bg-secondary-base)',
+				neutral: 'var(--bg-neutral-base)',
+				divider: 'var(--bg-divider-base)'
+			},
+			'gradient-vars': {
+				from: 'var(--gradient-from)',
+				via: 'var(--gradient-via)',
+				to: 'var(--gradient-to)'
+			},
+			'accent-vars': {
+				primary: 'var(--accent-primary)',
+				'primary-hover': 'var(--accent-primary-hover)',
+				'primary-active': 'var(--accent-primary-active)',
+				secondary: 'var(--accent-secondary)'
+			},
+			'text-vars': {
+				primary: 'var(--text-primary)',
+				secondary: 'var(--text-secondary)',
+				muted: 'var(--text-muted)',
+				'on-accent': 'var(--text-on-accent)'
+			},
   			editable: {
   				bg: '#FEF9C3',
   				primaryBg: '#E0F7F5',

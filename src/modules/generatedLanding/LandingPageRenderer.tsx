@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo } from 'react';
+import { useParams } from 'next/navigation';
 import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
 import { useOnboardingStore } from '@/hooks/useOnboardingStore';
 import { sectionList } from '@/modules/sections/sectionList';
@@ -9,6 +10,10 @@ import {
   assignEnhancedBackgroundsToAllSections
 } from '@/modules/Design/background/backgroundIntegration';
 import { SmartTextSection } from '@/components/layout/SmartTextSection';
+import { VariableThemeInjector } from '@/modules/Design/ColorSystem/VariableThemeInjector';
+import { VariableBackgroundRenderer } from '@/modules/Design/ColorSystem/VariableBackgroundRenderer';
+import { CSSVariableErrorBoundary } from '@/components/CSSVariableErrorBoundary';
+import { useFeatureFlags } from '@/utils/featureFlags';
 
 // ... (font loading utility remains the same)
 const loadGoogleFonts = () => {
@@ -99,9 +104,13 @@ const backgroundTypeMapping: Record<SectionBackground, 'primary' | 'secondary' |
 
 interface LandingPageRendererProps {
   className?: string;
+  tokenId?: string;
 }
 
-export default function LandingPageRenderer({ className = '' }: LandingPageRendererProps) {
+export default function LandingPageRenderer({ className = '', tokenId }: LandingPageRendererProps) {
+  // Get tokenId from props or URL params
+  const params = useParams();
+  const effectiveTokenId = tokenId || (params?.token as string) || 'default';
   const { 
     sections,
     sectionLayouts, 
@@ -114,6 +123,9 @@ export default function LandingPageRenderer({ className = '' }: LandingPageRende
     updateFromBackgroundSystem
   } = useEditStore();
 
+  // Get feature flags for CSS variable system
+  const featureFlags = useFeatureFlags(effectiveTokenId);
+  
   // Get onboarding data for dynamic backgrounds
   const { validatedFields, hiddenInferredFields } = useOnboardingStore();
 
@@ -357,7 +369,7 @@ const finalSections: OrderedSection[] = processedSections
       );
     }
 
-    // Render the actual component wrapped in SmartTextSection
+    // Render the actual component with feature flag-controlled wrapper
     try {
       // Debug logging for hero section
       if (sectionId === 'hero') {
@@ -370,23 +382,46 @@ const finalSections: OrderedSection[] = processedSections
         });
       }
       
-      return (
-        <SmartTextSection
-          key={sectionId}
-          backgroundType={backgroundType}
-          sectionBackgroundCSS={sectionBackgroundCSS}
-          sectionId={sectionId}
-        >
-          <LayoutComponent
+      // Choose rendering method based on feature flags
+      if (shouldUseVariableSystem) {
+        return (
+          <VariableBackgroundRenderer
+            key={sectionId}
+            tokenId={effectiveTokenId}
+            background={sectionBackgroundCSS}
             sectionId={sectionId}
+            className="relative"
+          >
+            <LayoutComponent
+              sectionId={sectionId}
+              backgroundType={backgroundType}
+              sectionBackgroundCSS={sectionBackgroundCSS}
+              className=""
+              isEditable={mode === 'edit'}
+              {...(data || {})}
+            />
+          </VariableBackgroundRenderer>
+        );
+      } else {
+        // Legacy rendering with SmartTextSection
+        return (
+          <SmartTextSection
+            key={sectionId}
             backgroundType={backgroundType}
-            sectionBackgroundCSS={sectionBackgroundCSS}
+            sectionId={sectionId}
             className=""
-            isEditable={mode === 'edit'}
-            {...(data || {})}
-          />
-        </SmartTextSection>
-      );
+          >
+            <LayoutComponent
+              sectionId={sectionId}
+              backgroundType={backgroundType}
+              sectionBackgroundCSS={sectionBackgroundCSS}
+              className=""
+              isEditable={mode === 'edit'}
+              {...(data || {})}
+            />
+          </SmartTextSection>
+        );
+      }
     } catch (error) {
       console.error(`Error rendering section ${sectionId}:`, error);
       
@@ -452,50 +487,110 @@ const finalSections: OrderedSection[] = processedSections
     );
   }
 
-  return (
+  // Prepare background system for VariableThemeInjector
+  const variableBackgroundSystem = useMemo(() => {
+    if (!theme?.colors?.sectionBackgrounds) return undefined;
+    
+    return {
+      primary: theme.colors.sectionBackgrounds.primary,
+      secondary: theme.colors.sectionBackgrounds.secondary,
+      neutral: theme.colors.sectionBackgrounds.neutral || 'bg-white',
+      divider: theme.colors.sectionBackgrounds.divider || 'bg-gray-100/50',
+      baseColor: theme.colors.baseColor,
+      accentColor: theme.colors.accentColor,
+      accentCSS: theme.colors.accentCSS,
+    };
+  }, [theme]);
+
+  // Determine rendering approach based on feature flags
+  const shouldUseVariableSystem = useMemo(() => {
+    // Check if variable mode is enabled
+    if (featureFlags.enableVariableMode && variableBackgroundSystem) {
+      return true;
+    }
+    
+    // Check if hybrid mode is enabled and browser supports CSS variables
+    if (featureFlags.enableHybridMode && variableBackgroundSystem) {
+      return true;
+    }
+    
+    // Default to legacy mode
+    return false;
+  }, [featureFlags, variableBackgroundSystem]);
+
+  // Log feature flag status in development
+  useEffect(() => {
+    if (process.env.NODE_ENV === 'development' && featureFlags.enableMigrationDebug) {
+      console.log('🚩 Feature Flags Status:', {
+        tokenId: effectiveTokenId,
+        enableVariableMode: featureFlags.enableVariableMode,
+        enableHybridMode: featureFlags.enableHybridMode,
+        enableLegacyFallbacks: featureFlags.enableLegacyFallbacks,
+        shouldUseVariableSystem,
+        rolloutPercentage: featureFlags.rolloutPercentage,
+        staffAccess: featureFlags.staffAccess,
+      });
+      
+      // Run CSS variable validation in development
+      import('@/utils/cssVariableValidation').then(({ runCSSVariableValidation }) => {
+        runCSSVariableValidation(effectiveTokenId).catch(console.error);
+      });
+    }
+  }, [featureFlags, shouldUseVariableSystem, effectiveTokenId]);
+
+  // Prepare business context for VariableThemeInjector
+  const businessContext = useMemo(() => ({
+    validatedFields,
+    hiddenInferredFields,
+  }), [validatedFields, hiddenInferredFields]);
+
+  // Main renderer with conditional variable system wrapper
+  const renderContent = () => (
     <main 
       className={`landing-page-renderer ${className}`}
       data-mode={mode}
+      data-variable-system={shouldUseVariableSystem ? 'enabled' : 'legacy'}
       style={{
         '--font-heading': `${theme.typography.headingFont}, 'Inter', sans-serif`,
         '--font-body': `${theme.typography.bodyFont}, 'Inter', sans-serif`,
       } as React.CSSProperties}
     >
-      {/* Enhanced Global CSS Variables for Color Tokens */}
-      <style jsx>{`
-        .landing-page-renderer {
-          --color-accent: ${colorTokens.accent};
-          --color-accent-hover: ${colorTokens.accentHover};
-          --color-accent-border: ${colorTokens.accentBorder};
-          --color-cta-bg: ${colorTokens.ctaBg};
-          --color-cta-hover: ${colorTokens.ctaHover};
-          --color-cta-text: ${colorTokens.ctaText};
-          --color-text-on-light: ${colorTokens.textOnLight};
-          --color-text-on-dark: ${colorTokens.textOnDark};
-          --color-text-on-accent: ${colorTokens.textOnAccent};
-          --color-link: ${colorTokens.link};
-          --color-bg-primary: ${colorTokens.bgPrimary};
-          --color-bg-secondary: ${colorTokens.bgSecondary};
-          --color-bg-neutral: ${colorTokens.bgNeutral};
-          --color-bg-divider: ${colorTokens.bgDivider};
-          --color-text-primary: ${colorTokens.textPrimary};
-          --color-text-secondary: ${colorTokens.textSecondary};
-          --color-text-muted: ${colorTokens.textMuted};
-          --color-text-inverse: ${colorTokens.textInverse};
-          --color-surface-card: ${colorTokens.surfaceCard};
-          --color-surface-elevated: ${colorTokens.surfaceElevated};
-          --color-surface-section: ${colorTokens.surfaceSection};
-          --color-surface-overlay: ${colorTokens.surfaceOverlay};
-          --color-border-default: ${colorTokens.borderDefault};
-          --color-border-subtle: ${colorTokens.borderSubtle};
-          --color-border-focus: ${colorTokens.borderFocus};
-          --color-success: ${colorTokens.success};
-          --color-warning: ${colorTokens.warning};
-          --color-error: ${colorTokens.error};
-          --color-info: ${colorTokens.info};
-        }
-      `}</style>
-
+      {/* Enhanced Global CSS Variables for Color Tokens - Only when using variable system */}
+      {shouldUseVariableSystem && (
+        <style jsx>{`
+          .landing-page-renderer {
+            --color-accent: ${colorTokens.accent};
+            --color-accent-hover: ${colorTokens.accentHover};
+            --color-accent-border: ${colorTokens.accentBorder};
+            --color-cta-bg: ${colorTokens.ctaBg};
+            --color-cta-hover: ${colorTokens.ctaHover};
+            --color-cta-text: ${colorTokens.ctaText};
+            --color-text-on-light: ${colorTokens.textOnLight};
+            --color-text-on-dark: ${colorTokens.textOnDark};
+            --color-text-on-accent: ${colorTokens.textOnAccent};
+            --color-link: ${colorTokens.link};
+            --color-bg-primary: ${colorTokens.bgPrimary};
+            --color-bg-secondary: ${colorTokens.bgSecondary};
+            --color-bg-neutral: ${colorTokens.bgNeutral};
+            --color-bg-divider: ${colorTokens.bgDivider};
+            --color-text-primary: ${colorTokens.textPrimary};
+            --color-text-secondary: ${colorTokens.textSecondary};
+            --color-text-muted: ${colorTokens.textMuted};
+            --color-text-inverse: ${colorTokens.textInverse};
+            --color-surface-card: ${colorTokens.surfaceCard};
+            --color-surface-elevated: ${colorTokens.surfaceElevated};
+            --color-surface-section: ${colorTokens.surfaceSection};
+            --color-surface-overlay: ${colorTokens.surfaceOverlay};
+            --color-border-default: ${colorTokens.borderDefault};
+            --color-border-subtle: ${colorTokens.borderSubtle};
+            --color-border-focus: ${colorTokens.borderFocus};
+            --color-success: ${colorTokens.success};
+            --color-warning: ${colorTokens.warning};
+            --color-error: ${colorTokens.error};
+            --color-info: ${colorTokens.info};
+          }
+        `}</style>
+      )}
       {/* Render all sections with ALTERNATING backgrounds */}
       {orderedSections.map(renderSection)}
 
@@ -504,6 +599,14 @@ const finalSections: OrderedSection[] = processedSections
         <div className="fixed bottom-4 right-4 z-50 space-y-2">
           <div className="bg-blue-600 text-white px-3 py-2 rounded-lg shadow-lg text-sm font-medium">
             ✏️ Edit Mode Active
+          </div>
+          {/* Feature Flag Status */}
+          <div className={`px-3 py-2 rounded-lg shadow-lg text-sm font-medium ${
+            shouldUseVariableSystem 
+              ? 'bg-green-600 text-white' 
+              : 'bg-gray-600 text-white'
+          }`}>
+            {shouldUseVariableSystem ? '🎨 Variable System' : '🏗️ Legacy Mode'}
           </div>
           {/* Background System Status */}
           <div className={`px-3 py-2 rounded-lg shadow-lg text-sm font-medium ${
@@ -550,6 +653,12 @@ const finalSections: OrderedSection[] = processedSections
                 <div className="capitalize">{mode}</div>
               </div>
               <div>
+                <div className="text-gray-400">System:</div>
+                <div className={shouldUseVariableSystem ? 'text-green-400' : 'text-gray-400'}>
+                  {shouldUseVariableSystem ? 'Variable' : 'Legacy'}
+                </div>
+              </div>
+              <div>
                 <div className="text-gray-400">Backgrounds:</div>
                 <div className={dynamicBackgroundSystem ? 'text-green-400' : 'text-yellow-400'}>
                   {dynamicBackgroundSystem ? 'Dynamic' : 'Static'}
@@ -584,6 +693,19 @@ const finalSections: OrderedSection[] = processedSections
               </div>
             </div>
             
+            {/* Feature Flag Details */}
+            {featureFlags.enableMigrationDebug && (
+              <div className="mt-2 pt-2 border-t border-gray-700 text-xs">
+                <div className="text-gray-400">Feature Flags:</div>
+                <div className="grid grid-cols-2 gap-2 mt-1">
+                  <div>Variable Mode: <span className={featureFlags.enableVariableMode ? 'text-green-400' : 'text-red-400'}>{featureFlags.enableVariableMode ? 'ON' : 'OFF'}</span></div>
+                  <div>Hybrid Mode: <span className={featureFlags.enableHybridMode ? 'text-green-400' : 'text-red-400'}>{featureFlags.enableHybridMode ? 'ON' : 'OFF'}</span></div>
+                  <div>Rollout: <span className="text-blue-400">{featureFlags.rolloutPercentage}%</span></div>
+                  <div>Staff Access: <span className={featureFlags.staffAccess ? 'text-green-400' : 'text-red-400'}>{featureFlags.staffAccess ? 'YES' : 'NO'}</span></div>
+                </div>
+              </div>
+            )}
+            
             {/* Show actual color values */}
             <div className="mt-2 pt-2 border-t border-gray-700 text-xs">
               <div className="text-gray-400">Color Tokens:</div>
@@ -595,6 +717,34 @@ const finalSections: OrderedSection[] = processedSections
           </div>
         </div>
       )}
-    </main>
+      </main>
+  );
+
+  // Conditionally wrap with VariableThemeInjector based on feature flags
+  return shouldUseVariableSystem ? (
+    <CSSVariableErrorBoundary
+      fallbackMode="legacy"
+      onError={(error, errorInfo) => {
+        console.error('CSS Variable system failed, falling back to legacy mode:', error);
+        // Could track this error in analytics
+        if (typeof window !== 'undefined' && (window as any).gtag) {
+          (window as any).gtag('event', 'css_variable_system_error', {
+            tokenId: effectiveTokenId,
+            error_message: error.message,
+            fallback_mode: 'legacy',
+          });
+        }
+      }}
+    >
+      <VariableThemeInjector
+        tokenId={effectiveTokenId}
+        backgroundSystem={variableBackgroundSystem}
+        businessContext={businessContext}
+      >
+        {renderContent()}
+      </VariableThemeInjector>
+    </CSSVariableErrorBoundary>
+  ) : (
+    renderContent()
   );
 }
