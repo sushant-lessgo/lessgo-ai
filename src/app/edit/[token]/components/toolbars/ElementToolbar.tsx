@@ -6,7 +6,6 @@ import { useEditor } from '@/hooks/useEditor';
 import { useToolbarActions } from '@/hooks/useToolbarActions';
 import { useToolbarVisibility } from '@/hooks/useSelectionPriority';
 import { calculateArrowPosition } from '@/utils/toolbarPositioning';
-import { AdvancedActionsMenu } from './AdvancedActionsMenu';
 import { useButtonConfigModal } from '@/hooks/useButtonConfigModal';
 
 interface ElementToolbarProps {
@@ -19,7 +18,6 @@ export function ElementToolbar({ elementSelection, position, contextActions }: E
   // STEP 1: Check toolbar visibility priority
   const { isVisible, reason } = useToolbarVisibility('element');
   
-  const [showAdvanced, setShowAdvanced] = useState(false);
   const { openModal } = useButtonConfigModal();
 
   // STEP 1: Priority-based early returns
@@ -29,7 +27,6 @@ export function ElementToolbar({ elementSelection, position, contextActions }: E
   }
   
   const toolbarRef = useRef<HTMLDivElement>(null);
-  const advancedRef = useRef<HTMLDivElement>(null);
   const variationsRef = useRef<HTMLDivElement>(null);
 
   const {
@@ -68,13 +65,6 @@ export function ElementToolbar({ elementSelection, position, contextActions }: E
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
-        advancedRef.current &&
-        !advancedRef.current.contains(event.target as Node) &&
-        !toolbarRef.current?.contains(event.target as Node)
-      ) {
-        setShowAdvanced(false);
-      }
-      if (
         variationsRef.current &&
         !variationsRef.current.contains(event.target as Node) &&
         !toolbarRef.current?.contains(event.target as Node)
@@ -84,11 +74,11 @@ export function ElementToolbar({ elementSelection, position, contextActions }: E
       }
     };
 
-    if (showAdvanced || elementVariations.visible) {
+    if (elementVariations.visible) {
       document.addEventListener('mousedown', handleClickOutside);
       return () => document.removeEventListener('mousedown', handleClickOutside);
     }
-  }, [showAdvanced, elementVariations.visible]);
+  }, [elementVariations.visible]);
 
   // Handle unified regeneration with variations
   const handleRegenerate = async () => {
@@ -113,16 +103,6 @@ export function ElementToolbar({ elementSelection, position, contextActions }: E
     }
   };
 
-  // Convert CTA to form
-  const handleConvertToForm = () => {
-    if (elementSelection.elementKey.includes('cta')) {
-      executeAction('convert-cta-to-form', { 
-        sectionId: elementSelection.sectionId,
-        elementKey: elementSelection.elementKey 
-      });
-      announceLiveRegion('Converting CTA to form');
-    }
-  };
 
   // Handle button configuration
   const handleButtonConfiguration = (e?: React.MouseEvent) => {
@@ -135,19 +115,7 @@ export function ElementToolbar({ elementSelection, position, contextActions }: E
     openModal(elementSelection);
   };
 
-  // Get element type for context
-  const getElementType = () => {
-    const elementKey = elementSelection.elementKey;
-    if (elementKey.includes('cta') || elementKey.includes('button')) return 'button';
-    if (elementKey.includes('headline')) return 'headline';
-    if (elementKey.includes('text')) return 'text';
-    return 'element';
-  };
 
-  // Check if element can be converted to form
-  const canConvertToForm = () => {
-    return elementSelection.elementKey.includes('cta') || elementSelection.elementKey.includes('button');
-  };
 
   // Check if element has text content
   const hasTextContent = () => {
@@ -155,6 +123,11 @@ export function ElementToolbar({ elementSelection, position, contextActions }: E
     return elementKey.includes('text') || elementKey.includes('headline') || 
            elementKey.includes('subhead') || elementKey.includes('cta') || 
            elementKey.includes('button') || elementKey.includes('description');
+  };
+
+  // Check if element can be converted to form
+  const canConvertToForm = () => {
+    return elementSelection.elementKey.includes('cta') || elementSelection.elementKey.includes('button');
   };
 
   // Primary Actions
@@ -204,45 +177,6 @@ export function ElementToolbar({ elementSelection, position, contextActions }: E
     },
   ];
 
-  // Advanced Actions - context-aware
-  const advancedActions = [
-    {
-      id: 'element-type',
-      label: `Change to ${getElementType() === 'button' ? 'Text' : 'Button'}`,
-      icon: 'transform',
-      handler: () => executeAction('change-element-type', { elementSelection }),
-    },
-    ...(canConvertToForm() ? [{
-      id: 'convert-form',
-      label: 'Convert to Form',
-      icon: 'form',
-      handler: handleConvertToForm,
-    }] : []),
-    {
-      id: 'link-settings',
-      label: 'Link Settings',
-      icon: 'link',
-      handler: () => executeAction('link-settings', { elementSelection }),
-    },
-    {
-      id: 'animation-settings',
-      label: 'Animation',
-      icon: 'animation',
-      handler: () => executeAction('animation-settings', { elementSelection }),
-    },
-    {
-      id: 'accessibility',
-      label: 'Accessibility',
-      icon: 'accessibility',
-      handler: () => executeAction('accessibility-settings', { elementSelection }),
-    },
-    {
-      id: 'element-analytics',
-      label: 'View Analytics',
-      icon: 'chart',
-      handler: () => executeAction('element-analytics', { elementSelection }),
-    },
-  ];
 
 
   return (
@@ -306,34 +240,9 @@ export function ElementToolbar({ elementSelection, position, contextActions }: E
               </button>
             </React.Fragment>
           ))}
-          
-          {/* Advanced Actions Trigger */}
-          <div className="w-px h-6 bg-gray-200 mx-1" />
-          <button
-            onClick={() => setShowAdvanced(!showAdvanced)}
-            className={`flex items-center space-x-1 px-2 py-1 text-xs rounded transition-colors ${
-              showAdvanced 
-                ? 'bg-gray-100 text-gray-900' 
-                : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
-            }`}
-            title="More options"
-          >
-            <span>⋯</span>
-          </button>
         </div>
       </div>
 
-      {/* Advanced Actions Menu */}
-      {showAdvanced && (
-        <AdvancedActionsMenu
-          ref={advancedRef}
-          actions={advancedActions}
-          triggerElement={document.body}
-          toolbarType="element"
-          isVisible={showAdvanced}
-          onClose={() => setShowAdvanced(false)}
-        />
-      )}
 
       {/* Variations Menu */}
       {elementVariations.visible && (
