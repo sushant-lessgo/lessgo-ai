@@ -213,7 +213,7 @@ export default function ValueStackCTA(props: LayoutComponentProps) {
               size="large"
               sectionId={sectionId}
               elementKey="cta_text"
-              onClick={createCTAClickHandler(sectionId)}
+              onClick={createCTAClickHandler(sectionId, "cta_text")}
             />
             
             {blockContent.guarantee_text && (

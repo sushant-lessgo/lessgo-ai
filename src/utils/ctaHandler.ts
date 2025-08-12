@@ -6,18 +6,51 @@ import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
  * @param sectionId - The section ID to get ctaConfig from
  * @returns onClick handler function
  */
-export function createCTAClickHandler(sectionId: string) {
+export function createCTAClickHandler(sectionId: string, elementKey?: string) {
   return () => {
     // Get ctaConfig from section data
     const { content } = useEditStore.getState();
     const sectionData = content[sectionId];
-    const ctaConfig = sectionData?.cta;
     
-    console.log('🔗 CTA Button clicked:', { ctaConfig, sectionId });
+    // First try to find CTA config in section.cta (legacy)
+    let ctaConfig = sectionData?.cta;
+    
+    // If not found, look for button config in element metadata (new approach)
+    if (!ctaConfig && elementKey && sectionData?.elements?.[elementKey]?.metadata?.buttonConfig) {
+      const buttonConfig = sectionData.elements[elementKey].metadata.buttonConfig;
+      ctaConfig = {
+        type: buttonConfig.type,
+        url: buttonConfig.url,
+        formId: buttonConfig.formId,
+        behavior: buttonConfig.behavior
+      };
+    }
+    
+    // Also check if there's a CTA button element we can infer config from
+    if (!ctaConfig && sectionData?.elements) {
+      // Look for CTA-related elements
+      const ctaElement = sectionData.elements['cta_text'] || sectionData.elements['cta'];
+      if (ctaElement?.metadata?.buttonConfig) {
+        const buttonConfig = ctaElement.metadata.buttonConfig;
+        ctaConfig = {
+          type: buttonConfig.type,
+          url: buttonConfig.url,
+          formId: buttonConfig.formId,
+          behavior: buttonConfig.behavior
+        };
+      }
+    }
+    
+    console.log('🔗 CTA Button clicked:', { ctaConfig, sectionId, elementKey, sectionData: sectionData?.elements });
     
     if (ctaConfig?.type === 'link' && ctaConfig.url) {
-      console.log('🔗 Opening external link:', ctaConfig.url);
-      window.open(ctaConfig.url, '_blank', 'noopener,noreferrer');
+      // Ensure URL has protocol - add https:// if missing
+      let url = ctaConfig.url;
+      if (!url.match(/^https?:\/\//)) {
+        url = `https://${url}`;
+      }
+      console.log('🔗 Opening external link:', url);
+      window.open(url, '_blank', 'noopener,noreferrer');
     } else if (ctaConfig?.type === 'form' && ctaConfig.formId) {
       console.log('📝 Form CTA clicked:', ctaConfig.formId);
       // Handle form CTAs - could scroll to form or open modal based on behavior
@@ -32,6 +65,7 @@ export function createCTAClickHandler(sectionId: string) {
       }
     } else {
       console.log('⚠️ No CTA config or URL found:', ctaConfig);
+      console.log('Available section elements:', Object.keys(sectionData?.elements || {}));
     }
   };
 }

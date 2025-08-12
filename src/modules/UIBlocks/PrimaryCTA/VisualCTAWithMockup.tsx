@@ -210,7 +210,7 @@ export default function VisualCTAWithMockup(props: LayoutComponentProps) {
                 size="large"
                 sectionId={sectionId}
                 elementKey="cta_text"
-                onClick={createCTAClickHandler(sectionId)}
+                onClick={createCTAClickHandler(sectionId, "cta_text")}
               />
               
               {blockContent.secondary_cta && (
@@ -222,7 +222,7 @@ export default function VisualCTAWithMockup(props: LayoutComponentProps) {
                   size="large"
                   sectionId={sectionId}
                   elementKey="secondary_cta"
-                  onClick={createCTAClickHandler(sectionId)}
+                  onClick={createCTAClickHandler(sectionId, "cta_text")}
                 />
               )}
             </div>

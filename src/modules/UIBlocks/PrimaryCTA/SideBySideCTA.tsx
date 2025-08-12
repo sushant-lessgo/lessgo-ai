@@ -131,7 +131,7 @@ export default function SideBySideCTA(props: LayoutComponentProps) {
                 variant="primary"
                 sectionId={sectionId}
                 elementKey="left_cta_text"
-                onClick={createCTAClickHandler(sectionId)}
+                onClick={createCTAClickHandler(sectionId, "cta_text")}
               />
             </div>
           </div>
@@ -183,7 +183,7 @@ export default function SideBySideCTA(props: LayoutComponentProps) {
                 variant="secondary"
                 sectionId={sectionId}
                 elementKey="right_cta_text"
-                onClick={createCTAClickHandler(sectionId)}
+                onClick={createCTAClickHandler(sectionId, "cta_text")}
               />
             </div>
           </div>

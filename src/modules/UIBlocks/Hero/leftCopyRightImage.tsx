@@ -350,7 +350,7 @@ export default function LeftCopyRightImage(props: LayoutComponentProps) {
                 variant="primary"
                 sectionId={sectionId}
                 elementKey="cta_text"
-                onClick={createCTAClickHandler(sectionId)}
+                onClick={createCTAClickHandler(sectionId, "cta_text")}
               />
 
               {/* ✅ ENHANCED: Trust Indicators with Dynamic Color */}

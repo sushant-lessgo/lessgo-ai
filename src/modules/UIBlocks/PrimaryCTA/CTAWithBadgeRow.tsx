@@ -166,7 +166,7 @@ export default function CTAWithBadgeRow(props: LayoutComponentProps) {
             size="large"
             sectionId={sectionId}
             elementKey="cta_text"
-            onClick={createCTAClickHandler(sectionId)}
+            onClick={createCTAClickHandler(sectionId, "cta_text")}
           />
         </div>
 

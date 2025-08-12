@@ -151,7 +151,7 @@ export default function CenteredHeadlineCTA(props: LayoutComponentProps) {
             className="text-xl px-12 py-6 shadow-2xl hover:shadow-3xl"
             sectionId={sectionId}
             elementKey="cta_text"
-            onClick={createCTAClickHandler(sectionId)}
+            onClick={createCTAClickHandler(sectionId, "cta_text")}
           />
         </div>
 

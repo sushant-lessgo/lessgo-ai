@@ -323,7 +323,7 @@ export default function SplitScreen(props: LayoutComponentProps) {
                   variant="primary"
                   sectionId={sectionId}
                   elementKey="cta_text"
-                  onClick={createCTAClickHandler(sectionId)}
+                  onClick={createCTAClickHandler(sectionId, "cta_text")}
                 />
 
                 <TrustIndicators 
