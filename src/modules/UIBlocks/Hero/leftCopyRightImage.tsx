@@ -413,6 +413,13 @@ export default function LeftCopyRightImage(props: LayoutComponentProps) {
                       });
                     }
                   }}
+                  onClick={(e) => {
+                    if (mode === 'edit') {
+                      e.stopPropagation();
+                      e.preventDefault();
+                      console.log('🖼️ Image onClick - prevented bubbling');
+                    }
+                  }}
                 />
               </div>
             ) : (

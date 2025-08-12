@@ -498,8 +498,14 @@ const handleAddSection = (afterSectionId?: string) => {
 
   // Clear selection on background click
  const handleBackgroundClick = (event: React.MouseEvent) => {
+  console.log('🎯 handleBackgroundClick called', {
+    target: event.target,
+    currentTarget: event.currentTarget,
+    condition: event.target === event.currentTarget
+  });
   // Only clear if clicking directly on the background, not on children
   if (event.target === event.currentTarget) {
+    console.log('🎯 CLEARING SELECTION from background click');
     clearSelection();
     hideElementPicker(); // ADD THIS LINE
     announceLiveRegion?.('Cleared selection');

@@ -25,6 +25,7 @@ export function useSelectionPriority() {
     textEditingElement,
     selectedElement,
     selectedSection,
+    toolbar,
   } = useEditStore();
   
   // STEP 2: Initialize transition lock system
@@ -59,8 +60,9 @@ export function useSelectionPriority() {
       textEditingElement,
       selectedElement,
       selectedSection,
+      toolbar,
     });
-  }, [mode, isTextEditing, textEditingElement, selectedElement, selectedSection]);
+  }, [mode, isTextEditing, textEditingElement, selectedElement, selectedSection, toolbar]);
   
   // Get active toolbar type (before lock consideration)
   const naturalActiveToolbar = useMemo(() => {
@@ -85,10 +87,18 @@ export function useSelectionPriority() {
     // Detect element selection changes
     else if (current.selectedElement?.elementKey !== previous.selectedElement?.elementKey) {
       if (current.selectedElement && !current.isTextEditing) {
+        // Determine the correct toolbar type based on explicit toolbar setting
+        const correctToolbarType = editorSelection.toolbarType || 'element';
+        console.log('🔒 Locking transition for element change:', {
+          elementKey: current.selectedElement.elementKey,
+          toolbarType: correctToolbarType,
+          explicitType: editorSelection.toolbarType
+        });
+        
         transitionLock.lockForElementChange({
           sectionId: current.selectedElement.sectionId,
           elementKey: current.selectedElement.elementKey,
-        });
+        }, correctToolbarType);
       }
     }
     

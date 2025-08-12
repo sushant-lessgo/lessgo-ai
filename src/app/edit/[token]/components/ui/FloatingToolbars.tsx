@@ -31,13 +31,21 @@ export function FloatingToolbars() {
   
   // Debug logging - only on actual changes
   useEffect(() => {
-    if (process.env.NODE_ENV === 'development') {
-      console.log('🎪 FloatingToolbars state changed:', {
-        activeToolbar,
-        hasActiveToolbar,
-      });
-    }
-  }, [activeToolbar, hasActiveToolbar]);
+    console.log('🎪🎪🎪 FloatingToolbars state changed:', {
+      activeToolbar,
+      hasActiveToolbar,
+      toolbarTarget,
+      editorSelection,
+      toolbar
+    });
+    console.log('🎪 shouldShowToolbar results:', {
+      section: shouldShowToolbar('section'),
+      element: shouldShowToolbar('element'), 
+      text: shouldShowToolbar('text'),
+      image: shouldShowToolbar('image'),
+      form: shouldShowToolbar('form')
+    });
+  }, [activeToolbar, hasActiveToolbar, toolbar, toolbarTarget, editorSelection, shouldShowToolbar]);
 
 
   // No longer need these hooks - they were removed
@@ -88,12 +96,38 @@ export function FloatingToolbars() {
         />
       )}
 
-      {shouldShowToolbar('image') && toolbarTarget.targetId && activeToolbar === 'image' && (
-        <ImageToolbar
-          targetId={toolbarTarget.targetId}
-          position={position}
-          contextActions={contextActions}
-        />
+      {(() => {
+        const shouldShow = shouldShowToolbar('image');
+        const hasTargetId = !!toolbarTarget.targetId;
+        const isImageActive = activeToolbar === 'image';
+        const allConditions = shouldShow && hasTargetId && isImageActive;
+        
+        console.log('🖼️ ImageToolbar render check:', {
+          shouldShow,
+          hasTargetId,
+          targetId: toolbarTarget.targetId,
+          isImageActive,
+          activeToolbar,
+          allConditions,
+          toolbarTarget: toolbarTarget
+        });
+        
+        return allConditions;
+      })() && (
+        <>
+          {console.log('🖼️ ImageToolbar rendering with:', {
+            shouldShowImage: shouldShowToolbar('image'),
+            targetId: toolbarTarget.targetId, 
+            activeToolbar,
+            position,
+            contextActions
+          })}
+          <ImageToolbar
+            targetId={toolbarTarget.targetId}
+            position={position}
+            contextActions={contextActions}
+          />
+        </>
       )}
 
       {shouldShowToolbar('form') && toolbarTarget.targetId && activeToolbar === 'form' && (

@@ -15,16 +15,15 @@ interface ElementToolbarProps {
 }
 
 export function ElementToolbar({ elementSelection, position, contextActions }: ElementToolbarProps) {
+  // ALL HOOKS MUST BE CALLED FIRST - BEFORE ANY CONDITIONAL RETURNS
+  
   // STEP 1: Check toolbar visibility priority
   const { isVisible, reason } = useToolbarVisibility('element');
   
   const { openModal } = useButtonConfigModal();
-
-  // STEP 1: Priority-based early returns
-  if (!isVisible) {
-    console.log('🔧 ElementToolbar hidden by priority system:', reason);
-    return null;
-  }
+  
+  // Get the current toolbar state to check if image/form toolbar is active
+  const toolbar = useEditStore((state) => state.toolbar);
   
   const toolbarRef = useRef<HTMLDivElement>(null);
   const variationsRef = useRef<HTMLDivElement>(null);
@@ -43,6 +42,54 @@ export function ElementToolbar({ elementSelection, position, contextActions }: E
   const { executeAction } = useToolbarActions();
   const { enterTextEditMode } = useEditor();
 
+  // Close menus when clicking outside - MOVED UP WITH OTHER HOOKS
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        variationsRef.current &&
+        !variationsRef.current.contains(event.target as Node) &&
+        !toolbarRef.current?.contains(event.target as Node)
+      ) {
+        // Hide variations using store action
+        hideElementVariations();
+      }
+    };
+
+    if (elementVariations.visible) {
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => document.removeEventListener('mousedown', handleClickOutside);
+    }
+  }, [elementVariations.visible, hideElementVariations]);
+
+  // NOW WE CAN DO CONDITIONAL RETURNS AFTER ALL HOOKS ARE CALLED
+  
+  // STEP 1: Priority-based early returns
+  console.log('🔧 ElementToolbar priority check:', {
+    isVisible,
+    reason,
+    condition: !isVisible
+  });
+  
+  if (!isVisible) {
+    console.log('🔧 ElementToolbar hidden by priority system:', reason);
+    return null;
+  }
+  
+  // Don't show element toolbar if image or form toolbar is explicitly active
+  console.log('🔧 ElementToolbar toolbar state check:', {
+    toolbarType: toolbar?.type,
+    toolbarVisible: toolbar?.visible,
+    toolbarTargetId: toolbar?.targetId,
+    fullToolbarState: toolbar
+  });
+  
+  if (toolbar?.type === 'image' || toolbar?.type === 'form') {
+    console.log('🔧🔧🔧 ElementToolbar hidden: specialized toolbar active:', toolbar.type);
+    return null;
+  }
+  
+  console.log('🔧 ElementToolbar proceeding to render with toolbar type:', toolbar?.type);
+
   // Enter text editing mode using unified system
   const handleEditText = (e?: React.MouseEvent) => {
     if (e) {
@@ -60,25 +107,6 @@ export function ElementToolbar({ elementSelection, position, contextActions }: E
     targetElement.getBoundingClientRect(),
     { width: 380, height: 48 }
   ) : null;
-
-  // Close menus when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (
-        variationsRef.current &&
-        !variationsRef.current.contains(event.target as Node) &&
-        !toolbarRef.current?.contains(event.target as Node)
-      ) {
-        // Hide variations using store action
-        hideElementVariations();
-      }
-    };
-
-    if (elementVariations.visible) {
-      document.addEventListener('mousedown', handleClickOutside);
-      return () => document.removeEventListener('mousedown', handleClickOutside);
-    }
-  }, [elementVariations.visible]);
 
   // Handle unified regeneration with variations
   const handleRegenerate = async () => {

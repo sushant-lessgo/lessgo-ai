@@ -174,8 +174,8 @@ export function useTransitionLock(config: Partial<TransitionLockConfig> = {}) {
   }, [lockTransition, finalConfig.lockDuration]);
   
   // Lock during element selection changes
-  const lockForElementChange = useCallback((elementInfo: { sectionId: string; elementKey: string }) => {
-    lockTransition('element', `element selected: ${elementInfo.elementKey}`, finalConfig.lockDuration);
+  const lockForElementChange = useCallback((elementInfo: { sectionId: string; elementKey: string }, toolbarType: ToolbarType = 'element') => {
+    lockTransition(toolbarType, `element selected: ${elementInfo.elementKey}`, finalConfig.lockDuration);
   }, [lockTransition, finalConfig.lockDuration]);
   
   // Lock during section selection changes

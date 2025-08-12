@@ -9,6 +9,62 @@ import type {
 } from '@/types/core';
 
 /**
+ * Helper function to parse image targetId (copied from ImageToolbar)
+ */
+function parseImageTargetId(targetId: string) {
+  console.log('🔍 Parsing image targetId:', targetId);
+  
+  // Check if targetId follows the "sectionId.elementKey" format (from showToolbar)
+  if (targetId.includes('.')) {
+    const [sectionId, elementKey] = targetId.split('.');
+    const result = { sectionId, elementKey };
+    console.log('🎯 Dot notation parsed:', result);
+    return result;
+  }
+  
+  // For hero images, targetId format is: sectionId-hero-image
+  // For other images, targetId format might be: sectionId-elementKey
+  const parts = targetId.split('-');
+  console.log('🔍 Split parts:', parts);
+  
+  // Check most specific patterns first (longest matches)
+  if (parts.length >= 5 && parts[parts.length - 4] === 'image' && parts[parts.length - 3] === 'first' && parts[parts.length - 2] === 'hero') {
+    // Image first hero case: "section123-image-first-hero-image" -> sectionId: "section123", elementKey: "image_first_hero_image"
+    const sectionId = parts.slice(0, -4).join('-');
+    const result = { sectionId, elementKey: 'image_first_hero_image' };
+    console.log('🎯 Image first hero image parsed:', result);
+    return result;
+  } else if (parts.length >= 4 && parts[parts.length - 3] === 'center' && parts[parts.length - 2] === 'hero') {
+    // Center hero image case: "section123-center-hero-image" -> sectionId: "section123", elementKey: "center_hero_image"
+    const sectionId = parts.slice(0, -3).join('-');
+    const result = { sectionId, elementKey: 'center_hero_image' };
+    console.log('🎯 Center hero image parsed:', result);
+    return result;
+  } else if (parts.length >= 4 && parts[parts.length - 3] === 'split' && parts[parts.length - 2] === 'hero') {
+    // Split hero image case: "section123-split-hero-image" -> sectionId: "section123", elementKey: "split_hero_image"
+    const sectionId = parts.slice(0, -3).join('-');
+    const result = { sectionId, elementKey: 'split_hero_image' };
+    console.log('🎯 Split hero image parsed:', result);
+    return result;
+  } else if (parts.length >= 3 && parts[parts.length - 2] === 'hero') {
+    // Standard hero image case: "section123-hero-image" -> sectionId: "section123", elementKey: "hero_image"
+    const sectionId = parts.slice(0, -2).join('-');
+    const result = { sectionId, elementKey: 'hero_image' };
+    console.log('🎯 Hero image parsed:', result);
+    return result;
+  } else if (parts.length >= 2) {
+    // Other image cases - assume format: "sectionId-elementKey"
+    const sectionId = parts[0];
+    const elementKey = parts.slice(1).join('-');
+    const result = { sectionId, elementKey };
+    console.log('🎯 Other image parsed:', result);
+    return result;
+  }
+  console.log('❌ Failed to parse image targetId');
+  return null;
+}
+
+/**
  * Helper function to get context-aware actions for toolbar types
  */
 function getActionsForType(type: string, targetId: string, state: EditStore): string[] {
@@ -215,7 +271,8 @@ export function createUIActions(set: any, get: any): UIActions {
     
     showToolbar: (type: 'section' | 'element' | 'text' | 'image' | 'form', targetId: string, position?: { x: number; y: number }) =>
       set((state: EditStore) => {
-        console.log('🔧 showToolbar called with:', { type, targetId, position });
+        console.log('🎯🎯🎯 showToolbar called with:', { type, targetId, position });
+        console.log('🎯 Current toolbar state BEFORE update:', state.toolbar);
         
         // Simple position calculation if not provided
         const pos = position || { x: 0, y: 0 };
@@ -223,7 +280,7 @@ export function createUIActions(set: any, get: any): UIActions {
         // Get context-aware actions based on type
         const actions = getActionsForType(type, targetId, state);
         
-        console.log('🔧 Setting toolbar state:', { type, visible: true, position: pos, targetId, actions });
+        console.log('🎯 Setting NEW toolbar state:', { type, visible: true, position: pos, targetId, actions });
         
         // Update toolbar state
         state.toolbar = {
@@ -233,6 +290,8 @@ export function createUIActions(set: any, get: any): UIActions {
           targetId,
           actions,
         };
+        
+        console.log('🎯 Toolbar state AFTER update:', state.toolbar);
         
         // Update selection state
         if (type === 'section') {
@@ -256,6 +315,31 @@ export function createUIActions(set: any, get: any): UIActions {
               elementKey,
               type: 'text' as any,
               editMode: 'inline' as any
+            };
+            state.selectedSection = sectionId;
+          }
+        } else if (type === 'image') {
+          // For image toolbar, parse the complex targetId format
+          const parsedImage = parseImageTargetId(targetId);
+          if (parsedImage) {
+            state.selectedElement = { 
+              sectionId: parsedImage.sectionId, 
+              elementKey: parsedImage.elementKey,
+              type: 'image' as any,
+              editMode: 'edit' as any
+            };
+            state.selectedSection = parsedImage.sectionId;
+          }
+          console.log('🎯 Image selection state set:', parsedImage);
+        } else if (type === 'form') {
+          // For form toolbar, parse the targetId (could be complex like image)
+          const [sectionId, elementKey] = targetId.split('.');
+          if (sectionId && elementKey) {
+            state.selectedElement = { 
+              sectionId, 
+              elementKey,
+              type: 'form' as any,
+              editMode: 'edit' as any
             };
             state.selectedSection = sectionId;
           }

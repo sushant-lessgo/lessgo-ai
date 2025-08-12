@@ -16,6 +16,12 @@ interface ImageToolbarProps {
 }
 
 export function ImageToolbar({ targetId, position, contextActions }: ImageToolbarProps) {
+  console.log('🖼️🖼️🖼️ ImageToolbar component initialized with props:', {
+    targetId,
+    position, 
+    contextActions
+  });
+
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [showUploader, setShowUploader] = useState(false);
   const [showStockPhotos, setShowStockPhotos] = useState(false);
@@ -92,11 +98,16 @@ export function ImageToolbar({ targetId, position, contextActions }: ImageToolba
 
   // Calculate arrow position
   const targetElement = document.querySelector(`[data-image-id="${targetId}"]`);
+  console.log('🖼️ Looking for target element with selector:', `[data-image-id="${targetId}"]`);
+  console.log('🖼️ Found target element:', targetElement);
+  
   const arrowInfo = targetElement ? calculateArrowPosition(
     position,
     targetElement.getBoundingClientRect(),
     { width: 340, height: 48 }
   ) : null;
+  
+  console.log('🖼️ Arrow info calculated:', arrowInfo);
 
 
 
@@ -293,8 +304,11 @@ export function ImageToolbar({ targetId, position, contextActions }: ImageToolba
 
 
 
+  console.log('🖼️ ImageToolbar about to render with position:', position);
+
   return (
     <>
+      {console.log('🖼️ ImageToolbar JSX rendering now!')}
       <div 
         ref={toolbarRef}
         className="fixed bg-white border border-gray-200 rounded-lg shadow-lg transition-all duration-200"

@@ -19,6 +19,9 @@ export interface EditorSelection {
   
   // Mode context
   mode: 'edit' | 'preview';
+  
+  // Explicit toolbar type from store
+  toolbarType?: ToolbarType;
 }
 
 export type ToolbarType = 'text' | 'element' | 'section' | 'image' | 'form' | null;
@@ -37,17 +40,28 @@ const toolbarCache = new Map<string, { result: ToolbarType; timestamp: number }>
 const CACHE_TTL = 100; // 100ms cache
 
 export function getActiveToolbar(selection: EditorSelection): ToolbarType {
-  // Create cache key from selection state
-  const cacheKey = `${selection.mode}-${selection.isTextEditing}-${selection.textEditingElement?.elementKey}-${selection.selectedElement?.elementKey}-${selection.selectedSection}`;
+  console.log('📊 getActiveToolbar called with selection:', {
+    mode: selection.mode,
+    isTextEditing: selection.isTextEditing,
+    textEditingElement: selection.textEditingElement,
+    selectedElement: selection.selectedElement,
+    selectedSection: selection.selectedSection,
+    toolbarType: selection.toolbarType
+  });
+
+  // Create cache key from selection state (include toolbarType)
+  const cacheKey = `${selection.mode}-${selection.isTextEditing}-${selection.textEditingElement?.elementKey}-${selection.selectedElement?.elementKey}-${selection.selectedSection}-${selection.toolbarType}`;
   
   // Check cache
   const cached = toolbarCache.get(cacheKey);
   if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
+    console.log('📊 Returning cached result:', cached.result);
     return cached.result;
   }
   
   // Not in edit mode - no toolbar
   if (selection.mode !== 'edit') {
+    console.log('📊 Not in edit mode, returning null');
     toolbarCache.set(cacheKey, { result: null, timestamp: Date.now() });
     return null;
   }
@@ -57,15 +71,28 @@ export function getActiveToolbar(selection: EditorSelection): ToolbarType {
   // Priority 1: Text editing always wins
   if (selection.isTextEditing && selection.textEditingElement) {
     result = 'text';
+    console.log('📊 Priority 1: Text editing active, result:', result);
   }
-  // Priority 2: Element selection - detect element type
+  // Priority 2: Check explicit toolbar type for specialized toolbars (image, form)
+  else if (selection.toolbarType === 'image' || selection.toolbarType === 'form') {
+    result = selection.toolbarType;
+    console.log('📊 Priority 2: Explicit toolbar type found, result:', result);
+  }
+  // Priority 3: Element selection - generic element toolbar
   else if (selection.selectedElement) {
     result = 'element';
+    console.log('📊 Priority 3: Element selection active, result:', result);
   }
-  // Priority 3: Section selection
+  // Priority 4: Section selection
   else if (selection.selectedSection) {
     result = 'section';
+    console.log('📊 Priority 4: Section selection active, result:', result);
   }
+  else {
+    console.log('📊 No active selection, result: null');
+  }
+  
+  console.log('📊 Final getActiveToolbar result:', result);
   
   // Cache result
   toolbarCache.set(cacheKey, { result, timestamp: Date.now() });
@@ -92,6 +119,7 @@ export function createEditorSelection(storeState: {
   textEditingElement?: { sectionId: string; elementKey: string };
   selectedElement?: ElementSelection;
   selectedSection?: string;
+  toolbar?: { type?: ToolbarType };
 }): EditorSelection {
   return {
     mode: storeState.mode,
@@ -99,6 +127,7 @@ export function createEditorSelection(storeState: {
     textEditingElement: storeState.textEditingElement,
     selectedElement: storeState.selectedElement,
     selectedSection: storeState.selectedSection,
+    toolbarType: storeState.toolbar?.type,
   };
 }
 
@@ -112,7 +141,7 @@ export function shouldShowToolbar(
   targetType: ToolbarType, 
   currentSelection: EditorSelection
 ): boolean {
-  const cacheKey = `${targetType}-${currentSelection.mode}-${currentSelection.isTextEditing}-${currentSelection.textEditingElement?.elementKey}-${currentSelection.selectedElement?.elementKey}-${currentSelection.selectedSection}`;
+  const cacheKey = `${targetType}-${currentSelection.mode}-${currentSelection.isTextEditing}-${currentSelection.textEditingElement?.elementKey}-${currentSelection.selectedElement?.elementKey}-${currentSelection.selectedSection}-${currentSelection.toolbarType}`;
   
   // Check cache
   const cached = showCache.get(cacheKey);
@@ -150,6 +179,12 @@ export function getToolbarTarget(selection: EditorSelection): {
 } {
   const toolbarType = getActiveToolbar(selection);
   
+  console.log('🎯 getToolbarTarget called with:', {
+    toolbarType,
+    selectedElement: selection.selectedElement,
+    toolbarTypeFromSelection: selection.toolbarType
+  });
+  
   switch (toolbarType) {
     case 'text':
       return {
@@ -163,6 +198,24 @@ export function getToolbarTarget(selection: EditorSelection): {
     case 'element':
       return {
         type: 'element',
+        targetId: selection.selectedElement ? 
+          `${selection.selectedElement.sectionId}.${selection.selectedElement.elementKey}` : null,
+        sectionId: selection.selectedElement?.sectionId || null,
+        elementKey: selection.selectedElement?.elementKey || null,
+      };
+      
+    case 'image':
+      return {
+        type: 'image',
+        targetId: selection.selectedElement ? 
+          `${selection.selectedElement.sectionId}.${selection.selectedElement.elementKey}` : null,
+        sectionId: selection.selectedElement?.sectionId || null,
+        elementKey: selection.selectedElement?.elementKey || null,
+      };
+      
+    case 'form':
+      return {
+        type: 'form',
         targetId: selection.selectedElement ? 
           `${selection.selectedElement.sectionId}.${selection.selectedElement.elementKey}` : null,
         sectionId: selection.selectedElement?.sectionId || null,

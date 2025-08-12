@@ -212,6 +212,13 @@ export function useEditor() {
     if (isToolbarClick) {
       return;
     }
+
+    // Check if click is on an image - let image handlers work
+    const isImageClick = target.tagName === 'IMG' && target.getAttribute('data-image-id');
+    if (isImageClick) {
+      console.log('🖼️ handleEditorClick: Detected image click, allowing image handlers to work');
+      return; // Don't interfere with image click handling
+    }
     
     // Check if click is on a modal or modal-related element - don't interfere
     const isModalClick = 
