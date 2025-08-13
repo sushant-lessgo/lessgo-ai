@@ -15,10 +15,10 @@ import { ValidationWarnings } from './ValidationWarnings';
 import { BaseModal } from '../modals/BaseModal';
 import { useVariableTheme } from '@/modules/Design/ColorSystem/VariableThemeInjector';
 // import { VariableBackgroundRenderer, VariableBackgroundVariation } from '@/modules/Design/ColorSystem/VariableBackgroundRenderer'; // Disabled
-import { migrationAdapter } from '@/modules/Design/ColorSystem/migrationAdapter';
+// import { migrationAdapter } from '@/modules/Design/ColorSystem/migrationAdapter'; // Disabled until CSS variable system is ready
 // Using simple buttons instead of tabs for now
 import { Badge } from '@/components/ui/badge';
-import { Info, Sparkles, Palette, Code, Eye } from 'lucide-react';
+import { Info, Sparkles, Palette, Code } from 'lucide-react';
 import type { BackgroundValidationResult, BackgroundSelectorMode } from '@/types/core';
 import type { VariableBackgroundVariation as VarBgVariation } from '@/modules/Design/ColorSystem/migrationAdapter';
 
@@ -44,11 +44,13 @@ export function VariableBackgroundModal({
   tokenId,
   enableVariableMode = true 
 }: VariableBackgroundModalProps) {
+  console.log('🕵️ [VariableBackgroundModal] Modal rendering with isOpen:', isOpen);
   const [validationResult, setValidationResult] = useState<BackgroundValidationResult | null>(null);
   const [isValidating, setIsValidating] = useState(false);
   const [selectedVariation, setSelectedVariation] = useState<any>(null);
   const [customColors, setCustomColorsState] = useState<CustomColorState>({});
   const [showVariableCode, setShowVariableCode] = useState(false);
+  const [hasInitialized, setHasInitialized] = useState(false);
   
   // Get variable theme context
   const { phase, isVariableMode, isHybridMode, flags } = useVariableTheme(tokenId);
@@ -70,6 +72,31 @@ export function VariableBackgroundModal({
     handleResetToGenerated,
   } = useBackgroundSelector(tokenId);
 
+  // Initialize state when modal opens
+  useEffect(() => {
+    if (isOpen && !hasInitialized) {
+      // Find the currently applied background variation from compatibleOptions
+      const currentVariation = compatibleOptions.find(option => {
+        if ('tailwindClass' in option) {
+          return option.tailwindClass === currentBackgroundSystem?.primary;
+        }
+        return false;
+      });
+      
+      if (currentVariation) {
+        setSelectedVariation(currentVariation);
+        setSelectedBackground(currentBackgroundSystem);
+      }
+      
+      setHasInitialized(true);
+    }
+    
+    // Reset initialization flag when modal closes
+    if (!isOpen) {
+      setHasInitialized(false);
+    }
+  }, [isOpen, hasInitialized, compatibleOptions, currentBackgroundSystem, setSelectedBackground]);
+
   // Enhanced mode options based on migration phase
   const availableModes = useMemo(() => {
     const modes: Array<{ value: BackgroundSelectorMode; label: string; description: string; icon: React.ReactNode }> = [
@@ -81,6 +108,14 @@ export function VariableBackgroundModal({
       }
     ];
     
+    console.log('🔍 [MODAL DEBUG] availableModes calculation:', {
+      phase,
+      isVariableMode,
+      isHybridMode,
+      enableCustomColorPicker: flags.enableCustomColorPicker,
+      allFlags: flags
+    });
+    
     // Note: Variable mode will be handled as part of recommended mode for now
     // since BackgroundSelectorMode type doesn't include 'variable'
     
@@ -91,13 +126,23 @@ export function VariableBackgroundModal({
         description: 'Create your own color palette',
         icon: <Palette className="w-4 h-4" />
       });
+      console.log('🎨 [MODAL DEBUG] Custom Colors mode ADDED to available modes');
+    } else {
+      console.log('⚠️ [MODAL DEBUG] Custom Colors mode NOT enabled - flags.enableCustomColorPicker is false');
     }
     
+    console.log('🔍 [MODAL DEBUG] Final available modes:', modes);
     return modes;
   }, [phase, isVariableMode, isHybridMode, flags]);
 
   // Convert compatible options to variable format if in variable mode
   const processedOptions = useMemo(() => {
+    // For now, disable variable conversion until CSS variable system is fully implemented
+    // Always return the original compatible options without conversion
+    return compatibleOptions;
+    
+    // TODO: Re-enable this when CSS variable system is ready
+    /*
     if (!isVariableMode && !isHybridMode) {
       return compatibleOptions;
     }
@@ -111,7 +156,8 @@ export function VariableBackgroundModal({
         return option;
       }
     });
-  }, [compatibleOptions, isVariableMode, isHybridMode]);
+    */
+  }, [compatibleOptions]);
 
   // Handle custom color changes
   const handleCustomColorChange = useCallback((colors: CustomColorState) => {
@@ -162,19 +208,29 @@ export function VariableBackgroundModal({
     return () => clearTimeout(timeoutId);
   }, [previewBackground, selectedBackground, mode]);
 
-  // Handle modal close with cleanup
+  // Handle modal close without full state reset
   const handleCancel = () => {
-    setSelectedBackground(null);
+    // Don't reset selectedBackground to preserve state
     setPreviewBackground(null);
     setValidationResult(null);
-    setSelectedVariation(null);
+    // Keep selectedVariation to show current selection when reopening
     setCustomColorsState({});
     setShowVariableCode(false);
+    setHasInitialized(false);
     onClose();
   };
 
   // Enhanced apply handler
   const handleApply = async () => {
+    console.log('🚀 [DEBUG] handleApply called:', {
+      selectedBackground,
+      previewBackground,
+      selectedVariation,
+      canApply,
+      validationErrors,
+      timestamp: new Date().toISOString()
+    });
+    
     if (validationResult?.errors && validationResult.errors.length > 0) {
       const confirmApply = window.confirm(
         'There are validation warnings. Do you want to apply anyway?'
@@ -184,7 +240,18 @@ export function VariableBackgroundModal({
 
     const success = await handleApplyBackground();
     if (success) {
-      handleCancel();
+      console.log('✅ [DEBUG] Background applied successfully, closing modal');
+      // Reset state after successful apply
+      setSelectedBackground(null);
+      setPreviewBackground(null);
+      setValidationResult(null);
+      setSelectedVariation(null);
+      setCustomColorsState({});
+      setShowVariableCode(false);
+      setHasInitialized(false);
+      onClose();
+    } else {
+      console.error('❌ [DEBUG] Background apply failed');
     }
   };
 
@@ -266,21 +333,34 @@ export function VariableBackgroundModal({
               })()}
               selectedVariation={selectedVariation}
               onVariationSelect={(variation) => {
+                console.log('🎯 [DEBUG] Variation selected:', {
+                  variationId: variation.variationId,
+                  tailwindClass: variation.tailwindClass,
+                  baseColor: variation.baseColor,
+                  timestamp: new Date().toISOString()
+                });
+                
                 setSelectedVariation(variation);
-                if ('structuralClass' in variation) {
-                  // Variable variation
-                  const varVariation = variation as unknown as VarBgVariation;
-                  setPreviewBackground({
-                    ...currentBackgroundSystem,
-                    primary: varVariation.structuralClass,
-                  });
-                } else {
-                  // Legacy variation
-                  setPreviewBackground({
-                    ...currentBackgroundSystem,
-                    primary: variation.tailwindClass,
-                  });
-                }
+                
+                // Since we're not converting variations anymore,
+                // we can directly use the tailwindClass
+                const newBackground = {
+                  ...currentBackgroundSystem,
+                  primary: variation.tailwindClass,
+                  // Use the variation's base color or keep current
+                  baseColor: variation.baseColor || currentBackgroundSystem.baseColor,
+                };
+                
+                console.log('🎯 [DEBUG] Setting background:', {
+                  newBackground,
+                  primary: newBackground.primary,
+                  baseColor: newBackground.baseColor
+                });
+                
+                // Only set selectedBackground, not previewBackground
+                // This avoids confusion in the apply handler
+                setSelectedBackground(newBackground);
+                setPreviewBackground(null);
               }}
               isLoading={isLoading}
               mode={mode}
@@ -377,33 +457,36 @@ export function VariableBackgroundModal({
               <CustomBackgroundPicker
                 colors={null}
                 onColorsChange={(colors) => {
-                  // Handle colors change
+                  console.log('🎨 [DEBUG] Custom colors changed:', colors);
+                  // Store custom colors for later use if needed
+                  setCustomColorsState(colors as any);
                 }}
                 onBackgroundChange={(background) => {
-                  setPreviewBackground(background);
+                  console.log('🎨 [CRITICAL DEBUG] Custom background changed:', {
+                    background,
+                    primary: background.primary,
+                    secondary: background.secondary,
+                    neutral: background.neutral,
+                    divider: background.divider,
+                    baseColor: background.baseColor,
+                    accentColor: background.accentColor,
+                    accentCSS: background.accentCSS,
+                    timestamp: new Date().toISOString()
+                  });
+                  // Set selectedBackground directly for custom mode
+                  setSelectedBackground(background);
+                  // Clear preview to avoid confusion
+                  setPreviewBackground(null);
+                  
+                  console.log('🎨 [CRITICAL DEBUG] setSelectedBackground called with:', {
+                    selectedBackgroundSet: true,
+                    previewBackgroundCleared: true
+                  });
                 }}
               />
           </div>
         )}
 
-        {/* Live Preview with Variable Renderer */}
-        <div className="border rounded-lg overflow-hidden">
-          <div className="flex items-center justify-between px-4 py-2 bg-gray-50 dark:bg-gray-900 border-b">
-            <span className="text-sm font-medium">Live Preview</span>
-            <Eye className="w-4 h-4 text-gray-500" />
-          </div>
-          <div className="h-48 p-4">
-            <div className="border rounded-lg p-4">
-              <div className="text-sm font-medium mb-2">Live Preview</div>
-              <div className="bg-gray-100 rounded p-4 text-center">
-                <div className="text-gray-600">Background Preview</div>
-                <div className="text-xs text-gray-500 mt-1">
-                  {(previewBackground || selectedBackground || currentBackgroundSystem)?.primary || 'No background selected'}
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
 
         {/* Validation Warnings */}
         {validationResult && (

@@ -320,6 +320,26 @@ const finalSections: OrderedSection[] = processedSections
       }
     })();
 
+    // ✅ CRITICAL FIX: Convert complex gradient classes to inline styles for better compatibility
+    const getInlineStyleFromTailwind = (cssClass: string): React.CSSProperties | undefined => {
+      // Check if it's a complex gradient in bracket notation
+      const gradientMatch = cssClass.match(/bg-\[(linear-gradient\([^)]+\))\]/);
+      if (gradientMatch) {
+        const gradientCSS = gradientMatch[1].replace(/\s/g, ' '); // Normalize spaces
+        console.log('🎨 [LandingPageRenderer] Converting complex gradient to inline style:', {
+          originalClass: cssClass,
+          extractedGradient: gradientCSS
+        });
+        return { background: gradientCSS };
+      }
+      
+      // For simple classes, let Tailwind handle it
+      return undefined;
+    };
+
+    const inlineStyle = getInlineStyleFromTailwind(sectionBackgroundCSS);
+    const finalClassName = inlineStyle ? '' : sectionBackgroundCSS; // Use empty class if inline style is used
+
     // Enhanced background logging
     if (backgroundType === 'secondary') {
       console.log(`🎨 Rendering secondary section ${sectionId}:`, {

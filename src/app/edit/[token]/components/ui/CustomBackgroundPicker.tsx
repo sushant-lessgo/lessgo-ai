@@ -29,6 +29,13 @@ export function CustomBackgroundPicker({
   onBackgroundChange,
   disabled = false 
 }: CustomBackgroundPickerProps) {
+  console.log('🎨 [CustomBackgroundPicker] Component rendered with props:', {
+    hasColors: !!colors,
+    hasOnColorsChange: !!onColorsChange,
+    hasOnBackgroundChange: !!onBackgroundChange,
+    disabled
+  });
+  
   // Store callbacks in refs to prevent re-renders
   const onColorsChangeRef = useRef(onColorsChange);
   const onBackgroundChangeRef = useRef(onBackgroundChange);
@@ -54,6 +61,15 @@ export function CustomBackgroundPicker({
 
   // Update parent when colors change (debounced)
   useEffect(() => {
+    console.log('🔄 [CustomBackgroundPicker] useEffect triggered with:', {
+      pickerMode,
+      customBackground,
+      localColors: {
+        primary: localColors.primary,
+        secondary: localColors.secondary
+      }
+    });
+    
     const timer = setTimeout(() => {
       if (onColorsChangeRef.current) {
         onColorsChangeRef.current(localColors);
@@ -64,16 +80,29 @@ export function CustomBackgroundPicker({
         const primaryCSS = generateBackgroundCSS(customBackground, pickerMode);
         const baseColor = extractBaseColor(localColors.primary);
         
-        const backgroundSystem: BackgroundSystem = {
-          primary: primaryCSS,
-          secondary: `bg-[${localColors.secondary}]`,
-          neutral: `bg-[${localColors.neutral}]`,
-          divider: `bg-[${localColors.divider}]`,
-          baseColor: baseColor,
-          accentColor: baseColor,
-          accentCSS: `bg-[${localColors.primary}]`
+        console.log('🎨 [CustomBackgroundPicker] Generated CSS:', {
+          primaryCSS,
+          baseColor,
+          pickerMode,
+          customBackground
+        });
+        
+        // Helper to format color for Tailwind
+        const formatColorForTailwind = (color: string) => {
+          return `bg-[${color}]`;
         };
         
+        const backgroundSystem: BackgroundSystem = {
+          primary: primaryCSS,
+          secondary: formatColorForTailwind(localColors.secondary),
+          neutral: formatColorForTailwind(localColors.neutral),
+          divider: formatColorForTailwind(localColors.divider),
+          baseColor: baseColor,
+          accentColor: baseColor,
+          accentCSS: `bg-[${localColors.primary}]` // Use proper Tailwind format for accent
+        };
+        
+        console.log('🎨 [CustomBackgroundPicker] Sending background system:', backgroundSystem);
         onBackgroundChangeRef.current(backgroundSystem);
       }
     }, 300);
@@ -92,11 +121,14 @@ export function CustomBackgroundPicker({
 
   // Handle gradient change
   const handleGradientChange = useCallback((gradient: any) => {
+    console.log('🎨 [CustomBackgroundPicker] handleGradientChange called with:', gradient);
+    
     setCustomBackground({ gradient });
     
     // Extract primary color from first gradient stop
     if (gradient?.stops?.[0]?.color) {
       const updatedScheme = updateColorScheme(localColors, 'primary', gradient.stops[0].color, true);
+      console.log('🎨 [CustomBackgroundPicker] Updated color scheme:', updatedScheme);
       setLocalColors(updatedScheme);
     }
   }, [localColors]);
@@ -112,23 +144,46 @@ export function CustomBackgroundPicker({
 
   // Generate CSS for the background
   const generateBackgroundCSS = (custom: CustomBackground, mode: BackgroundPickerMode): string => {
+    console.log('🎨 [CustomBackgroundPicker] generateBackgroundCSS called:', {
+      mode,
+      custom,
+      localColors
+    });
+    
     if (mode === 'solid' && custom.solid) {
       // Extract color value - handle both string and object formats
       const colorValue = custom.solid || localColors.primary;
-      
-      return `bg-[${colorValue}]`;
+      const cssClass = `bg-[${colorValue}]`;
+      console.log('🎨 [CustomBackgroundPicker] Generated solid CSS:', cssClass);
+      return cssClass;
     } else if (mode === 'gradient' && custom.gradient) {
       const { type, stops } = custom.gradient;
-      const gradientStops = stops.map(s => `${s.color} ${s.position}%`).join(',');
+      const gradientStops = stops.map((s: any) => `${s.color} ${s.position}%`).join(', ');
       
+      let cssClass;
       if (type === 'linear') {
         const angle = (custom.gradient as any).angle || 45; // Type guard with fallback
-        return `bg-[linear-gradient(${angle}deg,${gradientStops})]`;
+        cssClass = `bg-[linear-gradient(${angle}deg, ${gradientStops})]`;
       } else if (type === 'radial') {
-        return `bg-[radial-gradient(circle,${gradientStops})]`;
+        cssClass = `bg-[radial-gradient(circle, ${gradientStops})]`;
+      } else {
+        cssClass = `bg-[${localColors.primary}]`; // Fallback
       }
+      
+      console.log('🎨 [CustomBackgroundPicker] Generated gradient CSS:', {
+        type,
+        stops,
+        gradientStops,
+        angle: type === 'linear' ? (custom.gradient as any).angle || 45 : 'N/A',
+        cssClass
+      });
+      return cssClass;
     }
-    return `bg-[${localColors.primary}]`; // Fallback with proper format
+    
+    // Fallback with proper format
+    const fallbackClass = `bg-[${localColors.primary}]`;
+    console.log('🎨 [CustomBackgroundPicker] Using fallback CSS:', fallbackClass);
+    return fallbackClass;
   };
 
   // Extract base color name from hex
@@ -203,7 +258,10 @@ export function CustomBackgroundPicker({
               Solid Color
             </button>
             <button
-              onClick={() => setPickerMode('gradient')}
+              onClick={() => {
+                console.log('🎨 [CustomBackgroundPicker] Switching to gradient mode');
+                setPickerMode('gradient');
+              }}
               disabled={disabled}
               className={`py-2 px-1 border-b-2 font-medium text-sm transition-colors ${
                 pickerMode === 'gradient'

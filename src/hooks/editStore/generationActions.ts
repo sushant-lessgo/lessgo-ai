@@ -394,7 +394,18 @@ export function createGenerationActions(set: any, get: any) {
   // ✅ Background System Integration from PageStore
   updateFromBackgroundSystem: (backgroundSystem: BackgroundSystem) =>
     set((state: EditStore) => {
-      console.log('🔄 EditStore: Updating theme from background system:', backgroundSystem);
+      console.log('🔄 [STORE DEBUG] EditStore: BEFORE update:', {
+        oldPrimary: state.theme.colors.sectionBackgrounds.primary,
+        oldSecondary: state.theme.colors.sectionBackgrounds.secondary,
+        oldBaseColor: state.theme.colors.baseColor
+      });
+      
+      console.log('🔄 [STORE DEBUG] EditStore: Updating with new background system:', {
+        newPrimary: backgroundSystem.primary,
+        newSecondary: backgroundSystem.secondary,
+        newBaseColor: backgroundSystem.baseColor,
+        newAccentColor: backgroundSystem.accentColor
+      });
       
       state.theme.colors.baseColor = backgroundSystem.baseColor;
       state.theme.colors.accentColor = backgroundSystem.accentColor;
@@ -407,7 +418,12 @@ export function createGenerationActions(set: any, get: any) {
       
       state.persistence.isDirty = true;
       
-      console.log('✅ EditStore: Theme updated with sophisticated background system');
+      console.log('✅ [STORE DEBUG] EditStore: AFTER update:', {
+        actualPrimary: state.theme.colors.sectionBackgrounds.primary,
+        actualSecondary: state.theme.colors.sectionBackgrounds.secondary,
+        actualBaseColor: state.theme.colors.baseColor,
+        isDirty: state.persistence.isDirty
+      });
     }),
 
   // ✅ Font System Integration from PageStore

@@ -58,7 +58,8 @@
       "Bash(for file in *.tsx)",
       "Bash(do echo \"Processing: $file\")",
       "Bash(done)",
-      "Bash(timeout 5s npm run dev)"
+      "Bash(timeout 5s npm run dev)",
+      "Bash(timeout 15s npm run build)"
     ],
     "deny": []
   }

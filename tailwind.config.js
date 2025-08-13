@@ -94,6 +94,13 @@ module.exports = {
   
   // ✅ CSS variable usage
   'var(--tw-gradient-stops)',
+  
+  // ✅ Arbitrary background colors for custom color picker
+  { pattern: /bg-\[#[0-9a-fA-F]{6}\]/ },
+  { pattern: /bg-\[#[0-9a-fA-F]{3}\]/ },
+  { pattern: /bg-\[linear-gradient\([^\]]+\)\]/ },
+  { pattern: /bg-\[radial-gradient\([^\]]+\)\]/ },
+  { pattern: /bg-\[[a-zA-Z0-9#,%()\s-]+\]/ },
 ],
   theme: {
   	extend: {

@@ -146,13 +146,21 @@ export function useBackgroundSelector(tokenId: string) {
     try {
       // Quick return for recommended mode (same as old generated)
       if (mode === 'recommended') {
-        return getCompatibleBackgrounds('recommended', null, currentBackgroundSystem);
+        const options = getCompatibleBackgrounds('recommended', null, currentBackgroundSystem);
+        // Reset loading state when options are loaded
+        if (options.length > 0 && isLoading) {
+          setIsLoading(false);
+        }
+        return options;
       }
 
       // For custom mode, no compatible options needed
       if (mode === 'custom') {
         // Custom mode doesn't need background variations
         // User creates their own custom background
+        if (isLoading) {
+          setIsLoading(false);
+        }
         return [];
       }
 
@@ -162,9 +170,12 @@ export function useBackgroundSelector(tokenId: string) {
     } catch (error) {
       console.error('Error in compatibleOptions:', error);
       setValidationErrors(['Failed to load background options']);
+      if (isLoading) {
+        setIsLoading(false);
+      }
       return [];
     }
-  }, [mode, currentBackgroundSystem, asyncCompatibleOptions]);
+  }, [mode, currentBackgroundSystem, asyncCompatibleOptions, isLoading]);
 
   // Enhanced validation with debouncing
   const validateSelection = useCallback((background: BackgroundSystem | null): string[] => {
@@ -240,6 +251,7 @@ export function useBackgroundSelector(tokenId: string) {
     setPreviewBackground(null);
     setValidationErrors([]);
     setAsyncCompatibleOptions([]); // Reset async options
+    setIsLoading(false); // Reset loading state when changing modes
 
     // Clear cache when switching modes for fresh results
     setCompatibilityCache(new Map());
@@ -248,14 +260,34 @@ export function useBackgroundSelector(tokenId: string) {
   // Enhanced apply handler with better error handling
   const handleApplyBackground = useCallback(async (): Promise<boolean> => {
     console.log('🎯 handleApplyBackground called');
+    // Priority: selectedBackground over previewBackground
+    // selectedBackground is set when user clicks a variation
+    // previewBackground is for hover preview (not currently used)
     const backgroundToApply = selectedBackground || previewBackground;
     
-    console.log('🎯 Background to apply:', {
-      selectedBackground: selectedBackground ? 'exists' : 'null',
-      previewBackground: previewBackground ? 'exists' : 'null',
-      backgroundToApply: backgroundToApply ? 'exists' : 'null',
-      primary: backgroundToApply?.primary,
-      baseColor: backgroundToApply?.baseColor
+    console.log('🎯 [CRITICAL DEBUG] Background to apply:', {
+      selectedBackground: selectedBackground ? {
+        primary: selectedBackground.primary,
+        secondary: selectedBackground.secondary,
+        baseColor: selectedBackground.baseColor,
+        accentColor: selectedBackground.accentColor
+      } : 'null',
+      previewBackground: previewBackground ? {
+        primary: previewBackground.primary,
+        secondary: previewBackground.secondary,
+        baseColor: previewBackground.baseColor,
+        accentColor: previewBackground.accentColor
+      } : 'null',
+      finalBackgroundToApply: backgroundToApply ? {
+        primary: backgroundToApply.primary,
+        secondary: backgroundToApply.secondary,
+        baseColor: backgroundToApply.baseColor,
+        accentColor: backgroundToApply.accentColor,
+        neutral: backgroundToApply.neutral,
+        divider: backgroundToApply.divider,
+        accentCSS: backgroundToApply.accentCSS
+      } : 'null',
+      timestamp: new Date().toISOString()
     });
     
     if (!backgroundToApply) {
@@ -271,6 +303,12 @@ export function useBackgroundSelector(tokenId: string) {
       return false;
     }
 
+    // Prevent multiple simultaneous applies
+    if (isLoading) {
+      console.warn('⚠️ Already applying background, please wait');
+      return false;
+    }
+
     try {
       setIsLoading(true);
       setValidationErrors([]);
@@ -278,7 +316,16 @@ export function useBackgroundSelector(tokenId: string) {
       // Update the store with timeout protection
       const updatePromise = new Promise<void>((resolve, reject) => {
         try {
-          console.log('🔄 Calling updateFromBackgroundSystem with:', backgroundToApply);
+          console.log('🔄 [CRITICAL DEBUG] Calling updateFromBackgroundSystem with EXACT data:', {
+            primary: backgroundToApply.primary,
+            secondary: backgroundToApply.secondary,
+            neutral: backgroundToApply.neutral,
+            divider: backgroundToApply.divider,
+            baseColor: backgroundToApply.baseColor,
+            accentColor: backgroundToApply.accentColor,
+            accentCSS: backgroundToApply.accentCSS,
+            timestamp: new Date().toISOString()
+          });
           updateFromBackgroundSystem(backgroundToApply);
           console.log('✅ updateFromBackgroundSystem completed successfully');
           resolve();
@@ -335,7 +382,7 @@ export function useBackgroundSelector(tokenId: string) {
         console.log('🔄 Loading state reset');
       }
     }
-  }, [selectedBackground, previewBackground, validateSelection, updateFromBackgroundSystem, triggerAutoSave, mode]);
+  }, [selectedBackground, previewBackground, validateSelection, updateFromBackgroundSystem, triggerAutoSave, mode, isLoading]);
 
   // Enhanced reset handler
   const handleResetToGenerated = useCallback(async (): Promise<void> => {
@@ -406,13 +453,22 @@ export function useBackgroundSelector(tokenId: string) {
 
   // Can apply logic with comprehensive checks
   const canApply = useMemo(() => {
-    const hasSelection = !!(selectedBackground || previewBackground);
+    const hasSelection = !!selectedBackground; // Only check selectedBackground
     const hasNoErrors = validationErrors.length === 0;
     const isNotLoading = !isLoading;
-    const hasValidBackground = hasSelection && (selectedBackground?.primary || previewBackground?.primary);
+    const hasValidBackground = hasSelection && selectedBackground?.primary;
+    
+    console.log('🔍 [DEBUG] canApply check:', {
+      hasSelection,
+      hasNoErrors,
+      isNotLoading,
+      hasValidBackground,
+      selectedPrimary: selectedBackground?.primary,
+      result: hasSelection && hasNoErrors && isNotLoading && hasValidBackground
+    });
     
     return hasSelection && hasNoErrors && isNotLoading && hasValidBackground;
-  }, [selectedBackground, previewBackground, validationErrors, isLoading]);
+  }, [selectedBackground, validationErrors, isLoading]);
 
   // Performance monitoring in development
   useEffect(() => {

@@ -153,13 +153,19 @@ export function GradientPicker({ value, onChange }: GradientPickerProps) {
 
   // Apply preset gradient
   const applyPreset = useCallback((preset: GradientPreset) => {
+    console.log('🎨 [GradientPicker] Applying preset:', preset);
+    
     const config = preset.gradient;
     setGradientType(config.type);
     setStops(config.stops);
     if (config.type === 'linear') {
       setDirection(config.angle);
     }
+    
+    // Notify parent immediately with the preset gradient
     onChange(config);
+    
+    console.log('🎨 [GradientPicker] Preset applied, onChange called with:', config);
   }, [onChange]);
 
   // Generate CSS for preview

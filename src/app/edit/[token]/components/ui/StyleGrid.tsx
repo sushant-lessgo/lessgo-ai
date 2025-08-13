@@ -135,6 +135,14 @@ export function StyleGrid({
   }, [variations, mode]);
 
   const handleVariationClick = (variation: BackgroundVariation) => {
+    console.log('🕹️ [STYLEGRID DEBUG] handleVariationClick called with:', {
+      variationId: variation.variationId,
+      variationLabel: variation.variationLabel,
+      tailwindClass: variation.tailwindClass,
+      baseColor: variation.baseColor,
+      archetypeId: variation.archetypeId,
+      timestamp: new Date().toISOString()
+    });
     onVariationSelect(variation);
   };
 
