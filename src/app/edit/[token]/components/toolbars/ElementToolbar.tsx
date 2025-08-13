@@ -23,7 +23,7 @@ export function ElementToolbar({ elementSelection, position, contextActions }: E
   const { openModal } = useButtonConfigModal();
   
   // Get the current toolbar state to check if image/form toolbar is active
-  const toolbar = useEditStore((state) => state.toolbar);
+  const { toolbar } = useEditStore();
   
   const toolbarRef = useRef<HTMLDivElement>(null);
   const variationsRef = useRef<HTMLDivElement>(null);

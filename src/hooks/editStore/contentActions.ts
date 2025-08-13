@@ -145,7 +145,7 @@ export function createContentActions(set: any, get: any): ContentActions {
         console.log(`🔄 [${updateTime}] updateElementContent COMPLETED:`, {
           sectionId,
           elementKey,
-          oldValue: oldValue?.substring(0, 50) + '...',
+          oldValue: String(oldValue).substring(0, 50) + '...',
           newValue: (Array.isArray(content) ? content[0] : content)?.toString().substring(0, 50) + '...',
           isDirty: state.persistence.isDirty,
           queuedChangesCount: state.queuedChanges.length

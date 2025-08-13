@@ -33,6 +33,7 @@ export function StyleGrid({
   searchQuery = '',
   filterBy = 'all',
 }: StyleGridProps) {
+  console.log('📋 StyleGrid received variations:', variations?.length || 0, variations);
   const [sortBy, setSortBy] = useState<'default' | 'name' | 'archetype' | 'color'>('default');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
 
@@ -58,15 +59,15 @@ export function StyleGrid({
       filtered = filtered.filter(variation => {
         switch (filterBy) {
           case 'gradients':
-            return variation.tailwindClass.includes('gradient');
+            return variation.tailwindClass?.includes('gradient');
           case 'solid':
-            return !variation.tailwindClass.includes('gradient');
+            return variation.tailwindClass && !variation.tailwindClass.includes('gradient');
           case 'soft':
-            return variation.archetypeId.includes('soft') || variation.archetypeId.includes('blur');
+            return variation.archetypeId?.includes('soft') || variation.archetypeId?.includes('blur');
           case 'bold':
-            return variation.archetypeId.includes('energetic') || variation.archetypeId.includes('vibrant');
+            return variation.archetypeId?.includes('energetic') || variation.archetypeId?.includes('vibrant');
           case 'professional':
-            return variation.archetypeId.includes('startup') || variation.archetypeId.includes('trusty');
+            return variation.archetypeId?.includes('startup') || variation.archetypeId?.includes('trusty');
           default:
             return true;
         }
@@ -100,12 +101,12 @@ export function StyleGrid({
       { 
         id: 'gradients', 
         label: 'Gradients', 
-        count: variations.filter(v => v.tailwindClass.includes('gradient')).length 
+        count: variations.filter(v => v.tailwindClass?.includes('gradient')).length 
       },
       { 
         id: 'solid', 
         label: 'Solid Colors', 
-        count: variations.filter(v => !v.tailwindClass.includes('gradient')).length 
+        count: variations.filter(v => v.tailwindClass && !v.tailwindClass.includes('gradient')).length 
       },
     ];
 

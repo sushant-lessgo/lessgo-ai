@@ -19,10 +19,13 @@ export function createCTAClickHandler(sectionId: string, elementKey?: string) {
     if (!ctaConfig && elementKey && sectionData?.elements?.[elementKey]?.metadata?.buttonConfig) {
       const buttonConfig = sectionData.elements[elementKey].metadata.buttonConfig;
       ctaConfig = {
+        label: buttonConfig.label || 'Click Here',
         type: buttonConfig.type,
         url: buttonConfig.url,
         formId: buttonConfig.formId,
-        behavior: buttonConfig.behavior
+        behavior: buttonConfig.behavior,
+        variant: (buttonConfig.variant as 'primary' | 'secondary' | 'outline' | 'ghost') || 'primary',
+        size: (buttonConfig.size as 'small' | 'medium' | 'large') || 'medium'
       };
     }
     
@@ -33,10 +36,13 @@ export function createCTAClickHandler(sectionId: string, elementKey?: string) {
       if (ctaElement?.metadata?.buttonConfig) {
         const buttonConfig = ctaElement.metadata.buttonConfig;
         ctaConfig = {
+          label: buttonConfig.label || 'Click Here',
           type: buttonConfig.type,
           url: buttonConfig.url,
           formId: buttonConfig.formId,
-          behavior: buttonConfig.behavior
+          behavior: buttonConfig.behavior,
+          variant: (buttonConfig.variant as 'primary' | 'secondary' | 'outline' | 'ghost') || 'primary',
+          size: (buttonConfig.size as 'small' | 'medium' | 'large') || 'medium'
         };
       }
     }

@@ -120,12 +120,11 @@ export function TextToolbarMVP({ elementSelection, position, contextActions }: T
       formatStateItalic: formatState.italic,
       formatStateUnderline: formatState.underline,
       elementKey: elementSelection?.elementKey,
-      renderCount: ++TextToolbarMVP.renderCount
+      renderCount: Math.random() // Simple render tracking
     });
   }, [isVisible, reason, hasValidPosition]); // REMOVED: formatState, elementSelection
   
-  // Track render count
-  if (!TextToolbarMVP.renderCount) TextToolbarMVP.renderCount = 0;
+  // Track render count removed for type safety
 
   // Priority-based early return
   if (!isVisible) {

@@ -12,7 +12,7 @@ import { generateAccentCandidates } from '@/utils/colorHarmony';
 import { analyzeBackground } from '@/utils/backgroundAnalysis';
 import { calculateLuminance, parseColor } from '@/utils/colorUtils';
 import type { BackgroundSystem } from './colorTokens';
-import type { BusinessContext } from '@/types/core';
+// import type { BusinessContext } from '@/types/core'; // Not available
 
 // Enhanced types for variable-based color system
 export interface VariableColorSystem {
@@ -103,7 +103,7 @@ export interface VariableColorTokens {
  */
 export function generateVariableColorSystem(
   backgroundSystem: BackgroundSystem | Record<string, string>,
-  businessContext?: BusinessContext
+  businessContext?: any // BusinessContext type not available
 ): VariableColorSystem {
   // Handle both old and new background system formats
   const normalizedBg = normalizeBackgroundSystem(backgroundSystem);
@@ -240,7 +240,7 @@ export function generateVariableColorTokensFromLegacy({
   accentCSS?: string;
   sectionBackgrounds?: any;
   storedTextColors?: any;
-  businessContext?: BusinessContext;
+  businessContext?: any // BusinessContext type not available;
 }): VariableColorTokens {
   // Convert legacy parameters to variable system
   const mockBackgroundSystem = {

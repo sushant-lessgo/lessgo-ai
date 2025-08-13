@@ -123,7 +123,7 @@ export function FloatingToolbars() {
             contextActions
           })}
           <ImageToolbar
-            targetId={toolbarTarget.targetId}
+            targetId={toolbarTarget.targetId || ''}
             position={position}
             contextActions={contextActions}
           />

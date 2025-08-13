@@ -92,15 +92,15 @@ export function testTransitionLocks() {
         failed++;
       }
       
-      if (step.shouldLock) {
-        console.log(`     🔒 Should trigger lock: ${step.lockReason || 'transition'}`);
+      if ('shouldLock' in step && step.shouldLock) {
+        console.log(`     🔒 Should trigger lock: ${'lockReason' in step ? step.lockReason : 'transition'}`);
       }
       
-      if (step.shouldBlock) {
+      if ('shouldBlock' in step && step.shouldBlock) {
         console.log(`     ⛔ Should be blocked by debounce/lock`);
       }
       
-      if (step.duringLock) {
+      if ('duringLock' in step && step.duringLock) {
         console.log(`     🔒 During lock period - toolbar should remain locked`);
       }
     });

@@ -44,18 +44,15 @@ const FALLBACK_COLOR_TOKENS: ColorTokens = {
   textInverse: 'text-white',
   bgPrimary: 'bg-white',
   bgSecondary: 'bg-gray-50',
-  bgTertiary: 'bg-gray-100',
   bgNeutral: 'bg-white',
-  bgMuted: 'bg-gray-50',
-  bgAccent: 'bg-blue-600',
-  bgInverse: 'bg-gray-900',
-  borderPrimary: 'border-gray-200',
-  borderSecondary: 'border-gray-300',
-  borderAccent: 'border-blue-600', 
-  borderFocus: 'border-blue-500',
-  shadowSm: 'shadow-sm',
-  shadowMd: 'shadow-md',
-  shadowLg: 'shadow-lg'
+  bgDivider: 'bg-gray-200',
+  surfaceCard: 'bg-white',
+  surfaceElevated: 'bg-white',
+  surfaceSection: 'bg-gray-50',
+  surfaceOverlay: 'bg-white',
+  borderDefault: 'border-gray-200',
+  borderSubtle: 'border-gray-100',
+  borderFocus: 'border-blue-500'
 };
 
 // Centralized getColorTokens wrapper with global guard

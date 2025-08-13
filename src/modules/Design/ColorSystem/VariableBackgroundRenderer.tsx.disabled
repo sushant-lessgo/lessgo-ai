@@ -7,12 +7,12 @@ import { useMemo, CSSProperties } from 'react';
 import { cn } from '@/lib/utils';
 import { getMigrationFeatureFlags, determineMigrationPhase, type FeatureFlagContext } from '@/utils/featureFlags';
 import { migrationAdapter } from './migrationAdapter';
-import type { BackgroundSystem } from '../background/colorTokens';
+// import type { BackgroundSystem } from '../background/colorTokens'; // Missing file
 import type { LegacyBackgroundVariation, VariableBackgroundVariation } from './migrationAdapter';
 
 interface VariableBackgroundRendererProps {
   tokenId: string;
-  background: string | BackgroundSystem;
+  background: string | any; // BackgroundSystem type not available
   customColors?: Record<string, string>;
   className?: string;
   children?: React.ReactNode;
@@ -198,7 +198,7 @@ export function VariableBackgroundRenderer({
  */
 export function useVariableBackground(
   tokenId: string,
-  background: string | BackgroundSystem,
+  background: string | any, // BackgroundSystem type not available
   customColors?: Record<string, string>
 ) {
   const { phase, isVariableMode, isHybridMode } = useVariableTheme(tokenId);

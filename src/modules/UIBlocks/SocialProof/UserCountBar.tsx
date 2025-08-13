@@ -87,8 +87,7 @@ const MetricDisplay = React.memo(({
         <SocialProofNumber
           number={metric.value}
           label=""
-          className={`font-bold ${dynamicTextColors?.heading || 'text-gray-900'}`}
-          style={{...getTextStyle('h1'), fontSize: 'clamp(2rem, 4vw, 3rem)'}}
+          className={`font-bold text-3xl ${dynamicTextColors?.heading || 'text-gray-900'}`}
         />
         
         {metric.growth && (

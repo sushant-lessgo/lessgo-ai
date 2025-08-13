@@ -11,7 +11,7 @@ import {
 } from '@/modules/Design/background/backgroundIntegration';
 import { SmartTextSection } from '@/components/layout/SmartTextSection';
 import { VariableThemeInjector } from '@/modules/Design/ColorSystem/VariableThemeInjector';
-import { VariableBackgroundRenderer } from '@/modules/Design/ColorSystem/VariableBackgroundRenderer';
+// import { VariableBackgroundRenderer } from '@/modules/Design/ColorSystem/VariableBackgroundRenderer'; // Disabled
 import { CSSVariableErrorBoundary } from '@/components/CSSVariableErrorBoundary';
 import { useFeatureFlags } from '@/utils/featureFlags';
 
@@ -385,11 +385,8 @@ const finalSections: OrderedSection[] = processedSections
       // Choose rendering method based on feature flags
       if (shouldUseVariableSystem) {
         return (
-          <VariableBackgroundRenderer
+          <div
             key={sectionId}
-            tokenId={effectiveTokenId}
-            background={sectionBackgroundCSS}
-            sectionId={sectionId}
             className="relative"
           >
             <LayoutComponent
@@ -400,7 +397,7 @@ const finalSections: OrderedSection[] = processedSections
               isEditable={mode === 'edit'}
               {...(data || {})}
             />
-          </VariableBackgroundRenderer>
+          </div>
         );
       } else {
         // Legacy rendering with SmartTextSection
@@ -409,6 +406,7 @@ const finalSections: OrderedSection[] = processedSections
             key={sectionId}
             backgroundType={backgroundType}
             sectionId={sectionId}
+            sectionBackgroundCSS={sectionBackgroundCSS}
             className=""
           >
             <LayoutComponent
@@ -492,13 +490,13 @@ const finalSections: OrderedSection[] = processedSections
     if (!theme?.colors?.sectionBackgrounds) return undefined;
     
     return {
-      primary: theme.colors.sectionBackgrounds.primary,
-      secondary: theme.colors.sectionBackgrounds.secondary,
+      primary: theme.colors.sectionBackgrounds.primary || 'bg-white',
+      secondary: theme.colors.sectionBackgrounds.secondary || 'bg-gray-50',
       neutral: theme.colors.sectionBackgrounds.neutral || 'bg-white',
       divider: theme.colors.sectionBackgrounds.divider || 'bg-gray-100/50',
-      baseColor: theme.colors.baseColor,
-      accentColor: theme.colors.accentColor,
-      accentCSS: theme.colors.accentCSS,
+      baseColor: theme.colors.baseColor || 'blue',
+      accentColor: theme.colors.accentColor || 'blue',
+      accentCSS: theme.colors.accentCSS || 'bg-blue-600',
     };
   }, [theme]);
 

@@ -217,20 +217,22 @@ WorldMapVisualization.displayName = 'WorldMapVisualization';
 const GlobalStatDisplay = React.memo(({ 
   stat, 
   dynamicTextColors,
-  getTextStyle 
+  getTextStyle,
+  bodyStyle 
 }: { 
   stat: GlobalStat;
   dynamicTextColors: any;
   getTextStyle: any;
+  bodyStyle?: any;
 }) => {
   return (
     <div className="text-center">
       <SocialProofNumber
         number={stat.value}
         label=""
-        style={{...h2Style, fontSize: 'clamp(1.8rem, 4vw, 2.5rem)'}} className={`mb-2 ${dynamicTextColors?.heading || 'text-gray-900'}`}
+        className={`mb-2 ${dynamicTextColors?.heading || 'text-gray-900'}`}
       />
-      <p style={{...bodyStyle, fontSize: '0.875rem'}} className={`${dynamicTextColors?.muted || 'text-gray-600'}`}>
+      <p style={bodyStyle ? {...bodyStyle, fontSize: '0.875rem'} : {}} className={`text-sm ${dynamicTextColors?.muted || 'text-gray-600'}`}>
         {stat.label}
       </p>
     </div>
@@ -324,6 +326,7 @@ export default function MapHeatSpots(props: LayoutComponentProps) {
               stat={stat}
               dynamicTextColors={dynamicTextColors}
               getTextStyle={getTextStyle}
+              bodyStyle={bodyStyle}
             />
           ))}
         </div>

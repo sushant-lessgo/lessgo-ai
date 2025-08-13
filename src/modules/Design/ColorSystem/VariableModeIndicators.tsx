@@ -218,7 +218,7 @@ export function MigrationStatusIndicator({ tokenId, className }: MigrationStatus
       'variable': { step: 3, total: 3, label: 'Variable Phase', color: 'text-green-600' },
     };
 
-    return statusConfig[phase] || statusConfig.legacy;
+    return phases[phase] || phases.legacy;
   }, [phase]);
 
   return (

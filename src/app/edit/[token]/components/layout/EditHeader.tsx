@@ -4,7 +4,7 @@
 import React, { useState } from 'react';
 import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
 import { TypographyControls } from '../ui/TypographyControls';
-import { BackgroundSystemModal } from '../ui/BackgroundSystemModal';
+import { VariableBackgroundModal } from '../ui/VariableBackgroundModal';
 import { ColorSystemModalMVP } from '../ui/ColorSystemModalMVP';
 import { EditHeaderRightPanel } from './EditHeaderRightPanel';
 
@@ -73,10 +73,11 @@ export function EditHeader({ tokenId }: EditHeaderProps) {
         <EditHeaderRightPanel tokenId={tokenId} />
       </header>
 
-      <BackgroundSystemModal
+      <VariableBackgroundModal
         isOpen={showBackgroundModal}
         onClose={() => setShowBackgroundModal(false)}
         tokenId={tokenId}
+        enableVariableMode={true}
       />
 
       <ColorSystemModalMVP

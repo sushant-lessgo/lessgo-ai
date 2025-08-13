@@ -36,8 +36,8 @@ export function selectEditorMode(state: EditStore | undefined | null): EditorMod
 /**
  * Hook version for components that need reactive mode updates
  */
-export function useUnifiedMode(storeSelector: (state: EditStore | undefined | null) => EditStore | undefined | null): EditorMode {
-  const state = storeSelector((state) => state);
+export function useUnifiedMode(storeSelector: () => EditStore | undefined | null): EditorMode {
+  const state = storeSelector();
   return selectEditorMode(state);
 }
 

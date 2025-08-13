@@ -191,15 +191,15 @@ const MetricCard = React.memo(({
             <SocialProofNumber
               number={metric.value}
               label=""
-              style={{...h2Style, fontSize: 'clamp(1.5rem, 3vw, 2rem)'}} className={`${dynamicTextColors?.heading || 'text-gray-900'}`}
+              className={`${dynamicTextColors?.heading || 'text-gray-900'}`}
             />
-            <span style={{...bodyStyle, fontSize: '0.875rem'}} className={`${dynamicTextColors?.muted || 'text-gray-600'}`}>
+            <span className={`text-sm ${dynamicTextColors?.muted || 'text-gray-600'}`}>
               {metric.label}
             </span>
           </div>
           
           {metric.description && (
-            <p style={{...bodyStyle, fontSize: '0.875rem'}} className={`${dynamicTextColors?.body || 'text-gray-700'} leading-relaxed`}>
+            <p className={`text-sm ${dynamicTextColors?.body || 'text-gray-700'} leading-relaxed`}>
               {metric.description}
             </p>
           )}
@@ -207,10 +207,10 @@ const MetricCard = React.memo(({
           {metric.progress !== undefined && (
             <div className="space-y-2">
               <div className="flex justify-between items-center">
-                <span style={{...bodyStyle, fontSize: '0.75rem'}} className={`${dynamicTextColors?.muted || 'text-gray-600'}`}>
+                <span className={`text-xs ${dynamicTextColors?.muted || 'text-gray-600'}`}>
                   Progress
                 </span>
-                <span style={{...bodyStyle, fontSize: '0.75rem', fontWeight: 'bold'}} className={`${dynamicTextColors?.body || 'text-gray-700'}`}>
+                <span className={`text-xs font-bold ${dynamicTextColors?.body || 'text-gray-700'}`}>
                   {metric.progress}%
                 </span>
               </div>
@@ -330,19 +330,19 @@ export default function StackedStats(props: LayoutComponentProps) {
             </p>
             <div className="flex items-center justify-center space-x-6 pt-4">
               <div className="text-center">
-                <div style={{...h2Style, fontSize: 'clamp(1.5rem, 3vw, 2rem)'}} className={`${dynamicTextColors?.heading || 'text-gray-900'}`}>
+                <div className={`text-2xl font-bold ${dynamicTextColors?.heading || 'text-gray-900'}`}>
                   98%
                 </div>
-                <div style={{...bodyStyle, fontSize: '0.875rem'}} className={`${dynamicTextColors?.muted || 'text-gray-600'}`}>
+                <div className={`text-sm ${dynamicTextColors?.muted || 'text-gray-600'}`}>
                   Customer Satisfaction
                 </div>
               </div>
               <div className="w-px h-12 bg-gray-300"></div>
               <div className="text-center">
-                <div style={{...h2Style, fontSize: 'clamp(1.5rem, 3vw, 2rem)'}} className={`${dynamicTextColors?.heading || 'text-gray-900'}`}>
+                <div className={`text-2xl font-bold ${dynamicTextColors?.heading || 'text-gray-900'}`}>
                   {"<3min"}
                 </div>
-                <div style={{...bodyStyle, fontSize: '0.875rem'}} className={`${dynamicTextColors?.muted || 'text-gray-600'}`}>
+                <div className={`text-sm ${dynamicTextColors?.muted || 'text-gray-600'}`}>
                   Average Response Time
                 </div>
               </div>

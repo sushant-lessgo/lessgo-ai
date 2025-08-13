@@ -212,8 +212,8 @@ export function trackFeatureFlagUsage(
   enabled: boolean,
   context: FeatureFlagContext
 ): void {
-  if (typeof window !== 'undefined' && window.gtag) {
-    window.gtag('event', 'feature_flag_usage', {
+  if (typeof window !== 'undefined' && (window as any).gtag) {
+    (window as any).gtag('event', 'feature_flag_usage', {
       feature_name: feature,
       enabled,
       user_type: context.userType || 'regular',

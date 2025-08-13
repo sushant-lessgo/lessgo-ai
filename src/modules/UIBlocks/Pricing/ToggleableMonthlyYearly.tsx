@@ -194,11 +194,11 @@ export default function ToggleableMonthlyYearly(props: LayoutComponentProps) {
             {/* Price Display */}
             <div className="mb-4">
               <div className="flex items-baseline justify-center">
-                <span style={{...getTypographyStyle('h2'), fontSize: 'clamp(2rem, 4vw, 2.5rem)'}} className="font-bold text-gray-900">
+                <span style={{fontSize: 'clamp(2rem, 4vw, 2.5rem)'}} className="font-bold text-gray-900">
                   {currentPrice.includes('$') ? currentPrice.split('$')[1] : currentPrice}
                 </span>
                 {currentPrice.includes('$') && (
-                  <span style={{...getTypographyStyle('h2'), fontSize: 'clamp(2rem, 4vw, 2.5rem)'}} className="font-bold text-gray-900">$</span>
+                  <span style={{fontSize: 'clamp(2rem, 4vw, 2.5rem)'}} className="font-bold text-gray-900">$</span>
                 )}
                 {!currentPrice.toLowerCase().includes('contact') && (
                   <span className={`text-lg ${mutedTextColor} ml-1`}>

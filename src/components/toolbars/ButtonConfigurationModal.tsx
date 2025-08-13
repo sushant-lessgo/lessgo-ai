@@ -153,7 +153,12 @@ export function ButtonConfigurationModal({
             [elementSelection.elementKey]: updatedElement
           },
           // Also save ctaConfig at section level for easy access by CTA handler
-          cta: ctaConfig
+          cta: {
+            ...ctaConfig,
+            label: ctaConfig.cta_text,
+            variant: 'primary',
+            size: 'medium'
+          }
         });
         
         console.log('🔧 Button configuration saved:', config);

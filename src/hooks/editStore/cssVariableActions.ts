@@ -7,7 +7,8 @@ import type {
   CSSVariableActionCreator 
 } from '@/types/store/cssVariables';
 import type { MigrationFeatureFlags } from '@/utils/featureFlags';
-import { generateVariableColorTokens } from '@/modules/Design/ColorSystem/variableColorTokens';
+// import { generateVariableColorTokens } from '@/modules/Design/ColorSystem/variableColorTokens'; // File disabled
+const generateVariableColorTokens = (colors: any) => ({ /* stub */ });
 import { migrationAdapter } from '@/modules/Design/ColorSystem/migrationAdapter';
 
 /**

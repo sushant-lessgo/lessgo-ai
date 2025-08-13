@@ -374,7 +374,14 @@ export function createEditStore(tokenId: string) {
               lastUpdated: state.lastUpdated,
               version: state.version,
               performance: state.performance,
-              cssVariables: state.cssVariables,
+              // CSS Variable State
+              phase: state.phase,
+              featureFlags: state.featureFlags,
+              customColors: state.customColors,
+              generatedVariables: state.generatedVariables,
+              browserSupport: state.browserSupport,
+              metrics: state.metrics,
+              debugMode: state.debugMode,
             }),
             onRehydrateStorage: () => (state) => {
               if (state) {

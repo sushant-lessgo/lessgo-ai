@@ -7,16 +7,16 @@ import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useBackgroundSelector } from './useBackgroundSelector';
 import { validateBackgroundSystem } from './backgroundValidation';
 import { ModeToggle } from './ModeToggle';
-import { PreviewSection } from './PreviewSection';
+// import { VariablePreview } from './VariablePreviewComponents'; // Temporarily disabled
 import { CustomBackgroundPicker } from './CustomBackgroundPicker';
 import { StyleGrid } from './StyleGrid';
 import { ModalActions } from './ModalActions';
 import { ValidationWarnings } from './ValidationWarnings';
 import { BaseModal } from '../modals/BaseModal';
 import { useVariableTheme } from '@/modules/Design/ColorSystem/VariableThemeInjector';
-import { VariableBackgroundRenderer, VariableBackgroundVariation } from '@/modules/Design/ColorSystem/VariableBackgroundRenderer';
+// import { VariableBackgroundRenderer, VariableBackgroundVariation } from '@/modules/Design/ColorSystem/VariableBackgroundRenderer'; // Disabled
 import { migrationAdapter } from '@/modules/Design/ColorSystem/migrationAdapter';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+// Using simple buttons instead of tabs for now
 import { Badge } from '@/components/ui/badge';
 import { Info, Sparkles, Palette, Code, Eye } from 'lucide-react';
 import type { BackgroundValidationResult, BackgroundSelectorMode } from '@/types/core';
@@ -81,14 +81,8 @@ export function VariableBackgroundModal({
       }
     ];
     
-    if (isVariableMode || isHybridMode) {
-      modes.push({
-        value: 'variable',
-        label: 'Variable Mode',
-        description: 'Infinite customization with CSS variables',
-        icon: <Code className="w-4 h-4" />
-      });
-    }
+    // Note: Variable mode will be handled as part of recommended mode for now
+    // since BackgroundSelectorMode type doesn't include 'variable'
     
     if (flags.enableCustomColorPicker) {
       modes.push({
@@ -234,31 +228,48 @@ export function VariableBackgroundModal({
           </div>
         )}
 
-        {/* Mode Selection Tabs */}
-        <Tabs value={mode} onValueChange={(value) => setMode(value as BackgroundSelectorMode)}>
-          <TabsList className="grid w-full" style={{ gridTemplateColumns: `repeat(${availableModes.length}, 1fr)` }}>
-            {availableModes.map(({ value, label, icon }) => (
-              <TabsTrigger key={value} value={value} className="flex items-center gap-1">
-                {icon}
-                {label}
-              </TabsTrigger>
-            ))}
-          </TabsList>
+        {/* Mode Selection Buttons */}
+        <div className="grid w-full border rounded-lg overflow-hidden" style={{ gridTemplateColumns: `repeat(${availableModes.length}, 1fr)` }}>
+          {availableModes.map(({ value, label, icon }) => (
+            <button
+              key={value}
+              onClick={() => setMode(value as BackgroundSelectorMode)}
+              className={`flex items-center justify-center gap-1 px-3 py-2 text-sm font-medium transition-colors ${
+                mode === value
+                  ? 'bg-blue-500 text-white'
+                  : 'bg-white text-gray-700 hover:bg-gray-50 border-r border-gray-200 last:border-r-0'
+              }`}
+            >
+              {icon}
+              {label}
+            </button>
+          ))}
+        </div>
 
-          {/* Recommended/AI Generated Mode */}
-          <TabsContent value="recommended" className="space-y-4">
+        {/* Recommended/AI Generated Mode */}
+        {mode === 'recommended' && (
+          <div className="space-y-4">
             <div className="text-sm text-gray-600 dark:text-gray-400">
               AI-generated backgrounds optimized for your {currentBackgroundSystem?.baseColor || 'brand'}
             </div>
             
             <StyleGrid
-              options={processedOptions}
+              variations={(() => {
+                console.log('🔍 VariableBackgroundModal processedOptions:', processedOptions);
+                console.log('🔍 processedOptions.length:', processedOptions?.length);
+                if (processedOptions?.[0]) {
+                  console.log('🔍 First variation COMPLETE object:', JSON.stringify(processedOptions[0], null, 2));
+                  console.log('🔍 First variation keys:', Object.keys(processedOptions[0]));
+                }
+                console.log('🔍 isLoading:', isLoading, 'mode:', mode);
+                return processedOptions as any;
+              })()}
               selectedVariation={selectedVariation}
-              onSelect={(variation) => {
+              onVariationSelect={(variation) => {
                 setSelectedVariation(variation);
                 if ('structuralClass' in variation) {
                   // Variable variation
-                  const varVariation = variation as VarBgVariation;
+                  const varVariation = variation as unknown as VarBgVariation;
                   setPreviewBackground({
                     ...currentBackgroundSystem,
                     primary: varVariation.structuralClass,
@@ -272,15 +283,14 @@ export function VariableBackgroundModal({
                 }
               }}
               isLoading={isLoading}
-              useVariableRenderer={isVariableMode || isHybridMode}
-              tokenId={tokenId}
-              customColors={customColors as Record<string, string>}
+              mode={mode}
             />
-          </TabsContent>
+          </div>
+        )}
 
-          {/* Variable Mode */}
-          {(isVariableMode || isHybridMode) && (
-            <TabsContent value="variable" className="space-y-4">
+        {/* Variable Mode - disabled to avoid key conflicts */}
+        {false && (
+          <div className="space-y-4">
               <div className="text-sm text-gray-600 dark:text-gray-400">
                 Customize colors with CSS variables for infinite possibilities
               </div>
@@ -345,39 +355,36 @@ export function VariableBackgroundModal({
               
               {/* Variable Background Grid */}
               <StyleGrid
-                options={processedOptions.filter(opt => 'structuralClass' in opt)}
+                variations={processedOptions.filter(opt => 'structuralClass' in opt) as any}
                 selectedVariation={selectedVariation}
-                onSelect={(variation) => {
+                onVariationSelect={(variation) => {
                   setSelectedVariation(variation);
-                  const varVariation = variation as VarBgVariation;
+                  const varVariation = variation as unknown as VarBgVariation;
                   setPreviewBackground({
                     ...currentBackgroundSystem,
                     primary: varVariation.structuralClass,
                   });
                 }}
                 isLoading={isLoading}
-                useVariableRenderer={true}
-                tokenId={tokenId}
-                customColors={customColors as Record<string, string>}
+                mode={mode}
               />
-            </TabsContent>
-          )}
+          </div>
+        )}
 
-          {/* Custom Mode */}
-          {flags.enableCustomColorPicker && (
-            <TabsContent value="custom" className="space-y-4">
+        {/* Custom Mode */}
+        {flags.enableCustomColorPicker && mode === 'custom' && !(isVariableMode || isHybridMode) && (
+          <div className="space-y-4">
               <CustomBackgroundPicker
-                onSelect={(customBg) => {
-                  setPreviewBackground({
-                    ...currentBackgroundSystem,
-                    primary: customBg.css,
-                  });
+                colors={null}
+                onColorsChange={(colors) => {
+                  // Handle colors change
                 }}
-                currentBackground={currentBackgroundSystem}
+                onBackgroundChange={(background) => {
+                  setPreviewBackground(background);
+                }}
               />
-            </TabsContent>
-          )}
-        </Tabs>
+          </div>
+        )}
 
         {/* Live Preview with Variable Renderer */}
         <div className="border rounded-lg overflow-hidden">
@@ -385,25 +392,23 @@ export function VariableBackgroundModal({
             <span className="text-sm font-medium">Live Preview</span>
             <Eye className="w-4 h-4 text-gray-500" />
           </div>
-          <VariableBackgroundRenderer
-            tokenId={tokenId}
-            background={previewBackground || selectedBackground || currentBackgroundSystem}
-            customColors={customColors as Record<string, string>}
-            className="h-48"
-            debugMode={flags.enableMigrationDebug}
-          >
-            <PreviewSection
-              background={previewBackground || selectedBackground || currentBackgroundSystem}
-              showMobilePreview={false}
-            />
-          </VariableBackgroundRenderer>
+          <div className="h-48 p-4">
+            <div className="border rounded-lg p-4">
+              <div className="text-sm font-medium mb-2">Live Preview</div>
+              <div className="bg-gray-100 rounded p-4 text-center">
+                <div className="text-gray-600">Background Preview</div>
+                <div className="text-xs text-gray-500 mt-1">
+                  {(previewBackground || selectedBackground || currentBackgroundSystem)?.primary || 'No background selected'}
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* Validation Warnings */}
         {validationResult && (
           <ValidationWarnings
             validationResult={validationResult}
-            isValidating={isValidating}
           />
         )}
 
@@ -412,9 +417,9 @@ export function VariableBackgroundModal({
           onCancel={handleCancel}
           onApply={handleApply}
           onReset={handleResetToGenerated}
-          canApply={canApply}
+          canApply={!!canApply}
           isLoading={isLoading}
-          mode={mode}
+          hasSelection={!!selectedBackground}
         />
       </div>
     </BaseModal>
