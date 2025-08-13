@@ -372,7 +372,7 @@ export function VariableBackgroundModal({
         )}
 
         {/* Custom Mode */}
-        {flags.enableCustomColorPicker && mode === 'custom' && !(isVariableMode || isHybridMode) && (
+        {flags.enableCustomColorPicker && mode === 'custom' && (
           <div className="space-y-4">
               <CustomBackgroundPicker
                 colors={null}
