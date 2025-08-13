@@ -97,12 +97,101 @@ export function StyleOption({
   // Helper to convert Tailwind color names to hex
   const convertTailwindColorToHex = (colorName: string): string | null => {
     const colorMap: Record<string, string> = {
+      // Basic colors
+      'transparent': 'transparent', 'white': '#ffffff', 'black': '#000000',
+      
+      // Blues
       'blue-50': '#eff6ff', 'blue-100': '#dbeafe', 'blue-200': '#bfdbfe', 'blue-300': '#93c5fd',
       'blue-400': '#60a5fa', 'blue-500': '#3b82f6', 'blue-600': '#2563eb', 'blue-700': '#1d4ed8',
       'blue-800': '#1e40af', 'blue-900': '#1e3a8a',
-      'transparent': 'transparent', 'white': '#ffffff', 'black': '#000000',
-      // Add more colors as needed
+      
+      // Sky
+      'sky-50': '#f0f9ff', 'sky-100': '#e0f2fe', 'sky-200': '#bae6fd', 'sky-300': '#7dd3fc',
+      'sky-400': '#38bdf8', 'sky-500': '#0ea5e9', 'sky-600': '#0284c7', 'sky-700': '#0369a1',
+      'sky-800': '#075985', 'sky-900': '#0c4a6e',
+      
+      // Indigo
+      'indigo-50': '#eef2ff', 'indigo-100': '#e0e7ff', 'indigo-200': '#c7d2fe', 'indigo-300': '#a5b4fc',
+      'indigo-400': '#818cf8', 'indigo-500': '#6366f1', 'indigo-600': '#4f46e5', 'indigo-700': '#4338ca',
+      'indigo-800': '#3730a3', 'indigo-900': '#312e81',
+      
+      // Purple/Violet
+      'purple-50': '#faf5ff', 'purple-100': '#f3e8ff', 'purple-200': '#e9d5ff', 'purple-300': '#d8b4fe',
+      'purple-400': '#c084fc', 'purple-500': '#a855f7', 'purple-600': '#9333ea', 'purple-700': '#7e22ce',
+      'purple-800': '#6b21a8', 'purple-900': '#581c87',
+      
+      'violet-50': '#f5f3ff', 'violet-100': '#ede9fe', 'violet-200': '#ddd6fe', 'violet-300': '#c4b5fd',
+      'violet-400': '#a78bfa', 'violet-500': '#8b5cf6', 'violet-600': '#7c3aed', 'violet-700': '#6d28d9',
+      'violet-800': '#5b21b6', 'violet-900': '#4c1d95',
+      
+      // Greens
+      'green-50': '#f0fdf4', 'green-100': '#dcfce7', 'green-200': '#bbf7d0', 'green-300': '#86efac',
+      'green-400': '#4ade80', 'green-500': '#22c55e', 'green-600': '#16a34a', 'green-700': '#15803d',
+      'green-800': '#166534', 'green-900': '#14532d',
+      
+      // Emerald
+      'emerald-50': '#ecfdf5', 'emerald-100': '#d1fae5', 'emerald-200': '#a7f3d0', 'emerald-300': '#6ee7b7',
+      'emerald-400': '#34d399', 'emerald-500': '#10b981', 'emerald-600': '#059669', 'emerald-700': '#047857',
+      'emerald-800': '#065f46', 'emerald-900': '#064e3b',
+      
+      // Teal
+      'teal-50': '#f0fdfa', 'teal-100': '#ccfbf1', 'teal-200': '#99f6e4', 'teal-300': '#5eead4',
+      'teal-400': '#2dd4bf', 'teal-500': '#14b8a6', 'teal-600': '#0d9488', 'teal-700': '#0f766e',
+      'teal-800': '#115e59', 'teal-900': '#134e4a',
+      
+      // Cyan
+      'cyan-50': '#ecfeff', 'cyan-100': '#cffafe', 'cyan-200': '#a5f3fc', 'cyan-300': '#67e8f9',
+      'cyan-400': '#22d3ee', 'cyan-500': '#06b6d4', 'cyan-600': '#0891b2', 'cyan-700': '#0e7490',
+      'cyan-800': '#155e75', 'cyan-900': '#164e63',
+      
+      // Reds/Rose/Pink
+      'red-50': '#fef2f2', 'red-100': '#fee2e2', 'red-200': '#fecaca', 'red-300': '#fca5a5',
+      'red-400': '#f87171', 'red-500': '#ef4444', 'red-600': '#dc2626', 'red-700': '#b91c1c',
+      'red-800': '#991b1b', 'red-900': '#7f1d1d',
+      
+      'rose-50': '#fff1f2', 'rose-100': '#ffe4e6', 'rose-200': '#fecdd3', 'rose-300': '#fda4af',
+      'rose-400': '#fb7185', 'rose-500': '#f43f5e', 'rose-600': '#e11d48', 'rose-700': '#be123c',
+      'rose-800': '#9f1239', 'rose-900': '#881337',
+      
+      'pink-50': '#fdf2f8', 'pink-100': '#fce7f3', 'pink-200': '#fbcfe8', 'pink-300': '#f9a8d4',
+      'pink-400': '#f472b6', 'pink-500': '#ec4899', 'pink-600': '#db2777', 'pink-700': '#be185d',
+      'pink-800': '#9d174d', 'pink-900': '#831843',
+      
+      // Oranges/Amber
+      'orange-50': '#fff7ed', 'orange-100': '#ffedd5', 'orange-200': '#fed7aa', 'orange-300': '#fdba74',
+      'orange-400': '#fb923c', 'orange-500': '#f97316', 'orange-600': '#ea580c', 'orange-700': '#c2410c',
+      'orange-800': '#9a3412', 'orange-900': '#7c2d12',
+      
+      'amber-50': '#fffbeb', 'amber-100': '#fef3c7', 'amber-200': '#fde68a', 'amber-300': '#fcd34d',
+      'amber-400': '#fbbf24', 'amber-500': '#f59e0b', 'amber-600': '#d97706', 'amber-700': '#b45309',
+      'amber-800': '#92400e', 'amber-900': '#78350f',
+      
+      // Yellows
+      'yellow-50': '#fefce8', 'yellow-100': '#fef9c3', 'yellow-200': '#fef08a', 'yellow-300': '#fde047',
+      'yellow-400': '#facc15', 'yellow-500': '#eab308', 'yellow-600': '#ca8a04', 'yellow-700': '#a16207',
+      'yellow-800': '#854d0e', 'yellow-900': '#713f12',
+      
+      // Grays
       'gray-50': '#f9fafb', 'gray-100': '#f3f4f6', 'gray-200': '#e5e7eb', 'gray-300': '#d1d5db',
+      'gray-400': '#9ca3af', 'gray-500': '#6b7280', 'gray-600': '#4b5563', 'gray-700': '#374151',
+      'gray-800': '#1f2937', 'gray-900': '#111827',
+      
+      'slate-50': '#f8fafc', 'slate-100': '#f1f5f9', 'slate-200': '#e2e8f0', 'slate-300': '#cbd5e1',
+      'slate-400': '#94a3b8', 'slate-500': '#64748b', 'slate-600': '#475569', 'slate-700': '#334155',
+      'slate-800': '#1e293b', 'slate-900': '#0f172a',
+      
+      'zinc-50': '#fafafa', 'zinc-100': '#f4f4f5', 'zinc-200': '#e4e4e7', 'zinc-300': '#d4d4d8',
+      'zinc-400': '#a1a1aa', 'zinc-500': '#71717a', 'zinc-600': '#52525b', 'zinc-700': '#3f3f46',
+      'zinc-800': '#27272a', 'zinc-900': '#18181b',
+      
+      'neutral-50': '#fafafa', 'neutral-100': '#f5f5f5', 'neutral-200': '#e5e5e5', 'neutral-300': '#d4d4d4',
+      'neutral-400': '#a3a3a3', 'neutral-500': '#737373', 'neutral-600': '#525252', 'neutral-700': '#404040',
+      'neutral-800': '#262626', 'neutral-900': '#171717',
+      
+      // Custom colors I found in the variations
+      'mint-50': '#f0fdfa', 'mint-100': '#ccfbf1', 'mint-200': '#99f6e4', 'mint-300': '#5eead4',
+      'mint-400': '#2dd4bf', 'mint-500': '#14b8a6',
+      'peach': '#ffcdb2', 'peachpuff': '#ffdab9',
     };
     return colorMap[colorName] || null;
   };
@@ -114,12 +203,103 @@ export function StyleOption({
     // Debug logging to see what classes we're actually getting
     console.log('🎨 StyleOption bgClass:', bgClass);
     
+    // Handle opacity syntax (e.g., bg-white/60, bg-blue-500/80)
+    const opacityMatch = bgClass.match(/bg-([a-zA-Z]+-?\d*|white|black)\/(\d+)/);
+    if (opacityMatch) {
+      const colorName = opacityMatch[1];
+      const opacity = parseInt(opacityMatch[2]) / 100;
+      
+      let hexColor = colorName === 'white' ? '#ffffff' : 
+                     colorName === 'black' ? '#000000' :
+                     convertTailwindColorToHex(colorName) || '#ffffff';
+      
+      // Convert hex to rgba with opacity
+      const r = parseInt(hexColor.substr(1, 2), 16);
+      const g = parseInt(hexColor.substr(3, 2), 16);
+      const b = parseInt(hexColor.substr(5, 2), 16);
+      
+      console.log('✅ Found opacity color:', `rgba(${r}, ${g}, ${b}, ${opacity})`);
+      return { backgroundColor: `rgba(${r}, ${g}, ${b}, ${opacity})` };
+    }
+
     // Handle arbitrary value syntax like bg-[#hexcolor]
     const arbitraryColorMatch = bgClass.match(/bg-\[([#\w]+)\]/);
     if (arbitraryColorMatch) {
       const color = arbitraryColorMatch[1];
       console.log('✅ Found arbitrary color:', color);
       return { backgroundColor: color };
+    }
+    
+    // Handle standard gradients with arbitrary hex colors (e.g., bg-gradient-to-tr from-[#hex] via-[#hex] to-[#hex])
+    // Also handle mixed formats (e.g., from-white via-[#hex] to-[#hex])
+    if (bgClass.includes('gradient-to-') && (bgClass.includes('from-[') || bgClass.includes('from-'))) {
+      // Extract gradient direction
+      let direction = 'to bottom right'; // default
+      if (bgClass.includes('gradient-to-r')) direction = 'to right';
+      else if (bgClass.includes('gradient-to-l')) direction = 'to left';
+      else if (bgClass.includes('gradient-to-t')) direction = 'to top';
+      else if (bgClass.includes('gradient-to-b')) direction = 'to bottom';
+      else if (bgClass.includes('gradient-to-tr')) direction = 'to top right';
+      else if (bgClass.includes('gradient-to-tl')) direction = 'to top left';
+      else if (bgClass.includes('gradient-to-br')) direction = 'to bottom right';
+      else if (bgClass.includes('gradient-to-bl')) direction = 'to bottom left';
+
+      // Extract colors - handle both [#color] and plain color formats
+      // Use word boundaries to avoid matching gradient-to-tr instead of to-indigo-500
+      const fromMatch = bgClass.match(/from-\[([#\w]+)\](?:\/\d+)?/) || bgClass.match(/\s+from-([a-zA-Z]+-?\d*|white|black|transparent)/);
+      const viaMatch = bgClass.match(/via-\[([#\w]+)\](?:\/\d+)?/) || bgClass.match(/\s+via-([a-zA-Z]+-?\d*|white|black|transparent)/);
+      const toMatch = bgClass.match(/to-\[([#\w]+)\]/) || bgClass.match(/\s+to-([a-zA-Z]+-?\d*|white|black|transparent)/);
+      
+      if (fromMatch && toMatch) {
+        let fromColor = fromMatch[1];
+        let toColor = toMatch[1];
+        let viaColor = viaMatch?.[1];
+        
+        // Convert Tailwind color names to hex if needed
+        console.log('🎨 Converting gradient colors:', { fromColor, viaColor, toColor });
+        if (!fromColor.startsWith('#')) {
+          const convertedFrom = convertTailwindColorToHex(fromColor);
+          console.log('🎨 From color conversion:', `${fromColor} → ${convertedFrom}`);
+          fromColor = fromColor === 'white' ? '#ffffff' : 
+                     fromColor === 'black' ? '#000000' : 
+                     fromColor === 'transparent' ? 'transparent' :
+                     convertedFrom || fromColor;
+        }
+        if (!toColor.startsWith('#')) {
+          const convertedTo = convertTailwindColorToHex(toColor);
+          console.log('🎨 To color conversion:', `${toColor} → ${convertedTo}`);
+          toColor = toColor === 'white' ? '#ffffff' : 
+                   toColor === 'black' ? '#000000' : 
+                   toColor === 'transparent' ? 'transparent' :
+                   convertedTo || toColor;
+        }
+        if (viaColor && !viaColor.startsWith('#')) {
+          const convertedVia = convertTailwindColorToHex(viaColor);
+          console.log('🎨 Via color conversion:', `${viaColor} → ${convertedVia}`);
+          viaColor = viaColor === 'white' ? '#ffffff' : 
+                    viaColor === 'black' ? '#000000' : 
+                    viaColor === 'transparent' ? 'transparent' :
+                    convertedVia || viaColor;
+        }
+        
+        const colors = viaColor ? `${fromColor}, ${viaColor}, ${toColor}` : `${fromColor}, ${toColor}`;
+        const gradient = `linear-gradient(${direction}, ${colors})`;
+        
+        console.log('✅ Found standard hex gradient:', gradient);
+        return { background: gradient };
+      }
+    }
+
+    // Handle inline gradient syntax (e.g., bg-[radial-gradient(...)])
+    if (bgClass.includes('bg-[') && bgClass.includes('gradient') && !bgClass.includes('var(--tw-gradient-stops)')) {
+      const inlineGradientMatch = bgClass.match(/bg-\[(.*gradient.*?)\]/);
+      if (inlineGradientMatch) {
+        let gradient = inlineGradientMatch[1];
+        // Replace underscores with spaces and handle percentage values
+        gradient = gradient.replace(/_/g, ' ').replace(/(\d+)%/g, '$1%');
+        console.log('✅ Found inline gradient:', gradient);
+        return { background: gradient };
+      }
     }
     
     // Handle arbitrary gradient syntax with CSS variables
@@ -329,9 +509,14 @@ export function StyleOption({
       if (gradientStyle) return gradientStyle;
     }
 
-    // Handle solid colors
+    // Handle solid colors (but avoid matching opacity syntax)
     for (const [className, color] of Object.entries(tailwindColors)) {
-      if (bgClass.includes(className)) {
+      // Use exact match or word boundary to avoid matching bg-white in bg-white/60
+      const exactMatch = bgClass === className || 
+                         bgClass.startsWith(className + ' ') || 
+                         bgClass.endsWith(' ' + className) || 
+                         bgClass.includes(' ' + className + ' ');
+      if (exactMatch) {
         console.log('✅ Found solid color match:', className, '→', color);
         return { backgroundColor: color };
       }
