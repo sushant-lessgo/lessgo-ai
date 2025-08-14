@@ -25,10 +25,8 @@ export function suppressSelectionEvents(duration: number = 50): void {
   suppressTimeout = setTimeout(() => {
     suppressSelectionChange = false;
     suppressTimeout = null;
-    console.log('🛡️ Selection events re-enabled after', duration, 'ms');
   }, duration);
   
-  console.log('🛡️ Selection events suppressed for', duration, 'ms');
 }
 
 /**
@@ -47,7 +45,6 @@ export function restoreSelectionEvents(): void {
     clearTimeout(suppressTimeout);
     suppressTimeout = null;
   }
-  console.log('🛡️ Selection events force-restored');
 }
 
 /**
@@ -94,7 +91,6 @@ export function createGuardedSelectionHandler(
 ): (event: Event) => void {
   return (event: Event) => {
     if (suppressSelectionChange) {
-      console.log('🛡️ Selection change blocked (formatting in progress)');
       return;
     }
     
