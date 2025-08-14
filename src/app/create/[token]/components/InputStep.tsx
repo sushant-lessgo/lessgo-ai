@@ -10,7 +10,6 @@ import { DISPLAY_TO_CANONICAL, type CanonicalFieldName } from "@/types/core/inde
 
 // ===== TYPE DEFINITIONS =====
 interface ValidationResult {
-  field: string;
   value: string | null;
   confidence: number;
   alternatives?: string[];
@@ -144,6 +143,7 @@ export default function InputStep({ onSuccess, onProcessingStart }: InputStepPro
 
           // Only store fields that have values
           if (validationResult.value && validationResult.value.trim()) {
+            // Extract only the needed properties, excluding 'field' to avoid React rendering errors
             confirmedFields[canonicalFieldName] = {
               value: validationResult.value.trim(),
               confidence: Math.max(0, Math.min(1, validationResult.confidence || 0)), // Clamp 0-1

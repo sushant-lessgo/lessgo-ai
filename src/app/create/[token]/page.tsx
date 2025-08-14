@@ -55,7 +55,20 @@ export default function StartPage() {
         setOneLiner(data.inputText || "");
         
         // ✅ FIXED: Set confirmedFields (AI guesses with confidence)
-        setConfirmedFields(data.confirmedFields || {});
+        // Sanitize confirmedFields to ensure they don't contain 'field' property (for backward compatibility)
+        const sanitizedConfirmedFields: Record<string, any> = {};
+        if (data.confirmedFields) {
+          Object.entries(data.confirmedFields).forEach(([key, value]: [string, any]) => {
+            // If value has a 'field' property, remove it to avoid React rendering errors
+            if (value && typeof value === 'object' && 'field' in value) {
+              const { field, ...cleanValue } = value;
+              sanitizedConfirmedFields[key] = cleanValue;
+            } else {
+              sanitizedConfirmedFields[key] = value;
+            }
+          });
+        }
+        setConfirmedFields(sanitizedConfirmedFields);
         
         // ✅ FIXED: Set validatedFields (user-confirmed values)  
         setValidatedFields(data.validatedFields || {});

@@ -33,7 +33,14 @@ export async function POST(req: NextRequest) {
       let mockValidationResults: Record<string, ValidationResult> | undefined;
       if (includeValidation) {
       //  console.log('🔍 Using mock semantic validation (avoiding embeddings API)...');
-        mockValidationResults = generateMockValidationResults(mockInferredFields);
+        const rawMockValidationResults = generateMockValidationResults(mockInferredFields);
+        
+        // Clean validation results to remove 'field' property (prevent React rendering errors)
+        mockValidationResults = {};
+        for (const [key, result] of Object.entries(rawMockValidationResults)) {
+          const { field, ...cleanResult } = result;
+          mockValidationResults[key] = cleanResult as ValidationResult;
+        }
       //  console.log('✅ Mock semantic validation completed');
       }
 
@@ -56,7 +63,14 @@ export async function POST(req: NextRequest) {
     if (includeValidation) {
      // console.log('🔍 Starting semantic validation...');
       // Cast to InputVariables type - the validation function will handle type safety
-      validationResults = await validateInferredFields(inferredFields as any);
+      const rawValidationResults = await validateInferredFields(inferredFields as any);
+      
+      // Clean validation results to remove 'field' property (prevent React rendering errors)
+      validationResults = {};
+      for (const [key, result] of Object.entries(rawValidationResults)) {
+        const { field, ...cleanResult } = result;
+        validationResults[key] = cleanResult as ValidationResult;
+      }
       // console.log('✅ Semantic validation completed');
     }
 
@@ -78,7 +92,18 @@ export async function POST(req: NextRequest) {
       
      // console.log("AI inference failed, using mock fallback");
       const mockInferredFields = generateMockInferredFields(input || "");
-      const mockValidationResults = includeValidation ? generateMockValidationResults(mockInferredFields) : undefined;
+      
+      let mockValidationResults: Record<string, ValidationResult> | undefined;
+      if (includeValidation) {
+        const rawMockValidationResults = generateMockValidationResults(mockInferredFields);
+        
+        // Clean validation results to remove 'field' property (prevent React rendering errors)
+        mockValidationResults = {};
+        for (const [key, result] of Object.entries(rawMockValidationResults)) {
+          const { field, ...cleanResult } = result;
+          mockValidationResults[key] = cleanResult as ValidationResult;
+        }
+      }
       
       return Response.json({ 
         success: true, 

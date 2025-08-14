@@ -266,14 +266,24 @@ export function LeftPanel({ tokenId }: LeftPanelProps) {
     const canonicalFieldName = canonicalField as CanonicalFieldName;
     const displayName = FIELD_DISPLAY_NAMES[canonicalFieldName] || canonicalField;
     const originalFieldData = confirmedFields[canonicalFieldName];
-    const isAutoConfirmed = originalFieldData && originalFieldData.confidence >= 0.85;
+    
+    // Sanitize value - if it's an object with a 'value' property, extract it
+    let sanitizedValue = value;
+    if (typeof value === 'object' && value !== null && 'value' in value) {
+      sanitizedValue = (value as any).value;
+    }
+    // Ensure value is a string
+    const stringValue = typeof sanitizedValue === 'string' ? sanitizedValue : String(sanitizedValue || '');
+    
+    const isAutoConfirmed = originalFieldData && typeof originalFieldData === 'object' && 'confidence' in originalFieldData && originalFieldData.confidence >= 0.85;
+    const confidence = (originalFieldData && typeof originalFieldData === 'object' && 'confidence' in originalFieldData) ? originalFieldData.confidence : 1.0;
     
     return {
       canonicalField: canonicalFieldName,
       displayName,
-      value,
+      value: stringValue,
       isAutoConfirmed,
-      confidence: originalFieldData?.confidence || 1.0,
+      confidence: confidence,
       fieldType: 'validated' as const,
     };
   });
@@ -283,10 +293,18 @@ export function LeftPanel({ tokenId }: LeftPanelProps) {
     // Use HIDDEN_FIELD_DISPLAY_NAMES for proper display names
     const displayName = HIDDEN_FIELD_DISPLAY_NAMES[fieldName] || FIELD_DISPLAY_NAMES[fieldName as CanonicalFieldName] || fieldName;
     
+    // Sanitize value - if it's an object with a 'value' property, extract it
+    let sanitizedValue = value;
+    if (typeof value === 'object' && value !== null && 'value' in value) {
+      sanitizedValue = (value as any).value;
+    }
+    // Ensure value is a string
+    const stringValue = typeof sanitizedValue === 'string' ? sanitizedValue : String(sanitizedValue || '');
+    
     return {
       canonicalField: fieldName as AnyFieldName,
       displayName,
-      value,
+      value: stringValue,
       isAutoConfirmed: true, // AI inferred
       confidence: 0.75, // Default confidence for hidden fields
       fieldType: 'hidden' as const,
