@@ -223,11 +223,6 @@ export function InlineTextEditor({
       
       setCurrentContent(newContent);
       
-      console.log('📝 Content changed:', {
-        hasFormattedContent,
-        contentType: hasFormattedContent ? 'HTML' : 'TEXT',
-        content: newContent.substring(0, 100),
-      });
       
       // Only call onContentChange if not actively typing to prevent re-renders
       // Store the content locally and defer the store update
@@ -278,34 +273,22 @@ export function InlineTextEditor({
   // Text editing exit handler - consolidates all exit logic
   const exitTextEditingMode = useCallback(() => {
     const exitTime = Date.now();
-    console.log(`📝 [${exitTime}] exitTextEditingMode CALLED:`, {
-      isEditing,
-      isTextEditing,
-      formattingInProgress,
-      elementKey,
-      sectionId,
-      callStack: new Error().stack?.split('\n').slice(1, 3).join(' -> ')
-    });
     
     // Prevent recursive calls
     if (editorRef.current?.dataset.exiting === 'true') {
-      console.log(`📝 [${exitTime}] BLOCKED: Already exiting, preventing recursion`);
       return;
     }
     
     // Don't exit if formatting is in progress (Fix #2: Split User Intent)
     if (formattingInProgress) {
-      console.log(`📝 [${exitTime}] Skipping exit - formatting in progress`);
       return;
     }
     
     // Don't exit if interaction is from toolbar
     if (shouldIgnoreFocusChange()) {
-      console.log(`📝 [${exitTime}] Skipping exit - toolbar interaction`);
       return;
     }
     
-    console.log(`📝 [${exitTime}] Exiting text editing mode with hard cleanup`);
     
     try {
       // Set flag to prevent recursive calls
@@ -315,7 +298,6 @@ export function InlineTextEditor({
       
       setIsEditing(false);
       setTextEditingMode(false); // Exit text editing mode in store
-      console.log(`📝 [${exitTime}] State updates triggered`);
     
     // Hard cleanup on mode switch (Fix #4)
     // Clear selection events and force restore if needed
@@ -345,7 +327,6 @@ export function InlineTextEditor({
       // Save any pending content
       const pendingContent = editorRef.current.dataset.pendingContent;
       if (pendingContent) {
-        console.log('📝 Saving pending content on exit:', pendingContent);
         editorRef.current.dataset.lastSaveTime = Date.now().toString();
         onContentChange(pendingContent);
         delete editorRef.current.dataset.pendingContent;
@@ -367,7 +348,6 @@ export function InlineTextEditor({
     setCurrentSelection(null);
     selectionRef.current = null;
     
-    console.log(`📝 [${exitTime}] Hard cleanup completed on text editing mode exit`);
     } catch (error) {
       console.error(`📝 [${exitTime}] ERROR in exitTextEditingMode:`, error);
       // Don't throw error to prevent cascading failures
@@ -384,7 +364,7 @@ export function InlineTextEditor({
 
   // Event handlers
   const handleFocus = useCallback(() => {
-    console.log('📝 InlineTextEditor handleFocus called');
+    // console.log('📝 InlineTextEditor handleFocus called');
     setIsEditing(true);
     // Mark as actively typing to prevent store updates during typing
     if (editorRef.current) {
@@ -393,7 +373,6 @@ export function InlineTextEditor({
       // Safety timeout to clear activelyTyping flag if blur doesn't fire
       const safetyClearTimeout = setTimeout(() => {
         if (editorRef.current) {
-          console.log('📝 Safety timeout: clearing activelyTyping flag');
           editorRef.current.dataset.activelyTyping = 'false';
         }
       }, 10000); // 10 second safety timeout
@@ -404,7 +383,7 @@ export function InlineTextEditor({
   }, [onFocus]);
 
   const handleBlur = useCallback((e: React.FocusEvent) => {
-    console.log('📝 InlineTextEditor handleBlur called');
+    // console.log('📝 InlineTextEditor handleBlur called');
     logInteractionTimeline('focusout', { 
       relatedTarget: e.relatedTarget?.nodeName,
       interactionSource: getInteractionSource()
@@ -413,7 +392,6 @@ export function InlineTextEditor({
     // Check if focus moved to toolbar (portal-safe)
     const editorId = `editor-${sectionId}-${elementKey}`;
     if (e.relatedTarget && isInEditorContext(e.relatedTarget, editorId)) {
-      console.log('📝 Focus moved to toolbar - not exiting');
       return;
     }
     
@@ -425,19 +403,18 @@ export function InlineTextEditor({
   const handleInternalSelectionChange = useCallback(() => {
     // Check if we should ignore this selection change
     if (shouldIgnoreSelectionChange()) {
-      console.log('📝 Ignoring selection change per interaction tracking');
       return;
     }
     
     // Check if element is in text editing mode or actively typing - if so, don't interfere
     if (editorRef.current?.hasAttribute('data-editing') || 
         editorRef.current?.dataset.activelyTyping === 'true') {
-      console.log('📝 InlineTextEditor: Skipping selection change - element in text editing mode or actively typing');
+      // console.log('📝 InlineTextEditor: Skipping selection change - element in text editing mode or actively typing');
       return;
     }
     
     const selection = getSelection();
-    console.log('📝 InlineTextEditor selection changed:', { selection, isCollapsed: selection?.isCollapsed });
+    // console.log('📝 InlineTextEditor selection changed:', { selection, isCollapsed: selection?.isCollapsed });
     
     setCurrentSelection(selection);
     selectionRef.current = selection;
@@ -467,20 +444,12 @@ export function InlineTextEditor({
       case 'Escape':
         // Enhanced ESC key handling with comprehensive debugging
         const escTime = Date.now();
-        console.log(`🔑 [${escTime}] ESC KEY PRESSED in handleKeyDown:`, {
-          escapeKeyBehavior: config.escapeKeyBehavior,
-          currentContent: currentContent?.substring(0, 50),
-          originalContent: content?.substring(0, 50),
-          hasEditorRef: !!editorRef.current,
-          isTextEditing: isTextEditing
-        });
         
         e.preventDefault();
         e.stopPropagation(); // Prevent event bubbling
         
         try {
           if (config.escapeKeyBehavior === 'cancel') {
-            console.log(`🔑 [${escTime}] Canceling changes - restoring original content`);
             // Cancel changes - restore original content
             setCurrentContent(content);
             if (editorRef.current) {
@@ -490,7 +459,6 @@ export function InlineTextEditor({
             }
           }
           
-          console.log(`🔑 [${escTime}] Calling exitTextEditingMode from ESC handler`);
           
           // Add timeout safety net
           const timeoutId = setTimeout(() => {
@@ -504,7 +472,6 @@ export function InlineTextEditor({
           exitTextEditingMode();
           
           clearTimeout(timeoutId);
-          console.log(`🔑 [${escTime}] ESC handler completed successfully`);
         } catch (error) {
           console.error(`🔑 [${escTime}] ERROR in ESC handler:`, error);
           // Force clear exiting flag on error
@@ -597,7 +564,6 @@ export function InlineTextEditor({
     
     const handleClickOutside = (event: MouseEvent) => {
       if (editorRef.current && !editorRef.current.contains(event.target as Node)) {
-        console.log('📝 Click outside detected - exiting text editing mode');
         exitTextEditingMode();
       }
     };
@@ -620,18 +586,10 @@ export function InlineTextEditor({
     const handleGlobalKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
         const globalEscTime = Date.now();
-        console.log(`📝 [${globalEscTime}] GLOBAL ESC key detected - exiting text editing mode:`, {
-          isEditing,
-          target: event.target,
-          currentTarget: event.currentTarget,
-          bubbles: event.bubbles,
-          defaultPrevented: event.defaultPrevented
-        });
         event.preventDefault();
         event.stopPropagation();
         
         try {
-          console.log(`📝 [${globalEscTime}] Calling exitTextEditingMode from global handler`);
           
           // Add timeout safety net
           const timeoutId = setTimeout(() => {
@@ -644,7 +602,6 @@ export function InlineTextEditor({
           exitTextEditingMode();
           
           clearTimeout(timeoutId);
-          console.log(`📝 [${globalEscTime}] Global ESC handler completed`);
         } catch (error) {
           console.error(`📝 [${globalEscTime}] ERROR in global ESC handler:`, error);
           // Force clear exiting flag on error
@@ -679,14 +636,6 @@ export function InlineTextEditor({
       const isPendingUserContent = editorRef.current.dataset.pendingContent;
       const isActivelyTyping = editorRef.current.dataset.activelyTyping === 'true';
       
-      console.log('📝 Content sync useEffect triggered:', {
-        content,
-        currentContent,
-        currentElementContent,
-        isEditing,
-        isPendingUserContent,
-        isActivelyTyping
-      });
       
       // Only sync if the content prop is genuinely different from user's current input
       // AND it's not a result of the user's own changes being saved and returned from store
@@ -697,15 +646,8 @@ export function InlineTextEditor({
       // Check if this might be the user's own content being returned from the store
       const mightBeUserContentEcho = Math.abs(Date.now() - (parseInt(editorRef.current.dataset.lastSaveTime || '0', 10))) < 1000;
       
-      console.log('📝 Content sync decision:', {
-        shouldSync,
-        isUserCurrentlyEditing,
-        mightBeUserContentEcho,
-        timeSinceLastSave: Date.now() - (parseInt(editorRef.current.dataset.lastSaveTime || '0', 10))
-      });
       
       if (shouldSync && !mightBeUserContentEcho) {
-        console.log('📝 Syncing external content change:', content);
         setCurrentContent(content);
         
         // Check if incoming content is HTML (contains tags) or plain text
@@ -714,14 +656,11 @@ export function InlineTextEditor({
         if (isHtmlContent) {
           // Apply HTML content directly - will be sanitized on save
           editorRef.current.innerHTML = content;
-          console.log('📝 Applied HTML content directly:', content.substring(0, 100));
         } else {
           // Set as plain text
           editorRef.current.textContent = content;
-          console.log('📝 Applied plain text content:', content.substring(0, 100));
         }
       } else {
-        console.log('📝 Skipping content sync - likely user content echo or user is editing');
         // Just update our internal state to match the current DOM content
         const hasFormattedContent = editorRef.current.querySelector('span[style]');
         const actualContent = hasFormattedContent 
@@ -789,7 +728,6 @@ export function InlineTextEditor({
     onFocusOut: (e) => {
       // Additional focus out handling if needed
       if (!isInEditorContext(e.target, editorId)) {
-        console.log('📝 Focus left editor context completely');
         exitTextEditingMode();
       }
     }
@@ -830,7 +768,7 @@ export function InlineTextEditor({
         logInteractionTimeline('compositionend');
       }}
       onClick={(e) => {
-        console.log('📝 InlineTextEditor clicked');
+        // console.log('📝 InlineTextEditor clicked');
         // Don't prevent default - we want normal click behavior
       }}
       className={`
@@ -857,7 +795,7 @@ export function InlineTextEditor({
         const isHtmlContent = /<[^>]*>/g.test(currentContent);
         if (isHtmlContent) {
           // Directly render HTML content - already sanitized on save
-          console.log('📝 Rendering HTML content:', currentContent.substring(0, 100));
+          // console.log('📝 Rendering HTML content:', currentContent.substring(0, 100));
           return <span dangerouslySetInnerHTML={{ __html: currentContent }} />;
         } else {
           return currentContent || placeholder;

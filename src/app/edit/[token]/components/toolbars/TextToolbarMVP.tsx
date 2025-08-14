@@ -68,13 +68,6 @@ export function TextToolbarMVP({ elementSelection, position, contextActions }: T
   const currentRender = ++globalRenderCount;
   const renderTime = Date.now();
   
-  console.log(`🎪 [${renderTime}] TextToolbarMVP RENDER #${currentRender} STARTED:`, {
-    elementSelection: elementSelection ? {
-      sectionId: elementSelection.sectionId,
-      elementKey: elementSelection.elementKey
-    } : null,
-    position
-  });
   // Step 3: Global anchor positioning with MVP sizing
   const { 
     isVisible, 
@@ -109,26 +102,12 @@ export function TextToolbarMVP({ elementSelection, position, contextActions }: T
   // Track if user has text selected within the element
   const [hasTextSelection, setHasTextSelection] = useState(false);
 
-  // Debug logging - FIXED: Removed formatState and elementSelection dependencies to prevent infinite loops
-  useEffect(() => {
-    const renderTime = Date.now();
-    console.log(`📝 [${renderTime}] TextToolbarMVP RENDER:`, { 
-      isVisible, 
-      reason,
-      hasValidPosition,
-      formatStateBold: formatState.bold, // Direct properties to avoid object reference issues
-      formatStateItalic: formatState.italic,
-      formatStateUnderline: formatState.underline,
-      elementKey: elementSelection?.elementKey,
-      renderCount: Math.random() // Simple render tracking
-    });
-  }, [isVisible, reason, hasValidPosition]); // REMOVED: formatState, elementSelection
+  // Debug logging removed to prevent log spam
   
   // Track render count removed for type safety
 
   // Priority-based early return
   if (!isVisible) {
-    console.log('📝 TextToolbarMVP hidden:', reason);
     return null;
   }
 
@@ -168,7 +147,6 @@ export function TextToolbarMVP({ elementSelection, position, contextActions }: T
       formatState.color !== newFormatState.color;
       
     if (hasChanged) {
-      console.log(`📝 Format state CHANGED:`, { old: formatState, new: newFormatState });
       setFormatState(newFormatState);
     }
   }, [elementSelection, formatState]); // Keep formatState dependency for change detection
@@ -190,7 +168,6 @@ export function TextToolbarMVP({ elementSelection, position, contextActions }: T
 
       if (targetElement && targetElement.contains(range.commonAncestorContainer)) {
         setHasTextSelection(true);
-        console.log('📝 Text selection detected in element:', range.toString().substring(0, 50));
       } else {
         setHasTextSelection(false);
       }
@@ -207,41 +184,21 @@ export function TextToolbarMVP({ elementSelection, position, contextActions }: T
 
   // Enhanced format application with leading debounce and state management
   const applyFormatInternal = (newFormat: Partial<MVPFormatState>) => {
-    const startTime = Date.now();
-    console.log(`🔧 [${startTime}] applyFormatInternal STARTED:`, {
-      newFormat,
-      elementSelection: elementSelection ? {
-        sectionId: elementSelection.sectionId,
-        elementKey: elementSelection.elementKey
-      } : null,
-      hasTextSelection,
-      callStack: new Error().stack?.split('\n')[1]?.trim()
-    });
     
     if (!elementSelection) {
-      console.log(`🔧 [${startTime}] EARLY RETURN: No elementSelection`);
       return;
     }
 
     try {
       // Set formatting in progress flag (Fix #2: Split User Intent)
-      console.log(`🔧 [${startTime}] Setting formatting in progress...`);
       setFormattingInProgress(true);
 
       // Check if user has text selected
       const selection = window.getSelection();
       const hasActiveSelection = selection && selection.rangeCount > 0 && !selection.isCollapsed;
-      console.log(`🔧 [${startTime}] Selection check:`, {
-        hasSelection: !!selection,
-        rangeCount: selection?.rangeCount,
-        isCollapsed: selection?.isCollapsed,
-        hasActiveSelection,
-        hasTextSelection
-      });
 
       if (hasActiveSelection && hasTextSelection) {
         // PARTIAL SELECTION FORMATTING - Apply to selected text only
-        console.log(`🔧 [${startTime}] ✨ Applying format to selected text:`, newFormat);
         
         // Convert MVPFormatState to TextFormatState for compatibility
         const textFormatState = {
@@ -253,30 +210,18 @@ export function TextToolbarMVP({ elementSelection, position, contextActions }: T
           textAlign: newFormat.textAlign,
         };
 
-        console.log(`🔧 [${startTime}] Calling formatSelectedText...`);
         const result = formatSelectedText(textFormatState);
-        console.log(`🔧 [${startTime}] formatSelectedText result:`, {
-          success: result.success,
-          hasFormattedHTML: !!result.formattedHTML,
-          error: result.error,
-          formattedHTML: result.formattedHTML?.substring(0, 100) + '...'
-        });
         
         if (result.success && result.formattedHTML) {
           // Update store with HTML content instead of plain text
-          console.log(`🔧 [${startTime}] Updating store with formatted HTML...`);
           updateElementContent(
             elementSelection.sectionId, 
             elementSelection.elementKey, 
             result.formattedHTML
           );
-          console.log(`🔧 [${startTime}] ✨ Partial formatting applied successfully`);
-        } else {
-          console.error(`🔧 [${startTime}] ❌ Partial formatting failed:`, result.error);
         }
       } else {
         // WHOLE ELEMENT FORMATTING - Apply to entire element
-        console.log('📝 Applying format to whole element:', newFormat);
         
         const targetElement = document.querySelector(
           `[data-section-id="${elementSelection.sectionId}"] [data-element-key="${elementSelection.elementKey}"]`
@@ -312,23 +257,17 @@ export function TextToolbarMVP({ elementSelection, position, contextActions }: T
         const hasFormattedContent = targetElement.querySelector('span[style]');
         const contentToSave = hasFormattedContent ? targetElement.innerHTML : targetElement.textContent || '';
         
-        console.log(`🔧 [${startTime}] Updating store for whole element formatting...`);
         updateElementContent(
           elementSelection.sectionId, 
           elementSelection.elementKey, 
           contentToSave
         );
-        console.log(`🔧 [${startTime}] Whole element formatting completed`);
       }
-      console.log(`🔧 [${startTime}] applyFormatInternal COMPLETED successfully`);
     } catch (error) {
-      console.error(`🔧 [${startTime}] applyFormatInternal ERROR:`, error);
       throw error;
     } finally {
       // Always clear formatting flag after a delay
-      console.log(`🔧 [${startTime}] Setting timeout to clear formatting flag...`);
       setTimeout(() => {
-        console.log(`🔧 [${startTime}] Clearing formatting in progress flag`);
         setFormattingInProgress(false);
       }, 50);
     }
@@ -355,7 +294,6 @@ export function TextToolbarMVP({ elementSelection, position, contextActions }: T
     
     // Clear formatting flag after a delay
     setTimeout(() => {
-      console.log(`🎯 CLEANUP: Clearing formatting flag after 100ms`);
       setFormattingInProgress(false);
       logInteractionTimeline('format:end');
     }, 100);
@@ -366,35 +304,14 @@ export function TextToolbarMVP({ elementSelection, position, contextActions }: T
 
   // Simple format functions
   const toggleBold = (e?: React.MouseEvent) => {
-    const clickTime = Date.now();
-    console.log(`🔤 [${clickTime}] BOLD CLICKED:`, {
-      hasTextSelection,
-      currentBold: formatState.bold,
-      newBold: !formatState.bold,
-      hasSelection: hasSelection,
-      elementSelection: elementSelection ? {
-        sectionId: elementSelection.sectionId,
-        elementKey: elementSelection.elementKey
-      } : null,
-      windowSelection: {
-        hasSelection: !!window.getSelection(),
-        isCollapsed: window.getSelection()?.isCollapsed,
-        rangeCount: window.getSelection()?.rangeCount
-      }
-    });
-    
     if (hasTextSelection) {
-      console.log(`🔤 [${clickTime}] Restoring selection...`);
       restoreSelection();
     }
     
-    console.log(`🔤 [${clickTime}] Calling applyFormatImmediate with bold: ${!formatState.bold}`);
     applyFormatImmediate({ bold: !formatState.bold });
-    console.log(`🔤 [${clickTime}] Bold click handler completed`);
   };
   
   const toggleItalic = (e?: React.MouseEvent) => {
-    console.log('🔤 Toggle italic clicked, hasTextSelection:', hasTextSelection);
     if (hasTextSelection) {
       restoreSelection();
     }
@@ -402,7 +319,6 @@ export function TextToolbarMVP({ elementSelection, position, contextActions }: T
   };
   
   const toggleUnderline = (e?: React.MouseEvent) => {
-    console.log('🔤 Toggle underline clicked, hasTextSelection:', hasTextSelection);
     if (hasTextSelection) {
       restoreSelection();
     }

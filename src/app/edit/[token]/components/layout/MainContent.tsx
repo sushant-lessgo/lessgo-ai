@@ -134,7 +134,7 @@ export function MainContent({ tokenId }: MainContentProps) {
   
   // Debug logging for selection system
   React.useEffect(() => {
-    console.log('🎯 MainContent mode:', mode);
+    // console.log('🎯 MainContent mode:', mode);
   }, [mode]);
 
 const {
@@ -148,12 +148,12 @@ const {
 
 // Debug logging for element picker state
 React.useEffect(() => {
-  console.log('🎯 ElementPicker state changed:', {
-    isPickerVisible,
-    pickerSectionId,
-    pickerPosition,
-    pickerOptions
-  });
+  // console.log('🎯 ElementPicker state changed:', {
+  //   isPickerVisible,
+  //   pickerSectionId,
+  //   pickerPosition,
+  //   pickerOptions
+  // });
 }, [isPickerVisible, pickerSectionId, pickerPosition, pickerOptions]);
 
   const colorTokens = getColorTokens?.() || {};
@@ -161,13 +161,13 @@ React.useEffect(() => {
   // Debug logging for sections rendering (throttled)
   React.useEffect(() => {
     const timeoutId = setTimeout(() => {
-      console.log('🖼️ MainContent render:', {
-        sectionsLength: sections.length,
-        sections: sections,
-        contentKeys: Object.keys(content),
-        mode: mode,
-        selectedSection: selectedSection
-      });
+      // console.log('🖼️ MainContent render:', {
+      //   sectionsLength: sections.length,
+      //   sections: sections,
+      //   contentKeys: Object.keys(content),
+      //   mode: mode,
+      //   selectedSection: selectedSection
+      // });
     }, 100);
     return () => clearTimeout(timeoutId);
   }, [sections.length, mode, selectedSection]);
@@ -197,7 +197,6 @@ React.useEffect(() => {
   // Enhanced section click handler
  // Enhanced section click handler with context awareness
   const handleSectionClick = (sectionId: string, event: React.MouseEvent) => {
-    console.log('🔥 Section clicked:', sectionId, 'mode:', mode);
     if (mode !== 'edit') return;
 
     const startTime = performance.now();
@@ -216,7 +215,6 @@ React.useEffect(() => {
       };
       
       // Use context-aware section toolbar
-      console.log('🎪 Showing section toolbar for:', sectionId, 'at position:', position);
       
       if (typeof showSectionToolbar === 'function') {
         showSectionToolbar?.(sectionId, position);
@@ -237,7 +235,7 @@ React.useEffect(() => {
 // Enhanced element click handler with smart positioning
 // Enhanced element click handler with full context analysis
   const handleElementClick = (sectionId: string, elementKey: string, event: React.MouseEvent) => {
-    console.log('🎯 Element clicked:', sectionId, elementKey, 'mode:', mode);
+    // console.log('🎯 Element clicked:', sectionId, elementKey, 'mode:', mode);
     if (mode !== 'edit') return;
 
     const startTime = performance.now();
@@ -279,7 +277,7 @@ React.useEffect(() => {
       }
     }, 0);
 
-    console.log('🎯 Element selected, toolbar should show:', { elementId, position });
+    // console.log('🎯 Element selected, toolbar should show:', { elementId, position });
 
     trackPerformance?.('element-selection', startTime);
     
@@ -498,14 +496,8 @@ const handleAddSection = (afterSectionId?: string) => {
 
   // Clear selection on background click
  const handleBackgroundClick = (event: React.MouseEvent) => {
-  console.log('🎯 handleBackgroundClick called', {
-    target: event.target,
-    currentTarget: event.currentTarget,
-    condition: event.target === event.currentTarget
-  });
   // Only clear if clicking directly on the background, not on children
   if (event.target === event.currentTarget) {
-    console.log('🎯 CLEARING SELECTION from background click');
     clearSelection();
     hideElementPicker(); // ADD THIS LINE
     announceLiveRegion?.('Cleared selection');

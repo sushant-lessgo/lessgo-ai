@@ -85,12 +85,12 @@ export function useTransitionLock(config: Partial<TransitionLockConfig> = {}) {
     const lockUntil = now + Math.min(duration, finalConfig.maxLockTime);
     
     if (finalConfig.debug) {
-      console.log('🔒 Transition locked:', {
-        toolbarType,
-        reason,
-        duration,
-        lockUntil: new Date(lockUntil).toISOString(),
-      });
+      // console.log('🔒 Transition locked:', {
+      //   toolbarType,
+      //   reason,
+      //   duration,
+      //   lockUntil: new Date(lockUntil).toISOString(),
+      // });
     }
     
     clearTimers();

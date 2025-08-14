@@ -661,12 +661,12 @@ getTypographyForSection: (sectionId: string) => {
           return cache;
         }
         
-        console.log('🎨 [TOKENS-DEBUG] getColorTokens called with theme:', {
-          baseColor: theme.colors.baseColor,
-          accentColor: theme.colors.accentColor,
-          accentCSS: theme.colors.accentCSS,
-          cacheKey: newCacheKey
-        });
+        // console.log('🎨 [TOKENS-DEBUG] getColorTokens called with theme:', {
+        //   baseColor: theme.colors.baseColor,
+        //   accentColor: theme.colors.accentColor,
+        //   accentCSS: theme.colors.accentCSS,
+        //   cacheKey: newCacheKey
+        // });
       
       // Check if we have a complete background system
       const hasCompleteBackgroundSystem = 
@@ -724,9 +724,9 @@ getTypographyForSection: (sectionId: string) => {
           sectionBackgrounds: theme.colors.sectionBackgrounds,
           storedTextColors: theme.colors.textColors // Use stored text colors even in fallback
         };
-        console.log('🎨 [TOKENS-DEBUG] Fallback input:', fallbackInput);
+        // console.log('🎨 [TOKENS-DEBUG] Fallback input:', fallbackInput);
         const tokens = generateColorTokens(fallbackInput);
-        console.log('🎨 [TOKENS-DEBUG] Generated fallback tokens:', tokens);
+        // console.log('🎨 [TOKENS-DEBUG] Generated fallback tokens:', tokens);
         
         // Cache the result
         cache = tokens;

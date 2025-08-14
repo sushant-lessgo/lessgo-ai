@@ -169,9 +169,9 @@ export function VariableThemeInjector({
       styleRef.current = styleElement;
 
       // Performance logging if enabled
-      if (flags.enablePerformanceLogging) {
-        console.log(`VariableThemeInjector: Injected ${Object.keys(variableState.cssVariables).length} CSS variables for ${phase} mode`);
-      }
+      // if (flags.enablePerformanceLogging) {
+      //   console.log(`VariableThemeInjector: Injected ${Object.keys(variableState.cssVariables).length} CSS variables for ${phase} mode`);
+      // }
     }, 0); // Defer to next tick
 
     // Cleanup function

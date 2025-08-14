@@ -44,7 +44,7 @@ export function VariableBackgroundModal({
   tokenId,
   enableVariableMode = true 
 }: VariableBackgroundModalProps) {
-  console.log('🕵️ [VariableBackgroundModal] Modal rendering with isOpen:', isOpen);
+  // console.log('🕵️ [VariableBackgroundModal] Modal rendering with isOpen:', isOpen);
   const [validationResult, setValidationResult] = useState<BackgroundValidationResult | null>(null);
   const [isValidating, setIsValidating] = useState(false);
   const [selectedVariation, setSelectedVariation] = useState<any>(null);
@@ -108,13 +108,13 @@ export function VariableBackgroundModal({
       }
     ];
     
-    console.log('🔍 [MODAL DEBUG] availableModes calculation:', {
-      phase,
-      isVariableMode,
-      isHybridMode,
-      enableCustomColorPicker: flags.enableCustomColorPicker,
-      allFlags: flags
-    });
+    // console.log('🔍 [MODAL DEBUG] availableModes calculation:', {
+    //   phase,
+    //   isVariableMode,
+    //   isHybridMode,
+    //   enableCustomColorPicker: flags.enableCustomColorPicker,
+    //   allFlags: flags
+    // });
     
     // Note: Variable mode will be handled as part of recommended mode for now
     // since BackgroundSelectorMode type doesn't include 'variable'
@@ -126,12 +126,12 @@ export function VariableBackgroundModal({
         description: 'Create your own color palette',
         icon: <Palette className="w-4 h-4" />
       });
-      console.log('🎨 [MODAL DEBUG] Custom Colors mode ADDED to available modes');
+      // console.log('🎨 [MODAL DEBUG] Custom Colors mode ADDED to available modes');
     } else {
-      console.log('⚠️ [MODAL DEBUG] Custom Colors mode NOT enabled - flags.enableCustomColorPicker is false');
+      // console.log('⚠️ [MODAL DEBUG] Custom Colors mode NOT enabled - flags.enableCustomColorPicker is false');
     }
     
-    console.log('🔍 [MODAL DEBUG] Final available modes:', modes);
+    // console.log('🔍 [MODAL DEBUG] Final available modes:', modes);
     return modes;
   }, [phase, isVariableMode, isHybridMode, flags]);
 
@@ -322,13 +322,13 @@ export function VariableBackgroundModal({
             
             <StyleGrid
               variations={(() => {
-                console.log('🔍 VariableBackgroundModal processedOptions:', processedOptions);
-                console.log('🔍 processedOptions.length:', processedOptions?.length);
+                // console.log('🔍 VariableBackgroundModal processedOptions:', processedOptions);
+                // console.log('🔍 processedOptions.length:', processedOptions?.length);
                 if (processedOptions?.[0]) {
-                  console.log('🔍 First variation COMPLETE object:', JSON.stringify(processedOptions[0], null, 2));
-                  console.log('🔍 First variation keys:', Object.keys(processedOptions[0]));
+                  // console.log('🔍 First variation COMPLETE object:', JSON.stringify(processedOptions[0], null, 2));
+                  // console.log('🔍 First variation keys:', Object.keys(processedOptions[0]));
                 }
-                console.log('🔍 isLoading:', isLoading, 'mode:', mode);
+                // console.log('🔍 isLoading:', isLoading, 'mode:', mode);
                 return processedOptions as any;
               })()}
               selectedVariation={selectedVariation}

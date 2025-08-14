@@ -15,7 +15,7 @@ let isComposing = false;
  */
 export function setInteractionSource(source: InteractionSource): void {
   interactionSource = source;
-  console.log('🎯 Interaction source set:', source, new Date().toISOString());
+  // console.log('🎯 Interaction source set:', source, new Date().toISOString());
 }
 
 /**
@@ -32,13 +32,11 @@ export function getInteractionSource(): InteractionSource {
  */
 export function clearInteractionSource(): void {
   interactionSource = null;
-  console.log('🧹 Interaction source cleared', new Date().toISOString());
   
   // Extra safety: clear in next microtask to prevent masking legitimate interactions
   queueMicrotask(() => {
     if (interactionSource === null) return; // Already cleared
     interactionSource = null;
-    console.log('🧹 Interaction source cleared (microtask)', new Date().toISOString());
   });
 }
 
@@ -66,7 +64,6 @@ export function withInteractionSource<T>(
  */
 export function setComposing(composing: boolean): void {
   isComposing = composing;
-  console.log('🌏 Composition state:', composing);
 }
 
 /**
@@ -84,13 +81,11 @@ export function getIsComposing(): boolean {
 export function shouldIgnoreSelectionChange(): boolean {
   // Ignore if interaction is from toolbar
   if (interactionSource === 'toolbar') {
-    console.log('🚫 Ignoring selection change: toolbar interaction');
     return true;
   }
   
   // Ignore if composing (IME)
   if (isComposing) {
-    console.log('🚫 Ignoring selection change: composition active');
     return true;
   }
   
@@ -104,7 +99,6 @@ export function shouldIgnoreSelectionChange(): boolean {
 export function shouldIgnoreFocusChange(): boolean {
   // Ignore if interaction is from toolbar
   if (interactionSource === 'toolbar') {
-    console.log('🚫 Ignoring focus change: toolbar interaction');
     return true;
   }
   
@@ -138,11 +132,11 @@ export function logInteractionTimeline(
   event: string,
   details?: Record<string, any>
 ): void {
-  if (process.env.NODE_ENV === 'development') {
-    console.log(`📊 [${new Date().toISOString()}] ${event}`, {
-      interactionSource,
-      isComposing,
-      ...details
-    });
-  }
+  // if (process.env.NODE_ENV === 'development') {
+  //   console.log(`📊 [${new Date().toISOString()}] ${event}`, {
+  //     interactionSource,
+  //     isComposing,
+  //     ...details
+  //   });
+  // }
 }

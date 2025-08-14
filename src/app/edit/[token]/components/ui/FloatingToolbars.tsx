@@ -31,20 +31,20 @@ export function FloatingToolbars() {
   
   // Debug logging - only on actual changes
   useEffect(() => {
-    console.log('🎪🎪🎪 FloatingToolbars state changed:', {
-      activeToolbar,
-      hasActiveToolbar,
-      toolbarTarget,
-      editorSelection,
-      toolbar
-    });
-    console.log('🎪 shouldShowToolbar results:', {
-      section: shouldShowToolbar('section'),
-      element: shouldShowToolbar('element'), 
-      text: shouldShowToolbar('text'),
-      image: shouldShowToolbar('image'),
-      form: shouldShowToolbar('form')
-    });
+    // console.log('🎪🎪🎪 FloatingToolbars state changed:', {
+    //   activeToolbar,
+    //   hasActiveToolbar,
+    //   toolbarTarget,
+    //   editorSelection,
+    //   toolbar
+    // });
+    // Preserve function calls but remove logging
+    shouldShowToolbar('section');
+    shouldShowToolbar('element'); 
+    shouldShowToolbar('text');
+    shouldShowToolbar('image');
+    shouldShowToolbar('form');
+    // console.log('🎪 shouldShowToolbar results preserved but not logged');
   }, [activeToolbar, hasActiveToolbar, toolbar, toolbarTarget, editorSelection, shouldShowToolbar]);
 
 
@@ -102,26 +102,26 @@ export function FloatingToolbars() {
         const isImageActive = activeToolbar === 'image';
         const allConditions = shouldShow && hasTargetId && isImageActive;
         
-        console.log('🖼️ ImageToolbar render check:', {
-          shouldShow,
-          hasTargetId,
-          targetId: toolbarTarget.targetId,
-          isImageActive,
-          activeToolbar,
-          allConditions,
-          toolbarTarget: toolbarTarget
-        });
+        // console.log('🖼️ ImageToolbar render check:', {
+        //   shouldShow,
+        //   hasTargetId,
+        //   targetId: toolbarTarget.targetId,
+        //   isImageActive,
+        //   activeToolbar,
+        //   allConditions,
+        //   toolbarTarget: toolbarTarget
+        // });
         
         return allConditions;
       })() && (
         <>
-          {console.log('🖼️ ImageToolbar rendering with:', {
+          {/* console.log('🖼️ ImageToolbar rendering with:', {
             shouldShowImage: shouldShowToolbar('image'),
             targetId: toolbarTarget.targetId, 
             activeToolbar,
             position,
             contextActions
-          })}
+          }); */}
           <ImageToolbar
             targetId={toolbarTarget.targetId || ''}
             position={position}

@@ -271,8 +271,8 @@ export function createUIActions(set: any, get: any): UIActions {
     
     showToolbar: (type: 'section' | 'element' | 'text' | 'image' | 'form', targetId: string, position?: { x: number; y: number }) =>
       set((state: EditStore) => {
-        console.log('🎯🎯🎯 showToolbar called with:', { type, targetId, position });
-        console.log('🎯 Current toolbar state BEFORE update:', state.toolbar);
+        // console.log('🎯🎯🎯 showToolbar called with:', { type, targetId, position });
+        // console.log('🎯 Current toolbar state BEFORE update:', state.toolbar);
         
         // Simple position calculation if not provided
         const pos = position || { x: 0, y: 0 };
@@ -280,7 +280,7 @@ export function createUIActions(set: any, get: any): UIActions {
         // Get context-aware actions based on type
         const actions = getActionsForType(type, targetId, state);
         
-        console.log('🎯 Setting NEW toolbar state:', { type, visible: true, position: pos, targetId, actions });
+        // console.log('🎯 Setting NEW toolbar state:', { type, visible: true, position: pos, targetId, actions });
         
         // Update toolbar state
         state.toolbar = {
@@ -291,7 +291,7 @@ export function createUIActions(set: any, get: any): UIActions {
           actions,
         };
         
-        console.log('🎯 Toolbar state AFTER update:', state.toolbar);
+        // console.log('🎯 Toolbar state AFTER update:', state.toolbar);
         
         // Update selection state
         if (type === 'section') {

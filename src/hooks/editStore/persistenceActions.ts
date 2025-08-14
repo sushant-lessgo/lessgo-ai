@@ -19,15 +19,6 @@ export function createPersistenceActions(set: any, get: any) {
         const state = get();
         const exportedData = state.export();
         
-        console.log('💾 Calling /api/saveDraft with data:', { 
-          tokenId: state.tokenId, 
-          hasContent: !!exportedData,
-          sectionsCount: exportedData.sections?.length || 0,
-          contentKeys: Object.keys(exportedData.content || {}),
-          hasAnyElements: Object.values(exportedData.content || {}).some((section: any) => 
-            section.elements && Object.keys(section.elements).length > 0
-          )
-        });
         
         if (!state.tokenId) {
           throw new Error('No tokenId available in EditStore');
@@ -51,7 +42,6 @@ export function createPersistenceActions(set: any, get: any) {
         }
 
         const result = await response.json();
-        console.log('✅ Save API response:', result);
         
         set((state: EditStore) => {
           state.persistence.isSaving = false;
@@ -79,12 +69,6 @@ export function createPersistenceActions(set: any, get: any) {
           state.persistence.loadError = undefined;
         });
 
-        console.log('🔄 Loading draft data:', {
-          hasContent: !!apiResponse.content,
-          hasFinalContent: !!apiResponse.finalContent,
-          tokenId: apiResponse.tokenId || urlTokenId,
-          apiResponseKeys: Object.keys(apiResponse)
-        });
 
         // Handle different response formats - check both finalContent and content
         // The API stores the data under content.finalContent path
@@ -93,11 +77,6 @@ export function createPersistenceActions(set: any, get: any) {
         set((state: EditStore) => {
           // Restore core content if available
           if (contentToLoad && contentToLoad.sections && Array.isArray(contentToLoad.sections)) {
-            console.log('📥 Restoring sections and content:', {
-              sectionsCount: contentToLoad.sections.length,
-              contentKeys: Object.keys(contentToLoad.content || {}).length,
-              sectionLayoutsCount: Object.keys(contentToLoad.sectionLayouts || {}).length
-            });
             
             state.sections = contentToLoad.sections;
             state.sectionLayouts = contentToLoad.sectionLayouts || {};
@@ -115,43 +94,20 @@ export function createPersistenceActions(set: any, get: any) {
                 contentKeys: Object.keys(state.content)
               });
             } else {
-              console.log('✅ Section/Content match confirmed:', {
-                count: sectionsInContent
-              });
             }
           } else {
-            console.log('📝 No section data found in response, keeping empty state');
           }
           
           // Restore theme and settings if available
           if (contentToLoad && contentToLoad.theme) {
-            console.log('🎨 [PERSISTENCE-DEBUG] Restoring theme data from draft:', {
-              themeFromAPI: contentToLoad.theme,
-              currentTheme: state.theme,
-              backgroundsFromAPI: contentToLoad.theme?.colors?.sectionBackgrounds,
-              typographyFromAPI: {
-                headingFont: contentToLoad.theme?.typography?.headingFont,
-                bodyFont: contentToLoad.theme?.typography?.bodyFont
-              }
-            });
             
             const mergedTheme = { ...state.theme, ...contentToLoad.theme };
             state.theme = mergedTheme;
             
-            console.log('🎨 [PERSISTENCE-DEBUG] Theme after merge:', {
-              mergedTheme: mergedTheme,
-              backgroundsAfterMerge: mergedTheme?.colors?.sectionBackgrounds,
-              typographyAfterMerge: {
-                headingFont: mergedTheme?.typography?.headingFont,
-                bodyFont: mergedTheme?.typography?.bodyFont
-              }
-            });
           } else {
-            console.log('🎨 [PERSISTENCE-DEBUG] No theme data in API response, keeping current theme');
           }
           
           if (contentToLoad && contentToLoad.globalSettings) {
-            console.log('🎨 [PERSISTENCE-DEBUG] Restoring global settings:', contentToLoad.globalSettings);
             Object.assign(state.globalSettings, contentToLoad.globalSettings);
           }
           
@@ -183,13 +139,6 @@ export function createPersistenceActions(set: any, get: any) {
             };
           }
 
-          console.log('✅ Draft loading complete:', {
-            tokenId: state.tokenId,
-            title: state.title,
-            sectionsCount: state.sections.length,
-            contentKeysCount: Object.keys(state.content).length,
-            hasTheme: !!state.theme
-          });
         });
         
       } catch (error) {
@@ -218,14 +167,6 @@ export function createPersistenceActions(set: any, get: any) {
         version: state.version,
       };
       
-      // Debug logging
-      console.log('📤 Exporting store data:', {
-        sections: exportData.sections.length,
-        contentKeys: Object.keys(exportData.content),
-        hasElements: Object.values(exportData.content).some((section: any) => 
-          section.elements && Object.keys(section.elements).length > 0
-        )
-      });
       
       return exportData;
     },
@@ -373,19 +314,13 @@ export function createPersistenceActions(set: any, get: any) {
     triggerAutoSave: async () => {
       const state = get();
       if (state.persistence.isDirty && !state.persistence.isSaving) {
-        console.log('🔄 TriggerAutoSave: Saving dirty state...');
         try {
           await state.save();
-          console.log('✅ TriggerAutoSave: Save completed');
         } catch (error) {
           console.error('❌ TriggerAutoSave: Save failed:', error);
           throw error;
         }
       } else {
-        console.log('⏭️ TriggerAutoSave: No save needed', { 
-          isDirty: state.persistence.isDirty, 
-          isSaving: state.persistence.isSaving 
-        });
       }
     },
 

@@ -89,11 +89,11 @@ export function useSelectionPriority() {
       if (current.selectedElement && !current.isTextEditing) {
         // Determine the correct toolbar type based on explicit toolbar setting
         const correctToolbarType = editorSelection.toolbarType || 'element';
-        console.log('🔒 Locking transition for element change:', {
-          elementKey: current.selectedElement.elementKey,
-          toolbarType: correctToolbarType,
-          explicitType: editorSelection.toolbarType
-        });
+        // console.log('🔒 Locking transition for element change:', {
+        //   elementKey: current.selectedElement.elementKey,
+        //   toolbarType: correctToolbarType,
+        //   explicitType: editorSelection.toolbarType
+        // });
         
         transitionLock.lockForElementChange({
           sectionId: current.selectedElement.sectionId,

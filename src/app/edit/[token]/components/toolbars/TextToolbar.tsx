@@ -302,11 +302,11 @@ export function TextToolbar({ elementSelection, position, contextActions }: Text
         break;
     }
     
-    // Save content to store
+    // Save content to store with HTML preserved
     updateElementContent(
       elementSelection.sectionId,
       elementSelection.elementKey,
-      targetElement.textContent || ''
+      targetElement.innerHTML || targetElement.textContent || ''
     );
     
     announceLiveRegion(`${format} ${!isActive ? 'applied' : 'removed'}`);
@@ -321,11 +321,11 @@ export function TextToolbar({ elementSelection, position, contextActions }: Text
       if (selectionInfo?.hasSelection && targetElement) {
         applyFormatToSelection(format, selectionInfo.range, targetElement);
         
-        // Save content to store after partial formatting
+        // Save content to store after partial formatting with HTML preserved
         updateElementContent(
           elementSelection.sectionId,
           elementSelection.elementKey,
-          targetElement.textContent || ''
+          targetElement.innerHTML || targetElement.textContent || ''
         );
         
         announceLiveRegion(`${format} applied to selected text`);
@@ -380,11 +380,11 @@ export function TextToolbar({ elementSelection, position, contextActions }: Text
       announceLiveRegion(`Text color changed to ${color}`);
     }
     
-    // Save content to store
+    // Save content to store with HTML preserved
     updateElementContent(
       elementSelection.sectionId,
       elementSelection.elementKey,
-      targetElement.textContent || ''
+      targetElement.innerHTML || targetElement.textContent || ''
     );
   };
 
@@ -400,21 +400,30 @@ export function TextToolbar({ elementSelection, position, contextActions }: Text
         // Apply font size to selected text
         try {
           document.execCommand('styleWithCSS', false, 'true');
-          document.execCommand('fontSize', false, '7'); // Reset to default
-          // Apply custom font size via CSS
+          // Use execCommand with inline styles for better compatibility
+          document.execCommand('styleWithCSS', false, 'true');
+          
+          // Create a wrapper span with the font size
           const selection = window.getSelection();
           if (selection && selection.rangeCount > 0) {
             const range = selection.getRangeAt(0);
+            
+            // Extract and wrap the selected content
+            const selectedContent = range.extractContents();
             const span = document.createElement('span');
             span.style.fontSize = size;
-            try {
-              range.surroundContents(span);
-              announceLiveRegion(`Font size changed to ${size} for selected text`);
-            } catch (e) {
-              // Fallback to element-level
-              targetElement.style.fontSize = size;
-              announceLiveRegion(`Font size changed to ${size}`);
-            }
+            span.appendChild(selectedContent);
+            
+            // Insert the wrapped content back
+            range.insertNode(span);
+            
+            // Restore the selection around the new span
+            selection.removeAllRanges();
+            const newRange = document.createRange();
+            newRange.selectNodeContents(span);
+            selection.addRange(newRange);
+            
+            announceLiveRegion(`Font size changed to ${size} for selected text`);
           }
         } catch (error) {
           // Fallback to element-level
@@ -432,11 +441,11 @@ export function TextToolbar({ elementSelection, position, contextActions }: Text
       announceLiveRegion(`Font size changed to ${size}`);
     }
     
-    // Save content to store
+    // Save content to store with HTML preserved
     updateElementContent(
       elementSelection.sectionId,
       elementSelection.elementKey,
-      targetElement.textContent || ''
+      targetElement.innerHTML || targetElement.textContent || ''
     );
   };
 
@@ -447,11 +456,11 @@ export function TextToolbar({ elementSelection, position, contextActions }: Text
     setCurrentAlign(align);
     targetElement.style.textAlign = align;
     
-    // Save content to store
+    // Save content to store with HTML preserved
     updateElementContent(
       elementSelection.sectionId,
       elementSelection.elementKey,
-      targetElement.textContent || ''
+      targetElement.innerHTML || targetElement.textContent || ''
     );
     
     announceLiveRegion(`Text aligned ${align}`);
@@ -520,11 +529,11 @@ export function TextToolbar({ elementSelection, position, contextActions }: Text
     setCurrentSize('16px');
     setCurrentAlign('left');
     
-    // Save content to store
+    // Save content to store with HTML preserved
     updateElementContent(
       elementSelection.sectionId,
       elementSelection.elementKey,
-      targetElement.textContent || ''
+      targetElement.innerHTML || targetElement.textContent || ''
     );
     
     announceLiveRegion('All formatting cleared');

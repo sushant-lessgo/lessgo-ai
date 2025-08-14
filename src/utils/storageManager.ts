@@ -81,11 +81,11 @@ class StorageManager {
     this.state.isCleanupRunning = true;
     
     try {
-      console.log('🧹 Storage Manager: Starting maintenance cleanup');
+      // console.log('🧹 Storage Manager: Starting maintenance cleanup');
       
       // Check storage quota
       const stats = getStorageStats();
-      console.log('📊 Storage stats:', stats);
+      // console.log('📊 Storage stats:', stats);
 
       // Trigger cleanup if needed
       const needsCleanup = 
@@ -105,7 +105,7 @@ class StorageManager {
       }
 
       this.state.lastCleanupTime = Date.now();
-      console.log('✅ Storage maintenance cleanup completed');
+      // console.log('✅ Storage maintenance cleanup completed');
 
     } catch (error) {
       console.error('❌ Storage maintenance cleanup failed:', error);
@@ -338,5 +338,5 @@ if (process.env.NODE_ENV === 'development') {
     setQuotaThresholds: (w: number, e: number) => storageManager.setQuotaThresholds(w, e),
   };
   
-  console.log('🔧 Storage Manager debug utilities available at window.__storageManagerDebug');
+  // console.log('🔧 Storage Manager debug utilities available at window.__storageManagerDebug');
 }

@@ -283,7 +283,7 @@ export function useLayoutComponent<T = Record<string, any>>({
       const storageKey = mapBackgroundTypeToStorageKey(currentBackgroundType);
       const storedColors = theme.colors.textColors[storageKey as keyof typeof theme.colors.textColors];
       if (storedColors && storedColors[type]) {
-        console.log(`🎨 Using stored text color for ${type} on ${currentBackgroundType} (mapped to ${storageKey}):`, storedColors[type]);
+        // console.log(`🎨 Using stored text color for ${type} on ${currentBackgroundType} (mapped to ${storageKey}):`, storedColors[type]);
         return storedColors[type];
       }
     }

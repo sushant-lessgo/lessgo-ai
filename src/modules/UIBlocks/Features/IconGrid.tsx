@@ -163,7 +163,7 @@ FeatureCard.displayName = 'FeatureCard';
 
 export default function IconGrid(props: LayoutComponentProps) {
   
-  console.log('🎯 IconGrid component rendering with props:', props);
+  // console.log('🎯 IconGrid component rendering with props:', props);
   
   // ✅ ENHANCED: Use the abstraction hook with background type support
   const {
@@ -181,7 +181,7 @@ export default function IconGrid(props: LayoutComponentProps) {
     contentSchema: CONTENT_SCHEMA
   });
   
-  console.log('🎯 IconGrid hook result:', { sectionId, mode });
+  // console.log('🎯 IconGrid hook result:', { sectionId, mode });
 
   // Parse feature data
   const featureItems = parseFeatureData(blockContent.feature_titles, blockContent.feature_descriptions);

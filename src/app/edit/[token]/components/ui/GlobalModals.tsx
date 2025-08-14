@@ -39,7 +39,7 @@ export function GlobalModals() {
     return () => modalEvents.removeEventListener('stateChange', handleStateChange);
   }, []);
   
-  console.log('🎯 GlobalModals rendering with state:', state);
+  // console.log('🎯 GlobalModals rendering with state:', state);
   
   return (
     <>

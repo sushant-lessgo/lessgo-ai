@@ -303,7 +303,7 @@ export function createEditStore(tokenId: string) {
     throw new Error('Token ID is required to create EditStore');
   }
 
-  console.log(`🏭 Creating EditStore factory for token: ${tokenId}`);
+  // console.log(`🏭 Creating EditStore factory for token: ${tokenId}`);
 
   // Track project access
   if (isStorageAvailable()) {
@@ -385,30 +385,30 @@ export function createEditStore(tokenId: string) {
             }),
             onRehydrateStorage: () => (state) => {
               if (state) {
-                console.log(`🔄 [STORE-DEBUG] EditStore rehydrated for token ${tokenId}:`, {
-                  sections: state.sections?.length || 0,
-                  content: Object.keys(state.content || {}).length,
-                  tokenId: state.tokenId,
-                  hasTheme: !!state.theme,
-                  themeDetails: {
-                    colors: state.theme?.colors,
-                    typography: {
-                      headingFont: state.theme?.typography?.headingFont,
-                      bodyFont: state.theme?.typography?.bodyFont
-                    },
-                    backgroundsFromStorage: {
-                      primary: state.theme?.colors?.sectionBackgrounds?.primary,
-                      secondary: state.theme?.colors?.sectionBackgrounds?.secondary,
-                      neutral: state.theme?.colors?.sectionBackgrounds?.neutral,
-                      divider: state.theme?.colors?.sectionBackgrounds?.divider
-                    }
-                  },
-                  onboardingData: {
-                    hasOneLiner: !!state.onboardingData?.oneLiner,
-                    validatedFieldsCount: Object.keys(state.onboardingData?.validatedFields || {}).length,
-                    hiddenFieldsCount: Object.keys(state.onboardingData?.hiddenInferredFields || {}).length
-                  }
-                });
+                // console.log(`🔄 [STORE-DEBUG] EditStore rehydrated for token ${tokenId}:`, {
+                //   sections: state.sections?.length || 0,
+                //   content: Object.keys(state.content || {}).length,
+                //   tokenId: state.tokenId,
+                //   hasTheme: !!state.theme,
+                //   themeDetails: {
+                //     colors: state.theme?.colors,
+                //     typography: {
+                //       headingFont: state.theme?.typography?.headingFont,
+                //       bodyFont: state.theme?.typography?.bodyFont
+                //     },
+                //     backgroundsFromStorage: {
+                //       primary: state.theme?.colors?.sectionBackgrounds?.primary,
+                //       secondary: state.theme?.colors?.sectionBackgrounds?.secondary,
+                //       neutral: state.theme?.colors?.sectionBackgrounds?.neutral,
+                //       divider: state.theme?.colors?.sectionBackgrounds?.divider
+                //     }
+                //   },
+                //   onboardingData: {
+                //     hasOneLiner: !!state.onboardingData?.oneLiner,
+                //     validatedFieldsCount: Object.keys(state.onboardingData?.validatedFields || {}).length,
+                //     hiddenFieldsCount: Object.keys(state.onboardingData?.hiddenInferredFields || {}).length
+                //   }
+                // });
                 
                 // Ensure tokenId matches (in case of storage corruption)
                 if (state.tokenId !== tokenId) {
@@ -427,7 +427,7 @@ export function createEditStore(tokenId: string) {
                   };
                 }
               } else {
-                console.log(`🔄 [STORE-DEBUG] No stored data found for token ${tokenId}, using defaults`);
+                // console.log(`🔄 [STORE-DEBUG] No stored data found for token ${tokenId}, using defaults`);
               }
             },
             // Add error handling for corrupted storage
@@ -480,5 +480,5 @@ if (process.env.NODE_ENV === 'development') {
     createInitialState,
   };
   
-  console.log('🔧 Edit Store Factory debug utilities available at window.__editStoreFactory');
+  // console.log('🔧 Edit Store Factory debug utilities available at window.__editStoreFactory');
 }

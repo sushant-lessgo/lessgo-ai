@@ -55,9 +55,9 @@ class CSSVariablePerformanceMonitor {
       const end = performance.now();
       const duration = end - start;
       
-      if (process.env.NODE_ENV === 'development') {
-        console.log(`⏱️ ${operation}: ${duration.toFixed(2)}ms`);
-      }
+      // if (process.env.NODE_ENV === 'development') {
+      //   console.log(`⏱️ ${operation}: ${duration.toFixed(2)}ms`);
+      // }
       
       return duration;
     };

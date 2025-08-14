@@ -1,14 +1,150 @@
-EditLayoutErrorBoundary.tsx:32 🚨 EditLayout Error Boundary caught an error: 
-{error: 'Objects are not valid as a React child (found: obj…r a collection of children, use an array instead.', stack: 'Error: Objects are not valid as a React child (fou…ed/scheduler/cjs/scheduler.development.js:534:21)', componentStack: '\n    at p\n    at div\n    at div\n    at div\n    at …ts/react-dev-overlay/app/ReactDevOverlay.js:87:9)', tokenId: 'IpkONRhYzKPc'}
-componentStack
-: 
-"\n    at p\n    at div\n    at div\n    at div\n    at div\n    at div\n    at div\n    at div\n    at div\n    at LeftPanel (webpack-internal:///(app-pages-browser)/./src/app/edit/[token]/components/layout/LeftPanel.tsx:21:11)\n    at div\n    at div\n    at div\n    at div\n    at VariableThemeInjector (webpack-internal:///(app-pages-browser)/./src/modules/Design/ColorSystem/VariableThemeInjector.tsx:35:11)\n    at EditLayout (webpack-internal:///(app-pages-browser)/./src/app/edit/[token]/components/layout/EditLayout.tsx:39:11)\n    at EditPageContent (webpack-internal:///(app-pages-browser)/./src/app/edit/[token]/page.tsx:103:11)\n    at EditLayoutErrorBoundaryClass (webpack-internal:///(app-pages-browser)/./src/app/edit/[token]/components/layout/EditLayoutErrorBoundary.tsx:57:9)\n    at EditLayoutErrorBoundary (webpack-internal:///(app-pages-browser)/./src/app/edit/[token]/components/layout/EditLayoutErrorBoundary.tsx:303:11)\n    at EditErrorBoundary (webpack-internal:///(app-pages-browser)/./src/components/EditErrorBoundary.tsx:85:9)\n    at EditProvider (webpack-internal:///(app-pages-browser)/./src/components/EditProvider.tsx:133:11)\n    at EditPage (webpack-internal:///(app-pages-browser)/./src/app/edit/[token]/page.tsx:21:78)\n    at ClientPageRoot (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/client-page.js:14:11)\n    at InnerLayoutRouter (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:243:11)\n    at RedirectErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/redirect-boundary.js:74:9)\n    at RedirectBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/redirect-boundary.js:82:11)\n    at NotFoundBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/not-found-boundary.js:84:11)\n    at LoadingBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:349:11)\n    at ErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/error-boundary.js:160:11)\n    at InnerScrollAndFocusHandler (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:153:9)\n    at ScrollAndFocusHandler (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:228:11)\n    at RenderFromTemplateContext (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/render-from-template-context.js:16:44)\n    at OuterLayoutRouter (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:370:11)\n    at InnerLayoutRouter (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:243:11)\n    at RedirectErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/redirect-boundary.js:74:9)\n    at RedirectBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/redirect-boundary.js:82:11)\n    at NotFoundBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/not-found-boundary.js:84:11)\n    at LoadingBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:349:11)\n    at ErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/error-boundary.js:160:11)\n    at InnerScrollAndFocusHandler (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:153:9)\n    at ScrollAndFocusHandler (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:228:11)\n    at RenderFromTemplateContext (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/render-from-template-context.js:16:44)\n    at OuterLayoutRouter (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:370:11)\n    at InnerLayoutRouter (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:243:11)\n    at RedirectErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/redirect-boundary.js:74:9)\n    at RedirectBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/redirect-boundary.js:82:11)\n    at NotFoundErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/not-found-boundary.js:76:9)\n    at NotFoundBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/not-found-boundary.js:84:11)\n    at LoadingBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:349:11)\n    at ErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/error-boundary.js:160:11)\n    at InnerScrollAndFocusHandler (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:153:9)\n    at ScrollAndFocusHandler (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:228:11)\n    at RenderFromTemplateContext (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/render-from-template-context.js:16:44)\n    at OuterLayoutRouter (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:370:11)\n    at PostHogProvider (webpack-internal:///(app-pages-browser)/./node_modules/posthog-js/react/dist/esm/index.js:51:23)\n    at PostHogProvider (webpack-internal:///(app-pages-browser)/./src/providers/ph-provider.tsx:20:11)\n    at Provider (webpack-internal:///(app-pages-browser)/./node_modules/@radix-ui/react-context/dist/index.mjs:34:15)\n    at TooltipProvider (webpack-internal:///(app-pages-browser)/./node_modules/@radix-ui/react-tooltip/dist/index.mjs:58:13)\n    at body\n    at html\n    at SWRConfig (webpack-internal:///(app-pages-browser)/./node_modules/swr/dist/_internal/config-context-client-v7VOFo66.mjs:549:13)\n    at OrganizationProvider (webpack-internal:///(app-pages-browser)/./node_modules/@clerk/shared/dist/react/index.mjs:114:3)\n    at ClerkContextProvider (webpack-internal:///(app-pages-browser)/./node_modules/@clerk/clerk-react/dist/index.mjs:2207:11)\n    at ClerkProviderBase (webpack-internal:///(app-pages-browser)/./node_modules/@clerk/clerk-react/dist/index.mjs:2293:11)\n    at Hoc (webpack-internal:///(app-pages-browser)/./node_modules/@clerk/clerk-react/dist/index.mjs:118:5)\n    at ClerkNextOptionsProvider (webpack-internal:///(app-pages-browser)/./node_modules/@clerk/nextjs/dist/esm/client-boundary/NextOptionsContext.js:17:11)\n    at NextClientClerkProvider (webpack-internal:///(app-pages-browser)/./node_modules/@clerk/nextjs/dist/esm/app-router/client/ClerkProvider.js:60:13)\n    at ClientClerkProvider (webpack-internal:///(app-pages-browser)/./node_modules/@clerk/nextjs/dist/esm/app-router/client/ClerkProvider.js:127:13)\n    at ClerkProvider (Server)\n    at RootLayout (Server)\n    at RedirectErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/redirect-boundary.js:74:9)\n    at RedirectBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/redirect-boundary.js:82:11)\n    at NotFoundErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/not-found-boundary.js:76:9)\n    at NotFoundBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/not-found-boundary.js:84:11)\n    at DevRootNotFoundBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/dev-root-not-found-boundary.js:33:11)\n    at ReactDevOverlay (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/react-dev-overlay/app/ReactDevOverlay.js:87:9)\n    at HotReload (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/react-dev-overlay/app/hot-reloader-client.js:321:11)\n    at Router (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/app-router.js:207:11)\n    at ErrorBoundaryHandler (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/error-boundary.js:113:9)\n    at ErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/error-boundary.js:160:11)\n    at AppRouter (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/app-router.js:585:13)\n    at ServerRoot (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/app-index.js:112:27)\n    at Root (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/app-index.js:117:11)\n    at ReactDevOverlay (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/react-dev-overlay/app/ReactDevOverlay.js:87:9)"
-error
-: 
-"Objects are not valid as a React child (found: object with keys {field, value, confidence, alternatives}). If you meant to render a collection of children, use an array instead."
-stack
-: 
-"Error: Objects are not valid as a React child (found: object with keys {field, value, confidence, alternatives}). If you meant to render a collection of children, use an array instead.\n    at throwOnInvalidObjectType (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:9439:9)\n    at reconcileChildFibersImpl (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:10548:7)\n    at reconcileChildFibers (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:10573:27)\n    at reconcileChildren (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:15802:28)\n    at updateHostComponent$1 (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:16687:3)\n    at beginWork$1 (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:18503:14)\n    at beginWork (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:26927:14)\n    at performUnitOfWork (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:25748:12)\n    at workLoopSync (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:25464:5)\n    at renderRootSync (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:25419:7)\n    at recoverFromConcurrentError (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:24597:20)\n    at performSyncWorkOnRoot (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:24899:20)\n    at flushSyncWorkAcrossRoots_impl (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:7758:13)\n    at flushSyncWorkOnAllRoots (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:7718:3)\n    at commitRootImpl (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:26369:3)\n    at commitRoot (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:26077:5)\n    at commitRootWhenReady (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:24749:3)\n    at finishConcurrentRender (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:24714:5)\n    at performConcurrentWorkOnRoot (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:24559:9)\n    at workLoop (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/scheduler/cjs/scheduler.development.js:256:34)\n    at flushWork (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/scheduler/cjs/scheduler.development.js:225:14)\n    at MessagePort.performWorkUntilDeadline (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/scheduler/cjs/scheduler.development.js:534:21)"
-tokenId
-: 
-"IpkONRhYzKPc"
+IpkONRhYzKPc:1  GET http://localhost:3000/edit/IpkONRhYzKPc 500 (Internal Server Error)
+main-app.js:1836 Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+useEditStore.ts:308 🔧 useEditStore debug utilities available at window.__useEditStoreDebug
+EditProvider.tsx:400 🔧 EditProvider debug utilities available at window.__editProviderDebug
+versionManager.ts:663 🔧 Version Manager debug utilities available at window.__versionDebug
+storage.ts:293 🔄 Switching token: none → IpkONRhYzKPc
+clerk.browser.js:16 Clerk: Clerk has been loaded with development keys. Development instances have strict usage limits and should not be used when deploying your application to production. Learn more: https://clerk.com/docs/deployments/overview
+(anonymous) @ rrweb-plugin-console-record.js:2447
+warnOnce @ clerk.browser.js:16
+load @ clerk.browser.js:5
+loadClerkJS @ index.mjs:2112
+await in loadClerkJS
+_IsomorphicClerk @ index.mjs:1985
+getOrCreateInstance @ index.mjs:2011
+eval @ index.mjs:2271
+mountMemo @ react-dom.development.js:12600
+useMemo @ react-dom.development.js:13305
+useMemo @ react.development.js:2537
+useLoadedIsomorphicClerk @ index.mjs:2271
+ClerkContextProvider @ index.mjs:2208
+renderWithHooks @ react-dom.development.js:11121
+mountIndeterminateComponent @ react-dom.development.js:16869
+beginWork$1 @ react-dom.development.js:18458
+beginWork @ react-dom.development.js:26927
+performUnitOfWork @ react-dom.development.js:25748
+workLoopSync @ react-dom.development.js:25464
+renderRootSync @ react-dom.development.js:25419
+performConcurrentWorkOnRoot @ react-dom.development.js:24504
+workLoop @ scheduler.development.js:256
+flushWork @ scheduler.development.js:225
+performWorkUntilDeadline @ scheduler.development.js:534
+useBackgroundSelector.ts:461 🔍 [DEBUG] canApply check: {hasSelection: false, hasNoErrors: true, isNotLoading: true, hasValidBackground: false, selectedPrimary: undefined, …}
+useBackgroundSelector.ts:461 🔍 [DEBUG] canApply check: {hasSelection: false, hasNoErrors: true, isNotLoading: true, hasValidBackground: false, selectedPrimary: undefined, …}
+modalEmergencyReset.ts:75 🔍 Modal diagnostic mode enabled
+modalEmergencyReset.ts:75 🔍 Modal diagnostic mode enabled
+[Violation] Forced reflow while executing JavaScript took 31ms
+rrweb-plugin-console-record.js:2447 Image with src "http://localhost:3000/logo.svg" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio.
+(anonymous) @ rrweb-plugin-console-record.js:2447
+warnOnce @ warn-once.js:16
+eval @ image-component.js:112
+Promise.then
+handleLoading @ image-component.js:37
+onLoad @ image-component.js:198
+callCallback @ react-dom.development.js:20565
+invokeGuardedCallbackImpl @ react-dom.development.js:20614
+invokeGuardedCallback @ react-dom.development.js:20689
+invokeGuardedCallbackAndCatchFirstError @ react-dom.development.js:20703
+executeDispatch @ react-dom.development.js:32128
+processDispatchQueueItemsInOrder @ react-dom.development.js:32160
+processDispatchQueue @ react-dom.development.js:32173
+dispatchEventsForPlugins @ react-dom.development.js:32184
+eval @ react-dom.development.js:32374
+batchedUpdates$1 @ react-dom.development.js:24953
+batchedUpdates @ react-dom.development.js:28844
+dispatchEventForPluginEventSystem @ react-dom.development.js:32373
+dispatchEvent @ react-dom.development.js:30141
+ColorSystemModalMVP.tsx:191 🔍 Validating CTA stand-out: {ctaColor: 'bg-cyan-500', background: 'bg-black'}
+ColorSystemModalMVP.tsx:204 ✅ Stand-out result: {ratio: 8.65, score: 75, level: 'great', message: 'CTAs will stand out nicely ✅'}
+IconGrid.tsx:217 ✅ FORCED HEADLINE TO CENTER via direct DOM targeting
+persistenceActions.ts:22 💾 Calling /api/saveDraft with data: {tokenId: 'IpkONRhYzKPc', hasContent: true, sectionsCount: 8, contentKeys: Array(8), hasAnyElements: true}
+rrweb-plugin-console-record.js:2447 [Fast Refresh] rebuilding
+persistenceActions.ts:22 💾 Calling /api/saveDraft with data: {tokenId: 'IpkONRhYzKPc', hasContent: true, sectionsCount: 8, contentKeys: Array(8), hasAnyElements: true}
+rrweb-plugin-console-record.js:2447 [Fast Refresh] done in 976ms
+persistenceActions.ts:22 💾 Calling /api/saveDraft with data: {tokenId: 'IpkONRhYzKPc', hasContent: true, sectionsCount: 8, contentKeys: Array(8), hasAnyElements: true}
+persistenceActions.ts:82 🔄 Loading draft data: {hasContent: false, hasFinalContent: true, tokenId: 'IpkONRhYzKPc', apiResponseKeys: Array(10)}
+persistenceActions.ts:96 📥 Restoring sections and content: {sectionsCount: 8, contentKeys: 8, sectionLayoutsCount: 8}
+persistenceActions.ts:118 ✅ Section/Content match confirmed: {count: 8}
+persistenceActions.ts:128 🎨 [PERSISTENCE-DEBUG] Restoring theme data from draft: {themeFromAPI: {…}, currentTheme: Proxy(Object), backgroundsFromAPI: {…}, typographyFromAPI: {…}}
+persistenceActions.ts:141 🎨 [PERSISTENCE-DEBUG] Theme after merge: {mergedTheme: {…}, backgroundsAfterMerge: {…}, typographyAfterMerge: {…}}
+persistenceActions.ts:154 🎨 [PERSISTENCE-DEBUG] Restoring global settings: {maxWidth: '1200px', zoomLevel: 100, deviceMode: 'desktop', sectionSpacing: '64px', containerPadding: '32px'}
+persistenceActions.ts:54 ✅ Save API response: {message: 'Draft saved successfully', stepIndex: 0, timestamp: '2025-08-14T09:59:43.323Z', hasFinalContent: true}
+persistenceActions.ts:54 ✅ Save API response: {message: 'Draft saved successfully', stepIndex: 0, timestamp: '2025-08-14T09:59:43.344Z', hasFinalContent: true}
+persistenceActions.ts:54 ✅ Save API response: {message: 'Draft saved successfully', stepIndex: 0, timestamp: '2025-08-14T09:59:43.328Z', hasFinalContent: true}
+useTransitionLock.ts:66 🔓 Transition unlocked: timeout
+uiActions.ts:227 📝 Text editing mode changed: {isEditing: false, element: undefined, currentToolbar: 'element'}
+selectionGuard.ts:50 🛡️ Selection events force-restored
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+uiActions.ts:227 📝 Text editing mode changed: {isEditing: true, element: {…}, currentToolbar: 'element'}
+selectionGuard.ts:31 🛡️ Selection events suppressed for 0 ms
+selectionGuard.ts:31 🛡️ Selection events suppressed for 0 ms
+selectionGuard.ts:31 🛡️ Selection events suppressed for 0 ms
+selectionGuard.ts:28 🛡️ Selection events re-enabled after 0 ms
+useTransitionLock.ts:66 🔓 Transition unlocked: timeout
+selectionGuard.ts:31 🛡️ Selection events suppressed for 0 ms
+selectionGuard.ts:28 🛡️ Selection events re-enabled after 0 ms
+useSelectionPreserver.ts:202 🎯 Auto-saved selection: {text: 'power '}
+selectionGuard.ts:31 🛡️ Selection events suppressed for 0 ms
+selectionGuard.ts:28 🛡️ Selection events re-enabled after 0 ms
+selectionGuard.ts:31 🛡️ Selection events suppressed for 0 ms
+selectionGuard.ts:28 🛡️ Selection events re-enabled after 0 ms
+useSelectionPreserver.ts:202 🎯 Auto-saved selection: {text: 'power '}
+selectionGuard.ts:31 🛡️ Selection events suppressed for 0 ms
+selectionGuard.ts:28 🛡️ Selection events re-enabled after 0 ms
+selectionGuard.ts:31 🛡️ Selection events suppressed for 0 ms
+selectionGuard.ts:28 🛡️ Selection events re-enabled after 0 ms
+useSelectionPreserver.ts:202 🎯 Auto-saved selection: {text: 'your '}
+selectionGuard.ts:31 🛡️ Selection events suppressed for 0 ms
+selectionGuard.ts:28 🛡️ Selection events re-enabled after 0 ms
+uiActions.ts:227 📝 Text editing mode changed: {isEditing: false, element: undefined, currentToolbar: 'element'}
+selectionGuard.ts:50 🛡️ Selection events force-restored
+selectionGuard.ts:31 🛡️ Selection events suppressed for 0 ms
+selectionGuard.ts:31 🛡️ Selection events suppressed for 0 ms
+selectionGuard.ts:28 🛡️ Selection events re-enabled after 0 ms
+useTransitionLock.ts:66 🔓 Transition unlocked: timeout
+useTransitionLock.ts:66 🔓 Transition unlocked: timeout
+uiActions.ts:227 📝 Text editing mode changed: {isEditing: false, element: undefined, currentToolbar: 'element'}
+selectionGuard.ts:50 🛡️ Selection events force-restored
+uiActions.ts:227 📝 Text editing mode changed: {isEditing: true, element: {…}, currentToolbar: 'element'}
+selectionGuard.ts:31 🛡️ Selection events suppressed for 0 ms
+selectionGuard.ts:31 🛡️ Selection events suppressed for 0 ms
+selectionGuard.ts:97 🛡️ Selection change blocked (formatting in progress)
+selectionGuard.ts:31 🛡️ Selection events suppressed for 0 ms
+selectionGuard.ts:28 🛡️ Selection events re-enabled after 0 ms
+useTransitionLock.ts:66 🔓 Transition unlocked: timeout
+selectionGuard.ts:31 🛡️ Selection events suppressed for 0 ms
+selectionGuard.ts:28 🛡️ Selection events re-enabled after 0 ms
+useSelectionPreserver.ts:202 🎯 Auto-saved selection: {text: 'business '}
+selectionGuard.ts:31 🛡️ Selection events suppressed for 0 ms
+selectionGuard.ts:28 🛡️ Selection events re-enabled after 0 ms
+useSelectionPreserver.ts:202 🎯 Auto-saved selection: {text: 'ness'}
+selectionGuard.ts:31 🛡️ Selection events suppressed for 0 ms
+selectionGuard.ts:28 🛡️ Selection events re-enabled after 0 ms
+useSelectionPreserver.ts:202 🎯 Auto-saved selection: {text: 'dea'}
+selectionGuard.ts:31 🛡️ Selection events suppressed for 0 ms
+selectionGuard.ts:28 🛡️ Selection events re-enabled after 0 ms
+useSelectionPreserver.ts:202 🎯 Auto-saved selection: {text: 's'}
+selectionGuard.ts:31 🛡️ Selection events suppressed for 0 ms
+selectionGuard.ts:28 🛡️ Selection events re-enabled after 0 ms
+useSelectionPreserver.ts:202 🎯 Auto-saved selection: {text: ' your'}
+selectionGuard.ts:31 🛡️ Selection events suppressed for 0 ms
+selectionGuard.ts:28 🛡️ Selection events re-enabled after 0 ms
+uiActions.ts:227 📝 Text editing mode changed: {isEditing: false, element: undefined, currentToolbar: 'element'}
+selectionGuard.ts:50 🛡️ Selection events force-restored
+selectionGuard.ts:31 🛡️ Selection events suppressed for 0 ms
+selectionGuard.ts:31 🛡️ Selection events suppressed for 0 ms
+selectionGuard.ts:28 🛡️ Selection events re-enabled after 0 ms
+useTransitionLock.ts:66 🔓 Transition unlocked: timeout
