@@ -26,6 +26,13 @@ export function TextToolbar({ elementSelection, position, contextActions }: Text
     hasValidPosition 
   } = useToolbarVisibility('text', { width: 400, height: 60 }); // Specify toolbar size
   
+  console.log('🔧 TextToolbar render:', {
+    isVisible,
+    reason,
+    elementSelection: elementSelection?.elementKey,
+    hasDropdownActions: true
+  });
+  
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [activeFormats, setActiveFormats] = useState<Set<string>>(new Set());
   const [currentColor, setCurrentColor] = useState('#000000');
@@ -354,37 +361,94 @@ export function TextToolbar({ elementSelection, position, contextActions }: Text
     const targetElement = document.querySelector(targetSelector) as HTMLElement;
     if (!targetElement) return;
     
+    console.log('🎨 changeTextColor called:', {
+      color,
+      targetSelector,
+      currentHTML: targetElement.innerHTML,
+      currentText: targetElement.textContent,
+      USE_PARTIAL_SELECTION
+    });
+    
     setCurrentColor(color);
     
     if (USE_PARTIAL_SELECTION) {
       const selectionInfo = getSelectionInfo();
+      console.log('🎨 Selection info:', selectionInfo);
+      
       if (selectionInfo?.hasSelection) {
         // Apply color to selected text
         try {
           document.execCommand('styleWithCSS', false, 'true');
-          document.execCommand('foreColor', false, color);
+          const result = document.execCommand('foreColor', false, color);
+          console.log('🎨 execCommand result:', result);
           announceLiveRegion(`Text color changed to ${color} for selected text`);
         } catch (error) {
-          // Fallback to element-level
-          targetElement.style.color = color;
+          console.error('🎨 execCommand failed:', error);
+          // Fallback to wrapping in span
+          const selection = window.getSelection();
+          if (selection && selection.rangeCount > 0) {
+            const range = selection.getRangeAt(0);
+            const selectedContent = range.extractContents();
+            const span = document.createElement('span');
+            span.style.color = color;
+            span.appendChild(selectedContent);
+            range.insertNode(span);
+            console.log('🎨 Created span with color:', span.outerHTML);
+          }
           announceLiveRegion(`Text color changed to ${color}`);
         }
       } else {
-        // Element-level color change
-        targetElement.style.color = color;
+        // Element-level color change - wrap entire content in span
+        const currentHTML = targetElement.innerHTML;
+        console.log('🎨 Element-level change, current HTML:', currentHTML);
+        
+        if (currentHTML && !currentHTML.includes('<span')) {
+          // Wrap content in a span with the color
+          targetElement.innerHTML = `<span style="color: ${color}">${currentHTML}</span>`;
+          console.log('🎨 Wrapped in new span:', targetElement.innerHTML);
+        } else if (currentHTML && currentHTML.includes('<span')) {
+          // Update existing span or add new one
+          const tempDiv = document.createElement('div');
+          tempDiv.innerHTML = currentHTML;
+          const spans = tempDiv.querySelectorAll('span');
+          if (spans.length === 1 && spans[0].parentElement === tempDiv) {
+            // Single root span - update its color
+            spans[0].style.color = color;
+            targetElement.innerHTML = tempDiv.innerHTML;
+            console.log('🎨 Updated existing span:', targetElement.innerHTML);
+          } else {
+            // Multiple spans or nested structure - wrap all
+            targetElement.innerHTML = `<span style="color: ${color}">${currentHTML}</span>`;
+            console.log('🎨 Wrapped multiple spans:', targetElement.innerHTML);
+          }
+        } else {
+          // No content - just set style for future content
+          targetElement.style.color = color;
+          console.log('🎨 Set element style for empty content');
+        }
         announceLiveRegion(`Text color changed to ${color}`);
       }
     } else {
-      // Original element-level behavior
-      targetElement.style.color = color;
+      // Original element-level behavior - wrap in span for persistence
+      const currentHTML = targetElement.innerHTML;
+      if (currentHTML) {
+        targetElement.innerHTML = `<span style="color: ${color}">${currentHTML}</span>`;
+        console.log('🎨 Non-partial mode, wrapped in span:', targetElement.innerHTML);
+      } else {
+        targetElement.style.color = color;
+        console.log('🎨 Non-partial mode, set element style');
+      }
       announceLiveRegion(`Text color changed to ${color}`);
     }
+    
+    const finalHTML = targetElement.innerHTML || targetElement.textContent || '';
+    console.log('🎨 Final HTML to save:', finalHTML);
     
     // Save content to store with HTML preserved
     updateElementContent(
       elementSelection.sectionId,
       elementSelection.elementKey,
-      targetElement.innerHTML || targetElement.textContent || ''
+      finalHTML
     );
   };
 
@@ -392,17 +456,23 @@ export function TextToolbar({ elementSelection, position, contextActions }: Text
     const targetElement = document.querySelector(targetSelector) as HTMLElement;
     if (!targetElement) return;
     
+    console.log('📏 changeFontSize called:', {
+      size,
+      targetSelector,
+      currentHTML: targetElement.innerHTML,
+      currentText: targetElement.textContent,
+      USE_PARTIAL_SELECTION
+    });
+    
     setCurrentSize(size);
     
     if (USE_PARTIAL_SELECTION) {
       const selectionInfo = getSelectionInfo();
+      console.log('📏 Selection info:', selectionInfo);
+      
       if (selectionInfo?.hasSelection) {
         // Apply font size to selected text
         try {
-          document.execCommand('styleWithCSS', false, 'true');
-          // Use execCommand with inline styles for better compatibility
-          document.execCommand('styleWithCSS', false, 'true');
-          
           // Create a wrapper span with the font size
           const selection = window.getSelection();
           if (selection && selection.rangeCount > 0) {
@@ -416,6 +486,7 @@ export function TextToolbar({ elementSelection, position, contextActions }: Text
             
             // Insert the wrapped content back
             range.insertNode(span);
+            console.log('📏 Created span with font-size:', span.outerHTML);
             
             // Restore the selection around the new span
             selection.removeAllRanges();
@@ -426,26 +497,70 @@ export function TextToolbar({ elementSelection, position, contextActions }: Text
             announceLiveRegion(`Font size changed to ${size} for selected text`);
           }
         } catch (error) {
-          // Fallback to element-level
-          targetElement.style.fontSize = size;
+          console.error('📏 Font size change failed:', error);
+          // Fallback to wrapping in span
+          const currentHTML = targetElement.innerHTML;
+          if (currentHTML) {
+            targetElement.innerHTML = `<span style="font-size: ${size}">${currentHTML}</span>`;
+            console.log('📏 Fallback wrap:', targetElement.innerHTML);
+          } else {
+            targetElement.style.fontSize = size;
+            console.log('📏 Fallback element style');
+          }
           announceLiveRegion(`Font size changed to ${size}`);
         }
       } else {
-        // Element-level font size change
-        targetElement.style.fontSize = size;
+        // Element-level font size change - wrap entire content in span
+        const currentHTML = targetElement.innerHTML;
+        console.log('📏 Element-level change, current HTML:', currentHTML);
+        
+        if (currentHTML && !currentHTML.includes('<span')) {
+          // Wrap content in a span with the font size
+          targetElement.innerHTML = `<span style="font-size: ${size}">${currentHTML}</span>`;
+          console.log('📏 Wrapped in new span:', targetElement.innerHTML);
+        } else if (currentHTML && currentHTML.includes('<span')) {
+          // Update existing span or add new one
+          const tempDiv = document.createElement('div');
+          tempDiv.innerHTML = currentHTML;
+          const spans = tempDiv.querySelectorAll('span');
+          if (spans.length === 1 && spans[0].parentElement === tempDiv) {
+            // Single root span - update its font size
+            spans[0].style.fontSize = size;
+            targetElement.innerHTML = tempDiv.innerHTML;
+            console.log('📏 Updated existing span:', targetElement.innerHTML);
+          } else {
+            // Multiple spans or nested structure - wrap all
+            targetElement.innerHTML = `<span style="font-size: ${size}">${currentHTML}</span>`;
+            console.log('📏 Wrapped multiple spans:', targetElement.innerHTML);
+          }
+        } else {
+          // No content - just set style for future content
+          targetElement.style.fontSize = size;
+          console.log('📏 Set element style for empty content');
+        }
         announceLiveRegion(`Font size changed to ${size}`);
       }
     } else {
-      // Original element-level behavior
-      targetElement.style.fontSize = size;
+      // Original element-level behavior - wrap in span for persistence
+      const currentHTML = targetElement.innerHTML;
+      if (currentHTML) {
+        targetElement.innerHTML = `<span style="font-size: ${size}">${currentHTML}</span>`;
+        console.log('📏 Non-partial mode, wrapped in span:', targetElement.innerHTML);
+      } else {
+        targetElement.style.fontSize = size;
+        console.log('📏 Non-partial mode, set element style');
+      }
       announceLiveRegion(`Font size changed to ${size}`);
     }
+    
+    const finalHTML = targetElement.innerHTML || targetElement.textContent || '';
+    console.log('📏 Final HTML to save:', finalHTML);
     
     // Save content to store with HTML preserved
     updateElementContent(
       elementSelection.sectionId,
       elementSelection.elementKey,
-      targetElement.innerHTML || targetElement.textContent || ''
+      finalHTML
     );
   };
 
@@ -795,6 +910,7 @@ export function TextToolbar({ elementSelection, position, contextActions }: Text
                   action={action}
                   elementSelection={elementSelection}
                   onValueChange={(value) => {
+                    console.log('🔧 TextDropdown onValueChange called:', { actionId: action.id, value });
                     if (action.id === 'color') changeTextColor(value);
                     else if (action.id === 'size') changeFontSize(value);
                     else if (action.id === 'align') changeTextAlign(value);
@@ -862,6 +978,13 @@ function TextDropdown({ action, elementSelection, onValueChange }: {
 }) {
   const [showDropdown, setShowDropdown] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  
+  console.log('🔧 TextDropdown render:', {
+    actionId: action.id,
+    actionLabel: action.label,
+    showDropdown,
+    hasOnValueChange: !!onValueChange
+  });
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -920,7 +1043,10 @@ function TextDropdown({ action, elementSelection, onValueChange }: {
   return (
     <div className="relative" ref={dropdownRef}>
       <button
-        onClick={() => setShowDropdown(!showDropdown)}
+        onClick={() => {
+          console.log('🔧 TextDropdown button clicked:', { actionId: action.id, currentShow: showDropdown });
+          setShowDropdown(!showDropdown);
+        }}
         className="flex items-center space-x-1 px-2 py-1 text-xs rounded transition-colors text-gray-700 hover:bg-gray-100 hover:text-gray-900"
         title={action.label}
       >
@@ -937,6 +1063,7 @@ function TextDropdown({ action, elementSelection, onValueChange }: {
             <button
               key={option.value}
               onClick={() => {
+                console.log('🔧 TextDropdown option clicked:', { optionValue: option.value, actionId: action.id });
                 onValueChange(option.value);
                 setShowDropdown(false);
               }}

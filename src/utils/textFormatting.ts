@@ -471,15 +471,19 @@ function simpleSanitizeHTML(html: string): string {
   // 4. Clean up empty spans
   cleaned = cleaned.replace(/<span[^>]*><\/span>/g, '');
   
-  // 5. Remove redundant font-weight: normal (it's the default)
-  cleaned = cleaned.replace(/font-weight:\s*normal;?/g, '');
+  // 5. Remove redundant font-weight: normal (it's the default) - BUT preserve other meaningful styles
+  // Only remove font-weight: normal if it's the ONLY style, preserve if there are other styles
+  cleaned = cleaned.replace(/style="font-weight:\s*normal;?\s*"/g, '');
+  cleaned = cleaned.replace(/font-weight:\s*normal;\s*/g, ''); // Remove if it's part of multiple styles
   
   // 6. Clean up empty style attributes
   cleaned = cleaned.replace(/style="[;\s]*"/g, '');
   cleaned = cleaned.replace(/<span\s+>/g, '<span>');
   
-  // 7. Remove spans with no style attribute
+  // 7. Remove spans with no style attribute (preserve formatting spans with meaningful styles)
   cleaned = cleaned.replace(/<span>([^<]*)<\/span>/g, '$1');
+  
+  console.log('🧹 Preserving spans with meaningful styles (color, font-size, etc.)');
   
   console.log('🧹 Simple HTML cleanup:', {
     before: html.substring(0, 100),

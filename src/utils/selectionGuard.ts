@@ -60,12 +60,15 @@ export function withSelectionGuard<T extends (...args: any[]) => any>(
   duration: number = 50
 ): T {
   return ((...args: Parameters<T>) => {
+    console.log('🛡️ withSelectionGuard called, executing function');
     // Suppress selection events
     suppressSelectionEvents(duration);
     
     try {
       // Execute the formatting function
+      console.log('🛡️ About to execute formatting function');
       const result = formatFn(...args);
+      console.log('🛡️ Formatting function executed, result:', result);
       
       // If the function returns a promise, handle it
       if (result && typeof result.then === 'function') {

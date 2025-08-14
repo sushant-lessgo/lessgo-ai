@@ -1,0 +1,1 @@
+Because the editor is rendering the fields in plain-text mode (isHtmlContent: false), it outputs “Rendering plain text,” so any inline color styling is ignored/stripped and never applied.
