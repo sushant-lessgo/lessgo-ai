@@ -483,8 +483,6 @@ function simpleSanitizeHTML(html: string): string {
   // 7. Remove spans with no style attribute (preserve formatting spans with meaningful styles)
   cleaned = cleaned.replace(/<span>([^<]*)<\/span>/g, '$1');
   
-  console.log('🧹 Preserving spans with meaningful styles (color, font-size, etc.)');
-  
   console.log('🧹 Simple HTML cleanup:', {
     before: html.substring(0, 100),
     after: cleaned.substring(0, 100),

@@ -636,16 +636,6 @@ export function InlineTextEditor({
       const isPendingUserContent = editorRef.current.dataset.pendingContent;
       const isActivelyTyping = editorRef.current.dataset.activelyTyping === 'true';
       
-      console.log('📝 InlineTextEditor content sync:', {
-        elementKey,
-        sectionId,
-        contentFromProps: content?.substring(0, 100),
-        currentContent: currentContent?.substring(0, 100),
-        isEditing,
-        isPendingUserContent,
-        isActivelyTyping,
-        hasHTMLTags: /<[^>]*>/g.test(content)
-      });
       
       // Only sync if the content prop is genuinely different from user's current input
       // AND it's not a result of the user's own changes being saved and returned from store
@@ -656,11 +646,6 @@ export function InlineTextEditor({
       // Check if this might be the user's own content being returned from the store
       const mightBeUserContentEcho = Math.abs(Date.now() - (parseInt(editorRef.current.dataset.lastSaveTime || '0', 10))) < 1000;
       
-      console.log('📝 Sync decision:', {
-        shouldSync,
-        mightBeUserContentEcho,
-        willSync: shouldSync && !mightBeUserContentEcho
-      });
       
       if (shouldSync && !mightBeUserContentEcho) {
         setCurrentContent(content);
@@ -668,11 +653,6 @@ export function InlineTextEditor({
         // Check if incoming content is HTML (contains tags) or plain text
         const isHtmlContent = /<[^>]*>/g.test(content);
         
-        console.log('📝 Applying content to DOM:', {
-          isHtmlContent,
-          contentLength: content.length,
-          contentPreview: content.substring(0, 100)
-        });
         
         if (isHtmlContent) {
           // Apply HTML content directly - will be sanitized on save
@@ -689,10 +669,6 @@ export function InlineTextEditor({
           : editorRef.current.textContent || '';
           
         if (actualContent !== currentContent) {
-          console.log('📝 Syncing internal state with DOM:', {
-            hasFormattedContent: !!hasFormattedContent,
-            actualContent: actualContent?.substring(0, 100)
-          });
           setCurrentContent(actualContent);
         }
       }
@@ -818,20 +794,10 @@ export function InlineTextEditor({
       {/* Render HTML content if it contains formatting, otherwise plain text */}
       {(() => {
         const isHtmlContent = /<[^>]*>/g.test(currentContent);
-        console.log('📝 Rendering content:', {
-          elementKey,
-          sectionId,
-          isEditing,
-          isHtmlContent,
-          currentContent: currentContent?.substring(0, 100),
-          hasSpanTags: currentContent?.includes('<span')
-        });
         if (isHtmlContent) {
           // Directly render HTML content - already sanitized on save
-          console.log('📝 Rendering HTML via dangerouslySetInnerHTML:', currentContent.substring(0, 100));
           return <span dangerouslySetInnerHTML={{ __html: currentContent }} />;
         } else {
-          console.log('📝 Rendering plain text:', currentContent);
           return currentContent || placeholder;
         }
       })()}

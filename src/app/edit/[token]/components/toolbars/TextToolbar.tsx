@@ -26,12 +26,6 @@ export function TextToolbar({ elementSelection, position, contextActions }: Text
     hasValidPosition 
   } = useToolbarVisibility('text', { width: 400, height: 60 }); // Specify toolbar size
   
-  console.log('🔧 TextToolbar render:', {
-    isVisible,
-    reason,
-    elementSelection: elementSelection?.elementKey,
-    hasDropdownActions: true
-  });
   
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [activeFormats, setActiveFormats] = useState<Set<string>>(new Set());
@@ -361,29 +355,19 @@ export function TextToolbar({ elementSelection, position, contextActions }: Text
     const targetElement = document.querySelector(targetSelector) as HTMLElement;
     if (!targetElement) return;
     
-    console.log('🎨 changeTextColor called:', {
-      color,
-      targetSelector,
-      currentHTML: targetElement.innerHTML,
-      currentText: targetElement.textContent,
-      USE_PARTIAL_SELECTION
-    });
     
     setCurrentColor(color);
     
     if (USE_PARTIAL_SELECTION) {
       const selectionInfo = getSelectionInfo();
-      console.log('🎨 Selection info:', selectionInfo);
       
       if (selectionInfo?.hasSelection) {
         // Apply color to selected text
         try {
           document.execCommand('styleWithCSS', false, 'true');
-          const result = document.execCommand('foreColor', false, color);
-          console.log('🎨 execCommand result:', result);
+          document.execCommand('foreColor', false, color);
           announceLiveRegion(`Text color changed to ${color} for selected text`);
         } catch (error) {
-          console.error('🎨 execCommand failed:', error);
           // Fallback to wrapping in span
           const selection = window.getSelection();
           if (selection && selection.rangeCount > 0) {
@@ -393,19 +377,16 @@ export function TextToolbar({ elementSelection, position, contextActions }: Text
             span.style.color = color;
             span.appendChild(selectedContent);
             range.insertNode(span);
-            console.log('🎨 Created span with color:', span.outerHTML);
           }
           announceLiveRegion(`Text color changed to ${color}`);
         }
       } else {
         // Element-level color change - wrap entire content in span
         const currentHTML = targetElement.innerHTML;
-        console.log('🎨 Element-level change, current HTML:', currentHTML);
         
         if (currentHTML && !currentHTML.includes('<span')) {
           // Wrap content in a span with the color
           targetElement.innerHTML = `<span style="color: ${color}">${currentHTML}</span>`;
-          console.log('🎨 Wrapped in new span:', targetElement.innerHTML);
         } else if (currentHTML && currentHTML.includes('<span')) {
           // Update existing span or add new one
           const tempDiv = document.createElement('div');
@@ -415,16 +396,13 @@ export function TextToolbar({ elementSelection, position, contextActions }: Text
             // Single root span - update its color
             spans[0].style.color = color;
             targetElement.innerHTML = tempDiv.innerHTML;
-            console.log('🎨 Updated existing span:', targetElement.innerHTML);
           } else {
             // Multiple spans or nested structure - wrap all
             targetElement.innerHTML = `<span style="color: ${color}">${currentHTML}</span>`;
-            console.log('🎨 Wrapped multiple spans:', targetElement.innerHTML);
           }
         } else {
           // No content - just set style for future content
           targetElement.style.color = color;
-          console.log('🎨 Set element style for empty content');
         }
         announceLiveRegion(`Text color changed to ${color}`);
       }
@@ -433,16 +411,13 @@ export function TextToolbar({ elementSelection, position, contextActions }: Text
       const currentHTML = targetElement.innerHTML;
       if (currentHTML) {
         targetElement.innerHTML = `<span style="color: ${color}">${currentHTML}</span>`;
-        console.log('🎨 Non-partial mode, wrapped in span:', targetElement.innerHTML);
       } else {
         targetElement.style.color = color;
-        console.log('🎨 Non-partial mode, set element style');
       }
       announceLiveRegion(`Text color changed to ${color}`);
     }
     
     const finalHTML = targetElement.innerHTML || targetElement.textContent || '';
-    console.log('🎨 Final HTML to save:', finalHTML);
     
     // Save content to store with HTML preserved
     updateElementContent(
@@ -456,19 +431,10 @@ export function TextToolbar({ elementSelection, position, contextActions }: Text
     const targetElement = document.querySelector(targetSelector) as HTMLElement;
     if (!targetElement) return;
     
-    console.log('📏 changeFontSize called:', {
-      size,
-      targetSelector,
-      currentHTML: targetElement.innerHTML,
-      currentText: targetElement.textContent,
-      USE_PARTIAL_SELECTION
-    });
-    
     setCurrentSize(size);
     
     if (USE_PARTIAL_SELECTION) {
       const selectionInfo = getSelectionInfo();
-      console.log('📏 Selection info:', selectionInfo);
       
       if (selectionInfo?.hasSelection) {
         // Apply font size to selected text
@@ -486,7 +452,6 @@ export function TextToolbar({ elementSelection, position, contextActions }: Text
             
             // Insert the wrapped content back
             range.insertNode(span);
-            console.log('📏 Created span with font-size:', span.outerHTML);
             
             // Restore the selection around the new span
             selection.removeAllRanges();
@@ -497,15 +462,12 @@ export function TextToolbar({ elementSelection, position, contextActions }: Text
             announceLiveRegion(`Font size changed to ${size} for selected text`);
           }
         } catch (error) {
-          console.error('📏 Font size change failed:', error);
           // Fallback to wrapping in span
           const currentHTML = targetElement.innerHTML;
           if (currentHTML) {
             targetElement.innerHTML = `<span style="font-size: ${size}">${currentHTML}</span>`;
-            console.log('📏 Fallback wrap:', targetElement.innerHTML);
           } else {
             targetElement.style.fontSize = size;
-            console.log('📏 Fallback element style');
           }
           announceLiveRegion(`Font size changed to ${size}`);
         }

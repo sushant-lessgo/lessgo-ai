@@ -184,10 +184,7 @@ export function TextToolbarMVP({ elementSelection, position, contextActions }: T
 
   // Enhanced format application with leading debounce and state management
   const applyFormatInternal = (newFormat: Partial<MVPFormatState>) => {
-    console.log('⚙️ TextToolbarMVP applyFormatInternal called:', { newFormat, elementSelection: elementSelection?.elementKey });
-    
     if (!elementSelection) {
-      console.warn('⚙️ No elementSelection, returning');
       return;
     }
 
@@ -284,15 +281,6 @@ export function TextToolbarMVP({ elementSelection, position, contextActions }: T
           contentToSave = targetElement.textContent || '';
         }
         
-        console.log('💾 TextToolbarMVP saving content:', {
-          hasFormattedContent: !!hasFormattedContent,
-          elementHasDirectStyles,
-          contentToSave: contentToSave.substring(0, 100),
-          elementStyles: {
-            color: targetElement.style.color,
-            fontSize: targetElement.style.fontSize
-          }
-        });
         
         updateElementContent(
           elementSelection.sectionId, 
@@ -321,7 +309,6 @@ export function TextToolbarMVP({ elementSelection, position, contextActions }: T
 
   // Apply format with interaction tracking (for pointerDown)
   const applyFormatImmediate = (formatOptions: Partial<MVPFormatState>) => {
-    console.log('🚀 TextToolbarMVP applyFormatImmediate called:', { formatOptions });
     logInteractionTimeline('format:start', { formatOptions });
     
     // Set formatting in progress
@@ -380,15 +367,12 @@ export function TextToolbarMVP({ elementSelection, position, contextActions }: T
   };
   
   const setFontSize = (size: string, e?: React.PointerEvent) => {
-    console.log('📏 TextToolbarMVP setFontSize called:', { size, elementSelection: elementSelection?.elementKey });
     if (e) {
       e.preventDefault();
       e.stopPropagation();
     }
     
     withInteractionSource('toolbar', () => {
-      console.log('📏 Inside withInteractionSource');
-      console.log('📏 Calling applyFormatImmediate directly');
       if (hasTextSelection) {
         restoreSelection();
       }
@@ -398,15 +382,12 @@ export function TextToolbarMVP({ elementSelection, position, contextActions }: T
   };
   
   const setColor = (color: string, e?: React.PointerEvent) => {
-    console.log('🎨 TextToolbarMVP setColor called:', { color, elementSelection: elementSelection?.elementKey });
     if (e) {
       e.preventDefault();
       e.stopPropagation();
     }
     
     withInteractionSource('toolbar', () => {
-      console.log('🎨 Inside withInteractionSource');
-      console.log('🎨 Calling applyFormatImmediate directly');
       if (hasTextSelection) {
         restoreSelection();
       }
