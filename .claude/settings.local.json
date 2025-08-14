@@ -61,6 +61,7 @@
       "Bash(timeout 5s npm run dev)",
       "Bash(timeout 15s npm run build)"
     ],
-    "deny": []
+    "deny": [],
+    "defaultMode": "acceptEdits"
   }
 }

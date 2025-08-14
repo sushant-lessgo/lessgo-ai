@@ -118,7 +118,7 @@ export async function validateInferredFields(raw: InputVariables): Promise<Recor
     validateField('targetAudience', targetAudience, 'Target Audience'),
     validateField('startupStage', startupStage, 'Startup Stage'),
     validateField('pricingModel', pricingModel, 'Pricing Category and Model'),
-    validateField('landingPageGoals', landingPageGoals, 'Landing Page Goals'), // ✅ FIXED: Use canonical field name for semantic matching
+    validateField('landingGoal', landingPageGoals, 'Landing Page Goals'), // Fixed: Use 'landingGoal' to match database field type
   ]);
 
   // Key problem doesn't need semantic matching - it's free text
