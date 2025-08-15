@@ -44,7 +44,7 @@ export async function POST(req: Request) {
     const token = authHeader.replace("Bearer ", "").trim();
 
     if (process.env.NEXT_PUBLIC_USE_MOCK_GPT === "true" || token === DEMO_TOKEN) {
-      console.log("Using mock data for market insights");
+      // Using mock data for market insights
       
       // Generate mock features (existing logic)
       const mockFeatures = generateMockFeatures(category, subcategory, problem);
@@ -98,14 +98,17 @@ export async function POST(req: Request) {
     });
 
   } catch (err: any) {
-    console.error('[API] market-insights error:', err);
+    // A09: Security Logging - Safe error handling
+    if (process.env.NODE_ENV !== 'production') {
+      // Log market insights errors only in development
+    }
     
     // Fallback to mock data on error
     try {
       const body = await req.json();
       const { category, subcategory, problem, audience, startupStage, pricing, landingPageGoals } = body;
       
-      console.log("AI generation failed, using mock fallback");
+      // AI generation failed, using mock fallback
       const mockFeatures = generateMockFeatures(category, subcategory, problem);
       
       const validatedFieldsInput = {

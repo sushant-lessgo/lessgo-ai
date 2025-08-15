@@ -4,6 +4,7 @@ import { z } from 'zod';
 import { inferFields } from '@/modules/inference/inferFields';
 import { validateInferredFields, ValidationResult } from '@/modules/inference/validateOutput';
 import { generateMockInferredFields, generateMockValidationResults } from '@/modules/mock/mockDataGenerators';
+import { logger } from '@/lib/logger';
 
 const RequestSchema = z.object({
   input: z.string().min(1),
@@ -27,7 +28,7 @@ export async function POST(req: NextRequest) {
       
       // Generate mock inferred fields
       const mockInferredFields = generateMockInferredFields(input);
-      console.log('✅ Mock AI inference completed');
+      logger.dev('✅ Mock AI inference completed');
       
       // Generate mock validation results if requested (THIS IS THE KEY CHANGE)
       let mockValidationResults: Record<string, ValidationResult> | undefined;
@@ -83,7 +84,7 @@ export async function POST(req: NextRequest) {
     });
     
   } catch (err: any) {
-    console.error('[API] infer-fields error:', err);
+    logger.error('[API] infer-fields error:', err);
     
     // Fallback to mock data on error
     try {

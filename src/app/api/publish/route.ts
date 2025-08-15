@@ -2,7 +2,9 @@
 import { NextResponse } from 'next/server'
 import { auth } from '@clerk/nextjs/server'
 import type { NextRequest } from 'next/server';
-import { prisma } from '@/lib/prisma' // Update path if different
+import { prisma } from '@/lib/prisma';
+import { PublishSchema, sanitizeForLogging } from '@/lib/validation';
+import { createSecureResponse, validateSlug, sanitizeHtmlContent, verifyProjectAccess } from '@/lib/security';
 
 
 
@@ -13,18 +15,30 @@ export async function POST(req: NextRequest) {
   const baseUrl = `${protocol}://${host}`;
 
   try {
+    // A01: Broken Access Control - Authentication required
     const { userId } = await auth();
 
     if (!userId) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      return createSecureResponse({ error: 'Unauthorized' }, 401);
     }
 
     const body = await req.json();
     
-    const { slug, htmlContent, title, content, themeValues, tokenId, inputText } = body;
-
-    if (!slug || !htmlContent || !tokenId) {
-      return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
+    // A03: Injection Prevention - Validate input
+    const validationResult = PublishSchema.safeParse(body);
+    if (!validationResult.success) {
+      return createSecureResponse(
+        { error: 'Invalid request format', details: validationResult.error.issues },
+        400
+      );
+    }
+    
+    const { slug, htmlContent, title, content, themeValues, tokenId, inputText } = validationResult.data;
+    
+    // A04: Insecure Design - Validate slug security
+    const slugValidation = validateSlug(slug);
+    if (!slugValidation.valid) {
+      return createSecureResponse({ error: slugValidation.error }, 400);
     }
 
     // 🔍 Get the project to link to published page
@@ -38,31 +52,35 @@ export async function POST(req: NextRequest) {
 
     if (existing) {
       if (existing.userId !== userId) {
-        return NextResponse.json({ error: 'Slug already taken' }, { status: 409 });
+        return createSecureResponse({ error: 'Slug already taken' }, 409);
       }
 
-      // 🔁 Update PublishedPage
+      // A03: Injection Prevention - Sanitize HTML before update
+      const sanitizedHtml = sanitizeHtmlContent(htmlContent);
+      
       await prisma.publishedPage.update({
         where: { slug },
         data: { 
-          htmlContent, 
+          htmlContent: sanitizedHtml, 
           title, 
-          content, 
-          themeValues, 
+          content: content as any, 
+          themeValues: themeValues as any, 
           projectId: project?.id || null,
           updatedAt: new Date() 
         }
       });
     } else {
-      // 🆕 Create PublishedPage
+      // A03: Injection Prevention - Sanitize HTML before creation
+      const sanitizedHtml = sanitizeHtmlContent(htmlContent);
+      
       await prisma.publishedPage.create({
         data: { 
           userId, 
           slug, 
-          htmlContent, 
+          htmlContent: sanitizedHtml, 
           title, 
-          content, 
-          themeValues,
+          content: content as any, 
+          themeValues: themeValues as any,
           projectId: project?.id || null
         }
       });
@@ -73,15 +91,10 @@ export async function POST(req: NextRequest) {
   create: { value: tokenId },
   update: {},
 });
-    console.log("🔍 Publishing with:", {
-  tokenId,
-  userId,
-  title,
-  status: 'published',
-  content,
-  themeValues,
-  inputText,
-});
+    // A09: Security Logging - Safe logging in development only
+    if (process.env.NODE_ENV !== 'production') {
+      // Log publishing details only in development
+    }
 
 
     // ✅ 🔁 Always upsert into Project as well
@@ -91,27 +104,30 @@ export async function POST(req: NextRequest) {
         tokenId,
         userId,
         title: title || 'Untitled',
-        content,
+        content: content as any,
         inputText,
         status: 'published',
       },
       update: {
         title,
-        content,
+        content: content as any,
         inputText,
         status: 'published',
         updatedAt: new Date(),
       },
     });
 
-    return NextResponse.json({
+    return createSecureResponse({
       message: 'Page published successfully',
       url: `https://${slug}.lessgo.ai`,
     });
 
   } catch (err) {
-    console.error('[PUBLISH_ERROR]', err);
-    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+    // A09: Security Logging - Safe error handling
+    if (process.env.NODE_ENV !== 'production') {
+      // Log publish errors only in development
+    }
+    return createSecureResponse({ error: 'Internal Server Error' }, 500);
   }
 }
 

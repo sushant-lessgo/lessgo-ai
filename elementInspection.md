@@ -1,6 +1,0 @@
-Edit mode headline
-
-<h1 contenteditable="false" class="inline-text-editor cursor-text hover:bg-opacity-10 font-bold leading-tight text-gray-50 max-w-3xl selectable-element" data-section-id="hero" data-element-key="headline" data-editing="false" data-valid="true" data-background-type="primary" role="button" aria-label="Element headline in section hero" aria-multiline="true" aria-invalid="false" tabindex="0" style="--editing-outline: #3b82f6; --editing-glow: rgba(59, 130, 246, 0.1); --editing-background: rgba(59, 130, 246, 0.05); outline: none; outline-offset: 0px; border-radius: 0px; background-color: transparent; box-shadow: none; transition: 0.2s ease-in-out; font-weight: bold; font-style: normal; text-decoration: none; font-size: clamp(2rem, 5vw, 3rem); font-family: Rubik, sans-serif, Inter, sans-serif; text-align: left; line-height: 1.3; letter-spacing: -0.005em; text-transform: none; cursor: pointer;" data-selectable="true" aria-selected="false" data-actively-typing="false">Revolutionary AI Solution Solution</h1>
-
-Generate mode
-<h1 class="font-bold leading-tight text-gray-50 leading-tight max-w-3xl">Revolutionary AI Solution Solution</h1>

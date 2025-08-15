@@ -3,6 +3,7 @@
 import { NextResponse } from "next/server";
 import { parseAiResponse } from "@/modules/prompt/parseAiResponse";
 import { generateMockResponse } from "@/modules/prompt/mockResponseGenerator";
+import { logger } from '@/lib/logger';
 
 export async function POST(req: Request) {
   try {
@@ -21,7 +22,7 @@ export async function POST(req: Request) {
 
     // Check for mock data usage
     if (process.env.NEXT_PUBLIC_USE_MOCK_GPT === "true" || token === DEMO_TOKEN) {
-      console.log("Using mock response for content regeneration");
+      logger.dev("Using mock response for content regeneration");
       const mockResponse = generateMockResponse(prompt);
       const parsed = parseAiResponse(mockResponse.choices[0].message.content);
       
@@ -49,13 +50,13 @@ export async function POST(req: Request) {
     
     // Fallback to secondary provider
     if (!result.success) {
-      console.warn(`Primary provider failed, trying secondary...`);
+      logger.warn(`Primary provider failed, trying secondary...`);
       result = await callAIProvider(enhancedPrompt, !useOpenAI, !useOpenAI ? "gpt-3.5-turbo" : "mistralai/Mixtral-8x7B-Instruct-v0.1");
     }
 
     // Final fallback to mock
     if (!result.success) {
-      console.error("Both AI providers failed, returning mock response");
+      logger.error("Both AI providers failed, returning mock response");
       const mockResponse = generateMockResponse(prompt);
       const parsed = parseAiResponse(mockResponse.choices[0].message.content);
       parsed.isPartial = true;
@@ -81,7 +82,7 @@ export async function POST(req: Request) {
     });
 
   } catch (err) {
-    console.error("Content regeneration error:", err);
+    logger.error("Content regeneration error:", err);
     
     try {
       const { prompt } = await req.json();
@@ -112,7 +113,7 @@ async function callAIProvider(prompt: string, useOpenAI: boolean, model: string)
       : process.env.NEBIUS_API_KEY;
 
     if (!apiKey) {
-      console.error(`Missing API key for ${useOpenAI ? 'OpenAI' : 'Nebius'}`);
+      logger.error(`Missing API key for ${useOpenAI ? 'OpenAI' : 'Nebius'}`);
       return { success: false, error: "Missing API key" };
     }
 
@@ -132,14 +133,14 @@ async function callAIProvider(prompt: string, useOpenAI: boolean, model: string)
     const result = await response.json();
 
     if (!response.ok) {
-      console.error(`${useOpenAI ? "OpenAI" : "Nebius"} API Error:`, result);
+      logger.error(`${useOpenAI ? "OpenAI" : "Nebius"} API Error:`, result);
       return { success: false, error: result };
     }
 
     return { success: true, data: result };
 
   } catch (error) {
-    console.error(`Error calling ${useOpenAI ? 'OpenAI' : 'Nebius'}:`, error);
+    logger.error(`Error calling ${useOpenAI ? 'OpenAI' : 'Nebius'}:`, error);
     return { success: false, error };
   }
 }

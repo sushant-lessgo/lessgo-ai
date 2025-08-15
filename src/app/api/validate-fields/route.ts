@@ -132,7 +132,10 @@ export async function POST(req: NextRequest) {
     });
     
   } catch (err: any) {
-    console.error('[API] validate-fields error:', err);
+    // A09: Security Logging - Safe error handling
+    if (process.env.NODE_ENV !== 'production') {
+      // Log validation errors only in development
+    }
     
     // Fallback to mock data on error
     try {

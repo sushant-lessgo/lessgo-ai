@@ -60,7 +60,8 @@
       "Bash(done)",
       "Bash(timeout 5s npm run dev)",
       "Bash(timeout 15s npm run build)",
-      "Bash(timeout 10s npm run build)"
+      "Bash(timeout 10s npm run build)",
+      "Bash(npm audit:*)"
     ],
     "deny": [],
     "defaultMode": "acceptEdits"

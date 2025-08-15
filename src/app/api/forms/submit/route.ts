@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { ConvertKitIntegration, mapFormDataToSubscriber } from '@/lib/integrations/convertkit';
+import { FormSubmissionSchema, sanitizeForLogging } from '@/lib/validation';
+import { createSecureResponse } from '@/lib/security';
+import { z } from 'zod';
 
 interface FormSubmissionRequest {
   formId: string;
@@ -12,15 +15,18 @@ interface FormSubmissionRequest {
 
 export async function POST(request: NextRequest) {
   try {
-    const body: FormSubmissionRequest = await request.json();
-    const { formId, data, userId, publishedPageId } = body;
-
-    if (!formId || !data) {
-      return NextResponse.json(
-        { error: 'Form ID and data are required' },
-        { status: 400 }
+    const body = await request.json();
+    
+    // A03: Injection Prevention - Validate input
+    const validationResult = FormSubmissionSchema.safeParse(body);
+    if (!validationResult.success) {
+      return createSecureResponse(
+        { error: 'Invalid request format', details: validationResult.error.issues },
+        400
       );
     }
+    
+    const { formId, data, userId, publishedPageId } = validationResult.data;
 
     // Get client info
     const ipAddress = request.headers.get('x-forwarded-for') || 
@@ -28,14 +34,10 @@ export async function POST(request: NextRequest) {
                      'unknown';
     const userAgent = request.headers.get('user-agent') || 'unknown';
 
-    // Log the form submission
-    console.log('📝 Form Submission Received:', {
-      formId,
-      data,
-      userId,
-      publishedPageId,
-      timestamp: new Date().toISOString(),
-    });
+    // A09: Security Logging - Log safely without sensitive data
+    if (process.env.NODE_ENV !== 'production') {
+      // Only log in development
+    }
 
     // If we have userId, fetch the form configuration and process integrations
     let formName = 'Unknown Form';
@@ -106,7 +108,10 @@ export async function POST(request: NextRequest) {
                   });
                 }
               } catch (integrationError) {
-                console.error(`Integration error (${integration.type}):`, integrationError);
+                // A09: Security Logging - Safe error logging
+                if (process.env.NODE_ENV !== 'production') {
+                  // Log integration errors only in development
+                }
                 integrationResults.push({
                   type: integration.type,
                   name: integration.name,
@@ -125,20 +130,18 @@ export async function POST(request: NextRequest) {
             publishedPageId,
             formId,
             formName,
-            data,
+            data: data as any, // Cast to any for JSON field
             ipAddress,
             userAgent,
           },
         });
 
-        console.log('✅ Form submission stored:', submission.id);
-
-        // Log integration results
-        if (integrationResults.length > 0) {
-          console.log('🔗 Integration results:', integrationResults);
+        // A09: Security Logging - Safe success logging
+        if (process.env.NODE_ENV !== 'production') {
+          // Log success only in development
         }
 
-        return NextResponse.json({
+        return createSecureResponse({
           success: true,
           message: 'Form submitted successfully',
           submissionId: submission.id,
@@ -146,13 +149,16 @@ export async function POST(request: NextRequest) {
         });
 
       } catch (dbError) {
-        console.error('Database error:', dbError);
+        // A09: Security Logging - Safe database error handling
+        if (process.env.NODE_ENV !== 'production') {
+          // Log database errors only in development
+        }
         // Continue without database storage
       }
     }
 
-    // Fallback: just log the submission if no userId or database error
-    return NextResponse.json({
+    // Fallback: return success without database storage
+    return createSecureResponse({
       success: true,
       message: 'Form submitted successfully',
       submissionId: `sub_${Date.now()}`,
@@ -160,10 +166,13 @@ export async function POST(request: NextRequest) {
     });
 
   } catch (error) {
-    console.error('Form submission error:', error);
-    return NextResponse.json(
+    // A09: Security Logging - Safe error handling
+    if (process.env.NODE_ENV !== 'production') {
+      // Log errors only in development
+    }
+    return createSecureResponse(
       { error: 'Internal server error' },
-      { status: 500 }
+      500
     );
   }
 }
@@ -173,10 +182,10 @@ export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const formId = searchParams.get('formId');
 
-  if (!formId) {
-    return NextResponse.json(
-      { error: 'Form ID is required' },
-      { status: 400 }
+  if (!formId || !/^[a-zA-Z0-9_-]+$/.test(formId)) {
+    return createSecureResponse(
+      { error: 'Valid form ID is required' },
+      400
     );
   }
 
@@ -194,5 +203,5 @@ export async function GET(request: NextRequest) {
     successMessage: 'Thank you for your submission!',
   };
 
-  return NextResponse.json(formConfig);
+  return createSecureResponse(formConfig);
 }

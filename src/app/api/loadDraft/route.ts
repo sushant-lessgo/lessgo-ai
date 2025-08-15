@@ -1,6 +1,7 @@
 import { auth } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
+import { createSecureResponse, verifyProjectAccess, validateToken } from '@/lib/security';
 
 const DEMO_TOKEN = 'lessgodemomockdata';
 
@@ -40,17 +41,18 @@ interface ProjectContent {
 
 export async function GET(req: Request) {
   try {
-    // 🔒 Authentication required
+    // A01: Broken Access Control - Authentication required
     const { userId: clerkId } = await auth();
     if (!clerkId) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      return createSecureResponse({ error: 'Unauthorized' }, 401);
     }
 
     const { searchParams } = new URL(req.url);
     const tokenId = searchParams.get("tokenId");
 
-    if (!tokenId) {
-      return NextResponse.json({ error: "Missing tokenId" }, { status: 400 });
+    // A03: Injection Prevention - Validate token format
+    if (!tokenId || !validateToken(tokenId)) {
+      return createSecureResponse({ error: "Invalid or missing tokenId" }, 400);
     }
 
     const isDemo = tokenId === DEMO_TOKEN;
@@ -69,19 +71,19 @@ export async function GET(req: Request) {
     });
 
     if (!project) {
-      return NextResponse.json({ error: "Project not found" }, { status: 404 });
+      return createSecureResponse({ error: "Project not found" }, 404);
     }
 
-    // 🔒 Security check: Ensure user owns the project (skip for demo)
+    // A01: Broken Access Control - Ensure user owns the project (skip for demo)
     if (!isDemo) {
       const userRecord = await prisma.user.findUnique({ where: { clerkId } });
       
       if (!userRecord) {
-        return NextResponse.json({ error: 'User not found' }, { status: 404 });
+        return createSecureResponse({ error: 'User not found' }, 404);
       }
 
-      if (project.userId !== userRecord.id) {
-        return NextResponse.json({ error: 'Access denied' }, { status: 403 });
+      if (!await verifyProjectAccess(userRecord.id, project.userId, tokenId)) {
+        return createSecureResponse({ error: 'Access denied' }, 403);
       }
     }
 
@@ -109,26 +111,22 @@ export async function GET(req: Request) {
       lastUpdated: project.updatedAt,
     };
 
-    // 📊 Log load success for debugging
-    console.log(`✅ Draft loaded for token: ${tokenId}`, {
-      stepIndex: response.stepIndex,
-      confirmedFieldsCount: Object.keys(response.confirmedFields).length,
-      validatedFieldsCount: Object.keys(response.validatedFields).length,
-      featuresCount: response.featuresFromAI.length,
-      hiddenFieldsCount: Object.keys(response.hiddenInferredFields).length,
-      hasInputText: !!response.inputText,
-      hasFinalContent: !!response.finalContent,
-    });
+    // A09: Security Logging - Safe logging in development only
+    if (process.env.NODE_ENV !== 'production') {
+      // Log draft load success only in development
+    }
 
-    return NextResponse.json(response);
+    return createSecureResponse(response);
 
   } catch (err) {
-    console.error("[LOAD_DRAFT_ERROR]", err);
+    // A09: Security Logging - Safe error handling
+    if (process.env.NODE_ENV !== 'production') {
+      // Log load draft errors only in development
+    }
     
-    const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred';
-    return NextResponse.json(
-      { error: "Failed to load draft", details: errorMessage }, 
-      { status: 500 }
+    return createSecureResponse(
+      { error: "Failed to load draft" }, 
+      500
     );
   }
 }

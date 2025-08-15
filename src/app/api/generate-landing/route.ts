@@ -1,12 +1,13 @@
 import { NextResponse } from "next/server"
 import { parseAiResponse } from "@/modules/prompt/parseAiResponse"
 import { generateMockResponse } from "@/modules/prompt/mockResponseGenerator"
+import { logger } from '@/lib/logger'
 
 export async function POST(req: Request) {
-  console.log("🚀 /api/generate-landing route called")
+  logger.dev("🚀 /api/generate-landing route called")
   try {
     const { prompt } = await req.json()
-    console.log("📝 Prompt received, length:", prompt?.length || 0)
+    logger.dev("📝 Prompt received, length:", prompt?.length || 0)
 
     if (!prompt || typeof prompt !== 'string') {
       return NextResponse.json({ 
@@ -19,7 +20,7 @@ export async function POST(req: Request) {
     const authHeader = req.headers.get("Authorization") || ""
     const token = authHeader.replace("Bearer ", "").trim()
     
-    console.log("🔍 Environment check:", {
+    logger.dev("🔍 Environment check:", {
       NEXT_PUBLIC_USE_MOCK_GPT: process.env.NEXT_PUBLIC_USE_MOCK_GPT,
       token: token.substring(0, 10) + '...',
       isDemoToken: token === DEMO_TOKEN
@@ -27,11 +28,11 @@ export async function POST(req: Request) {
 
     // Check for mock data usage
     if (process.env.NEXT_PUBLIC_USE_MOCK_GPT === "true" || token === DEMO_TOKEN) {
-      console.log("🤖 Using mock response for AI copy generation")
+      logger.dev("🤖 Using mock response for AI copy generation")
       const mockResponse = generateMockResponse(prompt)
-      console.log("📦 Mock response content:", mockResponse.choices[0].message.content.substring(0, 500) + '...')
+      logger.dev("📦 Mock response content:", mockResponse.choices[0].message.content.substring(0, 500) + '...')
       const parsed = parseAiResponse(mockResponse.choices[0].message.content)
-      console.log("📊 Parsed result:", {
+      logger.dev("📊 Parsed result:", {
         success: parsed.success,
         contentKeys: Object.keys(parsed.content),
         errors: parsed.errors,
@@ -48,13 +49,13 @@ export async function POST(req: Request) {
     
     // If primary fails, try secondary provider
     if (!result.success) {
-      console.warn(`Primary AI provider (${useOpenAI ? 'OpenAI' : 'Nebius'}) failed, trying secondary...`)
+      logger.warn(`Primary AI provider (${useOpenAI ? 'OpenAI' : 'Nebius'}) failed, trying secondary...`)
       result = await callAIProvider(prompt, !useOpenAI, !useOpenAI ? "gpt-3.5-turbo" : "mistralai/Mixtral-8x7B-Instruct-v0.1")
     }
 
     // If both AI providers fail, return graceful degradation
     if (!result.success) {
-      console.error("Both AI providers failed, returning mock response")
+      logger.error("Both AI providers failed, returning mock response")
       const mockResponse = generateMockResponse(prompt)
       const parsed = parseAiResponse(mockResponse.choices[0].message.content)
       parsed.isPartial = true
@@ -73,7 +74,7 @@ export async function POST(req: Request) {
     return NextResponse.json(parsed)
 
   } catch (err) {
-    console.error("Server error:", err)
+    logger.error("Server error:", err)
     
     // Last resort: return basic mock response
     try {
@@ -105,7 +106,7 @@ async function callAIProvider(prompt: string, useOpenAI: boolean, model: string)
       : process.env.NEBIUS_API_KEY
 
     if (!apiKey) {
-      console.error(`Missing API key for ${useOpenAI ? 'OpenAI' : 'Nebius'}`)
+      logger.error(`Missing API key for ${useOpenAI ? 'OpenAI' : 'Nebius'}`)
       return { success: false, error: "Missing API key" }
     }
 
@@ -132,14 +133,14 @@ async function callAIProvider(prompt: string, useOpenAI: boolean, model: string)
     const result = await response.json()
 
     if (!response.ok) {
-      console.error(`${useOpenAI ? "OpenAI" : "Nebius"} API Error:`, result)
+      logger.error(`${useOpenAI ? "OpenAI" : "Nebius"} API Error:`, result)
       return { success: false, error: result }
     }
 
     return { success: true, data: result }
 
   } catch (error) {
-    console.error(`Error calling ${useOpenAI ? 'OpenAI' : 'Nebius'}:`, error)
+    logger.error(`Error calling ${useOpenAI ? 'OpenAI' : 'Nebius'}:`, error)
     return { success: false, error }
   }
 }
