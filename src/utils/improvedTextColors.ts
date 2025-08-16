@@ -360,7 +360,7 @@ export function getMutedColorForBackground(
  * Main export that replaces old text color functions
  */
 export function getSmartTextColor(
-  backgroundColor: string,
+  backgroundColor: string | { r: number; g: number; b: number },
   textType: 'heading' | 'body' | 'muted' = 'body'
 ): string {
   // ✅ FIX: Handle cases where an object is passed instead of a string
@@ -400,8 +400,19 @@ export function getSmartTextColor(
   // Get appropriate text colors
   const textColors = getTextColorsFromBackground(backgroundAnalysis, {});
   
-  // Debug logging (reduced)
-  // console.log('🎨 [TEXT-COLOR-DEBUG]:', { backgroundColor, textType, selectedColor: textColors[textType] || textColors.body });
+  // Debug logging (commented out for production)
+  // console.log('🎨 [TEXT-COLOR-DEBUG] getSmartTextColor called:', { 
+  //   originalBackground: backgroundColor, 
+  //   cleanBackground, 
+  //   textType, 
+  //   backgroundAnalysis: {
+  //     dominantColor: backgroundAnalysis.dominantColor,
+  //     isLight: backgroundAnalysis.isLight,
+  //     isDark: backgroundAnalysis.isDark,
+  //     confidence: backgroundAnalysis.confidence
+  //   },
+  //   selectedColor: textColors[textType] || textColors.body 
+  // });
   
   // Return the requested text type
   switch (textType) {

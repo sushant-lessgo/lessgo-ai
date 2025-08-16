@@ -35,12 +35,14 @@ export function getTextColorForBackground(
   // Analyze the background using the new smart system
   const backgroundAnalysis = analyzeBackground(backgroundCSS);
   
-  // Use smart text color selection - convert RGB to CSS string
-  const dominantColorCSS = `rgb(${backgroundAnalysis.dominantColor.r}, ${backgroundAnalysis.dominantColor.g}, ${backgroundAnalysis.dominantColor.b})`;
+  // ✅ FIX: Instead of converting RGB to rgb() string and re-analyzing,
+  // pass the RGB object directly to getSmartTextColor which has a fix for this
+  const dominantColorRGB = backgroundAnalysis.dominantColor;
+  
   return {
-    heading: getSmartTextColor(dominantColorCSS, 'heading'),
-    body: getSmartTextColor(dominantColorCSS, 'body'),
-    muted: getSmartTextColor(dominantColorCSS, 'muted')
+    heading: getSmartTextColor(dominantColorRGB, 'heading'),
+    body: getSmartTextColor(dominantColorRGB, 'body'),
+    muted: getSmartTextColor(dominantColorRGB, 'muted')
   };
 }
 
