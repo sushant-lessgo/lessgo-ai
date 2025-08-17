@@ -10,6 +10,7 @@ import {
   CTAButton,
   TrustIndicators 
 } from '@/components/layout/ComponentRegistry';
+import EditableTrustIndicators from '@/components/layout/EditableTrustIndicators';
 import { LayoutComponentProps } from '@/types/storeTypes';
 
 interface ValueReinforcementBlockContent {
@@ -27,6 +28,19 @@ interface ValueReinforcementBlockContent {
   subheadline?: string;
   supporting_text?: string;
   trust_items?: string;
+  trust_item_1?: string;
+  trust_item_2?: string;
+  trust_item_3?: string;
+  trust_item_4?: string;
+  trust_item_5?: string;
+  stat_1?: string;
+  stat_2?: string;
+  stat_3?: string;
+  stat_4?: string;
+  label_1?: string;
+  label_2?: string;
+  label_3?: string;
+  label_4?: string;
 }
 
 const CONTENT_SCHEMA = {
@@ -85,6 +99,58 @@ const CONTENT_SCHEMA = {
   trust_items: { 
     type: 'string' as const, 
     default: '' 
+  },
+  trust_item_1: { 
+    type: 'string' as const, 
+    default: '60-day money-back guarantee' 
+  },
+  trust_item_2: { 
+    type: 'string' as const, 
+    default: 'Free setup and onboarding' 
+  },
+  trust_item_3: { 
+    type: 'string' as const, 
+    default: '24/7 customer support' 
+  },
+  trust_item_4: { 
+    type: 'string' as const, 
+    default: '' 
+  },
+  trust_item_5: { 
+    type: 'string' as const, 
+    default: '' 
+  },
+  stat_1: { 
+    type: 'string' as const, 
+    default: '50,000+' 
+  },
+  stat_2: { 
+    type: 'string' as const, 
+    default: '99.9%' 
+  },
+  stat_3: { 
+    type: 'string' as const, 
+    default: '40%' 
+  },
+  stat_4: { 
+    type: 'string' as const, 
+    default: '24/7' 
+  },
+  label_1: { 
+    type: 'string' as const, 
+    default: 'Satisfied customers' 
+  },
+  label_2: { 
+    type: 'string' as const, 
+    default: 'Uptime guarantee' 
+  },
+  label_3: { 
+    type: 'string' as const, 
+    default: 'Average cost reduction' 
+  },
+  label_4: { 
+    type: 'string' as const, 
+    default: 'Expert support' 
   }
 };
 
@@ -131,17 +197,56 @@ export default function ValueReinforcementBlock(props: LayoutComponentProps) {
     ? blockContent.transformation_after.split('|').map(item => item.trim()).filter(Boolean)
     : [];
 
-  const socialProofStats = blockContent.social_proof_stats 
-    ? blockContent.social_proof_stats.split('|').map(item => item.trim()).filter(Boolean)
-    : [];
-
-  const socialProofLabels = blockContent.social_proof_labels 
-    ? blockContent.social_proof_labels.split('|').map(item => item.trim()).filter(Boolean)
-    : [];
-
-  const trustItems = blockContent.trust_items 
-    ? blockContent.trust_items.split('|').map(item => item.trim()).filter(Boolean)
-    : [];
+  // Handle social proof stats - support both individual fields and legacy format
+  const getSocialProofStats = (): {stat: string, label: string}[] => {
+    // Check if individual stat fields exist
+    const individualStats = [
+      {stat: blockContent.stat_1, label: blockContent.label_1},
+      {stat: blockContent.stat_2, label: blockContent.label_2},
+      {stat: blockContent.stat_3, label: blockContent.label_3},
+      {stat: blockContent.stat_4, label: blockContent.label_4}
+    ].filter(item => Boolean(item.stat && item.stat.trim() !== '' && item.stat !== '___REMOVED___'));
+    
+    if (individualStats.length > 0) {
+      return individualStats;
+    }
+    
+    // Legacy format fallback
+    const stats = blockContent.social_proof_stats 
+      ? blockContent.social_proof_stats.split('|').map(item => item.trim()).filter(Boolean)
+      : [];
+    const labels = blockContent.social_proof_labels 
+      ? blockContent.social_proof_labels.split('|').map(item => item.trim()).filter(Boolean)
+      : [];
+    
+    return stats.map((stat, index) => ({
+      stat,
+      label: labels[index] || 'Metric'
+    }));
+  };
+  
+  const socialProofData = getSocialProofStats();
+  
+  // Handle trust items - support both legacy pipe-separated format and individual fields
+  const getTrustItems = (): string[] => {
+    const individualItems = [
+      blockContent.trust_item_1,
+      blockContent.trust_item_2, 
+      blockContent.trust_item_3,
+      blockContent.trust_item_4,
+      blockContent.trust_item_5
+    ].filter((item): item is string => Boolean(item && item.trim() !== '' && item !== '___REMOVED___'));
+    
+    if (individualItems.length > 0) {
+      return individualItems;
+    }
+    
+    return blockContent.trust_items 
+      ? blockContent.trust_items.split('|').map(item => item.trim()).filter(Boolean)
+      : [];
+  };
+  
+  const trustItems = getTrustItems();
 
   const mutedTextColor = dynamicTextColors?.muted || colorTokens.textMuted;
 
@@ -389,10 +494,59 @@ export default function ValueReinforcementBlock(props: LayoutComponentProps) {
               <h3 className="mb-8" style={h2Style}>Trusted by Businesses Worldwide</h3>
               
               <div className="grid md:grid-cols-4 gap-8">
-                {socialProofStats.map((stat, index) => (
-                  <div key={index} className="text-center">
-                    <div className="mb-2" style={{...h2Style, fontSize: 'clamp(2rem, 4vw, 3rem)'}}>{stat}</div>
-                    <div className="text-blue-100">{socialProofLabels[index] || 'Metric'}</div>
+                {socialProofData.map((item, index) => (
+                  <div key={index} className="text-center relative group/stat-item">
+                    {mode === 'edit' ? (
+                      <div className="space-y-2">
+                        <EditableAdaptiveText
+                          mode={mode}
+                          value={item.stat}
+                          onEdit={(value) => handleContentUpdate(`stat_${index + 1}` as keyof ValueReinforcementBlockContent, value)}
+                          backgroundType={safeBackgroundType}
+                          colorTokens={colorTokens}
+                          variant="body"
+                          className="text-white font-bold"
+                          style={{...h2Style, fontSize: 'clamp(2rem, 4vw, 3rem)'}}
+                          placeholder={`Stat ${index + 1}`}
+                          sectionBackground={sectionBackground}
+                          data-section-id={sectionId}
+                          data-element-key={`stat_${index + 1}`}
+                        />
+                        <EditableAdaptiveText
+                          mode={mode}
+                          value={item.label}
+                          onEdit={(value) => handleContentUpdate(`label_${index + 1}` as keyof ValueReinforcementBlockContent, value)}
+                          backgroundType={safeBackgroundType}
+                          colorTokens={colorTokens}
+                          variant="body"
+                          className="text-blue-100"
+                          placeholder={`Label ${index + 1}`}
+                          sectionBackground={sectionBackground}
+                          data-section-id={sectionId}
+                          data-element-key={`label_${index + 1}`}
+                        />
+                        
+                        {/* Remove button for stat */}
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleContentUpdate(`stat_${index + 1}` as keyof ValueReinforcementBlockContent, '___REMOVED___');
+                            handleContentUpdate(`label_${index + 1}` as keyof ValueReinforcementBlockContent, '___REMOVED___');
+                          }}
+                          className="opacity-0 group-hover/stat-item:opacity-100 absolute -top-2 -right-2 p-1 rounded-full bg-white/80 hover:bg-white text-red-500 hover:text-red-700 transition-all duration-200 shadow-sm"
+                          title="Remove this stat"
+                        >
+                          <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                          </svg>
+                        </button>
+                      </div>
+                    ) : (
+                      <div>
+                        <div className="mb-2" style={{...h2Style, fontSize: 'clamp(2rem, 4vw, 3rem)'}}>{item.stat}</div>
+                        <div className="text-blue-100">{item.label}</div>
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>
@@ -458,12 +612,57 @@ export default function ValueReinforcementBlock(props: LayoutComponentProps) {
               />
             )}
 
-            {trustItems.length > 0 && (
-              <TrustIndicators 
-                items={trustItems}
-                colorClass={mutedTextColor}
-                iconColor="text-green-500"
-              />
+            {(trustItems.length > 0 || mode === 'edit') && (
+              <div className="mt-8">
+                {mode === 'edit' ? (
+                  <EditableTrustIndicators
+                    mode={mode}
+                    trustItems={[
+                      blockContent.trust_item_1 || '',
+                      blockContent.trust_item_2 || '',
+                      blockContent.trust_item_3 || '',
+                      blockContent.trust_item_4 || '',
+                      blockContent.trust_item_5 || ''
+                    ]}
+                    onTrustItemChange={(index, value) => {
+                      const fieldKey = `trust_item_${index + 1}` as keyof ValueReinforcementBlockContent;
+                      handleContentUpdate(fieldKey, value);
+                    }}
+                    onAddTrustItem={() => {
+                      const emptyIndex = [
+                        blockContent.trust_item_1,
+                        blockContent.trust_item_2,
+                        blockContent.trust_item_3,
+                        blockContent.trust_item_4,
+                        blockContent.trust_item_5
+                      ].findIndex(item => !item || item.trim() === '' || item === '___REMOVED___');
+                      
+                      if (emptyIndex !== -1) {
+                        const fieldKey = `trust_item_${emptyIndex + 1}` as keyof ValueReinforcementBlockContent;
+                        handleContentUpdate(fieldKey, 'New trust item');
+                      }
+                    }}
+                    onRemoveTrustItem={(index) => {
+                      const fieldKey = `trust_item_${index + 1}` as keyof ValueReinforcementBlockContent;
+                      handleContentUpdate(fieldKey, '___REMOVED___');
+                    }}
+                    colorTokens={colorTokens}
+                    sectionBackground={sectionBackground}
+                    sectionId={sectionId}
+                    backgroundType={safeBackgroundType}
+                    iconColor="text-green-500"
+                    colorClass={mutedTextColor}
+                  />
+                ) : (
+                  trustItems.length > 0 && (
+                    <TrustIndicators 
+                      items={trustItems}
+                      colorClass={mutedTextColor}
+                      iconColor="text-green-500"
+                    />
+                  )
+                )}
+              </div>
             )}
           </div>
         )}

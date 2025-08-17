@@ -10,6 +10,7 @@ import {
   CTAButton,
   TrustIndicators 
 } from '@/components/layout/ComponentRegistry';
+import EditableTrustIndicators from '@/components/layout/EditableTrustIndicators';
 import { LayoutComponentProps } from '@/types/storeTypes';
 
 interface LeadMagnetCardContent {
@@ -26,6 +27,11 @@ interface LeadMagnetCardContent {
   subheadline?: string;
   supporting_text?: string;
   trust_items?: string;
+  trust_item_1?: string;
+  trust_item_2?: string;
+  trust_item_3?: string;
+  trust_item_4?: string;
+  trust_item_5?: string;
 }
 
 const CONTENT_SCHEMA = {
@@ -80,6 +86,26 @@ const CONTENT_SCHEMA = {
   trust_items: { 
     type: 'string' as const, 
     default: '' 
+  },
+  trust_item_1: { 
+    type: 'string' as const, 
+    default: 'No spam, ever' 
+  },
+  trust_item_2: { 
+    type: 'string' as const, 
+    default: 'Instant download' 
+  },
+  trust_item_3: { 
+    type: 'string' as const, 
+    default: 'Unsubscribe anytime' 
+  },
+  trust_item_4: { 
+    type: 'string' as const, 
+    default: '' 
+  },
+  trust_item_5: { 
+    type: 'string' as const, 
+    default: '' 
   }
 };
 
@@ -114,9 +140,26 @@ export default function LeadMagnetCard(props: LayoutComponentProps) {
     ? blockContent.magnet_preview.split('|').map(item => item.trim()).filter(Boolean)
     : [];
 
-  const trustItems = blockContent.trust_items 
-    ? blockContent.trust_items.split('|').map(item => item.trim()).filter(Boolean)
-    : [];
+  // Handle trust items - support both legacy pipe-separated format and individual fields
+  const getTrustItems = (): string[] => {
+    const individualItems = [
+      blockContent.trust_item_1,
+      blockContent.trust_item_2, 
+      blockContent.trust_item_3,
+      blockContent.trust_item_4,
+      blockContent.trust_item_5
+    ].filter((item): item is string => Boolean(item && item.trim() !== '' && item !== '___REMOVED___'));
+    
+    if (individualItems.length > 0) {
+      return individualItems;
+    }
+    
+    return blockContent.trust_items 
+      ? blockContent.trust_items.split('|').map(item => item.trim()).filter(Boolean)
+      : [];
+  };
+  
+  const trustItems = getTrustItems();
 
   const mutedTextColor = dynamicTextColors?.muted || colorTokens.textMuted;
 
@@ -286,14 +329,42 @@ export default function LeadMagnetCard(props: LayoutComponentProps) {
                   </div>
                   
                   {/* Social Proof */}
-                  {blockContent.social_proof && (
-                    <div className="bg-white bg-opacity-10 rounded-lg p-4 mb-6">
+                  {(blockContent.social_proof || mode === 'edit') && (
+                    <div className="bg-white bg-opacity-10 rounded-lg p-4 mb-6 relative group/social-proof">
                       <div className="flex items-center justify-center space-x-2">
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
                         </svg>
-                        <span className="text-sm font-medium">{blockContent.social_proof}</span>
+                        <EditableAdaptiveText
+                          mode={mode}
+                          value={blockContent.social_proof || ''}
+                          onEdit={(value) => handleContentUpdate('social_proof', value)}
+                          backgroundType={safeBackgroundType}
+                          colorTokens={colorTokens}
+                          variant="body"
+                          className="text-sm font-medium"
+                          placeholder="Downloaded by 10,000+ business owners"
+                          sectionBackground={sectionBackground}
+                          data-section-id={sectionId}
+                          data-element-key="social_proof"
+                        />
                       </div>
+                      
+                      {/* Remove button for social proof */}
+                      {mode === 'edit' && (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleContentUpdate('social_proof', '___REMOVED___');
+                          }}
+                          className="opacity-0 group-hover/social-proof:opacity-100 absolute -top-2 -right-2 p-1 rounded-full bg-white/80 hover:bg-white text-red-500 hover:text-red-700 transition-all duration-200 shadow-sm"
+                          title="Remove social proof"
+                        >
+                          <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                          </svg>
+                        </button>
+                      )}
                     </div>
                   )}
                   
@@ -435,12 +506,57 @@ export default function LeadMagnetCard(props: LayoutComponentProps) {
               />
             )}
 
-            {trustItems.length > 0 && (
-              <TrustIndicators 
-                items={trustItems}
-                colorClass={mutedTextColor}
-                iconColor="text-green-500"
-              />
+            {(trustItems.length > 0 || mode === 'edit') && (
+              <div>
+                {mode === 'edit' ? (
+                  <EditableTrustIndicators
+                    mode={mode}
+                    trustItems={[
+                      blockContent.trust_item_1 || '',
+                      blockContent.trust_item_2 || '',
+                      blockContent.trust_item_3 || '',
+                      blockContent.trust_item_4 || '',
+                      blockContent.trust_item_5 || ''
+                    ]}
+                    onTrustItemChange={(index, value) => {
+                      const fieldKey = `trust_item_${index + 1}` as keyof LeadMagnetCardContent;
+                      handleContentUpdate(fieldKey, value);
+                    }}
+                    onAddTrustItem={() => {
+                      const emptyIndex = [
+                        blockContent.trust_item_1,
+                        blockContent.trust_item_2,
+                        blockContent.trust_item_3,
+                        blockContent.trust_item_4,
+                        blockContent.trust_item_5
+                      ].findIndex(item => !item || item.trim() === '' || item === '___REMOVED___');
+                      
+                      if (emptyIndex !== -1) {
+                        const fieldKey = `trust_item_${emptyIndex + 1}` as keyof LeadMagnetCardContent;
+                        handleContentUpdate(fieldKey, 'New trust item');
+                      }
+                    }}
+                    onRemoveTrustItem={(index) => {
+                      const fieldKey = `trust_item_${index + 1}` as keyof LeadMagnetCardContent;
+                      handleContentUpdate(fieldKey, '___REMOVED___');
+                    }}
+                    colorTokens={colorTokens}
+                    sectionBackground={sectionBackground}
+                    sectionId={sectionId}
+                    backgroundType={safeBackgroundType}
+                    iconColor="text-green-500"
+                    colorClass={mutedTextColor}
+                  />
+                ) : (
+                  trustItems.length > 0 && (
+                    <TrustIndicators 
+                      items={trustItems}
+                      colorClass={mutedTextColor}
+                      iconColor="text-green-500"
+                    />
+                  )
+                )}
+              </div>
             )}
           </div>
         )}
