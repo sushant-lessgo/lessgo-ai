@@ -5,9 +5,7 @@ import { sectionList } from '@/modules/sections/sectionList';
 import { useLayoutComponent } from '@/hooks/useLayoutComponent';
 import { InlineTextEditor, defaultEditorConfig } from '@/app/edit/[token]/components/editor/InlineTextEditor';
 import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
-import { UniversalElementRenderer } from '@/components/layout/UniversalElementRenderer';
 import type { TextFormatState, AutoSaveConfig, InlineEditorConfig, TextSelection } from '@/app/edit/[token]/components/editor/InlineTextEditor';
-import type { UniversalElementInstance } from '@/types/universalElements';
 
 interface EditablePageRendererProps {
   sectionId: string;
@@ -246,41 +244,8 @@ const EnhancedLayoutWrapper: React.FC<{
   globalSettings,
 }) => {
   
-  // Helper function to determine if an element is a universal element
-  const isUniversalElement = (elementData: any): boolean => {
-    const universalTypes = ['text', 'headline', 'list', 'button', 'link', 'image', 'icon', 'spacer', 'container'];
-    return universalTypes.includes(elementData.type);
-  };
-
-  // Helper function to convert element data to UniversalElementInstance
-  const toUniversalElement = (elementKey: string, elementData: any): UniversalElementInstance => {
-    return {
-      id: `${sectionId}-${elementKey}`,
-      elementKey,
-      sectionId,
-      type: elementData.type,
-      content: elementData.content || '',
-      props: elementData.props || {},
-      metadata: elementData.metadata || {
-        addedManually: true,
-        addedAt: Date.now(),
-        lastModified: Date.now(),
-        position: 0,
-        version: 1,
-      },
-      editState: {
-        isSelected: false,
-        isEditing: false,
-        isDirty: false,
-        hasErrors: false,
-      },
-      validation: {
-        isValid: true,
-        errors: [],
-        warnings: [],
-      },
-    };
-  };
+  // Note: Universal element functions removed as "Add Element" feature is disabled
+  // Regular AI-generated elements are handled by their native UIBlock components
   
   // The layout component should get its data from the store via useLayoutComponent
   // We only need to pass the essential props
@@ -309,96 +274,11 @@ const EnhancedLayoutWrapper: React.FC<{
     />
   );
 
-  // In preview mode, render layout with universal elements
-  if (mode !== 'edit') {
-    return (
-      <div data-section-id={sectionId}>
-        {RenderedLayout}
-        
-        {/* Render universal elements in preview mode */}
-        {sectionData?.elements && (() => {
-          const allElements = Object.entries(sectionData.elements);
-          // Filter out hero image elements that are handled by custom hero components
-          const heroImageElements = ['hero_image', 'center_hero_image', 'image_first_hero_image', 'split_hero_image'];
-          const universalElements = allElements.filter(([elementKey, elementData]: [string, any]) => 
-            isUniversalElement(elementData) && !heroImageElements.includes(elementKey)
-          );
-          
-          // console.log(`🎯 Preview mode - Section ${sectionId}:`, {
-          //   totalElements: allElements.length,
-          //   universalElements: universalElements.length,
-          //   elementTypes: allElements.map(([key, data]: [string, any]) => ({ key, type: data.type, isUniversal: isUniversalElement(data) }))
-          // });
-          
-          return universalElements
-            .sort(([, a]: [string, any], [, b]: [string, any]) => {
-              const posA = a.metadata?.position || 0;
-              const posB = b.metadata?.position || 0;
-              return posA - posB;
-            })
-            .map(([elementKey, elementData]: [string, any]) => {
-              const universalElement = toUniversalElement(elementKey, elementData);
-              
-              return (
-                <div key={`universal-preview-${elementKey}`} className="universal-element-container">
-                  <UniversalElementRenderer
-                    element={universalElement}
-                    mode="preview"
-                    onContentChange={() => {}} // No editing in preview
-                    onPropsChange={() => {}} // No editing in preview
-                  />
-                </div>
-              );
-            });
-        })()}
-      </div>
-    );
-  }
-
-  // In edit mode, add click handlers and editing overlay
+  // Simplified rendering - no universal elements needed
+  // All elements are handled by their native UIBlock components
   return (
-    <div className="relative" data-section-id={sectionId}>
+    <div className={mode === 'edit' ? 'relative' : ''} data-section-id={sectionId}>
       {RenderedLayout}
-      
-      {/* Render universal elements */} 
-      {sectionData?.elements && (() => {
-        const allElements = Object.entries(sectionData.elements);
-        // Filter out hero image elements that are handled by custom hero components
-        const heroImageElements = ['hero_image', 'center_hero_image', 'image_first_hero_image', 'split_hero_image'];
-        const universalElements = allElements.filter(([elementKey, elementData]: [string, any]) => 
-          isUniversalElement(elementData) && !heroImageElements.includes(elementKey)
-        );
-        
-        // console.log(`🎯 Edit mode - Section ${sectionId}:`, {
-        //   totalElements: allElements.length,
-        //   universalElements: universalElements.length,
-        //   elementTypes: allElements.map(([key, data]: [string, any]) => ({ key, type: data.type, isUniversal: isUniversalElement(data) }))
-        // });
-        
-        return universalElements
-          .sort(([, a]: [string, any], [, b]: [string, any]) => {
-            const posA = a.metadata?.position || 0;
-            const posB = b.metadata?.position || 0;
-            return posA - posB;
-          })
-          .map(([elementKey, elementData]: [string, any]) => {
-            const universalElement = toUniversalElement(elementKey, elementData);
-            
-            return (
-              <div key={`universal-${elementKey}`} className="universal-element-container">
-                <UniversalElementRenderer
-                  element={universalElement}
-                  mode={mode}
-                  onContentChange={(content) => onContentUpdate(elementKey)(Array.isArray(content) ? content.join('\n') : content)}
-                  onPropsChange={(props) => {
-                    // Handle props changes - would need to be implemented in the store
-                    // console.log('Props changed for', elementKey, props);
-                  }}
-                />
-              </div>
-            );
-          });
-      })()}
       
       {/* Editing overlay for each element - with delay to ensure DOM is ready */}
       {sectionData?.elements && Object.entries(sectionData.elements).map(([elementKey, elementData]: [string, any]) => {
