@@ -11,6 +11,7 @@ import {
   CTAButton,
   TrustIndicators 
 } from '@/components/layout/ComponentRegistry';
+import EditableTrustIndicators from '@/components/layout/EditableTrustIndicators';
 import { LayoutComponentProps } from '@/types/storeTypes';
 
 interface FeatureTestimonialContent {
@@ -25,6 +26,11 @@ interface FeatureTestimonialContent {
   supporting_text?: string;
   cta_text?: string;
   trust_items?: string;
+  trust_item_1?: string;
+  trust_item_2?: string;
+  trust_item_3?: string;
+  trust_item_4?: string;
+  trust_item_5?: string;
 }
 
 const CONTENT_SCHEMA = {
@@ -69,6 +75,26 @@ const CONTENT_SCHEMA = {
     default: '' 
   },
   trust_items: { 
+    type: 'string' as const, 
+    default: '' 
+  },
+  trust_item_1: { 
+    type: 'string' as const, 
+    default: 'SOC 2 Type II certified' 
+  },
+  trust_item_2: { 
+    type: 'string' as const, 
+    default: '99.99% uptime SLA' 
+  },
+  trust_item_3: { 
+    type: 'string' as const, 
+    default: '24/7 dedicated support' 
+  },
+  trust_item_4: { 
+    type: 'string' as const, 
+    default: '' 
+  },
+  trust_item_5: { 
     type: 'string' as const, 
     default: '' 
   }
@@ -221,9 +247,26 @@ export default function FeatureTestimonial(props: LayoutComponentProps) {
     avatar: testimonialAvatars[index] || ''
   }));
 
-  const trustItems = blockContent.trust_items 
-    ? blockContent.trust_items.split('|').map(item => item.trim()).filter(Boolean)
-    : [];
+  // Handle trust items - support both legacy pipe-separated format and individual fields
+  const getTrustItems = (): string[] => {
+    const individualItems = [
+      blockContent.trust_item_1,
+      blockContent.trust_item_2, 
+      blockContent.trust_item_3,
+      blockContent.trust_item_4,
+      blockContent.trust_item_5
+    ].filter((item): item is string => Boolean(item && item.trim() !== '' && item !== '___REMOVED___'));
+    
+    if (individualItems.length > 0) {
+      return individualItems;
+    }
+    
+    return blockContent.trust_items 
+      ? blockContent.trust_items.split('|').map(item => item.trim()).filter(Boolean)
+      : [];
+  };
+  
+  const trustItems = getTrustItems();
 
   const mutedTextColor = dynamicTextColors?.muted || colorTokens.textMuted;
   
@@ -432,12 +475,57 @@ export default function FeatureTestimonial(props: LayoutComponentProps) {
                   />
                 )}
 
-                {trustItems.length > 0 && (
-                  <TrustIndicators 
-                    items={trustItems}
-                    colorClass={mutedTextColor}
-                    iconColor="text-green-500"
-                  />
+                {(trustItems.length > 0 || mode === 'edit') && (
+                  <div>
+                    {mode === 'edit' ? (
+                      <EditableTrustIndicators
+                        mode={mode}
+                        trustItems={[
+                          blockContent.trust_item_1 || '',
+                          blockContent.trust_item_2 || '',
+                          blockContent.trust_item_3 || '',
+                          blockContent.trust_item_4 || '',
+                          blockContent.trust_item_5 || ''
+                        ]}
+                        onTrustItemChange={(index, value) => {
+                          const fieldKey = `trust_item_${index + 1}` as keyof FeatureTestimonialContent;
+                          handleContentUpdate(fieldKey, value);
+                        }}
+                        onAddTrustItem={() => {
+                          const emptyIndex = [
+                            blockContent.trust_item_1,
+                            blockContent.trust_item_2,
+                            blockContent.trust_item_3,
+                            blockContent.trust_item_4,
+                            blockContent.trust_item_5
+                          ].findIndex(item => !item || item.trim() === '' || item === '___REMOVED___');
+                          
+                          if (emptyIndex !== -1) {
+                            const fieldKey = `trust_item_${emptyIndex + 1}` as keyof FeatureTestimonialContent;
+                            handleContentUpdate(fieldKey, 'New trust item');
+                          }
+                        }}
+                        onRemoveTrustItem={(index) => {
+                          const fieldKey = `trust_item_${index + 1}` as keyof FeatureTestimonialContent;
+                          handleContentUpdate(fieldKey, '___REMOVED___');
+                        }}
+                        colorTokens={colorTokens}
+                        sectionBackground={sectionBackground}
+                        sectionId={sectionId}
+                        backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
+                        iconColor="text-green-500"
+                        colorClass={mutedTextColor}
+                      />
+                    ) : (
+                      trustItems.length > 0 && (
+                        <TrustIndicators 
+                          items={trustItems}
+                          colorClass={mutedTextColor}
+                          iconColor="text-green-500"
+                        />
+                      )
+                    )}
+                  </div>
                 )}
               </div>
             )}
