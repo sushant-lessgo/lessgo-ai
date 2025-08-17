@@ -482,8 +482,8 @@ export default function SplitScreen(props: LayoutComponentProps) {
 
               {(blockContent.show_social_proof !== false) && (
                 <div className="flex flex-col space-y-4 pt-4">
-                  {blockContent.customer_count && (
-                    <div className="flex items-center space-x-2">
+                  {blockContent.customer_count && blockContent.customer_count !== '___REMOVED___' && (
+                    <div className="relative group/customer-item flex items-center space-x-2">
                       {blockContent.show_customer_avatars !== false && (
                         <div className="flex -space-x-2">
                           {Array.from({ length: blockContent.avatar_count || 4 }, (_, i) => (
@@ -510,11 +510,27 @@ export default function SplitScreen(props: LayoutComponentProps) {
                         data-section-id={sectionId}
                         data-element-key="customer_count"
                       />
+                      
+                      {/* Remove button for customer count */}
+                      {mode === 'edit' && (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleContentUpdate('customer_count', '___REMOVED___');
+                          }}
+                          className="opacity-0 group-hover/customer-item:opacity-100 ml-2 p-1 rounded-full bg-white/80 hover:bg-white text-red-500 hover:text-red-700 transition-all duration-200 relative z-10 shadow-sm"
+                          title="Remove customer count"
+                        >
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                          </svg>
+                        </button>
+                      )}
                     </div>
                   )}
                   
-                  {blockContent.rating_value && (
-                    <div className="flex items-center space-x-1">
+                  {blockContent.rating_value && blockContent.rating_value !== '___REMOVED___' && (
+                    <div className="relative group/rating-item flex items-center space-x-1">
                       {renderStars(blockContent.rating_value)}
                       <div className="flex items-center space-x-1 ml-2">
                         <EditableAdaptiveText
@@ -544,6 +560,23 @@ export default function SplitScreen(props: LayoutComponentProps) {
                           data-element-key="rating_count"
                         />
                       </div>
+                      
+                      {/* Remove button for rating section */}
+                      {mode === 'edit' && (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleContentUpdate('rating_value', '___REMOVED___');
+                            handleContentUpdate('rating_count', '___REMOVED___');
+                          }}
+                          className="opacity-0 group-hover/rating-item:opacity-100 ml-2 p-1 rounded-full bg-white/80 hover:bg-white text-red-500 hover:text-red-700 transition-all duration-200 relative z-10 shadow-sm"
+                          title="Remove rating section"
+                        >
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                          </svg>
+                        </button>
+                      )}
                     </div>
                   )}
                 </div>

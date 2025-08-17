@@ -23,6 +23,10 @@ interface TestimonialCTAComboContent {
   testimonial_title: string;
   testimonial_company: string;
   rating?: string;
+  customer_count?: string;
+  average_rating?: string;
+  uptime_percentage?: string;
+  show_social_proof?: boolean;
 }
 
 // Content schema - defines structure and defaults
@@ -58,6 +62,22 @@ const CONTENT_SCHEMA = {
   rating: { 
     type: 'string' as const, 
     default: '5' 
+  },
+  customer_count: { 
+    type: 'string' as const, 
+    default: '10,000+' 
+  },
+  average_rating: { 
+    type: 'string' as const, 
+    default: '4.9/5' 
+  },
+  uptime_percentage: { 
+    type: 'string' as const, 
+    default: '99.9%' 
+  },
+  show_social_proof: { 
+    type: 'boolean' as const, 
+    default: true 
   }
 };
 
@@ -194,32 +214,123 @@ export default function TestimonialCTACombo(props: LayoutComponentProps) {
             />
 
             {/* Social Proof Stats */}
-            <div className="flex items-center space-x-8">
-              <div className="text-center">
-                <div className={`font-bold ${dynamicTextColors?.heading || colorTokens.textPrimary}`} style={h2Style}>
-                  10,000+
-                </div>
-                <div className={`text-sm ${dynamicTextColors?.muted || colorTokens.textMuted}`}>
-                  Happy Customers
-                </div>
+            {(blockContent.show_social_proof !== false) && (
+              <div className="flex items-center space-x-8">
+                {blockContent.customer_count && blockContent.customer_count !== '___REMOVED___' && (
+                  <div className="text-center relative group/customer-item">
+                    <EditableAdaptiveText
+                      mode={mode}
+                      value={blockContent.customer_count || '10,000+'}
+                      onEdit={(value) => handleContentUpdate('customer_count', value)}
+                      backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
+                      colorTokens={colorTokens}
+                      variant="body"
+                      className={`font-bold ${dynamicTextColors?.heading || colorTokens.textPrimary}`}
+                      style={h2Style}
+                      placeholder="10,000+"
+                      sectionBackground={sectionBackground}
+                      data-section-id={sectionId}
+                      data-element-key="customer_count"
+                    />
+                    <div className={`text-sm ${dynamicTextColors?.muted || colorTokens.textMuted}`}>
+                      Happy Customers
+                    </div>
+                    
+                    {/* Remove button for customer count */}
+                    {mode === 'edit' && (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleContentUpdate('customer_count', '___REMOVED___');
+                        }}
+                        className="opacity-0 group-hover/customer-item:opacity-100 absolute -top-2 -right-2 p-1 rounded-full bg-white/80 hover:bg-white text-red-500 hover:text-red-700 transition-all duration-200 shadow-sm"
+                        title="Remove customer count"
+                      >
+                        <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      </button>
+                    )}
+                  </div>
+                )}
+                
+                {blockContent.average_rating && blockContent.average_rating !== '___REMOVED___' && (
+                  <div className="text-center relative group/rating-item">
+                    <EditableAdaptiveText
+                      mode={mode}
+                      value={blockContent.average_rating || '4.9/5'}
+                      onEdit={(value) => handleContentUpdate('average_rating', value)}
+                      backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
+                      colorTokens={colorTokens}
+                      variant="body"
+                      className={`font-bold ${dynamicTextColors?.heading || colorTokens.textPrimary}`}
+                      style={h2Style}
+                      placeholder="4.9/5"
+                      sectionBackground={sectionBackground}
+                      data-section-id={sectionId}
+                      data-element-key="average_rating"
+                    />
+                    <div className={`text-sm ${dynamicTextColors?.muted || colorTokens.textMuted}`}>
+                      Average Rating
+                    </div>
+                    
+                    {/* Remove button for average rating */}
+                    {mode === 'edit' && (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleContentUpdate('average_rating', '___REMOVED___');
+                        }}
+                        className="opacity-0 group-hover/rating-item:opacity-100 absolute -top-2 -right-2 p-1 rounded-full bg-white/80 hover:bg-white text-red-500 hover:text-red-700 transition-all duration-200 shadow-sm"
+                        title="Remove average rating"
+                      >
+                        <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      </button>
+                    )}
+                  </div>
+                )}
+                
+                {blockContent.uptime_percentage && blockContent.uptime_percentage !== '___REMOVED___' && (
+                  <div className="text-center relative group/uptime-item">
+                    <EditableAdaptiveText
+                      mode={mode}
+                      value={blockContent.uptime_percentage || '99.9%'}
+                      onEdit={(value) => handleContentUpdate('uptime_percentage', value)}
+                      backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
+                      colorTokens={colorTokens}
+                      variant="body"
+                      className={`font-bold ${dynamicTextColors?.heading || colorTokens.textPrimary}`}
+                      style={h2Style}
+                      placeholder="99.9%"
+                      sectionBackground={sectionBackground}
+                      data-section-id={sectionId}
+                      data-element-key="uptime_percentage"
+                    />
+                    <div className={`text-sm ${dynamicTextColors?.muted || colorTokens.textMuted}`}>
+                      Uptime
+                    </div>
+                    
+                    {/* Remove button for uptime */}
+                    {mode === 'edit' && (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleContentUpdate('uptime_percentage', '___REMOVED___');
+                        }}
+                        className="opacity-0 group-hover/uptime-item:opacity-100 absolute -top-2 -right-2 p-1 rounded-full bg-white/80 hover:bg-white text-red-500 hover:text-red-700 transition-all duration-200 shadow-sm"
+                        title="Remove uptime percentage"
+                      >
+                        <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      </button>
+                    )}
+                  </div>
+                )}
               </div>
-              <div className="text-center">
-                <div className={`font-bold ${dynamicTextColors?.heading || colorTokens.textPrimary}`} style={h2Style}>
-                  4.9/5
-                </div>
-                <div className={`text-sm ${dynamicTextColors?.muted || colorTokens.textMuted}`}>
-                  Average Rating
-                </div>
-              </div>
-              <div className="text-center">
-                <div className={`font-bold ${dynamicTextColors?.heading || colorTokens.textPrimary}`} style={h2Style}>
-                  99.9%
-                </div>
-                <div className={`text-sm ${dynamicTextColors?.muted || colorTokens.textMuted}`}>
-                  Uptime
-                </div>
-              </div>
-            </div>
+            )}
           </div>
 
           {/* Right Column - Testimonial */}
@@ -232,8 +343,26 @@ export default function TestimonialCTACombo(props: LayoutComponentProps) {
             </div>
 
             {/* Rating */}
-            <div className="mb-4">
+            <div className="mb-4 relative group/rating-item">
               <StarRating rating={rating} />
+              {mode === 'edit' && (
+                <div className="flex items-center space-x-2 mt-2">
+                  <EditableAdaptiveText
+                    mode={mode}
+                    value={blockContent.rating || '5'}
+                    onEdit={(value) => handleContentUpdate('rating', value)}
+                    backgroundType="neutral"
+                    colorTokens={colorTokens}
+                    variant="body"
+                    className="text-sm"
+                    placeholder="5"
+                    sectionBackground="bg-white"
+                    data-section-id={sectionId}
+                    data-element-key="rating"
+                  />
+                  <span className="text-sm text-gray-500">stars</span>
+                </div>
+              )}
             </div>
 
             {/* Testimonial Quote */}
@@ -343,7 +472,11 @@ export const componentMeta = {
     { key: 'testimonial_author', label: 'Author Name', type: 'text', required: true },
     { key: 'testimonial_title', label: 'Author Title', type: 'text', required: true },
     { key: 'testimonial_company', label: 'Company Name', type: 'text', required: true },
-    { key: 'rating', label: 'Star Rating (1-5)', type: 'text', required: false }
+    { key: 'rating', label: 'Star Rating (1-5)', type: 'text', required: false },
+    { key: 'customer_count', label: 'Customer Count', type: 'text', required: false },
+    { key: 'average_rating', label: 'Average Rating', type: 'text', required: false },
+    { key: 'uptime_percentage', label: 'Uptime Percentage', type: 'text', required: false },
+    { key: 'show_social_proof', label: 'Show Social Proof', type: 'boolean', required: false }
   ],
   
   useCases: [
