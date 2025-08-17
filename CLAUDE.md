@@ -88,7 +88,7 @@ Comprehensive type definitions in `src/types/core/index.ts` covering:
 ### Key Features
 1. **AI-Powered Generation**: Landing page creation from user input with field inference
 2. **Visual Editor**: 
-   3 prone architecture. Edit header, left panl and right panel
+   3 prone architecture. Edit header, left panel and right panel
    - Inline text editing with contenteditable
    - Section toolbar
    - element toolbar

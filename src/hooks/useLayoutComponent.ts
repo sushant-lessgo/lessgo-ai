@@ -15,7 +15,7 @@ import { getSmartTextColor } from '@/utils/improvedTextColors';
 import { analyzeBackground } from '@/utils/backgroundAnalysis';
 
 export interface UseLayoutComponentProps extends LayoutComponentProps {
-  contentSchema: Record<string, { type: 'string' | 'array'; default: string }>;
+  contentSchema: Record<string, { type: 'string' | 'array' | 'boolean' | 'number'; default: string | boolean | number }>;
 }
 
 export function useLayoutComponent<T = Record<string, any>>({ 

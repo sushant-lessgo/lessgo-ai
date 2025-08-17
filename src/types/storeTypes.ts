@@ -322,7 +322,7 @@ export interface LayoutComponentProps {
 // Generic content extractor for any layout
 export const extractLayoutContent = <T extends Record<string, any>>(
   elements: Partial<StoreElementTypes>,
-  contentSchema: { [K in keyof T]: { type: 'string' | 'array'; default: T[K] } }
+  contentSchema: { [K in keyof T]: { type: 'string' | 'array' | 'boolean' | 'number'; default: T[K] } }
 ): T => {
   const result = {} as T;
   

@@ -13,6 +13,7 @@ import {
   CTAButton, 
   TrustIndicators 
 } from '@/components/layout/ComponentRegistry';
+import EditableTrustIndicators from '@/components/layout/EditableTrustIndicators';
 import { LayoutComponentProps } from '@/types/storeTypes';
 import { createCTAClickHandler } from '@/utils/ctaHandler';
 
@@ -23,7 +24,18 @@ interface ImageFirstContent {
   supporting_text?: string;
   badge_text?: string;
   trust_items?: string;
+  trust_item_1?: string;
+  trust_item_2?: string;
+  trust_item_3?: string;
+  trust_item_4?: string;
+  trust_item_5?: string;
   image_first_hero_image?: string;
+  customer_count?: string;
+  rating_value?: string;
+  rating_count?: string;
+  show_social_proof?: boolean;
+  show_customer_avatars?: boolean;
+  avatar_count?: number;
 }
 
 const CONTENT_SCHEMA = {
@@ -41,7 +53,7 @@ const CONTENT_SCHEMA = {
   },
   supporting_text: { 
     type: 'string' as const, 
-    default: 'Join 10,000+ businesses already saving 20+ hours per week with automated workflows that just work.' 
+    default: 'Save 20+ hours per week with automated workflows that just work.' 
   },
   badge_text: { 
     type: 'string' as const, 
@@ -51,9 +63,53 @@ const CONTENT_SCHEMA = {
     type: 'string' as const, 
     default: 'Free 14-day trial|No credit card required|Cancel anytime' 
   },
+  trust_item_1: { 
+    type: 'string' as const, 
+    default: 'Free 14-day trial' 
+  },
+  trust_item_2: { 
+    type: 'string' as const, 
+    default: 'No credit card required' 
+  },
+  trust_item_3: { 
+    type: 'string' as const, 
+    default: 'Cancel anytime' 
+  },
+  trust_item_4: { 
+    type: 'string' as const, 
+    default: '' 
+  },
+  trust_item_5: { 
+    type: 'string' as const, 
+    default: '' 
+  },
   image_first_hero_image: { 
     type: 'string' as const, 
     default: '/hero-placeholder.jpg' 
+  },
+  customer_count: { 
+    type: 'string' as const, 
+    default: '500+ happy customers' 
+  },
+  rating_value: { 
+    type: 'string' as const, 
+    default: '4.9/5' 
+  },
+  rating_count: { 
+    type: 'string' as const, 
+    default: 'from 127 reviews' 
+  },
+  show_social_proof: { 
+    type: 'boolean' as const, 
+    default: true 
+  },
+  show_customer_avatars: { 
+    type: 'boolean' as const, 
+    default: true 
+  },
+  avatar_count: { 
+    type: 'number' as const, 
+    default: 4 
   }
 };
 
@@ -213,11 +269,60 @@ export default function ImageFirst(props: LayoutComponentProps) {
   // Create typography styles
   const bodyLgStyle = getTypographyStyle('body-lg');
 
-  const trustItems = blockContent.trust_items 
-    ? blockContent.trust_items.split('|').map(item => item.trim()).filter(Boolean)
-    : ['Free trial', 'No credit card'];
+  // Handle trust items - support both legacy pipe-separated format and individual fields
+  const getTrustItems = (): string[] => {
+    // Check if individual trust item fields exist
+    const individualItems = [
+      blockContent.trust_item_1,
+      blockContent.trust_item_2, 
+      blockContent.trust_item_3,
+      blockContent.trust_item_4,
+      blockContent.trust_item_5
+    ].filter((item): item is string => Boolean(item && item.trim() !== ''));
+    
+    // If individual items exist, use them; otherwise fall back to legacy format
+    if (individualItems.length > 0) {
+      return individualItems;
+    }
+    
+    // Legacy format fallback
+    return blockContent.trust_items 
+      ? blockContent.trust_items.split('|').map(item => item.trim()).filter(Boolean)
+      : ['Free trial', 'No credit card'];
+  };
+  
+  const trustItems = getTrustItems();
 
   const mutedTextColor = dynamicTextColors?.muted || colorTokens.textMuted;
+
+  // Parse rating for dynamic stars
+  const parseRating = (rating: string) => {
+    const match = rating?.match(/([\d.]+)/);
+    return match ? parseFloat(match[1]) : 0;
+  };
+
+  const renderStars = (rating: string) => {
+    const ratingNum = parseRating(rating);
+    const stars = [];
+    
+    for (let i = 0; i < 5; i++) {
+      if (i < Math.floor(ratingNum)) {
+        stars.push(
+          <svg key={i} className="w-4 h-4 text-yellow-400 fill-current" viewBox="0 0 20 20">
+            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+          </svg>
+        );
+      } else {
+        stars.push(
+          <svg key={i} className="w-4 h-4 text-gray-300 fill-current" viewBox="0 0 20 20">
+            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+          </svg>
+        );
+      }
+    }
+    
+    return <>{stars}</>;
+  };
 
   
   // Use robust image toolbar hook
@@ -320,11 +425,53 @@ export default function ImageFirst(props: LayoutComponentProps) {
                 onClick={createCTAClickHandler(sectionId, "cta_text")}
               />
 
-              <TrustIndicators 
-                items={trustItems}
-                colorClass={mutedTextColor}
-                iconColor="text-green-500"
-              />
+              {mode === 'edit' ? (
+                <EditableTrustIndicators
+                  mode={mode}
+                  trustItems={[
+                    blockContent.trust_item_1 || '',
+                    blockContent.trust_item_2 || '',
+                    blockContent.trust_item_3 || '',
+                    blockContent.trust_item_4 || '',
+                    blockContent.trust_item_5 || ''
+                  ]}
+                  onTrustItemChange={(index, value) => {
+                    const fieldKey = `trust_item_${index + 1}` as keyof ImageFirstContent;
+                    handleContentUpdate(fieldKey, value);
+                  }}
+                  onAddTrustItem={() => {
+                    // Find first empty slot and add placeholder
+                    const emptyIndex = [
+                      blockContent.trust_item_1,
+                      blockContent.trust_item_2,
+                      blockContent.trust_item_3,
+                      blockContent.trust_item_4,
+                      blockContent.trust_item_5
+                    ].findIndex(item => !item || item.trim() === '');
+                    
+                    if (emptyIndex !== -1) {
+                      const fieldKey = `trust_item_${emptyIndex + 1}` as keyof ImageFirstContent;
+                      handleContentUpdate(fieldKey, 'New trust item');
+                    }
+                  }}
+                  onRemoveTrustItem={(index) => {
+                    const fieldKey = `trust_item_${index + 1}` as keyof ImageFirstContent;
+                    handleContentUpdate(fieldKey, '___REMOVED___');
+                  }}
+                  colorTokens={colorTokens}
+                  sectionBackground={sectionBackground}
+                  sectionId={sectionId}
+                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
+                  iconColor="text-green-500"
+                  colorClass={mutedTextColor}
+                />
+              ) : (
+                <TrustIndicators 
+                  items={trustItems}
+                  colorClass={mutedTextColor}
+                  iconColor="text-green-500"
+                />
+              )}
             </div>
 
             {(blockContent.supporting_text || mode === 'edit') && (
@@ -343,34 +490,74 @@ export default function ImageFirst(props: LayoutComponentProps) {
               />
             )}
 
-            <div className="flex flex-col sm:flex-row items-center justify-center space-y-4 sm:space-y-0 sm:space-x-8 pt-4">
-              <div className="flex items-center space-x-2">
-                <div className="flex -space-x-2">
-                  {[1,2,3,4].map(i => (
-                    <div 
-                      key={i}
-                      className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-400 to-indigo-500 border-2 border-white flex items-center justify-center text-white text-xs font-bold"
-                    >
-                      {i}
+            {(blockContent.show_social_proof !== false) && (
+              <div className="flex flex-col sm:flex-row items-center justify-center space-y-4 sm:space-y-0 sm:space-x-8 pt-4">
+                {blockContent.customer_count && (
+                  <div className="flex items-center space-x-2">
+                    {blockContent.show_customer_avatars !== false && (
+                      <div className="flex -space-x-2">
+                        {Array.from({ length: blockContent.avatar_count || 4 }, (_, i) => (
+                          <div 
+                            key={i}
+                            className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-400 to-indigo-500 border-2 border-white flex items-center justify-center text-white text-xs font-bold cursor-default"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            {String.fromCharCode(65 + i)}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                    <EditableAdaptiveText
+                      mode={mode}
+                      value={blockContent.customer_count || ''}
+                      onEdit={(value) => handleContentUpdate('customer_count', value)}
+                      backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
+                      colorTokens={colorTokens}
+                      variant="body"
+                      className="text-sm"
+                      placeholder="500+ happy customers"
+                      sectionBackground={sectionBackground}
+                      data-section-id={sectionId}
+                      data-element-key="customer_count"
+                    />
+                  </div>
+                )}
+                
+                {blockContent.rating_value && (
+                  <div className="flex items-center space-x-1">
+                    {renderStars(blockContent.rating_value)}
+                    <div className="flex items-center space-x-1 ml-2">
+                      <EditableAdaptiveText
+                        mode={mode}
+                        value={blockContent.rating_value || ''}
+                        onEdit={(value) => handleContentUpdate('rating_value', value)}
+                        backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
+                        colorTokens={colorTokens}
+                        variant="body"
+                        className="text-sm"
+                        placeholder="4.9/5"
+                        sectionBackground={sectionBackground}
+                        data-section-id={sectionId}
+                        data-element-key="rating_value"
+                      />
+                      <EditableAdaptiveText
+                        mode={mode}
+                        value={blockContent.rating_count || ''}
+                        onEdit={(value) => handleContentUpdate('rating_count', value)}
+                        backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
+                        colorTokens={colorTokens}
+                        variant="body"
+                        className="text-sm"
+                        placeholder="from 127 reviews"
+                        sectionBackground={sectionBackground}
+                        data-section-id={sectionId}
+                        data-element-key="rating_count"
+                      />
                     </div>
-                  ))}
-                </div>
-                <span className={`text-sm ${mutedTextColor}`}>
-                  10,000+ happy customers
-                </span>
+                  </div>
+                )}
               </div>
-              
-              <div className="flex items-center space-x-1">
-                {[1,2,3,4,5].map(i => (
-                  <svg key={i} className="w-4 h-4 text-yellow-400 fill-current" viewBox="0 0 20 20">
-                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                  </svg>
-                ))}
-                <span className={`text-sm ${mutedTextColor} ml-2`}>
-                  4.9/5 rating
-                </span>
-              </div>
-            </div>
+            )}
           </div>
         </div>
       </div>
@@ -394,6 +581,17 @@ export const componentMeta = {
     { key: 'cta_text', label: 'CTA Button Text', type: 'text', required: true },
     { key: 'badge_text', label: 'Badge Text (uses accent colors)', type: 'text', required: false },
     { key: 'trust_items', label: 'Trust Indicators (pipe separated)', type: 'text', required: false },
+    { key: 'trust_item_1', label: 'Trust Item 1', type: 'text', required: false },
+    { key: 'trust_item_2', label: 'Trust Item 2', type: 'text', required: false },
+    { key: 'trust_item_3', label: 'Trust Item 3', type: 'text', required: false },
+    { key: 'trust_item_4', label: 'Trust Item 4', type: 'text', required: false },
+    { key: 'trust_item_5', label: 'Trust Item 5', type: 'text', required: false },
+    { key: 'customer_count', label: 'Customer Count', type: 'text', required: false },
+    { key: 'rating_value', label: 'Rating (e.g., 4.9/5)', type: 'text', required: false },
+    { key: 'rating_count', label: 'Review Count (e.g., from 127 reviews)', type: 'text', required: false },
+    { key: 'show_social_proof', label: 'Show Social Proof', type: 'boolean', required: false },
+    { key: 'show_customer_avatars', label: 'Show Customer Avatars', type: 'boolean', required: false },
+    { key: 'avatar_count', label: 'Number of Avatars (1-6)', type: 'number', required: false },
     { key: 'image_first_hero_image', label: 'Hero Image', type: 'image', required: false }
   ],
   
