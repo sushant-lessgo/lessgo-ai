@@ -480,7 +480,7 @@ export default function LeftCopyRightImage(props: LayoutComponentProps) {
                       blockContent.trust_item_3,
                       blockContent.trust_item_4,
                       blockContent.trust_item_5
-                    ].findIndex(item => !item || item.trim() === '');
+                    ].findIndex(item => !item || item.trim() === '' || item === '___REMOVED___');
                     
                     if (emptyIndex !== -1) {
                       const fieldKey = `trust_item_${emptyIndex + 1}` as keyof LeftCopyRightImageContent;
