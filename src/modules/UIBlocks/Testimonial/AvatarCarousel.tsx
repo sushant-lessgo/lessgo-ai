@@ -27,6 +27,13 @@ interface AvatarCarouselContent {
   supporting_text?: string;
   cta_text?: string;
   trust_items?: string;
+  community_title?: string;
+  active_creators_count?: string;
+  active_creators_label?: string;
+  average_rating_display?: string;
+  average_rating_label?: string;
+  creations_count?: string;
+  creations_label?: string;
 }
 
 const CONTENT_SCHEMA = {
@@ -77,6 +84,34 @@ const CONTENT_SCHEMA = {
   trust_items: { 
     type: 'string' as const, 
     default: '' 
+  },
+  community_title: {
+    type: 'string' as const,
+    default: 'Join the Creator Community'
+  },
+  active_creators_count: {
+    type: 'string' as const,
+    default: '50K+'
+  },
+  active_creators_label: {
+    type: 'string' as const,
+    default: 'Active creators'
+  },
+  average_rating_display: {
+    type: 'string' as const,
+    default: '4.9★'
+  },
+  average_rating_label: {
+    type: 'string' as const,
+    default: 'Average rating'
+  },
+  creations_count: {
+    type: 'string' as const,
+    default: '1M+'
+  },
+  creations_label: {
+    type: 'string' as const,
+    default: 'Creations made'
   }
 };
 
@@ -418,20 +453,105 @@ export default function AvatarCarousel(props: LayoutComponentProps) {
         {/* Creator Community Stats */}
         <div className="bg-gradient-to-r from-pink-50 via-purple-50 to-indigo-50 rounded-2xl p-8 border border-pink-100 mb-12">
           <div className="text-center">
-            <h3 style={h3Style} className="font-semibold text-gray-900 mb-6">Join the Creator Community</h3>
+            <EditableAdaptiveText
+              mode={mode}
+              value={blockContent.community_title || ''}
+              onEdit={(value) => handleContentUpdate('community_title', value)}
+              backgroundType={safeBackgroundType}
+              colorTokens={colorTokens}
+              variant="h3"
+              style={h3Style}
+              className="font-semibold text-gray-900 mb-6"
+              placeholder="Community section title..."
+              sectionId={sectionId}
+              elementKey="community_title"
+              sectionBackground={sectionBackground}
+            />
             
             <div className="grid md:grid-cols-3 gap-6">
               <div className="text-center">
-                <div className="text-3xl font-bold text-purple-600 mb-2">50K+</div>
-                <div className={`text-sm ${mutedTextColor}`}>Active creators</div>
+                <EditableAdaptiveText
+                  mode={mode}
+                  value={blockContent.active_creators_count || ''}
+                  onEdit={(value) => handleContentUpdate('active_creators_count', value)}
+                  backgroundType={safeBackgroundType}
+                  colorTokens={colorTokens}
+                  variant="body"
+                  className="text-3xl font-bold text-purple-600 mb-2"
+                  placeholder="Creator count..."
+                  sectionId={sectionId}
+                  elementKey="active_creators_count"
+                  sectionBackground={sectionBackground}
+                />
+                <EditableAdaptiveText
+                  mode={mode}
+                  value={blockContent.active_creators_label || ''}
+                  onEdit={(value) => handleContentUpdate('active_creators_label', value)}
+                  backgroundType={safeBackgroundType}
+                  colorTokens={colorTokens}
+                  variant="body"
+                  className={`text-sm ${mutedTextColor}`}
+                  placeholder="Creator label..."
+                  sectionId={sectionId}
+                  elementKey="active_creators_label"
+                  sectionBackground={sectionBackground}
+                />
               </div>
               <div className="text-center">
-                <div className="text-3xl font-bold text-pink-600 mb-2">4.9★</div>
-                <div className={`text-sm ${mutedTextColor}`}>Average rating</div>
+                <EditableAdaptiveText
+                  mode={mode}
+                  value={blockContent.average_rating_display || ''}
+                  onEdit={(value) => handleContentUpdate('average_rating_display', value)}
+                  backgroundType={safeBackgroundType}
+                  colorTokens={colorTokens}
+                  variant="body"
+                  className="text-3xl font-bold text-pink-600 mb-2"
+                  placeholder="Rating display..."
+                  sectionId={sectionId}
+                  elementKey="average_rating_display"
+                  sectionBackground={sectionBackground}
+                />
+                <EditableAdaptiveText
+                  mode={mode}
+                  value={blockContent.average_rating_label || ''}
+                  onEdit={(value) => handleContentUpdate('average_rating_label', value)}
+                  backgroundType={safeBackgroundType}
+                  colorTokens={colorTokens}
+                  variant="body"
+                  className={`text-sm ${mutedTextColor}`}
+                  placeholder="Rating label..."
+                  sectionId={sectionId}
+                  elementKey="average_rating_label"
+                  sectionBackground={sectionBackground}
+                />
               </div>
               <div className="text-center">
-                <div className="text-3xl font-bold text-indigo-600 mb-2">1M+</div>
-                <div className={`text-sm ${mutedTextColor}`}>Creations made</div>
+                <EditableAdaptiveText
+                  mode={mode}
+                  value={blockContent.creations_count || ''}
+                  onEdit={(value) => handleContentUpdate('creations_count', value)}
+                  backgroundType={safeBackgroundType}
+                  colorTokens={colorTokens}
+                  variant="body"
+                  className="text-3xl font-bold text-indigo-600 mb-2"
+                  placeholder="Creations count..."
+                  sectionId={sectionId}
+                  elementKey="creations_count"
+                  sectionBackground={sectionBackground}
+                />
+                <EditableAdaptiveText
+                  mode={mode}
+                  value={blockContent.creations_label || ''}
+                  onEdit={(value) => handleContentUpdate('creations_label', value)}
+                  backgroundType={safeBackgroundType}
+                  colorTokens={colorTokens}
+                  variant="body"
+                  className={`text-sm ${mutedTextColor}`}
+                  placeholder="Creations label..."
+                  sectionId={sectionId}
+                  elementKey="creations_label"
+                  sectionBackground={sectionBackground}
+                />
               </div>
             </div>
           </div>
@@ -505,7 +625,14 @@ export const componentMeta = {
     { key: 'auto_rotate', label: 'Auto-rotate Carousel', type: 'boolean', required: false },
     { key: 'supporting_text', label: 'Supporting Text', type: 'textarea', required: false },
     { key: 'cta_text', label: 'CTA Button Text', type: 'text', required: false },
-    { key: 'trust_items', label: 'Trust Indicators (pipe separated)', type: 'text', required: false }
+    { key: 'trust_items', label: 'Trust Indicators (pipe separated)', type: 'text', required: false },
+    { key: 'community_title', label: 'Community Section Title', type: 'text', required: false },
+    { key: 'active_creators_count', label: 'Active Creators Count', type: 'text', required: false },
+    { key: 'active_creators_label', label: 'Active Creators Label', type: 'text', required: false },
+    { key: 'average_rating_display', label: 'Average Rating Display', type: 'text', required: false },
+    { key: 'average_rating_label', label: 'Average Rating Label', type: 'text', required: false },
+    { key: 'creations_count', label: 'Creations Count', type: 'text', required: false },
+    { key: 'creations_label', label: 'Creations Label', type: 'text', required: false }
   ],
   
   features: [

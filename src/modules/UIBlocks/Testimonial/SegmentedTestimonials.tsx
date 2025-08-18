@@ -27,6 +27,15 @@ interface SegmentedTestimonialsContent {
   supporting_text?: string;
   cta_text?: string;
   trust_items?: string;
+  segments_trust_title?: string;
+  enterprise_stat?: string;
+  enterprise_label?: string;
+  agencies_stat?: string;
+  agencies_label?: string;
+  small_business_stat?: string;
+  small_business_label?: string;
+  dev_teams_stat?: string;
+  dev_teams_label?: string;
 }
 
 const CONTENT_SCHEMA = {
@@ -81,6 +90,42 @@ const CONTENT_SCHEMA = {
   trust_items: { 
     type: 'string' as const, 
     default: '' 
+  },
+  segments_trust_title: {
+    type: 'string' as const,
+    default: 'Trusted Across All Segments'
+  },
+  enterprise_stat: {
+    type: 'string' as const,
+    default: 'Fortune 500'
+  },
+  enterprise_label: {
+    type: 'string' as const,
+    default: 'Enterprise clients'
+  },
+  agencies_stat: {
+    type: 'string' as const,
+    default: '1000+'
+  },
+  agencies_label: {
+    type: 'string' as const,
+    default: 'Marketing agencies'
+  },
+  small_business_stat: {
+    type: 'string' as const,
+    default: '10K+'
+  },
+  small_business_label: {
+    type: 'string' as const,
+    default: 'Small businesses'
+  },
+  dev_teams_stat: {
+    type: 'string' as const,
+    default: '500+'
+  },
+  dev_teams_label: {
+    type: 'string' as const,
+    default: 'Dev teams'
   }
 };
 
@@ -418,24 +463,133 @@ export default function SegmentedTestimonials(props: LayoutComponentProps) {
         {/* Industry Trust Indicators */}
         <div className="bg-gradient-to-r from-gray-50 to-white rounded-2xl p-8 border border-gray-100 mb-12">
           <div className="text-center">
-            <h3 style={h3Style} className="font-semibold text-gray-900 mb-6">Trusted Across All Segments</h3>
+            <EditableAdaptiveText
+              mode={mode}
+              value={blockContent.segments_trust_title || ''}
+              onEdit={(value) => handleContentUpdate('segments_trust_title', value)}
+              backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
+              colorTokens={colorTokens}
+              variant="h3"
+              style={h3Style}
+              className="font-semibold text-gray-900 mb-6"
+              placeholder="Segments trust title..."
+              sectionId={sectionId}
+              elementKey="segments_trust_title"
+              sectionBackground={sectionBackground}
+            />
             
             <div className="grid md:grid-cols-4 gap-6">
               <div className="text-center">
-                <div className="text-3xl font-bold text-blue-600 mb-2">Fortune 500</div>
-                <div className={`text-sm ${mutedTextColor}`}>Enterprise clients</div>
+                <EditableAdaptiveText
+                  mode={mode}
+                  value={blockContent.enterprise_stat || ''}
+                  onEdit={(value) => handleContentUpdate('enterprise_stat', value)}
+                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
+                  colorTokens={colorTokens}
+                  variant="body"
+                  className="text-3xl font-bold text-blue-600 mb-2"
+                  placeholder="Enterprise stat..."
+                  sectionId={sectionId}
+                  elementKey="enterprise_stat"
+                  sectionBackground={sectionBackground}
+                />
+                <EditableAdaptiveText
+                  mode={mode}
+                  value={blockContent.enterprise_label || ''}
+                  onEdit={(value) => handleContentUpdate('enterprise_label', value)}
+                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
+                  colorTokens={colorTokens}
+                  variant="body"
+                  className={`text-sm ${mutedTextColor}`}
+                  placeholder="Enterprise label..."
+                  sectionId={sectionId}
+                  elementKey="enterprise_label"
+                  sectionBackground={sectionBackground}
+                />
               </div>
               <div className="text-center">
-                <div className="text-3xl font-bold text-green-600 mb-2">1000+</div>
-                <div className={`text-sm ${mutedTextColor}`}>Marketing agencies</div>
+                <EditableAdaptiveText
+                  mode={mode}
+                  value={blockContent.agencies_stat || ''}
+                  onEdit={(value) => handleContentUpdate('agencies_stat', value)}
+                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
+                  colorTokens={colorTokens}
+                  variant="body"
+                  className="text-3xl font-bold text-green-600 mb-2"
+                  placeholder="Agencies stat..."
+                  sectionId={sectionId}
+                  elementKey="agencies_stat"
+                  sectionBackground={sectionBackground}
+                />
+                <EditableAdaptiveText
+                  mode={mode}
+                  value={blockContent.agencies_label || ''}
+                  onEdit={(value) => handleContentUpdate('agencies_label', value)}
+                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
+                  colorTokens={colorTokens}
+                  variant="body"
+                  className={`text-sm ${mutedTextColor}`}
+                  placeholder="Agencies label..."
+                  sectionId={sectionId}
+                  elementKey="agencies_label"
+                  sectionBackground={sectionBackground}
+                />
               </div>
               <div className="text-center">
-                <div className="text-3xl font-bold text-purple-600 mb-2">10K+</div>
-                <div className={`text-sm ${mutedTextColor}`}>Small businesses</div>
+                <EditableAdaptiveText
+                  mode={mode}
+                  value={blockContent.small_business_stat || ''}
+                  onEdit={(value) => handleContentUpdate('small_business_stat', value)}
+                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
+                  colorTokens={colorTokens}
+                  variant="body"
+                  className="text-3xl font-bold text-purple-600 mb-2"
+                  placeholder="Small business stat..."
+                  sectionId={sectionId}
+                  elementKey="small_business_stat"
+                  sectionBackground={sectionBackground}
+                />
+                <EditableAdaptiveText
+                  mode={mode}
+                  value={blockContent.small_business_label || ''}
+                  onEdit={(value) => handleContentUpdate('small_business_label', value)}
+                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
+                  colorTokens={colorTokens}
+                  variant="body"
+                  className={`text-sm ${mutedTextColor}`}
+                  placeholder="Small business label..."
+                  sectionId={sectionId}
+                  elementKey="small_business_label"
+                  sectionBackground={sectionBackground}
+                />
               </div>
               <div className="text-center">
-                <div className="text-3xl font-bold text-orange-600 mb-2">500+</div>
-                <div className={`text-sm ${mutedTextColor}`}>Dev teams</div>
+                <EditableAdaptiveText
+                  mode={mode}
+                  value={blockContent.dev_teams_stat || ''}
+                  onEdit={(value) => handleContentUpdate('dev_teams_stat', value)}
+                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
+                  colorTokens={colorTokens}
+                  variant="body"
+                  className="text-3xl font-bold text-orange-600 mb-2"
+                  placeholder="Dev teams stat..."
+                  sectionId={sectionId}
+                  elementKey="dev_teams_stat"
+                  sectionBackground={sectionBackground}
+                />
+                <EditableAdaptiveText
+                  mode={mode}
+                  value={blockContent.dev_teams_label || ''}
+                  onEdit={(value) => handleContentUpdate('dev_teams_label', value)}
+                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
+                  colorTokens={colorTokens}
+                  variant="body"
+                  className={`text-sm ${mutedTextColor}`}
+                  placeholder="Dev teams label..."
+                  sectionId={sectionId}
+                  elementKey="dev_teams_label"
+                  sectionBackground={sectionBackground}
+                />
               </div>
             </div>
           </div>
@@ -510,7 +664,16 @@ export const componentMeta = {
     { key: 'ratings', label: 'Ratings (pipe separated)', type: 'text', required: false },
     { key: 'supporting_text', label: 'Supporting Text', type: 'textarea', required: false },
     { key: 'cta_text', label: 'CTA Button Text', type: 'text', required: false },
-    { key: 'trust_items', label: 'Trust Indicators (pipe separated)', type: 'text', required: false }
+    { key: 'trust_items', label: 'Trust Indicators (pipe separated)', type: 'text', required: false },
+    { key: 'segments_trust_title', label: 'Segments Trust Title', type: 'text', required: false },
+    { key: 'enterprise_stat', label: 'Enterprise Statistic', type: 'text', required: false },
+    { key: 'enterprise_label', label: 'Enterprise Label', type: 'text', required: false },
+    { key: 'agencies_stat', label: 'Agencies Statistic', type: 'text', required: false },
+    { key: 'agencies_label', label: 'Agencies Label', type: 'text', required: false },
+    { key: 'small_business_stat', label: 'Small Business Statistic', type: 'text', required: false },
+    { key: 'small_business_label', label: 'Small Business Label', type: 'text', required: false },
+    { key: 'dev_teams_stat', label: 'Dev Teams Statistic', type: 'text', required: false },
+    { key: 'dev_teams_label', label: 'Dev Teams Label', type: 'text', required: false }
   ],
   
   features: [

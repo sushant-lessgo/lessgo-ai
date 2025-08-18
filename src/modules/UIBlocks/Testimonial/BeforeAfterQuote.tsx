@@ -27,6 +27,17 @@ interface BeforeAfterQuoteContent {
   supporting_text?: string;
   cta_text?: string;
   trust_items?: string;
+  results_title?: string;
+  time_saved_stat?: string;
+  time_saved_label?: string;
+  efficiency_stat?: string;
+  efficiency_label?: string;
+  time_to_results_stat?: string;
+  time_to_results_label?: string;
+  roi_stat?: string;
+  roi_label?: string;
+  guarantee_text?: string;
+  implementation_text?: string;
 }
 
 const CONTENT_SCHEMA = {
@@ -81,6 +92,50 @@ const CONTENT_SCHEMA = {
   trust_items: { 
     type: 'string' as const, 
     default: '' 
+  },
+  results_title: {
+    type: 'string' as const,
+    default: 'Average Customer Results'
+  },
+  time_saved_stat: {
+    type: 'string' as const,
+    default: '85%'
+  },
+  time_saved_label: {
+    type: 'string' as const,
+    default: 'Time saved'
+  },
+  efficiency_stat: {
+    type: 'string' as const,
+    default: '300%'
+  },
+  efficiency_label: {
+    type: 'string' as const,
+    default: 'Efficiency gain'
+  },
+  time_to_results_stat: {
+    type: 'string' as const,
+    default: '30 days'
+  },
+  time_to_results_label: {
+    type: 'string' as const,
+    default: 'To see results'
+  },
+  roi_stat: {
+    type: 'string' as const,
+    default: '500%'
+  },
+  roi_label: {
+    type: 'string' as const,
+    default: 'ROI achieved'
+  },
+  guarantee_text: {
+    type: 'string' as const,
+    default: 'Guaranteed results'
+  },
+  implementation_text: {
+    type: 'string' as const,
+    default: 'Fast implementation'
   }
 };
 
@@ -370,24 +425,133 @@ export default function BeforeAfterQuote(props: LayoutComponentProps) {
         {/* Transformation Summary Stats */}
         <div className="bg-gradient-to-r from-green-50 via-blue-50 to-purple-50 rounded-2xl p-8 border border-green-100 mb-12">
           <div className="text-center">
-            <h3 style={h3Style} className="font-semibold text-gray-900 mb-6">Average Customer Results</h3>
+            <EditableAdaptiveText
+              mode={mode}
+              value={blockContent.results_title || ''}
+              onEdit={(value) => handleContentUpdate('results_title', value)}
+              backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
+              colorTokens={colorTokens}
+              variant="h3"
+              style={h3Style}
+              className="font-semibold text-gray-900 mb-6"
+              placeholder="Results section title..."
+              sectionId={sectionId}
+              elementKey="results_title"
+              sectionBackground={sectionBackground}
+            />
             
             <div className="grid md:grid-cols-4 gap-6">
               <div className="text-center">
-                <div className="text-3xl font-bold text-green-600 mb-2">85%</div>
-                <div className={`text-sm ${mutedTextColor}`}>Time saved</div>
+                <EditableAdaptiveText
+                  mode={mode}
+                  value={blockContent.time_saved_stat || ''}
+                  onEdit={(value) => handleContentUpdate('time_saved_stat', value)}
+                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
+                  colorTokens={colorTokens}
+                  variant="body"
+                  className="text-3xl font-bold text-green-600 mb-2"
+                  placeholder="Time saved stat..."
+                  sectionId={sectionId}
+                  elementKey="time_saved_stat"
+                  sectionBackground={sectionBackground}
+                />
+                <EditableAdaptiveText
+                  mode={mode}
+                  value={blockContent.time_saved_label || ''}
+                  onEdit={(value) => handleContentUpdate('time_saved_label', value)}
+                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
+                  colorTokens={colorTokens}
+                  variant="body"
+                  className={`text-sm ${mutedTextColor}`}
+                  placeholder="Time saved label..."
+                  sectionId={sectionId}
+                  elementKey="time_saved_label"
+                  sectionBackground={sectionBackground}
+                />
               </div>
               <div className="text-center">
-                <div className="text-3xl font-bold text-blue-600 mb-2">300%</div>
-                <div className={`text-sm ${mutedTextColor}`}>Efficiency gain</div>
+                <EditableAdaptiveText
+                  mode={mode}
+                  value={blockContent.efficiency_stat || ''}
+                  onEdit={(value) => handleContentUpdate('efficiency_stat', value)}
+                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
+                  colorTokens={colorTokens}
+                  variant="body"
+                  className="text-3xl font-bold text-blue-600 mb-2"
+                  placeholder="Efficiency stat..."
+                  sectionId={sectionId}
+                  elementKey="efficiency_stat"
+                  sectionBackground={sectionBackground}
+                />
+                <EditableAdaptiveText
+                  mode={mode}
+                  value={blockContent.efficiency_label || ''}
+                  onEdit={(value) => handleContentUpdate('efficiency_label', value)}
+                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
+                  colorTokens={colorTokens}
+                  variant="body"
+                  className={`text-sm ${mutedTextColor}`}
+                  placeholder="Efficiency label..."
+                  sectionId={sectionId}
+                  elementKey="efficiency_label"
+                  sectionBackground={sectionBackground}
+                />
               </div>
               <div className="text-center">
-                <div className="text-3xl font-bold text-purple-600 mb-2">30 days</div>
-                <div className={`text-sm ${mutedTextColor}`}>To see results</div>
+                <EditableAdaptiveText
+                  mode={mode}
+                  value={blockContent.time_to_results_stat || ''}
+                  onEdit={(value) => handleContentUpdate('time_to_results_stat', value)}
+                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
+                  colorTokens={colorTokens}
+                  variant="body"
+                  className="text-3xl font-bold text-purple-600 mb-2"
+                  placeholder="Time to results stat..."
+                  sectionId={sectionId}
+                  elementKey="time_to_results_stat"
+                  sectionBackground={sectionBackground}
+                />
+                <EditableAdaptiveText
+                  mode={mode}
+                  value={blockContent.time_to_results_label || ''}
+                  onEdit={(value) => handleContentUpdate('time_to_results_label', value)}
+                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
+                  colorTokens={colorTokens}
+                  variant="body"
+                  className={`text-sm ${mutedTextColor}`}
+                  placeholder="Time to results label..."
+                  sectionId={sectionId}
+                  elementKey="time_to_results_label"
+                  sectionBackground={sectionBackground}
+                />
               </div>
               <div className="text-center">
-                <div className="text-3xl font-bold text-orange-600 mb-2">500%</div>
-                <div className={`text-sm ${mutedTextColor}`}>ROI achieved</div>
+                <EditableAdaptiveText
+                  mode={mode}
+                  value={blockContent.roi_stat || ''}
+                  onEdit={(value) => handleContentUpdate('roi_stat', value)}
+                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
+                  colorTokens={colorTokens}
+                  variant="body"
+                  className="text-3xl font-bold text-orange-600 mb-2"
+                  placeholder="ROI stat..."
+                  sectionId={sectionId}
+                  elementKey="roi_stat"
+                  sectionBackground={sectionBackground}
+                />
+                <EditableAdaptiveText
+                  mode={mode}
+                  value={blockContent.roi_label || ''}
+                  onEdit={(value) => handleContentUpdate('roi_label', value)}
+                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
+                  colorTokens={colorTokens}
+                  variant="body"
+                  className={`text-sm ${mutedTextColor}`}
+                  placeholder="ROI label..."
+                  sectionId={sectionId}
+                  elementKey="roi_label"
+                  sectionBackground={sectionBackground}
+                />
               </div>
             </div>
             
@@ -396,14 +560,38 @@ export default function BeforeAfterQuote(props: LayoutComponentProps) {
                 <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
-                <span className="text-gray-700 font-medium">Guaranteed results</span>
+                <EditableAdaptiveText
+                  mode={mode}
+                  value={blockContent.guarantee_text || ''}
+                  onEdit={(value) => handleContentUpdate('guarantee_text', value)}
+                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
+                  colorTokens={colorTokens}
+                  variant="body"
+                  className="text-gray-700 font-medium"
+                  placeholder="Guarantee text..."
+                  sectionId={sectionId}
+                  elementKey="guarantee_text"
+                  sectionBackground={sectionBackground}
+                />
               </div>
               <div className="w-px h-6 bg-gray-300" />
               <div className="flex items-center space-x-2">
                 <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                 </svg>
-                <span className="text-gray-700 font-medium">Fast implementation</span>
+                <EditableAdaptiveText
+                  mode={mode}
+                  value={blockContent.implementation_text || ''}
+                  onEdit={(value) => handleContentUpdate('implementation_text', value)}
+                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
+                  colorTokens={colorTokens}
+                  variant="body"
+                  className="text-gray-700 font-medium"
+                  placeholder="Implementation text..."
+                  sectionId={sectionId}
+                  elementKey="implementation_text"
+                  sectionBackground={sectionBackground}
+                />
               </div>
             </div>
           </div>
@@ -478,7 +666,18 @@ export const componentMeta = {
     { key: 'metrics', label: 'Results Metrics (pipe separated)', type: 'text', required: false },
     { key: 'supporting_text', label: 'Supporting Text', type: 'textarea', required: false },
     { key: 'cta_text', label: 'CTA Button Text', type: 'text', required: false },
-    { key: 'trust_items', label: 'Trust Indicators (pipe separated)', type: 'text', required: false }
+    { key: 'trust_items', label: 'Trust Indicators (pipe separated)', type: 'text', required: false },
+    { key: 'results_title', label: 'Results Section Title', type: 'text', required: false },
+    { key: 'time_saved_stat', label: 'Time Saved Statistic', type: 'text', required: false },
+    { key: 'time_saved_label', label: 'Time Saved Label', type: 'text', required: false },
+    { key: 'efficiency_stat', label: 'Efficiency Statistic', type: 'text', required: false },
+    { key: 'efficiency_label', label: 'Efficiency Label', type: 'text', required: false },
+    { key: 'time_to_results_stat', label: 'Time to Results Statistic', type: 'text', required: false },
+    { key: 'time_to_results_label', label: 'Time to Results Label', type: 'text', required: false },
+    { key: 'roi_stat', label: 'ROI Statistic', type: 'text', required: false },
+    { key: 'roi_label', label: 'ROI Label', type: 'text', required: false },
+    { key: 'guarantee_text', label: 'Guarantee Text', type: 'text', required: false },
+    { key: 'implementation_text', label: 'Implementation Text', type: 'text', required: false }
   ],
   
   features: [

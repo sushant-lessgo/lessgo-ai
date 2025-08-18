@@ -24,6 +24,14 @@ interface PullQuoteStackContent {
   supporting_text?: string;
   cta_text?: string;
   trust_items?: string;
+  struggle_title?: string;
+  pain_title?: string;
+  solution_title?: string;
+  result_title?: string;
+  pain_description?: string;
+  solution_description?: string;
+  result_description?: string;
+  community_message?: string;
 }
 
 const CONTENT_SCHEMA = {
@@ -70,6 +78,38 @@ const CONTENT_SCHEMA = {
   trust_items: { 
     type: 'string' as const, 
     default: '' 
+  },
+  struggle_title: {
+    type: 'string' as const,
+    default: 'You\'re Not Alone in This Struggle'
+  },
+  pain_title: {
+    type: 'string' as const,
+    default: 'The Pain'
+  },
+  solution_title: {
+    type: 'string' as const,
+    default: 'The Solution'
+  },
+  result_title: {
+    type: 'string' as const,
+    default: 'The Result'
+  },
+  pain_description: {
+    type: 'string' as const,
+    default: 'Overwhelm, burnout, and constant stress from trying to do everything manually'
+  },
+  solution_description: {
+    type: 'string' as const,
+    default: 'Automated systems that work while you focus on what truly matters'
+  },
+  result_description: {
+    type: 'string' as const,
+    default: 'Peace of mind, work-life balance, and sustainable business growth'
+  },
+  community_message: {
+    type: 'string' as const,
+    default: 'Every story above started with the same frustration you\'re feeling right now. The difference? They found a solution that actually works.'
   }
 };
 
@@ -324,7 +364,20 @@ export default function PullQuoteStack(props: LayoutComponentProps) {
             {/* Emotional Connection Summary */}
             <div className="bg-gradient-to-r from-gray-900 to-gray-800 rounded-2xl p-8 text-white mb-12">
               <div className="text-center">
-                <h3 style={h2Style} className="font-bold mb-6">You're Not Alone in This Struggle</h3>
+                <EditableAdaptiveText
+                  mode={mode}
+                  value={blockContent.struggle_title || ''}
+                  onEdit={(value) => handleContentUpdate('struggle_title', value)}
+                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
+                  colorTokens={colorTokens}
+                  variant="h2"
+                  style={h2Style}
+                  className="font-bold mb-6 text-white"
+                  placeholder="Struggle section title..."
+                  sectionId={sectionId}
+                  elementKey="struggle_title"
+                  sectionBackground={sectionBackground}
+                />
                 
                 <div className="grid md:grid-cols-3 gap-8 mb-8">
                   <div className="text-center">
@@ -333,8 +386,32 @@ export default function PullQuoteStack(props: LayoutComponentProps) {
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 15.5c-.77.833.192 2.5 1.732 2.5z" />
                       </svg>
                     </div>
-                    <div className="text-lg font-semibold text-red-400 mb-2">The Pain</div>
-                    <div className="text-gray-300 text-sm">Overwhelm, burnout, and constant stress from trying to do everything manually</div>
+                    <EditableAdaptiveText
+                      mode={mode}
+                      value={blockContent.pain_title || ''}
+                      onEdit={(value) => handleContentUpdate('pain_title', value)}
+                      backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
+                      colorTokens={colorTokens}
+                      variant="body"
+                      className="text-lg font-semibold text-red-400 mb-2"
+                      placeholder="Pain title..."
+                      sectionId={sectionId}
+                      elementKey="pain_title"
+                      sectionBackground={sectionBackground}
+                    />
+                    <EditableAdaptiveText
+                      mode={mode}
+                      value={blockContent.pain_description || ''}
+                      onEdit={(value) => handleContentUpdate('pain_description', value)}
+                      backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
+                      colorTokens={colorTokens}
+                      variant="body"
+                      className="text-gray-300 text-sm"
+                      placeholder="Pain description..."
+                      sectionId={sectionId}
+                      elementKey="pain_description"
+                      sectionBackground={sectionBackground}
+                    />
                   </div>
                   
                   <div className="text-center">
@@ -343,8 +420,32 @@ export default function PullQuoteStack(props: LayoutComponentProps) {
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                       </svg>
                     </div>
-                    <div className="text-lg font-semibold text-yellow-400 mb-2">The Solution</div>
-                    <div className="text-gray-300 text-sm">Automated systems that work while you focus on what truly matters</div>
+                    <EditableAdaptiveText
+                      mode={mode}
+                      value={blockContent.solution_title || ''}
+                      onEdit={(value) => handleContentUpdate('solution_title', value)}
+                      backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
+                      colorTokens={colorTokens}
+                      variant="body"
+                      className="text-lg font-semibold text-yellow-400 mb-2"
+                      placeholder="Solution title..."
+                      sectionId={sectionId}
+                      elementKey="solution_title"
+                      sectionBackground={sectionBackground}
+                    />
+                    <EditableAdaptiveText
+                      mode={mode}
+                      value={blockContent.solution_description || ''}
+                      onEdit={(value) => handleContentUpdate('solution_description', value)}
+                      backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
+                      colorTokens={colorTokens}
+                      variant="body"
+                      className="text-gray-300 text-sm"
+                      placeholder="Solution description..."
+                      sectionId={sectionId}
+                      elementKey="solution_description"
+                      sectionBackground={sectionBackground}
+                    />
                   </div>
                   
                   <div className="text-center">
@@ -353,16 +454,49 @@ export default function PullQuoteStack(props: LayoutComponentProps) {
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
                       </svg>
                     </div>
-                    <div className="text-lg font-semibold text-green-400 mb-2">The Result</div>
-                    <div className="text-gray-300 text-sm">Peace of mind, work-life balance, and sustainable business growth</div>
+                    <EditableAdaptiveText
+                      mode={mode}
+                      value={blockContent.result_title || ''}
+                      onEdit={(value) => handleContentUpdate('result_title', value)}
+                      backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
+                      colorTokens={colorTokens}
+                      variant="body"
+                      className="text-lg font-semibold text-green-400 mb-2"
+                      placeholder="Result title..."
+                      sectionId={sectionId}
+                      elementKey="result_title"
+                      sectionBackground={sectionBackground}
+                    />
+                    <EditableAdaptiveText
+                      mode={mode}
+                      value={blockContent.result_description || ''}
+                      onEdit={(value) => handleContentUpdate('result_description', value)}
+                      backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
+                      colorTokens={colorTokens}
+                      variant="body"
+                      className="text-gray-300 text-sm"
+                      placeholder="Result description..."
+                      sectionId={sectionId}
+                      elementKey="result_description"
+                      sectionBackground={sectionBackground}
+                    />
                   </div>
                 </div>
                 
                 <div className="bg-white/10 rounded-lg p-4 backdrop-blur-sm">
-                  <p className="text-gray-200">
-                    "Every story above started with the same frustration you're feeling right now. 
-                    The difference? They found a solution that actually works."
-                  </p>
+                  <EditableAdaptiveText
+                    mode={mode}
+                    value={blockContent.community_message || ''}
+                    onEdit={(value) => handleContentUpdate('community_message', value)}
+                    backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
+                    colorTokens={colorTokens}
+                    variant="body"
+                    className="text-gray-200"
+                    placeholder="Community message..."
+                    sectionId={sectionId}
+                    elementKey="community_message"
+                    sectionBackground={sectionBackground}
+                  />
                 </div>
               </div>
             </div>
@@ -436,7 +570,15 @@ export const componentMeta = {
     { key: 'emotional_hooks', label: 'Emotional Hooks (pipe separated)', type: 'text', required: true },
     { key: 'supporting_text', label: 'Supporting Text', type: 'textarea', required: false },
     { key: 'cta_text', label: 'CTA Button Text', type: 'text', required: false },
-    { key: 'trust_items', label: 'Trust Indicators (pipe separated)', type: 'text', required: false }
+    { key: 'trust_items', label: 'Trust Indicators (pipe separated)', type: 'text', required: false },
+    { key: 'struggle_title', label: 'Struggle Section Title', type: 'text', required: false },
+    { key: 'pain_title', label: 'Pain Title', type: 'text', required: false },
+    { key: 'solution_title', label: 'Solution Title', type: 'text', required: false },
+    { key: 'result_title', label: 'Result Title', type: 'text', required: false },
+    { key: 'pain_description', label: 'Pain Description', type: 'text', required: false },
+    { key: 'solution_description', label: 'Solution Description', type: 'text', required: false },
+    { key: 'result_description', label: 'Result Description', type: 'text', required: false },
+    { key: 'community_message', label: 'Community Message', type: 'textarea', required: false }
   ],
   
   features: [

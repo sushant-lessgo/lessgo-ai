@@ -5,7 +5,8 @@ import React from 'react';
 import { useLayoutComponent } from '@/hooks/useLayoutComponent';
 import { LayoutSection } from '@/components/layout/LayoutSection';
 import { 
-  EditableAdaptiveHeadline 
+  EditableAdaptiveHeadline,
+  EditableAdaptiveText
 } from '@/components/layout/EditableContent';
 import { EditableList } from '@/components/layout/EditableList';
 import { StarRating } from '@/components/layout/ComponentRegistry';
@@ -19,6 +20,8 @@ interface QuoteGridContent {
   customer_names: string;
   customer_titles?: string;
   customer_companies?: string;
+  verification_message?: string;
+  rating_value?: string;
 }
 
 // Testimonial structure
@@ -52,7 +55,44 @@ const CONTENT_SCHEMA = {
   customer_companies: { 
     type: 'string' as const, 
     default: 'TechFlow Inc|DataWorks|GrowthLab|Streamline Co' 
+  },
+  verification_message: {
+    type: 'string' as const,
+    default: 'All testimonials from verified customers'
+  },
+  rating_value: {
+    type: 'string' as const,
+    default: '5/5'
   }
+};
+
+// Parse rating for dynamic stars
+const parseRating = (rating: string) => {
+  const match = rating?.match(/([\d.]+)/);
+  return match ? parseFloat(match[1]) : 0;
+};
+
+const renderStars = (rating: string) => {
+  const ratingNum = parseRating(rating);
+  const stars = [];
+  
+  for (let i = 0; i < 5; i++) {
+    if (i < Math.floor(ratingNum)) {
+      stars.push(
+        <svg key={i} className="w-4 h-4 text-yellow-400 fill-current" viewBox="0 0 20 20">
+          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+        </svg>
+      );
+    } else {
+      stars.push(
+        <svg key={i} className="w-4 h-4 text-gray-300 fill-current" viewBox="0 0 20 20">
+          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+        </svg>
+      );
+    }
+  }
+  
+  return <>{stars}</>;
 };
 
 // Parse testimonial data from pipe-separated strings
@@ -123,7 +163,13 @@ const TestimonialCard = React.memo(({
   onQuoteEdit,
   onNameEdit,
   onTitleEdit,
-  onCompanyEdit
+  onCompanyEdit,
+  ratingValue,
+  onRatingEdit,
+  sectionId,
+  sectionBackground,
+  backgroundType,
+  handleContentUpdate
 }: {
   testimonial: Testimonial;
   mode: 'edit' | 'preview';
@@ -133,6 +179,12 @@ const TestimonialCard = React.memo(({
   onNameEdit: (index: number, value: string) => void;
   onTitleEdit: (index: number, value: string) => void;
   onCompanyEdit: (index: number, value: string) => void;
+  ratingValue: string;
+  onRatingEdit: (value: string) => void;
+  sectionId: string;
+  sectionBackground: any;
+  backgroundType: string;
+  handleContentUpdate: (key: string, value: string) => void;
 }) => {
   
   return (
@@ -240,7 +292,22 @@ const TestimonialCard = React.memo(({
       
       {/* Star Rating */}
       <div className="mt-4">
-        <StarRating rating={5} showNumber={true} size="small" />
+        <div className="flex items-center space-x-2">
+          {renderStars(ratingValue)}
+          <EditableAdaptiveText
+            mode={mode}
+            value={ratingValue || ''}
+            onEdit={onRatingEdit}
+            backgroundType={backgroundType}
+            colorTokens={colorTokens}
+            variant="body"
+            className="text-sm font-medium"
+            placeholder="5/5"
+            sectionId={sectionId}
+            elementKey="rating_value"
+            sectionBackground={sectionBackground}
+          />
+        </div>
       </div>
     </div>
   );
@@ -337,6 +404,12 @@ export default function QuoteGrid(props: LayoutComponentProps) {
               onNameEdit={handleNameEdit}
               onTitleEdit={handleTitleEdit}
               onCompanyEdit={handleCompanyEdit}
+              ratingValue={blockContent.rating_value || '5/5'}
+              onRatingEdit={(value) => handleContentUpdate('rating_value', value)}
+              sectionId={sectionId}
+              sectionBackground={sectionBackground}
+              backgroundType={backgroundType}
+              handleContentUpdate={handleContentUpdate}
             />
           ))}
         </div>
@@ -347,7 +420,23 @@ export default function QuoteGrid(props: LayoutComponentProps) {
             <svg className="w-5 h-5 mr-2 text-green-600" fill="currentColor" viewBox="0 0 20 20">
               <path fillRule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
             </svg>
-            <span className="font-medium">All testimonials from verified customers</span>
+            {mode === 'edit' ? (
+              <div 
+                contentEditable
+                suppressContentEditableWarning
+                onBlur={(e) => {
+                  const value = e.currentTarget.textContent || '';
+                  if (value !== blockContent.verification_message) {
+                    handleContentUpdate('verification_message', value);
+                  }
+                }}
+                className="outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-1 min-h-[20px] cursor-text hover:bg-gray-50 font-medium"
+              >
+                {blockContent.verification_message || 'Verification message...'}
+              </div>
+            ) : (
+              <span className="font-medium">{blockContent.verification_message}</span>
+            )}
           </div>
         </div>
 
@@ -381,7 +470,9 @@ export const componentMeta = {
     { key: 'testimonial_quotes', label: 'Testimonial Quotes (pipe separated)', type: 'textarea', required: true },
     { key: 'customer_names', label: 'Customer Names (pipe separated)', type: 'text', required: true },
     { key: 'customer_titles', label: 'Customer Titles (pipe separated)', type: 'text', required: false },
-    { key: 'customer_companies', label: 'Customer Companies (pipe separated)', type: 'text', required: false }
+    { key: 'customer_companies', label: 'Customer Companies (pipe separated)', type: 'text', required: false },
+    { key: 'verification_message', label: 'Verification Message', type: 'text', required: false },
+    { key: 'rating_value', label: 'Rating Value (e.g., 4.9/5)', type: 'text', required: false }
   ],
   
   // Usage examples

@@ -26,6 +26,15 @@ interface InteractiveTestimonialMapContent {
   supporting_text?: string;
   cta_text?: string;
   trust_items?: string;
+  community_features_title?: string;
+  global_reach_title?: string;
+  global_reach_stat?: string;
+  currency_title?: string;
+  currency_description?: string;
+  support_title?: string;
+  support_description?: string;
+  collaboration_title?: string;
+  collaboration_description?: string;
 }
 
 const CONTENT_SCHEMA = {
@@ -76,6 +85,42 @@ const CONTENT_SCHEMA = {
   trust_items: { 
     type: 'string' as const, 
     default: '' 
+  },
+  community_features_title: {
+    type: 'string' as const,
+    default: 'Built for a Global Creative Community'
+  },
+  global_reach_title: {
+    type: 'string' as const,
+    default: 'Global Reach'
+  },
+  global_reach_stat: {
+    type: 'string' as const,
+    default: '150+ countries'
+  },
+  currency_title: {
+    type: 'string' as const,
+    default: 'Multi-Currency'
+  },
+  currency_description: {
+    type: 'string' as const,
+    default: 'Local payments'
+  },
+  support_title: {
+    type: 'string' as const,
+    default: '24/7 Support'
+  },
+  support_description: {
+    type: 'string' as const,
+    default: 'All time zones'
+  },
+  collaboration_title: {
+    type: 'string' as const,
+    default: 'Collaboration'
+  },
+  collaboration_description: {
+    type: 'string' as const,
+    default: 'Cross-cultural'
   }
 };
 
@@ -449,7 +494,20 @@ export default function InteractiveTestimonialMap(props: LayoutComponentProps) {
         {/* Global Community Features */}
         <div className="bg-gradient-to-r from-purple-50 via-pink-50 to-orange-50 rounded-2xl p-8 border border-purple-100 mb-12">
           <div className="text-center">
-            <h3 style={h3Style} className="font-semibold text-gray-900 mb-6">Built for a Global Creative Community</h3>
+            <EditableAdaptiveText
+              mode={mode}
+              value={blockContent.community_features_title || ''}
+              onEdit={(value) => handleContentUpdate('community_features_title', value)}
+              backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
+              colorTokens={colorTokens}
+              variant="h3"
+              style={h3Style}
+              className="font-semibold text-gray-900 mb-6"
+              placeholder="Community features section title..."
+              sectionId={sectionId}
+              elementKey="community_features_title"
+              sectionBackground={sectionBackground}
+            />
             
             <div className="grid md:grid-cols-4 gap-6">
               <div className="text-center">
@@ -458,8 +516,32 @@ export default function InteractiveTestimonialMap(props: LayoutComponentProps) {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
                 </div>
-                <div className="font-semibold text-gray-900">Global Reach</div>
-                <div className={`text-sm ${mutedTextColor}`}>150+ countries</div>
+                <EditableAdaptiveText
+                  mode={mode}
+                  value={blockContent.global_reach_title || ''}
+                  onEdit={(value) => handleContentUpdate('global_reach_title', value)}
+                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
+                  colorTokens={colorTokens}
+                  variant="body"
+                  className="font-semibold text-gray-900"
+                  placeholder="Global reach title..."
+                  sectionId={sectionId}
+                  elementKey="global_reach_title"
+                  sectionBackground={sectionBackground}
+                />
+                <EditableAdaptiveText
+                  mode={mode}
+                  value={blockContent.global_reach_stat || ''}
+                  onEdit={(value) => handleContentUpdate('global_reach_stat', value)}
+                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
+                  colorTokens={colorTokens}
+                  variant="body"
+                  className={`text-sm ${mutedTextColor}`}
+                  placeholder="Global reach statistic..."
+                  sectionId={sectionId}
+                  elementKey="global_reach_stat"
+                  sectionBackground={sectionBackground}
+                />
               </div>
               
               <div className="text-center">
@@ -468,8 +550,32 @@ export default function InteractiveTestimonialMap(props: LayoutComponentProps) {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
                   </svg>
                 </div>
-                <div className="font-semibold text-gray-900">Multi-Currency</div>
-                <div className={`text-sm ${mutedTextColor}`}>Local payments</div>
+                <EditableAdaptiveText
+                  mode={mode}
+                  value={blockContent.currency_title || ''}
+                  onEdit={(value) => handleContentUpdate('currency_title', value)}
+                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
+                  colorTokens={colorTokens}
+                  variant="body"
+                  className="font-semibold text-gray-900"
+                  placeholder="Currency title..."
+                  sectionId={sectionId}
+                  elementKey="currency_title"
+                  sectionBackground={sectionBackground}
+                />
+                <EditableAdaptiveText
+                  mode={mode}
+                  value={blockContent.currency_description || ''}
+                  onEdit={(value) => handleContentUpdate('currency_description', value)}
+                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
+                  colorTokens={colorTokens}
+                  variant="body"
+                  className={`text-sm ${mutedTextColor}`}
+                  placeholder="Currency description..."
+                  sectionId={sectionId}
+                  elementKey="currency_description"
+                  sectionBackground={sectionBackground}
+                />
               </div>
               
               <div className="text-center">
@@ -478,8 +584,32 @@ export default function InteractiveTestimonialMap(props: LayoutComponentProps) {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z" />
                   </svg>
                 </div>
-                <div className="font-semibold text-gray-900">24/7 Support</div>
-                <div className={`text-sm ${mutedTextColor}`}>All time zones</div>
+                <EditableAdaptiveText
+                  mode={mode}
+                  value={blockContent.support_title || ''}
+                  onEdit={(value) => handleContentUpdate('support_title', value)}
+                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
+                  colorTokens={colorTokens}
+                  variant="body"
+                  className="font-semibold text-gray-900"
+                  placeholder="Support title..."
+                  sectionId={sectionId}
+                  elementKey="support_title"
+                  sectionBackground={sectionBackground}
+                />
+                <EditableAdaptiveText
+                  mode={mode}
+                  value={blockContent.support_description || ''}
+                  onEdit={(value) => handleContentUpdate('support_description', value)}
+                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
+                  colorTokens={colorTokens}
+                  variant="body"
+                  className={`text-sm ${mutedTextColor}`}
+                  placeholder="Support description..."
+                  sectionId={sectionId}
+                  elementKey="support_description"
+                  sectionBackground={sectionBackground}
+                />
               </div>
               
               <div className="text-center">
@@ -488,8 +618,32 @@ export default function InteractiveTestimonialMap(props: LayoutComponentProps) {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
                   </svg>
                 </div>
-                <div className="font-semibold text-gray-900">Collaboration</div>
-                <div className={`text-sm ${mutedTextColor}`}>Cross-cultural</div>
+                <EditableAdaptiveText
+                  mode={mode}
+                  value={blockContent.collaboration_title || ''}
+                  onEdit={(value) => handleContentUpdate('collaboration_title', value)}
+                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
+                  colorTokens={colorTokens}
+                  variant="body"
+                  className="font-semibold text-gray-900"
+                  placeholder="Collaboration title..."
+                  sectionId={sectionId}
+                  elementKey="collaboration_title"
+                  sectionBackground={sectionBackground}
+                />
+                <EditableAdaptiveText
+                  mode={mode}
+                  value={blockContent.collaboration_description || ''}
+                  onEdit={(value) => handleContentUpdate('collaboration_description', value)}
+                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
+                  colorTokens={colorTokens}
+                  variant="body"
+                  className={`text-sm ${mutedTextColor}`}
+                  placeholder="Collaboration description..."
+                  sectionId={sectionId}
+                  elementKey="collaboration_description"
+                  sectionBackground={sectionBackground}
+                />
               </div>
             </div>
           </div>
@@ -563,7 +717,16 @@ export const componentMeta = {
     { key: 'ratings', label: 'Ratings (pipe separated)', type: 'text', required: false },
     { key: 'supporting_text', label: 'Supporting Text', type: 'textarea', required: false },
     { key: 'cta_text', label: 'CTA Button Text', type: 'text', required: false },
-    { key: 'trust_items', label: 'Trust Indicators (pipe separated)', type: 'text', required: false }
+    { key: 'trust_items', label: 'Trust Indicators (pipe separated)', type: 'text', required: false },
+    { key: 'community_features_title', label: 'Community Features Title', type: 'text', required: false },
+    { key: 'global_reach_title', label: 'Global Reach Title', type: 'text', required: false },
+    { key: 'global_reach_stat', label: 'Global Reach Statistic', type: 'text', required: false },
+    { key: 'currency_title', label: 'Currency Feature Title', type: 'text', required: false },
+    { key: 'currency_description', label: 'Currency Feature Description', type: 'text', required: false },
+    { key: 'support_title', label: 'Support Feature Title', type: 'text', required: false },
+    { key: 'support_description', label: 'Support Feature Description', type: 'text', required: false },
+    { key: 'collaboration_title', label: 'Collaboration Feature Title', type: 'text', required: false },
+    { key: 'collaboration_description', label: 'Collaboration Feature Description', type: 'text', required: false }
   ],
   
   features: [

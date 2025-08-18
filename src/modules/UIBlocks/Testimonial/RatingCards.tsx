@@ -27,6 +27,15 @@ interface RatingCardsContent {
   supporting_text?: string;
   cta_text?: string;
   trust_items?: string;
+  platforms_title?: string;
+  g2_rating?: string;
+  g2_label?: string;
+  capterra_rating?: string;
+  capterra_label?: string;
+  trustpilot_rating?: string;
+  trustpilot_label?: string;
+  producthunt_rating?: string;
+  producthunt_label?: string;
 }
 
 const CONTENT_SCHEMA = {
@@ -81,6 +90,42 @@ const CONTENT_SCHEMA = {
   trust_items: { 
     type: 'string' as const, 
     default: '' 
+  },
+  platforms_title: {
+    type: 'string' as const,
+    default: 'Consistently High Ratings Across Platforms'
+  },
+  g2_rating: {
+    type: 'string' as const,
+    default: '4.8'
+  },
+  g2_label: {
+    type: 'string' as const,
+    default: 'G2 Rating'
+  },
+  capterra_rating: {
+    type: 'string' as const,
+    default: '4.9'
+  },
+  capterra_label: {
+    type: 'string' as const,
+    default: 'Capterra Rating'
+  },
+  trustpilot_rating: {
+    type: 'string' as const,
+    default: '4.7'
+  },
+  trustpilot_label: {
+    type: 'string' as const,
+    default: 'Trustpilot Rating'
+  },
+  producthunt_rating: {
+    type: 'string' as const,
+    default: '4.8'
+  },
+  producthunt_label: {
+    type: 'string' as const,
+    default: 'Product Hunt Rating'
   }
 };
 
@@ -388,7 +433,20 @@ export default function RatingCards(props: LayoutComponentProps) {
         {/* Platform Statistics */}
         <div className="bg-gradient-to-r from-orange-50 via-blue-50 to-green-50 rounded-2xl p-8 border border-orange-100 mb-12">
           <div className="text-center">
-            <h3 style={h3Style} className="font-semibold text-gray-900 mb-6">Consistently High Ratings Across Platforms</h3>
+            <EditableAdaptiveText
+              mode={mode}
+              value={blockContent.platforms_title || ''}
+              onEdit={(value) => handleContentUpdate('platforms_title', value)}
+              backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
+              colorTokens={colorTokens}
+              variant="h3"
+              style={h3Style}
+              className="font-semibold text-gray-900 mb-6"
+              placeholder="Platforms section title..."
+              sectionId={sectionId}
+              elementKey="platforms_title"
+              sectionBackground={sectionBackground}
+            />
             
             <div className="grid md:grid-cols-4 gap-6">
               <div className="text-center">
@@ -396,36 +454,132 @@ export default function RatingCards(props: LayoutComponentProps) {
                   <div className="w-8 h-8 bg-orange-500 rounded flex items-center justify-center text-white font-bold text-sm">
                     G2
                   </div>
-                  <span className="text-2xl font-bold text-orange-600">4.8</span>
+                  <EditableAdaptiveText
+                    mode={mode}
+                    value={blockContent.g2_rating || ''}
+                    onEdit={(value) => handleContentUpdate('g2_rating', value)}
+                    backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
+                    colorTokens={colorTokens}
+                    variant="body"
+                    className="text-2xl font-bold text-orange-600"
+                    placeholder="G2 rating..."
+                    sectionId={sectionId}
+                    elementKey="g2_rating"
+                    sectionBackground={sectionBackground}
+                  />
                 </div>
-                <div className={`text-sm ${mutedTextColor}`}>G2 Rating</div>
+                <EditableAdaptiveText
+                  mode={mode}
+                  value={blockContent.g2_label || ''}
+                  onEdit={(value) => handleContentUpdate('g2_label', value)}
+                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
+                  colorTokens={colorTokens}
+                  variant="body"
+                  className={`text-sm ${mutedTextColor}`}
+                  placeholder="G2 label..."
+                  sectionId={sectionId}
+                  elementKey="g2_label"
+                  sectionBackground={sectionBackground}
+                />
               </div>
               <div className="text-center">
                 <div className="flex items-center justify-center space-x-2 mb-2">
                   <div className="w-8 h-8 bg-blue-600 rounded flex items-center justify-center text-white font-bold text-sm">
                     C
                   </div>
-                  <span className="text-2xl font-bold text-blue-600">4.9</span>
+                  <EditableAdaptiveText
+                    mode={mode}
+                    value={blockContent.capterra_rating || ''}
+                    onEdit={(value) => handleContentUpdate('capterra_rating', value)}
+                    backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
+                    colorTokens={colorTokens}
+                    variant="body"
+                    className="text-2xl font-bold text-blue-600"
+                    placeholder="Capterra rating..."
+                    sectionId={sectionId}
+                    elementKey="capterra_rating"
+                    sectionBackground={sectionBackground}
+                  />
                 </div>
-                <div className={`text-sm ${mutedTextColor}`}>Capterra Rating</div>
+                <EditableAdaptiveText
+                  mode={mode}
+                  value={blockContent.capterra_label || ''}
+                  onEdit={(value) => handleContentUpdate('capterra_label', value)}
+                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
+                  colorTokens={colorTokens}
+                  variant="body"
+                  className={`text-sm ${mutedTextColor}`}
+                  placeholder="Capterra label..."
+                  sectionId={sectionId}
+                  elementKey="capterra_label"
+                  sectionBackground={sectionBackground}
+                />
               </div>
               <div className="text-center">
                 <div className="flex items-center justify-center space-x-2 mb-2">
                   <div className="w-8 h-8 bg-green-600 rounded flex items-center justify-center text-white font-bold text-sm">
                     T
                   </div>
-                  <span className="text-2xl font-bold text-green-600">4.7</span>
+                  <EditableAdaptiveText
+                    mode={mode}
+                    value={blockContent.trustpilot_rating || ''}
+                    onEdit={(value) => handleContentUpdate('trustpilot_rating', value)}
+                    backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
+                    colorTokens={colorTokens}
+                    variant="body"
+                    className="text-2xl font-bold text-green-600"
+                    placeholder="Trustpilot rating..."
+                    sectionId={sectionId}
+                    elementKey="trustpilot_rating"
+                    sectionBackground={sectionBackground}
+                  />
                 </div>
-                <div className={`text-sm ${mutedTextColor}`}>Trustpilot Rating</div>
+                <EditableAdaptiveText
+                  mode={mode}
+                  value={blockContent.trustpilot_label || ''}
+                  onEdit={(value) => handleContentUpdate('trustpilot_label', value)}
+                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
+                  colorTokens={colorTokens}
+                  variant="body"
+                  className={`text-sm ${mutedTextColor}`}
+                  placeholder="Trustpilot label..."
+                  sectionId={sectionId}
+                  elementKey="trustpilot_label"
+                  sectionBackground={sectionBackground}
+                />
               </div>
               <div className="text-center">
                 <div className="flex items-center justify-center space-x-2 mb-2">
                   <div className="w-8 h-8 bg-orange-600 rounded flex items-center justify-center text-white font-bold text-sm">
                     PH
                   </div>
-                  <span className="text-2xl font-bold text-orange-600">4.8</span>
+                  <EditableAdaptiveText
+                    mode={mode}
+                    value={blockContent.producthunt_rating || ''}
+                    onEdit={(value) => handleContentUpdate('producthunt_rating', value)}
+                    backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
+                    colorTokens={colorTokens}
+                    variant="body"
+                    className="text-2xl font-bold text-orange-600"
+                    placeholder="Product Hunt rating..."
+                    sectionId={sectionId}
+                    elementKey="producthunt_rating"
+                    sectionBackground={sectionBackground}
+                  />
                 </div>
-                <div className={`text-sm ${mutedTextColor}`}>Product Hunt Rating</div>
+                <EditableAdaptiveText
+                  mode={mode}
+                  value={blockContent.producthunt_label || ''}
+                  onEdit={(value) => handleContentUpdate('producthunt_label', value)}
+                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
+                  colorTokens={colorTokens}
+                  variant="body"
+                  className={`text-sm ${mutedTextColor}`}
+                  placeholder="Product Hunt label..."
+                  sectionId={sectionId}
+                  elementKey="producthunt_label"
+                  sectionBackground={sectionBackground}
+                />
               </div>
             </div>
           </div>
@@ -500,7 +654,16 @@ export const componentMeta = {
     { key: 'customer_locations', label: 'Customer Locations (pipe separated)', type: 'text', required: false },
     { key: 'supporting_text', label: 'Supporting Text', type: 'textarea', required: false },
     { key: 'cta_text', label: 'CTA Button Text', type: 'text', required: false },
-    { key: 'trust_items', label: 'Trust Indicators (pipe separated)', type: 'text', required: false }
+    { key: 'trust_items', label: 'Trust Indicators (pipe separated)', type: 'text', required: false },
+    { key: 'platforms_title', label: 'Platforms Section Title', type: 'text', required: false },
+    { key: 'g2_rating', label: 'G2 Rating', type: 'text', required: false },
+    { key: 'g2_label', label: 'G2 Label', type: 'text', required: false },
+    { key: 'capterra_rating', label: 'Capterra Rating', type: 'text', required: false },
+    { key: 'capterra_label', label: 'Capterra Label', type: 'text', required: false },
+    { key: 'trustpilot_rating', label: 'Trustpilot Rating', type: 'text', required: false },
+    { key: 'trustpilot_label', label: 'Trustpilot Label', type: 'text', required: false },
+    { key: 'producthunt_rating', label: 'Product Hunt Rating', type: 'text', required: false },
+    { key: 'producthunt_label', label: 'Product Hunt Label', type: 'text', required: false }
   ],
   
   features: [

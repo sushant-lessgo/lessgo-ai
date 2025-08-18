@@ -26,6 +26,13 @@ interface VideoTestimonialsContent {
   supporting_text?: string;
   cta_text?: string;
   trust_items?: string;
+  industry_leaders_title?: string;
+  enterprise_customers_stat?: string;
+  enterprise_customers_label?: string;
+  uptime_stat?: string;
+  uptime_label?: string;
+  support_stat?: string;
+  support_label?: string;
 }
 
 const CONTENT_SCHEMA = {
@@ -76,6 +83,34 @@ const CONTENT_SCHEMA = {
   trust_items: { 
     type: 'string' as const, 
     default: '' 
+  },
+  industry_leaders_title: {
+    type: 'string' as const,
+    default: 'Trusted by Industry Leaders'
+  },
+  enterprise_customers_stat: {
+    type: 'string' as const,
+    default: '500+'
+  },
+  enterprise_customers_label: {
+    type: 'string' as const,
+    default: 'Enterprise customers'
+  },
+  uptime_stat: {
+    type: 'string' as const,
+    default: '99.9%'
+  },
+  uptime_label: {
+    type: 'string' as const,
+    default: 'Uptime SLA'
+  },
+  support_stat: {
+    type: 'string' as const,
+    default: '24/7'
+  },
+  support_label: {
+    type: 'string' as const,
+    default: 'Enterprise support'
   }
 };
 
@@ -417,20 +452,105 @@ export default function VideoTestimonials(props: LayoutComponentProps) {
         {/* Enterprise Trust Indicators */}
         <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl p-8 border border-blue-100 mb-12">
           <div className="text-center">
-            <h3 style={h3Style} className="font-semibold text-gray-900 mb-6">Trusted by Industry Leaders</h3>
+            <EditableAdaptiveText
+              mode={mode}
+              value={blockContent.industry_leaders_title || ''}
+              onEdit={(value) => handleContentUpdate('industry_leaders_title', value)}
+              backgroundType={safeBackgroundType}
+              colorTokens={colorTokens}
+              variant="h3"
+              style={h3Style}
+              className="font-semibold text-gray-900 mb-6"
+              placeholder="Industry leaders title..."
+              sectionId={sectionId}
+              elementKey="industry_leaders_title"
+              sectionBackground={sectionBackground}
+            />
             
             <div className="grid md:grid-cols-3 gap-6">
               <div className="text-center">
-                <div className="text-3xl font-bold text-blue-600 mb-2">500+</div>
-                <div className={`text-sm ${mutedTextColor}`}>Enterprise customers</div>
+                <EditableAdaptiveText
+                  mode={mode}
+                  value={blockContent.enterprise_customers_stat || ''}
+                  onEdit={(value) => handleContentUpdate('enterprise_customers_stat', value)}
+                  backgroundType={safeBackgroundType}
+                  colorTokens={colorTokens}
+                  variant="body"
+                  className="text-3xl font-bold text-blue-600 mb-2"
+                  placeholder="Enterprise customers stat..."
+                  sectionId={sectionId}
+                  elementKey="enterprise_customers_stat"
+                  sectionBackground={sectionBackground}
+                />
+                <EditableAdaptiveText
+                  mode={mode}
+                  value={blockContent.enterprise_customers_label || ''}
+                  onEdit={(value) => handleContentUpdate('enterprise_customers_label', value)}
+                  backgroundType={safeBackgroundType}
+                  colorTokens={colorTokens}
+                  variant="body"
+                  className={`text-sm ${mutedTextColor}`}
+                  placeholder="Enterprise customers label..."
+                  sectionId={sectionId}
+                  elementKey="enterprise_customers_label"
+                  sectionBackground={sectionBackground}
+                />
               </div>
               <div className="text-center">
-                <div className="text-3xl font-bold text-green-600 mb-2">99.9%</div>
-                <div className={`text-sm ${mutedTextColor}`}>Uptime SLA</div>
+                <EditableAdaptiveText
+                  mode={mode}
+                  value={blockContent.uptime_stat || ''}
+                  onEdit={(value) => handleContentUpdate('uptime_stat', value)}
+                  backgroundType={safeBackgroundType}
+                  colorTokens={colorTokens}
+                  variant="body"
+                  className="text-3xl font-bold text-green-600 mb-2"
+                  placeholder="Uptime stat..."
+                  sectionId={sectionId}
+                  elementKey="uptime_stat"
+                  sectionBackground={sectionBackground}
+                />
+                <EditableAdaptiveText
+                  mode={mode}
+                  value={blockContent.uptime_label || ''}
+                  onEdit={(value) => handleContentUpdate('uptime_label', value)}
+                  backgroundType={safeBackgroundType}
+                  colorTokens={colorTokens}
+                  variant="body"
+                  className={`text-sm ${mutedTextColor}`}
+                  placeholder="Uptime label..."
+                  sectionId={sectionId}
+                  elementKey="uptime_label"
+                  sectionBackground={sectionBackground}
+                />
               </div>
               <div className="text-center">
-                <div className="text-3xl font-bold text-purple-600 mb-2">24/7</div>
-                <div className={`text-sm ${mutedTextColor}`}>Enterprise support</div>
+                <EditableAdaptiveText
+                  mode={mode}
+                  value={blockContent.support_stat || ''}
+                  onEdit={(value) => handleContentUpdate('support_stat', value)}
+                  backgroundType={safeBackgroundType}
+                  colorTokens={colorTokens}
+                  variant="body"
+                  className="text-3xl font-bold text-purple-600 mb-2"
+                  placeholder="Support stat..."
+                  sectionId={sectionId}
+                  elementKey="support_stat"
+                  sectionBackground={sectionBackground}
+                />
+                <EditableAdaptiveText
+                  mode={mode}
+                  value={blockContent.support_label || ''}
+                  onEdit={(value) => handleContentUpdate('support_label', value)}
+                  backgroundType={safeBackgroundType}
+                  colorTokens={colorTokens}
+                  variant="body"
+                  className={`text-sm ${mutedTextColor}`}
+                  placeholder="Support label..."
+                  sectionId={sectionId}
+                  elementKey="support_label"
+                  sectionBackground={sectionBackground}
+                />
               </div>
             </div>
           </div>
@@ -504,7 +624,14 @@ export const componentMeta = {
     { key: 'customer_companies', label: 'Customer Companies (pipe separated)', type: 'text', required: true },
     { key: 'supporting_text', label: 'Supporting Text', type: 'textarea', required: false },
     { key: 'cta_text', label: 'CTA Button Text', type: 'text', required: false },
-    { key: 'trust_items', label: 'Trust Indicators (pipe separated)', type: 'text', required: false }
+    { key: 'trust_items', label: 'Trust Indicators (pipe separated)', type: 'text', required: false },
+    { key: 'industry_leaders_title', label: 'Industry Leaders Title', type: 'text', required: false },
+    { key: 'enterprise_customers_stat', label: 'Enterprise Customers Statistic', type: 'text', required: false },
+    { key: 'enterprise_customers_label', label: 'Enterprise Customers Label', type: 'text', required: false },
+    { key: 'uptime_stat', label: 'Uptime Statistic', type: 'text', required: false },
+    { key: 'uptime_label', label: 'Uptime Label', type: 'text', required: false },
+    { key: 'support_stat', label: 'Support Statistic', type: 'text', required: false },
+    { key: 'support_label', label: 'Support Label', type: 'text', required: false }
   ],
   
   features: [
