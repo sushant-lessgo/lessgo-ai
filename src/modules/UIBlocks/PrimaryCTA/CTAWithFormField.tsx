@@ -9,6 +9,8 @@ import {
   EditableAdaptiveHeadline, 
   EditableAdaptiveText 
 } from '@/components/layout/EditableContent';
+import { TrustIndicators } from '@/components/layout/ComponentRegistry';
+import EditableTrustIndicators from '@/components/layout/EditableTrustIndicators';
 import { LayoutComponentProps } from '@/types/storeTypes';
 
 // Content interface for type safety
@@ -20,6 +22,16 @@ interface CTAWithFormFieldContent {
   cta_text: string;
   privacy_text: string;
   benefits: string;
+  benefit_1?: string;
+  benefit_2?: string;
+  benefit_3?: string;
+  benefit_4?: string;
+  benefit_5?: string;
+  trust_item_1?: string;
+  trust_item_2?: string;
+  trust_item_3?: string;
+  trust_item_4?: string;
+  trust_item_5?: string;
 }
 
 // Content schema - defines structure and defaults
@@ -51,6 +63,46 @@ const CONTENT_SCHEMA = {
   benefits: { 
     type: 'string' as const, 
     default: 'Free 14-day trial|No credit card required|Cancel anytime|Full feature access' 
+  },
+  benefit_1: { 
+    type: 'string' as const, 
+    default: 'Free 14-day trial' 
+  },
+  benefit_2: { 
+    type: 'string' as const, 
+    default: 'No credit card required' 
+  },
+  benefit_3: { 
+    type: 'string' as const, 
+    default: 'Cancel anytime' 
+  },
+  benefit_4: { 
+    type: 'string' as const, 
+    default: 'Full feature access' 
+  },
+  benefit_5: { 
+    type: 'string' as const, 
+    default: '' 
+  },
+  trust_item_1: { 
+    type: 'string' as const, 
+    default: 'Secure & encrypted' 
+  },
+  trust_item_2: { 
+    type: 'string' as const, 
+    default: 'GDPR compliant' 
+  },
+  trust_item_3: { 
+    type: 'string' as const, 
+    default: 'No spam policy' 
+  },
+  trust_item_4: { 
+    type: 'string' as const, 
+    default: '' 
+  },
+  trust_item_5: { 
+    type: 'string' as const, 
+    default: '' 
   }
 };
 
@@ -73,10 +125,45 @@ export default function CTAWithFormField(props: LayoutComponentProps) {
   const [email, setEmail] = useState('');
   const [isValid, setIsValid] = useState(true);
 
-  // Parse benefits from pipe-separated string
-  const benefits = blockContent.benefits 
-    ? blockContent.benefits.split('|').map(item => item.trim()).filter(Boolean)
-    : [];
+  // Handle benefits - support both legacy pipe-separated format and individual fields
+  const getBenefits = (): string[] => {
+    const individualItems = [
+      blockContent.benefit_1,
+      blockContent.benefit_2, 
+      blockContent.benefit_3,
+      blockContent.benefit_4,
+      blockContent.benefit_5
+    ].filter((item): item is string => Boolean(item && item.trim() !== '' && item !== '___REMOVED___'));
+    
+    if (individualItems.length > 0) {
+      return individualItems;
+    }
+    
+    return blockContent.benefits 
+      ? blockContent.benefits.split('|').map(item => item.trim()).filter(Boolean)
+      : ['Free 14-day trial', 'No credit card required', 'Cancel anytime'];
+  };
+  
+  const benefits = getBenefits();
+  
+  // Handle trust items - support both legacy pipe-separated format and individual fields
+  const getTrustItems = (): string[] => {
+    const individualItems = [
+      blockContent.trust_item_1,
+      blockContent.trust_item_2, 
+      blockContent.trust_item_3,
+      blockContent.trust_item_4,
+      blockContent.trust_item_5
+    ].filter((item): item is string => Boolean(item && item.trim() !== '' && item !== '___REMOVED___'));
+    
+    if (individualItems.length > 0) {
+      return individualItems;
+    }
+    
+    return ['Secure & encrypted', 'GDPR compliant', 'No spam policy'];
+  };
+  
+  const trustItems = getTrustItems();
 
   const validateEmail = (email: string) => {
     const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -137,18 +224,108 @@ export default function CTAWithFormField(props: LayoutComponentProps) {
 
             {/* Benefits List */}
             <div className="space-y-3">
-              {benefits.map((benefit, index) => (
-                <div key={index} className="flex items-center space-x-3">
-                  <div className="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center flex-shrink-0">
-                    <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                    </svg>
+              {benefits.map((benefit, index) => {
+                // Find the actual index in the original benefit fields array
+                let actualIndex = -1;
+                let validCount = 0;
+                const benefitFields = [
+                  blockContent.benefit_1,
+                  blockContent.benefit_2,
+                  blockContent.benefit_3,
+                  blockContent.benefit_4,
+                  blockContent.benefit_5
+                ];
+                
+                for (let i = 0; i < benefitFields.length; i++) {
+                  if (benefitFields[i] != null && benefitFields[i]!.trim() !== '' && benefitFields[i] !== '___REMOVED___') {
+                    if (validCount === index) {
+                      actualIndex = i;
+                      break;
+                    }
+                    validCount++;
+                  }
+                }
+                
+                return (
+                  <div key={index} className="flex items-center space-x-3 relative group/benefit-item">
+                    <div className="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center flex-shrink-0">
+                      <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                      </svg>
+                    </div>
+                    {mode === 'edit' ? (
+                      <div className="flex items-center space-x-2 flex-1">
+                        <EditableAdaptiveText
+                          mode={mode}
+                          value={benefit}
+                          onEdit={(value) => {
+                            if (actualIndex !== -1) {
+                              const fieldKey = `benefit_${actualIndex + 1}` as keyof CTAWithFormFieldContent;
+                              handleContentUpdate(fieldKey, value);
+                            }
+                          }}
+                          backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'secondary')}
+                          colorTokens={colorTokens}
+                          variant="body"
+                          className={`${dynamicTextColors?.body || colorTokens.textSecondary} flex-1`}
+                          placeholder={`Benefit ${actualIndex + 1}`}
+                          sectionBackground={sectionBackground}
+                          data-section-id={sectionId}
+                          data-element-key={`benefit_${actualIndex + 1}`}
+                        />
+                        
+                        {/* Remove button for benefit */}
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            if (actualIndex !== -1) {
+                              const fieldKey = `benefit_${actualIndex + 1}` as keyof CTAWithFormFieldContent;
+                              handleContentUpdate(fieldKey, '___REMOVED___');
+                            }
+                          }}
+                          className="opacity-0 group-hover/benefit-item:opacity-100 text-red-500 hover:text-red-700 transition-opacity duration-200"
+                          title="Remove this benefit"
+                        >
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                          </svg>
+                        </button>
+                      </div>
+                    ) : (
+                      <span className={`${dynamicTextColors?.body || colorTokens.textSecondary}`}>
+                        {benefit}
+                      </span>
+                    )}
                   </div>
-                  <span className={`${dynamicTextColors?.body || colorTokens.textSecondary}`}>
-                    {benefit}
-                  </span>
-                </div>
-              ))}
+                );
+              })}
+              
+              {/* Add benefit button - only show in edit mode */}
+              {mode === 'edit' && benefits.length < 5 && (
+                <button
+                  onClick={() => {
+                    // Find first empty slot and add placeholder
+                    const emptyIndex = [
+                      blockContent.benefit_1,
+                      blockContent.benefit_2,
+                      blockContent.benefit_3,
+                      blockContent.benefit_4,
+                      blockContent.benefit_5
+                    ].findIndex(item => !item || item.trim() === '' || item === '___REMOVED___');
+                    
+                    if (emptyIndex !== -1) {
+                      const fieldKey = `benefit_${emptyIndex + 1}` as keyof CTAWithFormFieldContent;
+                      handleContentUpdate(fieldKey, 'New benefit');
+                    }
+                  }}
+                  className="flex items-center space-x-2 text-sm text-blue-600 hover:text-blue-800 transition-colors"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                  </svg>
+                  <span>Add benefit</span>
+                </button>
+              )}
             </div>
           </div>
 
@@ -211,22 +388,58 @@ export default function CTAWithFormField(props: LayoutComponentProps) {
             </form>
 
             {/* Trust Indicators */}
-            <div className="mt-6 pt-6 border-t border-gray-200">
-              <div className="flex items-center justify-center space-x-4 text-sm text-gray-500">
-                <div className="flex items-center space-x-1">
-                  <svg className="w-4 h-4 text-green-500" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
-                  </svg>
-                  <span>Secure</span>
-                </div>
-                <div className="flex items-center space-x-1">
-                  <svg className="w-4 h-4 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                  </svg>
-                  <span>GDPR Compliant</span>
-                </div>
+            {(trustItems.length > 0 || mode === 'edit') && (
+              <div className="mt-6 pt-6 border-t border-gray-200">
+                {mode === 'edit' ? (
+                  <EditableTrustIndicators
+                    mode={mode}
+                    trustItems={[
+                      blockContent.trust_item_1 || '',
+                      blockContent.trust_item_2 || '',
+                      blockContent.trust_item_3 || '',
+                      blockContent.trust_item_4 || '',
+                      blockContent.trust_item_5 || ''
+                    ]}
+                    onTrustItemChange={(index, value) => {
+                      const fieldKey = `trust_item_${index + 1}` as keyof CTAWithFormFieldContent;
+                      handleContentUpdate(fieldKey, value);
+                    }}
+                    onAddTrustItem={() => {
+                      const emptyIndex = [
+                        blockContent.trust_item_1,
+                        blockContent.trust_item_2,
+                        blockContent.trust_item_3,
+                        blockContent.trust_item_4,
+                        blockContent.trust_item_5
+                      ].findIndex(item => !item || item.trim() === '' || item === '___REMOVED___');
+                      
+                      if (emptyIndex !== -1) {
+                        const fieldKey = `trust_item_${emptyIndex + 1}` as keyof CTAWithFormFieldContent;
+                        handleContentUpdate(fieldKey, 'New trust item');
+                      }
+                    }}
+                    onRemoveTrustItem={(index) => {
+                      const fieldKey = `trust_item_${index + 1}` as keyof CTAWithFormFieldContent;
+                      handleContentUpdate(fieldKey, '___REMOVED___');
+                    }}
+                    colorTokens={colorTokens}
+                    sectionBackground="bg-white"
+                    sectionId={sectionId}
+                    backgroundType="neutral"
+                    iconColor="text-green-500"
+                    colorClass="text-gray-500"
+                  />
+                ) : (
+                  <div className="flex items-center justify-center space-x-4 text-sm">
+                    <TrustIndicators 
+                      items={trustItems}
+                      colorClass="text-gray-500"
+                      iconColor="text-green-500"
+                    />
+                  </div>
+                )}
               </div>
-            </div>
+            )}
           </div>
         </div>
       </div>
@@ -259,7 +472,17 @@ export const componentMeta = {
     { key: 'placeholder_text', label: 'Input Placeholder', type: 'text', required: true },
     { key: 'cta_text', label: 'Submit Button Text', type: 'text', required: true },
     { key: 'privacy_text', label: 'Privacy Reassurance', type: 'text', required: true },
-    { key: 'benefits', label: 'Benefits List (pipe separated)', type: 'textarea', required: true }
+    { key: 'benefits', label: 'Benefits List (pipe separated)', type: 'textarea', required: false },
+    { key: 'benefit_1', label: 'Benefit 1', type: 'text', required: false },
+    { key: 'benefit_2', label: 'Benefit 2', type: 'text', required: false },
+    { key: 'benefit_3', label: 'Benefit 3', type: 'text', required: false },
+    { key: 'benefit_4', label: 'Benefit 4', type: 'text', required: false },
+    { key: 'benefit_5', label: 'Benefit 5', type: 'text', required: false },
+    { key: 'trust_item_1', label: 'Trust Item 1', type: 'text', required: false },
+    { key: 'trust_item_2', label: 'Trust Item 2', type: 'text', required: false },
+    { key: 'trust_item_3', label: 'Trust Item 3', type: 'text', required: false },
+    { key: 'trust_item_4', label: 'Trust Item 4', type: 'text', required: false },
+    { key: 'trust_item_5', label: 'Trust Item 5', type: 'text', required: false }
   ],
   
   useCases: [

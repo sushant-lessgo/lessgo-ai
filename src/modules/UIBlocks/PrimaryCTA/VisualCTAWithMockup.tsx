@@ -11,6 +11,7 @@ import {
   EditableAdaptiveText 
 } from '@/components/layout/EditableContent';
 import { CTAButton } from '@/components/layout/ComponentRegistry';
+import EditableTrustIndicators from '@/components/layout/EditableTrustIndicators';
 import { LayoutComponentProps } from '@/types/storeTypes';
 import { createCTAClickHandler } from '@/utils/ctaHandler';
 
@@ -21,6 +22,11 @@ interface VisualCTAWithMockupContent {
   cta_text: string;
   secondary_cta?: string;
   mockup_image?: string;
+  trust_item_1?: string;
+  trust_item_2?: string;
+  trust_item_3?: string;
+  trust_item_4?: string;
+  trust_item_5?: string;
 }
 
 // Content schema - defines structure and defaults
@@ -42,6 +48,26 @@ const CONTENT_SCHEMA = {
     default: 'Watch Demo' 
   },
   mockup_image: { 
+    type: 'string' as const, 
+    default: '' 
+  },
+  trust_item_1: { 
+    type: 'string' as const, 
+    default: 'Free 14-day trial' 
+  },
+  trust_item_2: { 
+    type: 'string' as const, 
+    default: 'No credit card required' 
+  },
+  trust_item_3: { 
+    type: 'string' as const, 
+    default: '' 
+  },
+  trust_item_4: { 
+    type: 'string' as const, 
+    default: '' 
+  },
+  trust_item_5: { 
     type: 'string' as const, 
     default: '' 
   }
@@ -228,23 +254,45 @@ export default function VisualCTAWithMockup(props: LayoutComponentProps) {
             </div>
 
             {/* Trust indicators */}
-            <div className="flex items-center space-x-6">
-              <div className="flex items-center space-x-2">
-                <svg className="w-5 h-5 text-green-500" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                </svg>
-                <span className={`text-sm ${dynamicTextColors?.muted || colorTokens.textMuted}`}>
-                  Free 14-day trial
-                </span>
-              </div>
-              <div className="flex items-center space-x-2">
-                <svg className="w-5 h-5 text-green-500" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                </svg>
-                <span className={`text-sm ${dynamicTextColors?.muted || colorTokens.textMuted}`}>
-                  No credit card required
-                </span>
-              </div>
+            <div>
+              <EditableTrustIndicators
+                mode={mode}
+                trustItems={[
+                  blockContent.trust_item_1 || '',
+                  blockContent.trust_item_2 || '',
+                  blockContent.trust_item_3 || '',
+                  blockContent.trust_item_4 || '',
+                  blockContent.trust_item_5 || ''
+                ]}
+                onTrustItemChange={(index, value) => {
+                  const fieldKey = `trust_item_${index + 1}` as keyof VisualCTAWithMockupContent;
+                  handleContentUpdate(fieldKey, value);
+                }}
+                onAddTrustItem={() => {
+                  const emptyIndex = [
+                    blockContent.trust_item_1,
+                    blockContent.trust_item_2,
+                    blockContent.trust_item_3,
+                    blockContent.trust_item_4,
+                    blockContent.trust_item_5
+                  ].findIndex(item => !item || item.trim() === '' || item === '___REMOVED___');
+                  
+                  if (emptyIndex !== -1) {
+                    const fieldKey = `trust_item_${emptyIndex + 1}` as keyof VisualCTAWithMockupContent;
+                    handleContentUpdate(fieldKey, 'New trust item');
+                  }
+                }}
+                onRemoveTrustItem={(index) => {
+                  const fieldKey = `trust_item_${index + 1}` as keyof VisualCTAWithMockupContent;
+                  handleContentUpdate(fieldKey, '___REMOVED___');
+                }}
+                colorTokens={colorTokens}
+                sectionBackground={sectionBackground}
+                sectionId={sectionId}
+                backgroundType={safeBackgroundType}
+                iconColor="text-green-500"
+                colorClass={dynamicTextColors?.muted || colorTokens.textMuted}
+              />
             </div>
           </div>
 
@@ -295,7 +343,12 @@ export const componentMeta = {
     { key: 'subheadline', label: 'Supporting Text', type: 'textarea', required: false },
     { key: 'cta_text', label: 'Primary Button Text', type: 'text', required: true },
     { key: 'secondary_cta', label: 'Secondary Button Text', type: 'text', required: false },
-    { key: 'mockup_image', label: 'Product Mockup Image', type: 'image', required: false }
+    { key: 'mockup_image', label: 'Product Mockup Image', type: 'image', required: false },
+    { key: 'trust_item_1', label: 'Trust Item 1', type: 'text', required: false },
+    { key: 'trust_item_2', label: 'Trust Item 2', type: 'text', required: false },
+    { key: 'trust_item_3', label: 'Trust Item 3', type: 'text', required: false },
+    { key: 'trust_item_4', label: 'Trust Item 4', type: 'text', required: false },
+    { key: 'trust_item_5', label: 'Trust Item 5', type: 'text', required: false }
   ],
   
   useCases: [
