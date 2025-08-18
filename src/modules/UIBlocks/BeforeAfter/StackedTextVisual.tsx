@@ -1,15 +1,12 @@
-import React, { useEffect } from 'react';
-import { generateColorTokens } from '../../Design/ColorSystem/colorTokens';
+import React from 'react';
 import { useTypography } from '@/hooks/useTypography';
-import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
-import { useOnboardingStore } from '@/hooks/useOnboardingStore';
 import { useLayoutComponent } from '@/hooks/useLayoutComponent';
 import { LayoutSection } from '@/components/layout/LayoutSection';
 import { 
-  LayoutComponentProps, 
-  extractLayoutContent,
-  StoreElementTypes 
-} from '@/types/storeTypes';
+  EditableAdaptiveHeadline, 
+  EditableAdaptiveText
+} from '@/components/layout/EditableContent';
+import { LayoutComponentProps } from '@/types/storeTypes';
 
 interface StackedTextVisualProps extends LayoutComponentProps {}
 
@@ -18,8 +15,12 @@ interface StackedTextVisualContent {
   headline: string;
   before_text: string;
   after_text: string;
+  before_label: string;
+  after_label: string;
   transition_text?: string;
   subheadline?: string;
+  summary_text?: string;
+  show_summary_box?: string;
 }
 
 // Content schema for StackedTextVisual layout
@@ -27,40 +28,14 @@ const CONTENT_SCHEMA = {
   headline: { type: 'string' as const, default: 'Transform Your Experience' },
   before_text: { type: 'string' as const, default: 'Struggling with manual processes, disconnected tools, and delayed insights that slow down your progress.' },
   after_text: { type: 'string' as const, default: 'Enjoy automated workflows, unified data, and instant insights that accelerate your success.' },
+  before_label: { type: 'string' as const, default: 'Before' },
+  after_label: { type: 'string' as const, default: 'After' },
   transition_text: { type: 'string' as const, default: '' },
-  subheadline: { type: 'string' as const, default: '' }
+  subheadline: { type: 'string' as const, default: '' },
+  summary_text: { type: 'string' as const, default: '' },
+  show_summary_box: { type: 'string' as const, default: 'false' }
 };
 
-// ModeWrapper component for handling edit/preview modes
-const ModeWrapper = ({ 
-  mode, 
-  children, 
-  sectionId, 
-  elementKey,
-  onEdit 
-}: {
-  mode: 'edit' | 'preview';
-  children: React.ReactNode;
-  sectionId: string;
-  elementKey: string;
-  onEdit?: (value: string) => void;
-}) => {
-  if (mode === 'edit' && onEdit) {
-    return (
-      <div 
-        contentEditable
-        suppressContentEditableWarning
-        onBlur={(e) => onEdit(e.currentTarget.textContent || '')}
-        className="outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-1 min-h-[24px] cursor-text hover:bg-gray-50"
-        data-placeholder={`Edit ${elementKey.replace('_', ' ')}`}
-      >
-        {children}
-      </div>
-    );
-  }
-  
-  return <>{children}</>;
-};
 
 export default function StackedTextVisual(props: StackedTextVisualProps) {
   // ✅ Use the standard useLayoutComponent hook
@@ -80,11 +55,19 @@ export default function StackedTextVisual(props: StackedTextVisualProps) {
     contentSchema: CONTENT_SCHEMA
   });
 
+  const { getTextStyle: getTypographyStyle } = useTypography();
+  
+  // Create typography styles
+  const bodyLgStyle = getTypographyStyle('body-lg');
+  
+  // Filter out 'custom' background type as it's not supported by EditableContent components
+  const safeBackgroundType = props.backgroundType === 'custom' ? 'neutral' : (props.backgroundType || 'neutral');
+
   return (
     <LayoutSection
       sectionId={sectionId}
       sectionType="StackedTextVisual"
-      backgroundType={backgroundType}
+      backgroundType={safeBackgroundType}
       sectionBackground={sectionBackground}
       mode={mode}
       className={props.className}
@@ -92,33 +75,35 @@ export default function StackedTextVisual(props: StackedTextVisualProps) {
       <div className="max-w-4xl mx-auto">
         {/* Header Section */}
         <div className="text-center mb-12">
-          <ModeWrapper
+          <EditableAdaptiveHeadline
             mode={mode}
+            value={blockContent.headline || ''}
+            onEdit={(value) => handleContentUpdate('headline', value)}
+            level="h2"
+            backgroundType={safeBackgroundType}
+            colorTokens={colorTokens}
+            className="mb-4"
             sectionId={sectionId}
             elementKey="headline"
-            onEdit={(value) => handleContentUpdate('headline', value)}
-          >
-            <h2 
-              className={`mb-4 ${colorTokens.textPrimary}`}
-            >
-              {blockContent.headline}
-            </h2>
-          </ModeWrapper>
+            sectionBackground={sectionBackground}
+          />
 
           {/* Optional Subheadline */}
           {(blockContent.subheadline || mode === 'edit') && (
-            <ModeWrapper
+            <EditableAdaptiveText
               mode={mode}
+              value={blockContent.subheadline || ''}
+              onEdit={(value) => handleContentUpdate('subheadline', value)}
+              backgroundType={safeBackgroundType}
+              colorTokens={colorTokens}
+              variant="body"
+              className="mb-6 max-w-2xl mx-auto"
+              style={bodyLgStyle}
+              placeholder="Add optional subheadline to introduce the transformation..."
               sectionId={sectionId}
               elementKey="subheadline"
-              onEdit={(value) => handleContentUpdate('subheadline', value)}
-            >
-              <p 
-                className={`mb-6 max-w-2xl mx-auto ${colorTokens.textSecondary} ${!blockContent.subheadline && mode === 'edit' ? 'opacity-50' : ''}`}
-              >
-                {blockContent.subheadline || (mode === 'edit' ? 'Add optional subheadline...' : '')}
-              </p>
-            </ModeWrapper>
+              sectionBackground={sectionBackground}
+            />
           )}
         </div>
 
@@ -142,24 +127,37 @@ export default function StackedTextVisual(props: StackedTextVisualProps) {
                 </div>
                 
                 <div className="flex-1">
-                  <h3 
-                    className="text-gray-700 font-semibold mb-3 uppercase tracking-wide text-sm"
-                  >
-                    Before
-                  </h3>
-                  
-                  <ModeWrapper
+                  <EditableAdaptiveText
                     mode={mode}
+                    value={blockContent.before_label || ''}
+                    onEdit={(value) => handleContentUpdate('before_label', value)}
+                    backgroundType={safeBackgroundType}
+                    colorTokens={colorTokens}
+                    variant="body"
+                    textStyle={{
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.05em',
+                      fontWeight: 600,
+                      fontSize: '0.875rem'
+                    }}
+                    className="text-gray-700 font-semibold mb-3 uppercase tracking-wide text-sm"
+                    sectionId={sectionId}
+                    elementKey="before_label"
+                    sectionBackground={sectionBackground}
+                  />
+                  
+                  <EditableAdaptiveText
+                    mode={mode}
+                    value={blockContent.before_text || ''}
+                    onEdit={(value) => handleContentUpdate('before_text', value)}
+                    backgroundType={safeBackgroundType}
+                    colorTokens={colorTokens}
+                    variant="body"
+                    className="text-gray-700 leading-relaxed"
                     sectionId={sectionId}
                     elementKey="before_text"
-                    onEdit={(value) => handleContentUpdate('before_text', value)}
-                  >
-                    <p 
-                      className="text-gray-700 leading-relaxed"
-                    >
-                      {blockContent.before_text}
-                    </p>
-                  </ModeWrapper>
+                    sectionBackground={sectionBackground}
+                  />
                 </div>
               </div>
             </div>
@@ -177,18 +175,19 @@ export default function StackedTextVisual(props: StackedTextVisualProps) {
               
               {/* Optional Transition Text */}
               {(blockContent.transition_text || mode === 'edit') && (
-                <ModeWrapper
+                <EditableAdaptiveText
                   mode={mode}
+                  value={blockContent.transition_text || ''}
+                  onEdit={(value) => handleContentUpdate('transition_text', value)}
+                  backgroundType={safeBackgroundType}
+                  colorTokens={colorTokens}
+                  variant="body"
+                  className="text-sm font-medium text-center px-4 py-2 bg-blue-50 rounded-full"
+                  placeholder="Add transition text..."
                   sectionId={sectionId}
                   elementKey="transition_text"
-                  onEdit={(value) => handleContentUpdate('transition_text', value)}
-                >
-                  <p 
-                    className={`text-sm font-medium ${colorTokens.textSecondary} text-center px-4 py-2 bg-blue-50 rounded-full ${!blockContent.transition_text && mode === 'edit' ? 'opacity-50' : ''}`}
-                  >
-                    {blockContent.transition_text || (mode === 'edit' ? 'Add transition text...' : '')}
-                  </p>
-                </ModeWrapper>
+                  sectionBackground={sectionBackground}
+                />
               )}
             </div>
           </div>
@@ -211,41 +210,98 @@ export default function StackedTextVisual(props: StackedTextVisualProps) {
                 </div>
                 
                 <div className="flex-1">
-                  <h3 
-                    className="text-green-700 font-semibold mb-3 uppercase tracking-wide text-sm"
-                  >
-                    After
-                  </h3>
-                  
-                  <ModeWrapper
+                  <EditableAdaptiveText
                     mode={mode}
+                    value={blockContent.after_label || ''}
+                    onEdit={(value) => handleContentUpdate('after_label', value)}
+                    backgroundType={safeBackgroundType}
+                    colorTokens={colorTokens}
+                    variant="body"
+                    textStyle={{
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.05em',
+                      fontWeight: 600,
+                      fontSize: '0.875rem',
+                      color: '#15803d'
+                    }}
+                    className="text-green-700 font-semibold mb-3 uppercase tracking-wide text-sm"
+                    sectionId={sectionId}
+                    elementKey="after_label"
+                    sectionBackground={sectionBackground}
+                  />
+                  
+                  <EditableAdaptiveText
+                    mode={mode}
+                    value={blockContent.after_text || ''}
+                    onEdit={(value) => handleContentUpdate('after_text', value)}
+                    backgroundType={safeBackgroundType}
+                    colorTokens={colorTokens}
+                    variant="body"
+                    className="text-green-700 leading-relaxed"
                     sectionId={sectionId}
                     elementKey="after_text"
-                    onEdit={(value) => handleContentUpdate('after_text', value)}
-                  >
-                    <p 
-                      className="text-green-700 leading-relaxed"
-                    >
-                      {blockContent.after_text}
-                    </p>
-                  </ModeWrapper>
+                    sectionBackground={sectionBackground}
+                  />
                 </div>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Edit Mode Indicators */}
-        {mode === 'edit' && (
-          <div className="mt-8 p-4 bg-blue-50 rounded-lg border border-blue-200">
-            <div className="flex items-center text-blue-700">
-              <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
-              </svg>
-              <span className="text-sm font-medium">
-                StackedTextVisual - Click any text to edit
-              </span>
+        {/* Optional Summary Box */}
+        {(blockContent.show_summary_box !== 'false' && (blockContent.summary_text || mode === 'edit')) && (
+          <div className="mt-8 p-6 bg-gradient-to-r from-blue-50 via-indigo-50 to-purple-50 rounded-2xl border border-blue-100 relative group/summary-item">
+            <div className="text-center">
+              <EditableAdaptiveText
+                mode={mode}
+                value={blockContent.summary_text || ''}
+                onEdit={(value) => handleContentUpdate('summary_text', value)}
+                backgroundType={safeBackgroundType}
+                colorTokens={colorTokens}
+                variant="body"
+                className="font-medium max-w-2xl mx-auto"
+                style={bodyLgStyle}
+                placeholder="Add optional summary text to reinforce the transformation..."
+                sectionId={sectionId}
+                elementKey="summary_text"
+                sectionBackground={sectionBackground}
+              />
             </div>
+            
+            {/* Remove button */}
+            {mode === 'edit' && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleContentUpdate('summary_text', '___REMOVED___');
+                  handleContentUpdate('show_summary_box', 'false');
+                }}
+                className="opacity-0 group-hover/summary-item:opacity-100 absolute top-2 right-2 p-1 rounded-full bg-white/80 hover:bg-white text-red-500 hover:text-red-700 transition-all duration-200 shadow-sm"
+                title="Remove summary box"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            )}
+          </div>
+        )}
+        
+        {/* Add summary box button */}
+        {mode === 'edit' && !blockContent.summary_text && blockContent.show_summary_box === 'false' && (
+          <div className="mt-8 text-center">
+            <button
+              onClick={() => {
+                handleContentUpdate('summary_text', 'Add your transformation summary here...');
+                handleContentUpdate('show_summary_box', 'true');
+              }}
+              className="flex items-center space-x-1 text-sm text-blue-600 hover:text-blue-800 transition-colors mx-auto"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+              </svg>
+              <span>Add summary box</span>
+            </button>
           </div>
         )}
       </div>

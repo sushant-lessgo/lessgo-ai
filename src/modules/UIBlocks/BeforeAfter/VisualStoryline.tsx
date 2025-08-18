@@ -24,6 +24,9 @@ interface VisualStorylineContent {
   step3_title: string;
   step3_description: string;
   step3_visual?: string;
+  journey_summary_title: string;
+  journey_summary_description: string;
+  show_journey_summary?: string;
   subheadline?: string;
   supporting_text?: string;
   cta_text?: string;
@@ -86,6 +89,18 @@ const CONTENT_SCHEMA = {
   trust_items: { 
     type: 'string' as const, 
     default: '' 
+  },
+  journey_summary_title: {
+    type: 'string' as const,
+    default: 'Your Complete Transformation Journey'
+  },
+  journey_summary_description: {
+    type: 'string' as const,
+    default: 'Experience this same progression with our proven methodology that has helped thousands transform their operations.'
+  },
+  show_journey_summary: {
+    type: 'string' as const,
+    default: 'true'
   }
 };
 
@@ -345,23 +360,78 @@ export default function VisualStoryline(props: LayoutComponentProps) {
           ))}
         </div>
 
-        <div className="bg-gradient-to-r from-blue-50 via-indigo-50 to-purple-50 rounded-2xl p-8 border border-blue-100 mb-12">
-          <div className="text-center">
-            <div className="flex justify-center space-x-2 mb-6">
-              <div className="w-3 h-3 rounded-full bg-red-400" />
-              <div className="w-3 h-3 rounded-full bg-blue-400" />
-              <div className="w-3 h-3 rounded-full bg-green-400" />
+        {(blockContent.show_journey_summary !== 'false') && (
+          <div className="bg-gradient-to-r from-blue-50 via-indigo-50 to-purple-50 rounded-2xl p-8 border border-blue-100 mb-12 relative group/journey-summary">
+            <div className="text-center">
+              <div className="flex justify-center space-x-2 mb-6">
+                <div className="w-3 h-3 rounded-full bg-red-400" />
+                <div className="w-3 h-3 rounded-full bg-blue-400" />
+                <div className="w-3 h-3 rounded-full bg-green-400" />
+              </div>
+              
+              <EditableAdaptiveText
+                mode={mode}
+                value={blockContent.journey_summary_title || ''}
+                onEdit={(value) => handleContentUpdate('journey_summary_title', value)}
+                backgroundType={safeBackgroundType}
+                colorTokens={colorTokens}
+                variant="body"
+                textStyle={{
+                  ...h3Style,
+                  color: '#111827'
+                }}
+                className="text-gray-900 mb-4"
+                sectionId={sectionId}
+                elementKey="journey_summary_title"
+                sectionBackground={sectionBackground}
+              />
+              
+              <EditableAdaptiveText
+                mode={mode}
+                value={blockContent.journey_summary_description || ''}
+                onEdit={(value) => handleContentUpdate('journey_summary_description', value)}
+                backgroundType={safeBackgroundType}
+                colorTokens={colorTokens}
+                variant="body"
+                className={`${mutedTextColor} max-w-2xl mx-auto`}
+                sectionId={sectionId}
+                elementKey="journey_summary_description"
+                sectionBackground={sectionBackground}
+              />
             </div>
             
-            <h3 className="text-gray-900 mb-4" style={h3Style}>
-              Your Complete Transformation Journey
-            </h3>
-            
-            <p className={`${mutedTextColor} max-w-2xl mx-auto`}>
-              Experience this same progression with our proven methodology that has helped thousands transform their operations.
-            </p>
+            {/* Remove button */}
+            {mode === 'edit' && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleContentUpdate('show_journey_summary', 'false');
+                }}
+                className="opacity-0 group-hover/journey-summary:opacity-100 absolute top-4 right-4 p-1 rounded-full bg-white/80 hover:bg-white text-red-500 hover:text-red-700 transition-all duration-200 shadow-sm"
+                title="Remove journey summary section"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            )}
           </div>
-        </div>
+        )}
+        
+        {/* Add journey summary back button */}
+        {mode === 'edit' && blockContent.show_journey_summary === 'false' && (
+          <div className="mb-12 text-center">
+            <button
+              onClick={() => handleContentUpdate('show_journey_summary', 'true')}
+              className="flex items-center space-x-1 text-sm text-blue-600 hover:text-blue-800 transition-colors mx-auto"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+              </svg>
+              <span>Add journey summary</span>
+            </button>
+          </div>
+        )}
 
         {(blockContent.cta_text || blockContent.trust_items || mode === 'edit') && (
           <div className="text-center space-y-6">

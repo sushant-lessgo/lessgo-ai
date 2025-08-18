@@ -21,6 +21,11 @@ interface SplitCardContent {
   after_description: string;
   before_visual?: string;
   after_visual?: string;
+  premium_features_text: string;
+  upgrade_text: string;
+  before_placeholder_text: string;
+  after_placeholder_text: string;
+  premium_badge_text: string;
   subheadline?: string;
   supporting_text?: string;
   cta_text?: string;
@@ -71,6 +76,26 @@ const CONTENT_SCHEMA = {
   trust_items: { 
     type: 'string' as const, 
     default: '' 
+  },
+  premium_features_text: {
+    type: 'string' as const,
+    default: 'Premium Features Included'
+  },
+  upgrade_text: {
+    type: 'string' as const,
+    default: 'Upgrade'
+  },
+  before_placeholder_text: {
+    type: 'string' as const,
+    default: 'Current State'
+  },
+  after_placeholder_text: {
+    type: 'string' as const,
+    default: 'Premium Result'
+  },
+  premium_badge_text: {
+    type: 'string' as const,
+    default: 'Premium'
   }
 };
 
@@ -82,7 +107,14 @@ const PremiumCard = React.memo(({
   showImageToolbar, 
   sectionId, 
   mode,
-  bodyLgStyle
+  bodyLgStyle,
+  handleContentUpdate,
+  colorTokens,
+  backgroundType,
+  sectionBackground,
+  premiumFeaturesText,
+  placeholderText,
+  premiumBadgeText
 }: {
   type: 'before' | 'after';
   label: string;
@@ -92,6 +124,13 @@ const PremiumCard = React.memo(({
   sectionId: string;
   mode: string;
   bodyLgStyle: React.CSSProperties;
+  handleContentUpdate: (key: string, value: string) => void;
+  colorTokens: any;
+  backgroundType: string;
+  sectionBackground: any;
+  premiumFeaturesText: string;
+  placeholderText: string;
+  premiumBadgeText: string;
 }) => {
   
   const VisualPlaceholder = () => (
@@ -111,7 +150,23 @@ const PremiumCard = React.memo(({
       </div>
       <div className="absolute bottom-4 left-4 right-4">
         <div className={`text-center text-sm font-medium ${type === 'before' ? 'text-slate-700' : 'text-amber-700'}`}>
-          {type === 'before' ? 'Current State' : 'Premium Result'}
+          <EditableAdaptiveText
+            mode={mode}
+            value={placeholderText || ''}
+            onEdit={(value) => handleContentUpdate(type === 'before' ? 'before_placeholder_text' : 'after_placeholder_text', value)}
+            backgroundType={backgroundType}
+            colorTokens={colorTokens}
+            variant="body"
+            textStyle={{
+              fontSize: '0.875rem',
+              fontWeight: 500,
+              color: type === 'before' ? '#334155' : '#d97706'
+            }}
+            className={`text-center text-sm font-medium ${type === 'before' ? 'text-slate-700' : 'text-amber-700'}`}
+            sectionId={sectionId}
+            elementKey={type === 'before' ? 'before_placeholder_text' : 'after_placeholder_text'}
+            sectionBackground={sectionBackground}
+          />
         </div>
       </div>
     </div>
@@ -127,7 +182,25 @@ const PremiumCard = React.memo(({
       {type === 'after' && (
         <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 z-10">
           <div className="bg-gradient-to-r from-amber-500 to-amber-600 text-white px-4 py-1 rounded-full text-xs font-semibold uppercase tracking-wide shadow-lg">
-            Premium
+            <EditableAdaptiveText
+              mode={mode}
+              value={premiumBadgeText || ''}
+              onEdit={(value) => handleContentUpdate('premium_badge_text', value)}
+              backgroundType={backgroundType}
+              colorTokens={colorTokens}
+              variant="body"
+              textStyle={{
+                fontSize: '0.75rem',
+                fontWeight: 600,
+                textTransform: 'uppercase',
+                letterSpacing: '0.05em',
+                color: 'white'
+              }}
+              className="text-white text-xs font-semibold uppercase tracking-wide"
+              sectionId={sectionId}
+              elementKey="premium_badge_text"
+              sectionBackground={sectionBackground}
+            />
           </div>
         </div>
       )}
@@ -151,14 +224,36 @@ const PremiumCard = React.memo(({
       <div className="p-8">
         <div className="flex items-center mb-4">
           <div className={`w-3 h-3 rounded-full mr-3 ${type === 'before' ? 'bg-slate-500' : 'bg-amber-500'} ring-4 ${type === 'before' ? 'ring-slate-100' : 'ring-amber-100'}`} />
-          <h3 className={type === 'before' ? 'text-slate-700' : 'text-amber-700'} style={bodyLgStyle}>
-            {label}
-          </h3>
+          <EditableAdaptiveText
+            mode={mode}
+            value={label || ''}
+            onEdit={(value) => handleContentUpdate(type === 'before' ? 'before_label' : 'after_label', value)}
+            backgroundType={backgroundType}
+            colorTokens={colorTokens}
+            variant="body"
+            textStyle={{
+              ...bodyLgStyle,
+              color: type === 'before' ? '#334155' : '#d97706'
+            }}
+            className={type === 'before' ? 'text-slate-700' : 'text-amber-700'}
+            sectionId={sectionId}
+            elementKey={type === 'before' ? 'before_label' : 'after_label'}
+            sectionBackground={sectionBackground}
+          />
         </div>
         
-        <p className="text-gray-600 leading-relaxed">
-          {description}
-        </p>
+        <EditableAdaptiveText
+          mode={mode}
+          value={description || ''}
+          onEdit={(value) => handleContentUpdate(type === 'before' ? 'before_description' : 'after_description', value)}
+          backgroundType={backgroundType}
+          colorTokens={colorTokens}
+          variant="body"
+          className="text-gray-600 leading-relaxed"
+          sectionId={sectionId}
+          elementKey={type === 'before' ? 'before_description' : 'after_description'}
+          sectionBackground={sectionBackground}
+        />
         
         {type === 'after' && (
           <div className="mt-6 pt-4 border-t border-amber-100">
@@ -166,7 +261,23 @@ const PremiumCard = React.memo(({
               <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
               </svg>
-              <span className="text-sm font-medium">Premium Features Included</span>
+              <EditableAdaptiveText
+                mode={mode}
+                value={premiumFeaturesText || ''}
+                onEdit={(value) => handleContentUpdate('premium_features_text', value)}
+                backgroundType={backgroundType}
+                colorTokens={colorTokens}
+                variant="body"
+                textStyle={{
+                  fontSize: '0.875rem',
+                  fontWeight: 500,
+                  color: '#d97706'
+                }}
+                className="text-sm font-medium"
+                sectionId={sectionId}
+                elementKey="premium_features_text"
+                sectionBackground={sectionBackground}
+              />
             </div>
           </div>
         )}
@@ -264,6 +375,13 @@ export default function SplitCard(props: LayoutComponentProps) {
               sectionId={sectionId}
               mode={mode}
               bodyLgStyle={bodyLgStyle}
+              handleContentUpdate={handleContentUpdate}
+              colorTokens={colorTokens}
+              backgroundType={safeBackgroundType}
+              sectionBackground={sectionBackground}
+              premiumFeaturesText={blockContent.premium_features_text}
+              placeholderText={blockContent.before_placeholder_text}
+              premiumBadgeText={blockContent.premium_badge_text}
             />
             
             <div className="text-center lg:hidden">
@@ -271,7 +389,18 @@ export default function SplitCard(props: LayoutComponentProps) {
                 <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
                 </svg>
-                <span className={`text-sm font-medium ${mutedTextColor}`}>Upgrade</span>
+                <EditableAdaptiveText
+                  mode={mode}
+                  value={blockContent.upgrade_text || ''}
+                  onEdit={(value) => handleContentUpdate('upgrade_text', value)}
+                  backgroundType={safeBackgroundType}
+                  colorTokens={colorTokens}
+                  variant="body"
+                  className={`text-sm font-medium ${mutedTextColor}`}
+                  sectionId={sectionId}
+                  elementKey="upgrade_text"
+                  sectionBackground={sectionBackground}
+                />
               </div>
             </div>
           </div>
@@ -282,9 +411,18 @@ export default function SplitCard(props: LayoutComponentProps) {
                 <svg className="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
                 </svg>
-                <span className={`text-sm font-medium ${mutedTextColor} writing-mode-vertical`}>
-                  Upgrade
-                </span>
+                <EditableAdaptiveText
+                  mode={mode}
+                  value={blockContent.upgrade_text || ''}
+                  onEdit={(value) => handleContentUpdate('upgrade_text', value)}
+                  backgroundType={safeBackgroundType}
+                  colorTokens={colorTokens}
+                  variant="body"
+                  className={`text-sm font-medium ${mutedTextColor} writing-mode-vertical`}
+                  sectionId={sectionId}
+                  elementKey="upgrade_text"
+                  sectionBackground={sectionBackground}
+                />
               </div>
             </div>
             
@@ -297,6 +435,13 @@ export default function SplitCard(props: LayoutComponentProps) {
               sectionId={sectionId}
               mode={mode}
               bodyLgStyle={bodyLgStyle}
+              handleContentUpdate={handleContentUpdate}
+              colorTokens={colorTokens}
+              backgroundType={safeBackgroundType}
+              sectionBackground={sectionBackground}
+              premiumFeaturesText={blockContent.premium_features_text}
+              placeholderText={blockContent.after_placeholder_text}
+              premiumBadgeText={blockContent.premium_badge_text}
             />
           </div>
         </div>

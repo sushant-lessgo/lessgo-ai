@@ -19,6 +19,14 @@ interface StatComparisonContent {
   before_stats: string;
   after_stats: string;
   improvement_text: string;
+  summary_title: string;
+  summary_stat_1_value: string;
+  summary_stat_1_label: string;
+  summary_stat_2_value: string;
+  summary_stat_2_label: string;
+  summary_stat_3_value: string;
+  summary_stat_3_label: string;
+  show_summary_section?: string;
   subheadline?: string;
   supporting_text?: string;
   cta_text?: string;
@@ -49,6 +57,38 @@ const CONTENT_SCHEMA = {
   improvement_text: { 
     type: 'string' as const, 
     default: 'Our clients typically see 300% ROI within the first 6 months of implementation.' 
+  },
+  summary_title: {
+    type: 'string' as const,
+    default: 'Key Performance Improvements'
+  },
+  summary_stat_1_value: {
+    type: 'string' as const,
+    default: '300%'
+  },
+  summary_stat_1_label: {
+    type: 'string' as const,
+    default: 'Efficiency Increase'
+  },
+  summary_stat_2_value: {
+    type: 'string' as const,
+    default: '$80K'
+  },
+  summary_stat_2_label: {
+    type: 'string' as const,
+    default: 'Annual Savings'
+  },
+  summary_stat_3_value: {
+    type: 'string' as const,
+    default: '75%'
+  },
+  summary_stat_3_label: {
+    type: 'string' as const,
+    default: 'Time Reduction'
+  },
+  show_summary_section: {
+    type: 'string' as const,
+    default: 'true'
   },
   subheadline: { 
     type: 'string' as const, 
@@ -391,45 +431,233 @@ export default function StatComparison(props: LayoutComponentProps) {
           </div>
         </div>
 
-        <div className="bg-white rounded-2xl p-8 shadow-lg border border-gray-100 mb-12">
-          <div className="text-center">
-            <h3 className="text-2xl font-bold text-gray-900 mb-6">
-              Key Performance Improvements
-            </h3>
-            
-            <div className="grid md:grid-cols-3 gap-6">
-              <div className="text-center">
-                <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
-                  </svg>
-                </div>
-                <div className="text-2xl font-bold text-green-600 mb-2">300%</div>
-                <div className={`text-sm ${mutedTextColor}`}>Efficiency Increase</div>
-              </div>
+        {(blockContent.show_summary_section !== 'false') && (
+          <div className="bg-white rounded-2xl p-8 shadow-lg border border-gray-100 mb-12 relative group/summary-section">
+            <div className="text-center">
+              <EditableAdaptiveText
+                mode={mode}
+                value={blockContent.summary_title || ''}
+                onEdit={(value) => handleContentUpdate('summary_title', value)}
+                backgroundType={safeBackgroundType}
+                colorTokens={colorTokens}
+                variant="body"
+                textStyle={{
+                  fontSize: '1.5rem',
+                  fontWeight: 'bold',
+                  lineHeight: '2rem'
+                }}
+                className="text-2xl font-bold text-gray-900 mb-6"
+                sectionId={sectionId}
+                elementKey="summary_title"
+                sectionBackground={sectionBackground}
+              />
               
-              <div className="text-center">
-                <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <svg className="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
-                  </svg>
-                </div>
-                <div className="text-2xl font-bold text-blue-600 mb-2">$80K</div>
-                <div className={`text-sm ${mutedTextColor}`}>Annual Savings</div>
-              </div>
-              
-              <div className="text-center">
-                <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <svg className="w-8 h-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                </div>
-                <div className="text-2xl font-bold text-purple-600 mb-2">75%</div>
-                <div className={`text-sm ${mutedTextColor}`}>Time Reduction</div>
+              <div className="grid md:grid-cols-3 gap-6">
+                {/* Stat 1 */}
+                {(blockContent.summary_stat_1_value && blockContent.summary_stat_1_value !== '___REMOVED___') && (
+                  <div className="text-center relative group/stat-1">
+                    <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                      </svg>
+                    </div>
+                    <EditableAdaptiveText
+                      mode={mode}
+                      value={blockContent.summary_stat_1_value || ''}
+                      onEdit={(value) => handleContentUpdate('summary_stat_1_value', value)}
+                      backgroundType={safeBackgroundType}
+                      colorTokens={colorTokens}
+                      variant="body"
+                      textStyle={{
+                        fontSize: '1.5rem',
+                        fontWeight: 'bold',
+                        color: '#059669'
+                      }}
+                      className="text-2xl font-bold text-green-600 mb-2"
+                      sectionId={sectionId}
+                      elementKey="summary_stat_1_value"
+                      sectionBackground={sectionBackground}
+                    />
+                    <EditableAdaptiveText
+                      mode={mode}
+                      value={blockContent.summary_stat_1_label || ''}
+                      onEdit={(value) => handleContentUpdate('summary_stat_1_label', value)}
+                      backgroundType={safeBackgroundType}
+                      colorTokens={colorTokens}
+                      variant="body"
+                      className={`text-sm ${mutedTextColor}`}
+                      sectionId={sectionId}
+                      elementKey="summary_stat_1_label"
+                      sectionBackground={sectionBackground}
+                    />
+                    
+                    {/* Remove button */}
+                    {mode === 'edit' && (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleContentUpdate('summary_stat_1_value', '___REMOVED___');
+                          handleContentUpdate('summary_stat_1_label', '___REMOVED___');
+                        }}
+                        className="opacity-0 group-hover/stat-1:opacity-100 absolute -top-2 -right-2 p-1 rounded-full bg-white/80 hover:bg-white text-red-500 hover:text-red-700 transition-all duration-200 shadow-sm"
+                        title="Remove stat 1"
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      </button>
+                    )}
+                  </div>
+                )}
+                
+                {/* Stat 2 */}
+                {(blockContent.summary_stat_2_value && blockContent.summary_stat_2_value !== '___REMOVED___') && (
+                  <div className="text-center relative group/stat-2">
+                    <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <svg className="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
+                      </svg>
+                    </div>
+                    <EditableAdaptiveText
+                      mode={mode}
+                      value={blockContent.summary_stat_2_value || ''}
+                      onEdit={(value) => handleContentUpdate('summary_stat_2_value', value)}
+                      backgroundType={safeBackgroundType}
+                      colorTokens={colorTokens}
+                      variant="body"
+                      textStyle={{
+                        fontSize: '1.5rem',
+                        fontWeight: 'bold',
+                        color: '#2563eb'
+                      }}
+                      className="text-2xl font-bold text-blue-600 mb-2"
+                      sectionId={sectionId}
+                      elementKey="summary_stat_2_value"
+                      sectionBackground={sectionBackground}
+                    />
+                    <EditableAdaptiveText
+                      mode={mode}
+                      value={blockContent.summary_stat_2_label || ''}
+                      onEdit={(value) => handleContentUpdate('summary_stat_2_label', value)}
+                      backgroundType={safeBackgroundType}
+                      colorTokens={colorTokens}
+                      variant="body"
+                      className={`text-sm ${mutedTextColor}`}
+                      sectionId={sectionId}
+                      elementKey="summary_stat_2_label"
+                      sectionBackground={sectionBackground}
+                    />
+                    
+                    {/* Remove button */}
+                    {mode === 'edit' && (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleContentUpdate('summary_stat_2_value', '___REMOVED___');
+                          handleContentUpdate('summary_stat_2_label', '___REMOVED___');
+                        }}
+                        className="opacity-0 group-hover/stat-2:opacity-100 absolute -top-2 -right-2 p-1 rounded-full bg-white/80 hover:bg-white text-red-500 hover:text-red-700 transition-all duration-200 shadow-sm"
+                        title="Remove stat 2"
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      </button>
+                    )}
+                  </div>
+                )}
+                
+                {/* Stat 3 */}
+                {(blockContent.summary_stat_3_value && blockContent.summary_stat_3_value !== '___REMOVED___') && (
+                  <div className="text-center relative group/stat-3">
+                    <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <svg className="w-8 h-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                    </div>
+                    <EditableAdaptiveText
+                      mode={mode}
+                      value={blockContent.summary_stat_3_value || ''}
+                      onEdit={(value) => handleContentUpdate('summary_stat_3_value', value)}
+                      backgroundType={safeBackgroundType}
+                      colorTokens={colorTokens}
+                      variant="body"
+                      textStyle={{
+                        fontSize: '1.5rem',
+                        fontWeight: 'bold',
+                        color: '#7c3aed'
+                      }}
+                      className="text-2xl font-bold text-purple-600 mb-2"
+                      sectionId={sectionId}
+                      elementKey="summary_stat_3_value"
+                      sectionBackground={sectionBackground}
+                    />
+                    <EditableAdaptiveText
+                      mode={mode}
+                      value={blockContent.summary_stat_3_label || ''}
+                      onEdit={(value) => handleContentUpdate('summary_stat_3_label', value)}
+                      backgroundType={safeBackgroundType}
+                      colorTokens={colorTokens}
+                      variant="body"
+                      className={`text-sm ${mutedTextColor}`}
+                      sectionId={sectionId}
+                      elementKey="summary_stat_3_label"
+                      sectionBackground={sectionBackground}
+                    />
+                    
+                    {/* Remove button */}
+                    {mode === 'edit' && (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleContentUpdate('summary_stat_3_value', '___REMOVED___');
+                          handleContentUpdate('summary_stat_3_label', '___REMOVED___');
+                        }}
+                        className="opacity-0 group-hover/stat-3:opacity-100 absolute -top-2 -right-2 p-1 rounded-full bg-white/80 hover:bg-white text-red-500 hover:text-red-700 transition-all duration-200 shadow-sm"
+                        title="Remove stat 3"
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      </button>
+                    )}
+                  </div>
+                )}
               </div>
             </div>
+            
+            {/* Remove entire summary section button */}
+            {mode === 'edit' && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleContentUpdate('show_summary_section', 'false');
+                }}
+                className="opacity-0 group-hover/summary-section:opacity-100 absolute top-4 right-4 p-1 rounded-full bg-white/80 hover:bg-white text-red-500 hover:text-red-700 transition-all duration-200 shadow-sm"
+                title="Remove summary section"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            )}
           </div>
-        </div>
+        )}
+        
+        {/* Add summary section back button */}
+        {mode === 'edit' && blockContent.show_summary_section === 'false' && (
+          <div className="mb-12 text-center">
+            <button
+              onClick={() => handleContentUpdate('show_summary_section', 'true')}
+              className="flex items-center space-x-1 text-sm text-blue-600 hover:text-blue-800 transition-colors mx-auto"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+              </svg>
+              <span>Add summary section</span>
+            </button>
+          </div>
+        )}
 
         {(blockContent.cta_text || blockContent.trust_items || mode === 'edit') && (
           <div className="text-center space-y-6">

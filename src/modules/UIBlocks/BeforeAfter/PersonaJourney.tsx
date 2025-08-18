@@ -22,10 +22,17 @@ interface PersonaJourneyContent {
   before_challenges: string;
   before_pain_points: string;
   journey_title: string;
+  journey_description: string;
   journey_steps: string;
   after_title: string;
   after_outcomes: string;
   after_benefits: string;
+  summary_title: string;
+  summary_description: string;
+  summary_label_1: string;
+  summary_label_2: string;
+  summary_label_3: string;
+  show_summary_section?: string;
   persona_avatar?: string;
   subheadline?: string;
   supporting_text?: string;
@@ -101,6 +108,34 @@ const CONTENT_SCHEMA = {
   trust_items: { 
     type: 'string' as const, 
     default: '' 
+  },
+  journey_description: {
+    type: 'string' as const,
+    default: 'Complete transformation process from assessment to success'
+  },
+  summary_title: {
+    type: 'string' as const,
+    default: 'Complete Enterprise Transformation'
+  },
+  summary_description: {
+    type: 'string' as const,
+    default: 'Experience the same proven methodology that has helped hundreds of enterprise clients achieve operational excellence.'
+  },
+  summary_label_1: {
+    type: 'string' as const,
+    default: 'Challenges'
+  },
+  summary_label_2: {
+    type: 'string' as const,
+    default: 'Process'
+  },
+  summary_label_3: {
+    type: 'string' as const,
+    default: 'Success'
+  },
+  show_summary_section: {
+    type: 'string' as const,
+    default: 'true'
   }
 };
 
@@ -527,7 +562,7 @@ export default function PersonaJourney(props: LayoutComponentProps) {
               
               <JourneyPhase
                 title={blockContent.journey_title}
-                description="Complete transformation process from assessment to success"
+                description={blockContent.journey_description}
                 items={journeySteps}
                 type="journey"
                 isJourney={true}
@@ -545,58 +580,161 @@ export default function PersonaJourney(props: LayoutComponentProps) {
           )}
         </div>
 
-        <div className="bg-gradient-to-r from-blue-50 via-indigo-50 to-purple-50 rounded-2xl p-8 border border-blue-100 mb-12">
-          <div className="text-center">
-            <div className="flex justify-center space-x-8 mb-6">
-              <div className="text-center">
-                <div className="w-12 h-12 bg-red-500 rounded-full flex items-center justify-center mx-auto mb-2">
-                  <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+        {(blockContent.show_summary_section !== 'false') && (
+          <div className="bg-gradient-to-r from-blue-50 via-indigo-50 to-purple-50 rounded-2xl p-8 border border-blue-100 mb-12 relative group/summary-section">
+            <div className="text-center">
+              <div className="flex justify-center space-x-8 mb-6">
+                <div className="text-center">
+                  <div className="w-12 h-12 bg-red-500 rounded-full flex items-center justify-center mx-auto mb-2">
+                    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                    </svg>
+                  </div>
+                  <EditableAdaptiveText
+                    mode={mode}
+                    value={blockContent.summary_label_1 || ''}
+                    onEdit={(value) => handleContentUpdate('summary_label_1', value)}
+                    backgroundType={safeBackgroundType}
+                    colorTokens={colorTokens}
+                    variant="body"
+                    textStyle={{
+                      fontSize: '0.875rem',
+                      fontWeight: 500,
+                      color: '#dc2626'
+                    }}
+                    className="text-sm font-medium text-red-600"
+                    sectionId={sectionId}
+                    elementKey="summary_label_1"
+                    sectionBackground={sectionBackground}
+                  />
+                </div>
+                
+                <div className="flex items-center">
+                  <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
                   </svg>
                 </div>
-                <div className="text-sm font-medium text-red-600">Challenges</div>
-              </div>
-              
-              <div className="flex items-center">
-                <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                </svg>
-              </div>
-              
-              <div className="text-center">
-                <div className="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center mx-auto mb-2">
-                  <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                
+                <div className="text-center">
+                  <div className="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center mx-auto mb-2">
+                    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                    </svg>
+                  </div>
+                  <EditableAdaptiveText
+                    mode={mode}
+                    value={blockContent.summary_label_2 || ''}
+                    onEdit={(value) => handleContentUpdate('summary_label_2', value)}
+                    backgroundType={safeBackgroundType}
+                    colorTokens={colorTokens}
+                    variant="body"
+                    textStyle={{
+                      fontSize: '0.875rem',
+                      fontWeight: 500,
+                      color: '#2563eb'
+                    }}
+                    className="text-sm font-medium text-blue-600"
+                    sectionId={sectionId}
+                    elementKey="summary_label_2"
+                    sectionBackground={sectionBackground}
+                  />
+                </div>
+                
+                <div className="flex items-center">
+                  <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
                   </svg>
                 </div>
-                <div className="text-sm font-medium text-blue-600">Process</div>
-              </div>
-              
-              <div className="flex items-center">
-                <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                </svg>
-              </div>
-              
-              <div className="text-center">
-                <div className="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-2">
-                  <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
+                
+                <div className="text-center">
+                  <div className="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-2">
+                    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  </div>
+                  <EditableAdaptiveText
+                    mode={mode}
+                    value={blockContent.summary_label_3 || ''}
+                    onEdit={(value) => handleContentUpdate('summary_label_3', value)}
+                    backgroundType={safeBackgroundType}
+                    colorTokens={colorTokens}
+                    variant="body"
+                    textStyle={{
+                      fontSize: '0.875rem',
+                      fontWeight: 500,
+                      color: '#059669'
+                    }}
+                    className="text-sm font-medium text-green-600"
+                    sectionId={sectionId}
+                    elementKey="summary_label_3"
+                    sectionBackground={sectionBackground}
+                  />
                 </div>
-                <div className="text-sm font-medium text-green-600">Success</div>
               </div>
+              
+              <EditableAdaptiveText
+                mode={mode}
+                value={blockContent.summary_title || ''}
+                onEdit={(value) => handleContentUpdate('summary_title', value)}
+                backgroundType={safeBackgroundType}
+                colorTokens={colorTokens}
+                variant="body"
+                textStyle={{
+                  ...h3Style,
+                  color: '#111827'
+                }}
+                className="text-gray-900 mb-4"
+                sectionId={sectionId}
+                elementKey="summary_title"
+                sectionBackground={sectionBackground}
+              />
+              
+              <EditableAdaptiveText
+                mode={mode}
+                value={blockContent.summary_description || ''}
+                onEdit={(value) => handleContentUpdate('summary_description', value)}
+                backgroundType={safeBackgroundType}
+                colorTokens={colorTokens}
+                variant="body"
+                className={`${mutedTextColor} max-w-2xl mx-auto`}
+                sectionId={sectionId}
+                elementKey="summary_description"
+                sectionBackground={sectionBackground}
+              />
             </div>
             
-            <h3 className="text-gray-900 mb-4" style={h3Style}>
-              Complete Enterprise Transformation
-            </h3>
-            
-            <p className={`${mutedTextColor} max-w-2xl mx-auto`}>
-              Experience the same proven methodology that has helped hundreds of enterprise clients achieve operational excellence.
-            </p>
+            {/* Remove button */}
+            {mode === 'edit' && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleContentUpdate('show_summary_section', 'false');
+                }}
+                className="opacity-0 group-hover/summary-section:opacity-100 absolute top-4 right-4 p-1 rounded-full bg-white/80 hover:bg-white text-red-500 hover:text-red-700 transition-all duration-200 shadow-sm"
+                title="Remove summary section"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            )}
           </div>
-        </div>
+        )}
+        
+        {/* Add summary section back button */}
+        {mode === 'edit' && blockContent.show_summary_section === 'false' && (
+          <div className="mb-12 text-center">
+            <button
+              onClick={() => handleContentUpdate('show_summary_section', 'true')}
+              className="flex items-center space-x-1 text-sm text-blue-600 hover:text-blue-800 transition-colors mx-auto"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+              </svg>
+              <span>Add transformation summary</span>
+            </button>
+          </div>
+        )}
 
         {(blockContent.cta_text || blockContent.trust_items || mode === 'edit') && (
           <div className="text-center space-y-6">

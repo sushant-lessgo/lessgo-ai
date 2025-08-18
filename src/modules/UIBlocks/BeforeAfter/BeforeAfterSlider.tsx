@@ -21,6 +21,10 @@ interface BeforeAfterSliderContent {
   after_description: string;
   before_visual?: string;
   after_visual?: string;
+  before_placeholder_text: string;
+  after_placeholder_text: string;
+  interaction_hint_text: string;
+  show_interaction_hint?: string;
   subheadline?: string;
   supporting_text?: string;
   cta_text?: string;
@@ -71,6 +75,22 @@ const CONTENT_SCHEMA = {
   trust_items: { 
     type: 'string' as const, 
     default: '' 
+  },
+  before_placeholder_text: {
+    type: 'string' as const,
+    default: 'Current Process'
+  },
+  after_placeholder_text: {
+    type: 'string' as const,
+    default: 'Optimized Solution'
+  },
+  interaction_hint_text: {
+    type: 'string' as const,
+    default: 'Drag to compare'
+  },
+  show_interaction_hint: {
+    type: 'string' as const,
+    default: 'true'
   }
 };
 
@@ -81,7 +101,15 @@ const InteractiveSlider = React.memo(({
   sectionId, 
   mode,
   h3Style,
-  bodyLgStyle
+  bodyLgStyle,
+  beforePlaceholderText,
+  afterPlaceholderText,
+  interactionHintText,
+  showInteractionHint,
+  handleContentUpdate,
+  colorTokens,
+  backgroundType,
+  sectionBackground
 }: {
   beforeContent: { label: string; description: string; visual?: string };
   afterContent: { label: string; description: string; visual?: string };
@@ -90,6 +118,14 @@ const InteractiveSlider = React.memo(({
   mode: string;
   h3Style: React.CSSProperties;
   bodyLgStyle: React.CSSProperties;
+  beforePlaceholderText: string;
+  afterPlaceholderText: string;
+  interactionHintText: string;
+  showInteractionHint?: string;
+  handleContentUpdate: (key: string, value: string) => void;
+  colorTokens: any;
+  backgroundType: string;
+  sectionBackground: any;
 }) => {
   const [isAfter, setIsAfter] = useState(false);
 
@@ -110,7 +146,22 @@ const InteractiveSlider = React.memo(({
       </div>
       <div className="absolute bottom-4 left-4 right-4">
         <div className={`text-center ${type === 'before' ? 'text-red-700' : 'text-green-700'}`} style={bodyLgStyle}>
-          {type === 'before' ? 'Current Process' : 'Optimized Solution'}
+          <EditableAdaptiveText
+            mode={mode}
+            value={type === 'before' ? beforePlaceholderText : afterPlaceholderText}
+            onEdit={(value) => handleContentUpdate(type === 'before' ? 'before_placeholder_text' : 'after_placeholder_text', value)}
+            backgroundType={backgroundType}
+            colorTokens={colorTokens}
+            variant="body"
+            textStyle={{
+              ...bodyLgStyle,
+              color: type === 'before' ? '#b91c1c' : '#15803d'
+            }}
+            className={`text-center ${type === 'before' ? 'text-red-700' : 'text-green-700'}`}
+            sectionId={sectionId}
+            elementKey={type === 'before' ? 'before_placeholder_text' : 'after_placeholder_text'}
+            sectionBackground={sectionBackground}
+          />
         </div>
       </div>
     </div>
@@ -197,14 +248,47 @@ const InteractiveSlider = React.memo(({
         </div>
       </div>
 
-      <div className="absolute -bottom-8 left-1/2 transform -translate-x-1/2">
-        <div className="flex items-center space-x-4 bg-white rounded-full shadow-lg px-6 py-3">
-          <span className="text-sm text-gray-500">Drag to compare</span>
-          <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 9l4-4 4 4m0 6l-4 4-4-4" />
-          </svg>
+      {showInteractionHint !== 'false' && (
+        <div className="absolute -bottom-8 left-1/2 transform -translate-x-1/2">
+          <div className="flex items-center space-x-4 bg-white rounded-full shadow-lg px-6 py-3 relative group/hint-item">
+            <EditableAdaptiveText
+              mode={mode}
+              value={interactionHintText || ''}
+              onEdit={(value) => handleContentUpdate('interaction_hint_text', value)}
+              backgroundType={backgroundType}
+              colorTokens={colorTokens}
+              variant="body"
+              textStyle={{
+                fontSize: '0.875rem',
+                color: '#6b7280'
+              }}
+              className="text-sm text-gray-500"
+              sectionId={sectionId}
+              elementKey="interaction_hint_text"
+              sectionBackground={sectionBackground}
+            />
+            <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 9l4-4 4 4m0 6l-4 4-4-4" />
+            </svg>
+            
+            {/* Remove button */}
+            {mode === 'edit' && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleContentUpdate('show_interaction_hint', 'false');
+                }}
+                className="opacity-0 group-hover/hint-item:opacity-100 absolute -top-2 -right-2 p-1 rounded-full bg-white/80 hover:bg-white text-red-500 hover:text-red-700 transition-all duration-200 shadow-sm"
+                title="Remove interaction hint"
+              >
+                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            )}
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 });
@@ -304,7 +388,30 @@ export default function BeforeAfterSlider(props: LayoutComponentProps) {
             mode={mode}
             h3Style={h3Style}
             bodyLgStyle={bodyLgStyle}
+            beforePlaceholderText={blockContent.before_placeholder_text}
+            afterPlaceholderText={blockContent.after_placeholder_text}
+            interactionHintText={blockContent.interaction_hint_text}
+            showInteractionHint={blockContent.show_interaction_hint}
+            handleContentUpdate={handleContentUpdate}
+            colorTokens={colorTokens}
+            backgroundType={safeBackgroundType}
+            sectionBackground={sectionBackground}
           />
+          
+          {/* Add interaction hint back button */}
+          {mode === 'edit' && blockContent.show_interaction_hint === 'false' && (
+            <div className="text-center mt-4">
+              <button
+                onClick={() => handleContentUpdate('show_interaction_hint', 'true')}
+                className="flex items-center space-x-1 text-sm text-blue-600 hover:text-blue-800 transition-colors mx-auto"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                </svg>
+                <span>Add interaction hint</span>
+              </button>
+            </div>
+          )}
         </div>
 
         <div className="grid md:grid-cols-2 gap-8 mb-12">
