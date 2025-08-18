@@ -205,7 +205,9 @@ export default function ValueReinforcementBlock(props: LayoutComponentProps) {
       {stat: blockContent.stat_2, label: blockContent.label_2},
       {stat: blockContent.stat_3, label: blockContent.label_3},
       {stat: blockContent.stat_4, label: blockContent.label_4}
-    ].filter(item => Boolean(item.stat && item.stat.trim() !== '' && item.stat !== '___REMOVED___'));
+    ].filter((item): item is { stat: string; label: string } => 
+      Boolean(item.stat && item.label && item.stat.trim() !== '' && item.stat !== '___REMOVED___')
+    );
     
     if (individualStats.length > 0) {
       return individualStats;
@@ -496,7 +498,7 @@ export default function ValueReinforcementBlock(props: LayoutComponentProps) {
               <div className="grid md:grid-cols-4 gap-8">
                 {socialProofData.map((item, index) => (
                   <div key={index} className="text-center relative group/stat-item">
-                    {mode === 'edit' ? (
+                    {mode !== 'preview' ? (
                       <div className="space-y-2">
                         <EditableAdaptiveText
                           mode={mode}

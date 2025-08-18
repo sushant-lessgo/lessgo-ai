@@ -18,8 +18,15 @@ interface CountdownLimitedCTAContent {
   headline: string;
   subheadline?: string;
   urgency_text: string;
+  urgency_badge_text: string;
   cta_text: string;
+  final_cta_headline: string;
   offer_details: string;
+  offer_detail_1?: string;
+  offer_detail_2?: string;
+  offer_detail_3?: string;
+  offer_detail_4?: string;
+  offer_detail_5?: string;
 }
 
 // Content schema - defines structure and defaults
@@ -36,13 +43,41 @@ const CONTENT_SCHEMA = {
     type: 'string' as const, 
     default: 'Offer expires in:' 
   },
+  urgency_badge_text: { 
+    type: 'string' as const, 
+    default: 'LIMITED TIME OFFER' 
+  },
   cta_text: { 
     type: 'string' as const, 
     default: 'Claim Your Discount' 
   },
+  final_cta_headline: { 
+    type: 'string' as const, 
+    default: 'Ready to Get Started?' 
+  },
   offer_details: { 
     type: 'string' as const, 
     default: 'No contract required|Cancel anytime|Full feature access|Premium support included' 
+  },
+  offer_detail_1: { 
+    type: 'string' as const, 
+    default: 'No contract required' 
+  },
+  offer_detail_2: { 
+    type: 'string' as const, 
+    default: 'Cancel anytime' 
+  },
+  offer_detail_3: { 
+    type: 'string' as const, 
+    default: 'Full feature access' 
+  },
+  offer_detail_4: { 
+    type: 'string' as const, 
+    default: 'Premium support included' 
+  },
+  offer_detail_5: { 
+    type: 'string' as const, 
+    default: '' 
   }
 };
 
@@ -125,10 +160,29 @@ export default function CountdownLimitedCTA(props: LayoutComponentProps) {
   
   const { getTextStyle: getTypographyStyle } = useTypography();
 
-  // Parse offer details from pipe-separated string
-  const offerDetails = blockContent.offer_details 
-    ? blockContent.offer_details.split('|').map(item => item.trim()).filter(Boolean)
-    : [];
+  // Handle offer details - support both legacy pipe-separated format and individual fields
+  const getOfferDetails = (): string[] => {
+    // Check if individual offer detail fields exist
+    const individualItems = [
+      blockContent.offer_detail_1,
+      blockContent.offer_detail_2, 
+      blockContent.offer_detail_3,
+      blockContent.offer_detail_4,
+      blockContent.offer_detail_5
+    ].filter((item): item is string => Boolean(item && item.trim() !== '' && item !== '___REMOVED___'));
+    
+    // If individual items exist, use them; otherwise fall back to legacy format
+    if (individualItems.length > 0) {
+      return individualItems;
+    }
+    
+    // Legacy format fallback
+    return blockContent.offer_details 
+      ? blockContent.offer_details.split('|').map(item => item.trim()).filter(Boolean)
+      : ['No contract required', 'Cancel anytime', 'Full feature access'];
+  };
+  
+  const offerDetails = getOfferDetails();
 
   return (
     <LayoutSection
@@ -146,7 +200,18 @@ export default function CountdownLimitedCTA(props: LayoutComponentProps) {
           <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
             <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-8.293l-3-3a1 1 0 00-1.414 0l-3 3a1 1 0 001.414 1.414L9 9.414V13a1 1 0 102 0V9.414l1.293 1.293a1 1 0 001.414-1.414z" clipRule="evenodd" />
           </svg>
-          <span className="font-semibold text-sm">LIMITED TIME OFFER</span>
+          <EditableAdaptiveText
+            mode={mode}
+            value={blockContent.urgency_badge_text || ''}
+            onEdit={(value) => handleContentUpdate('urgency_badge_text', value)}
+            backgroundType="neutral"
+            colorTokens={colorTokens}
+            variant="body"
+            className="font-semibold text-sm text-red-800"
+            sectionId={sectionId}
+            elementKey="urgency_badge_text"
+            sectionBackground="bg-red-100"
+          />
         </div>
 
         {/* Main Headlines */}
@@ -214,16 +279,108 @@ export default function CountdownLimitedCTA(props: LayoutComponentProps) {
 
         {/* Offer Details */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          {offerDetails.map((detail, index) => (
-            <div key={index} className="flex items-center justify-center space-x-2 text-sm">
-              <svg className="w-4 h-4 text-green-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-              </svg>
-              <span className={`${dynamicTextColors?.muted || colorTokens.textMuted} text-center`}>
-                {detail}
-              </span>
+          {offerDetails.map((detail, index) => {
+            // Find the actual index in the original offer detail fields array
+            let actualIndex = -1;
+            let validCount = 0;
+            const offerFields = [
+              blockContent.offer_detail_1,
+              blockContent.offer_detail_2,
+              blockContent.offer_detail_3,
+              blockContent.offer_detail_4,
+              blockContent.offer_detail_5
+            ];
+            
+            for (let i = 0; i < offerFields.length; i++) {
+              if (offerFields[i] != null && offerFields[i]!.trim() !== '' && offerFields[i] !== '___REMOVED___') {
+                if (validCount === index) {
+                  actualIndex = i;
+                  break;
+                }
+                validCount++;
+              }
+            }
+            
+            return (
+              <div key={index} className="flex items-center justify-center space-x-2 text-sm relative group/offer-item">
+                <svg className="w-4 h-4 text-green-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                </svg>
+                {mode !== 'preview' ? (
+                  <div className="flex items-center space-x-2 flex-1">
+                    <EditableAdaptiveText
+                      mode={mode}
+                      value={detail}
+                      onEdit={(value) => {
+                        if (actualIndex !== -1) {
+                          const fieldKey = `offer_detail_${actualIndex + 1}` as keyof CountdownLimitedCTAContent;
+                          handleContentUpdate(fieldKey, value);
+                        }
+                      }}
+                      backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
+                      colorTokens={colorTokens}
+                      variant="body"
+                      className={`${dynamicTextColors?.muted || colorTokens.textMuted} text-center flex-1`}
+                      placeholder={`Offer detail ${actualIndex + 1}`}
+                      sectionBackground={sectionBackground}
+                      data-section-id={sectionId}
+                      data-element-key={`offer_detail_${actualIndex + 1}`}
+                    />
+                    
+                    {/* Remove button for offer detail */}
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if (actualIndex !== -1) {
+                          const fieldKey = `offer_detail_${actualIndex + 1}` as keyof CountdownLimitedCTAContent;
+                          handleContentUpdate(fieldKey, '___REMOVED___');
+                        }
+                      }}
+                      className="opacity-0 group-hover/offer-item:opacity-100 text-red-500 hover:text-red-700 transition-opacity duration-200"
+                      title="Remove this offer detail"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </button>
+                  </div>
+                ) : (
+                  <span className={`${dynamicTextColors?.muted || colorTokens.textMuted} text-center`}>
+                    {detail}
+                  </span>
+                )}
+              </div>
+            );
+          })}
+          
+          {/* Add offer detail button - only show in edit mode */}
+          {mode !== 'preview' && offerDetails.length < 5 && (
+            <div className="flex items-center justify-center">
+              <button
+                onClick={() => {
+                  // Find first empty slot and add placeholder
+                  const emptyIndex = [
+                    blockContent.offer_detail_1,
+                    blockContent.offer_detail_2,
+                    blockContent.offer_detail_3,
+                    blockContent.offer_detail_4,
+                    blockContent.offer_detail_5
+                  ].findIndex(item => !item || item.trim() === '' || item === '___REMOVED___');
+                  
+                  if (emptyIndex !== -1) {
+                    const fieldKey = `offer_detail_${emptyIndex + 1}` as keyof CountdownLimitedCTAContent;
+                    handleContentUpdate(fieldKey, 'New offer detail');
+                  }
+                }}
+                className="flex items-center space-x-2 text-sm text-blue-600 hover:text-blue-800 transition-colors px-4 py-2 border-2 border-dashed border-blue-300 rounded-lg hover:border-blue-500"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                </svg>
+                <span>Add detail</span>
+              </button>
             </div>
-          ))}
+          )}
         </div>
 
       </div>
@@ -253,8 +410,15 @@ export const componentMeta = {
     { key: 'headline', label: 'Offer Headline', type: 'text', required: true },
     { key: 'subheadline', label: 'Offer Description', type: 'textarea', required: false },
     { key: 'urgency_text', label: 'Countdown Label', type: 'text', required: true },
+    { key: 'urgency_badge_text', label: 'Urgency Badge Text', type: 'text', required: true },
     { key: 'cta_text', label: 'CTA Button Text', type: 'text', required: true },
-    { key: 'offer_details', label: 'Offer Details (pipe separated)', type: 'textarea', required: true }
+    { key: 'final_cta_headline', label: 'Final CTA Headline', type: 'text', required: false },
+    { key: 'offer_details', label: 'Offer Details (pipe separated - legacy)', type: 'textarea', required: false },
+    { key: 'offer_detail_1', label: 'Offer Detail 1', type: 'text', required: false },
+    { key: 'offer_detail_2', label: 'Offer Detail 2', type: 'text', required: false },
+    { key: 'offer_detail_3', label: 'Offer Detail 3', type: 'text', required: false },
+    { key: 'offer_detail_4', label: 'Offer Detail 4', type: 'text', required: false },
+    { key: 'offer_detail_5', label: 'Offer Detail 5', type: 'text', required: false }
   ],
   
   useCases: [

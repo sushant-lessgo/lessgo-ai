@@ -329,7 +329,7 @@ export default function LeadMagnetCard(props: LayoutComponentProps) {
                   </div>
                   
                   {/* Social Proof */}
-                  {(blockContent.social_proof || mode === 'edit') && (
+                  {(blockContent.social_proof || mode !== 'preview') && (
                     <div className="bg-white bg-opacity-10 rounded-lg p-4 mb-6 relative group/social-proof">
                       <div className="flex items-center justify-center space-x-2">
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -351,7 +351,7 @@ export default function LeadMagnetCard(props: LayoutComponentProps) {
                       </div>
                       
                       {/* Remove button for social proof */}
-                      {mode === 'edit' && (
+                      {mode !== 'preview' && (
                         <button
                           onClick={(e) => {
                             e.stopPropagation();

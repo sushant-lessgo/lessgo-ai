@@ -20,6 +20,8 @@ interface ValueStackCTAContent {
   value_propositions: string;
   value_descriptions: string;
   cta_text: string;
+  final_cta_headline: string;
+  final_cta_description: string;
   guarantee_text?: string;
 }
 
@@ -44,6 +46,14 @@ const CONTENT_SCHEMA = {
   cta_text: { 
     type: 'string' as const, 
     default: 'Start Your Transformation' 
+  },
+  final_cta_headline: { 
+    type: 'string' as const, 
+    default: 'Ready to Get Started?' 
+  },
+  final_cta_description: { 
+    type: 'string' as const, 
+    default: 'Join thousands of businesses already transforming their operations with our platform.' 
   },
   guarantee_text: { 
     type: 'string' as const, 
@@ -197,12 +207,32 @@ export default function ValueStackCTA(props: LayoutComponentProps) {
 
         {/* CTA Section */}
         <div className="bg-gradient-to-r from-blue-600 to-indigo-700 rounded-2xl p-12 text-center text-white">
-          <h3 className="font-bold mb-4" style={{...h2Style, fontSize: 'clamp(1.8rem, 3vw, 2rem)'}}>
-            Ready to Get Started?
-          </h3>
-          <p className="text-blue-100 mb-8 max-w-2xl mx-auto" style={bodyLgStyle}>
-            Join thousands of businesses already transforming their operations with our platform.
-          </p>
+          <EditableAdaptiveHeadline
+            mode={mode}
+            value={blockContent.final_cta_headline || ''}
+            onEdit={(value) => handleContentUpdate('final_cta_headline', value)}
+            level="h3"
+            backgroundType="primary"
+            colorTokens={{ ...colorTokens, textPrimary: 'text-white' }}
+            className="font-bold mb-4"
+            style={{...h2Style, fontSize: 'clamp(1.8rem, 3vw, 2rem)'}}
+            sectionId={sectionId}
+            elementKey="final_cta_headline"
+            sectionBackground="bg-blue-600"
+          />
+          <EditableAdaptiveText
+            mode={mode}
+            value={blockContent.final_cta_description || ''}
+            onEdit={(value) => handleContentUpdate('final_cta_description', value)}
+            backgroundType="primary"
+            colorTokens={{ ...colorTokens, textSecondary: 'text-blue-100' }}
+            variant="body"
+            className="text-blue-100 mb-8 max-w-2xl mx-auto"
+            style={bodyLgStyle}
+            sectionId={sectionId}
+            elementKey="final_cta_description"
+            sectionBackground="bg-blue-600"
+          />
           
           <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
             <CTAButton
@@ -267,6 +297,8 @@ export const componentMeta = {
     { key: 'value_propositions', label: 'Value Proposition Titles (pipe separated)', type: 'textarea', required: true },
     { key: 'value_descriptions', label: 'Value Descriptions (pipe separated)', type: 'textarea', required: true },
     { key: 'cta_text', label: 'CTA Button Text', type: 'text', required: true },
+    { key: 'final_cta_headline', label: 'Final CTA Headline', type: 'text', required: true },
+    { key: 'final_cta_description', label: 'Final CTA Description', type: 'textarea', required: true },
     { key: 'guarantee_text', label: 'Guarantee Text', type: 'text', required: false }
   ],
   
