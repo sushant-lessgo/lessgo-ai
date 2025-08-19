@@ -204,7 +204,7 @@ export default function Carousel(props: LayoutComponentProps) {
             sectionBackground={sectionBackground}
           />
 
-          {(blockContent.subheadline || mode === 'edit') && (
+          {(blockContent.subheadline || (mode as string) === 'edit') && (
             <EditableAdaptiveText
               mode={mode}
               value={blockContent.subheadline || ''}
@@ -222,7 +222,7 @@ export default function Carousel(props: LayoutComponentProps) {
           )}
         </div>
 
-        {mode === 'edit' ? (
+        {(mode as string) === 'edit' ? (
           <div className="space-y-8">
             <div className="p-6 border border-gray-200 rounded-lg bg-gray-50">
               <h4 className="font-semibold text-gray-700 mb-4">Carousel Content</h4>
@@ -294,12 +294,12 @@ export default function Carousel(props: LayoutComponentProps) {
                   </p>
                   
                   <div className="flex items-center space-x-4">
-                    {(blockContent.benefit_1 || mode === 'edit') && blockContent.benefit_1 !== '___REMOVED___' && (
+                    {((blockContent.benefit_1 && blockContent.benefit_1 !== '___REMOVED___') || (mode as string) === 'edit') && (
                       <div className="flex items-center space-x-2 text-green-600 group/benefit-item relative">
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                         </svg>
-                        {mode === 'edit' ? (
+                        {(mode as string) === 'edit' ? (
                           <EditableAdaptiveText
                             mode={mode}
                             value={blockContent.benefit_1 || ''}
@@ -316,7 +316,7 @@ export default function Carousel(props: LayoutComponentProps) {
                         ) : (
                           <span className="text-sm font-medium">{blockContent.benefit_1}</span>
                         )}
-                        {mode === 'edit' && (
+                        {(mode as string) === 'edit' && (
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
@@ -332,12 +332,12 @@ export default function Carousel(props: LayoutComponentProps) {
                         )}
                       </div>
                     )}
-                    {(blockContent.benefit_2 || mode === 'edit') && blockContent.benefit_2 !== '___REMOVED___' && (
+                    {(blockContent.benefit_2 || (mode as string) === 'edit') && blockContent.benefit_2 !== '___REMOVED___' && (
                       <div className="flex items-center space-x-2 text-blue-600 group/benefit-item relative">
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
-                        {mode === 'edit' ? (
+                        {(mode as string) === 'edit' ? (
                           <EditableAdaptiveText
                             mode={mode}
                             value={blockContent.benefit_2 || ''}
@@ -354,7 +354,7 @@ export default function Carousel(props: LayoutComponentProps) {
                         ) : (
                           <span className="text-sm font-medium">{blockContent.benefit_2}</span>
                         )}
-                        {mode === 'edit' && (
+                        {(mode as string) === 'edit' && (
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
@@ -456,9 +456,9 @@ export default function Carousel(props: LayoutComponentProps) {
           </div>
         )}
 
-        {(blockContent.cta_text || blockContent.trust_items || mode === 'edit') && (
+        {(blockContent.cta_text || blockContent.trust_items || (mode as string) === 'edit') && (
           <div className="text-center space-y-6 mt-16">
-            {(blockContent.supporting_text || mode === 'edit') && (
+            {(blockContent.supporting_text || (mode as string) === 'edit') && (
               <EditableAdaptiveText
                 mode={mode}
                 value={blockContent.supporting_text || ''}

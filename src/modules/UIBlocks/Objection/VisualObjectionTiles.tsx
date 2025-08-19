@@ -15,6 +15,10 @@ interface VisualObjectionTilesContent {
   headline: string;
   subheadline?: string;
   objection_tiles: string;
+  bottom_cta_title?: string;
+  bottom_cta_text?: string;
+  bottom_cta_button_1?: string;
+  bottom_cta_button_2?: string;
 }
 
 // Content schema - defines structure and defaults
@@ -30,6 +34,22 @@ const CONTENT_SCHEMA = {
   objection_tiles: { 
     type: 'string' as const, 
     default: '💰|"Too expensive for small teams"|Actually starts at just $10/month with no hidden fees|⏰|"Takes too long to set up"|Most customers are up and running in under 10 minutes|🔧|"Too complex for non-technical users"|Designed with simplicity in mind - no coding required|📊|"Not enough integrations"|Works with 500+ popular tools out of the box|🔒|"Security concerns"|Enterprise-grade security with SOC 2 compliance|⚡|"Will slow down our workflow"|Actually speeds up processes by 3x on average' 
+  },
+  bottom_cta_title: {
+    type: 'string' as const,
+    default: 'Still Have Questions?'
+  },
+  bottom_cta_text: {
+    type: 'string' as const,
+    default: 'We\'re here to help! Our team has handled these concerns thousands of times and would love to address any specific questions you might have.'
+  },
+  bottom_cta_button_1: {
+    type: 'string' as const,
+    default: 'Get Answers'
+  },
+  bottom_cta_button_2: {
+    type: 'string' as const,
+    default: 'View FAQ'
   }
 };
 
@@ -124,16 +144,44 @@ export default function VisualObjectionTiles(props: LayoutComponentProps) {
 
               {/* Objection */}
               <div className="mb-4">
-                <h3 className="text-lg font-bold text-gray-900 mb-3 text-center">
-                  "{tile.objection}"
-                </h3>
+                <EditableAdaptiveText
+                  mode={mode}
+                  value={tile.objection || ''}
+                  onEdit={(value) => {
+                    const updatedTiles = blockContent.objection_tiles.split('|');
+                    updatedTiles[index * 3 + 1] = `"${value}"`;
+                    handleContentUpdate('objection_tiles', updatedTiles.join('|'));
+                  }}
+                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
+                  colorTokens={colorTokens}
+                  variant="headline"
+                  className="text-lg font-bold text-gray-900 mb-3 text-center"
+                  placeholder="Enter objection"
+                  sectionBackground={sectionBackground}
+                  data-section-id={sectionId}
+                  data-element-key={`objection_${index}_text`}
+                />
               </div>
 
               {/* Answer */}
               <div className="text-center">
-                <p className="text-gray-700 leading-relaxed">
-                  {tile.answer}
-                </p>
+                <EditableAdaptiveText
+                  mode={mode}
+                  value={tile.answer || ''}
+                  onEdit={(value) => {
+                    const updatedTiles = blockContent.objection_tiles.split('|');
+                    updatedTiles[index * 3 + 2] = value;
+                    handleContentUpdate('objection_tiles', updatedTiles.join('|'));
+                  }}
+                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
+                  colorTokens={colorTokens}
+                  variant="body"
+                  className="text-gray-700 leading-relaxed"
+                  placeholder="Enter answer"
+                  sectionBackground={sectionBackground}
+                  data-section-id={sectionId}
+                  data-element-key={`objection_${index}_answer`}
+                />
               </div>
 
               {/* Bottom accent */}
@@ -148,19 +196,71 @@ export default function VisualObjectionTiles(props: LayoutComponentProps) {
 
         {/* Bottom CTA Section */}
         <div className="mt-16 text-center bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl p-8">
-          <h3 className="text-xl font-bold text-gray-900 mb-4">
-            Still Have Questions?
-          </h3>
-          <p className="text-gray-700 mb-6 max-w-2xl mx-auto">
-            We're here to help! Our team has handled these concerns thousands of times and would love to address any specific questions you might have.
-          </p>
+          <EditableAdaptiveText
+            mode={mode}
+            value={blockContent.bottom_cta_title || ''}
+            onEdit={(value) => handleContentUpdate('bottom_cta_title', value)}
+            backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
+            colorTokens={colorTokens}
+            variant="headline"
+            className="text-xl font-bold text-gray-900 mb-4"
+            placeholder="Enter CTA title"
+            sectionBackground={sectionBackground}
+            data-section-id={sectionId}
+            data-element-key="bottom_cta_title"
+          />
+          <EditableAdaptiveText
+            mode={mode}
+            value={blockContent.bottom_cta_text || ''}
+            onEdit={(value) => handleContentUpdate('bottom_cta_text', value)}
+            backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
+            colorTokens={colorTokens}
+            variant="body"
+            className="text-gray-700 mb-6 max-w-2xl mx-auto"
+            placeholder="Enter CTA description"
+            sectionBackground={sectionBackground}
+            data-section-id={sectionId}
+            data-element-key="bottom_cta_text"
+          />
           <div className="flex items-center justify-center space-x-4 flex-wrap gap-2">
-            <button className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-lg font-medium transition-colors duration-200">
-              Get Answers
-            </button>
-            <button className="border border-gray-300 hover:border-gray-400 text-gray-700 px-6 py-3 rounded-lg font-medium transition-colors duration-200">
-              View FAQ
-            </button>
+            {mode === 'edit' ? (
+              <EditableAdaptiveText
+                mode={mode}
+                value={blockContent.bottom_cta_button_1 || ''}
+                onEdit={(value) => handleContentUpdate('bottom_cta_button_1', value)}
+                backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
+                colorTokens={colorTokens}
+                variant="body"
+                className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-lg font-medium transition-colors duration-200"
+                placeholder="Button 1 text"
+                sectionBackground={sectionBackground}
+                data-section-id={sectionId}
+                data-element-key="bottom_cta_button_1"
+              />
+            ) : (
+              <button className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-lg font-medium transition-colors duration-200">
+                {blockContent.bottom_cta_button_1 || 'Get Answers'}
+              </button>
+            )}
+            {mode === 'edit' ? (
+              <EditableAdaptiveText
+                mode={mode}
+                value={blockContent.bottom_cta_button_2 || ''}
+                onEdit={(value) => handleContentUpdate('bottom_cta_button_2', value)}
+                backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
+                colorTokens={colorTokens}
+                variant="body"
+                className="border border-gray-300 hover:border-gray-400 text-gray-700 px-6 py-3 rounded-lg font-medium transition-colors duration-200"
+                placeholder="Button 2 text"
+                sectionBackground={sectionBackground}
+                data-section-id={sectionId}
+                data-element-key="bottom_cta_button_2"
+              />
+            ) : (
+              <button className="border border-gray-300 hover:border-gray-400 text-gray-700 px-6 py-3 rounded-lg font-medium transition-colors duration-200">
+                {blockContent.bottom_cta_button_2 || 'View FAQ'}
+              </button>
+            )}
           </div>
         </div>
 

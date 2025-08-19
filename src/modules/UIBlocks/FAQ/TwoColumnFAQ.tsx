@@ -183,7 +183,7 @@ export default function TwoColumnFAQ(props: LayoutComponentProps) {
                   onEdit={(value) => handleContentUpdate(`left_question_${item.index}` as keyof TwoColumnFAQContent, value)}
                   backgroundType={backgroundType}
                   colorTokens={colorTokens}
-                  variant="heading"
+                  variant="body"
                   className={`font-semibold ${dynamicTextColors?.heading || colorTokens.textPrimary}`}
                   style={getTextStyle('h3')}
                   placeholder={`Question ${item.index}`}
@@ -260,7 +260,7 @@ export default function TwoColumnFAQ(props: LayoutComponentProps) {
                   onEdit={(value) => handleContentUpdate(`right_question_${item.index}` as keyof TwoColumnFAQContent, value)}
                   backgroundType={backgroundType}
                   colorTokens={colorTokens}
-                  variant="heading"
+                  variant="body"
                   className={`font-semibold ${dynamicTextColors?.heading || colorTokens.textPrimary}`}
                   style={getTextStyle('h3')}
                   placeholder={`Question ${item.index}`}

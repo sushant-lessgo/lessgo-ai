@@ -95,12 +95,12 @@ export default function QuoteStyleAnswers(props: LayoutComponentProps) {
       const expertName = blockContent[nameKey];
       const expertTitle = blockContent[titleKey];
       
-      if (question && question.trim() !== '' && question !== '___REMOVED___') {
+      if (question && typeof question === 'string' && question.trim() !== '' && question !== '___REMOVED___') {
         items.push({
           question: question.trim(),
-          answer: (answer && answer !== '___REMOVED___') ? answer.trim() : '',
-          expertName: (expertName && expertName !== '___REMOVED___') ? expertName.trim() : 'Expert',
-          expertTitle: (expertTitle && expertTitle !== '___REMOVED___') ? expertTitle.trim() : 'Senior Executive',
+          answer: (answer && typeof answer === 'string' && answer !== '___REMOVED___') ? answer.trim() : '',
+          expertName: (expertName && typeof expertName === 'string' && expertName !== '___REMOVED___') ? expertName.trim() : 'Expert',
+          expertTitle: (expertTitle && typeof expertTitle === 'string' && expertTitle !== '___REMOVED___') ? expertTitle.trim() : 'Senior Executive',
           index: i
         });
       }
@@ -190,7 +190,7 @@ export default function QuoteStyleAnswers(props: LayoutComponentProps) {
                   onEdit={(value) => handleContentUpdate(`question_${item.index}` as keyof QuoteStyleAnswersContent, value)}
                   backgroundType={backgroundType}
                   colorTokens={colorTokens}
-                  variant="heading"
+                  variant="body"
                   className={`font-semibold ${dynamicTextColors?.heading || colorTokens.textPrimary}`}
                   style={getTextStyle('h2')}
                   placeholder={`Question ${item.index}`}

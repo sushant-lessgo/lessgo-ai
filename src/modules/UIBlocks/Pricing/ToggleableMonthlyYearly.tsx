@@ -25,6 +25,21 @@ interface ToggleableMonthlyYearlyContent {
   subheadline?: string;
   supporting_text?: string;
   trust_items?: string;
+  // Platform features section
+  platform_feature_1?: string;
+  platform_feature_1_title?: string;
+  platform_feature_1_desc?: string;
+  platform_feature_2?: string;
+  platform_feature_2_title?: string;
+  platform_feature_2_desc?: string;
+  platform_feature_3?: string;
+  platform_feature_3_title?: string;
+  platform_feature_3_desc?: string;
+  platform_feature_4?: string;
+  platform_feature_4_title?: string;
+  platform_feature_4_desc?: string;
+  platform_features_title?: string;
+  show_platform_features?: boolean;
 }
 
 const CONTENT_SCHEMA = {
@@ -79,6 +94,63 @@ const CONTENT_SCHEMA = {
   trust_items: { 
     type: 'string' as const, 
     default: '' 
+  },
+  // Platform features section
+  platform_feature_1: { 
+    type: 'string' as const, 
+    default: 'free-trial' 
+  },
+  platform_feature_1_title: { 
+    type: 'string' as const, 
+    default: '14-Day Free Trial' 
+  },
+  platform_feature_1_desc: { 
+    type: 'string' as const, 
+    default: 'No credit card required' 
+  },
+  platform_feature_2: { 
+    type: 'string' as const, 
+    default: 'secure-reliable' 
+  },
+  platform_feature_2_title: { 
+    type: 'string' as const, 
+    default: 'Secure & Reliable' 
+  },
+  platform_feature_2_desc: { 
+    type: 'string' as const, 
+    default: 'Enterprise-grade security' 
+  },
+  platform_feature_3: { 
+    type: 'string' as const, 
+    default: 'support' 
+  },
+  platform_feature_3_title: { 
+    type: 'string' as const, 
+    default: '24/7 Support' 
+  },
+  platform_feature_3_desc: { 
+    type: 'string' as const, 
+    default: 'Always here to help' 
+  },
+  platform_feature_4: { 
+    type: 'string' as const, 
+    default: 'easy-migration' 
+  },
+  platform_feature_4_title: { 
+    type: 'string' as const, 
+    default: 'Easy Migration' 
+  },
+  platform_feature_4_desc: { 
+    type: 'string' as const, 
+    default: 'Switch plans anytime' 
+  },
+  platform_features_title: { 
+    type: 'string' as const, 
+    default: 'Why Choose Our Platform?' 
+  },
+  show_platform_features: { 
+    type: 'boolean' as const, 
+    default: true 
   }
 };
 
@@ -144,6 +216,76 @@ export default function ToggleableMonthlyYearly(props: LayoutComponentProps) {
     : [];
 
   const mutedTextColor = dynamicTextColors?.muted || colorTokens.textMuted;
+
+  // Helper function to get platform features
+  const getPlatformFeatures = () => {
+    const features = [
+      {
+        icon: blockContent.platform_feature_1 || 'free-trial',
+        title: blockContent.platform_feature_1_title || '14-Day Free Trial',
+        description: blockContent.platform_feature_1_desc || 'No credit card required',
+        bgColor: 'bg-green-500'
+      },
+      {
+        icon: blockContent.platform_feature_2 || 'secure-reliable',
+        title: blockContent.platform_feature_2_title || 'Secure & Reliable',
+        description: blockContent.platform_feature_2_desc || 'Enterprise-grade security',
+        bgColor: 'bg-blue-500'
+      },
+      {
+        icon: blockContent.platform_feature_3 || 'support',
+        title: blockContent.platform_feature_3_title || '24/7 Support',
+        description: blockContent.platform_feature_3_desc || 'Always here to help',
+        bgColor: 'bg-purple-500'
+      },
+      {
+        icon: blockContent.platform_feature_4 || 'easy-migration',
+        title: blockContent.platform_feature_4_title || 'Easy Migration',
+        description: blockContent.platform_feature_4_desc || 'Switch plans anytime',
+        bgColor: 'bg-orange-500'
+      }
+    ].filter(feature => 
+      feature.title !== '___REMOVED___' && 
+      feature.description !== '___REMOVED___' && 
+      feature.title.trim() !== '' && 
+      feature.description.trim() !== ''
+    );
+    
+    return features;
+  };
+
+  const getPlatformFeatureIcon = (iconName: string) => {
+    const icons = {
+      'free-trial': (
+        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+      ),
+      'secure-reliable': (
+        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+        </svg>
+      ),
+      'support': (
+        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z" />
+        </svg>
+      ),
+      'easy-migration': (
+        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+        </svg>
+      ),
+      'default': (
+        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+        </svg>
+      )
+    };
+    return icons[iconName as keyof typeof icons] || icons.default;
+  };
+
+  const platformFeatures = getPlatformFeatures();
 
   const calculateSavings = (monthlyPrice: string, yearlyPrice: string) => {
     const monthly = parseFloat(monthlyPrice.replace(/[^0-9.]/g, ''));
@@ -403,53 +545,101 @@ export default function ToggleableMonthlyYearly(props: LayoutComponentProps) {
         )}
 
         {/* Trust & Support */}
-        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl p-8 border border-blue-100 mb-12">
-          <div className="text-center">
-            <h3 className="text-lg font-semibold text-gray-900 mb-6">Why Choose Our Platform?</h3>
-            
-            <div className="grid md:grid-cols-4 gap-6">
-              <div className="text-center">
-                <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-green-500 flex items-center justify-center text-white">
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                </div>
-                <div className="font-semibold text-gray-900">14-Day Free Trial</div>
-                <div className={`text-sm ${mutedTextColor}`}>No credit card required</div>
-              </div>
+        {((blockContent.show_platform_features !== false && platformFeatures.length > 0) || mode === 'edit') && (
+          <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl p-8 border border-blue-100 mb-12">
+            <div className="text-center">
+              <EditableAdaptiveText
+                mode={mode}
+                value={blockContent.platform_features_title || ''}
+                onEdit={(value) => handleContentUpdate('platform_features_title', value)}
+                backgroundType={backgroundType}
+                colorTokens={colorTokens}
+                variant="body"
+                className="text-lg font-semibold text-gray-900 mb-6"
+                placeholder="Platform features section title"
+                sectionBackground={sectionBackground}
+                data-section-id={sectionId}
+                data-element-key="platform_features_title"
+              />
               
-              <div className="text-center">
-                <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-blue-500 flex items-center justify-center text-white">
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                  </svg>
+              {mode === 'edit' ? (
+                <div className="space-y-6">
+                  <div className="grid md:grid-cols-4 gap-6">
+                    {[1, 2, 3, 4].map((index) => {
+                      const featureTitle = blockContent[`platform_feature_${index}_title` as keyof ToggleableMonthlyYearlyContent] || '';
+                      const featureDesc = blockContent[`platform_feature_${index}_desc` as keyof ToggleableMonthlyYearlyContent] || '';
+                      const featureIcon = blockContent[`platform_feature_${index}` as keyof ToggleableMonthlyYearlyContent] || 'default';
+                      
+                      return (
+                        <div key={index} className="text-center relative group/platform-feature">
+                          <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-gray-100 flex items-center justify-center text-white">
+                            {getPlatformFeatureIcon(featureIcon)}
+                          </div>
+                          <EditableAdaptiveText
+                            mode={mode}
+                            value={featureTitle}
+                            onEdit={(value) => handleContentUpdate(`platform_feature_${index}_title`, value)}
+                            backgroundType={backgroundType}
+                            colorTokens={colorTokens}
+                            variant="body"
+                            className="font-semibold text-gray-900 mb-2"
+                            placeholder={`Feature ${index} title`}
+                            sectionBackground={sectionBackground}
+                            data-section-id={sectionId}
+                            data-element-key={`platform_feature_${index}_title`}
+                          />
+                          <EditableAdaptiveText
+                            mode={mode}
+                            value={featureDesc}
+                            onEdit={(value) => handleContentUpdate(`platform_feature_${index}_desc`, value)}
+                            backgroundType={backgroundType}
+                            colorTokens={colorTokens}
+                            variant="body"
+                            className={`text-sm ${mutedTextColor}`}
+                            placeholder={`Feature ${index} description`}
+                            sectionBackground={sectionBackground}
+                            data-section-id={sectionId}
+                            data-element-key={`platform_feature_${index}_desc`}
+                          />
+                          
+                          {/* Remove button */}
+                          {(featureTitle || featureDesc) && (
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleContentUpdate(`platform_feature_${index}_title`, '___REMOVED___');
+                                handleContentUpdate(`platform_feature_${index}_desc`, '___REMOVED___');
+                                handleContentUpdate(`platform_feature_${index}`, '___REMOVED___');
+                              }}
+                              className="opacity-0 group-hover/platform-feature:opacity-100 absolute -top-2 -right-2 p-1 rounded-full bg-white/80 hover:bg-white text-red-500 hover:text-red-700 transition-all duration-200 z-10 shadow-sm"
+                              title="Remove this feature"
+                            >
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                              </svg>
+                            </button>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
                 </div>
-                <div className="font-semibold text-gray-900">Secure & Reliable</div>
-                <div className={`text-sm ${mutedTextColor}`}>Enterprise-grade security</div>
-              </div>
-              
-              <div className="text-center">
-                <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-purple-500 flex items-center justify-center text-white">
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z" />
-                  </svg>
+              ) : (
+                <div className="grid md:grid-cols-4 gap-6">
+                  {platformFeatures.map((feature, index) => (
+                    <div key={index} className="text-center">
+                      <div className={`w-12 h-12 mx-auto mb-3 rounded-full ${feature.bgColor} flex items-center justify-center text-white`}>
+                        {getPlatformFeatureIcon(feature.icon)}
+                      </div>
+                      <div className="font-semibold text-gray-900">{feature.title}</div>
+                      <div className={`text-sm ${mutedTextColor}`}>{feature.description}</div>
+                    </div>
+                  ))}
                 </div>
-                <div className="font-semibold text-gray-900">24/7 Support</div>
-                <div className={`text-sm ${mutedTextColor}`}>Always here to help</div>
-              </div>
-              
-              <div className="text-center">
-                <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-orange-500 flex items-center justify-center text-white">
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                  </svg>
-                </div>
-                <div className="font-semibold text-gray-900">Easy Migration</div>
-                <div className={`text-sm ${mutedTextColor}`}>Switch plans anytime</div>
-              </div>
+              )}
             </div>
           </div>
-        </div>
+        )}
 
         {(blockContent.supporting_text || blockContent.trust_items || mode === 'edit') && (
           <div className="text-center space-y-6">
@@ -504,6 +694,16 @@ export const componentMeta = {
     { key: 'popular_tiers', label: 'Popular Tiers true/false (pipe separated)', type: 'text', required: false },
     { key: 'annual_discount_label', label: 'Annual Discount Label', type: 'text', required: false },
     { key: 'billing_note', label: 'Billing Note', type: 'text', required: false },
+    { key: 'platform_features_title', label: 'Platform Features Section Title', type: 'text', required: false },
+    { key: 'platform_feature_1_title', label: 'Platform Feature 1 Title', type: 'text', required: false },
+    { key: 'platform_feature_1_desc', label: 'Platform Feature 1 Description', type: 'text', required: false },
+    { key: 'platform_feature_2_title', label: 'Platform Feature 2 Title', type: 'text', required: false },
+    { key: 'platform_feature_2_desc', label: 'Platform Feature 2 Description', type: 'text', required: false },
+    { key: 'platform_feature_3_title', label: 'Platform Feature 3 Title', type: 'text', required: false },
+    { key: 'platform_feature_3_desc', label: 'Platform Feature 3 Description', type: 'text', required: false },
+    { key: 'platform_feature_4_title', label: 'Platform Feature 4 Title', type: 'text', required: false },
+    { key: 'platform_feature_4_desc', label: 'Platform Feature 4 Description', type: 'text', required: false },
+    { key: 'show_platform_features', label: 'Show Platform Features Section', type: 'boolean', required: false },
     { key: 'supporting_text', label: 'Supporting Text', type: 'textarea', required: false },
     { key: 'trust_items', label: 'Trust Indicators (pipe separated)', type: 'text', required: false }
   ],

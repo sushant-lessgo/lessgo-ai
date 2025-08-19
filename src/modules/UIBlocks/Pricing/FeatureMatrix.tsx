@@ -26,6 +26,21 @@ interface FeatureMatrixContent {
   subheadline?: string;
   supporting_text?: string;
   trust_items?: string;
+  // Enterprise features section
+  enterprise_section_title?: string;
+  enterprise_feature_1_title?: string;
+  enterprise_feature_1_desc?: string;
+  enterprise_feature_1_icon?: string;
+  enterprise_feature_2_title?: string;
+  enterprise_feature_2_desc?: string;
+  enterprise_feature_2_icon?: string;
+  enterprise_feature_3_title?: string;
+  enterprise_feature_3_desc?: string;
+  enterprise_feature_3_icon?: string;
+  enterprise_feature_4_title?: string;
+  enterprise_feature_4_desc?: string;
+  enterprise_feature_4_icon?: string;
+  show_enterprise_features?: boolean;
 }
 
 const CONTENT_SCHEMA = {
@@ -80,6 +95,63 @@ const CONTENT_SCHEMA = {
   trust_items: { 
     type: 'string' as const, 
     default: '' 
+  },
+  // Enterprise features section
+  enterprise_section_title: { 
+    type: 'string' as const, 
+    default: 'Enterprise-Grade Features' 
+  },
+  enterprise_feature_1_title: { 
+    type: 'string' as const, 
+    default: 'Security' 
+  },
+  enterprise_feature_1_desc: { 
+    type: 'string' as const, 
+    default: 'SOC 2, SSO, 2FA' 
+  },
+  enterprise_feature_1_icon: { 
+    type: 'string' as const, 
+    default: 'security' 
+  },
+  enterprise_feature_2_title: { 
+    type: 'string' as const, 
+    default: 'Performance' 
+  },
+  enterprise_feature_2_desc: { 
+    type: 'string' as const, 
+    default: '99.9% uptime SLA' 
+  },
+  enterprise_feature_2_icon: { 
+    type: 'string' as const, 
+    default: 'performance' 
+  },
+  enterprise_feature_3_title: { 
+    type: 'string' as const, 
+    default: 'Support' 
+  },
+  enterprise_feature_3_desc: { 
+    type: 'string' as const, 
+    default: 'Dedicated manager' 
+  },
+  enterprise_feature_3_icon: { 
+    type: 'string' as const, 
+    default: 'support' 
+  },
+  enterprise_feature_4_title: { 
+    type: 'string' as const, 
+    default: 'Integration' 
+  },
+  enterprise_feature_4_desc: { 
+    type: 'string' as const, 
+    default: 'Custom APIs' 
+  },
+  enterprise_feature_4_icon: { 
+    type: 'string' as const, 
+    default: 'integration' 
+  },
+  show_enterprise_features: { 
+    type: 'boolean' as const, 
+    default: true 
   }
 };
 
@@ -176,6 +248,76 @@ export default function FeatureMatrix(props: LayoutComponentProps) {
     : [];
 
   const mutedTextColor = dynamicTextColors?.muted || colorTokens.textMuted;
+
+  // Helper functions for enterprise features
+  const getEnterpriseFeatures = () => {
+    const features = [
+      {
+        title: blockContent.enterprise_feature_1_title || 'Security',
+        description: blockContent.enterprise_feature_1_desc || 'SOC 2, SSO, 2FA',
+        icon: blockContent.enterprise_feature_1_icon || 'security',
+        bgColor: 'bg-blue-500'
+      },
+      {
+        title: blockContent.enterprise_feature_2_title || 'Performance',
+        description: blockContent.enterprise_feature_2_desc || '99.9% uptime SLA',
+        icon: blockContent.enterprise_feature_2_icon || 'performance',
+        bgColor: 'bg-green-500'
+      },
+      {
+        title: blockContent.enterprise_feature_3_title || 'Support',
+        description: blockContent.enterprise_feature_3_desc || 'Dedicated manager',
+        icon: blockContent.enterprise_feature_3_icon || 'support',
+        bgColor: 'bg-purple-500'
+      },
+      {
+        title: blockContent.enterprise_feature_4_title || 'Integration',
+        description: blockContent.enterprise_feature_4_desc || 'Custom APIs',
+        icon: blockContent.enterprise_feature_4_icon || 'integration',
+        bgColor: 'bg-orange-500'
+      }
+    ].filter(feature => 
+      feature.title !== '___REMOVED___' && 
+      feature.description !== '___REMOVED___' && 
+      feature.title.trim() !== '' && 
+      feature.description.trim() !== ''
+    );
+    
+    return features;
+  };
+
+  const getEnterpriseFeatureIcon = (iconName: string) => {
+    const icons = {
+      security: (
+        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+        </svg>
+      ),
+      performance: (
+        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+        </svg>
+      ),
+      support: (
+        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z" />
+        </svg>
+      ),
+      integration: (
+        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+        </svg>
+      ),
+      default: (
+        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+        </svg>
+      )
+    };
+    return icons[iconName as keyof typeof icons] || icons.default;
+  };
+
+  const enterpriseFeatures = getEnterpriseFeatures();
 
   const renderFeatureValue = (value: string) => {
     if (value === '✓' || value.toLowerCase() === 'true') {
@@ -398,53 +540,94 @@ export default function FeatureMatrix(props: LayoutComponentProps) {
         )}
 
         {/* Enterprise Features Highlight */}
-        <div className="bg-gradient-to-r from-gray-900 to-gray-800 rounded-2xl p-8 text-white mt-12 mb-12">
-          <div className="text-center">
-            <h3 style={h3Style} className="font-semibold mb-6">Enterprise-Grade Features</h3>
-            
-            <div className="grid md:grid-cols-4 gap-6">
-              <div className="text-center">
-                <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-blue-500 flex items-center justify-center">
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                  </svg>
-                </div>
-                <div className="font-semibold text-white">Security</div>
-                <div className="text-gray-300 text-sm">SOC 2, SSO, 2FA</div>
-              </div>
+        {((blockContent.show_enterprise_features !== false && enterpriseFeatures.length > 0) || mode === 'edit') && (
+          <div className="bg-gradient-to-r from-gray-900 to-gray-800 rounded-2xl p-8 text-white mt-12 mb-12">
+            <div className="text-center">
+              <EditableAdaptiveText
+                mode={mode}
+                value={blockContent.enterprise_section_title || ''}
+                onEdit={(value) => handleContentUpdate('enterprise_section_title', value)}
+                backgroundType={backgroundType}
+                colorTokens={colorTokens}
+                variant="body"
+                style={h3Style}
+                className="font-semibold mb-6 text-white"
+                placeholder="Enterprise section title"
+                sectionBackground={sectionBackground}
+                data-section-id={sectionId}
+                data-element-key="enterprise_section_title"
+              />
               
-              <div className="text-center">
-                <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-green-500 flex items-center justify-center">
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                  </svg>
+              {mode === 'edit' ? (
+                <div className="space-y-6">
+                  <div className="grid md:grid-cols-4 gap-6">
+                    {[1, 2, 3, 4].map((index) => {
+                      const featureTitle = blockContent[`enterprise_feature_${index}_title` as keyof FeatureMatrixContent] || '';
+                      const featureDesc = blockContent[`enterprise_feature_${index}_desc` as keyof FeatureMatrixContent] || '';
+                      const featureIcon = blockContent[`enterprise_feature_${index}_icon` as keyof FeatureMatrixContent] || 'default';
+                      
+                      return (
+                        <div key={index} className="text-center relative group/enterprise-feature">
+                          <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-gray-500 flex items-center justify-center">
+                            {getEnterpriseFeatureIcon(featureIcon)}
+                          </div>
+                          <div 
+                            contentEditable
+                            suppressContentEditableWarning
+                            onBlur={(e) => handleContentUpdate(`enterprise_feature_${index}_title`, e.currentTarget.textContent || '')}
+                            className="outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-1 min-h-[20px] cursor-text hover:bg-gray-700 font-semibold text-white mb-2"
+                            data-placeholder={`Feature ${index} title`}
+                          >
+                            {featureTitle}
+                          </div>
+                          <div 
+                            contentEditable
+                            suppressContentEditableWarning
+                            onBlur={(e) => handleContentUpdate(`enterprise_feature_${index}_desc`, e.currentTarget.textContent || '')}
+                            className="outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-1 min-h-[20px] cursor-text hover:bg-gray-700 text-gray-300 text-sm"
+                            data-placeholder={`Feature ${index} description`}
+                          >
+                            {featureDesc}
+                          </div>
+                          
+                          {/* Remove button */}
+                          {(featureTitle || featureDesc) && (
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleContentUpdate(`enterprise_feature_${index}_title`, '___REMOVED___');
+                                handleContentUpdate(`enterprise_feature_${index}_desc`, '___REMOVED___');
+                                handleContentUpdate(`enterprise_feature_${index}_icon`, '___REMOVED___');
+                              }}
+                              className="opacity-0 group-hover/enterprise-feature:opacity-100 absolute -top-2 -right-2 p-1 rounded-full bg-white/20 hover:bg-white/30 text-red-400 hover:text-red-300 transition-all duration-200 z-10"
+                              title="Remove this feature"
+                            >
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                              </svg>
+                            </button>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
                 </div>
-                <div className="font-semibold text-white">Performance</div>
-                <div className="text-gray-300 text-sm">99.9% uptime SLA</div>
-              </div>
-              
-              <div className="text-center">
-                <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-purple-500 flex items-center justify-center">
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z" />
-                  </svg>
+              ) : (
+                <div className="grid md:grid-cols-4 gap-6">
+                  {enterpriseFeatures.map((feature, index) => (
+                    <div key={index} className="text-center">
+                      <div className={`w-12 h-12 mx-auto mb-3 rounded-full ${feature.bgColor} flex items-center justify-center`}>
+                        {getEnterpriseFeatureIcon(feature.icon)}
+                      </div>
+                      <div className="font-semibold text-white">{feature.title}</div>
+                      <div className="text-gray-300 text-sm">{feature.description}</div>
+                    </div>
+                  ))}
                 </div>
-                <div className="font-semibold text-white">Support</div>
-                <div className="text-gray-300 text-sm">Dedicated manager</div>
-              </div>
-              
-              <div className="text-center">
-                <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-orange-500 flex items-center justify-center">
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                  </svg>
-                </div>
-                <div className="font-semibold text-white">Integration</div>
-                <div className="text-gray-300 text-sm">Custom APIs</div>
-              </div>
+              )}
             </div>
           </div>
-        </div>
+        )}
 
         {(blockContent.supporting_text || blockContent.trust_items || mode === 'edit') && (
           <div className="text-center space-y-6">
@@ -499,6 +682,16 @@ export const componentMeta = {
     { key: 'feature_availability', label: 'Feature Availability Matrix (semicolon for tiers, pipe for features)', type: 'textarea', required: true },
     { key: 'popular_tiers', label: 'Popular Tiers true/false (pipe separated)', type: 'text', required: false },
     { key: 'feature_descriptions', label: 'Feature Descriptions (pipe separated)', type: 'textarea', required: false },
+    { key: 'enterprise_section_title', label: 'Enterprise Section Title', type: 'text', required: false },
+    { key: 'enterprise_feature_1_title', label: 'Enterprise Feature 1 Title', type: 'text', required: false },
+    { key: 'enterprise_feature_1_desc', label: 'Enterprise Feature 1 Description', type: 'text', required: false },
+    { key: 'enterprise_feature_2_title', label: 'Enterprise Feature 2 Title', type: 'text', required: false },
+    { key: 'enterprise_feature_2_desc', label: 'Enterprise Feature 2 Description', type: 'text', required: false },
+    { key: 'enterprise_feature_3_title', label: 'Enterprise Feature 3 Title', type: 'text', required: false },
+    { key: 'enterprise_feature_3_desc', label: 'Enterprise Feature 3 Description', type: 'text', required: false },
+    { key: 'enterprise_feature_4_title', label: 'Enterprise Feature 4 Title', type: 'text', required: false },
+    { key: 'enterprise_feature_4_desc', label: 'Enterprise Feature 4 Description', type: 'text', required: false },
+    { key: 'show_enterprise_features', label: 'Show Enterprise Features Section', type: 'boolean', required: false },
     { key: 'supporting_text', label: 'Supporting Text', type: 'textarea', required: false },
     { key: 'trust_items', label: 'Trust Indicators (pipe separated)', type: 'text', required: false }
   ],

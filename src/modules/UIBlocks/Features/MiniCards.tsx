@@ -420,7 +420,7 @@ export default function MiniCards(props: LayoutComponentProps) {
                   </div>
                 </>
               )}
-              {(blockContent.summary_item_3 || mode === 'edit') && blockContent.summary_item_3 !== '___REMOVED___' && blockContent.summary_item_3.trim() !== '' && (
+              {(blockContent.summary_item_3 || mode === 'edit') && blockContent.summary_item_3 !== '___REMOVED___' && blockContent.summary_item_3?.trim() !== '' && (
                 <>
                   <div className="w-px h-6 bg-gray-200" />
                   <div className="flex items-center space-x-2 group/summary-item relative">

@@ -15,6 +15,14 @@ interface SkepticToBelieverStepsContent {
   headline: string;
   subheadline?: string;
   conversion_steps: string;
+  success_title?: string;
+  success_description?: string;
+  stat_1_value?: string;
+  stat_1_label?: string;
+  stat_2_value?: string;
+  stat_2_label?: string;
+  stat_3_value?: string;
+  stat_3_label?: string;
 }
 
 // Content schema - defines structure and defaults
@@ -30,6 +38,38 @@ const CONTENT_SCHEMA = {
   conversion_steps: { 
     type: 'string' as const, 
     default: 'Start with healthy skepticism|"This sounds too good to be true"|We get it - you\'ve been disappointed before|Try our free trial|See the results for yourself|No commitment, just experience the difference|Experience the difference|Watch your workflow transform|Most users see immediate improvements in the first session|Share with your team|Get buy-in from stakeholders|92% of teams adopt after the first demo|Become a confident advocate|Join our community of believers|Help others discover what you\'ve found' 
+  },
+  success_title: {
+    type: 'string' as const,
+    default: 'Welcome to the Believer Community!'
+  },
+  success_description: {
+    type: 'string' as const,
+    default: 'You\'ve joined thousands of others who made this same journey from skepticism to advocacy. Now you\'re part of a community that\'s transforming how work gets done.'
+  },
+  stat_1_value: {
+    type: 'string' as const,
+    default: '89%'
+  },
+  stat_1_label: {
+    type: 'string' as const,
+    default: 'Complete the journey successfully'
+  },
+  stat_2_value: {
+    type: 'string' as const,
+    default: '2.3x'
+  },
+  stat_2_label: {
+    type: 'string' as const,
+    default: 'Average productivity increase'
+  },
+  stat_3_value: {
+    type: 'string' as const,
+    default: '94%'
+  },
+  stat_3_label: {
+    type: 'string' as const,
+    default: 'Recommend to colleagues'
   }
 };
 
@@ -149,24 +189,66 @@ export default function SkepticToBelieverSteps(props: LayoutComponentProps) {
                     <div className="bg-white/90 backdrop-blur-sm border border-gray-200 rounded-2xl p-8 shadow-lg hover:shadow-xl transition-shadow duration-300">
                       
                       {/* Step Title */}
-                      <h3 className="text-xl font-bold text-gray-900 mb-4">
-                        {step.title}
-                      </h3>
+                      <EditableAdaptiveText
+                        mode={mode}
+                        value={step.title || ''}
+                        onEdit={(value) => {
+                          const updatedSteps = blockContent.conversion_steps.split('|');
+                          updatedSteps[index * 3] = value;
+                          handleContentUpdate('conversion_steps', updatedSteps.join('|'));
+                        }}
+                        backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
+                        colorTokens={colorTokens}
+                        variant="headline"
+                        className="text-xl font-bold text-gray-900 mb-4"
+                        placeholder="Enter step title"
+                        sectionBackground={sectionBackground}
+                        data-section-id={sectionId}
+                        data-element-key={`step_${index}_title`}
+                      />
 
                       {/* Thought Bubble */}
                       {step.thought && (
                         <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 mb-4 relative">
                           <div className="absolute -left-2 top-4 w-4 h-4 bg-gray-50 border-l border-b border-gray-200 transform rotate-45"></div>
-                          <p className="text-gray-700 italic">
-                            "{step.thought}"
-                          </p>
+                          <EditableAdaptiveText
+                            mode={mode}
+                            value={step.thought || ''}
+                            onEdit={(value) => {
+                              const updatedSteps = blockContent.conversion_steps.split('|');
+                              updatedSteps[index * 3 + 1] = `"${value}"`;
+                              handleContentUpdate('conversion_steps', updatedSteps.join('|'));
+                            }}
+                            backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
+                            colorTokens={colorTokens}
+                            variant="body"
+                            className="text-gray-700 italic"
+                            placeholder="Enter skeptical thought"
+                            sectionBackground={sectionBackground}
+                            data-section-id={sectionId}
+                            data-element-key={`step_${index}_thought`}
+                          />
                         </div>
                       )}
 
                       {/* Step Description */}
-                      <p className="text-gray-600 leading-relaxed">
-                        {step.description}
-                      </p>
+                      <EditableAdaptiveText
+                        mode={mode}
+                        value={step.description || ''}
+                        onEdit={(value) => {
+                          const updatedSteps = blockContent.conversion_steps.split('|');
+                          updatedSteps[index * 3 + 2] = value;
+                          handleContentUpdate('conversion_steps', updatedSteps.join('|'));
+                        }}
+                        backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
+                        colorTokens={colorTokens}
+                        variant="body"
+                        className="text-gray-600 leading-relaxed"
+                        placeholder="Enter step description"
+                        sectionBackground={sectionBackground}
+                        data-section-id={sectionId}
+                        data-element-key={`step_${index}_description`}
+                      />
 
                       {/* Progress Indicator */}
                       <div className="mt-6 flex items-center space-x-2">
@@ -192,27 +274,118 @@ export default function SkepticToBelieverSteps(props: LayoutComponentProps) {
         <div className="mt-16 bg-gradient-to-r from-green-50 to-emerald-50 rounded-2xl p-8 text-center">
           <div className="max-w-4xl mx-auto">
             <div className="text-4xl mb-4">🎉</div>
-            <h3 className="text-2xl font-bold text-green-900 mb-4">
-              Welcome to the Believer Community!
-            </h3>
-            <p className="text-green-800 mb-6 text-lg leading-relaxed">
-              You've joined thousands of others who made this same journey from skepticism to advocacy. 
-              Now you're part of a community that's transforming how work gets done.
-            </p>
+            <EditableAdaptiveText
+              mode={mode}
+              value={blockContent.success_title || ''}
+              onEdit={(value) => handleContentUpdate('success_title', value)}
+              backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
+              colorTokens={colorTokens}
+              variant="headline"
+              className="text-2xl font-bold text-green-900 mb-4"
+              placeholder="Enter success title"
+              sectionBackground={sectionBackground}
+              data-section-id={sectionId}
+              data-element-key="success_title"
+            />
+            <EditableAdaptiveText
+              mode={mode}
+              value={blockContent.success_description || ''}
+              onEdit={(value) => handleContentUpdate('success_description', value)}
+              backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
+              colorTokens={colorTokens}
+              variant="body"
+              className="text-green-800 mb-6 text-lg leading-relaxed"
+              placeholder="Enter success description"
+              sectionBackground={sectionBackground}
+              data-section-id={sectionId}
+              data-element-key="success_description"
+            />
             
             {/* Stats */}
             <div className="grid md:grid-cols-3 gap-8 mt-8">
               <div className="text-center">
-                <div className="text-3xl font-bold text-green-900 mb-2">89%</div>
-                <div className="text-green-700 text-sm">Complete the journey successfully</div>
+                <EditableAdaptiveText
+                  mode={mode}
+                  value={blockContent.stat_1_value || ''}
+                  onEdit={(value) => handleContentUpdate('stat_1_value', value)}
+                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
+                  colorTokens={colorTokens}
+                  variant="headline"
+                  className="text-3xl font-bold text-green-900 mb-2"
+                  placeholder="Stat 1 value"
+                  sectionBackground={sectionBackground}
+                  data-section-id={sectionId}
+                  data-element-key="stat_1_value"
+                />
+                <EditableAdaptiveText
+                  mode={mode}
+                  value={blockContent.stat_1_label || ''}
+                  onEdit={(value) => handleContentUpdate('stat_1_label', value)}
+                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
+                  colorTokens={colorTokens}
+                  variant="body"
+                  className="text-green-700 text-sm"
+                  placeholder="Stat 1 label"
+                  sectionBackground={sectionBackground}
+                  data-section-id={sectionId}
+                  data-element-key="stat_1_label"
+                />
               </div>
               <div className="text-center">
-                <div className="text-3xl font-bold text-green-900 mb-2">2.3x</div>
-                <div className="text-green-700 text-sm">Average productivity increase</div>
+                <EditableAdaptiveText
+                  mode={mode}
+                  value={blockContent.stat_2_value || ''}
+                  onEdit={(value) => handleContentUpdate('stat_2_value', value)}
+                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
+                  colorTokens={colorTokens}
+                  variant="headline"
+                  className="text-3xl font-bold text-green-900 mb-2"
+                  placeholder="Stat 2 value"
+                  sectionBackground={sectionBackground}
+                  data-section-id={sectionId}
+                  data-element-key="stat_2_value"
+                />
+                <EditableAdaptiveText
+                  mode={mode}
+                  value={blockContent.stat_2_label || ''}
+                  onEdit={(value) => handleContentUpdate('stat_2_label', value)}
+                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
+                  colorTokens={colorTokens}
+                  variant="body"
+                  className="text-green-700 text-sm"
+                  placeholder="Stat 2 label"
+                  sectionBackground={sectionBackground}
+                  data-section-id={sectionId}
+                  data-element-key="stat_2_label"
+                />
               </div>
               <div className="text-center">
-                <div className="text-3xl font-bold text-green-900 mb-2">94%</div>
-                <div className="text-green-700 text-sm">Recommend to colleagues</div>
+                <EditableAdaptiveText
+                  mode={mode}
+                  value={blockContent.stat_3_value || ''}
+                  onEdit={(value) => handleContentUpdate('stat_3_value', value)}
+                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
+                  colorTokens={colorTokens}
+                  variant="headline"
+                  className="text-3xl font-bold text-green-900 mb-2"
+                  placeholder="Stat 3 value"
+                  sectionBackground={sectionBackground}
+                  data-section-id={sectionId}
+                  data-element-key="stat_3_value"
+                />
+                <EditableAdaptiveText
+                  mode={mode}
+                  value={blockContent.stat_3_label || ''}
+                  onEdit={(value) => handleContentUpdate('stat_3_label', value)}
+                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
+                  colorTokens={colorTokens}
+                  variant="body"
+                  className="text-green-700 text-sm"
+                  placeholder="Stat 3 label"
+                  sectionBackground={sectionBackground}
+                  data-section-id={sectionId}
+                  data-element-key="stat_3_label"
+                />
               </div>
             </div>
           </div>

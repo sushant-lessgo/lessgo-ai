@@ -266,7 +266,7 @@ export default function SegmentedFAQTabs(props: LayoutComponentProps) {
                     mode={mode}
                     value={label}
                     onEdit={(value) => handleContentUpdate(`tab_label_${index + 1}` as keyof SegmentedFAQTabsContent, value)}
-                    backgroundType={activeTab === index ? 'dark' : backgroundType}
+                    backgroundType={activeTab === index ? 'primary' : backgroundType}
                     colorTokens={activeTab === index ? {
                       ...colorTokens,
                       textPrimary: colorTokens.ctaText || '#ffffff',
@@ -298,7 +298,7 @@ export default function SegmentedFAQTabs(props: LayoutComponentProps) {
                   onEdit={(value) => handleContentUpdate(`tab${item.tabNumber}_question_${item.index}` as keyof SegmentedFAQTabsContent, value)}
                   backgroundType={backgroundType}
                   colorTokens={colorTokens}
-                  variant="heading"
+                  variant="body"
                   className={`font-semibold ${dynamicTextColors?.heading || colorTokens.textPrimary}`}
                   style={getTextStyle('h3')}
                   placeholder={`Question ${item.index} for Tab ${item.tabNumber}`}

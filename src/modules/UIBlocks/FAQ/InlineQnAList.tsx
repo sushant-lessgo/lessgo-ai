@@ -170,7 +170,7 @@ export default function InlineQnAList(props: LayoutComponentProps) {
                   onEdit={(value) => handleContentUpdate(`question_${item.index}` as keyof InlineQnAListContent, value)}
                   backgroundType={backgroundType}
                   colorTokens={colorTokens}
-                  variant="heading"
+                  variant="body"
                   className={`font-medium ${dynamicTextColors?.heading || colorTokens.textPrimary}`}
                   style={getTextStyle('h3')}
                   placeholder={`Question ${item.index}`}

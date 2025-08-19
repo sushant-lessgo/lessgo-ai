@@ -153,14 +153,14 @@ export default function TestimonialFAQs(props: LayoutComponentProps) {
       const customerCompany = blockContent[companyKey];
       const rating = blockContent[ratingKey];
       
-      if (question && question.trim() !== '' && question !== '___REMOVED___') {
+      if (question && typeof question === 'string' && question.trim() !== '' && question !== '___REMOVED___') {
         items.push({
           question: question.trim(),
-          answer: (answer && answer !== '___REMOVED___') ? answer.trim() : '',
-          customerName: (customerName && customerName !== '___REMOVED___') ? customerName.trim() : 'Customer',
-          customerTitle: (customerTitle && customerTitle !== '___REMOVED___') ? customerTitle.trim() : 'Customer',
-          customerCompany: (customerCompany && customerCompany !== '___REMOVED___') ? customerCompany.trim() : 'Company',
-          rating: (rating && rating !== '___REMOVED___') ? rating.trim() : '5',
+          answer: (answer && typeof answer === 'string' && answer !== '___REMOVED___') ? answer.trim() : '',
+          customerName: (customerName && typeof customerName === 'string' && customerName !== '___REMOVED___') ? customerName.trim() : 'Customer',
+          customerTitle: (customerTitle && typeof customerTitle === 'string' && customerTitle !== '___REMOVED___') ? customerTitle.trim() : 'Customer',
+          customerCompany: (customerCompany && typeof customerCompany === 'string' && customerCompany !== '___REMOVED___') ? customerCompany.trim() : 'Company',
+          rating: (rating && typeof rating === 'string' && rating !== '___REMOVED___') ? rating.trim() : '5',
           index: i
         });
       }
@@ -477,7 +477,7 @@ export default function TestimonialFAQs(props: LayoutComponentProps) {
               <button
                 onClick={(e) => {
                   e.stopPropagation();
-                  handleContentUpdate('show_trust_section', false);
+                  handleContentUpdate('show_trust_section', '___REMOVED___');
                 }}
                 className="opacity-0 group-hover/trust-section:opacity-100 absolute -top-2 right-0 p-1 rounded-full bg-white/80 hover:bg-white text-red-500 hover:text-red-700 transition-all duration-200 shadow-sm"
                 title="Remove trust section"

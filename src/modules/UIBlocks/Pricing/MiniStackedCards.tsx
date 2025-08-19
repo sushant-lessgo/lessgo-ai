@@ -26,6 +26,33 @@ interface MiniStackedCardsContent {
   subheadline?: string;
   supporting_text?: string;
   trust_items?: string;
+  // All plans include section
+  plans_feature_1?: string;
+  plans_feature_1_title?: string;
+  plans_feature_1_desc?: string;
+  plans_feature_2?: string;
+  plans_feature_2_title?: string;
+  plans_feature_2_desc?: string;
+  plans_feature_3?: string;
+  plans_feature_3_title?: string;
+  plans_feature_3_desc?: string;
+  show_plans_features?: boolean;
+  // FAQ section
+  faq_question_1?: string;
+  faq_answer_1?: string;
+  faq_question_2?: string;
+  faq_answer_2?: string;
+  faq_question_3?: string;
+  faq_answer_3?: string;
+  faq_question_4?: string;
+  faq_answer_4?: string;
+  show_faq?: boolean;
+  // Trust indicators
+  trust_item_1?: string;
+  trust_item_2?: string;
+  trust_item_3?: string;
+  trust_item_4?: string;
+  show_trust_bar?: boolean;
 }
 
 const CONTENT_SCHEMA = {
@@ -80,6 +107,105 @@ const CONTENT_SCHEMA = {
   trust_items: { 
     type: 'string' as const, 
     default: '' 
+  },
+  // All plans include section
+  plans_feature_1: { 
+    type: 'string' as const, 
+    default: 'secure-reliable' 
+  },
+  plans_feature_1_title: { 
+    type: 'string' as const, 
+    default: 'Secure & Reliable' 
+  },
+  plans_feature_1_desc: { 
+    type: 'string' as const, 
+    default: 'Enterprise-grade security with 99.9% uptime guarantee' 
+  },
+  plans_feature_2: { 
+    type: 'string' as const, 
+    default: 'expert-support' 
+  },
+  plans_feature_2_title: { 
+    type: 'string' as const, 
+    default: 'Expert Support' 
+  },
+  plans_feature_2_desc: { 
+    type: 'string' as const, 
+    default: 'Get help when you need it from our expert support team' 
+  },
+  plans_feature_3: { 
+    type: 'string' as const, 
+    default: 'easy-migration' 
+  },
+  plans_feature_3_title: { 
+    type: 'string' as const, 
+    default: 'Easy Migration' 
+  },
+  plans_feature_3_desc: { 
+    type: 'string' as const, 
+    default: 'Upgrade or downgrade your plan anytime without hassle' 
+  },
+  show_plans_features: { 
+    type: 'boolean' as const, 
+    default: true 
+  },
+  // FAQ section
+  faq_question_1: { 
+    type: 'string' as const, 
+    default: 'Can I change plans later?' 
+  },
+  faq_answer_1: { 
+    type: 'string' as const, 
+    default: 'Yes, you can upgrade or downgrade your plan at any time. Changes take effect immediately.' 
+  },
+  faq_question_2: { 
+    type: 'string' as const, 
+    default: 'Is there a free trial?' 
+  },
+  faq_answer_2: { 
+    type: 'string' as const, 
+    default: 'Yes, all paid plans come with a 14-day free trial. No credit card required.' 
+  },
+  faq_question_3: { 
+    type: 'string' as const, 
+    default: 'What payment methods do you accept?' 
+  },
+  faq_answer_3: { 
+    type: 'string' as const, 
+    default: 'We accept all major credit cards, PayPal, and bank transfers for enterprise plans.' 
+  },
+  faq_question_4: { 
+    type: 'string' as const, 
+    default: 'Do you offer refunds?' 
+  },
+  faq_answer_4: { 
+    type: 'string' as const, 
+    default: 'Yes, we offer a 30-day money-back guarantee on all plans. No questions asked.' 
+  },
+  show_faq: { 
+    type: 'boolean' as const, 
+    default: true 
+  },
+  // Trust indicators
+  trust_item_1: { 
+    type: 'string' as const, 
+    default: '14-day free trial' 
+  },
+  trust_item_2: { 
+    type: 'string' as const, 
+    default: 'No setup fees' 
+  },
+  trust_item_3: { 
+    type: 'string' as const, 
+    default: 'Cancel anytime' 
+  },
+  trust_item_4: { 
+    type: 'string' as const, 
+    default: '30-day money back' 
+  },
+  show_trust_bar: { 
+    type: 'boolean' as const, 
+    default: true 
   }
 };
 
@@ -160,6 +286,105 @@ export default function MiniStackedCards(props: LayoutComponentProps) {
     : [];
 
   const mutedTextColor = dynamicTextColors?.muted || colorTokens.textMuted;
+
+  // Helper functions to get editable content
+  const getPlansFeatures = () => {
+    const features = [
+      {
+        icon: blockContent.plans_feature_1 || 'secure-reliable',
+        title: blockContent.plans_feature_1_title || 'Secure & Reliable',
+        description: blockContent.plans_feature_1_desc || 'Enterprise-grade security with 99.9% uptime guarantee'
+      },
+      {
+        icon: blockContent.plans_feature_2 || 'expert-support',
+        title: blockContent.plans_feature_2_title || 'Expert Support',
+        description: blockContent.plans_feature_2_desc || 'Get help when you need it from our expert support team'
+      },
+      {
+        icon: blockContent.plans_feature_3 || 'easy-migration',
+        title: blockContent.plans_feature_3_title || 'Easy Migration',
+        description: blockContent.plans_feature_3_desc || 'Upgrade or downgrade your plan anytime without hassle'
+      }
+    ].filter(feature => 
+      feature.title !== '___REMOVED___' && 
+      feature.description !== '___REMOVED___' && 
+      feature.title.trim() !== '' && 
+      feature.description.trim() !== ''
+    );
+    
+    return features;
+  };
+
+  const getFaqItems = () => {
+    const faqs = [
+      {
+        question: blockContent.faq_question_1 || '',
+        answer: blockContent.faq_answer_1 || ''
+      },
+      {
+        question: blockContent.faq_question_2 || '',
+        answer: blockContent.faq_answer_2 || ''
+      },
+      {
+        question: blockContent.faq_question_3 || '',
+        answer: blockContent.faq_answer_3 || ''
+      },
+      {
+        question: blockContent.faq_question_4 || '',
+        answer: blockContent.faq_answer_4 || ''
+      }
+    ].filter(faq => 
+      faq.question !== '___REMOVED___' && 
+      faq.answer !== '___REMOVED___' && 
+      faq.question.trim() !== '' && 
+      faq.answer.trim() !== ''
+    );
+    
+    return faqs;
+  };
+
+  const getTrustBarItems = () => {
+    const items = [
+      blockContent.trust_item_1,
+      blockContent.trust_item_2,
+      blockContent.trust_item_3,
+      blockContent.trust_item_4
+    ].filter((item): item is string => 
+      Boolean(item && item.trim() !== '' && item !== '___REMOVED___')
+    );
+    
+    return items;
+  };
+
+  const getFeatureIcon = (iconName: string) => {
+    const icons = {
+      'secure-reliable': (
+        <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+        </svg>
+      ),
+      'expert-support': (
+        <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z" />
+        </svg>
+      ),
+      'easy-migration': (
+        <svg className="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+        </svg>
+      ),
+      'default': (
+        <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+        </svg>
+      )
+    };
+    return icons[iconName as keyof typeof icons] || icons.default;
+  };
+
+  const plansFeatures = getPlansFeatures();
+  const faqItems = getFaqItems();
+  const trustBarItems = getTrustBarItems();
 
   const MiniPricingCard = ({ tier, index, h3Style, getTypographyStyle }: {
     tier: typeof pricingTiers[0];
@@ -363,115 +588,231 @@ export default function MiniStackedCards(props: LayoutComponentProps) {
             </div>
 
             {/* Additional Features Comparison */}
-            <div className="bg-white rounded-xl border border-gray-200 p-8 mb-12">
-              <h3 style={h3Style} className="font-semibold text-gray-900 text-center mb-8">All plans include</h3>
-              
-              <div className="grid md:grid-cols-3 gap-8">
-                <div className="text-center">
-                  <div className="w-12 h-12 mx-auto mb-4 rounded-full bg-blue-100 flex items-center justify-center">
-                    <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                    </svg>
-                  </div>
-                  <h4 style={h4Style} className="font-semibold text-gray-900 mb-2">Secure & Reliable</h4>
-                  <p className={`text-sm ${mutedTextColor}`}>
-                    Enterprise-grade security with 99.9% uptime guarantee
-                  </p>
-                </div>
+            {((blockContent.show_plans_features !== false && plansFeatures.length > 0) || mode === 'edit') && (
+              <div className="bg-white rounded-xl border border-gray-200 p-8 mb-12">
+                <h3 style={h3Style} className="font-semibold text-gray-900 text-center mb-8">All plans include</h3>
                 
-                <div className="text-center">
-                  <div className="w-12 h-12 mx-auto mb-4 rounded-full bg-green-100 flex items-center justify-center">
-                    <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z" />
-                    </svg>
+                {mode === 'edit' ? (
+                  <div className="space-y-6">
+                    <div className="grid md:grid-cols-3 gap-6">
+                      {[1, 2, 3].map((index) => {
+                        const featureTitle = blockContent[`plans_feature_${index}_title` as keyof MiniStackedCardsContent] || '';
+                        const featureDesc = blockContent[`plans_feature_${index}_desc` as keyof MiniStackedCardsContent] || '';
+                        const featureIcon = blockContent[`plans_feature_${index}` as keyof MiniStackedCardsContent] || 'default';
+                        
+                        return (
+                          <div key={index} className="text-center relative group/plans-feature">
+                            <div className="w-12 h-12 mx-auto mb-4 rounded-full bg-gray-100 flex items-center justify-center">
+                              {getFeatureIcon(featureIcon)}
+                            </div>
+                            <EditableAdaptiveText
+                              mode={mode}
+                              value={featureTitle}
+                              onEdit={(value) => handleContentUpdate(`plans_feature_${index}_title`, value)}
+                              backgroundType={backgroundType}
+                              colorTokens={colorTokens}
+                              variant="body"
+                              style={h4Style}
+                              className="font-semibold text-gray-900 mb-2"
+                              placeholder={`Feature ${index} title`}
+                              sectionBackground={sectionBackground}
+                              data-section-id={sectionId}
+                              data-element-key={`plans_feature_${index}_title`}
+                            />
+                            <EditableAdaptiveText
+                              mode={mode}
+                              value={featureDesc}
+                              onEdit={(value) => handleContentUpdate(`plans_feature_${index}_desc`, value)}
+                              backgroundType={backgroundType}
+                              colorTokens={colorTokens}
+                              variant="body"
+                              className={`text-sm ${mutedTextColor}`}
+                              placeholder={`Feature ${index} description`}
+                              sectionBackground={sectionBackground}
+                              data-section-id={sectionId}
+                              data-element-key={`plans_feature_${index}_desc`}
+                            />
+                            
+                            {/* Remove button */}
+                            {(featureTitle || featureDesc) && (
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleContentUpdate(`plans_feature_${index}_title`, '___REMOVED___');
+                                  handleContentUpdate(`plans_feature_${index}_desc`, '___REMOVED___');
+                                  handleContentUpdate(`plans_feature_${index}`, '___REMOVED___');
+                                }}
+                                className="opacity-0 group-hover/plans-feature:opacity-100 absolute -top-2 -right-2 p-1 rounded-full bg-white/80 hover:bg-white text-red-500 hover:text-red-700 transition-all duration-200 z-10 shadow-sm"
+                                title="Remove this feature"
+                              >
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                              </button>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
                   </div>
-                  <h4 style={h4Style} className="font-semibold text-gray-900 mb-2">Expert Support</h4>
-                  <p className={`text-sm ${mutedTextColor}`}>
-                    Get help when you need it from our expert support team
-                  </p>
-                </div>
-                
-                <div className="text-center">
-                  <div className="w-12 h-12 mx-auto mb-4 rounded-full bg-purple-100 flex items-center justify-center">
-                    <svg className="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                    </svg>
+                ) : (
+                  <div className="grid md:grid-cols-3 gap-8">
+                    {plansFeatures.map((feature, index) => (
+                      <div key={index} className="text-center">
+                        <div className="w-12 h-12 mx-auto mb-4 rounded-full bg-gray-100 flex items-center justify-center">
+                          {getFeatureIcon(feature.icon)}
+                        </div>
+                        <h4 style={h4Style} className="font-semibold text-gray-900 mb-2">{feature.title}</h4>
+                        <p className={`text-sm ${mutedTextColor}`}>
+                          {feature.description}
+                        </p>
+                      </div>
+                    ))}
                   </div>
-                  <h4 style={h4Style} className="font-semibold text-gray-900 mb-2">Easy Migration</h4>
-                  <p className={`text-sm ${mutedTextColor}`}>
-                    Upgrade or downgrade your plan anytime without hassle
-                  </p>
-                </div>
+                )}
               </div>
-            </div>
+            )}
 
             {/* FAQ Section */}
-            <div className="bg-gray-50 rounded-xl p-8 border border-gray-100 mb-12">
-              <h3 style={h3Style} className="font-semibold text-gray-900 text-center mb-8">Frequently Asked Questions</h3>
-              
-              <div className="grid md:grid-cols-2 gap-8">
-                <div>
-                  <h4 style={h4Style} className="font-semibold text-gray-900 mb-2">Can I change plans later?</h4>
-                  <p className={`text-sm ${mutedTextColor}`}>
-                    Yes, you can upgrade or downgrade your plan at any time. Changes take effect immediately.
-                  </p>
-                </div>
+            {((blockContent.show_faq !== false && faqItems.length > 0) || mode === 'edit') && (
+              <div className="bg-gray-50 rounded-xl p-8 border border-gray-100 mb-12">
+                <h3 style={h3Style} className="font-semibold text-gray-900 text-center mb-8">Frequently Asked Questions</h3>
                 
-                <div>
-                  <h4 style={h4Style} className="font-semibold text-gray-900 mb-2">Is there a free trial?</h4>
-                  <p className={`text-sm ${mutedTextColor}`}>
-                    Yes, all paid plans come with a 14-day free trial. No credit card required.
-                  </p>
-                </div>
-                
-                <div>
-                  <h4 style={h4Style} className="font-semibold text-gray-900 mb-2">What payment methods do you accept?</h4>
-                  <p className={`text-sm ${mutedTextColor}`}>
-                    We accept all major credit cards, PayPal, and bank transfers for enterprise plans.
-                  </p>
-                </div>
-                
-                <div>
-                  <h4 style={h4Style} className="font-semibold text-gray-900 mb-2">Do you offer refunds?</h4>
-                  <p className={`text-sm ${mutedTextColor}`}>
-                    Yes, we offer a 30-day money-back guarantee on all plans. No questions asked.
-                  </p>
-                </div>
+                {mode === 'edit' ? (
+                  <div className="space-y-6">
+                    <div className="grid md:grid-cols-2 gap-6">
+                      {[1, 2, 3, 4].map((index) => {
+                        const question = blockContent[`faq_question_${index}` as keyof MiniStackedCardsContent] || '';
+                        const answer = blockContent[`faq_answer_${index}` as keyof MiniStackedCardsContent] || '';
+                        
+                        return (
+                          <div key={index} className="relative group/faq-item">
+                            <EditableAdaptiveText
+                              mode={mode}
+                              value={question}
+                              onEdit={(value) => handleContentUpdate(`faq_question_${index}`, value)}
+                              backgroundType={backgroundType}
+                              colorTokens={colorTokens}
+                              variant="body"
+                              style={h4Style}
+                              className="font-semibold text-gray-900 mb-2"
+                              placeholder={`FAQ Question ${index}`}
+                              sectionBackground={sectionBackground}
+                              data-section-id={sectionId}
+                              data-element-key={`faq_question_${index}`}
+                            />
+                            <EditableAdaptiveText
+                              mode={mode}
+                              value={answer}
+                              onEdit={(value) => handleContentUpdate(`faq_answer_${index}`, value)}
+                              backgroundType={backgroundType}
+                              colorTokens={colorTokens}
+                              variant="body"
+                              className={`text-sm ${mutedTextColor}`}
+                              placeholder={`FAQ Answer ${index}`}
+                              sectionBackground={sectionBackground}
+                              data-section-id={sectionId}
+                              data-element-key={`faq_answer_${index}`}
+                            />
+                            
+                            {/* Remove button */}
+                            {(question || answer) && (
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleContentUpdate(`faq_question_${index}`, '___REMOVED___');
+                                  handleContentUpdate(`faq_answer_${index}`, '___REMOVED___');
+                                }}
+                                className="opacity-0 group-hover/faq-item:opacity-100 absolute -top-2 -right-2 p-1 rounded-full bg-white/80 hover:bg-white text-red-500 hover:text-red-700 transition-all duration-200 z-10 shadow-sm"
+                                title="Remove this FAQ"
+                              >
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                              </button>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                ) : (
+                  <div className="grid md:grid-cols-2 gap-8">
+                    {faqItems.map((faq, index) => (
+                      <div key={index}>
+                        <h4 style={h4Style} className="font-semibold text-gray-900 mb-2">{faq.question}</h4>
+                        <p className={`text-sm ${mutedTextColor}`}>
+                          {faq.answer}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
-            </div>
+            )}
 
             {/* Trust Indicators */}
-            <div className="text-center bg-blue-50 rounded-xl p-6 border border-blue-100">
-              <div className="flex flex-wrap justify-center items-center gap-8">
-                <div className="flex items-center space-x-2">
-                  <svg className="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                  </svg>
-                  <span className="text-sm font-medium text-gray-700">14-day free trial</span>
-                </div>
-                
-                <div className="flex items-center space-x-2">
-                  <svg className="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                  </svg>
-                  <span className="text-sm font-medium text-gray-700">No setup fees</span>
-                </div>
-                
-                <div className="flex items-center space-x-2">
-                  <svg className="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                  </svg>
-                  <span className="text-sm font-medium text-gray-700">Cancel anytime</span>
-                </div>
-                
-                <div className="flex items-center space-x-2">
-                  <svg className="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                  </svg>
-                  <span className="text-sm font-medium text-gray-700">30-day money back</span>
-                </div>
+            {((blockContent.show_trust_bar !== false && trustBarItems.length > 0) || mode === 'edit') && (
+              <div className="text-center bg-blue-50 rounded-xl p-6 border border-blue-100">
+                {mode === 'edit' ? (
+                  <div className="space-y-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                      {[1, 2, 3, 4].map((index) => {
+                        const trustItem = blockContent[`trust_item_${index}` as keyof MiniStackedCardsContent] || '';
+                        
+                        return (
+                          <div key={index} className="flex items-center space-x-2 relative group/trust-item justify-center">
+                            <svg className="w-5 h-5 text-green-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                            </svg>
+                            <EditableAdaptiveText
+                              mode={mode}
+                              value={trustItem}
+                              onEdit={(value) => handleContentUpdate(`trust_item_${index}`, value)}
+                              backgroundType={backgroundType}
+                              colorTokens={colorTokens}
+                              variant="body"
+                              className="text-sm font-medium text-gray-700"
+                              placeholder={`Trust item ${index}`}
+                              sectionBackground={sectionBackground}
+                              data-section-id={sectionId}
+                              data-element-key={`trust_item_${index}`}
+                            />
+                            
+                            {/* Remove button */}
+                            {trustItem && (
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleContentUpdate(`trust_item_${index}`, '___REMOVED___');
+                                }}
+                                className="opacity-0 group-hover/trust-item:opacity-100 ml-1 p-1 rounded-full bg-white/80 hover:bg-white text-red-500 hover:text-red-700 transition-all duration-200 z-10 shadow-sm"
+                                title="Remove this trust item"
+                              >
+                                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                              </button>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                ) : (
+                  <div className="flex flex-wrap justify-center items-center gap-8">
+                    {trustBarItems.map((item, index) => (
+                      <div key={index} className="flex items-center space-x-2">
+                        <svg className="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                        </svg>
+                        <span className="text-sm font-medium text-gray-700">{item}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
-            </div>
+            )}
           </>
         )}
 
@@ -528,6 +869,27 @@ export const componentMeta = {
     { key: 'savings_labels', label: 'Savings Labels (pipe separated)', type: 'text', required: false },
     { key: 'feature_highlights', label: 'Feature Highlights (pipe separated)', type: 'text', required: false },
     { key: 'popular_tiers', label: 'Popular Tiers true/false (pipe separated)', type: 'text', required: false },
+    { key: 'plans_feature_1_title', label: 'Plans Feature 1 Title', type: 'text', required: false },
+    { key: 'plans_feature_1_desc', label: 'Plans Feature 1 Description', type: 'text', required: false },
+    { key: 'plans_feature_2_title', label: 'Plans Feature 2 Title', type: 'text', required: false },
+    { key: 'plans_feature_2_desc', label: 'Plans Feature 2 Description', type: 'text', required: false },
+    { key: 'plans_feature_3_title', label: 'Plans Feature 3 Title', type: 'text', required: false },
+    { key: 'plans_feature_3_desc', label: 'Plans Feature 3 Description', type: 'text', required: false },
+    { key: 'show_plans_features', label: 'Show Plans Features Section', type: 'boolean', required: false },
+    { key: 'faq_question_1', label: 'FAQ Question 1', type: 'text', required: false },
+    { key: 'faq_answer_1', label: 'FAQ Answer 1', type: 'text', required: false },
+    { key: 'faq_question_2', label: 'FAQ Question 2', type: 'text', required: false },
+    { key: 'faq_answer_2', label: 'FAQ Answer 2', type: 'text', required: false },
+    { key: 'faq_question_3', label: 'FAQ Question 3', type: 'text', required: false },
+    { key: 'faq_answer_3', label: 'FAQ Answer 3', type: 'text', required: false },
+    { key: 'faq_question_4', label: 'FAQ Question 4', type: 'text', required: false },
+    { key: 'faq_answer_4', label: 'FAQ Answer 4', type: 'text', required: false },
+    { key: 'show_faq', label: 'Show FAQ Section', type: 'boolean', required: false },
+    { key: 'trust_item_1', label: 'Trust Item 1', type: 'text', required: false },
+    { key: 'trust_item_2', label: 'Trust Item 2', type: 'text', required: false },
+    { key: 'trust_item_3', label: 'Trust Item 3', type: 'text', required: false },
+    { key: 'trust_item_4', label: 'Trust Item 4', type: 'text', required: false },
+    { key: 'show_trust_bar', label: 'Show Trust Bar Section', type: 'boolean', required: false },
     { key: 'supporting_text', label: 'Supporting Text', type: 'textarea', required: false },
     { key: 'trust_items', label: 'Trust Indicators (pipe separated)', type: 'text', required: false }
   ],

@@ -443,10 +443,20 @@ export default function SliderPricing(props: LayoutComponentProps) {
                   elementKey="cta_text"
                 />
                 
-                {blockContent.pricing_note && (
-                  <p className={`text-sm ${mutedTextColor}`}>
-                    {blockContent.pricing_note}
-                  </p>
+                {(blockContent.pricing_note || mode === 'edit') && (
+                  <EditableAdaptiveText
+                    mode={mode}
+                    value={blockContent.pricing_note || ''}
+                    onEdit={(value) => handleContentUpdate('pricing_note', value)}
+                    backgroundType={backgroundType}
+                    colorTokens={colorTokens}
+                    variant="body"
+                    className={`text-sm ${mutedTextColor}`}
+                    placeholder="Add pricing note..."
+                    sectionBackground={sectionBackground}
+                    data-section-id={sectionId}
+                    data-element-key="pricing_note"
+                  />
                 )}
               </div>
             </div>

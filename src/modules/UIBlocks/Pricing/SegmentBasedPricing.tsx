@@ -26,6 +26,10 @@ interface SegmentBasedPricingContent {
   subheadline?: string;
   supporting_text?: string;
   trust_items?: string;
+  // Segment comparison section
+  segment_comparison_title?: string;
+  segment_comparison_desc?: string;
+  show_segment_comparison?: boolean;
 }
 
 const CONTENT_SCHEMA = {
@@ -80,6 +84,19 @@ const CONTENT_SCHEMA = {
   trust_items: { 
     type: 'string' as const, 
     default: '' 
+  },
+  // Segment comparison section
+  segment_comparison_title: { 
+    type: 'string' as const, 
+    default: 'Why Segment-Specific Pricing?' 
+  },
+  segment_comparison_desc: { 
+    type: 'string' as const, 
+    default: 'Tailored for your specific needs and budget' 
+  },
+  show_segment_comparison: { 
+    type: 'boolean' as const, 
+    default: true 
   }
 };
 
@@ -445,28 +462,53 @@ export default function SegmentBasedPricing(props: LayoutComponentProps) {
         )}
 
         {/* Segment Comparison Summary */}
-        <div className="bg-gradient-to-r from-gray-50 to-white rounded-2xl p-8 border border-gray-100 mb-12">
-          <div className="text-center">
-            <h3 style={h3Style} className="font-semibold text-gray-900 mb-8">Why Segment-Specific Pricing?</h3>
-            
-            <div className="grid md:grid-cols-4 gap-8">
-              {segments.map((segment, index) => {
-                const color = getSegmentColor(index);
-                return (
-                  <div key={index} className="text-center">
-                    <div className={`w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br ${color.bg} flex items-center justify-center text-white`}>
-                      {getSegmentIcon(segment.icon)}
+        {((blockContent.show_segment_comparison !== false && (blockContent.segment_comparison_title || blockContent.segment_comparison_desc)) || mode === 'edit') && (
+          <div className="bg-gradient-to-r from-gray-50 to-white rounded-2xl p-8 border border-gray-100 mb-12">
+            <div className="text-center">
+              <EditableAdaptiveText
+                mode={mode}
+                value={blockContent.segment_comparison_title || ''}
+                onEdit={(value) => handleContentUpdate('segment_comparison_title', value)}
+                backgroundType={backgroundType}
+                colorTokens={colorTokens}
+                variant="body"
+                style={h3Style}
+                className="font-semibold text-gray-900 mb-8"
+                placeholder="Segment comparison section title"
+                sectionBackground={sectionBackground}
+                data-section-id={sectionId}
+                data-element-key="segment_comparison_title"
+              />
+              
+              <div className="grid md:grid-cols-4 gap-8">
+                {segments.map((segment, index) => {
+                  const color = getSegmentColor(index);
+                  return (
+                    <div key={index} className="text-center">
+                      <div className={`w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br ${color.bg} flex items-center justify-center text-white`}>
+                        {getSegmentIcon(segment.icon)}
+                      </div>
+                      <div className="font-semibold text-gray-900 mb-2">{segment.name}</div>
+                      <EditableAdaptiveText
+                        mode={mode}
+                        value={blockContent.segment_comparison_desc || ''}
+                        onEdit={(value) => handleContentUpdate('segment_comparison_desc', value)}
+                        backgroundType={backgroundType}
+                        colorTokens={colorTokens}
+                        variant="body"
+                        className={`text-sm ${mutedTextColor}`}
+                        placeholder="Segment description"
+                        sectionBackground={sectionBackground}
+                        data-section-id={sectionId}
+                        data-element-key="segment_comparison_desc"
+                      />
                     </div>
-                    <div className="font-semibold text-gray-900 mb-2">{segment.name}</div>
-                    <div className={`text-sm ${mutedTextColor}`}>
-                      Tailored for your specific needs and budget
-                    </div>
-                  </div>
-                );
-              })}
+                  );
+                })}
+              </div>
             </div>
           </div>
-        </div>
+        )}
 
         {(blockContent.supporting_text || blockContent.trust_items || mode === 'edit') && (
           <div className="text-center space-y-6">
@@ -521,6 +563,9 @@ export const componentMeta = {
     { key: 'cta_texts', label: 'CTA Texts by Segment (semicolon for segments, pipe for tiers)', type: 'textarea', required: true },
     { key: 'recommended_tiers', label: 'Recommended Tier Index per Segment (pipe separated)', type: 'text', required: false },
     { key: 'segment_icons', label: 'Segment Icons (pipe separated)', type: 'text', required: false },
+    { key: 'segment_comparison_title', label: 'Segment Comparison Section Title', type: 'text', required: false },
+    { key: 'segment_comparison_desc', label: 'Segment Comparison Description', type: 'text', required: false },
+    { key: 'show_segment_comparison', label: 'Show Segment Comparison Section', type: 'boolean', required: false },
     { key: 'supporting_text', label: 'Supporting Text', type: 'textarea', required: false },
     { key: 'trust_items', label: 'Trust Indicators (pipe separated)', type: 'text', required: false }
   ],

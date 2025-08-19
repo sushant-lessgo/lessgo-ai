@@ -219,7 +219,7 @@ export default function IconWithAnswers(props: LayoutComponentProps) {
                       onEdit={(value) => handleContentUpdate(`question_${item.index}` as keyof IconWithAnswersContent, value)}
                       backgroundType={backgroundType}
                       colorTokens={colorTokens}
-                      variant="heading"
+                      variant="body"
                       className="font-semibold"
                       style={getTextStyle('h3')}
                       placeholder={`Question ${item.index}`}

@@ -21,6 +21,10 @@ interface BoldGuaranteePanelContent {
   additional_guarantees: string;
   cta_text: string;
   risk_reversal_text?: string;
+  risk_section_title?: string;
+  trust_badge_1?: string;
+  trust_badge_2?: string;
+  trust_badge_3?: string;
 }
 
 // Content schema - defines structure and defaults
@@ -52,6 +56,22 @@ const CONTENT_SCHEMA = {
   risk_reversal_text: { 
     type: 'string' as const, 
     default: 'The only risk is missing out on the results everyone else is getting.' 
+  },
+  risk_section_title: {
+    type: 'string' as const,
+    default: 'Let\'s Talk About Risk'
+  },
+  trust_badge_1: {
+    type: 'string' as const,
+    default: 'Secure Payment'
+  },
+  trust_badge_2: {
+    type: 'string' as const,
+    default: '100% Protected'
+  },
+  trust_badge_3: {
+    type: 'string' as const,
+    default: 'Instant Access'
   }
 };
 
@@ -154,14 +174,44 @@ export default function BoldGuaranteePanel(props: LayoutComponentProps) {
             </div>
 
             {/* Main Guarantee */}
-            <h3 style={{...h1Style, fontSize: 'clamp(2rem, 5vw, 2.5rem)'}} className="mb-4">
-              {blockContent.main_guarantee}
-            </h3>
+            <EditableAdaptiveText
+              mode={mode}
+              value={blockContent.main_guarantee || ''}
+              onEdit={(value) => handleContentUpdate('main_guarantee', value)}
+              backgroundType="custom"
+              colorTokens={{
+                ...colorTokens,
+                primaryText: 'text-white',
+                mutedText: 'text-green-50'
+              }}
+              variant="headline"
+              style={{...h1Style, fontSize: 'clamp(2rem, 5vw, 2.5rem)'}} 
+              className="mb-4"
+              placeholder="Enter main guarantee"
+              sectionBackground="gradient"
+              data-section-id={sectionId}
+              data-element-key="main_guarantee"
+            />
 
             {/* Guarantee Details */}
-            <p style={{...bodyLgStyle, fontSize: 'clamp(1.1rem, 2.5vw, 1.25rem)'}} className="leading-relaxed max-w-3xl mx-auto mb-8 text-green-50">
-              {blockContent.guarantee_details}
-            </p>
+            <EditableAdaptiveText
+              mode={mode}
+              value={blockContent.guarantee_details || ''}
+              onEdit={(value) => handleContentUpdate('guarantee_details', value)}
+              backgroundType="custom"
+              colorTokens={{
+                ...colorTokens,
+                primaryText: 'text-green-50',
+                mutedText: 'text-green-100'
+              }}
+              variant="body"
+              style={{...bodyLgStyle, fontSize: 'clamp(1.1rem, 2.5vw, 1.25rem)'}} 
+              className="leading-relaxed max-w-3xl mx-auto mb-8"
+              placeholder="Enter guarantee details"
+              sectionBackground="gradient"
+              data-section-id={sectionId}
+              data-element-key="guarantee_details"
+            />
 
             {/* CTA Button */}
             <CTAButton
@@ -192,15 +242,45 @@ export default function BoldGuaranteePanel(props: LayoutComponentProps) {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                   </svg>
                 </div>
-                <h4 style={{...h3Style}} className="text-gray-900">
-                  {guarantee.title}
-                </h4>
+                <EditableAdaptiveText
+                  mode={mode}
+                  value={guarantee.title || ''}
+                  onEdit={(value) => {
+                    const updatedGuarantees = blockContent.additional_guarantees.split('|');
+                    updatedGuarantees[index * 2] = value;
+                    handleContentUpdate('additional_guarantees', updatedGuarantees.join('|'));
+                  }}
+                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
+                  colorTokens={colorTokens}
+                  variant="headline"
+                  style={{...h3Style}}
+                  className="text-gray-900"
+                  placeholder="Enter guarantee title"
+                  sectionBackground={sectionBackground}
+                  data-section-id={sectionId}
+                  data-element-key={`additional_guarantee_${index}_title`}
+                />
               </div>
 
               {/* Guarantee Description */}
-              <p style={{...bodyStyle}} className="text-gray-700 leading-relaxed">
-                {guarantee.description}
-              </p>
+              <EditableAdaptiveText
+                mode={mode}
+                value={guarantee.description || ''}
+                onEdit={(value) => {
+                  const updatedGuarantees = blockContent.additional_guarantees.split('|');
+                  updatedGuarantees[index * 2 + 1] = value;
+                  handleContentUpdate('additional_guarantees', updatedGuarantees.join('|'));
+                }}
+                backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
+                colorTokens={colorTokens}
+                variant="body"
+                style={{...bodyStyle}}
+                className="text-gray-700 leading-relaxed"
+                placeholder="Enter guarantee description"
+                sectionBackground={sectionBackground}
+                data-section-id={sectionId}
+                data-element-key={`additional_guarantee_${index}_desc`}
+              />
             </div>
           ))}
         </div>
@@ -216,9 +296,20 @@ export default function BoldGuaranteePanel(props: LayoutComponentProps) {
               </svg>
             </div>
 
-            <h3 style={{...h2Style}} className="text-gray-900 mb-4">
-              Let's Talk About Risk
-            </h3>
+            <EditableAdaptiveText
+              mode={mode}
+              value={blockContent.risk_section_title || ''}
+              onEdit={(value) => handleContentUpdate('risk_section_title', value)}
+              backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
+              colorTokens={colorTokens}
+              variant="headline"
+              style={{...h2Style}}
+              className="text-gray-900 mb-4"
+              placeholder="Enter risk section title"
+              sectionBackground={sectionBackground}
+              data-section-id={sectionId}
+              data-element-key="risk_section_title"
+            />
 
             {(blockContent.risk_reversal_text || mode === 'edit') && (
               <EditableAdaptiveText
@@ -242,20 +333,59 @@ export default function BoldGuaranteePanel(props: LayoutComponentProps) {
                 <svg className="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                 </svg>
-                <span style={{...bodyStyle, fontSize: '0.875rem'}} className="">Secure Payment</span>
+                <EditableAdaptiveText
+                  mode={mode}
+                  value={blockContent.trust_badge_1 || ''}
+                  onEdit={(value) => handleContentUpdate('trust_badge_1', value)}
+                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
+                  colorTokens={colorTokens}
+                  variant="body"
+                  style={{...bodyStyle, fontSize: '0.875rem'}}
+                  className=""
+                  placeholder="Trust badge 1"
+                  sectionBackground={sectionBackground}
+                  data-section-id={sectionId}
+                  data-element-key="trust_badge_1"
+                />
               </div>
               <div className="flex items-center space-x-2 text-gray-600">
                 <svg className="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                 </svg>
-                <span style={{...bodyStyle, fontSize: '0.875rem'}} className="">100% Protected</span>
+                <EditableAdaptiveText
+                  mode={mode}
+                  value={blockContent.trust_badge_2 || ''}
+                  onEdit={(value) => handleContentUpdate('trust_badge_2', value)}
+                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
+                  colorTokens={colorTokens}
+                  variant="body"
+                  style={{...bodyStyle, fontSize: '0.875rem'}}
+                  className=""
+                  placeholder="Trust badge 2"
+                  sectionBackground={sectionBackground}
+                  data-section-id={sectionId}
+                  data-element-key="trust_badge_2"
+                />
               </div>
               <div className="flex items-center space-x-2 text-gray-600">
                 <svg className="w-5 h-5 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                 </svg>
-                <span style={{...bodyStyle, fontSize: '0.875rem'}} className="">Instant Access</span>
+                <EditableAdaptiveText
+                  mode={mode}
+                  value={blockContent.trust_badge_3 || ''}
+                  onEdit={(value) => handleContentUpdate('trust_badge_3', value)}
+                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
+                  colorTokens={colorTokens}
+                  variant="body"
+                  style={{...bodyStyle, fontSize: '0.875rem'}}
+                  className=""
+                  placeholder="Trust badge 3"
+                  sectionBackground={sectionBackground}
+                  data-section-id={sectionId}
+                  data-element-key="trust_badge_3"
+                />
               </div>
             </div>
           </div>

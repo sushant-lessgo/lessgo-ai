@@ -5,6 +5,9 @@ import { useOnboardingStore } from '@/hooks/useOnboardingStore';
 import { useLayoutComponent } from '@/hooks/useLayoutComponent';
 import { LayoutSection } from '@/components/layout/LayoutSection';
 import { 
+  EditableAdaptiveText
+} from '@/components/layout/EditableContent';
+import { 
   LayoutComponentProps, 
   extractLayoutContent,
   StoreElementTypes 
@@ -32,6 +35,36 @@ interface TierCardsContent {
   cta_texts: string;
   feature_lists?: string;
   popular_labels?: string;
+  // Individual feature fields for each tier (up to 3 tiers, 8 features each)
+  tier_1_feature_1?: string;
+  tier_1_feature_2?: string;
+  tier_1_feature_3?: string;
+  tier_1_feature_4?: string;
+  tier_1_feature_5?: string;
+  tier_1_feature_6?: string;
+  tier_1_feature_7?: string;
+  tier_1_feature_8?: string;
+  tier_2_feature_1?: string;
+  tier_2_feature_2?: string;
+  tier_2_feature_3?: string;
+  tier_2_feature_4?: string;
+  tier_2_feature_5?: string;
+  tier_2_feature_6?: string;
+  tier_2_feature_7?: string;
+  tier_2_feature_8?: string;
+  tier_3_feature_1?: string;
+  tier_3_feature_2?: string;
+  tier_3_feature_3?: string;
+  tier_3_feature_4?: string;
+  tier_3_feature_5?: string;
+  tier_3_feature_6?: string;
+  tier_3_feature_7?: string;
+  tier_3_feature_8?: string;
+  // Trust indicators
+  trust_item_1?: string;
+  trust_item_2?: string;
+  trust_item_3?: string;
+  show_trust_footer?: boolean;
 }
 
 // Content schema for TierCards layout
@@ -42,7 +75,55 @@ const CONTENT_SCHEMA = {
   tier_descriptions: { type: 'string' as const, default: 'Perfect for small teams getting started|For growing businesses that need more power|Custom solutions for large organizations' },
   cta_texts: { type: 'string' as const, default: 'Start Free Trial|Start Free Trial|Contact Sales' },
   feature_lists: { type: 'string' as const, default: '' },
-  popular_labels: { type: 'string' as const, default: '' }
+  popular_labels: { type: 'string' as const, default: '' },
+  // Tier 1 (Starter) features
+  tier_1_feature_1: { type: 'string' as const, default: 'Up to 5 team members' },
+  tier_1_feature_2: { type: 'string' as const, default: 'Basic analytics' },
+  tier_1_feature_3: { type: 'string' as const, default: 'Email support' },
+  tier_1_feature_4: { type: 'string' as const, default: 'Core integrations' },
+  tier_1_feature_5: { type: 'string' as const, default: '10GB storage' },
+  tier_1_feature_6: { type: 'string' as const, default: '' },
+  tier_1_feature_7: { type: 'string' as const, default: '' },
+  tier_1_feature_8: { type: 'string' as const, default: '' },
+  // Tier 2 (Professional) features
+  tier_2_feature_1: { type: 'string' as const, default: 'Up to 25 team members' },
+  tier_2_feature_2: { type: 'string' as const, default: 'Advanced analytics' },
+  tier_2_feature_3: { type: 'string' as const, default: 'Priority support' },
+  tier_2_feature_4: { type: 'string' as const, default: 'All integrations' },
+  tier_2_feature_5: { type: 'string' as const, default: '100GB storage' },
+  tier_2_feature_6: { type: 'string' as const, default: 'Custom workflows' },
+  tier_2_feature_7: { type: 'string' as const, default: 'API access' },
+  tier_2_feature_8: { type: 'string' as const, default: '' },
+  // Tier 3 (Enterprise) features  
+  tier_3_feature_1: { type: 'string' as const, default: 'Unlimited team members' },
+  tier_3_feature_2: { type: 'string' as const, default: 'Enterprise analytics' },
+  tier_3_feature_3: { type: 'string' as const, default: 'Dedicated support' },
+  tier_3_feature_4: { type: 'string' as const, default: 'Custom integrations' },
+  tier_3_feature_5: { type: 'string' as const, default: 'Unlimited storage' },
+  tier_3_feature_6: { type: 'string' as const, default: 'Advanced security' },
+  tier_3_feature_7: { type: 'string' as const, default: 'SLA guarantee' },
+  tier_3_feature_8: { type: 'string' as const, default: 'White-label options' },
+  // Trust indicators
+  trust_item_1: { type: 'string' as const, default: '14-day free trial' },
+  trust_item_2: { type: 'string' as const, default: 'Cancel anytime' },
+  trust_item_3: { type: 'string' as const, default: 'No setup fees' },
+  show_trust_footer: { type: 'boolean' as const, default: true }
+};
+
+// Helper function to get tier features from individual fields
+const getTierFeatures = (tierIndex: number, blockContent: TierCardsContent): string[] => {
+  const features = [];
+  
+  for (let i = 1; i <= 8; i++) {
+    const featureKey = `tier_${tierIndex + 1}_feature_${i}` as keyof TierCardsContent;
+    const feature = blockContent[featureKey];
+    
+    if (feature && typeof feature === 'string' && feature.trim() !== '' && feature !== '___REMOVED___') {
+      features.push(feature.trim());
+    }
+  }
+  
+  return features;
 };
 
 // Parse pricing data from pipe-separated strings
@@ -51,6 +132,7 @@ const parsePricingData = (
   prices: string, 
   descriptions: string, 
   ctaTexts: string,
+  blockContent: TierCardsContent,
   featureLists?: string,
   popularLabels?: string
 ): PricingTier[] => {
@@ -99,15 +181,24 @@ const parsePricingData = (
     return ['Feature 1', 'Feature 2', 'Feature 3'];
   };
   
-  return nameList.map((name, index) => ({
-    id: `tier-${index}`,
-    name,
-    price: priceList[index] || 'Contact Us',
-    description: descriptionList[index] || 'Tier description not provided.',
-    ctaText: ctaList[index] || 'Get Started',
-    features: featuresList[index] || getDefaultFeatures(name, index),
-    isPopular: popularList[index] || (index === 1) // Default to middle tier as popular
-  }));
+  return nameList.map((name, index) => {
+    // Try individual fields first, then featuresList, then fallback to getDefaultFeatures
+    let features = getTierFeatures(index, blockContent);
+    
+    if (features.length === 0) {
+      features = featuresList[index] || getDefaultFeatures(name, index);
+    }
+    
+    return {
+      id: `tier-${index}`,
+      name,
+      price: priceList[index] || 'Contact Us',
+      description: descriptionList[index] || 'Tier description not provided.',
+      ctaText: ctaList[index] || 'Get Started',
+      features,
+      isPopular: popularList[index] || (index === 1) // Default to middle tier as popular
+    };
+  });
 };
 
 // ModeWrapper component for handling edit/preview modes
@@ -150,7 +241,12 @@ const PricingCard = ({
   onNameEdit,
   onPriceEdit,
   onDescriptionEdit,
-  onCtaEdit
+  onCtaEdit,
+  onFeatureEdit,
+  blockContent,
+  handleContentUpdate,
+  colorTokens,
+  sectionBackground
 }: {
   tier: PricingTier;
   mode: 'edit' | 'preview';
@@ -160,6 +256,11 @@ const PricingCard = ({
   onPriceEdit: (index: number, value: string) => void;
   onDescriptionEdit: (index: number, value: string) => void;
   onCtaEdit: (index: number, value: string) => void;
+  onFeatureEdit: (tierIndex: number, featureIndex: number, value: string) => void;
+  blockContent: TierCardsContent;
+  handleContentUpdate: (key: keyof TierCardsContent, value: string) => void;
+  colorTokens: any;
+  sectionBackground: any;
 }) => {
   const { getTextStyle } = useTypography();
   
@@ -247,18 +348,72 @@ const PricingCard = ({
         {/* Features List */}
         <div className="mb-8">
           <ul className="space-y-3">
-            {tier.features.map((feature, featureIndex) => (
-              <li key={featureIndex} className="flex items-start">
-                <svg className="w-5 h-5 text-green-500 mr-3 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                </svg>
-                <span 
-                  className="text-gray-700"
-                >
-                  {feature}
-                </span>
-              </li>
-            ))}
+            {mode === 'edit' ? (
+              // Edit mode: Show all 8 potential feature slots
+              Array.from({ length: 8 }, (_, featureIndex) => {
+                const featureKey = `tier_${index + 1}_feature_${featureIndex + 1}` as keyof TierCardsContent;
+                const feature = blockContent[featureKey] || '';
+                const isVisible = feature && typeof feature === 'string' && feature !== '___REMOVED___' && feature.trim() !== '';
+                
+                return (isVisible || mode === 'edit') ? (
+                  <li key={featureIndex} className={`flex items-start group/feature-item relative ${!isVisible ? 'opacity-60 hover:opacity-100 transition-opacity' : ''}`}>
+                    {isVisible ? (
+                      // Checkmark icon for features with content
+                      <svg className="w-5 h-5 text-green-500 mr-3 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                      </svg>
+                    ) : (
+                      // Plus icon for empty slots
+                      <svg className="w-5 h-5 text-gray-400 hover:text-green-500 mr-3 mt-0.5 flex-shrink-0 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                      </svg>
+                    )}
+                    <div className="flex-1 min-w-0 relative">
+                      <EditableAdaptiveText
+                        mode={mode}
+                        value={feature}
+                        onEdit={(value) => onFeatureEdit(index, featureIndex + 1, value)}
+                        backgroundType="neutral"
+                        colorTokens={colorTokens}
+                        variant="body"
+                        className={isVisible ? "text-gray-700" : "text-gray-400 italic"}
+                        placeholder={isVisible ? `Feature ${featureIndex + 1}` : "Click to add feature"}
+                        sectionBackground={sectionBackground}
+                        data-section-id={sectionId}
+                        data-element-key={featureKey}
+                      />
+                      {/* Remove button */}
+                      {isVisible && mode === 'edit' && (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleContentUpdate(featureKey, '___REMOVED___');
+                          }}
+                          className="opacity-0 group-hover/feature-item:opacity-100 absolute -top-1 -right-1 p-1 rounded-full bg-white/80 hover:bg-white text-red-500 hover:text-red-700 transition-all duration-200 shadow-sm z-10"
+                          title="Remove this feature"
+                        >
+                          <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                          </svg>
+                        </button>
+                      )}
+                    </div>
+                  </li>
+                ) : null;
+              }).filter(Boolean)
+            ) : (
+              // Preview mode: Show only visible features  
+              tier.features.map((feature, featureIndex) => (
+                <li key={featureIndex} className="flex items-start">
+                  <svg className="w-5 h-5 text-green-500 mr-3 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                  </svg>
+                  <span className="text-gray-700">
+                    {feature}
+                  </span>
+                </li>
+              ))
+            )}
           </ul>
         </div>
 
@@ -318,9 +473,25 @@ export default function TierCards(props: TierCardsProps) {
     blockContent.tier_prices,
     blockContent.tier_descriptions,
     blockContent.cta_texts,
+    blockContent,
     blockContent.feature_lists,
     blockContent.popular_labels
   );
+
+  // Helper function to get trust items
+  const getTrustFooterItems = () => {
+    const items = [
+      blockContent.trust_item_1,
+      blockContent.trust_item_2,
+      blockContent.trust_item_3
+    ].filter((item): item is string => 
+      Boolean(item && item.trim() !== '' && item !== '___REMOVED___')
+    );
+    
+    return items;
+  };
+
+  const trustFooterItems = getTrustFooterItems();
 
   // Handle individual editing
   const handleNameEdit = (index: number, value: string) => {
@@ -347,6 +518,10 @@ export default function TierCards(props: TierCardsProps) {
     handleContentUpdate('cta_texts', ctas.join('|'));
   };
 
+  const handleFeatureEdit = (tierIndex: number, featureIndex: number, value: string) => {
+    const featureKey = `tier_${tierIndex + 1}_feature_${featureIndex}` as keyof TierCardsContent;
+    handleContentUpdate(featureKey, value);
+  };
 
   return (
     <LayoutSection
@@ -391,33 +566,73 @@ export default function TierCards(props: TierCardsProps) {
               onPriceEdit={handlePriceEdit}
               onDescriptionEdit={handleDescriptionEdit}
               onCtaEdit={handleCtaEdit}
+              onFeatureEdit={handleFeatureEdit}
+              blockContent={blockContent}
+              handleContentUpdate={handleContentUpdate}
+              colorTokens={colorTokens}
+              sectionBackground={sectionBackground}
             />
           ))}
         </div>
 
         {/* Trust Indicators */}
-        <div className="mt-12 text-center">
-          <div className="flex flex-wrap justify-center items-center space-x-6 text-sm text-gray-500">
-            <div className="flex items-center">
-              <svg className="w-4 h-4 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-              </svg>
-              14-day free trial
-            </div>
-            <div className="flex items-center">
-              <svg className="w-4 h-4 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-              </svg>
-              Cancel anytime
-            </div>
-            <div className="flex items-center">
-              <svg className="w-4 h-4 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-              </svg>
-              No setup fees
-            </div>
+        {((blockContent.show_trust_footer !== false && trustFooterItems.length > 0) || mode === 'edit') && (
+          <div className="mt-12 text-center">
+            {mode === 'edit' ? (
+              <div className="space-y-4">
+                <div className="flex flex-wrap justify-center items-center gap-6">
+                  {[1, 2, 3].map((index) => {
+                    const trustItem = blockContent[`trust_item_${index}` as keyof TierCardsContent] || '';
+                    
+                    return (
+                      <div key={index} className="flex items-center space-x-2 relative group/trust-footer-item">
+                        <svg className="w-4 h-4 text-green-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                        </svg>
+                        <div 
+                          contentEditable
+                          suppressContentEditableWarning
+                          onBlur={(e) => handleContentUpdate(`trust_item_${index}`, e.currentTarget.textContent || '')}
+                          className="outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-1 min-h-[20px] cursor-text hover:bg-gray-50 text-sm text-gray-500"
+                          data-placeholder={`Trust item ${index}`}
+                        >
+                          {trustItem}
+                        </div>
+                        
+                        {/* Remove button */}
+                        {trustItem && (
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleContentUpdate(`trust_item_${index}`, '___REMOVED___');
+                            }}
+                            className="opacity-0 group-hover/trust-footer-item:opacity-100 ml-1 p-1 rounded-full bg-white/80 hover:bg-white text-red-500 hover:text-red-700 transition-all duration-200 z-10 shadow-sm"
+                            title="Remove this trust item"
+                          >
+                            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                          </button>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            ) : (
+              <div className="flex flex-wrap justify-center items-center space-x-6 text-sm text-gray-500">
+                {trustFooterItems.map((item, index) => (
+                  <div key={index} className="flex items-center">
+                    <svg className="w-4 h-4 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                    </svg>
+                    {item}
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
-        </div>
+        )}
 
       </div>
     </LayoutSection>
@@ -449,7 +664,11 @@ export const componentMeta = {
     tier_descriptions: 'Pipe-separated list of tier descriptions',
     cta_texts: 'Pipe-separated list of CTA button texts',
     feature_lists: 'Optional double-pipe separated feature lists',
-    popular_labels: 'Optional pipe-separated boolean values for popular tiers'
+    popular_labels: 'Optional pipe-separated boolean values for popular tiers',
+    trust_item_1: 'Trust indicator item 1',
+    trust_item_2: 'Trust indicator item 2',
+    trust_item_3: 'Trust indicator item 3',
+    show_trust_footer: 'Boolean to show/hide trust footer section'
   },
   examples: [
     'SaaS pricing plans',

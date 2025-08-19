@@ -80,7 +80,12 @@ const FeatureRow = React.memo(({
   sectionId,
   mode,
   h2Style,
-  bodyLgStyle
+  bodyLgStyle,
+  blockContent,
+  handleContentUpdate,
+  colorTokens,
+  sectionBackground,
+  props
 }: {
   title: string;
   description: string;
@@ -91,6 +96,11 @@ const FeatureRow = React.memo(({
   mode: string;
   h2Style: React.CSSProperties;
   bodyLgStyle: React.CSSProperties;
+  blockContent: SplitAlternatingContent;
+  handleContentUpdate: (key: keyof SplitAlternatingContent, value: string) => void;
+  colorTokens: any;
+  sectionBackground: any;
+  props: LayoutComponentProps;
 }) => {
   const isEven = index % 2 === 0;
   
@@ -370,6 +380,11 @@ export default function SplitAlternating(props: LayoutComponentProps) {
                 mode={mode}
                 h2Style={h2Style}
                 bodyLgStyle={bodyLgStyle}
+                blockContent={blockContent}
+                handleContentUpdate={handleContentUpdate}
+                colorTokens={colorTokens}
+                sectionBackground={sectionBackground}
+                props={props}
               />
             ))
           )}

@@ -29,6 +29,20 @@ interface CardWithTestimonialContent {
   subheadline?: string;
   supporting_text?: string;
   trust_items?: string;
+  // Social proof metrics
+  social_metric_1?: string;
+  social_metric_1_label?: string;
+  social_metric_2?: string;
+  social_metric_2_label?: string;
+  social_metric_3?: string;
+  social_metric_3_label?: string;
+  social_metric_4?: string;
+  social_metric_4_label?: string;
+  show_social_proof?: boolean;
+  // Guarantee section
+  guarantee_title?: string;
+  guarantee_description?: string;
+  show_guarantee?: boolean;
 }
 
 const CONTENT_SCHEMA = {
@@ -91,6 +105,56 @@ const CONTENT_SCHEMA = {
   trust_items: { 
     type: 'string' as const, 
     default: '' 
+  },
+  // Social proof metrics
+  social_metric_1: { 
+    type: 'string' as const, 
+    default: '10,000+' 
+  },
+  social_metric_1_label: { 
+    type: 'string' as const, 
+    default: 'Happy customers' 
+  },
+  social_metric_2: { 
+    type: 'string' as const, 
+    default: '99.9%' 
+  },
+  social_metric_2_label: { 
+    type: 'string' as const, 
+    default: 'Uptime guaranteed' 
+  },
+  social_metric_3: { 
+    type: 'string' as const, 
+    default: '4.9/5' 
+  },
+  social_metric_3_label: { 
+    type: 'string' as const, 
+    default: 'Customer satisfaction' 
+  },
+  social_metric_4: { 
+    type: 'string' as const, 
+    default: '24/7' 
+  },
+  social_metric_4_label: { 
+    type: 'string' as const, 
+    default: 'Expert support' 
+  },
+  show_social_proof: { 
+    type: 'boolean' as const, 
+    default: true 
+  },
+  // Guarantee section
+  guarantee_title: { 
+    type: 'string' as const, 
+    default: '30-Day Money-Back Guarantee' 
+  },
+  guarantee_description: { 
+    type: 'string' as const, 
+    default: 'Try risk-free. If you\'re not completely satisfied, we\'ll refund every penny.' 
+  },
+  show_guarantee: { 
+    type: 'boolean' as const, 
+    default: true 
   }
 };
 
@@ -182,6 +246,41 @@ export default function CardWithTestimonial(props: LayoutComponentProps) {
     : [];
 
   const mutedTextColor = dynamicTextColors?.muted || colorTokens.textMuted;
+
+  // Helper function to get social proof metrics
+  const getSocialMetrics = () => {
+    const metrics = [
+      {
+        value: blockContent.social_metric_1 || '10,000+',
+        label: blockContent.social_metric_1_label || 'Happy customers',
+        color: 'text-blue-600'
+      },
+      {
+        value: blockContent.social_metric_2 || '99.9%',
+        label: blockContent.social_metric_2_label || 'Uptime guaranteed',
+        color: 'text-green-600'
+      },
+      {
+        value: blockContent.social_metric_3 || '4.9/5',
+        label: blockContent.social_metric_3_label || 'Customer satisfaction',
+        color: 'text-purple-600'
+      },
+      {
+        value: blockContent.social_metric_4 || '24/7',
+        label: blockContent.social_metric_4_label || 'Expert support',
+        color: 'text-orange-600'
+      }
+    ].filter(metric => 
+      metric.value !== '___REMOVED___' && 
+      metric.label !== '___REMOVED___' && 
+      metric.value.trim() !== '' && 
+      metric.label.trim() !== ''
+    );
+    
+    return metrics;
+  };
+
+  const socialMetrics = getSocialMetrics();
 
   const getAvatarPlaceholder = (name: string) => {
     return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
@@ -425,50 +524,142 @@ export default function CardWithTestimonial(props: LayoutComponentProps) {
         )}
 
         {/* Social Proof Section */}
-        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl p-8 border border-blue-100 mb-12">
-          <div className="text-center">
-            <h3 style={h3Style} className="font-semibold text-gray-900 mb-6">Trusted by thousands of businesses</h3>
-            
-            <div className="grid md:grid-cols-4 gap-8">
-              <div className="text-center">
-                <div style={{...getTypographyStyle('h2'), fontSize: 'clamp(1.8rem, 3vw, 2rem)'}} className="font-bold text-blue-600 mb-2">10,000+</div>
-                <div className={`text-sm ${mutedTextColor}`}>Happy customers</div>
-              </div>
+        {((blockContent.show_social_proof !== false && socialMetrics.length > 0) || mode === 'edit') && (
+          <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl p-8 border border-blue-100 mb-12">
+            <div className="text-center">
+              <h3 style={h3Style} className="font-semibold text-gray-900 mb-6">Trusted by thousands of businesses</h3>
               
-              <div className="text-center">
-                <div style={{...getTypographyStyle('h2'), fontSize: 'clamp(1.8rem, 3vw, 2rem)'}} className="font-bold text-green-600 mb-2">99.9%</div>
-                <div className={`text-sm ${mutedTextColor}`}>Uptime guaranteed</div>
-              </div>
-              
-              <div className="text-center">
-                <div style={{...getTypographyStyle('h2'), fontSize: 'clamp(1.8rem, 3vw, 2rem)'}} className="font-bold text-purple-600 mb-2">4.9/5</div>
-                <div className={`text-sm ${mutedTextColor}`}>Customer satisfaction</div>
-              </div>
-              
-              <div className="text-center">
-                <div style={{...getTypographyStyle('h2'), fontSize: 'clamp(1.8rem, 3vw, 2rem)'}} className="font-bold text-orange-600 mb-2">24/7</div>
-                <div className={`text-sm ${mutedTextColor}`}>Expert support</div>
-              </div>
+              {mode === 'edit' ? (
+                <div className="space-y-6">
+                  <div className="grid md:grid-cols-4 gap-6">
+                    {[1, 2, 3, 4].map((index) => {
+                      const metricValue = blockContent[`social_metric_${index}` as keyof CardWithTestimonialContent] || '';
+                      const metricLabel = blockContent[`social_metric_${index}_label` as keyof CardWithTestimonialContent] || '';
+                      
+                      return (
+                        <div key={index} className="text-center relative group/social-metric">
+                          <div className="space-y-2">
+                            <EditableAdaptiveText
+                              mode={mode}
+                              value={metricValue}
+                              onEdit={(value) => handleContentUpdate(`social_metric_${index}`, value)}
+                              backgroundType={backgroundType}
+                              colorTokens={colorTokens}
+                              variant="body"
+                              className="text-2xl font-bold text-blue-600"
+                              placeholder={`Metric ${index}`}
+                              sectionBackground={sectionBackground}
+                              data-section-id={sectionId}
+                              data-element-key={`social_metric_${index}`}
+                            />
+                            <EditableAdaptiveText
+                              mode={mode}
+                              value={metricLabel}
+                              onEdit={(value) => handleContentUpdate(`social_metric_${index}_label`, value)}
+                              backgroundType={backgroundType}
+                              colorTokens={colorTokens}
+                              variant="body"
+                              className={`text-sm ${mutedTextColor}`}
+                              placeholder={`Label ${index}`}
+                              sectionBackground={sectionBackground}
+                              data-section-id={sectionId}
+                              data-element-key={`social_metric_${index}_label`}
+                            />
+                          </div>
+                          
+                          {/* Remove button */}
+                          {(metricValue || metricLabel) && (
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleContentUpdate(`social_metric_${index}`, '___REMOVED___');
+                                handleContentUpdate(`social_metric_${index}_label`, '___REMOVED___');
+                              }}
+                              className="opacity-0 group-hover/social-metric:opacity-100 absolute -top-2 -right-2 p-1 rounded-full bg-white/80 hover:bg-white text-red-500 hover:text-red-700 transition-all duration-200 z-10 shadow-sm"
+                              title="Remove this metric"
+                            >
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                              </svg>
+                            </button>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              ) : (
+                <div className="grid md:grid-cols-4 gap-8">
+                  {socialMetrics.map((metric, index) => (
+                    <div key={index} className="text-center">
+                      <div style={{...getTypographyStyle('h2'), fontSize: 'clamp(1.8rem, 3vw, 2rem)'}} className={`font-bold ${metric.color} mb-2`}>{metric.value}</div>
+                      <div className={`text-sm ${mutedTextColor}`}>{metric.label}</div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
-        </div>
+        )}
 
         {/* Money-back Guarantee */}
-        <div className="bg-green-50 rounded-2xl p-8 border border-green-200 mb-12">
-          <div className="flex items-center justify-center space-x-4">
-            <div className="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center text-white">
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-              </svg>
-            </div>
-            <div className="text-center">
-              <div style={bodyLgStyle} className="font-semibold text-gray-900">30-Day Money-Back Guarantee</div>
-              <div className={`text-sm ${mutedTextColor}`}>
-                Try risk-free. If you're not completely satisfied, we'll refund every penny.
+        {((blockContent.show_guarantee !== false && (blockContent.guarantee_title || blockContent.guarantee_description)) || mode === 'edit') && (
+          <div className="bg-green-50 rounded-2xl p-8 border border-green-200 mb-12 relative group/guarantee">
+            <div className="flex items-center justify-center space-x-4">
+              <div className="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center text-white">
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                </svg>
+              </div>
+              <div className="text-center">
+                <EditableAdaptiveText
+                  mode={mode}
+                  value={blockContent.guarantee_title || ''}
+                  onEdit={(value) => handleContentUpdate('guarantee_title', value)}
+                  backgroundType={backgroundType}
+                  colorTokens={colorTokens}
+                  variant="body"
+                  style={bodyLgStyle}
+                  className="font-semibold text-gray-900"
+                  placeholder="Guarantee title"
+                  sectionBackground={sectionBackground}
+                  data-section-id={sectionId}
+                  data-element-key="guarantee_title"
+                />
+                <EditableAdaptiveText
+                  mode={mode}
+                  value={blockContent.guarantee_description || ''}
+                  onEdit={(value) => handleContentUpdate('guarantee_description', value)}
+                  backgroundType={backgroundType}
+                  colorTokens={colorTokens}
+                  variant="body"
+                  className={`text-sm ${mutedTextColor} mt-1`}
+                  placeholder="Guarantee description"
+                  sectionBackground={sectionBackground}
+                  data-section-id={sectionId}
+                  data-element-key="guarantee_description"
+                />
               </div>
             </div>
+            
+            {/* Remove button */}
+            {mode === 'edit' && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleContentUpdate('guarantee_title', '___REMOVED___');
+                  handleContentUpdate('guarantee_description', '___REMOVED___');
+                }}
+                className="opacity-0 group-hover/guarantee:opacity-100 absolute -top-2 -right-2 p-1 rounded-full bg-white/80 hover:bg-white text-red-500 hover:text-red-700 transition-all duration-200 z-10 shadow-sm"
+                title="Remove guarantee section"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            )}
           </div>
-        </div>
+        )}
 
         {(blockContent.supporting_text || blockContent.trust_items || mode === 'edit') && (
           <div className="text-center space-y-6">
@@ -525,6 +716,18 @@ export const componentMeta = {
     { key: 'testimonial_ratings', label: 'Testimonial Ratings 1-5 (pipe separated)', type: 'text', required: false },
     { key: 'testimonial_images', label: 'Testimonial Avatar URLs (pipe separated)', type: 'text', required: false },
     { key: 'popular_tiers', label: 'Popular Tiers true/false (pipe separated)', type: 'text', required: false },
+    { key: 'social_metric_1', label: 'Social Metric 1 Value', type: 'text', required: false },
+    { key: 'social_metric_1_label', label: 'Social Metric 1 Label', type: 'text', required: false },
+    { key: 'social_metric_2', label: 'Social Metric 2 Value', type: 'text', required: false },
+    { key: 'social_metric_2_label', label: 'Social Metric 2 Label', type: 'text', required: false },
+    { key: 'social_metric_3', label: 'Social Metric 3 Value', type: 'text', required: false },
+    { key: 'social_metric_3_label', label: 'Social Metric 3 Label', type: 'text', required: false },
+    { key: 'social_metric_4', label: 'Social Metric 4 Value', type: 'text', required: false },
+    { key: 'social_metric_4_label', label: 'Social Metric 4 Label', type: 'text', required: false },
+    { key: 'show_social_proof', label: 'Show Social Proof Section', type: 'boolean', required: false },
+    { key: 'guarantee_title', label: 'Guarantee Title', type: 'text', required: false },
+    { key: 'guarantee_description', label: 'Guarantee Description', type: 'text', required: false },
+    { key: 'show_guarantee', label: 'Show Guarantee Section', type: 'boolean', required: false },
     { key: 'supporting_text', label: 'Supporting Text', type: 'textarea', required: false },
     { key: 'trust_items', label: 'Trust Indicators (pipe separated)', type: 'text', required: false }
   ],

@@ -16,6 +16,7 @@ interface ObjectionCarouselContent {
   headline: string;
   subheadline?: string;
   objection_slides: string;
+  autoplay_button_text?: string;
 }
 
 // Content schema - defines structure and defaults
@@ -31,6 +32,10 @@ const CONTENT_SCHEMA = {
   objection_slides: { 
     type: 'string' as const, 
     default: 'Is this really worth the investment?|We understand budget concerns. Most customers save 10x their investment within 3 months through improved efficiency.|🤔|Will this integrate with our existing tools?|Absolutely! We have pre-built integrations with 500+ popular tools, plus a robust API for custom connections.|🔗|How long does implementation take?|Most teams are up and running in under 24 hours. Our onboarding team guides you through every step.|⚡|What if we need support or have issues?|You get dedicated support with response times under 2 hours. Plus, our 99.9% uptime guarantee means reliability you can count on.|🛠️|Is our data secure with your platform?|Security is our top priority. We\'re SOC 2 compliant, GDPR ready, and use enterprise-grade encryption for all data.|🔒|What if it doesn\'t work for our specific use case?|Every business is unique. We offer a 30-day money-back guarantee and custom configuration to ensure it fits your exact needs.|✨' 
+  },
+  autoplay_button_text: {
+    type: 'string' as const,
+    default: '▶️ Auto-play for 15 seconds'
   }
 };
 
@@ -151,14 +156,42 @@ export default function ObjectionCarousel(props: LayoutComponentProps) {
                       </div>
 
                       {/* Question */}
-                      <h3 className="text-2xl lg:text-3xl font-bold text-gray-900 mb-8 leading-tight">
-                        {slide.question}
-                      </h3>
+                      <EditableAdaptiveText
+                        mode={mode}
+                        value={slide.question || ''}
+                        onEdit={(value) => {
+                          const updatedSlides = blockContent.objection_slides.split('|');
+                          updatedSlides[index * 3] = value;
+                          handleContentUpdate('objection_slides', updatedSlides.join('|'));
+                        }}
+                        backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
+                        colorTokens={colorTokens}
+                        variant="headline"
+                        className="text-2xl lg:text-3xl font-bold text-gray-900 mb-8 leading-tight"
+                        placeholder="Enter question"
+                        sectionBackground={sectionBackground}
+                        data-section-id={sectionId}
+                        data-element-key={`slide_${index}_question`}
+                      />
 
                       {/* Answer */}
-                      <p className="text-lg lg:text-xl text-gray-700 leading-relaxed">
-                        {slide.answer}
-                      </p>
+                      <EditableAdaptiveText
+                        mode={mode}
+                        value={slide.answer || ''}
+                        onEdit={(value) => {
+                          const updatedSlides = blockContent.objection_slides.split('|');
+                          updatedSlides[index * 3 + 1] = value;
+                          handleContentUpdate('objection_slides', updatedSlides.join('|'));
+                        }}
+                        backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
+                        colorTokens={colorTokens}
+                        variant="body"
+                        className="text-lg lg:text-xl text-gray-700 leading-relaxed"
+                        placeholder="Enter answer"
+                        sectionBackground={sectionBackground}
+                        data-section-id={sectionId}
+                        data-element-key={`slide_${index}_answer`}
+                      />
                     </div>
                   </div>
                 </div>
@@ -226,9 +259,23 @@ export default function ObjectionCarousel(props: LayoutComponentProps) {
                   Question {index + 1}
                 </span>
               </div>
-              <h4 className="font-semibold text-gray-900 text-sm leading-tight">
-                {slide.question.length > 60 ? slide.question.substring(0, 60) + '...' : slide.question}
-              </h4>
+              <EditableAdaptiveText
+                mode={mode}
+                value={slide.question.length > 60 ? slide.question.substring(0, 60) + '...' : slide.question}
+                onEdit={(value) => {
+                  const updatedSlides = blockContent.objection_slides.split('|');
+                  updatedSlides[index * 3] = value;
+                  handleContentUpdate('objection_slides', updatedSlides.join('|'));
+                }}
+                backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
+                colorTokens={colorTokens}
+                variant="body"
+                className="font-semibold text-gray-900 text-sm leading-tight"
+                placeholder="Question preview"
+                sectionBackground={sectionBackground}
+                data-section-id={sectionId}
+                data-element-key={`slide_${index}_preview`}
+              />
             </button>
           ))}
         </div>
@@ -242,7 +289,23 @@ export default function ObjectionCarousel(props: LayoutComponentProps) {
             }}
             className="text-blue-600 hover:text-blue-700 font-medium text-sm transition-colors duration-200"
           >
-            ▶️ Auto-play for 15 seconds
+            {mode === 'edit' ? (
+              <EditableAdaptiveText
+                mode={mode}
+                value={blockContent.autoplay_button_text || ''}
+                onEdit={(value) => handleContentUpdate('autoplay_button_text', value)}
+                backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
+                colorTokens={colorTokens}
+                variant="body"
+                className="text-blue-600 hover:text-blue-700 font-medium text-sm transition-colors duration-200"
+                placeholder="Auto-play button text"
+                sectionBackground={sectionBackground}
+                data-section-id={sectionId}
+                data-element-key="autoplay_button_text"
+              />
+            ) : (
+              blockContent.autoplay_button_text || '▶️ Auto-play for 15 seconds'
+            )}
           </button>
         </div>
 
