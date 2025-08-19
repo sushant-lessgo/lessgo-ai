@@ -16,6 +16,7 @@ import {
   CTAButton, 
   TrustIndicators 
 } from '@/components/layout/ComponentRegistry';
+import EditableTrustIndicators from '@/components/layout/EditableTrustIndicators';
 import { LayoutComponentProps } from '@/types/storeTypes';
 
 // Content interface for type safety
@@ -29,6 +30,15 @@ interface VideoNoteWithTranscriptContent {
   founder_title?: string;
   video_duration?: string;
   trust_items?: string;
+  trust_item_1: string;
+  trust_item_2: string;
+  trust_item_3: string;
+  trust_item_4: string;
+  trust_item_5: string;
+  transcript_heading: string;
+  secondary_cta_heading: string;
+  secondary_cta_description: string;
+  secondary_cta_button: string;
   video_thumbnail?: string;
 }
 
@@ -70,10 +80,19 @@ const CONTENT_SCHEMA = {
     type: 'string' as const, 
     default: 'Used by 10,000+ companies|30-day free trial|No credit card required' 
   },
+  trust_item_1: { type: 'string' as const, default: 'Used by 10,000+ companies' },
+  trust_item_2: { type: 'string' as const, default: '30-day free trial' },
+  trust_item_3: { type: 'string' as const, default: 'No credit card required' },
+  trust_item_4: { type: 'string' as const, default: '' },
+  trust_item_5: { type: 'string' as const, default: '' },
   video_thumbnail: { 
     type: 'string' as const, 
     default: '' 
-  }
+  },
+  transcript_heading: { type: 'string' as const, default: 'Video Transcript' },
+  secondary_cta_heading: { type: 'string' as const, default: 'Ready to get started?' },
+  secondary_cta_description: { type: 'string' as const, default: 'Book a personalized demo and see how this can work for your team.' },
+  secondary_cta_button: { type: 'string' as const, default: 'Book Your Demo' }
 };
 
 // Video Player Placeholder Component
@@ -141,10 +160,27 @@ export default function VideoNoteWithTranscript(props: LayoutComponentProps) {
   
   const { getTextStyle: getTypographyStyle } = useTypography();
 
-  // Parse trust indicators from pipe-separated string
-  const trustItems = blockContent.trust_items 
-    ? blockContent.trust_items.split('|').map(item => item.trim()).filter(Boolean)
-    : ['Trusted by thousands', 'Free trial available'];
+  // Helper function to get trust items with individual field support
+  const getTrustItems = (): string[] => {
+    const individualItems = [
+      blockContent.trust_item_1,
+      blockContent.trust_item_2,
+      blockContent.trust_item_3,
+      blockContent.trust_item_4,
+      blockContent.trust_item_5
+    ].filter((item): item is string => Boolean(item && item.trim() !== '' && item !== '___REMOVED___'));
+    
+    // Legacy format fallback
+    if (individualItems.length > 0) {
+      return individualItems;
+    }
+    
+    return blockContent.trust_items 
+      ? blockContent.trust_items.split('|').map(item => item.trim()).filter(Boolean)
+      : ['Used by 10,000+ companies', '30-day free trial'];
+  };
+  
+  const trustItems = getTrustItems();
 
   // Get muted text color for trust indicators
   const mutedTextColor = dynamicTextColors?.muted || colorTokens.textMuted;
@@ -289,9 +325,19 @@ export default function VideoNoteWithTranscript(props: LayoutComponentProps) {
               <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
               </svg>
-              <h3 className={`font-semibold ${dynamicTextColors?.heading || colorTokens.textPrimary}`}>
-                Video Transcript
-              </h3>
+              <EditableAdaptiveHeadline
+                mode={mode}
+                value={blockContent.transcript_heading || ''}
+                onEdit={(value) => handleContentUpdate('transcript_heading', value)}
+                level="h3"
+                backgroundType={backgroundType}
+                colorTokens={colorTokens}
+                textStyle={{ fontWeight: '600' }}
+                placeholder="Video Transcript"
+                sectionId={sectionId}
+                elementKey="transcript_heading"
+                sectionBackground={sectionBackground}
+              />
             </div>
 
             {/* Transcript Content */}
@@ -313,28 +359,91 @@ export default function VideoNoteWithTranscript(props: LayoutComponentProps) {
 
             {/* Trust Indicators */}
             <div className="pt-4 border-t border-gray-200">
-              <TrustIndicators 
-                items={trustItems}
-                colorClass={mutedTextColor}
-                iconColor="text-green-500"
-              />
+              {mode === 'edit' ? (
+                <EditableTrustIndicators
+                  mode={mode}
+                  trustItems={[
+                    blockContent.trust_item_1 || '',
+                    blockContent.trust_item_2 || '',
+                    blockContent.trust_item_3 || '',
+                    blockContent.trust_item_4 || '',
+                    blockContent.trust_item_5 || ''
+                  ]}
+                  onTrustItemChange={(index, value) => {
+                    const fieldKey = `trust_item_${index + 1}` as keyof VideoNoteWithTranscriptContent;
+                    handleContentUpdate(fieldKey, value);
+                  }}
+                  onAddTrustItem={() => {
+                    const emptyIndex = [
+                      blockContent.trust_item_1,
+                      blockContent.trust_item_2,
+                      blockContent.trust_item_3,
+                      blockContent.trust_item_4,
+                      blockContent.trust_item_5
+                    ].findIndex(item => !item || item.trim() === '' || item === '___REMOVED___');
+                    
+                    if (emptyIndex !== -1) {
+                      const fieldKey = `trust_item_${emptyIndex + 1}` as keyof VideoNoteWithTranscriptContent;
+                      handleContentUpdate(fieldKey, 'New trust item');
+                    }
+                  }}
+                  onRemoveTrustItem={(index) => {
+                    const fieldKey = `trust_item_${index + 1}` as keyof VideoNoteWithTranscriptContent;
+                    handleContentUpdate(fieldKey, '___REMOVED___');
+                  }}
+                  colorTokens={colorTokens}
+                  sectionBackground={sectionBackground}
+                  sectionId={sectionId}
+                  backgroundType={backgroundType}
+                  iconColor="text-green-500"
+                  colorClass={mutedTextColor}
+                />
+              ) : (
+                <TrustIndicators 
+                  items={trustItems}
+                  colorClass={mutedTextColor}
+                  iconColor="text-green-500"
+                />
+              )}
             </div>
 
             {/* Additional CTA */}
             <div className="bg-blue-50 rounded-lg p-6">
-              <h4 className="font-semibold text-blue-900 mb-2">
-                Ready to get started?
-              </h4>
-              <p className="text-blue-700 text-sm mb-4">
-                Book a personalized demo and see how this can work for your team.
-              </p>
+              <EditableAdaptiveHeadline
+                mode={mode}
+                value={blockContent.secondary_cta_heading || ''}
+                onEdit={(value) => handleContentUpdate('secondary_cta_heading', value)}
+                level="h4"
+                backgroundType="neutral"
+                colorTokens={colorTokens}
+                textStyle={{ fontWeight: '600', color: '#1E3A8A', marginBottom: '0.5rem' }}
+                placeholder="Ready to get started?"
+                sectionId={sectionId}
+                elementKey="secondary_cta_heading"
+                sectionBackground="bg-blue-50"
+              />
+              
+              <EditableAdaptiveText
+                mode={mode}
+                value={blockContent.secondary_cta_description || ''}
+                onEdit={(value) => handleContentUpdate('secondary_cta_description', value)}
+                backgroundType="neutral"
+                colorTokens={colorTokens}
+                variant="body"
+                textStyle={{ color: '#1D4ED8', fontSize: '0.875rem', marginBottom: '1rem' }}
+                placeholder="Book a personalized demo and see how this can work for your team."
+                sectionId={sectionId}
+                elementKey="secondary_cta_description"
+                sectionBackground="bg-blue-50"
+              />
+              
               <CTAButton
-                text="Book Your Demo"
+                text={blockContent.secondary_cta_button}
                 colorTokens={colorTokens}
                 className="w-full shadow-lg hover:shadow-xl transition-all duration-200"
                 variant="primary"
                 sectionId={sectionId}
-                elementKey="cta_text"
+                elementKey="secondary_cta_button"
               />
             </div>
           </div>

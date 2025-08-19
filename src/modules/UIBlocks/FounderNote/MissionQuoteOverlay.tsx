@@ -16,6 +16,7 @@ import {
   CTAButton, 
   TrustIndicators 
 } from '@/components/layout/ComponentRegistry';
+import EditableTrustIndicators from '@/components/layout/EditableTrustIndicators';
 import { LayoutComponentProps } from '@/types/storeTypes';
 
 // Content interface for type safety
@@ -26,9 +27,18 @@ interface MissionQuoteOverlayContent {
   cta_text: string;
   badge_text?: string;
   mission_stats?: string;
+  mission_stat_1: string;
+  mission_stat_2: string;
+  mission_stat_3: string;
+  mission_stat_4: string;
   founder_title?: string;
   mission_year?: string;
   trust_items?: string;
+  trust_item_1: string;
+  trust_item_2: string;
+  trust_item_3: string;
+  trust_item_4: string;
+  trust_item_5: string;
   background_image?: string;
 }
 
@@ -58,6 +68,10 @@ const CONTENT_SCHEMA = {
     type: 'string' as const, 
     default: '50,000+ creators empowered|$2M+ in creator earnings|100+ countries served' 
   },
+  mission_stat_1: { type: 'string' as const, default: '50,000+ creators empowered' },
+  mission_stat_2: { type: 'string' as const, default: '$2M+ in creator earnings' },
+  mission_stat_3: { type: 'string' as const, default: '100+ countries served' },
+  mission_stat_4: { type: 'string' as const, default: '' },
   founder_title: { 
     type: 'string' as const, 
     default: 'Founder & CEO' 
@@ -70,6 +84,11 @@ const CONTENT_SCHEMA = {
     type: 'string' as const, 
     default: 'B-Corp Certified|Climate Neutral|Open Source' 
   },
+  trust_item_1: { type: 'string' as const, default: 'B-Corp Certified' },
+  trust_item_2: { type: 'string' as const, default: 'Climate Neutral' },
+  trust_item_3: { type: 'string' as const, default: 'Open Source' },
+  trust_item_4: { type: 'string' as const, default: '' },
+  trust_item_5: { type: 'string' as const, default: '' },
   background_image: { 
     type: 'string' as const, 
     default: '' 
@@ -117,19 +136,52 @@ export default function MissionQuoteOverlay(props: LayoutComponentProps) {
   
   const { getTextStyle: getTypographyStyle } = useTypography();
 
-  // Parse mission stats from pipe-separated string
-  const missionStats = blockContent.mission_stats 
-    ? blockContent.mission_stats.split('|').map(item => item.trim()).filter(Boolean)
-    : ['Growing community', 'Positive impact'];
+  // Helper function to get mission stats with individual field support
+  const getMissionStats = (): string[] => {
+    const individualStats = [
+      blockContent.mission_stat_1,
+      blockContent.mission_stat_2,
+      blockContent.mission_stat_3,
+      blockContent.mission_stat_4
+    ].filter((stat): stat is string => Boolean(stat && stat.trim() !== '' && stat !== '___REMOVED___'));
+    
+    // Legacy format fallback
+    if (individualStats.length > 0) {
+      return individualStats;
+    }
+    
+    return blockContent.mission_stats 
+      ? blockContent.mission_stats.split('|').map(item => item.trim()).filter(Boolean)
+      : ['50,000+ creators empowered', '$2M+ in creator earnings'];
+  };
+  
+  const missionStats = getMissionStats();
     
   // Typography styles
   const h2Style = getTypographyStyle('h2');
   const bodyStyle = getTypographyStyle('body-lg');
 
-  // Parse trust indicators from pipe-separated string
-  const trustItems = blockContent.trust_items 
-    ? blockContent.trust_items.split('|').map(item => item.trim()).filter(Boolean)
-    : ['Certified', 'Trusted'];
+  // Helper function to get trust items with individual field support
+  const getTrustItems = (): string[] => {
+    const individualItems = [
+      blockContent.trust_item_1,
+      blockContent.trust_item_2,
+      blockContent.trust_item_3,
+      blockContent.trust_item_4,
+      blockContent.trust_item_5
+    ].filter((item): item is string => Boolean(item && item.trim() !== '' && item !== '___REMOVED___'));
+    
+    // Legacy format fallback
+    if (individualItems.length > 0) {
+      return individualItems;
+    }
+    
+    return blockContent.trust_items 
+      ? blockContent.trust_items.split('|').map(item => item.trim()).filter(Boolean)
+      : ['B-Corp Certified', 'Climate Neutral'];
+  };
+  
+  const trustItems = getTrustItems();
 
   // Get showImageToolbar for handling image clicks
   const store = useEditStore();
@@ -260,18 +312,91 @@ export default function MissionQuoteOverlay(props: LayoutComponentProps) {
             </div>
 
             {/* Mission Stats */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-3xl mx-auto">
-              {missionStats.map((stat, index) => (
-                <div key={index} className="text-center">
-                  <div style={h2Style} className="text-2xl lg:text-3xl font-bold text-white mb-1">
-                    {stat.split(' ')[0]}
-                  </div>
-                  <div style={bodyStyle} className="text-white text-opacity-80 text-sm">
-                    {stat.split(' ').slice(1).join(' ')}
-                  </div>
+            {mode === 'edit' ? (
+              <div className="bg-black bg-opacity-30 rounded-lg p-6 max-w-3xl mx-auto">
+                <h4 className="text-white font-semibold mb-4 text-center">Mission Statistics</h4>
+                <div className="space-y-3">
+                  {[
+                    { key: 'mission_stat_1', placeholder: '50,000+ creators empowered' },
+                    { key: 'mission_stat_2', placeholder: '$2M+ in creator earnings' },
+                    { key: 'mission_stat_3', placeholder: '100+ countries served' },
+                    { key: 'mission_stat_4', placeholder: 'Additional statistic...' }
+                  ].map((stat, index) => (
+                    ((blockContent as any)[stat.key] || mode === 'edit') && (
+                      <div key={index} className="relative group/stat-item flex items-center space-x-2">
+                        <EditableAdaptiveText
+                          mode={mode}
+                          value={(blockContent as any)[stat.key] || ''}
+                          onEdit={(value) => handleContentUpdate(stat.key as keyof MissionQuoteOverlayContent, value)}
+                          backgroundType="primary"
+                          colorTokens={colorTokens}
+                          variant="body"
+                          textStyle={{ color: '#ffffff', fontWeight: '500' }}
+                          placeholder={stat.placeholder}
+                          sectionId={sectionId}
+                          elementKey={stat.key}
+                          sectionBackground="transparent"
+                        />
+                        
+                        {/* Remove button */}
+                        {mode === 'edit' && (blockContent as any)[stat.key] && (blockContent as any)[stat.key] !== '___REMOVED___' && (
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleContentUpdate(stat.key as keyof MissionQuoteOverlayContent, '___REMOVED___');
+                            }}
+                            className="opacity-0 group-hover/stat-item:opacity-100 text-red-400 hover:text-red-300 transition-opacity duration-200"
+                            title="Remove this statistic"
+                          >
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                          </button>
+                        )}
+                      </div>
+                    )
+                  ))}
+                  
+                  {/* Add button */}
+                  {mode === 'edit' && missionStats.length < 4 && (
+                    <button
+                      onClick={() => {
+                        const emptyIndex = [
+                          blockContent.mission_stat_1,
+                          blockContent.mission_stat_2,
+                          blockContent.mission_stat_3,
+                          blockContent.mission_stat_4
+                        ].findIndex(stat => !stat || stat.trim() === '' || stat === '___REMOVED___');
+                        
+                        if (emptyIndex !== -1) {
+                          const fieldKey = `mission_stat_${emptyIndex + 1}` as keyof MissionQuoteOverlayContent;
+                          handleContentUpdate(fieldKey, 'New statistic');
+                        }
+                      }}
+                      className="flex items-center space-x-1 text-sm text-blue-200 hover:text-blue-100 transition-colors mt-2"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                      </svg>
+                      <span>Add statistic</span>
+                    </button>
+                  )}
                 </div>
-              ))}
-            </div>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-3xl mx-auto">
+                {missionStats.map((stat, index) => (
+                  <div key={index} className="text-center">
+                    <div style={h2Style} className="text-2xl lg:text-3xl font-bold text-white mb-1">
+                      {stat.split(' ')[0]}
+                    </div>
+                    <div style={bodyStyle} className="text-white text-opacity-80 text-sm">
+                      {stat.split(' ').slice(1).join(' ')}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
 
             {/* CTA Button */}
             <div>
@@ -312,11 +437,52 @@ export default function MissionQuoteOverlay(props: LayoutComponentProps) {
 
               {/* Trust Indicators */}
               <div className="lg:text-right">
-                <TrustIndicators 
-                  items={trustItems}
-                  colorClass="text-white text-opacity-80"
-                  iconColor="text-green-400"
-                />
+                {mode === 'edit' ? (
+                  <EditableTrustIndicators
+                    mode={mode}
+                    trustItems={[
+                      blockContent.trust_item_1 || '',
+                      blockContent.trust_item_2 || '',
+                      blockContent.trust_item_3 || '',
+                      blockContent.trust_item_4 || '',
+                      blockContent.trust_item_5 || ''
+                    ]}
+                    onTrustItemChange={(index, value) => {
+                      const fieldKey = `trust_item_${index + 1}` as keyof MissionQuoteOverlayContent;
+                      handleContentUpdate(fieldKey, value);
+                    }}
+                    onAddTrustItem={() => {
+                      const emptyIndex = [
+                        blockContent.trust_item_1,
+                        blockContent.trust_item_2,
+                        blockContent.trust_item_3,
+                        blockContent.trust_item_4,
+                        blockContent.trust_item_5
+                      ].findIndex(item => !item || item.trim() === '' || item === '___REMOVED___');
+                      
+                      if (emptyIndex !== -1) {
+                        const fieldKey = `trust_item_${emptyIndex + 1}` as keyof MissionQuoteOverlayContent;
+                        handleContentUpdate(fieldKey, 'New trust item');
+                      }
+                    }}
+                    onRemoveTrustItem={(index) => {
+                      const fieldKey = `trust_item_${index + 1}` as keyof MissionQuoteOverlayContent;
+                      handleContentUpdate(fieldKey, '___REMOVED___');
+                    }}
+                    colorTokens={colorTokens}
+                    sectionBackground="transparent"
+                    sectionId={sectionId}
+                    backgroundType={backgroundType}
+                    iconColor="text-green-400"
+                    colorClass="text-white text-opacity-80"
+                  />
+                ) : (
+                  <TrustIndicators 
+                    items={trustItems}
+                    colorClass="text-white text-opacity-80"
+                    iconColor="text-green-400"
+                  />
+                )}
               </div>
             </div>
           </div>

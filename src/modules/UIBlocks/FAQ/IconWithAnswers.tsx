@@ -99,11 +99,11 @@ export default function IconWithAnswers(props: LayoutComponentProps) {
       const answer = blockContent[answerKey];
       const icon = blockContent[iconKey];
       
-      if (question && question.trim() !== '' && question !== '___REMOVED___') {
+      if (question && typeof question === 'string' && question.trim() !== '' && question !== '___REMOVED___') {
         items.push({
           question: question.trim(),
-          answer: (answer && answer !== '___REMOVED___') ? answer.trim() : '',
-          icon: (icon && icon !== '___REMOVED___') ? icon.trim() : '💡',
+          answer: (answer && typeof answer === 'string' && answer !== '___REMOVED___') ? answer.trim() : '',
+          icon: (icon && typeof icon === 'string' && icon !== '___REMOVED___') ? icon.trim() : '💡',
           index: i
         });
       }

@@ -20,6 +20,18 @@ interface IconCircleStepsContent {
   supporting_text?: string;
   cta_text?: string;
   trust_items?: string;
+  // CircleStep features
+  circle_feature_1_text?: string;
+  circle_feature_2_text?: string;
+  circle_feature_3_text?: string;
+  // Summary Card fields
+  summary_card_heading?: string;
+  summary_card_description?: string;
+  summary_stat_1_text?: string;
+  summary_stat_2_text?: string;
+  summary_stat_3_text?: string;
+  show_circle_features?: boolean;
+  show_summary_card?: boolean;
 }
 
 const CONTENT_SCHEMA = {
@@ -50,6 +62,48 @@ const CONTENT_SCHEMA = {
   trust_items: { 
     type: 'string' as const, 
     default: '' 
+  },
+  // CircleStep features
+  circle_feature_1_text: { 
+    type: 'string' as const, 
+    default: 'Intuitive interface' 
+  },
+  circle_feature_2_text: { 
+    type: 'string' as const, 
+    default: 'Professional results' 
+  },
+  circle_feature_3_text: { 
+    type: 'string' as const, 
+    default: 'No experience needed' 
+  },
+  // Summary Card fields
+  summary_card_heading: { 
+    type: 'string' as const, 
+    default: 'Start seeing results in minutes' 
+  },
+  summary_card_description: { 
+    type: 'string' as const, 
+    default: 'Our streamlined process gets you up and running quickly with zero complexity' 
+  },
+  summary_stat_1_text: { 
+    type: 'string' as const, 
+    default: 'Under 10 minutes' 
+  },
+  summary_stat_2_text: { 
+    type: 'string' as const, 
+    default: 'No setup required' 
+  },
+  summary_stat_3_text: { 
+    type: 'string' as const, 
+    default: 'Instant results' 
+  },
+  show_circle_features: { 
+    type: 'boolean' as const, 
+    default: true 
+  },
+  show_summary_card: { 
+    type: 'boolean' as const, 
+    default: true 
   }
 };
 
@@ -283,40 +337,188 @@ export default function IconCircleSteps(props: LayoutComponentProps) {
         )}
 
         {/* Summary Card */}
-        <div className="bg-gradient-to-r from-blue-50 via-indigo-50 to-purple-50 rounded-2xl p-8 border border-blue-100 mb-12">
-          <div className="text-center">
-            <div className="flex justify-center items-center space-x-6 mb-4">
-              <div className="flex items-center space-x-2">
-                <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                <span className="text-gray-700 font-medium">Under 10 minutes</span>
+        {blockContent.show_summary_card !== false && (
+          <div className="bg-gradient-to-r from-blue-50 via-indigo-50 to-purple-50 rounded-2xl p-8 border border-blue-100 mb-12">
+            <div className="text-center">
+              <div className="flex justify-center items-center space-x-6 mb-4">
+                {(blockContent.summary_stat_1_text && blockContent.summary_stat_1_text !== '___REMOVED___') && (
+                  <div className="relative group/summary-stat-1 flex items-center space-x-2">
+                    <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <EditableAdaptiveText
+                      mode={mode}
+                      value={blockContent.summary_stat_1_text || ''}
+                      onEdit={(value) => handleContentUpdate('summary_stat_1_text', value)}
+                      backgroundType={backgroundType}
+                      colorTokens={colorTokens}
+                      variant="body"
+                      className="text-gray-700 font-medium"
+                      placeholder="Summary stat 1"
+                      sectionBackground={sectionBackground}
+                      data-section-id={sectionId}
+                      data-element-key="summary_stat_1_text"
+                    />
+                    {mode === 'edit' && (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleContentUpdate('summary_stat_1_text', '___REMOVED___');
+                        }}
+                        className="opacity-0 group-hover/summary-stat-1:opacity-100 ml-1 text-red-500 hover:text-red-700 transition-opacity duration-200"
+                        title="Remove stat 1"
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      </button>
+                    )}
+                  </div>
+                )}
+                {(blockContent.summary_stat_1_text && blockContent.summary_stat_1_text !== '___REMOVED___') && 
+                 (blockContent.summary_stat_2_text && blockContent.summary_stat_2_text !== '___REMOVED___') && (
+                  <div className="w-px h-6 bg-gray-300" />
+                )}
+                {(blockContent.summary_stat_2_text && blockContent.summary_stat_2_text !== '___REMOVED___') && (
+                  <div className="relative group/summary-stat-2 flex items-center space-x-2">
+                    <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                    </svg>
+                    <EditableAdaptiveText
+                      mode={mode}
+                      value={blockContent.summary_stat_2_text || ''}
+                      onEdit={(value) => handleContentUpdate('summary_stat_2_text', value)}
+                      backgroundType={backgroundType}
+                      colorTokens={colorTokens}
+                      variant="body"
+                      className="text-gray-700 font-medium"
+                      placeholder="Summary stat 2"
+                      sectionBackground={sectionBackground}
+                      data-section-id={sectionId}
+                      data-element-key="summary_stat_2_text"
+                    />
+                    {mode === 'edit' && (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleContentUpdate('summary_stat_2_text', '___REMOVED___');
+                        }}
+                        className="opacity-0 group-hover/summary-stat-2:opacity-100 ml-1 text-red-500 hover:text-red-700 transition-opacity duration-200"
+                        title="Remove stat 2"
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      </button>
+                    )}
+                  </div>
+                )}
+                {(blockContent.summary_stat_2_text && blockContent.summary_stat_2_text !== '___REMOVED___') && 
+                 (blockContent.summary_stat_3_text && blockContent.summary_stat_3_text !== '___REMOVED___') && (
+                  <div className="w-px h-6 bg-gray-300" />
+                )}
+                {(blockContent.summary_stat_3_text && blockContent.summary_stat_3_text !== '___REMOVED___') && (
+                  <div className="relative group/summary-stat-3 flex items-center space-x-2">
+                    <svg className="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <EditableAdaptiveText
+                      mode={mode}
+                      value={blockContent.summary_stat_3_text || ''}
+                      onEdit={(value) => handleContentUpdate('summary_stat_3_text', value)}
+                      backgroundType={backgroundType}
+                      colorTokens={colorTokens}
+                      variant="body"
+                      className="text-gray-700 font-medium"
+                      placeholder="Summary stat 3"
+                      sectionBackground={sectionBackground}
+                      data-section-id={sectionId}
+                      data-element-key="summary_stat_3_text"
+                    />
+                    {mode === 'edit' && (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleContentUpdate('summary_stat_3_text', '___REMOVED___');
+                        }}
+                        className="opacity-0 group-hover/summary-stat-3:opacity-100 ml-1 text-red-500 hover:text-red-700 transition-opacity duration-200"
+                        title="Remove stat 3"
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      </button>
+                    )}
+                  </div>
+                )}
               </div>
-              <div className="w-px h-6 bg-gray-300" />
-              <div className="flex items-center space-x-2">
-                <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                </svg>
-                <span className="text-gray-700 font-medium">No setup required</span>
-              </div>
-              <div className="w-px h-6 bg-gray-300" />
-              <div className="flex items-center space-x-2">
-                <svg className="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                <span className="text-gray-700 font-medium">Instant results</span>
-              </div>
+              
+              {(blockContent.summary_card_heading || mode === 'edit') && (
+                <div className="relative group/summary-heading">
+                  <EditableAdaptiveText
+                    mode={mode}
+                    value={blockContent.summary_card_heading || ''}
+                    onEdit={(value) => handleContentUpdate('summary_card_heading', value)}
+                    backgroundType={backgroundType}
+                    colorTokens={colorTokens}
+                    variant="body"
+                    className="text-xl font-semibold text-gray-900 mb-2"
+                    placeholder="Summary heading"
+                    sectionBackground={sectionBackground}
+                    data-section-id={sectionId}
+                    data-element-key="summary_card_heading"
+                  />
+                  {mode === 'edit' && (
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleContentUpdate('summary_card_heading', '___REMOVED___');
+                      }}
+                      className="opacity-0 group-hover/summary-heading:opacity-100 ml-2 p-1 rounded-full bg-white/80 hover:bg-white text-red-500 hover:text-red-700 transition-all duration-200"
+                      title="Remove summary heading"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </button>
+                  )}
+                </div>
+              )}
+              
+              {(blockContent.summary_card_description || mode === 'edit') && (
+                <div className="relative group/summary-desc">
+                  <EditableAdaptiveText
+                    mode={mode}
+                    value={blockContent.summary_card_description || ''}
+                    onEdit={(value) => handleContentUpdate('summary_card_description', value)}
+                    backgroundType={backgroundType}
+                    colorTokens={colorTokens}
+                    variant="body"
+                    className={`${mutedTextColor} max-w-2xl mx-auto`}
+                    placeholder="Summary description"
+                    sectionBackground={sectionBackground}
+                    data-section-id={sectionId}
+                    data-element-key="summary_card_description"
+                  />
+                  {mode === 'edit' && (
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleContentUpdate('summary_card_description', '___REMOVED___');
+                      }}
+                      className="opacity-0 group-hover/summary-desc:opacity-100 ml-2 p-1 rounded-full bg-white/80 hover:bg-white text-red-500 hover:text-red-700 transition-all duration-200"
+                      title="Remove summary description"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </button>
+                  )}
+                </div>
+              )}
             </div>
-            
-            <h3 className="text-xl font-semibold text-gray-900 mb-2">
-              Start seeing results in minutes
-            </h3>
-            
-            <p className={`${mutedTextColor} max-w-2xl mx-auto`}>
-              Our streamlined process gets you up and running quickly with zero complexity
-            </p>
           </div>
-        </div>
+        )}
 
         {(blockContent.cta_text || blockContent.trust_items || mode === 'edit') && (
           <div className="text-center space-y-6">
@@ -381,7 +583,17 @@ export const componentMeta = {
     { key: 'step_descriptions', label: 'Step Descriptions (pipe separated)', type: 'textarea', required: true },
     { key: 'supporting_text', label: 'Supporting Text', type: 'textarea', required: false },
     { key: 'cta_text', label: 'CTA Button Text', type: 'text', required: false },
-    { key: 'trust_items', label: 'Trust Indicators (pipe separated)', type: 'text', required: false }
+    { key: 'trust_items', label: 'Trust Indicators (pipe separated)', type: 'text', required: false },
+    { key: 'circle_feature_1_text', label: 'Circle Feature 1', type: 'text', required: false },
+    { key: 'circle_feature_2_text', label: 'Circle Feature 2', type: 'text', required: false },
+    { key: 'circle_feature_3_text', label: 'Circle Feature 3', type: 'text', required: false },
+    { key: 'summary_card_heading', label: 'Summary Card Heading', type: 'text', required: false },
+    { key: 'summary_card_description', label: 'Summary Card Description', type: 'textarea', required: false },
+    { key: 'summary_stat_1_text', label: 'Summary Stat 1', type: 'text', required: false },
+    { key: 'summary_stat_2_text', label: 'Summary Stat 2', type: 'text', required: false },
+    { key: 'summary_stat_3_text', label: 'Summary Stat 3', type: 'text', required: false },
+    { key: 'show_circle_features', label: 'Show Circle Features', type: 'boolean', required: false },
+    { key: 'show_summary_card', label: 'Show Summary Card', type: 'boolean', required: false }
   ],
   
   features: [

@@ -16,6 +16,7 @@ import {
   CTAButton, 
   TrustIndicators 
 } from '@/components/layout/ComponentRegistry';
+import EditableTrustIndicators from '@/components/layout/EditableTrustIndicators';
 import { LayoutComponentProps } from '@/types/storeTypes';
 
 // Content interface for type safety
@@ -28,7 +29,18 @@ interface FoundersBeliefStackContent {
   founder_name?: string;
   founder_title?: string;
   company_values?: string;
+  company_value_1: string;
+  company_value_2: string;
+  company_value_3: string;
+  company_value_4: string;
+  company_value_5: string;
+  values_heading: string;
   trust_items?: string;
+  trust_item_1: string;
+  trust_item_2: string;
+  trust_item_3: string;
+  trust_item_4: string;
+  trust_item_5: string;
   founder_image?: string;
 }
 
@@ -66,10 +78,21 @@ const CONTENT_SCHEMA = {
     type: 'string' as const, 
     default: 'Transparency|Innovation|Integrity|Customer Success' 
   },
+  company_value_1: { type: 'string' as const, default: 'Transparency' },
+  company_value_2: { type: 'string' as const, default: 'Innovation' },
+  company_value_3: { type: 'string' as const, default: 'Integrity' },
+  company_value_4: { type: 'string' as const, default: 'Customer Success' },
+  company_value_5: { type: 'string' as const, default: '' },
+  values_heading: { type: 'string' as const, default: 'Our Core Values' },
   trust_items: { 
     type: 'string' as const, 
     default: 'B-Corp Certified|SOC 2 Compliant|GDPR Compliant|Carbon Neutral' 
   },
+  trust_item_1: { type: 'string' as const, default: 'B-Corp Certified' },
+  trust_item_2: { type: 'string' as const, default: 'SOC 2 Compliant' },
+  trust_item_3: { type: 'string' as const, default: 'GDPR Compliant' },
+  trust_item_4: { type: 'string' as const, default: 'Carbon Neutral' },
+  trust_item_5: { type: 'string' as const, default: '' },
   founder_image: { 
     type: 'string' as const, 
     default: '' 
@@ -182,15 +205,49 @@ export default function FoundersBeliefStack(props: LayoutComponentProps) {
     }
   }
 
-  // Parse company values from pipe-separated string
-  const companyValues = blockContent.company_values 
-    ? blockContent.company_values.split('|').map(item => item.trim()).filter(Boolean)
-    : ['Quality', 'Innovation'];
+  // Helper function to get company values with individual field support
+  const getCompanyValues = (): string[] => {
+    const individualValues = [
+      blockContent.company_value_1,
+      blockContent.company_value_2,
+      blockContent.company_value_3,
+      blockContent.company_value_4,
+      blockContent.company_value_5
+    ].filter((value): value is string => Boolean(value && value.trim() !== '' && value !== '___REMOVED___'));
+    
+    // Legacy format fallback
+    if (individualValues.length > 0) {
+      return individualValues;
+    }
+    
+    return blockContent.company_values 
+      ? blockContent.company_values.split('|').map(item => item.trim()).filter(Boolean)
+      : ['Transparency', 'Innovation'];
+  };
+  
+  const companyValues = getCompanyValues();
 
-  // Parse trust indicators from pipe-separated string
-  const trustItems = blockContent.trust_items 
-    ? blockContent.trust_items.split('|').map(item => item.trim()).filter(Boolean)
-    : ['Certified', 'Compliant'];
+  // Helper function to get trust items with individual field support
+  const getTrustItems = (): string[] => {
+    const individualItems = [
+      blockContent.trust_item_1,
+      blockContent.trust_item_2,
+      blockContent.trust_item_3,
+      blockContent.trust_item_4,
+      blockContent.trust_item_5
+    ].filter((item): item is string => Boolean(item && item.trim() !== '' && item !== '___REMOVED___'));
+    
+    // Legacy format fallback
+    if (individualItems.length > 0) {
+      return individualItems;
+    }
+    
+    return blockContent.trust_items 
+      ? blockContent.trust_items.split('|').map(item => item.trim()).filter(Boolean)
+      : ['B-Corp Certified', 'SOC 2 Compliant'];
+  };
+  
+  const trustItems = getTrustItems();
 
   // Get muted text color for trust indicators
   const mutedTextColor = dynamicTextColors?.muted || colorTokens.textMuted;
@@ -353,14 +410,103 @@ export default function FoundersBeliefStack(props: LayoutComponentProps) {
 
         {/* Company Values */}
         <div className="text-center mb-12">
-          <h3 style={h3Style} className="text-gray-900 mb-6">Our Core Values</h3>
-          <div className="flex flex-wrap justify-center gap-4">
-            {companyValues.map((value, index) => (
-              <div key={index} className="bg-white rounded-full px-6 py-3 shadow-md border border-gray-100">
-                <span className="font-medium text-gray-700">{value}</span>
+          <EditableAdaptiveHeadline
+            mode={mode}
+            value={blockContent.values_heading || ''}
+            onEdit={(value) => handleContentUpdate('values_heading', value)}
+            level="h3"
+            backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
+            colorTokens={colorTokens}
+            className="mb-6"
+            placeholder="Our Core Values"
+            sectionId={sectionId}
+            elementKey="values_heading"
+            sectionBackground={sectionBackground}
+          />
+          
+          {mode === 'edit' ? (
+            <div className="space-y-4">
+              <div className="flex flex-wrap justify-center gap-4">
+                {[
+                  { key: 'company_value_1', placeholder: 'Transparency' },
+                  { key: 'company_value_2', placeholder: 'Innovation' },
+                  { key: 'company_value_3', placeholder: 'Integrity' },
+                  { key: 'company_value_4', placeholder: 'Customer Success' },
+                  { key: 'company_value_5', placeholder: 'Additional value...' }
+                ].map((value, index) => (
+                  ((blockContent as any)[value.key] || mode === 'edit') && (blockContent as any)[value.key] !== '___REMOVED___' && (
+                    <div key={index} className="relative group/value-item">
+                      <div className="bg-white rounded-full px-6 py-3 shadow-md border border-gray-100 flex items-center space-x-2">
+                        <EditableAdaptiveText
+                          mode={mode}
+                          value={(blockContent as any)[value.key] || ''}
+                          onEdit={(value) => handleContentUpdate(value.key as keyof FoundersBeliefStackContent, value)}
+                          backgroundType="neutral"
+                          colorTokens={colorTokens}
+                          variant="body"
+                          textStyle={{ fontWeight: '500', color: '#374151' }}
+                          placeholder={value.placeholder}
+                          sectionId={sectionId}
+                          elementKey={value.key}
+                          sectionBackground="bg-white"
+                        />
+                        
+                        {/* Remove button */}
+                        {mode === 'edit' && (blockContent as any)[value.key] && (blockContent as any)[value.key] !== '___REMOVED___' && (
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleContentUpdate(value.key as keyof FoundersBeliefStackContent, '___REMOVED___');
+                            }}
+                            className="opacity-0 group-hover/value-item:opacity-100 text-red-500 hover:text-red-700 transition-opacity duration-200"
+                            title="Remove this value"
+                          >
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  )
+                ))}
               </div>
-            ))}
-          </div>
+              
+              {/* Add button */}
+              {mode === 'edit' && companyValues.length < 5 && (
+                <button
+                  onClick={() => {
+                    const emptyIndex = [
+                      blockContent.company_value_1,
+                      blockContent.company_value_2,
+                      blockContent.company_value_3,
+                      blockContent.company_value_4,
+                      blockContent.company_value_5
+                    ].findIndex(value => !value || value.trim() === '' || value === '___REMOVED___');
+                    
+                    if (emptyIndex !== -1) {
+                      const fieldKey = `company_value_${emptyIndex + 1}` as keyof FoundersBeliefStackContent;
+                      handleContentUpdate(fieldKey, 'New value');
+                    }
+                  }}
+                  className="flex items-center space-x-1 text-sm text-blue-600 hover:text-blue-800 transition-colors mx-auto"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                  </svg>
+                  <span>Add value</span>
+                </button>
+              )}
+            </div>
+          ) : (
+            <div className="flex flex-wrap justify-center gap-4">
+              {companyValues.map((value, index) => (
+                <div key={index} className="bg-white rounded-full px-6 py-3 shadow-md border border-gray-100">
+                  <span className="font-medium text-gray-700">{value}</span>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Call to Action */}
@@ -375,11 +521,52 @@ export default function FoundersBeliefStack(props: LayoutComponentProps) {
           />
           
           {/* Trust Indicators */}
-          <TrustIndicators 
-            items={trustItems}
-            colorClass={mutedTextColor}
-            iconColor="text-green-500"
-          />
+          {mode === 'edit' ? (
+            <EditableTrustIndicators
+              mode={mode}
+              trustItems={[
+                blockContent.trust_item_1 || '',
+                blockContent.trust_item_2 || '',
+                blockContent.trust_item_3 || '',
+                blockContent.trust_item_4 || '',
+                blockContent.trust_item_5 || ''
+              ]}
+              onTrustItemChange={(index, value) => {
+                const fieldKey = `trust_item_${index + 1}` as keyof FoundersBeliefStackContent;
+                handleContentUpdate(fieldKey, value);
+              }}
+              onAddTrustItem={() => {
+                const emptyIndex = [
+                  blockContent.trust_item_1,
+                  blockContent.trust_item_2,
+                  blockContent.trust_item_3,
+                  blockContent.trust_item_4,
+                  blockContent.trust_item_5
+                ].findIndex(item => !item || item.trim() === '' || item === '___REMOVED___');
+                
+                if (emptyIndex !== -1) {
+                  const fieldKey = `trust_item_${emptyIndex + 1}` as keyof FoundersBeliefStackContent;
+                  handleContentUpdate(fieldKey, 'New trust item');
+                }
+              }}
+              onRemoveTrustItem={(index) => {
+                const fieldKey = `trust_item_${index + 1}` as keyof FoundersBeliefStackContent;
+                handleContentUpdate(fieldKey, '___REMOVED___');
+              }}
+              colorTokens={colorTokens}
+              sectionBackground={sectionBackground}
+              sectionId={sectionId}
+              backgroundType={backgroundType}
+              iconColor="text-green-500"
+              colorClass={mutedTextColor}
+            />
+          ) : (
+            <TrustIndicators 
+              items={trustItems}
+              colorClass={mutedTextColor}
+              iconColor="text-green-500"
+            />
+          )}
         </div>
       </div>
     </LayoutSection>

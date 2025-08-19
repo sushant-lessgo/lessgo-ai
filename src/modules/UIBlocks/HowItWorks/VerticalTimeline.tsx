@@ -65,7 +65,10 @@ const TimelineStep = React.memo(({
   index,
   isLast,
   colorTokens,
-  mutedTextColor
+  mutedTextColor,
+  blockContent,
+  handleContentUpdate,
+  mode
 }: {
   title: string;
   description: string;
@@ -74,6 +77,9 @@ const TimelineStep = React.memo(({
   isLast: boolean;
   colorTokens: any;
   mutedTextColor: string;
+  blockContent: VerticalTimelineContent;
+  handleContentUpdate: (key: string, value: any) => void;
+  mode: 'edit' | 'preview';
 }) => {
   
   const getStepColor = (index: number) => {
@@ -127,20 +133,54 @@ const TimelineStep = React.memo(({
               {description}
             </p>
             
-            <div className="flex items-center space-x-4">
-              <div className="flex items-center space-x-2 text-green-600">
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                </svg>
-                <span className="text-sm">Guided process</span>
+            {blockContent.show_step_features !== false && (
+              <div className="flex items-center space-x-4">
+                {(blockContent.step_feature_1_text && blockContent.step_feature_1_text !== '___REMOVED___') && (
+                  <div className="relative group/step-feature-1 flex items-center space-x-2 text-green-600">
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                    <span className="text-sm">{blockContent.step_feature_1_text}</span>
+                    {mode === 'edit' && (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleContentUpdate('step_feature_1_text', '___REMOVED___');
+                        }}
+                        className="opacity-0 group-hover/step-feature-1:opacity-100 ml-1 text-red-500 hover:text-red-700 transition-opacity duration-200"
+                        title="Remove feature 1"
+                      >
+                        <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      </button>
+                    )}
+                  </div>
+                )}
+                {(blockContent.step_feature_2_text && blockContent.step_feature_2_text !== '___REMOVED___') && (
+                  <div className="relative group/step-feature-2 flex items-center space-x-2 text-blue-600">
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192L5.636 18.364M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z" />
+                    </svg>
+                    <span className="text-sm">{blockContent.step_feature_2_text}</span>
+                    {mode === 'edit' && (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleContentUpdate('step_feature_2_text', '___REMOVED___');
+                        }}
+                        className="opacity-0 group-hover/step-feature-2:opacity-100 ml-1 text-red-500 hover:text-red-700 transition-opacity duration-200"
+                        title="Remove feature 2"
+                      >
+                        <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      </button>
+                    )}
+                  </div>
+                )}
               </div>
-              <div className="flex items-center space-x-2 text-blue-600">
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192L5.636 18.364M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z" />
-                </svg>
-                <span className="text-sm">Support included</span>
-              </div>
-            </div>
+            )}
           </div>
         </div>
       </div>
@@ -297,39 +337,153 @@ export default function VerticalTimeline(props: LayoutComponentProps) {
                 isLast={index === steps.length - 1}
                 colorTokens={colorTokens}
                 mutedTextColor={mutedTextColor}
+                blockContent={blockContent}
+                handleContentUpdate={handleContentUpdate}
+                mode={mode}
               />
             ))}
           </div>
         )}
 
         {/* Process Summary */}
-        <div className="mt-16 bg-gradient-to-r from-blue-50 via-indigo-50 to-purple-50 rounded-2xl p-8 border border-blue-100">
-          <div className="text-center">
-            <div className="flex justify-center items-center space-x-4 mb-6">
-              <div className="flex items-center space-x-2">
-                <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                <span className="text-lg font-semibold text-gray-900">{totalDuration} to complete</span>
+        {blockContent.show_process_summary !== false && (
+          <div className="mt-16 bg-gradient-to-r from-blue-50 via-indigo-50 to-purple-50 rounded-2xl p-8 border border-blue-100">
+            <div className="text-center">
+              <div className="flex justify-center items-center space-x-4 mb-6">
+                <div className="relative group/time-label flex items-center space-x-2">
+                  <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <EditableAdaptiveText
+                    mode={mode}
+                    value={blockContent.process_time_label || ''}
+                    onEdit={(value) => handleContentUpdate('process_time_label', value)}
+                    backgroundType={backgroundType}
+                    colorTokens={colorTokens}
+                    variant="body"
+                    className="text-lg font-semibold text-gray-900"
+                    placeholder="Time to complete"
+                    sectionBackground={sectionBackground}
+                    data-section-id={sectionId}
+                    data-element-key="process_time_label"
+                  />
+                  {mode === 'edit' && (
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleContentUpdate('process_time_label', '___REMOVED___');
+                      }}
+                      className="opacity-0 group-hover/time-label:opacity-100 ml-1 text-red-500 hover:text-red-700 transition-opacity duration-200"
+                      title="Remove time label"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </button>
+                  )}
+                </div>
+                <div className="w-px h-6 bg-gray-300" />
+                <div className="relative group/steps-label flex items-center space-x-2">
+                  <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <span className="text-lg font-semibold text-gray-900">{steps.length} </span>
+                  <EditableAdaptiveText
+                    mode={mode}
+                    value={blockContent.process_steps_label || ''}
+                    onEdit={(value) => handleContentUpdate('process_steps_label', value)}
+                    backgroundType={backgroundType}
+                    colorTokens={colorTokens}
+                    variant="body"
+                    className="text-lg font-semibold text-gray-900"
+                    placeholder="steps description"
+                    sectionBackground={sectionBackground}
+                    data-section-id={sectionId}
+                    data-element-key="process_steps_label"
+                  />
+                  {mode === 'edit' && (
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleContentUpdate('process_steps_label', '___REMOVED___');
+                      }}
+                      className="opacity-0 group-hover/steps-label:opacity-100 ml-1 text-red-500 hover:text-red-700 transition-opacity duration-200"
+                      title="Remove steps label"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </button>
+                  )}
+                </div>
               </div>
-              <div className="w-px h-6 bg-gray-300" />
-              <div className="flex items-center space-x-2">
-                <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                <span className="text-lg font-semibold text-gray-900">{steps.length} simple steps</span>
-              </div>
+              
+              {(blockContent.process_summary_heading || mode === 'edit') && (
+                <div className="relative group/summary-heading">
+                  <EditableAdaptiveText
+                    mode={mode}
+                    value={blockContent.process_summary_heading || ''}
+                    onEdit={(value) => handleContentUpdate('process_summary_heading', value)}
+                    backgroundType={backgroundType}
+                    colorTokens={colorTokens}
+                    variant="body"
+                    className="text-xl font-semibold text-gray-900 mb-2"
+                    placeholder="Process summary heading"
+                    sectionBackground={sectionBackground}
+                    data-section-id={sectionId}
+                    data-element-key="process_summary_heading"
+                  />
+                  {mode === 'edit' && (
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleContentUpdate('process_summary_heading', '___REMOVED___');
+                      }}
+                      className="opacity-0 group-hover/summary-heading:opacity-100 ml-2 p-1 rounded-full bg-white/80 hover:bg-white text-red-500 hover:text-red-700 transition-all duration-200"
+                      title="Remove summary heading"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </button>
+                  )}
+                </div>
+              )}
+              
+              {(blockContent.process_summary_description || mode === 'edit') && (
+                <div className="relative group/summary-desc">
+                  <EditableAdaptiveText
+                    mode={mode}
+                    value={blockContent.process_summary_description || ''}
+                    onEdit={(value) => handleContentUpdate('process_summary_description', value)}
+                    backgroundType={backgroundType}
+                    colorTokens={colorTokens}
+                    variant="body"
+                    className={`${mutedTextColor} max-w-2xl mx-auto`}
+                    placeholder="Process summary description"
+                    sectionBackground={sectionBackground}
+                    data-section-id={sectionId}
+                    data-element-key="process_summary_description"
+                  />
+                  {mode === 'edit' && (
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleContentUpdate('process_summary_description', '___REMOVED___');
+                      }}
+                      className="opacity-0 group-hover/summary-desc:opacity-100 ml-2 p-1 rounded-full bg-white/80 hover:bg-white text-red-500 hover:text-red-700 transition-all duration-200"
+                      title="Remove summary description"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </button>
+                  )}
+                </div>
+              )}
             </div>
-            
-            <h3 className="text-xl font-semibold text-gray-900 mb-2">
-              Get Started in Minutes, Not Hours
-            </h3>
-            
-            <p className={`${mutedTextColor} max-w-2xl mx-auto`}>
-              Our streamlined onboarding process gets you up and running quickly with personalized guidance every step of the way.
-            </p>
           </div>
-        </div>
+        )}
 
         {(blockContent.cta_text || blockContent.trust_items || mode === 'edit') && (
           <div className="text-center space-y-6 mt-16">
@@ -395,7 +549,15 @@ export const componentMeta = {
     { key: 'step_durations', label: 'Step Durations (pipe separated)', type: 'text', required: false },
     { key: 'supporting_text', label: 'Supporting Text', type: 'textarea', required: false },
     { key: 'cta_text', label: 'CTA Button Text', type: 'text', required: false },
-    { key: 'trust_items', label: 'Trust Indicators (pipe separated)', type: 'text', required: false }
+    { key: 'trust_items', label: 'Trust Indicators (pipe separated)', type: 'text', required: false },
+    { key: 'step_feature_1_text', label: 'Step Feature 1', type: 'text', required: false },
+    { key: 'step_feature_2_text', label: 'Step Feature 2', type: 'text', required: false },
+    { key: 'process_summary_heading', label: 'Process Summary Heading', type: 'text', required: false },
+    { key: 'process_summary_description', label: 'Process Summary Description', type: 'textarea', required: false },
+    { key: 'process_time_label', label: 'Process Time Label', type: 'text', required: false },
+    { key: 'process_steps_label', label: 'Process Steps Label', type: 'text', required: false },
+    { key: 'show_step_features', label: 'Show Step Features', type: 'boolean', required: false },
+    { key: 'show_process_summary', label: 'Show Process Summary', type: 'boolean', required: false }
   ],
   
   features: [

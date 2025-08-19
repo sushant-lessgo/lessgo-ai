@@ -16,6 +16,7 @@ import {
   CTAButton, 
   TrustIndicators 
 } from '@/components/layout/ComponentRegistry';
+import EditableTrustIndicators from '@/components/layout/EditableTrustIndicators';
 import { LayoutComponentProps } from '@/types/storeTypes';
 
 // Content interface for type safety
@@ -26,8 +27,17 @@ interface SideBySidePhotoStoryContent {
   cta_text: string;
   founder_name?: string;
   story_stats?: string;
+  story_stat_1: string;
+  story_stat_2: string;
+  story_stat_3: string;
+  story_stat_4: string;
   badge_text?: string;
   trust_items?: string;
+  trust_item_1: string;
+  trust_item_2: string;
+  trust_item_3: string;
+  trust_item_4: string;
+  trust_item_5: string;
   story_image?: string;
   secondary_image?: string;
 }
@@ -58,6 +68,10 @@ const CONTENT_SCHEMA = {
     type: 'string' as const, 
     default: '25,000+ creators|500,000+ projects|$50M+ creator earnings|150+ countries' 
   },
+  story_stat_1: { type: 'string' as const, default: '25,000+ creators' },
+  story_stat_2: { type: 'string' as const, default: '500,000+ projects' },
+  story_stat_3: { type: 'string' as const, default: '$50M+ creator earnings' },
+  story_stat_4: { type: 'string' as const, default: '150+ countries' },
   badge_text: { 
     type: 'string' as const, 
     default: '✨ Creator Story' 
@@ -66,6 +80,11 @@ const CONTENT_SCHEMA = {
     type: 'string' as const, 
     default: 'Built by creators, for creators|7-day free trial|Cancel anytime' 
   },
+  trust_item_1: { type: 'string' as const, default: 'Built by creators, for creators' },
+  trust_item_2: { type: 'string' as const, default: '7-day free trial' },
+  trust_item_3: { type: 'string' as const, default: 'Cancel anytime' },
+  trust_item_4: { type: 'string' as const, default: '' },
+  trust_item_5: { type: 'string' as const, default: '' },
   story_image: { 
     type: 'string' as const, 
     default: '' 
@@ -197,15 +216,48 @@ export default function SideBySidePhotoStory(props: LayoutComponentProps) {
   
   const { getTextStyle: getTypographyStyle } = useTypography();
 
-  // Parse story stats from pipe-separated string
-  const storyStats = blockContent.story_stats 
-    ? blockContent.story_stats.split('|').map(item => item.trim()).filter(Boolean)
-    : ['Growing community', 'Global reach'];
+  // Helper function to get story stats with individual field support
+  const getStoryStats = (): string[] => {
+    const individualStats = [
+      blockContent.story_stat_1,
+      blockContent.story_stat_2,
+      blockContent.story_stat_3,
+      blockContent.story_stat_4
+    ].filter((stat): stat is string => Boolean(stat && stat.trim() !== '' && stat !== '___REMOVED___'));
+    
+    // Legacy format fallback
+    if (individualStats.length > 0) {
+      return individualStats;
+    }
+    
+    return blockContent.story_stats 
+      ? blockContent.story_stats.split('|').map(item => item.trim()).filter(Boolean)
+      : ['25,000+ creators', '500,000+ projects'];
+  };
+  
+  const storyStats = getStoryStats();
 
-  // Parse trust indicators from pipe-separated string
-  const trustItems = blockContent.trust_items 
-    ? blockContent.trust_items.split('|').map(item => item.trim()).filter(Boolean)
-    : ['Creator-focused', 'Easy to start'];
+  // Helper function to get trust items with individual field support
+  const getTrustItems = (): string[] => {
+    const individualItems = [
+      blockContent.trust_item_1,
+      blockContent.trust_item_2,
+      blockContent.trust_item_3,
+      blockContent.trust_item_4,
+      blockContent.trust_item_5
+    ].filter((item): item is string => Boolean(item && item.trim() !== '' && item !== '___REMOVED___'));
+    
+    // Legacy format fallback
+    if (individualItems.length > 0) {
+      return individualItems;
+    }
+    
+    return blockContent.trust_items 
+      ? blockContent.trust_items.split('|').map(item => item.trim()).filter(Boolean)
+      : ['Built by creators', '7-day free trial'];
+  };
+  
+  const trustItems = getTrustItems();
 
   // Get muted text color for trust indicators
   const mutedTextColor = dynamicTextColors?.muted || colorTokens.textMuted;
@@ -324,11 +376,52 @@ export default function SideBySidePhotoStory(props: LayoutComponentProps) {
             />
 
             {/* Trust Indicators */}
-            <TrustIndicators 
-              items={trustItems}
-              colorClass={mutedTextColor}
-              iconColor="text-green-500"
-            />
+            {mode === 'edit' ? (
+              <EditableTrustIndicators
+                mode={mode}
+                trustItems={[
+                  blockContent.trust_item_1 || '',
+                  blockContent.trust_item_2 || '',
+                  blockContent.trust_item_3 || '',
+                  blockContent.trust_item_4 || '',
+                  blockContent.trust_item_5 || ''
+                ]}
+                onTrustItemChange={(index, value) => {
+                  const fieldKey = `trust_item_${index + 1}` as keyof SideBySidePhotoStoryContent;
+                  handleContentUpdate(fieldKey, value);
+                }}
+                onAddTrustItem={() => {
+                  const emptyIndex = [
+                    blockContent.trust_item_1,
+                    blockContent.trust_item_2,
+                    blockContent.trust_item_3,
+                    blockContent.trust_item_4,
+                    blockContent.trust_item_5
+                  ].findIndex(item => !item || item.trim() === '' || item === '___REMOVED___');
+                  
+                  if (emptyIndex !== -1) {
+                    const fieldKey = `trust_item_${emptyIndex + 1}` as keyof SideBySidePhotoStoryContent;
+                    handleContentUpdate(fieldKey, 'New trust item');
+                  }
+                }}
+                onRemoveTrustItem={(index) => {
+                  const fieldKey = `trust_item_${index + 1}` as keyof SideBySidePhotoStoryContent;
+                  handleContentUpdate(fieldKey, '___REMOVED___');
+                }}
+                colorTokens={colorTokens}
+                sectionBackground={sectionBackground}
+                sectionId={sectionId}
+                backgroundType={backgroundType}
+                iconColor="text-green-500"
+                colorClass={mutedTextColor}
+              />
+            ) : (
+              <TrustIndicators 
+                items={trustItems}
+                colorClass={mutedTextColor}
+                iconColor="text-green-500"
+              />
+            )}
           </div>
 
           {/* Right Column - Photo Story */}
@@ -372,16 +465,60 @@ export default function SideBySidePhotoStory(props: LayoutComponentProps) {
               {/* Stats */}
               <div className="bg-white rounded-lg shadow-md p-4 space-y-3">
                 <h4 className="font-semibold text-gray-900 text-sm mb-3">Impact So Far</h4>
-                {storyStats.slice(0, 3).map((stat, index) => (
-                  <div key={index} className="text-center">
-                    <div className="text-lg font-bold text-blue-600">
-                      {stat.split(' ')[0]}
-                    </div>
-                    <div className="text-xs text-gray-600">
-                      {stat.split(' ').slice(1).join(' ')}
-                    </div>
+                {mode === 'edit' ? (
+                  <div className="space-y-2">
+                    {[
+                      { key: 'story_stat_1', placeholder: '25,000+ creators' },
+                      { key: 'story_stat_2', placeholder: '500,000+ projects' },
+                      { key: 'story_stat_3', placeholder: '$50M+ creator earnings' }
+                    ].map((stat, index) => (
+                      ((blockContent as any)[stat.key] || mode === 'edit') && (
+                        <div key={index} className="relative group/stat-item flex items-center space-x-2">
+                          <EditableAdaptiveText
+                            mode={mode}
+                            value={(blockContent as any)[stat.key] || ''}
+                            onEdit={(value) => handleContentUpdate(stat.key as keyof SideBySidePhotoStoryContent, value)}
+                            backgroundType="neutral"
+                            colorTokens={colorTokens}
+                            variant="body"
+                            textStyle={{ fontSize: '0.75rem', fontWeight: '600', textAlign: 'center' }}
+                            placeholder={stat.placeholder}
+                            sectionId={sectionId}
+                            elementKey={stat.key}
+                            sectionBackground="bg-white"
+                          />
+                          
+                          {/* Remove button */}
+                          {mode === 'edit' && (blockContent as any)[stat.key] && (blockContent as any)[stat.key] !== '___REMOVED___' && (
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleContentUpdate(stat.key as keyof SideBySidePhotoStoryContent, '___REMOVED___');
+                              }}
+                              className="opacity-0 group-hover/stat-item:opacity-100 text-red-500 hover:text-red-700 transition-opacity duration-200"
+                              title="Remove this statistic"
+                            >
+                              <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                              </svg>
+                            </button>
+                          )}
+                        </div>
+                      )
+                    ))}
                   </div>
-                ))}
+                ) : (
+                  storyStats.slice(0, 3).map((stat, index) => (
+                    <div key={index} className="text-center">
+                      <div className="text-lg font-bold text-blue-600">
+                        {stat.split(' ')[0]}
+                      </div>
+                      <div className="text-xs text-gray-600">
+                        {stat.split(' ').slice(1).join(' ')}
+                      </div>
+                    </div>
+                  ))
+                )}
               </div>
             </div>
           </div>
@@ -389,18 +526,93 @@ export default function SideBySidePhotoStory(props: LayoutComponentProps) {
 
         {/* Bottom Stats Bar */}
         <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-8">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
-            {storyStats.map((stat, index) => (
-              <div key={index}>
-                <div className="text-2xl lg:text-3xl font-bold text-blue-600 mb-1">
-                  {stat.split(' ')[0]}
-                </div>
-                <div className="text-sm text-gray-600">
-                  {stat.split(' ').slice(1).join(' ')}
-                </div>
+          {mode === 'edit' ? (
+            <div className="space-y-4">
+              <h4 className="text-center font-semibold text-gray-900 mb-4">Story Statistics</h4>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                {[
+                  { key: 'story_stat_1', placeholder: '25,000+ creators' },
+                  { key: 'story_stat_2', placeholder: '500,000+ projects' },
+                  { key: 'story_stat_3', placeholder: '$50M+ creator earnings' },
+                  { key: 'story_stat_4', placeholder: '150+ countries' }
+                ].map((stat, index) => (
+                  ((blockContent as any)[stat.key] || mode === 'edit') && (
+                    <div key={index} className="relative group/stat-item text-center">
+                      <EditableAdaptiveText
+                        mode={mode}
+                        value={(blockContent as any)[stat.key] || ''}
+                        onEdit={(value) => handleContentUpdate(stat.key as keyof SideBySidePhotoStoryContent, value)}
+                        backgroundType="neutral"
+                        colorTokens={colorTokens}
+                        variant="body"
+                        textStyle={{ fontSize: '0.875rem', fontWeight: '500' }}
+                        placeholder={stat.placeholder}
+                        sectionId={sectionId}
+                        elementKey={stat.key}
+                        sectionBackground="bg-blue-50"
+                      />
+                      
+                      {/* Remove button */}
+                      {mode === 'edit' && (blockContent as any)[stat.key] && (blockContent as any)[stat.key] !== '___REMOVED___' && (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleContentUpdate(stat.key as keyof SideBySidePhotoStoryContent, '___REMOVED___');
+                          }}
+                          className="opacity-0 group-hover/stat-item:opacity-100 absolute -top-2 -right-2 text-red-500 hover:text-red-700 transition-opacity duration-200 bg-white rounded-full p-1 shadow-sm"
+                          title="Remove this statistic"
+                        >
+                          <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                          </svg>
+                        </button>
+                      )}
+                    </div>
+                  )
+                ))}
               </div>
-            ))}
-          </div>
+              
+              {/* Add button */}
+              {mode === 'edit' && storyStats.length < 4 && (
+                <div className="text-center">
+                  <button
+                    onClick={() => {
+                      const emptyIndex = [
+                        blockContent.story_stat_1,
+                        blockContent.story_stat_2,
+                        blockContent.story_stat_3,
+                        blockContent.story_stat_4
+                      ].findIndex(stat => !stat || stat.trim() === '' || stat === '___REMOVED___');
+                      
+                      if (emptyIndex !== -1) {
+                        const fieldKey = `story_stat_${emptyIndex + 1}` as keyof SideBySidePhotoStoryContent;
+                        handleContentUpdate(fieldKey, 'New statistic');
+                      }
+                    }}
+                    className="flex items-center space-x-1 text-sm text-blue-600 hover:text-blue-800 transition-colors mx-auto"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                    </svg>
+                    <span>Add statistic</span>
+                  </button>
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
+              {storyStats.map((stat, index) => (
+                <div key={index}>
+                  <div className="text-2xl lg:text-3xl font-bold text-blue-600 mb-1">
+                    {stat.split(' ')[0]}
+                  </div>
+                  <div className="text-sm text-gray-600">
+                    {stat.split(' ').slice(1).join(' ')}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </LayoutSection>

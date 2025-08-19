@@ -22,6 +22,16 @@ interface ZigzagImageStepsContent {
   supporting_text?: string;
   cta_text?: string;
   trust_items?: string;
+  // Creative Flow Summary fields
+  flow_summary_heading?: string;
+  flow_feature_1_icon?: string;
+  flow_feature_1_text?: string;
+  flow_feature_2_icon?: string;
+  flow_feature_2_text?: string;
+  flow_feature_3_icon?: string;
+  flow_feature_3_text?: string;
+  flow_summary_description?: string;
+  show_flow_summary?: boolean;
 }
 
 const CONTENT_SCHEMA = {
@@ -56,7 +66,66 @@ const CONTENT_SCHEMA = {
   trust_items: { 
     type: 'string' as const, 
     default: '' 
+  },
+  // Creative Flow Summary fields
+  flow_summary_heading: { 
+    type: 'string' as const, 
+    default: 'Unleash Your Creative Potential' 
+  },
+  flow_feature_1_icon: { 
+    type: 'string' as const, 
+    default: 'heart' 
+  },
+  flow_feature_1_text: { 
+    type: 'string' as const, 
+    default: 'Creative freedom' 
+  },
+  flow_feature_2_icon: { 
+    type: 'string' as const, 
+    default: 'lightning' 
+  },
+  flow_feature_2_text: { 
+    type: 'string' as const, 
+    default: 'Professional quality' 
+  },
+  flow_feature_3_icon: { 
+    type: 'string' as const, 
+    default: 'users' 
+  },
+  flow_feature_3_text: { 
+    type: 'string' as const, 
+    default: 'Community driven' 
+  },
+  flow_summary_description: { 
+    type: 'string' as const, 
+    default: 'Join thousands of creators who\'ve transformed their ideas into stunning visual content' 
+  },
+  show_flow_summary: { 
+    type: 'boolean' as const, 
+    default: true 
   }
+};
+
+// Helper function to get flow icons
+const getFlowIcon = (iconName: string) => {
+  const icons = {
+    'heart': (
+      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+      </svg>
+    ),
+    'lightning': (
+      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+      </svg>
+    ),
+    'users': (
+      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+      </svg>
+    )
+  };
+  return icons[iconName as keyof typeof icons] || icons.heart;
 };
 
 const ZigzagStep = React.memo(({ 
@@ -292,40 +361,192 @@ export default function ZigzagImageSteps(props: LayoutComponentProps) {
         )}
 
         {/* Creative Flow Summary */}
-        <div className="mt-16 bg-gradient-to-r from-pink-50 via-purple-50 to-indigo-50 rounded-2xl p-8 border border-pink-100">
-          <div className="text-center">
-            <h3 className="text-xl font-semibold text-gray-900 mb-6">
-              Unleash Your Creative Potential
-            </h3>
-            
-            <div className="flex justify-center items-center space-x-6 mb-4">
-              <div className="flex items-center space-x-2">
-                <svg className="w-6 h-6 text-pink-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                </svg>
-                <span className="text-gray-700 font-medium">Creative freedom</span>
+        {blockContent.show_flow_summary !== false && (
+          <div className="mt-16 bg-gradient-to-r from-pink-50 via-purple-50 to-indigo-50 rounded-2xl p-8 border border-pink-100">
+            <div className="text-center">
+              {(blockContent.flow_summary_heading || mode === 'edit') && (
+                <div className="relative group/summary-heading">
+                  <EditableAdaptiveText
+                    mode={mode}
+                    value={blockContent.flow_summary_heading || ''}
+                    onEdit={(value) => handleContentUpdate('flow_summary_heading', value)}
+                    backgroundType={backgroundType}
+                    colorTokens={colorTokens}
+                    variant="body"
+                    className="text-xl font-semibold text-gray-900 mb-6"
+                    placeholder="Summary heading"
+                    sectionBackground={sectionBackground}
+                    data-section-id={sectionId}
+                    data-element-key="flow_summary_heading"
+                  />
+                  {mode === 'edit' && (
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleContentUpdate('flow_summary_heading', '___REMOVED___');
+                      }}
+                      className="opacity-0 group-hover/summary-heading:opacity-100 ml-2 p-1 rounded-full bg-white/80 hover:bg-white text-red-500 hover:text-red-700 transition-all duration-200"
+                      title="Remove summary heading"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </button>
+                  )}
+                </div>
+              )}
+              
+              <div className="flex justify-center items-center space-x-6 mb-4">
+                {(blockContent.flow_feature_1_text && blockContent.flow_feature_1_text !== '___REMOVED___') && (
+                  <div className="relative group/feature-1 flex items-center space-x-2">
+                    <div className="w-6 h-6 text-pink-600">
+                      {getFlowIcon(blockContent.flow_feature_1_icon || 'heart')}
+                    </div>
+                    <EditableAdaptiveText
+                      mode={mode}
+                      value={blockContent.flow_feature_1_text || ''}
+                      onEdit={(value) => handleContentUpdate('flow_feature_1_text', value)}
+                      backgroundType={backgroundType}
+                      colorTokens={colorTokens}
+                      variant="body"
+                      className="text-gray-700 font-medium"
+                      placeholder="Feature 1"
+                      sectionBackground={sectionBackground}
+                      data-section-id={sectionId}
+                      data-element-key="flow_feature_1_text"
+                    />
+                    {mode === 'edit' && (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleContentUpdate('flow_feature_1_text', '___REMOVED___');
+                        }}
+                        className="opacity-0 group-hover/feature-1:opacity-100 ml-1 text-red-500 hover:text-red-700 transition-opacity duration-200"
+                        title="Remove feature 1"
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      </button>
+                    )}
+                  </div>
+                )}
+                
+                {(blockContent.flow_feature_1_text && blockContent.flow_feature_1_text !== '___REMOVED___') && 
+                 (blockContent.flow_feature_2_text && blockContent.flow_feature_2_text !== '___REMOVED___') && (
+                  <div className="w-px h-6 bg-gray-300" />
+                )}
+                
+                {(blockContent.flow_feature_2_text && blockContent.flow_feature_2_text !== '___REMOVED___') && (
+                  <div className="relative group/feature-2 flex items-center space-x-2">
+                    <div className="w-6 h-6 text-purple-600">
+                      {getFlowIcon(blockContent.flow_feature_2_icon || 'lightning')}
+                    </div>
+                    <EditableAdaptiveText
+                      mode={mode}
+                      value={blockContent.flow_feature_2_text || ''}
+                      onEdit={(value) => handleContentUpdate('flow_feature_2_text', value)}
+                      backgroundType={backgroundType}
+                      colorTokens={colorTokens}
+                      variant="body"
+                      className="text-gray-700 font-medium"
+                      placeholder="Feature 2"
+                      sectionBackground={sectionBackground}
+                      data-section-id={sectionId}
+                      data-element-key="flow_feature_2_text"
+                    />
+                    {mode === 'edit' && (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleContentUpdate('flow_feature_2_text', '___REMOVED___');
+                        }}
+                        className="opacity-0 group-hover/feature-2:opacity-100 ml-1 text-red-500 hover:text-red-700 transition-opacity duration-200"
+                        title="Remove feature 2"
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      </button>
+                    )}
+                  </div>
+                )}
+                
+                {(blockContent.flow_feature_2_text && blockContent.flow_feature_2_text !== '___REMOVED___') && 
+                 (blockContent.flow_feature_3_text && blockContent.flow_feature_3_text !== '___REMOVED___') && (
+                  <div className="w-px h-6 bg-gray-300" />
+                )}
+                
+                {(blockContent.flow_feature_3_text && blockContent.flow_feature_3_text !== '___REMOVED___') && (
+                  <div className="relative group/feature-3 flex items-center space-x-2">
+                    <div className="w-6 h-6 text-indigo-600">
+                      {getFlowIcon(blockContent.flow_feature_3_icon || 'users')}
+                    </div>
+                    <EditableAdaptiveText
+                      mode={mode}
+                      value={blockContent.flow_feature_3_text || ''}
+                      onEdit={(value) => handleContentUpdate('flow_feature_3_text', value)}
+                      backgroundType={backgroundType}
+                      colorTokens={colorTokens}
+                      variant="body"
+                      className="text-gray-700 font-medium"
+                      placeholder="Feature 3"
+                      sectionBackground={sectionBackground}
+                      data-section-id={sectionId}
+                      data-element-key="flow_feature_3_text"
+                    />
+                    {mode === 'edit' && (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleContentUpdate('flow_feature_3_text', '___REMOVED___');
+                        }}
+                        className="opacity-0 group-hover/feature-3:opacity-100 ml-1 text-red-500 hover:text-red-700 transition-opacity duration-200"
+                        title="Remove feature 3"
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      </button>
+                    )}
+                  </div>
+                )}
               </div>
-              <div className="w-px h-6 bg-gray-300" />
-              <div className="flex items-center space-x-2">
-                <svg className="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                </svg>
-                <span className="text-gray-700 font-medium">Professional quality</span>
-              </div>
-              <div className="w-px h-6 bg-gray-300" />
-              <div className="flex items-center space-x-2">
-                <svg className="w-6 h-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                </svg>
-                <span className="text-gray-700 font-medium">Community driven</span>
-              </div>
+              
+              {(blockContent.flow_summary_description || mode === 'edit') && (
+                <div className="relative group/summary-desc">
+                  <EditableAdaptiveText
+                    mode={mode}
+                    value={blockContent.flow_summary_description || ''}
+                    onEdit={(value) => handleContentUpdate('flow_summary_description', value)}
+                    backgroundType={backgroundType}
+                    colorTokens={colorTokens}
+                    variant="body"
+                    className={`${mutedTextColor} max-w-2xl mx-auto`}
+                    placeholder="Summary description"
+                    sectionBackground={sectionBackground}
+                    data-section-id={sectionId}
+                    data-element-key="flow_summary_description"
+                  />
+                  {mode === 'edit' && (
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleContentUpdate('flow_summary_description', '___REMOVED___');
+                      }}
+                      className="opacity-0 group-hover/summary-desc:opacity-100 ml-2 p-1 rounded-full bg-white/80 hover:bg-white text-red-500 hover:text-red-700 transition-all duration-200"
+                      title="Remove summary description"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </button>
+                  )}
+                </div>
+              )}
             </div>
-            
-            <p className={`${mutedTextColor} max-w-2xl mx-auto`}>
-              Join thousands of creators who've transformed their ideas into stunning visual content
-            </p>
           </div>
-        </div>
+        )}
 
         {(blockContent.cta_text || blockContent.trust_items || mode === 'edit') && (
           <div className="text-center space-y-6 mt-16">
@@ -391,7 +612,13 @@ export const componentMeta = {
     { key: 'step_visuals', label: 'Step Visuals (pipe separated)', type: 'textarea', required: false },
     { key: 'supporting_text', label: 'Supporting Text', type: 'textarea', required: false },
     { key: 'cta_text', label: 'CTA Button Text', type: 'text', required: false },
-    { key: 'trust_items', label: 'Trust Indicators (pipe separated)', type: 'text', required: false }
+    { key: 'trust_items', label: 'Trust Indicators (pipe separated)', type: 'text', required: false },
+    { key: 'flow_summary_heading', label: 'Flow Summary Heading', type: 'text', required: false },
+    { key: 'flow_feature_1_text', label: 'Flow Feature 1 Text', type: 'text', required: false },
+    { key: 'flow_feature_2_text', label: 'Flow Feature 2 Text', type: 'text', required: false },
+    { key: 'flow_feature_3_text', label: 'Flow Feature 3 Text', type: 'text', required: false },
+    { key: 'flow_summary_description', label: 'Flow Summary Description', type: 'textarea', required: false },
+    { key: 'show_flow_summary', label: 'Show Flow Summary', type: 'boolean', required: false }
   ],
   
   features: [

@@ -99,10 +99,10 @@ export default function ChatBubbleFAQ(props: LayoutComponentProps) {
       const question = blockContent[questionKey];
       const answer = blockContent[answerKey];
       
-      if (question && question.trim() !== '' && question !== '___REMOVED___') {
+      if (question && typeof question === 'string' && question.trim() !== '' && question !== '___REMOVED___') {
         items.push({
           question: question.trim(),
-          answer: (answer && answer !== '___REMOVED___') ? answer.trim() : '',
+          answer: (answer && typeof answer === 'string' && answer !== '___REMOVED___') ? answer.trim() : '',
           index: i
         });
       }
@@ -249,7 +249,7 @@ export default function ChatBubbleFAQ(props: LayoutComponentProps) {
                         mode={mode}
                         value={item.question}
                         onEdit={(value) => handleContentUpdate(`question_${item.index}` as keyof ChatBubbleFAQContent, value)}
-                        backgroundType="dark"
+                        backgroundType="primary"
                         colorTokens={{
                           ...colorTokens,
                           textPrimary: '#ffffff',
@@ -365,7 +365,7 @@ export default function ChatBubbleFAQ(props: LayoutComponentProps) {
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
-                      handleContentUpdate('show_typing_indicator', false);
+                      handleContentUpdate('show_typing_indicator', '___REMOVED___');
                     }}
                     className="opacity-0 group-hover/typing:opacity-100 ml-2 p-1 rounded-full bg-white/80 hover:bg-white text-red-500 hover:text-red-700 transition-all duration-200 shadow-sm"
                     title="Remove typing indicator"
@@ -440,7 +440,7 @@ export default function ChatBubbleFAQ(props: LayoutComponentProps) {
                     mode={mode}
                     value={blockContent.button_text || ''}
                     onEdit={(value) => handleContentUpdate('button_text', value)}
-                    backgroundType="dark"
+                    backgroundType="primary"
                     colorTokens={{
                       ...colorTokens,
                       textPrimary: '#ffffff',
@@ -462,7 +462,7 @@ export default function ChatBubbleFAQ(props: LayoutComponentProps) {
               <button
                 onClick={(e) => {
                   e.stopPropagation();
-                  handleContentUpdate('show_cta_section', false);
+                  handleContentUpdate('show_cta_section', '___REMOVED___');
                 }}
                 className="opacity-0 group-hover/cta-section:opacity-100 ml-4 p-1 rounded-full bg-white/80 hover:bg-white text-red-500 hover:text-red-700 transition-all duration-200 shadow-sm"
                 title="Remove CTA section"

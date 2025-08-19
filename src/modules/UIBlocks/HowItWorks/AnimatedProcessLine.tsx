@@ -21,6 +21,11 @@ interface AnimatedProcessLineContent {
   supporting_text?: string;
   cta_text?: string;
   trust_items?: string;
+  // Process indicators
+  process_indicator_1_text?: string;
+  process_indicator_2_text?: string;
+  process_indicator_3_text?: string;
+  show_process_indicators?: boolean;
 }
 
 const CONTENT_SCHEMA = {
@@ -55,6 +60,23 @@ const CONTENT_SCHEMA = {
   trust_items: { 
     type: 'string' as const, 
     default: '' 
+  },
+  // Process indicators
+  process_indicator_1_text: { 
+    type: 'string' as const, 
+    default: 'Automated' 
+  },
+  process_indicator_2_text: { 
+    type: 'string' as const, 
+    default: 'Real-time' 
+  },
+  process_indicator_3_text: { 
+    type: 'string' as const, 
+    default: 'Reliable' 
+  },
+  show_process_indicators: { 
+    type: 'boolean' as const, 
+    default: true 
   }
 };
 
@@ -325,28 +347,120 @@ export default function AnimatedProcessLine(props: LayoutComponentProps) {
                   {steps[activeStep]?.description}
                 </p>
                 
-                <div className="flex justify-center items-center space-x-6">
-                  <div className="flex items-center space-x-2">
-                    <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                    </svg>
-                    <span className="text-gray-700 font-medium">Automated</span>
+                {blockContent.show_process_indicators !== false && (
+                  <div className="flex justify-center items-center space-x-6">
+                    {(blockContent.process_indicator_1_text && blockContent.process_indicator_1_text !== '___REMOVED___') && (
+                      <div className="relative group/process-indicator-1 flex items-center space-x-2">
+                        <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                        </svg>
+                        <EditableAdaptiveText
+                          mode={mode}
+                          value={blockContent.process_indicator_1_text || ''}
+                          onEdit={(value) => handleContentUpdate('process_indicator_1_text', value)}
+                          backgroundType={backgroundType}
+                          colorTokens={colorTokens}
+                          variant="body"
+                          className="text-gray-700 font-medium"
+                          placeholder="Process indicator 1"
+                          sectionBackground={sectionBackground}
+                          data-section-id={sectionId}
+                          data-element-key="process_indicator_1_text"
+                        />
+                        {mode === 'edit' && (
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleContentUpdate('process_indicator_1_text', '___REMOVED___');
+                            }}
+                            className="opacity-0 group-hover/process-indicator-1:opacity-100 ml-1 text-red-500 hover:text-red-700 transition-opacity duration-200"
+                            title="Remove indicator 1"
+                          >
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                          </button>
+                        )}
+                      </div>
+                    )}
+                    {(blockContent.process_indicator_1_text && blockContent.process_indicator_1_text !== '___REMOVED___') && 
+                     (blockContent.process_indicator_2_text && blockContent.process_indicator_2_text !== '___REMOVED___') && (
+                      <div className="w-px h-6 bg-gray-300" />
+                    )}
+                    {(blockContent.process_indicator_2_text && blockContent.process_indicator_2_text !== '___REMOVED___') && (
+                      <div className="relative group/process-indicator-2 flex items-center space-x-2">
+                        <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <EditableAdaptiveText
+                          mode={mode}
+                          value={blockContent.process_indicator_2_text || ''}
+                          onEdit={(value) => handleContentUpdate('process_indicator_2_text', value)}
+                          backgroundType={backgroundType}
+                          colorTokens={colorTokens}
+                          variant="body"
+                          className="text-gray-700 font-medium"
+                          placeholder="Process indicator 2"
+                          sectionBackground={sectionBackground}
+                          data-section-id={sectionId}
+                          data-element-key="process_indicator_2_text"
+                        />
+                        {mode === 'edit' && (
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleContentUpdate('process_indicator_2_text', '___REMOVED___');
+                            }}
+                            className="opacity-0 group-hover/process-indicator-2:opacity-100 ml-1 text-red-500 hover:text-red-700 transition-opacity duration-200"
+                            title="Remove indicator 2"
+                          >
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                          </button>
+                        )}
+                      </div>
+                    )}
+                    {(blockContent.process_indicator_2_text && blockContent.process_indicator_2_text !== '___REMOVED___') && 
+                     (blockContent.process_indicator_3_text && blockContent.process_indicator_3_text !== '___REMOVED___') && (
+                      <div className="w-px h-6 bg-gray-300" />
+                    )}
+                    {(blockContent.process_indicator_3_text && blockContent.process_indicator_3_text !== '___REMOVED___') && (
+                      <div className="relative group/process-indicator-3 flex items-center space-x-2">
+                        <svg className="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <EditableAdaptiveText
+                          mode={mode}
+                          value={blockContent.process_indicator_3_text || ''}
+                          onEdit={(value) => handleContentUpdate('process_indicator_3_text', value)}
+                          backgroundType={backgroundType}
+                          colorTokens={colorTokens}
+                          variant="body"
+                          className="text-gray-700 font-medium"
+                          placeholder="Process indicator 3"
+                          sectionBackground={sectionBackground}
+                          data-section-id={sectionId}
+                          data-element-key="process_indicator_3_text"
+                        />
+                        {mode === 'edit' && (
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleContentUpdate('process_indicator_3_text', '___REMOVED___');
+                            }}
+                            className="opacity-0 group-hover/process-indicator-3:opacity-100 ml-1 text-red-500 hover:text-red-700 transition-opacity duration-200"
+                            title="Remove indicator 3"
+                          >
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                          </button>
+                        )}
+                      </div>
+                    )}
                   </div>
-                  <div className="w-px h-6 bg-gray-300" />
-                  <div className="flex items-center space-x-2">
-                    <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                    <span className="text-gray-700 font-medium">Real-time</span>
-                  </div>
-                  <div className="w-px h-6 bg-gray-300" />
-                  <div className="flex items-center space-x-2">
-                    <svg className="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                    <span className="text-gray-700 font-medium">Reliable</span>
-                  </div>
-                </div>
+                )}
               </div>
             </div>
           </>
@@ -416,7 +530,11 @@ export const componentMeta = {
     { key: 'auto_animate', label: 'Auto-animate Process', type: 'boolean', required: false },
     { key: 'supporting_text', label: 'Supporting Text', type: 'textarea', required: false },
     { key: 'cta_text', label: 'CTA Button Text', type: 'text', required: false },
-    { key: 'trust_items', label: 'Trust Indicators (pipe separated)', type: 'text', required: false }
+    { key: 'trust_items', label: 'Trust Indicators (pipe separated)', type: 'text', required: false },
+    { key: 'process_indicator_1_text', label: 'Process Indicator 1', type: 'text', required: false },
+    { key: 'process_indicator_2_text', label: 'Process Indicator 2', type: 'text', required: false },
+    { key: 'process_indicator_3_text', label: 'Process Indicator 3', type: 'text', required: false },
+    { key: 'show_process_indicators', label: 'Show Process Indicators', type: 'boolean', required: false }
   ],
   
   features: [

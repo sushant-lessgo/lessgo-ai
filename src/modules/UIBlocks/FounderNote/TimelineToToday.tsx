@@ -16,6 +16,7 @@ import {
   CTAButton, 
   TrustIndicators 
 } from '@/components/layout/ComponentRegistry';
+import EditableTrustIndicators from '@/components/layout/EditableTrustIndicators';
 import { LayoutComponentProps } from '@/types/storeTypes';
 
 // Content interface for type safety
@@ -28,6 +29,12 @@ interface TimelineToTodayContent {
   founder_name?: string;
   company_name?: string;
   trust_items?: string;
+  trust_item_1: string;
+  trust_item_2: string;
+  trust_item_3: string;
+  trust_item_4: string;
+  trust_item_5: string;
+  current_state_heading: string;
 }
 
 // Content schema - defines structure and defaults
@@ -63,7 +70,13 @@ const CONTENT_SCHEMA = {
   trust_items: { 
     type: 'string' as const, 
     default: '10,000+ customers|50+ countries|$100M+ processed|99.9% uptime' 
-  }
+  },
+  trust_item_1: { type: 'string' as const, default: '10,000+ customers' },
+  trust_item_2: { type: 'string' as const, default: '50+ countries' },
+  trust_item_3: { type: 'string' as const, default: '$100M+ processed' },
+  trust_item_4: { type: 'string' as const, default: '99.9% uptime' },
+  trust_item_5: { type: 'string' as const, default: '' },
+  current_state_heading: { type: 'string' as const, default: 'Where We Are Today' }
 };
 
 // Timeline Item Component
@@ -159,10 +172,27 @@ export default function TimelineToToday(props: LayoutComponentProps) {
     }
   }
 
-  // Parse trust indicators from pipe-separated string
-  const trustItems = blockContent.trust_items 
-    ? blockContent.trust_items.split('|').map(item => item.trim()).filter(Boolean)
-    : ['Growing fast', 'Trusted globally'];
+  // Helper function to get trust items with individual field support
+  const getTrustItems = (): string[] => {
+    const individualItems = [
+      blockContent.trust_item_1,
+      blockContent.trust_item_2,
+      blockContent.trust_item_3,
+      blockContent.trust_item_4,
+      blockContent.trust_item_5
+    ].filter((item): item is string => Boolean(item && item.trim() !== '' && item !== '___REMOVED___'));
+    
+    // Legacy format fallback
+    if (individualItems.length > 0) {
+      return individualItems;
+    }
+    
+    return blockContent.trust_items 
+      ? blockContent.trust_items.split('|').map(item => item.trim()).filter(Boolean)
+      : ['10,000+ customers', '50+ countries'];
+  };
+  
+  const trustItems = getTrustItems();
 
   // Get muted text color for trust indicators
   const mutedTextColor = dynamicTextColors?.muted || colorTokens.textMuted;
@@ -256,7 +286,19 @@ export default function TimelineToToday(props: LayoutComponentProps) {
               🎯
             </div>
             
-            <h3 className="text-2xl font-bold text-gray-900 mb-4">Where We Are Today</h3>
+            <EditableAdaptiveHeadline
+              mode={mode}
+              value={blockContent.current_state_heading || ''}
+              onEdit={(value) => handleContentUpdate('current_state_heading', value)}
+              level="h3"
+              backgroundType="neutral"
+              colorTokens={colorTokens}
+              textStyle={{ fontSize: '1.5rem', fontWeight: '700', color: '#111827', marginBottom: '1rem' }}
+              placeholder="Where We Are Today"
+              sectionId={sectionId}
+              elementKey="current_state_heading"
+              sectionBackground="bg-blue-50"
+            />
             
             <EditableAdaptiveText
               mode={mode}
@@ -273,17 +315,61 @@ export default function TimelineToToday(props: LayoutComponentProps) {
             />
 
             {/* Stats Grid */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-              {trustItems.map((item, index) => (
-                <div key={index} className="text-center">
-                  <div className="text-2xl font-bold text-blue-600 mb-1">
-                    {item.split(' ')[0]}
-                  </div>
-                  <div className="text-sm text-gray-600">
-                    {item.split(' ').slice(1).join(' ')}
-                  </div>
+            <div className="mb-8">
+              {mode === 'edit' ? (
+                <EditableTrustIndicators
+                  mode={mode}
+                  trustItems={[
+                    blockContent.trust_item_1 || '',
+                    blockContent.trust_item_2 || '',
+                    blockContent.trust_item_3 || '',
+                    blockContent.trust_item_4 || '',
+                    blockContent.trust_item_5 || ''
+                  ]}
+                  onTrustItemChange={(index, value) => {
+                    const fieldKey = `trust_item_${index + 1}` as keyof TimelineToTodayContent;
+                    handleContentUpdate(fieldKey, value);
+                  }}
+                  onAddTrustItem={() => {
+                    const emptyIndex = [
+                      blockContent.trust_item_1,
+                      blockContent.trust_item_2,
+                      blockContent.trust_item_3,
+                      blockContent.trust_item_4,
+                      blockContent.trust_item_5
+                    ].findIndex(item => !item || item.trim() === '' || item === '___REMOVED___');
+                    
+                    if (emptyIndex !== -1) {
+                      const fieldKey = `trust_item_${emptyIndex + 1}` as keyof TimelineToTodayContent;
+                      handleContentUpdate(fieldKey, 'New trust item');
+                    }
+                  }}
+                  onRemoveTrustItem={(index) => {
+                    const fieldKey = `trust_item_${index + 1}` as keyof TimelineToTodayContent;
+                    handleContentUpdate(fieldKey, '___REMOVED___');
+                  }}
+                  colorTokens={colorTokens}
+                  sectionBackground="bg-blue-50"
+                  sectionId={sectionId}
+                  backgroundType="neutral"
+                  iconColor="text-green-500"
+                  colorClass="text-gray-600"
+                  showAddButton={true}
+                />
+              ) : (
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  {trustItems.map((item, index) => (
+                    <div key={index} className="text-center">
+                      <div className="text-2xl font-bold text-blue-600 mb-1">
+                        {item.split(' ')[0]}
+                      </div>
+                      <div className="text-sm text-gray-600">
+                        {item.split(' ').slice(1).join(' ')}
+                      </div>
+                    </div>
+                  ))}
                 </div>
-              ))}
+              )}
             </div>
 
             {/* CTA */}

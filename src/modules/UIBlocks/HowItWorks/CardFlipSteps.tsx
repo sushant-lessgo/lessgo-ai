@@ -23,6 +23,17 @@ interface CardFlipStepsContent {
   supporting_text?: string;
   cta_text?: string;
   trust_items?: string;
+  // Flip card features
+  flip_feature_1_text?: string;
+  flip_feature_2_text?: string;
+  // Interactive Guide fields
+  guide_heading?: string;
+  guide_description?: string;
+  guide_indicator_1_text?: string;
+  guide_indicator_2_text?: string;
+  guide_indicator_3_text?: string;
+  show_flip_features?: boolean;
+  show_interactive_guide?: boolean;
 }
 
 const CONTENT_SCHEMA = {
@@ -61,6 +72,44 @@ const CONTENT_SCHEMA = {
   trust_items: { 
     type: 'string' as const, 
     default: '' 
+  },
+  // Flip card features
+  flip_feature_1_text: { 
+    type: 'string' as const, 
+    default: 'Fast & intuitive' 
+  },
+  flip_feature_2_text: { 
+    type: 'string' as const, 
+    default: 'No technical skills needed' 
+  },
+  // Interactive Guide fields
+  guide_heading: { 
+    type: 'string' as const, 
+    default: 'Hands-On Creative Experience' 
+  },
+  guide_description: { 
+    type: 'string' as const, 
+    default: 'Try before you buy with our interactive design process - see exactly how easy it is to create amazing results' 
+  },
+  guide_indicator_1_text: { 
+    type: 'string' as const, 
+    default: 'Interactive' 
+  },
+  guide_indicator_2_text: { 
+    type: 'string' as const, 
+    default: 'User-friendly' 
+  },
+  guide_indicator_3_text: { 
+    type: 'string' as const, 
+    default: 'Real-time' 
+  },
+  show_flip_features: { 
+    type: 'boolean' as const, 
+    default: true 
+  },
+  show_interactive_guide: { 
+    type: 'boolean' as const, 
+    default: true 
   }
 };
 
@@ -371,40 +420,188 @@ export default function CardFlipSteps(props: LayoutComponentProps) {
         )}
 
         {/* Interactive Guide */}
-        <div className="bg-gradient-to-r from-purple-50 via-pink-50 to-orange-50 rounded-2xl p-8 border border-purple-100 mb-12">
-          <div className="text-center">
-            <div className="flex justify-center items-center space-x-6 mb-4">
-              <div className="flex items-center space-x-2">
-                <svg className="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122" />
-                </svg>
-                <span className="text-gray-700 font-medium">Interactive</span>
+        {blockContent.show_interactive_guide !== false && (
+          <div className="bg-gradient-to-r from-purple-50 via-pink-50 to-orange-50 rounded-2xl p-8 border border-purple-100 mb-12">
+            <div className="text-center">
+              <div className="flex justify-center items-center space-x-6 mb-4">
+                {(blockContent.guide_indicator_1_text && blockContent.guide_indicator_1_text !== '___REMOVED___') && (
+                  <div className="relative group/guide-indicator-1 flex items-center space-x-2">
+                    <svg className="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122" />
+                    </svg>
+                    <EditableAdaptiveText
+                      mode={mode}
+                      value={blockContent.guide_indicator_1_text || ''}
+                      onEdit={(value) => handleContentUpdate('guide_indicator_1_text', value)}
+                      backgroundType={backgroundType}
+                      colorTokens={colorTokens}
+                      variant="body"
+                      className="text-gray-700 font-medium"
+                      placeholder="Guide indicator 1"
+                      sectionBackground={sectionBackground}
+                      data-section-id={sectionId}
+                      data-element-key="guide_indicator_1_text"
+                    />
+                    {mode === 'edit' && (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleContentUpdate('guide_indicator_1_text', '___REMOVED___');
+                        }}
+                        className="opacity-0 group-hover/guide-indicator-1:opacity-100 ml-1 text-red-500 hover:text-red-700 transition-opacity duration-200"
+                        title="Remove indicator 1"
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      </button>
+                    )}
+                  </div>
+                )}
+                {(blockContent.guide_indicator_1_text && blockContent.guide_indicator_1_text !== '___REMOVED___') && 
+                 (blockContent.guide_indicator_2_text && blockContent.guide_indicator_2_text !== '___REMOVED___') && (
+                  <div className="w-px h-6 bg-gray-300" />
+                )}
+                {(blockContent.guide_indicator_2_text && blockContent.guide_indicator_2_text !== '___REMOVED___') && (
+                  <div className="relative group/guide-indicator-2 flex items-center space-x-2">
+                    <svg className="w-6 h-6 text-pink-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                    </svg>
+                    <EditableAdaptiveText
+                      mode={mode}
+                      value={blockContent.guide_indicator_2_text || ''}
+                      onEdit={(value) => handleContentUpdate('guide_indicator_2_text', value)}
+                      backgroundType={backgroundType}
+                      colorTokens={colorTokens}
+                      variant="body"
+                      className="text-gray-700 font-medium"
+                      placeholder="Guide indicator 2"
+                      sectionBackground={sectionBackground}
+                      data-section-id={sectionId}
+                      data-element-key="guide_indicator_2_text"
+                    />
+                    {mode === 'edit' && (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleContentUpdate('guide_indicator_2_text', '___REMOVED___');
+                        }}
+                        className="opacity-0 group-hover/guide-indicator-2:opacity-100 ml-1 text-red-500 hover:text-red-700 transition-opacity duration-200"
+                        title="Remove indicator 2"
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      </button>
+                    )}
+                  </div>
+                )}
+                {(blockContent.guide_indicator_2_text && blockContent.guide_indicator_2_text !== '___REMOVED___') && 
+                 (blockContent.guide_indicator_3_text && blockContent.guide_indicator_3_text !== '___REMOVED___') && (
+                  <div className="w-px h-6 bg-gray-300" />
+                )}
+                {(blockContent.guide_indicator_3_text && blockContent.guide_indicator_3_text !== '___REMOVED___') && (
+                  <div className="relative group/guide-indicator-3 flex items-center space-x-2">
+                    <svg className="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                    </svg>
+                    <EditableAdaptiveText
+                      mode={mode}
+                      value={blockContent.guide_indicator_3_text || ''}
+                      onEdit={(value) => handleContentUpdate('guide_indicator_3_text', value)}
+                      backgroundType={backgroundType}
+                      colorTokens={colorTokens}
+                      variant="body"
+                      className="text-gray-700 font-medium"
+                      placeholder="Guide indicator 3"
+                      sectionBackground={sectionBackground}
+                      data-section-id={sectionId}
+                      data-element-key="guide_indicator_3_text"
+                    />
+                    {mode === 'edit' && (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleContentUpdate('guide_indicator_3_text', '___REMOVED___');
+                        }}
+                        className="opacity-0 group-hover/guide-indicator-3:opacity-100 ml-1 text-red-500 hover:text-red-700 transition-opacity duration-200"
+                        title="Remove indicator 3"
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      </button>
+                    )}
+                  </div>
+                )}
               </div>
-              <div className="w-px h-6 bg-gray-300" />
-              <div className="flex items-center space-x-2">
-                <svg className="w-6 h-6 text-pink-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                </svg>
-                <span className="text-gray-700 font-medium">User-friendly</span>
-              </div>
-              <div className="w-px h-6 bg-gray-300" />
-              <div className="flex items-center space-x-2">
-                <svg className="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                </svg>
-                <span className="text-gray-700 font-medium">Real-time</span>
-              </div>
+              
+              {(blockContent.guide_heading || mode === 'edit') && (
+                <div className="relative group/guide-heading">
+                  <EditableAdaptiveText
+                    mode={mode}
+                    value={blockContent.guide_heading || ''}
+                    onEdit={(value) => handleContentUpdate('guide_heading', value)}
+                    backgroundType={backgroundType}
+                    colorTokens={colorTokens}
+                    variant="body"
+                    className="text-xl font-semibold text-gray-900 mb-2"
+                    placeholder="Guide heading"
+                    sectionBackground={sectionBackground}
+                    data-section-id={sectionId}
+                    data-element-key="guide_heading"
+                  />
+                  {mode === 'edit' && (
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleContentUpdate('guide_heading', '___REMOVED___');
+                      }}
+                      className="opacity-0 group-hover/guide-heading:opacity-100 ml-2 p-1 rounded-full bg-white/80 hover:bg-white text-red-500 hover:text-red-700 transition-all duration-200"
+                      title="Remove guide heading"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </button>
+                  )}
+                </div>
+              )}
+              
+              {(blockContent.guide_description || mode === 'edit') && (
+                <div className="relative group/guide-desc">
+                  <EditableAdaptiveText
+                    mode={mode}
+                    value={blockContent.guide_description || ''}
+                    onEdit={(value) => handleContentUpdate('guide_description', value)}
+                    backgroundType={backgroundType}
+                    colorTokens={colorTokens}
+                    variant="body"
+                    className={`${mutedTextColor} max-w-2xl mx-auto`}
+                    placeholder="Guide description"
+                    sectionBackground={sectionBackground}
+                    data-section-id={sectionId}
+                    data-element-key="guide_description"
+                  />
+                  {mode === 'edit' && (
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleContentUpdate('guide_description', '___REMOVED___');
+                      }}
+                      className="opacity-0 group-hover/guide-desc:opacity-100 ml-2 p-1 rounded-full bg-white/80 hover:bg-white text-red-500 hover:text-red-700 transition-all duration-200"
+                      title="Remove guide description"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </button>
+                  )}
+                </div>
+              )}
             </div>
-            
-            <h3 className="text-xl font-semibold text-gray-900 mb-2">
-              Hands-On Creative Experience
-            </h3>
-            
-            <p className={`${mutedTextColor} max-w-2xl mx-auto`}>
-              Try before you buy with our interactive design process - see exactly how easy it is to create amazing results
-            </p>
           </div>
-        </div>
+        )}
 
         {(blockContent.cta_text || blockContent.trust_items || mode === 'edit') && (
           <div className="text-center space-y-6">
@@ -486,7 +683,16 @@ export const componentMeta = {
     { key: 'step_actions', label: 'Step Action Buttons (pipe separated)', type: 'text', required: true },
     { key: 'supporting_text', label: 'Supporting Text', type: 'textarea', required: false },
     { key: 'cta_text', label: 'CTA Button Text', type: 'text', required: false },
-    { key: 'trust_items', label: 'Trust Indicators (pipe separated)', type: 'text', required: false }
+    { key: 'trust_items', label: 'Trust Indicators (pipe separated)', type: 'text', required: false },
+    { key: 'flip_feature_1_text', label: 'Flip Feature 1', type: 'text', required: false },
+    { key: 'flip_feature_2_text', label: 'Flip Feature 2', type: 'text', required: false },
+    { key: 'guide_heading', label: 'Interactive Guide Heading', type: 'text', required: false },
+    { key: 'guide_description', label: 'Interactive Guide Description', type: 'textarea', required: false },
+    { key: 'guide_indicator_1_text', label: 'Guide Indicator 1', type: 'text', required: false },
+    { key: 'guide_indicator_2_text', label: 'Guide Indicator 2', type: 'text', required: false },
+    { key: 'guide_indicator_3_text', label: 'Guide Indicator 3', type: 'text', required: false },
+    { key: 'show_flip_features', label: 'Show Flip Features', type: 'boolean', required: false },
+    { key: 'show_interactive_guide', label: 'Show Interactive Guide', type: 'boolean', required: false }
   ],
   
   features: [

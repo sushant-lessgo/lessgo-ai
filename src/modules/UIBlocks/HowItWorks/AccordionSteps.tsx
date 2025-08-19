@@ -21,6 +21,21 @@ interface AccordionStepsContent {
   supporting_text?: string;
   cta_text?: string;
   trust_items?: string;
+  // Step indicators
+  step_indicator_1_text?: string;
+  step_indicator_2_text?: string;
+  step_indicator_3_text?: string;
+  // Technical Specs Summary
+  tech_specs_heading?: string;
+  tech_spec_1_value?: string;
+  tech_spec_1_label?: string;
+  tech_spec_2_value?: string;
+  tech_spec_2_label?: string;
+  tech_spec_3_value?: string;
+  tech_spec_3_label?: string;
+  tech_specs_description?: string;
+  show_step_indicators?: boolean;
+  show_tech_specs?: boolean;
 }
 
 const CONTENT_SCHEMA = {
@@ -55,6 +70,60 @@ const CONTENT_SCHEMA = {
   trust_items: { 
     type: 'string' as const, 
     default: '' 
+  },
+  // Step indicators
+  step_indicator_1_text: { 
+    type: 'string' as const, 
+    default: 'Enterprise Ready' 
+  },
+  step_indicator_2_text: { 
+    type: 'string' as const, 
+    default: 'Secure' 
+  },
+  step_indicator_3_text: { 
+    type: 'string' as const, 
+    default: 'API Driven' 
+  },
+  // Technical Specs Summary
+  tech_specs_heading: { 
+    type: 'string' as const, 
+    default: 'Enterprise-Grade Implementation' 
+  },
+  tech_spec_1_value: { 
+    type: 'string' as const, 
+    default: '99.9%' 
+  },
+  tech_spec_1_label: { 
+    type: 'string' as const, 
+    default: 'Uptime SLA' 
+  },
+  tech_spec_2_value: { 
+    type: 'string' as const, 
+    default: 'API-First' 
+  },
+  tech_spec_2_label: { 
+    type: 'string' as const, 
+    default: 'Architecture' 
+  },
+  tech_spec_3_value: { 
+    type: 'string' as const, 
+    default: 'SOC 2' 
+  },
+  tech_spec_3_label: { 
+    type: 'string' as const, 
+    default: 'Compliant' 
+  },
+  tech_specs_description: { 
+    type: 'string' as const, 
+    default: 'Built for enterprise requirements with comprehensive security, scalability, and integration capabilities' 
+  },
+  show_step_indicators: { 
+    type: 'boolean' as const, 
+    default: true 
+  },
+  show_tech_specs: { 
+    type: 'boolean' as const, 
+    default: true 
   }
 };
 
@@ -111,11 +180,14 @@ export default function AccordionSteps(props: LayoutComponentProps) {
     setOpenStep(openStep === index ? null : index);
   };
 
-  const AccordionStep = ({ step, index, isOpen, onToggle }: {
+  const AccordionStep = ({ step, index, isOpen, onToggle, blockContent, handleContentUpdate, mode }: {
     step: { title: string; description: string; details: string };
     index: number;
     isOpen: boolean;
     onToggle: () => void;
+    blockContent: AccordionStepsContent;
+    handleContentUpdate: (key: string, value: any) => void;
+    mode: 'edit' | 'preview';
   }) => (
     <div className={`border border-gray-200 rounded-lg overflow-hidden transition-all duration-300 ${isOpen ? 'shadow-lg' : 'hover:shadow-md'}`}>
       <button
@@ -295,36 +367,139 @@ export default function AccordionSteps(props: LayoutComponentProps) {
                 index={index}
                 isOpen={openStep === index}
                 onToggle={() => toggleStep(index)}
+                blockContent={blockContent}
+                handleContentUpdate={handleContentUpdate}
+                mode={mode}
               />
             ))}
           </div>
         )}
 
         {/* Technical Specs Summary */}
-        <div className="bg-gradient-to-r from-gray-900 to-gray-800 rounded-2xl p-8 text-white mb-12">
-          <div className="text-center">
-            <h3 className="text-xl font-semibold mb-6">Enterprise-Grade Implementation</h3>
-            
-            <div className="grid md:grid-cols-3 gap-6">
-              <div className="text-center">
-                <div className="text-3xl font-bold text-blue-400 mb-2">99.9%</div>
-                <div className="text-gray-300 text-sm">Uptime SLA</div>
+        {blockContent.show_tech_specs !== false && (
+          <div className="bg-gradient-to-r from-gray-900 to-gray-800 rounded-2xl p-8 text-white mb-12">
+            <div className="text-center">
+              {(blockContent.tech_specs_heading || mode === 'edit') && (
+                <EditableAdaptiveText
+                  mode={mode}
+                  value={blockContent.tech_specs_heading || ''}
+                  onEdit={(value) => handleContentUpdate('tech_specs_heading', value)}
+                  backgroundType="dark"
+                  colorTokens={colorTokens}
+                  variant="body"
+                  className="text-xl font-semibold mb-6 text-white"
+                  placeholder="Technical specs heading"
+                  sectionBackground="dark"
+                  data-section-id={sectionId}
+                  data-element-key="tech_specs_heading"
+                />
+              )}
+              
+              <div className="grid md:grid-cols-3 gap-6">
+                <div className="text-center">
+                  <EditableAdaptiveText
+                    mode={mode}
+                    value={blockContent.tech_spec_1_value || ''}
+                    onEdit={(value) => handleContentUpdate('tech_spec_1_value', value)}
+                    backgroundType="dark"
+                    colorTokens={colorTokens}
+                    variant="body"
+                    className="text-3xl font-bold text-blue-400 mb-2"
+                    placeholder="Spec 1 value"
+                    sectionBackground="dark"
+                    data-section-id={sectionId}
+                    data-element-key="tech_spec_1_value"
+                  />
+                  <EditableAdaptiveText
+                    mode={mode}
+                    value={blockContent.tech_spec_1_label || ''}
+                    onEdit={(value) => handleContentUpdate('tech_spec_1_label', value)}
+                    backgroundType="dark"
+                    colorTokens={colorTokens}
+                    variant="body"
+                    className="text-gray-300 text-sm"
+                    placeholder="Spec 1 label"
+                    sectionBackground="dark"
+                    data-section-id={sectionId}
+                    data-element-key="tech_spec_1_label"
+                  />
+                </div>
+                <div className="text-center">
+                  <EditableAdaptiveText
+                    mode={mode}
+                    value={blockContent.tech_spec_2_value || ''}
+                    onEdit={(value) => handleContentUpdate('tech_spec_2_value', value)}
+                    backgroundType="dark"
+                    colorTokens={colorTokens}
+                    variant="body"
+                    className="text-3xl font-bold text-green-400 mb-2"
+                    placeholder="Spec 2 value"
+                    sectionBackground="dark"
+                    data-section-id={sectionId}
+                    data-element-key="tech_spec_2_value"
+                  />
+                  <EditableAdaptiveText
+                    mode={mode}
+                    value={blockContent.tech_spec_2_label || ''}
+                    onEdit={(value) => handleContentUpdate('tech_spec_2_label', value)}
+                    backgroundType="dark"
+                    colorTokens={colorTokens}
+                    variant="body"
+                    className="text-gray-300 text-sm"
+                    placeholder="Spec 2 label"
+                    sectionBackground="dark"
+                    data-section-id={sectionId}
+                    data-element-key="tech_spec_2_label"
+                  />
+                </div>
+                <div className="text-center">
+                  <EditableAdaptiveText
+                    mode={mode}
+                    value={blockContent.tech_spec_3_value || ''}
+                    onEdit={(value) => handleContentUpdate('tech_spec_3_value', value)}
+                    backgroundType="dark"
+                    colorTokens={colorTokens}
+                    variant="body"
+                    className="text-3xl font-bold text-purple-400 mb-2"
+                    placeholder="Spec 3 value"
+                    sectionBackground="dark"
+                    data-section-id={sectionId}
+                    data-element-key="tech_spec_3_value"
+                  />
+                  <EditableAdaptiveText
+                    mode={mode}
+                    value={blockContent.tech_spec_3_label || ''}
+                    onEdit={(value) => handleContentUpdate('tech_spec_3_label', value)}
+                    backgroundType="dark"
+                    colorTokens={colorTokens}
+                    variant="body"
+                    className="text-gray-300 text-sm"
+                    placeholder="Spec 3 label"
+                    sectionBackground="dark"
+                    data-section-id={sectionId}
+                    data-element-key="tech_spec_3_label"
+                  />
+                </div>
               </div>
-              <div className="text-center">
-                <div className="text-3xl font-bold text-green-400 mb-2">API-First</div>
-                <div className="text-gray-300 text-sm">Architecture</div>
-              </div>
-              <div className="text-center">
-                <div className="text-3xl font-bold text-purple-400 mb-2">SOC 2</div>
-                <div className="text-gray-300 text-sm">Compliant</div>
-              </div>
+              
+              {(blockContent.tech_specs_description || mode === 'edit') && (
+                <EditableAdaptiveText
+                  mode={mode}
+                  value={blockContent.tech_specs_description || ''}
+                  onEdit={(value) => handleContentUpdate('tech_specs_description', value)}
+                  backgroundType="dark"
+                  colorTokens={colorTokens}
+                  variant="body"
+                  className="mt-6 text-gray-300 max-w-2xl mx-auto"
+                  placeholder="Technical specs description"
+                  sectionBackground="dark"
+                  data-section-id={sectionId}
+                  data-element-key="tech_specs_description"
+                />
+              )}
             </div>
-            
-            <p className="mt-6 text-gray-300 max-w-2xl mx-auto">
-              Built for enterprise requirements with comprehensive security, scalability, and integration capabilities
-            </p>
           </div>
-        </div>
+        )}
 
         {(blockContent.cta_text || blockContent.trust_items || mode === 'edit') && (
           <div className="text-center space-y-6">
@@ -390,7 +565,20 @@ export const componentMeta = {
     { key: 'step_details', label: 'Technical Details (pipe separated)', type: 'textarea', required: true },
     { key: 'supporting_text', label: 'Supporting Text', type: 'textarea', required: false },
     { key: 'cta_text', label: 'CTA Button Text', type: 'text', required: false },
-    { key: 'trust_items', label: 'Trust Indicators (pipe separated)', type: 'text', required: false }
+    { key: 'trust_items', label: 'Trust Indicators (pipe separated)', type: 'text', required: false },
+    { key: 'step_indicator_1_text', label: 'Step Indicator 1', type: 'text', required: false },
+    { key: 'step_indicator_2_text', label: 'Step Indicator 2', type: 'text', required: false },
+    { key: 'step_indicator_3_text', label: 'Step Indicator 3', type: 'text', required: false },
+    { key: 'tech_specs_heading', label: 'Technical Specs Heading', type: 'text', required: false },
+    { key: 'tech_spec_1_value', label: 'Tech Spec 1 Value', type: 'text', required: false },
+    { key: 'tech_spec_1_label', label: 'Tech Spec 1 Label', type: 'text', required: false },
+    { key: 'tech_spec_2_value', label: 'Tech Spec 2 Value', type: 'text', required: false },
+    { key: 'tech_spec_2_label', label: 'Tech Spec 2 Label', type: 'text', required: false },
+    { key: 'tech_spec_3_value', label: 'Tech Spec 3 Value', type: 'text', required: false },
+    { key: 'tech_spec_3_label', label: 'Tech Spec 3 Label', type: 'text', required: false },
+    { key: 'tech_specs_description', label: 'Technical Specs Description', type: 'textarea', required: false },
+    { key: 'show_step_indicators', label: 'Show Step Indicators', type: 'boolean', required: false },
+    { key: 'show_tech_specs', label: 'Show Technical Specs', type: 'boolean', required: false }
   ],
   
   features: [
