@@ -22,6 +22,13 @@ interface TimelineContent {
   supporting_text?: string;
   cta_text?: string;
   trust_items?: string;
+  // Step benefit badges
+  step_benefit_1?: string;
+  step_benefit_2?: string;
+  // Process Summary Fields
+  process_summary_title?: string;
+  process_summary_description?: string;
+  show_process_summary?: boolean;
 }
 
 const CONTENT_SCHEMA = {
@@ -60,6 +67,28 @@ const CONTENT_SCHEMA = {
   trust_items: { 
     type: 'string' as const, 
     default: '' 
+  },
+  // Step benefit badges
+  step_benefit_1: { 
+    type: 'string' as const, 
+    default: 'Automated' 
+  },
+  step_benefit_2: { 
+    type: 'string' as const, 
+    default: 'Time-saving' 
+  },
+  // Process Summary Schema
+  process_summary_title: { 
+    type: 'string' as const, 
+    default: 'Complete Setup in Under 30 Minutes' 
+  },
+  process_summary_description: { 
+    type: 'string' as const, 
+    default: 'Get your automated workflows up and running quickly with our intuitive process' 
+  },
+  show_process_summary: { 
+    type: 'boolean' as const, 
+    default: true 
   }
 };
 
@@ -71,7 +100,13 @@ const TimelineStep = React.memo(({
   isLast,
   colorTokens,
   mutedTextColor,
-  h3Style
+  h3Style,
+  mode,
+  blockContent,
+  handleContentUpdate,
+  sectionId,
+  sectionBackground,
+  props
 }: {
   number: string;
   title: string;
@@ -81,6 +116,12 @@ const TimelineStep = React.memo(({
   colorTokens: any;
   mutedTextColor: string;
   h3Style: React.CSSProperties;
+  mode: 'edit' | 'preview';
+  blockContent: any;
+  handleContentUpdate: any;
+  sectionId: string;
+  sectionBackground: string;
+  props: any;
 }) => {
   
   return (
@@ -123,18 +164,82 @@ const TimelineStep = React.memo(({
             </p>
             
             <div className="mt-4 flex items-center space-x-4">
-              <div className="flex items-center space-x-2 text-green-600">
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                </svg>
-                <span className="text-sm">Automated</span>
-              </div>
-              <div className="flex items-center space-x-2 text-blue-600">
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                <span className="text-sm">Time-saving</span>
-              </div>
+              {(blockContent.step_benefit_1 || mode === 'edit') && blockContent.step_benefit_1 !== '___REMOVED___' && (
+                <div className="flex items-center space-x-2 text-green-600 group/benefit-item relative">
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                  {mode === 'edit' ? (
+                    <EditableAdaptiveText
+                      mode={mode}
+                      value={blockContent.step_benefit_1 || ''}
+                      onEdit={(value) => handleContentUpdate('step_benefit_1', value)}
+                      backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
+                      colorTokens={colorTokens}
+                      variant="body"
+                      className="text-sm"
+                      placeholder="Benefit 1"
+                      sectionBackground={sectionBackground}
+                      data-section-id={sectionId}
+                      data-element-key="step_benefit_1"
+                    />
+                  ) : (
+                    <span className="text-sm">{blockContent.step_benefit_1}</span>
+                  )}
+                  {mode === 'edit' && (
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleContentUpdate('step_benefit_1', '___REMOVED___');
+                      }}
+                      className="opacity-0 group-hover/benefit-item:opacity-100 ml-1 text-red-500 hover:text-red-700 transition-opacity duration-200"
+                      title="Remove benefit 1"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </button>
+                  )}
+                </div>
+              )}
+              {(blockContent.step_benefit_2 || mode === 'edit') && blockContent.step_benefit_2 !== '___REMOVED___' && (
+                <div className="flex items-center space-x-2 text-blue-600 group/benefit-item relative">
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  {mode === 'edit' ? (
+                    <EditableAdaptiveText
+                      mode={mode}
+                      value={blockContent.step_benefit_2 || ''}
+                      onEdit={(value) => handleContentUpdate('step_benefit_2', value)}
+                      backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
+                      colorTokens={colorTokens}
+                      variant="body"
+                      className="text-sm"
+                      placeholder="Benefit 2"
+                      sectionBackground={sectionBackground}
+                      data-section-id={sectionId}
+                      data-element-key="step_benefit_2"
+                    />
+                  ) : (
+                    <span className="text-sm">{blockContent.step_benefit_2}</span>
+                  )}
+                  {mode === 'edit' && (
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleContentUpdate('step_benefit_2', '___REMOVED___');
+                      }}
+                      className="opacity-0 group-hover/benefit-item:opacity-100 ml-1 text-red-500 hover:text-red-700 transition-opacity duration-200"
+                      title="Remove benefit 2"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </button>
+                  )}
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -314,38 +419,84 @@ export default function Timeline(props: LayoutComponentProps) {
                 colorTokens={colorTokens}
                 mutedTextColor={mutedTextColor}
                 h3Style={h3Style}
+                mode={mode}
+                blockContent={blockContent}
+                handleContentUpdate={handleContentUpdate}
+                sectionId={sectionId}
+                sectionBackground={sectionBackground}
+                props={props}
               />
             ))}
           </div>
         )}
 
-        {/* Process Summary */}
-        <div className="mt-12 bg-gradient-to-r from-blue-50 via-indigo-50 to-purple-50 rounded-2xl p-8 border border-blue-100">
-          <div className="text-center">
-            <div className="flex justify-center space-x-8 mb-6">
-              {steps.map((step, index) => (
-                <div key={index} className="flex items-center">
-                  <div className={`w-10 h-10 rounded-full ${colorTokens.ctaBg} flex items-center justify-center`}>
-                    <span className="text-white font-bold text-sm">{step.number}</span>
+        {/* Process Summary - Editable */}
+        {blockContent.show_process_summary !== false && (blockContent.process_summary_title || mode === 'edit') && (
+          <div className="mt-12 bg-gradient-to-r from-blue-50 via-indigo-50 to-purple-50 rounded-2xl p-8 border border-blue-100">
+            <div className="text-center">
+              <div className="flex justify-center space-x-8 mb-6">
+                {steps.map((step, index) => (
+                  <div key={index} className="flex items-center">
+                    <div className={`w-10 h-10 rounded-full ${colorTokens.ctaBg} flex items-center justify-center`}>
+                      <span className="text-white font-bold text-sm">{step.number}</span>
+                    </div>
+                    {index < steps.length - 1 && (
+                      <svg className="w-6 h-6 text-gray-400 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                      </svg>
+                    )}
                   </div>
-                  {index < steps.length - 1 && (
-                    <svg className="w-6 h-6 text-gray-400 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                    </svg>
+                ))}
+              </div>
+              
+              <EditableAdaptiveText
+                mode={mode}
+                value={blockContent.process_summary_title || ''}
+                onEdit={(value) => handleContentUpdate('process_summary_title', value)}
+                backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
+                colorTokens={colorTokens}
+                variant="body"
+                className="text-xl font-semibold text-gray-900 mb-2"
+                placeholder="Process summary title..."
+                sectionBackground={sectionBackground}
+                data-section-id={sectionId}
+                data-element-key="process_summary_title"
+              />
+              
+              {(blockContent.process_summary_description || mode === 'edit') && blockContent.process_summary_description !== '___REMOVED___' && (
+                <div className="group/summary-description relative">
+                  <EditableAdaptiveText
+                    mode={mode}
+                    value={blockContent.process_summary_description || ''}
+                    onEdit={(value) => handleContentUpdate('process_summary_description', value)}
+                    backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
+                    colorTokens={colorTokens}
+                    variant="body"
+                    className={`${mutedTextColor} max-w-2xl mx-auto`}
+                    placeholder="Process summary description..."
+                    sectionBackground={sectionBackground}
+                    data-section-id={sectionId}
+                    data-element-key="process_summary_description"
+                  />
+                  {mode === 'edit' && (
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleContentUpdate('process_summary_description', '___REMOVED___');
+                      }}
+                      className="opacity-0 group-hover/summary-description:opacity-100 ml-2 text-red-500 hover:text-red-700 transition-opacity duration-200"
+                      title="Remove summary description"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </button>
                   )}
                 </div>
-              ))}
+              )}
             </div>
-            
-            <h3 className="text-xl font-semibold text-gray-900 mb-2">
-              Complete Setup in Under 30 Minutes
-            </h3>
-            
-            <p className={`${mutedTextColor} max-w-2xl mx-auto`}>
-              Get your automated workflows up and running quickly with our intuitive process
-            </p>
           </div>
-        </div>
+        )}
 
         {(blockContent.cta_text || blockContent.trust_items || mode === 'edit') && (
           <div className="text-center space-y-6 mt-16">
@@ -410,6 +561,10 @@ export const componentMeta = {
     { key: 'step_titles', label: 'Step Titles (pipe separated)', type: 'textarea', required: true },
     { key: 'step_descriptions', label: 'Step Descriptions (pipe separated)', type: 'textarea', required: true },
     { key: 'step_durations', label: 'Step Durations (pipe separated)', type: 'text', required: false },
+    { key: 'step_benefit_1', label: 'Step Benefit 1', type: 'text', required: false },
+    { key: 'step_benefit_2', label: 'Step Benefit 2', type: 'text', required: false },
+    { key: 'process_summary_title', label: 'Process Summary Title', type: 'text', required: false },
+    { key: 'process_summary_description', label: 'Process Summary Description', type: 'textarea', required: false },
     { key: 'supporting_text', label: 'Supporting Text', type: 'textarea', required: false },
     { key: 'cta_text', label: 'CTA Button Text', type: 'text', required: false },
     { key: 'trust_items', label: 'Trust Indicators (pipe separated)', type: 'text', required: false }

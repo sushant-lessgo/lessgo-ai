@@ -22,6 +22,9 @@ interface SplitAlternatingContent {
   supporting_text?: string;
   cta_text?: string;
   trust_items?: string;
+  // Benefit item fields
+  benefit_1?: string;
+  benefit_2?: string;
 }
 
 const CONTENT_SCHEMA = {
@@ -56,6 +59,15 @@ const CONTENT_SCHEMA = {
   trust_items: { 
     type: 'string' as const, 
     default: '' 
+  },
+  // Benefit item schema
+  benefit_1: { 
+    type: 'string' as const, 
+    default: 'Easy to implement' 
+  },
+  benefit_2: { 
+    type: 'string' as const, 
+    default: 'No coding required' 
   }
 };
 
@@ -117,18 +129,82 @@ const FeatureRow = React.memo(({
           </div>
           
           <div className="flex items-center space-x-4 pl-16">
-            <div className="flex items-center space-x-2 text-green-600">
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-              </svg>
-              <span className="text-sm font-medium">Easy to implement</span>
-            </div>
-            <div className="flex items-center space-x-2 text-green-600">
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-              </svg>
-              <span className="text-sm font-medium">No coding required</span>
-            </div>
+            {(blockContent.benefit_1 || mode === 'edit') && blockContent.benefit_1 !== '___REMOVED___' && (
+              <div className="flex items-center space-x-2 text-green-600 group/benefit-item relative">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+                {mode === 'edit' ? (
+                  <EditableAdaptiveText
+                    mode={mode}
+                    value={blockContent.benefit_1 || ''}
+                    onEdit={(value) => handleContentUpdate('benefit_1', value)}
+                    backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
+                    colorTokens={colorTokens}
+                    variant="body"
+                    className="text-sm font-medium"
+                    placeholder="Benefit 1"
+                    sectionBackground={sectionBackground}
+                    data-section-id={sectionId}
+                    data-element-key="benefit_1"
+                  />
+                ) : (
+                  <span className="text-sm font-medium">{blockContent.benefit_1}</span>
+                )}
+                {mode === 'edit' && (
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleContentUpdate('benefit_1', '___REMOVED___');
+                    }}
+                    className="opacity-0 group-hover/benefit-item:opacity-100 ml-1 text-red-500 hover:text-red-700 transition-opacity duration-200"
+                    title="Remove benefit 1"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                )}
+              </div>
+            )}
+            {(blockContent.benefit_2 || mode === 'edit') && blockContent.benefit_2 !== '___REMOVED___' && (
+              <div className="flex items-center space-x-2 text-green-600 group/benefit-item relative">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+                {mode === 'edit' ? (
+                  <EditableAdaptiveText
+                    mode={mode}
+                    value={blockContent.benefit_2 || ''}
+                    onEdit={(value) => handleContentUpdate('benefit_2', value)}
+                    backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
+                    colorTokens={colorTokens}
+                    variant="body"
+                    className="text-sm font-medium"
+                    placeholder="Benefit 2"
+                    sectionBackground={sectionBackground}
+                    data-section-id={sectionId}
+                    data-element-key="benefit_2"
+                  />
+                ) : (
+                  <span className="text-sm font-medium">{blockContent.benefit_2}</span>
+                )}
+                {mode === 'edit' && (
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleContentUpdate('benefit_2', '___REMOVED___');
+                    }}
+                    className="opacity-0 group-hover/benefit-item:opacity-100 ml-1 text-red-500 hover:text-red-700 transition-opacity duration-200"
+                    title="Remove benefit 2"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                )}
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -361,6 +437,8 @@ export const componentMeta = {
     { key: 'feature_titles', label: 'Feature Titles (pipe separated)', type: 'textarea', required: true },
     { key: 'feature_descriptions', label: 'Feature Descriptions (pipe separated)', type: 'textarea', required: true },
     { key: 'feature_visuals', label: 'Feature Visuals (pipe separated)', type: 'textarea', required: false },
+    { key: 'benefit_1', label: 'Benefit Item 1', type: 'text', required: false },
+    { key: 'benefit_2', label: 'Benefit Item 2', type: 'text', required: false },
     { key: 'supporting_text', label: 'Supporting Text', type: 'textarea', required: false },
     { key: 'cta_text', label: 'CTA Button Text', type: 'text', required: false },
     { key: 'trust_items', label: 'Trust Indicators (pipe separated)', type: 'text', required: false }

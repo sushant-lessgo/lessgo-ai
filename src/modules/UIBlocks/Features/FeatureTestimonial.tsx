@@ -31,6 +31,17 @@ interface FeatureTestimonialContent {
   trust_item_3?: string;
   trust_item_4?: string;
   trust_item_5?: string;
+  // Trust Banner Fields
+  trust_banner_title?: string;
+  trust_metric_1?: string;
+  trust_label_1?: string;
+  trust_metric_2?: string;
+  trust_label_2?: string;
+  trust_metric_3?: string;
+  trust_label_3?: string;
+  trust_metric_4?: string;
+  trust_label_4?: string;
+  show_trust_banner?: boolean;
 }
 
 const CONTENT_SCHEMA = {
@@ -97,6 +108,47 @@ const CONTENT_SCHEMA = {
   trust_item_5: { 
     type: 'string' as const, 
     default: '' 
+  },
+  // Trust Banner Schema
+  trust_banner_title: { 
+    type: 'string' as const, 
+    default: 'Trusted by 10,000+ Enterprise Teams' 
+  },
+  trust_metric_1: { 
+    type: 'string' as const, 
+    default: '99.99%' 
+  },
+  trust_label_1: { 
+    type: 'string' as const, 
+    default: 'Uptime SLA' 
+  },
+  trust_metric_2: { 
+    type: 'string' as const, 
+    default: 'SOC 2' 
+  },
+  trust_label_2: { 
+    type: 'string' as const, 
+    default: 'Type II Certified' 
+  },
+  trust_metric_3: { 
+    type: 'string' as const, 
+    default: '24/7' 
+  },
+  trust_label_3: { 
+    type: 'string' as const, 
+    default: 'Enterprise Support' 
+  },
+  trust_metric_4: { 
+    type: 'string' as const, 
+    default: 'GDPR' 
+  },
+  trust_label_4: { 
+    type: 'string' as const, 
+    default: 'Compliant' 
+  },
+  show_trust_banner: { 
+    type: 'boolean' as const, 
+    default: true 
   }
 };
 
@@ -416,33 +468,220 @@ export default function FeatureTestimonial(props: LayoutComponentProps) {
           </div>
         )}
 
-        {/* Trust Banner */}
-        <div className="mt-12 bg-gradient-to-r from-gray-50 to-gray-100 rounded-2xl p-8 border border-gray-200">
-          <div className="text-center">
-            <h3 style={h3Style} className="font-semibold text-gray-900 mb-4">
-              Trusted by 10,000+ Enterprise Teams
-            </h3>
-            
-            <div className="flex flex-wrap justify-center gap-8">
-              <div className="text-center">
-                <div className="text-3xl font-bold text-gray-900">99.99%</div>
-                <div className={`text-sm ${mutedTextColor}`}>Uptime SLA</div>
-              </div>
-              <div className="text-center">
-                <div className="text-3xl font-bold text-gray-900">SOC 2</div>
-                <div className={`text-sm ${mutedTextColor}`}>Type II Certified</div>
-              </div>
-              <div className="text-center">
-                <div className="text-3xl font-bold text-gray-900">24/7</div>
-                <div className={`text-sm ${mutedTextColor}`}>Enterprise Support</div>
-              </div>
-              <div className="text-center">
-                <div className="text-3xl font-bold text-gray-900">GDPR</div>
-                <div className={`text-sm ${mutedTextColor}`}>Compliant</div>
+        {/* Trust Banner - Editable */}
+        {blockContent.show_trust_banner !== false && (blockContent.trust_banner_title || mode === 'edit') && (
+          <div className="mt-12 bg-gradient-to-r from-gray-50 to-gray-100 rounded-2xl p-8 border border-gray-200">
+            <div className="text-center">
+              <EditableAdaptiveText
+                mode={mode}
+                value={blockContent.trust_banner_title || ''}
+                onEdit={(value) => handleContentUpdate('trust_banner_title', value)}
+                backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
+                colorTokens={colorTokens}
+                variant="body"
+                textStyle={{
+                  ...getTypographyStyle('h3'),
+                  fontWeight: 600
+                }}
+                className="text-gray-900 mb-4"
+                placeholder="Trust banner title..."
+                sectionBackground={sectionBackground}
+                data-section-id={sectionId}
+                data-element-key="trust_banner_title"
+              />
+              
+              <div className="flex flex-wrap justify-center gap-8">
+                {/* Trust Metric 1 */}
+                {(blockContent.trust_metric_1 || mode === 'edit') && blockContent.trust_metric_1 !== '___REMOVED___' && (
+                  <div className="text-center group/trust-item relative">
+                    <EditableAdaptiveText
+                      mode={mode}
+                      value={blockContent.trust_metric_1 || ''}
+                      onEdit={(value) => handleContentUpdate('trust_metric_1', value)}
+                      backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
+                      colorTokens={colorTokens}
+                      variant="body"
+                      className="text-3xl font-bold text-gray-900"
+                      placeholder="Metric 1"
+                      sectionBackground={sectionBackground}
+                      data-section-id={sectionId}
+                      data-element-key="trust_metric_1"
+                    />
+                    <EditableAdaptiveText
+                      mode={mode}
+                      value={blockContent.trust_label_1 || ''}
+                      onEdit={(value) => handleContentUpdate('trust_label_1', value)}
+                      backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
+                      colorTokens={colorTokens}
+                      variant="body"
+                      className={`text-sm ${mutedTextColor}`}
+                      placeholder="Label 1"
+                      sectionBackground={sectionBackground}
+                      data-section-id={sectionId}
+                      data-element-key="trust_label_1"
+                    />
+                    {mode === 'edit' && (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleContentUpdate('trust_metric_1', '___REMOVED___');
+                          handleContentUpdate('trust_label_1', '___REMOVED___');
+                        }}
+                        className="opacity-0 group-hover/trust-item:opacity-100 absolute -top-2 -right-2 p-1 rounded-full bg-white/80 hover:bg-white text-red-500 hover:text-red-700 transition-all duration-200 shadow-sm"
+                        title="Remove trust metric 1"
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      </button>
+                    )}
+                  </div>
+                )}
+                
+                {/* Trust Metric 2 */}
+                {(blockContent.trust_metric_2 || mode === 'edit') && blockContent.trust_metric_2 !== '___REMOVED___' && (
+                  <div className="text-center group/trust-item relative">
+                    <EditableAdaptiveText
+                      mode={mode}
+                      value={blockContent.trust_metric_2 || ''}
+                      onEdit={(value) => handleContentUpdate('trust_metric_2', value)}
+                      backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
+                      colorTokens={colorTokens}
+                      variant="body"
+                      className="text-3xl font-bold text-gray-900"
+                      placeholder="Metric 2"
+                      sectionBackground={sectionBackground}
+                      data-section-id={sectionId}
+                      data-element-key="trust_metric_2"
+                    />
+                    <EditableAdaptiveText
+                      mode={mode}
+                      value={blockContent.trust_label_2 || ''}
+                      onEdit={(value) => handleContentUpdate('trust_label_2', value)}
+                      backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
+                      colorTokens={colorTokens}
+                      variant="body"
+                      className={`text-sm ${mutedTextColor}`}
+                      placeholder="Label 2"
+                      sectionBackground={sectionBackground}
+                      data-section-id={sectionId}
+                      data-element-key="trust_label_2"
+                    />
+                    {mode === 'edit' && (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleContentUpdate('trust_metric_2', '___REMOVED___');
+                          handleContentUpdate('trust_label_2', '___REMOVED___');
+                        }}
+                        className="opacity-0 group-hover/trust-item:opacity-100 absolute -top-2 -right-2 p-1 rounded-full bg-white/80 hover:bg-white text-red-500 hover:text-red-700 transition-all duration-200 shadow-sm"
+                        title="Remove trust metric 2"
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      </button>
+                    )}
+                  </div>
+                )}
+                
+                {/* Trust Metric 3 */}
+                {(blockContent.trust_metric_3 || mode === 'edit') && blockContent.trust_metric_3 !== '___REMOVED___' && (
+                  <div className="text-center group/trust-item relative">
+                    <EditableAdaptiveText
+                      mode={mode}
+                      value={blockContent.trust_metric_3 || ''}
+                      onEdit={(value) => handleContentUpdate('trust_metric_3', value)}
+                      backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
+                      colorTokens={colorTokens}
+                      variant="body"
+                      className="text-3xl font-bold text-gray-900"
+                      placeholder="Metric 3"
+                      sectionBackground={sectionBackground}
+                      data-section-id={sectionId}
+                      data-element-key="trust_metric_3"
+                    />
+                    <EditableAdaptiveText
+                      mode={mode}
+                      value={blockContent.trust_label_3 || ''}
+                      onEdit={(value) => handleContentUpdate('trust_label_3', value)}
+                      backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
+                      colorTokens={colorTokens}
+                      variant="body"
+                      className={`text-sm ${mutedTextColor}`}
+                      placeholder="Label 3"
+                      sectionBackground={sectionBackground}
+                      data-section-id={sectionId}
+                      data-element-key="trust_label_3"
+                    />
+                    {mode === 'edit' && (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleContentUpdate('trust_metric_3', '___REMOVED___');
+                          handleContentUpdate('trust_label_3', '___REMOVED___');
+                        }}
+                        className="opacity-0 group-hover/trust-item:opacity-100 absolute -top-2 -right-2 p-1 rounded-full bg-white/80 hover:bg-white text-red-500 hover:text-red-700 transition-all duration-200 shadow-sm"
+                        title="Remove trust metric 3"
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      </button>
+                    )}
+                  </div>
+                )}
+                
+                {/* Trust Metric 4 */}
+                {(blockContent.trust_metric_4 || mode === 'edit') && blockContent.trust_metric_4 !== '___REMOVED___' && (
+                  <div className="text-center group/trust-item relative">
+                    <EditableAdaptiveText
+                      mode={mode}
+                      value={blockContent.trust_metric_4 || ''}
+                      onEdit={(value) => handleContentUpdate('trust_metric_4', value)}
+                      backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
+                      colorTokens={colorTokens}
+                      variant="body"
+                      className="text-3xl font-bold text-gray-900"
+                      placeholder="Metric 4"
+                      sectionBackground={sectionBackground}
+                      data-section-id={sectionId}
+                      data-element-key="trust_metric_4"
+                    />
+                    <EditableAdaptiveText
+                      mode={mode}
+                      value={blockContent.trust_label_4 || ''}
+                      onEdit={(value) => handleContentUpdate('trust_label_4', value)}
+                      backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
+                      colorTokens={colorTokens}
+                      variant="body"
+                      className={`text-sm ${mutedTextColor}`}
+                      placeholder="Label 4"
+                      sectionBackground={sectionBackground}
+                      data-section-id={sectionId}
+                      data-element-key="trust_label_4"
+                    />
+                    {mode === 'edit' && (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleContentUpdate('trust_metric_4', '___REMOVED___');
+                          handleContentUpdate('trust_label_4', '___REMOVED___');
+                        }}
+                        className="opacity-0 group-hover/trust-item:opacity-100 absolute -top-2 -right-2 p-1 rounded-full bg-white/80 hover:bg-white text-red-500 hover:text-red-700 transition-all duration-200 shadow-sm"
+                        title="Remove trust metric 4"
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      </button>
+                    )}
+                  </div>
+                )}
               </div>
             </div>
           </div>
-        </div>
+        )}
 
         {(blockContent.cta_text || blockContent.trust_items || mode === 'edit') && (
           <div className="text-center space-y-6 mt-16">
@@ -554,6 +793,15 @@ export const componentMeta = {
     { key: 'testimonial_names', label: 'Testimonial Names (pipe separated)', type: 'text', required: true },
     { key: 'testimonial_roles', label: 'Testimonial Roles (pipe separated)', type: 'text', required: true },
     { key: 'testimonial_avatars', label: 'Testimonial Avatars (pipe separated)', type: 'textarea', required: false },
+    { key: 'trust_banner_title', label: 'Trust Banner Title', type: 'text', required: false },
+    { key: 'trust_metric_1', label: 'Trust Metric 1', type: 'text', required: false },
+    { key: 'trust_label_1', label: 'Trust Label 1', type: 'text', required: false },
+    { key: 'trust_metric_2', label: 'Trust Metric 2', type: 'text', required: false },
+    { key: 'trust_label_2', label: 'Trust Label 2', type: 'text', required: false },
+    { key: 'trust_metric_3', label: 'Trust Metric 3', type: 'text', required: false },
+    { key: 'trust_label_3', label: 'Trust Label 3', type: 'text', required: false },
+    { key: 'trust_metric_4', label: 'Trust Metric 4', type: 'text', required: false },
+    { key: 'trust_label_4', label: 'Trust Label 4', type: 'text', required: false },
     { key: 'supporting_text', label: 'Supporting Text', type: 'textarea', required: false },
     { key: 'cta_text', label: 'CTA Button Text', type: 'text', required: false },
     { key: 'trust_items', label: 'Trust Indicators (pipe separated)', type: 'text', required: false }

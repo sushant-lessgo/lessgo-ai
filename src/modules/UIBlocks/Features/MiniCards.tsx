@@ -21,6 +21,11 @@ interface MiniCardsContent {
   supporting_text?: string;
   cta_text?: string;
   trust_items?: string;
+  // Feature Summary Fields
+  summary_item_1?: string;
+  summary_item_2?: string;
+  summary_item_3?: string;
+  show_feature_summary?: boolean;
 }
 
 const CONTENT_SCHEMA = {
@@ -55,6 +60,23 @@ const CONTENT_SCHEMA = {
   trust_items: { 
     type: 'string' as const, 
     default: '' 
+  },
+  // Feature Summary Schema
+  summary_item_1: { 
+    type: 'string' as const, 
+    default: 'Zero Setup Required' 
+  },
+  summary_item_2: { 
+    type: 'string' as const, 
+    default: 'Works Out-of-the-Box' 
+  },
+  summary_item_3: { 
+    type: 'string' as const, 
+    default: '' 
+  },
+  show_feature_summary: { 
+    type: 'boolean' as const, 
+    default: true 
   }
 };
 
@@ -306,31 +328,142 @@ export default function MiniCards(props: LayoutComponentProps) {
           </div>
         )}
 
-        {/* Feature Summary */}
-        <div className="mt-12 text-center">
-          <div className="inline-flex items-center space-x-6 bg-white rounded-2xl p-6 shadow-lg border border-gray-100">
-            <div className="flex items-center space-x-2">
-              <div className="w-2 h-2 rounded-full bg-green-500" />
-              <span className="text-sm font-medium text-gray-700">
-                {features.length} Core Features
-              </span>
-            </div>
-            <div className="w-px h-6 bg-gray-200" />
-            <div className="flex items-center space-x-2">
-              <div className="w-2 h-2 rounded-full bg-blue-500" />
-              <span className="text-sm font-medium text-gray-700">
-                Zero Setup Required
-              </span>
-            </div>
-            <div className="w-px h-6 bg-gray-200" />
-            <div className="flex items-center space-x-2">
-              <div className="w-2 h-2 rounded-full bg-purple-500" />
-              <span className="text-sm font-medium text-gray-700">
-                Works Out-of-the-Box
-              </span>
+        {/* Feature Summary - Editable */}
+        {blockContent.show_feature_summary !== false && (
+          <div className="mt-12 text-center">
+            <div className="inline-flex items-center space-x-6 bg-white rounded-2xl p-6 shadow-lg border border-gray-100">
+              <div className="flex items-center space-x-2">
+                <div className="w-2 h-2 rounded-full bg-green-500" />
+                <span className="text-sm font-medium text-gray-700">
+                  {features.length} Core Features
+                </span>
+              </div>
+              {(blockContent.summary_item_1 || mode === 'edit') && blockContent.summary_item_1 !== '___REMOVED___' && (
+                <>
+                  <div className="w-px h-6 bg-gray-200" />
+                  <div className="flex items-center space-x-2 group/summary-item relative">
+                    <div className="w-2 h-2 rounded-full bg-blue-500" />
+                    {mode === 'edit' ? (
+                      <EditableAdaptiveText
+                        mode={mode}
+                        value={blockContent.summary_item_1 || ''}
+                        onEdit={(value) => handleContentUpdate('summary_item_1', value)}
+                        backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
+                        colorTokens={colorTokens}
+                        variant="body"
+                        className="text-sm font-medium text-gray-700"
+                        placeholder="Summary item 1"
+                        sectionBackground={sectionBackground}
+                        data-section-id={sectionId}
+                        data-element-key="summary_item_1"
+                      />
+                    ) : (
+                      <span className="text-sm font-medium text-gray-700">
+                        {blockContent.summary_item_1}
+                      </span>
+                    )}
+                    {mode === 'edit' && (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleContentUpdate('summary_item_1', '___REMOVED___');
+                        }}
+                        className="opacity-0 group-hover/summary-item:opacity-100 ml-1 text-red-500 hover:text-red-700 transition-opacity duration-200"
+                        title="Remove summary item 1"
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      </button>
+                    )}
+                  </div>
+                </>
+              )}
+              {(blockContent.summary_item_2 || mode === 'edit') && blockContent.summary_item_2 !== '___REMOVED___' && (
+                <>
+                  <div className="w-px h-6 bg-gray-200" />
+                  <div className="flex items-center space-x-2 group/summary-item relative">
+                    <div className="w-2 h-2 rounded-full bg-purple-500" />
+                    {mode === 'edit' ? (
+                      <EditableAdaptiveText
+                        mode={mode}
+                        value={blockContent.summary_item_2 || ''}
+                        onEdit={(value) => handleContentUpdate('summary_item_2', value)}
+                        backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
+                        colorTokens={colorTokens}
+                        variant="body"
+                        className="text-sm font-medium text-gray-700"
+                        placeholder="Summary item 2"
+                        sectionBackground={sectionBackground}
+                        data-section-id={sectionId}
+                        data-element-key="summary_item_2"
+                      />
+                    ) : (
+                      <span className="text-sm font-medium text-gray-700">
+                        {blockContent.summary_item_2}
+                      </span>
+                    )}
+                    {mode === 'edit' && (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleContentUpdate('summary_item_2', '___REMOVED___');
+                        }}
+                        className="opacity-0 group-hover/summary-item:opacity-100 ml-1 text-red-500 hover:text-red-700 transition-opacity duration-200"
+                        title="Remove summary item 2"
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      </button>
+                    )}
+                  </div>
+                </>
+              )}
+              {(blockContent.summary_item_3 || mode === 'edit') && blockContent.summary_item_3 !== '___REMOVED___' && blockContent.summary_item_3.trim() !== '' && (
+                <>
+                  <div className="w-px h-6 bg-gray-200" />
+                  <div className="flex items-center space-x-2 group/summary-item relative">
+                    <div className="w-2 h-2 rounded-full bg-orange-500" />
+                    {mode === 'edit' ? (
+                      <EditableAdaptiveText
+                        mode={mode}
+                        value={blockContent.summary_item_3 || ''}
+                        onEdit={(value) => handleContentUpdate('summary_item_3', value)}
+                        backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
+                        colorTokens={colorTokens}
+                        variant="body"
+                        className="text-sm font-medium text-gray-700"
+                        placeholder="Summary item 3 (optional)"
+                        sectionBackground={sectionBackground}
+                        data-section-id={sectionId}
+                        data-element-key="summary_item_3"
+                      />
+                    ) : (
+                      <span className="text-sm font-medium text-gray-700">
+                        {blockContent.summary_item_3}
+                      </span>
+                    )}
+                    {mode === 'edit' && (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleContentUpdate('summary_item_3', '___REMOVED___');
+                        }}
+                        className="opacity-0 group-hover/summary-item:opacity-100 ml-1 text-red-500 hover:text-red-700 transition-opacity duration-200"
+                        title="Remove summary item 3"
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      </button>
+                    )}
+                  </div>
+                </>
+              )}
             </div>
           </div>
-        </div>
+        )}
 
         {(blockContent.cta_text || blockContent.trust_items || mode === 'edit') && (
           <div className="text-center space-y-6 mt-16">
@@ -394,6 +527,9 @@ export const componentMeta = {
     { key: 'feature_titles', label: 'Feature Titles (pipe separated)', type: 'textarea', required: true },
     { key: 'feature_descriptions', label: 'Feature Descriptions (pipe separated)', type: 'textarea', required: true },
     { key: 'feature_keywords', label: 'Feature Keywords/Badges (pipe separated)', type: 'text', required: false },
+    { key: 'summary_item_1', label: 'Summary Item 1', type: 'text', required: false },
+    { key: 'summary_item_2', label: 'Summary Item 2', type: 'text', required: false },
+    { key: 'summary_item_3', label: 'Summary Item 3', type: 'text', required: false },
     { key: 'supporting_text', label: 'Supporting Text', type: 'textarea', required: false },
     { key: 'cta_text', label: 'CTA Button Text', type: 'text', required: false },
     { key: 'trust_items', label: 'Trust Indicators (pipe separated)', type: 'text', required: false }

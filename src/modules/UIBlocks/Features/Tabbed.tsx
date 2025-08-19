@@ -23,6 +23,9 @@ interface TabbedContent {
   supporting_text?: string;
   cta_text?: string;
   trust_items?: string;
+  // Benefit badge fields
+  benefit_1?: string;
+  benefit_2?: string;
 }
 
 const CONTENT_SCHEMA = {
@@ -61,6 +64,15 @@ const CONTENT_SCHEMA = {
   trust_items: { 
     type: 'string' as const, 
     default: '' 
+  },
+  // Benefit badge schema
+  benefit_1: { 
+    type: 'string' as const, 
+    default: 'Fast Implementation' 
+  },
+  benefit_2: { 
+    type: 'string' as const, 
+    default: 'Enterprise Ready' 
   }
 };
 
@@ -271,23 +283,87 @@ export default function Tabbed(props: LayoutComponentProps) {
                   </p>
                   
                   <div className="flex flex-wrap gap-4">
-                    <div className="flex items-center space-x-2">
-                      <div className={`w-10 h-10 rounded-lg ${colorTokens.ctaBg} flex items-center justify-center`}>
-                        <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                        </svg>
+                    {(blockContent.benefit_1 || mode === 'edit') && blockContent.benefit_1 !== '___REMOVED___' && (
+                      <div className="flex items-center space-x-2 group/benefit-item relative">
+                        <div className={`w-10 h-10 rounded-lg ${colorTokens.ctaBg} flex items-center justify-center`}>
+                          <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                          </svg>
+                        </div>
+                        {mode === 'edit' ? (
+                          <EditableAdaptiveText
+                            mode={mode}
+                            value={blockContent.benefit_1 || ''}
+                            onEdit={(value) => handleContentUpdate('benefit_1', value)}
+                            backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
+                            colorTokens={colorTokens}
+                            variant="body"
+                            className="text-sm font-medium text-gray-700"
+                            placeholder="Benefit 1"
+                            sectionBackground={sectionBackground}
+                            data-section-id={sectionId}
+                            data-element-key="benefit_1"
+                          />
+                        ) : (
+                          <span className="text-sm font-medium text-gray-700">{blockContent.benefit_1}</span>
+                        )}
+                        {mode === 'edit' && (
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleContentUpdate('benefit_1', '___REMOVED___');
+                            }}
+                            className="opacity-0 group-hover/benefit-item:opacity-100 ml-1 text-red-500 hover:text-red-700 transition-opacity duration-200"
+                            title="Remove benefit 1"
+                          >
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                          </button>
+                        )}
                       </div>
-                      <span className="text-sm font-medium text-gray-700">Fast Implementation</span>
-                    </div>
+                    )}
                     
-                    <div className="flex items-center space-x-2">
-                      <div className={`w-10 h-10 rounded-lg ${colorTokens.ctaBg} flex items-center justify-center`}>
-                        <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
+                    {(blockContent.benefit_2 || mode === 'edit') && blockContent.benefit_2 !== '___REMOVED___' && (
+                      <div className="flex items-center space-x-2 group/benefit-item relative">
+                        <div className={`w-10 h-10 rounded-lg ${colorTokens.ctaBg} flex items-center justify-center`}>
+                          <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                          </svg>
+                        </div>
+                        {mode === 'edit' ? (
+                          <EditableAdaptiveText
+                            mode={mode}
+                            value={blockContent.benefit_2 || ''}
+                            onEdit={(value) => handleContentUpdate('benefit_2', value)}
+                            backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
+                            colorTokens={colorTokens}
+                            variant="body"
+                            className="text-sm font-medium text-gray-700"
+                            placeholder="Benefit 2"
+                            sectionBackground={sectionBackground}
+                            data-section-id={sectionId}
+                            data-element-key="benefit_2"
+                          />
+                        ) : (
+                          <span className="text-sm font-medium text-gray-700">{blockContent.benefit_2}</span>
+                        )}
+                        {mode === 'edit' && (
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleContentUpdate('benefit_2', '___REMOVED___');
+                            }}
+                            className="opacity-0 group-hover/benefit-item:opacity-100 ml-1 text-red-500 hover:text-red-700 transition-opacity duration-200"
+                            title="Remove benefit 2"
+                          >
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                          </button>
+                        )}
                       </div>
-                      <span className="text-sm font-medium text-gray-700">Enterprise Ready</span>
-                    </div>
+                    )}
                   </div>
                 </div>
 
@@ -389,6 +465,8 @@ export const componentMeta = {
     { key: 'tab_titles', label: 'Tab Titles (pipe separated)', type: 'textarea', required: true },
     { key: 'tab_descriptions', label: 'Tab Descriptions (pipe separated)', type: 'textarea', required: true },
     { key: 'tab_visuals', label: 'Tab Visuals (pipe separated)', type: 'textarea', required: false },
+    { key: 'benefit_1', label: 'Benefit Badge 1', type: 'text', required: false },
+    { key: 'benefit_2', label: 'Benefit Badge 2', type: 'text', required: false },
     { key: 'supporting_text', label: 'Supporting Text', type: 'textarea', required: false },
     { key: 'cta_text', label: 'CTA Button Text', type: 'text', required: false },
     { key: 'trust_items', label: 'Trust Indicators (pipe separated)', type: 'text', required: false }

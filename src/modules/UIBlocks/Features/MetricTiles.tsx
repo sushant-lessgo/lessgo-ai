@@ -22,6 +22,16 @@ interface MetricTilesContent {
   supporting_text?: string;
   cta_text?: string;
   trust_items?: string;
+  // ROI Summary Fields
+  roi_summary_title?: string;
+  roi_metric_1?: string;
+  roi_label_1?: string;
+  roi_metric_2?: string;
+  roi_label_2?: string;
+  roi_metric_3?: string;
+  roi_label_3?: string;
+  roi_description?: string;
+  show_roi_summary?: boolean;
 }
 
 const CONTENT_SCHEMA = {
@@ -60,6 +70,43 @@ const CONTENT_SCHEMA = {
   trust_items: { 
     type: 'string' as const, 
     default: '' 
+  },
+  // ROI Summary Schema
+  roi_summary_title: { 
+    type: 'string' as const, 
+    default: 'Proven Return on Investment' 
+  },
+  roi_metric_1: { 
+    type: 'string' as const, 
+    default: '6 Months' 
+  },
+  roi_label_1: { 
+    type: 'string' as const, 
+    default: 'Average Payback Period' 
+  },
+  roi_metric_2: { 
+    type: 'string' as const, 
+    default: '400%' 
+  },
+  roi_label_2: { 
+    type: 'string' as const, 
+    default: 'Average ROI in Year 1' 
+  },
+  roi_metric_3: { 
+    type: 'string' as const, 
+    default: '$5.2M' 
+  },
+  roi_label_3: { 
+    type: 'string' as const, 
+    default: 'Average 3-Year Value' 
+  },
+  roi_description: { 
+    type: 'string' as const, 
+    default: 'Based on independent analysis of 500+ enterprise implementations' 
+  },
+  show_roi_summary: { 
+    type: 'boolean' as const, 
+    default: true 
   }
 };
 
@@ -326,33 +373,205 @@ export default function MetricTiles(props: LayoutComponentProps) {
           </div>
         )}
 
-        {/* ROI Summary */}
-        <div className="mt-12 bg-gradient-to-r from-blue-50 via-indigo-50 to-purple-50 rounded-2xl p-8 border border-blue-100">
-          <div className="text-center">
-            <h3 style={h2Style} className="font-bold text-gray-900 mb-4">
-              Proven Return on Investment
-            </h3>
-            
-            <div className="grid md:grid-cols-3 gap-8">
-              <div className="text-center">
-                <div className="text-4xl font-bold text-blue-600 mb-2">6 Months</div>
-                <div className={`text-sm ${mutedTextColor}`}>Average Payback Period</div>
+        {/* ROI Summary - Editable */}
+        {blockContent.show_roi_summary !== false && (blockContent.roi_summary_title || mode === 'edit') && (
+          <div className="mt-12 bg-gradient-to-r from-blue-50 via-indigo-50 to-purple-50 rounded-2xl p-8 border border-blue-100">
+            <div className="text-center">
+              <EditableAdaptiveText
+                mode={mode}
+                value={blockContent.roi_summary_title || ''}
+                onEdit={(value) => handleContentUpdate('roi_summary_title', value)}
+                backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
+                colorTokens={colorTokens}
+                variant="body"
+                textStyle={{
+                  ...getTypographyStyle('h2'),
+                  fontWeight: 700
+                }}
+                className="mb-4"
+                placeholder="ROI section title..."
+                sectionBackground={sectionBackground}
+                data-section-id={sectionId}
+                data-element-key="roi_summary_title"
+              />
+              
+              <div className="grid md:grid-cols-3 gap-8">
+                {/* ROI Metric 1 */}
+                {(blockContent.roi_metric_1 || mode === 'edit') && blockContent.roi_metric_1 !== '___REMOVED___' && (
+                  <div className="text-center group/roi-item relative">
+                    <EditableAdaptiveText
+                      mode={mode}
+                      value={blockContent.roi_metric_1 || ''}
+                      onEdit={(value) => handleContentUpdate('roi_metric_1', value)}
+                      backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
+                      colorTokens={colorTokens}
+                      variant="body"
+                      className="text-4xl font-bold text-blue-600 mb-2"
+                      placeholder="Metric 1"
+                      sectionBackground={sectionBackground}
+                      data-section-id={sectionId}
+                      data-element-key="roi_metric_1"
+                    />
+                    <EditableAdaptiveText
+                      mode={mode}
+                      value={blockContent.roi_label_1 || ''}
+                      onEdit={(value) => handleContentUpdate('roi_label_1', value)}
+                      backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
+                      colorTokens={colorTokens}
+                      variant="body"
+                      className={`text-sm ${mutedTextColor}`}
+                      placeholder="Label 1"
+                      sectionBackground={sectionBackground}
+                      data-section-id={sectionId}
+                      data-element-key="roi_label_1"
+                    />
+                    {mode === 'edit' && (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleContentUpdate('roi_metric_1', '___REMOVED___');
+                          handleContentUpdate('roi_label_1', '___REMOVED___');
+                        }}
+                        className="opacity-0 group-hover/roi-item:opacity-100 absolute -top-2 -right-2 p-1 rounded-full bg-white/80 hover:bg-white text-red-500 hover:text-red-700 transition-all duration-200 shadow-sm"
+                        title="Remove ROI metric 1"
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      </button>
+                    )}
+                  </div>
+                )}
+                
+                {/* ROI Metric 2 */}
+                {(blockContent.roi_metric_2 || mode === 'edit') && blockContent.roi_metric_2 !== '___REMOVED___' && (
+                  <div className="text-center group/roi-item relative">
+                    <EditableAdaptiveText
+                      mode={mode}
+                      value={blockContent.roi_metric_2 || ''}
+                      onEdit={(value) => handleContentUpdate('roi_metric_2', value)}
+                      backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
+                      colorTokens={colorTokens}
+                      variant="body"
+                      className="text-4xl font-bold text-green-600 mb-2"
+                      placeholder="Metric 2"
+                      sectionBackground={sectionBackground}
+                      data-section-id={sectionId}
+                      data-element-key="roi_metric_2"
+                    />
+                    <EditableAdaptiveText
+                      mode={mode}
+                      value={blockContent.roi_label_2 || ''}
+                      onEdit={(value) => handleContentUpdate('roi_label_2', value)}
+                      backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
+                      colorTokens={colorTokens}
+                      variant="body"
+                      className={`text-sm ${mutedTextColor}`}
+                      placeholder="Label 2"
+                      sectionBackground={sectionBackground}
+                      data-section-id={sectionId}
+                      data-element-key="roi_label_2"
+                    />
+                    {mode === 'edit' && (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleContentUpdate('roi_metric_2', '___REMOVED___');
+                          handleContentUpdate('roi_label_2', '___REMOVED___');
+                        }}
+                        className="opacity-0 group-hover/roi-item:opacity-100 absolute -top-2 -right-2 p-1 rounded-full bg-white/80 hover:bg-white text-red-500 hover:text-red-700 transition-all duration-200 shadow-sm"
+                        title="Remove ROI metric 2"
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      </button>
+                    )}
+                  </div>
+                )}
+                
+                {/* ROI Metric 3 */}
+                {(blockContent.roi_metric_3 || mode === 'edit') && blockContent.roi_metric_3 !== '___REMOVED___' && (
+                  <div className="text-center group/roi-item relative">
+                    <EditableAdaptiveText
+                      mode={mode}
+                      value={blockContent.roi_metric_3 || ''}
+                      onEdit={(value) => handleContentUpdate('roi_metric_3', value)}
+                      backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
+                      colorTokens={colorTokens}
+                      variant="body"
+                      className="text-4xl font-bold text-purple-600 mb-2"
+                      placeholder="Metric 3"
+                      sectionBackground={sectionBackground}
+                      data-section-id={sectionId}
+                      data-element-key="roi_metric_3"
+                    />
+                    <EditableAdaptiveText
+                      mode={mode}
+                      value={blockContent.roi_label_3 || ''}
+                      onEdit={(value) => handleContentUpdate('roi_label_3', value)}
+                      backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
+                      colorTokens={colorTokens}
+                      variant="body"
+                      className={`text-sm ${mutedTextColor}`}
+                      placeholder="Label 3"
+                      sectionBackground={sectionBackground}
+                      data-section-id={sectionId}
+                      data-element-key="roi_label_3"
+                    />
+                    {mode === 'edit' && (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleContentUpdate('roi_metric_3', '___REMOVED___');
+                          handleContentUpdate('roi_label_3', '___REMOVED___');
+                        }}
+                        className="opacity-0 group-hover/roi-item:opacity-100 absolute -top-2 -right-2 p-1 rounded-full bg-white/80 hover:bg-white text-red-500 hover:text-red-700 transition-all duration-200 shadow-sm"
+                        title="Remove ROI metric 3"
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      </button>
+                    )}
+                  </div>
+                )}
               </div>
-              <div className="text-center">
-                <div className="text-4xl font-bold text-green-600 mb-2">400%</div>
-                <div className={`text-sm ${mutedTextColor}`}>Average ROI in Year 1</div>
-              </div>
-              <div className="text-center">
-                <div className="text-4xl font-bold text-purple-600 mb-2">$5.2M</div>
-                <div className={`text-sm ${mutedTextColor}`}>Average 3-Year Value</div>
-              </div>
+              
+              {(blockContent.roi_description || mode === 'edit') && blockContent.roi_description !== '___REMOVED___' && (
+                <div className="mt-6 group/roi-description relative">
+                  <EditableAdaptiveText
+                    mode={mode}
+                    value={blockContent.roi_description || ''}
+                    onEdit={(value) => handleContentUpdate('roi_description', value)}
+                    backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
+                    colorTokens={colorTokens}
+                    variant="body"
+                    className={`${mutedTextColor} max-w-2xl mx-auto`}
+                    placeholder="ROI description..."
+                    sectionBackground={sectionBackground}
+                    data-section-id={sectionId}
+                    data-element-key="roi_description"
+                  />
+                  {mode === 'edit' && (
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleContentUpdate('roi_description', '___REMOVED___');
+                      }}
+                      className="opacity-0 group-hover/roi-description:opacity-100 ml-2 text-red-500 hover:text-red-700 transition-opacity duration-200"
+                      title="Remove ROI description"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </button>
+                  )}
+                </div>
+              )}
             </div>
-            
-            <p className={`mt-6 ${mutedTextColor} max-w-2xl mx-auto`}>
-              Based on independent analysis of 500+ enterprise implementations
-            </p>
           </div>
-        </div>
+        )}
 
         {(blockContent.cta_text || blockContent.trust_items || mode === 'edit') && (
           <div className="text-center space-y-6 mt-16">
@@ -417,6 +636,14 @@ export const componentMeta = {
     { key: 'feature_metrics', label: 'Metrics (pipe separated)', type: 'text', required: true },
     { key: 'metric_labels', label: 'Metric Labels (pipe separated)', type: 'text', required: true },
     { key: 'feature_descriptions', label: 'Feature Descriptions (pipe separated)', type: 'textarea', required: true },
+    { key: 'roi_summary_title', label: 'ROI Summary Title', type: 'text', required: false },
+    { key: 'roi_metric_1', label: 'ROI Metric 1', type: 'text', required: false },
+    { key: 'roi_label_1', label: 'ROI Label 1', type: 'text', required: false },
+    { key: 'roi_metric_2', label: 'ROI Metric 2', type: 'text', required: false },
+    { key: 'roi_label_2', label: 'ROI Label 2', type: 'text', required: false },
+    { key: 'roi_metric_3', label: 'ROI Metric 3', type: 'text', required: false },
+    { key: 'roi_label_3', label: 'ROI Label 3', type: 'text', required: false },
+    { key: 'roi_description', label: 'ROI Description', type: 'textarea', required: false },
     { key: 'supporting_text', label: 'Supporting Text', type: 'textarea', required: false },
     { key: 'cta_text', label: 'CTA Button Text', type: 'text', required: false },
     { key: 'trust_items', label: 'Trust Indicators (pipe separated)', type: 'text', required: false }

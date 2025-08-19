@@ -24,6 +24,9 @@ interface CarouselContent {
   supporting_text?: string;
   cta_text?: string;
   trust_items?: string;
+  // Benefit badge fields
+  benefit_1?: string;
+  benefit_2?: string;
 }
 
 const CONTENT_SCHEMA = {
@@ -66,6 +69,15 @@ const CONTENT_SCHEMA = {
   trust_items: { 
     type: 'string' as const, 
     default: '' 
+  },
+  // Benefit badge schema
+  benefit_1: { 
+    type: 'string' as const, 
+    default: 'Easy to use' 
+  },
+  benefit_2: { 
+    type: 'string' as const, 
+    default: 'Instant results' 
   }
 };
 
@@ -282,18 +294,82 @@ export default function Carousel(props: LayoutComponentProps) {
                   </p>
                   
                   <div className="flex items-center space-x-4">
-                    <div className="flex items-center space-x-2 text-green-600">
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                      </svg>
-                      <span className="text-sm font-medium">Easy to use</span>
-                    </div>
-                    <div className="flex items-center space-x-2 text-blue-600">
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                      </svg>
-                      <span className="text-sm font-medium">Instant results</span>
-                    </div>
+                    {(blockContent.benefit_1 || mode === 'edit') && blockContent.benefit_1 !== '___REMOVED___' && (
+                      <div className="flex items-center space-x-2 text-green-600 group/benefit-item relative">
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                        </svg>
+                        {mode === 'edit' ? (
+                          <EditableAdaptiveText
+                            mode={mode}
+                            value={blockContent.benefit_1 || ''}
+                            onEdit={(value) => handleContentUpdate('benefit_1', value)}
+                            backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
+                            colorTokens={colorTokens}
+                            variant="body"
+                            className="text-sm font-medium"
+                            placeholder="Benefit 1"
+                            sectionBackground={sectionBackground}
+                            data-section-id={sectionId}
+                            data-element-key="benefit_1"
+                          />
+                        ) : (
+                          <span className="text-sm font-medium">{blockContent.benefit_1}</span>
+                        )}
+                        {mode === 'edit' && (
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleContentUpdate('benefit_1', '___REMOVED___');
+                            }}
+                            className="opacity-0 group-hover/benefit-item:opacity-100 ml-1 text-red-500 hover:text-red-700 transition-opacity duration-200"
+                            title="Remove benefit 1"
+                          >
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                          </button>
+                        )}
+                      </div>
+                    )}
+                    {(blockContent.benefit_2 || mode === 'edit') && blockContent.benefit_2 !== '___REMOVED___' && (
+                      <div className="flex items-center space-x-2 text-blue-600 group/benefit-item relative">
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        {mode === 'edit' ? (
+                          <EditableAdaptiveText
+                            mode={mode}
+                            value={blockContent.benefit_2 || ''}
+                            onEdit={(value) => handleContentUpdate('benefit_2', value)}
+                            backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
+                            colorTokens={colorTokens}
+                            variant="body"
+                            className="text-sm font-medium"
+                            placeholder="Benefit 2"
+                            sectionBackground={sectionBackground}
+                            data-section-id={sectionId}
+                            data-element-key="benefit_2"
+                          />
+                        ) : (
+                          <span className="text-sm font-medium">{blockContent.benefit_2}</span>
+                        )}
+                        {mode === 'edit' && (
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleContentUpdate('benefit_2', '___REMOVED___');
+                            }}
+                            className="opacity-0 group-hover/benefit-item:opacity-100 ml-1 text-red-500 hover:text-red-700 transition-opacity duration-200"
+                            title="Remove benefit 2"
+                          >
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                          </button>
+                        )}
+                      </div>
+                    )}
                   </div>
                 </div>
 
@@ -444,6 +520,8 @@ export const componentMeta = {
     { key: 'feature_visuals', label: 'Feature Visuals (pipe separated)', type: 'textarea', required: false },
     { key: 'feature_tags', label: 'Feature Tags/Badges (pipe separated)', type: 'text', required: false },
     { key: 'auto_play', label: 'Auto-play Carousel', type: 'boolean', required: false },
+    { key: 'benefit_1', label: 'Benefit Badge 1', type: 'text', required: false },
+    { key: 'benefit_2', label: 'Benefit Badge 2', type: 'text', required: false },
     { key: 'supporting_text', label: 'Supporting Text', type: 'textarea', required: false },
     { key: 'cta_text', label: 'CTA Button Text', type: 'text', required: false },
     { key: 'trust_items', label: 'Trust Indicators (pipe separated)', type: 'text', required: false }
