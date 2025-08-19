@@ -13,6 +13,9 @@ interface ProcessFlowDiagramContent {
   subheadline?: string;
   process_steps: string;
   step_descriptions: string;
+  benefits_title?: string;
+  benefit_titles?: string;
+  benefit_descriptions?: string;
 }
 
 const CONTENT_SCHEMA = {
@@ -31,6 +34,18 @@ const CONTENT_SCHEMA = {
   step_descriptions: { 
     type: 'string' as const, 
     default: 'Secure data collection from multiple sources with real-time validation|Advanced machine learning algorithms analyze patterns and trends|Proprietary AI identifies unique insights and opportunities|Automated workflows execute optimized processes|Human experts validate results for accuracy and quality|Actionable insights delivered through intuitive dashboards' 
+  },
+  benefits_title: { 
+    type: 'string' as const, 
+    default: 'Why Our Process is Different' 
+  },
+  benefit_titles: { 
+    type: 'string' as const, 
+    default: '10x Faster|99% Accurate|Fully Customizable' 
+  },
+  benefit_descriptions: { 
+    type: 'string' as const, 
+    default: 'Automated processing reduces time from days to hours|AI-powered validation ensures exceptional precision|Adapts to your unique business requirements' 
   }
 };
 
@@ -128,34 +143,37 @@ export default function ProcessFlowDiagram(props: LayoutComponentProps) {
         </div>
 
         {/* Key Benefits */}
-        <div className="mt-16 bg-blue-50 rounded-2xl p-8 border border-blue-200">
-          <h3 style={h3Style} className="text-center font-bold text-blue-900 mb-6">
-            Why Our Process is Different
-          </h3>
-          <div className="grid md:grid-cols-3 gap-6">
-            <div className="text-center">
-              <div className="w-16 h-16 bg-blue-600 rounded-xl flex items-center justify-center mx-auto mb-4">
-                <span className="text-2xl">⚡</span>
-              </div>
-              <h4 style={h4Style} className="font-semibold text-blue-900 mb-2">10x Faster</h4>
-              <p style={bodyStyle} className="text-blue-700 text-sm">Automated processing reduces time from days to hours</p>
-            </div>
-            <div className="text-center">
-              <div className="w-16 h-16 bg-blue-600 rounded-xl flex items-center justify-center mx-auto mb-4">
-                <span className="text-2xl">🎯</span>
-              </div>
-              <h4 style={h4Style} className="font-semibold text-blue-900 mb-2">99% Accurate</h4>
-              <p style={bodyStyle} className="text-blue-700 text-sm">AI-powered validation ensures exceptional precision</p>
-            </div>
-            <div className="text-center">
-              <div className="w-16 h-16 bg-blue-600 rounded-xl flex items-center justify-center mx-auto mb-4">
-                <span className="text-2xl">🔧</span>
-              </div>
-              <h4 style={h4Style} className="font-semibold text-blue-900 mb-2">Fully Customizable</h4>
-              <p style={bodyStyle} className="text-blue-700 text-sm">Adapts to your unique business requirements</p>
+        {(blockContent.benefits_title || blockContent.benefit_titles || mode === 'edit') && (
+          <div className="mt-16 bg-blue-50 rounded-2xl p-8 border border-blue-200">
+            <EditableAdaptiveHeadline
+              mode={mode}
+              value={blockContent.benefits_title || ''}
+              onEdit={(value) => handleContentUpdate('benefits_title', value)}
+              level="h3"
+              backgroundType="neutral"
+              colorTokens={{ ...colorTokens, textPrimary: 'text-blue-900' }}
+              className="text-center font-bold text-blue-900 mb-6"
+              sectionId={sectionId}
+              elementKey="benefits_title"
+              sectionBackground="bg-blue-50"
+            />
+            <div className="grid md:grid-cols-3 gap-6">
+              {blockContent.benefit_titles && blockContent.benefit_titles.split('|').map((title, index) => {
+                const descriptions = blockContent.benefit_descriptions ? blockContent.benefit_descriptions.split('|') : [];
+                const emojis = ['⚡', '🎯', '🔧'];
+                return (
+                  <div key={index} className="text-center">
+                    <div className="w-16 h-16 bg-blue-600 rounded-xl flex items-center justify-center mx-auto mb-4">
+                      <span className="text-2xl">{emojis[index] || '✨'}</span>
+                    </div>
+                    <h4 style={h4Style} className="font-semibold text-blue-900 mb-2">{title.trim()}</h4>
+                    <p style={bodyStyle} className="text-blue-700 text-sm">{descriptions[index]?.trim() || 'Benefit description'}</p>
+                  </div>
+                );
+              })}
             </div>
           </div>
-        </div>
+        )}
       </div>
     </LayoutSection>
   );

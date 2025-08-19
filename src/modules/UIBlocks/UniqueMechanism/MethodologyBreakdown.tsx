@@ -14,6 +14,9 @@ interface MethodologyBreakdownContent {
   methodology_description: string;
   key_principles: string;
   principle_details: string;
+  results_title?: string;
+  result_metrics?: string;
+  result_labels?: string;
 }
 
 const CONTENT_SCHEMA = {
@@ -36,6 +39,18 @@ const CONTENT_SCHEMA = {
   principle_details: { 
     type: 'string' as const, 
     default: 'System continuously learns from new data and user interactions|Algorithms automatically adjust strategies based on performance|Every decision backed by comprehensive data analysis|User experience optimized through behavioral insights|Anticipate trends and outcomes before they happen|Instant feedback loops enable rapid iteration and improvement' 
+  },
+  results_title: { 
+    type: 'string' as const, 
+    default: 'Proven Results' 
+  },
+  result_metrics: { 
+    type: 'string' as const, 
+    default: '300%|85%|99.7%|24/7' 
+  },
+  result_labels: { 
+    type: 'string' as const, 
+    default: 'Performance Increase|Time Saved|Accuracy Rate|Autonomous Operation' 
   }
 };
 
@@ -135,29 +150,33 @@ export default function MethodologyBreakdown(props: LayoutComponentProps) {
         </div>
 
         {/* Results Section */}
-        <div className="mt-16 text-center">
-          <h3 style={h3Style} className="font-bold text-gray-900 mb-8">
-            Proven Results
-          </h3>
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
-            <div>
-              <div className="text-4xl font-bold text-purple-600 mb-2">300%</div>
-              <div className="text-gray-600">Performance Increase</div>
-            </div>
-            <div>
-              <div className="text-4xl font-bold text-purple-600 mb-2">85%</div>
-              <div className="text-gray-600">Time Saved</div>
-            </div>
-            <div>
-              <div className="text-4xl font-bold text-purple-600 mb-2">99.7%</div>
-              <div className="text-gray-600">Accuracy Rate</div>
-            </div>
-            <div>
-              <div className="text-4xl font-bold text-purple-600 mb-2">24/7</div>
-              <div className="text-gray-600">Autonomous Operation</div>
+        {(blockContent.results_title || blockContent.result_metrics || mode === 'edit') && (
+          <div className="mt-16 text-center">
+            <EditableAdaptiveHeadline
+              mode={mode}
+              value={blockContent.results_title || ''}
+              onEdit={(value) => handleContentUpdate('results_title', value)}
+              level="h3"
+              backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'secondary')}
+              colorTokens={colorTokens}
+              className="font-bold text-gray-900 mb-8"
+              sectionId={sectionId}
+              elementKey="results_title"
+              sectionBackground={sectionBackground}
+            />
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
+              {blockContent.result_metrics && blockContent.result_metrics.split('|').map((metric, index) => {
+                const labels = blockContent.result_labels ? blockContent.result_labels.split('|') : [];
+                return (
+                  <div key={index}>
+                    <div className="text-4xl font-bold text-purple-600 mb-2">{metric.trim()}</div>
+                    <div className="text-gray-600">{labels[index]?.trim() || 'Metric'}</div>
+                  </div>
+                );
+              })}
             </div>
           </div>
-        </div>
+        )}
       </div>
     </LayoutSection>
   );

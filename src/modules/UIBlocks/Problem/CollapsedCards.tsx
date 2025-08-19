@@ -283,11 +283,21 @@ export default function CollapsedCards(props: LayoutComponentProps) {
             />
           )}
 
-          {blockContent.intro_text && (
+          {(blockContent.intro_text || mode === 'edit') && (
             <div className="max-w-3xl mx-auto mb-8">
-              <p className="text-lg text-gray-700 leading-relaxed">
-                {blockContent.intro_text}
-              </p>
+              <EditableAdaptiveText
+                mode={mode}
+                value={blockContent.intro_text || ''}
+                onEdit={(value) => handleContentUpdate('intro_text', value)}
+                backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
+                colorTokens={colorTokens}
+                variant="body"
+                className="text-lg leading-relaxed"
+                placeholder="Add introduction text to guide users through the problem cards..."
+                sectionBackground={sectionBackground}
+                data-section-id={sectionId}
+                data-element-key="intro_text"
+              />
             </div>
           )}
         </div>
@@ -380,17 +390,140 @@ export default function CollapsedCards(props: LayoutComponentProps) {
                 </p>
                 
                 <div className="grid md:grid-cols-3 gap-6">
-                  <div className="bg-white rounded-lg p-6 border border-orange-200">
-                    <div className="text-3xl font-bold text-orange-600 mb-2">73%</div>
-                    <div className="text-sm text-gray-600">of businesses struggle with at least 3 of these issues</div>
+                  <div className="bg-white rounded-lg p-6 border border-orange-200 group/stat-item relative">
+                    <div className="flex items-center justify-between mb-2">
+                      <EditableAdaptiveText
+                        mode={mode}
+                        value={blockContent.summary_stat_1 || ''}
+                        onEdit={(value) => handleContentUpdate('summary_stat_1', value)}
+                        backgroundType={backgroundType}
+                        colorTokens={colorTokens}
+                        variant="body"
+                        className="text-3xl font-bold text-orange-600"
+                        placeholder="73%"
+                        sectionBackground={sectionBackground}
+                        data-section-id={sectionId}
+                        data-element-key="summary_stat_1"
+                      />
+                      {mode === 'edit' && (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleContentUpdate('summary_stat_1', '___REMOVED___');
+                            handleContentUpdate('summary_stat_1_label', '___REMOVED___');
+                          }}
+                          className="opacity-0 group-hover/stat-item:opacity-100 ml-2 p-1 rounded-full bg-white/80 hover:bg-white text-red-500 hover:text-red-700 transition-all duration-200 relative z-10 shadow-sm"
+                          title="Remove this statistic"
+                        >
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                          </svg>
+                        </button>
+                      )}
+                    </div>
+                    <EditableAdaptiveText
+                      mode={mode}
+                      value={blockContent.summary_stat_1_label || ''}
+                      onEdit={(value) => handleContentUpdate('summary_stat_1_label', value)}
+                      backgroundType={backgroundType}
+                      colorTokens={colorTokens}
+                      variant="body"
+                      className="text-sm text-gray-600"
+                      placeholder="of businesses struggle with at least 3 of these issues"
+                      sectionBackground={sectionBackground}
+                      data-section-id={sectionId}
+                      data-element-key="summary_stat_1_label"
+                    />
                   </div>
-                  <div className="bg-white rounded-lg p-6 border border-orange-200">
-                    <div className="text-3xl font-bold text-red-600 mb-2">$47K</div>
-                    <div className="text-sm text-gray-600">average annual cost of inefficient processes</div>
+                  <div className="bg-white rounded-lg p-6 border border-orange-200 group/stat-item relative">
+                    <div className="flex items-center justify-between mb-2">
+                      <EditableAdaptiveText
+                        mode={mode}
+                        value={blockContent.summary_stat_2 || ''}
+                        onEdit={(value) => handleContentUpdate('summary_stat_2', value)}
+                        backgroundType={backgroundType}
+                        colorTokens={colorTokens}
+                        variant="body"
+                        className="text-3xl font-bold text-red-600"
+                        placeholder="$47K"
+                        sectionBackground={sectionBackground}
+                        data-section-id={sectionId}
+                        data-element-key="summary_stat_2"
+                      />
+                      {mode === 'edit' && (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleContentUpdate('summary_stat_2', '___REMOVED___');
+                            handleContentUpdate('summary_stat_2_label', '___REMOVED___');
+                          }}
+                          className="opacity-0 group-hover/stat-item:opacity-100 ml-2 p-1 rounded-full bg-white/80 hover:bg-white text-red-500 hover:text-red-700 transition-all duration-200 relative z-10 shadow-sm"
+                          title="Remove this statistic"
+                        >
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                          </svg>
+                        </button>
+                      )}
+                    </div>
+                    <EditableAdaptiveText
+                      mode={mode}
+                      value={blockContent.summary_stat_2_label || ''}
+                      onEdit={(value) => handleContentUpdate('summary_stat_2_label', value)}
+                      backgroundType={backgroundType}
+                      colorTokens={colorTokens}
+                      variant="body"
+                      className="text-sm text-gray-600"
+                      placeholder="average annual cost of inefficient processes"
+                      sectionBackground={sectionBackground}
+                      data-section-id={sectionId}
+                      data-element-key="summary_stat_2_label"
+                    />
                   </div>
-                  <div className="bg-white rounded-lg p-6 border border-orange-200">
-                    <div className="text-3xl font-bold text-green-600 mb-2">2.5x</div>
-                    <div className="text-sm text-gray-600">faster growth when these problems are solved</div>
+                  <div className="bg-white rounded-lg p-6 border border-orange-200 group/stat-item relative">
+                    <div className="flex items-center justify-between mb-2">
+                      <EditableAdaptiveText
+                        mode={mode}
+                        value={blockContent.summary_stat_3 || ''}
+                        onEdit={(value) => handleContentUpdate('summary_stat_3', value)}
+                        backgroundType={backgroundType}
+                        colorTokens={colorTokens}
+                        variant="body"
+                        className="text-3xl font-bold text-green-600"
+                        placeholder="2.5x"
+                        sectionBackground={sectionBackground}
+                        data-section-id={sectionId}
+                        data-element-key="summary_stat_3"
+                      />
+                      {mode === 'edit' && (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleContentUpdate('summary_stat_3', '___REMOVED___');
+                            handleContentUpdate('summary_stat_3_label', '___REMOVED___');
+                          }}
+                          className="opacity-0 group-hover/stat-item:opacity-100 ml-2 p-1 rounded-full bg-white/80 hover:bg-white text-red-500 hover:text-red-700 transition-all duration-200 relative z-10 shadow-sm"
+                          title="Remove this statistic"
+                        >
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                          </svg>
+                        </button>
+                      )}
+                    </div>
+                    <EditableAdaptiveText
+                      mode={mode}
+                      value={blockContent.summary_stat_3_label || ''}
+                      onEdit={(value) => handleContentUpdate('summary_stat_3_label', value)}
+                      backgroundType={backgroundType}
+                      colorTokens={colorTokens}
+                      variant="body"
+                      className="text-sm text-gray-600"
+                      placeholder="faster growth when these problems are solved"
+                      sectionBackground={sectionBackground}
+                      data-section-id={sectionId}
+                      data-element-key="summary_stat_3_label"
+                    />
                   </div>
                 </div>
               </div>

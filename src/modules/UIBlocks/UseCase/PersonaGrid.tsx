@@ -16,6 +16,8 @@ interface PersonaGridContent {
   headline: string;
   persona_names: string;
   persona_descriptions: string;
+  footer_text?: string;
+  badge_text?: string;
 }
 
 // Persona structure
@@ -39,6 +41,14 @@ const CONTENT_SCHEMA = {
   persona_descriptions: { 
     type: 'string' as const, 
     default: 'Track campaign performance, manage content calendars, and coordinate cross-team marketing initiatives with real-time visibility into ROI and engagement metrics.|Monitor sales pipeline, forecast revenue, and optimize team performance while maintaining clear visibility into customer interactions and deal progression.|Streamline processes, manage resource allocation, and ensure smooth day-to-day operations with automated workflows and performance tracking.|Coordinate product development, manage feature requests, and track user feedback while keeping stakeholders aligned on roadmap priorities.|Manage customer relationships, track satisfaction metrics, and proactively address issues while ensuring seamless onboarding and retention.|Oversee budgets, generate financial reports, and maintain fiscal oversight with real-time spending tracking and automated approval workflows.' 
+  },
+  footer_text: { 
+    type: 'string' as const, 
+    default: 'Designed to work seamlessly across all team roles' 
+  },
+  badge_text: { 
+    type: 'string' as const, 
+    default: 'Target User' 
   }
 };
 
@@ -115,14 +125,20 @@ const PersonaCard = React.memo(({
   persona, 
   mode, 
   colorTokens,
-  getTextStyle,
+  backgroundType,
+  sectionBackground,
+  sectionId,
+  badgeText,
   onNameEdit,
   onDescriptionEdit
 }: {
   persona: Persona;
   mode: 'edit' | 'preview';
   colorTokens: any;
-  getTextStyle: (variant: 'display' | 'hero' | 'h1' | 'h2' | 'h3' | 'body-lg' | 'body' | 'body-sm' | 'caption') => React.CSSProperties;
+  backgroundType: any;
+  sectionBackground: any;
+  sectionId: string;
+  badgeText: string;
   onNameEdit: (index: number, value: string) => void;
   onDescriptionEdit: (index: number, value: string) => void;
 }) => {
@@ -135,42 +151,36 @@ const PersonaCard = React.memo(({
       
       {/* Persona Name */}
       <div className="mb-4">
-        {mode === 'edit' ? (
-          <div 
-            contentEditable
-            suppressContentEditableWarning
-            onBlur={(e) => onNameEdit(persona.index, e.currentTarget.textContent || '')}
-            className="outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-1 min-h-[24px] cursor-text hover:bg-gray-50 font-bold"
-          >
-            {persona.name}
-          </div>
-        ) : (
-          <h3 
-            className={`font-bold ${colorTokens.textPrimary}`}
-          >
-            {persona.name}
-          </h3>
-        )}
+        <EditableAdaptiveText
+          mode={mode}
+          value={persona.name}
+          onEdit={(value) => onNameEdit(persona.index, value)}
+          backgroundType="neutral"
+          colorTokens={colorTokens}
+          variant="body"
+          className="font-bold"
+          placeholder="Enter persona name..."
+          sectionId={sectionId}
+          elementKey={`persona_name_${persona.index}`}
+          sectionBackground="bg-white"
+        />
       </div>
       
       {/* Persona Description */}
       <div className="mb-4">
-        {mode === 'edit' ? (
-          <div 
-            contentEditable
-            suppressContentEditableWarning
-            onBlur={(e) => onDescriptionEdit(persona.index, e.currentTarget.textContent || '')}
-            className="outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-1 min-h-[60px] cursor-text hover:bg-gray-50 leading-relaxed text-left"
-          >
-            {persona.description}
-          </div>
-        ) : (
-          <p 
-            className={`${colorTokens.textSecondary} leading-relaxed text-left`}
-          >
-            {persona.description}
-          </p>
-        )}
+        <EditableAdaptiveText
+          mode={mode}
+          value={persona.description}
+          onEdit={(value) => onDescriptionEdit(persona.index, value)}
+          backgroundType="neutral"
+          colorTokens={colorTokens}
+          variant="body"
+          className="leading-relaxed text-left text-gray-600"
+          placeholder="Enter persona description..."
+          sectionId={sectionId}
+          elementKey={`persona_description_${persona.index}`}
+          sectionBackground="bg-white"
+        />
       </div>
       
       {/* Persona Badge */}
@@ -178,7 +188,7 @@ const PersonaCard = React.memo(({
         <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
           <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
         </svg>
-        Target User
+        {badgeText}
       </div>
     </div>
   );
@@ -257,7 +267,10 @@ export default function PersonaGrid(props: LayoutComponentProps) {
               persona={persona}
               mode={mode}
               colorTokens={colorTokens}
-              getTextStyle={getTextStyle}
+              backgroundType={backgroundType}
+              sectionBackground={sectionBackground}
+              sectionId={sectionId}
+              badgeText={blockContent.badge_text || 'Target User'}
               onNameEdit={handleNameEdit}
               onDescriptionEdit={handleDescriptionEdit}
             />
@@ -265,14 +278,28 @@ export default function PersonaGrid(props: LayoutComponentProps) {
         </div>
 
         {/* Universal Appeal */}
-        <div className="mt-16 text-center">
-          <div className="inline-flex items-center px-6 py-3 bg-blue-50 border border-blue-200 rounded-full text-blue-800">
-            <svg className="w-5 h-5 mr-2 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
-              <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-            <span className="font-medium">Designed to work seamlessly across all team roles</span>
+        {(blockContent.footer_text || mode === 'edit') && (
+          <div className="mt-16 text-center">
+            <div className="inline-flex items-center px-6 py-3 bg-blue-50 border border-blue-200 rounded-full">
+              <svg className="w-5 h-5 mr-2 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <EditableAdaptiveText
+                mode={mode}
+                value={blockContent.footer_text || ''}
+                onEdit={(value) => handleContentUpdate('footer_text', value)}
+                backgroundType="neutral"
+                colorTokens={{ ...colorTokens, textPrimary: 'text-blue-800' }}
+                variant="body"
+                className="font-medium text-blue-800"
+                placeholder="Add footer message about team compatibility..."
+                sectionId={sectionId}
+                elementKey="footer_text"
+                sectionBackground="bg-blue-50"
+              />
+            </div>
           </div>
-        </div>
+        )}
 
       </div>
     </LayoutSection>

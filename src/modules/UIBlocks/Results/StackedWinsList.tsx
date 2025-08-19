@@ -25,6 +25,8 @@ interface StackedWinsListContent {
   categories?: string;
   subheadline?: string;
   win_count?: string;
+  footer_title?: string;
+  footer_text?: string;
 }
 
 // Content schema for StackedWinsList layout
@@ -34,7 +36,9 @@ const CONTENT_SCHEMA = {
   descriptions: { type: 'string' as const, default: 'Focus on strategy while automation handles the routine|Your team works smarter, not harder|Cut expenses while improving quality|Free up time for innovation and growth|Delight customers with faster, better service|Growth without the growing pains|Complex becomes simple with smart automation|Data-driven decisions at your fingertips' },
   categories: { type: 'string' as const, default: 'Time Savings|Productivity|Cost Reduction|Automation|Customer Success|Scalability|Workflow|Analytics' },
   subheadline: { type: 'string' as const, default: 'Every win builds momentum toward your bigger goals' },
-  win_count: { type: 'string' as const, default: 'Join 10,000+ achieving these wins daily' }
+  win_count: { type: 'string' as const, default: 'Join 10,000+ achieving these wins daily' },
+  footer_title: { type: 'string' as const, default: 'Momentum Builds Quickly' },
+  footer_text: { type: 'string' as const, default: 'Each win makes the next one easier to achieve' }
 };
 
 // Parse wins data from pipe-separated strings
@@ -291,19 +295,45 @@ export default function StackedWinsList(props: StackedWinsListProps) {
         </div>
 
         {/* Momentum Footer */}
-        <div className="mt-16 text-center">
-          <div className="inline-flex items-center px-6 py-4 bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-2xl">
-            <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-emerald-600 rounded-full flex items-center justify-center mr-4">
-              <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
-              </svg>
-            </div>
-            <div className="text-left">
-              <div className="font-bold text-green-900 text-lg">Momentum Builds Quickly</div>
-              <div className="text-green-700 text-sm">Each win makes the next one easier to achieve</div>
+        {(blockContent.footer_title || blockContent.footer_text || mode === 'edit') && (
+          <div className="mt-16 text-center">
+            <div className="inline-flex items-center px-6 py-4 bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-2xl">
+              <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-emerald-600 rounded-full flex items-center justify-center mr-4">
+                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                </svg>
+              </div>
+              <div className="text-left">
+                <EditableAdaptiveText
+                  mode={mode}
+                  value={blockContent.footer_title || ''}
+                  onEdit={(value) => handleContentUpdate('footer_title', value)}
+                  backgroundType={backgroundType}
+                  colorTokens={colorTokens}
+                  variant="body"
+                  className="font-bold text-green-900 text-lg"
+                  placeholder="Add footer title..."
+                  sectionBackground={sectionBackground}
+                  data-section-id={sectionId}
+                  data-element-key="footer_title"
+                />
+                <EditableAdaptiveText
+                  mode={mode}
+                  value={blockContent.footer_text || ''}
+                  onEdit={(value) => handleContentUpdate('footer_text', value)}
+                  backgroundType={backgroundType}
+                  colorTokens={colorTokens}
+                  variant="body"
+                  className="text-green-700 text-sm"
+                  placeholder="Add footer description..."
+                  sectionBackground={sectionBackground}
+                  data-section-id={sectionId}
+                  data-element-key="footer_text"
+                />
+              </div>
             </div>
           </div>
-        </div>
+        )}
 
       </div>
     </section>

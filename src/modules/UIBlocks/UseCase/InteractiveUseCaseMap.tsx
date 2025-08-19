@@ -9,12 +9,14 @@ interface InteractiveUseCaseMapContent {
   headline: string;
   categories: string;
   use_cases: string;
+  cta_text?: string;
 }
 
 const CONTENT_SCHEMA = {
   headline: { type: 'string' as const, default: 'Explore Use Cases by Category' },
   categories: { type: 'string' as const, default: 'Marketing|Sales|Operations|Finance|HR|IT' },
-  use_cases: { type: 'string' as const, default: 'Campaign automation and lead nurturing|Pipeline management and forecasting|Process optimization and workflow automation|Budget planning and expense tracking|Recruitment and employee onboarding|System monitoring and maintenance' }
+  use_cases: { type: 'string' as const, default: 'Campaign automation and lead nurturing|Pipeline management and forecasting|Process optimization and workflow automation|Budget planning and expense tracking|Recruitment and employee onboarding|System monitoring and maintenance' },
+  cta_text: { type: 'string' as const, default: 'Learn More →' }
 };
 
 export default function InteractiveUseCaseMap(props: LayoutComponentProps) {
@@ -39,7 +41,7 @@ export default function InteractiveUseCaseMap(props: LayoutComponentProps) {
             <h3 className="font-bold text-gray-900 mb-4 text-xl">{categories[selectedCategory]} Use Cases</h3>
             <p className="text-gray-600 mb-6">{useCases[selectedCategory] || 'Use case details for this category'}</p>
             <div className="inline-flex items-center text-blue-600 font-medium">
-              Learn More →
+              {blockContent.cta_text || 'Learn More →'}
             </div>
           </div>
         </div>

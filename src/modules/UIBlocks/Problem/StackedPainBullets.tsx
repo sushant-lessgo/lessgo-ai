@@ -1,17 +1,12 @@
-import React, { useEffect } from 'react';
-import { generateColorTokens } from '../../Design/ColorSystem/colorTokens';
-import { useTypography } from '@/hooks/useTypography';
-import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
-import { useOnboardingStore } from '@/hooks/useOnboardingStore';
+import React from 'react';
 import { useLayoutComponent } from '@/hooks/useLayoutComponent';
 import { LayoutSection } from '@/components/layout/LayoutSection';
 import { 
-  LayoutComponentProps, 
-  extractLayoutContent,
-  StoreElementTypes 
-} from '@/types/storeTypes';
+  EditableAdaptiveHeadline, 
+  EditableAdaptiveText
+} from '@/components/layout/EditableContent';
+import { LayoutComponentProps } from '@/types/storeTypes';
 
-interface StackedPainBulletsProps extends LayoutComponentProps {}
 
 // Pain point structure
 interface PainPoint {
@@ -26,6 +21,7 @@ interface StackedPainBulletsContent {
   pain_points: string;
   pain_descriptions?: string;
   subheadline?: string;
+  conclusion_text?: string;
 }
 
 // Content schema for StackedPainBullets layout
@@ -33,7 +29,8 @@ const CONTENT_SCHEMA = {
   headline: { type: 'string' as const, default: 'Are You Struggling With These Daily Frustrations?' },
   pain_points: { type: 'string' as const, default: 'Spending hours on manual data entry that could be automated|Juggling multiple tools that don\'t talk to each other|Missing important deadlines because nothing is centralized|Watching your team burn out from repetitive, mind-numbing tasks|Losing potential customers because your response time is too slow|Feeling overwhelmed by the chaos of disconnected workflows' },
   pain_descriptions: { type: 'string' as const, default: '' },
-  subheadline: { type: 'string' as const, default: '' }
+  subheadline: { type: 'string' as const, default: '' },
+  conclusion_text: { type: 'string' as const, default: 'Sound familiar? You\'re not alone.' }
 };
 
 // Parse pain point data from pipe-separated strings
@@ -48,36 +45,6 @@ const parsePainData = (points: string, descriptions?: string): PainPoint[] => {
   }));
 };
 
-// ModeWrapper component for handling edit/preview modes
-const ModeWrapper = ({ 
-  mode, 
-  children, 
-  sectionId, 
-  elementKey,
-  onEdit 
-}: {
-  mode: 'edit' | 'preview';
-  children: React.ReactNode;
-  sectionId: string;
-  elementKey: string;
-  onEdit?: (value: string) => void;
-}) => {
-  if (mode === 'edit' && onEdit) {
-    return (
-      <div 
-        contentEditable
-        suppressContentEditableWarning
-        onBlur={(e) => onEdit(e.currentTarget.textContent || '')}
-        className="outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-1 min-h-[24px] cursor-text hover:bg-gray-50"
-        data-placeholder={`Edit ${elementKey.replace('_', ' ')}`}
-      >
-        {children}
-      </div>
-    );
-  }
-  
-  return <>{children}</>;
-};
 
 // Pain Point Icon Component
 const PainIcon = ({ index }: { index: number }) => {
@@ -117,6 +84,9 @@ const PainPointItem = ({
   index, 
   mode, 
   sectionId,
+  colorTokens,
+  backgroundType,
+  sectionBackground,
   onPointEdit,
   onDescriptionEdit
 }: {
@@ -124,11 +94,12 @@ const PainPointItem = ({
   index: number;
   mode: 'edit' | 'preview';
   sectionId: string;
+  colorTokens: any;
+  backgroundType: any;
+  sectionBackground: any;
   onPointEdit: (index: number, value: string) => void;
   onDescriptionEdit: (index: number, value: string) => void;
 }) => {
-  const { getTextStyle } = useTypography();
-  
   return (
     <div className="group flex items-start space-x-4 p-6 bg-white rounded-lg border border-red-200 hover:border-red-300 hover:shadow-md transition-all duration-300">
       
@@ -141,43 +112,37 @@ const PainPointItem = ({
       <div className="flex-1">
         {/* Pain Point */}
         <div className="mb-2">
-          {mode === 'edit' ? (
-            <div 
-              contentEditable
-              suppressContentEditableWarning
-              onBlur={(e) => onPointEdit(index, e.currentTarget.textContent || '')}
-              className="outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-1 min-h-[24px] cursor-text hover:bg-gray-50 font-semibold text-gray-900 leading-relaxed"
-            >
-              {painPoint.point}
-            </div>
-          ) : (
-            <h3 
-              className="font-semibold text-gray-900 leading-relaxed"
-            >
-              {painPoint.point}
-            </h3>
-          )}
+          <EditableAdaptiveText
+            mode={mode}
+            value={painPoint.point}
+            onEdit={(value) => onPointEdit(index, value)}
+            backgroundType={backgroundType}
+            colorTokens={colorTokens}
+            variant="body"
+            className="font-semibold text-gray-900 leading-relaxed"
+            placeholder="Enter pain point..."
+            sectionBackground={sectionBackground}
+            data-section-id={sectionId}
+            data-element-key={`pain_point_${index}`}
+          />
         </div>
         
         {/* Optional Description */}
         {(painPoint.description || mode === 'edit') && (
           <div>
-            {mode === 'edit' ? (
-              <div 
-                contentEditable
-                suppressContentEditableWarning
-                onBlur={(e) => onDescriptionEdit(index, e.currentTarget.textContent || '')}
-                className={`outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-1 min-h-[20px] cursor-text hover:bg-gray-50 text-gray-600 leading-relaxed ${!painPoint.description ? 'opacity-50 italic' : ''}`}
-              >
-                {painPoint.description || 'Add optional description to elaborate on this pain point...'}
-              </div>
-            ) : painPoint.description && (
-              <p 
-                className="text-gray-600 leading-relaxed"
-              >
-                {painPoint.description}
-              </p>
-            )}
+            <EditableAdaptiveText
+              mode={mode}
+              value={painPoint.description || ''}
+              onEdit={(value) => onDescriptionEdit(index, value)}
+              backgroundType={backgroundType}
+              colorTokens={colorTokens}
+              variant="body"
+              className={`text-gray-600 leading-relaxed ${!painPoint.description && mode === 'edit' ? 'opacity-50 italic' : ''}`}
+              placeholder="Add optional description to elaborate on this pain point..."
+              sectionBackground={sectionBackground}
+              data-section-id={sectionId}
+              data-element-key={`pain_description_${index}`}
+            />
           </div>
         )}
       </div>
@@ -188,7 +153,7 @@ const PainPointItem = ({
   );
 };
 
-export default function StackedPainBullets(props: StackedPainBulletsProps) {
+export default function StackedPainBullets(props: LayoutComponentProps) {
   // ✅ Use the standard useLayoutComponent hook
   const {
     sectionId,
@@ -199,8 +164,7 @@ export default function StackedPainBullets(props: StackedPainBulletsProps) {
     getTextStyle,
     sectionBackground,
     backgroundType,
-    handleContentUpdate,
-    theme
+    handleContentUpdate
   } = useLayoutComponent<StackedPainBulletsContent>({
     ...props,
     contentSchema: CONTENT_SCHEMA
@@ -222,11 +186,12 @@ export default function StackedPainBullets(props: StackedPainBulletsProps) {
     handleContentUpdate('pain_descriptions', descriptions.join('|'));
   };
 
+
   return (
     <LayoutSection
       sectionId={sectionId}
       sectionType="StackedPainBullets"
-      backgroundType={backgroundType === 'custom' ? 'secondary' : backgroundType}
+      backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
       sectionBackground={sectionBackground}
       mode={mode}
       className={props.className}
@@ -234,33 +199,34 @@ export default function StackedPainBullets(props: StackedPainBulletsProps) {
       <div className="max-w-4xl mx-auto">
         {/* Header Section */}
         <div className="text-center mb-12">
-          <ModeWrapper
+          <EditableAdaptiveHeadline
             mode={mode}
+            value={blockContent.headline || ''}
+            onEdit={(value) => handleContentUpdate('headline', value)}
+            level="h2"
+            backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
+            colorTokens={colorTokens}
+            className="mb-6"
             sectionId={sectionId}
             elementKey="headline"
-            onEdit={(value) => handleContentUpdate('headline', value)}
-          >
-            <h2 
-              className={`mb-6 ${colorTokens.textPrimary}`}
-            >
-              {blockContent.headline}
-            </h2>
-          </ModeWrapper>
+            sectionBackground={sectionBackground}
+          />
 
           {/* Optional Subheadline */}
           {(blockContent.subheadline || mode === 'edit') && (
-            <ModeWrapper
+            <EditableAdaptiveText
               mode={mode}
+              value={blockContent.subheadline || ''}
+              onEdit={(value) => handleContentUpdate('subheadline', value)}
+              backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
+              colorTokens={colorTokens}
+              variant="body"
+              className="max-w-2xl mx-auto"
+              placeholder="Add optional subheadline to provide context..."
               sectionId={sectionId}
               elementKey="subheadline"
-              onEdit={(value) => handleContentUpdate('subheadline', value)}
-            >
-              <p 
-                className={`max-w-2xl mx-auto ${colorTokens.textSecondary} ${!blockContent.subheadline && mode === 'edit' ? 'opacity-50' : ''}`}
-              >
-                {blockContent.subheadline || (mode === 'edit' ? 'Add optional subheadline to provide context...' : '')}
-              </p>
-            </ModeWrapper>
+              sectionBackground={sectionBackground}
+            />
           )}
         </div>
 
@@ -273,6 +239,9 @@ export default function StackedPainBullets(props: StackedPainBulletsProps) {
               index={index}
               mode={mode}
               sectionId={sectionId}
+              colorTokens={colorTokens}
+              backgroundType={backgroundType}
+              sectionBackground={sectionBackground}
               onPointEdit={handlePointEdit}
               onDescriptionEdit={handleDescriptionEdit}
             />
@@ -285,9 +254,22 @@ export default function StackedPainBullets(props: StackedPainBulletsProps) {
             <svg className="w-5 h-5 mr-2 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
             </svg>
-            <span className="font-medium">Sound familiar? You're not alone.</span>
+            <EditableAdaptiveText
+              mode={mode}
+              value={blockContent.conclusion_text || ''}
+              onEdit={(value) => handleContentUpdate('conclusion_text', value)}
+              backgroundType={backgroundType}
+              colorTokens={colorTokens}
+              variant="body"
+              className="font-medium"
+              placeholder="Sound familiar? You're not alone."
+              sectionBackground={sectionBackground}
+              data-section-id={sectionId}
+              data-element-key="conclusion_text"
+            />
           </div>
         </div>
+
 
       </div>
     </LayoutSection>
@@ -296,31 +278,32 @@ export default function StackedPainBullets(props: StackedPainBulletsProps) {
 
 export const componentMeta = {
   name: 'StackedPainBullets',
-  category: 'Problem Identification',
-  description: 'Pain point identification with adaptive text colors and emotional appeal',
-  tags: ['pain-points', 'problems', 'empathy', 'bullets', 'adaptive-colors'],
+  category: 'Problem',
+  description: 'Simple, focused pain point identification with editable content and emotional conclusion.',
+  tags: ['pain-points', 'problems', 'empathy', 'bullets'],
+  defaultBackgroundType: 'neutral' as const,
+  complexity: 'simple',
+  estimatedBuildTime: '20 minutes',
+  
+  contentFields: [
+    { key: 'headline', label: 'Main Headline', type: 'text', required: true },
+    { key: 'subheadline', label: 'Subheadline', type: 'textarea', required: false },
+    { key: 'pain_points', label: 'Pain Points (pipe separated)', type: 'textarea', required: true },
+    { key: 'pain_descriptions', label: 'Pain Point Descriptions (pipe separated)', type: 'textarea', required: false },
+    { key: 'conclusion_text', label: 'Conclusion Text', type: 'text', required: false }
+  ],
+  
   features: [
-    'Automatic text color adaptation based on background type',
     'Editable pain points with optional descriptions',
     'Contextual warning icons for each pain point',
-    'Optional subheadline for additional context',
-    'Emotional conclusion to build empathy',
-    'Red-themed design for urgency'
+    'Editable emotional conclusion',
+    'Clean, focused design',
+    'Standard EditableAdaptive integration'
   ],
-  props: {
-    sectionId: 'string - Required section identifier',
-    backgroundType: '"primary" | "secondary" | "neutral" | "divider" - Controls text color adaptation',
-    className: 'string - Additional CSS classes'
-  },
-  contentSchema: {
-    headline: 'Main heading text (often a question)',
-    pain_points: 'Pipe-separated list of pain points',
-    pain_descriptions: 'Optional pipe-separated descriptions for each pain point',
-    subheadline: 'Optional subheading for additional context'
-  },
-  examples: [
+  
+  useCases: [
     'Customer frustration identification',
-    'Problem statement section',
+    'Problem statement sections',
     'Challenge recognition',
     'Pain point validation'
   ]

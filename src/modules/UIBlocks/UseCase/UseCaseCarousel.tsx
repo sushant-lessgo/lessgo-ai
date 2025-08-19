@@ -8,11 +8,13 @@ import { LayoutComponentProps } from '@/types/storeTypes';
 interface UseCaseCarouselContent {
   headline: string;
   use_cases: string;
+  use_case_description?: string;
 }
 
 const CONTENT_SCHEMA = {
   headline: { type: 'string' as const, default: 'Endless Possibilities' },
-  use_cases: { type: 'string' as const, default: 'Customer Support Automation|Sales Pipeline Management|Marketing Campaign Optimization|Financial Report Generation|HR Process Streamlining|Inventory Management' }
+  use_cases: { type: 'string' as const, default: 'Customer Support Automation|Sales Pipeline Management|Marketing Campaign Optimization|Financial Report Generation|HR Process Streamlining|Inventory Management' },
+  use_case_description: { type: 'string' as const, default: 'Optimize and automate this critical business process.' }
 };
 
 export default function UseCaseCarousel(props: LayoutComponentProps) {
@@ -30,7 +32,7 @@ export default function UseCaseCarousel(props: LayoutComponentProps) {
                 <span className="text-2xl">📋</span>
               </div>
               <h3 className="font-bold text-gray-900 mb-2">{useCase}</h3>
-              <p className="text-gray-600 text-sm">Optimize and automate this critical business process.</p>
+              <p className="text-gray-600 text-sm">{blockContent.use_case_description || 'Optimize and automate this critical business process.'}</p>
             </div>
           ))}
         </div>

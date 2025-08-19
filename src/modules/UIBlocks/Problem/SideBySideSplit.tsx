@@ -23,6 +23,13 @@ interface SideBySideSplitContent {
   subheadline?: string;
   supporting_text?: string;
   trust_items?: string;
+  bottom_stat_1?: string;
+  bottom_stat_1_label?: string;
+  bottom_stat_2?: string;
+  bottom_stat_2_label?: string;
+  bottom_stat_3?: string;
+  bottom_stat_3_label?: string;
+  cta_section_message?: string;
 }
 
 const CONTENT_SCHEMA = {
@@ -69,7 +76,14 @@ const CONTENT_SCHEMA = {
   trust_items: { 
     type: 'string' as const, 
     default: '' 
-  }
+  },
+  bottom_stat_1: { type: 'string' as const, default: '73%' },
+  bottom_stat_1_label: { type: 'string' as const, default: 'Stick with Path 1 and struggle' },
+  bottom_stat_2: { type: 'string' as const, default: '27%' },
+  bottom_stat_2_label: { type: 'string' as const, default: 'Switch to Path 2 and thrive' },
+  bottom_stat_3: { type: 'string' as const, default: '2.5x' },
+  bottom_stat_3_label: { type: 'string' as const, default: 'For businesses on Path 2' },
+  cta_section_message: { type: 'string' as const, default: 'The choice is yours. Every day you stay on Path 1 is another day your competitors pull ahead on Path 2.' }
 };
 
 export default function SideBySideSplit(props: LayoutComponentProps) {
@@ -356,9 +370,19 @@ export default function SideBySideSplit(props: LayoutComponentProps) {
                 {blockContent.call_to_action && (
                   <div className="bg-gradient-to-r from-green-600 to-blue-600 rounded-2xl p-8 text-white">
                     <h3 className="text-2xl font-bold mb-4">{blockContent.call_to_action}</h3>
-                    <p className="text-green-100 mb-8 max-w-2xl mx-auto">
-                      The choice is yours. Every day you stay on Path 1 is another day your competitors pull ahead on Path 2.
-                    </p>
+                    <EditableAdaptiveText
+                      mode={mode}
+                      value={blockContent.cta_section_message || ''}
+                      onEdit={(value) => handleContentUpdate('cta_section_message', value)}
+                      backgroundType={backgroundType}
+                      colorTokens={{...colorTokens, textPrimary: 'text-green-100'}}
+                      variant="body"
+                      className="mb-8 max-w-2xl mx-auto"
+                      placeholder="The choice is yours. Every day you stay on Path 1 is another day your competitors pull ahead on Path 2."
+                      sectionBackground={sectionBackground}
+                      data-section-id={sectionId}
+                      data-element-key="cta_section_message"
+                    />
                     
                     <CTAButton
                       text="Choose the Better Path"
@@ -380,22 +404,145 @@ export default function SideBySideSplit(props: LayoutComponentProps) {
               </h3>
               
               <div className="grid md:grid-cols-3 gap-8">
-                <div className="text-center">
-                  <div className="text-3xl font-bold text-red-600 mb-2">73%</div>
+                <div className="text-center group/bottom-stat relative">
+                  <div className="flex items-center justify-center mb-2">
+                    <EditableAdaptiveText
+                      mode={mode}
+                      value={blockContent.bottom_stat_1 || ''}
+                      onEdit={(value) => handleContentUpdate('bottom_stat_1', value)}
+                      backgroundType={backgroundType}
+                      colorTokens={colorTokens}
+                      variant="body"
+                      className="text-3xl font-bold text-red-600"
+                      placeholder="73%"
+                      sectionBackground={sectionBackground}
+                      data-section-id={sectionId}
+                      data-element-key="bottom_stat_1"
+                    />
+                    {mode === 'edit' && (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleContentUpdate('bottom_stat_1', '___REMOVED___');
+                          handleContentUpdate('bottom_stat_1_label', '___REMOVED___');
+                        }}
+                        className="opacity-0 group-hover/bottom-stat:opacity-100 ml-2 p-1 rounded-full bg-white/80 hover:bg-white text-red-500 hover:text-red-700 transition-all duration-200 relative z-10 shadow-sm"
+                        title="Remove this statistic"
+                      >
+                        <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      </button>
+                    )}
+                  </div>
                   <div className={`text-sm ${mutedTextColor} mb-2`}>of businesses</div>
-                  <div className="text-sm text-gray-700">Stick with Path 1 and struggle</div>
+                  <EditableAdaptiveText
+                    mode={mode}
+                    value={blockContent.bottom_stat_1_label || ''}
+                    onEdit={(value) => handleContentUpdate('bottom_stat_1_label', value)}
+                    backgroundType={backgroundType}
+                    colorTokens={colorTokens}
+                    variant="body"
+                    className="text-sm text-gray-700"
+                    placeholder="Stick with Path 1 and struggle"
+                    sectionBackground={sectionBackground}
+                    data-section-id={sectionId}
+                    data-element-key="bottom_stat_1_label"
+                  />
                 </div>
                 
-                <div className="text-center">
-                  <div className="text-3xl font-bold text-green-600 mb-2">27%</div>
+                <div className="text-center group/bottom-stat relative">
+                  <div className="flex items-center justify-center mb-2">
+                    <EditableAdaptiveText
+                      mode={mode}
+                      value={blockContent.bottom_stat_2 || ''}
+                      onEdit={(value) => handleContentUpdate('bottom_stat_2', value)}
+                      backgroundType={backgroundType}
+                      colorTokens={colorTokens}
+                      variant="body"
+                      className="text-3xl font-bold text-green-600"
+                      placeholder="27%"
+                      sectionBackground={sectionBackground}
+                      data-section-id={sectionId}
+                      data-element-key="bottom_stat_2"
+                    />
+                    {mode === 'edit' && (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleContentUpdate('bottom_stat_2', '___REMOVED___');
+                          handleContentUpdate('bottom_stat_2_label', '___REMOVED___');
+                        }}
+                        className="opacity-0 group-hover/bottom-stat:opacity-100 ml-2 p-1 rounded-full bg-white/80 hover:bg-white text-red-500 hover:text-red-700 transition-all duration-200 relative z-10 shadow-sm"
+                        title="Remove this statistic"
+                      >
+                        <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      </button>
+                    )}
+                  </div>
                   <div className={`text-sm ${mutedTextColor} mb-2`}>of businesses</div>
-                  <div className="text-sm text-gray-700">Switch to Path 2 and thrive</div>
+                  <EditableAdaptiveText
+                    mode={mode}
+                    value={blockContent.bottom_stat_2_label || ''}
+                    onEdit={(value) => handleContentUpdate('bottom_stat_2_label', value)}
+                    backgroundType={backgroundType}
+                    colorTokens={colorTokens}
+                    variant="body"
+                    className="text-sm text-gray-700"
+                    placeholder="Switch to Path 2 and thrive"
+                    sectionBackground={sectionBackground}
+                    data-section-id={sectionId}
+                    data-element-key="bottom_stat_2_label"
+                  />
                 </div>
                 
-                <div className="text-center">
-                  <div className="text-3xl font-bold text-blue-600 mb-2">2.5x</div>
+                <div className="text-center group/bottom-stat relative">
+                  <div className="flex items-center justify-center mb-2">
+                    <EditableAdaptiveText
+                      mode={mode}
+                      value={blockContent.bottom_stat_3 || ''}
+                      onEdit={(value) => handleContentUpdate('bottom_stat_3', value)}
+                      backgroundType={backgroundType}
+                      colorTokens={colorTokens}
+                      variant="body"
+                      className="text-3xl font-bold text-blue-600"
+                      placeholder="2.5x"
+                      sectionBackground={sectionBackground}
+                      data-section-id={sectionId}
+                      data-element-key="bottom_stat_3"
+                    />
+                    {mode === 'edit' && (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleContentUpdate('bottom_stat_3', '___REMOVED___');
+                          handleContentUpdate('bottom_stat_3_label', '___REMOVED___');
+                        }}
+                        className="opacity-0 group-hover/bottom-stat:opacity-100 ml-2 p-1 rounded-full bg-white/80 hover:bg-white text-red-500 hover:text-red-700 transition-all duration-200 relative z-10 shadow-sm"
+                        title="Remove this statistic"
+                      >
+                        <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      </button>
+                    )}
+                  </div>
                   <div className={`text-sm ${mutedTextColor} mb-2`}>faster growth</div>
-                  <div className="text-sm text-gray-700">For businesses on Path 2</div>
+                  <EditableAdaptiveText
+                    mode={mode}
+                    value={blockContent.bottom_stat_3_label || ''}
+                    onEdit={(value) => handleContentUpdate('bottom_stat_3_label', value)}
+                    backgroundType={backgroundType}
+                    colorTokens={colorTokens}
+                    variant="body"
+                    className="text-sm text-gray-700"
+                    placeholder="For businesses on Path 2"
+                    sectionBackground={sectionBackground}
+                    data-section-id={sectionId}
+                    data-element-key="bottom_stat_3_label"
+                  />
                 </div>
               </div>
             </div>

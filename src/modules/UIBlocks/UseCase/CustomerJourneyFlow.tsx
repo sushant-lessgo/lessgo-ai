@@ -2,19 +2,23 @@
 import React from 'react';
 import { useLayoutComponent } from '@/hooks/useLayoutComponent';
 import { LayoutSection } from '@/components/layout/LayoutSection';
-import { EditableAdaptiveHeadline } from '@/components/layout/EditableContent';
+import { EditableAdaptiveHeadline, EditableAdaptiveText } from '@/components/layout/EditableContent';
 import { LayoutComponentProps } from '@/types/storeTypes';
 
 interface CustomerJourneyFlowContent {
   headline: string;
   journey_stages: string;
   stage_descriptions: string;
+  footer_title?: string;
+  footer_description?: string;
 }
 
 const CONTENT_SCHEMA = {
   headline: { type: 'string' as const, default: 'Customer Journey Optimization' },
   journey_stages: { type: 'string' as const, default: 'Awareness|Interest|Consideration|Purchase|Onboarding|Retention' },
-  stage_descriptions: { type: 'string' as const, default: 'Discover your brand and solutions|Learn about features and benefits|Compare options and evaluate fit|Make purchase decision|Get started and integrated|Ongoing success and growth' }
+  stage_descriptions: { type: 'string' as const, default: 'Discover your brand and solutions|Learn about features and benefits|Compare options and evaluate fit|Make purchase decision|Get started and integrated|Ongoing success and growth' },
+  footer_title: { type: 'string' as const, default: 'Optimize Every Touchpoint' },
+  footer_description: { type: 'string' as const, default: 'Our platform helps you understand and improve each stage of the customer journey for maximum satisfaction and retention.' }
 };
 
 export default function CustomerJourneyFlow(props: LayoutComponentProps) {
@@ -40,10 +44,35 @@ export default function CustomerJourneyFlow(props: LayoutComponentProps) {
             ))}
           </div>
         </div>
-        <div className="mt-16 bg-blue-50 rounded-2xl p-8 text-center border border-blue-200">
-          <h3 className="font-bold text-blue-900 mb-4">Optimize Every Touchpoint</h3>
-          <p className="text-blue-700">Our platform helps you understand and improve each stage of the customer journey for maximum satisfaction and retention.</p>
-        </div>
+        {(blockContent.footer_title || blockContent.footer_description || mode === 'edit') && (
+          <div className="mt-16 bg-blue-50 rounded-2xl p-8 text-center border border-blue-200">
+            <EditableAdaptiveHeadline
+              mode={mode}
+              value={blockContent.footer_title || ''}
+              onEdit={(value) => handleContentUpdate('footer_title', value)}
+              level="h3"
+              backgroundType="neutral"
+              colorTokens={{ ...colorTokens, textPrimary: 'text-blue-900' }}
+              className="font-bold text-blue-900 mb-4"
+              sectionId={sectionId}
+              elementKey="footer_title"
+              sectionBackground="bg-blue-50"
+            />
+            <EditableAdaptiveText
+              mode={mode}
+              value={blockContent.footer_description || ''}
+              onEdit={(value) => handleContentUpdate('footer_description', value)}
+              backgroundType="neutral"
+              colorTokens={{ ...colorTokens, textPrimary: 'text-blue-700' }}
+              variant="body"
+              className="text-blue-700"
+              placeholder="Add footer description..."
+              sectionId={sectionId}
+              elementKey="footer_description"
+              sectionBackground="bg-blue-50"
+            />
+          </div>
+        )}
       </div>
     </LayoutSection>
   );

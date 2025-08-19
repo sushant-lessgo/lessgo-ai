@@ -9,12 +9,16 @@ interface BeforeAfterWorkflowContent {
   headline: string;
   before_steps: string;
   after_steps: string;
+  before_title?: string;
+  after_title?: string;
 }
 
 const CONTENT_SCHEMA = {
   headline: { type: 'string' as const, default: 'Transform Your Workflow' },
   before_steps: { type: 'string' as const, default: 'Manual Data Entry|Time-Consuming Analysis|Error-Prone Processes|Delayed Reporting' },
-  after_steps: { type: 'string' as const, default: 'Automated Data Collection|Instant AI Analysis|Error-Free Processing|Real-Time Insights' }
+  after_steps: { type: 'string' as const, default: 'Automated Data Collection|Instant AI Analysis|Error-Free Processing|Real-Time Insights' },
+  before_title: { type: 'string' as const, default: 'Before (Manual Process)' },
+  after_title: { type: 'string' as const, default: 'After (With Our Solution)' }
 };
 
 export default function BeforeAfterWorkflow(props: LayoutComponentProps) {
@@ -28,7 +32,7 @@ export default function BeforeAfterWorkflow(props: LayoutComponentProps) {
         <EditableAdaptiveHeadline mode={mode} value={blockContent.headline || ''} onEdit={(value) => handleContentUpdate('headline', value)} level="h2" backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')} colorTokens={colorTokens} className="text-center mb-16" sectionId={sectionId} elementKey="headline" sectionBackground={sectionBackground} />
         <div className="grid lg:grid-cols-2 gap-12">
           <div className="bg-red-50 p-8 rounded-xl border border-red-200">
-            <h3 className="font-bold text-red-900 mb-6 text-center text-xl">Before (Manual Process)</h3>
+            <h3 className="font-bold text-red-900 mb-6 text-center text-xl">{blockContent.before_title || 'Before (Manual Process)'}</h3>
             <div className="space-y-4">
               {beforeSteps.map((step, index) => (
                 <div key={index} className="flex items-center space-x-3">
@@ -39,7 +43,7 @@ export default function BeforeAfterWorkflow(props: LayoutComponentProps) {
             </div>
           </div>
           <div className="bg-green-50 p-8 rounded-xl border border-green-200">
-            <h3 className="font-bold text-green-900 mb-6 text-center text-xl">After (With Our Solution)</h3>
+            <h3 className="font-bold text-green-900 mb-6 text-center text-xl">{blockContent.after_title || 'After (With Our Solution)'}</h3>
             <div className="space-y-4">
               {afterSteps.map((step, index) => (
                 <div key={index} className="flex items-center space-x-3">

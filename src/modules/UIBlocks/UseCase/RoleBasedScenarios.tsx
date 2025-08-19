@@ -9,12 +9,14 @@ interface RoleBasedScenariosContent {
   headline: string;
   roles: string;
   scenarios: string;
+  cta_text?: string;
 }
 
 const CONTENT_SCHEMA = {
   headline: { type: 'string' as const, default: 'Perfect for Every Role' },
   roles: { type: 'string' as const, default: 'CEO|CTO|Marketing Manager|Sales Director|Operations Manager|Data Analyst' },
-  scenarios: { type: 'string' as const, default: 'Get executive dashboards and strategic insights|Monitor system performance and technical metrics|Track campaign performance and lead generation|Manage pipeline and forecast revenue|Optimize processes and resource allocation|Analyze data trends and create reports' }
+  scenarios: { type: 'string' as const, default: 'Get executive dashboards and strategic insights|Monitor system performance and technical metrics|Track campaign performance and lead generation|Manage pipeline and forecast revenue|Optimize processes and resource allocation|Analyze data trends and create reports' },
+  cta_text: { type: 'string' as const, default: 'View Details →' }
 };
 
 export default function RoleBasedScenarios(props: LayoutComponentProps) {
@@ -36,7 +38,7 @@ export default function RoleBasedScenarios(props: LayoutComponentProps) {
                 <h3 className="font-bold text-gray-900 mb-3">{role}</h3>
                 <p className="text-gray-600">{scenarios[index] || 'Role-specific scenario'}</p>
               </div>
-              <div className="text-blue-600 font-medium">View Details →</div>
+              <div className="text-blue-600 font-medium">{blockContent.cta_text || 'View Details →'}</div>
             </div>
           ))}
         </div>

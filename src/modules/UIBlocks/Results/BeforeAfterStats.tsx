@@ -27,6 +27,7 @@ interface BeforeAfterStatsContent {
   stat_improvements: string;
   subheadline?: string;
   time_period?: string;
+  footer_text?: string;
 }
 
 // Content schema for BeforeAfterStats layout
@@ -37,7 +38,8 @@ const CONTENT_SCHEMA = {
   stat_after: { type: 'string' as const, default: '2 hours/day|$75K|96%|85%' },
   stat_improvements: { type: 'string' as const, default: '75% faster|200% increase|24% improvement|45% boost' },
   subheadline: { type: 'string' as const, default: 'Real results from companies who transformed their operations with our solution' },
-  time_period: { type: 'string' as const, default: 'Results achieved within 90 days' }
+  time_period: { type: 'string' as const, default: 'Results achieved within 90 days' },
+  footer_text: { type: 'string' as const, default: 'Average results across 500+ implementations' }
 };
 
 // Parse stat comparison data from pipe-separated strings
@@ -329,14 +331,28 @@ export default function BeforeAfterStats(props: BeforeAfterStatsProps) {
         </div>
 
         {/* Results Footer */}
-        <div className="mt-16 text-center">
-          <div className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-full text-green-800">
-            <svg className="w-5 h-5 mr-2 text-green-600" fill="currentColor" viewBox="0 0 20 20">
-              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-            </svg>
-            <span className="font-medium">Average results across 500+ implementations</span>
+        {(blockContent.footer_text || mode === 'edit') && (
+          <div className="mt-16 text-center">
+            <div className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-full text-green-800">
+              <svg className="w-5 h-5 mr-2 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+              </svg>
+              <EditableAdaptiveText
+                mode={mode}
+                value={blockContent.footer_text || ''}
+                onEdit={(value) => handleContentUpdate('footer_text', value)}
+                backgroundType={backgroundType}
+                colorTokens={colorTokens}
+                variant="body"
+                className="font-medium"
+                placeholder="Add footer credibility text..."
+                sectionBackground={sectionBackground}
+                data-section-id={sectionId}
+                data-element-key="footer_text"
+              />
+            </div>
           </div>
-        </div>
+        )}
 
       </div>
     </section>

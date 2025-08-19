@@ -23,6 +23,15 @@ interface ProblemChecklistContent {
   subheadline?: string;
   supporting_text?: string;
   trust_items?: string;
+  result_stat_1?: string;
+  result_stat_1_label?: string;
+  result_stat_2?: string;
+  result_stat_2_label?: string;
+  result_stat_3?: string;
+  result_stat_3_label?: string;
+  encouragement_tip_1?: string;
+  encouragement_tip_2?: string;
+  encouragement_tip_3?: string;
 }
 
 const CONTENT_SCHEMA = {
@@ -69,7 +78,16 @@ const CONTENT_SCHEMA = {
   trust_items: { 
     type: 'string' as const, 
     default: '' 
-  }
+  },
+  result_stat_1: { type: 'string' as const, default: '87%' },
+  result_stat_1_label: { type: 'string' as const, default: 'of businesses see results within 30 days' },
+  result_stat_2: { type: 'string' as const, default: '3.2x' },
+  result_stat_2_label: { type: 'string' as const, default: 'average productivity increase' },
+  result_stat_3: { type: 'string' as const, default: '$47K' },
+  result_stat_3_label: { type: 'string' as const, default: 'average annual savings' },
+  encouragement_tip_1: { type: 'string' as const, default: 'Regular process reviews' },
+  encouragement_tip_2: { type: 'string' as const, default: 'Proactive improvements' },
+  encouragement_tip_3: { type: 'string' as const, default: 'Team feedback loops' }
 };
 
 export default function ProblemChecklist(props: LayoutComponentProps) {
@@ -237,11 +255,21 @@ export default function ProblemChecklist(props: LayoutComponentProps) {
             />
           )}
 
-          {blockContent.intro_text && (
+          {(blockContent.intro_text || mode === 'edit') && (
             <div className="max-w-3xl mx-auto mb-8">
-              <p className="text-lg text-gray-700 leading-relaxed">
-                {blockContent.intro_text}
-              </p>
+              <EditableAdaptiveText
+                mode={mode}
+                value={blockContent.intro_text || ''}
+                onEdit={(value) => handleContentUpdate('intro_text', value)}
+                backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
+                colorTokens={colorTokens}
+                variant="body"
+                className="text-lg leading-relaxed"
+                placeholder="Add introduction text to guide the assessment..."
+                sectionBackground={sectionBackground}
+                data-section-id={sectionId}
+                data-element-key="intro_text"
+              />
             </div>
           )}
         </div>
@@ -405,17 +433,140 @@ export default function ProblemChecklist(props: LayoutComponentProps) {
 
                 {/* Statistics */}
                 <div className="grid md:grid-cols-3 gap-6">
-                  <div className="bg-white rounded-lg p-4 border border-blue-200">
-                    <div className="text-2xl font-bold text-blue-600 mb-1">87%</div>
-                    <div className="text-sm text-gray-600">of businesses see results within 30 days</div>
+                  <div className="bg-white rounded-lg p-4 border border-blue-200 group/result-stat relative">
+                    <div className="flex items-center justify-between mb-1">
+                      <EditableAdaptiveText
+                        mode={mode}
+                        value={blockContent.result_stat_1 || ''}
+                        onEdit={(value) => handleContentUpdate('result_stat_1', value)}
+                        backgroundType={backgroundType}
+                        colorTokens={colorTokens}
+                        variant="body"
+                        className="text-2xl font-bold text-blue-600"
+                        placeholder="87%"
+                        sectionBackground={sectionBackground}
+                        data-section-id={sectionId}
+                        data-element-key="result_stat_1"
+                      />
+                      {mode === 'edit' && (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleContentUpdate('result_stat_1', '___REMOVED___');
+                            handleContentUpdate('result_stat_1_label', '___REMOVED___');
+                          }}
+                          className="opacity-0 group-hover/result-stat:opacity-100 ml-1 p-1 rounded-full bg-white/80 hover:bg-white text-red-500 hover:text-red-700 transition-all duration-200 relative z-10 shadow-sm"
+                          title="Remove this statistic"
+                        >
+                          <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                          </svg>
+                        </button>
+                      )}
+                    </div>
+                    <EditableAdaptiveText
+                      mode={mode}
+                      value={blockContent.result_stat_1_label || ''}
+                      onEdit={(value) => handleContentUpdate('result_stat_1_label', value)}
+                      backgroundType={backgroundType}
+                      colorTokens={colorTokens}
+                      variant="body"
+                      className="text-sm text-gray-600"
+                      placeholder="of businesses see results within 30 days"
+                      sectionBackground={sectionBackground}
+                      data-section-id={sectionId}
+                      data-element-key="result_stat_1_label"
+                    />
                   </div>
-                  <div className="bg-white rounded-lg p-4 border border-blue-200">
-                    <div className="text-2xl font-bold text-green-600 mb-1">3.2x</div>
-                    <div className="text-sm text-gray-600">average productivity increase</div>
+                  <div className="bg-white rounded-lg p-4 border border-blue-200 group/result-stat relative">
+                    <div className="flex items-center justify-between mb-1">
+                      <EditableAdaptiveText
+                        mode={mode}
+                        value={blockContent.result_stat_2 || ''}
+                        onEdit={(value) => handleContentUpdate('result_stat_2', value)}
+                        backgroundType={backgroundType}
+                        colorTokens={colorTokens}
+                        variant="body"
+                        className="text-2xl font-bold text-green-600"
+                        placeholder="3.2x"
+                        sectionBackground={sectionBackground}
+                        data-section-id={sectionId}
+                        data-element-key="result_stat_2"
+                      />
+                      {mode === 'edit' && (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleContentUpdate('result_stat_2', '___REMOVED___');
+                            handleContentUpdate('result_stat_2_label', '___REMOVED___');
+                          }}
+                          className="opacity-0 group-hover/result-stat:opacity-100 ml-1 p-1 rounded-full bg-white/80 hover:bg-white text-red-500 hover:text-red-700 transition-all duration-200 relative z-10 shadow-sm"
+                          title="Remove this statistic"
+                        >
+                          <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                          </svg>
+                        </button>
+                      )}
+                    </div>
+                    <EditableAdaptiveText
+                      mode={mode}
+                      value={blockContent.result_stat_2_label || ''}
+                      onEdit={(value) => handleContentUpdate('result_stat_2_label', value)}
+                      backgroundType={backgroundType}
+                      colorTokens={colorTokens}
+                      variant="body"
+                      className="text-sm text-gray-600"
+                      placeholder="average productivity increase"
+                      sectionBackground={sectionBackground}
+                      data-section-id={sectionId}
+                      data-element-key="result_stat_2_label"
+                    />
                   </div>
-                  <div className="bg-white rounded-lg p-4 border border-blue-200">
-                    <div className="text-2xl font-bold text-purple-600 mb-1">$47K</div>
-                    <div className="text-sm text-gray-600">average annual savings</div>
+                  <div className="bg-white rounded-lg p-4 border border-blue-200 group/result-stat relative">
+                    <div className="flex items-center justify-between mb-1">
+                      <EditableAdaptiveText
+                        mode={mode}
+                        value={blockContent.result_stat_3 || ''}
+                        onEdit={(value) => handleContentUpdate('result_stat_3', value)}
+                        backgroundType={backgroundType}
+                        colorTokens={colorTokens}
+                        variant="body"
+                        className="text-2xl font-bold text-purple-600"
+                        placeholder="$47K"
+                        sectionBackground={sectionBackground}
+                        data-section-id={sectionId}
+                        data-element-key="result_stat_3"
+                      />
+                      {mode === 'edit' && (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleContentUpdate('result_stat_3', '___REMOVED___');
+                            handleContentUpdate('result_stat_3_label', '___REMOVED___');
+                          }}
+                          className="opacity-0 group-hover/result-stat:opacity-100 ml-1 p-1 rounded-full bg-white/80 hover:bg-white text-red-500 hover:text-red-700 transition-all duration-200 relative z-10 shadow-sm"
+                          title="Remove this statistic"
+                        >
+                          <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                          </svg>
+                        </button>
+                      )}
+                    </div>
+                    <EditableAdaptiveText
+                      mode={mode}
+                      value={blockContent.result_stat_3_label || ''}
+                      onEdit={(value) => handleContentUpdate('result_stat_3_label', value)}
+                      backgroundType={backgroundType}
+                      colorTokens={colorTokens}
+                      variant="body"
+                      className="text-sm text-gray-600"
+                      placeholder="average annual savings"
+                      sectionBackground={sectionBackground}
+                      data-section-id={sectionId}
+                      data-element-key="result_stat_3_label"
+                    />
                   </div>
                 </div>
               </div>
@@ -435,9 +586,46 @@ export default function ProblemChecklist(props: LayoutComponentProps) {
                 <div className="bg-white rounded-lg p-6 border border-green-200">
                   <h4 className="font-semibold text-gray-900 mb-3">Keep Growing:</h4>
                   <div className="grid md:grid-cols-3 gap-4 text-sm text-gray-600">
-                    <div>✓ Regular process reviews</div>
-                    <div>✓ Proactive improvements</div>
-                    <div>✓ Team feedback loops</div>
+                    {[
+                      blockContent.encouragement_tip_1,
+                      blockContent.encouragement_tip_2,
+                      blockContent.encouragement_tip_3
+                    ].filter(tip => tip && tip !== '___REMOVED___').map((tip, index) => (
+                      <div key={index} className="group/tip relative flex items-center">
+                        <span className="mr-2">✓</span>
+                        <EditableAdaptiveText
+                          mode={mode}
+                          value={tip || ''}
+                          onEdit={(value) => {
+                            const fieldKey = `encouragement_tip_${index + 1}` as keyof ProblemChecklistContent;
+                            handleContentUpdate(fieldKey, value);
+                          }}
+                          backgroundType={backgroundType}
+                          colorTokens={colorTokens}
+                          variant="body"
+                          className="flex-1"
+                          placeholder={`Encouragement tip ${index + 1}`}
+                          sectionBackground={sectionBackground}
+                          data-section-id={sectionId}
+                          data-element-key={`encouragement_tip_${index + 1}`}
+                        />
+                        {mode === 'edit' && (
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              const fieldKey = `encouragement_tip_${index + 1}` as keyof ProblemChecklistContent;
+                              handleContentUpdate(fieldKey, '___REMOVED___');
+                            }}
+                            className="opacity-0 group-hover/tip:opacity-100 ml-1 p-1 rounded-full bg-white/80 hover:bg-white text-red-500 hover:text-red-700 transition-all duration-200 relative z-10 shadow-sm"
+                            title="Remove this tip"
+                          >
+                            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                          </button>
+                        )}
+                      </div>
+                    ))}
                   </div>
                 </div>
               </div>

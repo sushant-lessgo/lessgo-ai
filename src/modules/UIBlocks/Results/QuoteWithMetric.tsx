@@ -31,6 +31,7 @@ interface QuoteWithMetricContent {
   metric_labels: string;
   metric_values: string;
   subheadline?: string;
+  footer_text?: string;
 }
 
 // Content schema for QuoteWithMetric layout
@@ -42,7 +43,8 @@ const CONTENT_SCHEMA = {
   roles: { type: 'string' as const, default: 'Chief Technology Officer|VP of Operations|Head of Product' },
   metric_labels: { type: 'string' as const, default: 'Cost Reduction|Revenue Increase|Time Saved' },
   metric_values: { type: 'string' as const, default: '67%|$2.4M|25 hrs/week' },
-  subheadline: { type: 'string' as const, default: 'Real customer testimonials with quantified business impact' }
+  subheadline: { type: 'string' as const, default: 'Real customer testimonials with quantified business impact' },
+  footer_text: { type: 'string' as const, default: 'Verified customer results and testimonials' }
 };
 
 // Parse quote data from pipe-separated strings
@@ -378,14 +380,28 @@ export default function QuoteWithMetric(props: QuoteWithMetricProps) {
         </div>
 
         {/* Credibility Footer */}
-        <div className="mt-16 text-center">
-          <div className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-emerald-50 to-green-50 border border-emerald-200 rounded-full text-emerald-800">
-            <svg className="w-5 h-5 mr-2 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.25-7a4.5 4.5 0 11-6.364 6.364L12 5.636l-1.318-1.318A4.5 4.5 0 015.318 10.5L12 17.182l6.682-6.682a4.5 4.5 0 000-6.364z" />
-            </svg>
-            <span className="font-medium">Verified customer results and testimonials</span>
+        {(blockContent.footer_text || mode === 'edit') && (
+          <div className="mt-16 text-center">
+            <div className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-emerald-50 to-green-50 border border-emerald-200 rounded-full text-emerald-800">
+              <svg className="w-5 h-5 mr-2 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.25-7a4.5 4.5 0 11-6.364 6.364L12 5.636l-1.318-1.318A4.5 4.5 0 015.318 10.5L12 17.182l6.682-6.682a4.5 4.5 0 000-6.364z" />
+              </svg>
+              <EditableAdaptiveText
+                mode={mode}
+                value={blockContent.footer_text || ''}
+                onEdit={(value) => handleContentUpdate('footer_text', value)}
+                backgroundType={backgroundType}
+                colorTokens={colorTokens}
+                variant="body"
+                className="font-medium"
+                placeholder="Add credibility footer text..."
+                sectionBackground={sectionBackground}
+                data-section-id={sectionId}
+                data-element-key="footer_text"
+              />
+            </div>
           </div>
-        </div>
+        )}
 
       </div>
     </section>

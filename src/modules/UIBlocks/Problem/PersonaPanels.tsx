@@ -23,6 +23,14 @@ interface PersonaPanelsContent {
   subheadline?: string;
   supporting_text?: string;
   trust_items?: string;
+  solution_title_1?: string;
+  solution_description_1?: string;
+  solution_title_2?: string;
+  solution_description_2?: string;
+  solution_title_3?: string;
+  solution_description_3?: string;
+  solution_title_4?: string;
+  solution_description_4?: string;
 }
 
 const CONTENT_SCHEMA = {
@@ -69,7 +77,15 @@ const CONTENT_SCHEMA = {
   trust_items: { 
     type: 'string' as const, 
     default: '' 
-  }
+  },
+  solution_title_1: { type: 'string' as const, default: 'Automation' },
+  solution_description_1: { type: 'string' as const, default: 'Reduce manual work by 80%' },
+  solution_title_2: { type: 'string' as const, default: 'Analytics' },
+  solution_description_2: { type: 'string' as const, default: 'Clear visibility into everything' },
+  solution_title_3: { type: 'string' as const, default: 'Integration' },
+  solution_description_3: { type: 'string' as const, default: 'Connect all your tools' },
+  solution_title_4: { type: 'string' as const, default: 'Scaling' },
+  solution_description_4: { type: 'string' as const, default: 'Grow without complexity' }
 };
 
 export default function PersonaPanels(props: LayoutComponentProps) {
@@ -346,11 +362,21 @@ export default function PersonaPanels(props: LayoutComponentProps) {
             />
           )}
 
-          {blockContent.intro_text && (
+          {(blockContent.intro_text || mode === 'edit') && (
             <div className="max-w-4xl mx-auto mb-8">
-              <p className="text-lg text-gray-700 leading-relaxed">
-                {blockContent.intro_text}
-              </p>
+              <EditableAdaptiveText
+                mode={mode}
+                value={blockContent.intro_text || ''}
+                onEdit={(value) => handleContentUpdate('intro_text', value)}
+                backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
+                colorTokens={colorTokens}
+                variant="body"
+                className="text-lg leading-relaxed"
+                placeholder="Add introduction text to guide persona selection..."
+                sectionBackground={sectionBackground}
+                data-section-id={sectionId}
+                data-element-key="intro_text"
+              />
             </div>
           )}
         </div>
@@ -447,45 +473,71 @@ export default function PersonaPanels(props: LayoutComponentProps) {
               </h3>
               
               <div className="grid md:grid-cols-4 gap-6">
-                <div className="text-center">
-                  <div className="w-12 h-12 bg-blue-500 rounded-lg flex items-center justify-center mx-auto mb-4">
-                    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                    </svg>
+                {[
+                  { title: blockContent.solution_title_1, description: blockContent.solution_description_1, color: 'bg-blue-500', icon: 'M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z' },
+                  { title: blockContent.solution_title_2, description: blockContent.solution_description_2, color: 'bg-green-500', icon: 'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z' },
+                  { title: blockContent.solution_title_3, description: blockContent.solution_description_3, color: 'bg-purple-500', icon: 'M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z' },
+                  { title: blockContent.solution_title_4, description: blockContent.solution_description_4, color: 'bg-orange-500', icon: 'M13 10V3L4 14h7v7l9-11h-7z' }
+                ].filter(item => item.title && item.title !== '___REMOVED___').map((solution, index) => (
+                  <div key={index} className="text-center group/solution-item relative">
+                    <div className="flex items-center justify-center mb-4">
+                      <div className={`w-12 h-12 ${solution.color} rounded-lg flex items-center justify-center mx-auto`}>
+                        <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={solution.icon} />
+                        </svg>
+                      </div>
+                      {mode === 'edit' && (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            const titleKey = `solution_title_${index + 1}` as keyof PersonaPanelsContent;
+                            const descKey = `solution_description_${index + 1}` as keyof PersonaPanelsContent;
+                            handleContentUpdate(titleKey, '___REMOVED___');
+                            handleContentUpdate(descKey, '___REMOVED___');
+                          }}
+                          className="opacity-0 group-hover/solution-item:opacity-100 ml-2 p-1 rounded-full bg-white/80 hover:bg-white text-red-500 hover:text-red-700 transition-all duration-200 relative z-10 shadow-sm"
+                          title="Remove this solution"
+                        >
+                          <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                          </svg>
+                        </button>
+                      )}
+                    </div>
+                    <EditableAdaptiveText
+                      mode={mode}
+                      value={solution.title || ''}
+                      onEdit={(value) => {
+                        const fieldKey = `solution_title_${index + 1}` as keyof PersonaPanelsContent;
+                        handleContentUpdate(fieldKey, value);
+                      }}
+                      backgroundType={backgroundType}
+                      colorTokens={colorTokens}
+                      variant="body"
+                      className="font-semibold text-gray-900 mb-2"
+                      placeholder={`Solution ${index + 1} title`}
+                      sectionBackground={sectionBackground}
+                      data-section-id={sectionId}
+                      data-element-key={`solution_title_${index + 1}`}
+                    />
+                    <EditableAdaptiveText
+                      mode={mode}
+                      value={solution.description || ''}
+                      onEdit={(value) => {
+                        const fieldKey = `solution_description_${index + 1}` as keyof PersonaPanelsContent;
+                        handleContentUpdate(fieldKey, value);
+                      }}
+                      backgroundType={backgroundType}
+                      colorTokens={colorTokens}
+                      variant="body"
+                      className={`text-sm ${mutedTextColor}`}
+                      placeholder={`Solution ${index + 1} description`}
+                      sectionBackground={sectionBackground}
+                      data-section-id={sectionId}
+                      data-element-key={`solution_description_${index + 1}`}
+                    />
                   </div>
-                  <h4 className="font-semibold text-gray-900 mb-2">Automation</h4>
-                  <p className={`text-sm ${mutedTextColor}`}>Reduce manual work by 80%</p>
-                </div>
-                
-                <div className="text-center">
-                  <div className="w-12 h-12 bg-green-500 rounded-lg flex items-center justify-center mx-auto mb-4">
-                    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                    </svg>
-                  </div>
-                  <h4 className="font-semibold text-gray-900 mb-2">Analytics</h4>
-                  <p className={`text-sm ${mutedTextColor}`}>Clear visibility into everything</p>
-                </div>
-                
-                <div className="text-center">
-                  <div className="w-12 h-12 bg-purple-500 rounded-lg flex items-center justify-center mx-auto mb-4">
-                    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                    </svg>
-                  </div>
-                  <h4 className="font-semibold text-gray-900 mb-2">Integration</h4>
-                  <p className={`text-sm ${mutedTextColor}`}>Connect all your tools</p>
-                </div>
-                
-                <div className="text-center">
-                  <div className="w-12 h-12 bg-orange-500 rounded-lg flex items-center justify-center mx-auto mb-4">
-                    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                    </svg>
-                  </div>
-                  <h4 className="font-semibold text-gray-900 mb-2">Scaling</h4>
-                  <p className={`text-sm ${mutedTextColor}`}>Grow without complexity</p>
-                </div>
+                ))}
               </div>
             </div>
           </>

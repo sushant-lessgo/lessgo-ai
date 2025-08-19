@@ -9,12 +9,14 @@ interface IndustryUseCaseGridContent {
   headline: string;
   industries: string;
   use_cases: string;
+  cta_text?: string;
 }
 
 const CONTENT_SCHEMA = {
   headline: { type: 'string' as const, default: 'Trusted Across Industries' },
   industries: { type: 'string' as const, default: 'Healthcare|Finance|Manufacturing|Retail|Education|Technology' },
-  use_cases: { type: 'string' as const, default: 'Patient data management and treatment optimization|Risk assessment and fraud detection|Quality control and supply chain optimization|Customer analytics and inventory management|Student performance tracking and curriculum planning|Development workflow automation and testing' }
+  use_cases: { type: 'string' as const, default: 'Patient data management and treatment optimization|Risk assessment and fraud detection|Quality control and supply chain optimization|Customer analytics and inventory management|Student performance tracking and curriculum planning|Development workflow automation and testing' },
+  cta_text: { type: 'string' as const, default: 'Learn More →' }
 };
 
 export default function IndustryUseCaseGrid(props: LayoutComponentProps) {
@@ -45,7 +47,7 @@ export default function IndustryUseCaseGrid(props: LayoutComponentProps) {
               <p className="text-gray-600 text-center">{useCases[index] || 'Industry-specific use case'}</p>
               <div className="mt-6 text-center">
                 <div className="inline-flex items-center text-blue-600 text-sm font-medium">
-                  Learn More →
+                  {blockContent.cta_text || 'Learn More →'}
                 </div>
               </div>
             </div>

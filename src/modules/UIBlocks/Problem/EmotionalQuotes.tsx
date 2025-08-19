@@ -236,11 +236,21 @@ export default function EmotionalQuotes(props: LayoutComponentProps) {
             />
           )}
 
-          {blockContent.relatable_intro && (
+          {(blockContent.relatable_intro || mode === 'edit') && (
             <div className="max-w-4xl mx-auto mb-8">
-              <p className="text-xl text-gray-700 leading-relaxed">
-                {blockContent.relatable_intro}
-              </p>
+              <EditableAdaptiveText
+                mode={mode}
+                value={blockContent.relatable_intro || ''}
+                onEdit={(value) => handleContentUpdate('relatable_intro', value)}
+                backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
+                colorTokens={colorTokens}
+                variant="body"
+                className="text-xl leading-relaxed"
+                placeholder="Add relatable introduction text..."
+                sectionBackground={sectionBackground}
+                data-section-id={sectionId}
+                data-element-key="relatable_intro"
+              />
             </div>
           )}
         </div>

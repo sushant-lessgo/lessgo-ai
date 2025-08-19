@@ -25,6 +25,7 @@ interface OutcomeIconsContent {
   descriptions: string;
   subheadline?: string;
   layout_style?: string;
+  footer_text?: string;
 }
 
 // Content schema for OutcomeIcons layout
@@ -34,7 +35,8 @@ const CONTENT_SCHEMA = {
   titles: { type: 'string' as const, default: 'Accelerated Growth|Maximum Efficiency|Enterprise Security|Seamless Collaboration|Smart Automation|Continuous Innovation' },
   descriptions: { type: 'string' as const, default: 'Scale your business faster with proven strategies and tools|Optimize workflows and eliminate bottlenecks for peak performance|Bank-level security protecting your data and operations|Unite your team with powerful collaboration features|Automate repetitive tasks and focus on what matters most|Stay ahead with cutting-edge features and regular updates' },
   subheadline: { type: 'string' as const, default: 'Transform your business with these proven outcome drivers' },
-  layout_style: { type: 'string' as const, default: 'grid' }
+  layout_style: { type: 'string' as const, default: 'grid' },
+  footer_text: { type: 'string' as const, default: 'These outcomes are built into every solution we deliver' }
 };
 
 // Parse outcome data from pipe-separated strings
@@ -324,14 +326,28 @@ export default function OutcomeIcons(props: OutcomeIconsProps) {
         </div>
 
         {/* Outcome Promise Footer */}
-        <div className="mt-16 text-center">
-          <div className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-full text-blue-800">
-            <svg className="w-5 h-5 mr-2 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
-              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-            </svg>
-            <span className="font-medium">These outcomes are built into every solution we deliver</span>
+        {(blockContent.footer_text || mode === 'edit') && (
+          <div className="mt-16 text-center">
+            <div className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-full text-blue-800">
+              <svg className="w-5 h-5 mr-2 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+              </svg>
+              <EditableAdaptiveText
+                mode={mode}
+                value={blockContent.footer_text || ''}
+                onEdit={(value) => handleContentUpdate('footer_text', value)}
+                backgroundType={backgroundType}
+                colorTokens={colorTokens}
+                variant="body"
+                className="font-medium"
+                placeholder="Add footer outcome promise..."
+                sectionBackground={sectionBackground}
+                data-section-id={sectionId}
+                data-element-key="footer_text"
+              />
+            </div>
           </div>
-        </div>
+        )}
 
       </div>
     </section>

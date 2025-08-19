@@ -196,17 +196,63 @@ const renderStars = (rating: string) => {
 
 ## Trust Indicators
 
+> **🚨 CRITICAL WARNING: Avoid Trust Items Over-Engineering**
+>
+> **Before implementing individual trust_item fields, ALWAYS check if the component already has working trust_items functionality.**
+> 
+> Many components already use a simple, effective pipe-separated format:
+> ```tsx
+> trust_items: "Free trial|No credit card|Cancel anytime"
+> ```
+> 
+> **❌ DO NOT over-engineer existing working components by adding:**
+> - Individual `trust_item_1`, `trust_item_2`, etc. fields to components that already have `trust_items`
+> - `EditableTrustIndicators` component when simple `TrustIndicators` already works
+> - Complex `getTrustItems()` functions when simple `.split('|')` works
+> 
+> **✅ The correct approach:**
+> 1. **First**: Check if the component already handles `trust_items` with pipe separation
+> 2. **If it does**: Keep the simple format and make the existing field editable
+> 3. **If it doesn't**: Only then consider individual fields for new implementations
+>
+> **Example of the mistake that was corrected:**
+> ```tsx
+> // ❌ WRONG: Over-engineered when trust_items already worked
+> trust_item_1: { type: 'string' as const, default: 'Free trial' },
+> trust_item_2: { type: 'string' as const, default: 'No credit card' },
+> // ... complex getTrustItems() function
+> // ... EditableTrustIndicators component
+> 
+> // ✅ CORRECT: Simple, working solution
+> trust_items: { type: 'string' as const, default: 'Free trial|No credit card' }
+> // Simple: trust_items.split('|').map(item => item.trim()).filter(Boolean)
+> // Simple: <TrustIndicators items={trustItems} />
+> ```
+
+### When to Use Individual vs Pipe-Separated Trust Items
+
+**Use Individual Fields (`trust_item_1`, `trust_item_2`, etc.) ONLY when:**
+- Creating a brand new component that has never had trust items
+- The component needs complex per-item editing controls
+- Each trust item needs different validation or behavior
+
+**Use Pipe-Separated Format (`trust_items`) when:**
+- The component already has working trust_items functionality
+- Simple list-based trust items are sufficient
+- You want to keep the implementation clean and maintainable
+- The existing format already works perfectly
+
 ### Content Schema for Trust Items
 
 ```tsx
-// Individual trust item fields (preferred)
+// Option 1: Individual trust item fields (for NEW components only)
 trust_item_1: { type: 'string' as const, default: 'Free 14-day trial' },
 trust_item_2: { type: 'string' as const, default: 'No credit card required' },
 trust_item_3: { type: 'string' as const, default: 'Cancel anytime' },
 trust_item_4: { type: 'string' as const, default: '' },
 trust_item_5: { type: 'string' as const, default: '' },
 
-// Legacy field (for backward compatibility)
+// Option 2: Pipe-separated format (for existing components or simple implementations)
 trust_items: { type: 'string' as const, default: 'Free 14-day trial|No credit card required|Cancel anytime' }
 ```
 
@@ -485,13 +531,37 @@ const StarRating = React.memo(({ rating, size = 'small' }: { rating: number; siz
 
 ## Best Practices
 
-### 1. Consistent Naming Conventions
+### 1. ALWAYS Audit Components Before Making Changes
+
+**🔍 Pre-Implementation Audit Checklist:**
+- [ ] Does the component already have working `trust_items`, `features`, or similar pipe-separated fields?
+- [ ] What functionality already exists and works correctly?
+- [ ] Are you tasked with "making static fields editable" or "adding new functionality"?
+- [ ] Would your changes preserve existing working functionality?
+
+**The Golden Rule: Don't fix what isn't broken.**
+
+If a component already handles trust items with `trust_items.split('|')` and renders with `<TrustIndicators>`, then simply make that existing field editable instead of rebuilding it with individual fields.
+
+### 2. Scope Boundaries: Static → Editable vs Adding Features
+
+**✅ Within Scope (Making Static → Editable):**
+- Making existing static text fields editable
+- Adding EditableAdaptiveText to hardcoded strings
+- Making existing pipe-separated fields editable in edit mode
+
+**❌ Outside Scope (Adding New Features):**
+- Adding trust items to components that never had them
+- Changing working data structures to different formats
+- Adding complex editing interfaces where simple ones work
+
+### 3. Consistent Naming Conventions
 - Use `show_[element]` for boolean visibility toggles
 - Use `[element]_count` for quantity controls
 - Use `[element]_[index]` for individual items in collections
 - Use clear, descriptive field names
 
-### 2. Content Schema Patterns
+### 4. Content Schema Patterns
 ```tsx
 // Boolean controls for visibility
 show_social_proof: { type: 'boolean' as const, default: true },
@@ -506,7 +576,7 @@ trust_item_3: { type: 'string' as const, default: '' }, // Optional
 avatar_count: { type: 'number' as const, default: 4 },
 ```
 
-### 3. Conditional Rendering Rules
+### 5. Conditional Rendering Rules
 ```tsx
 // Show in edit mode even if empty (for editing)
 {(content.field || mode === 'edit') && <Component />}
@@ -518,7 +588,7 @@ avatar_count: { type: 'number' as const, default: 4 },
 {content.show_feature !== false && <Component />}
 ```
 
-### 4. Event Handling Best Practices
+### 6. Event Handling Best Practices
 ```tsx
 // Always stop propagation for edit buttons
 onClick={(e) => {
@@ -530,7 +600,7 @@ onClick={(e) => {
 onClick={(e) => e.stopPropagation()}
 ```
 
-### 5. Accessibility Considerations
+### 7. Accessibility Considerations
 ```tsx
 // Provide meaningful titles for buttons
 title="Remove customer count"
@@ -688,15 +758,52 @@ const getYourElements = (): string[] => {
 )}
 ```
 
+## Lessons Learned: Problem Section Over-Engineering
+
+### The Problem Section Trust Items Mistake
+
+During the Problem section implementation, a significant over-engineering mistake occurred:
+
+**What Happened:**
+- All 8 Problem UIBlocks already had working `trust_items` functionality using pipe-separated strings
+- Instead of making the existing fields editable, individual `trust_item_1-5` fields were incorrectly added
+- Complex `getTrustItems()` functions and `EditableTrustIndicators` components were unnecessarily implemented
+- This created interface mismatches and broke existing functionality
+
+**The Correction:**
+All components were reverted to their original, simple format:
+```tsx
+// ✅ CORRECTED: Simple pipe-separated format
+const trustItems = blockContent.trust_items 
+  ? blockContent.trust_items.split('|').map(item => item.trim()).filter(Boolean)
+  : [];
+
+// Simple rendering
+{trustItems.length > 0 && (
+  <TrustIndicators 
+    items={trustItems}
+    colorClass={mutedTextColor}
+    iconColor="text-green-500"
+  />
+)}
+```
+
+**Key Lessons:**
+1. **Always audit first** - Check what already works before changing it
+2. **Understand task scope** - "Making static fields editable" ≠ "Adding new functionality"
+3. **Respect existing patterns** - If pipe-separated format works, keep it
+4. **Don't over-engineer** - Simple solutions are often better than complex ones
+
 ## Conclusion
 
 This guide provides the patterns and components needed to make any static element editable within UIBlocks. The key principles are:
 
-1. **Separation of Edit and View modes** - Different UX for different contexts
-2. **Individual field storage** - Better control and flexibility
-3. **Consistent removal patterns** - Using `___REMOVED___` markers
-4. **Reusable components** - EditableTrustIndicators, StarRating, etc.
-5. **Hover-based controls** - Clean UI with contextual editing
-6. **Backwards compatibility** - Supporting legacy data formats
+1. **Audit before implementing** - Check existing functionality first
+2. **Separation of Edit and View modes** - Different UX for different contexts
+3. **Preserve working solutions** - Don't fix what isn't broken
+4. **Consistent removal patterns** - Using `___REMOVED___` markers
+5. **Reusable components** - But only when they add value
+6. **Hover-based controls** - Clean UI with contextual editing
+7. **Backwards compatibility** - Supporting existing data formats
 
-Follow the implementation checklist and use the provided examples to convert any remaining static elements into fully editable components.
+Follow the implementation checklist, heed the warnings about over-engineering, and use the provided examples to convert any remaining static elements into fully editable components.

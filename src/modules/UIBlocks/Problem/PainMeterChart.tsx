@@ -23,6 +23,12 @@ interface PainMeterChartContent {
   subheadline?: string;
   supporting_text?: string;
   trust_items?: string;
+  action_stat_1?: string;
+  action_stat_1_label?: string;
+  action_stat_2?: string;
+  action_stat_2_label?: string;
+  action_stat_3?: string;
+  action_stat_3_label?: string;
 }
 
 const CONTENT_SCHEMA = {
@@ -69,7 +75,13 @@ const CONTENT_SCHEMA = {
   trust_items: { 
     type: 'string' as const, 
     default: '' 
-  }
+  },
+  action_stat_1: { type: 'string' as const, default: '$50K+' },
+  action_stat_1_label: { type: 'string' as const, default: 'Annual loss estimate' },
+  action_stat_2: { type: 'string' as const, default: '40%' },
+  action_stat_2_label: { type: 'string' as const, default: 'Productivity impact' },
+  action_stat_3: { type: 'string' as const, default: 'High' },
+  action_stat_3_label: { type: 'string' as const, default: 'Team burnout risk' }
 };
 
 export default function PainMeterChart(props: LayoutComponentProps) {
@@ -259,11 +271,21 @@ export default function PainMeterChart(props: LayoutComponentProps) {
             />
           )}
 
-          {blockContent.intro_text && (
+          {(blockContent.intro_text || mode === 'edit') && (
             <div className="max-w-4xl mx-auto mb-8">
-              <p className="text-lg text-gray-700 leading-relaxed">
-                {blockContent.intro_text}
-              </p>
+              <EditableAdaptiveText
+                mode={mode}
+                value={blockContent.intro_text || ''}
+                onEdit={(value) => handleContentUpdate('intro_text', value)}
+                backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
+                colorTokens={colorTokens}
+                variant="body"
+                className="text-lg leading-relaxed"
+                placeholder="Add introduction text to explain the pain meter data..."
+                sectionBackground={sectionBackground}
+                data-section-id={sectionId}
+                data-element-key="intro_text"
+              />
             </div>
           )}
         </div>
@@ -415,17 +437,140 @@ export default function PainMeterChart(props: LayoutComponentProps) {
                     Your business is experiencing severe pain points that are likely costing you significant revenue and team productivity.
                   </p>
                   <div className="grid md:grid-cols-3 gap-4">
-                    <div className="text-center">
-                      <div className="text-2xl font-bold text-red-600">$50K+</div>
-                      <div className="text-sm text-red-700">Annual loss estimate</div>
+                    <div className="text-center group/action-stat relative">
+                      <div className="flex items-center justify-center mb-1">
+                        <EditableAdaptiveText
+                          mode={mode}
+                          value={blockContent.action_stat_1 || ''}
+                          onEdit={(value) => handleContentUpdate('action_stat_1', value)}
+                          backgroundType={backgroundType}
+                          colorTokens={colorTokens}
+                          variant="body"
+                          className="text-2xl font-bold text-red-600"
+                          placeholder="$50K+"
+                          sectionBackground={sectionBackground}
+                          data-section-id={sectionId}
+                          data-element-key="action_stat_1"
+                        />
+                        {mode === 'edit' && (
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleContentUpdate('action_stat_1', '___REMOVED___');
+                              handleContentUpdate('action_stat_1_label', '___REMOVED___');
+                            }}
+                            className="opacity-0 group-hover/action-stat:opacity-100 ml-2 p-1 rounded-full bg-white/80 hover:bg-white text-red-500 hover:text-red-700 transition-all duration-200 relative z-10 shadow-sm"
+                            title="Remove this statistic"
+                          >
+                            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                          </button>
+                        )}
+                      </div>
+                      <EditableAdaptiveText
+                        mode={mode}
+                        value={blockContent.action_stat_1_label || ''}
+                        onEdit={(value) => handleContentUpdate('action_stat_1_label', value)}
+                        backgroundType={backgroundType}
+                        colorTokens={colorTokens}
+                        variant="body"
+                        className="text-sm text-red-700"
+                        placeholder="Annual loss estimate"
+                        sectionBackground={sectionBackground}
+                        data-section-id={sectionId}
+                        data-element-key="action_stat_1_label"
+                      />
                     </div>
-                    <div className="text-center">
-                      <div className="text-2xl font-bold text-red-600">40%</div>
-                      <div className="text-sm text-red-700">Productivity impact</div>
+                    <div className="text-center group/action-stat relative">
+                      <div className="flex items-center justify-center mb-1">
+                        <EditableAdaptiveText
+                          mode={mode}
+                          value={blockContent.action_stat_2 || ''}
+                          onEdit={(value) => handleContentUpdate('action_stat_2', value)}
+                          backgroundType={backgroundType}
+                          colorTokens={colorTokens}
+                          variant="body"
+                          className="text-2xl font-bold text-red-600"
+                          placeholder="40%"
+                          sectionBackground={sectionBackground}
+                          data-section-id={sectionId}
+                          data-element-key="action_stat_2"
+                        />
+                        {mode === 'edit' && (
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleContentUpdate('action_stat_2', '___REMOVED___');
+                              handleContentUpdate('action_stat_2_label', '___REMOVED___');
+                            }}
+                            className="opacity-0 group-hover/action-stat:opacity-100 ml-2 p-1 rounded-full bg-white/80 hover:bg-white text-red-500 hover:text-red-700 transition-all duration-200 relative z-10 shadow-sm"
+                            title="Remove this statistic"
+                          >
+                            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                          </button>
+                        )}
+                      </div>
+                      <EditableAdaptiveText
+                        mode={mode}
+                        value={blockContent.action_stat_2_label || ''}
+                        onEdit={(value) => handleContentUpdate('action_stat_2_label', value)}
+                        backgroundType={backgroundType}
+                        colorTokens={colorTokens}
+                        variant="body"
+                        className="text-sm text-red-700"
+                        placeholder="Productivity impact"
+                        sectionBackground={sectionBackground}
+                        data-section-id={sectionId}
+                        data-element-key="action_stat_2_label"
+                      />
                     </div>
-                    <div className="text-center">
-                      <div className="text-2xl font-bold text-red-600">High</div>
-                      <div className="text-sm text-red-700">Team burnout risk</div>
+                    <div className="text-center group/action-stat relative">
+                      <div className="flex items-center justify-center mb-1">
+                        <EditableAdaptiveText
+                          mode={mode}
+                          value={blockContent.action_stat_3 || ''}
+                          onEdit={(value) => handleContentUpdate('action_stat_3', value)}
+                          backgroundType={backgroundType}
+                          colorTokens={colorTokens}
+                          variant="body"
+                          className="text-2xl font-bold text-red-600"
+                          placeholder="High"
+                          sectionBackground={sectionBackground}
+                          data-section-id={sectionId}
+                          data-element-key="action_stat_3"
+                        />
+                        {mode === 'edit' && (
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleContentUpdate('action_stat_3', '___REMOVED___');
+                              handleContentUpdate('action_stat_3_label', '___REMOVED___');
+                            }}
+                            className="opacity-0 group-hover/action-stat:opacity-100 ml-2 p-1 rounded-full bg-white/80 hover:bg-white text-red-500 hover:text-red-700 transition-all duration-200 relative z-10 shadow-sm"
+                            title="Remove this statistic"
+                          >
+                            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                          </button>
+                        )}
+                      </div>
+                      <EditableAdaptiveText
+                        mode={mode}
+                        value={blockContent.action_stat_3_label || ''}
+                        onEdit={(value) => handleContentUpdate('action_stat_3_label', value)}
+                        backgroundType={backgroundType}
+                        colorTokens={colorTokens}
+                        variant="body"
+                        className="text-sm text-red-700"
+                        placeholder="Team burnout risk"
+                        sectionBackground={sectionBackground}
+                        data-section-id={sectionId}
+                        data-element-key="action_stat_3_label"
+                      />
                     </div>
                   </div>
                 </div>

@@ -5,6 +5,10 @@ import { useOnboardingStore } from '@/hooks/useOnboardingStore';
 import { useLayoutComponent } from '@/hooks/useLayoutComponent';
 import { LayoutSection } from '@/components/layout/LayoutSection';
 import { 
+  EditableAdaptiveHeadline, 
+  EditableAdaptiveText 
+} from '@/components/layout/EditableContent';
+import { 
   LayoutComponentProps, 
   extractLayoutContent,
   StoreElementTypes 
@@ -25,6 +29,7 @@ interface StackedHighlightsContent {
   highlight_titles: string;
   highlight_descriptions: string;
   mechanism_name?: string;
+  footer_text?: string;
 }
 
 // Content schema for StackedHighlights layout
@@ -32,7 +37,8 @@ const CONTENT_SCHEMA = {
   headline: { type: 'string' as const, default: 'Our Proprietary SmartFlow System™' },
   highlight_titles: { type: 'string' as const, default: 'Intelligent Auto-Prioritization|Dynamic Context Switching|Predictive Resource Allocation|Real-Time Quality Assurance' },
   highlight_descriptions: { type: 'string' as const, default: 'Our AI analyzes your workflow patterns and automatically prioritizes tasks based on deadlines, dependencies, and business impact, ensuring critical work never falls through the cracks.|The system seamlessly adapts to changing priorities and contexts, maintaining efficiency even when your focus needs to shift between different projects or urgent requests.|Advanced algorithms predict resource needs and automatically allocate team capacity, preventing bottlenecks before they occur and optimizing productivity across all initiatives.|Built-in quality checks run continuously in the background, catching potential issues early and maintaining high standards without slowing down your workflow.' },
-  mechanism_name: { type: 'string' as const, default: '' }
+  mechanism_name: { type: 'string' as const, default: '' },
+  footer_text: { type: 'string' as const, default: 'Our proprietary approach that you won\'t find anywhere else' }
 };
 
 // Parse highlight data from pipe-separated strings
@@ -47,36 +53,6 @@ const parseHighlightData = (titles: string, descriptions: string): HighlightItem
   }));
 };
 
-// ModeWrapper component for handling edit/preview modes
-const ModeWrapper = ({ 
-  mode, 
-  children, 
-  sectionId, 
-  elementKey,
-  onEdit 
-}: {
-  mode: 'edit' | 'preview';
-  children: React.ReactNode;
-  sectionId: string;
-  elementKey: string;
-  onEdit?: (value: string) => void;
-}) => {
-  if (mode === 'edit' && onEdit) {
-    return (
-      <div 
-        contentEditable
-        suppressContentEditableWarning
-        onBlur={(e) => onEdit(e.currentTarget.textContent || '')}
-        className="outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-1 min-h-[24px] cursor-text hover:bg-gray-50"
-        data-placeholder={`Edit ${elementKey.replace('_', ' ')}`}
-      >
-        {children}
-      </div>
-    );
-  }
-  
-  return <>{children}</>;
-};
 
 // Highlight Icon Component
 const HighlightIcon = ({ title, index }: { title: string, index: number }) => {
@@ -278,38 +254,41 @@ export default function StackedHighlights(props: StackedHighlightsProps) {
       <div className="max-w-4xl mx-auto">
         {/* Header Section */}
         <div className="text-center mb-16">
-          <ModeWrapper
+          <EditableAdaptiveHeadline
             mode={mode}
+            value={blockContent.headline || ''}
+            onEdit={(value) => handleContentUpdate('headline', value)}
+            level="h2"
+            backgroundType={backgroundType === 'custom' ? 'secondary' : backgroundType}
+            colorTokens={colorTokens}
+            className="mb-6"
             sectionId={sectionId}
             elementKey="headline"
-            onEdit={(value) => handleContentUpdate('headline', value)}
-          >
-            <h2 
-              className={`mb-6 ${colorTokens.textPrimary}`}
-            >
-              {blockContent.headline}
-            </h2>
-          </ModeWrapper>
+            sectionBackground={sectionBackground}
+          />
 
           {/* Optional Mechanism Name */}
           {(blockContent.mechanism_name || mode === 'edit') && (
-            <ModeWrapper
-              mode={mode}
-              sectionId={sectionId}
-              elementKey="mechanism_name"
-              onEdit={(value) => handleContentUpdate('mechanism_name', value)}
-            >
-              <div 
-                className={`inline-flex items-center px-4 py-2 bg-blue-100 border border-blue-300 rounded-full text-blue-800 font-semibold ${!blockContent.mechanism_name && mode === 'edit' ? 'opacity-50' : ''}`}
-              >
-                {blockContent.mechanism_name && (
-                  <svg className="w-4 h-4 mr-2 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
-                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                  </svg>
-                )}
-                {blockContent.mechanism_name || (mode === 'edit' ? 'Add mechanism name (e.g., "Powered by SmartFlow™")' : '')}
-              </div>
-            </ModeWrapper>
+            <div className="inline-flex items-center px-4 py-2 bg-blue-100 border border-blue-300 rounded-full">
+              {blockContent.mechanism_name && (
+                <svg className="w-4 h-4 mr-2 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                  <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                </svg>
+              )}
+              <EditableAdaptiveText
+                mode={mode}
+                value={blockContent.mechanism_name || ''}
+                onEdit={(value) => handleContentUpdate('mechanism_name', value)}
+                backgroundType="neutral"
+                colorTokens={{ ...colorTokens, textPrimary: 'text-blue-800' }}
+                variant="body"
+                className="font-semibold text-blue-800"
+                placeholder="Add mechanism name (e.g., 'Powered by SmartFlow™')"
+                sectionId={sectionId}
+                elementKey="mechanism_name"
+                sectionBackground="bg-blue-100"
+              />
+            </div>
           )}
         </div>
 
@@ -329,14 +308,28 @@ export default function StackedHighlights(props: StackedHighlightsProps) {
         </div>
 
         {/* Unique Value Proposition */}
-        <div className="mt-16 text-center">
-          <div className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-200 rounded-full text-blue-800">
-            <svg className="w-5 h-5 mr-2 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
-              <path fillRule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clipRule="evenodd" />
-            </svg>
-            <span className="font-medium">Our proprietary approach that you won't find anywhere else</span>
+        {(blockContent.footer_text || mode === 'edit') && (
+          <div className="mt-16 text-center">
+            <div className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-200 rounded-full">
+              <svg className="w-5 h-5 mr-2 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clipRule="evenodd" />
+              </svg>
+              <EditableAdaptiveText
+                mode={mode}
+                value={blockContent.footer_text || ''}
+                onEdit={(value) => handleContentUpdate('footer_text', value)}
+                backgroundType="neutral"
+                colorTokens={{ ...colorTokens, textPrimary: 'text-blue-800' }}
+                variant="body"
+                className="font-medium text-blue-800"
+                placeholder="Add unique value proposition..."
+                sectionId={sectionId}
+                elementKey="footer_text"
+                sectionBackground="bg-blue-50"
+              />
+            </div>
           </div>
-        </div>
+        )}
 
       </div>
     </LayoutSection>

@@ -28,6 +28,7 @@ interface PersonaResultPanelsContent {
   result_descriptions: string;
   key_benefits: string;
   subheadline?: string;
+  footer_text?: string;
 }
 
 // Content schema for PersonaResultPanels layout
@@ -38,7 +39,8 @@ const CONTENT_SCHEMA = {
   result_metrics: { type: 'string' as const, default: '3x Lead Generation|40% Sales Increase|60% Cost Reduction|50% Faster Delivery' },
   result_descriptions: { type: 'string' as const, default: 'Generate qualified leads at scale with automated campaigns|Close more deals with intelligent sales automation|Streamline operations and eliminate wasteful processes|Ship features faster with automated workflows' },
   key_benefits: { type: 'string' as const, default: 'Better targeting,Higher conversion,Real-time analytics|Shorter sales cycles,Better forecasting,Automated follow-ups|Process optimization,Resource savings,Team productivity|Faster deployment,Better quality,Reduced errors' },
-  subheadline: { type: 'string' as const, default: 'See how different teams achieve breakthrough results with our solution' }
+  subheadline: { type: 'string' as const, default: 'See how different teams achieve breakthrough results with our solution' },
+  footer_text: { type: 'string' as const, default: 'Tailored results for every team in your organization' }
 };
 
 // Parse persona panel data from pipe-separated strings
@@ -391,14 +393,28 @@ export default function PersonaResultPanels(props: PersonaResultPanelsProps) {
         </div>
 
         {/* Universal Success Footer */}
-        <div className="mt-16 text-center">
-          <div className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-gray-50 to-slate-50 border border-gray-200 rounded-full text-gray-800">
-            <svg className="w-5 h-5 mr-2 text-gray-600" fill="currentColor" viewBox="0 0 20 20">
-              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-            </svg>
-            <span className="font-medium">Tailored results for every team in your organization</span>
+        {(blockContent.footer_text || mode === 'edit') && (
+          <div className="mt-16 text-center">
+            <div className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-gray-50 to-slate-50 border border-gray-200 rounded-full text-gray-800">
+              <svg className="w-5 h-5 mr-2 text-gray-600" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+              </svg>
+              <EditableAdaptiveText
+                mode={mode}
+                value={blockContent.footer_text || ''}
+                onEdit={(value) => handleContentUpdate('footer_text', value)}
+                backgroundType={backgroundType}
+                colorTokens={colorTokens}
+                variant="body"
+                className="font-medium"
+                placeholder="Add footer message about team results..."
+                sectionBackground={sectionBackground}
+                data-section-id={sectionId}
+                data-element-key="footer_text"
+              />
+            </div>
           </div>
-        </div>
+        )}
 
       </div>
     </section>
