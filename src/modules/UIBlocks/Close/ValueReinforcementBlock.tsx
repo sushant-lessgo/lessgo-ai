@@ -41,6 +41,10 @@ interface ValueReinforcementBlockContent {
   label_2?: string;
   label_3?: string;
   label_4?: string;
+  transformation_title?: string;
+  transformation_description?: string;
+  social_proof_title?: string;
+  final_cta_title?: string;
 }
 
 const CONTENT_SCHEMA = {
@@ -151,6 +155,22 @@ const CONTENT_SCHEMA = {
   label_4: { 
     type: 'string' as const, 
     default: 'Expert support' 
+  },
+  transformation_title: { 
+    type: 'string' as const, 
+    default: 'See the Transformation' 
+  },
+  transformation_description: { 
+    type: 'string' as const, 
+    default: 'Watch how businesses like yours have transformed their operations' 
+  },
+  social_proof_title: { 
+    type: 'string' as const, 
+    default: 'Trusted by Businesses Worldwide' 
+  },
+  final_cta_title: { 
+    type: 'string' as const, 
+    default: 'Ready to Experience These Results?' 
   }
 };
 
@@ -469,12 +489,34 @@ export default function ValueReinforcementBlock(props: LayoutComponentProps) {
             {/* Transformation Section */}
             <div className="bg-gradient-to-r from-gray-50 to-blue-50 rounded-2xl p-8 border border-gray-100 mb-16">
               <div className="text-center mb-12">
-                <h3 className="text-gray-900 mb-4" style={h2Style}>
-                  See the Transformation
-                </h3>
-                <p className={`${mutedTextColor} max-w-2xl mx-auto`} style={bodyLgStyle}>
-                  Watch how businesses like yours have transformed their operations
-                </p>
+                <EditableAdaptiveText
+                  mode={mode}
+                  value={blockContent.transformation_title || ''}
+                  onEdit={(value) => handleContentUpdate('transformation_title', value)}
+                  backgroundType={safeBackgroundType}
+                  colorTokens={colorTokens}
+                  variant="body"
+                  className="text-gray-900 mb-4"
+                  style={h2Style}
+                  placeholder="See the Transformation"
+                  sectionId={sectionId}
+                  elementKey="transformation_title"
+                  sectionBackground={sectionBackground}
+                />
+                <EditableAdaptiveText
+                  mode={mode}
+                  value={blockContent.transformation_description || ''}
+                  onEdit={(value) => handleContentUpdate('transformation_description', value)}
+                  backgroundType={safeBackgroundType}
+                  colorTokens={colorTokens}
+                  variant="body"
+                  className={`${mutedTextColor} max-w-2xl mx-auto`}
+                  style={bodyLgStyle}
+                  placeholder="Watch how businesses like yours have transformed their operations"
+                  sectionId={sectionId}
+                  elementKey="transformation_description"
+                  sectionBackground={sectionBackground}
+                />
               </div>
 
               <div className="space-y-6">
@@ -493,7 +535,20 @@ export default function ValueReinforcementBlock(props: LayoutComponentProps) {
 
             {/* Social Proof Stats */}
             <div className="bg-gradient-to-r from-blue-600 to-blue-700 rounded-2xl p-8 text-white text-center mb-16">
-              <h3 className="mb-8" style={h2Style}>Trusted by Businesses Worldwide</h3>
+              <EditableAdaptiveText
+                mode={mode}
+                value={blockContent.social_proof_title || ''}
+                onEdit={(value) => handleContentUpdate('social_proof_title', value)}
+                backgroundType={safeBackgroundType}
+                colorTokens={colorTokens}
+                variant="body"
+                className="mb-8 text-white"
+                style={h2Style}
+                placeholder="Trusted by Businesses Worldwide"
+                sectionId={sectionId}
+                elementKey="social_proof_title"
+                sectionBackground={sectionBackground}
+              />
               
               <div className="grid md:grid-cols-4 gap-8">
                 {socialProofData.map((item, index) => (
@@ -556,9 +611,19 @@ export default function ValueReinforcementBlock(props: LayoutComponentProps) {
 
             {/* Final CTA Section */}
             <div className="bg-white rounded-2xl border-2 border-gray-200 p-8 text-center shadow-xl">
-              <h3 className="text-2xl font-bold text-gray-900 mb-4">
-                Ready to Experience These Results?
-              </h3>
+              <EditableAdaptiveText
+                mode={mode}
+                value={blockContent.final_cta_title || ''}
+                onEdit={(value) => handleContentUpdate('final_cta_title', value)}
+                backgroundType={safeBackgroundType}
+                colorTokens={colorTokens}
+                variant="body"
+                className="text-2xl font-bold text-gray-900 mb-4"
+                placeholder="Ready to Experience These Results?"
+                sectionId={sectionId}
+                elementKey="final_cta_title"
+                sectionBackground={sectionBackground}
+              />
               
               <div className="mb-8">
                 <CTAButton
@@ -696,7 +761,11 @@ export const componentMeta = {
     { key: 'urgency_text', label: 'Urgency Text', type: 'text', required: false },
     { key: 'risk_reversal', label: 'Risk Reversal Text', type: 'text', required: false },
     { key: 'supporting_text', label: 'Supporting Text', type: 'textarea', required: false },
-    { key: 'trust_items', label: 'Trust Indicators (pipe separated)', type: 'text', required: false }
+    { key: 'trust_items', label: 'Trust Indicators (pipe separated)', type: 'text', required: false },
+    { key: 'transformation_title', label: 'Transformation Section Title', type: 'text', required: false },
+    { key: 'transformation_description', label: 'Transformation Section Description', type: 'textarea', required: false },
+    { key: 'social_proof_title', label: 'Social Proof Section Title', type: 'text', required: false },
+    { key: 'final_cta_title', label: 'Final CTA Title', type: 'text', required: false }
   ],
   
   features: [

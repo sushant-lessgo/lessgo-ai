@@ -33,6 +33,13 @@ interface BonusStackCTAContent {
   trust_item_3?: string;
   trust_item_4?: string;
   trust_item_5?: string;
+  social_proof_footer_text?: string;
+  main_offer_badge?: string;
+  bonus_badge?: string;
+  bonus_description?: string;
+  total_value_label?: string;
+  final_cta_title?: string;
+  final_cta_description?: string;
 }
 
 const CONTENT_SCHEMA = {
@@ -111,6 +118,34 @@ const CONTENT_SCHEMA = {
   trust_item_5: { 
     type: 'string' as const, 
     default: '' 
+  },
+  social_proof_footer_text: { 
+    type: 'string' as const, 
+    default: 'Join the leading enterprises who chose our platform' 
+  },
+  main_offer_badge: { 
+    type: 'string' as const, 
+    default: '🎯 MAIN OFFER' 
+  },
+  bonus_badge: { 
+    type: 'string' as const, 
+    default: '🎁 EXCLUSIVE BONUSES INCLUDED' 
+  },
+  bonus_description: { 
+    type: 'string' as const, 
+    default: 'When you order today, you\'ll also receive these valuable bonuses absolutely FREE:' 
+  },
+  total_value_label: { 
+    type: 'string' as const, 
+    default: 'Total Package Value:' 
+  },
+  final_cta_title: { 
+    type: 'string' as const, 
+    default: 'Ready to Get Started?' 
+  },
+  final_cta_description: { 
+    type: 'string' as const, 
+    default: 'Join thousands of users who have transformed their workflow with our simple 3-step process.' 
   }
 };
 
@@ -325,7 +360,19 @@ export default function BonusStackCTA(props: LayoutComponentProps) {
             <div className="bg-gradient-to-r from-blue-600 to-blue-700 rounded-2xl p-8 text-white mb-8 shadow-2xl">
               <div className="text-center">
                 <div className="inline-block bg-yellow-400 text-blue-900 px-4 py-2 rounded-full text-sm font-bold mb-4">
-                  🎯 MAIN OFFER
+                  <EditableAdaptiveText
+                    mode={mode}
+                    value={blockContent.main_offer_badge || ''}
+                    onEdit={(value) => handleContentUpdate('main_offer_badge', value)}
+                    backgroundType={safeBackgroundType}
+                    colorTokens={colorTokens}
+                    variant="body"
+                    className="text-sm font-bold text-blue-900"
+                    placeholder="🎯 MAIN OFFER"
+                    sectionId={sectionId}
+                    elementKey="main_offer_badge"
+                    sectionBackground={sectionBackground}
+                  />
                 </div>
                 <h3 className="font-bold mb-6" style={h2Style}>{blockContent.main_offer}</h3>
                 
@@ -361,11 +408,33 @@ export default function BonusStackCTA(props: LayoutComponentProps) {
             <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-2xl p-8 border-2 border-green-200 mb-8">
               <div className="text-center mb-8">
                 <div className="inline-block bg-green-500 text-white px-6 py-3 rounded-full font-bold text-lg mb-4">
-                  🎁 EXCLUSIVE BONUSES INCLUDED
+                  <EditableAdaptiveText
+                    mode={mode}
+                    value={blockContent.bonus_badge || ''}
+                    onEdit={(value) => handleContentUpdate('bonus_badge', value)}
+                    backgroundType={safeBackgroundType}
+                    colorTokens={colorTokens}
+                    variant="body"
+                    className="font-bold text-lg text-white"
+                    placeholder="🎁 EXCLUSIVE BONUSES INCLUDED"
+                    sectionId={sectionId}
+                    elementKey="bonus_badge"
+                    sectionBackground={sectionBackground}
+                  />
                 </div>
-                <p className="text-gray-700">
-                  When you order today, you'll also receive these valuable bonuses absolutely FREE:
-                </p>
+                <EditableAdaptiveText
+                  mode={mode}
+                  value={blockContent.bonus_description || ''}
+                  onEdit={(value) => handleContentUpdate('bonus_description', value)}
+                  backgroundType={safeBackgroundType}
+                  colorTokens={colorTokens}
+                  variant="body"
+                  className="text-gray-700"
+                  placeholder="When you order today, you'll also receive these valuable bonuses absolutely FREE:"
+                  sectionId={sectionId}
+                  elementKey="bonus_description"
+                  sectionBackground={sectionBackground}
+                />
               </div>
 
               <div className="space-y-4 mb-8">
@@ -382,7 +451,19 @@ export default function BonusStackCTA(props: LayoutComponentProps) {
               {/* Total Value Summary */}
               <div className="bg-white rounded-xl p-6 border-2 border-green-300">
                 <div className="text-center">
-                  <div className="text-lg text-gray-600 mb-2">Total Package Value:</div>
+                  <EditableAdaptiveText
+                    mode={mode}
+                    value={blockContent.total_value_label || ''}
+                    onEdit={(value) => handleContentUpdate('total_value_label', value)}
+                    backgroundType={safeBackgroundType}
+                    colorTokens={colorTokens}
+                    variant="body"
+                    className="text-lg text-gray-600 mb-2"
+                    placeholder="Total Package Value:"
+                    sectionId={sectionId}
+                    elementKey="total_value_label"
+                    sectionBackground={sectionBackground}
+                  />
                   <div className="font-bold text-green-600 mb-4" style={{...h2Style, fontSize: 'clamp(1.5rem, 3vw, 2rem)'}}>
                     {blockContent.total_value}
                   </div>
@@ -547,7 +628,11 @@ export const componentMeta = {
     { key: 'trust_item_2', label: 'Trust Item 2', type: 'text', required: false },
     { key: 'trust_item_3', label: 'Trust Item 3', type: 'text', required: false },
     { key: 'trust_item_4', label: 'Trust Item 4', type: 'text', required: false },
-    { key: 'trust_item_5', label: 'Trust Item 5', type: 'text', required: false }
+    { key: 'trust_item_5', label: 'Trust Item 5', type: 'text', required: false },
+    { key: 'main_offer_badge', label: 'Main Offer Badge', type: 'text', required: false },
+    { key: 'bonus_badge', label: 'Bonus Badge', type: 'text', required: false },
+    { key: 'bonus_description', label: 'Bonus Description', type: 'textarea', required: false },
+    { key: 'total_value_label', label: 'Total Value Label', type: 'text', required: false }
   ],
   
   features: [

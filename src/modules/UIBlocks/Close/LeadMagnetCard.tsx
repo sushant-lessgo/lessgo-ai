@@ -32,6 +32,13 @@ interface LeadMagnetCardContent {
   trust_item_3?: string;
   trust_item_4?: string;
   trust_item_5?: string;
+  benefits_label?: string;
+  instant_access_title?: string;
+  instant_access_description?: string;
+  free_title?: string;
+  free_description?: string;
+  privacy_title?: string;
+  privacy_description?: string;
 }
 
 const CONTENT_SCHEMA = {
@@ -106,6 +113,34 @@ const CONTENT_SCHEMA = {
   trust_item_5: { 
     type: 'string' as const, 
     default: '' 
+  },
+  benefits_label: { 
+    type: 'string' as const, 
+    default: 'You\'ll get:' 
+  },
+  instant_access_title: { 
+    type: 'string' as const, 
+    default: 'Instant Access' 
+  },
+  instant_access_description: { 
+    type: 'string' as const, 
+    default: 'Download immediately' 
+  },
+  free_title: { 
+    type: 'string' as const, 
+    default: '100% Free' 
+  },
+  free_description: { 
+    type: 'string' as const, 
+    default: 'No hidden costs' 
+  },
+  privacy_title: { 
+    type: 'string' as const, 
+    default: 'Privacy Protected' 
+  },
+  privacy_description: { 
+    type: 'string' as const, 
+    default: 'We never spam' 
   }
 };
 
@@ -407,7 +442,19 @@ export default function LeadMagnetCard(props: LayoutComponentProps) {
                 
                 {/* Benefits */}
                 <div className="mb-8">
-                  <div className="text-sm font-semibold text-gray-700 mb-4">You'll get:</div>
+                  <EditableAdaptiveText
+                    mode={mode}
+                    value={blockContent.benefits_label || ''}
+                    onEdit={(value) => handleContentUpdate('benefits_label', value)}
+                    backgroundType={safeBackgroundType}
+                    colorTokens={colorTokens}
+                    variant="body"
+                    className="text-sm font-semibold text-gray-700 mb-4"
+                    placeholder="You'll get:"
+                    sectionId={sectionId}
+                    elementKey="benefits_label"
+                    sectionBackground={sectionBackground}
+                  />
                   <div className="space-y-3">
                     {benefits.map((benefit, index) => (
                       <div key={index} className="flex items-start space-x-3">
@@ -462,8 +509,32 @@ export default function LeadMagnetCard(props: LayoutComponentProps) {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                 </svg>
               </div>
-              <div className="font-semibold text-gray-900">Instant Access</div>
-              <div className={`text-sm ${mutedTextColor}`}>Download immediately</div>
+              <EditableAdaptiveText
+                mode={mode}
+                value={blockContent.instant_access_title || ''}
+                onEdit={(value) => handleContentUpdate('instant_access_title', value)}
+                backgroundType={safeBackgroundType}
+                colorTokens={colorTokens}
+                variant="body"
+                className="font-semibold text-gray-900"
+                placeholder="Instant Access"
+                sectionId={sectionId}
+                elementKey="instant_access_title"
+                sectionBackground={sectionBackground}
+              />
+              <EditableAdaptiveText
+                mode={mode}
+                value={blockContent.instant_access_description || ''}
+                onEdit={(value) => handleContentUpdate('instant_access_description', value)}
+                backgroundType={safeBackgroundType}
+                colorTokens={colorTokens}
+                variant="body"
+                className={`text-sm ${mutedTextColor}`}
+                placeholder="Download immediately"
+                sectionId={sectionId}
+                elementKey="instant_access_description"
+                sectionBackground={sectionBackground}
+              />
             </div>
             
             <div className="text-center">
@@ -472,8 +543,32 @@ export default function LeadMagnetCard(props: LayoutComponentProps) {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                 </svg>
               </div>
-              <div className="font-semibold text-gray-900">100% Free</div>
-              <div className={`text-sm ${mutedTextColor}`}>No hidden costs</div>
+              <EditableAdaptiveText
+                mode={mode}
+                value={blockContent.free_title || ''}
+                onEdit={(value) => handleContentUpdate('free_title', value)}
+                backgroundType={safeBackgroundType}
+                colorTokens={colorTokens}
+                variant="body"
+                className="font-semibold text-gray-900"
+                placeholder="100% Free"
+                sectionId={sectionId}
+                elementKey="free_title"
+                sectionBackground={sectionBackground}
+              />
+              <EditableAdaptiveText
+                mode={mode}
+                value={blockContent.free_description || ''}
+                onEdit={(value) => handleContentUpdate('free_description', value)}
+                backgroundType={safeBackgroundType}
+                colorTokens={colorTokens}
+                variant="body"
+                className={`text-sm ${mutedTextColor}`}
+                placeholder="No hidden costs"
+                sectionId={sectionId}
+                elementKey="free_description"
+                sectionBackground={sectionBackground}
+              />
             </div>
             
             <div className="text-center">
@@ -482,8 +577,32 @@ export default function LeadMagnetCard(props: LayoutComponentProps) {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                 </svg>
               </div>
-              <div className="font-semibold text-gray-900">Privacy Protected</div>
-              <div className={`text-sm ${mutedTextColor}`}>We never spam</div>
+              <EditableAdaptiveText
+                mode={mode}
+                value={blockContent.privacy_title || ''}
+                onEdit={(value) => handleContentUpdate('privacy_title', value)}
+                backgroundType={safeBackgroundType}
+                colorTokens={colorTokens}
+                variant="body"
+                className="font-semibold text-gray-900"
+                placeholder="Privacy Protected"
+                sectionId={sectionId}
+                elementKey="privacy_title"
+                sectionBackground={sectionBackground}
+              />
+              <EditableAdaptiveText
+                mode={mode}
+                value={blockContent.privacy_description || ''}
+                onEdit={(value) => handleContentUpdate('privacy_description', value)}
+                backgroundType={safeBackgroundType}
+                colorTokens={colorTokens}
+                variant="body"
+                className={`text-sm ${mutedTextColor}`}
+                placeholder="We never spam"
+                sectionId={sectionId}
+                elementKey="privacy_description"
+                sectionBackground={sectionBackground}
+              />
             </div>
           </div>
         </div>
@@ -587,7 +706,14 @@ export const componentMeta = {
     { key: 'magnet_preview', label: 'Preview/Chapters (pipe separated)', type: 'textarea', required: false },
     { key: 'delivery_method', label: 'Delivery Method', type: 'text', required: false },
     { key: 'supporting_text', label: 'Supporting Text', type: 'textarea', required: false },
-    { key: 'trust_items', label: 'Trust Indicators (pipe separated)', type: 'text', required: false }
+    { key: 'trust_items', label: 'Trust Indicators (pipe separated)', type: 'text', required: false },
+    { key: 'benefits_label', label: 'Benefits Label', type: 'text', required: false },
+    { key: 'instant_access_title', label: 'Instant Access Title', type: 'text', required: false },
+    { key: 'instant_access_description', label: 'Instant Access Description', type: 'text', required: false },
+    { key: 'free_title', label: 'Free Title', type: 'text', required: false },
+    { key: 'free_description', label: 'Free Description', type: 'text', required: false },
+    { key: 'privacy_title', label: 'Privacy Title', type: 'text', required: false },
+    { key: 'privacy_description', label: 'Privacy Description', type: 'text', required: false }
   ],
   
   features: [

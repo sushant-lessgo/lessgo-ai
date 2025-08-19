@@ -122,11 +122,11 @@ const PremiumCard = React.memo(({
   visual?: string;
   showImageToolbar: any;
   sectionId: string;
-  mode: string;
+  mode: 'preview' | 'edit';
   bodyLgStyle: React.CSSProperties;
   handleContentUpdate: (key: string, value: string) => void;
   colorTokens: any;
-  backgroundType: string;
+  backgroundType: 'custom' | 'neutral' | 'primary' | 'secondary' | 'divider' | 'theme';
   sectionBackground: any;
   premiumFeaturesText: string;
   placeholderText: string;

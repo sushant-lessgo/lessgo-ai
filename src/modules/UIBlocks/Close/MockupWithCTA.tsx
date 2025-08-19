@@ -19,6 +19,7 @@ interface MockupWithCTAContent {
   cta_text: string;
   urgency_text?: string;
   guarantee_text?: string;
+  browser_url?: string;
 }
 
 // Content schema - defines structure and defaults
@@ -42,11 +43,15 @@ const CONTENT_SCHEMA = {
   guarantee_text: { 
     type: 'string' as const, 
     default: '30-day money back guarantee' 
+  },
+  browser_url: { 
+    type: 'string' as const, 
+    default: 'yourapp.com' 
   }
 };
 
 // Simple Device Mockup Component
-const DeviceMockup = React.memo(({ type = 'laptop' }: { type?: 'laptop' | 'phone' }) => {
+const DeviceMockup = React.memo(({ type = 'laptop', browserUrl = 'yourapp.com' }: { type?: 'laptop' | 'phone'; browserUrl?: string }) => {
   if (type === 'phone') {
     return (
       <div className="relative mx-auto w-64 h-[520px] transform hover:scale-105 transition-transform duration-300">
@@ -91,7 +96,7 @@ const DeviceMockup = React.memo(({ type = 'laptop' }: { type?: 'laptop' | 'phone
                 <div className="w-3 h-3 bg-green-500 rounded-full"></div>
               </div>
               <div className="flex-1 mx-4 h-5 bg-white rounded border text-xs flex items-center px-2 text-gray-400">
-                yourapp.com
+                {browserUrl}
               </div>
             </div>
             
@@ -160,7 +165,7 @@ export default function MockupWithCTA(props: LayoutComponentProps) {
           
           {/* Mockup Side */}
           <div className="order-1 lg:order-1 flex justify-center lg:justify-start">
-            <DeviceMockup type="laptop" />
+            <DeviceMockup type="laptop" browserUrl={blockContent.browser_url || 'yourapp.com'} />
           </div>
 
           {/* CTA Content Side */}
@@ -246,6 +251,26 @@ export default function MockupWithCTA(props: LayoutComponentProps) {
                   sectionBackground={sectionBackground}
                 />
               )}
+
+              {/* Browser URL - Only show in edit mode */}
+              {mode === 'edit' && (
+                <div className="mt-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Browser URL (shown in mockup)</label>
+                  <EditableAdaptiveText
+                    mode={mode}
+                    value={blockContent.browser_url || ''}
+                    onEdit={(value) => handleContentUpdate('browser_url', value)}
+                    backgroundType={safeBackgroundType}
+                    colorTokens={colorTokens}
+                    variant="body"
+                    className="text-sm"
+                    placeholder="yourapp.com"
+                    sectionId={sectionId}
+                    elementKey="browser_url"
+                    sectionBackground={sectionBackground}
+                  />
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -270,7 +295,8 @@ export const componentMeta = {
     { key: 'subheadline', label: 'Subheadline', type: 'textarea', required: false },
     { key: 'cta_text', label: 'CTA Button Text', type: 'text', required: true },
     { key: 'urgency_text', label: 'Urgency Text', type: 'text', required: false },
-    { key: 'guarantee_text', label: 'Guarantee Text', type: 'text', required: false }
+    { key: 'guarantee_text', label: 'Guarantee Text', type: 'text', required: false },
+    { key: 'browser_url', label: 'Browser URL (mockup)', type: 'text', required: false }
   ],
   
   // ✅ NEW: Enhanced features

@@ -115,7 +115,7 @@ const InteractiveSlider = React.memo(({
   afterContent: { label: string; description: string; visual?: string };
   showImageToolbar: any;
   sectionId: string;
-  mode: string;
+  mode: 'preview' | 'edit';
   h3Style: React.CSSProperties;
   bodyLgStyle: React.CSSProperties;
   beforePlaceholderText: string;
@@ -124,7 +124,7 @@ const InteractiveSlider = React.memo(({
   showInteractionHint?: string;
   handleContentUpdate: (key: string, value: string) => void;
   colorTokens: any;
-  backgroundType: string;
+  backgroundType: 'custom' | 'neutral' | 'primary' | 'secondary' | 'divider' | 'theme';
   sectionBackground: any;
 }) => {
   const [isAfter, setIsAfter] = useState(false);

@@ -15,8 +15,20 @@ import { parsePipeData, updateListData } from '@/utils/dataParsingUtils';
 interface AccordionFAQContent {
   headline: string;
   subheadline?: string;
-  questions: string;
-  answers: string;
+  // Individual Q&A fields (up to 5 items)
+  question_1: string;
+  answer_1: string;
+  question_2: string;
+  answer_2: string;
+  question_3: string;
+  answer_3: string;
+  question_4: string;
+  answer_4: string;
+  question_5: string;
+  answer_5: string;
+  // Legacy fields for backward compatibility
+  questions?: string;
+  answers?: string;
 }
 
 // FAQ item structure
@@ -37,27 +49,60 @@ const CONTENT_SCHEMA = {
     type: 'string' as const, 
     default: 'Find answers to common questions about our platform and services.' 
   },
-  questions: { 
-    type: 'string' as const, 
-    default: 'How does the free trial work?|What payment methods do you accept?|Can I cancel anytime?|Do you offer customer support?|Is my data secure?' 
-  },
-  answers: { 
-    type: 'string' as const, 
-    default: 'Our free trial gives you full access to all features for 14 days. No credit card required to start.|We accept all major credit cards, PayPal, and bank transfers for annual plans. All payments are processed securely.|Yes, you can cancel your subscription at any time. No long-term contracts or cancellation fees.|We offer 24/7 customer support via chat, email, and phone. Our average response time is under 2 hours.|Absolutely. We use enterprise-grade encryption and are SOC 2 compliant. Your data is stored securely and never shared with third parties.' 
-  }
+  // Individual Q&A fields
+  question_1: { type: 'string' as const, default: 'How does the free trial work?' },
+  answer_1: { type: 'string' as const, default: 'Our free trial gives you full access to all features for 14 days. No credit card required to start.' },
+  question_2: { type: 'string' as const, default: 'What payment methods do you accept?' },
+  answer_2: { type: 'string' as const, default: 'We accept all major credit cards, PayPal, and bank transfers for annual plans. All payments are processed securely.' },
+  question_3: { type: 'string' as const, default: 'Can I cancel anytime?' },
+  answer_3: { type: 'string' as const, default: 'Yes, you can cancel your subscription at any time. No long-term contracts or cancellation fees.' },
+  question_4: { type: 'string' as const, default: 'Do you offer customer support?' },
+  answer_4: { type: 'string' as const, default: 'We offer 24/7 customer support via chat, email, and phone. Our average response time is under 2 hours.' },
+  question_5: { type: 'string' as const, default: 'Is my data secure?' },
+  answer_5: { type: 'string' as const, default: 'Absolutely. We use enterprise-grade encryption and are SOC 2 compliant. Your data is stored securely and never shared with third parties.' },
+  // Legacy fields for backward compatibility
+  questions: { type: 'string' as const, default: '' },
+  answers: { type: 'string' as const, default: '' }
 };
 
-// Parse FAQ data from pipe-separated strings
-const parseFAQData = (questions: string, answers: string): FAQItem[] => {
-  const questionList = parsePipeData(questions);
-  const answerList = parsePipeData(answers);
+// Helper function to get FAQ items
+const getFAQItems = (blockContent: AccordionFAQContent): FAQItem[] => {
+  const items: FAQItem[] = [];
   
-  return questionList.map((question, index) => ({
-    id: `faq-${index}`,
-    index,
-    question,
-    answer: answerList[index] || 'Answer not provided.'
-  }));
+  // Check individual fields first (preferred)
+  for (let i = 1; i <= 5; i++) {
+    const questionKey = `question_${i}` as keyof AccordionFAQContent;
+    const answerKey = `answer_${i}` as keyof AccordionFAQContent;
+    
+    const question = blockContent[questionKey];
+    const answer = blockContent[answerKey];
+    
+    if (question && question.trim() !== '' && question !== '___REMOVED___') {
+      items.push({
+        id: `faq-${i}`,
+        index: i,
+        question: question.trim(),
+        answer: (answer && answer !== '___REMOVED___') ? answer.trim() : 'Answer not provided.'
+      });
+    }
+  }
+  
+  // Fallback to legacy format if no individual items found
+  if (items.length === 0 && blockContent.questions) {
+    const questionList = parsePipeData(blockContent.questions);
+    const answerList = parsePipeData(blockContent.answers || '');
+    
+    questionList.forEach((question, index) => {
+      items.push({
+        id: `faq-${index}`,
+        index: index + 1,
+        question,
+        answer: answerList[index] || 'Answer not provided.'
+      });
+    });
+  }
+  
+  return items;
 };
 
 // Individual FAQ Accordion Item Component
@@ -69,7 +114,11 @@ const FAQAccordionItem = React.memo(({
   colorTokens,
   getTextStyle,
   onQuestionEdit,
-  onAnswerEdit 
+  onAnswerEdit,
+  backgroundType,
+  sectionBackground,
+  sectionId,
+  onRemove
 }: {
   item: FAQItem;
   isOpen: boolean;
@@ -79,10 +128,14 @@ const FAQAccordionItem = React.memo(({
   getTextStyle: (variant: 'display' | 'hero' | 'h1' | 'h2' | 'h3' | 'body-lg' | 'body' | 'body-sm' | 'caption') => React.CSSProperties;
   onQuestionEdit: (index: number, value: string) => void;
   onAnswerEdit: (index: number, value: string) => void;
+  backgroundType: any;
+  sectionBackground: any;
+  sectionId: string;
+  onRemove: (index: number) => void;
 }) => {
   
   return (
-    <div className="border border-gray-200 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-200">
+    <div className="relative group/faq-item border border-gray-200 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-200">
       {/* Question Header */}
       <button
         onClick={onToggle}
@@ -91,22 +144,19 @@ const FAQAccordionItem = React.memo(({
       >
         <div className="flex items-center justify-between">
           <div className="flex-1 pr-4">
-            {mode === 'edit' ? (
-              <div 
-                contentEditable
-                suppressContentEditableWarning
-                onBlur={(e) => onQuestionEdit(item.index, e.currentTarget.textContent || '')}
-                className="outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-1 min-h-[24px] cursor-text hover:bg-gray-50"
-              >
-                {item.question}
-              </div>
-            ) : (
-              <h3 
-                className={`font-semibold ${colorTokens.textOnLight || colorTokens.textPrimary} hover:${colorTokens.link} transition-colors duration-200`}
-              >
-                {item.question}
-              </h3>
-            )}
+            <EditableAdaptiveText
+              mode={mode}
+              value={item.question}
+              onEdit={(value) => onQuestionEdit(item.index, value)}
+              backgroundType={backgroundType}
+              colorTokens={colorTokens}
+              variant="body"
+              className={`font-semibold ${colorTokens.textOnLight || colorTokens.textPrimary} hover:${colorTokens.link} transition-colors duration-200`}
+              placeholder={`Question ${item.index}`}
+              sectionBackground={sectionBackground}
+              data-section-id={sectionId}
+              data-element-key={`question_${item.index}`}
+            />
           </div>
           
           {/* Expand/Collapse Icon */}
@@ -130,24 +180,37 @@ const FAQAccordionItem = React.memo(({
         }`}
       >
         <div className={`px-6 py-4 ${colorTokens.surfaceElevated} border-t border-gray-200`}>
-          {mode === 'edit' ? (
-            <div 
-              contentEditable
-              suppressContentEditableWarning
-              onBlur={(e) => onAnswerEdit(item.index, e.currentTarget.textContent || '')}
-              className="outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-1 min-h-[24px] cursor-text hover:bg-gray-100 leading-relaxed"
-            >
-              {item.answer}
-            </div>
-          ) : (
-            <p 
-              className={`${colorTokens.textSecondary} leading-relaxed`}
-            >
-              {item.answer}
-            </p>
-          )}
+          <EditableAdaptiveText
+            mode={mode}
+            value={item.answer}
+            onEdit={(value) => onAnswerEdit(item.index, value)}
+            backgroundType={backgroundType}
+            colorTokens={colorTokens}
+            variant="body"
+            className={`${colorTokens.textSecondary} leading-relaxed`}
+            placeholder={`Answer ${item.index}...`}
+            sectionBackground={sectionBackground}
+            data-section-id={sectionId}
+            data-element-key={`answer_${item.index}`}
+          />
         </div>
       </div>
+      
+      {/* Remove button */}
+      {mode === 'edit' && (
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            onRemove(item.index);
+          }}
+          className="opacity-0 group-hover/faq-item:opacity-100 absolute top-2 right-2 p-1 rounded-full bg-white/80 hover:bg-white text-red-500 hover:text-red-700 transition-all duration-200 shadow-sm z-10"
+          title="Remove this FAQ item"
+        >
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      )}
     </div>
   );
 });
@@ -173,18 +236,18 @@ export default function AccordionFAQ(props: LayoutComponentProps) {
   // State for accordion open/closed items
   const [openItems, setOpenItems] = useState<Set<string>>(new Set(['faq-0'])); // First item open by default
 
-  // Parse FAQ data
-  const faqItems = parseFAQData(blockContent.questions, blockContent.answers);
+  // Get FAQ items
+  const faqItems = getFAQItems(blockContent);
 
   // Handle individual question/answer editing
   const handleQuestionEdit = (index: number, value: string) => {
-    const updatedQuestions = updateListData(blockContent.questions, index, value);
-    handleContentUpdate('questions', updatedQuestions);
+    const questionKey = `question_${index}` as keyof AccordionFAQContent;
+    handleContentUpdate(questionKey, value);
   };
 
   const handleAnswerEdit = (index: number, value: string) => {
-    const updatedAnswers = updateListData(blockContent.answers, index, value);
-    handleContentUpdate('answers', updatedAnswers);
+    const answerKey = `answer_${index}` as keyof AccordionFAQContent;
+    handleContentUpdate(answerKey, value);
   };
 
   // Toggle accordion item
@@ -262,8 +325,40 @@ export default function AccordionFAQ(props: LayoutComponentProps) {
               getTextStyle={getTextStyle}
               onQuestionEdit={handleQuestionEdit}
               onAnswerEdit={handleAnswerEdit}
+              backgroundType={backgroundType}
+              sectionBackground={sectionBackground}
+              sectionId={sectionId}
+              onRemove={(index) => {
+                handleContentUpdate(`question_${index}` as keyof AccordionFAQContent, '___REMOVED___');
+                handleContentUpdate(`answer_${index}` as keyof AccordionFAQContent, '___REMOVED___');
+              }}
             />
           ))}
+          
+          {/* Add new FAQ button */}
+          {mode === 'edit' && faqItems.length < 5 && (
+            <button
+              onClick={() => {
+                // Find the first empty slot
+                for (let i = 1; i <= 5; i++) {
+                  const questionKey = `question_${i}` as keyof AccordionFAQContent;
+                  if (!blockContent[questionKey] || blockContent[questionKey] === '' || blockContent[questionKey] === '___REMOVED___') {
+                    handleContentUpdate(questionKey, 'New question');
+                    handleContentUpdate(`answer_${i}` as keyof AccordionFAQContent, 'New answer');
+                    // Auto-open the new item
+                    setOpenItems(prev => new Set([...prev, `faq-${i}`]));
+                    break;
+                  }
+                }
+              }}
+              className="flex items-center space-x-2 text-sm text-blue-600 hover:text-blue-800 transition-colors mt-6 p-4 border-2 border-dashed border-blue-300 rounded-lg hover:border-blue-400 hover:bg-blue-50/50 w-full justify-center"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+              </svg>
+              <span>Add FAQ item</span>
+            </button>
+          )}
         </div>
 
       </div>
