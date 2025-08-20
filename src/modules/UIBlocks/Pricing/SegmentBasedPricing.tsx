@@ -6,6 +6,7 @@ import {
   EditableAdaptiveHeadline, 
   EditableAdaptiveText
 } from '@/components/layout/EditableContent';
+import IconEditableText from '@/components/ui/IconEditableText';
 import { 
   CTAButton,
   TrustIndicators 
@@ -71,7 +72,7 @@ const CONTENT_SCHEMA = {
   },
   segment_icons: { 
     type: 'string' as const, 
-    default: 'building|trending-up|shield|users' 
+    default: '🏢|📈|🛡️|👥' 
   },
   subheadline: { 
     type: 'string' as const, 
@@ -251,7 +252,22 @@ export default function SegmentBasedPricing(props: LayoutComponentProps) {
       >
         <div className="flex items-start space-x-4">
           <div className={`w-12 h-12 rounded-lg bg-gradient-to-br ${color.bg} flex items-center justify-center text-white`}>
-            {getSegmentIcon(segment.icon)}
+            <IconEditableText
+              mode={mode}
+              value={segment.icon}
+              onEdit={(value) => {
+                const updatedIcons = segmentIcons.slice();
+                updatedIcons[index] = value;
+                handleContentUpdate('segment_icons', updatedIcons.join('|'));
+              }}
+              backgroundType="primary"
+              colorTokens={colorTokens}
+              iconSize="md"
+              className="text-white text-xl"
+              placeholder="🏢"
+              sectionId={sectionId}
+              elementKey={`segment_icon_${index}`}
+            />
           </div>
           <div className="flex-1">
             <h3 style={h3Style} className={`font-bold ${isActive ? color.text : 'text-gray-900'}`}>
@@ -486,7 +502,22 @@ export default function SegmentBasedPricing(props: LayoutComponentProps) {
                   return (
                     <div key={index} className="text-center">
                       <div className={`w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br ${color.bg} flex items-center justify-center text-white`}>
-                        {getSegmentIcon(segment.icon)}
+                        <IconEditableText
+                          mode={mode}
+                          value={segment.icon}
+                          onEdit={(value) => {
+                            const updatedIcons = segmentIcons.slice();
+                            updatedIcons[index] = value;
+                            handleContentUpdate('segment_icons', updatedIcons.join('|'));
+                          }}
+                          backgroundType="primary"
+                          colorTokens={colorTokens}
+                          iconSize="lg"
+                          className="text-white text-2xl"
+                          placeholder="🏢"
+                          sectionId={sectionId}
+                          elementKey={`segment_comparison_icon_${index}`}
+                        />
                       </div>
                       <div className="font-semibold text-gray-900 mb-2">{segment.name}</div>
                       <EditableAdaptiveText

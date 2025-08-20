@@ -7,6 +7,7 @@ import {
   EditableAdaptiveHeadline, 
   EditableAdaptiveText
 } from '@/components/layout/EditableContent';
+import IconEditableText from '@/components/ui/IconEditableText';
 import { 
   CTAButton,
   TrustIndicators 
@@ -34,6 +35,10 @@ interface PersonaJourneyContent {
   summary_label_3: string;
   show_summary_section?: string;
   persona_avatar?: string;
+  // Phase icons
+  before_icon?: string;
+  journey_icon?: string;
+  after_icon?: string;
   subheadline?: string;
   supporting_text?: string;
   cta_text?: string;
@@ -92,6 +97,19 @@ const CONTENT_SCHEMA = {
   persona_avatar: { 
     type: 'string' as const, 
     default: '/persona-placeholder.jpg' 
+  },
+  // Phase icons
+  before_icon: { 
+    type: 'string' as const, 
+    default: '⚠️' 
+  },
+  journey_icon: { 
+    type: 'string' as const, 
+    default: '⚡' 
+  },
+  after_icon: { 
+    type: 'string' as const, 
+    default: '✅' 
   },
   subheadline: { 
     type: 'string' as const, 

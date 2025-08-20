@@ -9,6 +9,7 @@ import {
   EditableAdaptiveText 
 } from '@/components/layout/EditableContent';
 import { FeatureIcon } from '@/components/layout/ComponentRegistry';
+import IconEditableText from '@/components/ui/IconEditableText';
 import { LayoutComponentProps } from '@/types/storeTypes';
 import { parsePipeData, updateListData } from '@/utils/dataParsingUtils';
 
@@ -18,6 +19,13 @@ interface IconGridContent {
   subheadline?: string;
   feature_titles: string;
   feature_descriptions: string;
+  // Icon overrides (empty string means use auto-selection)
+  icon_override_1?: string;
+  icon_override_2?: string;
+  icon_override_3?: string;
+  icon_override_4?: string;
+  icon_override_5?: string;
+  icon_override_6?: string;
 }
 
 // Feature item structure
@@ -27,6 +35,7 @@ interface FeatureItem {
   title: string;
   description: string;
   iconType: string;
+  iconOverride?: string; // Manual override or empty for auto-selection
 }
 
 // Content schema - defines structure and defaults
@@ -46,11 +55,18 @@ const CONTENT_SCHEMA = {
   feature_descriptions: { 
     type: 'string' as const, 
     default: 'Work together seamlessly with your team in real-time, no matter where you are.|Get deep insights into your data with powerful analytics and reporting tools.|Automate repetitive tasks and workflows to save time and reduce errors.|Enterprise-grade security keeps your data safe with encryption and compliance.|Connect with your favorite tools through our extensive integration library.|Round-the-clock support from our expert team whenever you need help.' 
-  }
+  },
+  // Icon overrides (empty = use auto-selection)
+  icon_override_1: { type: 'string' as const, default: '' },
+  icon_override_2: { type: 'string' as const, default: '' },
+  icon_override_3: { type: 'string' as const, default: '' },
+  icon_override_4: { type: 'string' as const, default: '' },
+  icon_override_5: { type: 'string' as const, default: '' },
+  icon_override_6: { type: 'string' as const, default: '' }
 };
 
-// Parse feature data from pipe-separated strings
-const parseFeatureData = (titles: string, descriptions: string): FeatureItem[] => {
+// Parse feature data from pipe-separated strings with override support
+const parseFeatureData = (titles: string, descriptions: string, blockContent: IconGridContent): FeatureItem[] => {
   const titleList = parsePipeData(titles);
   const descriptionList = parsePipeData(descriptions);
   
@@ -65,13 +81,24 @@ const parseFeatureData = (titles: string, descriptions: string): FeatureItem[] =
     if (lower.includes('support') || lower.includes('help')) return 'support';
     return 'star'; // Default fallback
   };
+
+  // Get icon overrides
+  const overrides = [
+    blockContent.icon_override_1,
+    blockContent.icon_override_2,
+    blockContent.icon_override_3,
+    blockContent.icon_override_4,
+    blockContent.icon_override_5,
+    blockContent.icon_override_6
+  ];
   
   return titleList.map((title, index) => ({
     id: `feature-${index}`,
     index,
     title,
     description: descriptionList[index] || 'Feature description not provided.',
-    iconType: getIconType(title)
+    iconType: getIconType(title),
+    iconOverride: overrides[index] || '' // Use override if provided, empty if auto-select
   }));
 };
 
@@ -84,6 +111,7 @@ const FeatureCard = React.memo(({
   getTextStyle,
   onTitleEdit,
   onDescriptionEdit,
+  onIconEdit,
   sectionId,
   backgroundType,
   sectionBackground
@@ -95,6 +123,7 @@ const FeatureCard = React.memo(({
   getTextStyle: (variant: 'display' | 'hero' | 'h1' | 'h2' | 'h3' | 'body-lg' | 'body' | 'body-sm' | 'caption') => React.CSSProperties;
   onTitleEdit: (index: number, value: string) => void;
   onDescriptionEdit: (index: number, value: string) => void;
+  onIconEdit?: (index: number, value: string) => void;
   sectionId: string;
   backgroundType: string;
   sectionBackground: string;
@@ -111,15 +140,39 @@ const FeatureCard = React.memo(({
   
   return (
     <div className={`group p-6 rounded-xl border ${cardBackground} ${cardHover} transition-all duration-300`}>
-      {/* ✅ ENHANCED: Icon with Accent Colors */}
+      {/* ✅ ENHANCED: Icon with Manual Override Support */}
       <div className="mb-4">
         <div className={`inline-flex items-center justify-center w-12 h-12 rounded-lg ${colorTokens.ctaBg || 'bg-blue-600'} bg-opacity-10 group-hover:bg-opacity-20 transition-all duration-300`}>
-          <FeatureIcon
-            type={item.iconType}
-            colorTokens={colorTokens}
-            size="medium"
-            className="group-hover:scale-110 transition-transform duration-300"
-          />
+          {item.iconOverride ? (
+            <IconEditableText
+              mode={mode}
+              value={item.iconOverride}
+              onEdit={(value) => onIconEdit && onIconEdit(item.index, value)}
+              backgroundType={backgroundType as any}
+              colorTokens={colorTokens}
+              iconSize="md"
+              className="text-2xl group-hover:scale-110 transition-transform duration-300"
+              placeholder="🎯"
+              sectionId={sectionId}
+              elementKey={`icon_override_${item.index + 1}`}
+            />
+          ) : (
+            <FeatureIcon
+              type={item.iconType}
+              colorTokens={colorTokens}
+              size="medium"
+              className="group-hover:scale-110 transition-transform duration-300"
+            />
+          )}
+          {mode === 'edit' && !item.iconOverride && (
+            <button
+              onClick={() => onIconEdit && onIconEdit(item.index, '🎯')}
+              className="absolute -top-1 -right-1 w-5 h-5 bg-blue-600 text-white rounded-full text-xs hover:bg-blue-700 transition-colors opacity-0 group-hover:opacity-100"
+              title="Add custom icon"
+            >
+              +
+            </button>
+          )}
         </div>
       </div>
 
@@ -184,7 +237,7 @@ export default function IconGrid(props: LayoutComponentProps) {
   // console.log('🎯 IconGrid hook result:', { sectionId, mode });
 
   // Parse feature data
-  const featureItems = parseFeatureData(blockContent.feature_titles, blockContent.feature_descriptions);
+  const featureItems = parseFeatureData(blockContent.feature_titles, blockContent.feature_descriptions, blockContent);
 
   // Handle individual title/description editing
   const handleTitleEdit = (index: number, value: string) => {
@@ -195,6 +248,12 @@ export default function IconGrid(props: LayoutComponentProps) {
   const handleDescriptionEdit = (index: number, value: string) => {
     const updatedDescriptions = updateListData(blockContent.feature_descriptions, index, value);
     handleContentUpdate('feature_descriptions', updatedDescriptions);
+  };
+
+  // Handle icon editing
+  const handleIconEdit = (index: number, value: string) => {
+    const iconField = `icon_override_${index + 1}` as keyof IconGridContent;
+    handleContentUpdate(iconField, value);
   };
 
   // Force center alignment for headline - DIRECT DOM TARGETING
@@ -291,6 +350,7 @@ export default function IconGrid(props: LayoutComponentProps) {
               getTextStyle={getTextStyle}
               onTitleEdit={handleTitleEdit}
               onDescriptionEdit={handleDescriptionEdit}
+              onIconEdit={handleIconEdit}
               sectionId={sectionId}
               backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
               sectionBackground={sectionBackground}

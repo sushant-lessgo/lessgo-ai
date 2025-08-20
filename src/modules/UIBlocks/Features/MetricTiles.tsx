@@ -6,6 +6,7 @@ import {
   EditableAdaptiveHeadline, 
   EditableAdaptiveText
 } from '@/components/layout/EditableContent';
+import IconEditableText from '@/components/ui/IconEditableText';
 import { 
   CTAButton,
   TrustIndicators 
@@ -18,6 +19,11 @@ interface MetricTilesContent {
   feature_metrics: string;
   feature_descriptions: string;
   metric_labels: string;
+  // Metric icons
+  metric_icon_1?: string;
+  metric_icon_2?: string;
+  metric_icon_3?: string;
+  metric_icon_4?: string;
   subheadline?: string;
   supporting_text?: string;
   cta_text?: string;
@@ -54,6 +60,23 @@ const CONTENT_SCHEMA = {
   feature_descriptions: { 
     type: 'string' as const, 
     default: 'Automate manual processes and reduce task completion time by 300% with our intelligent workflow engine.|Save an average of $2.4M annually through reduced operational costs and improved resource allocation.|Achieve 99.9% accuracy with our AI-powered error detection and automatic correction systems.|Drive 47% revenue growth through optimized processes and improved customer satisfaction.' 
+  },
+  // Metric icons - matching the themes
+  metric_icon_1: { 
+    type: 'string' as const, 
+    default: '⚡' 
+  },
+  metric_icon_2: { 
+    type: 'string' as const, 
+    default: '💰' 
+  },
+  metric_icon_3: { 
+    type: 'string' as const, 
+    default: '✅' 
+  },
+  metric_icon_4: { 
+    type: 'string' as const, 
+    default: '📈' 
   },
   subheadline: { 
     type: 'string' as const, 
@@ -118,7 +141,11 @@ const MetricTile = React.memo(({
   index,
   colorTokens,
   mutedTextColor,
-  h3Style
+  h3Style,
+  mode,
+  handleContentUpdate,
+  blockContent,
+  sectionId
 }: {
   title: string;
   metric: string;
@@ -128,28 +155,21 @@ const MetricTile = React.memo(({
   colorTokens: any;
   mutedTextColor: string;
   h3Style: any;
+  mode: 'edit' | 'preview';
+  handleContentUpdate: (key: keyof MetricTilesContent, value: any) => void;
+  blockContent: MetricTilesContent;
+  sectionId: string;
 }) => {
   
-  const getIconForIndex = (index: number) => {
-    const icons = [
-      // Efficiency Boost
-      <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-      </svg>,
-      // Cost Reduction
-      <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
-      </svg>,
-      // Error Prevention
-      <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-      </svg>,
-      // Revenue Growth
-      <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
-      </svg>
+  // Get metric icon from content fields
+  const getMetricIcon = (index: number) => {
+    const iconFields = [
+      blockContent.metric_icon_1,
+      blockContent.metric_icon_2,
+      blockContent.metric_icon_3,
+      blockContent.metric_icon_4
     ];
-    return icons[index % icons.length];
+    return iconFields[index] || '📊';
   };
 
   const getGradientForIndex = (index: number) => {
@@ -167,7 +187,18 @@ const MetricTile = React.memo(({
       
       <div className="mb-6">
         <div className={`inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br ${getGradientForIndex(index)} shadow-lg mb-4`}>
-          {getIconForIndex(index)}
+          <IconEditableText
+            mode={mode}
+            value={getMetricIcon(index)}
+            onEdit={(value) => handleContentUpdate(`metric_icon_${index + 1}` as keyof MetricTilesContent, value)}
+            backgroundType="primary"
+            colorTokens={colorTokens}
+            iconSize="lg"
+            className="text-white text-2xl"
+            placeholder="📊"
+            sectionId={sectionId}
+            elementKey={`metric_icon_${index + 1}`}
+          />
         </div>
         
         <h3 style={h3Style} className="font-bold text-gray-900 mb-2">{title}</h3>
@@ -368,6 +399,10 @@ export default function MetricTiles(props: LayoutComponentProps) {
                 colorTokens={colorTokens}
                 mutedTextColor={mutedTextColor}
                 h3Style={h3Style}
+                mode={mode}
+                handleContentUpdate={handleContentUpdate}
+                blockContent={blockContent}
+                sectionId={sectionId}
               />
             ))}
           </div>

@@ -6,6 +6,7 @@ import { useLayoutComponent } from '@/hooks/useLayoutComponent';
 import { useTypography } from '@/hooks/useTypography';
 import { LayoutSection } from '@/components/layout/LayoutSection';
 import { EditableAdaptiveHeadline, EditableAdaptiveText } from '@/components/layout/EditableContent';
+import IconEditableText from '@/components/ui/IconEditableText';
 import { LayoutComponentProps } from '@/types/storeTypes';
 
 interface ProcessFlowDiagramContent {
@@ -16,6 +17,10 @@ interface ProcessFlowDiagramContent {
   benefits_title?: string;
   benefit_titles?: string;
   benefit_descriptions?: string;
+  // Benefit icons
+  benefit_icon_1?: string;
+  benefit_icon_2?: string;
+  benefit_icon_3?: string;
 }
 
 const CONTENT_SCHEMA = {
@@ -46,6 +51,19 @@ const CONTENT_SCHEMA = {
   benefit_descriptions: { 
     type: 'string' as const, 
     default: 'Automated processing reduces time from days to hours|AI-powered validation ensures exceptional precision|Adapts to your unique business requirements' 
+  },
+  // Benefit icons
+  benefit_icon_1: { 
+    type: 'string' as const, 
+    default: '⚡' 
+  },
+  benefit_icon_2: { 
+    type: 'string' as const, 
+    default: '🎯' 
+  },
+  benefit_icon_3: { 
+    type: 'string' as const, 
+    default: '🔧' 
   }
 };
 
@@ -160,11 +178,26 @@ export default function ProcessFlowDiagram(props: LayoutComponentProps) {
             <div className="grid md:grid-cols-3 gap-6">
               {blockContent.benefit_titles && blockContent.benefit_titles.split('|').map((title, index) => {
                 const descriptions = blockContent.benefit_descriptions ? blockContent.benefit_descriptions.split('|') : [];
-                const emojis = ['⚡', '🎯', '🔧'];
+                const iconFields = [
+                  blockContent.benefit_icon_1,
+                  blockContent.benefit_icon_2,
+                  blockContent.benefit_icon_3
+                ];
                 return (
                   <div key={index} className="text-center">
                     <div className="w-16 h-16 bg-blue-600 rounded-xl flex items-center justify-center mx-auto mb-4">
-                      <span className="text-2xl">{emojis[index] || '✨'}</span>
+                      <IconEditableText
+                        mode={mode}
+                        value={iconFields[index] || '✨'}
+                        onEdit={(value) => handleContentUpdate(`benefit_icon_${index + 1}` as keyof ProcessFlowDiagramContent, value)}
+                        backgroundType="primary"
+                        colorTokens={colorTokens}
+                        iconSize="lg"
+                        className="text-white text-2xl"
+                        placeholder="✨"
+                        sectionId={sectionId}
+                        elementKey={`benefit_icon_${index + 1}`}
+                      />
                     </div>
                     <h4 style={h4Style} className="font-semibold text-blue-900 mb-2">{title.trim()}</h4>
                     <p style={bodyStyle} className="text-blue-700 text-sm">{descriptions[index]?.trim() || 'Benefit description'}</p>

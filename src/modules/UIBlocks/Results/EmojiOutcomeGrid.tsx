@@ -5,6 +5,7 @@ import {
   EditableAdaptiveHeadline, 
   EditableAdaptiveText 
 } from '@/components/layout/EditableContent';
+import IconEditableText from '@/components/ui/IconEditableText';
 import { LayoutComponentProps } from '@/types/storeTypes';
 
 interface EmojiOutcomeGridProps extends LayoutComponentProps {}
@@ -76,21 +77,20 @@ const OutcomeCard = ({
       
       {/* Emoji Icon */}
       <div className="mb-4">
-        {mode === 'edit' ? (
-          <div 
-            contentEditable
-            suppressContentEditableWarning
-            onBlur={(e) => onEmojiEdit(index, e.currentTarget.textContent || '')}
-            className="outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-1 min-h-[60px] cursor-text hover:bg-gray-50 flex items-center justify-center text-5xl mx-auto w-20 h-20 group-hover:scale-110 transition-transform duration-300"
-            data-placeholder="Add emoji"
-          >
-            {outcome.emoji}
-          </div>
-        ) : (
-          <div className="text-5xl mx-auto w-20 h-20 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
-            {outcome.emoji}
-          </div>
-        )}
+        <div className="text-5xl mx-auto w-20 h-20 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+          <IconEditableText
+            mode={mode}
+            value={outcome.emoji}
+            onEdit={(value) => onEmojiEdit(index, value)}
+            backgroundType="neutral"
+            colorTokens={{}}
+            iconSize="xl"
+            className="text-5xl"
+            placeholder="🚀"
+            sectionId={sectionId}
+            elementKey={`emoji_outcome_${index}`}
+          />
+        </div>
       </div>
 
       {/* Outcome Title */}

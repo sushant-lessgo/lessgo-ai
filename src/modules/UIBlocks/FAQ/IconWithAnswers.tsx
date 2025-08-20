@@ -5,6 +5,7 @@ import {
   EditableAdaptiveHeadline, 
   EditableAdaptiveText
 } from '@/components/layout/EditableContent';
+import IconEditableText from '@/components/ui/IconEditableText';
 import { LayoutComponentProps } from '@/types/storeTypes';
 
 interface IconWithAnswersContent {
@@ -190,23 +191,19 @@ export default function IconWithAnswers(props: LayoutComponentProps) {
                     className="w-14 h-14 rounded-xl flex items-center justify-center text-2xl"
                     style={{ backgroundColor: `${accentColor}20` }}
                   >
-                    {mode === 'edit' ? (
-                      <EditableAdaptiveText
-                        mode={mode}
-                        value={item.icon}
-                        onEdit={(value) => handleContentUpdate(`icon_${item.index}` as keyof IconWithAnswersContent, value)}
-                        backgroundType={backgroundType}
-                        colorTokens={colorTokens}
-                        variant="body"
-                        className="text-2xl text-center min-w-[2rem] min-h-[2rem] flex items-center justify-center"
-                        placeholder="🎯"
-                        sectionBackground={sectionBackground}
-                        data-section-id={sectionId}
-                        data-element-key={`icon_${item.index}`}
-                      />
-                    ) : (
-                      <span className="text-2xl">{item.icon}</span>
-                    )}
+                    <IconEditableText
+                      mode={mode}
+                      value={item.icon}
+                      onEdit={(value) => handleContentUpdate(`icon_${item.index}` as keyof IconWithAnswersContent, value)}
+                      backgroundType={backgroundType}
+                      colorTokens={colorTokens}
+                      variant="body"
+                      iconSize="lg"
+                      placeholder="🎯"
+                      sectionBackground={sectionBackground}
+                      sectionId={sectionId}
+                      elementKey={`icon_${item.index}`}
+                    />
                   </div>
                 </div>
                 

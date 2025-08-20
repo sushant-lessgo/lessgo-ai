@@ -8,6 +8,7 @@ import {
   EditableAdaptiveHeadline, 
   EditableAdaptiveText 
 } from '@/components/layout/EditableContent';
+import IconEditableText from '@/components/ui/IconEditableText';
 import { LayoutComponentProps } from '@/types/storeTypes';
 
 // Content interface for type safety
@@ -138,7 +139,23 @@ export default function VisualObjectionTiles(props: LayoutComponentProps) {
               {/* Icon */}
               <div className="text-center mb-6">
                 <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-blue-50 to-indigo-100 rounded-2xl text-3xl group-hover:scale-110 transition-transform duration-300">
-                  {tile.icon}
+                  <IconEditableText
+                    mode={mode}
+                    value={tile.icon}
+                    onEdit={(value) => {
+                      const updatedTiles = blockContent.objection_tiles.split('|');
+                      updatedTiles[index * 3] = value;
+                      handleContentUpdate('objection_tiles', updatedTiles.join('|'));
+                    }}
+                    backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
+                    colorTokens={colorTokens}
+                    variant="body"
+                    iconSize="xl"
+                    placeholder="💰"
+                    sectionBackground={sectionBackground}
+                    sectionId={sectionId}
+                    elementKey={`objection_icon_${index}`}
+                  />
                 </div>
               </div>
 

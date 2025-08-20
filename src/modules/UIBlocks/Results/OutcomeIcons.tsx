@@ -5,6 +5,7 @@ import {
   EditableAdaptiveHeadline, 
   EditableAdaptiveText 
 } from '@/components/layout/EditableContent';
+import IconEditableText from '@/components/ui/IconEditableText';
 import { LayoutComponentProps } from '@/types/storeTypes';
 
 interface OutcomeIconsProps extends LayoutComponentProps {}
@@ -31,7 +32,7 @@ interface OutcomeIconsContent {
 // Content schema for OutcomeIcons layout
 const CONTENT_SCHEMA = {
   headline: { type: 'string' as const, default: 'Powerful Outcomes You Can Expect' },
-  icon_types: { type: 'string' as const, default: 'growth|efficiency|security|collaboration|automation|innovation' },
+  icon_types: { type: 'string' as const, default: '📈|⚡|🔒|👥|🤖|💡' },
   titles: { type: 'string' as const, default: 'Accelerated Growth|Maximum Efficiency|Enterprise Security|Seamless Collaboration|Smart Automation|Continuous Innovation' },
   descriptions: { type: 'string' as const, default: 'Scale your business faster with proven strategies and tools|Optimize workflows and eliminate bottlenecks for peak performance|Bank-level security protecting your data and operations|Unite your team with powerful collaboration features|Automate repetitive tasks and focus on what matters most|Stay ahead with cutting-edge features and regular updates' },
   subheadline: { type: 'string' as const, default: 'Transform your business with these proven outcome drivers' },
@@ -161,22 +162,19 @@ const OutcomeCard = ({
       {/* Icon */}
       <div className="mb-6">
         <div className={`w-16 h-16 ${colorScheme.bg} rounded-2xl border ${colorScheme.border} flex items-center justify-center ${colorScheme.icon} mx-auto group-hover:scale-110 transition-transform duration-300`}>
-          <OutcomeIconSvg iconType={outcome.iconType} />
+          <IconEditableText
+            mode={mode}
+            value={outcome.iconType}
+            onEdit={(value) => onIconEdit(index, value)}
+            backgroundType="primary"
+            colorTokens={{}}
+            iconSize="lg"
+            className="text-2xl"
+            placeholder="📊"
+            sectionId={sectionId}
+            elementKey={`outcome_icon_${index}`}
+          />
         </div>
-        
-        {/* Icon Type Editor (Hidden in Preview) */}
-        {mode === 'edit' && (
-          <div className="mt-2">
-            <div 
-              contentEditable
-              suppressContentEditableWarning
-              onBlur={(e) => onIconEdit(index, e.currentTarget.textContent || '')}
-              className="outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-1 min-h-[20px] cursor-text hover:bg-gray-50 text-xs text-gray-500 italic"
-            >
-              {outcome.iconType}
-            </div>
-          </div>
-        )}
       </div>
 
       {/* Title */}

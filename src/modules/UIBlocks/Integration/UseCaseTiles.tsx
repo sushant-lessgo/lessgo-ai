@@ -9,6 +9,7 @@ import {
   EditableAdaptiveHeadline, 
   EditableAdaptiveText 
 } from '@/components/layout/EditableContent';
+import IconEditableText from '@/components/ui/IconEditableText';
 import { LayoutComponentProps } from '@/types/storeTypes';
 
 // Content interface for type safety
@@ -127,7 +128,11 @@ const UseCaseTile = React.memo(({
   colorTokens,
   h3Style,
   bodySmStyle,
-  labelStyle
+  labelStyle,
+  mode,
+  handleContentUpdate,
+  sectionId,
+  index
 }: { 
   useCase: any; 
   isHovered: boolean; 
@@ -137,6 +142,10 @@ const UseCaseTile = React.memo(({
   h3Style: React.CSSProperties;
   bodySmStyle: React.CSSProperties;
   labelStyle: React.CSSProperties;
+  mode: 'edit' | 'preview';
+  handleContentUpdate: (key: keyof UseCaseTilesContent, value: any) => void;
+  sectionId: string;
+  index: number;
 }) => (
   <div 
     className={`relative p-6 rounded-xl border transition-all duration-300 cursor-pointer group ${
@@ -149,7 +158,18 @@ const UseCaseTile = React.memo(({
   >
     {/* Icon */}
     <div className="text-4xl mb-4 transform transition-transform duration-300 group-hover:scale-110">
-      {useCase.icon}
+      <IconEditableText
+        mode={mode}
+        value={useCase.icon}
+        onEdit={(value) => handleContentUpdate(`usecase_${index + 1}_icon` as keyof UseCaseTilesContent, value)}
+        backgroundType="neutral"
+        colorTokens={colorTokens}
+        iconSize="xl"
+        className="text-4xl"
+        placeholder="📊"
+        sectionId={sectionId}
+        elementKey={`usecase_${index + 1}_icon`}
+      />
     </div>
 
     {/* Title */}
@@ -294,6 +314,10 @@ export default function UseCaseTiles(props: LayoutComponentProps) {
               h3Style={h3Style}
               bodySmStyle={bodySmStyle}
               labelStyle={labelStyle}
+              mode={mode}
+              handleContentUpdate={handleContentUpdate}
+              sectionId={sectionId}
+              index={index}
             />
           ))}
         </div>
