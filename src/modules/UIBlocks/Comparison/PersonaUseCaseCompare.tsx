@@ -8,6 +8,7 @@ import {
 } from '@/components/layout/EditableContent';
 import { LayoutComponentProps } from '@/types/storeTypes';
 import { parsePipeData, updateListData } from '@/utils/dataParsingUtils';
+import IconEditableText from '@/components/ui/IconEditableText';
 
 // Content interface for type safety
 interface PersonaUseCaseCompareContent {
@@ -17,6 +18,10 @@ interface PersonaUseCaseCompareContent {
   persona_descriptions: string;
   use_cases: string;
   solutions: string;
+  persona_icon_1?: string;
+  persona_icon_2?: string;
+  persona_icon_3?: string;
+  persona_icon_4?: string;
 }
 
 // Content schema - defines structure and defaults
@@ -44,6 +49,22 @@ const CONTENT_SCHEMA = {
   solutions: { 
     type: 'string' as const, 
     default: 'Visual workflow builder, AI-powered insights, Real-time analytics|CRM integration, Automated follow-ups, Revenue intelligence|Custom workflows, Team collaboration, Cost tracking|SSO/SAML, REST APIs, SOC 2 certified' 
+  },
+  persona_icon_1: { 
+    type: 'string' as const, 
+    default: '📢' 
+  },
+  persona_icon_2: { 
+    type: 'string' as const, 
+    default: '📊' 
+  },
+  persona_icon_3: { 
+    type: 'string' as const, 
+    default: '⚙️' 
+  },
+  persona_icon_4: { 
+    type: 'string' as const, 
+    default: '💻' 
   }
 };
 
@@ -92,29 +113,18 @@ export default function PersonaUseCaseCompare(props: LayoutComponentProps) {
     handleContentUpdate('persona_descriptions', newDescriptions.join('|'));
   };
 
-  // Get persona icon
-  const getPersonaIcon = (index: number) => {
-    const icons = [
-      // Marketing
-      <svg key="marketing" className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z" />
-      </svg>,
-      // Sales
-      <svg key="sales" className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-      </svg>,
-      // Operations
-      <svg key="operations" className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-      </svg>,
-      // IT
-      <svg key="it" className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z" />
-      </svg>
-    ];
-    return icons[index] || icons[0];
+  // Icon edit handler
+  const handlePersonaIconEdit = (index: number, value: string) => {
+    const iconField = `persona_icon_${index + 1}` as keyof PersonaUseCaseCompareContent;
+    handleContentUpdate(iconField, value);
   };
+
+  // Get persona icon value
+  const getPersonaIconValue = (index: number) => {
+    const iconFields = ['persona_icon_1', 'persona_icon_2', 'persona_icon_3', 'persona_icon_4'];
+    return blockContent[iconFields[index] as keyof PersonaUseCaseCompareContent] || ['📢', '📊', '⚙️', '💻'][index];
+  };
+
 
   return (
     <LayoutSection
@@ -167,8 +177,18 @@ export default function PersonaUseCaseCompare(props: LayoutComponentProps) {
             >
               <div className={`flex flex-col items-center ${
                 activePersona === index ? 'text-primary' : colorTokens.textSecondary
-              }`}>
-                {getPersonaIcon(index)}
+              } group/icon-edit`}>
+                <IconEditableText
+                  mode={mode}
+                  value={getPersonaIconValue(index)}
+                  onEdit={(value) => handlePersonaIconEdit(index, value)}
+                  backgroundType={backgroundType as any}
+                  colorTokens={colorTokens}
+                  iconSize="lg"
+                  className="text-3xl mb-2"
+                  sectionId={sectionId}
+                  elementKey={`persona_icon_${index + 1}`}
+                />
                 {mode === 'edit' ? (
                   <input
                     type="text"

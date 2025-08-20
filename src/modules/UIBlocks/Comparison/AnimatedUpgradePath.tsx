@@ -8,6 +8,7 @@ import {
 } from '@/components/layout/EditableContent';
 import { LayoutComponentProps } from '@/types/storeTypes';
 import { parsePipeData, updateListData } from '@/utils/dataParsingUtils';
+import IconEditableText from '@/components/ui/IconEditableText';
 
 // Content interface for type safety
 interface AnimatedUpgradePathContent {
@@ -16,6 +17,9 @@ interface AnimatedUpgradePathContent {
   stage_titles: string;
   stage_descriptions: string;
   stage_icons?: string;
+  stage_icon_1?: string;
+  stage_icon_2?: string;
+  stage_icon_3?: string;
   cta_text?: string;
 }
 
@@ -40,6 +44,18 @@ const CONTENT_SCHEMA = {
   stage_icons: { 
     type: 'string' as const, 
     default: 'chaos|tools|rocket' 
+  },
+  stage_icon_1: { 
+    type: 'string' as const, 
+    default: '⚠️' 
+  },
+  stage_icon_2: { 
+    type: 'string' as const, 
+    default: '🔧' 
+  },
+  stage_icon_3: { 
+    type: 'string' as const, 
+    default: '🚀' 
   },
   cta_text: { 
     type: 'string' as const, 
@@ -85,32 +101,18 @@ export default function AnimatedUpgradePath(props: LayoutComponentProps) {
     handleContentUpdate('stage_descriptions', newDescriptions.join('|'));
   };
 
-  // Get icon based on stage
-  const getStageIcon = (iconType: string, index: number) => {
-    switch (index) {
-      case 0: // Current state - chaos
-        return (
-          <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
-        );
-      case 1: // Basic tools
-        return (
-          <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-          </svg>
-        );
-      case 2: // With our platform - rocket
-        return (
-          <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-          </svg>
-        );
-      default:
-        return null;
-    }
+  // Icon edit handler
+  const handleStageIconEdit = (index: number, value: string) => {
+    const iconField = `stage_icon_${index + 1}` as keyof AnimatedUpgradePathContent;
+    handleContentUpdate(iconField, value);
   };
+
+  // Get stage icon value
+  const getStageIconValue = (index: number) => {
+    const iconFields = ['stage_icon_1', 'stage_icon_2', 'stage_icon_3'];
+    return blockContent[iconFields[index] as keyof AnimatedUpgradePathContent] || ['⚠️', '🔧', '🚀'][index];
+  };
+
 
   // Get stage color styling
   const getStageColor = (index: number) => {
@@ -171,8 +173,18 @@ export default function AnimatedUpgradePath(props: LayoutComponentProps) {
                     : `${colorTokens.bgNeutral} border border-gray-200`
                 }`}>
                   {/* Icon */}
-                  <div className={`w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 ${getStageColor(index)}`}>
-                    {getStageIcon(stageIcons[index], index)}
+                  <div className={`w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 ${getStageColor(index)} group/icon-edit`}>
+                    <IconEditableText
+                      mode={mode}
+                      value={getStageIconValue(index)}
+                      onEdit={(value) => handleStageIconEdit(index, value)}
+                      backgroundType={backgroundType as any}
+                      colorTokens={colorTokens}
+                      iconSize="xl"
+                      className="text-4xl"
+                      sectionId={sectionId}
+                      elementKey={`stage_icon_${index + 1}`}
+                    />
                   </div>
 
                   {/* Title */}

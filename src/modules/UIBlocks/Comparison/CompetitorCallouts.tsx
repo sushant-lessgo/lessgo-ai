@@ -8,6 +8,7 @@ import {
 } from '@/components/layout/EditableContent';
 import { LayoutComponentProps } from '@/types/storeTypes';
 import { parsePipeData, updateListData } from '@/utils/dataParsingUtils';
+import IconEditableText from '@/components/ui/IconEditableText';
 
 // Content interface for type safety
 interface CompetitorCalloutsContent {
@@ -17,6 +18,12 @@ interface CompetitorCalloutsContent {
   competitor_issues: string;
   our_solution: string;
   trust_badge?: string;
+  issue_icon_1?: string;
+  issue_icon_2?: string;
+  issue_icon_3?: string;
+  solution_icon_1?: string;
+  solution_icon_2?: string;
+  solution_icon_3?: string;
 }
 
 // Content schema - defines structure and defaults
@@ -44,6 +51,30 @@ const CONTENT_SCHEMA = {
   trust_badge: { 
     type: 'string' as const, 
     default: 'Trusted by 10,000+ teams worldwide' 
+  },
+  issue_icon_1: { 
+    type: 'string' as const, 
+    default: '⚠️' 
+  },
+  issue_icon_2: { 
+    type: 'string' as const, 
+    default: '⚠️' 
+  },
+  issue_icon_3: { 
+    type: 'string' as const, 
+    default: '⚠️' 
+  },
+  solution_icon_1: { 
+    type: 'string' as const, 
+    default: '✅' 
+  },
+  solution_icon_2: { 
+    type: 'string' as const, 
+    default: '✅' 
+  },
+  solution_icon_3: { 
+    type: 'string' as const, 
+    default: '✅' 
   }
 };
 
@@ -89,6 +120,28 @@ export default function CompetitorCallouts(props: LayoutComponentProps) {
     const newSolutions = [...ourSolutions];
     newSolutions[index] = value;
     handleContentUpdate('our_solution', newSolutions.join('|'));
+  };
+
+  // Icon edit handlers
+  const handleIssueIconEdit = (index: number, value: string) => {
+    const iconField = `issue_icon_${index + 1}` as keyof CompetitorCalloutsContent;
+    handleContentUpdate(iconField, value);
+  };
+
+  const handleSolutionIconEdit = (index: number, value: string) => {
+    const iconField = `solution_icon_${index + 1}` as keyof CompetitorCalloutsContent;
+    handleContentUpdate(iconField, value);
+  };
+
+  // Get icon values
+  const getIssueIconValue = (index: number) => {
+    const iconFields = ['issue_icon_1', 'issue_icon_2', 'issue_icon_3'];
+    return blockContent[iconFields[index] as keyof CompetitorCalloutsContent] || '⚠️';
+  };
+
+  const getSolutionIconValue = (index: number) => {
+    const iconFields = ['solution_icon_1', 'solution_icon_2', 'solution_icon_3'];
+    return blockContent[iconFields[index] as keyof CompetitorCalloutsContent] || '✅';
   };
 
   return (
@@ -152,10 +205,20 @@ export default function CompetitorCallouts(props: LayoutComponentProps) {
                     </h3>
                   )}
                   
-                  <div className="flex items-start">
-                    <svg className="w-5 h-5 text-red-500 mr-2 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
+                  <div className="flex items-start group/icon-edit">
+                    <div className="mr-2 mt-0.5 flex-shrink-0">
+                      <IconEditableText
+                        mode={mode}
+                        value={getIssueIconValue(index)}
+                        onEdit={(value) => handleIssueIconEdit(index, value)}
+                        backgroundType={backgroundType as any}
+                        colorTokens={colorTokens}
+                        iconSize="sm"
+                        className="text-xl text-red-500"
+                        sectionId={sectionId}
+                        elementKey={`issue_icon_${index + 1}`}
+                      />
+                    </div>
                     {mode === 'edit' ? (
                       <textarea
                         value={competitorIssues[index]}
@@ -184,10 +247,20 @@ export default function CompetitorCallouts(props: LayoutComponentProps) {
                     Our Solution
                   </h4>
                   
-                  <div className="flex items-start">
-                    <svg className={`w-5 h-5 text-primary mr-2 mt-0.5 flex-shrink-0`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                    </svg>
+                  <div className="flex items-start group/icon-edit">
+                    <div className="mr-2 mt-0.5 flex-shrink-0">
+                      <IconEditableText
+                        mode={mode}
+                        value={getSolutionIconValue(index)}
+                        onEdit={(value) => handleSolutionIconEdit(index, value)}
+                        backgroundType={backgroundType as any}
+                        colorTokens={colorTokens}
+                        iconSize="sm"
+                        className="text-xl text-primary"
+                        sectionId={sectionId}
+                        elementKey={`solution_icon_${index + 1}`}
+                      />
+                    </div>
                     {mode === 'edit' ? (
                       <textarea
                         value={ourSolutions[index]}
