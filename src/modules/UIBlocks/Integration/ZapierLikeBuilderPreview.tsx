@@ -9,6 +9,7 @@ import {
   EditableAdaptiveHeadline, 
   EditableAdaptiveText 
 } from '@/components/layout/EditableContent';
+import IconEditableText from '@/components/ui/IconEditableText';
 import { LayoutComponentProps } from '@/types/storeTypes';
 
 // Content interface for type safety
@@ -18,12 +19,16 @@ interface ZapierLikeBuilderPreviewContent {
   workflow_title: string;
   trigger_app: string;
   trigger_action: string;
+  trigger_app_icon?: string;
   action_1_app: string;
   action_1_action: string;
+  action_1_app_icon?: string;
   action_2_app: string;
   action_2_action: string;
+  action_2_app_icon?: string;
   action_3_app: string;
   action_3_action: string;
+  action_3_app_icon?: string;
 }
 
 // Content schema - defines structure and defaults
@@ -71,6 +76,22 @@ const CONTENT_SCHEMA = {
   action_3_action: { 
     type: 'string' as const, 
     default: 'Send Notification' 
+  },
+  trigger_app_icon: { 
+    type: 'string' as const, 
+    default: '📝' 
+  },
+  action_1_app_icon: { 
+    type: 'string' as const, 
+    default: '🔄' 
+  },
+  action_2_app_icon: { 
+    type: 'string' as const, 
+    default: '📧' 
+  },
+  action_3_app_icon: { 
+    type: 'string' as const, 
+    default: '💬' 
   }
 };
 
@@ -80,29 +101,29 @@ const WorkflowNode = React.memo(({
   action, 
   type, 
   isActive, 
-  colorTokens
+  colorTokens,
+  icon,
+  mode,
+  onIconEdit,
+  sectionId,
+  elementKey
 }: { 
   app: string; 
   action: string; 
   type: 'trigger' | 'action';
   isActive: boolean;
   colorTokens: any;
+  icon: string;
+  mode: 'edit' | 'preview';
+  onIconEdit: (value: string) => void;
+  sectionId: string;
+  elementKey: string;
 }) => {
   const nodeColors = {
     trigger: 'bg-gradient-to-br from-green-500 to-green-600',
     action: 'bg-gradient-to-br from-blue-500 to-blue-600'
   };
 
-  const iconMap: { [key: string]: string } = {
-    'Typeform': '📝',
-    'HubSpot': '🔄',
-    'Mailchimp': '📧',
-    'Slack': '💬',
-    'GitHub': '⚡',
-    'Airtable': '📊',
-    'Google Sheets': '📈',
-    'Zapier': '⚡'
-  };
 
   return (
     <div className={`relative transition-all duration-500 ${isActive ? 'scale-105 z-10' : ''}`}>
@@ -113,7 +134,18 @@ const WorkflowNode = React.memo(({
         {/* App Icon and Name */}
         <div className="flex items-center mb-2">
           <div className="w-8 h-8 bg-white bg-opacity-20 rounded-lg flex items-center justify-center mr-3">
-            <span className="text-lg">{iconMap[app] || '🔗'}</span>
+            <IconEditableText
+              mode={mode}
+              value={icon}
+              onEdit={onIconEdit}
+              backgroundType="primary"
+              colorTokens={colorTokens}
+              iconSize="sm"
+              className="text-lg text-white"
+              placeholder="🔗"
+              sectionId={sectionId}
+              elementKey={elementKey}
+            />
           </div>
           <span className="font-semibold text-sm">{app}</span>
         </div>
@@ -181,27 +213,41 @@ export default function ZapierLikeBuilderPreview(props: LayoutComponentProps) {
   const [activeStep, setActiveStep] = useState(0);
   const [isRunning, setIsRunning] = useState(false);
 
+  // Icon edit handlers
+  const handleIconEdit = (stepType: string, value: string) => {
+    const iconField = `${stepType}_app_icon` as keyof ZapierLikeBuilderPreviewContent;
+    handleContentUpdate(iconField, value);
+  };
+
   // Build workflow steps
   const workflowSteps = [
     {
       app: blockContent.trigger_app,
       action: blockContent.trigger_action,
-      type: 'trigger' as const
+      type: 'trigger' as const,
+      icon: blockContent.trigger_app_icon || '📝',
+      iconField: 'trigger'
     },
     {
       app: blockContent.action_1_app,
       action: blockContent.action_1_action,
-      type: 'action' as const
+      type: 'action' as const,
+      icon: blockContent.action_1_app_icon || '🔄',
+      iconField: 'action_1'
     },
     {
       app: blockContent.action_2_app,
       action: blockContent.action_2_action,
-      type: 'action' as const
+      type: 'action' as const,
+      icon: blockContent.action_2_app_icon || '📧',
+      iconField: 'action_2'
     },
     {
       app: blockContent.action_3_app,
       action: blockContent.action_3_action,
-      type: 'action' as const
+      type: 'action' as const,
+      icon: blockContent.action_3_app_icon || '💬',
+      iconField: 'action_3'
     }
   ];
 
@@ -302,6 +348,11 @@ export default function ZapierLikeBuilderPreview(props: LayoutComponentProps) {
                     type={step.type}
                     isActive={isRunning && activeStep === index}
                     colorTokens={colorTokens}
+                    icon={step.icon}
+                    mode={mode}
+                    onIconEdit={(value) => handleIconEdit(step.iconField, value)}
+                    sectionId={sectionId}
+                    elementKey={`${step.iconField}_app_icon`}
                   />
                   {index < workflowSteps.length - 1 && (
                     <ConnectionArrow isAnimated={isRunning && activeStep === index} />

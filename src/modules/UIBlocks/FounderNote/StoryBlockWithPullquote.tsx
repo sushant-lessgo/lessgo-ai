@@ -17,6 +17,7 @@ import {
   TrustIndicators 
 } from '@/components/layout/ComponentRegistry';
 import EditableTrustIndicators from '@/components/layout/EditableTrustIndicators';
+import IconEditableText from '@/components/ui/IconEditableText';
 import { LayoutComponentProps } from '@/types/storeTypes';
 
 // Content interface for type safety
@@ -40,6 +41,7 @@ interface StoryBlockWithPullquoteContent {
   cta_section_heading: string;
   cta_section_description: string;
   founder_image?: string;
+  quote_icon?: string;
 }
 
 // Content schema - defines structure and defaults
@@ -98,7 +100,8 @@ const CONTENT_SCHEMA = {
     default: '' 
   },
   cta_section_heading: { type: 'string' as const, default: 'Ready to be part of the story?' },
-  cta_section_description: { type: 'string' as const, default: 'Join thousands of professionals who have already transformed their workflow with our platform.' }
+  cta_section_description: { type: 'string' as const, default: 'Join thousands of professionals who have already transformed their workflow with our platform.' },
+  quote_icon: { type: 'string' as const, default: '"' }
 };
 
 // Founder Image Placeholder Component
@@ -300,7 +303,23 @@ export default function StoryBlockWithPullquote(props: LayoutComponentProps) {
             <div className="relative bg-white rounded-2xl shadow-lg border border-gray-100 p-8 transform rotate-1">
               
               {/* Quote mark */}
-              <div className="text-6xl text-blue-500 opacity-20 font-serif leading-none mb-4">"</div>
+              <div className="text-6xl text-blue-500 opacity-20 font-serif leading-none mb-4 relative group/icon-edit">
+                {mode === 'edit' ? (
+                  <IconEditableText
+                    mode={mode}
+                    value={blockContent.quote_icon || '"'}
+                    onEdit={(value) => handleContentUpdate('quote_icon', value)}
+                    backgroundType={'neutral' as any}
+                    colorTokens={colorTokens}
+                    iconSize="xl"
+                    className="text-6xl text-blue-500 opacity-20 font-serif leading-none"
+                    sectionId={sectionId}
+                    elementKey="quote_icon"
+                  />
+                ) : (
+                  blockContent.quote_icon || '"'
+                )}
+              </div>
               
               {/* Quote text */}
               <EditableAdaptiveText

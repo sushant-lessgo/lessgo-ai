@@ -9,6 +9,7 @@ import {
   EditableAdaptiveHeadline, 
   EditableAdaptiveText 
 } from '@/components/layout/EditableContent';
+import IconEditableText from '@/components/ui/IconEditableText';
 import { LayoutComponentProps } from '@/types/storeTypes';
 
 // Content interface for type safety
@@ -19,18 +20,26 @@ interface LogoWithQuoteUseContent {
   integration_1_quote: string;
   integration_1_author: string;
   integration_1_company: string;
+  integration_1_logo?: string;
+  integration_1_avatar?: string;
   integration_2_name: string;
   integration_2_quote: string;
   integration_2_author: string;
   integration_2_company: string;
+  integration_2_logo?: string;
+  integration_2_avatar?: string;
   integration_3_name: string;
   integration_3_quote: string;
   integration_3_author: string;
   integration_3_company: string;
+  integration_3_logo?: string;
+  integration_3_avatar?: string;
   integration_4_name: string;
   integration_4_quote: string;
   integration_4_author: string;
   integration_4_company: string;
+  integration_4_logo?: string;
+  integration_4_avatar?: string;
   trusted_companies: string;
 }
 
@@ -111,6 +120,38 @@ const CONTENT_SCHEMA = {
   trusted_companies: { 
     type: 'string' as const, 
     default: 'Microsoft|Google|Amazon|Meta|Stripe|Shopify|Airbnb|Uber|Netflix|Spotify' 
+  },
+  integration_1_logo: { 
+    type: 'string' as const, 
+    default: '📊' 
+  },
+  integration_1_avatar: { 
+    type: 'string' as const, 
+    default: '👩‍💼' 
+  },
+  integration_2_logo: { 
+    type: 'string' as const, 
+    default: '💬' 
+  },
+  integration_2_avatar: { 
+    type: 'string' as const, 
+    default: '👨‍💻' 
+  },
+  integration_3_logo: { 
+    type: 'string' as const, 
+    default: '📈' 
+  },
+  integration_3_avatar: { 
+    type: 'string' as const, 
+    default: '👩‍💼' 
+  },
+  integration_4_logo: { 
+    type: 'string' as const, 
+    default: '⚡' 
+  },
+  integration_4_avatar: { 
+    type: 'string' as const, 
+    default: '👨‍💼' 
   }
 };
 
@@ -123,7 +164,11 @@ const IntegrationCard = React.memo(({
   textStyle,
   labelStyle,
   h3Style,
-  bodySmStyle
+  bodySmStyle,
+  mode,
+  onLogoEdit,
+  sectionId,
+  integrationIndex
 }: { 
   integration: any; 
   isActive: boolean; 
@@ -133,6 +178,10 @@ const IntegrationCard = React.memo(({
   labelStyle: React.CSSProperties;
   h3Style: React.CSSProperties;
   bodySmStyle: React.CSSProperties;
+  mode: 'edit' | 'preview';
+  onLogoEdit: (value: string) => void;
+  sectionId: string;
+  integrationIndex: number;
 }) => (
   <div 
     className={`p-6 rounded-xl border cursor-pointer transition-all duration-300 ${
@@ -147,9 +196,18 @@ const IntegrationCard = React.memo(({
       <div className={`w-12 h-12 rounded-lg flex items-center justify-center mr-4 ${
         isActive ? 'bg-white bg-opacity-20' : 'bg-gradient-to-br from-blue-500 to-purple-600'
       }`}>
-        <span className={`${isActive ? 'text-white' : 'text-white'}`} style={labelStyle}>
-          {integration.name.substring(0, 2).toUpperCase()}
-        </span>
+        <IconEditableText
+          mode={mode}
+          value={integration.logo}
+          onEdit={onLogoEdit}
+          backgroundType="primary"
+          colorTokens={colorTokens}
+          iconSize="md"
+          className="text-xl text-white"
+          placeholder={integration.name.substring(0, 2).toUpperCase()}
+          sectionId={sectionId}
+          elementKey={`integration_${integrationIndex + 1}_logo`}
+        />
       </div>
       <h3 className={`${isActive ? 'text-current' : colorTokens.textPrimary}`} style={h3Style}>
         {integration.name}
@@ -180,11 +238,19 @@ IntegrationCard.displayName = 'IntegrationCard';
 const FeaturedQuote = React.memo(({ 
   integration, 
   colorTokens, 
-  textStyle 
+  textStyle,
+  mode,
+  onAvatarEdit,
+  sectionId,
+  integrationIndex
 }: { 
   integration: any; 
   colorTokens: any;
   textStyle: React.CSSProperties;
+  mode: 'edit' | 'preview';
+  onAvatarEdit: (value: string) => void;
+  sectionId: string;
+  integrationIndex: number;
 }) => (
   <div className={`p-8 rounded-2xl ${colorTokens.bgSecondary} border-gray-200 border`}>
     {/* Quote */}
@@ -195,9 +261,18 @@ const FeaturedQuote = React.memo(({
     {/* Author Info */}
     <div className="flex items-center">
       <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center mr-4">
-        <span className="text-white font-bold">
-          {integration.author.split(' ').map((n: string) => n[0]).join('')}
-        </span>
+        <IconEditableText
+          mode={mode}
+          value={integration.avatar}
+          onEdit={onAvatarEdit}
+          backgroundType="primary"
+          colorTokens={colorTokens}
+          iconSize="md"
+          className="text-xl text-white"
+          placeholder={integration.author.split(' ').map((n: string) => n[0]).join('')}
+          sectionId={sectionId}
+          elementKey={`integration_${integrationIndex + 1}_avatar`}
+        />
       </div>
       <div>
         <p className={`font-semibold ${colorTokens.textPrimary}`}>{integration.author}</p>
@@ -251,31 +326,50 @@ export default function LogoWithQuoteUse(props: LayoutComponentProps) {
   const bodySmStyle = getTypographyStyle('body-sm');
   const labelStyle = getTypographyStyle('label');
 
+  // Icon edit handlers
+  const handleLogoEdit = (index: number, value: string) => {
+    const logoField = `integration_${index + 1}_logo` as keyof LogoWithQuoteUseContent;
+    handleContentUpdate(logoField, value);
+  };
+
+  const handleAvatarEdit = (index: number, value: string) => {
+    const avatarField = `integration_${index + 1}_avatar` as keyof LogoWithQuoteUseContent;
+    handleContentUpdate(avatarField, value);
+  };
+
   // Parse integrations
   const integrations = [
     {
       name: blockContent.integration_1_name,
       quote: blockContent.integration_1_quote,
       author: blockContent.integration_1_author,
-      company: blockContent.integration_1_company
+      company: blockContent.integration_1_company,
+      logo: blockContent.integration_1_logo || '📊',
+      avatar: blockContent.integration_1_avatar || '👩‍💼'
     },
     {
       name: blockContent.integration_2_name,
       quote: blockContent.integration_2_quote,
       author: blockContent.integration_2_author,
-      company: blockContent.integration_2_company
+      company: blockContent.integration_2_company,
+      logo: blockContent.integration_2_logo || '💬',
+      avatar: blockContent.integration_2_avatar || '👨‍💻'
     },
     {
       name: blockContent.integration_3_name,
       quote: blockContent.integration_3_quote,
       author: blockContent.integration_3_author,
-      company: blockContent.integration_3_company
+      company: blockContent.integration_3_company,
+      logo: blockContent.integration_3_logo || '📈',
+      avatar: blockContent.integration_3_avatar || '👩‍💼'
     },
     {
       name: blockContent.integration_4_name,
       quote: blockContent.integration_4_quote,
       author: blockContent.integration_4_author,
-      company: blockContent.integration_4_company
+      company: blockContent.integration_4_company,
+      logo: blockContent.integration_4_logo || '⚡',
+      avatar: blockContent.integration_4_avatar || '👨‍💼'
     }
   ];
 
@@ -343,6 +437,10 @@ export default function LogoWithQuoteUse(props: LayoutComponentProps) {
                 labelStyle={labelStyle}
                 h3Style={h3Style}
                 bodySmStyle={bodySmStyle}
+                mode={mode}
+                onLogoEdit={(value) => handleLogoEdit(index, value)}
+                sectionId={sectionId}
+                integrationIndex={index}
               />
             ))}
           </div>
@@ -353,6 +451,10 @@ export default function LogoWithQuoteUse(props: LayoutComponentProps) {
               integration={integrations[selectedIntegration]}
               colorTokens={colorTokens}
               textStyle={{}}
+              mode={mode}
+              onAvatarEdit={(value) => handleAvatarEdit(selectedIntegration, value)}
+              sectionId={sectionId}
+              integrationIndex={selectedIntegration}
             />
           </div>
         </div>

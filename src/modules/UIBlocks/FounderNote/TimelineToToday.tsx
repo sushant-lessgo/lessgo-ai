@@ -17,6 +17,7 @@ import {
   TrustIndicators 
 } from '@/components/layout/ComponentRegistry';
 import EditableTrustIndicators from '@/components/layout/EditableTrustIndicators';
+import IconEditableText from '@/components/ui/IconEditableText';
 import { LayoutComponentProps } from '@/types/storeTypes';
 
 // Content interface for type safety
@@ -35,6 +36,14 @@ interface TimelineToTodayContent {
   trust_item_4: string;
   trust_item_5: string;
   current_state_heading: string;
+  // Individual timeline icon fields
+  timeline_icon_1?: string;
+  timeline_icon_2?: string;
+  timeline_icon_3?: string;
+  timeline_icon_4?: string;
+  timeline_icon_5?: string;
+  timeline_icon_6?: string;
+  current_state_icon?: string;
 }
 
 // Content schema - defines structure and defaults
@@ -76,7 +85,15 @@ const CONTENT_SCHEMA = {
   trust_item_3: { type: 'string' as const, default: '$100M+ processed' },
   trust_item_4: { type: 'string' as const, default: '99.9% uptime' },
   trust_item_5: { type: 'string' as const, default: '' },
-  current_state_heading: { type: 'string' as const, default: 'Where We Are Today' }
+  current_state_heading: { type: 'string' as const, default: 'Where We Are Today' },
+  // Individual timeline icon fields
+  timeline_icon_1: { type: 'string' as const, default: '💡' },
+  timeline_icon_2: { type: 'string' as const, default: '🚀' },
+  timeline_icon_3: { type: 'string' as const, default: '📈' },
+  timeline_icon_4: { type: 'string' as const, default: '🌍' },
+  timeline_icon_5: { type: 'string' as const, default: '🎯' },
+  timeline_icon_6: { type: 'string' as const, default: '✨' },
+  current_state_icon: { type: 'string' as const, default: '🎯' }
 };
 
 // Timeline Item Component
@@ -88,7 +105,12 @@ const TimelineItem = React.memo(({
   stats, 
   isLast, 
   colorTokens,
-  dynamicTextColors 
+  dynamicTextColors,
+  mode,
+  onIconEdit,
+  index,
+  sectionId,
+  backgroundType
 }: {
   year: string;
   icon: string;
@@ -98,6 +120,11 @@ const TimelineItem = React.memo(({
   isLast: boolean;
   colorTokens: any;
   dynamicTextColors: any;
+  mode?: string;
+  onIconEdit?: (index: number, value: string) => void;
+  index?: number;
+  sectionId?: string;
+  backgroundType?: string;
 }) => (
   <div className="relative flex items-start space-x-6 pb-8">
     {/* Timeline line */}
@@ -114,7 +141,23 @@ const TimelineItem = React.memo(({
     <div className="flex-1 min-w-0 bg-white rounded-lg shadow-md border border-gray-100 p-6 hover:shadow-lg transition-shadow duration-200">
       <div className="flex items-start justify-between mb-3">
         <div className="flex items-center space-x-3">
-          <span className="text-2xl">{icon}</span>
+          <div className="text-2xl relative group/icon-edit">
+            {mode === 'edit' ? (
+              <IconEditableText
+                mode={mode}
+                value={icon}
+                onEdit={(value) => onIconEdit?.(index || 0, value)}
+                backgroundType={backgroundType as any}
+                colorTokens={colorTokens}
+                iconSize="lg"
+                className="text-2xl"
+                sectionId={sectionId || 'timeline'}
+                elementKey={`timeline_icon_${(index || 0) + 1}`}
+              />
+            ) : (
+              <span>{icon}</span>
+            )}
+          </div>
           <div>
             <h3 className="text-lg font-semibold text-gray-900">{title}</h3>
             <span className="text-sm text-blue-600 font-medium">{year}</span>
@@ -154,6 +197,19 @@ export default function TimelineToToday(props: LayoutComponentProps) {
   
   const { getTextStyle: getTypographyStyle } = useTypography();
 
+  // Get individual timeline icon fields
+  const getTimelineIcon = (index: number): string => {
+    const iconFields = ['timeline_icon_1', 'timeline_icon_2', 'timeline_icon_3', 'timeline_icon_4', 'timeline_icon_5', 'timeline_icon_6'];
+    return blockContent[iconFields[index] as keyof TimelineToTodayContent] || '📅';
+  };
+
+  // Handle timeline icon editing
+  const handleTimelineIconEdit = (index: number, value: string) => {
+    const iconFields = ['timeline_icon_1', 'timeline_icon_2', 'timeline_icon_3', 'timeline_icon_4', 'timeline_icon_5', 'timeline_icon_6'];
+    const fieldKey = iconFields[index] as keyof TimelineToTodayContent;
+    handleContentUpdate(fieldKey, value);
+  };
+
   // Parse timeline items from pipe-separated string
   const timelineData = blockContent.timeline_items 
     ? blockContent.timeline_items.split('|')
@@ -162,12 +218,17 @@ export default function TimelineToToday(props: LayoutComponentProps) {
   const timelineItems = [];
   for (let i = 0; i < timelineData.length; i += 4) {
     if (i + 3 < timelineData.length) {
+      const itemIndex = timelineItems.length;
+      const fallbackIcon = timelineData[i + 1]?.trim().split(' ')[0] || '📅';
+      const icon = getTimelineIcon(itemIndex) || fallbackIcon;
+      
       timelineItems.push({
         year: timelineData[i]?.trim() || '',
-        icon: timelineData[i + 1]?.trim() || '📅',
+        icon: icon,
         title: timelineData[i + 1]?.split(' ').slice(1).join(' ') || 'Milestone',
         description: timelineData[i + 2]?.trim() || '',
-        stats: timelineData[i + 3]?.trim() || ''
+        stats: timelineData[i + 3]?.trim() || '',
+        index: itemIndex
       });
     }
   }
@@ -266,13 +327,18 @@ export default function TimelineToToday(props: LayoutComponentProps) {
                 <TimelineItem
                   key={index}
                   year={item.year}
-                  icon={item.icon.split(' ')[0]}
+                  icon={item.icon}
                   title={item.title}
                   description={item.description}
                   stats={item.stats}
                   isLast={index === timelineItems.length - 1}
                   colorTokens={colorTokens}
                   dynamicTextColors={dynamicTextColors}
+                  mode={mode}
+                  onIconEdit={handleTimelineIconEdit}
+                  index={item.index}
+                  sectionId={sectionId}
+                  backgroundType={backgroundType}
                 />
               ))}
             </div>
@@ -282,8 +348,22 @@ export default function TimelineToToday(props: LayoutComponentProps) {
         {/* Current State */}
         <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-8 text-center">
           <div className="max-w-3xl mx-auto">
-            <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center text-white text-2xl font-bold mx-auto mb-6 shadow-lg">
-              🎯
+            <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center text-white text-2xl font-bold mx-auto mb-6 shadow-lg relative group/icon-edit">
+              {mode === 'edit' ? (
+                <IconEditableText
+                  mode={mode}
+                  value={blockContent.current_state_icon || '🎯'}
+                  onEdit={(value) => handleContentUpdate('current_state_icon', value)}
+                  backgroundType={'primary' as any}
+                  colorTokens={colorTokens}
+                  iconSize="xl"
+                  className="text-2xl text-white"
+                  sectionId={sectionId}
+                  elementKey="current_state_icon"
+                />
+              ) : (
+                blockContent.current_state_icon || '🎯'
+              )}
             </div>
             
             <EditableAdaptiveHeadline

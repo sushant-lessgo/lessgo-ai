@@ -5,6 +5,7 @@ import {
   EditableAdaptiveHeadline, 
   EditableAdaptiveText
 } from '@/components/layout/EditableContent';
+import IconEditableText from '@/components/ui/IconEditableText';
 import { LayoutComponentProps } from '@/types/storeTypes';
 
 interface TestimonialFAQsContent {
@@ -34,6 +35,9 @@ interface TestimonialFAQsContent {
   overall_rating: string;
   satisfaction_text: string;
   show_trust_section?: boolean;
+  // Star icon fields
+  star_icon?: string;
+  overall_rating_star_icon?: string;
   // Legacy fields for backward compatibility
   questions?: string;
   answers?: string;
@@ -75,6 +79,9 @@ const CONTENT_SCHEMA = {
   overall_rating: { type: 'string' as const, default: '4.9/5 rating' },
   satisfaction_text: { type: 'string' as const, default: '99% customer satisfaction' },
   show_trust_section: { type: 'boolean' as const, default: true },
+  // Star icon fields
+  star_icon: { type: 'string' as const, default: '⭐' },
+  overall_rating_star_icon: { type: 'string' as const, default: '⭐' },
   // Legacy fields for backward compatibility
   questions: { type: 'string' as const, default: '' },
   answers: { type: 'string' as const, default: '' },
@@ -99,37 +106,28 @@ export default function TestimonialFAQs(props: LayoutComponentProps) {
     contentSchema: CONTENT_SCHEMA
   });
 
-  // Helper function to render stars
-  const renderStars = (rating: string | number) => {
+  // Helper function to render stars using IconEditableText
+  const renderStars = (rating: string | number, testimonialIndex?: number) => {
     const ratingNum = typeof rating === 'string' ? parseFloat(rating) || 5 : rating;
-    const fullStars = Math.floor(ratingNum);
-    const hasHalfStar = (ratingNum % 1) >= 0.5;
-    const emptyStars = 5 - fullStars - (hasHalfStar ? 1 : 0);
+    const starCount = Math.round(ratingNum);
     
     return (
-      <>
-        {Array.from({ length: fullStars }, (_, i) => (
-          <svg key={`full-${i}`} className="w-5 h-5 text-yellow-400 fill-current" viewBox="0 0 20 20">
-            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-          </svg>
+      <div className="flex items-center gap-1">
+        {Array.from({ length: starCount }, (_, i) => (
+          <IconEditableText
+            key={i}
+            mode={mode}
+            value={blockContent.star_icon || '⭐'}
+            onEdit={(value) => handleContentUpdate('star_icon', value)}
+            backgroundType={backgroundType as any}
+            colorTokens={colorTokens}
+            iconSize="sm"
+            className="text-yellow-400"
+            sectionId={sectionId}
+            elementKey={`star_icon_${testimonialIndex || 'rating'}_${i}`}
+          />
         ))}
-        {hasHalfStar && (
-          <svg className="w-5 h-5 text-yellow-400" viewBox="0 0 20 20">
-            <defs>
-              <linearGradient id="half">
-                <stop offset="50%" stopColor="currentColor" />
-                <stop offset="50%" stopColor="#e5e7eb" />
-              </linearGradient>
-            </defs>
-            <path fill="url(#half)" d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-          </svg>
-        )}
-        {Array.from({ length: emptyStars }, (_, i) => (
-          <svg key={`empty-${i}`} className="w-5 h-5 text-gray-300 fill-current" viewBox="0 0 20 20">
-            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-          </svg>
-        ))}
-      </>
+      </div>
     );
   };
   
@@ -346,7 +344,7 @@ export default function TestimonialFAQs(props: LayoutComponentProps) {
                 
                 {/* Star Rating */}
                 <div className="ml-auto flex items-center gap-1 relative group/rating">
-                  {renderStars(item.rating)}
+                  {renderStars(item.rating, item.index)}
                   {mode === 'edit' && (
                     <EditableAdaptiveText
                       mode={mode}
@@ -438,7 +436,22 @@ export default function TestimonialFAQs(props: LayoutComponentProps) {
               
               {blockContent.overall_rating && blockContent.overall_rating !== '___REMOVED___' && (
                 <div className="flex items-center gap-2">
-                  <span className="text-yellow-400">★★★★★</span>
+                  <div className="flex items-center gap-1">
+                    {Array.from({ length: 5 }, (_, i) => (
+                      <IconEditableText
+                        key={i}
+                        mode={mode}
+                        value={blockContent.overall_rating_star_icon || '⭐'}
+                        onEdit={(value) => handleContentUpdate('overall_rating_star_icon', value)}
+                        backgroundType={backgroundType as any}
+                        colorTokens={colorTokens}
+                        iconSize="sm"
+                        className="text-yellow-400"
+                        sectionId={sectionId}
+                        elementKey={`overall_rating_star_${i}`}
+                      />
+                    ))}
+                  </div>
                   <EditableAdaptiveText
                     mode={mode}
                     value={blockContent.overall_rating}

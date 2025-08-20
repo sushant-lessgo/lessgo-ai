@@ -247,8 +247,15 @@ export default function BonusStackCTA(props: LayoutComponentProps) {
             mode={mode}
             value={blockContent.bonus_check_icon || '✅'}
             onEdit={(value) => handleContentUpdate('bonus_check_icon', value)}
-            className="text-white text-sm"
-            fallback={<svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>}
+            backgroundType="primary"
+            colorTokens={{
+              textPrimary: '#ffffff',
+              textOnDark: '#ffffff'
+            }}
+            iconSize="sm"
+            className="text-white"
+            sectionId={sectionId}
+            elementKey="bonus_check_icon"
           />
         </div>
         <div>
@@ -522,8 +529,15 @@ export default function BonusStackCTA(props: LayoutComponentProps) {
                       mode={mode}
                       value={blockContent.urgency_icon || '⏰'}
                       onEdit={(value) => handleContentUpdate('urgency_icon', value)}
-                      className="text-yellow-300 text-lg"
-                      fallback={<svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>}
+                      backgroundType="primary"
+                      colorTokens={{
+                        textPrimary: '#fcd34d',
+                        textOnDark: '#fcd34d'
+                      }}
+                      iconSize="sm"
+                      className="text-yellow-300"
+                      sectionId={sectionId}
+                      elementKey="urgency_icon"
                     />
                     <span className="font-semibold">{blockContent.urgency_text}</span>
                   </div>
@@ -535,8 +549,15 @@ export default function BonusStackCTA(props: LayoutComponentProps) {
                       mode={mode}
                       value={blockContent.scarcity_icon || '🔥'}
                       onEdit={(value) => handleContentUpdate('scarcity_icon', value)}
-                      className="text-red-300 text-lg"
-                      fallback={<svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z" /></svg>}
+                      backgroundType="primary"
+                      colorTokens={{
+                        textPrimary: '#fca5a5',
+                        textOnDark: '#fca5a5'
+                      }}
+                      iconSize="sm"
+                      className="text-red-300"
+                      sectionId={sectionId}
+                      elementKey="scarcity_icon"
                     />
                     <span className="font-semibold">{blockContent.scarcity_text}</span>
                   </div>
@@ -548,8 +569,15 @@ export default function BonusStackCTA(props: LayoutComponentProps) {
                       mode={mode}
                       value={blockContent.guarantee_icon || '🛡️'}
                       onEdit={(value) => handleContentUpdate('guarantee_icon', value)}
-                      className="text-green-300 text-lg"
-                      fallback={<svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>}
+                      backgroundType="primary"
+                      colorTokens={{
+                        textPrimary: '#86efac',
+                        textOnDark: '#86efac'
+                      }}
+                      iconSize="sm"
+                      className="text-green-300"
+                      sectionId={sectionId}
+                      elementKey="guarantee_icon"
                     />
                     <span className="font-semibold">{blockContent.guarantee_text}</span>
                   </div>

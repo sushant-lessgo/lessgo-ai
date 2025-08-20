@@ -17,6 +17,7 @@ import {
   TrustIndicators 
 } from '@/components/layout/ComponentRegistry';
 import EditableTrustIndicators from '@/components/layout/EditableTrustIndicators';
+import IconEditableText from '@/components/ui/IconEditableText';
 import { LayoutComponentProps } from '@/types/storeTypes';
 
 // Content interface for type safety
@@ -40,6 +41,8 @@ interface VideoNoteWithTranscriptContent {
   secondary_cta_description: string;
   secondary_cta_button: string;
   video_thumbnail?: string;
+  transcript_icon?: string;
+  secondary_cta_icon?: string;
 }
 
 // Content schema - defines structure and defaults
@@ -92,7 +95,9 @@ const CONTENT_SCHEMA = {
   transcript_heading: { type: 'string' as const, default: 'Video Transcript' },
   secondary_cta_heading: { type: 'string' as const, default: 'Ready to get started?' },
   secondary_cta_description: { type: 'string' as const, default: 'Book a personalized demo and see how this can work for your team.' },
-  secondary_cta_button: { type: 'string' as const, default: 'Book Your Demo' }
+  secondary_cta_button: { type: 'string' as const, default: 'Book Your Demo' },
+  transcript_icon: { type: 'string' as const, default: '📄' },
+  secondary_cta_icon: { type: 'string' as const, default: '🚀' }
 };
 
 // Video Player Placeholder Component
@@ -322,9 +327,23 @@ export default function VideoNoteWithTranscript(props: LayoutComponentProps) {
             
             {/* Transcript Header */}
             <div className="flex items-center space-x-2 pb-4 border-b border-gray-200">
-              <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-              </svg>
+              <div className="relative group/icon-edit">
+                {mode === 'edit' ? (
+                  <IconEditableText
+                    mode={mode}
+                    value={blockContent.transcript_icon || '📄'}
+                    onEdit={(value) => handleContentUpdate('transcript_icon', value)}
+                    backgroundType={backgroundType as any}
+                    colorTokens={colorTokens}
+                    iconSize="md"
+                    className="text-gray-400"
+                    sectionId={sectionId}
+                    elementKey="transcript_icon"
+                  />
+                ) : (
+                  <span className="text-lg text-gray-400">{blockContent.transcript_icon || '📄'}</span>
+                )}
+              </div>
               <EditableAdaptiveHeadline
                 mode={mode}
                 value={blockContent.transcript_heading || ''}
@@ -409,19 +428,38 @@ export default function VideoNoteWithTranscript(props: LayoutComponentProps) {
 
             {/* Additional CTA */}
             <div className="bg-blue-50 rounded-lg p-6">
-              <EditableAdaptiveHeadline
-                mode={mode}
-                value={blockContent.secondary_cta_heading || ''}
-                onEdit={(value) => handleContentUpdate('secondary_cta_heading', value)}
-                level="h4"
-                backgroundType="neutral"
-                colorTokens={colorTokens}
-                textStyle={{ fontWeight: '600', color: '#1E3A8A', marginBottom: '0.5rem' }}
-                placeholder="Ready to get started?"
-                sectionId={sectionId}
-                elementKey="secondary_cta_heading"
-                sectionBackground="bg-blue-50"
-              />
+              <div className="flex items-center space-x-2 mb-2">
+                <div className="relative group/icon-edit">
+                  {mode === 'edit' ? (
+                    <IconEditableText
+                      mode={mode}
+                      value={blockContent.secondary_cta_icon || '🚀'}
+                      onEdit={(value) => handleContentUpdate('secondary_cta_icon', value)}
+                      backgroundType={'neutral' as any}
+                      colorTokens={colorTokens}
+                      iconSize="sm"
+                      className="text-blue-600"
+                      sectionId={sectionId}
+                      elementKey="secondary_cta_icon"
+                    />
+                  ) : (
+                    <span className="text-blue-600">{blockContent.secondary_cta_icon || '🚀'}</span>
+                  )}
+                </div>
+                <EditableAdaptiveHeadline
+                  mode={mode}
+                  value={blockContent.secondary_cta_heading || ''}
+                  onEdit={(value) => handleContentUpdate('secondary_cta_heading', value)}
+                  level="h4"
+                  backgroundType="neutral"
+                  colorTokens={colorTokens}
+                  textStyle={{ fontWeight: '600', color: '#1E3A8A', marginBottom: '0rem' }}
+                  placeholder="Ready to get started?"
+                  sectionId={sectionId}
+                  elementKey="secondary_cta_heading"
+                  sectionBackground="bg-blue-50"
+                />
+              </div>
               
               <EditableAdaptiveText
                 mode={mode}

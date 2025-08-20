@@ -269,7 +269,7 @@ const JourneyPhase = React.memo(({
       <div className="flex items-center mb-6">
         <div className={`w-12 h-12 rounded-full ${colors.bg} ${colors.ring} ring-4 flex items-center justify-center shadow-lg mr-4`}>
           <IconEditableText
-            mode={mode}
+            mode={mode as 'preview' | 'edit'}
             value={getIconForType(type)}
             onEdit={(value) => {
               const iconField = type === 'before' ? 'before_icon' : 

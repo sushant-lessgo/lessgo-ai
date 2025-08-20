@@ -17,6 +17,7 @@ import {
   TrustIndicators 
 } from '@/components/layout/ComponentRegistry';
 import EditableTrustIndicators from '@/components/layout/EditableTrustIndicators';
+import IconEditableText from '@/components/ui/IconEditableText';
 import { LayoutComponentProps } from '@/types/storeTypes';
 
 // Content interface for type safety
@@ -40,6 +41,7 @@ interface MissionQuoteOverlayContent {
   trust_item_4: string;
   trust_item_5: string;
   background_image?: string;
+  badge_icon?: string;
 }
 
 // Content schema - defines structure and defaults
@@ -62,7 +64,11 @@ const CONTENT_SCHEMA = {
   },
   badge_text: { 
     type: 'string' as const, 
-    default: '🌟 Our Mission' 
+    default: 'Our Mission' 
+  },
+  badge_icon: {
+    type: 'string' as const,
+    default: '🌟'
   },
   mission_stats: { 
     type: 'string' as const, 
@@ -221,19 +227,41 @@ export default function MissionQuoteOverlay(props: LayoutComponentProps) {
           <div className="text-center space-y-8">
             
             {/* Badge */}
-            {(blockContent.badge_text || mode === 'edit') && (
-              <div>
-                <AccentBadge
-                  mode={mode}
-                  value={blockContent.badge_text || ''}
-                  onEdit={(value) => handleContentUpdate('badge_text', value)}
-                  colorTokens={colorTokens}
-                  textStyle={{ fontSize: '0.875rem', fontWeight: '500', color: '#ffffff' }}
-                  placeholder="🌟 Our Mission"
-                  sectionId={sectionId}
-                  elementKey="badge_text"
-                  sectionBackground="transparent"
-                />
+            {(blockContent.badge_text || blockContent.badge_icon || mode === 'edit') && (
+              <div className="flex items-center justify-center space-x-2">
+                {mode === 'edit' ? (
+                  <div className="flex items-center space-x-2">
+                    <div className="relative group/icon-edit">
+                      <IconEditableText
+                        mode={mode}
+                        value={blockContent.badge_icon || '🌟'}
+                        onEdit={(value) => handleContentUpdate('badge_icon', value)}
+                        backgroundType={'primary' as any}
+                        colorTokens={colorTokens}
+                        iconSize="md"
+                        className="text-white"
+                        sectionId={sectionId}
+                        elementKey="badge_icon"
+                      />
+                    </div>
+                    <AccentBadge
+                      mode={mode}
+                      value={blockContent.badge_text || ''}
+                      onEdit={(value) => handleContentUpdate('badge_text', value)}
+                      colorTokens={colorTokens}
+                      textStyle={{ fontSize: '0.875rem', fontWeight: '500', color: '#ffffff' }}
+                      placeholder="Our Mission"
+                      sectionId={sectionId}
+                      elementKey="badge_text"
+                      sectionBackground="transparent"
+                    />
+                  </div>
+                ) : (
+                  <div className="inline-flex items-center space-x-2 bg-white bg-opacity-10 backdrop-blur-sm rounded-full px-4 py-2 border border-white border-opacity-20">
+                    <span className="text-lg">{blockContent.badge_icon || '🌟'}</span>
+                    <span className="text-white text-sm font-medium">{blockContent.badge_text || 'Our Mission'}</span>
+                  </div>
+                )}
               </div>
             )}
 

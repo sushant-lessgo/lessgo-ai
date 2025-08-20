@@ -226,7 +226,7 @@ const StorylineStep = React.memo(({
           <div className="flex flex-col items-center space-y-2">
             <div className="w-1 h-8 bg-gradient-to-b from-gray-300 to-gray-400 rounded-full" />
             <IconEditableText
-              mode={mode}
+              mode={mode as 'preview' | 'edit'}
               value={blockContent.step_connector_icon || '⬇️'}
               onEdit={(value) => handleContentUpdate('step_connector_icon', value)}
               backgroundType={backgroundType}

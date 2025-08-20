@@ -5,6 +5,7 @@ import {
   EditableAdaptiveHeadline, 
   EditableAdaptiveText
 } from '@/components/layout/EditableContent';
+import IconEditableText from '@/components/ui/IconEditableText';
 import { LayoutComponentProps } from '@/types/storeTypes';
 
 interface QuoteStyleAnswersContent {
@@ -25,6 +26,7 @@ interface QuoteStyleAnswersContent {
   expert_title_3: string;
   // Customization
   show_quote_mark?: boolean;
+  quote_icon?: string;
   // Legacy fields for backward compatibility
   questions?: string;
   answers?: string;
@@ -56,6 +58,7 @@ const CONTENT_SCHEMA = {
   expert_title_3: { type: 'string' as const, default: 'Head of Infrastructure' },
   // Customization
   show_quote_mark: { type: 'boolean' as const, default: true },
+  quote_icon: { type: 'string' as const, default: '💬' },
   // Legacy fields for backward compatibility
   questions: { type: 'string' as const, default: '' },
   answers: { type: 'string' as const, default: '' },
@@ -204,11 +207,23 @@ export default function QuoteStyleAnswers(props: LayoutComponentProps) {
               <div className="relative pl-8 border-l-4" style={{ borderColor: accentColor }}>
                 {/* Large Quote Icon */}
                 {blockContent.show_quote_mark !== false && (
-                  <div 
-                    className="absolute -left-4 -top-2 text-5xl opacity-20"
-                    style={{ color: accentColor }}
-                  >
-                    "
+                  <div className="absolute -left-4 -top-2 opacity-30">
+                    <IconEditableText
+                      mode={mode}
+                      value={blockContent.quote_icon || '💬'}
+                      onEdit={(value) => handleContentUpdate('quote_icon', value)}
+                      backgroundType={backgroundType as any}
+                      colorTokens={{
+                        ...colorTokens,
+                        textPrimary: accentColor,
+                        textOnDark: accentColor
+                      }}
+                      iconSize="xl"
+                      className="text-5xl"
+                      style={{ color: accentColor }}
+                      sectionId={sectionId}
+                      elementKey={`quote_icon_${item.index}`}
+                    />
                   </div>
                 )}
                 

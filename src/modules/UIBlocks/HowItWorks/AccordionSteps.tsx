@@ -6,6 +6,7 @@ import {
   EditableAdaptiveHeadline, 
   EditableAdaptiveText
 } from '@/components/layout/EditableContent';
+import IconEditableText from '@/components/ui/IconEditableText';
 import { 
   CTAButton,
   TrustIndicators 
@@ -25,6 +26,9 @@ interface AccordionStepsContent {
   step_indicator_1_text?: string;
   step_indicator_2_text?: string;
   step_indicator_3_text?: string;
+  step_indicator_1_icon?: string;
+  step_indicator_2_icon?: string;
+  step_indicator_3_icon?: string;
   // Technical Specs Summary
   tech_specs_heading?: string;
   tech_spec_1_value?: string;
@@ -84,6 +88,9 @@ const CONTENT_SCHEMA = {
     type: 'string' as const, 
     default: 'API Driven' 
   },
+  step_indicator_1_icon: { type: 'string' as const, default: '✅' },
+  step_indicator_2_icon: { type: 'string' as const, default: '🔒' },
+  step_indicator_3_icon: { type: 'string' as const, default: '💻' },
   // Technical Specs Summary
   tech_specs_heading: { 
     type: 'string' as const, 
@@ -180,7 +187,18 @@ export default function AccordionSteps(props: LayoutComponentProps) {
     setOpenStep(openStep === index ? null : index);
   };
 
-  const AccordionStep = ({ step, index, isOpen, onToggle, blockContent, handleContentUpdate, mode }: {
+  // Icon edit handlers
+  const handleStepIndicatorIconEdit = (index: number, value: string) => {
+    const iconField = `step_indicator_${index + 1}_icon` as keyof AccordionStepsContent;
+    handleContentUpdate(iconField, value);
+  };
+
+  const getStepIndicatorIcon = (index: number) => {
+    const iconFields = ['step_indicator_1_icon', 'step_indicator_2_icon', 'step_indicator_3_icon'];
+    return blockContent[iconFields[index] as keyof AccordionStepsContent] || ['✅', '🔒', '💻'][index];
+  };
+
+  const AccordionStep = ({ step, index, isOpen, onToggle, blockContent, handleContentUpdate, mode, backgroundType, colorTokens, sectionId }: {
     step: { title: string; description: string; details: string };
     index: number;
     isOpen: boolean;
@@ -188,6 +206,9 @@ export default function AccordionSteps(props: LayoutComponentProps) {
     blockContent: AccordionStepsContent;
     handleContentUpdate: (key: string, value: any) => void;
     mode: 'edit' | 'preview';
+    backgroundType: any;
+    colorTokens: any;
+    sectionId: string;
   }) => (
     <div className={`border border-gray-200 rounded-lg overflow-hidden transition-all duration-300 ${isOpen ? 'shadow-lg' : 'hover:shadow-md'}`}>
       <button
@@ -243,22 +264,46 @@ export default function AccordionSteps(props: LayoutComponentProps) {
             
             <div className="flex items-center space-x-4 pt-4">
               <div className="flex items-center space-x-2 text-green-600">
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                <span className="text-sm font-medium">Enterprise Ready</span>
+                <IconEditableText
+                  mode={mode}
+                  value={getStepIndicatorIcon(0)}
+                  onEdit={(value) => handleStepIndicatorIconEdit(0, value)}
+                  backgroundType={backgroundType as any}
+                  colorTokens={colorTokens}
+                  iconSize="sm"
+                  className="text-lg text-green-600"
+                  sectionId={sectionId}
+                  elementKey="step_indicator_1_icon"
+                />
+                <span className="text-sm font-medium">{blockContent.step_indicator_1_text}</span>
               </div>
               <div className="flex items-center space-x-2 text-blue-600">
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                </svg>
-                <span className="text-sm font-medium">Secure</span>
+                <IconEditableText
+                  mode={mode}
+                  value={getStepIndicatorIcon(1)}
+                  onEdit={(value) => handleStepIndicatorIconEdit(1, value)}
+                  backgroundType={backgroundType as any}
+                  colorTokens={colorTokens}
+                  iconSize="sm"
+                  className="text-lg text-blue-600"
+                  sectionId={sectionId}
+                  elementKey="step_indicator_2_icon"
+                />
+                <span className="text-sm font-medium">{blockContent.step_indicator_2_text}</span>
               </div>
               <div className="flex items-center space-x-2 text-purple-600">
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                </svg>
-                <span className="text-sm font-medium">API Driven</span>
+                <IconEditableText
+                  mode={mode}
+                  value={getStepIndicatorIcon(2)}
+                  onEdit={(value) => handleStepIndicatorIconEdit(2, value)}
+                  backgroundType={backgroundType as any}
+                  colorTokens={colorTokens}
+                  iconSize="sm"
+                  className="text-lg text-purple-600"
+                  sectionId={sectionId}
+                  elementKey="step_indicator_3_icon"
+                />
+                <span className="text-sm font-medium">{blockContent.step_indicator_3_text}</span>
               </div>
             </div>
           </div>
@@ -370,6 +415,9 @@ export default function AccordionSteps(props: LayoutComponentProps) {
                 blockContent={blockContent}
                 handleContentUpdate={handleContentUpdate}
                 mode={mode}
+                backgroundType={backgroundType}
+                colorTokens={colorTokens}
+                sectionId={sectionId}
               />
             ))}
           </div>

@@ -10,6 +10,7 @@ import {
   CTAButton,
   TrustIndicators 
 } from '@/components/layout/ComponentRegistry';
+import IconEditableText from '@/components/ui/IconEditableText';
 import { LayoutComponentProps } from '@/types/storeTypes';
 
 interface TimelineContent {
@@ -25,6 +26,9 @@ interface TimelineContent {
   // Step benefit badges
   step_benefit_1?: string;
   step_benefit_2?: string;
+  // Step benefit icons
+  step_benefit_icon_1?: string;
+  step_benefit_icon_2?: string;
   // Process Summary Fields
   process_summary_title?: string;
   process_summary_description?: string;
@@ -76,6 +80,15 @@ const CONTENT_SCHEMA = {
   step_benefit_2: { 
     type: 'string' as const, 
     default: 'Time-saving' 
+  },
+  // Step benefit icons
+  step_benefit_icon_1: { 
+    type: 'string' as const, 
+    default: '✅' 
+  },
+  step_benefit_icon_2: { 
+    type: 'string' as const, 
+    default: '⏱️' 
   },
   // Process Summary Schema
   process_summary_title: { 
@@ -166,9 +179,17 @@ const TimelineStep = React.memo(({
             <div className="mt-4 flex items-center space-x-4">
               {(blockContent.step_benefit_1 || mode === 'edit') && blockContent.step_benefit_1 !== '___REMOVED___' && (
                 <div className="flex items-center space-x-2 text-green-600 group/benefit-item relative">
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                  </svg>
+                  <IconEditableText
+                    mode={mode}
+                    value={blockContent.step_benefit_icon_1 || '✅'}
+                    onEdit={(value) => handleContentUpdate('step_benefit_icon_1', value)}
+                    backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
+                    colorTokens={colorTokens}
+                    iconSize="sm"
+                    className="text-green-600 text-lg"
+                    sectionId={sectionId}
+                    elementKey="step_benefit_icon_1"
+                  />
                   {mode === 'edit' ? (
                     <EditableAdaptiveText
                       mode={mode}
@@ -204,9 +225,17 @@ const TimelineStep = React.memo(({
               )}
               {(blockContent.step_benefit_2 || mode === 'edit') && blockContent.step_benefit_2 !== '___REMOVED___' && (
                 <div className="flex items-center space-x-2 text-blue-600 group/benefit-item relative">
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
+                  <IconEditableText
+                    mode={mode}
+                    value={blockContent.step_benefit_icon_2 || '⏱️'}
+                    onEdit={(value) => handleContentUpdate('step_benefit_icon_2', value)}
+                    backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
+                    colorTokens={colorTokens}
+                    iconSize="sm"
+                    className="text-blue-600 text-lg"
+                    sectionId={sectionId}
+                    elementKey="step_benefit_icon_2"
+                  />
                   {mode === 'edit' ? (
                     <EditableAdaptiveText
                       mode={mode}

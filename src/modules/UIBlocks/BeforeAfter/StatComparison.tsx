@@ -172,7 +172,7 @@ const StatCard = React.memo(({
         <div className="absolute -top-2 -right-2">
           <div className="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
             <IconEditableText
-              mode={mode}
+              mode={mode as 'preview' | 'edit'}
               value={blockContent.improvement_icon || '✅'}
               onEdit={(value) => handleContentUpdate('improvement_icon', value)}
               backgroundType={backgroundType}

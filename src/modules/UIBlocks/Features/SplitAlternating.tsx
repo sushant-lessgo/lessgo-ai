@@ -11,6 +11,7 @@ import {
   CTAButton,
   TrustIndicators 
 } from '@/components/layout/ComponentRegistry';
+import IconEditableText from '@/components/ui/IconEditableText';
 import { LayoutComponentProps } from '@/types/storeTypes';
 
 interface SplitAlternatingContent {
@@ -22,6 +23,11 @@ interface SplitAlternatingContent {
   supporting_text?: string;
   cta_text?: string;
   trust_items?: string;
+  // Feature icons
+  feature_icon_1?: string;
+  feature_icon_2?: string;
+  feature_icon_3?: string;
+  feature_icon_4?: string;
   // Benefit item fields
   benefit_1?: string;
   benefit_2?: string;
@@ -59,6 +65,23 @@ const CONTENT_SCHEMA = {
   trust_items: { 
     type: 'string' as const, 
     default: '' 
+  },
+  // Feature icon schema
+  feature_icon_1: { 
+    type: 'string' as const, 
+    default: '🎯' 
+  },
+  feature_icon_2: { 
+    type: 'string' as const, 
+    default: '⚡' 
+  },
+  feature_icon_3: { 
+    type: 'string' as const, 
+    default: '📈' 
+  },
+  feature_icon_4: { 
+    type: 'string' as const, 
+    default: '🔧' 
   },
   // Benefit item schema
   benefit_1: { 
@@ -104,6 +127,17 @@ const FeatureRow = React.memo(({
 }) => {
   const isEven = index % 2 === 0;
   
+  // Get feature icon from content fields
+  const getFeatureIcon = (index: number) => {
+    const iconFields = [
+      blockContent.feature_icon_1,
+      blockContent.feature_icon_2,
+      blockContent.feature_icon_3,
+      blockContent.feature_icon_4
+    ];
+    return iconFields[index] || '🎯';
+  };
+  
   const VisualPlaceholder = () => (
     <div className="relative w-full h-full min-h-[300px] rounded-xl overflow-hidden bg-gradient-to-br from-blue-50 to-indigo-100">
       <div className="absolute inset-0 flex items-center justify-center">
@@ -128,7 +162,20 @@ const FeatureRow = React.memo(({
         <div className="space-y-6">
           <div className="flex items-start space-x-4">
             <div className="flex-shrink-0 w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-lg">
-              <span className="text-white font-bold text-lg">{index + 1}</span>
+              <IconEditableText
+                mode={mode}
+                value={getFeatureIcon(index)}
+                onEdit={(value) => {
+                  const iconField = `feature_icon_${index + 1}` as keyof SplitAlternatingContent;
+                  handleContentUpdate(iconField, value);
+                }}
+                backgroundType={props.backgroundType as any}
+                colorTokens={colorTokens}
+                iconSize="md"
+                className="text-white text-xl"
+                sectionId={sectionId}
+                elementKey={`feature_icon_${index + 1}`}
+              />
             </div>
             <div className="flex-1">
               <h3 style={h2Style} className="font-bold text-gray-900 mb-4">{title}</h3>

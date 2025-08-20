@@ -9,6 +9,7 @@ import {
   EditableAdaptiveHeadline, 
   EditableAdaptiveText 
 } from '@/components/layout/EditableContent';
+import IconEditableText from '@/components/ui/IconEditableText';
 import { LayoutComponentProps } from '@/types/storeTypes';
 
 // Content interface for type safety
@@ -16,6 +17,8 @@ interface MythVsRealityGridContent {
   headline: string;
   subheadline?: string;
   myth_reality_pairs: string;
+  myth_icon?: string;
+  reality_icon?: string;
 }
 
 // Content schema - defines structure and defaults
@@ -31,7 +34,9 @@ const CONTENT_SCHEMA = {
   myth_reality_pairs: { 
     type: 'string' as const, 
     default: 'Myth: This is too complex for small teams|Reality: Our platform is designed for teams of any size, with setup taking less than 5 minutes|Myth: AI tools replace human creativity|Reality: Our AI enhances your creativity by handling repetitive tasks so you can focus on strategy|Myth: Implementation takes months|Reality: Most customers see results within the first week|Myth: It\'s just another analytics tool|Reality: We provide actionable insights with automated recommendations, not just data' 
-  }
+  },
+  myth_icon: { type: 'string' as const, default: '❌' },
+  reality_icon: { type: 'string' as const, default: '✅' }
 };
 
 export default function MythVsRealityGrid(props: LayoutComponentProps) {
@@ -126,9 +131,17 @@ export default function MythVsRealityGrid(props: LayoutComponentProps) {
                 <div className="pt-4">
                   <div className="flex items-start space-x-3">
                     <div className="flex-shrink-0 w-8 h-8 bg-red-500 rounded-full flex items-center justify-center mt-1">
-                      <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                      </svg>
+                      <IconEditableText
+                        mode={mode}
+                        value={blockContent.myth_icon || '❌'}
+                        onEdit={(value) => handleContentUpdate('myth_icon', value)}
+                        backgroundType="custom"
+                        colorTokens={{...colorTokens, primaryText: 'text-white'}}
+                        iconSize="sm"
+                        className="text-base text-white"
+                        sectionId={sectionId}
+                        elementKey="myth_icon"
+                      />
                     </div>
                     <p style={{...bodyStyle}} className="text-red-900 leading-relaxed">{pair.myth}</p>
                   </div>
@@ -145,9 +158,17 @@ export default function MythVsRealityGrid(props: LayoutComponentProps) {
                 <div className="pt-4">
                   <div className="flex items-start space-x-3">
                     <div className="flex-shrink-0 w-8 h-8 bg-green-500 rounded-full flex items-center justify-center mt-1">
-                      <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                      </svg>
+                      <IconEditableText
+                        mode={mode}
+                        value={blockContent.reality_icon || '✅'}
+                        onEdit={(value) => handleContentUpdate('reality_icon', value)}
+                        backgroundType="custom"
+                        colorTokens={{...colorTokens, primaryText: 'text-white'}}
+                        iconSize="sm"
+                        className="text-base text-white"
+                        sectionId={sectionId}
+                        elementKey="reality_icon"
+                      />
                     </div>
                     <p style={{...bodyStyle}} className="text-green-900 leading-relaxed">{pair.reality}</p>
                   </div>

@@ -196,9 +196,20 @@ const FeatureCard = React.memo(({
       <div className="mb-6">
         <div className="flex items-start space-x-4 mb-4">
           <div className={`flex-shrink-0 w-12 h-12 rounded-xl ${colorTokens.ctaBg} flex items-center justify-center shadow-lg`}>
-            <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
+            <IconEditableText
+              mode={mode}
+              value={getFeatureIcon(index)}
+              onEdit={(value) => {
+                const iconField = `feature_icon_${index + 1}` as keyof FeatureTestimonialContent;
+                handleContentUpdate(iconField, value);
+              }}
+              backgroundType={backgroundType as any}
+              colorTokens={colorTokens}
+              iconSize="md"
+              className="text-white text-2xl"
+              sectionId={sectionId}
+              elementKey={`feature_icon_${index + 1}`}
+            />
           </div>
           <div>
             <h3 style={h3Style} className="font-bold text-gray-900">{title}</h3>

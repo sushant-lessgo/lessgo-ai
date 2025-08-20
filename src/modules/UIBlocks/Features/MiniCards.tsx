@@ -10,6 +10,7 @@ import {
   CTAButton,
   TrustIndicators 
 } from '@/components/layout/ComponentRegistry';
+import IconEditableText from '@/components/ui/IconEditableText';
 import { LayoutComponentProps } from '@/types/storeTypes';
 
 interface MiniCardsContent {
@@ -17,6 +18,13 @@ interface MiniCardsContent {
   feature_titles: string;
   feature_descriptions: string;
   feature_keywords: string;
+  // Feature icons
+  feature_icon_1?: string;
+  feature_icon_2?: string;
+  feature_icon_3?: string;
+  feature_icon_4?: string;
+  feature_icon_5?: string;
+  feature_icon_6?: string;
   subheadline?: string;
   supporting_text?: string;
   cta_text?: string;
@@ -44,6 +52,31 @@ const CONTENT_SCHEMA = {
   feature_keywords: { 
     type: 'string' as const, 
     default: 'AI-Powered|Instant|SOC 2|Live Updates|iOS & Android|1000+ Integrations' 
+  },
+  // Feature icon schema
+  feature_icon_1: { 
+    type: 'string' as const, 
+    default: '⚡' 
+  },
+  feature_icon_2: { 
+    type: 'string' as const, 
+    default: '💽' 
+  },
+  feature_icon_3: { 
+    type: 'string' as const, 
+    default: '🔒' 
+  },
+  feature_icon_4: { 
+    type: 'string' as const, 
+    default: '👥' 
+  },
+  feature_icon_5: { 
+    type: 'string' as const, 
+    default: '📱' 
+  },
+  feature_icon_6: { 
+    type: 'string' as const, 
+    default: '🔧' 
   },
   subheadline: { 
     type: 'string' as const, 
@@ -86,7 +119,12 @@ const MiniCard = React.memo(({
   keyword,
   index,
   colorTokens,
-  h3Style
+  h3Style,
+  mode,
+  handleContentUpdate,
+  blockContent,
+  sectionId,
+  backgroundType
 }: {
   title: string;
   description: string;
@@ -94,36 +132,24 @@ const MiniCard = React.memo(({
   index: number;
   colorTokens: any;
   h3Style: React.CSSProperties;
+  mode: 'edit' | 'preview';
+  handleContentUpdate: (key: keyof MiniCardsContent, value: string) => void;
+  blockContent: MiniCardsContent;
+  sectionId: string;
+  backgroundType: string;
 }) => {
   
-  const getIconForIndex = (index: number) => {
-    const icons = [
-      // Smart Automation
-      <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-      </svg>,
-      // Real-Time Sync
-      <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-      </svg>,
-      // Advanced Security
-      <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-      </svg>,
-      // Team Collaboration
-      <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-      </svg>,
-      // Mobile Access
-      <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
-      </svg>,
-      // API Integration
-      <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-      </svg>
+  // Get feature icon from content fields
+  const getFeatureIcon = (index: number) => {
+    const iconFields = [
+      blockContent.feature_icon_1,
+      blockContent.feature_icon_2,
+      blockContent.feature_icon_3,
+      blockContent.feature_icon_4,
+      blockContent.feature_icon_5,
+      blockContent.feature_icon_6
     ];
-    return icons[index % icons.length];
+    return iconFields[index] || '📊';
   };
 
   const getColorForIndex = (index: number) => {
@@ -143,7 +169,20 @@ const MiniCard = React.memo(({
       
       <div className="flex items-start space-x-4 mb-4">
         <div className={`flex-shrink-0 w-10 h-10 rounded-lg bg-gradient-to-br ${getColorForIndex(index)} flex items-center justify-center shadow-md group-hover:shadow-lg transition-shadow duration-300`}>
-          {getIconForIndex(index)}
+          <IconEditableText
+            mode={mode}
+            value={getFeatureIcon(index)}
+            onEdit={(value) => {
+              const iconField = `feature_icon_${index + 1}` as keyof MiniCardsContent;
+              handleContentUpdate(iconField, value);
+            }}
+            backgroundType={backgroundType as any}
+            colorTokens={colorTokens}
+            iconSize="sm"
+            className="text-white text-xl"
+            sectionId={sectionId}
+            elementKey={`feature_icon_${index + 1}`}
+          />
         </div>
         
         <div className="flex-1 min-w-0">
@@ -323,6 +362,11 @@ export default function MiniCards(props: LayoutComponentProps) {
                 index={index}
                 colorTokens={colorTokens}
                 h3Style={h3Style}
+                mode={mode}
+                handleContentUpdate={handleContentUpdate}
+                blockContent={blockContent}
+                sectionId={sectionId}
+                backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
               />
             ))}
           </div>

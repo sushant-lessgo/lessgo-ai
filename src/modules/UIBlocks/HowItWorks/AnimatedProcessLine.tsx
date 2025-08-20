@@ -6,6 +6,7 @@ import {
   EditableAdaptiveHeadline, 
   EditableAdaptiveText
 } from '@/components/layout/EditableContent';
+import IconEditableText from '@/components/ui/IconEditableText';
 import { 
   CTAButton,
   TrustIndicators 
@@ -21,10 +22,18 @@ interface AnimatedProcessLineContent {
   supporting_text?: string;
   cta_text?: string;
   trust_items?: string;
+  // Step icons
+  step_icon_1?: string;
+  step_icon_2?: string;
+  step_icon_3?: string;
+  step_icon_4?: string;
   // Process indicators
   process_indicator_1_text?: string;
   process_indicator_2_text?: string;
   process_indicator_3_text?: string;
+  process_indicator_1_icon?: string;
+  process_indicator_2_icon?: string;
+  process_indicator_3_icon?: string;
   show_process_indicators?: boolean;
 }
 
@@ -61,11 +70,19 @@ const CONTENT_SCHEMA = {
     type: 'string' as const, 
     default: '' 
   },
+  // Step icons
+  step_icon_1: { type: 'string' as const, default: '📥' },
+  step_icon_2: { type: 'string' as const, default: '⚙️' },
+  step_icon_3: { type: 'string' as const, default: '⚡' },
+  step_icon_4: { type: 'string' as const, default: '📊' },
   // Process indicators
   process_indicator_1_text: { 
     type: 'string' as const, 
     default: 'Automated' 
   },
+  process_indicator_1_icon: { type: 'string' as const, default: '⚡' },
+  process_indicator_2_icon: { type: 'string' as const, default: '🕒' },
+  process_indicator_3_icon: { type: 'string' as const, default: '✅' },
   process_indicator_2_text: { 
     type: 'string' as const, 
     default: 'Real-time' 
@@ -143,33 +160,32 @@ export default function AnimatedProcessLine(props: LayoutComponentProps) {
 
   const mutedTextColor = dynamicTextColors?.muted || colorTokens.textMuted;
 
+  // Icon edit handlers
+  const handleStepIconEdit = (index: number, value: string) => {
+    const iconField = `step_icon_${index + 1}` as keyof AnimatedProcessLineContent;
+    handleContentUpdate(iconField, value);
+  };
+
+  const handleProcessIndicatorIconEdit = (index: number, value: string) => {
+    const iconField = `process_indicator_${index + 1}_icon` as keyof AnimatedProcessLineContent;
+    handleContentUpdate(iconField, value);
+  };
+
+  const getStepIcon = (index: number) => {
+    const iconFields = ['step_icon_1', 'step_icon_2', 'step_icon_3', 'step_icon_4'];
+    return blockContent[iconFields[index] as keyof AnimatedProcessLineContent] || ['📥', '⚙️', '⚡', '📊'][index];
+  };
+
+  const getProcessIndicatorIcon = (index: number) => {
+    const iconFields = ['process_indicator_1_icon', 'process_indicator_2_icon', 'process_indicator_3_icon'];
+    return blockContent[iconFields[index] as keyof AnimatedProcessLineContent] || ['⚡', '🕒', '✅'][index];
+  };
+
   const ProcessStep = ({ step, index, isActive }: {
     step: { title: string; description: string };
     index: number;
     isActive: boolean;
   }) => {
-    const getStepIcon = (index: number) => {
-      const icons = [
-        // Input
-        <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-        </svg>,
-        // Process
-        <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-        </svg>,
-        // Optimize
-        <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-        </svg>,
-        // Output
-        <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V9a2 2 0 012-2h6l2 2h6a2 2 0 012 2v8a2 2 0 01-2 2z" />
-        </svg>
-      ];
-      return icons[index % icons.length];
-    };
 
     return (
       <div 
@@ -184,7 +200,17 @@ export default function AnimatedProcessLine(props: LayoutComponentProps) {
             ? `${colorTokens.ctaBg} shadow-xl` 
             : 'bg-gray-200 hover:bg-gray-300'
         }`}>
-          {getStepIcon(index)}
+          <IconEditableText
+            mode={mode}
+            value={getStepIcon(index)}
+            onEdit={(value) => handleStepIconEdit(index, value)}
+            backgroundType={backgroundType as any}
+            colorTokens={colorTokens}
+            iconSize="lg"
+            className="text-3xl text-white"
+            sectionId={sectionId}
+            elementKey={`step_icon_${index + 1}`}
+          />
           
           {/* Pulse animation for active step */}
           {isActive && (
@@ -351,9 +377,17 @@ export default function AnimatedProcessLine(props: LayoutComponentProps) {
                   <div className="flex justify-center items-center space-x-6">
                     {(blockContent.process_indicator_1_text && blockContent.process_indicator_1_text !== '___REMOVED___') && (
                       <div className="relative group/process-indicator-1 flex items-center space-x-2">
-                        <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                        </svg>
+                        <IconEditableText
+                          mode={mode}
+                          value={getProcessIndicatorIcon(0)}
+                          onEdit={(value) => handleProcessIndicatorIconEdit(0, value)}
+                          backgroundType={backgroundType as any}
+                          colorTokens={colorTokens}
+                          iconSize="sm"
+                          className="text-xl text-green-600"
+                          sectionId={sectionId}
+                          elementKey="process_indicator_1_icon"
+                        />
                         <EditableAdaptiveText
                           mode={mode}
                           value={blockContent.process_indicator_1_text || ''}
@@ -389,9 +423,17 @@ export default function AnimatedProcessLine(props: LayoutComponentProps) {
                     )}
                     {(blockContent.process_indicator_2_text && blockContent.process_indicator_2_text !== '___REMOVED___') && (
                       <div className="relative group/process-indicator-2 flex items-center space-x-2">
-                        <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
+                        <IconEditableText
+                          mode={mode}
+                          value={getProcessIndicatorIcon(1)}
+                          onEdit={(value) => handleProcessIndicatorIconEdit(1, value)}
+                          backgroundType={backgroundType as any}
+                          colorTokens={colorTokens}
+                          iconSize="sm"
+                          className="text-xl text-blue-600"
+                          sectionId={sectionId}
+                          elementKey="process_indicator_2_icon"
+                        />
                         <EditableAdaptiveText
                           mode={mode}
                           value={blockContent.process_indicator_2_text || ''}
@@ -427,9 +469,17 @@ export default function AnimatedProcessLine(props: LayoutComponentProps) {
                     )}
                     {(blockContent.process_indicator_3_text && blockContent.process_indicator_3_text !== '___REMOVED___') && (
                       <div className="relative group/process-indicator-3 flex items-center space-x-2">
-                        <svg className="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
+                        <IconEditableText
+                          mode={mode}
+                          value={getProcessIndicatorIcon(2)}
+                          onEdit={(value) => handleProcessIndicatorIconEdit(2, value)}
+                          backgroundType={backgroundType as any}
+                          colorTokens={colorTokens}
+                          iconSize="sm"
+                          className="text-xl text-purple-600"
+                          sectionId={sectionId}
+                          elementKey="process_indicator_3_icon"
+                        />
                         <EditableAdaptiveText
                           mode={mode}
                           value={blockContent.process_indicator_3_text || ''}
@@ -527,13 +577,20 @@ export const componentMeta = {
     { key: 'subheadline', label: 'Subheadline', type: 'textarea', required: false },
     { key: 'step_titles', label: 'Step Titles (pipe separated)', type: 'text', required: true },
     { key: 'step_descriptions', label: 'Step Descriptions (pipe separated)', type: 'textarea', required: true },
+    { key: 'step_icon_1', label: 'Step 1 Icon', type: 'text', required: false },
+    { key: 'step_icon_2', label: 'Step 2 Icon', type: 'text', required: false },
+    { key: 'step_icon_3', label: 'Step 3 Icon', type: 'text', required: false },
+    { key: 'step_icon_4', label: 'Step 4 Icon', type: 'text', required: false },
     { key: 'auto_animate', label: 'Auto-animate Process', type: 'boolean', required: false },
     { key: 'supporting_text', label: 'Supporting Text', type: 'textarea', required: false },
     { key: 'cta_text', label: 'CTA Button Text', type: 'text', required: false },
     { key: 'trust_items', label: 'Trust Indicators (pipe separated)', type: 'text', required: false },
     { key: 'process_indicator_1_text', label: 'Process Indicator 1', type: 'text', required: false },
+    { key: 'process_indicator_1_icon', label: 'Process Indicator 1 Icon', type: 'text', required: false },
     { key: 'process_indicator_2_text', label: 'Process Indicator 2', type: 'text', required: false },
+    { key: 'process_indicator_2_icon', label: 'Process Indicator 2 Icon', type: 'text', required: false },
     { key: 'process_indicator_3_text', label: 'Process Indicator 3', type: 'text', required: false },
+    { key: 'process_indicator_3_icon', label: 'Process Indicator 3 Icon', type: 'text', required: false },
     { key: 'show_process_indicators', label: 'Show Process Indicators', type: 'boolean', required: false }
   ],
   

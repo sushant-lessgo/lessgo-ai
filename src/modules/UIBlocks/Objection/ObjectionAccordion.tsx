@@ -9,6 +9,7 @@ import {
   EditableAdaptiveHeadline, 
   EditableAdaptiveText 
 } from '@/components/layout/EditableContent';
+import IconEditableText from '@/components/ui/IconEditableText';
 import { LayoutComponentProps } from '@/types/storeTypes';
 import { parsePipeData, updateListData } from '@/utils/dataParsingUtils';
 
@@ -18,6 +19,9 @@ interface ObjectionAccordionContent {
   subheadline?: string;
   objection_titles: string;
   objection_responses: string;
+  objection_icons?: string;
+  response_icon?: string;
+  trust_icon?: string;
 }
 
 // Objection item structure
@@ -26,6 +30,7 @@ interface ObjectionItem {
   index: number;
   title: string;
   response: string;
+  icon?: string;
 }
 
 // Content schema - defines structure and defaults
@@ -45,51 +50,50 @@ const CONTENT_SCHEMA = {
   objection_responses: { 
     type: 'string' as const, 
     default: 'We designed our pricing specifically for growing businesses. Most customers save more than the monthly cost within the first week through improved efficiency.|Not at all. We integrate seamlessly with your existing tools and workflows. You can start small and gradually expand usage as your team gets comfortable.|We offer a 30-day free trial with full access to all features. Plus, over 10,000 businesses already trust us with their operations.|Our dedicated onboarding team provides white-glove setup, training, and ongoing support. Most customers are fully operational within 24 hours.|Absolutely. We use bank-level encryption, are SOC 2 compliant, and never share your data with third parties. Your information is more secure with us than on local systems.' 
+  },
+  objection_icons: {
+    type: 'string' as const,
+    default: '💰|🔧|❓|🛠️|🔒'
+  },
+  response_icon: {
+    type: 'string' as const,
+    default: '✅'
+  },
+  trust_icon: {
+    type: 'string' as const,
+    default: '✅'
   }
 };
 
 // Parse objection data from pipe-separated strings
-const parseObjectionData = (titles: string, responses: string): ObjectionItem[] => {
+const parseObjectionData = (titles: string, responses: string, icons?: string): ObjectionItem[] => {
   const titleList = parsePipeData(titles);
   const responseList = parsePipeData(responses);
+  const iconList = icons ? parsePipeData(icons) : [];
   
   return titleList.map((title, index) => ({
     id: `objection-${index}`,
     index,
     title,
-    response: responseList[index] || 'Response not provided.'
+    response: responseList[index] || 'Response not provided.',
+    icon: iconList[index] || getDefaultIcon(title)
   }));
 };
 
-// Get objection icon based on content
-const getObjectionIcon = (title: string) => {
+// Get default icon based on content
+const getDefaultIcon = (title: string) => {
   const lower = title.toLowerCase();
   if (lower.includes('expensive') || lower.includes('cost') || lower.includes('price')) {
-    return (
-      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
-      </svg>
-    );
+    return '💰';
   } else if (lower.includes('replace') || lower.includes('system') || lower.includes('integration')) {
-    return (
-      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-      </svg>
-    );
+    return '🔧';
   } else if (lower.includes('secure') || lower.includes('data') || lower.includes('privacy')) {
-    return (
-      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-      </svg>
-    );
+    return '🔒';
+  } else if (lower.includes('help') || lower.includes('support') || lower.includes('setup')) {
+    return '🛠️';
   }
-  
   // Default question icon
-  return (
-    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-    </svg>
-  );
+  return '❓';
 };
 
 // Individual Objection Accordion Item
@@ -100,7 +104,13 @@ const ObjectionAccordionItem = React.memo(({
   mode, 
   colorTokens,
   onTitleEdit,
-  onResponseEdit 
+  onResponseEdit,
+  onIconEdit,
+  responseIcon,
+  onResponseIconEdit,
+  sectionId,
+  backgroundType,
+  sectionBackground
 }: {
   item: ObjectionItem;
   isOpen: boolean;
@@ -109,6 +119,12 @@ const ObjectionAccordionItem = React.memo(({
   colorTokens: any;
   onTitleEdit: (index: number, value: string) => void;
   onResponseEdit: (index: number, value: string) => void;
+  onIconEdit: (index: number, value: string) => void;
+  responseIcon: string;
+  onResponseIconEdit: (value: string) => void;
+  sectionId: string;
+  backgroundType: any;
+  sectionBackground: any;
 }) => {
   
   return (
@@ -123,7 +139,17 @@ const ObjectionAccordionItem = React.memo(({
           <div className="flex items-center space-x-4 flex-1 pr-4">
             {/* Objection Icon */}
             <div className="flex-shrink-0 w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center text-red-600">
-              {getObjectionIcon(item.title)}
+              <IconEditableText
+                mode={mode}
+                value={item.icon || '❓'}
+                onEdit={(value) => onIconEdit(item.index, value)}
+                backgroundType="custom"
+                colorTokens={{...colorTokens, primaryText: 'text-red-600'}}
+                iconSize="sm"
+                className="text-xl"
+                sectionId={sectionId}
+                elementKey={`objection_icon_${item.index}`}
+              />
             </div>
             
             {/* Objection Title */}
@@ -172,9 +198,17 @@ const ObjectionAccordionItem = React.memo(({
           <div className="flex items-start space-x-4">
             {/* Response Icon */}
             <div className="flex-shrink-0 w-8 h-8 bg-green-600 rounded-full flex items-center justify-center text-white mt-1">
-              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-              </svg>
+              <IconEditableText
+                mode={mode}
+                value={responseIcon || '✅'}
+                onEdit={onResponseIconEdit}
+                backgroundType="custom"
+                colorTokens={{...colorTokens, primaryText: 'text-white'}}
+                iconSize="sm"
+                className="text-base"
+                sectionId={sectionId}
+                elementKey="response_icon"
+              />
             </div>
             
             {/* Response Text */}
@@ -225,7 +259,11 @@ export default function ObjectionAccordion(props: LayoutComponentProps) {
   const [openItems, setOpenItems] = useState<Set<string>>(new Set());
 
   // Parse objection data
-  const objectionItems = parseObjectionData(blockContent.objection_titles, blockContent.objection_responses);
+  const objectionItems = parseObjectionData(
+    blockContent.objection_titles, 
+    blockContent.objection_responses,
+    blockContent.objection_icons
+  );
 
   // Handle individual title/response editing
   const handleTitleEdit = (index: number, value: string) => {
@@ -236,6 +274,15 @@ export default function ObjectionAccordion(props: LayoutComponentProps) {
   const handleResponseEdit = (index: number, value: string) => {
     const updatedResponses = updateListData(blockContent.objection_responses, index, value);
     handleContentUpdate('objection_responses', updatedResponses);
+  };
+
+  const handleIconEdit = (index: number, value: string) => {
+    const icons = blockContent.objection_icons ? blockContent.objection_icons.split('|') : [];
+    while (icons.length <= index) {
+      icons.push('❓');
+    }
+    icons[index] = value;
+    handleContentUpdate('objection_icons', icons.join('|'));
   };
 
   // Toggle accordion item
@@ -310,6 +357,12 @@ export default function ObjectionAccordion(props: LayoutComponentProps) {
               colorTokens={colorTokens}
               onTitleEdit={handleTitleEdit}
               onResponseEdit={handleResponseEdit}
+              onIconEdit={handleIconEdit}
+              responseIcon={blockContent.response_icon || '✅'}
+              onResponseIconEdit={(value) => handleContentUpdate('response_icon', value)}
+              sectionId={sectionId}
+              backgroundType={backgroundType}
+              sectionBackground={sectionBackground}
             />
           ))}
         </div>
@@ -317,9 +370,17 @@ export default function ObjectionAccordion(props: LayoutComponentProps) {
         {/* Trust Reinforcement */}
         <div className="mt-12 text-center">
           <div className="inline-flex items-center space-x-2 px-4 py-2 bg-blue-50 rounded-full text-blue-700 text-sm">
-            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-            </svg>
+            <IconEditableText
+              mode={mode}
+              value={blockContent.trust_icon || '✅'}
+              onEdit={(value) => handleContentUpdate('trust_icon', value)}
+              backgroundType="custom"
+              colorTokens={{...colorTokens, primaryText: 'text-blue-700'}}
+              iconSize="sm"
+              className="text-base"
+              sectionId={sectionId}
+              elementKey="trust_icon"
+            />
             <span>Still have questions? We're here to help.</span>
           </div>
         </div>

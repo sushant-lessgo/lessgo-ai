@@ -9,6 +9,7 @@ import {
   EditableAdaptiveHeadline, 
   EditableAdaptiveText 
 } from '@/components/layout/EditableContent';
+import IconEditableText from '@/components/ui/IconEditableText';
 import { LayoutComponentProps } from '@/types/storeTypes';
 
 // Content interface for type safety
@@ -17,12 +18,16 @@ interface CategoryAccordionContent {
   subheadline?: string;
   category_1_title: string;
   category_1_integrations: string;
+  category_1_icon?: string;
   category_2_title: string;
   category_2_integrations: string;
+  category_2_icon?: string;
   category_3_title: string;
   category_3_integrations: string;
+  category_3_icon?: string;
   category_4_title: string;
   category_4_integrations: string;
+  category_4_icon?: string;
 }
 
 // Content schema - defines structure and defaults
@@ -66,6 +71,22 @@ const CONTENT_SCHEMA = {
   category_4_integrations: { 
     type: 'string' as const, 
     default: 'AWS|Google Cloud|Azure|Dropbox|Google Drive|OneDrive|Box|S3' 
+  },
+  category_1_icon: { 
+    type: 'string' as const, 
+    default: '💬' 
+  },
+  category_2_icon: { 
+    type: 'string' as const, 
+    default: '📊' 
+  },
+  category_3_icon: { 
+    type: 'string' as const, 
+    default: '⚡' 
+  },
+  category_4_icon: { 
+    type: 'string' as const, 
+    default: '☁️' 
   }
 };
 
@@ -86,7 +107,12 @@ const AccordionItem = React.memo(({
   onToggle, 
   colorTokens,
   h3Style,
-  labelStyle
+  labelStyle,
+  categoryIcon,
+  mode,
+  onIconEdit,
+  sectionId,
+  categoryIndex
 }: { 
   title: string; 
   integrations: string[]; 
@@ -95,13 +121,34 @@ const AccordionItem = React.memo(({
   colorTokens: any;
   h3Style: React.CSSProperties;
   labelStyle: React.CSSProperties;
+  categoryIcon: string;
+  mode: 'edit' | 'preview';
+  onIconEdit: (value: string) => void;
+  sectionId: string;
+  categoryIndex: number;
 }) => (
   <div className={`border rounded-xl border-gray-200 ${colorTokens.bgSecondary} overflow-hidden`}>
     <button
       onClick={onToggle}
       className={`w-full px-6 py-4 text-left flex items-center justify-between ${colorTokens.textPrimary} hover:${colorTokens.bgSecondary} transition-colors duration-200`}
     >
-      <h3 style={h3Style}>{title}</h3>
+      <div className="flex items-center">
+        <div className="mr-3">
+          <IconEditableText
+            mode={mode}
+            value={categoryIcon}
+            onEdit={onIconEdit}
+            backgroundType="primary"
+            colorTokens={colorTokens}
+            iconSize="md"
+            className="text-2xl"
+            placeholder="📁"
+            sectionId={sectionId}
+            elementKey={`category_${categoryIndex + 1}_icon`}
+          />
+        </div>
+        <h3 style={h3Style}>{title}</h3>
+      </div>
       <svg 
         className={`w-5 h-5 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} 
         fill="none" 
@@ -155,6 +202,12 @@ export default function CategoryAccordion(props: LayoutComponentProps) {
   const bodySmStyle = getTypographyStyle('body-sm');
   const bodyLgStyle = getTypographyStyle('body-lg');
 
+  // Icon edit handler
+  const handleCategoryIconEdit = (categoryIndex: number, value: string) => {
+    const iconField = `category_${categoryIndex + 1}_icon` as keyof CategoryAccordionContent;
+    handleContentUpdate(iconField, value);
+  };
+
   const toggleItem = (index: number) => {
     const newOpenItems = new Set(openItems);
     if (newOpenItems.has(index)) {
@@ -169,19 +222,23 @@ export default function CategoryAccordion(props: LayoutComponentProps) {
   const categories = [
     {
       title: blockContent.category_1_title,
-      integrations: blockContent.category_1_integrations ? blockContent.category_1_integrations.split('|') : []
+      integrations: blockContent.category_1_integrations ? blockContent.category_1_integrations.split('|') : [],
+      icon: blockContent.category_1_icon || '💬'
     },
     {
       title: blockContent.category_2_title,
-      integrations: blockContent.category_2_integrations ? blockContent.category_2_integrations.split('|') : []
+      integrations: blockContent.category_2_integrations ? blockContent.category_2_integrations.split('|') : [],
+      icon: blockContent.category_2_icon || '📊'
     },
     {
       title: blockContent.category_3_title,
-      integrations: blockContent.category_3_integrations ? blockContent.category_3_integrations.split('|') : []
+      integrations: blockContent.category_3_integrations ? blockContent.category_3_integrations.split('|') : [],
+      icon: blockContent.category_3_icon || '⚡'
     },
     {
       title: blockContent.category_4_title,
-      integrations: blockContent.category_4_integrations ? blockContent.category_4_integrations.split('|') : []
+      integrations: blockContent.category_4_integrations ? blockContent.category_4_integrations.split('|') : [],
+      icon: blockContent.category_4_icon || '☁️'
     }
   ];
 
@@ -241,6 +298,11 @@ export default function CategoryAccordion(props: LayoutComponentProps) {
               colorTokens={colorTokens}
               h3Style={h3Style}
               labelStyle={labelStyle}
+              categoryIcon={category.icon}
+              mode={mode}
+              onIconEdit={(value) => handleCategoryIconEdit(index, value)}
+              sectionId={sectionId}
+              categoryIndex={index}
             />
           ))}
         </div>

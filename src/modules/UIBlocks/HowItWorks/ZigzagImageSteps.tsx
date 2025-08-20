@@ -7,6 +7,7 @@ import {
   EditableAdaptiveHeadline, 
   EditableAdaptiveText
 } from '@/components/layout/EditableContent';
+import IconEditableText from '@/components/ui/IconEditableText';
 import { 
   CTAButton,
   TrustIndicators 
@@ -74,7 +75,7 @@ const CONTENT_SCHEMA = {
   },
   flow_feature_1_icon: { 
     type: 'string' as const, 
-    default: 'heart' 
+    default: '💖' 
   },
   flow_feature_1_text: { 
     type: 'string' as const, 
@@ -82,7 +83,7 @@ const CONTENT_SCHEMA = {
   },
   flow_feature_2_icon: { 
     type: 'string' as const, 
-    default: 'lightning' 
+    default: '⚡' 
   },
   flow_feature_2_text: { 
     type: 'string' as const, 
@@ -90,7 +91,7 @@ const CONTENT_SCHEMA = {
   },
   flow_feature_3_icon: { 
     type: 'string' as const, 
-    default: 'users' 
+    default: '👥' 
   },
   flow_feature_3_text: { 
     type: 'string' as const, 
@@ -106,27 +107,6 @@ const CONTENT_SCHEMA = {
   }
 };
 
-// Helper function to get flow icons
-const getFlowIcon = (iconName: string) => {
-  const icons = {
-    'heart': (
-      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-      </svg>
-    ),
-    'lightning': (
-      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-      </svg>
-    ),
-    'users': (
-      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-      </svg>
-    )
-  };
-  return icons[iconName as keyof typeof icons] || icons.heart;
-};
 
 const ZigzagStep = React.memo(({ 
   title, 
@@ -264,6 +244,17 @@ export default function ZigzagImageSteps(props: LayoutComponentProps) {
   
   const store = useEditStore();
   const showImageToolbar = store.showImageToolbar;
+
+  // Icon edit handlers
+  const handleFlowFeatureIconEdit = (index: number, value: string) => {
+    const iconField = `flow_feature_${index + 1}_icon` as keyof ZigzagImageStepsContent;
+    handleContentUpdate(iconField, value);
+  };
+
+  const getFlowFeatureIcon = (index: number) => {
+    const iconFields = ['flow_feature_1_icon', 'flow_feature_2_icon', 'flow_feature_3_icon'];
+    return blockContent[iconFields[index] as keyof ZigzagImageStepsContent] || ['💖', '⚡', '👥'][index];
+  };
   
   return (
     <LayoutSection
@@ -399,9 +390,17 @@ export default function ZigzagImageSteps(props: LayoutComponentProps) {
               <div className="flex justify-center items-center space-x-6 mb-4">
                 {(blockContent.flow_feature_1_text && blockContent.flow_feature_1_text !== '___REMOVED___') && (
                   <div className="relative group/feature-1 flex items-center space-x-2">
-                    <div className="w-6 h-6 text-pink-600">
-                      {getFlowIcon(blockContent.flow_feature_1_icon || 'heart')}
-                    </div>
+                    <IconEditableText
+                      mode={mode}
+                      value={getFlowFeatureIcon(0)}
+                      onEdit={(value) => handleFlowFeatureIconEdit(0, value)}
+                      backgroundType={backgroundType as any}
+                      colorTokens={colorTokens}
+                      iconSize="sm"
+                      className="text-xl text-pink-600"
+                      sectionId={sectionId}
+                      elementKey="flow_feature_1_icon"
+                    />
                     <EditableAdaptiveText
                       mode={mode}
                       value={blockContent.flow_feature_1_text || ''}
@@ -439,9 +438,17 @@ export default function ZigzagImageSteps(props: LayoutComponentProps) {
                 
                 {(blockContent.flow_feature_2_text && blockContent.flow_feature_2_text !== '___REMOVED___') && (
                   <div className="relative group/feature-2 flex items-center space-x-2">
-                    <div className="w-6 h-6 text-purple-600">
-                      {getFlowIcon(blockContent.flow_feature_2_icon || 'lightning')}
-                    </div>
+                    <IconEditableText
+                      mode={mode}
+                      value={getFlowFeatureIcon(1)}
+                      onEdit={(value) => handleFlowFeatureIconEdit(1, value)}
+                      backgroundType={backgroundType as any}
+                      colorTokens={colorTokens}
+                      iconSize="sm"
+                      className="text-xl text-purple-600"
+                      sectionId={sectionId}
+                      elementKey="flow_feature_2_icon"
+                    />
                     <EditableAdaptiveText
                       mode={mode}
                       value={blockContent.flow_feature_2_text || ''}
@@ -479,9 +486,17 @@ export default function ZigzagImageSteps(props: LayoutComponentProps) {
                 
                 {(blockContent.flow_feature_3_text && blockContent.flow_feature_3_text !== '___REMOVED___') && (
                   <div className="relative group/feature-3 flex items-center space-x-2">
-                    <div className="w-6 h-6 text-indigo-600">
-                      {getFlowIcon(blockContent.flow_feature_3_icon || 'users')}
-                    </div>
+                    <IconEditableText
+                      mode={mode}
+                      value={getFlowFeatureIcon(2)}
+                      onEdit={(value) => handleFlowFeatureIconEdit(2, value)}
+                      backgroundType={backgroundType as any}
+                      colorTokens={colorTokens}
+                      iconSize="sm"
+                      className="text-xl text-indigo-600"
+                      sectionId={sectionId}
+                      elementKey="flow_feature_3_icon"
+                    />
                     <EditableAdaptiveText
                       mode={mode}
                       value={blockContent.flow_feature_3_text || ''}

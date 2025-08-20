@@ -8,6 +8,7 @@ import {
   EditableAdaptiveHeadline, 
   EditableAdaptiveText 
 } from '@/components/layout/EditableContent';
+import IconEditableText from '@/components/ui/IconEditableText';
 import { LayoutComponentProps } from '@/types/storeTypes';
 import { parsePipeData, updateListData } from '@/utils/dataParsingUtils';
 
@@ -26,6 +27,9 @@ interface AccordionFAQContent {
   answer_4: string;
   question_5: string;
   answer_5: string;
+  // Icon fields
+  expand_icon?: string;
+  collapse_icon?: string;
   // Legacy fields for backward compatibility
   questions?: string;
   answers?: string;
@@ -60,6 +64,9 @@ const CONTENT_SCHEMA = {
   answer_4: { type: 'string' as const, default: 'We offer 24/7 customer support via chat, email, and phone. Our average response time is under 2 hours.' },
   question_5: { type: 'string' as const, default: 'Is my data secure?' },
   answer_5: { type: 'string' as const, default: 'Absolutely. We use enterprise-grade encryption and are SOC 2 compliant. Your data is stored securely and never shared with third parties.' },
+  // Icon fields
+  expand_icon: { type: 'string' as const, default: '➕' },
+  collapse_icon: { type: 'string' as const, default: '➖' },
   // Legacy fields for backward compatibility
   questions: { type: 'string' as const, default: '' },
   answers: { type: 'string' as const, default: '' }
@@ -131,6 +138,8 @@ const FAQAccordionItem = React.memo(({
   backgroundType: any;
   sectionBackground: any;
   sectionId: string;
+  blockContent: AccordionFAQContent;
+  handleContentUpdate: (key: keyof AccordionFAQContent, value: string) => void;
   onRemove: (index: number) => void;
 }) => {
   
@@ -161,14 +170,17 @@ const FAQAccordionItem = React.memo(({
           
           {/* Expand/Collapse Icon */}
           <div className="flex-shrink-0">
-            <svg 
-              className={`w-5 h-5 text-gray-500 transition-transform duration-200 ${isOpen ? 'rotate-45' : ''}`}
-              fill="none" 
-              stroke="currentColor" 
-              viewBox="0 0 24 24"
-            >
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-            </svg>
+            <IconEditableText
+              mode={mode}
+              value={isOpen ? (blockContent.collapse_icon || '➖') : (blockContent.expand_icon || '➕')}
+              onEdit={(value) => handleContentUpdate(isOpen ? 'collapse_icon' : 'expand_icon', value)}
+              backgroundType={backgroundType as any}
+              colorTokens={colorTokens}
+              iconSize="md"
+              className="text-gray-500"
+              sectionId={sectionId}
+              elementKey={isOpen ? `collapse_icon_${item.index}` : `expand_icon_${item.index}`}
+            />
           </div>
         </div>
       </button>
@@ -328,6 +340,8 @@ export default function AccordionFAQ(props: LayoutComponentProps) {
               backgroundType={backgroundType}
               sectionBackground={sectionBackground}
               sectionId={sectionId}
+              blockContent={blockContent}
+              handleContentUpdate={handleContentUpdate}
               onRemove={(index) => {
                 handleContentUpdate(`question_${index}` as keyof AccordionFAQContent, '___REMOVED___');
                 handleContentUpdate(`answer_${index}` as keyof AccordionFAQContent, '___REMOVED___');

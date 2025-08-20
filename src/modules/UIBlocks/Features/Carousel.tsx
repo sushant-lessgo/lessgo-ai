@@ -11,6 +11,7 @@ import {
   CTAButton,
   TrustIndicators 
 } from '@/components/layout/ComponentRegistry';
+import IconEditableText from '@/components/ui/IconEditableText';
 import { LayoutComponentProps } from '@/types/storeTypes';
 
 interface CarouselContent {
@@ -27,6 +28,9 @@ interface CarouselContent {
   // Benefit badge fields
   benefit_1?: string;
   benefit_2?: string;
+  // Benefit icons
+  benefit_icon_1?: string;
+  benefit_icon_2?: string;
 }
 
 const CONTENT_SCHEMA = {
@@ -78,6 +82,15 @@ const CONTENT_SCHEMA = {
   benefit_2: { 
     type: 'string' as const, 
     default: 'Instant results' 
+  },
+  // Benefit icon schema
+  benefit_icon_1: { 
+    type: 'string' as const, 
+    default: '✅' 
+  },
+  benefit_icon_2: { 
+    type: 'string' as const, 
+    default: '⏱️' 
   }
 };
 
@@ -296,9 +309,17 @@ export default function Carousel(props: LayoutComponentProps) {
                   <div className="flex items-center space-x-4">
                     {((blockContent.benefit_1 && blockContent.benefit_1 !== '___REMOVED___') || (mode as string) === 'edit') && (
                       <div className="flex items-center space-x-2 text-green-600 group/benefit-item relative">
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                        </svg>
+                        <IconEditableText
+                          mode={mode}
+                          value={blockContent.benefit_icon_1 || '✅'}
+                          onEdit={(value) => handleContentUpdate('benefit_icon_1', value)}
+                          backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
+                          colorTokens={colorTokens}
+                          iconSize="sm"
+                          className="text-green-600 text-lg"
+                          sectionId={sectionId}
+                          elementKey="benefit_icon_1"
+                        />
                         {(mode as string) === 'edit' ? (
                           <EditableAdaptiveText
                             mode={mode}
@@ -334,9 +355,17 @@ export default function Carousel(props: LayoutComponentProps) {
                     )}
                     {(blockContent.benefit_2 || (mode as string) === 'edit') && blockContent.benefit_2 !== '___REMOVED___' && (
                       <div className="flex items-center space-x-2 text-blue-600 group/benefit-item relative">
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
+                        <IconEditableText
+                          mode={mode}
+                          value={blockContent.benefit_icon_2 || '⏱️'}
+                          onEdit={(value) => handleContentUpdate('benefit_icon_2', value)}
+                          backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
+                          colorTokens={colorTokens}
+                          iconSize="sm"
+                          className="text-blue-600 text-lg"
+                          sectionId={sectionId}
+                          elementKey="benefit_icon_2"
+                        />
                         {(mode as string) === 'edit' ? (
                           <EditableAdaptiveText
                             mode={mode}

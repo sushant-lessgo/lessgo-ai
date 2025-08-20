@@ -11,6 +11,7 @@ import {
   CTAButton,
   TrustIndicators 
 } from '@/components/layout/ComponentRegistry';
+import IconEditableText from '@/components/ui/IconEditableText';
 import { LayoutComponentProps } from '@/types/storeTypes';
 
 interface TabbedContent {
@@ -26,6 +27,9 @@ interface TabbedContent {
   // Benefit badge fields
   benefit_1?: string;
   benefit_2?: string;
+  // Benefit icons
+  benefit_icon_1?: string;
+  benefit_icon_2?: string;
 }
 
 const CONTENT_SCHEMA = {
@@ -73,6 +77,15 @@ const CONTENT_SCHEMA = {
   benefit_2: { 
     type: 'string' as const, 
     default: 'Enterprise Ready' 
+  },
+  // Benefit icon schema
+  benefit_icon_1: { 
+    type: 'string' as const, 
+    default: '⚡' 
+  },
+  benefit_icon_2: { 
+    type: 'string' as const, 
+    default: '✅' 
   }
 };
 
@@ -286,9 +299,17 @@ export default function Tabbed(props: LayoutComponentProps) {
                     {(blockContent.benefit_1 || mode === 'edit') && blockContent.benefit_1 !== '___REMOVED___' && (
                       <div className="flex items-center space-x-2 group/benefit-item relative">
                         <div className={`w-10 h-10 rounded-lg ${colorTokens.ctaBg} flex items-center justify-center`}>
-                          <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                          </svg>
+                          <IconEditableText
+                            mode={mode}
+                            value={blockContent.benefit_icon_1 || '⚡'}
+                            onEdit={(value) => handleContentUpdate('benefit_icon_1', value)}
+                            backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
+                            colorTokens={colorTokens}
+                            iconSize="md"
+                            className="text-white text-xl"
+                            sectionId={sectionId}
+                            elementKey="benefit_icon_1"
+                          />
                         </div>
                         {mode === 'edit' ? (
                           <EditableAdaptiveText
@@ -327,9 +348,17 @@ export default function Tabbed(props: LayoutComponentProps) {
                     {(blockContent.benefit_2 || mode === 'edit') && blockContent.benefit_2 !== '___REMOVED___' && (
                       <div className="flex items-center space-x-2 group/benefit-item relative">
                         <div className={`w-10 h-10 rounded-lg ${colorTokens.ctaBg} flex items-center justify-center`}>
-                          <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                          </svg>
+                          <IconEditableText
+                            mode={mode}
+                            value={blockContent.benefit_icon_2 || '✅'}
+                            onEdit={(value) => handleContentUpdate('benefit_icon_2', value)}
+                            backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
+                            colorTokens={colorTokens}
+                            iconSize="md"
+                            className="text-white text-xl"
+                            sectionId={sectionId}
+                            elementKey="benefit_icon_2"
+                          />
                         </div>
                         {mode === 'edit' ? (
                           <EditableAdaptiveText

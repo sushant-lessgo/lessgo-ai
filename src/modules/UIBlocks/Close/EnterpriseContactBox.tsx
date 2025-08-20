@@ -193,10 +193,17 @@ export default function EnterpriseContactBox(props: LayoutComponentProps) {
     return (
       <IconEditableText
         mode={mode}
-        value={iconValue || ''}
+        value={iconValue || ['📞', '💬', '📧', '📅', '🌐'][index % 5]}
         onEdit={(value) => handleContentUpdate(iconField, value)}
-        className="text-white text-xl"
-        fallback={fallbackIcons[index % fallbackIcons.length]}
+        backgroundType="primary"
+        colorTokens={{
+          textPrimary: '#ffffff',
+          textOnDark: '#ffffff'
+        }}
+        iconSize="lg"
+        className="text-white"
+        sectionId={sectionId}
+        elementKey={iconField}
       />
     );
   };
@@ -220,8 +227,15 @@ export default function EnterpriseContactBox(props: LayoutComponentProps) {
               mode={mode}
               value={blockContent.response_time_icon || '⏱️'}
               onEdit={(value) => handleContentUpdate('response_time_icon', value)}
-              className="text-green-500 text-sm"
-              fallback={<svg className="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>}
+              backgroundType="primary"
+              colorTokens={{
+                textPrimary: '#10b981',
+                textOnDark: '#10b981'
+              }}
+              iconSize="sm"
+              className="text-green-500"
+              sectionId={sectionId}
+              elementKey="response_time_icon"
             />
             <span className="text-sm font-medium text-green-600">Response: {responseTime}</span>
           </div>
@@ -410,8 +424,15 @@ export default function EnterpriseContactBox(props: LayoutComponentProps) {
                       mode={mode}
                       value={blockContent.enterprise_check_icon || '✅'}
                       onEdit={(value) => handleContentUpdate('enterprise_check_icon', value)}
-                      className="text-blue-600 text-lg mt-0.5 flex-shrink-0"
-                      fallback={<svg className="w-6 h-6 text-blue-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>}
+                      backgroundType="primary"
+                      colorTokens={{
+                        textPrimary: '#2563eb',
+                        textOnDark: '#2563eb'
+                      }}
+                      iconSize="md"
+                      className="text-blue-600 mt-0.5 flex-shrink-0"
+                      sectionId={sectionId}
+                      elementKey="enterprise_check_icon"
                     />
                     <span className="text-gray-700 font-medium">{feature}</span>
                   </div>
@@ -438,8 +459,15 @@ export default function EnterpriseContactBox(props: LayoutComponentProps) {
                         mode={mode}
                         value={blockContent.qualification_check_icon || '✅'}
                         onEdit={(value) => handleContentUpdate('qualification_check_icon', value)}
-                        className="text-white text-sm"
-                        fallback={<svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>}
+                        backgroundType="primary"
+                        colorTokens={{
+                          textPrimary: '#ffffff',
+                          textOnDark: '#ffffff'
+                        }}
+                        iconSize="sm"
+                        className="text-white"
+                        sectionId={sectionId}
+                        elementKey="qualification_check_icon"
                       />
                     </div>
                     <div className="text-sm font-medium text-gray-900">{point}</div>
@@ -457,8 +485,15 @@ export default function EnterpriseContactBox(props: LayoutComponentProps) {
                       mode={mode}
                       value={blockContent.social_proof_icon || '👥'}
                       onEdit={(value) => handleContentUpdate('social_proof_icon', value)}
-                      className="text-white text-xl"
-                      fallback={<svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" /></svg>}
+                      backgroundType="primary"
+                      colorTokens={{
+                        textPrimary: '#ffffff',
+                        textOnDark: '#ffffff'
+                      }}
+                      iconSize="lg"
+                      className="text-white"
+                      sectionId={sectionId}
+                      elementKey="social_proof_icon"
                     />
                   </div>
                   <div>

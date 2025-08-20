@@ -9,6 +9,7 @@ import {
   EditableAdaptiveHeadline, 
   EditableAdaptiveText 
 } from '@/components/layout/EditableContent';
+import IconEditableText from '@/components/ui/IconEditableText';
 import { LayoutComponentProps } from '@/types/storeTypes';
 import { parsePipeData, updateListData } from '@/utils/dataParsingUtils';
 
@@ -17,6 +18,7 @@ interface LogoGridContent {
   headline: string;
   subheadline?: string;
   integration_names: string;
+  default_icon?: string;
 }
 
 // Integration item structure
@@ -39,6 +41,10 @@ const CONTENT_SCHEMA = {
   integration_names: { 
     type: 'string' as const, 
     default: 'Slack|Microsoft Teams|Google Workspace|Salesforce|HubSpot|Zoom|Asana|Trello|Notion|Airtable|Dropbox|GitHub' 
+  },
+  default_icon: { 
+    type: 'string' as const, 
+    default: '🔗' 
   }
 };
 
@@ -54,7 +60,21 @@ const parseIntegrationData = (names: string): IntegrationItem[] => {
 };
 
 // Logo Placeholder Component
-const LogoPlaceholder = React.memo(({ name }: { name: string }) => {
+const LogoPlaceholder = React.memo(({ 
+  name, 
+  defaultIcon, 
+  mode, 
+  onIconEdit, 
+  sectionId, 
+  index 
+}: { 
+  name: string; 
+  defaultIcon: string;
+  mode: 'edit' | 'preview';
+  onIconEdit: (value: string) => void;
+  sectionId: string;
+  index: number;
+}) => {
   // Generate a simple logo placeholder
   const getLogoPlaceholder = (integrationName: string) => {
     const firstLetter = integrationName.charAt(0).toUpperCase();
@@ -81,7 +101,18 @@ const LogoPlaceholder = React.memo(({ name }: { name: string }) => {
       {/* Logo Circle */}
       <div className="mb-3">
         <div className={`w-12 h-12 bg-gradient-to-br ${colorClass} rounded-lg flex items-center justify-center text-white font-bold text-lg mx-auto group-hover:scale-110 transition-transform duration-300`}>
-          {letter}
+          <IconEditableText
+            mode={mode}
+            value={defaultIcon}
+            onEdit={onIconEdit}
+            backgroundType="primary"
+            colorTokens={{}} 
+            iconSize="md"
+            className="text-xl text-white"
+            placeholder={letter}
+            sectionId={sectionId}
+            elementKey={`integration_icon_${index}`}
+          />
         </div>
       </div>
       
@@ -99,12 +130,18 @@ const EditableLogoItem = React.memo(({
   item, 
   mode, 
   getTextStyle,
-  onNameEdit
+  onNameEdit,
+  defaultIcon,
+  onIconEdit,
+  sectionId
 }: {
   item: IntegrationItem;
   mode: 'edit' | 'preview';
   getTextStyle: (variant: 'display' | 'hero' | 'h1' | 'h2' | 'h3' | 'body-lg' | 'body' | 'body-sm' | 'caption') => React.CSSProperties;
   onNameEdit: (index: number, value: string) => void;
+  defaultIcon: string;
+  onIconEdit: (value: string) => void;
+  sectionId: string;
 }) => {
   
   if (mode === 'edit') {
@@ -129,7 +166,18 @@ const EditableLogoItem = React.memo(({
       <div className="group p-6 bg-white rounded-lg border border-border-gray-200 hover:border-blue-300 hover:shadow-md transition-all duration-300 text-center">
         <div className="mb-3">
           <div className={`w-12 h-12 bg-gradient-to-br ${colorClass} rounded-lg flex items-center justify-center text-white font-bold text-lg mx-auto group-hover:scale-110 transition-transform duration-300`}>
-            {letter}
+            <IconEditableText
+              mode={mode}
+              value={defaultIcon}
+              onEdit={onIconEdit}
+              backgroundType="primary"
+              colorTokens={{}}
+              iconSize="md"
+              className="text-xl text-white"
+              placeholder={letter}
+              sectionId={sectionId}
+              elementKey={`integration_icon_${item.index}`}
+            />
           </div>
         </div>
         
@@ -146,7 +194,16 @@ const EditableLogoItem = React.memo(({
     );
   }
   
-  return <LogoPlaceholder name={item.name} />;
+  return (
+    <LogoPlaceholder 
+      name={item.name} 
+      defaultIcon={defaultIcon}
+      mode={mode}
+      onIconEdit={onIconEdit}
+      sectionId={sectionId}
+      index={item.index}
+    />
+  );
 });
 EditableLogoItem.displayName = 'EditableLogoItem';
 
@@ -181,6 +238,11 @@ export default function LogoGrid(props: LayoutComponentProps) {
   const handleNameEdit = (index: number, value: string) => {
     const updatedNames = updateListData(blockContent.integration_names, index, value);
     handleContentUpdate('integration_names', updatedNames);
+  };
+
+  // Handle icon editing
+  const handleIconEdit = (value: string) => {
+    handleContentUpdate('default_icon', value);
   };
 
   return (
@@ -236,6 +298,9 @@ export default function LogoGrid(props: LayoutComponentProps) {
               mode={mode}
               getTextStyle={getTextStyle}
               onNameEdit={handleNameEdit}
+              defaultIcon={blockContent.default_icon || '🔗'}
+              onIconEdit={handleIconEdit}
+              sectionId={sectionId}
             />
           ))}
         </div>

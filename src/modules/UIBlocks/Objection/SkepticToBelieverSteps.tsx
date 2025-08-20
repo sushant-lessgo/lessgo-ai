@@ -8,6 +8,7 @@ import {
   EditableAdaptiveHeadline, 
   EditableAdaptiveText 
 } from '@/components/layout/EditableContent';
+import IconEditableText from '@/components/ui/IconEditableText';
 import { LayoutComponentProps } from '@/types/storeTypes';
 
 // Content interface for type safety
@@ -23,6 +24,11 @@ interface SkepticToBelieverStepsContent {
   stat_2_label?: string;
   stat_3_value?: string;
   stat_3_label?: string;
+  step_icon_1?: string;
+  step_icon_2?: string;
+  step_icon_3?: string;
+  step_icon_4?: string;
+  step_icon_5?: string;
 }
 
 // Content schema - defines structure and defaults
@@ -70,7 +76,12 @@ const CONTENT_SCHEMA = {
   stat_3_label: {
     type: 'string' as const,
     default: 'Recommend to colleagues'
-  }
+  },
+  step_icon_1: { type: 'string' as const, default: '🤔' },
+  step_icon_2: { type: 'string' as const, default: '🔍' },
+  step_icon_3: { type: 'string' as const, default: '💡' },
+  step_icon_4: { type: 'string' as const, default: '🤝' },
+  step_icon_5: { type: 'string' as const, default: '🚀' }
 };
 
 export default function SkepticToBelieverSteps(props: LayoutComponentProps) {
@@ -104,7 +115,12 @@ export default function SkepticToBelieverSteps(props: LayoutComponentProps) {
       }, [] as Array<{title: string, thought: string, description: string}>)
     : [];
 
-  const stepIcons = ['🤔', '🔍', '💡', '🤝', '🚀'];
+  const getStepIcon = (index: number) => {
+    const iconFields = ['step_icon_1', 'step_icon_2', 'step_icon_3', 'step_icon_4', 'step_icon_5'];
+    const defaultIcons = ['🤔', '🔍', '💡', '🤝', '🚀'];
+    const fieldName = iconFields[index] as keyof SkepticToBelieverStepsContent;
+    return blockContent[fieldName] || defaultIcons[index] || '✨';
+  };
 
   return (
     <LayoutSection
@@ -173,9 +189,20 @@ export default function SkepticToBelieverSteps(props: LayoutComponentProps) {
                         'bg-green-500'
                       }`}
                     >
-                      <span className="text-2xl">
-                        {stepIcons[index] || '✨'}
-                      </span>
+                      <IconEditableText
+                        mode={mode}
+                        value={getStepIcon(index)}
+                        onEdit={(value) => {
+                          const iconField = `step_icon_${index + 1}` as keyof SkepticToBelieverStepsContent;
+                          handleContentUpdate(iconField, value);
+                        }}
+                        backgroundType="custom"
+                        colorTokens={{...colorTokens, primaryText: 'text-white'}}
+                        iconSize="md"
+                        className="text-2xl text-white"
+                        sectionId={sectionId}
+                        elementKey={`step_icon_${index + 1}`}
+                      />
                     </div>
                     <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2">
                       <span className="text-xs font-bold text-gray-500">

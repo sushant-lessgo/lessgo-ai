@@ -9,6 +9,7 @@ import {
   EditableAdaptiveHeadline, 
   EditableAdaptiveText 
 } from '@/components/layout/EditableContent';
+import IconEditableText from '@/components/ui/IconEditableText';
 import { LayoutComponentProps } from '@/types/storeTypes';
 
 // Content interface for type safety
@@ -152,7 +153,21 @@ export default function ObjectionCarousel(props: LayoutComponentProps) {
                       
                       {/* Icon */}
                       <div className="text-6xl mb-8">
-                        {slide.icon}
+                        <IconEditableText
+                          mode={mode}
+                          value={slide.icon || '🤔'}
+                          onEdit={(value) => {
+                            const updatedSlides = blockContent.objection_slides.split('|');
+                            updatedSlides[index * 3 + 2] = value;
+                            handleContentUpdate('objection_slides', updatedSlides.join('|'));
+                          }}
+                          backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
+                          colorTokens={colorTokens}
+                          iconSize="xl"
+                          className="text-6xl"
+                          sectionId={sectionId}
+                          elementKey={`slide_${index}_icon`}
+                        />
                       </div>
 
                       {/* Question */}
@@ -254,7 +269,21 @@ export default function ObjectionCarousel(props: LayoutComponentProps) {
               }`}
             >
               <div className="flex items-center space-x-3 mb-3">
-                <span className="text-2xl">{slide.icon}</span>
+                <IconEditableText
+                  mode={mode}
+                  value={slide.icon || '🤔'}
+                  onEdit={(value) => {
+                    const updatedSlides = blockContent.objection_slides.split('|');
+                    updatedSlides[index * 3 + 2] = value;
+                    handleContentUpdate('objection_slides', updatedSlides.join('|'));
+                  }}
+                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
+                  colorTokens={colorTokens}
+                  iconSize="md"
+                  className="text-2xl"
+                  sectionId={sectionId}
+                  elementKey={`grid_${index}_icon`}
+                />
                 <span className="text-sm font-medium text-gray-500">
                   Question {index + 1}
                 </span>

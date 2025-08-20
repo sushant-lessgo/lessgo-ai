@@ -109,6 +109,9 @@ const CONTENT_SCHEMA = {
     type: 'string' as const, 
     default: 'Expert consultation included' 
   },
+  demo_stat_1_icon: { type: 'string' as const, default: '' },
+  demo_stat_2_icon: { type: 'string' as const, default: '' },
+  demo_stat_3_icon: { type: 'string' as const, default: '' },
   // Video Info indicators
   video_info_1_text: { 
     type: 'string' as const, 
@@ -118,6 +121,8 @@ const CONTENT_SCHEMA = {
     type: 'string' as const, 
     default: '5 min watch' 
   },
+  video_info_1_icon: { type: 'string' as const, default: '' },
+  video_info_2_icon: { type: 'string' as const, default: '' },
   show_demo_stats: { 
     type: 'boolean' as const, 
     default: true 
@@ -157,6 +162,27 @@ export default function VideoWalkthrough(props: LayoutComponentProps) {
   
   const store = useEditStore();
   const showImageToolbar = store.showImageToolbar;
+
+  // Icon edit handlers
+  const handleDemoStatIconEdit = (index: number, value: string) => {
+    const iconField = `demo_stat_${index + 1}_icon` as keyof VideoWalkthroughContent;
+    handleContentUpdate(iconField, value);
+  };
+
+  const handleVideoInfoIconEdit = (index: number, value: string) => {
+    const iconField = `video_info_${index + 1}_icon` as keyof VideoWalkthroughContent;
+    handleContentUpdate(iconField, value);
+  };
+
+  const getDemoStatIcon = (index: number) => {
+    const iconFields = ['demo_stat_1_icon', 'demo_stat_2_icon', 'demo_stat_3_icon'];
+    return blockContent[iconFields[index] as keyof VideoWalkthroughContent] || '';
+  };
+
+  const getVideoInfoIcon = (index: number) => {
+    const iconFields = ['video_info_1_icon', 'video_info_2_icon'];
+    return blockContent[iconFields[index] as keyof VideoWalkthroughContent] || '';
+  };
 
   const VideoPlayer = () => {
     if (blockContent.video_url && blockContent.video_url.includes('youtube')) {

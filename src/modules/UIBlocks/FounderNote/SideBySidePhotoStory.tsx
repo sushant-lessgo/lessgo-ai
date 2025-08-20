@@ -17,6 +17,7 @@ import {
   TrustIndicators 
 } from '@/components/layout/ComponentRegistry';
 import EditableTrustIndicators from '@/components/layout/EditableTrustIndicators';
+import IconEditableText from '@/components/ui/IconEditableText';
 import { LayoutComponentProps } from '@/types/storeTypes';
 
 // Content interface for type safety
@@ -40,6 +41,9 @@ interface SideBySidePhotoStoryContent {
   trust_item_5: string;
   story_image?: string;
   secondary_image?: string;
+  badge_icon?: string;
+  placeholder_icon_1?: string;
+  placeholder_icon_2?: string;
 }
 
 // Content schema - defines structure and defaults
@@ -74,7 +78,19 @@ const CONTENT_SCHEMA = {
   story_stat_4: { type: 'string' as const, default: '150+ countries' },
   badge_text: { 
     type: 'string' as const, 
-    default: '✨ Creator Story' 
+    default: 'Creator Story' 
+  },
+  badge_icon: {
+    type: 'string' as const,
+    default: '✨'
+  },
+  placeholder_icon_1: {
+    type: 'string' as const,
+    default: '🎨'
+  },
+  placeholder_icon_2: {
+    type: 'string' as const,
+    default: '✨'
   },
   trust_items: { 
     type: 'string' as const, 
@@ -96,7 +112,23 @@ const CONTENT_SCHEMA = {
 };
 
 // Photo Story Placeholder Component
-const PhotoStoryPlaceholder = React.memo(({ type = 'primary' }: { type?: 'primary' | 'secondary' }) => (
+const PhotoStoryPlaceholder = React.memo(({ 
+  type = 'primary',
+  mode,
+  icon,
+  onIconEdit,
+  sectionId,
+  colorTokens,
+  backgroundType
+}: { 
+  type?: 'primary' | 'secondary';
+  mode?: string;
+  icon?: string;
+  onIconEdit?: (value: string) => void;
+  sectionId?: string;
+  colorTokens?: any;
+  backgroundType?: string;
+}) => (
   <div className="relative w-full h-full min-h-[400px] bg-gradient-to-br from-indigo-100 via-purple-50 to-pink-100 rounded-2xl overflow-hidden shadow-lg">
     
     {/* Creative workspace mockup */}
@@ -169,8 +201,22 @@ const PhotoStoryPlaceholder = React.memo(({ type = 'primary' }: { type?: 'primar
                 <span className="text-xs font-medium text-blue-800">Creative Projects</span>
               </div>
               <div className="grid grid-cols-2 gap-2">
-                <div className="bg-gradient-to-br from-blue-100 to-purple-100 rounded h-12 flex items-center justify-center">
-                  <span className="text-xs">🎨</span>
+                <div className="bg-gradient-to-br from-blue-100 to-purple-100 rounded h-12 flex items-center justify-center relative group/icon-edit">
+                  {mode === 'edit' ? (
+                    <IconEditableText
+                      mode={mode}
+                      value={icon || '🎨'}
+                      onEdit={(value) => onIconEdit?.(value)}
+                      backgroundType={backgroundType as any}
+                      colorTokens={colorTokens}
+                      iconSize="sm"
+                      className="text-xs"
+                      sectionId={sectionId || 'placeholder'}
+                      elementKey={type === 'primary' ? 'placeholder_icon_1' : 'placeholder_icon_2'}
+                    />
+                  ) : (
+                    <span className="text-xs">{icon || (type === 'primary' ? '🎨' : '✨')}</span>
+                  )}
                 </div>
                 <div className="bg-gradient-to-br from-purple-100 to-pink-100 rounded h-12 flex items-center justify-center">
                   <span className="text-xs">✨</span>
@@ -279,18 +325,40 @@ export default function SideBySidePhotoStory(props: LayoutComponentProps) {
         
         {/* Header */}
         <div className="text-center mb-12">
-          {(blockContent.badge_text || mode === 'edit') && (
-            <div className="mb-6">
-              <AccentBadge
-                mode={mode}
-                value={blockContent.badge_text || ''}
-                onEdit={(value) => handleContentUpdate('badge_text', value)}
-                colorTokens={colorTokens}
-                placeholder="✨ Creator Story"
-                sectionId={sectionId}
-                elementKey="badge_text"
-                sectionBackground={sectionBackground}
-              />
+          {(blockContent.badge_text || blockContent.badge_icon || mode === 'edit') && (
+            <div className="mb-6 flex justify-center">
+              {mode === 'edit' ? (
+                <div className="flex items-center space-x-2">
+                  <div className="relative group/icon-edit">
+                    <IconEditableText
+                      mode={mode}
+                      value={blockContent.badge_icon || '✨'}
+                      onEdit={(value) => handleContentUpdate('badge_icon', value)}
+                      backgroundType={backgroundType as any}
+                      colorTokens={colorTokens}
+                      iconSize="md"
+                      className=""
+                      sectionId={sectionId}
+                      elementKey="badge_icon"
+                    />
+                  </div>
+                  <AccentBadge
+                    mode={mode}
+                    value={blockContent.badge_text || ''}
+                    onEdit={(value) => handleContentUpdate('badge_text', value)}
+                    colorTokens={colorTokens}
+                    placeholder="Creator Story"
+                    sectionId={sectionId}
+                    elementKey="badge_text"
+                    sectionBackground={sectionBackground}
+                  />
+                </div>
+              ) : (
+                <div className="inline-flex items-center space-x-2 bg-blue-50 text-blue-700 px-4 py-2 rounded-full border border-blue-200">
+                  <span>{blockContent.badge_icon || '✨'}</span>
+                  <span className="font-medium text-sm">{blockContent.badge_text || 'Creator Story'}</span>
+                </div>
+              )}
             </div>
           )}
 
@@ -440,7 +508,15 @@ export default function SideBySidePhotoStory(props: LayoutComponentProps) {
                       }}
                 />
               ) : (
-                <PhotoStoryPlaceholder type="primary" />
+                <PhotoStoryPlaceholder 
+                  type="primary" 
+                  mode={mode}
+                  icon={blockContent.placeholder_icon_1}
+                  onIconEdit={(value) => handleContentUpdate('placeholder_icon_1', value)}
+                  sectionId={sectionId}
+                  colorTokens={colorTokens}
+                  backgroundType={backgroundType}
+                />
               )}
             </div>
 
@@ -458,7 +534,15 @@ export default function SideBySidePhotoStory(props: LayoutComponentProps) {
                       }}
                   />
                 ) : (
-                  <PhotoStoryPlaceholder type="secondary" />
+                  <PhotoStoryPlaceholder 
+                    type="secondary" 
+                    mode={mode}
+                    icon={blockContent.placeholder_icon_2}
+                    onIconEdit={(value) => handleContentUpdate('placeholder_icon_2', value)}
+                    sectionId={sectionId}
+                    colorTokens={colorTokens}
+                    backgroundType={backgroundType}
+                  />
                 )}
               </div>
               

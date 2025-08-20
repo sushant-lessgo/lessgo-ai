@@ -6,6 +6,7 @@ import {
   EditableAdaptiveHeadline, 
   EditableAdaptiveText
 } from '@/components/layout/EditableContent';
+import IconEditableText from '@/components/ui/IconEditableText';
 import { 
   CTAButton,
   TrustIndicators 
@@ -21,6 +22,12 @@ interface VerticalTimelineContent {
   supporting_text?: string;
   cta_text?: string;
   trust_items?: string;
+  // Optional step icon overrides
+  step_icon_1?: string;
+  step_icon_2?: string;
+  step_icon_3?: string;
+  step_icon_4?: string;
+  use_step_icons?: boolean;
 }
 
 const CONTENT_SCHEMA = {
@@ -55,7 +62,13 @@ const CONTENT_SCHEMA = {
   trust_items: { 
     type: 'string' as const, 
     default: '' 
-  }
+  },
+  // Optional step icon overrides
+  step_icon_1: { type: 'string' as const, default: '' },
+  step_icon_2: { type: 'string' as const, default: '' },
+  step_icon_3: { type: 'string' as const, default: '' },
+  step_icon_4: { type: 'string' as const, default: '' },
+  use_step_icons: { type: 'boolean' as const, default: false }
 };
 
 const TimelineStep = React.memo(({ 
@@ -68,7 +81,11 @@ const TimelineStep = React.memo(({
   mutedTextColor,
   blockContent,
   handleContentUpdate,
-  mode
+  mode,
+  backgroundType,
+  sectionId,
+  getStepIcon,
+  handleStepIconEdit
 }: {
   title: string;
   description: string;
@@ -80,6 +97,10 @@ const TimelineStep = React.memo(({
   blockContent: VerticalTimelineContent;
   handleContentUpdate: (key: string, value: any) => void;
   mode: 'edit' | 'preview';
+  backgroundType: any;
+  sectionId: string;
+  getStepIcon: (index: number) => string;
+  handleStepIconEdit: (index: number, value: string) => void;
 }) => {
   
   const getStepColor = (index: number) => {
@@ -103,10 +124,24 @@ const TimelineStep = React.memo(({
       
       {/* Step Content */}
       <div className="flex items-start space-x-6 w-full">
-        {/* Step Number */}
+        {/* Step Number/Icon */}
         <div className="flex-shrink-0 relative">
           <div className={`w-12 h-12 rounded-full bg-gradient-to-br ${getStepColor(index)} shadow-lg flex items-center justify-center z-10 relative`}>
-            <span className="text-white font-bold text-lg">{index + 1}</span>
+            {blockContent.use_step_icons && getStepIcon(index) ? (
+              <IconEditableText
+                mode={mode}
+                value={getStepIcon(index)}
+                onEdit={(value) => handleStepIconEdit(index, value)}
+                backgroundType={backgroundType as any}
+                colorTokens={colorTokens}
+                iconSize="sm"
+                className="text-xl text-white"
+                sectionId={sectionId}
+                elementKey={`step_icon_${index + 1}`}
+              />
+            ) : (
+              <span className="text-white font-bold text-lg">{index + 1}</span>
+            )}
           </div>
           {!isLast && (
             <div className="absolute top-12 left-1/2 transform -translate-x-1/2">
@@ -219,6 +254,17 @@ export default function VerticalTimeline(props: LayoutComponentProps) {
   const stepDurations = blockContent.step_durations 
     ? blockContent.step_durations.split('|').map(item => item.trim()).filter(Boolean)
     : [];
+
+  // Icon edit handlers
+  const handleStepIconEdit = (index: number, value: string) => {
+    const iconField = `step_icon_${index + 1}` as keyof VerticalTimelineContent;
+    handleContentUpdate(iconField, value);
+  };
+
+  const getStepIcon = (index: number) => {
+    const iconFields = ['step_icon_1', 'step_icon_2', 'step_icon_3', 'step_icon_4'];
+    return blockContent[iconFields[index] as keyof VerticalTimelineContent] || '';
+  };
 
   const steps = stepTitles.map((title, index) => ({
     title,
@@ -340,6 +386,10 @@ export default function VerticalTimeline(props: LayoutComponentProps) {
                 blockContent={blockContent}
                 handleContentUpdate={handleContentUpdate}
                 mode={mode}
+                backgroundType={backgroundType}
+                sectionId={sectionId}
+                getStepIcon={getStepIcon}
+                handleStepIconEdit={handleStepIconEdit}
               />
             ))}
           </div>

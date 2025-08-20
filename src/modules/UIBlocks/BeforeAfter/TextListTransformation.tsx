@@ -110,7 +110,7 @@ const ListItem = React.memo(({
         : 'bg-green-100 group-hover:bg-green-200'
     } transition-colors duration-200`}>
       <IconEditableText
-        mode={mode}
+        mode={mode as 'preview' | 'edit'}
         value={type === 'before' ? 
           (blockContent.before_icon || '❌') : 
           (blockContent.after_icon || '✅')

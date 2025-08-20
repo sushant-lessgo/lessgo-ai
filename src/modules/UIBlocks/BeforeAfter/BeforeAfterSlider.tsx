@@ -125,7 +125,8 @@ const InteractiveSlider = React.memo(({
   handleContentUpdate,
   colorTokens,
   backgroundType,
-  sectionBackground
+  sectionBackground,
+  blockContent
 }: {
   beforeContent: { label: string; description: string; visual?: string; before_icon?: string };
   afterContent: { label: string; description: string; visual?: string; after_icon?: string };

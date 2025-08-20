@@ -7,6 +7,7 @@ import {
   EditableAdaptiveHeadline, 
   EditableAdaptiveText
 } from '@/components/layout/EditableContent';
+import IconEditableText from '@/components/ui/IconEditableText';
 import { 
   CTAButton,
   TrustIndicators 
@@ -26,12 +27,17 @@ interface CardFlipStepsContent {
   // Flip card features
   flip_feature_1_text?: string;
   flip_feature_2_text?: string;
+  flip_feature_1_icon?: string;
+  flip_feature_2_icon?: string;
   // Interactive Guide fields
   guide_heading?: string;
   guide_description?: string;
   guide_indicator_1_text?: string;
   guide_indicator_2_text?: string;
   guide_indicator_3_text?: string;
+  guide_indicator_1_icon?: string;
+  guide_indicator_2_icon?: string;
+  guide_indicator_3_icon?: string;
   show_flip_features?: boolean;
   show_interactive_guide?: boolean;
 }
@@ -82,6 +88,8 @@ const CONTENT_SCHEMA = {
     type: 'string' as const, 
     default: 'No technical skills needed' 
   },
+  flip_feature_1_icon: { type: 'string' as const, default: '⚡' },
+  flip_feature_2_icon: { type: 'string' as const, default: '✅' },
   // Interactive Guide fields
   guide_heading: { 
     type: 'string' as const, 
@@ -103,6 +111,9 @@ const CONTENT_SCHEMA = {
     type: 'string' as const, 
     default: 'Real-time' 
   },
+  guide_indicator_1_icon: { type: 'string' as const, default: '🎯' },
+  guide_indicator_2_icon: { type: 'string' as const, default: '💖' },
+  guide_indicator_3_icon: { type: 'string' as const, default: '⚡' },
   show_flip_features: { 
     type: 'boolean' as const, 
     default: true 
@@ -123,7 +134,11 @@ const FlipCard = React.memo(({
   onFlip,
   showImageToolbar,
   sectionId,
-  mode
+  mode,
+  blockContent,
+  handleContentUpdate,
+  backgroundType,
+  colorTokens
 }: {
   title: string;
   description: string;
@@ -135,6 +150,10 @@ const FlipCard = React.memo(({
   showImageToolbar: any;
   sectionId: string;
   mode: string;
+  blockContent: CardFlipStepsContent;
+  handleContentUpdate: (key: string, value: any) => void;
+  backgroundType: any;
+  colorTokens: any;
 }) => {
   
   const getColorForIndex = (index: number) => {
@@ -216,16 +235,32 @@ const FlipCard = React.memo(({
             
             <div className="space-y-3">
               <div className="flex items-center space-x-2">
-                <svg className="w-5 h-5 text-white/80" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                </svg>
-                <span className="text-white/80">Fast & intuitive</span>
+                <IconEditableText
+                  mode={mode}
+                  value={blockContent.flip_feature_1_icon || '⚡'}
+                  onEdit={(value) => handleContentUpdate('flip_feature_1_icon', value)}
+                  backgroundType={backgroundType as any}
+                  colorTokens={colorTokens}
+                  iconSize="sm"
+                  className="text-xl text-white/80"
+                  sectionId={sectionId}
+                  elementKey="flip_feature_1_icon"
+                />
+                <span className="text-white/80">{blockContent.flip_feature_1_text}</span>
               </div>
               <div className="flex items-center space-x-2">
-                <svg className="w-5 h-5 text-white/80" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                <span className="text-white/80">No technical skills needed</span>
+                <IconEditableText
+                  mode={mode}
+                  value={blockContent.flip_feature_2_icon || '✅'}
+                  onEdit={(value) => handleContentUpdate('flip_feature_2_icon', value)}
+                  backgroundType={backgroundType as any}
+                  colorTokens={colorTokens}
+                  iconSize="sm"
+                  className="text-xl text-white/80"
+                  sectionId={sectionId}
+                  elementKey="flip_feature_2_icon"
+                />
+                <span className="text-white/80">{blockContent.flip_feature_2_text}</span>
               </div>
             </div>
           </div>
@@ -306,6 +341,17 @@ export default function CardFlipSteps(props: LayoutComponentProps) {
   
   const store = useEditStore();
   const showImageToolbar = store.showImageToolbar;
+
+  // Icon edit handlers
+  const handleGuideIndicatorIconEdit = (index: number, value: string) => {
+    const iconField = `guide_indicator_${index + 1}_icon` as keyof CardFlipStepsContent;
+    handleContentUpdate(iconField, value);
+  };
+
+  const getGuideIndicatorIcon = (index: number) => {
+    const iconFields = ['guide_indicator_1_icon', 'guide_indicator_2_icon', 'guide_indicator_3_icon'];
+    return blockContent[iconFields[index] as keyof CardFlipStepsContent] || ['🎯', '💖', '⚡'][index];
+  };
   
   return (
     <LayoutSection
@@ -414,6 +460,10 @@ export default function CardFlipSteps(props: LayoutComponentProps) {
                 showImageToolbar={showImageToolbar}
                 sectionId={sectionId}
                 mode={mode}
+                blockContent={blockContent}
+                handleContentUpdate={handleContentUpdate}
+                backgroundType={backgroundType}
+                colorTokens={colorTokens}
               />
             ))}
           </div>
@@ -426,9 +476,17 @@ export default function CardFlipSteps(props: LayoutComponentProps) {
               <div className="flex justify-center items-center space-x-6 mb-4">
                 {(blockContent.guide_indicator_1_text && blockContent.guide_indicator_1_text !== '___REMOVED___') && (
                   <div className="relative group/guide-indicator-1 flex items-center space-x-2">
-                    <svg className="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122" />
-                    </svg>
+                    <IconEditableText
+                      mode={mode}
+                      value={getGuideIndicatorIcon(0)}
+                      onEdit={(value) => handleGuideIndicatorIconEdit(0, value)}
+                      backgroundType={backgroundType as any}
+                      colorTokens={colorTokens}
+                      iconSize="md"
+                      className="text-2xl text-purple-600"
+                      sectionId={sectionId}
+                      elementKey="guide_indicator_1_icon"
+                    />
                     <EditableAdaptiveText
                       mode={mode}
                       value={blockContent.guide_indicator_1_text || ''}
@@ -464,9 +522,17 @@ export default function CardFlipSteps(props: LayoutComponentProps) {
                 )}
                 {(blockContent.guide_indicator_2_text && blockContent.guide_indicator_2_text !== '___REMOVED___') && (
                   <div className="relative group/guide-indicator-2 flex items-center space-x-2">
-                    <svg className="w-6 h-6 text-pink-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                    </svg>
+                    <IconEditableText
+                      mode={mode}
+                      value={getGuideIndicatorIcon(1)}
+                      onEdit={(value) => handleGuideIndicatorIconEdit(1, value)}
+                      backgroundType={backgroundType as any}
+                      colorTokens={colorTokens}
+                      iconSize="md"
+                      className="text-2xl text-pink-600"
+                      sectionId={sectionId}
+                      elementKey="guide_indicator_2_icon"
+                    />
                     <EditableAdaptiveText
                       mode={mode}
                       value={blockContent.guide_indicator_2_text || ''}
@@ -502,9 +568,17 @@ export default function CardFlipSteps(props: LayoutComponentProps) {
                 )}
                 {(blockContent.guide_indicator_3_text && blockContent.guide_indicator_3_text !== '___REMOVED___') && (
                   <div className="relative group/guide-indicator-3 flex items-center space-x-2">
-                    <svg className="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                    </svg>
+                    <IconEditableText
+                      mode={mode}
+                      value={getGuideIndicatorIcon(2)}
+                      onEdit={(value) => handleGuideIndicatorIconEdit(2, value)}
+                      backgroundType={backgroundType as any}
+                      colorTokens={colorTokens}
+                      iconSize="md"
+                      className="text-2xl text-orange-600"
+                      sectionId={sectionId}
+                      elementKey="guide_indicator_3_icon"
+                    />
                     <EditableAdaptiveText
                       mode={mode}
                       value={blockContent.guide_indicator_3_text || ''}

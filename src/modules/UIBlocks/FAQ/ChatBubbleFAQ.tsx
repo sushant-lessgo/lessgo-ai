@@ -5,6 +5,7 @@ import {
   EditableAdaptiveHeadline, 
   EditableAdaptiveText
 } from '@/components/layout/EditableContent';
+import IconEditableText from '@/components/ui/IconEditableText';
 import { LayoutComponentProps } from '@/types/storeTypes';
 
 interface ChatBubbleFAQContent {
@@ -31,6 +32,10 @@ interface ChatBubbleFAQContent {
   button_text?: string;
   show_typing_indicator?: boolean;
   show_cta_section?: boolean;
+  // Icon fields
+  status_indicator_icon?: string;
+  send_icon?: string;
+  support_avatar_icon?: string;
   // Legacy fields for backward compatibility
   questions?: string;
   answers?: string;
@@ -66,6 +71,10 @@ const CONTENT_SCHEMA = {
   button_text: { type: 'string' as const, default: 'Chat with us now' },
   show_typing_indicator: { type: 'boolean' as const, default: true },
   show_cta_section: { type: 'boolean' as const, default: true },
+  // Icon fields
+  status_indicator_icon: { type: 'string' as const, default: '🟢' },
+  send_icon: { type: 'string' as const, default: '➤' },
+  support_avatar_icon: { type: 'string' as const, default: '👤' },
   // Legacy fields for backward compatibility
   questions: { type: 'string' as const, default: '' },
   answers: { type: 'string' as const, default: '' }
@@ -181,25 +190,54 @@ export default function ChatBubbleFAQ(props: LayoutComponentProps) {
           {/* Chat Header */}
           <div className="flex items-center gap-3 pb-4 border-b border-gray-200 dark:border-gray-700 mb-6">
             <div 
-              className="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold"
+              className="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold relative group/avatar-icon"
               style={{ backgroundColor: accentColor }}
             >
-              {mode === 'edit' ? (
-                <EditableAdaptiveText
+              {blockContent.support_avatar_icon && blockContent.support_avatar_icon !== '👤' ? (
+                <IconEditableText
                   mode={mode}
-                  value={blockContent.support_avatar || ''}
-                  onEdit={(value) => handleContentUpdate('support_avatar', value)}
-                  backgroundType={backgroundType}
-                  colorTokens={colorTokens}
-                  variant="body"
-                  className="text-center font-bold text-white min-w-[1rem] min-h-[1rem] flex items-center justify-center"
-                  placeholder="A"
-                  sectionBackground={sectionBackground}
-                  data-section-id={sectionId}
-                  data-element-key="support_avatar"
+                  value={blockContent.support_avatar_icon}
+                  onEdit={(value) => handleContentUpdate('support_avatar_icon', value)}
+                  backgroundType="primary"
+                  colorTokens={{
+                    ...colorTokens,
+                    textPrimary: '#ffffff',
+                    textOnDark: '#ffffff'
+                  }}
+                  iconSize="md"
+                  className="text-white"
+                  sectionId={sectionId}
+                  elementKey="support_avatar_icon"
                 />
               ) : (
-                blockContent.support_avatar || 'A'
+                <>
+                  {mode === 'edit' ? (
+                    <EditableAdaptiveText
+                      mode={mode}
+                      value={blockContent.support_avatar || ''}
+                      onEdit={(value) => handleContentUpdate('support_avatar', value)}
+                      backgroundType={backgroundType}
+                      colorTokens={colorTokens}
+                      variant="body"
+                      className="text-center font-bold text-white min-w-[1rem] min-h-[1rem] flex items-center justify-center"
+                      placeholder="A"
+                      sectionBackground={sectionBackground}
+                      data-section-id={sectionId}
+                      data-element-key="support_avatar"
+                    />
+                  ) : (
+                    blockContent.support_avatar || 'A'
+                  )}
+                  {mode === 'edit' && (
+                    <button
+                      onClick={() => handleContentUpdate('support_avatar_icon', '👤')}
+                      className="opacity-0 group-hover/avatar-icon:opacity-100 absolute -top-1 -right-1 w-4 h-4 bg-blue-500 text-white rounded-full text-xs flex items-center justify-center hover:bg-blue-600 transition-all duration-200"
+                      title="Add avatar icon"
+                    >
+                      +
+                    </button>
+                  )}
+                </>
               )}
             </div>
             <div>
@@ -219,7 +257,17 @@ export default function ChatBubbleFAQ(props: LayoutComponentProps) {
                 />
               </div>
               <div className="flex items-center gap-2 text-sm text-green-500 relative group/status">
-                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                <IconEditableText
+                  mode={mode}
+                  value={blockContent.status_indicator_icon || '🟢'}
+                  onEdit={(value) => handleContentUpdate('status_indicator_icon', value)}
+                  backgroundType={backgroundType as any}
+                  colorTokens={colorTokens}
+                  iconSize="sm"
+                  className="text-sm"
+                  sectionId={sectionId}
+                  elementKey="status_indicator_icon"
+                />
                 <EditableAdaptiveText
                   mode={mode}
                   value={blockContent.online_status_text || ''}
@@ -398,12 +446,24 @@ export default function ChatBubbleFAQ(props: LayoutComponentProps) {
                 />
               </div>
               <button 
-                className="p-2 rounded-full text-white"
+                className="p-2 rounded-full text-white flex items-center justify-center"
                 style={{ backgroundColor: accentColor }}
               >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
-                </svg>
+                <IconEditableText
+                  mode={mode}
+                  value={blockContent.send_icon || '➤'}
+                  onEdit={(value) => handleContentUpdate('send_icon', value)}
+                  backgroundType="primary"
+                  colorTokens={{
+                    ...colorTokens,
+                    textPrimary: '#ffffff',
+                    textOnDark: '#ffffff'
+                  }}
+                  iconSize="md"
+                  className="text-white"
+                  sectionId={sectionId}
+                  elementKey="send_icon"
+                />
               </button>
             </div>
           </div>

@@ -9,6 +9,7 @@ import {
   EditableAdaptiveHeadline, 
   EditableAdaptiveText 
 } from '@/components/layout/EditableContent';
+import IconEditableText from '@/components/ui/IconEditableText';
 import { LayoutComponentProps } from '@/types/storeTypes';
 
 // Content interface for type safety
@@ -19,6 +20,10 @@ interface BadgeCarouselContent {
   popular_integrations: string;
   developer_tools: string;
   enterprise_tools: string;
+  featured_icon?: string;
+  popular_icon?: string;
+  developer_icon?: string;
+  enterprise_icon?: string;
 }
 
 // Content schema - defines structure and defaults
@@ -46,6 +51,22 @@ const CONTENT_SCHEMA = {
   enterprise_tools: { 
     type: 'string' as const, 
     default: '🏢 SAP|🏢 Oracle|🏢 Workday|🏢 ServiceNow|🏢 Tableau|🏢 Power BI|🏢 Snowflake|🏢 Databricks' 
+  },
+  featured_icon: { 
+    type: 'string' as const, 
+    default: '⭐' 
+  },
+  popular_icon: { 
+    type: 'string' as const, 
+    default: '🔥' 
+  },
+  developer_icon: { 
+    type: 'string' as const, 
+    default: '⚡' 
+  },
+  enterprise_icon: { 
+    type: 'string' as const, 
+    default: '🏢' 
   }
 };
 
@@ -146,6 +167,12 @@ export default function BadgeCarousel(props: LayoutComponentProps) {
 
   const [highlightedIntegration, setHighlightedIntegration] = useState<string | null>(null);
 
+  // Icon edit handlers
+  const handleCategoryIconEdit = (category: string, value: string) => {
+    const iconField = `${category}_icon` as keyof BadgeCarouselContent;
+    handleContentUpdate(iconField, value);
+  };
+
   // Parse integration lists
   const integrationRows = [
     {
@@ -235,6 +262,85 @@ export default function BadgeCarousel(props: LayoutComponentProps) {
               sectionBackground={sectionBackground}
             />
           )}
+        </div>
+
+        {/* Category Icons */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+          <div className="text-center">
+            <div className="mb-2">
+              <IconEditableText
+                mode={mode}
+                value={blockContent.featured_icon || '⭐'}
+                onEdit={(value) => handleCategoryIconEdit('featured', value)}
+                backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
+                colorTokens={colorTokens}
+                iconSize="xl"
+                className="text-4xl"
+                placeholder="⭐"
+                sectionId={sectionId}
+                elementKey="featured_icon"
+              />
+            </div>
+            <h3 className={`font-semibold ${colorTokens.textPrimary}`}>Featured</h3>
+            <p className={`text-sm ${dynamicTextColors?.muted || colorTokens.textMuted}`}>Top picks</p>
+          </div>
+          
+          <div className="text-center">
+            <div className="mb-2">
+              <IconEditableText
+                mode={mode}
+                value={blockContent.popular_icon || '🔥'}
+                onEdit={(value) => handleCategoryIconEdit('popular', value)}
+                backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
+                colorTokens={colorTokens}
+                iconSize="xl"
+                className="text-4xl"
+                placeholder="🔥"
+                sectionId={sectionId}
+                elementKey="popular_icon"
+              />
+            </div>
+            <h3 className={`font-semibold ${colorTokens.textPrimary}`}>Popular</h3>
+            <p className={`text-sm ${dynamicTextColors?.muted || colorTokens.textMuted}`}>Most used</p>
+          </div>
+          
+          <div className="text-center">
+            <div className="mb-2">
+              <IconEditableText
+                mode={mode}
+                value={blockContent.developer_icon || '⚡'}
+                onEdit={(value) => handleCategoryIconEdit('developer', value)}
+                backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
+                colorTokens={colorTokens}
+                iconSize="xl"
+                className="text-4xl"
+                placeholder="⚡"
+                sectionId={sectionId}
+                elementKey="developer_icon"
+              />
+            </div>
+            <h3 className={`font-semibold ${colorTokens.textPrimary}`}>Developer</h3>
+            <p className={`text-sm ${dynamicTextColors?.muted || colorTokens.textMuted}`}>Dev tools</p>
+          </div>
+          
+          <div className="text-center">
+            <div className="mb-2">
+              <IconEditableText
+                mode={mode}
+                value={blockContent.enterprise_icon || '🏢'}
+                onEdit={(value) => handleCategoryIconEdit('enterprise', value)}
+                backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
+                colorTokens={colorTokens}
+                iconSize="xl"
+                className="text-4xl"
+                placeholder="🏢"
+                sectionId={sectionId}
+                elementKey="enterprise_icon"
+              />
+            </div>
+            <h3 className={`font-semibold ${colorTokens.textPrimary}`}>Enterprise</h3>
+            <p className={`text-sm ${dynamicTextColors?.muted || colorTokens.textMuted}`}>Business tools</p>
+          </div>
         </div>
 
         {/* Carousel Rows */}

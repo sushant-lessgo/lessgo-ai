@@ -17,6 +17,7 @@ import {
   TrustIndicators 
 } from '@/components/layout/ComponentRegistry';
 import EditableTrustIndicators from '@/components/layout/EditableTrustIndicators';
+import IconEditableText from '@/components/ui/IconEditableText';
 import { LayoutComponentProps } from '@/types/storeTypes';
 
 // Content interface for type safety
@@ -42,6 +43,13 @@ interface FoundersBeliefStackContent {
   trust_item_4: string;
   trust_item_5: string;
   founder_image?: string;
+  // Individual belief icon fields
+  belief_icon_1?: string;
+  belief_icon_2?: string;
+  belief_icon_3?: string;
+  belief_icon_4?: string;
+  belief_icon_5?: string;
+  belief_icon_6?: string;
 }
 
 // Content schema - defines structure and defaults
@@ -96,7 +104,14 @@ const CONTENT_SCHEMA = {
   founder_image: { 
     type: 'string' as const, 
     default: '' 
-  }
+  },
+  // Individual belief icon fields
+  belief_icon_1: { type: 'string' as const, default: '🎯' },
+  belief_icon_2: { type: 'string' as const, default: '🚀' },
+  belief_icon_3: { type: 'string' as const, default: '🌱' },
+  belief_icon_4: { type: 'string' as const, default: '🔒' },
+  belief_icon_5: { type: 'string' as const, default: '⚡' },
+  belief_icon_6: { type: 'string' as const, default: '🌍' }
 };
 
 // Belief Card Component
@@ -107,7 +122,11 @@ const BeliefCard = React.memo(({
   index,
   colorTokens,
   dynamicTextColors,
-  h3Style
+  h3Style,
+  mode,
+  onIconEdit,
+  sectionId,
+  backgroundType
 }: {
   icon: string;
   title: string;
@@ -116,6 +135,10 @@ const BeliefCard = React.memo(({
   colorTokens: any;
   dynamicTextColors: any;
   h3Style: React.CSSProperties;
+  mode?: string;
+  onIconEdit?: (index: number, value: string) => void;
+  sectionId?: string;
+  backgroundType?: string;
 }) => {
   const cardColors = [
     'from-blue-500 to-indigo-600',
@@ -139,8 +162,22 @@ const BeliefCard = React.memo(({
     <div className={`relative bg-white rounded-xl shadow-lg border border-gray-100 p-6 hover:shadow-xl transition-all duration-300 hover:-translate-y-1`}>
       
       {/* Icon */}
-      <div className={`w-12 h-12 bg-gradient-to-br ${cardColors[index % cardColors.length]} rounded-lg flex items-center justify-center text-white text-xl mb-4 shadow-md`}>
-        {icon}
+      <div className={`w-12 h-12 bg-gradient-to-br ${cardColors[index % cardColors.length]} rounded-lg flex items-center justify-center text-white text-xl mb-4 shadow-md relative group/icon-edit`}>
+        {mode === 'edit' ? (
+          <IconEditableText
+            mode={mode}
+            value={icon}
+            onEdit={(value) => onIconEdit?.(index, value)}
+            backgroundType={backgroundType as any}
+            colorTokens={colorTokens}
+            iconSize="lg"
+            className="text-xl text-white"
+            sectionId={sectionId || 'belief'}
+            elementKey={`belief_icon_${index + 1}`}
+          />
+        ) : (
+          icon
+        )}
       </div>
       
       {/* Content */}
@@ -188,6 +225,19 @@ export default function FoundersBeliefStack(props: LayoutComponentProps) {
   // Create typography styles
   const h3Style = getTypographyStyle('h3');
 
+  // Get individual belief icon fields
+  const getBeliefIcon = (index: number): string => {
+    const iconFields = ['belief_icon_1', 'belief_icon_2', 'belief_icon_3', 'belief_icon_4', 'belief_icon_5', 'belief_icon_6'];
+    return blockContent[iconFields[index] as keyof FoundersBeliefStackContent] || '💡';
+  };
+
+  // Handle belief icon editing
+  const handleBeliefIconEdit = (index: number, value: string) => {
+    const iconFields = ['belief_icon_1', 'belief_icon_2', 'belief_icon_3', 'belief_icon_4', 'belief_icon_5', 'belief_icon_6'];
+    const fieldKey = iconFields[index] as keyof FoundersBeliefStackContent;
+    handleContentUpdate(fieldKey, value);
+  };
+
   // Parse belief items from pipe-separated string
   const beliefData = blockContent.belief_items 
     ? blockContent.belief_items.split('|')
@@ -197,11 +247,13 @@ export default function FoundersBeliefStack(props: LayoutComponentProps) {
   for (let i = 0; i < beliefData.length; i += 2) {
     if (i + 1 < beliefData.length) {
       const titleWithIcon = beliefData[i]?.trim() || '';
-      const icon = titleWithIcon.split(' ')[0] || '💡';
+      const fallbackIcon = titleWithIcon.split(' ')[0] || '💡';
       const title = titleWithIcon.split(' ').slice(1).join(' ') || 'Belief';
       const description = beliefData[i + 1]?.trim() || '';
+      const itemIndex = beliefItems.length;
+      const icon = getBeliefIcon(itemIndex) || fallbackIcon;
       
-      beliefItems.push({ icon, title, description });
+      beliefItems.push({ icon, title, description, index: itemIndex });
     }
   }
 
@@ -327,10 +379,14 @@ export default function FoundersBeliefStack(props: LayoutComponentProps) {
                   icon={belief.icon}
                   title={belief.title}
                   description={belief.description}
-                  index={index}
+                  index={belief.index}
                   colorTokens={colorTokens}
                   dynamicTextColors={dynamicTextColors}
                   h3Style={h3Style}
+                  mode={mode}
+                  onIconEdit={handleBeliefIconEdit}
+                  sectionId={sectionId}
+                  backgroundType={backgroundType}
                 />
               ))}
             </div>

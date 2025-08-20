@@ -9,6 +9,7 @@ import {
   EditableAdaptiveHeadline, 
   EditableAdaptiveText 
 } from '@/components/layout/EditableContent';
+import IconEditableText from '@/components/ui/IconEditableText';
 import { LayoutComponentProps } from '@/types/storeTypes';
 
 // Content interface for type safety
@@ -17,12 +18,16 @@ interface TabbyIntegrationCardsContent {
   subheadline?: string;
   tab_1_title: string;
   tab_1_integrations: string;
+  tab_1_icon?: string;
   tab_2_title: string;
   tab_2_integrations: string;
+  tab_2_icon?: string;
   tab_3_title: string;
   tab_3_integrations: string;
+  tab_3_icon?: string;
   tab_4_title: string;
   tab_4_integrations: string;
+  tab_4_icon?: string;
 }
 
 // Content schema - defines structure and defaults
@@ -66,6 +71,22 @@ const CONTENT_SCHEMA = {
   tab_4_integrations: { 
     type: 'string' as const, 
     default: 'Google Analytics|Mixpanel|Amplitude|Segment|Hotjar|Datadog|New Relic|Sentry' 
+  },
+  tab_1_icon: { 
+    type: 'string' as const, 
+    default: '💬' 
+  },
+  tab_2_icon: { 
+    type: 'string' as const, 
+    default: '📊' 
+  },
+  tab_3_icon: { 
+    type: 'string' as const, 
+    default: '⚡' 
+  },
+  tab_4_icon: { 
+    type: 'string' as const, 
+    default: '📈' 
   }
 };
 
@@ -78,7 +99,12 @@ const IntegrationCard = React.memo(({
   onLeave,
   h4Style,
   bodySmStyle,
-  labelStyle
+  labelStyle,
+  tabIcon,
+  mode,
+  onTabIconEdit,
+  sectionId,
+  tabIndex
 }: { 
   name: string; 
   colorTokens: any;
@@ -88,6 +114,11 @@ const IntegrationCard = React.memo(({
   h4Style: React.CSSProperties;
   bodySmStyle: React.CSSProperties;
   labelStyle: React.CSSProperties;
+  tabIcon: string;
+  mode: 'edit' | 'preview';
+  onTabIconEdit: (value: string) => void;
+  sectionId: string;
+  tabIndex: number;
 }) => {
   // Generate random status and setup time for demo
   const statuses = ['Connected', 'Available', 'Popular'];
@@ -113,9 +144,18 @@ const IntegrationCard = React.memo(({
     >
       {/* Logo Placeholder */}
       <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center mb-3">
-        <span className="text-white" style={labelStyle}>
-          {name.substring(0, 2).toUpperCase()}
-        </span>
+        <IconEditableText
+          mode={mode}
+          value={tabIcon}
+          onEdit={onTabIconEdit}
+          backgroundType="primary"
+          colorTokens={colorTokens}
+          iconSize="md"
+          className="text-xl text-white"
+          placeholder="🔗"
+          sectionId={sectionId}
+          elementKey={`tab_${tabIndex + 1}_icon`}
+        />
       </div>
 
       {/* Integration Name */}
@@ -195,23 +235,33 @@ export default function TabbyIntegrationCards(props: LayoutComponentProps) {
   const labelStyle = getTypographyStyle('label');
   const [hoveredCard, setHoveredCard] = useState<string | null>(null);
 
+  // Icon edit handler
+  const handleTabIconEdit = (tabIndex: number, value: string) => {
+    const iconField = `tab_${tabIndex + 1}_icon` as keyof TabbyIntegrationCardsContent;
+    handleContentUpdate(iconField, value);
+  };
+
   // Parse integration tabs
   const tabs = [
     {
       title: blockContent.tab_1_title,
-      integrations: blockContent.tab_1_integrations ? blockContent.tab_1_integrations.split('|') : []
+      integrations: blockContent.tab_1_integrations ? blockContent.tab_1_integrations.split('|') : [],
+      icon: blockContent.tab_1_icon || '💬'
     },
     {
       title: blockContent.tab_2_title,
-      integrations: blockContent.tab_2_integrations ? blockContent.tab_2_integrations.split('|') : []
+      integrations: blockContent.tab_2_integrations ? blockContent.tab_2_integrations.split('|') : [],
+      icon: blockContent.tab_2_icon || '📊'
     },
     {
       title: blockContent.tab_3_title,
-      integrations: blockContent.tab_3_integrations ? blockContent.tab_3_integrations.split('|') : []
+      integrations: blockContent.tab_3_integrations ? blockContent.tab_3_integrations.split('|') : [],
+      icon: blockContent.tab_3_icon || '⚡'
     },
     {
       title: blockContent.tab_4_title,
-      integrations: blockContent.tab_4_integrations ? blockContent.tab_4_integrations.split('|') : []
+      integrations: blockContent.tab_4_integrations ? blockContent.tab_4_integrations.split('|') : [],
+      icon: blockContent.tab_4_icon || '📈'
     }
   ];
 
@@ -286,6 +336,11 @@ export default function TabbyIntegrationCards(props: LayoutComponentProps) {
               h4Style={h4Style}
               bodySmStyle={bodySmStyle}
               labelStyle={labelStyle}
+              tabIcon={currentTab.icon}
+              mode={mode}
+              onTabIconEdit={(value) => handleTabIconEdit(activeTab, value)}
+              sectionId={sectionId}
+              tabIndex={activeTab}
             />
           ))}
         </div>
