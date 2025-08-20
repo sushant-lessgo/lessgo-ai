@@ -11,6 +11,7 @@ import {
   CTAButton,
   TrustIndicators 
 } from '@/components/layout/ComponentRegistry';
+import IconEditableText from '@/components/ui/IconEditableText';
 import { LayoutComponentProps } from '@/types/storeTypes';
 
 interface SplitCardContent {
@@ -26,6 +27,10 @@ interface SplitCardContent {
   before_placeholder_text: string;
   after_placeholder_text: string;
   premium_badge_text: string;
+  before_icon?: string;
+  after_icon?: string;
+  upgrade_icon?: string;
+  premium_feature_icon?: string;
   subheadline?: string;
   supporting_text?: string;
   cta_text?: string;
@@ -96,6 +101,22 @@ const CONTENT_SCHEMA = {
   premium_badge_text: {
     type: 'string' as const,
     default: 'Premium'
+  },
+  before_icon: {
+    type: 'string' as const,
+    default: '⚠️'
+  },
+  after_icon: {
+    type: 'string' as const,
+    default: '⭐'
+  },
+  upgrade_icon: {
+    type: 'string' as const,
+    default: '➡️'
+  },
+  premium_feature_icon: {
+    type: 'string' as const,
+    default: '✅'
   }
 };
 
@@ -114,7 +135,8 @@ const PremiumCard = React.memo(({
   sectionBackground,
   premiumFeaturesText,
   placeholderText,
-  premiumBadgeText
+  premiumBadgeText,
+  blockContent
 }: {
   type: 'before' | 'after';
   label: string;
@@ -131,21 +153,27 @@ const PremiumCard = React.memo(({
   premiumFeaturesText: string;
   placeholderText: string;
   premiumBadgeText: string;
+  blockContent: SplitCardContent;
 }) => {
   
   const VisualPlaceholder = () => (
     <div className={`relative w-full h-64 rounded-t-xl overflow-hidden ${type === 'before' ? 'bg-gradient-to-br from-slate-100 to-slate-200' : 'bg-gradient-to-br from-amber-50 to-amber-100'}`}>
       <div className="absolute inset-0 flex items-center justify-center">
         <div className={`w-20 h-20 rounded-full ${type === 'before' ? 'bg-slate-300' : 'bg-amber-200'} flex items-center justify-center`}>
-          {type === 'before' ? (
-            <svg className="w-10 h-10 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-            </svg>
-          ) : (
-            <svg className="w-10 h-10 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
-            </svg>
-          )}
+          <IconEditableText
+            mode={mode}
+            value={type === 'before' ? 
+              (blockContent.before_icon || '⚠️') : 
+              (blockContent.after_icon || '⭐')
+            }
+            onEdit={(value) => handleContentUpdate(type === 'before' ? 'before_icon' : 'after_icon', value)}
+            backgroundType={backgroundType}
+            colorTokens={colorTokens}
+            iconSize="xl"
+            className="text-4xl"
+            sectionId={sectionId}
+            elementKey={type === 'before' ? 'before_icon' : 'after_icon'}
+          />
         </div>
       </div>
       <div className="absolute bottom-4 left-4 right-4">
@@ -258,9 +286,17 @@ const PremiumCard = React.memo(({
         {type === 'after' && (
           <div className="mt-6 pt-4 border-t border-amber-100">
             <div className="flex items-center text-amber-600">
-              <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-              </svg>
+              <IconEditableText
+                mode={mode}
+                value={blockContent.premium_feature_icon || '✅'}
+                onEdit={(value) => handleContentUpdate('premium_feature_icon', value)}
+                backgroundType={backgroundType}
+                colorTokens={colorTokens}
+                iconSize="sm"
+                className="text-sm mr-2"
+                sectionId={sectionId}
+                elementKey="premium_feature_icon"
+              />
               <EditableAdaptiveText
                 mode={mode}
                 value={premiumFeaturesText || ''}
@@ -382,13 +418,22 @@ export default function SplitCard(props: LayoutComponentProps) {
               premiumFeaturesText={blockContent.premium_features_text}
               placeholderText={blockContent.before_placeholder_text}
               premiumBadgeText={blockContent.premium_badge_text}
+              blockContent={blockContent}
             />
             
             <div className="text-center lg:hidden">
               <div className="inline-flex items-center space-x-2 bg-white rounded-full shadow-lg px-6 py-3">
-                <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                </svg>
+                <IconEditableText
+                  mode={mode}
+                  value={blockContent.upgrade_icon || '➡️'}
+                  onEdit={(value) => handleContentUpdate('upgrade_icon', value)}
+                  backgroundType={safeBackgroundType}
+                  colorTokens={colorTokens}
+                  iconSize="sm"
+                  className="text-lg text-gray-400"
+                  sectionId={sectionId}
+                  elementKey="upgrade_icon_mobile"
+                />
                 <EditableAdaptiveText
                   mode={mode}
                   value={blockContent.upgrade_text || ''}
@@ -408,9 +453,17 @@ export default function SplitCard(props: LayoutComponentProps) {
           <div className="relative">
             <div className="hidden lg:block absolute -left-8 top-1/2 transform -translate-y-1/2">
               <div className="flex flex-col items-center space-y-2 bg-white rounded-full shadow-lg px-4 py-6">
-                <svg className="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                </svg>
+                <IconEditableText
+                  mode={mode}
+                  value={blockContent.upgrade_icon || '➡️'}
+                  onEdit={(value) => handleContentUpdate('upgrade_icon', value)}
+                  backgroundType={safeBackgroundType}
+                  colorTokens={colorTokens}
+                  iconSize="md"
+                  className="text-xl text-gray-400"
+                  sectionId={sectionId}
+                  elementKey="upgrade_icon_desktop"
+                />
                 <EditableAdaptiveText
                   mode={mode}
                   value={blockContent.upgrade_text || ''}
@@ -442,6 +495,7 @@ export default function SplitCard(props: LayoutComponentProps) {
               premiumFeaturesText={blockContent.premium_features_text}
               placeholderText={blockContent.after_placeholder_text}
               premiumBadgeText={blockContent.premium_badge_text}
+              blockContent={blockContent}
             />
           </div>
         </div>

@@ -6,6 +6,7 @@ import {
   EditableAdaptiveHeadline, 
   EditableAdaptiveText
 } from '@/components/layout/EditableContent';
+import IconEditableText from '@/components/ui/IconEditableText';
 import { 
   CTAButton,
   TrustIndicators 
@@ -26,6 +27,10 @@ interface LivePreviewEmbedContent {
   subheadline?: string;
   supporting_text?: string;
   trust_items?: string;
+  live_demo_icon?: string;
+  secure_icon?: string;
+  instant_icon?: string;
+  full_access_icon?: string;
 }
 
 const CONTENT_SCHEMA = {
@@ -80,6 +85,22 @@ const CONTENT_SCHEMA = {
   trust_items: { 
     type: 'string' as const, 
     default: '' 
+  },
+  live_demo_icon: { 
+    type: 'string' as const, 
+    default: '🎥' 
+  },
+  secure_icon: { 
+    type: 'string' as const, 
+    default: '🔒' 
+  },
+  instant_icon: { 
+    type: 'string' as const, 
+    default: '⚡' 
+  },
+  full_access_icon: { 
+    type: 'string' as const, 
+    default: '✅' 
   }
 };
 
@@ -461,9 +482,13 @@ export default function LivePreviewEmbed(props: LayoutComponentProps) {
           <div className="grid md:grid-cols-4 gap-8 mb-8">
             <div className="text-center">
               <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-blue-100 flex items-center justify-center">
-                <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                </svg>
+                <IconEditableText
+                  mode={mode}
+                  value={blockContent.live_demo_icon || '🎥'}
+                  onEdit={(value) => handleContentUpdate('live_demo_icon', value)}
+                  className="text-blue-600 text-xl"
+                  fallback={<svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>}
+                />
               </div>
               <div className="font-semibold text-gray-900">Live Demo</div>
               <div className={`text-sm ${mutedTextColor}`}>Real-time simulation</div>
@@ -471,9 +496,13 @@ export default function LivePreviewEmbed(props: LayoutComponentProps) {
             
             <div className="text-center">
               <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-green-100 flex items-center justify-center">
-                <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                </svg>
+                <IconEditableText
+                  mode={mode}
+                  value={blockContent.secure_icon || '🔒'}
+                  onEdit={(value) => handleContentUpdate('secure_icon', value)}
+                  className="text-green-600 text-xl"
+                  fallback={<svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>}
+                />
               </div>
               <div className="font-semibold text-gray-900">Secure</div>
               <div className={`text-sm ${mutedTextColor}`}>Safe to explore</div>
@@ -481,9 +510,13 @@ export default function LivePreviewEmbed(props: LayoutComponentProps) {
             
             <div className="text-center">
               <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-purple-100 flex items-center justify-center">
-                <svg className="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                </svg>
+                <IconEditableText
+                  mode={mode}
+                  value={blockContent.instant_icon || '⚡'}
+                  onEdit={(value) => handleContentUpdate('instant_icon', value)}
+                  className="text-purple-600 text-xl"
+                  fallback={<svg className="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>}
+                />
               </div>
               <div className="font-semibold text-gray-900">Instant</div>
               <div className={`text-sm ${mutedTextColor}`}>No waiting time</div>
@@ -491,9 +524,13 @@ export default function LivePreviewEmbed(props: LayoutComponentProps) {
             
             <div className="text-center">
               <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-orange-100 flex items-center justify-center">
-                <svg className="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
+                <IconEditableText
+                  mode={mode}
+                  value={blockContent.full_access_icon || '✅'}
+                  onEdit={(value) => handleContentUpdate('full_access_icon', value)}
+                  className="text-orange-600 text-xl"
+                  fallback={<svg className="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>}
+                />
               </div>
               <div className="font-semibold text-gray-900">Full Access</div>
               <div className={`text-sm ${mutedTextColor}`}>All features available</div>
@@ -555,7 +592,11 @@ export const componentMeta = {
     { key: 'demo_benefits', label: 'Demo Benefits (pipe separated)', type: 'textarea', required: false },
     { key: 'access_note', label: 'Access Note', type: 'text', required: false },
     { key: 'supporting_text', label: 'Supporting Text', type: 'textarea', required: false },
-    { key: 'trust_items', label: 'Trust Indicators (pipe separated)', type: 'text', required: false }
+    { key: 'trust_items', label: 'Trust Indicators (pipe separated)', type: 'text', required: false },
+    { key: 'live_demo_icon', label: 'Live Demo Icon', type: 'text', required: false },
+    { key: 'secure_icon', label: 'Secure Icon', type: 'text', required: false },
+    { key: 'instant_icon', label: 'Instant Icon', type: 'text', required: false },
+    { key: 'full_access_icon', label: 'Full Access Icon', type: 'text', required: false }
   ],
   
   features: [

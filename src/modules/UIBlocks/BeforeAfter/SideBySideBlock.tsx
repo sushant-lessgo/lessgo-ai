@@ -20,6 +20,8 @@ interface SideBySideContent {
   after_label: string;
   before_description: string;
   after_description: string;
+  before_icon?: string;
+  after_icon?: string;
   subheadline?: string;
   supporting_text?: string;
   cta_text?: string;
@@ -63,6 +65,14 @@ const CONTENT_SCHEMA = {
   trust_items: { 
     type: 'string' as const, 
     default: '' 
+  },
+  before_icon: {
+    type: 'string' as const,
+    default: ''
+  },
+  after_icon: {
+    type: 'string' as const,
+    default: ''
   }
 };
 
@@ -154,7 +164,21 @@ export default function SideBySideBlocks(props: LayoutComponentProps) {
           <div className="group">
             <div className={`${colorTokens.surfaceCard} rounded-lg shadow-lg p-8 border border-gray-200 hover:shadow-xl transition-shadow duration-300 h-full`}>
               <div className="flex items-center mb-6">
-                <div className="w-3 h-3 rounded-full mr-3 bg-red-500 ring-4 ring-red-100" />
+                {blockContent.before_icon ? (
+                  <IconEditableText
+                    mode={mode}
+                    value={blockContent.before_icon}
+                    onEdit={(value) => handleContentUpdate('before_icon', value)}
+                    backgroundType={safeBackgroundType}
+                    colorTokens={colorTokens}
+                    iconSize="sm"
+                    className="text-lg mr-3"
+                    sectionId={sectionId}
+                    elementKey="before_icon"
+                  />
+                ) : (
+                  <div className="w-3 h-3 rounded-full mr-3 bg-red-500 ring-4 ring-red-100" />
+                )}
                 <EditableAdaptiveText
                   mode={mode}
                   value={blockContent.before_label || ''}
@@ -188,6 +212,26 @@ export default function SideBySideBlocks(props: LayoutComponentProps) {
                 elementKey="before_description"
                 sectionBackground={sectionBackground}
               />
+              
+              {mode === 'edit' && (
+                <div className="mt-4 text-center">
+                  {blockContent.before_icon ? (
+                    <button
+                      onClick={() => handleContentUpdate('before_icon', '')}
+                      className="text-xs text-red-600 hover:text-red-800 transition-colors"
+                    >
+                      Remove icon
+                    </button>
+                  ) : (
+                    <button
+                      onClick={() => handleContentUpdate('before_icon', '⚠️')}
+                      className="text-xs text-blue-600 hover:text-blue-800 transition-colors"
+                    >
+                      Add icon
+                    </button>
+                  )}
+                </div>
+              )}
             </div>
           </div>
 
@@ -195,7 +239,21 @@ export default function SideBySideBlocks(props: LayoutComponentProps) {
           <div className="group">
             <div className={`${colorTokens.surfaceCard} rounded-lg shadow-lg p-8 border border-gray-200 hover:shadow-xl transition-shadow duration-300 h-full`}>
               <div className="flex items-center mb-6">
-                <div className="w-3 h-3 rounded-full mr-3 bg-green-500 ring-4 ring-green-100" />
+                {blockContent.after_icon ? (
+                  <IconEditableText
+                    mode={mode}
+                    value={blockContent.after_icon}
+                    onEdit={(value) => handleContentUpdate('after_icon', value)}
+                    backgroundType={safeBackgroundType}
+                    colorTokens={colorTokens}
+                    iconSize="sm"
+                    className="text-lg mr-3"
+                    sectionId={sectionId}
+                    elementKey="after_icon"
+                  />
+                ) : (
+                  <div className="w-3 h-3 rounded-full mr-3 bg-green-500 ring-4 ring-green-100" />
+                )}
                 <EditableAdaptiveText
                   mode={mode}
                   value={blockContent.after_label || ''}
@@ -229,6 +287,26 @@ export default function SideBySideBlocks(props: LayoutComponentProps) {
                 elementKey="after_description"
                 sectionBackground={sectionBackground}
               />
+              
+              {mode === 'edit' && (
+                <div className="mt-4 text-center">
+                  {blockContent.after_icon ? (
+                    <button
+                      onClick={() => handleContentUpdate('after_icon', '')}
+                      className="text-xs text-red-600 hover:text-red-800 transition-colors"
+                    >
+                      Remove icon
+                    </button>
+                  ) : (
+                    <button
+                      onClick={() => handleContentUpdate('after_icon', '✅')}
+                      className="text-xs text-blue-600 hover:text-blue-800 transition-colors"
+                    >
+                      Add icon
+                    </button>
+                  )}
+                </div>
+              )}
             </div>
           </div>
         </div>

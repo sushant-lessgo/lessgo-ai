@@ -6,6 +6,7 @@ import {
   EditableAdaptiveHeadline, 
   EditableAdaptiveText
 } from '@/components/layout/EditableContent';
+import IconEditableText from '@/components/ui/IconEditableText';
 import { 
   CTAButton,
   TrustIndicators 
@@ -26,6 +27,18 @@ interface MultistepCTAStackContent {
   subheadline?: string;
   supporting_text?: string;
   trust_items?: string;
+  step_1_icon?: string;
+  step_2_icon?: string;
+  step_3_icon?: string;
+  time_icon?: string;
+  detail_check_icon?: string;
+  benefit_check_icon?: string;
+  quick_setup_icon?: string;
+  guided_icon?: string;
+  user_friendly_icon?: string;
+  support_icon?: string;
+  info_icon?: string;
+  guarantee_icon?: string;
 }
 
 const CONTENT_SCHEMA = {
@@ -80,6 +93,54 @@ const CONTENT_SCHEMA = {
   trust_items: { 
     type: 'string' as const, 
     default: '' 
+  },
+  step_1_icon: { 
+    type: 'string' as const, 
+    default: '📝' 
+  },
+  step_2_icon: { 
+    type: 'string' as const, 
+    default: '⚙️' 
+  },
+  step_3_icon: { 
+    type: 'string' as const, 
+    default: '⚡' 
+  },
+  time_icon: { 
+    type: 'string' as const, 
+    default: '⏱️' 
+  },
+  detail_check_icon: { 
+    type: 'string' as const, 
+    default: '✅' 
+  },
+  benefit_check_icon: { 
+    type: 'string' as const, 
+    default: '✅' 
+  },
+  quick_setup_icon: { 
+    type: 'string' as const, 
+    default: '⚡' 
+  },
+  guided_icon: { 
+    type: 'string' as const, 
+    default: '✅' 
+  },
+  user_friendly_icon: { 
+    type: 'string' as const, 
+    default: '❤️' 
+  },
+  support_icon: { 
+    type: 'string' as const, 
+    default: '💬' 
+  },
+  info_icon: { 
+    type: 'string' as const, 
+    default: 'ℹ️' 
+  },
+  guarantee_icon: { 
+    type: 'string' as const, 
+    default: '🛡️' 
   }
 };
 
@@ -154,22 +215,25 @@ export default function MultistepCTAStack(props: LayoutComponentProps) {
   const safeBackgroundType = props.backgroundType === 'custom' ? 'neutral' : (props.backgroundType || 'neutral');
 
   const getStepIcon = (stepIndex: number) => {
-    const icons = [
-      // Sign Up
-      <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
-      </svg>,
-      // Setup
-      <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-      </svg>,
-      // Launch
-      <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-      </svg>
+    const iconFields = ['step_1_icon', 'step_2_icon', 'step_3_icon'] as const;
+    const iconField = iconFields[stepIndex % iconFields.length];
+    const iconValue = blockContent[iconField];
+    
+    const fallbackIcons = [
+      <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" /></svg>,
+      <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>,
+      <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
     ];
-    return icons[stepIndex % icons.length];
+    
+    return (
+      <IconEditableText
+        mode={mode}
+        value={iconValue || ''}
+        onEdit={(value) => handleContentUpdate(iconField, value)}
+        className="text-white text-2xl"
+        fallback={fallbackIcons[stepIndex % fallbackIcons.length]}
+      />
+    );
   };
 
   const StepCard = ({ step, index, isActive }: {
@@ -202,9 +266,13 @@ export default function MultistepCTAStack(props: LayoutComponentProps) {
             
             {/* Time Estimate */}
             <div className="flex items-center space-x-2 mb-4">
-              <svg className="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
+              <IconEditableText
+                mode={mode}
+                value={blockContent.time_icon || '⏱️'}
+                onEdit={(value) => handleContentUpdate('time_icon', value)}
+                className="text-green-500 text-sm"
+                fallback={<svg className="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>}
+              />
               <span className="text-sm font-medium text-green-600">Takes {step.time}</span>
             </div>
           </div>
@@ -223,9 +291,13 @@ export default function MultistepCTAStack(props: LayoutComponentProps) {
         <div className="space-y-3 mb-6">
           {step.details.map((detail, detailIndex) => (
             <div key={detailIndex} className="flex items-start space-x-3">
-              <svg className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-              </svg>
+              <IconEditableText
+                mode={mode}
+                value={blockContent.detail_check_icon || '✅'}
+                onEdit={(value) => handleContentUpdate('detail_check_icon', value)}
+                className="text-green-500 text-lg mt-0.5 flex-shrink-0"
+                fallback={<svg className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>}
+              />
               <span className="text-gray-700 text-sm">{detail}</span>
             </div>
           ))}
@@ -235,9 +307,13 @@ export default function MultistepCTAStack(props: LayoutComponentProps) {
         {step.benefit && (
           <div className={`bg-blue-50 rounded-lg p-4 mb-6 border border-blue-200`}>
             <div className="flex items-start space-x-2">
-              <svg className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
+              <IconEditableText
+                mode={mode}
+                value={blockContent.benefit_check_icon || '✅'}
+                onEdit={(value) => handleContentUpdate('benefit_check_icon', value)}
+                className="text-blue-600 text-lg mt-0.5 flex-shrink-0"
+                fallback={<svg className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>}
+              />
               <p className="text-blue-800 text-sm font-medium">{step.benefit}</p>
             </div>
           </div>
@@ -409,9 +485,13 @@ export default function MultistepCTAStack(props: LayoutComponentProps) {
               <div className="text-center mb-12">
                 <div className="bg-yellow-50 rounded-xl p-6 border border-yellow-200 max-w-2xl mx-auto">
                   <div className="flex items-center justify-center space-x-2 mb-3">
-                    <svg className="w-5 h-5 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
+                    <IconEditableText
+                      mode={mode}
+                      value={blockContent.info_icon || 'ℹ️'}
+                      onEdit={(value) => handleContentUpdate('info_icon', value)}
+                      className="text-yellow-600 text-lg"
+                      fallback={<svg className="w-5 h-5 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>}
+                    />
                     <span className="font-semibold text-yellow-900">Flexible Process</span>
                   </div>
                   <p className="text-yellow-800">{blockContent.process_note}</p>
@@ -437,9 +517,13 @@ export default function MultistepCTAStack(props: LayoutComponentProps) {
 
               {blockContent.guarantee_text && (
                 <p className="text-blue-200 text-sm mt-6 flex items-center justify-center space-x-2">
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                  </svg>
+                  <IconEditableText
+                    mode={mode}
+                    value={blockContent.guarantee_icon || '🛡️'}
+                    onEdit={(value) => handleContentUpdate('guarantee_icon', value)}
+                    className="text-blue-200 text-sm"
+                    fallback={<svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>}
+                  />
                   <span>{blockContent.guarantee_text}</span>
                 </p>
               )}
@@ -454,9 +538,13 @@ export default function MultistepCTAStack(props: LayoutComponentProps) {
               <div className="grid md:grid-cols-4 gap-8">
                 <div className="text-center">
                   <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-green-100 flex items-center justify-center">
-                    <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                    </svg>
+                    <IconEditableText
+                      mode={mode}
+                      value={blockContent.quick_setup_icon || '⚡'}
+                      onEdit={(value) => handleContentUpdate('quick_setup_icon', value)}
+                      className="text-green-600 text-xl"
+                      fallback={<svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>}
+                    />
                   </div>
                   <div className="font-semibold text-gray-900">Quick Setup</div>
                   <div className={`text-sm ${mutedTextColor}`}>Average: 7 minutes</div>
@@ -464,9 +552,13 @@ export default function MultistepCTAStack(props: LayoutComponentProps) {
                 
                 <div className="text-center">
                   <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-blue-100 flex items-center justify-center">
-                    <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
+                    <IconEditableText
+                      mode={mode}
+                      value={blockContent.guided_icon || '✅'}
+                      onEdit={(value) => handleContentUpdate('guided_icon', value)}
+                      className="text-blue-600 text-xl"
+                      fallback={<svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>}
+                    />
                   </div>
                   <div className="font-semibold text-gray-900">Guided Process</div>
                   <div className={`text-sm ${mutedTextColor}`}>Step-by-step help</div>
@@ -474,9 +566,13 @@ export default function MultistepCTAStack(props: LayoutComponentProps) {
                 
                 <div className="text-center">
                   <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-purple-100 flex items-center justify-center">
-                    <svg className="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                    </svg>
+                    <IconEditableText
+                      mode={mode}
+                      value={blockContent.user_friendly_icon || '❤️'}
+                      onEdit={(value) => handleContentUpdate('user_friendly_icon', value)}
+                      className="text-purple-600 text-xl"
+                      fallback={<svg className="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" /></svg>}
+                    />
                   </div>
                   <div className="font-semibold text-gray-900">User-Friendly</div>
                   <div className={`text-sm ${mutedTextColor}`}>No tech skills needed</div>
@@ -484,9 +580,13 @@ export default function MultistepCTAStack(props: LayoutComponentProps) {
                 
                 <div className="text-center">
                   <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-orange-100 flex items-center justify-center">
-                    <svg className="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z" />
-                    </svg>
+                    <IconEditableText
+                      mode={mode}
+                      value={blockContent.support_icon || '💬'}
+                      onEdit={(value) => handleContentUpdate('support_icon', value)}
+                      className="text-orange-600 text-xl"
+                      fallback={<svg className="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z" /></svg>}
+                    />
                   </div>
                   <div className="font-semibold text-gray-900">Support Ready</div>
                   <div className={`text-sm ${mutedTextColor}`}>Help when needed</div>
@@ -550,7 +650,19 @@ export const componentMeta = {
     { key: 'process_note', label: 'Process Note', type: 'text', required: false },
     { key: 'guarantee_text', label: 'Guarantee Text', type: 'text', required: false },
     { key: 'supporting_text', label: 'Supporting Text', type: 'textarea', required: false },
-    { key: 'trust_items', label: 'Trust Indicators (pipe separated)', type: 'text', required: false }
+    { key: 'trust_items', label: 'Trust Indicators (pipe separated)', type: 'text', required: false },
+    { key: 'step_1_icon', label: 'Step 1 Icon', type: 'text', required: false },
+    { key: 'step_2_icon', label: 'Step 2 Icon', type: 'text', required: false },
+    { key: 'step_3_icon', label: 'Step 3 Icon', type: 'text', required: false },
+    { key: 'time_icon', label: 'Time Icon', type: 'text', required: false },
+    { key: 'detail_check_icon', label: 'Detail Check Icon', type: 'text', required: false },
+    { key: 'benefit_check_icon', label: 'Benefit Check Icon', type: 'text', required: false },
+    { key: 'quick_setup_icon', label: 'Quick Setup Icon', type: 'text', required: false },
+    { key: 'guided_icon', label: 'Guided Icon', type: 'text', required: false },
+    { key: 'user_friendly_icon', label: 'User Friendly Icon', type: 'text', required: false },
+    { key: 'support_icon', label: 'Support Icon', type: 'text', required: false },
+    { key: 'info_icon', label: 'Info Icon', type: 'text', required: false },
+    { key: 'guarantee_icon', label: 'Guarantee Icon', type: 'text', required: false }
   ],
   
   features: [

@@ -6,6 +6,7 @@ import {
   EditableAdaptiveHeadline, 
   EditableAdaptiveText
 } from '@/components/layout/EditableContent';
+import IconEditableText from '@/components/ui/IconEditableText';
 import { 
   CTAButton,
   TrustIndicators 
@@ -27,6 +28,14 @@ interface EnterpriseContactBoxContent {
   subheadline?: string;
   supporting_text?: string;
   trust_items?: string;
+  calendar_icon?: string;
+  demo_icon?: string;
+  quote_icon?: string;
+  download_icon?: string;
+  response_time_icon?: string;
+  enterprise_check_icon?: string;
+  qualification_check_icon?: string;
+  social_proof_icon?: string;
 }
 
 const CONTENT_SCHEMA = {
@@ -85,6 +94,38 @@ const CONTENT_SCHEMA = {
   trust_items: { 
     type: 'string' as const, 
     default: '' 
+  },
+  calendar_icon: { 
+    type: 'string' as const, 
+    default: '📅' 
+  },
+  demo_icon: { 
+    type: 'string' as const, 
+    default: '🎥' 
+  },
+  quote_icon: { 
+    type: 'string' as const, 
+    default: '📊' 
+  },
+  download_icon: { 
+    type: 'string' as const, 
+    default: '📄' 
+  },
+  response_time_icon: { 
+    type: 'string' as const, 
+    default: '⏱️' 
+  },
+  enterprise_check_icon: { 
+    type: 'string' as const, 
+    default: '✅' 
+  },
+  qualification_check_icon: { 
+    type: 'string' as const, 
+    default: '✅' 
+  },
+  social_proof_icon: { 
+    type: 'string' as const, 
+    default: '👥' 
   }
 };
 
@@ -138,25 +179,26 @@ export default function EnterpriseContactBox(props: LayoutComponentProps) {
   const mutedTextColor = dynamicTextColors?.muted || colorTokens.textMuted;
 
   const getContactIcon = (index: number) => {
-    const icons = [
-      // Schedule Call
-      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-      </svg>,
-      // Demo
-      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
-      </svg>,
-      // Quote
-      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
-      </svg>,
-      // Download
-      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-      </svg>
+    const iconFields = ['calendar_icon', 'demo_icon', 'quote_icon', 'download_icon'] as const;
+    const iconField = iconFields[index % iconFields.length];
+    const iconValue = blockContent[iconField];
+    
+    const fallbackIcons = [
+      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>,
+      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>,
+      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" /></svg>,
+      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
     ];
-    return icons[index % icons.length];
+    
+    return (
+      <IconEditableText
+        mode={mode}
+        value={iconValue || ''}
+        onEdit={(value) => handleContentUpdate(iconField, value)}
+        className="text-white text-xl"
+        fallback={fallbackIcons[index % fallbackIcons.length]}
+      />
+    );
   };
 
   const ContactOption = ({ option, description, responseTime, index }: {
@@ -174,9 +216,13 @@ export default function EnterpriseContactBox(props: LayoutComponentProps) {
           <h4 className="font-semibold text-gray-900 mb-2">{option}</h4>
           <p className={`text-sm ${mutedTextColor} mb-3`}>{description}</p>
           <div className="flex items-center space-x-2">
-            <svg className="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
+            <IconEditableText
+              mode={mode}
+              value={blockContent.response_time_icon || '⏱️'}
+              onEdit={(value) => handleContentUpdate('response_time_icon', value)}
+              className="text-green-500 text-sm"
+              fallback={<svg className="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>}
+            />
             <span className="text-sm font-medium text-green-600">Response: {responseTime}</span>
           </div>
         </div>
@@ -360,9 +406,13 @@ export default function EnterpriseContactBox(props: LayoutComponentProps) {
               <div className="grid md:grid-cols-2 gap-6">
                 {enterpriseFeatures.map((feature, index) => (
                   <div key={index} className="flex items-start space-x-3">
-                    <svg className="w-6 h-6 text-blue-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                    </svg>
+                    <IconEditableText
+                      mode={mode}
+                      value={blockContent.enterprise_check_icon || '✅'}
+                      onEdit={(value) => handleContentUpdate('enterprise_check_icon', value)}
+                      className="text-blue-600 text-lg mt-0.5 flex-shrink-0"
+                      fallback={<svg className="w-6 h-6 text-blue-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>}
+                    />
                     <span className="text-gray-700 font-medium">{feature}</span>
                   </div>
                 ))}
@@ -384,9 +434,13 @@ export default function EnterpriseContactBox(props: LayoutComponentProps) {
                 {qualificationPoints.map((point, index) => (
                   <div key={index} className="text-center p-4 bg-blue-50 rounded-lg border border-blue-100">
                     <div className="w-8 h-8 mx-auto mb-2 rounded-full bg-blue-500 flex items-center justify-center">
-                      <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                      </svg>
+                      <IconEditableText
+                        mode={mode}
+                        value={blockContent.qualification_check_icon || '✅'}
+                        onEdit={(value) => handleContentUpdate('qualification_check_icon', value)}
+                        className="text-white text-sm"
+                        fallback={<svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>}
+                      />
                     </div>
                     <div className="text-sm font-medium text-gray-900">{point}</div>
                   </div>
@@ -399,9 +453,13 @@ export default function EnterpriseContactBox(props: LayoutComponentProps) {
               <div className="text-center bg-green-50 rounded-xl p-6 border border-green-100 mb-16">
                 <div className="flex items-center justify-center space-x-4">
                   <div className="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center">
-                    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                    </svg>
+                    <IconEditableText
+                      mode={mode}
+                      value={blockContent.social_proof_icon || '👥'}
+                      onEdit={(value) => handleContentUpdate('social_proof_icon', value)}
+                      className="text-white text-xl"
+                      fallback={<svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" /></svg>}
+                    />
                   </div>
                   <div>
                     <div className="font-semibold text-gray-900 text-lg">{blockContent.team_size_text}</div>
@@ -470,7 +528,15 @@ export const componentMeta = {
     { key: 'availability_text', label: 'Availability Text', type: 'text', required: false },
     { key: 'team_size_text', label: 'Social Proof Text', type: 'text', required: false },
     { key: 'supporting_text', label: 'Supporting Text', type: 'textarea', required: false },
-    { key: 'trust_items', label: 'Trust Indicators (pipe separated)', type: 'text', required: false }
+    { key: 'trust_items', label: 'Trust Indicators (pipe separated)', type: 'text', required: false },
+    { key: 'calendar_icon', label: 'Calendar Icon', type: 'text', required: false },
+    { key: 'demo_icon', label: 'Demo Icon', type: 'text', required: false },
+    { key: 'quote_icon', label: 'Quote Icon', type: 'text', required: false },
+    { key: 'download_icon', label: 'Download Icon', type: 'text', required: false },
+    { key: 'response_time_icon', label: 'Response Time Icon', type: 'text', required: false },
+    { key: 'enterprise_check_icon', label: 'Enterprise Check Icon', type: 'text', required: false },
+    { key: 'qualification_check_icon', label: 'Qualification Check Icon', type: 'text', required: false },
+    { key: 'social_proof_icon', label: 'Social Proof Icon', type: 'text', required: false }
   ],
   
   features: [

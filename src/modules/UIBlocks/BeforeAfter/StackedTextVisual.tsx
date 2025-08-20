@@ -6,6 +6,7 @@ import {
   EditableAdaptiveHeadline, 
   EditableAdaptiveText
 } from '@/components/layout/EditableContent';
+import IconEditableText from '@/components/ui/IconEditableText';
 import { LayoutComponentProps } from '@/types/storeTypes';
 
 interface StackedTextVisualProps extends LayoutComponentProps {}
@@ -18,6 +19,9 @@ interface StackedTextVisualContent {
   before_label: string;
   after_label: string;
   transition_text?: string;
+  before_icon?: string;
+  after_icon?: string;
+  transition_icon?: string;
   subheadline?: string;
   summary_text?: string;
   show_summary_box?: string;
@@ -33,7 +37,19 @@ const CONTENT_SCHEMA = {
   transition_text: { type: 'string' as const, default: '' },
   subheadline: { type: 'string' as const, default: '' },
   summary_text: { type: 'string' as const, default: '' },
-  show_summary_box: { type: 'string' as const, default: 'false' }
+  show_summary_box: { type: 'string' as const, default: 'false' },
+  before_icon: {
+    type: 'string' as const,
+    default: '➕'
+  },
+  after_icon: {
+    type: 'string' as const,
+    default: '⚡'
+  },
+  transition_icon: {
+    type: 'string' as const,
+    default: '⬇️'
+  }
 };
 
 
@@ -121,9 +137,17 @@ export default function StackedTextVisual(props: StackedTextVisualProps) {
               <div className="flex items-start space-x-4">
                 {/* Before Icon */}
                 <div className="flex-shrink-0 w-12 h-12 bg-gray-200 rounded-full flex items-center justify-center">
-                  <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
+                  <IconEditableText
+                    mode={mode}
+                    value={blockContent.before_icon || '➕'}
+                    onEdit={(value) => handleContentUpdate('before_icon', value)}
+                    backgroundType={safeBackgroundType}
+                    colorTokens={colorTokens}
+                    iconSize="md"
+                    className="text-2xl text-gray-600"
+                    sectionId={sectionId}
+                    elementKey="before_icon"
+                  />
                 </div>
                 
                 <div className="flex-1">
@@ -168,9 +192,17 @@ export default function StackedTextVisual(props: StackedTextVisualProps) {
             <div className="flex flex-col items-center space-y-2">
               {/* Arrow */}
               <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center">
-                <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
-                </svg>
+                <IconEditableText
+                  mode={mode}
+                  value={blockContent.transition_icon || '⬇️'}
+                  onEdit={(value) => handleContentUpdate('transition_icon', value)}
+                  backgroundType={safeBackgroundType}
+                  colorTokens={colorTokens}
+                  iconSize="sm"
+                  className="text-lg text-blue-600"
+                  sectionId={sectionId}
+                  elementKey="transition_icon"
+                />
               </div>
               
               {/* Optional Transition Text */}
@@ -204,9 +236,17 @@ export default function StackedTextVisual(props: StackedTextVisualProps) {
               <div className="flex items-start space-x-4">
                 {/* After Icon */}
                 <div className="flex-shrink-0 w-12 h-12 bg-green-200 rounded-full flex items-center justify-center">
-                  <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                  </svg>
+                  <IconEditableText
+                    mode={mode}
+                    value={blockContent.after_icon || '⚡'}
+                    onEdit={(value) => handleContentUpdate('after_icon', value)}
+                    backgroundType={safeBackgroundType}
+                    colorTokens={colorTokens}
+                    iconSize="md"
+                    className="text-2xl text-green-600"
+                    sectionId={sectionId}
+                    elementKey="after_icon"
+                  />
                 </div>
                 
                 <div className="flex-1">

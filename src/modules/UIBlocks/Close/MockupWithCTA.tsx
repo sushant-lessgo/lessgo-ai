@@ -9,6 +9,7 @@ import {
   EditableAdaptiveHeadline, 
   EditableAdaptiveText 
 } from '@/components/layout/EditableContent';
+import IconEditableText from '@/components/ui/IconEditableText';
 import { CTAButton } from '@/components/layout/ComponentRegistry';
 import { LayoutComponentProps } from '@/types/storeTypes';
 
@@ -20,6 +21,7 @@ interface MockupWithCTAContent {
   urgency_text?: string;
   guarantee_text?: string;
   browser_url?: string;
+  device_app_icon?: string;
 }
 
 // Content schema - defines structure and defaults
@@ -47,6 +49,10 @@ const CONTENT_SCHEMA = {
   browser_url: { 
     type: 'string' as const, 
     default: 'yourapp.com' 
+  },
+  device_app_icon: { 
+    type: 'string' as const, 
+    default: '📊' 
   }
 };
 
@@ -65,9 +71,13 @@ const DeviceMockup = React.memo(({ type = 'laptop', browserUrl = 'yourapp.com' }
             <div className="w-full h-full bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
               <div className="text-center p-8">
                 <div className="w-16 h-16 bg-blue-500 rounded-xl mx-auto mb-4 flex items-center justify-center">
-                  <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                  </svg>
+                  <IconEditableText
+                    mode={mode}
+                    value={blockContent.device_app_icon || '📊'}
+                    onEdit={(value) => handleContentUpdate('device_app_icon', value)}
+                    className="text-white text-2xl"
+                    fallback={<svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>}
+                  />
                 </div>
                 <div className="space-y-2">
                   <div className="h-3 bg-gray-300 rounded w-24 mx-auto"></div>
@@ -104,9 +114,13 @@ const DeviceMockup = React.memo(({ type = 'laptop', browserUrl = 'yourapp.com' }
             <div className="w-full h-full bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
               <div className="text-center p-6">
                 <div className="w-20 h-20 bg-blue-500 rounded-2xl mx-auto mb-4 flex items-center justify-center">
-                  <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                  </svg>
+                  <IconEditableText
+                    mode={mode}
+                    value={blockContent.device_app_icon || '📊'}
+                    onEdit={(value) => handleContentUpdate('device_app_icon', value)}
+                    className="text-white text-3xl"
+                    fallback={<svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>}
+                  />
                 </div>
                 <div className="space-y-2">
                   <div className="h-4 bg-gray-300 rounded w-32 mx-auto"></div>
@@ -296,7 +310,8 @@ export const componentMeta = {
     { key: 'cta_text', label: 'CTA Button Text', type: 'text', required: true },
     { key: 'urgency_text', label: 'Urgency Text', type: 'text', required: false },
     { key: 'guarantee_text', label: 'Guarantee Text', type: 'text', required: false },
-    { key: 'browser_url', label: 'Browser URL (mockup)', type: 'text', required: false }
+    { key: 'browser_url', label: 'Browser URL (mockup)', type: 'text', required: false },
+    { key: 'device_app_icon', label: 'Device App Icon', type: 'text', required: false }
   ],
   
   // ✅ NEW: Enhanced features

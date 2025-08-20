@@ -6,6 +6,7 @@ import {
   EditableAdaptiveHeadline, 
   EditableAdaptiveText
 } from '@/components/layout/EditableContent';
+import IconEditableText from '@/components/ui/IconEditableText';
 import { 
   CTAButton,
   TrustIndicators 
@@ -39,6 +40,12 @@ interface LeadMagnetCardContent {
   free_description?: string;
   privacy_title?: string;
   privacy_description?: string;
+  magnet_icon?: string;
+  benefit_check_icon?: string;
+  delivery_icon?: string;
+  instant_access_icon?: string;
+  free_icon?: string;
+  privacy_icon?: string;
 }
 
 const CONTENT_SCHEMA = {
@@ -141,6 +148,30 @@ const CONTENT_SCHEMA = {
   privacy_description: { 
     type: 'string' as const, 
     default: 'We never spam' 
+  },
+  magnet_icon: { 
+    type: 'string' as const, 
+    default: '📄' 
+  },
+  benefit_check_icon: { 
+    type: 'string' as const, 
+    default: '✅' 
+  },
+  delivery_icon: { 
+    type: 'string' as const, 
+    default: '⚡' 
+  },
+  instant_access_icon: { 
+    type: 'string' as const, 
+    default: '⚡' 
+  },
+  free_icon: { 
+    type: 'string' as const, 
+    default: '🆓' 
+  },
+  privacy_icon: { 
+    type: 'string' as const, 
+    default: '🛡️' 
   }
 };
 
@@ -201,35 +232,22 @@ export default function LeadMagnetCard(props: LayoutComponentProps) {
   const getMagnetIcon = () => {
     const format = blockContent.magnet_format.toLowerCase();
     
-    if (format.includes('pdf') || format.includes('guide') || format.includes('ebook')) {
-      return (
-        <svg className="w-16 h-16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-        </svg>
-      );
-    }
+    const fallbackSvg = format.includes('pdf') || format.includes('guide') || format.includes('ebook') ? 
+      <svg className="w-16 h-16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg> :
+    format.includes('video') || format.includes('course') ?
+      <svg className="w-16 h-16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg> :
+    format.includes('template') || format.includes('worksheet') ?
+      <svg className="w-16 h-16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" /></svg> :
+      <svg className="w-16 h-16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" /></svg>;
     
-    if (format.includes('video') || format.includes('course')) {
-      return (
-        <svg className="w-16 h-16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
-        </svg>
-      );
-    }
-    
-    if (format.includes('template') || format.includes('worksheet')) {
-      return (
-        <svg className="w-16 h-16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
-        </svg>
-      );
-    }
-    
-    // Default checklist icon
     return (
-      <svg className="w-16 h-16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
-      </svg>
+      <IconEditableText
+        mode={mode}
+        value={blockContent.magnet_icon || '📄'}
+        onEdit={(value) => handleContentUpdate('magnet_icon', value)}
+        className="text-4xl"
+        fallback={fallbackSvg}
+      />
     );
   };
   
@@ -458,9 +476,13 @@ export default function LeadMagnetCard(props: LayoutComponentProps) {
                   <div className="space-y-3">
                     {benefits.map((benefit, index) => (
                       <div key={index} className="flex items-start space-x-3">
-                        <svg className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                        </svg>
+                        <IconEditableText
+                          mode={mode}
+                          value={blockContent.benefit_check_icon || '✅'}
+                          onEdit={(value) => handleContentUpdate('benefit_check_icon', value)}
+                          className="text-green-500 text-lg mt-0.5 flex-shrink-0"
+                          fallback={<svg className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>}
+                        />
                         <span className="text-gray-700">{benefit}</span>
                       </div>
                     ))}
@@ -482,9 +504,13 @@ export default function LeadMagnetCard(props: LayoutComponentProps) {
                 {/* Delivery Method */}
                 {blockContent.delivery_method && (
                   <div className="flex items-center justify-center space-x-2 text-sm text-gray-600 mb-4">
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                    </svg>
+                    <IconEditableText
+                      mode={mode}
+                      value={blockContent.delivery_icon || '⚡'}
+                      onEdit={(value) => handleContentUpdate('delivery_icon', value)}
+                      className="text-gray-600 text-sm"
+                      fallback={<svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>}
+                    />
                     <span>{blockContent.delivery_method}</span>
                   </div>
                 )}
@@ -505,9 +531,13 @@ export default function LeadMagnetCard(props: LayoutComponentProps) {
           <div className="grid md:grid-cols-3 gap-8 mb-8">
             <div className="text-center">
               <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-green-100 flex items-center justify-center">
-                <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                </svg>
+                <IconEditableText
+                  mode={mode}
+                  value={blockContent.instant_access_icon || '⚡'}
+                  onEdit={(value) => handleContentUpdate('instant_access_icon', value)}
+                  className="text-green-600 text-xl"
+                  fallback={<svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>}
+                />
               </div>
               <EditableAdaptiveText
                 mode={mode}
@@ -539,9 +569,13 @@ export default function LeadMagnetCard(props: LayoutComponentProps) {
             
             <div className="text-center">
               <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-blue-100 flex items-center justify-center">
-                <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                </svg>
+                <IconEditableText
+                  mode={mode}
+                  value={blockContent.free_icon || '🆓'}
+                  onEdit={(value) => handleContentUpdate('free_icon', value)}
+                  className="text-blue-600 text-xl"
+                  fallback={<svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>}
+                />
               </div>
               <EditableAdaptiveText
                 mode={mode}
@@ -573,9 +607,13 @@ export default function LeadMagnetCard(props: LayoutComponentProps) {
             
             <div className="text-center">
               <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-purple-100 flex items-center justify-center">
-                <svg className="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                </svg>
+                <IconEditableText
+                  mode={mode}
+                  value={blockContent.privacy_icon || '🛡️'}
+                  onEdit={(value) => handleContentUpdate('privacy_icon', value)}
+                  className="text-purple-600 text-xl"
+                  fallback={<svg className="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>}
+                />
               </div>
               <EditableAdaptiveText
                 mode={mode}
@@ -713,7 +751,13 @@ export const componentMeta = {
     { key: 'free_title', label: 'Free Title', type: 'text', required: false },
     { key: 'free_description', label: 'Free Description', type: 'text', required: false },
     { key: 'privacy_title', label: 'Privacy Title', type: 'text', required: false },
-    { key: 'privacy_description', label: 'Privacy Description', type: 'text', required: false }
+    { key: 'privacy_description', label: 'Privacy Description', type: 'text', required: false },
+    { key: 'magnet_icon', label: 'Lead Magnet Icon', type: 'text', required: false },
+    { key: 'benefit_check_icon', label: 'Benefit Check Icon', type: 'text', required: false },
+    { key: 'delivery_icon', label: 'Delivery Icon', type: 'text', required: false },
+    { key: 'instant_access_icon', label: 'Instant Access Icon', type: 'text', required: false },
+    { key: 'free_icon', label: 'Free Icon', type: 'text', required: false },
+    { key: 'privacy_icon', label: 'Privacy Icon', type: 'text', required: false }
   ],
   
   features: [

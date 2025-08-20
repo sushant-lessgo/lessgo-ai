@@ -6,6 +6,7 @@ import {
   EditableAdaptiveHeadline, 
   EditableAdaptiveText
 } from '@/components/layout/EditableContent';
+import IconEditableText from '@/components/ui/IconEditableText';
 import { 
   CTAButton,
   TrustIndicators 
@@ -45,6 +46,17 @@ interface ValueReinforcementBlockContent {
   transformation_description?: string;
   social_proof_title?: string;
   final_cta_title?: string;
+  trending_up_icon?: string;
+  dollar_sign_icon?: string;
+  automation_icon?: string;
+  users_icon?: string;
+  chart_bar_icon?: string;
+  integration_icon?: string;
+  before_cross_icon?: string;
+  after_check_icon?: string;
+  arrow_icon?: string;
+  urgency_clock_icon?: string;
+  guarantee_shield_icon?: string;
 }
 
 const CONTENT_SCHEMA = {
@@ -171,6 +183,50 @@ const CONTENT_SCHEMA = {
   final_cta_title: { 
     type: 'string' as const, 
     default: 'Ready to Experience These Results?' 
+  },
+  trending_up_icon: { 
+    type: 'string' as const, 
+    default: '📈' 
+  },
+  dollar_sign_icon: { 
+    type: 'string' as const, 
+    default: '💰' 
+  },
+  automation_icon: { 
+    type: 'string' as const, 
+    default: '⚙️' 
+  },
+  users_icon: { 
+    type: 'string' as const, 
+    default: '👥' 
+  },
+  chart_bar_icon: { 
+    type: 'string' as const, 
+    default: '📊' 
+  },
+  integration_icon: { 
+    type: 'string' as const, 
+    default: '🔗' 
+  },
+  before_cross_icon: { 
+    type: 'string' as const, 
+    default: '❌' 
+  },
+  after_check_icon: { 
+    type: 'string' as const, 
+    default: '✅' 
+  },
+  arrow_icon: { 
+    type: 'string' as const, 
+    default: '➡️' 
+  },
+  urgency_clock_icon: { 
+    type: 'string' as const, 
+    default: '⏰' 
+  },
+  guarantee_shield_icon: { 
+    type: 'string' as const, 
+    default: '🛡️' 
   }
 };
 
@@ -272,41 +328,37 @@ export default function ValueReinforcementBlock(props: LayoutComponentProps) {
 
   const mutedTextColor = dynamicTextColors?.muted || colorTokens.textMuted;
 
-  const getValueIcon = (iconName: string) => {
-    const icons = {
-      'trending-up': (
-        <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
-        </svg>
-      ),
-      'dollar-sign': (
-        <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
-        </svg>
-      ),
-      'automation': (
-        <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-        </svg>
-      ),
-      'users': (
-        <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
-        </svg>
-      ),
-      'chart-bar': (
-        <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-        </svg>
-      ),
-      'integration': (
-        <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-        </svg>
-      )
+  const getValueIcon = (iconName: string, index: number) => {
+    const iconMapping = {
+      'trending-up': 'trending_up_icon',
+      'dollar-sign': 'dollar_sign_icon', 
+      'automation': 'automation_icon',
+      'users': 'users_icon',
+      'chart-bar': 'chart_bar_icon',
+      'integration': 'integration_icon'
     };
-    return icons[iconName as keyof typeof icons] || icons['trending-up'];
+    
+    const iconField = iconMapping[iconName as keyof typeof iconMapping] || 'trending_up_icon';
+    const iconValue = blockContent[iconField as keyof ValueReinforcementBlockContent];
+    
+    const fallbackIcons = {
+      'trending-up': <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" /></svg>,
+      'dollar-sign': <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" /></svg>,
+      'automation': <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>,
+      'users': <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" /></svg>,
+      'chart-bar': <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>,
+      'integration': <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+    };
+    
+    return (
+      <IconEditableText
+        mode={mode}
+        value={iconValue as string || ''}
+        onEdit={(value) => handleContentUpdate(iconField as keyof ValueReinforcementBlockContent, value)}
+        className="text-white text-2xl"
+        fallback={fallbackIcons[iconName as keyof typeof fallbackIcons] || fallbackIcons['trending-up']}
+      />
+    );
   };
 
   const ValuePoint = ({ point, icon, index }: {
@@ -316,7 +368,7 @@ export default function ValueReinforcementBlock(props: LayoutComponentProps) {
   }) => (
     <div className="flex items-start space-x-4 p-6 bg-white rounded-xl border border-gray-200 hover:border-blue-200 hover:shadow-lg transition-all duration-300">
       <div className={`w-16 h-16 rounded-xl ${colorTokens.ctaBg} flex items-center justify-center text-white flex-shrink-0`}>
-        {getValueIcon(icon)}
+        {getValueIcon(icon, index)}
       </div>
       <div>
         <p className="text-gray-700 font-medium leading-relaxed">{point}</p>
@@ -333,26 +385,38 @@ export default function ValueReinforcementBlock(props: LayoutComponentProps) {
       {/* Before */}
       <div className="flex-1 text-center">
         <div className="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-3">
-          <svg className="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-          </svg>
+          <IconEditableText
+            mode={mode}
+            value={blockContent.before_cross_icon || '❌'}
+            onEdit={(value) => handleContentUpdate('before_cross_icon', value)}
+            className="text-red-500 text-sm"
+            fallback={<svg className="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>}
+          />
         </div>
         <p className="text-gray-600 text-sm">{before}</p>
       </div>
       
       {/* Arrow */}
       <div className="flex-shrink-0">
-        <svg className="w-8 h-8 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
-        </svg>
+        <IconEditableText
+          mode={mode}
+          value={blockContent.arrow_icon || '➡️'}
+          onEdit={(value) => handleContentUpdate('arrow_icon', value)}
+          className="text-blue-500 text-xl"
+          fallback={<svg className="w-8 h-8 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" /></svg>}
+        />
       </div>
       
       {/* After */}
       <div className="flex-1 text-center">
         <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3">
-          <svg className="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-          </svg>
+          <IconEditableText
+            mode={mode}
+            value={blockContent.after_check_icon || '✅'}
+            onEdit={(value) => handleContentUpdate('after_check_icon', value)}
+            className="text-green-500 text-sm"
+            fallback={<svg className="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>}
+          />
         </div>
         <p className="text-gray-700 text-sm font-medium">{after}</p>
       </div>
@@ -641,18 +705,26 @@ export default function ValueReinforcementBlock(props: LayoutComponentProps) {
               <div className="space-y-3">
                 {blockContent.urgency_text && (
                   <div className="flex items-center justify-center space-x-2 text-orange-600">
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
+                    <IconEditableText
+                      mode={mode}
+                      value={blockContent.urgency_clock_icon || '⏰'}
+                      onEdit={(value) => handleContentUpdate('urgency_clock_icon', value)}
+                      className="text-orange-600 text-lg"
+                      fallback={<svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>}
+                    />
                     <span className="font-semibold">{blockContent.urgency_text}</span>
                   </div>
                 )}
 
                 {blockContent.risk_reversal && (
                   <div className="flex items-center justify-center space-x-2 text-green-600">
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                    </svg>
+                    <IconEditableText
+                      mode={mode}
+                      value={blockContent.guarantee_shield_icon || '🛡️'}
+                      onEdit={(value) => handleContentUpdate('guarantee_shield_icon', value)}
+                      className="text-green-600 text-lg"
+                      fallback={<svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>}
+                    />
                     <span className="font-semibold">{blockContent.risk_reversal}</span>
                   </div>
                 )}
@@ -765,7 +837,18 @@ export const componentMeta = {
     { key: 'transformation_title', label: 'Transformation Section Title', type: 'text', required: false },
     { key: 'transformation_description', label: 'Transformation Section Description', type: 'textarea', required: false },
     { key: 'social_proof_title', label: 'Social Proof Section Title', type: 'text', required: false },
-    { key: 'final_cta_title', label: 'Final CTA Title', type: 'text', required: false }
+    { key: 'final_cta_title', label: 'Final CTA Title', type: 'text', required: false },
+    { key: 'trending_up_icon', label: 'Trending Up Icon', type: 'text', required: false },
+    { key: 'dollar_sign_icon', label: 'Dollar Sign Icon', type: 'text', required: false },
+    { key: 'automation_icon', label: 'Automation Icon', type: 'text', required: false },
+    { key: 'users_icon', label: 'Users Icon', type: 'text', required: false },
+    { key: 'chart_bar_icon', label: 'Chart Bar Icon', type: 'text', required: false },
+    { key: 'integration_icon', label: 'Integration Icon', type: 'text', required: false },
+    { key: 'before_cross_icon', label: 'Before Cross Icon', type: 'text', required: false },
+    { key: 'after_check_icon', label: 'After Check Icon', type: 'text', required: false },
+    { key: 'arrow_icon', label: 'Arrow Icon', type: 'text', required: false },
+    { key: 'urgency_clock_icon', label: 'Urgency Clock Icon', type: 'text', required: false },
+    { key: 'guarantee_shield_icon', label: 'Guarantee Shield Icon', type: 'text', required: false }
   ],
   
   features: [

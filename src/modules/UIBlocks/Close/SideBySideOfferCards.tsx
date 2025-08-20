@@ -6,6 +6,7 @@ import {
   EditableAdaptiveHeadline, 
   EditableAdaptiveText
 } from '@/components/layout/EditableContent';
+import IconEditableText from '@/components/ui/IconEditableText';
 import { 
   CTAButton,
   TrustIndicators 
@@ -26,6 +27,14 @@ interface SideBySideOfferCardsContent {
   subheadline?: string;
   supporting_text?: string;
   trust_items?: string;
+  feature_check_icon?: string;
+  feature_unavailable_icon?: string;
+  info_icon?: string;
+  guarantee_shield_icon?: string;
+  proven_icon?: string;
+  setup_icon?: string;
+  support_icon?: string;
+  security_icon?: string;
 }
 
 const CONTENT_SCHEMA = {
@@ -80,6 +89,38 @@ const CONTENT_SCHEMA = {
   trust_items: { 
     type: 'string' as const, 
     default: '' 
+  },
+  feature_check_icon: { 
+    type: 'string' as const, 
+    default: '✅' 
+  },
+  feature_unavailable_icon: { 
+    type: 'string' as const, 
+    default: '❌' 
+  },
+  info_icon: { 
+    type: 'string' as const, 
+    default: 'ℹ️' 
+  },
+  guarantee_shield_icon: { 
+    type: 'string' as const, 
+    default: '🛡️' 
+  },
+  proven_icon: { 
+    type: 'string' as const, 
+    default: '✅' 
+  },
+  setup_icon: { 
+    type: 'string' as const, 
+    default: '⚡' 
+  },
+  support_icon: { 
+    type: 'string' as const, 
+    default: '💬' 
+  },
+  security_icon: { 
+    type: 'string' as const, 
+    default: '🔒' 
   }
 };
 
@@ -204,9 +245,13 @@ export default function SideBySideOfferCards(props: LayoutComponentProps) {
         <div className="space-y-4 mb-8">
           {offer.features.map((feature, featureIndex) => (
             <div key={featureIndex} className="flex items-start space-x-3">
-              <svg className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-              </svg>
+              <IconEditableText
+                mode={mode}
+                value={blockContent.feature_check_icon || '✅'}
+                onEdit={(value) => handleContentUpdate('feature_check_icon', value)}
+                className="text-green-500 text-lg mt-0.5 flex-shrink-0"
+                fallback={<svg className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>}
+              />
               <span className="text-gray-700">{feature}</span>
             </div>
           ))}
@@ -356,9 +401,13 @@ export default function SideBySideOfferCards(props: LayoutComponentProps) {
               <div className="text-center mb-12">
                 <div className="bg-blue-50 rounded-xl p-6 border border-blue-200 max-w-2xl mx-auto">
                   <div className="flex items-center justify-center space-x-2 mb-3">
-                    <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
+                    <IconEditableText
+                      mode={mode}
+                      value={blockContent.info_icon || 'ℹ️'}
+                      onEdit={(value) => handleContentUpdate('info_icon', value)}
+                      className="text-blue-600 text-lg"
+                      fallback={<svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>}
+                    />
                     <span className="font-semibold text-blue-900">Good to Know</span>
                   </div>
                   <p className="text-blue-800">{blockContent.comparison_note}</p>
@@ -396,13 +445,21 @@ export default function SideBySideOfferCards(props: LayoutComponentProps) {
                         {offers.map((offer, offerIndex) => (
                           <td key={offerIndex} className="text-center p-6">
                             {offer.features.includes(feature) ? (
-                              <svg className="w-6 h-6 text-green-500 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                              </svg>
+                              <IconEditableText
+                                mode={mode}
+                                value={blockContent.feature_check_icon || '✅'}
+                                onEdit={(value) => handleContentUpdate('feature_check_icon', value)}
+                                className="text-green-500 text-xl mx-auto"
+                                fallback={<svg className="w-6 h-6 text-green-500 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>}
+                              />
                             ) : (
-                              <svg className="w-6 h-6 text-gray-300 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                              </svg>
+                              <IconEditableText
+                                mode={mode}
+                                value={blockContent.feature_unavailable_icon || '❌'}
+                                onEdit={(value) => handleContentUpdate('feature_unavailable_icon', value)}
+                                className="text-gray-300 text-xl mx-auto"
+                                fallback={<svg className="w-6 h-6 text-gray-300 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>}
+                              />
                             )}
                           </td>
                         ))}
@@ -418,9 +475,13 @@ export default function SideBySideOfferCards(props: LayoutComponentProps) {
               <div className="bg-green-50 rounded-2xl p-8 border border-green-200 text-center mb-16">
                 <div className="flex items-center justify-center space-x-4">
                   <div className="w-16 h-16 bg-green-500 rounded-full flex items-center justify-center">
-                    <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                    </svg>
+                    <IconEditableText
+                      mode={mode}
+                      value={blockContent.guarantee_shield_icon || '🛡️'}
+                      onEdit={(value) => handleContentUpdate('guarantee_shield_icon', value)}
+                      className="text-white text-3xl"
+                      fallback={<svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>}
+                    />
                   </div>
                   <div className="text-center">
                     <div className="font-bold text-gray-900 text-xl mb-2">Risk-Free Guarantee</div>
@@ -439,9 +500,13 @@ export default function SideBySideOfferCards(props: LayoutComponentProps) {
               <div className="grid md:grid-cols-4 gap-8">
                 <div className="text-center">
                   <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-blue-100 flex items-center justify-center">
-                    <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
+                    <IconEditableText
+                      mode={mode}
+                      value={blockContent.proven_icon || '✅'}
+                      onEdit={(value) => handleContentUpdate('proven_icon', value)}
+                      className="text-blue-600 text-xl"
+                      fallback={<svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>}
+                    />
                   </div>
                   <div className="font-semibold text-gray-900">Proven Results</div>
                   <div className={`text-sm ${mutedTextColor}`}>Trusted by thousands</div>
@@ -449,9 +514,13 @@ export default function SideBySideOfferCards(props: LayoutComponentProps) {
                 
                 <div className="text-center">
                   <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-green-100 flex items-center justify-center">
-                    <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                    </svg>
+                    <IconEditableText
+                      mode={mode}
+                      value={blockContent.setup_icon || '⚡'}
+                      onEdit={(value) => handleContentUpdate('setup_icon', value)}
+                      className="text-green-600 text-xl"
+                      fallback={<svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>}
+                    />
                   </div>
                   <div className="font-semibold text-gray-900">Quick Setup</div>
                   <div className={`text-sm ${mutedTextColor}`}>Ready in minutes</div>
@@ -459,9 +528,13 @@ export default function SideBySideOfferCards(props: LayoutComponentProps) {
                 
                 <div className="text-center">
                   <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-purple-100 flex items-center justify-center">
-                    <svg className="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z" />
-                    </svg>
+                    <IconEditableText
+                      mode={mode}
+                      value={blockContent.support_icon || '💬'}
+                      onEdit={(value) => handleContentUpdate('support_icon', value)}
+                      className="text-purple-600 text-xl"
+                      fallback={<svg className="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z" /></svg>}
+                    />
                   </div>
                   <div className="font-semibold text-gray-900">Expert Support</div>
                   <div className={`text-sm ${mutedTextColor}`}>Always here to help</div>
@@ -469,9 +542,13 @@ export default function SideBySideOfferCards(props: LayoutComponentProps) {
                 
                 <div className="text-center">
                   <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-orange-100 flex items-center justify-center">
-                    <svg className="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                    </svg>
+                    <IconEditableText
+                      mode={mode}
+                      value={blockContent.security_icon || '🔒'}
+                      onEdit={(value) => handleContentUpdate('security_icon', value)}
+                      className="text-orange-600 text-xl"
+                      fallback={<svg className="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>}
+                    />
                   </div>
                   <div className="font-semibold text-gray-900">Secure & Reliable</div>
                   <div className={`text-sm ${mutedTextColor}`}>Bank-grade security</div>
@@ -535,7 +612,15 @@ export const componentMeta = {
     { key: 'comparison_note', label: 'Comparison Note', type: 'text', required: false },
     { key: 'guarantee_text', label: 'Guarantee Text', type: 'text', required: false },
     { key: 'supporting_text', label: 'Supporting Text', type: 'textarea', required: false },
-    { key: 'trust_items', label: 'Trust Indicators (pipe separated)', type: 'text', required: false }
+    { key: 'trust_items', label: 'Trust Indicators (pipe separated)', type: 'text', required: false },
+    { key: 'feature_check_icon', label: 'Feature Check Icon', type: 'text', required: false },
+    { key: 'feature_unavailable_icon', label: 'Feature Unavailable Icon', type: 'text', required: false },
+    { key: 'info_icon', label: 'Info Icon', type: 'text', required: false },
+    { key: 'guarantee_shield_icon', label: 'Guarantee Shield Icon', type: 'text', required: false },
+    { key: 'proven_icon', label: 'Proven Icon', type: 'text', required: false },
+    { key: 'setup_icon', label: 'Setup Icon', type: 'text', required: false },
+    { key: 'support_icon', label: 'Support Icon', type: 'text', required: false },
+    { key: 'security_icon', label: 'Security Icon', type: 'text', required: false }
   ],
   
   features: [

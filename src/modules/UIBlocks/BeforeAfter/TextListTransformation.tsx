@@ -10,6 +10,7 @@ import {
   CTAButton,
   TrustIndicators 
 } from '@/components/layout/ComponentRegistry';
+import IconEditableText from '@/components/ui/IconEditableText';
 import { LayoutComponentProps } from '@/types/storeTypes';
 
 interface TextListTransformationContent {
@@ -19,6 +20,9 @@ interface TextListTransformationContent {
   before_list: string;
   after_list: string;
   transformation_text: string;
+  before_icon?: string;
+  after_icon?: string;
+  transformation_icon?: string;
   subheadline?: string;
   supporting_text?: string;
   cta_text?: string;
@@ -65,15 +69,39 @@ const CONTENT_SCHEMA = {
   trust_items: { 
     type: 'string' as const, 
     default: '' 
+  },
+  before_icon: {
+    type: 'string' as const,
+    default: '❌'
+  },
+  after_icon: {
+    type: 'string' as const,
+    default: '✅'
+  },
+  transformation_icon: {
+    type: 'string' as const,
+    default: '➡️'
   }
 };
 
 const ListItem = React.memo(({ 
   text, 
-  type 
+  type,
+  mode,
+  blockContent,
+  handleContentUpdate,
+  backgroundType,
+  colorTokens,
+  sectionId
 }: { 
   text: string; 
-  type: 'before' | 'after' 
+  type: 'before' | 'after';
+  mode: string;
+  blockContent: TextListTransformationContent;
+  handleContentUpdate: (key: string, value: string) => void;
+  backgroundType: any;
+  colorTokens: any;
+  sectionId: string;
 }) => (
   <div className="flex items-start space-x-3 group">
     <div className={`flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center mt-0.5 ${
@@ -81,15 +109,20 @@ const ListItem = React.memo(({
         ? 'bg-red-100 group-hover:bg-red-200' 
         : 'bg-green-100 group-hover:bg-green-200'
     } transition-colors duration-200`}>
-      {type === 'before' ? (
-        <svg className="w-4 h-4 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-        </svg>
-      ) : (
-        <svg className="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-        </svg>
-      )}
+      <IconEditableText
+        mode={mode}
+        value={type === 'before' ? 
+          (blockContent.before_icon || '❌') : 
+          (blockContent.after_icon || '✅')
+        }
+        onEdit={(value) => handleContentUpdate(type === 'before' ? 'before_icon' : 'after_icon', value)}
+        backgroundType={backgroundType}
+        colorTokens={colorTokens}
+        iconSize="sm"
+        className="text-sm"
+        sectionId={sectionId}
+        elementKey={type === 'before' ? 'before_icon' : 'after_icon'}
+      />
     </div>
     <p className="text-gray-700 leading-relaxed group-hover:text-gray-900 transition-colors duration-200">
       {text}
@@ -224,7 +257,17 @@ export default function TextListTransformation(props: LayoutComponentProps) {
                 />
               ) : (
                 beforeItems.map((item, index) => (
-                  <ListItem key={index} text={item} type="before" />
+                  <ListItem 
+                    key={index} 
+                    text={item} 
+                    type="before"
+                    mode={mode}
+                    blockContent={blockContent}
+                    handleContentUpdate={handleContentUpdate}
+                    backgroundType={safeBackgroundType}
+                    colorTokens={colorTokens}
+                    sectionId={sectionId}
+                  />
                 ))
               )}
             </div>
@@ -233,9 +276,17 @@ export default function TextListTransformation(props: LayoutComponentProps) {
           <div className="flex items-center justify-center">
             <div className="text-center space-y-4">
               <div className={`w-16 h-16 mx-auto rounded-full ${colorTokens.ctaBg} flex items-center justify-center shadow-lg`}>
-                <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                </svg>
+                <IconEditableText
+                  mode={mode}
+                  value={blockContent.transformation_icon || '➡️'}
+                  onEdit={(value) => handleContentUpdate('transformation_icon', value)}
+                  backgroundType={safeBackgroundType}
+                  colorTokens={colorTokens}
+                  iconSize="lg"
+                  className="text-3xl text-white"
+                  sectionId={sectionId}
+                  elementKey="transformation_icon"
+                />
               </div>
               
               <EditableAdaptiveText
@@ -295,7 +346,17 @@ export default function TextListTransformation(props: LayoutComponentProps) {
                 />
               ) : (
                 afterItems.map((item, index) => (
-                  <ListItem key={index} text={item} type="after" />
+                  <ListItem 
+                    key={index} 
+                    text={item} 
+                    type="after"
+                    mode={mode}
+                    blockContent={blockContent}
+                    handleContentUpdate={handleContentUpdate}
+                    backgroundType={safeBackgroundType}
+                    colorTokens={colorTokens}
+                    sectionId={sectionId}
+                  />
                 ))
               )}
             </div>

@@ -11,6 +11,7 @@ import {
   CTAButton,
   TrustIndicators 
 } from '@/components/layout/ComponentRegistry';
+import IconEditableText from '@/components/ui/IconEditableText';
 import { LayoutComponentProps } from '@/types/storeTypes';
 
 interface BeforeAfterSliderContent {
@@ -25,6 +26,9 @@ interface BeforeAfterSliderContent {
   after_placeholder_text: string;
   interaction_hint_text: string;
   show_interaction_hint?: string;
+  before_icon?: string;
+  after_icon?: string;
+  hint_icon?: string;
   subheadline?: string;
   supporting_text?: string;
   cta_text?: string;
@@ -91,6 +95,18 @@ const CONTENT_SCHEMA = {
   show_interaction_hint: {
     type: 'string' as const,
     default: 'true'
+  },
+  before_icon: {
+    type: 'string' as const,
+    default: '⚠️'
+  },
+  after_icon: {
+    type: 'string' as const,
+    default: '✅'
+  },
+  hint_icon: {
+    type: 'string' as const,
+    default: '🔼'
   }
 };
 
@@ -111,8 +127,8 @@ const InteractiveSlider = React.memo(({
   backgroundType,
   sectionBackground
 }: {
-  beforeContent: { label: string; description: string; visual?: string };
-  afterContent: { label: string; description: string; visual?: string };
+  beforeContent: { label: string; description: string; visual?: string; before_icon?: string };
+  afterContent: { label: string; description: string; visual?: string; after_icon?: string };
   showImageToolbar: any;
   sectionId: string;
   mode: 'preview' | 'edit';
@@ -126,6 +142,7 @@ const InteractiveSlider = React.memo(({
   colorTokens: any;
   backgroundType: 'custom' | 'neutral' | 'primary' | 'secondary' | 'divider' | 'theme';
   sectionBackground: any;
+  blockContent: BeforeAfterSliderContent;
 }) => {
   const [isAfter, setIsAfter] = useState(false);
 
@@ -133,15 +150,20 @@ const InteractiveSlider = React.memo(({
     <div className={`relative w-full h-80 rounded-lg overflow-hidden ${type === 'before' ? 'bg-gradient-to-br from-red-50 to-orange-100' : 'bg-gradient-to-br from-green-50 to-emerald-100'}`}>
       <div className="absolute inset-0 flex items-center justify-center">
         <div className={`w-24 h-24 rounded-full ${type === 'before' ? 'bg-red-200' : 'bg-green-200'} flex items-center justify-center`}>
-          {type === 'before' ? (
-            <svg className="w-12 h-12 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-          ) : (
-            <svg className="w-12 h-12 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-          )}
+          <IconEditableText
+            mode={mode}
+            value={type === 'before' ? 
+              (beforeContent.before_icon || '⚠️') : 
+              (afterContent.after_icon || '✅')
+            }
+            onEdit={(value) => handleContentUpdate(type === 'before' ? 'before_icon' : 'after_icon', value)}
+            backgroundType={backgroundType}
+            colorTokens={colorTokens}
+            iconSize="xl"
+            className="text-4xl"
+            sectionId={sectionId}
+            elementKey={type === 'before' ? 'before_icon' : 'after_icon'}
+          />
         </div>
       </div>
       <div className="absolute bottom-4 left-4 right-4">
@@ -267,9 +289,17 @@ const InteractiveSlider = React.memo(({
               elementKey="interaction_hint_text"
               sectionBackground={sectionBackground}
             />
-            <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 9l4-4 4 4m0 6l-4 4-4-4" />
-            </svg>
+            <IconEditableText
+              mode={mode}
+              value={blockContent.hint_icon || '🔼'}
+              onEdit={(value) => handleContentUpdate('hint_icon', value)}
+              backgroundType={backgroundType}
+              colorTokens={colorTokens}
+              iconSize="sm"
+              className="text-lg text-gray-400"
+              sectionId={sectionId}
+              elementKey="hint_icon"
+            />
             
             {/* Remove button */}
             {mode === 'edit' && (
@@ -376,12 +406,14 @@ export default function BeforeAfterSlider(props: LayoutComponentProps) {
             beforeContent={{
               label: blockContent.before_label,
               description: blockContent.before_description,
-              visual: blockContent.before_visual
+              visual: blockContent.before_visual,
+              before_icon: blockContent.before_icon
             }}
             afterContent={{
               label: blockContent.after_label,
               description: blockContent.after_description,
-              visual: blockContent.after_visual
+              visual: blockContent.after_visual,
+              after_icon: blockContent.after_icon
             }}
             showImageToolbar={showImageToolbar}
             sectionId={sectionId}
@@ -396,6 +428,7 @@ export default function BeforeAfterSlider(props: LayoutComponentProps) {
             colorTokens={colorTokens}
             backgroundType={safeBackgroundType}
             sectionBackground={sectionBackground}
+            blockContent={blockContent}
           />
           
           {/* Add interaction hint back button */}

@@ -11,6 +11,7 @@ import {
   CTAButton,
   TrustIndicators 
 } from '@/components/layout/ComponentRegistry';
+import IconEditableText from '@/components/ui/IconEditableText';
 import { LayoutComponentProps } from '@/types/storeTypes';
 
 interface VisualStorylineContent {
@@ -27,6 +28,10 @@ interface VisualStorylineContent {
   journey_summary_title: string;
   journey_summary_description: string;
   show_journey_summary?: string;
+  step_connector_icon?: string;
+  summary_icon_1?: string;
+  summary_icon_2?: string;
+  summary_icon_3?: string;
   subheadline?: string;
   supporting_text?: string;
   cta_text?: string;
@@ -101,6 +106,22 @@ const CONTENT_SCHEMA = {
   show_journey_summary: {
     type: 'string' as const,
     default: 'true'
+  },
+  step_connector_icon: {
+    type: 'string' as const,
+    default: '⬇️'
+  },
+  summary_icon_1: {
+    type: 'string' as const,
+    default: '🔴'
+  },
+  summary_icon_2: {
+    type: 'string' as const,
+    default: '🔵'
+  },
+  summary_icon_3: {
+    type: 'string' as const,
+    default: '🟢'
   }
 };
 
@@ -115,7 +136,11 @@ const StorylineStep = React.memo(({
   mode,
   h3Style,
   bodyLgStyle,
-  labelStyle
+  labelStyle,
+  blockContent,
+  handleContentUpdate,
+  backgroundType,
+  colorTokens
 }: {
   stepNumber: number;
   title: string;
@@ -128,6 +153,10 @@ const StorylineStep = React.memo(({
   h3Style: React.CSSProperties;
   bodyLgStyle: React.CSSProperties;
   labelStyle: React.CSSProperties;
+  blockContent: VisualStorylineContent;
+  handleContentUpdate: (key: string, value: string) => void;
+  backgroundType: any;
+  colorTokens: any;
 }) => {
   
   const getStepColor = (step: number) => {
@@ -196,9 +225,17 @@ const StorylineStep = React.memo(({
         <div className="flex justify-center my-8">
           <div className="flex flex-col items-center space-y-2">
             <div className="w-1 h-8 bg-gradient-to-b from-gray-300 to-gray-400 rounded-full" />
-            <svg className="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
-            </svg>
+            <IconEditableText
+              mode={mode}
+              value={blockContent.step_connector_icon || '⬇️'}
+              onEdit={(value) => handleContentUpdate('step_connector_icon', value)}
+              backgroundType={backgroundType}
+              colorTokens={colorTokens}
+              iconSize="md"
+              className="text-xl text-gray-400"
+              sectionId={sectionId}
+              elementKey="step_connector_icon"
+            />
           </div>
         </div>
       )}
@@ -354,6 +391,10 @@ export default function VisualStoryline(props: LayoutComponentProps) {
                   h3Style={h3Style}
                   bodyLgStyle={bodyLgStyle}
                   labelStyle={labelStyle}
+                  blockContent={blockContent}
+                  handleContentUpdate={handleContentUpdate}
+                  backgroundType={safeBackgroundType}
+                  colorTokens={colorTokens}
                 />
               )}
             </div>
@@ -364,9 +405,39 @@ export default function VisualStoryline(props: LayoutComponentProps) {
           <div className="bg-gradient-to-r from-blue-50 via-indigo-50 to-purple-50 rounded-2xl p-8 border border-blue-100 mb-12 relative group/journey-summary">
             <div className="text-center">
               <div className="flex justify-center space-x-2 mb-6">
-                <div className="w-3 h-3 rounded-full bg-red-400" />
-                <div className="w-3 h-3 rounded-full bg-blue-400" />
-                <div className="w-3 h-3 rounded-full bg-green-400" />
+                <IconEditableText
+                  mode={mode}
+                  value={blockContent.summary_icon_1 || '🔴'}
+                  onEdit={(value) => handleContentUpdate('summary_icon_1', value)}
+                  backgroundType={safeBackgroundType}
+                  colorTokens={colorTokens}
+                  iconSize="sm"
+                  className="text-sm"
+                  sectionId={sectionId}
+                  elementKey="summary_icon_1"
+                />
+                <IconEditableText
+                  mode={mode}
+                  value={blockContent.summary_icon_2 || '🔵'}
+                  onEdit={(value) => handleContentUpdate('summary_icon_2', value)}
+                  backgroundType={safeBackgroundType}
+                  colorTokens={colorTokens}
+                  iconSize="sm"
+                  className="text-sm"
+                  sectionId={sectionId}
+                  elementKey="summary_icon_2"
+                />
+                <IconEditableText
+                  mode={mode}
+                  value={blockContent.summary_icon_3 || '🟢'}
+                  onEdit={(value) => handleContentUpdate('summary_icon_3', value)}
+                  backgroundType={safeBackgroundType}
+                  colorTokens={colorTokens}
+                  iconSize="sm"
+                  className="text-sm"
+                  sectionId={sectionId}
+                  elementKey="summary_icon_3"
+                />
               </div>
               
               <EditableAdaptiveText

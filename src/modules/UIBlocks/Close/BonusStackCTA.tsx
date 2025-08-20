@@ -6,6 +6,7 @@ import {
   EditableAdaptiveHeadline, 
   EditableAdaptiveText
 } from '@/components/layout/EditableContent';
+import IconEditableText from '@/components/ui/IconEditableText';
 import { 
   CTAButton,
   TrustIndicators 
@@ -40,6 +41,10 @@ interface BonusStackCTAContent {
   total_value_label?: string;
   final_cta_title?: string;
   final_cta_description?: string;
+  bonus_check_icon?: string;
+  urgency_icon?: string;
+  scarcity_icon?: string;
+  guarantee_icon?: string;
 }
 
 const CONTENT_SCHEMA = {
@@ -146,6 +151,22 @@ const CONTENT_SCHEMA = {
   final_cta_description: { 
     type: 'string' as const, 
     default: 'Join thousands of users who have transformed their workflow with our simple 3-step process.' 
+  },
+  bonus_check_icon: { 
+    type: 'string' as const, 
+    default: '✅' 
+  },
+  urgency_icon: { 
+    type: 'string' as const, 
+    default: '⏰' 
+  },
+  scarcity_icon: { 
+    type: 'string' as const, 
+    default: '🔥' 
+  },
+  guarantee_icon: { 
+    type: 'string' as const, 
+    default: '🛡️' 
   }
 };
 
@@ -222,9 +243,13 @@ export default function BonusStackCTA(props: LayoutComponentProps) {
     <div className="flex items-center justify-between p-4 bg-white rounded-lg border border-gray-200 hover:border-green-300 hover:shadow-md transition-all duration-300">
       <div className="flex items-center space-x-4">
         <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center flex-shrink-0">
-          <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-          </svg>
+          <IconEditableText
+            mode={mode}
+            value={blockContent.bonus_check_icon || '✅'}
+            onEdit={(value) => handleContentUpdate('bonus_check_icon', value)}
+            className="text-white text-sm"
+            fallback={<svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>}
+          />
         </div>
         <div>
           <div className="font-semibold text-gray-900">{item}</div>
@@ -493,27 +518,39 @@ export default function BonusStackCTA(props: LayoutComponentProps) {
               <div className="space-y-3">
                 {blockContent.urgency_text && (
                   <div className="flex items-center justify-center space-x-2 text-yellow-300">
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
+                    <IconEditableText
+                      mode={mode}
+                      value={blockContent.urgency_icon || '⏰'}
+                      onEdit={(value) => handleContentUpdate('urgency_icon', value)}
+                      className="text-yellow-300 text-lg"
+                      fallback={<svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>}
+                    />
                     <span className="font-semibold">{blockContent.urgency_text}</span>
                   </div>
                 )}
 
                 {blockContent.scarcity_text && (
                   <div className="flex items-center justify-center space-x-2 text-red-300">
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z" />
-                    </svg>
+                    <IconEditableText
+                      mode={mode}
+                      value={blockContent.scarcity_icon || '🔥'}
+                      onEdit={(value) => handleContentUpdate('scarcity_icon', value)}
+                      className="text-red-300 text-lg"
+                      fallback={<svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z" /></svg>}
+                    />
                     <span className="font-semibold">{blockContent.scarcity_text}</span>
                   </div>
                 )}
 
                 {blockContent.guarantee_text && (
                   <div className="flex items-center justify-center space-x-2 text-green-300">
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                    </svg>
+                    <IconEditableText
+                      mode={mode}
+                      value={blockContent.guarantee_icon || '🛡️'}
+                      onEdit={(value) => handleContentUpdate('guarantee_icon', value)}
+                      className="text-green-300 text-lg"
+                      fallback={<svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>}
+                    />
                     <span className="font-semibold">{blockContent.guarantee_text}</span>
                   </div>
                 )}
@@ -632,7 +669,11 @@ export const componentMeta = {
     { key: 'main_offer_badge', label: 'Main Offer Badge', type: 'text', required: false },
     { key: 'bonus_badge', label: 'Bonus Badge', type: 'text', required: false },
     { key: 'bonus_description', label: 'Bonus Description', type: 'textarea', required: false },
-    { key: 'total_value_label', label: 'Total Value Label', type: 'text', required: false }
+    { key: 'total_value_label', label: 'Total Value Label', type: 'text', required: false },
+    { key: 'bonus_check_icon', label: 'Bonus Check Icon', type: 'text', required: false },
+    { key: 'urgency_icon', label: 'Urgency Icon', type: 'text', required: false },
+    { key: 'scarcity_icon', label: 'Scarcity Icon', type: 'text', required: false },
+    { key: 'guarantee_icon', label: 'Guarantee Icon', type: 'text', required: false }
   ],
   
   features: [

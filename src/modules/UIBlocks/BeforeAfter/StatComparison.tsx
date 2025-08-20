@@ -10,6 +10,7 @@ import {
   CTAButton,
   TrustIndicators 
 } from '@/components/layout/ComponentRegistry';
+import IconEditableText from '@/components/ui/IconEditableText';
 import { LayoutComponentProps } from '@/types/storeTypes';
 
 interface StatComparisonContent {
@@ -27,6 +28,11 @@ interface StatComparisonContent {
   summary_stat_3_value: string;
   summary_stat_3_label: string;
   show_summary_section?: string;
+  improvement_icon?: string;
+  flow_icon?: string;
+  stat_icon_1?: string;
+  stat_icon_2?: string;
+  stat_icon_3?: string;
   subheadline?: string;
   supporting_text?: string;
   cta_text?: string;
@@ -105,6 +111,26 @@ const CONTENT_SCHEMA = {
   trust_items: { 
     type: 'string' as const, 
     default: '' 
+  },
+  improvement_icon: {
+    type: 'string' as const,
+    default: '✅'
+  },
+  flow_icon: {
+    type: 'string' as const,
+    default: '➡️'
+  },
+  stat_icon_1: {
+    type: 'string' as const,
+    default: '📈'
+  },
+  stat_icon_2: {
+    type: 'string' as const,
+    default: '💰'
+  },
+  stat_icon_3: {
+    type: 'string' as const,
+    default: '⏰'
   }
 };
 
@@ -113,13 +139,25 @@ const StatCard = React.memo(({
   label, 
   type, 
   index,
-  valueStyle
+  valueStyle,
+  mode,
+  blockContent,
+  handleContentUpdate,
+  backgroundType,
+  colorTokens,
+  sectionId
 }: { 
   value: string; 
   label: string; 
   type: 'before' | 'after';
   index: number;
   valueStyle: React.CSSProperties;
+  mode: string;
+  blockContent: StatComparisonContent;
+  handleContentUpdate: (key: string, value: string) => void;
+  backgroundType: any;
+  colorTokens: any;
+  sectionId: string;
 }) => {
   const isImprovement = type === 'after';
   
@@ -133,9 +171,17 @@ const StatCard = React.memo(({
       {isImprovement && (
         <div className="absolute -top-2 -right-2">
           <div className="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
-            <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-            </svg>
+            <IconEditableText
+              mode={mode}
+              value={blockContent.improvement_icon || '✅'}
+              onEdit={(value) => handleContentUpdate('improvement_icon', value)}
+              backgroundType={backgroundType}
+              colorTokens={colorTokens}
+              iconSize="sm"
+              className="text-sm text-white"
+              sectionId={sectionId}
+              elementKey="improvement_icon"
+            />
           </div>
         </div>
       )}
@@ -310,6 +356,12 @@ export default function StatComparison(props: LayoutComponentProps) {
                       letterSpacing: h2Style.letterSpacing,
                       fontFamily: h2Style.fontFamily
                     }}
+                    mode={mode}
+                    blockContent={blockContent}
+                    handleContentUpdate={handleContentUpdate}
+                    backgroundType={safeBackgroundType}
+                    colorTokens={colorTokens}
+                    sectionId={sectionId}
                   />
                 ))
               )}
@@ -370,6 +422,12 @@ export default function StatComparison(props: LayoutComponentProps) {
                       letterSpacing: h2Style.letterSpacing,
                       fontFamily: h2Style.fontFamily
                     }}
+                    mode={mode}
+                    blockContent={blockContent}
+                    handleContentUpdate={handleContentUpdate}
+                    backgroundType={safeBackgroundType}
+                    colorTokens={colorTokens}
+                    sectionId={sectionId}
                   />
                 ))
               )}
@@ -396,9 +454,17 @@ export default function StatComparison(props: LayoutComponentProps) {
               </div>
               
               <div className="flex items-center">
-                <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                </svg>
+                <IconEditableText
+                  mode={mode}
+                  value={blockContent.flow_icon || '➡️'}
+                  onEdit={(value) => handleContentUpdate('flow_icon', value)}
+                  backgroundType={safeBackgroundType}
+                  colorTokens={colorTokens}
+                  iconSize="lg"
+                  className="text-3xl text-gray-400"
+                  sectionId={sectionId}
+                  elementKey="flow_icon"
+                />
               </div>
               
               <div className="text-center">
@@ -457,9 +523,17 @@ export default function StatComparison(props: LayoutComponentProps) {
                 {(blockContent.summary_stat_1_value && blockContent.summary_stat_1_value !== '___REMOVED___') && (
                   <div className="text-center relative group/stat-1">
                     <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                      <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
-                      </svg>
+                      <IconEditableText
+                        mode={mode}
+                        value={blockContent.stat_icon_1 || '📈'}
+                        onEdit={(value) => handleContentUpdate('stat_icon_1', value)}
+                        backgroundType={safeBackgroundType}
+                        colorTokens={colorTokens}
+                        iconSize="lg"
+                        className="text-3xl"
+                        sectionId={sectionId}
+                        elementKey="stat_icon_1"
+                      />
                     </div>
                     <EditableAdaptiveText
                       mode={mode}
@@ -514,9 +588,17 @@ export default function StatComparison(props: LayoutComponentProps) {
                 {(blockContent.summary_stat_2_value && blockContent.summary_stat_2_value !== '___REMOVED___') && (
                   <div className="text-center relative group/stat-2">
                     <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                      <svg className="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
-                      </svg>
+                      <IconEditableText
+                        mode={mode}
+                        value={blockContent.stat_icon_2 || '💰'}
+                        onEdit={(value) => handleContentUpdate('stat_icon_2', value)}
+                        backgroundType={safeBackgroundType}
+                        colorTokens={colorTokens}
+                        iconSize="lg"
+                        className="text-3xl"
+                        sectionId={sectionId}
+                        elementKey="stat_icon_2"
+                      />
                     </div>
                     <EditableAdaptiveText
                       mode={mode}
@@ -571,9 +653,17 @@ export default function StatComparison(props: LayoutComponentProps) {
                 {(blockContent.summary_stat_3_value && blockContent.summary_stat_3_value !== '___REMOVED___') && (
                   <div className="text-center relative group/stat-3">
                     <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                      <svg className="w-8 h-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                      </svg>
+                      <IconEditableText
+                        mode={mode}
+                        value={blockContent.stat_icon_3 || '⏰'}
+                        onEdit={(value) => handleContentUpdate('stat_icon_3', value)}
+                        backgroundType={safeBackgroundType}
+                        colorTokens={colorTokens}
+                        iconSize="lg"
+                        className="text-3xl"
+                        sectionId={sectionId}
+                        elementKey="stat_icon_3"
+                      />
                     </div>
                     <EditableAdaptiveText
                       mode={mode}

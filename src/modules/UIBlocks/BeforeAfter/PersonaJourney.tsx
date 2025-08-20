@@ -221,7 +221,13 @@ const JourneyPhase = React.memo(({
   items, 
   type, 
   isJourney = false,
-  h3Style
+  h3Style,
+  mode,
+  blockContent,
+  handleContentUpdate,
+  backgroundType,
+  colorTokens,
+  sectionId
 }: {
   title: string;
   description: string;
@@ -229,6 +235,12 @@ const JourneyPhase = React.memo(({
   type: 'before' | 'journey' | 'after';
   isJourney?: boolean;
   h3Style: React.CSSProperties;
+  mode: string;
+  blockContent: PersonaJourneyContent;
+  handleContentUpdate: (key: string, value: string) => void;
+  backgroundType: any;
+  colorTokens: any;
+  sectionId: string;
 }) => {
   
   const getPhaseColor = () => {
@@ -242,34 +254,35 @@ const JourneyPhase = React.memo(({
 
   const colors = getPhaseColor();
 
-  const getIcon = () => {
-    switch (type) {
-      case 'before':
-        return (
-          <svg className={`w-6 h-6 ${colors.icon}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-          </svg>
-        );
-      case 'journey':
-        return (
-          <svg className={`w-6 h-6 ${colors.icon}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-          </svg>
-        );
-      case 'after':
-        return (
-          <svg className={`w-6 h-6 ${colors.icon}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
-        );
-    }
+  const getIconForType = (iconType: 'before' | 'journey' | 'after') => {
+    const iconFields = {
+      before: 'before_icon',
+      journey: 'journey_icon', 
+      after: 'after_icon'
+    };
+    return blockContent[iconFields[iconType] as keyof PersonaJourneyContent] || 
+           (iconType === 'before' ? '⚠️' : iconType === 'journey' ? '⚡' : '✅');
   };
 
   return (
     <div className="bg-white rounded-xl p-8 shadow-lg border border-gray-200 h-full">
       <div className="flex items-center mb-6">
         <div className={`w-12 h-12 rounded-full ${colors.bg} ${colors.ring} ring-4 flex items-center justify-center shadow-lg mr-4`}>
-          {getIcon()}
+          <IconEditableText
+            mode={mode}
+            value={getIconForType(type)}
+            onEdit={(value) => {
+              const iconField = type === 'before' ? 'before_icon' : 
+                              type === 'journey' ? 'journey_icon' : 'after_icon';
+              handleContentUpdate(iconField, value);
+            }}
+            backgroundType={backgroundType as any}
+            colorTokens={colorTokens}
+            iconSize="lg"
+            className="text-2xl"
+            sectionId={sectionId}
+            elementKey={`${type}_icon`}
+          />
         </div>
         <h3 className={colors.text} style={h3Style}>{title}</h3>
       </div>
@@ -576,6 +589,12 @@ export default function PersonaJourney(props: LayoutComponentProps) {
                 items={beforePainPoints}
                 type="before"
                 h3Style={h3Style}
+                mode={mode}
+                blockContent={blockContent}
+                handleContentUpdate={handleContentUpdate}
+                backgroundType={backgroundType}
+                colorTokens={colorTokens}
+                sectionId={sectionId}
               />
               
               <JourneyPhase
@@ -585,6 +604,12 @@ export default function PersonaJourney(props: LayoutComponentProps) {
                 type="journey"
                 isJourney={true}
                 h3Style={h3Style}
+                mode={mode}
+                blockContent={blockContent}
+                handleContentUpdate={handleContentUpdate}
+                backgroundType={backgroundType}
+                colorTokens={colorTokens}
+                sectionId={sectionId}
               />
               
               <JourneyPhase
@@ -593,6 +618,12 @@ export default function PersonaJourney(props: LayoutComponentProps) {
                 items={afterBenefits}
                 type="after"
                 h3Style={h3Style}
+                mode={mode}
+                blockContent={blockContent}
+                handleContentUpdate={handleContentUpdate}
+                backgroundType={backgroundType}
+                colorTokens={colorTokens}
+                sectionId={sectionId}
               />
             </>
           )}
@@ -604,9 +635,17 @@ export default function PersonaJourney(props: LayoutComponentProps) {
               <div className="flex justify-center space-x-8 mb-6">
                 <div className="text-center">
                   <div className="w-12 h-12 bg-red-500 rounded-full flex items-center justify-center mx-auto mb-2">
-                    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                    </svg>
+                    <IconEditableText
+                      mode={mode}
+                      value={blockContent.before_icon || '⚠️'}
+                      onEdit={(value) => handleContentUpdate('before_icon', value)}
+                      backgroundType={safeBackgroundType}
+                      colorTokens={colorTokens}
+                      iconSize="lg"
+                      className="text-2xl text-white"
+                      sectionId={sectionId}
+                      elementKey="summary_before_icon"
+                    />
                   </div>
                   <EditableAdaptiveText
                     mode={mode}
@@ -635,9 +674,17 @@ export default function PersonaJourney(props: LayoutComponentProps) {
                 
                 <div className="text-center">
                   <div className="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center mx-auto mb-2">
-                    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                    </svg>
+                    <IconEditableText
+                      mode={mode}
+                      value={blockContent.journey_icon || '⚡'}
+                      onEdit={(value) => handleContentUpdate('journey_icon', value)}
+                      backgroundType={safeBackgroundType}
+                      colorTokens={colorTokens}
+                      iconSize="lg"
+                      className="text-2xl text-white"
+                      sectionId={sectionId}
+                      elementKey="summary_journey_icon"
+                    />
                   </div>
                   <EditableAdaptiveText
                     mode={mode}
@@ -666,9 +713,17 @@ export default function PersonaJourney(props: LayoutComponentProps) {
                 
                 <div className="text-center">
                   <div className="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-2">
-                    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
+                    <IconEditableText
+                      mode={mode}
+                      value={blockContent.after_icon || '✅'}
+                      onEdit={(value) => handleContentUpdate('after_icon', value)}
+                      backgroundType={safeBackgroundType}
+                      colorTokens={colorTokens}
+                      iconSize="lg"
+                      className="text-2xl text-white"
+                      sectionId={sectionId}
+                      elementKey="summary_after_icon"
+                    />
                   </div>
                   <EditableAdaptiveText
                     mode={mode}
