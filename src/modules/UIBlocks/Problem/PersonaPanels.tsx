@@ -5,6 +5,7 @@ import {
   EditableAdaptiveHeadline, 
   EditableAdaptiveText
 } from '@/components/layout/EditableContent';
+import IconEditableText from '@/components/ui/IconEditableText';
 import { 
   CTAButton,
   TrustIndicators 
@@ -31,6 +32,10 @@ interface PersonaPanelsContent {
   solution_description_3?: string;
   solution_title_4?: string;
   solution_description_4?: string;
+  persona_icon_1?: string;
+  persona_icon_2?: string;
+  persona_icon_3?: string;
+  persona_icon_4?: string;
 }
 
 const CONTENT_SCHEMA = {
@@ -85,7 +90,11 @@ const CONTENT_SCHEMA = {
   solution_title_3: { type: 'string' as const, default: 'Integration' },
   solution_description_3: { type: 'string' as const, default: 'Connect all your tools' },
   solution_title_4: { type: 'string' as const, default: 'Scaling' },
-  solution_description_4: { type: 'string' as const, default: 'Grow without complexity' }
+  solution_description_4: { type: 'string' as const, default: 'Grow without complexity' },
+  persona_icon_1: { type: 'string' as const, default: '⏰' },
+  persona_icon_2: { type: 'string' as const, default: '📈' },
+  persona_icon_3: { type: 'string' as const, default: '⚙️' },
+  persona_icon_4: { type: 'string' as const, default: '⚡' }
 };
 
 export default function PersonaPanels(props: LayoutComponentProps) {
@@ -161,26 +170,10 @@ export default function PersonaPanels(props: LayoutComponentProps) {
     return colors[index % colors.length];
   }
 
+  // Get persona icon for specific index
   function getPersonaIcon(index: number) {
-    const icons = [
-      // Overwhelmed Founder
-      <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-      </svg>,
-      // Scaling CEO
-      <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
-      </svg>,
-      // Efficiency Seeker
-      <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-      </svg>,
-      // Growth Leader
-      <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-      </svg>
-    ];
-    return icons[index % icons.length];
+    const iconFields = ['persona_icon_1', 'persona_icon_2', 'persona_icon_3', 'persona_icon_4'];
+    return blockContent[iconFields[index] as keyof PersonaPanelsContent] || '💼';
   }
 
   const PersonaCard = ({ persona, index, isActive }: {
@@ -199,8 +192,21 @@ export default function PersonaPanels(props: LayoutComponentProps) {
       <div className="p-6">
         {/* Header */}
         <div className="text-center mb-6">
-          <div className={`w-16 h-16 rounded-full ${persona.color.bg} flex items-center justify-center text-white mx-auto mb-4`}>
-            {getPersonaIcon(index)}
+          <div className={`w-16 h-16 rounded-full ${persona.color.bg} flex items-center justify-center text-white mx-auto mb-4 group/icon-edit relative`}>
+            <IconEditableText
+              mode={mode}
+              value={getPersonaIcon(index)}
+              onEdit={(value) => {
+                const iconField = `persona_icon_${index + 1}` as keyof PersonaPanelsContent;
+                handleContentUpdate(iconField, value);
+              }}
+              backgroundType={backgroundType as any}
+              colorTokens={{...colorTokens, textPrimary: 'text-white'}}
+              iconSize="xl"
+              className="text-3xl text-white"
+              sectionId={sectionId}
+              elementKey={`persona_icon_${index + 1}`}
+            />
           </div>
           <h3 className="text-xl font-bold text-gray-900 mb-2">{persona.name}</h3>
           {persona.title && (
@@ -241,8 +247,21 @@ export default function PersonaPanels(props: LayoutComponentProps) {
       
       {/* Header */}
       <div className="flex items-center space-x-4 mb-8">
-        <div className={`w-16 h-16 rounded-full ${persona.color.bg} flex items-center justify-center text-white`}>
-          {getPersonaIcon(activePersona)}
+        <div className={`w-16 h-16 rounded-full ${persona.color.bg} flex items-center justify-center text-white group/icon-edit relative`}>
+          <IconEditableText
+            mode={mode}
+            value={getPersonaIcon(activePersona)}
+            onEdit={(value) => {
+              const iconField = `persona_icon_${activePersona + 1}` as keyof PersonaPanelsContent;
+              handleContentUpdate(iconField, value);
+            }}
+            backgroundType={backgroundType as any}
+            colorTokens={{...colorTokens, textPrimary: 'text-white'}}
+            iconSize="xl"
+            className="text-3xl text-white"
+            sectionId={sectionId}
+            elementKey={`persona_detail_icon_${activePersona + 1}`}
+          />
         </div>
         <div>
           <h3 className="text-2xl font-bold text-gray-900">{persona.name}</h3>

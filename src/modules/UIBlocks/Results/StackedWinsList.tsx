@@ -5,6 +5,7 @@ import {
   EditableAdaptiveHeadline, 
   EditableAdaptiveText 
 } from '@/components/layout/EditableContent';
+import IconEditableText from '@/components/ui/IconEditableText';
 import { LayoutComponentProps } from '@/types/storeTypes';
 
 interface StackedWinsListProps extends LayoutComponentProps {}
@@ -27,6 +28,9 @@ interface StackedWinsListContent {
   win_count?: string;
   footer_title?: string;
   footer_text?: string;
+  win_icon?: string;
+  momentum_icon?: string;
+  badge_icon?: string;
 }
 
 // Content schema for StackedWinsList layout
@@ -38,7 +42,10 @@ const CONTENT_SCHEMA = {
   subheadline: { type: 'string' as const, default: 'Every win builds momentum toward your bigger goals' },
   win_count: { type: 'string' as const, default: 'Join 10,000+ achieving these wins daily' },
   footer_title: { type: 'string' as const, default: 'Momentum Builds Quickly' },
-  footer_text: { type: 'string' as const, default: 'Each win makes the next one easier to achieve' }
+  footer_text: { type: 'string' as const, default: 'Each win makes the next one easier to achieve' },
+  win_icon: { type: 'string' as const, default: '✅' },
+  momentum_icon: { type: 'string' as const, default: '📈' },
+  badge_icon: { type: 'string' as const, default: '🏆' }
 };
 
 // Parse wins data from pipe-separated strings
@@ -100,9 +107,17 @@ const WinItem = ({
       {/* Checkmark Icon */}
       <div className="flex-shrink-0 mt-1">
         <div className="w-8 h-8 bg-gradient-to-br from-green-400 to-emerald-500 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
-          <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-          </svg>
+          <IconEditableText
+            mode={mode}
+            value={blockContent.win_icon || '✅'}
+            onEdit={(value) => handleContentUpdate('win_icon', value)}
+            backgroundType="neutral"
+            colorTokens={{}}
+            iconSize="sm"
+            className="text-white text-lg"
+            sectionId={sectionId}
+            elementKey="win_icon"
+          />
         </div>
       </div>
 
@@ -259,9 +274,17 @@ export default function StackedWinsList(props: StackedWinsListProps) {
           {/* Win Count Badge */}
           {(blockContent.win_count || mode === 'edit') && (
             <div className="inline-flex items-center px-4 py-2 bg-green-50 border border-green-200 rounded-full text-green-800">
-              <svg className="w-4 h-4 mr-2 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
+              <IconEditableText
+                mode={mode}
+                value={blockContent.badge_icon || '🏆'}
+                onEdit={(value) => handleContentUpdate('badge_icon', value)}
+                backgroundType="neutral"
+                colorTokens={{}}
+                iconSize="sm"
+                className="text-green-600 text-sm mr-2"
+                sectionId={sectionId}
+                elementKey="badge_icon"
+              />
               {mode === 'edit' ? (
                 <div 
                   contentEditable
@@ -299,9 +322,17 @@ export default function StackedWinsList(props: StackedWinsListProps) {
           <div className="mt-16 text-center">
             <div className="inline-flex items-center px-6 py-4 bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-2xl">
               <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-emerald-600 rounded-full flex items-center justify-center mr-4">
-                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
-                </svg>
+                <IconEditableText
+                  mode={mode}
+                  value={blockContent.momentum_icon || '📈'}
+                  onEdit={(value) => handleContentUpdate('momentum_icon', value)}
+                  backgroundType="neutral"
+                  colorTokens={{}}
+                  iconSize="md"
+                  className="text-white text-xl"
+                  sectionId={sectionId}
+                  elementKey="momentum_icon"
+                />
               </div>
               <div className="text-left">
                 <EditableAdaptiveText

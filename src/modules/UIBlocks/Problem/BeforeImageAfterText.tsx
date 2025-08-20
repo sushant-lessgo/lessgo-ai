@@ -5,6 +5,7 @@ import {
   EditableAdaptiveHeadline, 
   EditableAdaptiveText
 } from '@/components/layout/EditableContent';
+import IconEditableText from '@/components/ui/IconEditableText';
 import { 
   CTAButton,
   TrustIndicators 
@@ -21,6 +22,9 @@ interface BeforeImageAfterTextContent {
   subheadline?: string;
   supporting_text?: string;
   trust_items?: string;
+  transformation_icon_1?: string;
+  transformation_icon_2?: string;
+  transformation_icon_3?: string;
 }
 
 const CONTENT_SCHEMA = {
@@ -59,7 +63,10 @@ const CONTENT_SCHEMA = {
   trust_items: { 
     type: 'string' as const, 
     default: '' 
-  }
+  },
+  transformation_icon_1: { type: 'string' as const, default: '⚡' },
+  transformation_icon_2: { type: 'string' as const, default: '✓' },
+  transformation_icon_3: { type: 'string' as const, default: '💖' }
 };
 
 export default function BeforeImageAfterText(props: LayoutComponentProps) {
@@ -377,30 +384,54 @@ export default function BeforeImageAfterText(props: LayoutComponentProps) {
               
               <div className="grid md:grid-cols-3 gap-8">
                 <div className="text-center">
-                  <div className="w-16 h-16 mx-auto mb-4 bg-blue-100 rounded-full flex items-center justify-center">
-                    <svg className="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                    </svg>
+                  <div className="w-16 h-16 mx-auto mb-4 bg-blue-100 rounded-full flex items-center justify-center group/icon-edit relative">
+                    <IconEditableText
+                      mode={mode}
+                      value={blockContent.transformation_icon_1 || '⚡'}
+                      onEdit={(value) => handleContentUpdate('transformation_icon_1', value)}
+                      backgroundType={backgroundType as any}
+                      colorTokens={{...colorTokens, textPrimary: 'text-blue-600'}}
+                      iconSize="xl"
+                      className="text-3xl text-blue-600"
+                      sectionId={sectionId}
+                      elementKey="transformation_icon_1"
+                    />
                   </div>
                   <div className="font-semibold text-gray-900">Faster</div>
                   <div className={`text-sm ${mutedTextColor}`}>2.5x productivity increase</div>
                 </div>
                 
                 <div className="text-center">
-                  <div className="w-16 h-16 mx-auto mb-4 bg-green-100 rounded-full flex items-center justify-center">
-                    <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
+                  <div className="w-16 h-16 mx-auto mb-4 bg-green-100 rounded-full flex items-center justify-center group/icon-edit relative">
+                    <IconEditableText
+                      mode={mode}
+                      value={blockContent.transformation_icon_2 || '✓'}
+                      onEdit={(value) => handleContentUpdate('transformation_icon_2', value)}
+                      backgroundType={backgroundType as any}
+                      colorTokens={{...colorTokens, textPrimary: 'text-green-600'}}
+                      iconSize="xl"
+                      className="text-3xl text-green-600"
+                      sectionId={sectionId}
+                      elementKey="transformation_icon_2"
+                    />
                   </div>
                   <div className="font-semibold text-gray-900">Smarter</div>
                   <div className={`text-sm ${mutedTextColor}`}>Data-driven decisions</div>
                 </div>
                 
                 <div className="text-center">
-                  <div className="w-16 h-16 mx-auto mb-4 bg-purple-100 rounded-full flex items-center justify-center">
-                    <svg className="w-8 h-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                    </svg>
+                  <div className="w-16 h-16 mx-auto mb-4 bg-purple-100 rounded-full flex items-center justify-center group/icon-edit relative">
+                    <IconEditableText
+                      mode={mode}
+                      value={blockContent.transformation_icon_3 || '💖'}
+                      onEdit={(value) => handleContentUpdate('transformation_icon_3', value)}
+                      backgroundType={backgroundType as any}
+                      colorTokens={{...colorTokens, textPrimary: 'text-purple-600'}}
+                      iconSize="xl"
+                      className="text-3xl text-purple-600"
+                      sectionId={sectionId}
+                      elementKey="transformation_icon_3"
+                    />
                   </div>
                   <div className="font-semibold text-gray-900">Happier</div>
                   <div className={`text-sm ${mutedTextColor}`}>Stress-free operations</div>

@@ -8,6 +8,7 @@ import {
   EditableAdaptiveHeadline,
   EditableAdaptiveText
 } from '@/components/layout/EditableContent';
+import IconEditableText from '@/components/ui/IconEditableText';
 import { EditableList } from '@/components/layout/EditableList';
 import { StarRating } from '@/components/layout/ComponentRegistry';
 import { LayoutComponentProps } from '@/types/storeTypes';
@@ -22,6 +23,8 @@ interface QuoteGridContent {
   customer_companies?: string;
   verification_message?: string;
   rating_value?: string;
+  quote_mark_icon?: string;
+  verification_icon?: string;
 }
 
 // Testimonial structure
@@ -63,6 +66,14 @@ const CONTENT_SCHEMA = {
   rating_value: {
     type: 'string' as const,
     default: '5/5'
+  },
+  quote_mark_icon: {
+    type: 'string' as const,
+    default: '“'
+  },
+  verification_icon: {
+    type: 'string' as const,
+    default: '✅'
   }
 };
 
@@ -191,10 +202,18 @@ const TestimonialCard = React.memo(({
     <div className="group bg-white p-8 rounded-xl border border-gray-200 hover:border-blue-300 hover:shadow-lg transition-all duration-300 relative">
       
       {/* Quote Mark */}
-      <div className="absolute top-6 right-6 opacity-20 group-hover:opacity-30 transition-opacity duration-300">
-        <svg className="w-8 h-8 text-blue-500" fill="currentColor" viewBox="0 0 24 24">
-          <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h4v10h-10z"/>
-        </svg>
+      <div className="absolute top-6 right-6 opacity-20 group-hover:opacity-30 transition-opacity duration-300 group/icon-edit relative">
+        <IconEditableText
+          mode={mode}
+          value={blockContent.quote_mark_icon || '“'}
+          onEdit={(value) => handleContentUpdate('quote_mark_icon', value)}
+          backgroundType={backgroundType}
+          colorTokens={colorTokens}
+          iconSize="xl"
+          className="text-4xl text-blue-500"
+          sectionId={sectionId}
+          elementKey="quote_mark_icon"
+        />
       </div>
       
       {/* Testimonial Quote */}
@@ -417,9 +436,19 @@ export default function QuoteGrid(props: LayoutComponentProps) {
         {/* Trust Reinforcement */}
         <div className="mt-16 text-center">
           <div className="inline-flex items-center px-6 py-3 bg-green-50 border border-green-200 rounded-full text-green-800">
-            <svg className="w-5 h-5 mr-2 text-green-600" fill="currentColor" viewBox="0 0 20 20">
-              <path fillRule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-            </svg>
+            <div className="mr-2 group/icon-edit relative">
+              <IconEditableText
+                mode={mode}
+                value={blockContent.verification_icon || '✅'}
+                onEdit={(value) => handleContentUpdate('verification_icon', value)}
+                backgroundType={backgroundType}
+                colorTokens={colorTokens}
+                iconSize="md"
+                className="text-xl text-green-600"
+                sectionId={sectionId}
+                elementKey="verification_icon"
+              />
+            </div>
             {mode === 'edit' ? (
               <div 
                 contentEditable

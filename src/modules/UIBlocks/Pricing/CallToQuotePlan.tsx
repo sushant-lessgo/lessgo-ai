@@ -6,6 +6,7 @@ import {
   EditableAdaptiveHeadline, 
   EditableAdaptiveText
 } from '@/components/layout/EditableContent';
+import IconEditableText from '@/components/ui/IconEditableText';
 import { 
   CTAButton,
   TrustIndicators 
@@ -26,6 +27,11 @@ interface CallToQuotePlanContent {
   subheadline?: string;
   supporting_text?: string;
   trust_items?: string;
+  // Contact icons
+  contact_icon_1?: string;
+  contact_icon_2?: string;
+  contact_icon_3?: string;
+  contact_icon_4?: string;
 }
 
 const CONTENT_SCHEMA = {
@@ -80,7 +86,12 @@ const CONTENT_SCHEMA = {
   trust_items: { 
     type: 'string' as const, 
     default: '' 
-  }
+  },
+  // Contact icons
+  contact_icon_1: { type: 'string' as const, default: '🎥' },
+  contact_icon_2: { type: 'string' as const, default: '💰' },
+  contact_icon_3: { type: 'string' as const, default: '📞' },
+  contact_icon_4: { type: 'string' as const, default: '📄' }
 };
 
 export default function CallToQuotePlan(props: LayoutComponentProps) {
@@ -151,25 +162,8 @@ export default function CallToQuotePlan(props: LayoutComponentProps) {
   const mutedTextColor = dynamicTextColors?.muted || colorTokens.textMuted;
 
   const getContactIcon = (index: number) => {
-    const icons = [
-      // Demo
-      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
-      </svg>,
-      // Quote  
-      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
-      </svg>,
-      // Sales
-      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-      </svg>,
-      // Download
-      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-      </svg>
-    ];
-    return icons[index % icons.length];
+    const iconFields = ['contact_icon_1', 'contact_icon_2', 'contact_icon_3', 'contact_icon_4'];
+    return blockContent[iconFields[index] as keyof CallToQuotePlanContent] || ['🎥', '💰', '📞', '📄'][index];
   };
 
   const ContactCard = ({ option, index }: {
@@ -178,8 +172,18 @@ export default function CallToQuotePlan(props: LayoutComponentProps) {
   }) => (
     <div className="bg-white rounded-xl border-2 border-gray-200 p-6 hover:border-gray-300 hover:shadow-lg transition-all duration-300">
       <div className="text-center">
-        <div className={`w-16 h-16 mx-auto mb-4 rounded-full ${colorTokens.ctaBg} flex items-center justify-center text-white`}>
-          {getContactIcon(index)}
+        <div className={`w-16 h-16 mx-auto mb-4 rounded-full ${colorTokens.ctaBg} flex items-center justify-center text-white group/icon-edit`}>
+          <IconEditableText
+            mode={mode}
+            value={getContactIcon(index)}
+            onEdit={(value) => handleContentUpdate(`contact_icon_${index + 1}` as keyof CallToQuotePlanContent, value)}
+            backgroundType="primary"
+            colorTokens={colorTokens}
+            iconSize="lg"
+            className="text-white text-3xl"
+            sectionId={sectionId}
+            elementKey={`contact_icon_${index + 1}`}
+          />
         </div>
         <h3 style={h3Style} className="font-semibold text-gray-900 mb-3">{option.title}</h3>
         <CTAButton
@@ -497,7 +501,11 @@ export const componentMeta = {
     { key: 'pricing_factors', label: 'Pricing Factors (pipe separated)', type: 'textarea', required: false },
     { key: 'success_metrics', label: 'Success Metrics (pipe separated)', type: 'text', required: false },
     { key: 'supporting_text', label: 'Supporting Text', type: 'textarea', required: false },
-    { key: 'trust_items', label: 'Trust Indicators (pipe separated)', type: 'text', required: false }
+    { key: 'trust_items', label: 'Trust Indicators (pipe separated)', type: 'text', required: false },
+    { key: 'contact_icon_1', label: 'Contact Icon 1 (Demo)', type: 'text', required: false },
+    { key: 'contact_icon_2', label: 'Contact Icon 2 (Quote)', type: 'text', required: false },
+    { key: 'contact_icon_3', label: 'Contact Icon 3 (Sales)', type: 'text', required: false },
+    { key: 'contact_icon_4', label: 'Contact Icon 4 (Download)', type: 'text', required: false }
   ],
   
   features: [

@@ -8,6 +8,7 @@ import {
   EditableAdaptiveHeadline, 
   EditableAdaptiveText 
 } from '@/components/layout/EditableContent';
+import IconEditableText from '@/components/ui/IconEditableText';
 import { LayoutComponentProps } from '@/types/storeTypes';
 import { parsePipeData, updateListData } from '@/utils/dataParsingUtils';
 
@@ -18,6 +19,13 @@ interface PersonaGridContent {
   persona_descriptions: string;
   footer_text?: string;
   badge_text?: string;
+  // Optional persona icon overrides
+  persona_icon_1?: string;
+  persona_icon_2?: string;
+  persona_icon_3?: string;
+  persona_icon_4?: string;
+  persona_icon_5?: string;
+  persona_icon_6?: string;
 }
 
 // Persona structure
@@ -49,7 +57,14 @@ const CONTENT_SCHEMA = {
   badge_text: { 
     type: 'string' as const, 
     default: 'Target User' 
-  }
+  },
+  // Optional persona icon overrides (empty by default to show initials)
+  persona_icon_1: { type: 'string' as const, default: '' },
+  persona_icon_2: { type: 'string' as const, default: '' },
+  persona_icon_3: { type: 'string' as const, default: '' },
+  persona_icon_4: { type: 'string' as const, default: '' },
+  persona_icon_5: { type: 'string' as const, default: '' },
+  persona_icon_6: { type: 'string' as const, default: '' }
 };
 
 // Parse persona data from pipe-separated strings
@@ -66,7 +81,23 @@ const parsePersonaData = (names: string, descriptions: string): Persona[] => {
 };
 
 // Persona Avatar Component
-const PersonaAvatar = React.memo(({ name }: { name: string }) => {
+const PersonaAvatar = React.memo(({ 
+  name, 
+  iconOverride, 
+  mode, 
+  colorTokens, 
+  sectionId, 
+  index, 
+  onIconEdit 
+}: { 
+  name: string;
+  iconOverride?: string;
+  mode: 'edit' | 'preview';
+  colorTokens: any;
+  sectionId: string;
+  index: number;
+  onIconEdit: (index: number, value: string) => void;
+}) => {
   // Generate avatar based on persona type
   const getPersonaInfo = (personaName: string) => {
     const lower = personaName.toLowerCase();
@@ -108,13 +139,38 @@ const PersonaAvatar = React.memo(({ name }: { name: string }) => {
     <div className="relative mb-4">
       {/* Main Avatar Circle */}
       <div className={`w-16 h-16 bg-gradient-to-br ${bg} rounded-full flex items-center justify-center text-white shadow-lg mx-auto`}>
-        <span className="font-bold text-lg">{initials}</span>
+        {iconOverride ? (
+          <IconEditableText
+            mode={mode}
+            value={iconOverride}
+            onEdit={(value) => onIconEdit(index, value)}
+            backgroundType="primary"
+            colorTokens={{ ...colorTokens, textPrimary: 'text-white' }}
+            iconSize="lg"
+            className="text-2xl text-white"
+            sectionId={sectionId}
+            elementKey={`persona_icon_${index + 1}`}
+          />
+        ) : (
+          <span className="font-bold text-lg">{initials}</span>
+        )}
       </div>
       
       {/* Role Badge */}
       <div className="absolute -top-1 -right-1 w-6 h-6 bg-white rounded-full flex items-center justify-center shadow-md border-2 border-gray-100">
         <div className="w-3 h-3 bg-green-500 rounded-full"></div>
       </div>
+      
+      {/* Icon Override Button for Edit Mode */}
+      {mode === 'edit' && !iconOverride && (
+        <button
+          onClick={() => onIconEdit(index, '👤')}
+          className="absolute top-0 right-0 w-6 h-6 bg-blue-600 text-white rounded-full text-xs opacity-0 group-hover:opacity-100 transition-opacity"
+          title="Add custom icon"
+        >
+          +
+        </button>
+      )}
     </div>
   );
 });
@@ -129,8 +185,10 @@ const PersonaCard = React.memo(({
   sectionBackground,
   sectionId,
   badgeText,
+  iconOverride,
   onNameEdit,
-  onDescriptionEdit
+  onDescriptionEdit,
+  onIconEdit
 }: {
   persona: Persona;
   mode: 'edit' | 'preview';
@@ -139,15 +197,25 @@ const PersonaCard = React.memo(({
   sectionBackground: any;
   sectionId: string;
   badgeText: string;
+  iconOverride?: string;
   onNameEdit: (index: number, value: string) => void;
   onDescriptionEdit: (index: number, value: string) => void;
+  onIconEdit: (index: number, value: string) => void;
 }) => {
   
   return (
     <div className="group bg-white p-6 rounded-xl border border-gray-200 hover:border-blue-300 hover:shadow-lg transition-all duration-300 text-center">
       
       {/* Persona Avatar */}
-      <PersonaAvatar name={persona.name} />
+      <PersonaAvatar 
+        name={persona.name} 
+        iconOverride={iconOverride}
+        mode={mode}
+        colorTokens={colorTokens}
+        sectionId={sectionId}
+        index={persona.index}
+        onIconEdit={onIconEdit}
+      />
       
       {/* Persona Name */}
       <div className="mb-4">
@@ -215,6 +283,19 @@ export default function PersonaGrid(props: LayoutComponentProps) {
   // Parse persona data
   const personas = parsePersonaData(blockContent.persona_names, blockContent.persona_descriptions);
 
+  // Get persona icon from content fields by index
+  const getPersonaIcon = (index: number) => {
+    const iconFields = [
+      blockContent.persona_icon_1,
+      blockContent.persona_icon_2,
+      blockContent.persona_icon_3,
+      blockContent.persona_icon_4,
+      blockContent.persona_icon_5,
+      blockContent.persona_icon_6
+    ];
+    return iconFields[index];
+  };
+
   // Handle individual editing
   const handleNameEdit = (index: number, value: string) => {
     const updatedNames = updateListData(blockContent.persona_names, index, value);
@@ -224,6 +305,11 @@ export default function PersonaGrid(props: LayoutComponentProps) {
   const handleDescriptionEdit = (index: number, value: string) => {
     const updatedDescriptions = updateListData(blockContent.persona_descriptions, index, value);
     handleContentUpdate('persona_descriptions', updatedDescriptions);
+  };
+
+  const handleIconEdit = (index: number, value: string) => {
+    const iconField = `persona_icon_${index + 1}` as keyof PersonaGridContent;
+    handleContentUpdate(iconField, value);
   };
 
   return (
@@ -271,8 +357,10 @@ export default function PersonaGrid(props: LayoutComponentProps) {
               sectionBackground={sectionBackground}
               sectionId={sectionId}
               badgeText={blockContent.badge_text || 'Target User'}
+              iconOverride={getPersonaIcon(persona.index)}
               onNameEdit={handleNameEdit}
               onDescriptionEdit={handleDescriptionEdit}
+              onIconEdit={handleIconEdit}
             />
           ))}
         </div>

@@ -29,12 +29,33 @@ export default function SystemArchitecture(props: LayoutComponentProps) {
       <div className="max-w-6xl mx-auto text-center">
         <EditableAdaptiveHeadline mode={mode} value={blockContent.headline || ''} onEdit={(value) => handleContentUpdate('headline', value)} level="h2" backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')} colorTokens={colorTokens} className="mb-12" sectionId={sectionId} elementKey="headline" sectionBackground={sectionBackground} />
         <div className="grid grid-cols-2 md:grid-cols-3 gap-8">
-          {components.map((component, index) => (
-            <div key={index} className="bg-white p-6 rounded-xl border border-gray-200 hover:shadow-lg transition-all duration-300">
-              <div className="w-16 h-16 bg-blue-100 rounded-lg mx-auto mb-4 flex items-center justify-center text-2xl">🏗️</div>
-              <h3 style={h3Style} className="font-bold text-gray-900">{component}</h3>
-            </div>
-          ))}
+          {components.map((component, index) => {
+            const getComponentIcon = (index: number) => {
+              const iconField = `component_icon_${index + 1}` as keyof SystemArchitectureContent;
+              return blockContent[iconField] || '🏗️';
+            };
+            return (
+              <div key={index} className="bg-white p-6 rounded-xl border border-gray-200 hover:shadow-lg transition-all duration-300">
+                <div className="w-16 h-16 bg-blue-100 rounded-lg mx-auto mb-4 flex items-center justify-center">
+                  <IconEditableText
+                    mode={mode}
+                    value={getComponentIcon(index)}
+                    onEdit={(value) => {
+                      const iconField = `component_icon_${index + 1}` as keyof SystemArchitectureContent;
+                      handleContentUpdate(iconField, value);
+                    }}
+                    backgroundType="neutral"
+                    colorTokens={colorTokens}
+                    iconSize="lg"
+                    className="text-2xl"
+                    sectionId={sectionId}
+                    elementKey={`component_icon_${index + 1}`}
+                  />
+                </div>
+                <h3 style={h3Style} className="font-bold text-gray-900">{component}</h3>
+              </div>
+            );
+          })}
         </div>
       </div>
     </LayoutSection>

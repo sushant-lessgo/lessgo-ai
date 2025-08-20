@@ -11,6 +11,7 @@ import {
 } from '@/components/layout/EditableContent';
 import { LayoutComponentProps } from '@/types/storeTypes';
 import { parsePipeData } from '@/utils/dataParsingUtils';
+import IconEditableText from '@/components/ui/IconEditableText';
 
 // Content interface for type safety
 interface IndustryBadgeLineContent {
@@ -19,6 +20,9 @@ interface IndustryBadgeLineContent {
   certification_badges: string;
   industry_awards?: string;
   compliance_standards?: string;
+  cert_icon_override?: string;
+  award_icon_override?: string;
+  compliance_icon_override?: string;
 }
 
 // Badge structure
@@ -50,7 +54,10 @@ const CONTENT_SCHEMA = {
   compliance_standards: { 
     type: 'string' as const, 
     default: 'Enterprise Security|99.9% SLA|24/7 Monitoring|Data Encryption' 
-  }
+  },
+  cert_icon_override: { type: 'string' as const, default: '' },
+  award_icon_override: { type: 'string' as const, default: '' },
+  compliance_icon_override: { type: 'string' as const, default: '' }
 };
 
 // Parse badge data from pipe-separated strings
@@ -97,43 +104,49 @@ const parseBadgeData = (badges: string, awards?: string, compliance?: string): C
 // Badge Component
 const BadgeDisplay = React.memo(({ 
   badge, 
-  dynamicTextColors 
+  dynamicTextColors,
+  mode,
+  blockContent,
+  backgroundType,
+  colorTokens,
+  sectionId,
+  handleContentUpdate
 }: { 
   badge: CertificationBadge;
   dynamicTextColors: any;
+  mode: 'edit' | 'preview';
+  blockContent: IndustryBadgeLineContent;
+  backgroundType: string;
+  colorTokens: any;
+  sectionId: string;
+  handleContentUpdate: (key: keyof IndustryBadgeLineContent, value: string) => void;
 }) => {
   
-  // Get badge styling based on type
+  // Get badge styling and icon override
   const getBadgeStyle = (type: CertificationBadge['type']) => {
+    const baseStyles = {
+      certification: { bgGradient: 'from-blue-500 to-blue-600', defaultIcon: '🛡️' },
+      award: { bgGradient: 'from-yellow-500 to-yellow-600', defaultIcon: '🏆' },
+      compliance: { bgGradient: 'from-green-500 to-green-600', defaultIcon: '🔒' }
+    };
+    return baseStyles[type];
+  };
+
+  // Get icon override field based on badge type
+  const getIconOverrideField = (type: CertificationBadge['type']): keyof IndustryBadgeLineContent => {
     switch (type) {
-      case 'certification':
-        return {
-          bgGradient: 'from-blue-500 to-blue-600',
-          icon: (
-            <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-          )
-        };
-      case 'award':
-        return {
-          bgGradient: 'from-yellow-500 to-yellow-600',
-          icon: (
-            <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
-            </svg>
-          )
-        };
-      case 'compliance':
-        return {
-          bgGradient: 'from-green-500 to-green-600',
-          icon: (
-            <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-            </svg>
-          )
-        };
+      case 'certification': return 'cert_icon_override';
+      case 'award': return 'award_icon_override';
+      case 'compliance': return 'compliance_icon_override';
     }
+  };
+
+  // Get icon value (override or default)
+  const getIconValue = (type: CertificationBadge['type']) => {
+    const overrideField = getIconOverrideField(type);
+    const override = blockContent[overrideField];
+    const style = getBadgeStyle(type);
+    return override || style.defaultIcon;
   };
 
   const style = getBadgeStyle(badge.type);
@@ -141,7 +154,20 @@ const BadgeDisplay = React.memo(({
   return (
     <div className="flex flex-col items-center space-y-3 p-4 bg-white/5 backdrop-blur-sm rounded-xl border border-white/10 hover:bg-white/10 transition-all duration-300 group">
       <div className={`w-16 h-16 bg-gradient-to-br ${style.bgGradient} rounded-full flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300`}>
-        {style.icon}
+        <IconEditableText
+          mode={mode}
+          value={getIconValue(badge.type)}
+          onEdit={(value) => {
+            const overrideField = getIconOverrideField(badge.type);
+            handleContentUpdate(overrideField, value);
+          }}
+          backgroundType={backgroundType as any}
+          colorTokens={colorTokens}
+          iconSize="lg"
+          className="text-2xl text-white"
+          sectionId={sectionId}
+          elementKey={`${badge.type}_icon`}
+        />
       </div>
       <span className={`text-sm font-medium text-center leading-tight ${dynamicTextColors?.body || 'text-gray-700'}`}>
         {badge.name}
@@ -264,6 +290,12 @@ export default function IndustryBadgeLine(props: LayoutComponentProps) {
                   key={badge.id}
                   badge={badge}
                   dynamicTextColors={dynamicTextColors}
+                  mode={mode}
+                  blockContent={blockContent}
+                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
+                  colorTokens={colorTokens}
+                  sectionId={sectionId}
+                  handleContentUpdate={handleContentUpdate}
                 />
               ))}
             </div>
@@ -282,6 +314,12 @@ export default function IndustryBadgeLine(props: LayoutComponentProps) {
                   key={badge.id}
                   badge={badge}
                   dynamicTextColors={dynamicTextColors}
+                  mode={mode}
+                  blockContent={blockContent}
+                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
+                  colorTokens={colorTokens}
+                  sectionId={sectionId}
+                  handleContentUpdate={handleContentUpdate}
                 />
               ))}
             </div>

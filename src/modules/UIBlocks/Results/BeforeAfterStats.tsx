@@ -5,6 +5,7 @@ import {
   EditableAdaptiveHeadline, 
   EditableAdaptiveText 
 } from '@/components/layout/EditableContent';
+import IconEditableText from '@/components/ui/IconEditableText';
 import { LayoutComponentProps } from '@/types/storeTypes';
 
 interface BeforeAfterStatsProps extends LayoutComponentProps {}
@@ -28,6 +29,9 @@ interface BeforeAfterStatsContent {
   subheadline?: string;
   time_period?: string;
   footer_text?: string;
+  before_icon?: string;
+  after_icon?: string;
+  improvement_icon?: string;
 }
 
 // Content schema for BeforeAfterStats layout
@@ -39,7 +43,10 @@ const CONTENT_SCHEMA = {
   stat_improvements: { type: 'string' as const, default: '75% faster|200% increase|24% improvement|45% boost' },
   subheadline: { type: 'string' as const, default: 'Real results from companies who transformed their operations with our solution' },
   time_period: { type: 'string' as const, default: 'Results achieved within 90 days' },
-  footer_text: { type: 'string' as const, default: 'Average results across 500+ implementations' }
+  footer_text: { type: 'string' as const, default: 'Average results across 500+ implementations' },
+  before_icon: { type: 'string' as const, default: '❌' },
+  after_icon: { type: 'string' as const, default: '✅' },
+  improvement_icon: { type: 'string' as const, default: '📈' }
 };
 
 // Parse stat comparison data from pipe-separated strings
@@ -110,9 +117,17 @@ const StatComparisonCard = ({
         <div className="flex items-center justify-between p-4 bg-red-50 rounded-xl border border-red-100">
           <div className="flex items-center space-x-3">
             <div className="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center">
-              <svg className="w-4 h-4 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
+              <IconEditableText
+                mode={mode}
+                value={blockContent.before_icon || '❌'}
+                onEdit={(value) => handleContentUpdate('before_icon', value)}
+                backgroundType="neutral"
+                colorTokens={{}}
+                iconSize="sm"
+                className="text-red-600 text-lg"
+                sectionId={sectionId}
+                elementKey="before_icon"
+              />
             </div>
             <span className="text-sm font-medium text-red-800">Before</span>
           </div>
@@ -138,9 +153,17 @@ const StatComparisonCard = ({
         {/* Arrow Indicator */}
         <div className="flex justify-center">
           <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
-            <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
-            </svg>
+            <IconEditableText
+              mode={mode}
+              value="⬇️"
+              onEdit={() => {}}
+              backgroundType="neutral"
+              colorTokens={{}}
+              iconSize="sm"
+              className="text-white text-sm"
+              sectionId={sectionId}
+              elementKey="arrow_icon"
+            />
           </div>
         </div>
 
@@ -148,9 +171,17 @@ const StatComparisonCard = ({
         <div className="flex items-center justify-between p-4 bg-green-50 rounded-xl border border-green-100">
           <div className="flex items-center space-x-3">
             <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
-              <svg className="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-              </svg>
+              <IconEditableText
+                mode={mode}
+                value={blockContent.after_icon || '✅'}
+                onEdit={(value) => handleContentUpdate('after_icon', value)}
+                backgroundType="neutral"
+                colorTokens={{}}
+                iconSize="sm"
+                className="text-green-600 text-lg"
+                sectionId={sectionId}
+                elementKey="after_icon"
+              />
             </div>
             <span className="text-sm font-medium text-green-800">After</span>
           </div>
@@ -177,9 +208,17 @@ const StatComparisonCard = ({
       {/* Improvement Badge */}
       <div className="mt-6 text-center">
         <div className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-full text-white font-semibold text-sm">
-          <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
-          </svg>
+          <IconEditableText
+            mode={mode}
+            value={blockContent.improvement_icon || '📈'}
+            onEdit={(value) => handleContentUpdate('improvement_icon', value)}
+            backgroundType="neutral"
+            colorTokens={{}}
+            iconSize="sm"
+            className="text-white text-sm mr-2"
+            sectionId={sectionId}
+            elementKey="improvement_icon"
+          />
           {mode === 'edit' ? (
             <div 
               contentEditable

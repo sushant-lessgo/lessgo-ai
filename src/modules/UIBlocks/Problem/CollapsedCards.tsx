@@ -5,6 +5,7 @@ import {
   EditableAdaptiveHeadline, 
   EditableAdaptiveText
 } from '@/components/layout/EditableContent';
+import IconEditableText from '@/components/ui/IconEditableText';
 import { 
   CTAButton,
   TrustIndicators 
@@ -22,6 +23,12 @@ interface CollapsedCardsContent {
   subheadline?: string;
   supporting_text?: string;
   trust_items?: string;
+  problem_icon_1?: string;
+  problem_icon_2?: string;
+  problem_icon_3?: string;
+  problem_icon_4?: string;
+  problem_icon_5?: string;
+  problem_icon_6?: string;
 }
 
 const CONTENT_SCHEMA = {
@@ -64,7 +71,13 @@ const CONTENT_SCHEMA = {
   trust_items: { 
     type: 'string' as const, 
     default: '' 
-  }
+  },
+  problem_icon_1: { type: 'string' as const, default: '⏰' },
+  problem_icon_2: { type: 'string' as const, default: '📊' },
+  problem_icon_3: { type: 'string' as const, default: '💬' },
+  problem_icon_4: { type: 'string' as const, default: '⚙️' },
+  problem_icon_5: { type: 'string' as const, default: '👥' },
+  problem_icon_6: { type: 'string' as const, default: '🎯' }
 };
 
 export default function CollapsedCards(props: LayoutComponentProps) {
@@ -120,34 +133,10 @@ export default function CollapsedCards(props: LayoutComponentProps) {
 
   const mutedTextColor = dynamicTextColors?.muted || colorTokens.textMuted;
 
+  // Get problem icon for specific index
   const getProblemIcon = (index: number) => {
-    const icons = [
-      // Time Management
-      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-      </svg>,
-      // Resource Allocation
-      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-      </svg>,
-      // Communication
-      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-      </svg>,
-      // Process
-      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-      </svg>,
-      // Team Productivity
-      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-      </svg>,
-      // Customer Service
-      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192L5.636 18.364M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z" />
-      </svg>
-    ];
-    return icons[index % icons.length];
+    const iconFields = ['problem_icon_1', 'problem_icon_2', 'problem_icon_3', 'problem_icon_4', 'problem_icon_5', 'problem_icon_6'];
+    return blockContent[iconFields[index] as keyof CollapsedCardsContent] || '⚙️';
   };
 
   const toggleCard = (index: number) => {
@@ -175,8 +164,21 @@ export default function CollapsedCards(props: LayoutComponentProps) {
         >
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
-              <div className={`w-12 h-12 rounded-lg ${isExpanded ? 'bg-red-500' : 'bg-gray-100'} flex items-center justify-center ${isExpanded ? 'text-white' : 'text-gray-600'} transition-colors duration-300`}>
-                {getProblemIcon(index)}
+              <div className={`w-12 h-12 rounded-lg ${isExpanded ? 'bg-red-500' : 'bg-gray-100'} flex items-center justify-center ${isExpanded ? 'text-white' : 'text-gray-600'} transition-colors duration-300 group/icon-edit relative`}>
+                <IconEditableText
+                  mode={mode}
+                  value={getProblemIcon(index)}
+                  onEdit={(value) => {
+                    const iconField = `problem_icon_${index + 1}` as keyof CollapsedCardsContent;
+                    handleContentUpdate(iconField, value);
+                  }}
+                  backgroundType={backgroundType as any}
+                  colorTokens={colorTokens}
+                  iconSize="lg"
+                  className="text-2xl"
+                  sectionId={sectionId}
+                  elementKey={`problem_icon_${index + 1}`}
+                />
               </div>
               <div>
                 <h3 className="text-lg font-semibold text-gray-900">{problem.title}</h3>

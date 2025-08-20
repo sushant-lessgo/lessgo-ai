@@ -6,6 +6,7 @@ import {
   EditableAdaptiveHeadline, 
   EditableAdaptiveText
 } from '@/components/layout/EditableContent';
+import IconEditableText from '@/components/ui/IconEditableText';
 import { 
   CTAButton,
   TrustIndicators 
@@ -111,7 +112,7 @@ const CONTENT_SCHEMA = {
   },
   enterprise_feature_1_icon: { 
     type: 'string' as const, 
-    default: 'security' 
+    default: '🔒' 
   },
   enterprise_feature_2_title: { 
     type: 'string' as const, 
@@ -123,7 +124,7 @@ const CONTENT_SCHEMA = {
   },
   enterprise_feature_2_icon: { 
     type: 'string' as const, 
-    default: 'performance' 
+    default: '⚡' 
   },
   enterprise_feature_3_title: { 
     type: 'string' as const, 
@@ -135,7 +136,7 @@ const CONTENT_SCHEMA = {
   },
   enterprise_feature_3_icon: { 
     type: 'string' as const, 
-    default: 'support' 
+    default: '💬' 
   },
   enterprise_feature_4_title: { 
     type: 'string' as const, 
@@ -147,7 +148,7 @@ const CONTENT_SCHEMA = {
   },
   enterprise_feature_4_icon: { 
     type: 'string' as const, 
-    default: 'integration' 
+    default: '🔧' 
   },
   show_enterprise_features: { 
     type: 'boolean' as const, 
@@ -255,25 +256,25 @@ export default function FeatureMatrix(props: LayoutComponentProps) {
       {
         title: blockContent.enterprise_feature_1_title || 'Security',
         description: blockContent.enterprise_feature_1_desc || 'SOC 2, SSO, 2FA',
-        icon: blockContent.enterprise_feature_1_icon || 'security',
+        icon: blockContent.enterprise_feature_1_icon || '🔒',
         bgColor: 'bg-blue-500'
       },
       {
         title: blockContent.enterprise_feature_2_title || 'Performance',
         description: blockContent.enterprise_feature_2_desc || '99.9% uptime SLA',
-        icon: blockContent.enterprise_feature_2_icon || 'performance',
+        icon: blockContent.enterprise_feature_2_icon || '⚡',
         bgColor: 'bg-green-500'
       },
       {
         title: blockContent.enterprise_feature_3_title || 'Support',
         description: blockContent.enterprise_feature_3_desc || 'Dedicated manager',
-        icon: blockContent.enterprise_feature_3_icon || 'support',
+        icon: blockContent.enterprise_feature_3_icon || '💬',
         bgColor: 'bg-purple-500'
       },
       {
         title: blockContent.enterprise_feature_4_title || 'Integration',
         description: blockContent.enterprise_feature_4_desc || 'Custom APIs',
-        icon: blockContent.enterprise_feature_4_icon || 'integration',
+        icon: blockContent.enterprise_feature_4_icon || '🔧',
         bgColor: 'bg-orange-500'
       }
     ].filter(feature => 
@@ -286,36 +287,6 @@ export default function FeatureMatrix(props: LayoutComponentProps) {
     return features;
   };
 
-  const getEnterpriseFeatureIcon = (iconName: string) => {
-    const icons = {
-      security: (
-        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-        </svg>
-      ),
-      performance: (
-        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-        </svg>
-      ),
-      support: (
-        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z" />
-        </svg>
-      ),
-      integration: (
-        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-        </svg>
-      ),
-      default: (
-        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-        </svg>
-      )
-    };
-    return icons[iconName as keyof typeof icons] || icons.default;
-  };
 
   const enterpriseFeatures = getEnterpriseFeatures();
 
@@ -568,8 +539,18 @@ export default function FeatureMatrix(props: LayoutComponentProps) {
                       
                       return (
                         <div key={index} className="text-center relative group/enterprise-feature">
-                          <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-gray-500 flex items-center justify-center">
-                            {getEnterpriseFeatureIcon(featureIcon)}
+                          <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-gray-500 flex items-center justify-center group/icon-edit">
+                            <IconEditableText
+                              mode={mode}
+                              value={featureIcon}
+                              onEdit={(value) => handleContentUpdate(`enterprise_feature_${index}_icon`, value)}
+                              backgroundType="primary"
+                              colorTokens={colorTokens}
+                              iconSize="md"
+                              className="text-white text-2xl"
+                              sectionId={sectionId}
+                              elementKey={`enterprise_feature_${index}_icon`}
+                            />
                           </div>
                           <div 
                             contentEditable
@@ -617,7 +598,7 @@ export default function FeatureMatrix(props: LayoutComponentProps) {
                   {enterpriseFeatures.map((feature, index) => (
                     <div key={index} className="text-center">
                       <div className={`w-12 h-12 mx-auto mb-3 rounded-full ${feature.bgColor} flex items-center justify-center`}>
-                        {getEnterpriseFeatureIcon(feature.icon)}
+                        <span className="text-2xl text-white">{feature.icon}</span>
                       </div>
                       <div className="font-semibold text-white">{feature.title}</div>
                       <div className="text-gray-300 text-sm">{feature.description}</div>

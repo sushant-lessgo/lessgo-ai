@@ -5,6 +5,7 @@ import {
   EditableAdaptiveHeadline, 
   EditableAdaptiveText
 } from '@/components/layout/EditableContent';
+import IconEditableText from '@/components/ui/IconEditableText';
 import { 
   CTAButton,
   TrustIndicators 
@@ -22,6 +23,11 @@ interface EmotionalQuotesContent {
   subheadline?: string;
   supporting_text?: string;
   trust_items?: string;
+  category_icon_1?: string;
+  category_icon_2?: string;
+  category_icon_3?: string;
+  category_icon_4?: string;
+  category_icon_5?: string;
 }
 
 const CONTENT_SCHEMA = {
@@ -64,7 +70,12 @@ const CONTENT_SCHEMA = {
   trust_items: { 
     type: 'string' as const, 
     default: '' 
-  }
+  },
+  category_icon_1: { type: 'string' as const, default: '⏰' },
+  category_icon_2: { type: 'string' as const, default: '📈' },
+  category_icon_3: { type: 'string' as const, default: '👥' },
+  category_icon_4: { type: 'string' as const, default: '💼' },
+  category_icon_5: { type: 'string' as const, default: '💡' }
 };
 
 export default function EmotionalQuotes(props: LayoutComponentProps) {
@@ -110,40 +121,10 @@ export default function EmotionalQuotes(props: LayoutComponentProps) {
 
   const mutedTextColor = dynamicTextColors?.muted || colorTokens.textMuted;
 
-  const getCategoryIcon = (category: string) => {
-    if (category.toLowerCase().includes('time')) {
-      return (
-        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-        </svg>
-      );
-    }
-    if (category.toLowerCase().includes('competitive') || category.toLowerCase().includes('pressure')) {
-      return (
-        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 17h8m0 0V9m0 8l-8-8-4 4-6-6" />
-        </svg>
-      );
-    }
-    if (category.toLowerCase().includes('team')) {
-      return (
-        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-        </svg>
-      );
-    }
-    if (category.toLowerCase().includes('personal') || category.toLowerCase().includes('burden')) {
-      return (
-        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-        </svg>
-      );
-    }
-    return (
-      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-      </svg>
-    );
+  // Get category icon for specific index (map quote index to category icon)
+  const getCategoryIcon = (index: number) => {
+    const iconFields = ['category_icon_1', 'category_icon_2', 'category_icon_3', 'category_icon_4', 'category_icon_5'];
+    return blockContent[iconFields[index] as keyof EmotionalQuotesContent] || '💡';
   };
 
   const QuoteCard = ({ quote, index, isActive }: {
@@ -177,8 +158,21 @@ export default function EmotionalQuotes(props: LayoutComponentProps) {
         <div>
           <div className="font-semibold text-gray-900">{quote.attribution}</div>
           <div className="flex items-center space-x-2 mt-2">
-            <div className={`w-8 h-8 rounded-lg ${colorTokens.ctaBg} flex items-center justify-center text-white`}>
-              {getCategoryIcon(quote.category)}
+            <div className={`w-8 h-8 rounded-lg ${colorTokens.ctaBg} flex items-center justify-center text-white group/icon-edit relative`}>
+              <IconEditableText
+                mode={mode}
+                value={getCategoryIcon(index)}
+                onEdit={(value) => {
+                  const iconField = `category_icon_${index + 1}` as keyof EmotionalQuotesContent;
+                  handleContentUpdate(iconField, value);
+                }}
+                backgroundType={backgroundType as any}
+                colorTokens={{...colorTokens, textPrimary: 'text-white'}}
+                iconSize="md"
+                className="text-lg text-white"
+                sectionId={sectionId}
+                elementKey={`category_icon_${index + 1}`}
+              />
             </div>
             <span className={`text-sm ${mutedTextColor}`}>{quote.category}</span>
           </div>
@@ -349,8 +343,21 @@ export default function EmotionalQuotes(props: LayoutComponentProps) {
                   </blockquote>
                   
                   <div className="flex items-center justify-center space-x-4">
-                    <div className={`w-12 h-12 rounded-full ${colorTokens.ctaBg} flex items-center justify-center text-white`}>
-                      {getCategoryIcon(quotes[activeQuote].category)}
+                    <div className={`w-12 h-12 rounded-full ${colorTokens.ctaBg} flex items-center justify-center text-white group/icon-edit relative`}>
+                      <IconEditableText
+                        mode={mode}
+                        value={getCategoryIcon(activeQuote)}
+                        onEdit={(value) => {
+                          const iconField = `category_icon_${activeQuote + 1}` as keyof EmotionalQuotesContent;
+                          handleContentUpdate(iconField, value);
+                        }}
+                        backgroundType={backgroundType as any}
+                        colorTokens={{...colorTokens, textPrimary: 'text-white'}}
+                        iconSize="lg"
+                        className="text-2xl text-white"
+                        sectionId={sectionId}
+                        elementKey={`featured_category_icon_${activeQuote + 1}`}
+                      />
                     </div>
                     <div className="text-left">
                       <div className="font-semibold text-gray-900">{quotes[activeQuote].attribution}</div>

@@ -5,6 +5,7 @@ import {
   EditableAdaptiveHeadline, 
   EditableAdaptiveText
 } from '@/components/layout/EditableContent';
+import IconEditableText from '@/components/ui/IconEditableText';
 import { 
   CTAButton,
   TrustIndicators 
@@ -30,6 +31,8 @@ interface SideBySideSplitContent {
   bottom_stat_3?: string;
   bottom_stat_3_label?: string;
   cta_section_message?: string;
+  path_1_icon?: string;
+  path_2_icon?: string;
 }
 
 const CONTENT_SCHEMA = {
@@ -83,7 +86,9 @@ const CONTENT_SCHEMA = {
   bottom_stat_2_label: { type: 'string' as const, default: 'Switch to Path 2 and thrive' },
   bottom_stat_3: { type: 'string' as const, default: '2.5x' },
   bottom_stat_3_label: { type: 'string' as const, default: 'For businesses on Path 2' },
-  cta_section_message: { type: 'string' as const, default: 'The choice is yours. Every day you stay on Path 1 is another day your competitors pull ahead on Path 2.' }
+  cta_section_message: { type: 'string' as const, default: 'The choice is yours. Every day you stay on Path 1 is another day your competitors pull ahead on Path 2.' },
+  path_1_icon: { type: 'string' as const, default: '⚠️' },
+  path_2_icon: { type: 'string' as const, default: '✓' }
 };
 
 export default function SideBySideSplit(props: LayoutComponentProps) {
@@ -254,10 +259,18 @@ export default function SideBySideSplit(props: LayoutComponentProps) {
                 <div className="bg-gradient-to-br from-red-50 to-orange-50 rounded-2xl p-8 border-2 border-red-200 h-full">
                   {/* Problem Header */}
                   <div className="text-center mb-8">
-                    <div className="w-16 h-16 bg-red-500 rounded-full flex items-center justify-center mx-auto mb-4">
-                      <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
-                      </svg>
+                    <div className="w-16 h-16 bg-red-500 rounded-full flex items-center justify-center mx-auto mb-4 group/icon-edit relative">
+                      <IconEditableText
+                        mode={mode}
+                        value={blockContent.path_1_icon || '⚠️'}
+                        onEdit={(value) => handleContentUpdate('path_1_icon', value)}
+                        backgroundType={backgroundType as any}
+                        colorTokens={{...colorTokens, textPrimary: 'text-white'}}
+                        iconSize="xl"
+                        className="text-3xl text-white"
+                        sectionId={sectionId}
+                        elementKey="path_1_icon"
+                      />
                     </div>
                     <h3 className="text-2xl font-bold text-gray-900 mb-4">{blockContent.problem_title}</h3>
                   </div>
@@ -306,10 +319,18 @@ export default function SideBySideSplit(props: LayoutComponentProps) {
                 <div className="bg-gradient-to-br from-green-50 to-blue-50 rounded-2xl p-8 border-2 border-green-200 h-full">
                   {/* Solution Header */}
                   <div className="text-center mb-8">
-                    <div className="w-16 h-16 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-4">
-                      <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                      </svg>
+                    <div className="w-16 h-16 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-4 group/icon-edit relative">
+                      <IconEditableText
+                        mode={mode}
+                        value={blockContent.path_2_icon || '✓'}
+                        onEdit={(value) => handleContentUpdate('path_2_icon', value)}
+                        backgroundType={backgroundType as any}
+                        colorTokens={{...colorTokens, textPrimary: 'text-white'}}
+                        iconSize="xl"
+                        className="text-3xl text-white"
+                        sectionId={sectionId}
+                        elementKey="path_2_icon"
+                      />
                     </div>
                     <h3 className="text-2xl font-bold text-gray-900 mb-4">The Solution Path</h3>
                   </div>

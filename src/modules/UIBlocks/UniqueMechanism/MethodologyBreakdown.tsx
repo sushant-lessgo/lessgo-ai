@@ -6,6 +6,7 @@ import { useLayoutComponent } from '@/hooks/useLayoutComponent';
 import { useTypography } from '@/hooks/useTypography';
 import { LayoutSection } from '@/components/layout/LayoutSection';
 import { EditableAdaptiveHeadline, EditableAdaptiveText } from '@/components/layout/EditableContent';
+import IconEditableText from '@/components/ui/IconEditableText';
 import { LayoutComponentProps } from '@/types/storeTypes';
 
 interface MethodologyBreakdownContent {
@@ -17,6 +18,7 @@ interface MethodologyBreakdownContent {
   results_title?: string;
   result_metrics?: string;
   result_labels?: string;
+  methodology_icon?: string;
 }
 
 const CONTENT_SCHEMA = {
@@ -51,6 +53,10 @@ const CONTENT_SCHEMA = {
   result_labels: { 
     type: 'string' as const, 
     default: 'Performance Increase|Time Saved|Accuracy Rate|Autonomous Operation' 
+  },
+  methodology_icon: { 
+    type: 'string' as const, 
+    default: '🧠' 
   }
 };
 
@@ -104,7 +110,17 @@ export default function MethodologyBreakdown(props: LayoutComponentProps) {
         {/* Methodology Header */}
         <div className="bg-gradient-to-r from-purple-600 to-indigo-700 rounded-2xl p-12 text-white text-center mb-12">
           <div className="w-20 h-20 bg-white bg-opacity-20 rounded-full flex items-center justify-center mx-auto mb-6">
-            <span className="text-3xl">🧠</span>
+            <IconEditableText
+              mode={mode}
+              value={blockContent.methodology_icon || '🧠'}
+              onEdit={(value) => handleContentUpdate('methodology_icon', value)}
+              backgroundType="primary"
+              colorTokens={colorTokens}
+              iconSize="xl"
+              className="text-white text-3xl"
+              sectionId={sectionId}
+              elementKey="methodology_icon"
+            />
           </div>
           <EditableAdaptiveHeadline
             mode={mode}

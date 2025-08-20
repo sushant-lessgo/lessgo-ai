@@ -5,6 +5,7 @@ import {
   EditableAdaptiveHeadline, 
   EditableAdaptiveText 
 } from '@/components/layout/EditableContent';
+import IconEditableText from '@/components/ui/IconEditableText';
 import { LayoutComponentProps } from '@/types/storeTypes';
 
 interface StatBlocksProps extends LayoutComponentProps {}
@@ -24,6 +25,12 @@ interface StatBlocksContent {
   stat_labels: string;
   stat_descriptions?: string;
   subheadline?: string;
+  stat_icon_1?: string;
+  stat_icon_2?: string;
+  stat_icon_3?: string;
+  stat_icon_4?: string;
+  stat_icon_5?: string;
+  stat_icon_6?: string;
 }
 
 // Content schema for StatBlocks layout
@@ -32,7 +39,11 @@ const CONTENT_SCHEMA = {
   stat_values: { type: 'string' as const, default: '10,000+|98%|2.5x|24/7' },
   stat_labels: { type: 'string' as const, default: 'Happy Customers|Customer Satisfaction|Revenue Growth|Support Available' },
   stat_descriptions: { type: 'string' as const, default: '' },
-  subheadline: { type: 'string' as const, default: '' }
+  subheadline: { type: 'string' as const, default: '' },
+  stat_icon_1: { type: 'string' as const, default: '👥' },
+  stat_icon_2: { type: 'string' as const, default: '❤️' },
+  stat_icon_3: { type: 'string' as const, default: '📈' },
+  stat_icon_4: { type: 'string' as const, default: '⏰' }
 };
 
 // Parse stat data from pipe-separated strings
@@ -153,7 +164,8 @@ const StatBlock = ({
   sectionId,
   onValueEdit,
   onLabelEdit,
-  onDescriptionEdit
+  onDescriptionEdit,
+  onStatIconEdit
 }: {
   stat: StatItem;
   index: number;
@@ -162,6 +174,7 @@ const StatBlock = ({
   onValueEdit: (index: number, value: string) => void;
   onLabelEdit: (index: number, value: string) => void;
   onDescriptionEdit: (index: number, value: string) => void;
+  onStatIconEdit: (index: number, value: string) => void;
 }) => {
   const { getTextStyle } = useTypography();
   
@@ -171,7 +184,17 @@ const StatBlock = ({
       {/* Stat Icon */}
       <div className="mb-6">
         <div className="w-16 h-16 bg-blue-100 rounded-2xl flex items-center justify-center text-blue-600 mx-auto group-hover:bg-blue-200 group-hover:scale-110 transition-all duration-300">
-          <StatIcon label={stat.label} index={index} />
+          <IconEditableText
+            mode={mode}
+            value={getStatIcon(index)}
+            onEdit={(value) => handleStatIconEdit(index, value)}
+            backgroundType="neutral"
+            colorTokens={{}}
+            iconSize="lg"
+            className="text-blue-600 text-2xl"
+            sectionId={sectionId}
+            elementKey={`stat_icon_${index + 1}`}
+          />
         </div>
       </div>
       
@@ -266,6 +289,18 @@ export default function StatBlocks(props: StatBlocksProps) {
     handleContentUpdate('stat_values', values.join('|'));
   };
 
+  const handleStatIconEdit = (index: number, value: string) => {
+    const iconField = `stat_icon_${index + 1}` as keyof StatBlocksContent;
+    handleContentUpdate(iconField, value);
+  };
+
+  // Get stat icon from content or default
+  const getStatIcon = (index: number): string => {
+    const iconFields = ['stat_icon_1', 'stat_icon_2', 'stat_icon_3', 'stat_icon_4', 'stat_icon_5', 'stat_icon_6'];
+    const iconField = iconFields[index] as keyof StatBlocksContent;
+    return blockContent[iconField] || ['👥', '❤️', '📈', '⏰', '⚡', '🏆'][index] || '📊';
+  };
+
   const handleLabelEdit = (index: number, value: string) => {
     const labels = blockContent.stat_labels.split('|');
     labels[index] = value;
@@ -335,6 +370,7 @@ export default function StatBlocks(props: StatBlocksProps) {
               onValueEdit={handleValueEdit}
               onLabelEdit={handleLabelEdit}
               onDescriptionEdit={handleDescriptionEdit}
+              onStatIconEdit={handleStatIconEdit}
             />
           ))}
         </div>

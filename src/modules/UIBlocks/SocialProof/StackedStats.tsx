@@ -12,6 +12,7 @@ import {
 import { SocialProofNumber } from '@/components/layout/ComponentRegistry';
 import { LayoutComponentProps } from '@/types/storeTypes';
 import { parsePipeData } from '@/utils/dataParsingUtils';
+import IconEditableText from '@/components/ui/IconEditableText';
 
 // Content interface for type safety
 interface StackedStatsContent {
@@ -21,6 +22,12 @@ interface StackedStatsContent {
   metric_labels: string;
   metric_descriptions?: string;
   progress_percentages?: string;
+  metric_icon_1?: string;
+  metric_icon_2?: string;
+  metric_icon_3?: string;
+  metric_icon_4?: string;
+  metric_icon_5?: string;
+  metric_icon_6?: string;
 }
 
 // Metric structure
@@ -58,7 +65,13 @@ const CONTENT_SCHEMA = {
   progress_percentages: { 
     type: 'string' as const, 
     default: '85|92|99|100|78|95' 
-  }
+  },
+  metric_icon_1: { type: 'string' as const, default: '👥' },
+  metric_icon_2: { type: 'string' as const, default: '📈' },
+  metric_icon_3: { type: 'string' as const, default: '✅' },
+  metric_icon_4: { type: 'string' as const, default: '🛠️' },
+  metric_icon_5: { type: 'string' as const, default: '💾' },
+  metric_icon_6: { type: 'string' as const, default: '⏰' }
 };
 
 // Parse metric data from pipe-separated strings
@@ -117,6 +130,12 @@ const ProgressBar = React.memo(({
 });
 ProgressBar.displayName = 'ProgressBar';
 
+// Function to get metric icon
+const getMetricIcon = (index: number, blockContent: StackedStatsContent) => {
+  const iconFields = ['metric_icon_1', 'metric_icon_2', 'metric_icon_3', 'metric_icon_4', 'metric_icon_5', 'metric_icon_6'];
+  return blockContent[iconFields[index] as keyof StackedStatsContent] || ['👥', '📈', '✅', '🛠️', '💾', '⏰'][index] || '📊';
+};
+
 // Metric Card Component
 const MetricCard = React.memo(({ 
   metric, 
@@ -124,7 +143,13 @@ const MetricCard = React.memo(({
   getTextStyle,
   index,
   h2Style,
-  bodyStyle
+  bodyStyle,
+  mode,
+  blockContent,
+  backgroundType,
+  colorTokens,
+  sectionId,
+  handleContentUpdate
 }: { 
   metric: StackedMetric;
   dynamicTextColors: any;
@@ -132,43 +157,17 @@ const MetricCard = React.memo(({
   index: number;
   h2Style: any;
   bodyStyle: any;
+  mode: 'edit' | 'preview';
+  blockContent: StackedStatsContent;
+  backgroundType: string;
+  colorTokens: any;
+  sectionId: string;
+  handleContentUpdate: (key: keyof StackedStatsContent, value: string) => void;
 }) => {
   
   // Color scheme for each metric
   const colors = ['blue', 'green', 'purple', 'orange', 'red', 'indigo'];
   const color = colors[index % colors.length];
-  
-  // Icon for each metric type
-  const getIcon = (index: number) => {
-    const icons = [
-      // Users
-      <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
-      </svg>,
-      // Growth
-      <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
-      </svg>,
-      // Uptime
-      <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-      </svg>,
-      // Support
-      <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192L5.636 18.364M12 12h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-      </svg>,
-      // Data
-      <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4" />
-      </svg>,
-      // Time
-      <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-      </svg>
-    ];
-    
-    return icons[index % icons.length];
-  };
 
   return (
     <div className="p-6 bg-white/5 backdrop-blur-sm rounded-xl border border-white/10 hover:bg-white/10 transition-all duration-300 group">
@@ -182,7 +181,20 @@ const MetricCard = React.memo(({
           color === 'red' ? 'from-red-500 to-red-600' :
           'from-indigo-500 to-indigo-600'
         } rounded-lg flex items-center justify-center text-white shadow-lg group-hover:scale-110 transition-transform duration-300`}>
-          {getIcon(index)}
+          <IconEditableText
+            mode={mode}
+            value={getMetricIcon(index, blockContent)}
+            onEdit={(value) => {
+              const iconField = `metric_icon_${index + 1}` as keyof StackedStatsContent;
+              handleContentUpdate(iconField, value);
+            }}
+            backgroundType={backgroundType as any}
+            colorTokens={colorTokens}
+            iconSize="lg"
+            className="text-3xl text-white"
+            sectionId={sectionId}
+            elementKey={`metric_icon_${index + 1}`}
+          />
         </div>
         
         {/* Content */}
@@ -310,6 +322,12 @@ export default function StackedStats(props: LayoutComponentProps) {
               index={index}
               h2Style={h2Style}
               bodyStyle={bodyStyle}
+              mode={mode}
+              blockContent={blockContent}
+              backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
+              colorTokens={colorTokens}
+              sectionId={sectionId}
+              handleContentUpdate={handleContentUpdate}
             />
           ))}
         </div>

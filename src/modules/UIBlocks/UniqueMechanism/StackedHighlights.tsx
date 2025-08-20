@@ -8,6 +8,7 @@ import {
   EditableAdaptiveHeadline, 
   EditableAdaptiveText 
 } from '@/components/layout/EditableContent';
+import IconEditableText from '@/components/ui/IconEditableText';
 import { 
   LayoutComponentProps, 
   extractLayoutContent,
@@ -30,6 +31,10 @@ interface StackedHighlightsContent {
   highlight_descriptions: string;
   mechanism_name?: string;
   footer_text?: string;
+  highlight_icon_1?: string;
+  highlight_icon_2?: string;
+  highlight_icon_3?: string;
+  highlight_icon_4?: string;
 }
 
 // Content schema for StackedHighlights layout
@@ -38,7 +43,11 @@ const CONTENT_SCHEMA = {
   highlight_titles: { type: 'string' as const, default: 'Intelligent Auto-Prioritization|Dynamic Context Switching|Predictive Resource Allocation|Real-Time Quality Assurance' },
   highlight_descriptions: { type: 'string' as const, default: 'Our AI analyzes your workflow patterns and automatically prioritizes tasks based on deadlines, dependencies, and business impact, ensuring critical work never falls through the cracks.|The system seamlessly adapts to changing priorities and contexts, maintaining efficiency even when your focus needs to shift between different projects or urgent requests.|Advanced algorithms predict resource needs and automatically allocate team capacity, preventing bottlenecks before they occur and optimizing productivity across all initiatives.|Built-in quality checks run continuously in the background, catching potential issues early and maintaining high standards without slowing down your workflow.' },
   mechanism_name: { type: 'string' as const, default: '' },
-  footer_text: { type: 'string' as const, default: 'Our proprietary approach that you won\'t find anywhere else' }
+  footer_text: { type: 'string' as const, default: 'Our proprietary approach that you won\'t find anywhere else' },
+  highlight_icon_1: { type: 'string' as const, default: '🧠' },
+  highlight_icon_2: { type: 'string' as const, default: '🔄' },
+  highlight_icon_3: { type: 'string' as const, default: '📊' },
+  highlight_icon_4: { type: 'string' as const, default: '✅' }
 };
 
 // Parse highlight data from pipe-separated strings
@@ -54,70 +63,15 @@ const parseHighlightData = (titles: string, descriptions: string): HighlightItem
 };
 
 
-// Highlight Icon Component
-const HighlightIcon = ({ title, index }: { title: string, index: number }) => {
-  const getIcon = (highlightTitle: string, fallbackIndex: number) => {
-    const lower = highlightTitle.toLowerCase();
-    
-    if (lower.includes('intelligent') || lower.includes('ai') || lower.includes('smart') || lower.includes('prioritization')) {
-      return (
-        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-        </svg>
-      );
-    } else if (lower.includes('dynamic') || lower.includes('adaptive') || lower.includes('switching') || lower.includes('context')) {
-      return (
-        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-        </svg>
-      );
-    } else if (lower.includes('predictive') || lower.includes('algorithm') || lower.includes('resource') || lower.includes('allocation')) {
-      return (
-        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-        </svg>
-      );
-    } else if (lower.includes('quality') || lower.includes('assurance') || lower.includes('monitoring') || lower.includes('real-time')) {
-      return (
-        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-        </svg>
-      );
-    } else if (lower.includes('automation') || lower.includes('automatic') || lower.includes('workflow')) {
-      return (
-        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-        </svg>
-      );
-    } else if (lower.includes('optimization') || lower.includes('performance') || lower.includes('efficiency')) {
-      return (
-        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
-        </svg>
-      );
-    }
-    
-    // Default icons based on position
-    const defaultIcons = [
-      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
-      </svg>,
-      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-      </svg>,
-      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-      </svg>,
-      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-      </svg>
-    ];
-    
-    return defaultIcons[fallbackIndex % defaultIcons.length];
-  };
-  
-  return getIcon(title, index);
+// Helper function to get highlight icon
+const getHighlightIcon = (blockContent: StackedHighlightsContent, index: number) => {
+  const iconFields = [
+    blockContent.highlight_icon_1,
+    blockContent.highlight_icon_2,
+    blockContent.highlight_icon_3,
+    blockContent.highlight_icon_4
+  ];
+  return iconFields[index] || '✨';
 };
 
 // Individual Highlight Card
@@ -127,7 +81,10 @@ const HighlightCard = ({
   mode, 
   sectionId,
   onTitleEdit,
-  onDescriptionEdit
+  onDescriptionEdit,
+  blockContent,
+  colorTokens,
+  handleContentUpdate
 }: {
   highlight: HighlightItem;
   index: number;
@@ -135,6 +92,9 @@ const HighlightCard = ({
   sectionId: string;
   onTitleEdit: (index: number, value: string) => void;
   onDescriptionEdit: (index: number, value: string) => void;
+  blockContent: StackedHighlightsContent;
+  colorTokens: any;
+  handleContentUpdate: (field: keyof StackedHighlightsContent, value: string) => void;
 }) => {
   const { getTextStyle } = useTypography();
   
@@ -147,8 +107,21 @@ const HighlightCard = ({
       <div className="relative flex items-start space-x-6 p-8 bg-white rounded-xl border border-blue-200 hover:border-blue-400 hover:shadow-lg transition-all duration-300 mb-6">
         
         {/* Icon Circle */}
-        <div className="flex-shrink-0 w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center text-white shadow-lg group-hover:shadow-xl group-hover:scale-110 transition-all duration-300">
-          <HighlightIcon title={highlight.title} index={index} />
+        <div className="flex-shrink-0 w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center shadow-lg group-hover:shadow-xl group-hover:scale-110 transition-all duration-300">
+          <IconEditableText
+            mode={mode}
+            value={getHighlightIcon(blockContent, index)}
+            onEdit={(value) => {
+              const iconField = `highlight_icon_${index + 1}` as keyof StackedHighlightsContent;
+              handleContentUpdate(iconField, value);
+            }}
+            backgroundType="primary"
+            colorTokens={colorTokens}
+            iconSize="lg"
+            className="text-white text-2xl"
+            sectionId={sectionId}
+            elementKey={`highlight_icon_${index + 1}`}
+          />
         </div>
         
         {/* Content */}
@@ -303,6 +276,9 @@ export default function StackedHighlights(props: StackedHighlightsProps) {
               sectionId={sectionId}
               onTitleEdit={handleTitleEdit}
               onDescriptionEdit={handleDescriptionEdit}
+              blockContent={blockContent}
+              colorTokens={colorTokens}
+              handleContentUpdate={handleContentUpdate}
             />
           ))}
         </div>

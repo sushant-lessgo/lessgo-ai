@@ -5,6 +5,7 @@ import {
   EditableAdaptiveHeadline, 
   EditableAdaptiveText 
 } from '@/components/layout/EditableContent';
+import IconEditableText from '@/components/ui/IconEditableText';
 import { LayoutComponentProps } from '@/types/storeTypes';
 
 interface QuoteWithMetricProps extends LayoutComponentProps {}
@@ -32,6 +33,8 @@ interface QuoteWithMetricContent {
   metric_values: string;
   subheadline?: string;
   footer_text?: string;
+  quote_icon?: string;
+  credibility_icon?: string;
 }
 
 // Content schema for QuoteWithMetric layout
@@ -44,7 +47,9 @@ const CONTENT_SCHEMA = {
   metric_labels: { type: 'string' as const, default: 'Cost Reduction|Revenue Increase|Time Saved' },
   metric_values: { type: 'string' as const, default: '67%|$2.4M|25 hrs/week' },
   subheadline: { type: 'string' as const, default: 'Real customer testimonials with quantified business impact' },
-  footer_text: { type: 'string' as const, default: 'Verified customer results and testimonials' }
+  footer_text: { type: 'string' as const, default: 'Verified customer results and testimonials' },
+  quote_icon: { type: 'string' as const, default: '💬' },
+  credibility_icon: { type: 'string' as const, default: '🔒' }
 };
 
 // Parse quote data from pipe-separated strings
@@ -126,9 +131,17 @@ const QuoteCard = ({
       <div className="p-8 pb-6">
         {/* Quote Icon */}
         <div className="mb-6">
-          <svg className="w-10 h-10 text-blue-500 opacity-20" fill="currentColor" viewBox="0 0 24 24">
-            <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h4v10h-10z"/>
-          </svg>
+          <IconEditableText
+            mode={mode}
+            value={blockContent.quote_icon || '💬'}
+            onEdit={(value) => handleContentUpdate('quote_icon', value)}
+            backgroundType="neutral"
+            colorTokens={{}}
+            iconSize="lg"
+            className="text-blue-500 text-4xl opacity-20"
+            sectionId={sectionId}
+            elementKey="quote_icon"
+          />
         </div>
 
         {/* Quote Text */}
@@ -383,9 +396,17 @@ export default function QuoteWithMetric(props: QuoteWithMetricProps) {
         {(blockContent.footer_text || mode === 'edit') && (
           <div className="mt-16 text-center">
             <div className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-emerald-50 to-green-50 border border-emerald-200 rounded-full text-emerald-800">
-              <svg className="w-5 h-5 mr-2 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.25-7a4.5 4.5 0 11-6.364 6.364L12 5.636l-1.318-1.318A4.5 4.5 0 015.318 10.5L12 17.182l6.682-6.682a4.5 4.5 0 000-6.364z" />
-              </svg>
+              <IconEditableText
+                mode={mode}
+                value={blockContent.credibility_icon || '🔒'}
+                onEdit={(value) => handleContentUpdate('credibility_icon', value)}
+                backgroundType="neutral"
+                colorTokens={{}}
+                iconSize="sm"
+                className="text-emerald-600 text-lg mr-2"
+                sectionId={sectionId}
+                elementKey="credibility_icon"
+              />
               <EditableAdaptiveText
                 mode={mode}
                 value={blockContent.footer_text || ''}

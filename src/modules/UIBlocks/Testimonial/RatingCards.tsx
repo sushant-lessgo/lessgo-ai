@@ -6,6 +6,7 @@ import {
   EditableAdaptiveHeadline, 
   EditableAdaptiveText
 } from '@/components/layout/EditableContent';
+import IconEditableText from '@/components/ui/IconEditableText';
 import { 
   CTAButton,
   TrustIndicators,
@@ -36,6 +37,10 @@ interface RatingCardsContent {
   trustpilot_label?: string;
   producthunt_rating?: string;
   producthunt_label?: string;
+  g2_icon?: string;
+  capterra_icon?: string;
+  trustpilot_icon?: string;
+  producthunt_icon?: string;
 }
 
 const CONTENT_SCHEMA = {
@@ -126,6 +131,22 @@ const CONTENT_SCHEMA = {
   producthunt_label: {
     type: 'string' as const,
     default: 'Product Hunt Rating'
+  },
+  g2_icon: {
+    type: 'string' as const,
+    default: '🗡️'
+  },
+  capterra_icon: {
+    type: 'string' as const,
+    default: '📈'
+  },
+  trustpilot_icon: {
+    type: 'string' as const,
+    default: '✅'
+  },
+  producthunt_icon: {
+    type: 'string' as const,
+    default: '🚀'
   }
 };
 
@@ -200,41 +221,35 @@ export default function RatingCards(props: LayoutComponentProps) {
 
   const mutedTextColor = dynamicTextColors?.muted || colorTokens.textMuted;
 
-  const getPlatformIcon = (platform: string) => {
+  const getPlatformIcon = (platform: string, index: number) => {
     const platformLower = platform.toLowerCase();
+    const iconFields = ['g2_icon', 'capterra_icon', 'trustpilot_icon', 'producthunt_icon'];
+    const defaultIcons = ['🗡️', '📈', '✅', '🚀'];
     
+    let iconField: keyof RatingCardsContent = 'g2_icon';
     if (platformLower.includes('g2')) {
-      return (
-        <div className="w-6 h-6 bg-orange-500 rounded flex items-center justify-center text-white font-bold text-xs">
-          G2
-        </div>
-      );
-    }
-    if (platformLower.includes('capterra')) {
-      return (
-        <div className="w-6 h-6 bg-blue-600 rounded flex items-center justify-center text-white font-bold text-xs">
-          C
-        </div>
-      );
-    }
-    if (platformLower.includes('trustpilot')) {
-      return (
-        <div className="w-6 h-6 bg-green-600 rounded flex items-center justify-center text-white font-bold text-xs">
-          T
-        </div>
-      );
-    }
-    if (platformLower.includes('product hunt')) {
-      return (
-        <div className="w-6 h-6 bg-orange-600 rounded flex items-center justify-center text-white font-bold text-xs">
-          PH
-        </div>
-      );
+      iconField = 'g2_icon';
+    } else if (platformLower.includes('capterra')) {
+      iconField = 'capterra_icon';
+    } else if (platformLower.includes('trustpilot')) {
+      iconField = 'trustpilot_icon';
+    } else if (platformLower.includes('product hunt')) {
+      iconField = 'producthunt_icon';
     }
     
     return (
-      <div className="w-6 h-6 bg-gray-500 rounded flex items-center justify-center text-white font-bold text-xs">
-        {platform.charAt(0)}
+      <div className="w-6 h-6 rounded flex items-center justify-center group/icon-edit relative">
+        <IconEditableText
+          mode={mode}
+          value={blockContent[iconField] || defaultIcons[Math.min(index, defaultIcons.length - 1)]}
+          onEdit={(value) => handleContentUpdate(iconField, value)}
+          backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
+          colorTokens={colorTokens}
+          iconSize="sm"
+          className="text-base"
+          sectionId={sectionId}
+          elementKey={iconField}
+        />
       </div>
     );
   };
@@ -284,7 +299,7 @@ export default function RatingCards(props: LayoutComponentProps) {
       {/* Footer */}
       <div className="flex items-center justify-between pt-4 border-t border-gray-100">
         <div className="flex items-center space-x-2">
-          {getPlatformIcon(review.platform)}
+          {getPlatformIcon(review.platform, index)}
           <span className="text-sm font-medium text-gray-600">{review.platform}</span>
         </div>
         
@@ -451,8 +466,18 @@ export default function RatingCards(props: LayoutComponentProps) {
             <div className="grid md:grid-cols-4 gap-6">
               <div className="text-center">
                 <div className="flex items-center justify-center space-x-2 mb-2">
-                  <div className="w-8 h-8 bg-orange-500 rounded flex items-center justify-center text-white font-bold text-sm">
-                    G2
+                  <div className="w-8 h-8 bg-orange-500 rounded flex items-center justify-center text-white font-bold text-sm group/icon-edit relative">
+                    <IconEditableText
+                      mode={mode}
+                      value={blockContent.g2_icon || '🗡️'}
+                      onEdit={(value) => handleContentUpdate('g2_icon', value)}
+                      backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
+                      colorTokens={colorTokens}
+                      iconSize="md"
+                      className="text-xl"
+                      sectionId={sectionId}
+                      elementKey="g2_icon"
+                    />
                   </div>
                   <EditableAdaptiveText
                     mode={mode}
@@ -484,8 +509,18 @@ export default function RatingCards(props: LayoutComponentProps) {
               </div>
               <div className="text-center">
                 <div className="flex items-center justify-center space-x-2 mb-2">
-                  <div className="w-8 h-8 bg-blue-600 rounded flex items-center justify-center text-white font-bold text-sm">
-                    C
+                  <div className="w-8 h-8 bg-blue-600 rounded flex items-center justify-center text-white font-bold text-sm group/icon-edit relative">
+                    <IconEditableText
+                      mode={mode}
+                      value={blockContent.capterra_icon || '📈'}
+                      onEdit={(value) => handleContentUpdate('capterra_icon', value)}
+                      backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
+                      colorTokens={colorTokens}
+                      iconSize="md"
+                      className="text-xl"
+                      sectionId={sectionId}
+                      elementKey="capterra_icon"
+                    />
                   </div>
                   <EditableAdaptiveText
                     mode={mode}
@@ -517,8 +552,18 @@ export default function RatingCards(props: LayoutComponentProps) {
               </div>
               <div className="text-center">
                 <div className="flex items-center justify-center space-x-2 mb-2">
-                  <div className="w-8 h-8 bg-green-600 rounded flex items-center justify-center text-white font-bold text-sm">
-                    T
+                  <div className="w-8 h-8 bg-green-600 rounded flex items-center justify-center text-white font-bold text-sm group/icon-edit relative">
+                    <IconEditableText
+                      mode={mode}
+                      value={blockContent.trustpilot_icon || '✅'}
+                      onEdit={(value) => handleContentUpdate('trustpilot_icon', value)}
+                      backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
+                      colorTokens={colorTokens}
+                      iconSize="md"
+                      className="text-xl"
+                      sectionId={sectionId}
+                      elementKey="trustpilot_icon"
+                    />
                   </div>
                   <EditableAdaptiveText
                     mode={mode}
@@ -550,8 +595,18 @@ export default function RatingCards(props: LayoutComponentProps) {
               </div>
               <div className="text-center">
                 <div className="flex items-center justify-center space-x-2 mb-2">
-                  <div className="w-8 h-8 bg-orange-600 rounded flex items-center justify-center text-white font-bold text-sm">
-                    PH
+                  <div className="w-8 h-8 bg-orange-600 rounded flex items-center justify-center text-white font-bold text-sm group/icon-edit relative">
+                    <IconEditableText
+                      mode={mode}
+                      value={blockContent.producthunt_icon || '🚀'}
+                      onEdit={(value) => handleContentUpdate('producthunt_icon', value)}
+                      backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
+                      colorTokens={colorTokens}
+                      iconSize="md"
+                      className="text-xl"
+                      sectionId={sectionId}
+                      elementKey="producthunt_icon"
+                    />
                   </div>
                   <EditableAdaptiveText
                     mode={mode}

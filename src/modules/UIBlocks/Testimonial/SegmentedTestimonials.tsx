@@ -6,6 +6,7 @@ import {
   EditableAdaptiveHeadline, 
   EditableAdaptiveText
 } from '@/components/layout/EditableContent';
+import IconEditableText from '@/components/ui/IconEditableText';
 import { 
   CTAButton,
   TrustIndicators,
@@ -36,6 +37,10 @@ interface SegmentedTestimonialsContent {
   small_business_label?: string;
   dev_teams_stat?: string;
   dev_teams_label?: string;
+  segment_icon_1?: string;
+  segment_icon_2?: string;
+  segment_icon_3?: string;
+  segment_icon_4?: string;
 }
 
 const CONTENT_SCHEMA = {
@@ -126,6 +131,22 @@ const CONTENT_SCHEMA = {
   dev_teams_label: {
     type: 'string' as const,
     default: 'Dev teams'
+  },
+  segment_icon_1: {
+    type: 'string' as const,
+    default: '🏢'
+  },
+  segment_icon_2: {
+    type: 'string' as const,
+    default: '📈'
+  },
+  segment_icon_3: {
+    type: 'string' as const,
+    default: '📈'
+  },
+  segment_icon_4: {
+    type: 'string' as const,
+    default: '💻'
   }
 };
 
@@ -203,26 +224,9 @@ export default function SegmentedTestimonials(props: LayoutComponentProps) {
   const mutedTextColor = dynamicTextColors?.muted || colorTokens.textMuted;
 
   const getSegmentIcon = (index: number) => {
-    const icons = [
-      // Enterprise
-      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-      </svg>,
-      // Marketing/Agency
-      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z" />
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z" />
-      </svg>,
-      // Small Business
-      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
-      </svg>,
-      // Development
-      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
-      </svg>
-    ];
-    return icons[index % icons.length];
+    const iconFields = ['segment_icon_1', 'segment_icon_2', 'segment_icon_3', 'segment_icon_4'];
+    const iconField = iconFields[index] as keyof SegmentedTestimonialsContent;
+    return blockContent[iconField] || ['🏢', '📈', '📈', '💻'][index];
   };
 
   const getSegmentColor = (index: number) => {
@@ -252,8 +256,22 @@ export default function SegmentedTestimonials(props: LayoutComponentProps) {
         }`}
       >
         <div className="flex items-center space-x-3">
-          <div className={`w-12 h-12 rounded-lg bg-gradient-to-br ${color.bg} flex items-center justify-center text-white`}>
-            {getSegmentIcon(index)}
+          <div className={`w-12 h-12 rounded-lg bg-gradient-to-br ${color.bg} flex items-center justify-center text-white group/icon-edit relative`}>
+            <IconEditableText
+              mode={mode}
+              value={getSegmentIcon(index)}
+              onEdit={(value) => {
+                const iconFields = ['segment_icon_1', 'segment_icon_2', 'segment_icon_3', 'segment_icon_4'];
+                const iconField = iconFields[index] as keyof SegmentedTestimonialsContent;
+                handleContentUpdate(iconField, value);
+              }}
+              backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
+              colorTokens={colorTokens}
+              iconSize="lg"
+              className="text-2xl"
+              sectionId={sectionId}
+              elementKey={`segment_icon_${index + 1}`}
+            />
           </div>
           <div className="flex-1">
             <div className={`font-semibold ${isActive ? color.text : 'text-gray-900'}`}>
@@ -415,8 +433,22 @@ export default function SegmentedTestimonials(props: LayoutComponentProps) {
                   {/* Header */}
                   <div className={`p-6 ${activeColor.bgLight} border-b ${activeColor.border}`}>
                     <div className="flex items-center space-x-3 mb-4">
-                      <div className={`w-12 h-12 rounded-lg bg-gradient-to-br ${activeColor.bg} flex items-center justify-center text-white`}>
-                        {getSegmentIcon(activeSegment)}
+                      <div className={`w-12 h-12 rounded-lg bg-gradient-to-br ${activeColor.bg} flex items-center justify-center text-white group/icon-edit relative`}>
+                        <IconEditableText
+                          mode={mode}
+                          value={getSegmentIcon(activeSegment)}
+                          onEdit={(value) => {
+                            const iconFields = ['segment_icon_1', 'segment_icon_2', 'segment_icon_3', 'segment_icon_4'];
+                            const iconField = iconFields[activeSegment] as keyof SegmentedTestimonialsContent;
+                            handleContentUpdate(iconField, value);
+                          }}
+                          backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
+                          colorTokens={colorTokens}
+                          iconSize="lg"
+                          className="text-2xl"
+                          sectionId={sectionId}
+                          elementKey={`segment_icon_${activeSegment + 1}`}
+                        />
                       </div>
                       <div>
                         <h4 className={`font-bold text-lg ${activeColor.text}`}>

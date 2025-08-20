@@ -5,6 +5,7 @@ import {
   EditableAdaptiveHeadline, 
   EditableAdaptiveText
 } from '@/components/layout/EditableContent';
+import IconEditableText from '@/components/ui/IconEditableText';
 import { LayoutComponentProps } from '@/types/storeTypes';
 
 
@@ -22,6 +23,12 @@ interface StackedPainBulletsContent {
   pain_descriptions?: string;
   subheadline?: string;
   conclusion_text?: string;
+  pain_icon_1?: string;
+  pain_icon_2?: string;
+  pain_icon_3?: string;
+  pain_icon_4?: string;
+  pain_icon_5?: string;
+  pain_icon_6?: string;
 }
 
 // Content schema for StackedPainBullets layout
@@ -30,7 +37,13 @@ const CONTENT_SCHEMA = {
   pain_points: { type: 'string' as const, default: 'Spending hours on manual data entry that could be automated|Juggling multiple tools that don\'t talk to each other|Missing important deadlines because nothing is centralized|Watching your team burn out from repetitive, mind-numbing tasks|Losing potential customers because your response time is too slow|Feeling overwhelmed by the chaos of disconnected workflows' },
   pain_descriptions: { type: 'string' as const, default: '' },
   subheadline: { type: 'string' as const, default: '' },
-  conclusion_text: { type: 'string' as const, default: 'Sound familiar? You\'re not alone.' }
+  conclusion_text: { type: 'string' as const, default: 'Sound familiar? You\'re not alone.' },
+  pain_icon_1: { type: 'string' as const, default: '⏰' },
+  pain_icon_2: { type: 'string' as const, default: '🔗' },
+  pain_icon_3: { type: 'string' as const, default: '⚠️' },
+  pain_icon_4: { type: 'string' as const, default: '😰' },
+  pain_icon_5: { type: 'string' as const, default: '📉' },
+  pain_icon_6: { type: 'string' as const, default: '🌪️' }
 };
 
 // Parse pain point data from pipe-separated strings
@@ -46,36 +59,10 @@ const parsePainData = (points: string, descriptions?: string): PainPoint[] => {
 };
 
 
-// Pain Point Icon Component
-const PainIcon = ({ index }: { index: number }) => {
-  const icons = [
-    // Clock - Time wasting
-    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-    </svg>,
-    // Disconnect - Integration issues
-    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728L5.636 5.636m12.728 12.728L18 21l-3-3m-5.64-5.64l-.006-.006m1.318-1.318L15 11l-1-1m-3.682-2.682L9 9" />
-    </svg>,
-    // Warning - Missing deadlines
-    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
-    </svg>,
-    // Stress - Burnout
-    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-    </svg>,
-    // Loss - Losing customers
-    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 17h8m0 0V9m0 8l-8-8-4 4-6-6" />
-    </svg>,
-    // Chaos - Overwhelm
-    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
-    </svg>
-  ];
-  
-  return icons[index % icons.length];
+// Get pain icon for specific index
+const getPainIcon = (index: number, blockContent: StackedPainBulletsContent) => {
+  const iconFields = ['pain_icon_1', 'pain_icon_2', 'pain_icon_3', 'pain_icon_4', 'pain_icon_5', 'pain_icon_6'];
+  return blockContent[iconFields[index] as keyof StackedPainBulletsContent] || '⚠️';
 };
 
 // Individual Pain Point Item
@@ -87,6 +74,8 @@ const PainPointItem = ({
   colorTokens,
   backgroundType,
   sectionBackground,
+  blockContent,
+  handleContentUpdate,
   onPointEdit,
   onDescriptionEdit
 }: {
@@ -97,6 +86,8 @@ const PainPointItem = ({
   colorTokens: any;
   backgroundType: any;
   sectionBackground: any;
+  blockContent: StackedPainBulletsContent;
+  handleContentUpdate: (field: keyof StackedPainBulletsContent, value: any) => void;
   onPointEdit: (index: number, value: string) => void;
   onDescriptionEdit: (index: number, value: string) => void;
 }) => {
@@ -104,8 +95,21 @@ const PainPointItem = ({
     <div className="group flex items-start space-x-4 p-6 bg-white rounded-lg border border-red-200 hover:border-red-300 hover:shadow-md transition-all duration-300">
       
       {/* Pain Icon */}
-      <div className="flex-shrink-0 w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center text-red-600 group-hover:bg-red-200 transition-colors duration-300">
-        <PainIcon index={index} />
+      <div className="flex-shrink-0 w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center text-red-600 group-hover:bg-red-200 transition-colors duration-300 group/icon-edit relative">
+        <IconEditableText
+          mode={mode}
+          value={getPainIcon(index, blockContent)}
+          onEdit={(value) => {
+            const iconField = `pain_icon_${index + 1}` as keyof StackedPainBulletsContent;
+            handleContentUpdate(iconField, value);
+          }}
+          backgroundType={backgroundType as any}
+          colorTokens={colorTokens}
+          iconSize="lg"
+          className="text-2xl"
+          sectionId={sectionId}
+          elementKey={`pain_icon_${index + 1}`}
+        />
       </div>
       
       {/* Pain Content */}
@@ -242,6 +246,8 @@ export default function StackedPainBullets(props: LayoutComponentProps) {
               colorTokens={colorTokens}
               backgroundType={backgroundType}
               sectionBackground={sectionBackground}
+              blockContent={blockContent}
+              handleContentUpdate={handleContentUpdate}
               onPointEdit={handlePointEdit}
               onDescriptionEdit={handleDescriptionEdit}
             />

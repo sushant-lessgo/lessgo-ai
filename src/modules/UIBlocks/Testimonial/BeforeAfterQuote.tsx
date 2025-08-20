@@ -6,6 +6,7 @@ import {
   EditableAdaptiveHeadline, 
   EditableAdaptiveText
 } from '@/components/layout/EditableContent';
+import IconEditableText from '@/components/ui/IconEditableText';
 import { 
   CTAButton,
   TrustIndicators,
@@ -38,6 +39,11 @@ interface BeforeAfterQuoteContent {
   roi_label?: string;
   guarantee_text?: string;
   implementation_text?: string;
+  before_icon?: string;
+  after_icon?: string;
+  metrics_icon?: string;
+  guarantee_icon?: string;
+  implementation_icon?: string;
 }
 
 const CONTENT_SCHEMA = {
@@ -136,6 +142,26 @@ const CONTENT_SCHEMA = {
   implementation_text: {
     type: 'string' as const,
     default: 'Fast implementation'
+  },
+  before_icon: {
+    type: 'string' as const,
+    default: '❌'
+  },
+  after_icon: {
+    type: 'string' as const,
+    default: '✅'
+  },
+  metrics_icon: {
+    type: 'string' as const,
+    default: '📈'
+  },
+  guarantee_icon: {
+    type: 'string' as const,
+    default: '✅'
+  },
+  implementation_icon: {
+    type: 'string' as const,
+    default: '⚡'
   }
 };
 
@@ -222,10 +248,18 @@ export default function BeforeAfterQuote(props: LayoutComponentProps) {
         {/* Before */}
         <div className="p-6 bg-red-50">
           <div className="flex items-center space-x-2 mb-4">
-            <div className="w-8 h-8 rounded-full bg-red-500 flex items-center justify-center">
-              <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
+            <div className="w-8 h-8 rounded-full bg-red-500 flex items-center justify-center group/icon-edit relative">
+              <IconEditableText
+                mode={mode}
+                value={blockContent.before_icon || '❌'}
+                onEdit={(value) => handleContentUpdate('before_icon', value)}
+                backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
+                colorTokens={colorTokens}
+                iconSize="md"
+                className="text-lg text-white"
+                sectionId={sectionId}
+                elementKey="before_icon"
+              />
             </div>
             <span className="font-semibold text-red-700">Before</span>
           </div>
@@ -237,10 +271,18 @@ export default function BeforeAfterQuote(props: LayoutComponentProps) {
         {/* After */}
         <div className="p-6 bg-green-50">
           <div className="flex items-center space-x-2 mb-4">
-            <div className="w-8 h-8 rounded-full bg-green-500 flex items-center justify-center">
-              <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-              </svg>
+            <div className="w-8 h-8 rounded-full bg-green-500 flex items-center justify-center group/icon-edit relative">
+              <IconEditableText
+                mode={mode}
+                value={blockContent.after_icon || '✅'}
+                onEdit={(value) => handleContentUpdate('after_icon', value)}
+                backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
+                colorTokens={colorTokens}
+                iconSize="md"
+                className="text-lg text-white"
+                sectionId={sectionId}
+                elementKey="after_icon"
+              />
             </div>
             <span className="font-semibold text-green-700">After</span>
           </div>
@@ -255,9 +297,19 @@ export default function BeforeAfterQuote(props: LayoutComponentProps) {
         <div className="px-6 py-3 bg-gradient-to-r from-blue-50 to-indigo-50 border-t border-gray-200">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2">
-              <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
-              </svg>
+              <div className="group/icon-edit relative">
+                <IconEditableText
+                  mode={mode}
+                  value={blockContent.metrics_icon || '📈'}
+                  onEdit={(value) => handleContentUpdate('metrics_icon', value)}
+                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
+                  colorTokens={colorTokens}
+                  iconSize="sm"
+                  className="text-base"
+                  sectionId={sectionId}
+                  elementKey="metrics_icon"
+                />
+              </div>
               <span className="text-sm font-semibold text-blue-700">{transformation.metric}</span>
             </div>
             {transformation.timeframe && (
@@ -557,9 +609,19 @@ export default function BeforeAfterQuote(props: LayoutComponentProps) {
             
             <div className="mt-6 flex justify-center items-center space-x-6">
               <div className="flex items-center space-x-2">
-                <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
+                <div className="group/icon-edit relative">
+                  <IconEditableText
+                    mode={mode}
+                    value={blockContent.guarantee_icon || '✅'}
+                    onEdit={(value) => handleContentUpdate('guarantee_icon', value)}
+                    backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
+                    colorTokens={colorTokens}
+                    iconSize="md"
+                    className="text-xl"
+                    sectionId={sectionId}
+                    elementKey="guarantee_icon"
+                  />
+                </div>
                 <EditableAdaptiveText
                   mode={mode}
                   value={blockContent.guarantee_text || ''}
@@ -576,9 +638,19 @@ export default function BeforeAfterQuote(props: LayoutComponentProps) {
               </div>
               <div className="w-px h-6 bg-gray-300" />
               <div className="flex items-center space-x-2">
-                <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                </svg>
+                <div className="group/icon-edit relative">
+                  <IconEditableText
+                    mode={mode}
+                    value={blockContent.implementation_icon || '⚡'}
+                    onEdit={(value) => handleContentUpdate('implementation_icon', value)}
+                    backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
+                    colorTokens={colorTokens}
+                    iconSize="md"
+                    className="text-xl"
+                    sectionId={sectionId}
+                    elementKey="implementation_icon"
+                  />
+                </div>
                 <EditableAdaptiveText
                   mode={mode}
                   value={blockContent.implementation_text || ''}

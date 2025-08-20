@@ -5,6 +5,7 @@ import {
   EditableAdaptiveHeadline, 
   EditableAdaptiveText 
 } from '@/components/layout/EditableContent';
+import IconEditableText from '@/components/ui/IconEditableText';
 import { LayoutComponentProps } from '@/types/storeTypes';
 
 interface PersonaResultPanelsProps extends LayoutComponentProps {}
@@ -29,6 +30,12 @@ interface PersonaResultPanelsContent {
   key_benefits: string;
   subheadline?: string;
   footer_text?: string;
+  persona_icon_1?: string;
+  persona_icon_2?: string;
+  persona_icon_3?: string;
+  persona_icon_4?: string;
+  persona_icon_5?: string;
+  persona_icon_6?: string;
 }
 
 // Content schema for PersonaResultPanels layout
@@ -40,7 +47,13 @@ const CONTENT_SCHEMA = {
   result_descriptions: { type: 'string' as const, default: 'Generate qualified leads at scale with automated campaigns|Close more deals with intelligent sales automation|Streamline operations and eliminate wasteful processes|Ship features faster with automated workflows' },
   key_benefits: { type: 'string' as const, default: 'Better targeting,Higher conversion,Real-time analytics|Shorter sales cycles,Better forecasting,Automated follow-ups|Process optimization,Resource savings,Team productivity|Faster deployment,Better quality,Reduced errors' },
   subheadline: { type: 'string' as const, default: 'See how different teams achieve breakthrough results with our solution' },
-  footer_text: { type: 'string' as const, default: 'Tailored results for every team in your organization' }
+  footer_text: { type: 'string' as const, default: 'Tailored results for every team in your organization' },
+  persona_icon_1: { type: 'string' as const, default: '📢' },
+  persona_icon_2: { type: 'string' as const, default: '📈' },
+  persona_icon_3: { type: 'string' as const, default: '⚙️' },
+  persona_icon_4: { type: 'string' as const, default: '⚡' },
+  persona_icon_5: { type: 'string' as const, default: '👥' },
+  persona_icon_6: { type: 'string' as const, default: '👤' }
 };
 
 // Parse persona panel data from pipe-separated strings
@@ -135,7 +148,8 @@ const PersonaPanel = ({
   onRoleEdit,
   onMetricEdit,
   onDescriptionEdit,
-  onBenefitsEdit
+  onBenefitsEdit,
+  onPersonaIconEdit
 }: {
   panel: PersonaPanel;
   index: number;
@@ -146,6 +160,7 @@ const PersonaPanel = ({
   onMetricEdit: (index: number, value: string) => void;
   onDescriptionEdit: (index: number, value: string) => void;
   onBenefitsEdit: (index: number, value: string) => void;
+  onPersonaIconEdit: (index: number, value: string) => void;
 }) => {
   const { getTextStyle } = useTypography();
   const colors = getPersonaColor(index);
@@ -158,7 +173,17 @@ const PersonaPanel = ({
       <div className="flex items-center space-x-4 mb-6">
         {/* Icon */}
         <div className={`w-16 h-16 ${colors.accent} rounded-2xl flex items-center justify-center text-white group-hover:scale-110 transition-transform duration-300`}>
-          {getPersonaIcon(panel.persona)}
+          <IconEditableText
+            mode={mode}
+            value={getPersonaIcon(index)}
+            onEdit={(value) => handlePersonaIconEdit(index, value)}
+            backgroundType="neutral"
+            colorTokens={{}}
+            iconSize="lg"
+            className="text-white text-2xl"
+            sectionId={sectionId}
+            elementKey={`persona_icon_${index + 1}`}
+          />
         </div>
         
         {/* Persona Info */}
@@ -305,6 +330,18 @@ export default function PersonaResultPanels(props: PersonaResultPanelsProps) {
     handleContentUpdate('personas', personaList.join('|'));
   };
 
+  const handlePersonaIconEdit = (index: number, value: string) => {
+    const iconField = `persona_icon_${index + 1}` as keyof PersonaResultPanelsContent;
+    handleContentUpdate(iconField, value);
+  };
+
+  // Get persona icon from content or default
+  const getPersonaIcon = (index: number): string => {
+    const iconFields = ['persona_icon_1', 'persona_icon_2', 'persona_icon_3', 'persona_icon_4', 'persona_icon_5', 'persona_icon_6'];
+    const iconField = iconFields[index] as keyof PersonaResultPanelsContent;
+    return blockContent[iconField] || ['📢', '📈', '⚙️', '⚡', '👥', '👤'][index] || '👤';
+  };
+
   const handleRoleEdit = (index: number, value: string) => {
     const roleList = blockContent.roles.split('|');
     roleList[index] = value;
@@ -388,6 +425,7 @@ export default function PersonaResultPanels(props: PersonaResultPanelsProps) {
               onMetricEdit={handleMetricEdit}
               onDescriptionEdit={handleDescriptionEdit}
               onBenefitsEdit={handleBenefitsEdit}
+              onPersonaIconEdit={handlePersonaIconEdit}
             />
           ))}
         </div>

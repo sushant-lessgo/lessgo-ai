@@ -6,6 +6,7 @@ import {
   EditableAdaptiveHeadline, 
   EditableAdaptiveText
 } from '@/components/layout/EditableContent';
+import IconEditableText from '@/components/ui/IconEditableText';
 import { 
   CTAButton,
   TrustIndicators 
@@ -32,6 +33,9 @@ interface PullQuoteStackContent {
   solution_description?: string;
   result_description?: string;
   community_message?: string;
+  pain_icon?: string;
+  solution_icon?: string;
+  result_icon?: string;
 }
 
 const CONTENT_SCHEMA = {
@@ -110,6 +114,18 @@ const CONTENT_SCHEMA = {
   community_message: {
     type: 'string' as const,
     default: 'Every story above started with the same frustration you\'re feeling right now. The difference? They found a solution that actually works.'
+  },
+  pain_icon: {
+    type: 'string' as const,
+    default: '⚠️'
+  },
+  solution_icon: {
+    type: 'string' as const,
+    default: '⚡'
+  },
+  result_icon: {
+    type: 'string' as const,
+    default: '❤️'
   }
 };
 
@@ -381,10 +397,18 @@ export default function PullQuoteStack(props: LayoutComponentProps) {
                 
                 <div className="grid md:grid-cols-3 gap-8 mb-8">
                   <div className="text-center">
-                    <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-red-500/20 flex items-center justify-center">
-                      <svg className="w-8 h-8 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 15.5c-.77.833.192 2.5 1.732 2.5z" />
-                      </svg>
+                    <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-red-500/20 flex items-center justify-center group/icon-edit relative">
+                      <IconEditableText
+                        mode={mode}
+                        value={blockContent.pain_icon || '⚠️'}
+                        onEdit={(value) => handleContentUpdate('pain_icon', value)}
+                        backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
+                        colorTokens={colorTokens}
+                        iconSize="xl"
+                        className="text-3xl"
+                        sectionId={sectionId}
+                        elementKey="pain_icon"
+                      />
                     </div>
                     <EditableAdaptiveText
                       mode={mode}
@@ -415,10 +439,18 @@ export default function PullQuoteStack(props: LayoutComponentProps) {
                   </div>
                   
                   <div className="text-center">
-                    <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-yellow-500/20 flex items-center justify-center">
-                      <svg className="w-8 h-8 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                      </svg>
+                    <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-yellow-500/20 flex items-center justify-center group/icon-edit relative">
+                      <IconEditableText
+                        mode={mode}
+                        value={blockContent.solution_icon || '⚡'}
+                        onEdit={(value) => handleContentUpdate('solution_icon', value)}
+                        backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
+                        colorTokens={colorTokens}
+                        iconSize="xl"
+                        className="text-3xl"
+                        sectionId={sectionId}
+                        elementKey="solution_icon"
+                      />
                     </div>
                     <EditableAdaptiveText
                       mode={mode}
@@ -449,10 +481,18 @@ export default function PullQuoteStack(props: LayoutComponentProps) {
                   </div>
                   
                   <div className="text-center">
-                    <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-green-500/20 flex items-center justify-center">
-                      <svg className="w-8 h-8 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                      </svg>
+                    <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-green-500/20 flex items-center justify-center group/icon-edit relative">
+                      <IconEditableText
+                        mode={mode}
+                        value={blockContent.result_icon || '❤️'}
+                        onEdit={(value) => handleContentUpdate('result_icon', value)}
+                        backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
+                        colorTokens={colorTokens}
+                        iconSize="xl"
+                        className="text-3xl"
+                        sectionId={sectionId}
+                        elementKey="result_icon"
+                      />
                     </div>
                     <EditableAdaptiveText
                       mode={mode}

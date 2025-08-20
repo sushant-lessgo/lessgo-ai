@@ -5,6 +5,7 @@ import {
   EditableAdaptiveHeadline, 
   EditableAdaptiveText 
 } from '@/components/layout/EditableContent';
+import IconEditableText from '@/components/ui/IconEditableText';
 import { LayoutComponentProps } from '@/types/storeTypes';
 
 interface TimelineResultsProps extends LayoutComponentProps {}
@@ -27,6 +28,9 @@ interface TimelineResultsContent {
   metrics?: string;
   subheadline?: string;
   timeline_period?: string;
+  metric_icon?: string;
+  timeline_icon?: string;
+  success_icon?: string;
 }
 
 // Content schema for TimelineResults layout
@@ -37,7 +41,10 @@ const CONTENT_SCHEMA = {
   descriptions: { type: 'string' as const, default: 'Quick 15-minute setup gets you running immediately|See first productivity gains and time savings|Workflows optimized, team fully onboarded|Maximum efficiency reached, processes perfected|Scaling confidently with automated systems|Industry-leading performance and recognition' },
   metrics: { type: 'string' as const, default: '15 min setup|20% faster|50% efficiency|80% automation|3x growth|#1 in category' },
   subheadline: { type: 'string' as const, default: 'Track your transformation journey from day one to market leadership' },
-  timeline_period: { type: 'string' as const, default: 'Typical customer journey over 12 months' }
+  timeline_period: { type: 'string' as const, default: 'Typical customer journey over 12 months' },
+  metric_icon: { type: 'string' as const, default: '📈' },
+  timeline_icon: { type: 'string' as const, default: '⏰' },
+  success_icon: { type: 'string' as const, default: '✅' }
 };
 
 // Parse timeline data from pipe-separated strings
@@ -165,9 +172,17 @@ const TimelineMilestone = ({
         {/* Optional Metric */}
         {(milestone.metric || mode === 'edit') && (
           <div className="inline-flex items-center px-4 py-2 bg-green-50 border border-green-200 rounded-lg">
-            <svg className="w-4 h-4 mr-2 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
-            </svg>
+            <IconEditableText
+              mode={mode}
+              value={blockContent.metric_icon || '📈'}
+              onEdit={(value) => handleContentUpdate('metric_icon', value)}
+              backgroundType="neutral"
+              colorTokens={{}}
+              iconSize="sm"
+              className="text-green-600 text-sm mr-2"
+              sectionId={sectionId}
+              elementKey="metric_icon"
+            />
             {mode === 'edit' ? (
               <div 
                 contentEditable
@@ -282,9 +297,17 @@ export default function TimelineResults(props: TimelineResultsProps) {
           {/* Timeline Period */}
           {(blockContent.timeline_period || mode === 'edit') && (
             <div className="inline-flex items-center px-4 py-2 bg-indigo-50 border border-indigo-200 rounded-full text-indigo-800">
-              <svg className="w-4 h-4 mr-2 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
+              <IconEditableText
+                mode={mode}
+                value={blockContent.timeline_icon || '⏰'}
+                onEdit={(value) => handleContentUpdate('timeline_icon', value)}
+                backgroundType="neutral"
+                colorTokens={{}}
+                iconSize="sm"
+                className="text-indigo-600 text-sm mr-2"
+                sectionId={sectionId}
+                elementKey="timeline_icon"
+              />
               {mode === 'edit' ? (
                 <div 
                   contentEditable
@@ -323,9 +346,17 @@ export default function TimelineResults(props: TimelineResultsProps) {
         <div className="mt-12 text-center">
           <div className="inline-flex items-center px-6 py-4 bg-gradient-to-r from-emerald-50 to-green-50 border border-emerald-200 rounded-2xl">
             <div className="w-12 h-12 bg-gradient-to-br from-emerald-500 to-green-600 rounded-full flex items-center justify-center mr-4">
-              <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
+              <IconEditableText
+                mode={mode}
+                value={blockContent.success_icon || '✅'}
+                onEdit={(value) => handleContentUpdate('success_icon', value)}
+                backgroundType="neutral"
+                colorTokens={{}}
+                iconSize="md"
+                className="text-white text-xl"
+                sectionId={sectionId}
+                elementKey="success_icon"
+              />
             </div>
             <div className="text-left">
               <div className="font-bold text-emerald-900 text-lg">Success Guaranteed</div>

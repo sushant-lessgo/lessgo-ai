@@ -5,6 +5,7 @@ import {
   EditableAdaptiveHeadline, 
   EditableAdaptiveText
 } from '@/components/layout/EditableContent';
+import IconEditableText from '@/components/ui/IconEditableText';
 import { 
   CTAButton,
   TrustIndicators 
@@ -40,6 +41,11 @@ interface ToggleableMonthlyYearlyContent {
   platform_feature_4_desc?: string;
   platform_features_title?: string;
   show_platform_features?: boolean;
+  // Platform feature icons
+  platform_feature_1_icon?: string;
+  platform_feature_2_icon?: string;
+  platform_feature_3_icon?: string;
+  platform_feature_4_icon?: string;
 }
 
 const CONTENT_SCHEMA = {
@@ -151,7 +157,12 @@ const CONTENT_SCHEMA = {
   show_platform_features: { 
     type: 'boolean' as const, 
     default: true 
-  }
+  },
+  // Platform feature icons
+  platform_feature_1_icon: { type: 'string' as const, default: '✅' },
+  platform_feature_2_icon: { type: 'string' as const, default: '🛡️' },
+  platform_feature_3_icon: { type: 'string' as const, default: '💬' },
+  platform_feature_4_icon: { type: 'string' as const, default: '⚡' }
 };
 
 export default function ToggleableMonthlyYearly(props: LayoutComponentProps) {
@@ -221,25 +232,25 @@ export default function ToggleableMonthlyYearly(props: LayoutComponentProps) {
   const getPlatformFeatures = () => {
     const features = [
       {
-        icon: blockContent.platform_feature_1 || 'free-trial',
+        icon: blockContent.platform_feature_1_icon || '✅',
         title: blockContent.platform_feature_1_title || '14-Day Free Trial',
         description: blockContent.platform_feature_1_desc || 'No credit card required',
         bgColor: 'bg-green-500'
       },
       {
-        icon: blockContent.platform_feature_2 || 'secure-reliable',
+        icon: blockContent.platform_feature_2_icon || '🛡️',
         title: blockContent.platform_feature_2_title || 'Secure & Reliable',
         description: blockContent.platform_feature_2_desc || 'Enterprise-grade security',
         bgColor: 'bg-blue-500'
       },
       {
-        icon: blockContent.platform_feature_3 || 'support',
+        icon: blockContent.platform_feature_3_icon || '💬',
         title: blockContent.platform_feature_3_title || '24/7 Support',
         description: blockContent.platform_feature_3_desc || 'Always here to help',
         bgColor: 'bg-purple-500'
       },
       {
-        icon: blockContent.platform_feature_4 || 'easy-migration',
+        icon: blockContent.platform_feature_4_icon || '⚡',
         title: blockContent.platform_feature_4_title || 'Easy Migration',
         description: blockContent.platform_feature_4_desc || 'Switch plans anytime',
         bgColor: 'bg-orange-500'
@@ -254,36 +265,6 @@ export default function ToggleableMonthlyYearly(props: LayoutComponentProps) {
     return features;
   };
 
-  const getPlatformFeatureIcon = (iconName: string) => {
-    const icons = {
-      'free-trial': (
-        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-        </svg>
-      ),
-      'secure-reliable': (
-        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-        </svg>
-      ),
-      'support': (
-        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z" />
-        </svg>
-      ),
-      'easy-migration': (
-        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-        </svg>
-      ),
-      'default': (
-        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-        </svg>
-      )
-    };
-    return icons[iconName as keyof typeof icons] || icons.default;
-  };
 
   const platformFeatures = getPlatformFeatures();
 
@@ -568,12 +549,22 @@ export default function ToggleableMonthlyYearly(props: LayoutComponentProps) {
                     {[1, 2, 3, 4].map((index) => {
                       const featureTitle = blockContent[`platform_feature_${index}_title` as keyof ToggleableMonthlyYearlyContent] || '';
                       const featureDesc = blockContent[`platform_feature_${index}_desc` as keyof ToggleableMonthlyYearlyContent] || '';
-                      const featureIcon = blockContent[`platform_feature_${index}` as keyof ToggleableMonthlyYearlyContent] || 'default';
+                      const featureIcon = blockContent[`platform_feature_${index}_icon` as keyof ToggleableMonthlyYearlyContent] || ['✅', '🛡️', '💬', '⚡'][index - 1] || '🎯';
                       
                       return (
                         <div key={index} className="text-center relative group/platform-feature">
-                          <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-gray-100 flex items-center justify-center text-white">
-                            {getPlatformFeatureIcon(featureIcon)}
+                          <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-gray-100 flex items-center justify-center group/icon-edit">
+                            <IconEditableText
+                              mode={mode}
+                              value={featureIcon}
+                              onEdit={(value) => handleContentUpdate(`platform_feature_${index}_icon`, value)}
+                              backgroundType="neutral"
+                              colorTokens={colorTokens}
+                              iconSize="md"
+                              className="text-2xl"
+                              sectionId={sectionId}
+                              elementKey={`platform_feature_${index}_icon`}
+                            />
                           </div>
                           <EditableAdaptiveText
                             mode={mode}
@@ -629,7 +620,7 @@ export default function ToggleableMonthlyYearly(props: LayoutComponentProps) {
                   {platformFeatures.map((feature, index) => (
                     <div key={index} className="text-center">
                       <div className={`w-12 h-12 mx-auto mb-3 rounded-full ${feature.bgColor} flex items-center justify-center text-white`}>
-                        {getPlatformFeatureIcon(feature.icon)}
+                        <span className="text-xl">{feature.icon}</span>
                       </div>
                       <div className="font-semibold text-gray-900">{feature.title}</div>
                       <div className={`text-sm ${mutedTextColor}`}>{feature.description}</div>
@@ -705,7 +696,11 @@ export const componentMeta = {
     { key: 'platform_feature_4_desc', label: 'Platform Feature 4 Description', type: 'text', required: false },
     { key: 'show_platform_features', label: 'Show Platform Features Section', type: 'boolean', required: false },
     { key: 'supporting_text', label: 'Supporting Text', type: 'textarea', required: false },
-    { key: 'trust_items', label: 'Trust Indicators (pipe separated)', type: 'text', required: false }
+    { key: 'trust_items', label: 'Trust Indicators (pipe separated)', type: 'text', required: false },
+    { key: 'platform_feature_1_icon', label: 'Platform Feature 1 Icon', type: 'text', required: false },
+    { key: 'platform_feature_2_icon', label: 'Platform Feature 2 Icon', type: 'text', required: false },
+    { key: 'platform_feature_3_icon', label: 'Platform Feature 3 Icon', type: 'text', required: false },
+    { key: 'platform_feature_4_icon', label: 'Platform Feature 4 Icon', type: 'text', required: false }
   ],
   
   features: [
