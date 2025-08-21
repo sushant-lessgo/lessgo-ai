@@ -32,13 +32,17 @@ export function TaxonomyModalManager() {
   const { 
     validatedFields, 
     hiddenInferredFields, 
-    confirmField
+    confirmField,
+    removePendingRevalidationField
     // updateHiddenField 
   } = useOnboardingStore();
 
   const { triggerAutoSave, updateOnboardingData } = useEditStore();
 
   const openFieldModal = useCallback((fieldName: AnyFieldName, currentValue?: string) => {
+    // Remove this field from the queue if it's there (prevents duplicate opening)
+    setModalQueue(prev => prev.filter(f => f !== fieldName));
+    
     const modalType = getModalTypeForField(fieldName);
     
     setModalState({
@@ -100,16 +104,20 @@ export function TaxonomyModalManager() {
       confirmField(displayName, value);
     }
 
+    // Remove from pending revalidation since user has confirmed the field
+    removePendingRevalidationField(fieldName as CanonicalFieldName);
+
+    // Handle field dependencies BEFORE syncing to edit store
+    handleFieldDependency(fieldName as any, value);
+
     // Immediately sync to edit store for left panel reactivity
     const updatedOnboardingState = useOnboardingStore.getState();
     updateOnboardingData({
       validatedFields: updatedOnboardingState.validatedFields,
       hiddenInferredFields: updatedOnboardingState.hiddenInferredFields,
       confirmedFields: updatedOnboardingState.confirmedFields,
+      pendingRevalidationFields: updatedOnboardingState.pendingRevalidationFields,
     });
-
-    // Handle field dependencies
-    handleFieldDependency(fieldName as any, value);
     
     // Trigger auto-save
     triggerAutoSave();
@@ -121,8 +129,14 @@ export function TaxonomyModalManager() {
   const handleFieldDependency = (updatedField: CanonicalFieldName, newValue: string) => {
     // Market category change forces subcategory selection
     if (updatedField === 'marketCategory') {
-      // Add subcategory to queue for auto-opening
-      setModalQueue(prev => [...prev, 'marketSubcategory']);
+      // Add subcategory to queue - it will open automatically when current modal closes
+      // Prevent duplicates in the queue
+      setModalQueue(prev => {
+        if (!prev.includes('marketSubcategory')) {
+          return [...prev, 'marketSubcategory'];
+        }
+        return prev;
+      });
     }
   };
 

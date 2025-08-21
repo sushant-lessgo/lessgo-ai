@@ -27,6 +27,7 @@ type OnboardingStore = {
   stepIndex: number;
   featuresFromAI: FeatureItem[]; // ✅ Already properly typed
   forceManualFields: CanonicalFieldName[]; // ✅ Track fields that should bypass auto-confirmation
+  pendingRevalidationFields: CanonicalFieldName[]; // ✅ Track fields needing revalidation due to dependencies
 
   setOneLiner: (input: string) => void;
   setConfirmedFields: (fields: Partial<Record<CanonicalFieldName, ConfirmedFieldData>>) => void; // ✅ Type-safe
@@ -38,6 +39,9 @@ type OnboardingStore = {
   reopenFieldForEditing: (canonicalField: CanonicalFieldName) => void; // ✅ Type-safe parameter
   addForceManualField: (canonicalField: CanonicalFieldName) => void; // ✅ Add field to force manual list
   isFieldForceManual: (canonicalField: CanonicalFieldName) => boolean; // ✅ Check if field should be forced manual
+  addPendingRevalidationField: (canonicalField: CanonicalFieldName) => void; // ✅ Add field to pending revalidation
+  removePendingRevalidationField: (canonicalField: CanonicalFieldName) => void; // ✅ Remove field from pending revalidation
+  isFieldPendingRevalidation: (canonicalField: CanonicalFieldName) => boolean; // ✅ Check if field needs revalidation
   reset: () => void;
 };
 
@@ -60,6 +64,7 @@ export const useOnboardingStore = create<OnboardingStore>((set, get) => ({
   stepIndex: 0,
   featuresFromAI: [],
   forceManualFields: [], // ✅ Initialize empty array for force manual fields
+  pendingRevalidationFields: [], // ✅ Initialize empty array for pending revalidation fields
 
   setOneLiner: (input) => set({ oneLiner: input }),
   
@@ -98,17 +103,30 @@ export const useOnboardingStore = create<OnboardingStore>((set, get) => ({
       let newForceManualFields = [...state.forceManualFields];
       
       if (canonicalField === 'marketCategory') {
-        // Market Category changed - invalidate Market Subcategory
-        delete newValidatedFields['marketSubcategory'];
+        // Market Category changed - mark Market Subcategory as needing update instead of deleting
+        // Keep the subcategory visible but mark it as pending revalidation
         if (!newForceManualFields.includes('marketSubcategory')) {
           newForceManualFields.push('marketSubcategory');
         }
-        console.log(`Market Category changed to "${value}" - invalidated Market Subcategory`);
+        console.log(`Market Category changed to "${value}" - Market Subcategory needs revalidation`);
+        
+        // Mark subcategory as pending revalidation instead of deleting
+        if (newValidatedFields['marketSubcategory']) {
+          // Keep existing subcategory but mark as needing revalidation
+          console.log('Keeping existing subcategory visible for revalidation');
+        }
       }
 
       return {
         validatedFields: newValidatedFields,
         forceManualFields: newForceManualFields,
+        // Add subcategory to pending revalidation if market category changed
+        ...(canonicalField === 'marketCategory' && {
+          pendingRevalidationFields: [
+            ...state.pendingRevalidationFields.filter(f => f !== 'marketSubcategory'),
+            'marketSubcategory'
+          ]
+        })
       };
     });
   },
@@ -160,6 +178,29 @@ export const useOnboardingStore = create<OnboardingStore>((set, get) => ({
     return get().forceManualFields.includes(canonicalField);
   },
 
+  // ✅ Add field to pending revalidation list
+  addPendingRevalidationField: (canonicalField) => {
+    set((state) => {
+      const newPendingFields = [...state.pendingRevalidationFields];
+      if (!newPendingFields.includes(canonicalField)) {
+        newPendingFields.push(canonicalField);
+      }
+      return { pendingRevalidationFields: newPendingFields };
+    });
+  },
+
+  // ✅ Remove field from pending revalidation list
+  removePendingRevalidationField: (canonicalField) => {
+    set((state) => ({
+      pendingRevalidationFields: state.pendingRevalidationFields.filter(field => field !== canonicalField)
+    }));
+  },
+
+  // ✅ Check if field is pending revalidation
+  isFieldPendingRevalidation: (canonicalField) => {
+    return get().pendingRevalidationFields.includes(canonicalField);
+  },
+
   setStepIndex: (index) => set({ stepIndex: index }),
   setFeaturesFromAI: (features) => set({ featuresFromAI: features }),
 
@@ -172,6 +213,7 @@ export const useOnboardingStore = create<OnboardingStore>((set, get) => ({
       stepIndex: 0,
       featuresFromAI: [],
       forceManualFields: [], // ✅ Reset force manual fields
+      pendingRevalidationFields: [], // ✅ Reset pending revalidation fields
     }),
 }));
 

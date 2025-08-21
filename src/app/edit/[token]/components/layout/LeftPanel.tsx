@@ -30,6 +30,8 @@ export function LeftPanel({ tokenId }: LeftPanelProps) {
     reopenFieldForEditing,
     setValidatedFields,
     setHiddenInferredFields,
+    isFieldPendingRevalidation,
+    removePendingRevalidationField,
   } = useOnboardingStore();
   
   // Get onboarding data from onboarding store (for fallback)
@@ -114,6 +116,9 @@ export function LeftPanel({ tokenId }: LeftPanelProps) {
   }, [isResizing]);
 
   const handleEditField = (fieldName: AnyFieldName) => {
+    // Clear pending revalidation status when manually opening a field
+    removePendingRevalidationField(fieldName as CanonicalFieldName);
+    
     // Use global modal manager to open field modal
     const modalManager = (window as any).__taxonomyModalManager;
     if (modalManager) {
@@ -317,6 +322,7 @@ export function LeftPanel({ tokenId }: LeftPanelProps) {
     
     const isAutoConfirmed = originalFieldData && typeof originalFieldData === 'object' && 'confidence' in originalFieldData && originalFieldData.confidence >= 0.85;
     const confidence = (originalFieldData && typeof originalFieldData === 'object' && 'confidence' in originalFieldData) ? originalFieldData.confidence : 1.0;
+    const isPendingRevalidation = isFieldPendingRevalidation(canonicalFieldName);
     
     return {
       canonicalField: canonicalFieldName,
@@ -325,6 +331,7 @@ export function LeftPanel({ tokenId }: LeftPanelProps) {
       isAutoConfirmed,
       confidence: confidence,
       fieldType: 'validated' as const,
+      isPendingRevalidation,
     };
   });
 
@@ -434,19 +441,43 @@ export function LeftPanel({ tokenId }: LeftPanelProps) {
                   </div>
                   
                   <div className="space-y-3">
-                    {validatedFieldsOnly.map(({ canonicalField, displayName, value }) => (
-                      <div key={canonicalField} className="bg-white border border-gray-200 rounded-lg p-4 hover:border-gray-300 transition-colors">
+                    {validatedFieldsOnly.map(({ canonicalField, displayName, value, isPendingRevalidation }) => (
+                      <div key={canonicalField} className={`rounded-lg p-4 hover:border-gray-300 transition-colors ${
+                        isPendingRevalidation 
+                          ? 'bg-amber-50 border-2 border-amber-200' 
+                          : 'bg-white border border-gray-200'
+                      }`}>
                         <div className="flex items-center justify-between mb-2">
-                          <h4 className="text-sm font-medium text-gray-700">{displayName}</h4>
+                          <div className="flex items-center gap-2">
+                            <h4 className="text-sm font-medium text-gray-700">{displayName}</h4>
+                            {isPendingRevalidation && (
+                              <span className="text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full border border-amber-200 flex items-center gap-1">
+                                ⚠️ Needs Update
+                              </span>
+                            )}
+                          </div>
                           <button 
                             onClick={() => handleEditField(canonicalField)}
-                            className="text-xs text-blue-600 hover:text-blue-700 transition-colors flex items-center gap-1"
-                            title="Edit this field"
+                            className={`text-xs transition-colors flex items-center gap-1 ${
+                              isPendingRevalidation
+                                ? 'text-amber-600 hover:text-amber-700 font-medium'
+                                : 'text-blue-600 hover:text-blue-700'
+                            }`}
+                            title={isPendingRevalidation ? "Update this field" : "Edit this field"}
                           >
-                            ✏️ Edit
+                            {isPendingRevalidation ? '🔄 Update' : '✏️ Edit'}
                           </button>
                         </div>
-                        <p className="text-sm text-gray-900 leading-relaxed">{value}</p>
+                        <p className={`text-sm leading-relaxed ${
+                          isPendingRevalidation ? 'text-amber-800' : 'text-gray-900'
+                        }`}>
+                          {value}
+                        </p>
+                        {isPendingRevalidation && (
+                          <p className="text-xs text-amber-600 mt-2 italic">
+                            This field may need updating due to changes in related fields
+                          </p>
+                        )}
                       </div>
                     ))}
                   </div>
