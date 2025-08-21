@@ -111,6 +111,7 @@ export interface LayoutSlice {
   // Section Structure
   sections: string[];
   sectionLayouts: Record<string, string>;
+  sectionSpacing?: Record<string, 'compact' | 'normal' | 'spacious' | 'extra'>; // Section-specific spacing
   
   // Theme System
   theme: Theme;
@@ -120,7 +121,7 @@ export interface LayoutSlice {
   globalSettings: {
     maxWidth: string;
     containerPadding: string;
-    sectionSpacing: string;
+    sectionSpacing: string; // Default global spacing (fallback)
     deviceMode: 'desktop' | 'mobile';
     zoomLevel: number;
   };

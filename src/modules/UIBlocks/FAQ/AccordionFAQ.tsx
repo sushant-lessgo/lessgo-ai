@@ -125,6 +125,8 @@ const FAQAccordionItem = React.memo(({
   backgroundType,
   sectionBackground,
   sectionId,
+  blockContent,
+  handleContentUpdate,
   onRemove
 }: {
   item: FAQItem;

@@ -1,5 +1,6 @@
 import React, { forwardRef } from 'react';
 import type { BackgroundType } from '@/types/sectionBackground';
+import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
 
 interface LayoutSectionProps {
   sectionId: string;
@@ -26,6 +27,28 @@ export const LayoutSection = forwardRef<HTMLElement, LayoutSectionProps>(({
   children,
   editModeInfo,
 }, ref) => {
+  
+  // Get section-specific spacing from store
+  const store = useEditStore();
+  const sectionSpacing = store.sectionSpacing;
+  const spacingValue = sectionSpacing?.[sectionId];
+  
+  // Map spacing values to Tailwind classes
+  const getSpacingClass = (spacing?: string): string => {
+    switch (spacing) {
+      case 'compact':
+        return 'py-12'; // 48px
+      case 'spacious':
+        return 'py-24'; // 96px
+      case 'extra':
+        return 'py-32'; // 128px
+      case 'normal':
+      default:
+        return 'py-16'; // 64px (default)
+    }
+  };
+  
+  const spacingClass = getSpacingClass(spacingValue);
   
   // ✅ CRITICAL FIX: Extract inline style for complex gradients that Tailwind may not process
   const getInlineStyleFromTailwind = (cssClass: string): React.CSSProperties | undefined => {
@@ -64,11 +87,12 @@ export const LayoutSection = forwardRef<HTMLElement, LayoutSectionProps>(({
     <>
       <section 
         ref={ref}
-        className={`py-16 px-4 ${finalClassName} ${className}`}
+        className={`${spacingClass} px-4 ${finalClassName} ${className}`}
         style={inlineStyle}
         data-section-id={sectionId}
         data-section-type={sectionType}
         data-background-type={backgroundType}
+        data-spacing={spacingValue || 'normal'}
       >
         {children}
       </section>

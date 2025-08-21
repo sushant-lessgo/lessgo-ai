@@ -10,6 +10,7 @@ import { buildFullPrompt } from '@/modules/prompt/buildPrompt';
 import { parseAiResponse } from '@/modules/prompt/parseAiResponse';
 import { autoSaveDraft } from '@/utils/autoSaveDraft';
 import { generateCompleteBackgroundSystem } from '@/modules/Design/background/backgroundIntegration';
+import { calculateSectionSpacing } from '@/modules/sections/objectionFlowEngine';
 // Progress steps for UX - Customer psychology focused
 const PROGRESS_STEPS = [
   { id: 1, label: "Getting into your customer's mind...", duration: 800 },
@@ -415,6 +416,12 @@ export function usePageGeneration(tokenId: string) {
       
       // Use initializeSections for fresh setup instead of reorderSections
       storeState.initializeSections(result.sections, result.sectionLayouts);
+
+      // Calculate and apply smart spacing for sections
+      const sectionSpacing = calculateSectionSpacing(result.sections);
+      
+      // Update store with spacing information
+      editStore.setState({ sectionSpacing });
 
       // Update meta data - Create proper meta object
       const metaData = {

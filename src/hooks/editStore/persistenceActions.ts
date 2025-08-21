@@ -80,6 +80,7 @@ export function createPersistenceActions(set: any, get: any) {
             
             state.sections = contentToLoad.sections;
             state.sectionLayouts = contentToLoad.sectionLayouts || {};
+            state.sectionSpacing = contentToLoad.sectionSpacing || {};
             state.content = contentToLoad.content || {};
             
             // Log section/content match for debugging
@@ -159,6 +160,7 @@ export function createPersistenceActions(set: any, get: any) {
         slug: state.slug,
         sections: state.sections,
         sectionLayouts: state.sectionLayouts,
+        sectionSpacing: state.sectionSpacing,
         content: state.content,
         theme: state.theme,
         globalSettings: state.globalSettings,

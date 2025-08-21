@@ -113,6 +113,7 @@ function createInitialState(tokenId: string): EditStore {
     // Layout Slice
     sections: [] as string[],
     sectionLayouts: {} as Record<string, string>,
+    sectionSpacing: {} as Record<string, 'compact' | 'normal' | 'spacious' | 'extra'>,
     theme: defaultTheme,
     globalSettings: {
       maxWidth: '1200px',
@@ -364,6 +365,7 @@ export function createEditStore(tokenId: string) {
             partialize: (state) => ({
               sections: state.sections,
               sectionLayouts: state.sectionLayouts,
+              sectionSpacing: state.sectionSpacing,
               content: state.content,
               theme: state.theme,
               globalSettings: state.globalSettings,

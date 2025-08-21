@@ -78,7 +78,10 @@ const TimelineMilestone = ({
   onTimeframeEdit,
   onTitleEdit,
   onDescriptionEdit,
-  onMetricEdit
+  onMetricEdit,
+  metricIcon,
+  onMetricIconEdit,
+  colorTokens
 }: {
   milestone: TimelineMilestone;
   index: number;
@@ -89,6 +92,9 @@ const TimelineMilestone = ({
   onTitleEdit: (index: number, value: string) => void;
   onDescriptionEdit: (index: number, value: string) => void;
   onMetricEdit: (index: number, value: string) => void;
+  metricIcon?: string;
+  onMetricIconEdit: (value: string) => void;
+  colorTokens: any;
 }) => {
   const { getTextStyle } = useTypography();
   
@@ -174,10 +180,10 @@ const TimelineMilestone = ({
           <div className="inline-flex items-center px-4 py-2 bg-green-50 border border-green-200 rounded-lg">
             <IconEditableText
               mode={mode}
-              value={blockContent.metric_icon || '📈'}
-              onEdit={(value) => handleContentUpdate('metric_icon', value)}
+              value={metricIcon || '📈'}
+              onEdit={onMetricIconEdit}
               backgroundType="neutral"
-              colorTokens={{}}
+              colorTokens={colorTokens}
               iconSize="sm"
               className="text-green-600 text-sm mr-2"
               sectionId={sectionId}
@@ -338,6 +344,9 @@ export default function TimelineResults(props: TimelineResultsProps) {
               onTitleEdit={handleTitleEdit}
               onDescriptionEdit={handleDescriptionEdit}
               onMetricEdit={handleMetricEdit}
+              metricIcon={blockContent.metric_icon}
+              onMetricIconEdit={(value) => handleContentUpdate('metric_icon', value)}
+              colorTokens={colorTokens}
             />
           ))}
         </div>

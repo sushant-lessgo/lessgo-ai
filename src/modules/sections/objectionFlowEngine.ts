@@ -1,5 +1,5 @@
 // objectionFlowEngine.ts - ✅ FIXED: Uses centralized taxonomy types
-import { sectionList } from "./sectionList";
+import { sectionList, type SectionSpacing } from "./sectionList";
 import type {
   AwarenessLevel,
   MarketSophisticationLevel,
@@ -487,4 +487,77 @@ function orderSections(sections: string[]): string[] {
     const orderB = sectionOrderMap.get(b) || 999;
     return orderA - orderB;
   });
+}
+
+// ===== SECTION SPACING CALCULATOR =====
+/**
+ * Calculate optimal spacing between sections based on:
+ * - Content density of current and next section
+ * - Position in the flow (breathing rhythm)
+ * - Special rules (e.g., extra space before CTA)
+ */
+export function calculateSectionSpacing(sections: string[]): Record<string, SectionSpacing> {
+  const spacingMap: Record<string, SectionSpacing> = {};
+  const sectionMetaMap = new Map(sectionList.map(s => [s.id, s]));
+  
+  sections.forEach((sectionId, index) => {
+    const currentSection = sectionMetaMap.get(sectionId);
+    const nextSection = sections[index + 1] ? sectionMetaMap.get(sections[index + 1]) : null;
+    const isLastSection = index === sections.length - 1;
+    
+    // Start with default spacing from section definition
+    let spacing: SectionSpacing = currentSection?.defaultSpacingAfter || 'normal';
+    
+    // Apply smart spacing rules
+    
+    // Rule 1: Hero section always gets spacious spacing
+    if (sectionId === SECTION_IDS.hero) {
+      spacing = 'spacious';
+    }
+    
+    // Rule 2: Extra space before CTA sections
+    if (nextSection?.id === SECTION_IDS.cta || nextSection?.id === SECTION_IDS.closeSection) {
+      spacing = 'extra';
+    }
+    
+    // Rule 3: Compact spacing between light content sections
+    if (currentSection?.contentDensity === 'light' && nextSection?.contentDensity === 'light') {
+      spacing = 'compact';
+    }
+    
+    // Rule 4: Spacious after heavy content sections
+    if (currentSection?.contentDensity === 'heavy') {
+      spacing = 'spacious';
+    }
+    
+    // Rule 5: Create breathing rhythm - every 3rd section gets spacious
+    if ((index + 1) % 3 === 0 && spacing !== 'extra') {
+      spacing = 'spacious';
+    }
+    
+    // Rule 6: Social proof gets compact spacing (it's usually brief)
+    if (sectionId === SECTION_IDS.socialProof) {
+      spacing = 'compact';
+    }
+    
+    // Rule 7: Pricing and FAQ need more breathing room
+    if (sectionId === SECTION_IDS.pricing || sectionId === SECTION_IDS.faq) {
+      spacing = 'spacious';
+    }
+    
+    // Rule 8: Last section doesn't need spacing after it
+    if (isLastSection) {
+      spacing = 'normal';
+    }
+    
+    // Rule 9: Consecutive sections with same background get compact spacing
+    if (currentSection?.background === nextSection?.background && 
+        currentSection?.background !== 'primary-highlight') {
+      spacing = 'compact';
+    }
+    
+    spacingMap[sectionId] = spacing;
+  });
+  
+  return spacingMap;
 }
