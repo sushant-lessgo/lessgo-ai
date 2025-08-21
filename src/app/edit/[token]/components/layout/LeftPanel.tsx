@@ -189,13 +189,31 @@ export function LeftPanel({ tokenId }: LeftPanelProps) {
     }
   };
 
-  // Store original field values on mount
+  // Store original field values on mount and update when fields change
   useEffect(() => {
     const initialFields = { ...validatedFields, ...hiddenInferredFields };
     setOriginalFields(initialFields);
   }, []); // Only run once on mount
   
-  // Sync data between stores - bidirectional sync
+  // Force refresh mechanism: Update original fields when actual field updates occur
+  useEffect(() => {
+    const currentFields = { ...validatedFields, ...hiddenInferredFields };
+    const hasActualChanges = Object.keys(currentFields).some(key => {
+      return (currentFields as any)[key] !== (originalFields as any)[key];
+    });
+    
+    // If we detect field changes from modals, update original fields after a short delay
+    // This prevents infinite loops while ensuring UI reflects latest changes
+    if (hasActualChanges && Object.keys(originalFields).length > 0) {
+      const timeoutId = setTimeout(() => {
+        setOriginalFields(currentFields);
+      }, 100);
+      
+      return () => clearTimeout(timeoutId);
+    }
+  }, [validatedFields, hiddenInferredFields, originalFields]);
+  
+  // Sync data between stores - bidirectional sync with real-time field updates
   useEffect(() => {
     const onboardingStoreHasData = Object.keys(onboardingStoreState.hiddenInferredFields || {}).length > 0 || 
                                    Object.keys(onboardingStoreState.validatedFields || {}).length > 0;
@@ -230,6 +248,28 @@ export function LeftPanel({ tokenId }: LeftPanelProps) {
       }
       if (onboardingData.hiddenInferredFields && Object.keys(onboardingData.hiddenInferredFields).length > 0) {
         setHiddenInferredFields(onboardingData.hiddenInferredFields);
+      }
+    }
+    // Real-time sync: Always sync onboarding store changes to edit store if both have data
+    else if (onboardingStoreHasData && editStoreHasData) {
+      // Check if onboarding store has newer data
+      const onboardingFieldCount = Object.keys(onboardingStoreState.validatedFields || {}).length + 
+                                   Object.keys(onboardingStoreState.hiddenInferredFields || {}).length;
+      const editFieldCount = Object.keys(onboardingData.validatedFields || {}).length + 
+                            Object.keys(onboardingData.hiddenInferredFields || {}).length;
+      
+      // If field counts differ or onboarding store has different values, sync
+      const hasFieldDifferences = onboardingFieldCount !== editFieldCount ||
+        JSON.stringify(onboardingStoreState.validatedFields) !== JSON.stringify(onboardingData.validatedFields) ||
+        JSON.stringify(onboardingStoreState.hiddenInferredFields) !== JSON.stringify(onboardingData.hiddenInferredFields);
+      
+      if (hasFieldDifferences) {
+        // console.log('🔄 Real-time sync: Onboarding store → Edit store');
+        updateOnboardingData?.({
+          validatedFields: { ...onboardingData.validatedFields, ...onboardingStoreState.validatedFields },
+          hiddenInferredFields: { ...onboardingData.hiddenInferredFields, ...onboardingStoreState.hiddenInferredFields },
+          confirmedFields: { ...onboardingData.confirmedFields, ...onboardingStoreState.confirmedFields },
+        });
       }
     }
   }, [onboardingData, onboardingStoreState, updateOnboardingData, setValidatedFields, setHiddenInferredFields]);

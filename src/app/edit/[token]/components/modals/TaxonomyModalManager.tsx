@@ -36,7 +36,7 @@ export function TaxonomyModalManager() {
     // updateHiddenField 
   } = useOnboardingStore();
 
-  const { triggerAutoSave } = useEditStore();
+  const { triggerAutoSave, updateOnboardingData } = useEditStore();
 
   const openFieldModal = useCallback((fieldName: AnyFieldName, currentValue?: string) => {
     const modalType = getModalTypeForField(fieldName);
@@ -86,7 +86,7 @@ export function TaxonomyModalManager() {
 
     const fieldName = modalState.fieldName;
     
-    // Update appropriate store
+    // Update onboarding store first
     if ((validatedFields as any)[fieldName] !== undefined) {
       // Field exists in validatedFields - update via confirmField
       const displayName = getDisplayNameForField(fieldName);
@@ -100,6 +100,14 @@ export function TaxonomyModalManager() {
       confirmField(displayName, value);
     }
 
+    // Immediately sync to edit store for left panel reactivity
+    const updatedOnboardingState = useOnboardingStore.getState();
+    updateOnboardingData({
+      validatedFields: updatedOnboardingState.validatedFields,
+      hiddenInferredFields: updatedOnboardingState.hiddenInferredFields,
+      confirmedFields: updatedOnboardingState.confirmedFields,
+    });
+
     // Handle field dependencies
     handleFieldDependency(fieldName as any, value);
     
@@ -108,7 +116,7 @@ export function TaxonomyModalManager() {
     
     // Close modal
     closeModal();
-  }, [modalState.fieldName, validatedFields, hiddenInferredFields, confirmField, triggerAutoSave, closeModal]);
+  }, [modalState.fieldName, validatedFields, hiddenInferredFields, confirmField, updateOnboardingData, triggerAutoSave, closeModal]);
 
   const handleFieldDependency = (updatedField: CanonicalFieldName, newValue: string) => {
     // Market category change forces subcategory selection
