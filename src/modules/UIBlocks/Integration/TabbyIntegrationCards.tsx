@@ -10,6 +10,7 @@ import {
   EditableAdaptiveText 
 } from '@/components/layout/EditableContent';
 import IconEditableText from '@/components/ui/IconEditableText';
+import LogoEditableComponent from '@/components/ui/LogoEditableComponent';
 import { LayoutComponentProps } from '@/types/storeTypes';
 
 // Content interface for type safety
@@ -28,6 +29,11 @@ interface TabbyIntegrationCardsContent {
   tab_4_title: string;
   tab_4_integrations: string;
   tab_4_icon?: string;
+  // Logo URLs for popular integrations
+  slack_logo?: string;
+  hubspot_logo?: string;
+  github_logo?: string;
+  google_meet_logo?: string;
 }
 
 // Content schema - defines structure and defaults
@@ -87,6 +93,23 @@ const CONTENT_SCHEMA = {
   tab_4_icon: { 
     type: 'string' as const, 
     default: '📈' 
+  },
+  // Logo URLs for popular integrations
+  slack_logo: { 
+    type: 'string' as const, 
+    default: '' 
+  },
+  hubspot_logo: { 
+    type: 'string' as const, 
+    default: '' 
+  },
+  github_logo: { 
+    type: 'string' as const, 
+    default: '' 
+  },
+  google_meet_logo: { 
+    type: 'string' as const, 
+    default: '' 
   }
 };
 
@@ -104,7 +127,9 @@ const IntegrationCard = React.memo(({
   mode,
   onTabIconEdit,
   sectionId,
-  tabIndex
+  tabIndex,
+  blockContent,
+  handleContentUpdate
 }: { 
   name: string; 
   colorTokens: any;
@@ -119,6 +144,8 @@ const IntegrationCard = React.memo(({
   onTabIconEdit: (value: string) => void;
   sectionId: string;
   tabIndex: number;
+  blockContent: TabbyIntegrationCardsContent;
+  handleContentUpdate: (key: keyof TabbyIntegrationCardsContent, value: any) => void;
 }) => {
   // Generate random status and setup time for demo
   const statuses = ['Connected', 'Available', 'Popular'];
@@ -143,19 +170,43 @@ const IntegrationCard = React.memo(({
       onMouseLeave={onLeave}
     >
       {/* Logo Placeholder */}
-      <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center mb-3">
-        <IconEditableText
-          mode={mode}
-          value={tabIcon}
-          onEdit={onTabIconEdit}
-          backgroundType="primary"
-          colorTokens={colorTokens}
-          iconSize="md"
-          className="text-xl text-white"
-          placeholder="🔗"
-          sectionId={sectionId}
-          elementKey={`tab_${tabIndex + 1}_icon`}
-        />
+      <div className="mb-3">
+        {(() => {
+          // Check if this integration has editable logo support
+          const logoKey = `${name.toLowerCase().replace(/\s+/g, '_')}_logo` as keyof TabbyIntegrationCardsContent;
+          const hasEditableLogo = ['slack', 'hubspot', 'github', 'google_meet'].includes(name.toLowerCase().replace(/\s+/g, '_'));
+          
+          if (hasEditableLogo && logoKey in blockContent) {
+            // Use LogoEditableComponent for supported integrations
+            return (
+              <LogoEditableComponent
+                mode={mode}
+                logoUrl={blockContent[logoKey] as string}
+                onLogoChange={(url) => handleContentUpdate(logoKey, url)}
+                companyName={name}
+                size="md"
+              />
+            );
+          }
+          
+          // Use existing IconEditableText for other integrations
+          return (
+            <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
+              <IconEditableText
+                mode={mode}
+                value={tabIcon}
+                onEdit={onTabIconEdit}
+                backgroundType="primary"
+                colorTokens={colorTokens}
+                iconSize="md"
+                className="text-xl text-white"
+                placeholder="🔗"
+                sectionId={sectionId}
+                elementKey={`tab_${tabIndex + 1}_icon`}
+              />
+            </div>
+          );
+        })()}
       </div>
 
       {/* Integration Name */}
@@ -341,6 +392,8 @@ export default function TabbyIntegrationCards(props: LayoutComponentProps) {
               onTabIconEdit={(value) => handleTabIconEdit(activeTab, value)}
               sectionId={sectionId}
               tabIndex={activeTab}
+              blockContent={blockContent}
+              handleContentUpdate={handleContentUpdate}
             />
           ))}
         </div>

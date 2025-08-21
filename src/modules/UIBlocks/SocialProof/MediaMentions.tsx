@@ -11,6 +11,7 @@ import {
 } from '@/components/layout/EditableContent';
 import { LayoutComponentProps } from '@/types/storeTypes';
 import { parsePipeData } from '@/utils/dataParsingUtils';
+import LogoEditableComponent from '@/components/ui/LogoEditableComponent';
 
 // Content interface for type safety
 interface MediaMentionsContent {
@@ -18,6 +19,8 @@ interface MediaMentionsContent {
   subheadline?: string;
   media_outlets: string;
   testimonial_quotes?: string;
+  techcrunch_logo?: string;
+  forbes_logo?: string;
 }
 
 // Media outlet structure
@@ -44,6 +47,14 @@ const CONTENT_SCHEMA = {
   testimonial_quotes: { 
     type: 'string' as const, 
     default: '"Revolutionary approach to solving complex problems"|"Game-changing innovation in the industry"|"Setting new standards for excellence"' 
+  },
+  techcrunch_logo: { 
+    type: 'string' as const, 
+    default: '' 
+  },
+  forbes_logo: { 
+    type: 'string' as const, 
+    default: '' 
   }
 };
 
@@ -181,14 +192,41 @@ export default function MediaMentions(props: LayoutComponentProps) {
 
         {/* Media Outlet Logos Grid */}
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-6 mb-16">
-          {mediaOutlets.slice(0, 12).map((outlet) => (
-            <MediaOutletLogo
-              key={outlet.id}
-              outlet={outlet}
-              dynamicTextColors={dynamicTextColors}
-              bodyStyle={bodyStyle}
-            />
-          ))}
+          {mediaOutlets.slice(0, 12).map((outlet) => {
+            // Check if this outlet should have an editable logo
+            const getEditableOutletLogo = (outletName: string) => {
+              switch (outletName) {
+                case 'TechCrunch': return { logoUrl: blockContent.techcrunch_logo, field: 'techcrunch_logo' };
+                case 'Forbes': return { logoUrl: blockContent.forbes_logo, field: 'forbes_logo' };
+                default: return null;
+              }
+            };
+            
+            const editableLogoData = getEditableOutletLogo(outlet.name);
+            
+            return editableLogoData ? (
+              // Editable media outlet logo with isolated hover
+              <div key={outlet.id} className="flex flex-col items-center space-y-3 p-6 bg-white/5 backdrop-blur-sm rounded-xl border border-white/10 hover:bg-white/10 transition-all duration-300">
+                <LogoEditableComponent
+                  mode={mode}
+                  logoUrl={editableLogoData.logoUrl}
+                  onLogoChange={(url) => handleContentUpdate(editableLogoData.field as keyof MediaMentionsContent, url)}
+                  companyName={outlet.name}
+                  size="md"
+                />
+                <span style={{...bodyStyle, fontSize: '0.875rem'}} className={`text-center ${dynamicTextColors?.body || 'text-gray-700'}`}>
+                  {outlet.name}
+                </span>
+              </div>
+            ) : (
+              <MediaOutletLogo
+                key={outlet.id}
+                outlet={outlet}
+                dynamicTextColors={dynamicTextColors}
+                bodyStyle={bodyStyle}
+              />
+            );
+          })}
         </div>
 
         {/* Testimonial Quotes */}

@@ -20,6 +20,9 @@ interface LogoWallContent {
   subheadline?: string;
   company_names: string;
   microsoft_logo?: string;
+  google_logo?: string;
+  amazon_logo?: string;
+  tesla_logo?: string;
 }
 
 // Company logo structure
@@ -44,6 +47,18 @@ const CONTENT_SCHEMA = {
     default: 'Microsoft|Google|Amazon|Tesla|Spotify|Airbnb|Netflix|Shopify|Stripe|Zoom|Slack|Dropbox|Adobe|Salesforce|HubSpot|Atlassian' 
   },
   microsoft_logo: { 
+    type: 'string' as const, 
+    default: '' 
+  },
+  google_logo: { 
+    type: 'string' as const, 
+    default: '' 
+  },
+  amazon_logo: { 
+    type: 'string' as const, 
+    default: '' 
+  },
+  tesla_logo: { 
     type: 'string' as const, 
     default: '' 
   }
@@ -213,14 +228,27 @@ export default function LogoWall(props: LayoutComponentProps) {
 
         {/* Company Logos Grid */}
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6">
-          {companyLogos.map((company) => (
-            company.name === 'Microsoft' ? (
-              // Special Microsoft logo with isolated hover
+          {companyLogos.map((company) => {
+            // Check if this company should have an editable logo
+            const getEditableLogo = (companyName: string) => {
+              switch (companyName) {
+                case 'Microsoft': return { logoUrl: blockContent.microsoft_logo, field: 'microsoft_logo' };
+                case 'Google': return { logoUrl: blockContent.google_logo, field: 'google_logo' };
+                case 'Amazon': return { logoUrl: blockContent.amazon_logo, field: 'amazon_logo' };
+                case 'Tesla': return { logoUrl: blockContent.tesla_logo, field: 'tesla_logo' };
+                default: return null;
+              }
+            };
+            
+            const editableLogoData = getEditableLogo(company.name);
+            
+            return editableLogoData ? (
+              // Editable logo with isolated hover
               <div key={company.id} className="p-6 bg-white rounded-lg border border-gray-200 hover:border-gray-300 hover:shadow-md transition-all duration-300 flex flex-col items-center justify-center min-h-[120px]">
                 <LogoEditableComponent
                   mode={mode}
-                  logoUrl={blockContent.microsoft_logo}
-                  onLogoChange={(url) => handleContentUpdate('microsoft_logo', url)}
+                  logoUrl={editableLogoData.logoUrl}
+                  onLogoChange={(url) => handleContentUpdate(editableLogoData.field as keyof LogoWallContent, url)}
                   companyName={company.name}
                   size="md"
                 />
@@ -252,8 +280,8 @@ export default function LogoWall(props: LayoutComponentProps) {
                 getTextStyle={getTextStyle}
                 onNameEdit={handleNameEdit}
               />
-            )
-          ))}
+            );
+          })}
         </div>
 
         {/* Social Proof Stats */}

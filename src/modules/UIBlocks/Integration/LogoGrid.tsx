@@ -10,6 +10,7 @@ import {
   EditableAdaptiveText 
 } from '@/components/layout/EditableContent';
 import IconEditableText from '@/components/ui/IconEditableText';
+import LogoEditableComponent from '@/components/ui/LogoEditableComponent';
 import { LayoutComponentProps } from '@/types/storeTypes';
 import { parsePipeData, updateListData } from '@/utils/dataParsingUtils';
 
@@ -19,6 +20,13 @@ interface LogoGridContent {
   subheadline?: string;
   integration_names: string;
   default_icon?: string;
+  // Logo URLs for major integrations
+  slack_logo?: string;
+  microsoft_teams_logo?: string;
+  google_workspace_logo?: string;
+  salesforce_logo?: string;
+  hubspot_logo?: string;
+  zoom_logo?: string;
 }
 
 // Integration item structure
@@ -45,6 +53,31 @@ const CONTENT_SCHEMA = {
   default_icon: { 
     type: 'string' as const, 
     default: '🔗' 
+  },
+  // Logo URLs for major integrations
+  slack_logo: { 
+    type: 'string' as const, 
+    default: '' 
+  },
+  microsoft_teams_logo: { 
+    type: 'string' as const, 
+    default: '' 
+  },
+  google_workspace_logo: { 
+    type: 'string' as const, 
+    default: '' 
+  },
+  salesforce_logo: { 
+    type: 'string' as const, 
+    default: '' 
+  },
+  hubspot_logo: { 
+    type: 'string' as const, 
+    default: '' 
+  },
+  zoom_logo: { 
+    type: 'string' as const, 
+    default: '' 
   }
 };
 
@@ -291,18 +324,61 @@ export default function LogoGrid(props: LayoutComponentProps) {
 
         {/* Integration Logos Grid */}
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-6">
-          {integrationItems.map((item) => (
-            <EditableLogoItem
-              key={item.id}
-              item={item}
-              mode={mode}
-              getTextStyle={getTextStyle}
-              onNameEdit={handleNameEdit}
-              defaultIcon={blockContent.default_icon || '🔗'}
-              onIconEdit={handleIconEdit}
-              sectionId={sectionId}
-            />
-          ))}
+          {integrationItems.map((item) => {
+            // Check if this integration has editable logo support
+            const logoKey = `${item.name.toLowerCase().replace(/\s+/g, '_')}_logo` as keyof LogoGridContent;
+            const hasEditableLogo = ['slack', 'microsoft_teams', 'google_workspace', 'salesforce', 'hubspot', 'zoom'].includes(item.name.toLowerCase().replace(/\s+/g, '_'));
+            
+            if (hasEditableLogo && logoKey in blockContent) {
+              // Use LogoEditableComponent for supported integrations
+              return (
+                <div key={item.id} className="p-6 bg-white rounded-lg border border-gray-200 hover:border-blue-300 hover:shadow-md transition-all duration-300 text-center">
+                  <div className="mb-3 flex justify-center">
+                    <LogoEditableComponent
+                      mode={mode}
+                      logoUrl={blockContent[logoKey] as string}
+                      onLogoChange={(url) => handleContentUpdate(logoKey, url)}
+                      companyName={item.name}
+                      size="md"
+                    />
+                  </div>
+                  
+                  {/* Company Name */}
+                  <div className="text-center">
+                    {mode === 'edit' ? (
+                      <div 
+                        contentEditable
+                        suppressContentEditableWarning
+                        onBlur={(e) => handleNameEdit(item.index, e.currentTarget.textContent || '')}
+                        className="outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-1 min-h-[20px] cursor-text hover:bg-gray-50 text-gray-900"
+                        style={getTextStyle('body-sm')}
+                      >
+                        {item.name}
+                      </div>
+                    ) : (
+                      <span className="text-gray-900" style={getTextStyle('body-sm')}>
+                        {item.name}
+                      </span>
+                    )}
+                  </div>
+                </div>
+              );
+            }
+            
+            // Use existing EditableLogoItem for other integrations
+            return (
+              <EditableLogoItem
+                key={item.id}
+                item={item}
+                mode={mode}
+                getTextStyle={getTextStyle}
+                onNameEdit={handleNameEdit}
+                defaultIcon={blockContent.default_icon || '🔗'}
+                onIconEdit={handleIconEdit}
+                sectionId={sectionId}
+              />
+            );
+          })}
         </div>
 
         {/* Additional Integration Info */}

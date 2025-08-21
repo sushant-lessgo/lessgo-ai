@@ -6,6 +6,7 @@ import { useLayoutComponent } from '@/hooks/useLayoutComponent';
 import { LayoutSection } from '@/components/layout/LayoutSection';
 import { EditableAdaptiveHeadline } from '@/components/layout/EditableContent';
 import EditableTrustIndicators from '@/components/layout/EditableTrustIndicators';
+import LogoEditableComponent from '@/components/ui/LogoEditableComponent';
 import { LayoutComponentProps } from '@/types/storeTypes';
 
 interface TrustSealCollectionContent {
@@ -16,6 +17,11 @@ interface TrustSealCollectionContent {
   trust_item_3?: string;
   trust_item_4?: string;
   trust_item_5?: string;
+  // Logo URL fields for trust seals
+  norton_logo?: string;
+  mcafee_logo?: string;
+  bbb_logo?: string;
+  trustpilot_logo?: string;
 }
 
 const CONTENT_SCHEMA = {
@@ -44,6 +50,23 @@ const CONTENT_SCHEMA = {
     default: 'TrustPilot 4.8/5' 
   },
   trust_item_5: { 
+    type: 'string' as const, 
+    default: '' 
+  },
+  // Logo URL fields for trust seals
+  norton_logo: { 
+    type: 'string' as const, 
+    default: '' 
+  },
+  mcafee_logo: { 
+    type: 'string' as const, 
+    default: '' 
+  },
+  bbb_logo: { 
+    type: 'string' as const, 
+    default: '' 
+  },
+  trustpilot_logo: { 
     type: 'string' as const, 
     default: '' 
   }
@@ -152,14 +175,86 @@ export default function TrustSealCollection(props: LayoutComponentProps) {
           />
         ) : (
           <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-4 gap-8">
-            {trustSeals.map((seal, index) => (
-              <div key={index} className="bg-white p-6 rounded-xl border border-gray-200 hover:shadow-lg transition-all duration-300">
-                <div className="w-16 h-16 bg-gray-100 rounded-lg mx-auto mb-4 flex items-center justify-center">
-                  <span className="text-2xl">🛡️</span>
-                </div>
-                <div className="text-sm font-semibold text-gray-900">{seal}</div>
-              </div>
-            ))}
+            {trustSeals.map((seal, index) => {
+              // Check if this seal matches our editable logos
+              const sealLower = seal.toLowerCase();
+              
+              if (sealLower.includes('norton')) {
+                return (
+                  <div key={index} className="bg-white p-6 rounded-xl border border-gray-200 hover:border-gray-300 hover:shadow-lg transition-all duration-300 text-center">
+                    <div className="mb-4">
+                      <LogoEditableComponent
+                        mode={mode}
+                        logoUrl={blockContent.norton_logo}
+                        onLogoChange={(url) => handleContentUpdate('norton_logo', url)}
+                        companyName="Norton"
+                        size="md"
+                        className="mx-auto"
+                      />
+                    </div>
+                    <div className="text-sm font-semibold text-gray-900">{seal}</div>
+                  </div>
+                );
+              } else if (sealLower.includes('mcafee')) {
+                return (
+                  <div key={index} className="bg-white p-6 rounded-xl border border-gray-200 hover:border-gray-300 hover:shadow-lg transition-all duration-300 text-center">
+                    <div className="mb-4">
+                      <LogoEditableComponent
+                        mode={mode}
+                        logoUrl={blockContent.mcafee_logo}
+                        onLogoChange={(url) => handleContentUpdate('mcafee_logo', url)}
+                        companyName="McAfee"
+                        size="md"
+                        className="mx-auto"
+                      />
+                    </div>
+                    <div className="text-sm font-semibold text-gray-900">{seal}</div>
+                  </div>
+                );
+              } else if (sealLower.includes('bbb')) {
+                return (
+                  <div key={index} className="bg-white p-6 rounded-xl border border-gray-200 hover:border-gray-300 hover:shadow-lg transition-all duration-300 text-center">
+                    <div className="mb-4">
+                      <LogoEditableComponent
+                        mode={mode}
+                        logoUrl={blockContent.bbb_logo}
+                        onLogoChange={(url) => handleContentUpdate('bbb_logo', url)}
+                        companyName="Better Business Bureau"
+                        size="md"
+                        className="mx-auto"
+                      />
+                    </div>
+                    <div className="text-sm font-semibold text-gray-900">{seal}</div>
+                  </div>
+                );
+              } else if (sealLower.includes('trustpilot')) {
+                return (
+                  <div key={index} className="bg-white p-6 rounded-xl border border-gray-200 hover:border-gray-300 hover:shadow-lg transition-all duration-300 text-center">
+                    <div className="mb-4">
+                      <LogoEditableComponent
+                        mode={mode}
+                        logoUrl={blockContent.trustpilot_logo}
+                        onLogoChange={(url) => handleContentUpdate('trustpilot_logo', url)}
+                        companyName="Trustpilot"
+                        size="md"
+                        className="mx-auto"
+                      />
+                    </div>
+                    <div className="text-sm font-semibold text-gray-900">{seal}</div>
+                  </div>
+                );
+              } else {
+                // Default trust seal for non-logo items
+                return (
+                  <div key={index} className="bg-white p-6 rounded-xl border border-gray-200 hover:shadow-lg transition-all duration-300">
+                    <div className="w-16 h-16 bg-gray-100 rounded-lg mx-auto mb-4 flex items-center justify-center">
+                      <span className="text-2xl">🛡️</span>
+                    </div>
+                    <div className="text-sm font-semibold text-gray-900">{seal}</div>
+                  </div>
+                );
+              }
+            })}
           </div>
         )}
       </div>

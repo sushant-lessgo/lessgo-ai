@@ -10,6 +10,7 @@ import {
   EditableAdaptiveText 
 } from '@/components/layout/EditableContent';
 import IconEditableText from '@/components/ui/IconEditableText';
+import LogoEditableComponent from '@/components/ui/LogoEditableComponent';
 import { LayoutComponentProps } from '@/types/storeTypes';
 
 // Content interface for type safety
@@ -193,20 +194,13 @@ const IntegrationCard = React.memo(({
   >
     {/* Integration Logo */}
     <div className="flex items-center mb-4">
-      <div className={`w-12 h-12 rounded-lg flex items-center justify-center mr-4 ${
-        isActive ? 'bg-white bg-opacity-20' : 'bg-gradient-to-br from-blue-500 to-purple-600'
-      }`}>
-        <IconEditableText
+      <div className="mr-4">
+        <LogoEditableComponent
           mode={mode}
-          value={integration.logo}
-          onEdit={onLogoEdit}
-          backgroundType="primary"
-          colorTokens={colorTokens}
-          iconSize="md"
-          className="text-xl text-white"
-          placeholder={integration.name.substring(0, 2).toUpperCase()}
-          sectionId={sectionId}
-          elementKey={`integration_${integrationIndex + 1}_logo`}
+          logoUrl={integration.logoUrl}
+          onLogoChange={onLogoEdit}
+          companyName={integration.name}
+          size="md"
         />
       </div>
       <h3 className={`${isActive ? 'text-current' : colorTokens.textPrimary}`} style={h3Style}>
@@ -344,7 +338,7 @@ export default function LogoWithQuoteUse(props: LayoutComponentProps) {
       quote: blockContent.integration_1_quote,
       author: blockContent.integration_1_author,
       company: blockContent.integration_1_company,
-      logo: blockContent.integration_1_logo || '📊',
+      logoUrl: blockContent.integration_1_logo || '',
       avatar: blockContent.integration_1_avatar || '👩‍💼'
     },
     {
@@ -352,7 +346,7 @@ export default function LogoWithQuoteUse(props: LayoutComponentProps) {
       quote: blockContent.integration_2_quote,
       author: blockContent.integration_2_author,
       company: blockContent.integration_2_company,
-      logo: blockContent.integration_2_logo || '💬',
+      logoUrl: blockContent.integration_2_logo || '',
       avatar: blockContent.integration_2_avatar || '👨‍💻'
     },
     {
@@ -360,7 +354,7 @@ export default function LogoWithQuoteUse(props: LayoutComponentProps) {
       quote: blockContent.integration_3_quote,
       author: blockContent.integration_3_author,
       company: blockContent.integration_3_company,
-      logo: blockContent.integration_3_logo || '📈',
+      logoUrl: blockContent.integration_3_logo || '',
       avatar: blockContent.integration_3_avatar || '👩‍💼'
     },
     {
@@ -368,7 +362,7 @@ export default function LogoWithQuoteUse(props: LayoutComponentProps) {
       quote: blockContent.integration_4_quote,
       author: blockContent.integration_4_author,
       company: blockContent.integration_4_company,
-      logo: blockContent.integration_4_logo || '⚡',
+      logoUrl: blockContent.integration_4_logo || '',
       avatar: blockContent.integration_4_avatar || '👨‍💼'
     }
   ];

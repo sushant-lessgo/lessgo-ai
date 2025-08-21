@@ -10,6 +10,7 @@ import {
   EditableAdaptiveText 
 } from '@/components/layout/EditableContent';
 import { CTAButton } from '@/components/layout/ComponentRegistry';
+import LogoEditableComponent from '@/components/ui/LogoEditableComponent';
 import { LayoutComponentProps } from '@/types/storeTypes';
 import { createCTAClickHandler } from '@/utils/ctaHandler';
 
@@ -22,6 +23,7 @@ interface TestimonialCTAComboContent {
   testimonial_author: string;
   testimonial_title: string;
   testimonial_company: string;
+  testimonial_company_logo?: string;
   rating?: string;
   customer_count?: string;
   average_rating?: string;
@@ -58,6 +60,10 @@ const CONTENT_SCHEMA = {
   testimonial_company: { 
     type: 'string' as const, 
     default: 'TechFlow Solutions' 
+  },
+  testimonial_company_logo: { 
+    type: 'string' as const, 
+    default: '' 
   },
   rating: { 
     type: 'string' as const, 
@@ -102,7 +108,19 @@ const StarRating = React.memo(({ rating }: { rating: number }) => {
 StarRating.displayName = 'StarRating';
 
 // Avatar Component
-const TestimonialAvatar = React.memo(({ name, company }: { name: string, company: string }) => {
+const TestimonialAvatar = React.memo(({ 
+  name, 
+  company, 
+  mode, 
+  logoUrl, 
+  onLogoChange 
+}: { 
+  name: string, 
+  company: string,
+  mode: 'edit' | 'preview',
+  logoUrl?: string,
+  onLogoChange: (url: string) => void
+}) => {
   const initials = name
     .split(' ')
     .map(word => word.charAt(0))
@@ -125,11 +143,16 @@ const TestimonialAvatar = React.memo(({ name, company }: { name: string, company
       <div className={`w-16 h-16 bg-gradient-to-br ${colors[colorIndex]} rounded-full flex items-center justify-center text-white font-bold text-lg shadow-lg`}>
         {initials}
       </div>
-      {/* Company logo placeholder */}
+      {/* Company logo - editable */}
       <div className="absolute -bottom-2 -right-2 w-8 h-8 bg-white rounded-full border-2 border-gray-200 flex items-center justify-center">
-        <div className="w-5 h-5 bg-gray-100 rounded text-xs flex items-center justify-center font-bold text-gray-600">
-          {company.charAt(0)}
-        </div>
+        <LogoEditableComponent
+          mode={mode}
+          logoUrl={logoUrl}
+          onLogoChange={onLogoChange}
+          companyName={company}
+          size="sm"
+          className="w-5 h-5 rounded"
+        />
       </div>
     </div>
   );
@@ -384,6 +407,9 @@ export default function TestimonialCTACombo(props: LayoutComponentProps) {
               <TestimonialAvatar 
                 name={blockContent.testimonial_author} 
                 company={blockContent.testimonial_company}
+                mode={mode}
+                logoUrl={blockContent.testimonial_company_logo}
+                onLogoChange={(url) => handleContentUpdate('testimonial_company_logo', url)}
               />
               
               <div>
@@ -472,6 +498,7 @@ export const componentMeta = {
     { key: 'testimonial_author', label: 'Author Name', type: 'text', required: true },
     { key: 'testimonial_title', label: 'Author Title', type: 'text', required: true },
     { key: 'testimonial_company', label: 'Company Name', type: 'text', required: true },
+    { key: 'testimonial_company_logo', label: 'Company Logo', type: 'image', required: false },
     { key: 'rating', label: 'Star Rating (1-5)', type: 'text', required: false },
     { key: 'customer_count', label: 'Customer Count', type: 'text', required: false },
     { key: 'average_rating', label: 'Average Rating', type: 'text', required: false },

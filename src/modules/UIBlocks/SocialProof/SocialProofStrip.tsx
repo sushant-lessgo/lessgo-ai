@@ -11,6 +11,7 @@ import {
 } from '@/components/layout/EditableContent';
 import { LayoutComponentProps } from '@/types/storeTypes';
 import { parsePipeData } from '@/utils/dataParsingUtils';
+import LogoEditableComponent from '@/components/ui/LogoEditableComponent';
 
 // Content interface for type safety
 interface SocialProofStripContent {
@@ -19,6 +20,8 @@ interface SocialProofStripContent {
   stat_labels?: string;
   company_logos?: string;
   company_names?: string;
+  google_logo?: string;
+  microsoft_logo?: string;
 }
 
 // Proof stat structure
@@ -57,6 +60,14 @@ const CONTENT_SCHEMA = {
   company_names: { 
     type: 'string' as const, 
     default: 'Google|Microsoft|Amazon|Meta|Netflix|Apple|Tesla|Shopify|Stripe|Slack|Zoom|Adobe' 
+  },
+  google_logo: { 
+    type: 'string' as const, 
+    default: '' 
+  },
+  microsoft_logo: { 
+    type: 'string' as const, 
+    default: '' 
   }
 };
 
@@ -236,14 +247,43 @@ export default function SocialProofStrip(props: LayoutComponentProps) {
               Trusted by industry leaders
             </div>
             <div className="flex flex-wrap items-center justify-center gap-4">
-              {companies.slice(0, 8).map((company) => (
-                <CompanyLogo
-                  key={company.id}
-                  company={company}
-                  dynamicTextColors={dynamicTextColors}
-                  bodyStyle={bodyStyle}
-                />
-              ))}
+              {companies.slice(0, 8).map((company) => {
+                // Check if this company should have an editable logo
+                const getEditableCompanyLogo = (companyName: string) => {
+                  switch (companyName) {
+                    case 'Google': return { logoUrl: blockContent.google_logo, field: 'google_logo' };
+                    case 'Microsoft': return { logoUrl: blockContent.microsoft_logo, field: 'microsoft_logo' };
+                    default: return null;
+                  }
+                };
+                
+                const editableLogoData = getEditableCompanyLogo(company.name);
+                
+                return editableLogoData ? (
+                  // Editable company logo with isolated hover
+                  <div key={company.id} className="flex items-center justify-center px-4 py-2 bg-white/5 backdrop-blur-sm rounded-lg border border-white/10 hover:bg-white/10 transition-all duration-300">
+                    <div className="flex items-center space-x-2">
+                      <LogoEditableComponent
+                        mode={mode}
+                        logoUrl={editableLogoData.logoUrl}
+                        onLogoChange={(url) => handleContentUpdate(editableLogoData.field as keyof SocialProofStripContent, url)}
+                        companyName={company.name}
+                        size="sm"
+                      />
+                      <span style={{...bodyStyle, fontSize: '0.875rem'}} className={`${dynamicTextColors?.body || 'text-gray-700'}`}>
+                        {company.name}
+                      </span>
+                    </div>
+                  </div>
+                ) : (
+                  <CompanyLogo
+                    key={company.id}
+                    company={company}
+                    dynamicTextColors={dynamicTextColors}
+                    bodyStyle={bodyStyle}
+                  />
+                );
+              })}
             </div>
           </div>
         )}
