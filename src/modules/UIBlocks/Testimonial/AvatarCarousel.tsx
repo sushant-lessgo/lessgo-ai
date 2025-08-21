@@ -12,7 +12,14 @@ import {
   TrustIndicators,
   StarRating 
 } from '@/components/layout/ComponentRegistry';
+import AvatarEditableComponent from '@/components/ui/AvatarEditableComponent';
 import { LayoutComponentProps } from '@/types/storeTypes';
+import { 
+  parseCustomerAvatarData, 
+  getCustomerAvatarUrl, 
+  updateAvatarUrls,
+  parsePipeData 
+} from '@/utils/dataParsingUtils';
 
 interface AvatarCarouselContent {
   headline: string;
@@ -34,6 +41,8 @@ interface AvatarCarouselContent {
   average_rating_label?: string;
   creations_count?: string;
   creations_label?: string;
+  // Dynamic avatar system
+  avatar_urls?: string;
 }
 
 const CONTENT_SCHEMA = {
@@ -112,6 +121,10 @@ const CONTENT_SCHEMA = {
   creations_label: {
     type: 'string' as const,
     default: 'Creations made'
+  },
+  avatar_urls: { 
+    type: 'string' as const, 
+    default: '{}' 
   }
 };
 
@@ -161,11 +174,27 @@ export default function AvatarCarousel(props: LayoutComponentProps) {
     ? blockContent.ratings.split('|').map(item => parseInt(item.trim()) || 5)
     : [];
 
+  // Handle avatar URL updates
+  const handleAvatarChange = (customerName: string, avatarUrl: string) => {
+    const updatedAvatarUrls = updateAvatarUrls(blockContent.avatar_urls || '{}', customerName, avatarUrl);
+    handleContentUpdate('avatar_urls', updatedAvatarUrls);
+  };
+
+  // Get avatar URL for customer - prioritize dynamic system over legacy
+  const getAvatarForCustomer = (customerName: string, fallbackIndex: number): string => {
+    // First try dynamic avatar_urls system
+    const dynamicAvatar = getCustomerAvatarUrl(blockContent.avatar_urls || '{}', customerName);
+    if (dynamicAvatar) return dynamicAvatar;
+    
+    // Fallback to legacy customer_avatars system
+    return customerAvatars[fallbackIndex] || '';
+  };
+
   const testimonials = testimonialQuotes.map((quote, index) => ({
     quote,
     name: customerNames[index] || '',
     title: customerTitles[index] || '',
-    avatar: customerAvatars[index] || '',
+    avatar: getAvatarForCustomer(customerNames[index] || '', index),
     company: customerCompanies[index] || '',
     rating: ratings[index] || 5
   }));
@@ -216,23 +245,14 @@ export default function AvatarCarousel(props: LayoutComponentProps) {
           setIsAutoRotating(false);
         }}
       >
-        <div className="w-20 h-20 rounded-full overflow-hidden border-4 border-white shadow-xl">
-          {testimonial.avatar && testimonial.avatar !== '' ? (
-            <img
-              src={testimonial.avatar}
-              alt={testimonial.name}
-              className="w-full h-full object-cover"
-              data-image-id={`${sectionId}-avatar${index}`}
-              onMouseUp={(e) => {
-                // Image toolbar is only available in edit mode
-              }}
-            />
-          ) : (
-            <div className="w-full h-full bg-gradient-to-br from-purple-400 to-pink-500 flex items-center justify-center text-white font-bold text-xl">
-              {testimonial.name.charAt(0)}
-            </div>
-          )}
-        </div>
+        <AvatarEditableComponent
+          mode={mode}
+          avatarUrl={testimonial.avatar}
+          onAvatarChange={(url) => handleAvatarChange(testimonial.name, url)}
+          customerName={testimonial.name}
+          size="lg"
+          className="border-4 border-white shadow-xl"
+        />
         
         {isActive && (
           <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2">
@@ -619,7 +639,8 @@ export const componentMeta = {
     { key: 'testimonial_quotes', label: 'Testimonial Quotes (pipe separated)', type: 'textarea', required: true },
     { key: 'customer_names', label: 'Customer Names (pipe separated)', type: 'text', required: true },
     { key: 'customer_titles', label: 'Customer Titles (pipe separated)', type: 'text', required: true },
-    { key: 'customer_avatars', label: 'Customer Avatars (pipe separated)', type: 'textarea', required: false },
+    { key: 'customer_avatars', label: 'Customer Avatars (pipe separated) - Legacy', type: 'textarea', required: false },
+    { key: 'avatar_urls', label: 'Avatar URLs (JSON format)', type: 'text', required: false },
     { key: 'customer_companies', label: 'Customer Handles/Companies (pipe separated)', type: 'text', required: false },
     { key: 'ratings', label: 'Ratings (pipe separated)', type: 'text', required: false },
     { key: 'auto_rotate', label: 'Auto-rotate Carousel', type: 'boolean', required: false },

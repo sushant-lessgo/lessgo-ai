@@ -14,7 +14,14 @@ import {
   TrustIndicators 
 } from '@/components/layout/ComponentRegistry';
 import EditableTrustIndicators from '@/components/layout/EditableTrustIndicators';
+import AvatarEditableComponent from '@/components/ui/AvatarEditableComponent';
 import { LayoutComponentProps } from '@/types/storeTypes';
+import { 
+  parseCustomerAvatarData, 
+  getCustomerAvatarUrl, 
+  updateAvatarUrls,
+  parsePipeData 
+} from '@/utils/dataParsingUtils';
 
 interface CenterStackedContent {
   headline: string;
@@ -35,6 +42,9 @@ interface CenterStackedContent {
   show_social_proof?: boolean;
   show_customer_avatars?: boolean;
   avatar_count?: number;
+  // Dynamic avatar system
+  customer_names?: string;
+  avatar_urls?: string;
 }
 
 const CONTENT_SCHEMA = {
@@ -109,6 +119,14 @@ const CONTENT_SCHEMA = {
   avatar_count: { 
     type: 'number' as const, 
     default: 4 
+  },
+  customer_names: { 
+    type: 'string' as const, 
+    default: 'Sarah Chen|Alex Rivera|Jordan Kim|Maya Patel' 
+  },
+  avatar_urls: { 
+    type: 'string' as const, 
+    default: '{}' 
   }
 };
 
@@ -293,6 +311,37 @@ export default function CenterStacked(props: LayoutComponentProps) {
   const trustItems = getTrustItems();
 
   const mutedTextColor = dynamicTextColors?.muted || colorTokens.textMuted;
+
+  // Handle customer avatars - support both legacy avatar_count and new dynamic system
+  const getCustomerAvatars = (): { name: string; avatarUrl: string }[] => {
+    // If customer_names exists, use dynamic system
+    if (blockContent.customer_names) {
+      const customerData = parseCustomerAvatarData(
+        blockContent.customer_names, 
+        blockContent.avatar_urls || '{}'
+      );
+      return customerData.map(customer => ({
+        name: customer.name,
+        avatarUrl: customer.avatarUrl || ''
+      }));
+    }
+    
+    // Fallback to legacy system with generic names
+    const avatarCount = blockContent.avatar_count || 4;
+    const defaultNames = ['Sarah Chen', 'Alex Rivera', 'Jordan Kim', 'Maya Patel', 'Casey Martinez', 'Taylor Wright'];
+    return Array.from({ length: Math.min(avatarCount, 6) }, (_, i) => ({
+      name: defaultNames[i] || `Customer ${i + 1}`,
+      avatarUrl: ''
+    }));
+  };
+
+  const customerAvatars = getCustomerAvatars();
+
+  // Handle avatar URL updates
+  const handleAvatarChange = (customerName: string, avatarUrl: string) => {
+    const updatedAvatarUrls = updateAvatarUrls(blockContent.avatar_urls || '{}', customerName, avatarUrl);
+    handleContentUpdate('avatar_urls', updatedAvatarUrls);
+  };
 
   // Parse rating for dynamic stars
   const parseRating = (rating: string) => {
@@ -491,14 +540,16 @@ export default function CenterStacked(props: LayoutComponentProps) {
                 <div className="flex items-center space-x-2 relative group/customer-item">
                   {blockContent.show_customer_avatars !== false && (
                     <div className="flex -space-x-2">
-                      {Array.from({ length: blockContent.avatar_count || 4 }, (_, i) => (
-                        <div 
-                          key={i}
-                          className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-400 to-indigo-500 border-2 border-white flex items-center justify-center text-white text-xs font-bold cursor-default"
-                          onClick={(e) => e.stopPropagation()}
-                        >
-                          {String.fromCharCode(65 + i)}
-                        </div>
+                      {customerAvatars.map((customer, i) => (
+                        <AvatarEditableComponent
+                          key={customer.name}
+                          mode={mode}
+                          avatarUrl={customer.avatarUrl}
+                          onAvatarChange={(url) => handleAvatarChange(customer.name, url)}
+                          customerName={customer.name}
+                          size="sm"
+                          className="cursor-default"
+                        />
                       ))}
                     </div>
                   )}
@@ -657,7 +708,9 @@ export const componentMeta = {
     { key: 'rating_count', label: 'Review Count (e.g., from 127 reviews)', type: 'text', required: false },
     { key: 'show_social_proof', label: 'Show Social Proof', type: 'boolean', required: false },
     { key: 'show_customer_avatars', label: 'Show Customer Avatars', type: 'boolean', required: false },
-    { key: 'avatar_count', label: 'Number of Avatars (1-6)', type: 'number', required: false },
+    { key: 'avatar_count', label: 'Number of Avatars (1-6) - Legacy', type: 'number', required: false },
+    { key: 'customer_names', label: 'Customer Names (pipe separated)', type: 'text', required: false },
+    { key: 'avatar_urls', label: 'Avatar URLs (JSON format)', type: 'text', required: false },
     { key: 'hero_image', label: 'Hero Image', type: 'image', required: false }
   ],
   

@@ -173,3 +173,85 @@ export function validateListLengths(
     errors
   };
 }
+
+// Avatar management utilities
+export interface CustomerAvatar {
+  id: string;
+  index: number;
+  name: string;
+  avatarUrl?: string;
+}
+
+// Parse customer avatar URLs from JSON string
+export function parseAvatarUrls(avatarUrlsJson: string): Record<string, string> {
+  try {
+    return JSON.parse(avatarUrlsJson || '{}');
+  } catch {
+    return {};
+  }
+}
+
+// Update avatar URLs JSON string
+export function updateAvatarUrls(avatarUrlsJson: string, customerName: string, avatarUrl: string): string {
+  const avatarUrls = parseAvatarUrls(avatarUrlsJson);
+  if (avatarUrl === '') {
+    delete avatarUrls[customerName];
+  } else {
+    avatarUrls[customerName] = avatarUrl;
+  }
+  return JSON.stringify(avatarUrls);
+}
+
+// Get avatar URL for a customer
+export function getCustomerAvatarUrl(avatarUrlsJson: string, customerName: string): string {
+  const avatarUrls = parseAvatarUrls(avatarUrlsJson);
+  return avatarUrls[customerName] || '';
+}
+
+// Parse customer avatar data from names and URLs
+export function parseCustomerAvatarData(
+  customerNames: string,
+  avatarUrlsJson: string = '{}'
+): CustomerAvatar[] {
+  const names = parsePipeData(customerNames);
+  const avatarUrls = parseAvatarUrls(avatarUrlsJson);
+  
+  return names.map((name, index) => ({
+    id: `customer-${index}`,
+    index,
+    name,
+    avatarUrl: avatarUrls[name] || ''
+  }));
+}
+
+// Update customer names and clean up orphaned avatar URLs
+export function updateCustomerNamesWithAvatars(
+  oldNames: string, 
+  newNames: string, 
+  avatarUrlsJson: string
+): { names: string; avatarUrls: string } {
+  const oldCustomers = parsePipeData(oldNames).map(name => name.trim());
+  const newCustomers = parsePipeData(newNames).map(name => name.trim());
+  const avatarUrls = parseAvatarUrls(avatarUrlsJson);
+  
+  // Remove avatar URLs for customers that no longer exist
+  const cleanedAvatarUrls: Record<string, string> = {};
+  newCustomers.forEach(customer => {
+    if (avatarUrls[customer]) {
+      cleanedAvatarUrls[customer] = avatarUrls[customer];
+    }
+  });
+  
+  return {
+    names: newCustomers.join('|'),
+    avatarUrls: JSON.stringify(cleanedAvatarUrls)
+  };
+}
+
+// Generate customer initials for fallback display
+export function getCustomerInitials(name: string): string {
+  const words = name.trim().split(' ').filter(Boolean);
+  if (words.length === 0) return 'U'; // Unknown
+  if (words.length === 1) return name.substring(0, 2).toUpperCase();
+  return words.slice(0, 2).map(w => w[0]).join('').toUpperCase();
+}
