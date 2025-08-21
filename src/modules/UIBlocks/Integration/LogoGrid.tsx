@@ -9,7 +9,6 @@ import {
   EditableAdaptiveHeadline, 
   EditableAdaptiveText 
 } from '@/components/layout/EditableContent';
-import IconEditableText from '@/components/ui/IconEditableText';
 import LogoEditableComponent from '@/components/ui/LogoEditableComponent';
 import { LayoutComponentProps } from '@/types/storeTypes';
 import { parsePipeData, updateListData } from '@/utils/dataParsingUtils';
@@ -20,13 +19,7 @@ interface LogoGridContent {
   subheadline?: string;
   integration_names: string;
   default_icon?: string;
-  // Logo URLs for major integrations
-  slack_logo?: string;
-  microsoft_teams_logo?: string;
-  google_workspace_logo?: string;
-  salesforce_logo?: string;
-  hubspot_logo?: string;
-  zoom_logo?: string;
+  logo_urls: string; // JSON structure: {"IntegrationName": "logoUrl"}
 }
 
 // Integration item structure
@@ -54,30 +47,9 @@ const CONTENT_SCHEMA = {
     type: 'string' as const, 
     default: '🔗' 
   },
-  // Logo URLs for major integrations
-  slack_logo: { 
+  logo_urls: { 
     type: 'string' as const, 
-    default: '' 
-  },
-  microsoft_teams_logo: { 
-    type: 'string' as const, 
-    default: '' 
-  },
-  google_workspace_logo: { 
-    type: 'string' as const, 
-    default: '' 
-  },
-  salesforce_logo: { 
-    type: 'string' as const, 
-    default: '' 
-  },
-  hubspot_logo: { 
-    type: 'string' as const, 
-    default: '' 
-  },
-  zoom_logo: { 
-    type: 'string' as const, 
-    default: '' 
+    default: '{}' // JSON object for logo URLs
   }
 };
 
@@ -92,153 +64,52 @@ const parseIntegrationData = (names: string): IntegrationItem[] => {
   }));
 };
 
-// Logo Placeholder Component
-const LogoPlaceholder = React.memo(({ 
-  name, 
-  defaultIcon, 
-  mode, 
-  onIconEdit, 
-  sectionId, 
-  index 
-}: { 
-  name: string; 
-  defaultIcon: string;
-  mode: 'edit' | 'preview';
-  onIconEdit: (value: string) => void;
-  sectionId: string;
-  index: number;
-}) => {
-  // Generate a simple logo placeholder
-  const getLogoPlaceholder = (integrationName: string) => {
-    const firstLetter = integrationName.charAt(0).toUpperCase();
-    const colors = [
-      'from-blue-500 to-blue-600',
-      'from-green-500 to-green-600', 
-      'from-purple-500 to-purple-600',
-      'from-red-500 to-red-600',
-      'from-yellow-500 to-yellow-600',
-      'from-indigo-500 to-indigo-600'
-    ];
-    
-    // Simple hash for consistent color
-    const hash = integrationName.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
-    const colorClass = colors[hash % colors.length];
-    
-    return { letter: firstLetter, colorClass };
-  };
-
-  const { letter, colorClass } = getLogoPlaceholder(name);
-  
-  return (
-    <div className="group p-6 bg-white rounded-lg border border-border-gray-200 hover:border-blue-300 hover:shadow-md transition-all duration-300 text-center">
-      {/* Logo Circle */}
-      <div className="mb-3">
-        <div className={`w-12 h-12 bg-gradient-to-br ${colorClass} rounded-lg flex items-center justify-center text-white font-bold text-lg mx-auto group-hover:scale-110 transition-transform duration-300`}>
-          <IconEditableText
-            mode={mode}
-            value={defaultIcon}
-            onEdit={onIconEdit}
-            backgroundType="primary"
-            colorTokens={{}} 
-            iconSize="md"
-            className="text-xl text-white"
-            placeholder={letter}
-            sectionId={sectionId}
-            elementKey={`integration_icon_${index}`}
-          />
-        </div>
-      </div>
-      
-      {/* Integration Name */}
-      <h3 className="text-gray-900 group-hover:text-blue-600 transition-colors duration-300">
-        {name}
-      </h3>
-    </div>
-  );
-});
-LogoPlaceholder.displayName = 'LogoPlaceholder';
-
-// Editable Logo Item for Edit Mode
-const EditableLogoItem = React.memo(({ 
-  item, 
-  mode, 
-  getTextStyle,
-  onNameEdit,
-  defaultIcon,
-  onIconEdit,
-  sectionId
-}: {
-  item: IntegrationItem;
-  mode: 'edit' | 'preview';
-  getTextStyle: (variant: 'display' | 'hero' | 'h1' | 'h2' | 'h3' | 'body-lg' | 'body' | 'body-sm' | 'caption') => React.CSSProperties;
-  onNameEdit: (index: number, value: string) => void;
-  defaultIcon: string;
-  onIconEdit: (value: string) => void;
-  sectionId: string;
-}) => {
-  
-  if (mode === 'edit') {
-    const { letter, colorClass } = (() => {
-      const firstLetter = item.name.charAt(0).toUpperCase();
-      const colors = [
-        'from-blue-500 to-blue-600',
-        'from-green-500 to-green-600', 
-        'from-purple-500 to-purple-600',
-        'from-red-500 to-red-600',
-        'from-yellow-500 to-yellow-600',
-        'from-indigo-500 to-indigo-600'
-      ];
-      
-      const hash = item.name.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
-      const colorClass = colors[hash % colors.length];
-      
-      return { letter: firstLetter, colorClass };
-    })();
-    
-    return (
-      <div className="group p-6 bg-white rounded-lg border border-border-gray-200 hover:border-blue-300 hover:shadow-md transition-all duration-300 text-center">
-        <div className="mb-3">
-          <div className={`w-12 h-12 bg-gradient-to-br ${colorClass} rounded-lg flex items-center justify-center text-white font-bold text-lg mx-auto group-hover:scale-110 transition-transform duration-300`}>
-            <IconEditableText
-              mode={mode}
-              value={defaultIcon}
-              onEdit={onIconEdit}
-              backgroundType="primary"
-              colorTokens={{}}
-              iconSize="md"
-              className="text-xl text-white"
-              placeholder={letter}
-              sectionId={sectionId}
-              elementKey={`integration_icon_${item.index}`}
-            />
-          </div>
-        </div>
-        
-        <div 
-          contentEditable
-          suppressContentEditableWarning
-          onBlur={(e) => onNameEdit(item.index, e.currentTarget.textContent || '')}
-          className="outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-1 min-h-[20px] cursor-text hover:bg-gray-50 text-gray-900"
-          style={getTextStyle('body-sm')}
-        >
-          {item.name}
-        </div>
-      </div>
-    );
+// Parse logo URLs from JSON string
+const parseLogoUrls = (logoUrlsJson: string): Record<string, string> => {
+  try {
+    return JSON.parse(logoUrlsJson || '{}');
+  } catch {
+    return {};
   }
+};
+
+// Update logo URLs JSON string
+const updateLogoUrls = (logoUrlsJson: string, integrationName: string, logoUrl: string): string => {
+  const logoUrls = parseLogoUrls(logoUrlsJson);
+  if (logoUrl === '') {
+    delete logoUrls[integrationName];
+  } else {
+    logoUrls[integrationName] = logoUrl;
+  }
+  return JSON.stringify(logoUrls);
+};
+
+// Get logo URL for an integration
+const getIntegrationLogoUrl = (logoUrlsJson: string, integrationName: string): string => {
+  const logoUrls = parseLogoUrls(logoUrlsJson);
+  return logoUrls[integrationName] || '';
+};
+
+// Update integration names and clean up orphaned logos
+const updateIntegrationNames = (oldNames: string, newNames: string, logoUrlsJson: string): { names: string; logoUrls: string } => {
+  const oldIntegrations = parsePipeData(oldNames).map(name => name.trim());
+  const newIntegrations = parsePipeData(newNames).map(name => name.trim());
+  const logoUrls = parseLogoUrls(logoUrlsJson);
   
-  return (
-    <LogoPlaceholder 
-      name={item.name} 
-      defaultIcon={defaultIcon}
-      mode={mode}
-      onIconEdit={onIconEdit}
-      sectionId={sectionId}
-      index={item.index}
-    />
-  );
-});
-EditableLogoItem.displayName = 'EditableLogoItem';
+  // Remove logos for integrations that no longer exist
+  const cleanedLogoUrls: Record<string, string> = {};
+  newIntegrations.forEach(integration => {
+    if (logoUrls[integration]) {
+      cleanedLogoUrls[integration] = logoUrls[integration];
+    }
+  });
+  
+  return {
+    names: newIntegrations.join('|'),
+    logoUrls: JSON.stringify(cleanedLogoUrls)
+  };
+};
+
 
 export default function LogoGrid(props: LayoutComponentProps) {
   const { getTextStyle: getTypographyStyle } = useTypography();
@@ -262,10 +133,6 @@ export default function LogoGrid(props: LayoutComponentProps) {
   // Parse integration data
   const integrationItems = parseIntegrationData(blockContent.integration_names);
   
-  // Create typography styles
-  const h3Style = getTypographyStyle('h3');
-  const bodySmStyle = getTypographyStyle('body-sm');
-  const labelStyle = getTypographyStyle('label');
 
   // Handle individual name editing
   const handleNameEdit = (index: number, value: string) => {
@@ -273,10 +140,6 @@ export default function LogoGrid(props: LayoutComponentProps) {
     handleContentUpdate('integration_names', updatedNames);
   };
 
-  // Handle icon editing
-  const handleIconEdit = (value: string) => {
-    handleContentUpdate('default_icon', value);
-  };
 
   return (
     <LayoutSection
@@ -325,66 +188,101 @@ export default function LogoGrid(props: LayoutComponentProps) {
         {/* Integration Logos Grid */}
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-6">
           {integrationItems.map((item) => {
-            // Check if this integration has editable logo support
-            const logoKey = `${item.name.toLowerCase().replace(/\s+/g, '_')}_logo` as keyof LogoGridContent;
-            const hasEditableLogo = ['slack', 'microsoft_teams', 'google_workspace', 'salesforce', 'hubspot', 'zoom'].includes(item.name.toLowerCase().replace(/\s+/g, '_'));
+            // Every integration gets an editable logo using dynamic system
+            const logoUrl = getIntegrationLogoUrl(blockContent.logo_urls, item.name);
             
-            if (hasEditableLogo && logoKey in blockContent) {
-              // Use LogoEditableComponent for supported integrations
-              return (
-                <div key={item.id} className="p-6 bg-white rounded-lg border border-gray-200 hover:border-blue-300 hover:shadow-md transition-all duration-300 text-center">
-                  <div className="mb-3 flex justify-center">
-                    <LogoEditableComponent
-                      mode={mode}
-                      logoUrl={blockContent[logoKey] as string}
-                      onLogoChange={(url) => handleContentUpdate(logoKey, url)}
-                      companyName={item.name}
-                      size="md"
-                    />
-                  </div>
-                  
-                  {/* Company Name */}
-                  <div className="text-center">
-                    {mode === 'edit' ? (
+            return (
+              // All integrations are now editable with isolated hover
+              <div key={item.id} className="p-6 bg-white rounded-lg border border-gray-200 hover:border-blue-300 hover:shadow-md transition-all duration-300 text-center">
+                <div className="mb-3 flex justify-center">
+                  <LogoEditableComponent
+                    mode={mode}
+                    logoUrl={logoUrl}
+                    onLogoChange={(url) => {
+                      const updatedLogoUrls = updateLogoUrls(blockContent.logo_urls, item.name, url);
+                      handleContentUpdate('logo_urls', updatedLogoUrls);
+                    }}
+                    companyName={item.name}
+                    size="md"
+                  />
+                </div>
+                
+                {/* Integration Name */}
+                <div className="text-center">
+                  {mode === 'edit' ? (
+                    <div className="flex items-center justify-center gap-2">
                       <div 
                         contentEditable
                         suppressContentEditableWarning
                         onBlur={(e) => handleNameEdit(item.index, e.currentTarget.textContent || '')}
-                        className="outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-1 min-h-[20px] cursor-text hover:bg-gray-50 text-gray-900"
+                        className="outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-1 min-h-[20px] cursor-text hover:bg-gray-50 text-gray-900 flex-1 text-center"
                         style={getTextStyle('body-sm')}
                       >
                         {item.name}
                       </div>
-                    ) : (
-                      <span className="text-gray-900" style={getTextStyle('body-sm')}>
-                        {item.name}
-                      </span>
-                    )}
-                  </div>
+                      {/* Delete Integration Button */}
+                      <button
+                        onClick={(e) => {
+                          e.preventDefault();
+                          if (confirm(`Delete ${item.name} completely?`)) {
+                            const currentNames = parsePipeData(blockContent.integration_names);
+                            const updatedNames = currentNames.filter((_, idx) => idx !== item.index);
+                            const updatedNamesString = updatedNames.join('|');
+                            const { logoUrls } = updateIntegrationNames(blockContent.integration_names, updatedNamesString, blockContent.logo_urls);
+                            handleContentUpdate('integration_names', updatedNamesString);
+                            handleContentUpdate('logo_urls', logoUrls);
+                          }
+                        }}
+                        className="w-5 h-5 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center text-xs transition-colors"
+                        title="Delete integration"
+                      >
+                        ×
+                      </button>
+                    </div>
+                  ) : (
+                    <span className="text-gray-900" style={getTextStyle('body-sm')}>
+                      {item.name}
+                    </span>
+                  )}
                 </div>
-              );
-            }
-            
-            // Use existing EditableLogoItem for other integrations
-            return (
-              <EditableLogoItem
-                key={item.id}
-                item={item}
-                mode={mode}
-                getTextStyle={getTextStyle}
-                onNameEdit={handleNameEdit}
-                defaultIcon={blockContent.default_icon || '🔗'}
-                onIconEdit={handleIconEdit}
-                sectionId={sectionId}
-              />
+              </div>
             );
           })}
+          
+          {/* Add Integration Button (Edit Mode Only) */}
+          {mode === 'edit' && (
+            <div className="p-6 bg-white/20 backdrop-blur-sm rounded-lg border-2 border-dashed border-gray-300 hover:border-gray-400 transition-all duration-300 flex flex-col items-center justify-center min-h-[120px]">
+              <button
+                onClick={(e) => {
+                  e.preventDefault();
+                  const newIntegrationName = prompt('Enter integration name:');
+                  if (newIntegrationName && newIntegrationName.trim()) {
+                    const currentNames = parsePipeData(blockContent.integration_names);
+                    if (!currentNames.includes(newIntegrationName.trim())) {
+                      const updatedNames = [...currentNames, newIntegrationName.trim()].join('|');
+                      handleContentUpdate('integration_names', updatedNames);
+                    } else {
+                      alert('Integration already exists!');
+                    }
+                  }
+                }}
+                className="flex flex-col items-center space-y-2 text-gray-600 hover:text-gray-800 transition-colors"
+              >
+                <div className="w-16 h-16 bg-gray-200 rounded-xl flex items-center justify-center">
+                  <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                  </svg>
+                </div>
+                <span className="text-sm font-medium">Add Integration</span>
+              </button>
+            </div>
+          )}
         </div>
 
         {/* Additional Integration Info */}
         {integrationItems.length > 0 && (
           <div className="mt-12 text-center">
-            <p className={`${colorTokens.textSecondary} mb-4`} style={bodySmStyle}>
+            <p className={`${colorTokens.textSecondary} mb-4`} style={getTextStyle('body-sm')}>
               and {integrationItems.length}+ more integrations available
             </p>
             

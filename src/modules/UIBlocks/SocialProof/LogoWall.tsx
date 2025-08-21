@@ -19,10 +19,7 @@ interface LogoWallContent {
   headline: string;
   subheadline?: string;
   company_names: string;
-  microsoft_logo?: string;
-  google_logo?: string;
-  amazon_logo?: string;
-  tesla_logo?: string;
+  logo_urls: string; // JSON structure: {"CompanyName": "logoUrl"}
 }
 
 // Company logo structure
@@ -46,21 +43,9 @@ const CONTENT_SCHEMA = {
     type: 'string' as const, 
     default: 'Microsoft|Google|Amazon|Tesla|Spotify|Airbnb|Netflix|Shopify|Stripe|Zoom|Slack|Dropbox|Adobe|Salesforce|HubSpot|Atlassian' 
   },
-  microsoft_logo: { 
+  logo_urls: { 
     type: 'string' as const, 
-    default: '' 
-  },
-  google_logo: { 
-    type: 'string' as const, 
-    default: '' 
-  },
-  amazon_logo: { 
-    type: 'string' as const, 
-    default: '' 
-  },
-  tesla_logo: { 
-    type: 'string' as const, 
-    default: '' 
+    default: '{}' // JSON object for logo URLs
   }
 };
 
@@ -73,6 +58,52 @@ const parseCompanyData = (names: string): CompanyLogo[] => {
     index,
     name: name.trim()
   }));
+};
+
+// Parse logo URLs from JSON string
+const parseLogoUrls = (logoUrlsJson: string): Record<string, string> => {
+  try {
+    return JSON.parse(logoUrlsJson || '{}');
+  } catch {
+    return {};
+  }
+};
+
+// Update logo URLs JSON string
+const updateLogoUrls = (logoUrlsJson: string, companyName: string, logoUrl: string): string => {
+  const logoUrls = parseLogoUrls(logoUrlsJson);
+  if (logoUrl === '') {
+    delete logoUrls[companyName];
+  } else {
+    logoUrls[companyName] = logoUrl;
+  }
+  return JSON.stringify(logoUrls);
+};
+
+// Get logo URL for a company
+const getCompanyLogoUrl = (logoUrlsJson: string, companyName: string): string => {
+  const logoUrls = parseLogoUrls(logoUrlsJson);
+  return logoUrls[companyName] || '';
+};
+
+// Update company names and clean up orphaned logos
+const updateCompanyNames = (oldNames: string, newNames: string, logoUrlsJson: string): { names: string; logoUrls: string } => {
+  const oldCompanies = parsePipeData(oldNames).map(name => name.trim());
+  const newCompanies = parsePipeData(newNames).map(name => name.trim());
+  const logoUrls = parseLogoUrls(logoUrlsJson);
+  
+  // Remove logos for companies that no longer exist
+  const cleanedLogoUrls: Record<string, string> = {};
+  newCompanies.forEach(company => {
+    if (logoUrls[company]) {
+      cleanedLogoUrls[company] = logoUrls[company];
+    }
+  });
+  
+  return {
+    names: newCompanies.join('|'),
+    logoUrls: JSON.stringify(cleanedLogoUrls)
+  };
 };
 
 // Company Logo Placeholder Component
@@ -229,26 +260,19 @@ export default function LogoWall(props: LayoutComponentProps) {
         {/* Company Logos Grid */}
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6">
           {companyLogos.map((company) => {
-            // Check if this company should have an editable logo
-            const getEditableLogo = (companyName: string) => {
-              switch (companyName) {
-                case 'Microsoft': return { logoUrl: blockContent.microsoft_logo, field: 'microsoft_logo' };
-                case 'Google': return { logoUrl: blockContent.google_logo, field: 'google_logo' };
-                case 'Amazon': return { logoUrl: blockContent.amazon_logo, field: 'amazon_logo' };
-                case 'Tesla': return { logoUrl: blockContent.tesla_logo, field: 'tesla_logo' };
-                default: return null;
-              }
-            };
+            // Every company gets an editable logo using dynamic system
+            const logoUrl = getCompanyLogoUrl(blockContent.logo_urls, company.name);
             
-            const editableLogoData = getEditableLogo(company.name);
-            
-            return editableLogoData ? (
-              // Editable logo with isolated hover
+            return (
+              // All logos are now editable with isolated hover
               <div key={company.id} className="p-6 bg-white rounded-lg border border-gray-200 hover:border-gray-300 hover:shadow-md transition-all duration-300 flex flex-col items-center justify-center min-h-[120px]">
                 <LogoEditableComponent
                   mode={mode}
-                  logoUrl={editableLogoData.logoUrl}
-                  onLogoChange={(url) => handleContentUpdate(editableLogoData.field as keyof LogoWallContent, url)}
+                  logoUrl={logoUrl}
+                  onLogoChange={(url) => {
+                    const updatedLogoUrls = updateLogoUrls(blockContent.logo_urls, company.name, url);
+                    handleContentUpdate('logo_urls', updatedLogoUrls);
+                  }}
                   companyName={company.name}
                   size="md"
                 />
@@ -256,13 +280,33 @@ export default function LogoWall(props: LayoutComponentProps) {
                 {/* Company Name */}
                 <div className="text-center mt-3">
                   {mode === 'edit' ? (
-                    <div 
-                      contentEditable
-                      suppressContentEditableWarning
-                      onBlur={(e) => handleNameEdit(company.index, e.currentTarget.textContent || '')}
-                      className="outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-1 min-h-[20px] cursor-text hover:bg-gray-50 font-medium text-gray-700 text-sm text-center"
-                    >
-                      {company.name}
+                    <div className="flex items-center justify-center gap-2">
+                      <div 
+                        contentEditable
+                        suppressContentEditableWarning
+                        onBlur={(e) => handleNameEdit(company.index, e.currentTarget.textContent || '')}
+                        className="outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-1 min-h-[20px] cursor-text hover:bg-gray-50 font-medium text-gray-700 text-sm text-center flex-1"
+                      >
+                        {company.name}
+                      </div>
+                      {/* Delete Company Button */}
+                      <button
+                        onClick={(e) => {
+                          e.preventDefault();
+                          if (confirm(`Delete ${company.name} completely?`)) {
+                            const currentNames = parsePipeData(blockContent.company_names);
+                            const updatedNames = currentNames.filter((_, idx) => idx !== company.index);
+                            const updatedNamesString = updatedNames.join('|');
+                            const { logoUrls } = updateCompanyNames(blockContent.company_names, updatedNamesString, blockContent.logo_urls);
+                            handleContentUpdate('company_names', updatedNamesString);
+                            handleContentUpdate('logo_urls', logoUrls);
+                          }
+                        }}
+                        className="w-5 h-5 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center text-xs transition-colors"
+                        title="Delete company"
+                      >
+                        ×
+                      </button>
                     </div>
                   ) : (
                     <span className="font-medium text-gray-700 text-sm">
@@ -271,17 +315,37 @@ export default function LogoWall(props: LayoutComponentProps) {
                   )}
                 </div>
               </div>
-            ) : (
-              // Regular company logos with existing placeholder
-              <CompanyLogoPlaceholder
-                key={company.id}
-                company={company}
-                mode={mode}
-                getTextStyle={getTextStyle}
-                onNameEdit={handleNameEdit}
-              />
             );
           })}
+          
+          {/* Add Company Button (Edit Mode Only) */}
+          {mode === 'edit' && (
+            <div className="p-6 bg-white/20 backdrop-blur-sm rounded-lg border-2 border-dashed border-gray-300 hover:border-gray-400 transition-all duration-300 flex flex-col items-center justify-center min-h-[120px]">
+              <button
+                onClick={(e) => {
+                  e.preventDefault();
+                  const newCompanyName = prompt('Enter company name:');
+                  if (newCompanyName && newCompanyName.trim()) {
+                    const currentNames = parsePipeData(blockContent.company_names);
+                    if (!currentNames.includes(newCompanyName.trim())) {
+                      const updatedNames = [...currentNames, newCompanyName.trim()].join('|');
+                      handleContentUpdate('company_names', updatedNames);
+                    } else {
+                      alert('Company already exists!');
+                    }
+                  }
+                }}
+                className="flex flex-col items-center space-y-2 text-gray-600 hover:text-gray-800 transition-colors"
+              >
+                <div className="w-16 h-16 bg-gray-200 rounded-xl flex items-center justify-center">
+                  <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                  </svg>
+                </div>
+                <span className="text-sm font-medium">Add Company</span>
+              </button>
+            </div>
+          )}
         </div>
 
         {/* Social Proof Stats */}

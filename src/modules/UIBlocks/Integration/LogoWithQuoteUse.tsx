@@ -12,36 +12,19 @@ import {
 import IconEditableText from '@/components/ui/IconEditableText';
 import LogoEditableComponent from '@/components/ui/LogoEditableComponent';
 import { LayoutComponentProps } from '@/types/storeTypes';
+import { parsePipeData, updateListData } from '@/utils/dataParsingUtils';
 
 // Content interface for type safety
 interface LogoWithQuoteUseContent {
   headline: string;
   subheadline?: string;
-  integration_1_name: string;
-  integration_1_quote: string;
-  integration_1_author: string;
-  integration_1_company: string;
-  integration_1_logo?: string;
-  integration_1_avatar?: string;
-  integration_2_name: string;
-  integration_2_quote: string;
-  integration_2_author: string;
-  integration_2_company: string;
-  integration_2_logo?: string;
-  integration_2_avatar?: string;
-  integration_3_name: string;
-  integration_3_quote: string;
-  integration_3_author: string;
-  integration_3_company: string;
-  integration_3_logo?: string;
-  integration_3_avatar?: string;
-  integration_4_name: string;
-  integration_4_quote: string;
-  integration_4_author: string;
-  integration_4_company: string;
-  integration_4_logo?: string;
-  integration_4_avatar?: string;
-  trusted_companies: string;
+  integration_names: string;        // Pipe-separated integration names
+  integration_quotes: string;       // Pipe-separated quotes
+  integration_authors: string;      // Pipe-separated author names
+  integration_companies: string;    // Pipe-separated author companies
+  trusted_companies: string;        // Pipe-separated trusted company names
+  logo_urls: string;               // JSON: {"CompanyName": "logoUrl"}
+  avatar_urls: string;             // JSON: {"AuthorName": "avatarUrl"}
 }
 
 // Content schema - defines structure and defaults
@@ -54,106 +37,133 @@ const CONTENT_SCHEMA = {
     type: 'string' as const, 
     default: 'See how industry leaders use our integrations to transform their workflows and achieve remarkable results.' 
   },
-  integration_1_name: { 
+  integration_names: { 
     type: 'string' as const, 
-    default: 'Salesforce Integration' 
+    default: 'Salesforce Integration|Slack Integration|HubSpot Integration|GitHub Integration' 
   },
-  integration_1_quote: { 
+  integration_quotes: { 
     type: 'string' as const, 
-    default: 'Our sales team productivity increased by 40% after implementing this Salesforce integration. The automated lead routing alone saves us 10 hours per week.' 
+    default: 'Our sales team productivity increased by 40% after implementing this Salesforce integration. The automated lead routing alone saves us 10 hours per week.|Real-time notifications and automated status updates have transformed how our remote team stays aligned. Game-changing for distributed collaboration.|The seamless data sync between our marketing tools has eliminated manual data entry entirely. Our campaigns are now 3x more effective.|Automated deployment workflows and issue tracking integration have reduced our release cycles from weeks to days. Incredible development velocity.' 
   },
-  integration_1_author: { 
+  integration_authors: { 
     type: 'string' as const, 
-    default: 'Sarah Chen' 
+    default: 'Sarah Chen|Marcus Rodriguez|Emma Thompson|David Park' 
   },
-  integration_1_company: { 
+  integration_companies: { 
     type: 'string' as const, 
-    default: 'VP Sales, TechFlow' 
-  },
-  integration_2_name: { 
-    type: 'string' as const, 
-    default: 'Slack Integration' 
-  },
-  integration_2_quote: { 
-    type: 'string' as const, 
-    default: 'Real-time notifications and automated status updates have transformed how our remote team stays aligned. Game-changing for distributed collaboration.' 
-  },
-  integration_2_author: { 
-    type: 'string' as const, 
-    default: 'Marcus Rodriguez' 
-  },
-  integration_2_company: { 
-    type: 'string' as const, 
-    default: 'Engineering Lead, InnovateCorp' 
-  },
-  integration_3_name: { 
-    type: 'string' as const, 
-    default: 'HubSpot Integration' 
-  },
-  integration_3_quote: { 
-    type: 'string' as const, 
-    default: 'The seamless data sync between our marketing tools has eliminated manual data entry entirely. Our campaigns are now 3x more effective.' 
-  },
-  integration_3_author: { 
-    type: 'string' as const, 
-    default: 'Emma Thompson' 
-  },
-  integration_3_company: { 
-    type: 'string' as const, 
-    default: 'Marketing Director, GrowthLabs' 
-  },
-  integration_4_name: { 
-    type: 'string' as const, 
-    default: 'GitHub Integration' 
-  },
-  integration_4_quote: { 
-    type: 'string' as const, 
-    default: 'Automated deployment workflows and issue tracking integration have reduced our release cycles from weeks to days. Incredible development velocity.' 
-  },
-  integration_4_author: { 
-    type: 'string' as const, 
-    default: 'David Park' 
-  },
-  integration_4_company: { 
-    type: 'string' as const, 
-    default: 'CTO, DevScale' 
+    default: 'VP Sales, TechFlow|Engineering Lead, InnovateCorp|Marketing Director, GrowthLabs|CTO, DevScale' 
   },
   trusted_companies: { 
     type: 'string' as const, 
     default: 'Microsoft|Google|Amazon|Meta|Stripe|Shopify|Airbnb|Uber|Netflix|Spotify' 
   },
-  integration_1_logo: { 
+  logo_urls: { 
     type: 'string' as const, 
-    default: '📊' 
+    default: '{}' // JSON object for logo URLs
   },
-  integration_1_avatar: { 
+  avatar_urls: { 
     type: 'string' as const, 
-    default: '👩‍💼' 
-  },
-  integration_2_logo: { 
-    type: 'string' as const, 
-    default: '💬' 
-  },
-  integration_2_avatar: { 
-    type: 'string' as const, 
-    default: '👨‍💻' 
-  },
-  integration_3_logo: { 
-    type: 'string' as const, 
-    default: '📈' 
-  },
-  integration_3_avatar: { 
-    type: 'string' as const, 
-    default: '👩‍💼' 
-  },
-  integration_4_logo: { 
-    type: 'string' as const, 
-    default: '⚡' 
-  },
-  integration_4_avatar: { 
-    type: 'string' as const, 
-    default: '👨‍💼' 
+    default: '{}' // JSON object for avatar URLs
   }
+};
+
+// Integration structure
+interface Integration {
+  id: string;
+  index: number;
+  name: string;
+  quote: string;
+  author: string;
+  company: string;
+}
+
+// Parse logo URLs from JSON string
+const parseLogoUrls = (logoUrlsJson: string): Record<string, string> => {
+  try {
+    return JSON.parse(logoUrlsJson || '{}');
+  } catch {
+    return {};
+  }
+};
+
+// Update logo URLs JSON string
+const updateLogoUrls = (logoUrlsJson: string, companyName: string, logoUrl: string): string => {
+  const logoUrls = parseLogoUrls(logoUrlsJson);
+  if (logoUrl === '') {
+    delete logoUrls[companyName];
+  } else {
+    logoUrls[companyName] = logoUrl;
+  }
+  return JSON.stringify(logoUrls);
+};
+
+// Get logo URL for a company
+const getCompanyLogoUrl = (logoUrlsJson: string, companyName: string): string => {
+  const logoUrls = parseLogoUrls(logoUrlsJson);
+  return logoUrls[companyName] || '';
+};
+
+// Parse avatar URLs from JSON string
+const parseAvatarUrls = (avatarUrlsJson: string): Record<string, string> => {
+  try {
+    return JSON.parse(avatarUrlsJson || '{}');
+  } catch {
+    return {};
+  }
+};
+
+// Update avatar URLs JSON string
+const updateAvatarUrls = (avatarUrlsJson: string, authorName: string, avatarUrl: string): string => {
+  const avatarUrls = parseAvatarUrls(avatarUrlsJson);
+  if (avatarUrl === '') {
+    delete avatarUrls[authorName];
+  } else {
+    avatarUrls[authorName] = avatarUrl;
+  }
+  return JSON.stringify(avatarUrls);
+};
+
+// Get avatar URL for an author
+const getAuthorAvatarUrl = (avatarUrlsJson: string, authorName: string): string => {
+  const avatarUrls = parseAvatarUrls(avatarUrlsJson);
+  return avatarUrls[authorName] || '';
+};
+
+// Parse integration data from pipe-separated strings
+const parseIntegrationData = (names: string, quotes: string, authors: string, companies: string): Integration[] => {
+  const nameList = parsePipeData(names);
+  const quoteList = parsePipeData(quotes);
+  const authorList = parsePipeData(authors);
+  const companyList = parsePipeData(companies);
+  
+  return nameList.map((name, index) => ({
+    id: `integration-${index}`,
+    index,
+    name: name.trim(),
+    quote: quoteList[index] || '',
+    author: authorList[index] || '',
+    company: companyList[index] || ''
+  }));
+};
+
+// Update company names and clean up orphaned logos
+const updateCompanyNames = (oldNames: string, newNames: string, logoUrlsJson: string): { names: string; logoUrls: string } => {
+  const oldCompanies = parsePipeData(oldNames).map(name => name.trim());
+  const newCompanies = parsePipeData(newNames).map(name => name.trim());
+  const logoUrls = parseLogoUrls(logoUrlsJson);
+  
+  // Remove logos for companies that no longer exist
+  const cleanedLogoUrls: Record<string, string> = {};
+  newCompanies.forEach(company => {
+    if (logoUrls[company]) {
+      cleanedLogoUrls[company] = logoUrls[company];
+    }
+  });
+  
+  return {
+    names: newCompanies.join('|'),
+    logoUrls: JSON.stringify(cleanedLogoUrls)
+  };
 };
 
 // Integration Card Component
@@ -171,7 +181,7 @@ const IntegrationCard = React.memo(({
   sectionId,
   integrationIndex
 }: { 
-  integration: any; 
+  integration: Integration; 
   isActive: boolean; 
   onClick: () => void;
   colorTokens: any;
@@ -183,6 +193,7 @@ const IntegrationCard = React.memo(({
   onLogoEdit: (value: string) => void;
   sectionId: string;
   integrationIndex: number;
+  logoUrl: string;
 }) => (
   <div 
     className={`p-6 rounded-xl border cursor-pointer transition-all duration-300 ${
@@ -197,7 +208,7 @@ const IntegrationCard = React.memo(({
       <div className="mr-4">
         <LogoEditableComponent
           mode={mode}
-          logoUrl={integration.logoUrl}
+          logoUrl={logoUrl}
           onLogoChange={onLogoEdit}
           companyName={integration.name}
           size="md"
@@ -238,13 +249,14 @@ const FeaturedQuote = React.memo(({
   sectionId,
   integrationIndex
 }: { 
-  integration: any; 
+  integration: Integration; 
   colorTokens: any;
   textStyle: React.CSSProperties;
   mode: 'edit' | 'preview';
   onAvatarEdit: (value: string) => void;
   sectionId: string;
   integrationIndex: number;
+  avatarUrl: string;
 }) => (
   <div className={`p-8 rounded-2xl ${colorTokens.bgSecondary} border-gray-200 border`}>
     {/* Quote */}
@@ -257,7 +269,7 @@ const FeaturedQuote = React.memo(({
       <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center mr-4">
         <IconEditableText
           mode={mode}
-          value={integration.avatar}
+          value={avatarUrl || integration.author.split(' ').map((n: string) => n[0]).join('')}
           onEdit={onAvatarEdit}
           backgroundType="primary"
           colorTokens={colorTokens}
@@ -286,11 +298,61 @@ const FeaturedQuote = React.memo(({
 FeaturedQuote.displayName = 'FeaturedQuote';
 
 // Company Logo Component
-const CompanyLogo = React.memo(({ name, colorTokens }: { name: string; colorTokens: any }) => (
-  <div className={`flex items-center justify-center p-4 rounded-lg ${colorTokens.bgSecondary} border-gray-200 border hover:${colorTokens.bgSecondary} transition-colors duration-200`}>
-    <span className={`font-semibold text-lg ${colorTokens.textSecondary}`}>
-      {name}
-    </span>
+const CompanyLogo = React.memo(({ 
+  company, 
+  mode, 
+  onLogoChange, 
+  onNameEdit, 
+  onDelete, 
+  logoUrl, 
+  colorTokens 
+}: { 
+  company: { id: string; index: number; name: string };
+  mode: 'edit' | 'preview';
+  onLogoChange: (url: string) => void;
+  onNameEdit: (index: number, value: string) => void;
+  onDelete: (index: number) => void;
+  logoUrl: string;
+  colorTokens: any;
+}) => (
+  <div className={`flex flex-col items-center space-y-3 p-4 rounded-lg ${colorTokens.bgSecondary} border-gray-200 border hover:${colorTokens.bgSecondary} transition-colors duration-200`}>
+    <LogoEditableComponent
+      mode={mode}
+      logoUrl={logoUrl}
+      onLogoChange={onLogoChange}
+      companyName={company.name}
+      size="md"
+    />
+    <div className="text-center w-full">
+      {mode === 'edit' ? (
+        <div className="flex items-center justify-center gap-2">
+          <div 
+            contentEditable
+            suppressContentEditableWarning
+            onBlur={(e) => onNameEdit(company.index, e.currentTarget.textContent || '')}
+            className="outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-1 min-h-[20px] cursor-text hover:bg-gray-50 font-semibold text-center flex-1"
+          >
+            {company.name}
+          </div>
+          <button
+            onClick={(e) => {
+              e.preventDefault();
+              if (confirm(`Delete ${company.name} completely?`)) {
+                onDelete(company.index);
+              }
+            }}
+            className="w-4 h-4 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center text-xs transition-colors"
+            title="Delete company"
+          >
+            ×
+          </button>
+        </div>
+      ) : (
+        <span className={`font-semibold text-sm ${colorTokens.textSecondary}`}>
+          {company.name}
+        </span>
+      )}
+    </div>
   </div>
 ));
 CompanyLogo.displayName = 'CompanyLogo';
@@ -320,57 +382,58 @@ export default function LogoWithQuoteUse(props: LayoutComponentProps) {
   const bodySmStyle = getTypographyStyle('body-sm');
   const labelStyle = getTypographyStyle('label');
 
-  // Icon edit handlers
-  const handleLogoEdit = (index: number, value: string) => {
-    const logoField = `integration_${index + 1}_logo` as keyof LogoWithQuoteUseContent;
-    handleContentUpdate(logoField, value);
-  };
-
-  const handleAvatarEdit = (index: number, value: string) => {
-    const avatarField = `integration_${index + 1}_avatar` as keyof LogoWithQuoteUseContent;
-    handleContentUpdate(avatarField, value);
-  };
-
-  // Parse integrations
-  const integrations = [
-    {
-      name: blockContent.integration_1_name,
-      quote: blockContent.integration_1_quote,
-      author: blockContent.integration_1_author,
-      company: blockContent.integration_1_company,
-      logoUrl: blockContent.integration_1_logo || '',
-      avatar: blockContent.integration_1_avatar || '👩‍💼'
-    },
-    {
-      name: blockContent.integration_2_name,
-      quote: blockContent.integration_2_quote,
-      author: blockContent.integration_2_author,
-      company: blockContent.integration_2_company,
-      logoUrl: blockContent.integration_2_logo || '',
-      avatar: blockContent.integration_2_avatar || '👨‍💻'
-    },
-    {
-      name: blockContent.integration_3_name,
-      quote: blockContent.integration_3_quote,
-      author: blockContent.integration_3_author,
-      company: blockContent.integration_3_company,
-      logoUrl: blockContent.integration_3_logo || '',
-      avatar: blockContent.integration_3_avatar || '👩‍💼'
-    },
-    {
-      name: blockContent.integration_4_name,
-      quote: blockContent.integration_4_quote,
-      author: blockContent.integration_4_author,
-      company: blockContent.integration_4_company,
-      logoUrl: blockContent.integration_4_logo || '',
-      avatar: blockContent.integration_4_avatar || '👨‍💼'
-    }
-  ];
+  // Parse integrations using dynamic system
+  const integrations = parseIntegrationData(
+    blockContent.integration_names,
+    blockContent.integration_quotes,
+    blockContent.integration_authors,
+    blockContent.integration_companies
+  );
 
   // Parse trusted companies
-  const trustedCompanies = blockContent.trusted_companies 
-    ? blockContent.trusted_companies.split('|').map(company => company.trim()) 
-    : [];
+  const trustedCompanies = parsePipeData(blockContent.trusted_companies || '');
+  const trustedCompanyData = trustedCompanies.map((name, index) => ({
+    id: `company-${index}`,
+    index,
+    name: name.trim()
+  }));
+
+  // Edit handlers for integrations
+  const handleIntegrationLogoEdit = (index: number, logoUrl: string) => {
+    const integration = integrations[index];
+    if (integration) {
+      const updatedLogoUrls = updateLogoUrls(blockContent.logo_urls, integration.name, logoUrl);
+      handleContentUpdate('logo_urls', updatedLogoUrls);
+    }
+  };
+
+  const handleIntegrationAvatarEdit = (index: number, avatarUrl: string) => {
+    const integration = integrations[index];
+    if (integration) {
+      const updatedAvatarUrls = updateAvatarUrls(blockContent.avatar_urls, integration.author, avatarUrl);
+      handleContentUpdate('avatar_urls', updatedAvatarUrls);
+    }
+  };
+
+  // Edit handlers for trusted companies
+  const handleCompanyLogoEdit = (company: string, logoUrl: string) => {
+    const updatedLogoUrls = updateLogoUrls(blockContent.logo_urls, company, logoUrl);
+    handleContentUpdate('logo_urls', updatedLogoUrls);
+  };
+
+  const handleCompanyNameEdit = (index: number, value: string) => {
+    const updatedNames = updateListData(blockContent.trusted_companies, index, value);
+    handleContentUpdate('trusted_companies', updatedNames);
+  };
+
+  const handleCompanyDelete = (index: number) => {
+    const currentCompanies = parsePipeData(blockContent.trusted_companies);
+    const updatedCompanies = currentCompanies.filter((_, idx) => idx !== index);
+    const updatedCompaniesString = updatedCompanies.join('|');
+    const { logoUrls } = updateCompanyNames(blockContent.trusted_companies, updatedCompaniesString, blockContent.logo_urls);
+    handleContentUpdate('trusted_companies', updatedCompaniesString);
+    handleContentUpdate('logo_urls', logoUrls);
+  };
 
   return (
     <LayoutSection
@@ -432,9 +495,10 @@ export default function LogoWithQuoteUse(props: LayoutComponentProps) {
                 h3Style={h3Style}
                 bodySmStyle={bodySmStyle}
                 mode={mode}
-                onLogoEdit={(value) => handleLogoEdit(index, value)}
+                onLogoEdit={(logoUrl) => handleIntegrationLogoEdit(index, logoUrl)}
                 sectionId={sectionId}
                 integrationIndex={index}
+                logoUrl={getCompanyLogoUrl(blockContent.logo_urls, integration.name)}
               />
             ))}
           </div>
@@ -446,9 +510,10 @@ export default function LogoWithQuoteUse(props: LayoutComponentProps) {
               colorTokens={colorTokens}
               textStyle={{}}
               mode={mode}
-              onAvatarEdit={(value) => handleAvatarEdit(selectedIntegration, value)}
+              onAvatarEdit={(avatarUrl) => handleIntegrationAvatarEdit(selectedIntegration, avatarUrl)}
               sectionId={sectionId}
               integrationIndex={selectedIntegration}
+              avatarUrl={getAuthorAvatarUrl(blockContent.avatar_urls, integrations[selectedIntegration]?.author || '')}
             />
           </div>
         </div>
@@ -460,13 +525,47 @@ export default function LogoWithQuoteUse(props: LayoutComponentProps) {
           </h3>
           
           <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-8">
-            {trustedCompanies.slice(0, 10).map((company, index) => (
+            {trustedCompanyData.slice(0, 10).map((company) => (
               <CompanyLogo
-                key={index}
-                name={company}
+                key={company.id}
+                company={company}
+                mode={mode}
+                onLogoChange={(logoUrl) => handleCompanyLogoEdit(company.name, logoUrl)}
+                onNameEdit={handleCompanyNameEdit}
+                onDelete={handleCompanyDelete}
+                logoUrl={getCompanyLogoUrl(blockContent.logo_urls, company.name)}
                 colorTokens={colorTokens}
               />
             ))}
+            
+            {/* Add Company Button (Edit Mode Only) */}
+            {mode === 'edit' && (
+              <div className={`flex flex-col items-center justify-center space-y-2 p-4 rounded-lg border-2 border-dashed border-gray-300 hover:border-gray-400 transition-colors duration-200 ${colorTokens.bgSecondary}`}>
+                <button
+                  onClick={(e) => {
+                    e.preventDefault();
+                    const newCompanyName = prompt('Enter company name:');
+                    if (newCompanyName && newCompanyName.trim()) {
+                      const currentCompanies = parsePipeData(blockContent.trusted_companies);
+                      if (!currentCompanies.includes(newCompanyName.trim())) {
+                        const updatedCompanies = [...currentCompanies, newCompanyName.trim()].join('|');
+                        handleContentUpdate('trusted_companies', updatedCompanies);
+                      } else {
+                        alert('Company already exists!');
+                      }
+                    }
+                  }}
+                  className="flex flex-col items-center space-y-2 text-gray-600 hover:text-gray-800 transition-colors"
+                >
+                  <div className="w-12 h-12 bg-gray-200 rounded-lg flex items-center justify-center">
+                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                    </svg>
+                  </div>
+                  <span className="text-xs font-medium">Add Company</span>
+                </button>
+              </div>
+            )}
           </div>
 
           {/* Stats */}
@@ -507,22 +606,10 @@ export const componentMeta = {
   contentFields: [
     { key: 'headline', label: 'Main Headline', type: 'text', required: true },
     { key: 'subheadline', label: 'Subheadline', type: 'textarea', required: false },
-    { key: 'integration_1_name', label: 'Integration 1 Name', type: 'text', required: true },
-    { key: 'integration_1_quote', label: 'Integration 1 Quote', type: 'textarea', required: true },
-    { key: 'integration_1_author', label: 'Integration 1 Author', type: 'text', required: true },
-    { key: 'integration_1_company', label: 'Integration 1 Company', type: 'text', required: true },
-    { key: 'integration_2_name', label: 'Integration 2 Name', type: 'text', required: true },
-    { key: 'integration_2_quote', label: 'Integration 2 Quote', type: 'textarea', required: true },
-    { key: 'integration_2_author', label: 'Integration 2 Author', type: 'text', required: true },
-    { key: 'integration_2_company', label: 'Integration 2 Company', type: 'text', required: true },
-    { key: 'integration_3_name', label: 'Integration 3 Name', type: 'text', required: true },
-    { key: 'integration_3_quote', label: 'Integration 3 Quote', type: 'textarea', required: true },
-    { key: 'integration_3_author', label: 'Integration 3 Author', type: 'text', required: true },
-    { key: 'integration_3_company', label: 'Integration 3 Company', type: 'text', required: true },
-    { key: 'integration_4_name', label: 'Integration 4 Name', type: 'text', required: true },
-    { key: 'integration_4_quote', label: 'Integration 4 Quote', type: 'textarea', required: true },
-    { key: 'integration_4_author', label: 'Integration 4 Author', type: 'text', required: true },
-    { key: 'integration_4_company', label: 'Integration 4 Company', type: 'text', required: true },
+    { key: 'integration_names', label: 'Integration Names (pipe separated)', type: 'text', required: true },
+    { key: 'integration_quotes', label: 'Integration Quotes (pipe separated)', type: 'textarea', required: true },
+    { key: 'integration_authors', label: 'Integration Authors (pipe separated)', type: 'text', required: true },
+    { key: 'integration_companies', label: 'Integration Companies (pipe separated)', type: 'text', required: true },
     { key: 'trusted_companies', label: 'Trusted Companies (pipe separated)', type: 'text', required: true }
   ],
   

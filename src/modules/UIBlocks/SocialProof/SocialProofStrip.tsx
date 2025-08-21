@@ -20,8 +20,7 @@ interface SocialProofStripContent {
   stat_labels?: string;
   company_logos?: string;
   company_names?: string;
-  google_logo?: string;
-  microsoft_logo?: string;
+  logo_urls: string; // JSON structure: {"CompanyName": "logoUrl"}
 }
 
 // Proof stat structure
@@ -61,13 +60,9 @@ const CONTENT_SCHEMA = {
     type: 'string' as const, 
     default: 'Google|Microsoft|Amazon|Meta|Netflix|Apple|Tesla|Shopify|Stripe|Slack|Zoom|Adobe' 
   },
-  google_logo: { 
+  logo_urls: { 
     type: 'string' as const, 
-    default: '' 
-  },
-  microsoft_logo: { 
-    type: 'string' as const, 
-    default: '' 
+    default: '{}' // JSON object for logo URLs
   }
 };
 
@@ -93,6 +88,52 @@ const parseCompanyData = (names: string): Company[] => {
     index,
     name: name.trim()
   }));
+};
+
+// Parse logo URLs from JSON string
+const parseLogoUrls = (logoUrlsJson: string): Record<string, string> => {
+  try {
+    return JSON.parse(logoUrlsJson || '{}');
+  } catch {
+    return {};
+  }
+};
+
+// Update logo URLs JSON string
+const updateLogoUrls = (logoUrlsJson: string, companyName: string, logoUrl: string): string => {
+  const logoUrls = parseLogoUrls(logoUrlsJson);
+  if (logoUrl === '') {
+    delete logoUrls[companyName];
+  } else {
+    logoUrls[companyName] = logoUrl;
+  }
+  return JSON.stringify(logoUrls);
+};
+
+// Get logo URL for a company
+const getCompanyLogoUrl = (logoUrlsJson: string, companyName: string): string => {
+  const logoUrls = parseLogoUrls(logoUrlsJson);
+  return logoUrls[companyName] || '';
+};
+
+// Update company names and clean up orphaned logos
+const updateCompanyNames = (oldNames: string, newNames: string, logoUrlsJson: string): { names: string; logoUrls: string } => {
+  const oldCompanies = parsePipeData(oldNames).map(name => name.trim());
+  const newCompanies = parsePipeData(newNames).map(name => name.trim());
+  const logoUrls = parseLogoUrls(logoUrlsJson);
+  
+  // Remove logos for companies that no longer exist
+  const cleanedLogoUrls: Record<string, string> = {};
+  newCompanies.forEach(company => {
+    if (logoUrls[company]) {
+      cleanedLogoUrls[company] = logoUrls[company];
+    }
+  });
+  
+  return {
+    names: newCompanies.join('|'),
+    logoUrls: JSON.stringify(cleanedLogoUrls)
+  };
 };
 
 // Stat Display Component
@@ -248,42 +289,79 @@ export default function SocialProofStrip(props: LayoutComponentProps) {
             </div>
             <div className="flex flex-wrap items-center justify-center gap-4">
               {companies.slice(0, 8).map((company) => {
-                // Check if this company should have an editable logo
-                const getEditableCompanyLogo = (companyName: string) => {
-                  switch (companyName) {
-                    case 'Google': return { logoUrl: blockContent.google_logo, field: 'google_logo' };
-                    case 'Microsoft': return { logoUrl: blockContent.microsoft_logo, field: 'microsoft_logo' };
-                    default: return null;
-                  }
-                };
+                // Every company gets an editable logo using dynamic system
+                const logoUrl = getCompanyLogoUrl(blockContent.logo_urls, company.name);
                 
-                const editableLogoData = getEditableCompanyLogo(company.name);
-                
-                return editableLogoData ? (
-                  // Editable company logo with isolated hover
+                return (
+                  // All companies are now editable with isolated hover
                   <div key={company.id} className="flex items-center justify-center px-4 py-2 bg-white/5 backdrop-blur-sm rounded-lg border border-white/10 hover:bg-white/10 transition-all duration-300">
                     <div className="flex items-center space-x-2">
                       <LogoEditableComponent
                         mode={mode}
-                        logoUrl={editableLogoData.logoUrl}
-                        onLogoChange={(url) => handleContentUpdate(editableLogoData.field as keyof SocialProofStripContent, url)}
+                        logoUrl={logoUrl}
+                        onLogoChange={(url) => {
+                          const updatedLogoUrls = updateLogoUrls(blockContent.logo_urls, company.name, url);
+                          handleContentUpdate('logo_urls', updatedLogoUrls);
+                        }}
                         companyName={company.name}
                         size="sm"
                       />
-                      <span style={{...bodyStyle, fontSize: '0.875rem'}} className={`${dynamicTextColors?.body || 'text-gray-700'}`}>
+                      <span style={{...bodyStyle, fontSize: '0.875rem'}} className={`${dynamicTextColors?.body || 'text-gray-700'} flex-1`}>
                         {company.name}
                       </span>
+                      {/* Delete Company Button */}
+                      {mode === 'edit' && (
+                        <button
+                          onClick={(e) => {
+                            e.preventDefault();
+                            if (confirm(`Delete ${company.name} completely?`)) {
+                              const currentCompanies = parsePipeData(blockContent.company_names || '');
+                              const updatedCompanies = currentCompanies.filter((_, idx) => idx !== company.index);
+                              const updatedCompaniesString = updatedCompanies.join('|');
+                              const { logoUrls } = updateCompanyNames(blockContent.company_names || '', updatedCompaniesString, blockContent.logo_urls);
+                              handleContentUpdate('company_names', updatedCompaniesString);
+                              handleContentUpdate('logo_urls', logoUrls);
+                            }
+                          }}
+                          className="w-4 h-4 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center text-xs transition-colors ml-2"
+                          title="Delete company"
+                        >
+                          ×
+                        </button>
+                      )}
                     </div>
                   </div>
-                ) : (
-                  <CompanyLogo
-                    key={company.id}
-                    company={company}
-                    dynamicTextColors={dynamicTextColors}
-                    bodyStyle={bodyStyle}
-                  />
                 );
               })}
+              
+              {/* Add Company Button (Edit Mode Only) */}
+              {mode === 'edit' && (
+                <div className="flex items-center justify-center px-4 py-2 bg-white/10 backdrop-blur-sm rounded-lg border-2 border-dashed border-white/20 hover:border-white/30 transition-all duration-300">
+                  <button
+                    onClick={(e) => {
+                      e.preventDefault();
+                      const newCompanyName = prompt('Enter company name:');
+                      if (newCompanyName && newCompanyName.trim()) {
+                        const currentCompanies = parsePipeData(blockContent.company_names || '');
+                        if (!currentCompanies.includes(newCompanyName.trim())) {
+                          const updatedCompanies = [...currentCompanies, newCompanyName.trim()].join('|');
+                          handleContentUpdate('company_names', updatedCompanies);
+                        } else {
+                          alert('Company already exists!');
+                        }
+                      }
+                    }}
+                    className="flex items-center space-x-2 text-gray-400 hover:text-gray-600 transition-colors"
+                  >
+                    <div className="w-6 h-6 bg-white/10 rounded flex items-center justify-center">
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                      </svg>
+                    </div>
+                    <span className="text-sm font-medium">Add Company</span>
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         )}

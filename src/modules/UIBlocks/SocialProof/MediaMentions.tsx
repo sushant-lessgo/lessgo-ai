@@ -19,8 +19,7 @@ interface MediaMentionsContent {
   subheadline?: string;
   media_outlets: string;
   testimonial_quotes?: string;
-  techcrunch_logo?: string;
-  forbes_logo?: string;
+  logo_urls: string; // JSON structure: {"OutletName": "logoUrl"}
 }
 
 // Media outlet structure
@@ -48,13 +47,9 @@ const CONTENT_SCHEMA = {
     type: 'string' as const, 
     default: '"Revolutionary approach to solving complex problems"|"Game-changing innovation in the industry"|"Setting new standards for excellence"' 
   },
-  techcrunch_logo: { 
+  logo_urls: { 
     type: 'string' as const, 
-    default: '' 
-  },
-  forbes_logo: { 
-    type: 'string' as const, 
-    default: '' 
+    default: '{}' // JSON object for logo URLs
   }
 };
 
@@ -67,6 +62,52 @@ const parseMediaData = (outlets: string): MediaOutlet[] => {
     index,
     name: name.trim()
   }));
+};
+
+// Parse logo URLs from JSON string
+const parseLogoUrls = (logoUrlsJson: string): Record<string, string> => {
+  try {
+    return JSON.parse(logoUrlsJson || '{}');
+  } catch {
+    return {};
+  }
+};
+
+// Update logo URLs JSON string
+const updateLogoUrls = (logoUrlsJson: string, outletName: string, logoUrl: string): string => {
+  const logoUrls = parseLogoUrls(logoUrlsJson);
+  if (logoUrl === '') {
+    delete logoUrls[outletName];
+  } else {
+    logoUrls[outletName] = logoUrl;
+  }
+  return JSON.stringify(logoUrls);
+};
+
+// Get logo URL for an outlet
+const getOutletLogoUrl = (logoUrlsJson: string, outletName: string): string => {
+  const logoUrls = parseLogoUrls(logoUrlsJson);
+  return logoUrls[outletName] || '';
+};
+
+// Update outlet names and clean up orphaned logos
+const updateOutletNames = (oldNames: string, newNames: string, logoUrlsJson: string): { names: string; logoUrls: string } => {
+  const oldOutlets = parsePipeData(oldNames).map(name => name.trim());
+  const newOutlets = parsePipeData(newNames).map(name => name.trim());
+  const logoUrls = parseLogoUrls(logoUrlsJson);
+  
+  // Remove logos for outlets that no longer exist
+  const cleanedLogoUrls: Record<string, string> = {};
+  newOutlets.forEach(outlet => {
+    if (logoUrls[outlet]) {
+      cleanedLogoUrls[outlet] = logoUrls[outlet];
+    }
+  });
+  
+  return {
+    names: newOutlets.join('|'),
+    logoUrls: JSON.stringify(cleanedLogoUrls)
+  };
 };
 
 // Media Outlet Logo Component
@@ -193,40 +234,83 @@ export default function MediaMentions(props: LayoutComponentProps) {
         {/* Media Outlet Logos Grid */}
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-6 mb-16">
           {mediaOutlets.slice(0, 12).map((outlet) => {
-            // Check if this outlet should have an editable logo
-            const getEditableOutletLogo = (outletName: string) => {
-              switch (outletName) {
-                case 'TechCrunch': return { logoUrl: blockContent.techcrunch_logo, field: 'techcrunch_logo' };
-                case 'Forbes': return { logoUrl: blockContent.forbes_logo, field: 'forbes_logo' };
-                default: return null;
-              }
-            };
+            // Every outlet gets an editable logo using dynamic system
+            const logoUrl = getOutletLogoUrl(blockContent.logo_urls, outlet.name);
             
-            const editableLogoData = getEditableOutletLogo(outlet.name);
-            
-            return editableLogoData ? (
-              // Editable media outlet logo with isolated hover
+            return (
+              // All outlets are now editable with isolated hover
               <div key={outlet.id} className="flex flex-col items-center space-y-3 p-6 bg-white/5 backdrop-blur-sm rounded-xl border border-white/10 hover:bg-white/10 transition-all duration-300">
                 <LogoEditableComponent
                   mode={mode}
-                  logoUrl={editableLogoData.logoUrl}
-                  onLogoChange={(url) => handleContentUpdate(editableLogoData.field as keyof MediaMentionsContent, url)}
+                  logoUrl={logoUrl}
+                  onLogoChange={(url) => {
+                    const updatedLogoUrls = updateLogoUrls(blockContent.logo_urls, outlet.name, url);
+                    handleContentUpdate('logo_urls', updatedLogoUrls);
+                  }}
                   companyName={outlet.name}
                   size="md"
                 />
-                <span style={{...bodyStyle, fontSize: '0.875rem'}} className={`text-center ${dynamicTextColors?.body || 'text-gray-700'}`}>
-                  {outlet.name}
-                </span>
+                {mode === 'edit' ? (
+                  <div className="flex items-center justify-center gap-2 text-center">
+                    <span style={{...bodyStyle, fontSize: '0.875rem'}} className={`${dynamicTextColors?.body || 'text-gray-700'} flex-1`}>
+                      {outlet.name}
+                    </span>
+                    {/* Delete Outlet Button */}
+                    <button
+                      onClick={(e) => {
+                        e.preventDefault();
+                        if (confirm(`Delete ${outlet.name} completely?`)) {
+                          const currentOutlets = parsePipeData(blockContent.media_outlets);
+                          const updatedOutlets = currentOutlets.filter((_, idx) => idx !== outlet.index);
+                          const updatedOutletsString = updatedOutlets.join('|');
+                          const { logoUrls } = updateOutletNames(blockContent.media_outlets, updatedOutletsString, blockContent.logo_urls);
+                          handleContentUpdate('media_outlets', updatedOutletsString);
+                          handleContentUpdate('logo_urls', logoUrls);
+                        }
+                      }}
+                      className="w-4 h-4 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center text-xs transition-colors"
+                      title="Delete outlet"
+                    >
+                      ×
+                    </button>
+                  </div>
+                ) : (
+                  <span style={{...bodyStyle, fontSize: '0.875rem'}} className={`text-center ${dynamicTextColors?.body || 'text-gray-700'}`}>
+                    {outlet.name}
+                  </span>
+                )}
               </div>
-            ) : (
-              <MediaOutletLogo
-                key={outlet.id}
-                outlet={outlet}
-                dynamicTextColors={dynamicTextColors}
-                bodyStyle={bodyStyle}
-              />
             );
           })}
+          
+          {/* Add Outlet Button (Edit Mode Only) */}
+          {mode === 'edit' && (
+            <div className="flex flex-col items-center space-y-3 p-6 bg-white/10 backdrop-blur-sm rounded-xl border-2 border-dashed border-white/20 hover:border-white/30 transition-all duration-300">
+              <button
+                onClick={(e) => {
+                  e.preventDefault();
+                  const newOutletName = prompt('Enter media outlet name:');
+                  if (newOutletName && newOutletName.trim()) {
+                    const currentOutlets = parsePipeData(blockContent.media_outlets);
+                    if (!currentOutlets.includes(newOutletName.trim())) {
+                      const updatedOutlets = [...currentOutlets, newOutletName.trim()].join('|');
+                      handleContentUpdate('media_outlets', updatedOutlets);
+                    } else {
+                      alert('Outlet already exists!');
+                    }
+                  }
+                }}
+                className="flex flex-col items-center space-y-2 text-gray-400 hover:text-gray-600 transition-colors"
+              >
+                <div className="w-16 h-16 bg-white/10 rounded-lg flex items-center justify-center">
+                  <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                  </svg>
+                </div>
+                <span className="text-sm font-medium">Add Outlet</span>
+              </button>
+            </div>
+          )}
         </div>
 
         {/* Testimonial Quotes */}
