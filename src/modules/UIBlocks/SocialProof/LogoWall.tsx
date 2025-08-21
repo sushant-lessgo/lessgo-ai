@@ -20,6 +20,17 @@ interface LogoWallContent {
   subheadline?: string;
   company_names: string;
   logo_urls: string; // JSON structure: {"CompanyName": "logoUrl"}
+  // Social proof stats fields
+  stat_1_number: string;
+  stat_1_label: string;
+  stat_2_number: string;
+  stat_2_label: string;
+  stat_3_number: string;
+  stat_3_label: string;
+  show_stats_section?: boolean;
+  // Trust reinforcement fields
+  trust_badge_text: string;
+  show_trust_badge?: boolean;
 }
 
 // Company logo structure
@@ -46,7 +57,18 @@ const CONTENT_SCHEMA = {
   logo_urls: { 
     type: 'string' as const, 
     default: '{}' // JSON object for logo URLs
-  }
+  },
+  // Social proof stats
+  stat_1_number: { type: 'string' as const, default: '500+' },
+  stat_1_label: { type: 'string' as const, default: 'Companies Trust Us' },
+  stat_2_number: { type: 'string' as const, default: '50+' },
+  stat_2_label: { type: 'string' as const, default: 'Countries Worldwide' },
+  stat_3_number: { type: 'string' as const, default: '15+' },
+  stat_3_label: { type: 'string' as const, default: 'Industries Served' },
+  show_stats_section: { type: 'boolean' as const, default: true },
+  // Trust reinforcement
+  trust_badge_text: { type: 'string' as const, default: 'Join thousands of satisfied customers' },
+  show_trust_badge: { type: 'boolean' as const, default: true }
 };
 
 // Parse company data from pipe-separated strings
@@ -349,33 +371,229 @@ export default function LogoWall(props: LayoutComponentProps) {
         </div>
 
         {/* Social Proof Stats */}
-        <div className="mt-16 grid grid-cols-1 sm:grid-cols-3 gap-8 max-w-3xl mx-auto text-center">
-          <SocialProofNumber
-            number="500+"
-            label="Companies Trust Us"
-            highlighted={true}
-          />
-          
-          <SocialProofNumber
-            number="50+"
-            label="Countries Worldwide"
-          />
-          
-          <SocialProofNumber
-            number="15+"
-            label="Industries Served"
-          />
-        </div>
+        {blockContent.show_stats_section !== false && (
+          <div className="mt-16 grid grid-cols-1 sm:grid-cols-3 gap-8 max-w-3xl mx-auto text-center">
+            {/* Stat 1 */}
+            {blockContent.stat_1_number && blockContent.stat_1_number !== '___REMOVED___' && (
+              <div className="relative group/stat-item">
+                {mode === 'edit' ? (
+                  <div className="space-y-2">
+                    <EditableAdaptiveText
+                      mode={mode}
+                      value={blockContent.stat_1_number || ''}
+                      onEdit={(value) => handleContentUpdate('stat_1_number', value)}
+                      backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
+                      colorTokens={colorTokens}
+                      variant="display"
+                      className="text-3xl font-bold"
+                      placeholder="500+"
+                      sectionBackground={sectionBackground}
+                      sectionId={sectionId}
+                      elementKey="stat_1_number"
+                    />
+                    <EditableAdaptiveText
+                      mode={mode}
+                      value={blockContent.stat_1_label || ''}
+                      onEdit={(value) => handleContentUpdate('stat_1_label', value)}
+                      backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
+                      colorTokens={colorTokens}
+                      variant="body"
+                      className="text-sm font-medium"
+                      placeholder="Companies Trust Us"
+                      sectionBackground={sectionBackground}
+                      sectionId={sectionId}
+                      elementKey="stat_1_label"
+                    />
+                  </div>
+                ) : (
+                  <SocialProofNumber
+                    number={blockContent.stat_1_number}
+                    label={blockContent.stat_1_label}
+                    highlighted={true}
+                  />
+                )}
+                
+                {/* Remove button */}
+                {mode === 'edit' && (
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleContentUpdate('stat_1_number', '___REMOVED___');
+                      handleContentUpdate('stat_1_label', '___REMOVED___');
+                    }}
+                    className="opacity-0 group-hover/stat-item:opacity-100 absolute top-0 right-0 p-1 rounded-full bg-white/80 hover:bg-white text-red-500 hover:text-red-700 transition-all duration-200 shadow-sm"
+                    title="Remove this stat"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                )}
+              </div>
+            )}
+            
+            {/* Stat 2 */}
+            {blockContent.stat_2_number && blockContent.stat_2_number !== '___REMOVED___' && (
+              <div className="relative group/stat-item">
+                {mode === 'edit' ? (
+                  <div className="space-y-2">
+                    <EditableAdaptiveText
+                      mode={mode}
+                      value={blockContent.stat_2_number || ''}
+                      onEdit={(value) => handleContentUpdate('stat_2_number', value)}
+                      backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
+                      colorTokens={colorTokens}
+                      variant="display"
+                      className="text-3xl font-bold"
+                      placeholder="50+"
+                      sectionBackground={sectionBackground}
+                      sectionId={sectionId}
+                      elementKey="stat_2_number"
+                    />
+                    <EditableAdaptiveText
+                      mode={mode}
+                      value={blockContent.stat_2_label || ''}
+                      onEdit={(value) => handleContentUpdate('stat_2_label', value)}
+                      backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
+                      colorTokens={colorTokens}
+                      variant="body"
+                      className="text-sm font-medium"
+                      placeholder="Countries Worldwide"
+                      sectionBackground={sectionBackground}
+                      sectionId={sectionId}
+                      elementKey="stat_2_label"
+                    />
+                  </div>
+                ) : (
+                  <SocialProofNumber
+                    number={blockContent.stat_2_number}
+                    label={blockContent.stat_2_label}
+                  />
+                )}
+                
+                {/* Remove button */}
+                {mode === 'edit' && (
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleContentUpdate('stat_2_number', '___REMOVED___');
+                      handleContentUpdate('stat_2_label', '___REMOVED___');
+                    }}
+                    className="opacity-0 group-hover/stat-item:opacity-100 absolute top-0 right-0 p-1 rounded-full bg-white/80 hover:bg-white text-red-500 hover:text-red-700 transition-all duration-200 shadow-sm"
+                    title="Remove this stat"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                )}
+              </div>
+            )}
+            
+            {/* Stat 3 */}
+            {blockContent.stat_3_number && blockContent.stat_3_number !== '___REMOVED___' && (
+              <div className="relative group/stat-item">
+                {mode === 'edit' ? (
+                  <div className="space-y-2">
+                    <EditableAdaptiveText
+                      mode={mode}
+                      value={blockContent.stat_3_number || ''}
+                      onEdit={(value) => handleContentUpdate('stat_3_number', value)}
+                      backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
+                      colorTokens={colorTokens}
+                      variant="display"
+                      className="text-3xl font-bold"
+                      placeholder="15+"
+                      sectionBackground={sectionBackground}
+                      sectionId={sectionId}
+                      elementKey="stat_3_number"
+                    />
+                    <EditableAdaptiveText
+                      mode={mode}
+                      value={blockContent.stat_3_label || ''}
+                      onEdit={(value) => handleContentUpdate('stat_3_label', value)}
+                      backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
+                      colorTokens={colorTokens}
+                      variant="body"
+                      className="text-sm font-medium"
+                      placeholder="Industries Served"
+                      sectionBackground={sectionBackground}
+                      sectionId={sectionId}
+                      elementKey="stat_3_label"
+                    />
+                  </div>
+                ) : (
+                  <SocialProofNumber
+                    number={blockContent.stat_3_number}
+                    label={blockContent.stat_3_label}
+                  />
+                )}
+                
+                {/* Remove button */}
+                {mode === 'edit' && (
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleContentUpdate('stat_3_number', '___REMOVED___');
+                      handleContentUpdate('stat_3_label', '___REMOVED___');
+                    }}
+                    className="opacity-0 group-hover/stat-item:opacity-100 absolute top-0 right-0 p-1 rounded-full bg-white/80 hover:bg-white text-red-500 hover:text-red-700 transition-all duration-200 shadow-sm"
+                    title="Remove this stat"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                )}
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Trust Reinforcement */}
-        <div className="mt-12 text-center">
-          <div className="inline-flex items-center px-6 py-3 bg-blue-50 border border-blue-200 rounded-full text-blue-800">
-            <svg className="w-5 h-5 mr-2 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
-              <path fillRule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-            </svg>
-            <span className="font-medium">Join thousands of satisfied customers</span>
+        {blockContent.show_trust_badge !== false && blockContent.trust_badge_text && blockContent.trust_badge_text !== '___REMOVED___' && (
+          <div className="mt-12 text-center">
+            <div className="relative group/trust-badge inline-flex items-center px-6 py-3 bg-blue-50 border border-blue-200 rounded-full text-blue-800">
+              <svg className="w-5 h-5 mr-2 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+              </svg>
+              
+              {mode === 'edit' ? (
+                <EditableAdaptiveText
+                  mode={mode}
+                  value={blockContent.trust_badge_text || ''}
+                  onEdit={(value) => handleContentUpdate('trust_badge_text', value)}
+                  backgroundType="neutral" // Force neutral since we're inside a blue badge
+                  colorTokens={colorTokens}
+                  variant="body"
+                  className="font-medium text-blue-800"
+                  placeholder="Join thousands of satisfied customers"
+                  sectionBackground={sectionBackground}
+                  sectionId={sectionId}
+                  elementKey="trust_badge_text"
+                />
+              ) : (
+                <span className="font-medium">{blockContent.trust_badge_text}</span>
+              )}
+              
+              {/* Remove button */}
+              {mode === 'edit' && (
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleContentUpdate('trust_badge_text', '___REMOVED___');
+                  }}
+                  className="opacity-0 group-hover/trust-badge:opacity-100 ml-2 p-1 rounded-full bg-white/80 hover:bg-white text-red-500 hover:text-red-700 transition-all duration-200 shadow-sm"
+                  title="Remove trust badge"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              )}
+            </div>
           </div>
-        </div>
+        )}
 
       </div>
     </LayoutSection>
