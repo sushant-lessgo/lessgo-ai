@@ -12,12 +12,14 @@ import {
 import { SocialProofNumber } from '@/components/layout/ComponentRegistry';
 import { LayoutComponentProps } from '@/types/storeTypes';
 import { parsePipeData, updateListData } from '@/utils/dataParsingUtils';
+import LogoEditableComponent from '@/components/ui/LogoEditableComponent';
 
 // Content interface for type safety
 interface LogoWallContent {
   headline: string;
   subheadline?: string;
   company_names: string;
+  microsoft_logo?: string;
 }
 
 // Company logo structure
@@ -40,6 +42,10 @@ const CONTENT_SCHEMA = {
   company_names: { 
     type: 'string' as const, 
     default: 'Microsoft|Google|Amazon|Tesla|Spotify|Airbnb|Netflix|Shopify|Stripe|Zoom|Slack|Dropbox|Adobe|Salesforce|HubSpot|Atlassian' 
+  },
+  microsoft_logo: { 
+    type: 'string' as const, 
+    default: '' 
   }
 };
 
@@ -208,13 +214,45 @@ export default function LogoWall(props: LayoutComponentProps) {
         {/* Company Logos Grid */}
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6">
           {companyLogos.map((company) => (
-            <CompanyLogoPlaceholder
-              key={company.id}
-              company={company}
-              mode={mode}
-              getTextStyle={getTextStyle}
-              onNameEdit={handleNameEdit}
-            />
+            company.name === 'Microsoft' ? (
+              // Special Microsoft logo with isolated hover
+              <div key={company.id} className="p-6 bg-white rounded-lg border border-gray-200 hover:border-gray-300 hover:shadow-md transition-all duration-300 flex flex-col items-center justify-center min-h-[120px]">
+                <LogoEditableComponent
+                  mode={mode}
+                  logoUrl={blockContent.microsoft_logo}
+                  onLogoChange={(url) => handleContentUpdate('microsoft_logo', url)}
+                  companyName={company.name}
+                  size="md"
+                />
+                
+                {/* Company Name */}
+                <div className="text-center mt-3">
+                  {mode === 'edit' ? (
+                    <div 
+                      contentEditable
+                      suppressContentEditableWarning
+                      onBlur={(e) => handleNameEdit(company.index, e.currentTarget.textContent || '')}
+                      className="outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-1 min-h-[20px] cursor-text hover:bg-gray-50 font-medium text-gray-700 text-sm text-center"
+                    >
+                      {company.name}
+                    </div>
+                  ) : (
+                    <span className="font-medium text-gray-700 text-sm">
+                      {company.name}
+                    </span>
+                  )}
+                </div>
+              </div>
+            ) : (
+              // Regular company logos with existing placeholder
+              <CompanyLogoPlaceholder
+                key={company.id}
+                company={company}
+                mode={mode}
+                getTextStyle={getTextStyle}
+                onNameEdit={handleNameEdit}
+              />
+            )
           ))}
         </div>
 
