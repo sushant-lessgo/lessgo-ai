@@ -134,7 +134,7 @@ export function EditLayout({ tokenId }: EditLayoutProps) {
               ? 'w-12 lg:w-12' 
               : `w-[${leftPanel.width}px]`
             }
-            lg:relative absolute lg:static z-30 lg:z-auto
+            lg:relative absolute lg:static z-40
             ${leftPanel.collapsed ? '' : 'shadow-lg lg:shadow-none'}
           `}
           style={{

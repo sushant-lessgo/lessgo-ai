@@ -28,7 +28,7 @@ export function GlobalAppHeader({ tokenId }: GlobalAppHeaderProps) {
 
 
   return (
-    <header className="w-full border-b border-brand-border bg-white px-6 py-3">
+    <header className="w-full border-b border-brand-border bg-white px-6 py-3 relative z-60">
       <div className="max-w-7xl mx-auto flex items-center justify-between">
         {/* Left: Logo and breadcrumb */}
         <div className="flex items-center space-x-4">
