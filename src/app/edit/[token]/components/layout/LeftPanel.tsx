@@ -404,7 +404,7 @@ export function LeftPanel({ tokenId }: LeftPanelProps) {
           </div>
 
           {/* Scrollable Content */}
-          <div className="flex-1 overflow-y-auto min-h-0">
+          <div className={`flex-1 overflow-y-auto min-h-0 ${hasFieldChanges ? 'max-h-[calc(100vh-260px)]' : ''}`}>
             <div className="p-4 space-y-6">
               {/* Product Description Card - Read Only */}
               <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
@@ -522,7 +522,7 @@ export function LeftPanel({ tokenId }: LeftPanelProps) {
 
           {/* Sticky Regeneration Controls */}
           {(validatedFieldsOnly.length > 0 || hiddenFieldsOnly.length > 0) && (
-            <div className="flex-shrink-0 border-t border-gray-200 bg-white p-4 space-y-3 overflow-visible">
+            <div className={`flex-shrink-0 border-t border-gray-200 bg-white px-5 space-y-4 overflow-visible ${hasFieldChanges ? 'py-6 min-h-[180px]' : 'py-4'}`}>
               {hasFieldChanges && (
                 <>
                   {/* Design Regeneration Option */}
@@ -536,13 +536,10 @@ export function LeftPanel({ tokenId }: LeftPanelProps) {
                       />
                       <div className="flex-1">
                         <div className="text-sm font-medium text-amber-800">
-                          {leftPanel.width < 350 ? 'Regenerate design' : 'Also regenerate design'}
+                          Also regenerate design
                         </div>
-                        <div className="text-xs text-amber-700 mt-1 leading-tight">
-                          {leftPanel.width < 350 
-                            ? 'Will lose customizations'
-                            : 'Changes sections, layouts & colors. Will lose customizations.'
-                          }
+                        <div className="text-xs text-amber-700 mt-1">
+                          Changes sections, layouts & colors. Will lose customizations.
                         </div>
                       </div>
                     </label>
@@ -552,34 +549,29 @@ export function LeftPanel({ tokenId }: LeftPanelProps) {
                   <button
                     onClick={handleRegenerateContent}
                     disabled={isRegenerating}
-                    className="w-full py-3 px-2 rounded-lg font-medium text-sm transition-all duration-200 bg-blue-600 hover:bg-blue-700 text-white shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed min-w-0"
+                    className="w-full py-4 px-4 rounded-lg font-medium text-sm transition-all duration-200 bg-blue-600 hover:bg-blue-700 text-white shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {isRegenerating ? (
-                      <div className="flex items-center justify-center space-x-2 min-w-0">
-                        <div className="w-4 h-4 border-2 border-gray-300 border-t-blue-600 rounded-full animate-spin flex-shrink-0"></div>
-                        <span className="truncate">
-                          {includeDesignRegeneration ? 'Regenerating...' : 'Regenerating...'}
+                      <div className="flex items-center justify-center space-x-2">
+                        <div className="w-4 h-4 border-2 border-gray-300 border-t-blue-600 rounded-full animate-spin"></div>
+                        <span>
+                          {includeDesignRegeneration ? 'Regenerating Design + Content...' : 'Regenerating Content...'}
                         </span>
                       </div>
                     ) : (
-                      <div className="flex items-center justify-center space-x-1 min-w-0">
-                        <span className="flex-shrink-0">🔄</span>
-                        <span className="truncate text-center leading-tight">
-                          {leftPanel.width < 350 
-                            ? (includeDesignRegeneration ? 'Regenerate All' : 'Regenerate Copy')
-                            : (includeDesignRegeneration ? 'Regenerate Design + Content' : 'Regenerate Content Only')
-                          }
+                      <div className="flex items-center justify-center space-x-2">
+                        <span>🔄</span>
+                        <span>
+                          {includeDesignRegeneration ? 'Regenerate Design + Content' : 'Regenerate Content Only'}
                         </span>
                       </div>
                     )}
                   </button>
 
-                  <p className="text-xs text-gray-500 text-center leading-tight px-1">
-                    {leftPanel.width < 350 
-                      ? (includeDesignRegeneration ? 'Full regeneration' : 'Copy only')
-                      : (includeDesignRegeneration 
-                        ? 'This will completely regenerate design and content'
-                        : 'This will update copy while preserving your current design')
+                  <p className="text-xs text-gray-500 text-center mb-2">
+                    {includeDesignRegeneration 
+                      ? 'This will completely regenerate design and content'
+                      : 'This will update copy while preserving your current design'
                     }
                   </p>
                 </>
