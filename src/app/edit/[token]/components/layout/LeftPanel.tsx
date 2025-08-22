@@ -439,7 +439,7 @@ export function LeftPanel({ tokenId }: LeftPanelProps) {
           </div>
 
           {/* Scrollable Content */}
-          <div className={`flex-1 overflow-y-auto min-h-0 ${hasFieldChanges ? 'max-h-[calc(100vh-260px)]' : ''}`}>
+          <div className={`flex-1 overflow-y-auto min-h-0 ${hasFieldChanges ? 'max-h-[calc(100vh-300px)]' : ''}`}>
             <div className="p-4 space-y-6">
               {/* Product Description Card - Read Only */}
               <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
@@ -557,7 +557,7 @@ export function LeftPanel({ tokenId }: LeftPanelProps) {
 
           {/* Sticky Regeneration Controls */}
           {(validatedFieldsOnly.length > 0 || hiddenFieldsOnly.length > 0) && (
-            <div className={`flex-shrink-0 border-t border-gray-200 bg-white px-5 space-y-4 overflow-visible ${hasFieldChanges ? 'py-6 min-h-[180px]' : 'py-4'}`}>
+            <div className={`flex-shrink-0 border-t border-gray-200 bg-white px-5 space-y-4 overflow-visible ${hasFieldChanges ? 'py-8 min-h-[220px]' : 'py-4'}`}>
               {hasFieldChanges && (
                 <>
                   {/* Design Regeneration Option */}
