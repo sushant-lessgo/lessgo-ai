@@ -83,6 +83,7 @@ export function LeftPanel({ tokenId }: LeftPanelProps) {
   const [originalFields, setOriginalFields] = useState<Record<string, string>>({});
   const [isRegenerating, setIsRegenerating] = useState(false);
   const [includeDesignRegeneration, setIncludeDesignRegeneration] = useState(false);
+  const [showDesignWarning, setShowDesignWarning] = useState(false);
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => setMounted(true), []);
@@ -133,6 +134,40 @@ export function LeftPanel({ tokenId }: LeftPanelProps) {
       }
     }
   };
+
+  const handleDesignRegenerationChange = (checked: boolean) => {
+    if (checked) {
+      // Show confirmation dialog before enabling
+      setShowDesignWarning(true);
+    } else {
+      // Allow unchecking without confirmation
+      setIncludeDesignRegeneration(false);
+    }
+  };
+
+  const handleDesignWarningConfirm = () => {
+    setIncludeDesignRegeneration(true);
+    setShowDesignWarning(false);
+  };
+
+  const handleDesignWarningCancel = () => {
+    setShowDesignWarning(false);
+    // Keep includeDesignRegeneration as false
+  };
+
+  // Handle ESC key press for dialog
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape' && showDesignWarning) {
+        handleDesignWarningCancel();
+      }
+    };
+
+    if (showDesignWarning) {
+      document.addEventListener('keydown', handleKeyDown);
+      return () => document.removeEventListener('keydown', handleKeyDown);
+    }
+  }, [showDesignWarning]);
 
   const handleRegenerateContent = async () => {
     if (!hasFieldChanges || isRegenerating) return;
@@ -531,15 +566,12 @@ export function LeftPanel({ tokenId }: LeftPanelProps) {
                       <input
                         type="checkbox"
                         checked={includeDesignRegeneration}
-                        onChange={(e) => setIncludeDesignRegeneration(e.target.checked)}
+                        onChange={(e) => handleDesignRegenerationChange(e.target.checked)}
                         className="mt-0.5 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded flex-shrink-0"
                       />
                       <div className="flex-1">
                         <div className="text-sm font-medium text-amber-800">
                           Also regenerate design
-                        </div>
-                        <div className="text-xs text-amber-700 mt-1">
-                          Changes sections, layouts & colors. Will lose customizations.
                         </div>
                       </div>
                     </label>
@@ -598,6 +630,51 @@ export function LeftPanel({ tokenId }: LeftPanelProps) {
           <div className="w-0.5 h-8 bg-gray-400 rounded-full"></div>
         </div>
       </div>
+
+      {/* Design Warning Confirmation Dialog */}
+      {showDesignWarning && (
+        <div 
+          className="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
+          onClick={handleDesignWarningCancel}
+        >
+          <div 
+            className="bg-white rounded-lg shadow-xl max-w-md w-full mx-4 p-6"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-start space-x-3 mb-4">
+              <div className="flex-shrink-0">
+                <div className="w-8 h-8 bg-amber-100 rounded-full flex items-center justify-center">
+                  <span className="text-amber-600 text-lg">⚠️</span>
+                </div>
+              </div>
+              <div className="flex-1">
+                <h3 className="text-lg font-medium text-gray-900 mb-2">
+                  Regenerate Design & Content?
+                </h3>
+                <p className="text-sm text-gray-600">
+                  This will completely regenerate the design including sections, layouts, and colors. 
+                  All your current customizations will be lost.
+                </p>
+              </div>
+            </div>
+            
+            <div className="flex space-x-3 justify-end">
+              <button
+                onClick={handleDesignWarningCancel}
+                className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleDesignWarningConfirm}
+                className="px-4 py-2 text-sm font-medium text-white bg-amber-600 border border-amber-600 rounded-lg hover:bg-amber-700 transition-colors"
+              >
+                Confirm
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Taxonomy Modal Manager */}
       <TaxonomyModalManager />
