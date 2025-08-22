@@ -557,11 +557,11 @@ export function LeftPanel({ tokenId }: LeftPanelProps) {
 
           {/* Sticky Regeneration Controls */}
           {(validatedFieldsOnly.length > 0 || hiddenFieldsOnly.length > 0) && (
-            <div className={`flex-shrink-0 border-t border-gray-200 bg-white px-5 space-y-4 overflow-visible ${hasFieldChanges ? 'py-8 min-h-[220px]' : 'py-4'}`}>
+            <div className={`flex-shrink-0 border-t border-gray-200 bg-white px-5 space-y-4 overflow-visible ${hasFieldChanges ? 'py-4 min-h-[220px]' : 'py-4'}`}>
               {hasFieldChanges && (
                 <>
                   {/* Design Regeneration Option */}
-                  <div className="bg-amber-50 border border-amber-200 rounded-lg p-3">
+                  <div className="bg-amber-50 border border-amber-200 p-1">
                     <label className="flex items-start space-x-3 cursor-pointer">
                       <input
                         type="checkbox"
@@ -581,7 +581,7 @@ export function LeftPanel({ tokenId }: LeftPanelProps) {
                   <button
                     onClick={handleRegenerateContent}
                     disabled={isRegenerating}
-                    className="w-full py-4 px-4 rounded-lg font-medium text-sm transition-all duration-200 bg-blue-600 hover:bg-blue-700 text-white shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="w-full py-4 px-4 rounded-lg font-medium text-base transition-all duration-200 bg-blue-600 hover:bg-blue-700 text-white shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {isRegenerating ? (
                       <div className="flex items-center justify-center space-x-2">
@@ -600,12 +600,7 @@ export function LeftPanel({ tokenId }: LeftPanelProps) {
                     )}
                   </button>
 
-                  <p className="text-xs text-gray-500 text-center mb-2">
-                    {includeDesignRegeneration 
-                      ? 'This will completely regenerate design and content'
-                      : 'This will update copy while preserving your current design'
-                    }
-                  </p>
+                 
                 </>
               )}
               
