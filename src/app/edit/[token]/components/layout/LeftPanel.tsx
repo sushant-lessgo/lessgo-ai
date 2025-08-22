@@ -124,7 +124,7 @@ export function LeftPanel({ tokenId }: LeftPanelProps) {
     if (modalManager) {
       const currentValue = (validatedFields as any)[fieldName] || (hiddenInferredFields as any)[fieldName] || '';
       modalManager.openFieldModal(fieldName, currentValue);
-      // Don't set hasFieldChanges here - wait for actual changes
+      // Field changes will be detected by the useEffect watching validatedFields/hiddenInferredFields
     } else {
       console.error('Modal manager not available');
       // Fallback to existing method (only works for canonical fields)
@@ -151,9 +151,10 @@ export function LeftPanel({ tokenId }: LeftPanelProps) {
       setHasFieldChanges(false);
       setIncludeDesignRegeneration(false);
       
-      // Update original fields to new values to prevent immediate re-triggering
-      const newFields = { ...validatedFields, ...hiddenInferredFields };
-      setOriginalFields(newFields);
+      // Update original fields to current values after regeneration
+      // This creates a new baseline for future change detection
+      const currentFields = { ...validatedFields, ...hiddenInferredFields };
+      setOriginalFields(currentFields);
     } catch (error) {
       console.error('Regeneration failed:', error);
     } finally {
@@ -194,29 +195,11 @@ export function LeftPanel({ tokenId }: LeftPanelProps) {
     }
   };
 
-  // Store original field values on mount and update when fields change
+  // Store original field values on mount
   useEffect(() => {
     const initialFields = { ...validatedFields, ...hiddenInferredFields };
     setOriginalFields(initialFields);
   }, []); // Only run once on mount
-  
-  // Force refresh mechanism: Update original fields when actual field updates occur
-  useEffect(() => {
-    const currentFields = { ...validatedFields, ...hiddenInferredFields };
-    const hasActualChanges = Object.keys(currentFields).some(key => {
-      return (currentFields as any)[key] !== (originalFields as any)[key];
-    });
-    
-    // If we detect field changes from modals, update original fields after a short delay
-    // This prevents infinite loops while ensuring UI reflects latest changes
-    if (hasActualChanges && Object.keys(originalFields).length > 0) {
-      const timeoutId = setTimeout(() => {
-        setOriginalFields(currentFields);
-      }, 100);
-      
-      return () => clearTimeout(timeoutId);
-    }
-  }, [validatedFields, hiddenInferredFields, originalFields]);
   
   // Sync data between stores - bidirectional sync with real-time field updates
   useEffect(() => {
@@ -281,25 +264,35 @@ export function LeftPanel({ tokenId }: LeftPanelProps) {
 
   // Watch for actual field changes to enable regeneration
   useEffect(() => {
-    const checkForChanges = () => {
-      const currentFields = { ...validatedFields, ...hiddenInferredFields };
-      
-      // Compare current fields with original fields
-      const hasChanges = Object.keys(currentFields).some(key => {
-        return (currentFields as any)[key] !== (originalFields as any)[key];
-      });
-      
-      // Also check if new fields were added
-      const hasNewFields = Object.keys(currentFields).length !== Object.keys(originalFields).length;
-      
-      setHasFieldChanges(hasChanges || hasNewFields);
-    };
-
-    // Only check if we have original fields to compare against
-    if (Object.keys(originalFields).length > 0) {
-      checkForChanges();
+    // Skip if we don't have original fields yet (initial load)
+    if (Object.keys(originalFields).length === 0) {
+      return;
     }
-  }, [validatedFields, hiddenInferredFields, originalFields]);
+    
+    const currentFields = { ...validatedFields, ...hiddenInferredFields };
+    
+    // Check if all current field keys exist in original fields
+    const currentKeys = Object.keys(currentFields).sort();
+    const originalKeys = Object.keys(originalFields).sort();
+    
+    // Check for new or removed fields
+    const keysChanged = currentKeys.length !== originalKeys.length || 
+                       currentKeys.some((key, index) => key !== originalKeys[index]);
+    
+    // Check for value changes in existing fields
+    const valuesChanged = currentKeys.some(key => {
+      const currentValue = (currentFields as any)[key];
+      const originalValue = (originalFields as any)[key];
+      return currentValue !== originalValue;
+    });
+    
+    const shouldHaveChanges = keysChanged || valuesChanged;
+    
+    // Update the state only if it actually changed to prevent unnecessary re-renders
+    if (hasFieldChanges !== shouldHaveChanges) {
+      setHasFieldChanges(shouldHaveChanges);
+    }
+  }, [validatedFields, hiddenInferredFields, originalFields, hasFieldChanges]);
 
   if (!mounted) return null;
   
@@ -529,7 +522,7 @@ export function LeftPanel({ tokenId }: LeftPanelProps) {
 
           {/* Sticky Regeneration Controls */}
           {(validatedFieldsOnly.length > 0 || hiddenFieldsOnly.length > 0) && (
-            <div className="flex-shrink-0 border-t border-gray-200 bg-white p-4 space-y-3">
+            <div className="flex-shrink-0 border-t border-gray-200 bg-white p-4 space-y-3 overflow-visible">
               {hasFieldChanges && (
                 <>
                   {/* Design Regeneration Option */}
@@ -539,9 +532,9 @@ export function LeftPanel({ tokenId }: LeftPanelProps) {
                         type="checkbox"
                         checked={includeDesignRegeneration}
                         onChange={(e) => setIncludeDesignRegeneration(e.target.checked)}
-                        className="mt-0.5 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                        className="mt-0.5 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded flex-shrink-0"
                       />
-                      <div className="flex-1 min-w-0">
+                      <div className="flex-1">
                         <div className="text-sm font-medium text-amber-800">
                           Also regenerate design
                         </div>
