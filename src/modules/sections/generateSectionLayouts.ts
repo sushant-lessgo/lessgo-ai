@@ -7,6 +7,7 @@ import type { EditStoreInstance } from '@/stores/editStore';
 // Helper function to get fallback layouts for sections
 function getSectionFallback(sectionId: string): string {
   const sectionFallbacks: Record<string, string> = {
+    header: "NavWithCTAHeader",
     beforeAfter: "SideBySideBlocks",
     closeSection: "MockupWithCTA", 
     comparisonTable: "BasicFeatureGrid",
@@ -26,6 +27,7 @@ function getSectionFallback(sectionId: string): string {
     testimonials: "QuoteGrid",
     uniqueMechanism: "StackedHighlights",
     useCases: "PersonaGrid",
+    footer: "MultiColumnFooter",
   };
   
   return sectionFallbacks[sectionId] || "IconGrid"; // Ultimate fallback

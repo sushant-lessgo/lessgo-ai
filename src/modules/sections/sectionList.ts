@@ -14,6 +14,7 @@ export type SectionMeta = {
 };
 
 export const sectionList: SectionMeta[] = [
+  { id: "header", label: "Header", order: 0, background: "neutral", required: true, defaultSpacingAfter: 'compact', contentDensity: 'light' },
   { id: "beforeAfter", label: "Before / After", order: 3, background: "neutral", defaultSpacingAfter: 'spacious', contentDensity: 'medium' },
   { id: "closeSection", label: "Close Section", order: 24, background: "primary-highlight", defaultSpacingAfter: 'normal', contentDensity: 'medium' },
   { id: "comparisonTable", label: "Comparison Table", order: 12, background: "neutral", defaultSpacingAfter: 'spacious', contentDensity: 'heavy' },
@@ -33,4 +34,5 @@ export const sectionList: SectionMeta[] = [
   { id: "testimonials", label: "Testimonials", order: 9, background: "neutral", defaultSpacingAfter: 'spacious', contentDensity: 'medium' },
   { id: "uniqueMechanism", label: "Unique Mechanism / Why Different", order: 6, background: "secondary-highlight", defaultSpacingAfter: 'normal', contentDensity: 'medium' },
   { id: "useCases", label: "Use Cases & Target Users", order: 4, background: "neutral", defaultSpacingAfter: 'normal', contentDensity: 'medium' },
+  { id: "footer", label: "Footer", order: 25, background: "neutral", required: true, defaultSpacingAfter: 'normal', contentDensity: 'light' },
 ];

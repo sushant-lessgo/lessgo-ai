@@ -59,6 +59,7 @@ export interface LandingPageContent {
 }
 
 export type SectionType = 
+  | 'header'
   | 'hero' 
   | 'features' 
   | 'testimonials' 
@@ -68,7 +69,8 @@ export type SectionType =
   | 'problem'
   | 'results'
   | 'logos'
-  | 'custom';
+  | 'custom'
+  | 'footer';
 
 export interface SectionData {
   id: string;

@@ -88,7 +88,11 @@ const WinItem = ({
   sectionId,
   onWinEdit,
   onDescriptionEdit,
-  onCategoryEdit
+  onCategoryEdit,
+  blockContent,
+  handleContentUpdate,
+  backgroundType,
+  colorTokens
 }: {
   win: WinItem;
   index: number;
@@ -97,6 +101,10 @@ const WinItem = ({
   onWinEdit: (index: number, value: string) => void;
   onDescriptionEdit: (index: number, value: string) => void;
   onCategoryEdit: (index: number, value: string) => void;
+  blockContent: StackedWinsListContent;
+  handleContentUpdate: (key: string, value: any) => void;
+  backgroundType: string;
+  colorTokens: any;
 }) => {
   const { getTextStyle } = useTypography();
   const categoryColors = getCategoryColor(win.category);
@@ -313,6 +321,10 @@ export default function StackedWinsList(props: StackedWinsListProps) {
               onWinEdit={handleWinEdit}
               onDescriptionEdit={handleDescriptionEdit}
               onCategoryEdit={handleCategoryEdit}
+              blockContent={blockContent}
+              handleContentUpdate={handleContentUpdate}
+              backgroundType={backgroundType}
+              colorTokens={colorTokens}
             />
           ))}
         </div>

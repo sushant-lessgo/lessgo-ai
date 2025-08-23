@@ -148,6 +148,13 @@ function getSectionLayoutGuidance(sectionType: string, layout: string): string {
       FoundersBeliefStack: "Value-driven founder presentation. Use conviction-based language. Connect beliefs to product benefits."
     },
 
+    Header: {
+      MinimalNavHeader: "Simple navigation header. Keep nav items short (1-2 words). Use clear, action-oriented labels. Nav items should match main sections.",
+      NavWithCTAHeader: "Navigation with primary CTA. Nav items should be intuitive. CTA should match main conversion goal. Keep CTA text urgent but not pushy.",
+      CenteredLogoHeader: "Balanced centered logo design. Distribute nav items evenly. Use consistent labeling style. Create visual hierarchy through spacing.",
+      FullNavHeader: "Complete navigation with dual CTAs. Primary CTA should be stronger action. Secondary CTA for existing users. Maintain clear visual hierarchy."
+    },
+
     Hero: {
       leftCopyRightImage: "Left-side copy with right-side visual. Keep headlines punchy and scannable. Prioritize clarity over cleverness.",
       centerStacked: "Centered layout for maximum impact. Headlines can be longer and more descriptive. Focus on emotional connection.",
@@ -285,6 +292,13 @@ function getSectionLayoutGuidance(sectionType: string, layout: string): string {
       SegmentSplitBlocks: "Market segment presentation. Use segment-appropriate language and positioning. Address different market needs.",
       CarouselAvatars: "Rotating user story presentation. Each story should be complete and relatable. Use consistent narrative structure.",
       RoleBenefitMatrix: "Role-based benefit mapping. Connect specific roles to relevant benefits. Use role-appropriate language and concerns."
+    },
+
+    Footer: {
+      SimpleFooter: "Minimal footer design. Include essential legal links. Keep copyright current. Link text should be standard (Privacy, Terms, etc.).",
+      LinksAndSocialFooter: "Footer with social presence. Include relevant social platforms only. Tagline should reinforce brand value. Organize links logically.",
+      MultiColumnFooter: "Organized multi-column layout. Group links by category (Product, Company, Resources). Column titles should be clear. Maintain consistent link style.",
+      ContactFooter: "Contact-focused footer with newsletter. Newsletter copy should offer value. Include multiple contact methods. Make contact info scannable."
     }
   };
 

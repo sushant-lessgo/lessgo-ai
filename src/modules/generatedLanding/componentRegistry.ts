@@ -1,5 +1,17 @@
 import React from 'react';
 
+// Header components
+import MinimalNavHeader from '@/modules/UIBlocks/Header/MinimalNavHeader';
+import NavWithCTAHeader from '@/modules/UIBlocks/Header/NavWithCTAHeader';
+import CenteredLogoHeader from '@/modules/UIBlocks/Header/CenteredLogoHeader';
+import FullNavHeader from '@/modules/UIBlocks/Header/FullNavHeader';
+
+// Footer components
+import SimpleFooter from '@/modules/UIBlocks/Footer/SimpleFooter';
+import LinksAndSocialFooter from '@/modules/UIBlocks/Footer/LinksAndSocialFooter';
+import MultiColumnFooter from '@/modules/UIBlocks/Footer/MultiColumnFooter';
+import ContactFooter from '@/modules/UIBlocks/Footer/ContactFooter';
+
 import AccordionFAQ from '@/modules/UIBlocks/FAQ/AccordionFAQ';
 import AccordionSteps from '@/modules/UIBlocks/HowItWorks/AccordionSteps';
 import AlgorithmExplainer from '@/modules/UIBlocks/UniqueMechanism/AlgorithmExplainer';
@@ -154,6 +166,13 @@ export type ComponentRegistry = Record<string, Record<string, React.ComponentTyp
 
 // Main component registry - maps section types and layouts to components
 export const componentRegistry: ComponentRegistry = {
+  header: {
+    MinimalNavHeader: MinimalNavHeader,
+    NavWithCTAHeader: NavWithCTAHeader,
+    CenteredLogoHeader: CenteredLogoHeader,
+    FullNavHeader: FullNavHeader,
+  },
+  
   beforeAfter: {
     SideBySideBlocks: SideBySideBlock,
     StackedTextVisual: StackedTextVisual,
@@ -380,6 +399,13 @@ export const componentRegistry: ComponentRegistry = {
     LivePreviewEmbed: LivePreviewEmbed,
     SideBySideOfferCards: SideBySideOfferCards,
     MultistepCTAStack: MultistepCTAStack,
+  },
+  
+  footer: {
+    SimpleFooter: SimpleFooter,
+    LinksAndSocialFooter: LinksAndSocialFooter,
+    MultiColumnFooter: MultiColumnFooter,
+    ContactFooter: ContactFooter,
   },
 };
 

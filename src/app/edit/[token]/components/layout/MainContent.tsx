@@ -395,12 +395,14 @@ React.useEffect(() => {
   // Handle add section
 const handleAddSection = (afterSectionId?: string) => {
   const sectionTypes = [
+    { id: 'header', label: 'Header', icon: '🔝' },
     { id: 'hero', label: 'Hero Section', icon: '🏆' },
     { id: 'features', label: 'Features', icon: '⭐' },
     { id: 'testimonials', label: 'Testimonials', icon: '💬' },
     { id: 'pricing', label: 'Pricing', icon: '💰' },
     { id: 'faq', label: 'FAQ', icon: '❓' },
     { id: 'cta', label: 'Call to Action', icon: '🎯' },
+    { id: 'footer', label: 'Footer', icon: '🔚' },
   ];
 
   // Fix: Use the correct addSection signature (type, position)

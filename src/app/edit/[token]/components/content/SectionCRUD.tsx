@@ -16,11 +16,13 @@ export function AddSectionButton({ position, className = '', onSectionAdded }: A
   const { addSection } = useSectionCRUD();
 
   const sectionTypes: Array<{ type: SectionType; label: string; description: string; icon: string }> = [
+    { type: 'header', label: 'Header', description: 'Navigation and branding', icon: '🔝' },
     { type: 'hero', label: 'Hero Section', description: 'Main header with headline and CTA', icon: '🚀' },
     { type: 'features', label: 'Features', description: 'Highlight key features and benefits', icon: '✨' },
     { type: 'testimonials', label: 'Testimonials', description: 'Customer reviews and social proof', icon: '💬' },
     { type: 'cta', label: 'Call to Action', description: 'Conversion-focused section', icon: '🎯' },
     { type: 'faq', label: 'FAQ', description: 'Frequently asked questions', icon: '❓' },
+    { type: 'footer', label: 'Footer', description: 'Links and contact information', icon: '🔚' },
     { type: 'custom', label: 'Custom Section', description: 'Start with a blank section', icon: '🔧' },
   ];
 

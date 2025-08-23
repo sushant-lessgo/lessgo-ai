@@ -274,7 +274,11 @@ export function getSectionsFromObjectionFlows(input: FlowInput): string[] {
   const orderedFlow = orderSections(finalFlow);
   // console.log('📊 Final Ordered Flow:', orderedFlow);
   
-  return orderedFlow;
+  // Step 8: Add header at the beginning and footer at the end
+  const withHeaderFooter = ['header', ...orderedFlow, 'footer'];
+  // console.log('🎯 With Header and Footer:', withHeaderFooter);
+  
+  return withHeaderFooter;
 }
 
 // ===== HELPER FUNCTIONS =====

@@ -7,6 +7,7 @@ import { pickComparisonLayout } from "./pickComparisonLayout";
 import { pickFAQLayout } from "./pickFAQLayout";
 import { pickFeatureLayout } from "./pickFeature";
 import { pickFounderNoteLayout } from "./pickFounderNoteLayout";
+import { pickHeaderLayout } from "./pickHeader";
 import { pickHeroLayout } from "./pickHero";
 import { pickHowItWorksLayout } from "./pickHowItWorks";
 import { pickIntegrationLayout } from "./pickIntegrationLayout";
@@ -20,10 +21,12 @@ import { pickSocialProofLayout } from "./pickSocialProofLayout";
 import { pickTestimonialLayout } from "./pickTestimonialLayout";
 import { pickUniqueMechanismLayout } from "./pickUniqueMechanism";
 import { pickUseCaseLayout } from "./pickUseCaseLayout";
+import { pickFooterLayout } from "./pickFooter";
 
 type LayoutPicker = (input: LayoutPickerInput) => string;
 
 export const layoutPickers: Record<string, LayoutPicker> = {
+  header: pickHeaderLayout,
   beforeAfter: pickBeforeAfterLayout,
   closeSection: pickCloseLayout,
   comparisonTable: pickComparisonLayout,
@@ -43,4 +46,5 @@ export const layoutPickers: Record<string, LayoutPicker> = {
   testimonials: pickTestimonialLayout,
   uniqueMechanism: pickUniqueMechanismLayout,
   useCases: pickUseCaseLayout,
+  footer: pickFooterLayout,
 };
