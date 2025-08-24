@@ -3,7 +3,7 @@
  * Provides a UI for editing header navigation items
  */
 
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
 import type { NavigationItem } from '@/types/store/state';
@@ -34,6 +34,26 @@ const NavigationEditor: React.FC<NavigationEditorProps> = ({
     sectionId: undefined,
   });
   const [linkType, setLinkType] = useState<'section' | 'external' | 'email' | 'phone'>('section');
+  
+  // Refs for UX improvements
+  const editFormRef = useRef<HTMLDivElement>(null);
+  const labelInputRef = useRef<HTMLInputElement>(null);
+
+  // Auto-scroll and focus when edit form appears
+  useEffect(() => {
+    if (showAddForm && editFormRef.current && labelInputRef.current) {
+      // Smooth scroll to the edit form
+      editFormRef.current.scrollIntoView({ 
+        behavior: 'smooth', 
+        block: 'nearest' 
+      });
+      
+      // Focus the first input after a short delay to ensure scroll completes
+      setTimeout(() => {
+        labelInputRef.current?.focus();
+      }, 300);
+    }
+  }, [showAddForm, editingItem]);
 
   if (!isVisible || !store.navigationConfig) return null;
 
@@ -205,7 +225,7 @@ const NavigationEditor: React.FC<NavigationEditorProps> = ({
 
           {/* Add/Edit Form */}
           {showAddForm && (
-            <div className="border-t pt-6">
+            <div ref={editFormRef} className="border-t pt-6 animate-in slide-in-from-top-2 duration-300">
               <h3 className="text-sm font-medium text-gray-700 mb-3">
                 {editingItem ? 'Edit Navigation Item' : 'Add Navigation Item'}
               </h3>
@@ -216,6 +236,7 @@ const NavigationEditor: React.FC<NavigationEditorProps> = ({
                     Label
                   </label>
                   <input
+                    ref={labelInputRef}
                     type="text"
                     value={formData.label}
                     onChange={(e) => setFormData({ ...formData, label: e.target.value })}
