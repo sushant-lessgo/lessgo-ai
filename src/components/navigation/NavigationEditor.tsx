@@ -33,7 +33,6 @@ const NavigationEditor: React.FC<NavigationEditorProps> = ({
     link: '',
     sectionId: undefined,
   });
-  const [linkType, setLinkType] = useState<'section' | 'external' | 'email' | 'phone'>('section');
   
   // Refs for UX improvements
   const editFormRef = useRef<HTMLDivElement>(null);
@@ -70,24 +69,21 @@ const NavigationEditor: React.FC<NavigationEditorProps> = ({
   if (typeof document === 'undefined') return null;
 
   const handleSaveItem = () => {
-    if (!formData.label.trim()) return;
+    if (!formData.label.trim() || !formData.sectionId) return;
 
-    let finalLink = formData.link;
-    if (linkType === 'section' && formData.sectionId) {
-      finalLink = `#${formData.sectionId}`;
-    }
+    const finalLink = `#${formData.sectionId}`;
 
     if (editingItem) {
       store.updateNavItem(editingItem.id, {
         label: formData.label,
         link: finalLink,
-        sectionId: linkType === 'section' ? formData.sectionId : undefined,
+        sectionId: formData.sectionId,
       });
     } else {
       store.addNavItem(
         formData.label,
         finalLink,
-        linkType === 'section' ? formData.sectionId : undefined
+        formData.sectionId
       );
     }
 
@@ -102,17 +98,6 @@ const NavigationEditor: React.FC<NavigationEditorProps> = ({
       sectionId: item.sectionId,
     });
     
-    // Determine link type
-    if (item.link.startsWith('#')) {
-      setLinkType('section');
-    } else if (item.link.startsWith('mailto:')) {
-      setLinkType('email');
-    } else if (item.link.startsWith('tel:')) {
-      setLinkType('phone');
-    } else {
-      setLinkType('external');
-    }
-    
     setShowAddForm(true);
   };
 
@@ -124,7 +109,6 @@ const NavigationEditor: React.FC<NavigationEditorProps> = ({
     setFormData({ label: '', link: '', sectionId: undefined });
     setEditingItem(null);
     setShowAddForm(false);
-    setLinkType('section');
   };
 
   const handleClose = () => {
@@ -247,89 +231,26 @@ const NavigationEditor: React.FC<NavigationEditorProps> = ({
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Link Type
+                    Target Section
                   </label>
                   <select
-                    value={linkType}
-                    onChange={(e) => setLinkType(e.target.value as any)}
+                    value={formData.sectionId || ''}
+                    onChange={(e) => setFormData({ ...formData, sectionId: e.target.value })}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   >
-                    <option value="section">Section on this page</option>
-                    <option value="external">External URL</option>
-                    <option value="email">Email address</option>
-                    <option value="phone">Phone number</option>
+                    <option value="">Select a section</option>
+                    {availableSections.map((section) => (
+                      <option key={section.id} value={section.id}>
+                        {section.label}
+                      </option>
+                    ))}
                   </select>
                 </div>
-
-                {linkType === 'section' && (
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Target Section
-                    </label>
-                    <select
-                      value={formData.sectionId || ''}
-                      onChange={(e) => setFormData({ ...formData, sectionId: e.target.value })}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    >
-                      <option value="">Select a section</option>
-                      {availableSections.map((section) => (
-                        <option key={section.id} value={section.id}>
-                          {section.label}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                )}
-
-                {linkType === 'external' && (
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      URL
-                    </label>
-                    <input
-                      type="url"
-                      value={formData.link}
-                      onChange={(e) => setFormData({ ...formData, link: e.target.value })}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      placeholder="https://example.com"
-                    />
-                  </div>
-                )}
-
-                {linkType === 'email' && (
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Email Address
-                    </label>
-                    <input
-                      type="email"
-                      value={formData.link.replace('mailto:', '')}
-                      onChange={(e) => setFormData({ ...formData, link: `mailto:${e.target.value}` })}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      placeholder="contact@example.com"
-                    />
-                  </div>
-                )}
-
-                {linkType === 'phone' && (
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Phone Number
-                    </label>
-                    <input
-                      type="tel"
-                      value={formData.link.replace('tel:', '')}
-                      onChange={(e) => setFormData({ ...formData, link: `tel:${e.target.value}` })}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      placeholder="+1-234-567-8900"
-                    />
-                  </div>
-                )}
 
                 <div className="flex gap-2">
                   <button
                     onClick={handleSaveItem}
-                    disabled={!formData.label.trim()}
+                    disabled={!formData.label.trim() || !formData.sectionId}
                     className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {editingItem ? 'Update' : 'Add'}
