@@ -4,6 +4,7 @@
  */
 
 import React, { useState } from 'react';
+import { createPortal } from 'react-dom';
 import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
 import type { NavigationItem } from '@/types/store/state';
 
@@ -44,6 +45,9 @@ const NavigationEditor: React.FC<NavigationEditorProps> = ({
       layout: store.sectionLayouts[id] || '',
       label: getSectionDisplayName(id, store.sectionLayouts[id] || ''),
     }));
+
+  // Use portal to render modal at document root level to escape layout container constraints
+  if (typeof document === 'undefined') return null;
 
   const handleSaveItem = () => {
     if (!formData.label.trim()) return;
@@ -108,10 +112,10 @@ const NavigationEditor: React.FC<NavigationEditorProps> = ({
     onClose();
   };
 
-  return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[60]">
-      <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[80vh] overflow-hidden">
-        <div className="p-6 border-b">
+  return createPortal(
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[100] p-4">
+      <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-hidden relative flex flex-col">
+        <div className="p-6 border-b flex-shrink-0">
           <div className="flex items-center justify-between">
             <h2 className="text-lg font-semibold text-gray-900">
               Navigation Settings
@@ -127,7 +131,7 @@ const NavigationEditor: React.FC<NavigationEditorProps> = ({
           </div>
         </div>
 
-        <div className="p-6 overflow-y-auto max-h-[calc(80vh-140px)]">
+        <div className="p-6 overflow-y-auto max-h-[calc(90vh-180px)] flex-1">
           {/* Current Navigation Items */}
           <div className="mb-6">
             <h3 className="text-sm font-medium text-gray-700 mb-3">Current Navigation</h3>
@@ -336,7 +340,7 @@ const NavigationEditor: React.FC<NavigationEditorProps> = ({
           )}
         </div>
 
-        <div className="p-6 border-t bg-gray-50">
+        <div className="p-6 border-t bg-gray-50 flex-shrink-0">
           <button
             onClick={handleClose}
             className="w-full px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700"
@@ -345,7 +349,8 @@ const NavigationEditor: React.FC<NavigationEditorProps> = ({
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
 
