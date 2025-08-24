@@ -27,19 +27,19 @@ interface FullNavHeaderContent {
 
 // Content schema - defines structure and defaults
 const CONTENT_SCHEMA = {
-  nav_item_1: { type: 'string' as const, default: 'Products' },
-  nav_item_2: { type: 'string' as const, default: 'Solutions' },
-  nav_item_3: { type: 'string' as const, default: 'Features' },
-  nav_item_4: { type: 'string' as const, default: 'Pricing' },
-  nav_item_5: { type: 'string' as const, default: 'Resources' },
-  nav_item_6: { type: 'string' as const, default: 'Company' },
+  nav_item_1: { type: 'string' as const, default: 'Home' },
+  nav_item_2: { type: 'string' as const, default: 'Products' },
+  nav_item_3: { type: 'string' as const, default: 'Solutions' },
+  nav_item_4: { type: 'string' as const, default: 'Features' },
+  nav_item_5: { type: 'string' as const, default: 'Pricing' },
+  nav_item_6: { type: 'string' as const, default: 'Resources' },
   nav_item_7: { type: 'string' as const, default: 'Contact' },
-  nav_link_1: { type: 'string' as const, default: '#products' },
-  nav_link_2: { type: 'string' as const, default: '#solutions' },
-  nav_link_3: { type: 'string' as const, default: '#features' },
-  nav_link_4: { type: 'string' as const, default: '#pricing' },
-  nav_link_5: { type: 'string' as const, default: '#resources' },
-  nav_link_6: { type: 'string' as const, default: '#company' },
+  nav_link_1: { type: 'string' as const, default: '#' },
+  nav_link_2: { type: 'string' as const, default: '#products' },
+  nav_link_3: { type: 'string' as const, default: '#solutions' },
+  nav_link_4: { type: 'string' as const, default: '#features' },
+  nav_link_5: { type: 'string' as const, default: '#pricing' },
+  nav_link_6: { type: 'string' as const, default: '#resources' },
   nav_link_7: { type: 'string' as const, default: '#contact' },
 };
 

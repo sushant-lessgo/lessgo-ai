@@ -23,15 +23,15 @@ interface MinimalNavHeaderContent {
 const CONTENT_SCHEMA = {
   nav_item_1: { 
     type: 'string' as const, 
-    default: 'Features' 
+    default: 'Home' 
   },
   nav_item_2: { 
     type: 'string' as const, 
-    default: 'Pricing' 
+    default: 'Features' 
   },
   nav_item_3: { 
     type: 'string' as const, 
-    default: 'About' 
+    default: 'Pricing' 
   },
   nav_item_4: { 
     type: 'string' as const, 
@@ -39,15 +39,15 @@ const CONTENT_SCHEMA = {
   },
   nav_link_1: { 
     type: 'string' as const, 
-    default: '#features' 
+    default: '#' 
   },
   nav_link_2: { 
     type: 'string' as const, 
-    default: '#pricing' 
+    default: '#features' 
   },
   nav_link_3: { 
     type: 'string' as const, 
-    default: '#about' 
+    default: '#pricing' 
   },
   nav_link_4: { 
     type: 'string' as const, 
