@@ -229,9 +229,9 @@ export function scanSectionsForNavigation(
 export function getMaxNavItemsForHeader(headerLayout: string): number {
   const maxItemsMap: Record<string, number> = {
     MinimalNavHeader: 4,
-    NavWithCTAHeader: 4,
+    NavWithCTAHeader: 6,  // Updated from 4 to 6 (no CTA anymore)
     CenteredLogoHeader: 6,
-    FullNavHeader: 5,
+    FullNavHeader: 7,  // Updated from 5 to 7 (no CTAs anymore)
   };
   
   return maxItemsMap[headerLayout] || 4;
