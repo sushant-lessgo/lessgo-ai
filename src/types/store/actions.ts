@@ -65,6 +65,15 @@ getTypographyForSection: (sectionId: string) => FontTheme;
   updateColorTokens: (newTokens: ColorTokens) => void;
   recalculateTextColors: () => void; // NEW: Recalculate text colors when backgrounds change
   initializeSections: (sectionIds: string[], sectionLayouts: Record<string, string>) => void;
+  
+  // Navigation Management
+  initializeNavigation: () => void;
+  updateNavItem: (itemId: string, updates: Partial<{ label: string; link: string; sectionId?: string }>) => void;
+  addNavItem: (label: string, link: string, sectionId?: string) => void;
+  removeNavItem: (itemId: string) => void;
+  reorderNavItems: (newOrder: string[]) => void;
+  updateNavigationOnSectionChange: () => void;
+  setNavigationMaxItems: (maxItems: number) => void;
 }
 
 /**

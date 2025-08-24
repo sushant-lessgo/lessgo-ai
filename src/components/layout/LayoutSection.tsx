@@ -87,6 +87,7 @@ export const LayoutSection = forwardRef<HTMLElement, LayoutSectionProps>(({
     <>
       <section 
         ref={ref}
+        id={sectionId}
         className={`${spacingClass} px-4 ${finalClassName} ${className}`}
         style={inlineStyle}
         data-section-id={sectionId}
