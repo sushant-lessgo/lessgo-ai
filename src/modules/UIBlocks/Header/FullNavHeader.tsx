@@ -162,7 +162,7 @@ const FullNavHeader: React.FC<LayoutComponentProps> = (props) => {
         <div className="flex items-center justify-center flex-1">
           {mode === 'preview' ? (
             // Preview Mode: Simple clickable navigation
-            <ul className="flex items-center gap-7">
+            <ul className="flex items-center gap-8">
               {navItems.map((navItem, index) => (
                 <li key={navItem.id}>
                   <a 
@@ -180,7 +180,7 @@ const FullNavHeader: React.FC<LayoutComponentProps> = (props) => {
             <div className="flex items-center gap-6">
               <div className="flex items-center gap-4 px-3 py-2 bg-blue-50 border border-blue-200 rounded-md">
                 <span className="text-sm text-blue-700 font-medium">Navigation:</span>
-                <div className="flex gap-3">
+                <div className="flex gap-4">
                   {navItems.map((navItem, index) => (
                     <span key={navItem.id} className="text-sm text-blue-600">
                       {navItem.label || `Item ${index + 1}`}
