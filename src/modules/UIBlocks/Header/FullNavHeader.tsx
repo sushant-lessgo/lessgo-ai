@@ -6,6 +6,7 @@ import { EditableAdaptiveText } from '@/components/layout/EditableContent';
 import { CTAButton } from '@/components/layout/ComponentRegistry';
 import { LayoutComponentProps } from '@/types/storeTypes';
 import { createCTAClickHandler } from '@/utils/ctaHandler';
+import HeaderLogo from '@/components/ui/HeaderLogo';
 
 interface FullNavHeaderContent {
   logo?: string;
@@ -53,8 +54,8 @@ const FullNavHeader: React.FC<LayoutComponentProps> = (props) => {
     contentSchema: CONTENT_SCHEMA
   });
   const store = useEditStore();
-  const logoUrl = store?.logoUrl || '/api/placeholder/150/50';
   const handleCTAClick = createCTAClickHandler(store);
+  
 
   const navItems = [
     { text: blockContent.nav_item_1, link: blockContent.nav_link_1 || '#' },
@@ -76,10 +77,9 @@ const FullNavHeader: React.FC<LayoutComponentProps> = (props) => {
     >
       <nav className="flex items-center justify-between">
         <div className="flex items-center">
-          <img 
-            src={logoUrl} 
-            alt="Logo" 
-            className="h-8 w-auto mr-10"
+          <HeaderLogo 
+            mode={mode}
+            className="h-8 w-auto object-contain mr-10"
           />
           
           <ul className="flex items-center gap-7">

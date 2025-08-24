@@ -643,6 +643,20 @@ getTypographyForSection: (sectionId: string) => {
       }),
 
     /**
+     * ===== LOGO MANAGEMENT =====
+     */
+    
+    setLogoUrl: (url: string) =>
+      set((state: EditStore) => {
+        state.globalSettings.logoUrl = url;
+      }),
+    
+    clearLogo: () =>
+      set((state: EditStore) => {
+        state.globalSettings.logoUrl = undefined;
+      }),
+
+    /**
      * ===== COLOR TOKENS INTEGRATION =====
      */
     

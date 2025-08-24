@@ -56,6 +56,10 @@ getTypographyForSection: (sectionId: string) => FontTheme;
   setDeviceMode: (mode: 'desktop' | 'mobile') => void;
   setZoomLevel: (level: number) => void;
   
+  // Logo Management
+  setLogoUrl: (url: string) => void;
+  clearLogo: () => void;
+  
   // Color System Integration
   getColorTokens: () => ReturnType<typeof import('@/modules/Design/ColorSystem/colorTokens').generateColorTokens>;
   updateColorTokens: (newTokens: ColorTokens) => void;

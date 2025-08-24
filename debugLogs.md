@@ -1,6 +1,124 @@
 :3000/api/saveDraft:1  Failed to load resource: the server responded with a status of 400 (Bad Request)
-StackedWinsList.tsx:112 Uncaught ReferenceError: blockContent is not defined
-    at WinItem (StackedWinsList.tsx:112:20)
+app-index.js:33 Warning: Cannot update a component (`HotReload`) while rendering a different component (`SystemArchitecture`). To locate the bad setState() call inside `SystemArchitecture`, follow the stack trace as described in https://reactjs.org/link/setstate-in-render
+    at SystemArchitecture (webpack-internal:///(app-pages-browser)/./src/modules/UIBlocks/UniqueMechanism/SystemArchitecture.tsx:33:191)
+    at div
+    at main
+    at div
+    at VariableThemeInjector (webpack-internal:///(app-pages-browser)/./src/modules/Design/ColorSystem/VariableThemeInjector.tsx:35:11)
+    at CSSVariableErrorBoundary (webpack-internal:///(app-pages-browser)/./src/components/CSSVariableErrorBoundary.tsx:259:9)
+    at LandingPageRenderer (webpack-internal:///(app-pages-browser)/./src/modules/generatedLanding/LandingPageRenderer.tsx:136:11)
+    at div
+    at div
+    at PageRevealAnimation (webpack-internal:///(app-pages-browser)/./src/app/generate/[token]/components/PageRevealAnimation.tsx:17:11)
+    at div
+    at GeneratePageContent (webpack-internal:///(app-pages-browser)/./src/app/generate/[token]/page.tsx:102:11)
+    at EditErrorBoundary (webpack-internal:///(app-pages-browser)/./src/components/EditErrorBoundary.tsx:85:9)
+    at EditProvider (webpack-internal:///(app-pages-browser)/./src/components/EditProvider.tsx:133:11)
+    at GeneratePage (webpack-internal:///(app-pages-browser)/./src/app/generate/[token]/page.tsx:27:78)
+    at ClientPageRoot (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/client-page.js:14:11)
+    at InnerLayoutRouter (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:243:11)
+    at RedirectErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/redirect-boundary.js:74:9)
+    at RedirectBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/redirect-boundary.js:82:11)
+    at NotFoundBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/not-found-boundary.js:84:11)
+    at LoadingBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:349:11)
+    at ErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/error-boundary.js:160:11)
+    at InnerScrollAndFocusHandler (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:153:9)
+    at ScrollAndFocusHandler (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:228:11)
+    at RenderFromTemplateContext (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/render-from-template-context.js:16:44)
+    at OuterLayoutRouter (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:370:11)
+    at InnerLayoutRouter (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:243:11)
+    at RedirectErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/redirect-boundary.js:74:9)
+    at RedirectBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/redirect-boundary.js:82:11)
+    at NotFoundBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/not-found-boundary.js:84:11)
+    at LoadingBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:349:11)
+    at ErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/error-boundary.js:160:11)
+    at InnerScrollAndFocusHandler (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:153:9)
+    at ScrollAndFocusHandler (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:228:11)
+    at RenderFromTemplateContext (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/render-from-template-context.js:16:44)
+    at OuterLayoutRouter (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:370:11)
+    at InnerLayoutRouter (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:243:11)
+    at RedirectErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/redirect-boundary.js:74:9)
+    at RedirectBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/redirect-boundary.js:82:11)
+    at NotFoundErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/not-found-boundary.js:76:9)
+    at NotFoundBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/not-found-boundary.js:84:11)
+    at LoadingBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:349:11)
+    at ErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/error-boundary.js:160:11)
+    at InnerScrollAndFocusHandler (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:153:9)
+    at ScrollAndFocusHandler (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:228:11)
+    at RenderFromTemplateContext (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/render-from-template-context.js:16:44)
+    at OuterLayoutRouter (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:370:11)
+    at PostHogProvider (webpack-internal:///(app-pages-browser)/./node_modules/posthog-js/react/dist/esm/index.js:51:23)
+    at PostHogProvider (webpack-internal:///(app-pages-browser)/./src/providers/ph-provider.tsx:20:11)
+    at Provider (webpack-internal:///(app-pages-browser)/./node_modules/@radix-ui/react-context/dist/index.mjs:34:15)
+    at TooltipProvider (webpack-internal:///(app-pages-browser)/./node_modules/@radix-ui/react-tooltip/dist/index.mjs:58:13)
+    at body
+    at html
+    at __experimental_CheckoutProvider (webpack-internal:///(app-pages-browser)/./node_modules/@clerk/shared/dist/react/index.mjs:117:42)
+    at SWRConfig (webpack-internal:///(app-pages-browser)/./node_modules/swr/dist/_internal/config-context-client-BoS53ST9.mjs:554:13)
+    at OrganizationProvider (webpack-internal:///(app-pages-browser)/./node_modules/@clerk/shared/dist/react/index.mjs:129:3)
+    at ClerkContextProvider (webpack-internal:///(app-pages-browser)/./node_modules/@clerk/clerk-react/dist/index.mjs:1448:11)
+    at ClerkProviderBase (webpack-internal:///(app-pages-browser)/./node_modules/@clerk/clerk-react/dist/index.mjs:1540:11)
+    at Hoc (webpack-internal:///(app-pages-browser)/./node_modules/@clerk/clerk-react/dist/chunk-3664V5SS.mjs:81:5)
+    at ClerkNextOptionsProvider (webpack-internal:///(app-pages-browser)/./node_modules/@clerk/nextjs/dist/esm/client-boundary/NextOptionsContext.js:17:11)
+    at NextClientClerkProvider (webpack-internal:///(app-pages-browser)/./node_modules/@clerk/nextjs/dist/esm/app-router/client/ClerkProvider.js:60:13)
+    at ClientClerkProvider (webpack-internal:///(app-pages-browser)/./node_modules/@clerk/nextjs/dist/esm/app-router/client/ClerkProvider.js:127:13)
+    at ClerkProvider (Server)
+    at RootLayout (Server)
+    at RedirectErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/redirect-boundary.js:74:9)
+    at RedirectBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/redirect-boundary.js:82:11)
+    at NotFoundErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/not-found-boundary.js:76:9)
+    at NotFoundBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/not-found-boundary.js:84:11)
+    at DevRootNotFoundBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/dev-root-not-found-boundary.js:33:11)
+    at ReactDevOverlay (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/react-dev-overlay/app/ReactDevOverlay.js:87:9)
+    at HotReload (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/react-dev-overlay/app/hot-reloader-client.js:321:11)
+    at Router (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/app-router.js:207:11)
+    at ErrorBoundaryHandler (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/error-boundary.js:113:9)
+    at ErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/error-boundary.js:160:11)
+    at AppRouter (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/app-router.js:585:13)
+    at ServerRoot (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/app-index.js:112:27)
+    at Root (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/app-index.js:117:11)
+    at ReactDevOverlay (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/react-dev-overlay/app/ReactDevOverlay.js:87:9)
+window.console.error @ app-index.js:33
+SystemArchitecture.tsx:40 Uncaught ReferenceError: IconEditableText is not defined
+    at eval (SystemArchitecture.tsx:40:20)
+    at Array.map (<anonymous>)
+    at SystemArchitecture (SystemArchitecture.tsx:32:23)
+    at renderWithHooks (react-dom.development.js:11121:18)
+    at mountIndeterminateComponent (react-dom.development.js:16869:13)
+    at beginWork$1 (react-dom.development.js:18458:16)
+    at HTMLUnknownElement.callCallback (react-dom.development.js:20565:14)
+    at Object.invokeGuardedCallbackImpl (react-dom.development.js:20614:16)
+    at invokeGuardedCallback (react-dom.development.js:20689:29)
+    at beginWork (react-dom.development.js:26949:7)
+    at performUnitOfWork (react-dom.development.js:25748:12)
+    at workLoopSync (react-dom.development.js:25464:5)
+    at renderRootSync (react-dom.development.js:25419:7)
+    at performConcurrentWorkOnRoot (react-dom.development.js:24504:74)
+    at workLoop (scheduler.development.js:256:34)
+    at flushWork (scheduler.development.js:225:14)
+    at MessagePort.performWorkUntilDeadline (scheduler.development.js:534:21)
+SystemArchitecture.tsx:40 Uncaught ReferenceError: IconEditableText is not defined
+    at eval (SystemArchitecture.tsx:40:20)
+    at Array.map (<anonymous>)
+    at SystemArchitecture (SystemArchitecture.tsx:32:23)
+    at renderWithHooks (react-dom.development.js:11121:18)
+    at mountIndeterminateComponent (react-dom.development.js:16869:13)
+    at beginWork$1 (react-dom.development.js:18458:16)
+    at HTMLUnknownElement.callCallback (react-dom.development.js:20565:14)
+    at Object.invokeGuardedCallbackImpl (react-dom.development.js:20614:16)
+    at invokeGuardedCallback (react-dom.development.js:20689:29)
+    at beginWork (react-dom.development.js:26949:7)
+    at performUnitOfWork (react-dom.development.js:25748:12)
+    at workLoopSync (react-dom.development.js:25464:5)
+    at renderRootSync (react-dom.development.js:25419:7)
+    at performConcurrentWorkOnRoot (react-dom.development.js:24504:74)
+    at workLoop (scheduler.development.js:256:34)
+    at flushWork (scheduler.development.js:225:14)
+    at MessagePort.performWorkUntilDeadline (scheduler.development.js:534:21)
+SystemArchitecture.tsx:40 Uncaught ReferenceError: IconEditableText is not defined
+    at eval (SystemArchitecture.tsx:40:20)
+    at Array.map (<anonymous>)
+    at SystemArchitecture (SystemArchitecture.tsx:32:23)
     at renderWithHooks (react-dom.development.js:11121:18)
     at mountIndeterminateComponent (react-dom.development.js:16869:13)
     at beginWork$1 (react-dom.development.js:18458:16)
@@ -16,8 +134,10 @@ StackedWinsList.tsx:112 Uncaught ReferenceError: blockContent is not defined
     at workLoop (scheduler.development.js:256:34)
     at flushWork (scheduler.development.js:225:14)
     at MessagePort.performWorkUntilDeadline (scheduler.development.js:534:21)
-StackedWinsList.tsx:112 Uncaught ReferenceError: blockContent is not defined
-    at WinItem (StackedWinsList.tsx:112:20)
+SystemArchitecture.tsx:40 Uncaught ReferenceError: IconEditableText is not defined
+    at eval (SystemArchitecture.tsx:40:20)
+    at Array.map (<anonymous>)
+    at SystemArchitecture (SystemArchitecture.tsx:32:23)
     at renderWithHooks (react-dom.development.js:11121:18)
     at mountIndeterminateComponent (react-dom.development.js:16869:13)
     at beginWork$1 (react-dom.development.js:18458:16)
@@ -33,13 +153,9 @@ StackedWinsList.tsx:112 Uncaught ReferenceError: blockContent is not defined
     at workLoop (scheduler.development.js:256:34)
     at flushWork (scheduler.development.js:225:14)
     at MessagePort.performWorkUntilDeadline (scheduler.development.js:534:21)
-app-index.js:33 The above error occurred in the <WinItem> component:
+app-index.js:33 The above error occurred in the <SystemArchitecture> component:
 
-    at WinItem (webpack-internal:///(app-pages-browser)/./src/modules/UIBlocks/Results/StackedWinsList.tsx:136:11)
-    at div
-    at div
-    at section
-    at StackedWinsList (webpack-internal:///(app-pages-browser)/./src/modules/UIBlocks/Results/StackedWinsList.tsx:270:263)
+    at SystemArchitecture (webpack-internal:///(app-pages-browser)/./src/modules/UIBlocks/UniqueMechanism/SystemArchitecture.tsx:33:191)
     at div
     at main
     at div
@@ -126,10 +242,10 @@ app-index.js:33 🚨 EditErrorBoundary caught an error: Object
 window.console.error @ app-index.js:33
 app-index.js:33 🚨 EditProvider error boundary caught: Object
 window.console.error @ app-index.js:33
-analytics-visual.jpg:1  Failed to load resource: the server responded with a status of 404 (Not Found)
-50:1  Failed to load resource: the server responded with a status of 404 (Not Found)
-StackedWinsList.tsx:112 Uncaught ReferenceError: blockContent is not defined
-    at WinItem (StackedWinsList.tsx:112:20)
+SystemArchitecture.tsx:40 Uncaught ReferenceError: IconEditableText is not defined
+    at eval (SystemArchitecture.tsx:40:20)
+    at Array.map (<anonymous>)
+    at SystemArchitecture (SystemArchitecture.tsx:32:23)
     at renderWithHooks (react-dom.development.js:11121:18)
     at mountIndeterminateComponent (react-dom.development.js:16869:13)
     at beginWork$1 (react-dom.development.js:18458:16)
@@ -144,8 +260,10 @@ StackedWinsList.tsx:112 Uncaught ReferenceError: blockContent is not defined
     at workLoop (scheduler.development.js:256:34)
     at flushWork (scheduler.development.js:225:14)
     at MessagePort.performWorkUntilDeadline (scheduler.development.js:534:21)
-StackedWinsList.tsx:112 Uncaught ReferenceError: blockContent is not defined
-    at WinItem (StackedWinsList.tsx:112:20)
+SystemArchitecture.tsx:40 Uncaught ReferenceError: IconEditableText is not defined
+    at eval (SystemArchitecture.tsx:40:20)
+    at Array.map (<anonymous>)
+    at SystemArchitecture (SystemArchitecture.tsx:32:23)
     at renderWithHooks (react-dom.development.js:11121:18)
     at mountIndeterminateComponent (react-dom.development.js:16869:13)
     at beginWork$1 (react-dom.development.js:18458:16)
@@ -160,8 +278,10 @@ StackedWinsList.tsx:112 Uncaught ReferenceError: blockContent is not defined
     at workLoop (scheduler.development.js:256:34)
     at flushWork (scheduler.development.js:225:14)
     at MessagePort.performWorkUntilDeadline (scheduler.development.js:534:21)
-StackedWinsList.tsx:112 Uncaught ReferenceError: blockContent is not defined
-    at WinItem (StackedWinsList.tsx:112:20)
+SystemArchitecture.tsx:40 Uncaught ReferenceError: IconEditableText is not defined
+    at eval (SystemArchitecture.tsx:40:20)
+    at Array.map (<anonymous>)
+    at SystemArchitecture (SystemArchitecture.tsx:32:23)
     at renderWithHooks (react-dom.development.js:11121:18)
     at mountIndeterminateComponent (react-dom.development.js:16869:13)
     at beginWork$1 (react-dom.development.js:18458:16)
@@ -177,8 +297,10 @@ StackedWinsList.tsx:112 Uncaught ReferenceError: blockContent is not defined
     at workLoop (scheduler.development.js:256:34)
     at flushWork (scheduler.development.js:225:14)
     at MessagePort.performWorkUntilDeadline (scheduler.development.js:534:21)
-StackedWinsList.tsx:112 Uncaught ReferenceError: blockContent is not defined
-    at WinItem (StackedWinsList.tsx:112:20)
+SystemArchitecture.tsx:40 Uncaught ReferenceError: IconEditableText is not defined
+    at eval (SystemArchitecture.tsx:40:20)
+    at Array.map (<anonymous>)
+    at SystemArchitecture (SystemArchitecture.tsx:32:23)
     at renderWithHooks (react-dom.development.js:11121:18)
     at mountIndeterminateComponent (react-dom.development.js:16869:13)
     at beginWork$1 (react-dom.development.js:18458:16)
@@ -194,13 +316,9 @@ StackedWinsList.tsx:112 Uncaught ReferenceError: blockContent is not defined
     at workLoop (scheduler.development.js:256:34)
     at flushWork (scheduler.development.js:225:14)
     at MessagePort.performWorkUntilDeadline (scheduler.development.js:534:21)
-app-index.js:33 The above error occurred in the <WinItem> component:
+app-index.js:33 The above error occurred in the <SystemArchitecture> component:
 
-    at WinItem (webpack-internal:///(app-pages-browser)/./src/modules/UIBlocks/Results/StackedWinsList.tsx:136:11)
-    at div
-    at div
-    at section
-    at StackedWinsList (webpack-internal:///(app-pages-browser)/./src/modules/UIBlocks/Results/StackedWinsList.tsx:270:263)
+    at SystemArchitecture (webpack-internal:///(app-pages-browser)/./src/modules/UIBlocks/UniqueMechanism/SystemArchitecture.tsx:33:191)
     at div
     at main
     at div
@@ -287,10 +405,10 @@ app-index.js:33 🚨 EditErrorBoundary caught an error: Object
 window.console.error @ app-index.js:33
 app-index.js:33 🚨 EditProvider error boundary caught: Object
 window.console.error @ app-index.js:33
-analytics-visual.jpg:1  Failed to load resource: the server responded with a status of 404 (Not Found)
-50:1  Failed to load resource: the server responded with a status of 404 (Not Found)
-StackedWinsList.tsx:112 Uncaught ReferenceError: blockContent is not defined
-    at WinItem (StackedWinsList.tsx:112:20)
+SystemArchitecture.tsx:40 Uncaught ReferenceError: IconEditableText is not defined
+    at eval (SystemArchitecture.tsx:40:20)
+    at Array.map (<anonymous>)
+    at SystemArchitecture (SystemArchitecture.tsx:32:23)
     at renderWithHooks (react-dom.development.js:11121:18)
     at mountIndeterminateComponent (react-dom.development.js:16869:13)
     at beginWork$1 (react-dom.development.js:18458:16)
@@ -305,8 +423,10 @@ StackedWinsList.tsx:112 Uncaught ReferenceError: blockContent is not defined
     at workLoop (scheduler.development.js:256:34)
     at flushWork (scheduler.development.js:225:14)
     at MessagePort.performWorkUntilDeadline (scheduler.development.js:534:21)
-StackedWinsList.tsx:112 Uncaught ReferenceError: blockContent is not defined
-    at WinItem (StackedWinsList.tsx:112:20)
+SystemArchitecture.tsx:40 Uncaught ReferenceError: IconEditableText is not defined
+    at eval (SystemArchitecture.tsx:40:20)
+    at Array.map (<anonymous>)
+    at SystemArchitecture (SystemArchitecture.tsx:32:23)
     at renderWithHooks (react-dom.development.js:11121:18)
     at mountIndeterminateComponent (react-dom.development.js:16869:13)
     at beginWork$1 (react-dom.development.js:18458:16)
@@ -321,8 +441,10 @@ StackedWinsList.tsx:112 Uncaught ReferenceError: blockContent is not defined
     at workLoop (scheduler.development.js:256:34)
     at flushWork (scheduler.development.js:225:14)
     at MessagePort.performWorkUntilDeadline (scheduler.development.js:534:21)
-StackedWinsList.tsx:112 Uncaught ReferenceError: blockContent is not defined
-    at WinItem (StackedWinsList.tsx:112:20)
+SystemArchitecture.tsx:40 Uncaught ReferenceError: IconEditableText is not defined
+    at eval (SystemArchitecture.tsx:40:20)
+    at Array.map (<anonymous>)
+    at SystemArchitecture (SystemArchitecture.tsx:32:23)
     at renderWithHooks (react-dom.development.js:11121:18)
     at mountIndeterminateComponent (react-dom.development.js:16869:13)
     at beginWork$1 (react-dom.development.js:18458:16)
@@ -338,8 +460,10 @@ StackedWinsList.tsx:112 Uncaught ReferenceError: blockContent is not defined
     at workLoop (scheduler.development.js:256:34)
     at flushWork (scheduler.development.js:225:14)
     at MessagePort.performWorkUntilDeadline (scheduler.development.js:534:21)
-StackedWinsList.tsx:112 Uncaught ReferenceError: blockContent is not defined
-    at WinItem (StackedWinsList.tsx:112:20)
+SystemArchitecture.tsx:40 Uncaught ReferenceError: IconEditableText is not defined
+    at eval (SystemArchitecture.tsx:40:20)
+    at Array.map (<anonymous>)
+    at SystemArchitecture (SystemArchitecture.tsx:32:23)
     at renderWithHooks (react-dom.development.js:11121:18)
     at mountIndeterminateComponent (react-dom.development.js:16869:13)
     at beginWork$1 (react-dom.development.js:18458:16)
@@ -355,13 +479,9 @@ StackedWinsList.tsx:112 Uncaught ReferenceError: blockContent is not defined
     at workLoop (scheduler.development.js:256:34)
     at flushWork (scheduler.development.js:225:14)
     at MessagePort.performWorkUntilDeadline (scheduler.development.js:534:21)
-app-index.js:33 The above error occurred in the <WinItem> component:
+app-index.js:33 The above error occurred in the <SystemArchitecture> component:
 
-    at WinItem (webpack-internal:///(app-pages-browser)/./src/modules/UIBlocks/Results/StackedWinsList.tsx:136:11)
-    at div
-    at div
-    at section
-    at StackedWinsList (webpack-internal:///(app-pages-browser)/./src/modules/UIBlocks/Results/StackedWinsList.tsx:270:263)
+    at SystemArchitecture (webpack-internal:///(app-pages-browser)/./src/modules/UIBlocks/UniqueMechanism/SystemArchitecture.tsx:33:191)
     at div
     at main
     at div
@@ -448,10 +568,10 @@ app-index.js:33 🚨 EditErrorBoundary caught an error: Object
 window.console.error @ app-index.js:33
 app-index.js:33 🚨 EditProvider error boundary caught: Object
 window.console.error @ app-index.js:33
-analytics-visual.jpg:1  Failed to load resource: the server responded with a status of 404 (Not Found)
-50:1  Failed to load resource: the server responded with a status of 404 (Not Found)
-StackedWinsList.tsx:112 Uncaught ReferenceError: blockContent is not defined
-    at WinItem (StackedWinsList.tsx:112:20)
+SystemArchitecture.tsx:40 Uncaught ReferenceError: IconEditableText is not defined
+    at eval (SystemArchitecture.tsx:40:20)
+    at Array.map (<anonymous>)
+    at SystemArchitecture (SystemArchitecture.tsx:32:23)
     at renderWithHooks (react-dom.development.js:11121:18)
     at mountIndeterminateComponent (react-dom.development.js:16869:13)
     at beginWork$1 (react-dom.development.js:18458:16)
@@ -466,8 +586,10 @@ StackedWinsList.tsx:112 Uncaught ReferenceError: blockContent is not defined
     at workLoop (scheduler.development.js:256:34)
     at flushWork (scheduler.development.js:225:14)
     at MessagePort.performWorkUntilDeadline (scheduler.development.js:534:21)
-StackedWinsList.tsx:112 Uncaught ReferenceError: blockContent is not defined
-    at WinItem (StackedWinsList.tsx:112:20)
+SystemArchitecture.tsx:40 Uncaught ReferenceError: IconEditableText is not defined
+    at eval (SystemArchitecture.tsx:40:20)
+    at Array.map (<anonymous>)
+    at SystemArchitecture (SystemArchitecture.tsx:32:23)
     at renderWithHooks (react-dom.development.js:11121:18)
     at mountIndeterminateComponent (react-dom.development.js:16869:13)
     at beginWork$1 (react-dom.development.js:18458:16)
@@ -482,8 +604,10 @@ StackedWinsList.tsx:112 Uncaught ReferenceError: blockContent is not defined
     at workLoop (scheduler.development.js:256:34)
     at flushWork (scheduler.development.js:225:14)
     at MessagePort.performWorkUntilDeadline (scheduler.development.js:534:21)
-StackedWinsList.tsx:112 Uncaught ReferenceError: blockContent is not defined
-    at WinItem (StackedWinsList.tsx:112:20)
+SystemArchitecture.tsx:40 Uncaught ReferenceError: IconEditableText is not defined
+    at eval (SystemArchitecture.tsx:40:20)
+    at Array.map (<anonymous>)
+    at SystemArchitecture (SystemArchitecture.tsx:32:23)
     at renderWithHooks (react-dom.development.js:11121:18)
     at mountIndeterminateComponent (react-dom.development.js:16869:13)
     at beginWork$1 (react-dom.development.js:18458:16)
@@ -499,8 +623,10 @@ StackedWinsList.tsx:112 Uncaught ReferenceError: blockContent is not defined
     at workLoop (scheduler.development.js:256:34)
     at flushWork (scheduler.development.js:225:14)
     at MessagePort.performWorkUntilDeadline (scheduler.development.js:534:21)
-StackedWinsList.tsx:112 Uncaught ReferenceError: blockContent is not defined
-    at WinItem (StackedWinsList.tsx:112:20)
+SystemArchitecture.tsx:40 Uncaught ReferenceError: IconEditableText is not defined
+    at eval (SystemArchitecture.tsx:40:20)
+    at Array.map (<anonymous>)
+    at SystemArchitecture (SystemArchitecture.tsx:32:23)
     at renderWithHooks (react-dom.development.js:11121:18)
     at mountIndeterminateComponent (react-dom.development.js:16869:13)
     at beginWork$1 (react-dom.development.js:18458:16)
@@ -516,13 +642,9 @@ StackedWinsList.tsx:112 Uncaught ReferenceError: blockContent is not defined
     at workLoop (scheduler.development.js:256:34)
     at flushWork (scheduler.development.js:225:14)
     at MessagePort.performWorkUntilDeadline (scheduler.development.js:534:21)
-app-index.js:33 The above error occurred in the <WinItem> component:
+app-index.js:33 The above error occurred in the <SystemArchitecture> component:
 
-    at WinItem (webpack-internal:///(app-pages-browser)/./src/modules/UIBlocks/Results/StackedWinsList.tsx:136:11)
-    at div
-    at div
-    at section
-    at StackedWinsList (webpack-internal:///(app-pages-browser)/./src/modules/UIBlocks/Results/StackedWinsList.tsx:270:263)
+    at SystemArchitecture (webpack-internal:///(app-pages-browser)/./src/modules/UIBlocks/UniqueMechanism/SystemArchitecture.tsx:33:191)
     at div
     at main
     at div
@@ -609,5 +731,3 @@ app-index.js:33 🚨 EditErrorBoundary caught an error: Object
 window.console.error @ app-index.js:33
 app-index.js:33 🚨 EditProvider error boundary caught: Object
 window.console.error @ app-index.js:33
-analytics-visual.jpg:1  Failed to load resource: the server responded with a status of 404 (Not Found)
-50:1  Failed to load resource: the server responded with a status of 404 (Not Found)

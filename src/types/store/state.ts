@@ -124,6 +124,7 @@ export interface LayoutSlice {
     sectionSpacing: string; // Default global spacing (fallback)
     deviceMode: 'desktop' | 'mobile';
     zoomLevel: number;
+    logoUrl?: string; // Logo URL for global branding
   };
 }
 

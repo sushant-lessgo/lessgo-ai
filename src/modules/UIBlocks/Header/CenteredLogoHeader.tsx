@@ -1,9 +1,9 @@
 import React from 'react';
 import { useLayoutComponent } from '@/hooks/useLayoutComponent';
-import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
 import { LayoutSection } from '@/components/layout/LayoutSection';
 import { EditableAdaptiveText } from '@/components/layout/EditableContent';
 import { LayoutComponentProps } from '@/types/storeTypes';
+import HeaderLogo from '@/components/ui/HeaderLogo';
 
 interface CenteredLogoHeaderContent {
   logo?: string;
@@ -50,8 +50,7 @@ const CenteredLogoHeader: React.FC<LayoutComponentProps> = (props) => {
     ...props,
     contentSchema: CONTENT_SCHEMA
   });
-  const store = useEditStore();
-  const logoUrl = store?.logoUrl || '/api/placeholder/150/50';
+  
 
   const leftNavItems = [
     { text: blockContent.nav_item_1, link: blockContent.nav_link_1 || '#' },
@@ -111,10 +110,9 @@ const CenteredLogoHeader: React.FC<LayoutComponentProps> = (props) => {
         </ul>
         
         <div className="px-8">
-          <img 
-            src={logoUrl} 
-            alt="Logo" 
-            className="h-8 w-auto"
+          <HeaderLogo 
+            mode={mode}
+            className="h-8 w-auto object-contain"
           />
         </div>
         
