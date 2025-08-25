@@ -124,6 +124,20 @@ export interface NavigationConfig {
   lastUpdated: number;
 }
 
+export interface SocialMediaItem {
+  id: string;
+  platform: string; // Display name (e.g., "Twitter", "LinkedIn")
+  url: string;
+  icon: string; // Icon component name (e.g., "FaTwitter", "FaLinkedin")
+  order: number;
+}
+
+export interface SocialMediaConfig {
+  items: SocialMediaItem[];
+  maxItems: number; // Maximum allowed social links
+  lastUpdated: number;
+}
+
 /**
  * ===== LAYOUT SLICE INTERFACE =====
  */
@@ -135,6 +149,7 @@ export interface LayoutSlice {
   
   // Navigation Configuration
   navigationConfig?: NavigationConfig;
+  socialMediaConfig?: SocialMediaConfig;
   
   // Theme System
   theme: Theme;

@@ -1068,5 +1068,110 @@ getTypographyForSection: (sectionId: string) => {
         
         state.history.redoStack = [];
       }),
+
+    // ====== SOCIAL MEDIA MANAGEMENT ======
+
+    initializeSocialMedia: () =>
+      set((state: EditStore) => {
+        if (state.socialMediaConfig) return; // Already initialized
+        
+        state.socialMediaConfig = {
+          items: [],
+          maxItems: 8, // Default maximum social media links
+          lastUpdated: Date.now(),
+        };
+      }),
+
+    addSocialMediaItem: (platform: string, url: string, icon: string) =>
+      set((state: EditStore) => {
+        if (!state.socialMediaConfig) {
+          // Auto-initialize if not exists
+          state.socialMediaConfig = {
+            items: [],
+            maxItems: 8,
+            lastUpdated: Date.now(),
+          };
+        }
+
+        // Check if we're at max items
+        if (state.socialMediaConfig.items.length >= state.socialMediaConfig.maxItems) {
+          return; // Don't add if at limit
+        }
+
+        const newItem = {
+          id: `social-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+          platform,
+          url,
+          icon,
+          order: state.socialMediaConfig.items.length,
+        };
+
+        state.socialMediaConfig.items.push(newItem);
+        state.socialMediaConfig.lastUpdated = Date.now();
+        state.persistence.isDirty = true;
+
+        console.log('🔗 [SOCIAL-DEBUG] Added social media item:', newItem);
+      }),
+
+    updateSocialMediaItem: (itemId: string, updates: Partial<{ platform: string; url: string; icon: string }>) =>
+      set((state: EditStore) => {
+        if (!state.socialMediaConfig) return;
+        
+        const itemIndex = state.socialMediaConfig.items.findIndex(item => item.id === itemId);
+        if (itemIndex === -1) return;
+        
+        const updatedItem = {
+          ...state.socialMediaConfig.items[itemIndex],
+          ...updates,
+        };
+
+        state.socialMediaConfig.items[itemIndex] = updatedItem;
+        state.socialMediaConfig.lastUpdated = Date.now();
+        state.persistence.isDirty = true;
+
+        console.log('🔗 [SOCIAL-DEBUG] Updated social media item:', updatedItem);
+      }),
+
+    removeSocialMediaItem: (itemId: string) =>
+      set((state: EditStore) => {
+        if (!state.socialMediaConfig) return;
+        
+        const itemIndex = state.socialMediaConfig.items.findIndex(item => item.id === itemId);
+        if (itemIndex === -1) return;
+        
+        const removedItem = state.socialMediaConfig.items[itemIndex];
+        state.socialMediaConfig.items.splice(itemIndex, 1);
+        
+        // Reorder remaining items
+        state.socialMediaConfig.items.forEach((item, index) => {
+          item.order = index;
+        });
+        
+        state.socialMediaConfig.lastUpdated = Date.now();
+        state.persistence.isDirty = true;
+
+        console.log('🔗 [SOCIAL-DEBUG] Removed social media item:', removedItem);
+      }),
+
+    reorderSocialMediaItems: (newOrder: string[]) =>
+      set((state: EditStore) => {
+        if (!state.socialMediaConfig) return;
+        
+        const reorderedItems = newOrder.map(id => 
+          state.socialMediaConfig!.items.find(item => item.id === id)!
+        ).filter(Boolean);
+        
+        // Update order property
+        reorderedItems.forEach((item, index) => {
+          item.order = index;
+        });
+        
+        state.socialMediaConfig.items = reorderedItems;
+        state.socialMediaConfig.lastUpdated = Date.now();
+        state.persistence.isDirty = true;
+
+        console.log('🔗 [SOCIAL-DEBUG] Reordered social media items:', reorderedItems);
+      }),
+
   };
 }

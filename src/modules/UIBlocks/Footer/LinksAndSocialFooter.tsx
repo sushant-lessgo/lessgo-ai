@@ -1,27 +1,17 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useLayoutComponent } from '@/hooks/useLayoutComponent';
 import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
 import { LayoutSection } from '@/components/layout/LayoutSection';
 import { EditableAdaptiveText } from '@/components/layout/EditableContent';
 import { LayoutComponentProps } from '@/types/storeTypes';
-import { FaTwitter, FaLinkedin, FaGithub, FaFacebook } from 'react-icons/fa';
+import { FaTwitter, FaLinkedin, FaGithub, FaFacebook, FaInstagram, FaYoutube, FaTiktok, FaDiscord, FaMedium, FaDribbble, FaGlobe } from 'react-icons/fa';
+import HeaderLogo from '@/components/ui/HeaderLogo';
+import SocialMediaEditor from '@/components/social/SocialMediaEditor';
 
 interface LinksAndSocialFooterContent {
   copyright?: string;
   company_name?: string;
   tagline?: string;
-  link_1?: string;
-  link_text_1?: string;
-  link_2?: string;
-  link_text_2?: string;
-  link_3?: string;
-  link_text_3?: string;
-  link_4?: string;
-  link_text_4?: string;
-  social_twitter?: string;
-  social_linkedin?: string;
-  social_github?: string;
-  social_facebook?: string;
 }
 
 // Content schema - defines structure and defaults
@@ -29,17 +19,6 @@ const CONTENT_SCHEMA = {
   company_name: { type: 'string' as const, default: 'Your Company' },
   tagline: { type: 'string' as const, default: 'Building the future of technology' },
   copyright: { type: 'string' as const, default: `© ${new Date().getFullYear()} Your Company. All rights reserved.` },
-  link_text_1: { type: 'string' as const, default: 'About' },
-  link_1: { type: 'string' as const, default: '/about' },
-  link_text_2: { type: 'string' as const, default: 'Privacy' },
-  link_2: { type: 'string' as const, default: '/privacy' },
-  link_text_3: { type: 'string' as const, default: 'Terms' },
-  link_3: { type: 'string' as const, default: '/terms' },
-  link_text_4: { type: 'string' as const, default: 'Contact' },
-  link_4: { type: 'string' as const, default: '/contact' },
-  social_twitter: { type: 'string' as const, default: 'https://twitter.com' },
-  social_linkedin: { type: 'string' as const, default: 'https://linkedin.com' },
-  social_github: { type: 'string' as const, default: 'https://github.com' },
 };
 
 const LinksAndSocialFooter: React.FC<LayoutComponentProps> = (props) => {
@@ -55,22 +34,48 @@ const LinksAndSocialFooter: React.FC<LayoutComponentProps> = (props) => {
     ...props,
     contentSchema: CONTENT_SCHEMA
   });
+
   const store = useEditStore();
-  const logoUrl = store?.logoUrl || '/api/placeholder/150/50';
+  const [showSocialEditor, setShowSocialEditor] = useState(false);
 
-  const links = [
-    { text: blockContent.link_text_1, url: blockContent.link_1 },
-    { text: blockContent.link_text_2, url: blockContent.link_2 },
-    { text: blockContent.link_text_3, url: blockContent.link_3 },
-    { text: blockContent.link_text_4, url: blockContent.link_4 },
-  ].filter(link => link.text);
+  // Initialize social media config if needed
+  useEffect(() => {
+    if (!store.socialMediaConfig) {
+      store.initializeSocialMedia();
+    }
+  }, [store]);
 
-  const socialLinks = [
-    { icon: FaTwitter, url: blockContent.social_twitter, label: 'Twitter' },
-    { icon: FaLinkedin, url: blockContent.social_linkedin, label: 'LinkedIn' },
-    { icon: FaGithub, url: blockContent.social_github, label: 'GitHub' },
-    { icon: FaFacebook, url: blockContent.social_facebook, label: 'Facebook' },
-  ].filter(social => social.url);
+  // Get social links from store
+  const socialLinks = store.socialMediaConfig?.items || [];
+  
+  // Debug logging
+  useEffect(() => {
+    console.log('🔗 [FOOTER-DEBUG] LinksAndSocialFooter render:', {
+      mode,
+      socialMediaConfig: store.socialMediaConfig,
+      socialLinksCount: socialLinks.length,
+      socialLinks: socialLinks.map(s => ({ platform: s.platform, url: s.url })),
+      sectionId
+    });
+  }, [mode, store.socialMediaConfig, socialLinks.length, sectionId]);
+
+  // Map icon names to icon components
+  const getIconComponent = (iconName: string) => {
+    const iconMap: Record<string, React.ComponentType<any>> = {
+      FaTwitter,
+      FaLinkedin,
+      FaGithub,
+      FaFacebook,
+      FaInstagram,
+      FaYoutube,
+      FaTiktok,
+      FaDiscord,
+      FaMedium,
+      FaDribbble,
+      FaGlobe,
+    };
+    return iconMap[iconName] || FaGlobe;
+  };
 
   return (
     <LayoutSection
@@ -82,13 +87,14 @@ const LinksAndSocialFooter: React.FC<LayoutComponentProps> = (props) => {
       className="bg-gray-900 text-white"
       innerClassName="py-12"
     >
-      <div className="grid md:grid-cols-2 gap-8 mb-8">
-        <div>
-          <img 
-            src={logoUrl} 
-            alt="Logo" 
-            className="h-8 w-auto mb-4 brightness-0 invert"
-          />
+      <div className="flex flex-col items-center gap-6 mb-8">
+        <div className="text-center">
+          <div className="mb-4">
+            <HeaderLogo 
+              mode={mode}
+              className="h-8 w-auto object-contain brightness-0 invert mx-auto"
+            />
+          </div>
           {blockContent.tagline && (
             <p className="text-gray-400 text-sm">
               <EditableAdaptiveText
@@ -108,48 +114,42 @@ const LinksAndSocialFooter: React.FC<LayoutComponentProps> = (props) => {
           )}
         </div>
         
-        <div className="flex flex-col md:items-end gap-4">
-          <nav className="flex flex-wrap gap-6">
-            {links.map((link, index) => (
+        <div className="flex items-center gap-4">
+          {socialLinks.map((social, index) => {
+            const IconComponent = getIconComponent(social.icon);
+            return (
               <a
-                key={index}
-                href={link.url || '#'}
-                className="text-sm text-gray-400 hover:text-white transition-colors"
+                key={social.id}
+                href={social.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-gray-400 hover:text-white transition-colors relative"
+                aria-label={social.platform}
+                onClick={(e) => mode === 'edit' ? e.preventDefault() : undefined}
               >
-                <EditableAdaptiveText
-                  mode={mode}
-                  value={link.text || ''}
-                  onEdit={(value) => handleContentUpdate(`link_text_${index + 1}`, value)}
-                  backgroundType={backgroundType}
-                  colorTokens={colorTokens}
-                  variant="body"
-                  className="text-sm"
-                  placeholder={`Link ${index + 1}`}
-                  sectionId={sectionId}
-                  elementKey={`link_text_${index + 1}`}
-                  sectionBackground={sectionBackground}
-                />
+                <IconComponent className="w-5 h-5" />
+                {mode === 'edit' && (
+                  <span className="absolute -top-6 left-1/2 transform -translate-x-1/2 text-xs text-gray-500 whitespace-nowrap">
+                    {social.platform}
+                  </span>
+                )}
               </a>
-            ))}
-          </nav>
+            );
+          })}
           
-          <div className="flex gap-4">
-            {socialLinks.map((social, index) => {
-              const Icon = social.icon;
-              return (
-                <a
-                  key={index}
-                  href={social.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-gray-400 hover:text-white transition-colors"
-                  aria-label={social.label}
-                >
-                  <Icon className="w-5 h-5" />
-                </a>
-              );
-            })}
-          </div>
+          {mode === 'edit' && (
+            <button
+              onClick={() => setShowSocialEditor(true)}
+              className="flex items-center gap-1 px-2 py-1 bg-blue-600 text-white text-xs rounded-md hover:bg-blue-700 transition-colors"
+              title="Edit social media links"
+            >
+              <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+              </svg>
+              Edit Links
+            </button>
+          )}
         </div>
       </div>
       
@@ -170,6 +170,13 @@ const LinksAndSocialFooter: React.FC<LayoutComponentProps> = (props) => {
           />
         </p>
       </div>
+      
+      {/* Social Media Editor Modal */}
+      <SocialMediaEditor
+        isVisible={showSocialEditor}
+        onClose={() => setShowSocialEditor(false)}
+        targetFooterId={sectionId}
+      />
     </LayoutSection>
   );
 };

@@ -115,6 +115,8 @@ function createInitialState(tokenId: string): EditStore {
     sectionLayouts: {} as Record<string, string>,
     sectionSpacing: {} as Record<string, 'compact' | 'normal' | 'spacious' | 'extra'>,
     theme: defaultTheme,
+    navigationConfig: undefined,
+    socialMediaConfig: undefined,
     globalSettings: {
       maxWidth: '1200px',
       containerPadding: '32px',
@@ -368,6 +370,8 @@ export function createEditStore(tokenId: string) {
               sectionSpacing: state.sectionSpacing,
               content: state.content,
               theme: state.theme,
+              navigationConfig: state.navigationConfig,
+              socialMediaConfig: state.socialMediaConfig,
               globalSettings: state.globalSettings,
               tokenId: state.tokenId,
               onboardingData: state.onboardingData,

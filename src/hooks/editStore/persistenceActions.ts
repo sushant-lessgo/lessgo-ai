@@ -118,6 +118,11 @@ export function createPersistenceActions(set: any, get: any) {
             console.log('🧭 [NAV-DEBUG] Restored navigation config:', state.navigationConfig);
           }
           
+          if (contentToLoad && contentToLoad.socialMediaConfig) {
+            state.socialMediaConfig = contentToLoad.socialMediaConfig;
+            console.log('🔗 [SOCIAL-DEBUG] Restored social media config:', state.socialMediaConfig);
+          }
+          
           // Restore meta data
           state.id = apiResponse.tokenId || urlTokenId || '';
           state.title = apiResponse.title || 'Untitled Project';
@@ -171,6 +176,7 @@ export function createPersistenceActions(set: any, get: any) {
         theme: state.theme,
         globalSettings: state.globalSettings,
         navigationConfig: state.navigationConfig,
+        socialMediaConfig: state.socialMediaConfig,
         onboardingData: state.onboardingData,
         lastUpdated: state.lastUpdated,
         version: state.version,

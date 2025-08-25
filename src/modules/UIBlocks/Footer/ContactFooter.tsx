@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useLayoutComponent } from '@/hooks/useLayoutComponent';
 import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
 import { LayoutSection } from '@/components/layout/LayoutSection';
@@ -6,7 +6,9 @@ import { EditableAdaptiveText, EditableAdaptiveHeadline } from '@/components/lay
 import { CTAButton } from '@/components/layout/ComponentRegistry';
 import { LayoutComponentProps } from '@/types/storeTypes';
 import { createCTAClickHandler } from '@/utils/ctaHandler';
-import { FaEnvelope, FaPhone, FaMapMarkerAlt } from 'react-icons/fa';
+import { FaEnvelope, FaPhone, FaMapMarkerAlt, FaTwitter, FaLinkedin, FaGithub, FaFacebook, FaInstagram, FaYoutube, FaTiktok, FaDiscord, FaMedium, FaDribbble, FaGlobe } from 'react-icons/fa';
+import HeaderLogo from '@/components/ui/HeaderLogo';
+import SocialMediaEditor from '@/components/social/SocialMediaEditor';
 
 interface ContactFooterContent {
   copyright?: string;
@@ -16,14 +18,6 @@ interface ContactFooterContent {
   email?: string;
   phone?: string;
   address?: string;
-  link_1?: string;
-  link_text_1?: string;
-  link_2?: string;
-  link_text_2?: string;
-  link_3?: string;
-  link_text_3?: string;
-  link_4?: string;
-  link_text_4?: string;
 }
 
 // Content schema - defines structure and defaults
@@ -35,14 +29,6 @@ const CONTENT_SCHEMA = {
   email: { type: 'string' as const, default: 'contact@company.com' },
   phone: { type: 'string' as const, default: '+1 (555) 123-4567' },
   address: { type: 'string' as const, default: '123 Business St, Suite 100, City, State 12345' },
-  link_text_1: { type: 'string' as const, default: 'Privacy Policy' },
-  link_1: { type: 'string' as const, default: '/privacy' },
-  link_text_2: { type: 'string' as const, default: 'Terms of Service' },
-  link_2: { type: 'string' as const, default: '/terms' },
-  link_text_3: { type: 'string' as const, default: 'Support' },
-  link_3: { type: 'string' as const, default: '/support' },
-  link_text_4: { type: 'string' as const, default: 'FAQ' },
-  link_4: { type: 'string' as const, default: '/faq' },
 };
 
 const ContactFooter: React.FC<LayoutComponentProps> = (props) => {
@@ -60,21 +46,53 @@ const ContactFooter: React.FC<LayoutComponentProps> = (props) => {
   });
 
   const store = useEditStore();
-  const logoUrl = store?.logoUrl || '/api/placeholder/150/50';
   const handleCTAClick = createCTAClickHandler(store);
+  const [showSocialEditor, setShowSocialEditor] = useState(false);
 
-  const links = [
-    { text: blockContent.link_text_1, url: blockContent.link_1 },
-    { text: blockContent.link_text_2, url: blockContent.link_2 },
-    { text: blockContent.link_text_3, url: blockContent.link_3 },
-    { text: blockContent.link_text_4, url: blockContent.link_4 },
-  ].filter(link => link.text);
+  // Initialize social media config if needed
+  useEffect(() => {
+    if (!store.socialMediaConfig) {
+      store.initializeSocialMedia();
+    }
+  }, [store]);
 
   const contactInfo = [
     { icon: FaEnvelope, text: blockContent.email, id: 'email' },
     { icon: FaPhone, text: blockContent.phone, id: 'phone' },
     { icon: FaMapMarkerAlt, text: blockContent.address, id: 'address' },
   ].filter(info => info.text);
+
+  // Get social links from store
+  const socialLinks = store.socialMediaConfig?.items || [];
+  
+  // Debug logging
+  useEffect(() => {
+    console.log('🔗 [FOOTER-DEBUG] ContactFooter render:', {
+      mode,
+      socialMediaConfig: store.socialMediaConfig,
+      socialLinksCount: socialLinks.length,
+      socialLinks: socialLinks.map(s => ({ platform: s.platform, url: s.url })),
+      sectionId
+    });
+  }, [mode, store.socialMediaConfig, socialLinks.length, sectionId]);
+
+  // Map icon names to icon components
+  const getIconComponent = (iconName: string) => {
+    const iconMap: Record<string, React.ComponentType<any>> = {
+      FaTwitter,
+      FaLinkedin,
+      FaGithub,
+      FaFacebook,
+      FaInstagram,
+      FaYoutube,
+      FaTiktok,
+      FaDiscord,
+      FaMedium,
+      FaDribbble,
+      FaGlobe,
+    };
+    return iconMap[iconName] || FaGlobe;
+  };
 
   return (
     <LayoutSection
@@ -86,13 +104,14 @@ const ContactFooter: React.FC<LayoutComponentProps> = (props) => {
       className="bg-gray-900 text-white"
       innerClassName="py-16"
     >
-      <div className="grid md:grid-cols-3 gap-12 mb-12">
+      <div className="grid md:grid-cols-2 gap-12 mb-12">
         <div>
-          <img 
-            src={logoUrl} 
-            alt="Logo" 
-            className="h-8 w-auto mb-6 brightness-0 invert"
-          />
+          <div className="mb-6">
+            <HeaderLogo 
+              mode={mode}
+              className="h-8 w-auto object-contain brightness-0 invert"
+            />
+          </div>
           <div className="space-y-3">
             {contactInfo.map((info, index) => {
               const Icon = info.icon;
@@ -118,34 +137,44 @@ const ContactFooter: React.FC<LayoutComponentProps> = (props) => {
               );
             })}
           </div>
-        </div>
-        
-        <div>
-          <h3 className="font-semibold text-white mb-4">Quick Links</h3>
-          <ul className="space-y-3">
-            {links.map((link, index) => (
-              <li key={index}>
-                <a
-                  href={link.url || '#'}
-                  className="text-sm text-gray-300 hover:text-white transition-colors"
-                >
-                  <EditableAdaptiveText
-                    mode={mode}
-                    value={link.text || ''}
-                    onEdit={(value) => handleContentUpdate(`link_text_${index + 1}`, value)}
-                    backgroundType={backgroundType}
-                    colorTokens={colorTokens}
-                    variant="body"
-                    className="text-sm"
-                    placeholder={`Link ${index + 1}`}
-                    sectionId={sectionId}
-                    elementKey={`link_text_${index + 1}`}
-                    sectionBackground={sectionBackground}
-                  />
-                </a>
-              </li>
-            ))}
-          </ul>
+          
+          {/* Social Media Links */}
+          {(socialLinks.length > 0 || mode === 'edit') && (
+            <div className="mt-6 pt-4 border-t border-gray-700">
+              <div className="flex items-center gap-4">
+                {socialLinks.map((social) => {
+                  const IconComponent = getIconComponent(social.icon);
+                  return (
+                    <a
+                      key={social.id}
+                      href={social.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-gray-400 hover:text-white transition-colors"
+                      aria-label={social.platform}
+                      onClick={(e) => mode === 'edit' ? e.preventDefault() : undefined}
+                    >
+                      <IconComponent className="w-5 h-5" />
+                    </a>
+                  );
+                })}
+                
+                {mode === 'edit' && (
+                  <button
+                    onClick={() => setShowSocialEditor(true)}
+                    className="flex items-center gap-1 px-2 py-1 bg-blue-600 text-white text-xs rounded-md hover:bg-blue-700 transition-colors"
+                    title="Edit social media links"
+                  >
+                    <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                    Social Links
+                  </button>
+                )}
+              </div>
+            </div>
+          )}
         </div>
         
         <div>
@@ -215,6 +244,13 @@ const ContactFooter: React.FC<LayoutComponentProps> = (props) => {
           />
         </p>
       </div>
+      
+      {/* Social Media Editor Modal */}
+      <SocialMediaEditor
+        isVisible={showSocialEditor}
+        onClose={() => setShowSocialEditor(false)}
+        targetFooterId={sectionId}
+      />
     </LayoutSection>
   );
 };
