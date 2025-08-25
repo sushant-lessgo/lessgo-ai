@@ -3,9 +3,30 @@ import { logger } from '@/lib/logger';
 
 export async function POST(req: Request) {
   try {
-    const { sectionId, elementKey, currentContent, variationCount = 5 } = await req.json();
+    const body = await req.json();
+    const { sectionId, elementKey, currentContent, variationCount = 5 } = body;
+    
+    // Extract tokenId from query parameters
+    const url = new URL(req.url);
+    const tokenId = url.searchParams.get('tokenId');
+
+    // Debug logging
+    logger.dev("Regenerate element request:", {
+      tokenId,
+      sectionId,
+      elementKey,
+      currentContent: currentContent?.substring?.(0, 100) + "...",
+      variationCount,
+      bodyKeys: Object.keys(body)
+    });
 
     if (!sectionId || !elementKey || !currentContent) {
+      logger.error("Missing required fields:", {
+        sectionId: !!sectionId,
+        elementKey: !!elementKey,
+        currentContent: !!currentContent,
+        receivedBody: body
+      });
       return NextResponse.json({ 
         error: "Invalid request", 
         detail: "sectionId, elementKey, and currentContent are required" 
@@ -13,8 +34,7 @@ export async function POST(req: Request) {
     }
 
     const DEMO_TOKEN = "lessgodemomockdata";
-    const authHeader = req.headers.get("Authorization") || "";
-    const token = authHeader.replace("Bearer ", "").trim();
+    const token = tokenId || "";
 
     // Check for mock data usage
     if (process.env.NEXT_PUBLIC_USE_MOCK_GPT === "true" || token === DEMO_TOKEN) {

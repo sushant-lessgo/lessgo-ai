@@ -99,14 +99,45 @@ export function createAIActions(set: any, get: any) {
       try {
         const currentState = get() as any;
         const section = currentState.content[sectionId];
-        if (!section || !section.elements[elementKey]) {
+        
+        // Handle both structures: section.elements[elementKey] and section[elementKey]
+        let element = section?.elements?.[elementKey] || section?.[elementKey];
+        
+        if (!section || !element) {
+          console.error('Element not found:', {
+            sectionId,
+            elementKey,
+            sectionExists: !!section,
+            hasElementsObject: !!section?.elements,
+            elementInElements: section?.elements?.[elementKey],
+            elementDirect: section?.[elementKey],
+            availableSections: Object.keys(currentState.content || {}),
+            availableElementKeys: section?.elements ? Object.keys(section.elements) : [],
+            availableDirectKeys: section ? Object.keys(section) : []
+          });
           throw new Error('Element not found');
         }
 
-        const currentContent = section.elements[elementKey].content;
+        // Extract content - handle both element.content and direct content
+        let currentContent = element.content !== undefined ? element.content : element;
+        
+        // Handle array content by joining it or using the first element
+        if (Array.isArray(currentContent)) {
+          currentContent = currentContent.length > 0 ? currentContent.join(' ') : '';
+        }
+        
+        // Ensure currentContent is a string
+        currentContent = String(currentContent || '');
+        
+        console.log('Regenerate element request:', {
+          sectionId,
+          elementKey,
+          currentContent: currentContent.substring(0, 100) + '...',
+          tokenId: currentState.tokenId
+        });
         
         // Call the new API endpoint
-        const response = await fetch('/api/regenerate-element', {
+        const response = await fetch(`/api/regenerate-element?tokenId=${encodeURIComponent(currentState.tokenId)}`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -228,17 +259,27 @@ export function createAIActions(set: any, get: any) {
         const variation = state.elementVariations.variations[variationIndex];
         if (variation) {
           const section = state.content[sectionId];
-          if (section && section.elements[elementKey]) {
-            section.elements[elementKey].content = variation;
-            section.editMetadata.lastModified = Date.now();
-            state.persistence.isDirty = true;
-            
-            // Update AI metadata
-            (section.elements[elementKey] as any).aiMetadata = {
-              ...(section.elements[elementKey] as any).aiMetadata,
-              lastGenerated: Date.now(),
-              isCustomized: variationIndex === 0, // First option is original content
-            };
+          if (section) {
+            // Handle both structures: section.elements[elementKey] and section[elementKey]
+            if (section.elements && section.elements[elementKey]) {
+              section.elements[elementKey].content = variation;
+              section.editMetadata.lastModified = Date.now();
+              state.persistence.isDirty = true;
+              
+              // Update AI metadata
+              (section.elements[elementKey] as any).aiMetadata = {
+                ...(section.elements[elementKey] as any).aiMetadata,
+                lastGenerated: Date.now(),
+                isCustomized: variationIndex === 0, // First option is original content
+              };
+            } else if (section[elementKey] !== undefined) {
+              // Handle direct element structure
+              section[elementKey] = variation;
+              if (section.editMetadata) {
+                section.editMetadata.lastModified = Date.now();
+              }
+              state.persistence.isDirty = true;
+            }
             
             // Hide variations after applying
             state.elementVariations = {
