@@ -18,11 +18,87 @@ export function createAIActions(set: any, get: any) {
       });
 
       try {
-        // Mock regeneration logic - replace with actual API call
-        await new Promise(resolve => setTimeout(resolve, 2000));
+        const currentState = get() as EditStore;
+        const section = currentState.content[sectionId];
         
+        if (!section) {
+          throw new Error(`Section ${sectionId} not found`);
+        }
+        
+        // Get section type and layout
+        const sectionType = sectionId.split('-')[0]; // Extract type from ID like "hero-123456"
+        const layout = currentState.sectionLayouts?.[sectionId];
+        
+        console.log('Regenerating section:', {
+          sectionId,
+          sectionType,
+          layout,
+          tokenId: currentState.tokenId,
+          hasUserGuidance: !!userGuidance
+        });
+        
+        // Call the API endpoint
+        const response = await fetch('/api/regenerate-section', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            sectionId,
+            tokenId: currentState.tokenId,
+            userGuidance,
+            currentContent: section.elements,
+            sectionType,
+            layout
+          })
+        });
+        
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.error || 'Failed to regenerate section');
+        }
+        
+        const data = await response.json();
+        console.log('Section regeneration response:', data);
+        
+        // Update the section content
         set((state: EditStore) => {
-          if (state.content[sectionId]) {
+          if (state.content[sectionId] && data.content) {
+            // Preserve existing structure but update element content
+            const updatedElements = { ...state.content[sectionId].elements };
+            
+            // Merge new content with existing elements
+            Object.entries(data.content).forEach(([key, value]: [string, any]) => {
+              if (updatedElements[key]) {
+                // Update existing element
+                if (typeof value === 'object' && value.content !== undefined) {
+                  updatedElements[key] = {
+                    ...updatedElements[key],
+                    content: value.content,
+                    ...(value.type && { type: value.type })
+                  };
+                } else if (typeof value === 'string') {
+                  // Handle simple string content
+                  if (typeof updatedElements[key] === 'object') {
+                    updatedElements[key].content = value;
+                  } else {
+                    updatedElements[key] = {
+                      content: value,
+                      type: 'text',
+                      isEditable: true,
+                      editMode: 'inline'
+                    };
+                  }
+                }
+              } else {
+                // Add new element
+                updatedElements[key] = value;
+              }
+            });
+            
+            // Update the section
+            state.content[sectionId].elements = updatedElements;
+            
             // Update AI metadata
             state.content[sectionId].aiMetadata = {
               ...state.content[sectionId].aiMetadata,
@@ -30,19 +106,48 @@ export function createAIActions(set: any, get: any) {
               isCustomized: false,
             };
             
+            // Update generation state
             state.aiGeneration.isGenerating = false;
             state.aiGeneration.currentOperation = null;
             state.aiGeneration.progress = 100;
             state.aiGeneration.status = 'Section regenerated successfully';
             state.persistence.isDirty = true;
+            state.lastUpdated = Date.now();
+            
+            // Track change for auto-save
+            state.queuedChanges.push({
+              id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+              type: 'content',
+              sectionId,
+              oldValue: section.elements,
+              newValue: updatedElements,
+              timestamp: Date.now(),
+              source: 'ai',
+            });
           }
         });
+        
+        // Trigger auto-save
+        const autoSaveModule = await import('@/utils/autoSaveDraft');
+        if (autoSaveModule.completeSaveDraft) {
+          await autoSaveModule.completeSaveDraft(currentState.tokenId, {
+            description: `Section ${sectionId} regenerated`,
+          });
+        }
+        
       } catch (error) {
+        console.error('Section regeneration error:', error);
         set((state: EditStore) => {
           state.aiGeneration.isGenerating = false;
           state.aiGeneration.currentOperation = null;
           state.aiGeneration.errors.push(error instanceof Error ? error.message : 'Regeneration failed');
         });
+        
+        // Show user-friendly error message
+        set((state: EditStore) => {
+          state.aiGeneration.status = 'Failed to regenerate section. Please try again.';
+        });
+        
         throw error;
       }
     },

@@ -150,11 +150,13 @@ export function createGenerationActions(set: any, get: any) {
         console.log('🎯 Processing AI response content:', {
           contentKeys: Object.keys(aiResponse.content),
           totalSections: Object.keys(aiResponse.content).length,
+          fullRawContent: JSON.stringify(aiResponse.content, null, 2),
           sampleContent: Object.entries(aiResponse.content).slice(0, 2).map(([k, v]) => ({
             section: k,
             hasContent: !!v,
             contentType: typeof v,
-            keys: v && typeof v === 'object' ? Object.keys(v) : []
+            keys: v && typeof v === 'object' ? Object.keys(v) : [],
+            rawValue: v
           }))
         });
         
@@ -214,15 +216,33 @@ export function createGenerationActions(set: any, get: any) {
           const generatedElements: string[] = [];
 
           // Update elements with AI-generated content
-          console.log(`📝 Processing elements for section ${sectionId}:`, Object.keys(sectionData));
+          console.log(`📝 Processing elements for section ${sectionId}:`, {
+            elementKeys: Object.keys(sectionData),
+            elementCount: Object.keys(sectionData).length,
+            sectionDataType: typeof sectionData,
+            rawSectionData: sectionData
+          });
           
           Object.entries(sectionData).forEach(([elementKey, elementValue]: [string, any]) => {
+            console.log(`🔍 Processing element: ${elementKey}`, {
+              elementKey,
+              elementValue,
+              elementType: typeof elementValue,
+              isUndefined: elementValue === undefined,
+              isNull: elementValue === null,
+              isEmpty: elementValue === '',
+              elementLength: typeof elementValue === 'string' ? elementValue.length : 'N/A'
+            });
+            
             if (elementValue !== undefined && elementValue !== null) {
               section.elements[elementKey] = elementValue;
               generatedElements.push(elementKey);
               console.log(`  ✅ Added element: ${elementKey} = "${typeof elementValue === 'string' ? elementValue.substring(0, 50) + '...' : elementValue}"`);
             } else {
-              console.log(`  ⚠️ Skipped null/undefined element: ${elementKey}`);
+              console.log(`  ⚠️ Skipped null/undefined element: ${elementKey}`, {
+                reason: elementValue === undefined ? 'undefined' : 'null',
+                originalValue: elementValue
+              });
             }
           });
 
