@@ -282,50 +282,59 @@ const { addElement } = useElementCRUD();
     // Get section type from the current layout name
     let sectionType = getSectionTypeFromLayout(currentLayout);
     
-    // If we couldn't determine from layout, use the sectionId or aiMetadata
+    // If we couldn't determine from layout, extract from sectionId or use fallback
     if (sectionType === 'hero') {
-      // First try using the sectionId itself as it might be the section type
-      const sectionIdMapping: Record<string, string> = {
-        'uniqueMechanism': 'uniqueMechanism',
-        'unique-mechanism': 'uniqueMechanism',
-        'unique_mechanism': 'uniqueMechanism',
-        'cta': 'cta',
-        'CTA': 'cta',
-        'beforeAfter': 'beforeAfter',
-        'features': 'features',
-        'faq': 'faq',
-        'pricing': 'pricing',
-        'testimonials': 'testimonials',
-        'howItWorks': 'howItWorks',
-        'problem': 'problem',
-        'results': 'results',
-        'security': 'security',
-        'socialProof': 'socialProof',
-        'founderNote': 'founderNote',
-        'integrations': 'integrations',
-        'objectionHandling': 'objectionHandling',
-        'useCases': 'useCases',
-        'comparisonTable': 'comparisonTable',
-        'closeSection': 'closeSection',
-      };
+      // Extract base section type from IDs like "header-1234567-abc12" or "footer-1234567-xyz99"
+      const sectionIdMatch = sectionId.match(/^(header|footer|hero|features|pricing|testimonials|faq|cta|problem|results|security|socialProof|founderNote|integrations|objectionHandling|useCases|comparisonTable|closeSection|beforeAfter|howItWorks|uniqueMechanism)-/);
       
-      if (sectionIdMapping[sectionId]) {
-        sectionType = sectionIdMapping[sectionId];
-      } else if ((section.aiMetadata as any)?.sectionType) {
-        // Try aiMetadata as last resort
-        sectionType = (section.aiMetadata as any).sectionType;
-        
-        // Handle any naming differences in aiMetadata
-        const aiMetadataMapping: Record<string, string> = {
+      if (sectionIdMatch) {
+        sectionType = sectionIdMatch[1];
+      } else {
+        // Try direct mapping for older section IDs without timestamps
+        const sectionIdMapping: Record<string, string> = {
+          'header': 'header',
+          'footer': 'footer',
+          'uniqueMechanism': 'uniqueMechanism',
           'unique-mechanism': 'uniqueMechanism',
           'unique_mechanism': 'uniqueMechanism',
-          'UniqueMechanism': 'uniqueMechanism',
+          'cta': 'cta',
           'CTA': 'cta',
-          'Cta': 'cta',
+          'beforeAfter': 'beforeAfter',
+          'features': 'features',
+          'faq': 'faq',
+          'pricing': 'pricing',
+          'testimonials': 'testimonials',
+          'howItWorks': 'howItWorks',
+          'problem': 'problem',
+          'results': 'results',
+          'security': 'security',
+          'socialProof': 'socialProof',
+          'founderNote': 'founderNote',
+          'integrations': 'integrations',
+          'objectionHandling': 'objectionHandling',
+          'useCases': 'useCases',
+          'comparisonTable': 'comparisonTable',
+          'closeSection': 'closeSection',
         };
         
-        if (aiMetadataMapping[sectionType]) {
-          sectionType = aiMetadataMapping[sectionType];
+        if (sectionIdMapping[sectionId]) {
+          sectionType = sectionIdMapping[sectionId];
+        } else if ((section.aiMetadata as any)?.sectionType) {
+          // Try aiMetadata as last resort
+          sectionType = (section.aiMetadata as any).sectionType;
+          
+          // Handle any naming differences in aiMetadata
+          const aiMetadataMapping: Record<string, string> = {
+            'unique-mechanism': 'uniqueMechanism',
+            'unique_mechanism': 'uniqueMechanism',
+            'UniqueMechanism': 'uniqueMechanism',
+            'CTA': 'cta',
+            'Cta': 'cta',
+          };
+          
+          if (aiMetadataMapping[sectionType]) {
+            sectionType = aiMetadataMapping[sectionType];
+          }
         }
       }
     }

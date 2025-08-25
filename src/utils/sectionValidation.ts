@@ -316,6 +316,20 @@ const SECTION_VALIDATION_CONFIGS: Record<SectionType, SectionValidationConfig> =
     completionWeights: { logos: 70, headline: 30 },
     validationRules: []
   },
+  header: {
+    sectionType: 'header',
+    requiredElements: ['logo', 'nav_items'],
+    optionalElements: ['cta_primary', 'cta_secondary'],
+    completionWeights: { logo: 40, nav_items: 40, cta_primary: 20 },
+    validationRules: []
+  },
+  footer: {
+    sectionType: 'footer',
+    requiredElements: ['copyright'],
+    optionalElements: ['links', 'social_links', 'contact_info'],
+    completionWeights: { copyright: 50, links: 30, social_links: 20 },
+    validationRules: []
+  },
 };
 
 /**

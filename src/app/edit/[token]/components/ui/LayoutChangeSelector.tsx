@@ -54,6 +54,8 @@ export function LayoutChangeSelector({
       'testimonials': 'Testimonial',
       'uniqueMechanism': 'UniqueMechanism',
       'useCases': 'UseCase',
+      'header': 'Header',
+      'footer': 'Footer',
     };
     return mapping[sectionId] || sectionId;
   };

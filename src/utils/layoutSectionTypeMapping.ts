@@ -185,6 +185,18 @@ export const layoutToSectionType: Record<string, string> = {
   'CTAWithFormField': 'cta',
   'ValueStackCTA': 'cta',
   'TestimonialCTACombo': 'cta',
+
+  // Header layouts
+  'CenteredLogoHeader': 'header',
+  'FullNavHeader': 'header',
+  'MinimalNavHeader': 'header',
+  'NavWithCTAHeader': 'header',
+
+  // Footer layouts
+  'SimpleFooter': 'footer',
+  'LinksAndSocialFooter': 'footer',
+  'MultiColumnFooter': 'footer',
+  'ContactFooter': 'footer',
 };
 
 export function getSectionTypeFromLayout(layoutName: string): string {

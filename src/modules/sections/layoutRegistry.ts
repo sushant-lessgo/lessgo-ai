@@ -203,4 +203,18 @@ export const layoutRegistry = {
     "CarouselAvatars",
     "RoleBenefitMatrix",
   ] as const,
+
+  Header: [
+    "CenteredLogoHeader",
+    "FullNavHeader",
+    "MinimalNavHeader",
+    "NavWithCTAHeader",
+  ] as const,
+
+  Footer: [
+    "SimpleFooter",
+    "LinksAndSocialFooter",
+    "MultiColumnFooter",
+    "ContactFooter",
+  ] as const,
 } as const;
