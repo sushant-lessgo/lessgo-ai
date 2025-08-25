@@ -62,10 +62,10 @@ const NavWithCTAHeader: React.FC<LayoutComponentProps> = (props) => {
     }
   }, [store]);
 
-  // Get navigation items from store, fallback to legacy content
-  const getNavigationItems = (): NavigationItem[] => {
+  // Get navigation items from store, fallback to legacy content - direct store access
+  const getNavItems = (): NavigationItem[] => {
     if (store.navigationConfig?.items && store.navigationConfig.items.length > 0) {
-      return store.navigationConfig.items.slice(0, 6); // Max 6 for NavWithCTAHeader (was 4)
+      return store.navigationConfig.items.slice(0, 6); // Max 6 for NavWithCTAHeader
     }
     
     // Fallback to legacy content schema
@@ -79,7 +79,7 @@ const NavWithCTAHeader: React.FC<LayoutComponentProps> = (props) => {
     ].filter(item => item.label);
   };
 
-  const navItems = getNavigationItems();
+  const navItems = getNavItems();
 
   const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>, link: string) => {
     if (link.startsWith('#')) {

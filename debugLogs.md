@@ -1,733 +1,81 @@
-:3000/api/saveDraft:1  Failed to load resource: the server responded with a status of 400 (Bad Request)
-app-index.js:33 Warning: Cannot update a component (`HotReload`) while rendering a different component (`SystemArchitecture`). To locate the bad setState() call inside `SystemArchitecture`, follow the stack trace as described in https://reactjs.org/link/setstate-in-render
-    at SystemArchitecture (webpack-internal:///(app-pages-browser)/./src/modules/UIBlocks/UniqueMechanism/SystemArchitecture.tsx:33:191)
-    at div
-    at main
-    at div
-    at VariableThemeInjector (webpack-internal:///(app-pages-browser)/./src/modules/Design/ColorSystem/VariableThemeInjector.tsx:35:11)
-    at CSSVariableErrorBoundary (webpack-internal:///(app-pages-browser)/./src/components/CSSVariableErrorBoundary.tsx:259:9)
-    at LandingPageRenderer (webpack-internal:///(app-pages-browser)/./src/modules/generatedLanding/LandingPageRenderer.tsx:136:11)
-    at div
-    at div
-    at PageRevealAnimation (webpack-internal:///(app-pages-browser)/./src/app/generate/[token]/components/PageRevealAnimation.tsx:17:11)
-    at div
-    at GeneratePageContent (webpack-internal:///(app-pages-browser)/./src/app/generate/[token]/page.tsx:102:11)
-    at EditErrorBoundary (webpack-internal:///(app-pages-browser)/./src/components/EditErrorBoundary.tsx:85:9)
-    at EditProvider (webpack-internal:///(app-pages-browser)/./src/components/EditProvider.tsx:133:11)
-    at GeneratePage (webpack-internal:///(app-pages-browser)/./src/app/generate/[token]/page.tsx:27:78)
-    at ClientPageRoot (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/client-page.js:14:11)
-    at InnerLayoutRouter (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:243:11)
-    at RedirectErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/redirect-boundary.js:74:9)
-    at RedirectBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/redirect-boundary.js:82:11)
-    at NotFoundBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/not-found-boundary.js:84:11)
-    at LoadingBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:349:11)
-    at ErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/error-boundary.js:160:11)
-    at InnerScrollAndFocusHandler (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:153:9)
-    at ScrollAndFocusHandler (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:228:11)
-    at RenderFromTemplateContext (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/render-from-template-context.js:16:44)
-    at OuterLayoutRouter (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:370:11)
-    at InnerLayoutRouter (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:243:11)
-    at RedirectErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/redirect-boundary.js:74:9)
-    at RedirectBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/redirect-boundary.js:82:11)
-    at NotFoundBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/not-found-boundary.js:84:11)
-    at LoadingBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:349:11)
-    at ErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/error-boundary.js:160:11)
-    at InnerScrollAndFocusHandler (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:153:9)
-    at ScrollAndFocusHandler (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:228:11)
-    at RenderFromTemplateContext (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/render-from-template-context.js:16:44)
-    at OuterLayoutRouter (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:370:11)
-    at InnerLayoutRouter (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:243:11)
-    at RedirectErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/redirect-boundary.js:74:9)
-    at RedirectBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/redirect-boundary.js:82:11)
-    at NotFoundErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/not-found-boundary.js:76:9)
-    at NotFoundBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/not-found-boundary.js:84:11)
-    at LoadingBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:349:11)
-    at ErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/error-boundary.js:160:11)
-    at InnerScrollAndFocusHandler (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:153:9)
-    at ScrollAndFocusHandler (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:228:11)
-    at RenderFromTemplateContext (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/render-from-template-context.js:16:44)
-    at OuterLayoutRouter (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:370:11)
-    at PostHogProvider (webpack-internal:///(app-pages-browser)/./node_modules/posthog-js/react/dist/esm/index.js:51:23)
-    at PostHogProvider (webpack-internal:///(app-pages-browser)/./src/providers/ph-provider.tsx:20:11)
-    at Provider (webpack-internal:///(app-pages-browser)/./node_modules/@radix-ui/react-context/dist/index.mjs:34:15)
-    at TooltipProvider (webpack-internal:///(app-pages-browser)/./node_modules/@radix-ui/react-tooltip/dist/index.mjs:58:13)
-    at body
-    at html
-    at __experimental_CheckoutProvider (webpack-internal:///(app-pages-browser)/./node_modules/@clerk/shared/dist/react/index.mjs:117:42)
-    at SWRConfig (webpack-internal:///(app-pages-browser)/./node_modules/swr/dist/_internal/config-context-client-BoS53ST9.mjs:554:13)
-    at OrganizationProvider (webpack-internal:///(app-pages-browser)/./node_modules/@clerk/shared/dist/react/index.mjs:129:3)
-    at ClerkContextProvider (webpack-internal:///(app-pages-browser)/./node_modules/@clerk/clerk-react/dist/index.mjs:1448:11)
-    at ClerkProviderBase (webpack-internal:///(app-pages-browser)/./node_modules/@clerk/clerk-react/dist/index.mjs:1540:11)
-    at Hoc (webpack-internal:///(app-pages-browser)/./node_modules/@clerk/clerk-react/dist/chunk-3664V5SS.mjs:81:5)
-    at ClerkNextOptionsProvider (webpack-internal:///(app-pages-browser)/./node_modules/@clerk/nextjs/dist/esm/client-boundary/NextOptionsContext.js:17:11)
-    at NextClientClerkProvider (webpack-internal:///(app-pages-browser)/./node_modules/@clerk/nextjs/dist/esm/app-router/client/ClerkProvider.js:60:13)
-    at ClientClerkProvider (webpack-internal:///(app-pages-browser)/./node_modules/@clerk/nextjs/dist/esm/app-router/client/ClerkProvider.js:127:13)
-    at ClerkProvider (Server)
-    at RootLayout (Server)
-    at RedirectErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/redirect-boundary.js:74:9)
-    at RedirectBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/redirect-boundary.js:82:11)
-    at NotFoundErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/not-found-boundary.js:76:9)
-    at NotFoundBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/not-found-boundary.js:84:11)
-    at DevRootNotFoundBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/dev-root-not-found-boundary.js:33:11)
-    at ReactDevOverlay (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/react-dev-overlay/app/ReactDevOverlay.js:87:9)
-    at HotReload (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/react-dev-overlay/app/hot-reloader-client.js:321:11)
-    at Router (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/app-router.js:207:11)
-    at ErrorBoundaryHandler (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/error-boundary.js:113:9)
-    at ErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/error-boundary.js:160:11)
-    at AppRouter (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/app-router.js:585:13)
-    at ServerRoot (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/app-index.js:112:27)
-    at Root (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/app-index.js:117:11)
-    at ReactDevOverlay (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/react-dev-overlay/app/ReactDevOverlay.js:87:9)
-window.console.error @ app-index.js:33
-SystemArchitecture.tsx:40 Uncaught ReferenceError: IconEditableText is not defined
-    at eval (SystemArchitecture.tsx:40:20)
-    at Array.map (<anonymous>)
-    at SystemArchitecture (SystemArchitecture.tsx:32:23)
-    at renderWithHooks (react-dom.development.js:11121:18)
-    at mountIndeterminateComponent (react-dom.development.js:16869:13)
-    at beginWork$1 (react-dom.development.js:18458:16)
-    at HTMLUnknownElement.callCallback (react-dom.development.js:20565:14)
-    at Object.invokeGuardedCallbackImpl (react-dom.development.js:20614:16)
-    at invokeGuardedCallback (react-dom.development.js:20689:29)
-    at beginWork (react-dom.development.js:26949:7)
-    at performUnitOfWork (react-dom.development.js:25748:12)
-    at workLoopSync (react-dom.development.js:25464:5)
-    at renderRootSync (react-dom.development.js:25419:7)
-    at performConcurrentWorkOnRoot (react-dom.development.js:24504:74)
-    at workLoop (scheduler.development.js:256:34)
-    at flushWork (scheduler.development.js:225:14)
-    at MessagePort.performWorkUntilDeadline (scheduler.development.js:534:21)
-SystemArchitecture.tsx:40 Uncaught ReferenceError: IconEditableText is not defined
-    at eval (SystemArchitecture.tsx:40:20)
-    at Array.map (<anonymous>)
-    at SystemArchitecture (SystemArchitecture.tsx:32:23)
-    at renderWithHooks (react-dom.development.js:11121:18)
-    at mountIndeterminateComponent (react-dom.development.js:16869:13)
-    at beginWork$1 (react-dom.development.js:18458:16)
-    at HTMLUnknownElement.callCallback (react-dom.development.js:20565:14)
-    at Object.invokeGuardedCallbackImpl (react-dom.development.js:20614:16)
-    at invokeGuardedCallback (react-dom.development.js:20689:29)
-    at beginWork (react-dom.development.js:26949:7)
-    at performUnitOfWork (react-dom.development.js:25748:12)
-    at workLoopSync (react-dom.development.js:25464:5)
-    at renderRootSync (react-dom.development.js:25419:7)
-    at performConcurrentWorkOnRoot (react-dom.development.js:24504:74)
-    at workLoop (scheduler.development.js:256:34)
-    at flushWork (scheduler.development.js:225:14)
-    at MessagePort.performWorkUntilDeadline (scheduler.development.js:534:21)
-SystemArchitecture.tsx:40 Uncaught ReferenceError: IconEditableText is not defined
-    at eval (SystemArchitecture.tsx:40:20)
-    at Array.map (<anonymous>)
-    at SystemArchitecture (SystemArchitecture.tsx:32:23)
-    at renderWithHooks (react-dom.development.js:11121:18)
-    at mountIndeterminateComponent (react-dom.development.js:16869:13)
-    at beginWork$1 (react-dom.development.js:18458:16)
-    at HTMLUnknownElement.callCallback (react-dom.development.js:20565:14)
-    at Object.invokeGuardedCallbackImpl (react-dom.development.js:20614:16)
-    at invokeGuardedCallback (react-dom.development.js:20689:29)
-    at beginWork (react-dom.development.js:26949:7)
-    at performUnitOfWork (react-dom.development.js:25748:12)
-    at workLoopSync (react-dom.development.js:25464:5)
-    at renderRootSync (react-dom.development.js:25419:7)
-    at recoverFromConcurrentError (react-dom.development.js:24597:20)
-    at performConcurrentWorkOnRoot (react-dom.development.js:24542:26)
-    at workLoop (scheduler.development.js:256:34)
-    at flushWork (scheduler.development.js:225:14)
-    at MessagePort.performWorkUntilDeadline (scheduler.development.js:534:21)
-SystemArchitecture.tsx:40 Uncaught ReferenceError: IconEditableText is not defined
-    at eval (SystemArchitecture.tsx:40:20)
-    at Array.map (<anonymous>)
-    at SystemArchitecture (SystemArchitecture.tsx:32:23)
-    at renderWithHooks (react-dom.development.js:11121:18)
-    at mountIndeterminateComponent (react-dom.development.js:16869:13)
-    at beginWork$1 (react-dom.development.js:18458:16)
-    at HTMLUnknownElement.callCallback (react-dom.development.js:20565:14)
-    at Object.invokeGuardedCallbackImpl (react-dom.development.js:20614:16)
-    at invokeGuardedCallback (react-dom.development.js:20689:29)
-    at beginWork (react-dom.development.js:26949:7)
-    at performUnitOfWork (react-dom.development.js:25748:12)
-    at workLoopSync (react-dom.development.js:25464:5)
-    at renderRootSync (react-dom.development.js:25419:7)
-    at recoverFromConcurrentError (react-dom.development.js:24597:20)
-    at performConcurrentWorkOnRoot (react-dom.development.js:24542:26)
-    at workLoop (scheduler.development.js:256:34)
-    at flushWork (scheduler.development.js:225:14)
-    at MessagePort.performWorkUntilDeadline (scheduler.development.js:534:21)
-app-index.js:33 The above error occurred in the <SystemArchitecture> component:
-
-    at SystemArchitecture (webpack-internal:///(app-pages-browser)/./src/modules/UIBlocks/UniqueMechanism/SystemArchitecture.tsx:33:191)
-    at div
-    at main
-    at div
-    at VariableThemeInjector (webpack-internal:///(app-pages-browser)/./src/modules/Design/ColorSystem/VariableThemeInjector.tsx:35:11)
-    at div
-    at div
-    at CSSVariableErrorBoundary (webpack-internal:///(app-pages-browser)/./src/components/CSSVariableErrorBoundary.tsx:259:9)
-    at LandingPageRenderer (webpack-internal:///(app-pages-browser)/./src/modules/generatedLanding/LandingPageRenderer.tsx:136:11)
-    at div
-    at div
-    at PageRevealAnimation (webpack-internal:///(app-pages-browser)/./src/app/generate/[token]/components/PageRevealAnimation.tsx:17:11)
-    at div
-    at GeneratePageContent (webpack-internal:///(app-pages-browser)/./src/app/generate/[token]/page.tsx:102:11)
-    at EditErrorBoundary (webpack-internal:///(app-pages-browser)/./src/components/EditErrorBoundary.tsx:85:9)
-    at EditProvider (webpack-internal:///(app-pages-browser)/./src/components/EditProvider.tsx:133:11)
-    at GeneratePage (webpack-internal:///(app-pages-browser)/./src/app/generate/[token]/page.tsx:27:78)
-    at ClientPageRoot (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/client-page.js:14:11)
-    at InnerLayoutRouter (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:243:11)
-    at RedirectErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/redirect-boundary.js:74:9)
-    at RedirectBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/redirect-boundary.js:82:11)
-    at NotFoundBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/not-found-boundary.js:84:11)
-    at LoadingBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:349:11)
-    at ErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/error-boundary.js:160:11)
-    at InnerScrollAndFocusHandler (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:153:9)
-    at ScrollAndFocusHandler (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:228:11)
-    at RenderFromTemplateContext (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/render-from-template-context.js:16:44)
-    at OuterLayoutRouter (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:370:11)
-    at InnerLayoutRouter (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:243:11)
-    at RedirectErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/redirect-boundary.js:74:9)
-    at RedirectBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/redirect-boundary.js:82:11)
-    at NotFoundBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/not-found-boundary.js:84:11)
-    at LoadingBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:349:11)
-    at ErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/error-boundary.js:160:11)
-    at InnerScrollAndFocusHandler (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:153:9)
-    at ScrollAndFocusHandler (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:228:11)
-    at RenderFromTemplateContext (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/render-from-template-context.js:16:44)
-    at OuterLayoutRouter (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:370:11)
-    at InnerLayoutRouter (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:243:11)
-    at RedirectErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/redirect-boundary.js:74:9)
-    at RedirectBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/redirect-boundary.js:82:11)
-    at NotFoundErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/not-found-boundary.js:76:9)
-    at NotFoundBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/not-found-boundary.js:84:11)
-    at LoadingBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:349:11)
-    at ErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/error-boundary.js:160:11)
-    at InnerScrollAndFocusHandler (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:153:9)
-    at ScrollAndFocusHandler (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:228:11)
-    at RenderFromTemplateContext (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/render-from-template-context.js:16:44)
-    at OuterLayoutRouter (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:370:11)
-    at PostHogProvider (webpack-internal:///(app-pages-browser)/./node_modules/posthog-js/react/dist/esm/index.js:51:23)
-    at PostHogProvider (webpack-internal:///(app-pages-browser)/./src/providers/ph-provider.tsx:20:11)
-    at Provider (webpack-internal:///(app-pages-browser)/./node_modules/@radix-ui/react-context/dist/index.mjs:34:15)
-    at TooltipProvider (webpack-internal:///(app-pages-browser)/./node_modules/@radix-ui/react-tooltip/dist/index.mjs:58:13)
-    at body
-    at html
-    at __experimental_CheckoutProvider (webpack-internal:///(app-pages-browser)/./node_modules/@clerk/shared/dist/react/index.mjs:117:42)
-    at SWRConfig (webpack-internal:///(app-pages-browser)/./node_modules/swr/dist/_internal/config-context-client-BoS53ST9.mjs:554:13)
-    at OrganizationProvider (webpack-internal:///(app-pages-browser)/./node_modules/@clerk/shared/dist/react/index.mjs:129:3)
-    at ClerkContextProvider (webpack-internal:///(app-pages-browser)/./node_modules/@clerk/clerk-react/dist/index.mjs:1448:11)
-    at ClerkProviderBase (webpack-internal:///(app-pages-browser)/./node_modules/@clerk/clerk-react/dist/index.mjs:1540:11)
-    at Hoc (webpack-internal:///(app-pages-browser)/./node_modules/@clerk/clerk-react/dist/chunk-3664V5SS.mjs:81:5)
-    at ClerkNextOptionsProvider (webpack-internal:///(app-pages-browser)/./node_modules/@clerk/nextjs/dist/esm/client-boundary/NextOptionsContext.js:17:11)
-    at NextClientClerkProvider (webpack-internal:///(app-pages-browser)/./node_modules/@clerk/nextjs/dist/esm/app-router/client/ClerkProvider.js:60:13)
-    at ClientClerkProvider (webpack-internal:///(app-pages-browser)/./node_modules/@clerk/nextjs/dist/esm/app-router/client/ClerkProvider.js:127:13)
-    at ClerkProvider (Server)
-    at RootLayout (Server)
-    at RedirectErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/redirect-boundary.js:74:9)
-    at RedirectBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/redirect-boundary.js:82:11)
-    at NotFoundErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/not-found-boundary.js:76:9)
-    at NotFoundBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/not-found-boundary.js:84:11)
-    at DevRootNotFoundBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/dev-root-not-found-boundary.js:33:11)
-    at ReactDevOverlay (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/react-dev-overlay/app/ReactDevOverlay.js:87:9)
-    at HotReload (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/react-dev-overlay/app/hot-reloader-client.js:321:11)
-    at Router (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/app-router.js:207:11)
-    at ErrorBoundaryHandler (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/error-boundary.js:113:9)
-    at ErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/error-boundary.js:160:11)
-    at AppRouter (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/app-router.js:585:13)
-    at ServerRoot (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/app-index.js:112:27)
-    at Root (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/app-index.js:117:11)
-    at ReactDevOverlay (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/react-dev-overlay/app/ReactDevOverlay.js:87:9)
-
-React will try to recreate this component tree from scratch using the error boundary you provided, EditErrorBoundary.
-window.console.error @ app-index.js:33
-app-index.js:33 🚨 EditErrorBoundary caught an error: Object
-window.console.error @ app-index.js:33
-app-index.js:33 🚨 EditProvider error boundary caught: Object
-window.console.error @ app-index.js:33
-SystemArchitecture.tsx:40 Uncaught ReferenceError: IconEditableText is not defined
-    at eval (SystemArchitecture.tsx:40:20)
-    at Array.map (<anonymous>)
-    at SystemArchitecture (SystemArchitecture.tsx:32:23)
-    at renderWithHooks (react-dom.development.js:11121:18)
-    at mountIndeterminateComponent (react-dom.development.js:16869:13)
-    at beginWork$1 (react-dom.development.js:18458:16)
-    at HTMLUnknownElement.callCallback (react-dom.development.js:20565:14)
-    at Object.invokeGuardedCallbackImpl (react-dom.development.js:20614:16)
-    at invokeGuardedCallback (react-dom.development.js:20689:29)
-    at beginWork (react-dom.development.js:26949:7)
-    at performUnitOfWork (react-dom.development.js:25748:12)
-    at workLoopSync (react-dom.development.js:25464:5)
-    at renderRootSync (react-dom.development.js:25419:7)
-    at performConcurrentWorkOnRoot (react-dom.development.js:24504:74)
-    at workLoop (scheduler.development.js:256:34)
-    at flushWork (scheduler.development.js:225:14)
-    at MessagePort.performWorkUntilDeadline (scheduler.development.js:534:21)
-SystemArchitecture.tsx:40 Uncaught ReferenceError: IconEditableText is not defined
-    at eval (SystemArchitecture.tsx:40:20)
-    at Array.map (<anonymous>)
-    at SystemArchitecture (SystemArchitecture.tsx:32:23)
-    at renderWithHooks (react-dom.development.js:11121:18)
-    at mountIndeterminateComponent (react-dom.development.js:16869:13)
-    at beginWork$1 (react-dom.development.js:18458:16)
-    at HTMLUnknownElement.callCallback (react-dom.development.js:20565:14)
-    at Object.invokeGuardedCallbackImpl (react-dom.development.js:20614:16)
-    at invokeGuardedCallback (react-dom.development.js:20689:29)
-    at beginWork (react-dom.development.js:26949:7)
-    at performUnitOfWork (react-dom.development.js:25748:12)
-    at workLoopSync (react-dom.development.js:25464:5)
-    at renderRootSync (react-dom.development.js:25419:7)
-    at performConcurrentWorkOnRoot (react-dom.development.js:24504:74)
-    at workLoop (scheduler.development.js:256:34)
-    at flushWork (scheduler.development.js:225:14)
-    at MessagePort.performWorkUntilDeadline (scheduler.development.js:534:21)
-SystemArchitecture.tsx:40 Uncaught ReferenceError: IconEditableText is not defined
-    at eval (SystemArchitecture.tsx:40:20)
-    at Array.map (<anonymous>)
-    at SystemArchitecture (SystemArchitecture.tsx:32:23)
-    at renderWithHooks (react-dom.development.js:11121:18)
-    at mountIndeterminateComponent (react-dom.development.js:16869:13)
-    at beginWork$1 (react-dom.development.js:18458:16)
-    at HTMLUnknownElement.callCallback (react-dom.development.js:20565:14)
-    at Object.invokeGuardedCallbackImpl (react-dom.development.js:20614:16)
-    at invokeGuardedCallback (react-dom.development.js:20689:29)
-    at beginWork (react-dom.development.js:26949:7)
-    at performUnitOfWork (react-dom.development.js:25748:12)
-    at workLoopSync (react-dom.development.js:25464:5)
-    at renderRootSync (react-dom.development.js:25419:7)
-    at recoverFromConcurrentError (react-dom.development.js:24597:20)
-    at performConcurrentWorkOnRoot (react-dom.development.js:24542:26)
-    at workLoop (scheduler.development.js:256:34)
-    at flushWork (scheduler.development.js:225:14)
-    at MessagePort.performWorkUntilDeadline (scheduler.development.js:534:21)
-SystemArchitecture.tsx:40 Uncaught ReferenceError: IconEditableText is not defined
-    at eval (SystemArchitecture.tsx:40:20)
-    at Array.map (<anonymous>)
-    at SystemArchitecture (SystemArchitecture.tsx:32:23)
-    at renderWithHooks (react-dom.development.js:11121:18)
-    at mountIndeterminateComponent (react-dom.development.js:16869:13)
-    at beginWork$1 (react-dom.development.js:18458:16)
-    at HTMLUnknownElement.callCallback (react-dom.development.js:20565:14)
-    at Object.invokeGuardedCallbackImpl (react-dom.development.js:20614:16)
-    at invokeGuardedCallback (react-dom.development.js:20689:29)
-    at beginWork (react-dom.development.js:26949:7)
-    at performUnitOfWork (react-dom.development.js:25748:12)
-    at workLoopSync (react-dom.development.js:25464:5)
-    at renderRootSync (react-dom.development.js:25419:7)
-    at recoverFromConcurrentError (react-dom.development.js:24597:20)
-    at performConcurrentWorkOnRoot (react-dom.development.js:24542:26)
-    at workLoop (scheduler.development.js:256:34)
-    at flushWork (scheduler.development.js:225:14)
-    at MessagePort.performWorkUntilDeadline (scheduler.development.js:534:21)
-app-index.js:33 The above error occurred in the <SystemArchitecture> component:
-
-    at SystemArchitecture (webpack-internal:///(app-pages-browser)/./src/modules/UIBlocks/UniqueMechanism/SystemArchitecture.tsx:33:191)
-    at div
-    at main
-    at div
-    at VariableThemeInjector (webpack-internal:///(app-pages-browser)/./src/modules/Design/ColorSystem/VariableThemeInjector.tsx:35:11)
-    at div
-    at div
-    at CSSVariableErrorBoundary (webpack-internal:///(app-pages-browser)/./src/components/CSSVariableErrorBoundary.tsx:259:9)
-    at LandingPageRenderer (webpack-internal:///(app-pages-browser)/./src/modules/generatedLanding/LandingPageRenderer.tsx:136:11)
-    at div
-    at div
-    at PageRevealAnimation (webpack-internal:///(app-pages-browser)/./src/app/generate/[token]/components/PageRevealAnimation.tsx:17:11)
-    at div
-    at GeneratePageContent (webpack-internal:///(app-pages-browser)/./src/app/generate/[token]/page.tsx:102:11)
-    at EditErrorBoundary (webpack-internal:///(app-pages-browser)/./src/components/EditErrorBoundary.tsx:85:9)
-    at EditProvider (webpack-internal:///(app-pages-browser)/./src/components/EditProvider.tsx:133:11)
-    at GeneratePage (webpack-internal:///(app-pages-browser)/./src/app/generate/[token]/page.tsx:27:78)
-    at ClientPageRoot (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/client-page.js:14:11)
-    at InnerLayoutRouter (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:243:11)
-    at RedirectErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/redirect-boundary.js:74:9)
-    at RedirectBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/redirect-boundary.js:82:11)
-    at NotFoundBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/not-found-boundary.js:84:11)
-    at LoadingBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:349:11)
-    at ErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/error-boundary.js:160:11)
-    at InnerScrollAndFocusHandler (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:153:9)
-    at ScrollAndFocusHandler (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:228:11)
-    at RenderFromTemplateContext (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/render-from-template-context.js:16:44)
-    at OuterLayoutRouter (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:370:11)
-    at InnerLayoutRouter (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:243:11)
-    at RedirectErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/redirect-boundary.js:74:9)
-    at RedirectBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/redirect-boundary.js:82:11)
-    at NotFoundBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/not-found-boundary.js:84:11)
-    at LoadingBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:349:11)
-    at ErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/error-boundary.js:160:11)
-    at InnerScrollAndFocusHandler (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:153:9)
-    at ScrollAndFocusHandler (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:228:11)
-    at RenderFromTemplateContext (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/render-from-template-context.js:16:44)
-    at OuterLayoutRouter (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:370:11)
-    at InnerLayoutRouter (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:243:11)
-    at RedirectErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/redirect-boundary.js:74:9)
-    at RedirectBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/redirect-boundary.js:82:11)
-    at NotFoundErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/not-found-boundary.js:76:9)
-    at NotFoundBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/not-found-boundary.js:84:11)
-    at LoadingBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:349:11)
-    at ErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/error-boundary.js:160:11)
-    at InnerScrollAndFocusHandler (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:153:9)
-    at ScrollAndFocusHandler (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:228:11)
-    at RenderFromTemplateContext (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/render-from-template-context.js:16:44)
-    at OuterLayoutRouter (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:370:11)
-    at PostHogProvider (webpack-internal:///(app-pages-browser)/./node_modules/posthog-js/react/dist/esm/index.js:51:23)
-    at PostHogProvider (webpack-internal:///(app-pages-browser)/./src/providers/ph-provider.tsx:20:11)
-    at Provider (webpack-internal:///(app-pages-browser)/./node_modules/@radix-ui/react-context/dist/index.mjs:34:15)
-    at TooltipProvider (webpack-internal:///(app-pages-browser)/./node_modules/@radix-ui/react-tooltip/dist/index.mjs:58:13)
-    at body
-    at html
-    at __experimental_CheckoutProvider (webpack-internal:///(app-pages-browser)/./node_modules/@clerk/shared/dist/react/index.mjs:117:42)
-    at SWRConfig (webpack-internal:///(app-pages-browser)/./node_modules/swr/dist/_internal/config-context-client-BoS53ST9.mjs:554:13)
-    at OrganizationProvider (webpack-internal:///(app-pages-browser)/./node_modules/@clerk/shared/dist/react/index.mjs:129:3)
-    at ClerkContextProvider (webpack-internal:///(app-pages-browser)/./node_modules/@clerk/clerk-react/dist/index.mjs:1448:11)
-    at ClerkProviderBase (webpack-internal:///(app-pages-browser)/./node_modules/@clerk/clerk-react/dist/index.mjs:1540:11)
-    at Hoc (webpack-internal:///(app-pages-browser)/./node_modules/@clerk/clerk-react/dist/chunk-3664V5SS.mjs:81:5)
-    at ClerkNextOptionsProvider (webpack-internal:///(app-pages-browser)/./node_modules/@clerk/nextjs/dist/esm/client-boundary/NextOptionsContext.js:17:11)
-    at NextClientClerkProvider (webpack-internal:///(app-pages-browser)/./node_modules/@clerk/nextjs/dist/esm/app-router/client/ClerkProvider.js:60:13)
-    at ClientClerkProvider (webpack-internal:///(app-pages-browser)/./node_modules/@clerk/nextjs/dist/esm/app-router/client/ClerkProvider.js:127:13)
-    at ClerkProvider (Server)
-    at RootLayout (Server)
-    at RedirectErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/redirect-boundary.js:74:9)
-    at RedirectBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/redirect-boundary.js:82:11)
-    at NotFoundErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/not-found-boundary.js:76:9)
-    at NotFoundBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/not-found-boundary.js:84:11)
-    at DevRootNotFoundBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/dev-root-not-found-boundary.js:33:11)
-    at ReactDevOverlay (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/react-dev-overlay/app/ReactDevOverlay.js:87:9)
-    at HotReload (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/react-dev-overlay/app/hot-reloader-client.js:321:11)
-    at Router (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/app-router.js:207:11)
-    at ErrorBoundaryHandler (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/error-boundary.js:113:9)
-    at ErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/error-boundary.js:160:11)
-    at AppRouter (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/app-router.js:585:13)
-    at ServerRoot (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/app-index.js:112:27)
-    at Root (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/app-index.js:117:11)
-    at ReactDevOverlay (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/react-dev-overlay/app/ReactDevOverlay.js:87:9)
-
-React will try to recreate this component tree from scratch using the error boundary you provided, EditErrorBoundary.
-window.console.error @ app-index.js:33
-app-index.js:33 🚨 EditErrorBoundary caught an error: Object
-window.console.error @ app-index.js:33
-app-index.js:33 🚨 EditProvider error boundary caught: Object
-window.console.error @ app-index.js:33
-SystemArchitecture.tsx:40 Uncaught ReferenceError: IconEditableText is not defined
-    at eval (SystemArchitecture.tsx:40:20)
-    at Array.map (<anonymous>)
-    at SystemArchitecture (SystemArchitecture.tsx:32:23)
-    at renderWithHooks (react-dom.development.js:11121:18)
-    at mountIndeterminateComponent (react-dom.development.js:16869:13)
-    at beginWork$1 (react-dom.development.js:18458:16)
-    at HTMLUnknownElement.callCallback (react-dom.development.js:20565:14)
-    at Object.invokeGuardedCallbackImpl (react-dom.development.js:20614:16)
-    at invokeGuardedCallback (react-dom.development.js:20689:29)
-    at beginWork (react-dom.development.js:26949:7)
-    at performUnitOfWork (react-dom.development.js:25748:12)
-    at workLoopSync (react-dom.development.js:25464:5)
-    at renderRootSync (react-dom.development.js:25419:7)
-    at performConcurrentWorkOnRoot (react-dom.development.js:24504:74)
-    at workLoop (scheduler.development.js:256:34)
-    at flushWork (scheduler.development.js:225:14)
-    at MessagePort.performWorkUntilDeadline (scheduler.development.js:534:21)
-SystemArchitecture.tsx:40 Uncaught ReferenceError: IconEditableText is not defined
-    at eval (SystemArchitecture.tsx:40:20)
-    at Array.map (<anonymous>)
-    at SystemArchitecture (SystemArchitecture.tsx:32:23)
-    at renderWithHooks (react-dom.development.js:11121:18)
-    at mountIndeterminateComponent (react-dom.development.js:16869:13)
-    at beginWork$1 (react-dom.development.js:18458:16)
-    at HTMLUnknownElement.callCallback (react-dom.development.js:20565:14)
-    at Object.invokeGuardedCallbackImpl (react-dom.development.js:20614:16)
-    at invokeGuardedCallback (react-dom.development.js:20689:29)
-    at beginWork (react-dom.development.js:26949:7)
-    at performUnitOfWork (react-dom.development.js:25748:12)
-    at workLoopSync (react-dom.development.js:25464:5)
-    at renderRootSync (react-dom.development.js:25419:7)
-    at performConcurrentWorkOnRoot (react-dom.development.js:24504:74)
-    at workLoop (scheduler.development.js:256:34)
-    at flushWork (scheduler.development.js:225:14)
-    at MessagePort.performWorkUntilDeadline (scheduler.development.js:534:21)
-SystemArchitecture.tsx:40 Uncaught ReferenceError: IconEditableText is not defined
-    at eval (SystemArchitecture.tsx:40:20)
-    at Array.map (<anonymous>)
-    at SystemArchitecture (SystemArchitecture.tsx:32:23)
-    at renderWithHooks (react-dom.development.js:11121:18)
-    at mountIndeterminateComponent (react-dom.development.js:16869:13)
-    at beginWork$1 (react-dom.development.js:18458:16)
-    at HTMLUnknownElement.callCallback (react-dom.development.js:20565:14)
-    at Object.invokeGuardedCallbackImpl (react-dom.development.js:20614:16)
-    at invokeGuardedCallback (react-dom.development.js:20689:29)
-    at beginWork (react-dom.development.js:26949:7)
-    at performUnitOfWork (react-dom.development.js:25748:12)
-    at workLoopSync (react-dom.development.js:25464:5)
-    at renderRootSync (react-dom.development.js:25419:7)
-    at recoverFromConcurrentError (react-dom.development.js:24597:20)
-    at performConcurrentWorkOnRoot (react-dom.development.js:24542:26)
-    at workLoop (scheduler.development.js:256:34)
-    at flushWork (scheduler.development.js:225:14)
-    at MessagePort.performWorkUntilDeadline (scheduler.development.js:534:21)
-SystemArchitecture.tsx:40 Uncaught ReferenceError: IconEditableText is not defined
-    at eval (SystemArchitecture.tsx:40:20)
-    at Array.map (<anonymous>)
-    at SystemArchitecture (SystemArchitecture.tsx:32:23)
-    at renderWithHooks (react-dom.development.js:11121:18)
-    at mountIndeterminateComponent (react-dom.development.js:16869:13)
-    at beginWork$1 (react-dom.development.js:18458:16)
-    at HTMLUnknownElement.callCallback (react-dom.development.js:20565:14)
-    at Object.invokeGuardedCallbackImpl (react-dom.development.js:20614:16)
-    at invokeGuardedCallback (react-dom.development.js:20689:29)
-    at beginWork (react-dom.development.js:26949:7)
-    at performUnitOfWork (react-dom.development.js:25748:12)
-    at workLoopSync (react-dom.development.js:25464:5)
-    at renderRootSync (react-dom.development.js:25419:7)
-    at recoverFromConcurrentError (react-dom.development.js:24597:20)
-    at performConcurrentWorkOnRoot (react-dom.development.js:24542:26)
-    at workLoop (scheduler.development.js:256:34)
-    at flushWork (scheduler.development.js:225:14)
-    at MessagePort.performWorkUntilDeadline (scheduler.development.js:534:21)
-app-index.js:33 The above error occurred in the <SystemArchitecture> component:
-
-    at SystemArchitecture (webpack-internal:///(app-pages-browser)/./src/modules/UIBlocks/UniqueMechanism/SystemArchitecture.tsx:33:191)
-    at div
-    at main
-    at div
-    at VariableThemeInjector (webpack-internal:///(app-pages-browser)/./src/modules/Design/ColorSystem/VariableThemeInjector.tsx:35:11)
-    at div
-    at div
-    at CSSVariableErrorBoundary (webpack-internal:///(app-pages-browser)/./src/components/CSSVariableErrorBoundary.tsx:259:9)
-    at LandingPageRenderer (webpack-internal:///(app-pages-browser)/./src/modules/generatedLanding/LandingPageRenderer.tsx:136:11)
-    at div
-    at div
-    at PageRevealAnimation (webpack-internal:///(app-pages-browser)/./src/app/generate/[token]/components/PageRevealAnimation.tsx:17:11)
-    at div
-    at GeneratePageContent (webpack-internal:///(app-pages-browser)/./src/app/generate/[token]/page.tsx:102:11)
-    at EditErrorBoundary (webpack-internal:///(app-pages-browser)/./src/components/EditErrorBoundary.tsx:85:9)
-    at EditProvider (webpack-internal:///(app-pages-browser)/./src/components/EditProvider.tsx:133:11)
-    at GeneratePage (webpack-internal:///(app-pages-browser)/./src/app/generate/[token]/page.tsx:27:78)
-    at ClientPageRoot (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/client-page.js:14:11)
-    at InnerLayoutRouter (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:243:11)
-    at RedirectErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/redirect-boundary.js:74:9)
-    at RedirectBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/redirect-boundary.js:82:11)
-    at NotFoundBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/not-found-boundary.js:84:11)
-    at LoadingBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:349:11)
-    at ErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/error-boundary.js:160:11)
-    at InnerScrollAndFocusHandler (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:153:9)
-    at ScrollAndFocusHandler (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:228:11)
-    at RenderFromTemplateContext (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/render-from-template-context.js:16:44)
-    at OuterLayoutRouter (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:370:11)
-    at InnerLayoutRouter (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:243:11)
-    at RedirectErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/redirect-boundary.js:74:9)
-    at RedirectBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/redirect-boundary.js:82:11)
-    at NotFoundBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/not-found-boundary.js:84:11)
-    at LoadingBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:349:11)
-    at ErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/error-boundary.js:160:11)
-    at InnerScrollAndFocusHandler (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:153:9)
-    at ScrollAndFocusHandler (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:228:11)
-    at RenderFromTemplateContext (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/render-from-template-context.js:16:44)
-    at OuterLayoutRouter (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:370:11)
-    at InnerLayoutRouter (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:243:11)
-    at RedirectErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/redirect-boundary.js:74:9)
-    at RedirectBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/redirect-boundary.js:82:11)
-    at NotFoundErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/not-found-boundary.js:76:9)
-    at NotFoundBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/not-found-boundary.js:84:11)
-    at LoadingBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:349:11)
-    at ErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/error-boundary.js:160:11)
-    at InnerScrollAndFocusHandler (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:153:9)
-    at ScrollAndFocusHandler (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:228:11)
-    at RenderFromTemplateContext (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/render-from-template-context.js:16:44)
-    at OuterLayoutRouter (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:370:11)
-    at PostHogProvider (webpack-internal:///(app-pages-browser)/./node_modules/posthog-js/react/dist/esm/index.js:51:23)
-    at PostHogProvider (webpack-internal:///(app-pages-browser)/./src/providers/ph-provider.tsx:20:11)
-    at Provider (webpack-internal:///(app-pages-browser)/./node_modules/@radix-ui/react-context/dist/index.mjs:34:15)
-    at TooltipProvider (webpack-internal:///(app-pages-browser)/./node_modules/@radix-ui/react-tooltip/dist/index.mjs:58:13)
-    at body
-    at html
-    at __experimental_CheckoutProvider (webpack-internal:///(app-pages-browser)/./node_modules/@clerk/shared/dist/react/index.mjs:117:42)
-    at SWRConfig (webpack-internal:///(app-pages-browser)/./node_modules/swr/dist/_internal/config-context-client-BoS53ST9.mjs:554:13)
-    at OrganizationProvider (webpack-internal:///(app-pages-browser)/./node_modules/@clerk/shared/dist/react/index.mjs:129:3)
-    at ClerkContextProvider (webpack-internal:///(app-pages-browser)/./node_modules/@clerk/clerk-react/dist/index.mjs:1448:11)
-    at ClerkProviderBase (webpack-internal:///(app-pages-browser)/./node_modules/@clerk/clerk-react/dist/index.mjs:1540:11)
-    at Hoc (webpack-internal:///(app-pages-browser)/./node_modules/@clerk/clerk-react/dist/chunk-3664V5SS.mjs:81:5)
-    at ClerkNextOptionsProvider (webpack-internal:///(app-pages-browser)/./node_modules/@clerk/nextjs/dist/esm/client-boundary/NextOptionsContext.js:17:11)
-    at NextClientClerkProvider (webpack-internal:///(app-pages-browser)/./node_modules/@clerk/nextjs/dist/esm/app-router/client/ClerkProvider.js:60:13)
-    at ClientClerkProvider (webpack-internal:///(app-pages-browser)/./node_modules/@clerk/nextjs/dist/esm/app-router/client/ClerkProvider.js:127:13)
-    at ClerkProvider (Server)
-    at RootLayout (Server)
-    at RedirectErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/redirect-boundary.js:74:9)
-    at RedirectBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/redirect-boundary.js:82:11)
-    at NotFoundErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/not-found-boundary.js:76:9)
-    at NotFoundBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/not-found-boundary.js:84:11)
-    at DevRootNotFoundBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/dev-root-not-found-boundary.js:33:11)
-    at ReactDevOverlay (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/react-dev-overlay/app/ReactDevOverlay.js:87:9)
-    at HotReload (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/react-dev-overlay/app/hot-reloader-client.js:321:11)
-    at Router (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/app-router.js:207:11)
-    at ErrorBoundaryHandler (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/error-boundary.js:113:9)
-    at ErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/error-boundary.js:160:11)
-    at AppRouter (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/app-router.js:585:13)
-    at ServerRoot (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/app-index.js:112:27)
-    at Root (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/app-index.js:117:11)
-    at ReactDevOverlay (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/react-dev-overlay/app/ReactDevOverlay.js:87:9)
-
-React will try to recreate this component tree from scratch using the error boundary you provided, EditErrorBoundary.
-window.console.error @ app-index.js:33
-app-index.js:33 🚨 EditErrorBoundary caught an error: Object
-window.console.error @ app-index.js:33
-app-index.js:33 🚨 EditProvider error boundary caught: Object
-window.console.error @ app-index.js:33
-SystemArchitecture.tsx:40 Uncaught ReferenceError: IconEditableText is not defined
-    at eval (SystemArchitecture.tsx:40:20)
-    at Array.map (<anonymous>)
-    at SystemArchitecture (SystemArchitecture.tsx:32:23)
-    at renderWithHooks (react-dom.development.js:11121:18)
-    at mountIndeterminateComponent (react-dom.development.js:16869:13)
-    at beginWork$1 (react-dom.development.js:18458:16)
-    at HTMLUnknownElement.callCallback (react-dom.development.js:20565:14)
-    at Object.invokeGuardedCallbackImpl (react-dom.development.js:20614:16)
-    at invokeGuardedCallback (react-dom.development.js:20689:29)
-    at beginWork (react-dom.development.js:26949:7)
-    at performUnitOfWork (react-dom.development.js:25748:12)
-    at workLoopSync (react-dom.development.js:25464:5)
-    at renderRootSync (react-dom.development.js:25419:7)
-    at performConcurrentWorkOnRoot (react-dom.development.js:24504:74)
-    at workLoop (scheduler.development.js:256:34)
-    at flushWork (scheduler.development.js:225:14)
-    at MessagePort.performWorkUntilDeadline (scheduler.development.js:534:21)
-SystemArchitecture.tsx:40 Uncaught ReferenceError: IconEditableText is not defined
-    at eval (SystemArchitecture.tsx:40:20)
-    at Array.map (<anonymous>)
-    at SystemArchitecture (SystemArchitecture.tsx:32:23)
-    at renderWithHooks (react-dom.development.js:11121:18)
-    at mountIndeterminateComponent (react-dom.development.js:16869:13)
-    at beginWork$1 (react-dom.development.js:18458:16)
-    at HTMLUnknownElement.callCallback (react-dom.development.js:20565:14)
-    at Object.invokeGuardedCallbackImpl (react-dom.development.js:20614:16)
-    at invokeGuardedCallback (react-dom.development.js:20689:29)
-    at beginWork (react-dom.development.js:26949:7)
-    at performUnitOfWork (react-dom.development.js:25748:12)
-    at workLoopSync (react-dom.development.js:25464:5)
-    at renderRootSync (react-dom.development.js:25419:7)
-    at performConcurrentWorkOnRoot (react-dom.development.js:24504:74)
-    at workLoop (scheduler.development.js:256:34)
-    at flushWork (scheduler.development.js:225:14)
-    at MessagePort.performWorkUntilDeadline (scheduler.development.js:534:21)
-SystemArchitecture.tsx:40 Uncaught ReferenceError: IconEditableText is not defined
-    at eval (SystemArchitecture.tsx:40:20)
-    at Array.map (<anonymous>)
-    at SystemArchitecture (SystemArchitecture.tsx:32:23)
-    at renderWithHooks (react-dom.development.js:11121:18)
-    at mountIndeterminateComponent (react-dom.development.js:16869:13)
-    at beginWork$1 (react-dom.development.js:18458:16)
-    at HTMLUnknownElement.callCallback (react-dom.development.js:20565:14)
-    at Object.invokeGuardedCallbackImpl (react-dom.development.js:20614:16)
-    at invokeGuardedCallback (react-dom.development.js:20689:29)
-    at beginWork (react-dom.development.js:26949:7)
-    at performUnitOfWork (react-dom.development.js:25748:12)
-    at workLoopSync (react-dom.development.js:25464:5)
-    at renderRootSync (react-dom.development.js:25419:7)
-    at recoverFromConcurrentError (react-dom.development.js:24597:20)
-    at performConcurrentWorkOnRoot (react-dom.development.js:24542:26)
-    at workLoop (scheduler.development.js:256:34)
-    at flushWork (scheduler.development.js:225:14)
-    at MessagePort.performWorkUntilDeadline (scheduler.development.js:534:21)
-SystemArchitecture.tsx:40 Uncaught ReferenceError: IconEditableText is not defined
-    at eval (SystemArchitecture.tsx:40:20)
-    at Array.map (<anonymous>)
-    at SystemArchitecture (SystemArchitecture.tsx:32:23)
-    at renderWithHooks (react-dom.development.js:11121:18)
-    at mountIndeterminateComponent (react-dom.development.js:16869:13)
-    at beginWork$1 (react-dom.development.js:18458:16)
-    at HTMLUnknownElement.callCallback (react-dom.development.js:20565:14)
-    at Object.invokeGuardedCallbackImpl (react-dom.development.js:20614:16)
-    at invokeGuardedCallback (react-dom.development.js:20689:29)
-    at beginWork (react-dom.development.js:26949:7)
-    at performUnitOfWork (react-dom.development.js:25748:12)
-    at workLoopSync (react-dom.development.js:25464:5)
-    at renderRootSync (react-dom.development.js:25419:7)
-    at recoverFromConcurrentError (react-dom.development.js:24597:20)
-    at performConcurrentWorkOnRoot (react-dom.development.js:24542:26)
-    at workLoop (scheduler.development.js:256:34)
-    at flushWork (scheduler.development.js:225:14)
-    at MessagePort.performWorkUntilDeadline (scheduler.development.js:534:21)
-app-index.js:33 The above error occurred in the <SystemArchitecture> component:
-
-    at SystemArchitecture (webpack-internal:///(app-pages-browser)/./src/modules/UIBlocks/UniqueMechanism/SystemArchitecture.tsx:33:191)
-    at div
-    at main
-    at div
-    at VariableThemeInjector (webpack-internal:///(app-pages-browser)/./src/modules/Design/ColorSystem/VariableThemeInjector.tsx:35:11)
-    at div
-    at div
-    at CSSVariableErrorBoundary (webpack-internal:///(app-pages-browser)/./src/components/CSSVariableErrorBoundary.tsx:259:9)
-    at LandingPageRenderer (webpack-internal:///(app-pages-browser)/./src/modules/generatedLanding/LandingPageRenderer.tsx:136:11)
-    at div
-    at div
-    at PageRevealAnimation (webpack-internal:///(app-pages-browser)/./src/app/generate/[token]/components/PageRevealAnimation.tsx:17:11)
-    at div
-    at GeneratePageContent (webpack-internal:///(app-pages-browser)/./src/app/generate/[token]/page.tsx:102:11)
-    at EditErrorBoundary (webpack-internal:///(app-pages-browser)/./src/components/EditErrorBoundary.tsx:85:9)
-    at EditProvider (webpack-internal:///(app-pages-browser)/./src/components/EditProvider.tsx:133:11)
-    at GeneratePage (webpack-internal:///(app-pages-browser)/./src/app/generate/[token]/page.tsx:27:78)
-    at ClientPageRoot (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/client-page.js:14:11)
-    at InnerLayoutRouter (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:243:11)
-    at RedirectErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/redirect-boundary.js:74:9)
-    at RedirectBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/redirect-boundary.js:82:11)
-    at NotFoundBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/not-found-boundary.js:84:11)
-    at LoadingBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:349:11)
-    at ErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/error-boundary.js:160:11)
-    at InnerScrollAndFocusHandler (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:153:9)
-    at ScrollAndFocusHandler (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:228:11)
-    at RenderFromTemplateContext (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/render-from-template-context.js:16:44)
-    at OuterLayoutRouter (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:370:11)
-    at InnerLayoutRouter (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:243:11)
-    at RedirectErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/redirect-boundary.js:74:9)
-    at RedirectBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/redirect-boundary.js:82:11)
-    at NotFoundBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/not-found-boundary.js:84:11)
-    at LoadingBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:349:11)
-    at ErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/error-boundary.js:160:11)
-    at InnerScrollAndFocusHandler (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:153:9)
-    at ScrollAndFocusHandler (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:228:11)
-    at RenderFromTemplateContext (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/render-from-template-context.js:16:44)
-    at OuterLayoutRouter (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:370:11)
-    at InnerLayoutRouter (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:243:11)
-    at RedirectErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/redirect-boundary.js:74:9)
-    at RedirectBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/redirect-boundary.js:82:11)
-    at NotFoundErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/not-found-boundary.js:76:9)
-    at NotFoundBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/not-found-boundary.js:84:11)
-    at LoadingBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:349:11)
-    at ErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/error-boundary.js:160:11)
-    at InnerScrollAndFocusHandler (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:153:9)
-    at ScrollAndFocusHandler (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:228:11)
-    at RenderFromTemplateContext (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/render-from-template-context.js:16:44)
-    at OuterLayoutRouter (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:370:11)
-    at PostHogProvider (webpack-internal:///(app-pages-browser)/./node_modules/posthog-js/react/dist/esm/index.js:51:23)
-    at PostHogProvider (webpack-internal:///(app-pages-browser)/./src/providers/ph-provider.tsx:20:11)
-    at Provider (webpack-internal:///(app-pages-browser)/./node_modules/@radix-ui/react-context/dist/index.mjs:34:15)
-    at TooltipProvider (webpack-internal:///(app-pages-browser)/./node_modules/@radix-ui/react-tooltip/dist/index.mjs:58:13)
-    at body
-    at html
-    at __experimental_CheckoutProvider (webpack-internal:///(app-pages-browser)/./node_modules/@clerk/shared/dist/react/index.mjs:117:42)
-    at SWRConfig (webpack-internal:///(app-pages-browser)/./node_modules/swr/dist/_internal/config-context-client-BoS53ST9.mjs:554:13)
-    at OrganizationProvider (webpack-internal:///(app-pages-browser)/./node_modules/@clerk/shared/dist/react/index.mjs:129:3)
-    at ClerkContextProvider (webpack-internal:///(app-pages-browser)/./node_modules/@clerk/clerk-react/dist/index.mjs:1448:11)
-    at ClerkProviderBase (webpack-internal:///(app-pages-browser)/./node_modules/@clerk/clerk-react/dist/index.mjs:1540:11)
-    at Hoc (webpack-internal:///(app-pages-browser)/./node_modules/@clerk/clerk-react/dist/chunk-3664V5SS.mjs:81:5)
-    at ClerkNextOptionsProvider (webpack-internal:///(app-pages-browser)/./node_modules/@clerk/nextjs/dist/esm/client-boundary/NextOptionsContext.js:17:11)
-    at NextClientClerkProvider (webpack-internal:///(app-pages-browser)/./node_modules/@clerk/nextjs/dist/esm/app-router/client/ClerkProvider.js:60:13)
-    at ClientClerkProvider (webpack-internal:///(app-pages-browser)/./node_modules/@clerk/nextjs/dist/esm/app-router/client/ClerkProvider.js:127:13)
-    at ClerkProvider (Server)
-    at RootLayout (Server)
-    at RedirectErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/redirect-boundary.js:74:9)
-    at RedirectBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/redirect-boundary.js:82:11)
-    at NotFoundErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/not-found-boundary.js:76:9)
-    at NotFoundBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/not-found-boundary.js:84:11)
-    at DevRootNotFoundBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/dev-root-not-found-boundary.js:33:11)
-    at ReactDevOverlay (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/react-dev-overlay/app/ReactDevOverlay.js:87:9)
-    at HotReload (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/react-dev-overlay/app/hot-reloader-client.js:321:11)
-    at Router (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/app-router.js:207:11)
-    at ErrorBoundaryHandler (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/error-boundary.js:113:9)
-    at ErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/error-boundary.js:160:11)
-    at AppRouter (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/app-router.js:585:13)
-    at ServerRoot (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/app-index.js:112:27)
-    at Root (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/app-index.js:117:11)
-    at ReactDevOverlay (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/react-dev-overlay/app/ReactDevOverlay.js:87:9)
-
-React will try to recreate this component tree from scratch using the error boundary you provided, EditErrorBoundary.
-window.console.error @ app-index.js:33
-app-index.js:33 🚨 EditErrorBoundary caught an error: Object
-window.console.error @ app-index.js:33
-app-index.js:33 🚨 EditProvider error boundary caught: Object
-window.console.error @ app-index.js:33
+main-app.js:1836 Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+useEditStore.ts:308 🔧 useEditStore debug utilities available at window.__useEditStoreDebug
+EditProvider.tsx:400 🔧 EditProvider debug utilities available at window.__editProviderDebug
+versionManager.ts:663 🔧 Version Manager debug utilities available at window.__versionDebug
+storage.ts:293 🔄 Switching token: none → UIwxjhERGZw0
+useBackgroundSelector.ts:461 🔍 [DEBUG] canApply check: {hasSelection: false, hasNoErrors: true, isNotLoading: true, hasValidBackground: false, selectedPrimary: undefined, …}
+useBackgroundSelector.ts:461 🔍 [DEBUG] canApply check: {hasSelection: false, hasNoErrors: true, isNotLoading: true, hasValidBackground: false, selectedPrimary: undefined, …}
+layoutActions.ts:814 🧭 [NAV-DEBUG] initializeNavigation action called
+layoutActions.ts:818 🧭 [NAV-DEBUG] Current store state: {hasSections: true, sectionsLength: 9, hasNavigationConfig: false}
+sectionScanner.ts:265 🧭 [NAV-DEBUG] Initializing navigation... {sections: Array(9), sectionLayouts: {…}, hasContent: true}
+sectionScanner.ts:281 🧭 [NAV-DEBUG] Header config: {headerSection: 'header', headerLayout: 'NavWithCTAHeader', maxItems: 6}
+sectionScanner.ts:145 🧭 [NAV-DEBUG] Scanning sections... {sectionsCount: 9, sections: Array(9), layouts: {…}, maxItems: 6}
+sectionScanner.ts:158 🧭 [NAV-DEBUG] Skipping header/footer section: header
+sectionScanner.ts:165 🧭 [NAV-DEBUG] Analyzing section: {sectionId: 'hero', layout: 'leftCopyRightImage', sectionType: 'custom', hasContent: true}
+sectionScanner.ts:199 🧭 [NAV-DEBUG] Custom section, skipping: hero
+sectionScanner.ts:165 🧭 [NAV-DEBUG] Analyzing section: {sectionId: 'features', layout: 'Carousel', sectionType: 'features', hasContent: true}
+sectionScanner.ts:178 🧭 [NAV-DEBUG] Adding section to navigation: {sectionId: 'features', sectionType: 'features', label: 'Features', priority: 1}
+sectionScanner.ts:165 🧭 [NAV-DEBUG] Analyzing section: {sectionId: 'uniqueMechanism', layout: 'IllustratedModel', sectionType: 'uniquemechanism', hasContent: true}
+sectionScanner.ts:178 🧭 [NAV-DEBUG] Adding section to navigation: {sectionId: 'uniqueMechanism', sectionType: 'uniquemechanism', label: 'Technology', priority: 15}
+sectionScanner.ts:165 🧭 [NAV-DEBUG] Analyzing section: {sectionId: 'howItWorks', layout: 'CardFlipSteps', sectionType: 'howitworks', hasContent: true}
+sectionScanner.ts:178 🧭 [NAV-DEBUG] Adding section to navigation: {sectionId: 'howItWorks', sectionType: 'howitworks', label: 'How It Works', priority: 8}
+sectionScanner.ts:165 🧭 [NAV-DEBUG] Analyzing section: {sectionId: 'results', layout: 'OutcomeIcons', sectionType: 'results', hasContent: true}
+sectionScanner.ts:178 🧭 [NAV-DEBUG] Adding section to navigation: {sectionId: 'results', sectionType: 'results', label: 'Results', priority: 6}
+sectionScanner.ts:165 🧭 [NAV-DEBUG] Analyzing section: {sectionId: 'faq', layout: 'AccordionFAQ', sectionType: 'faq', hasContent: true}
+sectionScanner.ts:178 🧭 [NAV-DEBUG] Adding section to navigation: {sectionId: 'faq', sectionType: 'faq', label: 'FAQ', priority: 4}
+sectionScanner.ts:165 🧭 [NAV-DEBUG] Analyzing section: {sectionId: 'cta', layout: 'VisualCTAWithMockup', sectionType: 'custom', hasContent: true}
+sectionScanner.ts:199 🧭 [NAV-DEBUG] Custom section, skipping: cta
+sectionScanner.ts:158 🧭 [NAV-DEBUG] Skipping header/footer section: footer
+sectionScanner.ts:203 🧭 [NAV-DEBUG] Found section infos: (5) [{…}, {…}, {…}, {…}, {…}]
+sectionScanner.ts:210 🧭 [NAV-DEBUG] Top sections after sorting: (5) [{…}, {…}, {…}, {…}, {…}]
+sectionScanner.ts:234 🧭 [NAV-DEBUG] Final navigation items: (6) [{…}, {…}, {…}, {…}, {…}, {…}]
+sectionScanner.ts:295 🧭 [NAV-DEBUG] Generated navigation items: (6) [{…}, {…}, {…}, {…}, {…}, {…}]
+layoutActions.ts:832 🧭 [NAV-DEBUG] Setting navigation config in store
+layoutActions.ts:840 🧭 [NAV-DEBUG] Creating navigation config: {navItemsCount: 6, maxItems: 6, headerSection: 'header', headerLayout: 'NavWithCTAHeader'}
+layoutActions.ts:856 🧭 [NAV-DEBUG] Navigation config set: {items: Array(6), autoConfigured: true, maxItems: 6, lastUpdated: 1756109606961}
+modalEmergencyReset.ts:75 🔍 Modal diagnostic mode enabled
+layoutActions.ts:814 🧭 [NAV-DEBUG] initializeNavigation action called
+layoutActions.ts:818 🧭 [NAV-DEBUG] Current store state: {hasSections: true, sectionsLength: 9, hasNavigationConfig: true}
+layoutActions.ts:825 🧭 [NAV-DEBUG] Navigation already configured, skipping
+modalEmergencyReset.ts:75 🔍 Modal diagnostic mode enabled
+ColorSystemModalMVP.tsx:191 🔍 Validating CTA stand-out: {ctaColor: 'bg-emerald-500', background: 'bg-gradient-to-tr from-orange-400 via-pink-400 to-purple-400'}
+ColorSystemModalMVP.tsx:204 ✅ Stand-out result: {ratio: 0, score: 0, level: 'poor', message: 'CTAs might blend in ⚠️'}
+SectionToolbar.tsx:41 🟢 SectionToolbar[fyc18tumz] MOUNTED for section: header
+SectionToolbar.tsx:49 🔍 SectionToolbar[fyc18tumz] - showAdvanced changed to: false
+SectionToolbar.tsx:43 🔴 SectionToolbar[fyc18tumz] UNMOUNTING for section: header
+SectionToolbar.tsx:41 🟢 SectionToolbar[fyc18tumz] MOUNTED for section: header
+SectionToolbar.tsx:49 🔍 SectionToolbar[fyc18tumz] - showAdvanced changed to: false
+useTransitionLock.ts:66 🔓 Transition unlocked: timeout
+layoutActions.ts:890 🧭 [STORE-DEBUG] Navigation item updated: {itemId: 'nav-features', updates: {…}, oldItem: {…}, newItem: {…}, totalItems: 6, …}
+SectionToolbar.tsx:43 🔴 SectionToolbar[fyc18tumz] UNMOUNTING for section: header
+PreviewButton.tsx:28 🔵 Native mousedown event fired! MouseEvent {isTrusted: true, screenX: -515, screenY: 269, clientX: 1405, clientY: 108, …}
+PreviewButton.tsx:29 🔍 mousedown defaultPrevented: false
+PreviewButton.tsx:33 🔵 Native mouseup event fired! MouseEvent {isTrusted: true, screenX: -515, screenY: 269, clientX: 1405, clientY: 108, …}
+PreviewButton.tsx:34 🔍 mouseup defaultPrevented: false
+PreviewButton.tsx:24 🔵 Native click event fired! PointerEvent {isTrusted: true, pointerId: 1, width: 1, height: 1, pressure: 0, …}
+usePreviewNavigation.ts:28 🚀 handlePreviewClick called
+usePreviewNavigation.ts:30 🔄 Setting isNavigating to true
+usePreviewNavigation.ts:33 💾 Triggering auto-save...
+usePreviewNavigation.ts:35 ✅ Auto-save completed
+usePreviewNavigation.ts:38 🔗 Opening preview URL: /preview/UIwxjhERGZw0
+usePreviewNavigation.ts:47 🪟 Window.open result: Window {window: Window, self: Window, document: document, name: '', location: Location, …}
+usePreviewNavigation.ts:49 🔄 Setting isNavigating to false
+rrweb-plugin-console-record.js:2447 [Fast Refresh] rebuilding
+rrweb-plugin-console-record.js:2447 [Fast Refresh] done in 788ms
+storageManager.ts:209 📡 Storage event detected from other tab: {key: 'edit-store-metadata', oldValue: 'exists', newValue: 'exists'}
+storageManager.ts:209 📡 Storage event detected from other tab: {key: 'edit-store-metadata', oldValue: 'exists', newValue: 'exists'}
+storageManager.ts:209 📡 Storage event detected from other tab: {key: 'edit-store-metadata', oldValue: 'exists', newValue: 'exists'}
+storageManager.ts:209 📡 Storage event detected from other tab: {key: 'edit-store-metadata', oldValue: 'exists', newValue: 'exists'}
+storageManager.ts:209 📡 Storage event detected from other tab: {key: 'edit-store-UIwxjhERGZw0', oldValue: 'exists', newValue: 'exists'}
+storageManager.ts:209 📡 Storage event detected from other tab: {key: 'edit-store-UIwxjhERGZw0', oldValue: 'exists', newValue: 'exists'}
+storageManager.ts:209 📡 Storage event detected from other tab: {key: 'edit-store-UIwxjhERGZw0', oldValue: 'exists', newValue: 'exists'}
+storageManager.ts:209 📡 Storage event detected from other tab: {key: 'edit-store-UIwxjhERGZw0', oldValue: 'exists', newValue: 'exists'}
+storageManager.ts:209 📡 Storage event detected from other tab: {key: 'edit-store-UIwxjhERGZw0', oldValue: 'exists', newValue: 'exists'}
+storageManager.ts:209 📡 Storage event detected from other tab: {key: 'edit-store-UIwxjhERGZw0', oldValue: 'exists', newValue: 'exists'}
+storageManager.ts:209 📡 Storage event detected from other tab: {key: 'edit-store-UIwxjhERGZw0', oldValue: 'exists', newValue: 'exists'}
+storageManager.ts:209 📡 Storage event detected from other tab: {key: 'edit-store-UIwxjhERGZw0', oldValue: 'exists', newValue: 'exists'}
+storageManager.ts:209 📡 Storage event detected from other tab: {key: 'edit-store-UIwxjhERGZw0', oldValue: 'exists', newValue: 'exists'}
+storageManager.ts:209 📡 Storage event detected from other tab: {key: 'edit-store-UIwxjhERGZw0', oldValue: 'exists', newValue: 'exists'}
+storageManager.ts:209 📡 Storage event detected from other tab: {key: 'edit-store-UIwxjhERGZw0', oldValue: 'exists', newValue: 'exists'}
+storageManager.ts:209 📡 Storage event detected from other tab: {key: 'edit-store-UIwxjhERGZw0', oldValue: 'exists', newValue: 'exists'}
+storageManager.ts:209 📡 Storage event detected from other tab: {key: 'edit-store-UIwxjhERGZw0', oldValue: 'exists', newValue: 'exists'}

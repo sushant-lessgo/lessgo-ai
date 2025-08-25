@@ -75,17 +75,18 @@ const FullNavHeader: React.FC<LayoutComponentProps> = (props) => {
     }
   }, [store]);
 
-  // Get navigation items from store, fallback to legacy content
-  const getNavigationItems = (): NavigationItem[] => {
-    console.log('🧭 [NAV-DEBUG] getNavigationItems called', {
+  // Get navigation items from store, fallback to legacy content - direct store access
+  const getNavItems = (): NavigationItem[] => {
+    console.log('🧭 [NAV-DEBUG] Getting navigation items', {
       hasNavigationConfig: !!store.navigationConfig,
       navigationItems: store.navigationConfig?.items?.length || 0,
+      lastUpdated: store.navigationConfig?.lastUpdated,
       blockContent
     });
     
     if (store.navigationConfig?.items && store.navigationConfig.items.length > 0) {
       console.log('🧭 [NAV-DEBUG] Using navigation config items:', store.navigationConfig.items);
-      return store.navigationConfig.items.slice(0, 7); // Max 7 for FullNavHeader (was 5)
+      return store.navigationConfig.items.slice(0, 7); // Max 7 for FullNavHeader
     }
     
     console.log('🧭 [NAV-DEBUG] Falling back to legacy content schema');
@@ -105,7 +106,7 @@ const FullNavHeader: React.FC<LayoutComponentProps> = (props) => {
     return fallbackItems;
   };
 
-  const navItems = getNavigationItems();
+  const navItems = getNavItems();
 
   const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>, link: string) => {
     e.preventDefault();

@@ -112,6 +112,12 @@ export function createPersistenceActions(set: any, get: any) {
             Object.assign(state.globalSettings, contentToLoad.globalSettings);
           }
           
+          // Restore navigation configuration if available
+          if (contentToLoad && contentToLoad.navigationConfig) {
+            state.navigationConfig = contentToLoad.navigationConfig;
+            console.log('🧭 [NAV-DEBUG] Restored navigation config:', state.navigationConfig);
+          }
+          
           // Restore meta data
           state.id = apiResponse.tokenId || urlTokenId || '';
           state.title = apiResponse.title || 'Untitled Project';
@@ -164,6 +170,7 @@ export function createPersistenceActions(set: any, get: any) {
         content: state.content,
         theme: state.theme,
         globalSettings: state.globalSettings,
+        navigationConfig: state.navigationConfig,
         onboardingData: state.onboardingData,
         lastUpdated: state.lastUpdated,
         version: state.version,
