@@ -254,44 +254,46 @@ export function createAIActions(set: any, get: any) {
         state.elementVariations.selectedIndex = index;
       }),
 
-    applyVariation: (sectionId: string, elementKey: string, variationIndex: number) =>
-      set((state: EditStore) => {
-        const variation = state.elementVariations.variations[variationIndex];
-        if (variation) {
+    applyVariation: (sectionId: string, elementKey: string, variationIndex: number) => {
+      const state = get() as EditStore;
+      const variation = state.elementVariations.variations[variationIndex];
+      
+      if (variation) {
+        // Use the proper updateElementContent function to update the content
+        // This ensures proper state management, change tracking, and auto-save
+        get().updateElementContent(sectionId, elementKey, variation);
+        
+        // Update AI metadata
+        set((state: EditStore) => {
           const section = state.content[sectionId];
           if (section) {
             // Handle both structures: section.elements[elementKey] and section[elementKey]
             if (section.elements && section.elements[elementKey]) {
-              section.elements[elementKey].content = variation;
-              section.editMetadata.lastModified = Date.now();
-              state.persistence.isDirty = true;
-              
               // Update AI metadata
               (section.elements[elementKey] as any).aiMetadata = {
                 ...(section.elements[elementKey] as any).aiMetadata,
                 lastGenerated: Date.now(),
                 isCustomized: variationIndex === 0, // First option is original content
               };
-            } else if (section[elementKey] !== undefined) {
-              // Handle direct element structure
-              section[elementKey] = variation;
-              if (section.editMetadata) {
-                section.editMetadata.lastModified = Date.now();
-              }
-              state.persistence.isDirty = true;
             }
             
-            // Hide variations after applying
-            state.elementVariations = {
-              visible: false,
-              variations: [],
-              selectedIndex: 0,
-              sectionId: '',
-              elementKey: ''
-            };
+            // Update section's edit metadata
+            if (section.editMetadata) {
+              section.editMetadata.lastModified = Date.now();
+            }
           }
-        }
-      }),
+          
+          // Hide variations modal after applying
+          state.elementVariations = {
+            visible: false,
+            variations: [],
+            selectedIndex: 0,
+            sectionId: '',
+            elementKey: ''
+          };
+        });
+      }
+    },
 
     /**
      * ===== AI GENERATION STATUS =====
