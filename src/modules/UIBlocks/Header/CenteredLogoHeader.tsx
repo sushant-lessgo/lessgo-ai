@@ -143,7 +143,7 @@ const CenteredLogoHeader: React.FC<LayoutComponentProps> = (props) => {
             <div className="px-8">
               <HeaderLogo 
                 mode={mode}
-                className="h-8 w-auto object-contain"
+                className="h-12 w-auto object-contain"
               />
             </div>
             
@@ -181,7 +181,7 @@ const CenteredLogoHeader: React.FC<LayoutComponentProps> = (props) => {
             <div className="px-8">
               <HeaderLogo 
                 mode={mode}
-                className="h-8 w-auto object-contain"
+                className="h-12 w-auto object-contain"
               />
             </div>
             

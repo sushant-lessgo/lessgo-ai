@@ -8,7 +8,7 @@ interface HeaderLogoProps {
 
 const HeaderLogo: React.FC<HeaderLogoProps> = ({ 
   mode, 
-  className = 'h-8 w-auto'
+  className = 'h-12 w-auto'
 }) => {
   const [isHovered, setIsHovered] = useState(false);
   const [isUploading, setIsUploading] = useState(false);

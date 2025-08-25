@@ -103,7 +103,7 @@ const NavWithCTAHeader: React.FC<LayoutComponentProps> = (props) => {
       <nav className="flex items-center justify-between">
         <HeaderLogo 
           mode={mode}
-          className="h-8 w-auto object-contain"
+          className="h-12 w-auto object-contain"
         />
         
         <div className="flex items-center justify-center flex-1">

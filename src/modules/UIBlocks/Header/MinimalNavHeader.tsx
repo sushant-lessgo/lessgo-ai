@@ -137,7 +137,7 @@ const MinimalNavHeader: React.FC<LayoutComponentProps> = (props) => {
         <div className="flex items-center">
           <HeaderLogo 
             mode={mode}
-            className="h-8 w-auto object-contain mr-8"
+            className="h-12 w-auto object-contain mr-8"
           />
         </div>
         
