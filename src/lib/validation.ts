@@ -15,7 +15,7 @@ export const FormSubmissionSchema = z.object({
 export const DraftSaveSchema = z.object({
   tokenId: z.string().min(1).max(100).regex(/^[a-zA-Z0-9_-]+$/, 'Invalid token format'),
   inputText: z.string().max(5000).optional(),
-  stepIndex: z.number().int().min(0).max(10).optional(),
+  stepIndex: z.number().int().min(0).max(999).optional(), // Allow up to 999 for generation complete status
   confirmedFields: z.record(z.string(), z.object({
     value: z.string().max(1000),
     confidence: z.number().min(0).max(1),

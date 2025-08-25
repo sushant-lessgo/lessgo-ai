@@ -94,7 +94,17 @@ const getPersonaColor = (index: number): { bg: string; accent: string; border: s
 };
 
 // Get persona icon based on persona type
-const getPersonaIcon = (persona: string) => {
+const getPersonaIcon = (persona: string | undefined) => {
+  // Defensive check: ensure persona is a valid string
+  if (!persona || typeof persona !== 'string') {
+    // Return a default user icon as fallback
+    return (
+      <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+      </svg>
+    );
+  }
+  
   const lower = persona.toLowerCase();
   
   if (lower.includes('marketing')) {
@@ -175,7 +185,7 @@ const PersonaPanel = ({
         <div className={`w-16 h-16 ${colors.accent} rounded-2xl flex items-center justify-center text-white group-hover:scale-110 transition-transform duration-300`}>
           <IconEditableText
             mode={mode}
-            value={getPersonaIcon(index)}
+            value={getPersonaIcon(panel.persona)}
             onEdit={(value) => handlePersonaIconEdit(index, value)}
             backgroundType="neutral"
             colorTokens={{}}

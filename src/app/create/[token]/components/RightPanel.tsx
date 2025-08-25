@@ -7,7 +7,7 @@ import Logo from "@/components/shared/Logo";
 import PageIntro from "@/components/shared/PageIntro";
 import { getOptionsForField } from "@/utils/getOptionsForField";
 import { autoSaveDraft } from "@/utils/autoSaveDraft";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import FeatureEditor from "./FeatureEditor";
 import LoadingButtonBar from "@/components/shared/LoadingButtonBar";
 import { Button } from "@/components/ui/button";
@@ -47,6 +47,7 @@ export default function RightPanel() {
   } = useOnboardingStore();
 
   const params = useParams();
+  const router = useRouter();
   const tokenId = params?.token as string;
 
   // Page generation hook
@@ -184,6 +185,14 @@ export default function RightPanel() {
       fetchFeatures();
     }
   }, [isFinalStep, featuresFromAI.length, validatedFields, setFeaturesFromAI, setHiddenInferredFields]);
+
+  // ✅ FIX: Redirect if generation is already completed to avoid infinite loops
+  useEffect(() => {
+    if (stepIndex === 999 && featuresFromAI.length > 0 && tokenId) {
+      console.log('Generation already completed, redirecting to generated page');
+      router.push(`/generate/${tokenId}`);
+    }
+  }, [stepIndex, featuresFromAI.length, router, tokenId]);
 
   // Calculate progress including auto-confirmed fields
   const totalFields = CANONICAL_FIELD_NAMES.length;

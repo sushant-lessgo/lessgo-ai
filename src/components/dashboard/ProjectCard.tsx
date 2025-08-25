@@ -35,9 +35,24 @@ export default function ProjectCard({ project, onEdit, onPreview }: Props) {
         if (response.ok) {
           const data = await response.json()
           
-          // If has finalContent, go to edit; otherwise go to create (onboarding)
-          const destination = data.finalContent ? '/edit/' : '/create/'
-          router.push(`${destination}${project.tokenId}`)
+          // Enhanced routing logic to handle different project states
+          if (data.finalContent && data.stepIndex === 999) {
+            // Generation is complete with usable page data - go directly to edit
+            console.log('Project has generated page, routing to edit mode')
+            router.push(`/edit/${project.tokenId}`)
+          } else if (data.stepIndex >= 6 && data.featuresFromAI?.length > 0) {
+            // Onboarding complete, has features, show generated page first
+            console.log('Project ready for generation, routing to generate page')
+            router.push(`/generate/${project.tokenId}`)
+          } else if (data.finalContent) {
+            // Has some final content but not from complete generation - go to edit
+            console.log('Project has content, routing to edit mode') 
+            router.push(`/edit/${project.tokenId}`)
+          } else {
+            // Still in onboarding flow
+            console.log('Project in onboarding, routing to create flow')
+            router.push(`/create/${project.tokenId}`)
+          }
         } else {
           // Fallback to create for any errors
           router.push(`/create/${project.tokenId}`)
