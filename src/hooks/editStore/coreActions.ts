@@ -10,7 +10,7 @@ export function createCoreActions(set: any, get: any) {
     /**
      * ===== LAYOUT ACTIONS =====
      */
-    addSection: (sectionId: string, layout: string) =>
+    addExistingSection: (sectionId: string, layout: string) =>
       set((state: EditStore) => {
         if (!state.sections.includes(sectionId)) {
           state.sections.push(sectionId);

@@ -25,7 +25,7 @@ export function LeftPanel({ tokenId }: LeftPanelProps) {
     setLeftPanelWidth: storeState?.setLeftPanelWidth,
     toggleLeftPanel: storeState?.toggleLeftPanel,
     regenerateAllContent: storeState?.regenerateAllContent,
-    regenerateDesignAndCopy: storeState?.regenerateDesignAndCopy, // ✅ CRITICAL: This is the method that does design regeneration
+    // regenerateDesignAndCopy: storeState?.regenerateDesignAndCopy, // ✅ CRITICAL: This is the method that does design regeneration // TEMP: commented for build
     regenerateContentOnly: storeState?.regenerateContentOnly,
     updateOnboardingData: storeState?.updateOnboardingData,
     announceLiveRegion: storeState?.announceLiveRegion,

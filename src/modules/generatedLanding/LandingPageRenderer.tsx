@@ -213,21 +213,23 @@ export default function LandingPageRenderer({ className = '', tokenId }: Landing
       return [];
     }
 
-    console.log('🔄 Processing section backgrounds with ALTERNATING LOGIC:', {
+    console.log('🔄 Processing sections with EDIT MODE ORDER preserved:', {
       hasDynamicSystem: !!dynamicBackgroundSystem,
       totalSections: sections.length,
-      sectionOrder: sections
+      editModeOrder: sections,
+      preservedOrder: 'Using edit mode positions instead of sectionList metadata order'
     });
 
   const processedSections = sections
-  .map((sectionId: string) => {
+  .map((sectionId: string, index: number) => {
     const sectionMeta = sectionList.find((s: any) => s.id === sectionId);
     const sectionData = content[sectionId];
     const layout = sectionLayouts[sectionId] || sectionData?.layout;
     
     return {
       id: sectionId,
-      order: sectionMeta?.order ?? 999,
+      order: index, // ✅ Use edit mode position instead of sectionMeta.order
+      metaOrder: sectionMeta?.order ?? 999, // Keep metadata order for debugging
       layout,
       data: sectionData,
       sectionMeta
@@ -235,10 +237,10 @@ export default function LandingPageRenderer({ className = '', tokenId }: Landing
   })
   .filter((section: any): section is typeof section & { layout: string } => {
     return section.layout !== undefined && typeof section.layout === 'string';
-  })
-  .sort((a: any, b: any) => a.order - b.order);
+  });
+  // ✅ REMOVED the sort() - preserve edit mode order
 
-    // ✅ NOW APPLY ALTERNATING LOGIC to the sorted sections
+    // ✅ NOW APPLY ALTERNATING LOGIC to preserve edit mode order
     // ✅ Use batch assignment instead of individual calls
 const allSectionIds = processedSections.map((s: any) => s.id);
 const backgroundAssignments = assignEnhancedBackgroundsToAllSections(allSectionIds, {

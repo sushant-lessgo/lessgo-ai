@@ -60,10 +60,26 @@ const getDefaultLayout = (sectionType: string): string => {
 };
 
 /**
- * Validate section order bounds
+ * Validate section order bounds with enhanced logging
  */
 const validateSectionPosition = (sections: string[], position: number): number => {
-  return Math.max(0, Math.min(position, sections.length));
+  const originalPosition = position;
+  const maxPosition = sections.length;
+  const validatedPosition = Math.max(0, Math.min(position, maxPosition));
+  
+  // Enhanced debug logging for position validation
+  if (originalPosition !== validatedPosition) {
+    console.log('🔧 Section position adjusted:', {
+      requested: originalPosition,
+      adjusted: validatedPosition,
+      reason: originalPosition < 0 ? 'below minimum' : originalPosition > maxPosition ? 'above maximum' : 'within bounds',
+      sectionsLength: sections.length,
+      availablePositions: `0 to ${maxPosition}`,
+      currentSections: sections
+    });
+  }
+  
+  return validatedPosition;
 };
 
 /**
@@ -74,10 +90,22 @@ export function createSectionCRUDActions(set: any, get: any) {
     /**
      * Add a new section
      */
-    addSection: (sectionId?: string, position?: number, sectionType: string = 'custom') =>
+    addSection: (sectionType: string, position?: number, customSectionId?: string) =>
       set((state: EditStore) => {
-        const newSectionId = sectionId || generateSectionId(sectionType);
+        const newSectionId = customSectionId || generateSectionId(sectionType);
         const targetPosition = position !== undefined ? validateSectionPosition(state.sections, position) : state.sections.length;
+        
+        // Enhanced debug logging for section addition
+        console.log('➕ Adding section:', {
+          sectionType,
+          requestedPosition: position,
+          targetPosition,
+          customSectionId,
+          newSectionId,
+          beforeSections: [...state.sections],
+          sectionsLength: state.sections.length,
+          willInsertAt: `position ${targetPosition} (${targetPosition === state.sections.length ? 'end' : 'middle'})`
+        });
         
         // Add to sections array at specified position
         const newSections = [...state.sections];
@@ -118,6 +146,16 @@ export function createSectionCRUDActions(set: any, get: any) {
         });
         
         state.history.redoStack = [];
+        
+        // Final success logging
+        console.log('✅ Section added successfully:', {
+          newSectionId,
+          finalPosition: state.sections.indexOf(newSectionId),
+          afterSections: [...state.sections],
+          sectionsLength: state.sections.length,
+          layoutSet: state.sectionLayouts[newSectionId],
+          contentCreated: !!state.content[newSectionId]
+        });
         
         return newSectionId;
       }),

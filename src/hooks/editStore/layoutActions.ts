@@ -64,6 +64,18 @@ export function createLayoutActions(set: any, get: any): LayoutActions {
       const sectionId = `${sectionType}-${Date.now()}`;
       set((state: EditStore) => {
         const insertPos = position ?? state.sections.length;
+        
+        // Enhanced debug logging for layoutActions.addSection
+        console.log('➕ LayoutActions adding section:', {
+          sectionType,
+          requestedPosition: position,
+          insertPos,
+          sectionId,
+          beforeSections: [...state.sections],
+          sectionsLength: state.sections.length,
+          willInsertAt: `position ${insertPos} (${insertPos === state.sections.length ? 'end' : 'middle'})`
+        });
+        
         state.sections.splice(insertPos, 0, sectionId);
         state.sectionLayouts[sectionId] = 'default';
         
@@ -108,6 +120,16 @@ export function createLayoutActions(set: any, get: any): LayoutActions {
         
         // Clear redo stack
         state.history.redoStack = [];
+        
+        // Final success logging
+        console.log('✅ LayoutActions section added successfully:', {
+          sectionId,
+          finalPosition: state.sections.indexOf(sectionId),
+          afterSections: [...state.sections],
+          sectionsLength: state.sections.length,
+          layoutSet: state.sectionLayouts[sectionId],
+          contentCreated: !!state.content[sectionId]
+        });
       });
       return sectionId;
     },
