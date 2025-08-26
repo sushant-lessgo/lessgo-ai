@@ -12,6 +12,7 @@ import {
 import { CTAButton } from '@/components/layout/ComponentRegistry';
 import { LayoutComponentProps } from '@/types/storeTypes';
 import { createCTAClickHandler } from '@/utils/ctaHandler';
+import IconEditableText from '@/components/ui/IconEditableText';
 
 // Content interface for type safety
 interface ValueStackCTAContent {
@@ -23,6 +24,13 @@ interface ValueStackCTAContent {
   final_cta_headline: string;
   final_cta_description: string;
   guarantee_text?: string;
+  // Icon fields for value propositions
+  value_icon_1?: string;
+  value_icon_2?: string;
+  value_icon_3?: string;
+  value_icon_4?: string;
+  value_icon_5?: string;
+  value_icon_6?: string;
 }
 
 // Content schema - defines structure and defaults
@@ -58,7 +66,14 @@ const CONTENT_SCHEMA = {
   guarantee_text: { 
     type: 'string' as const, 
     default: '30-day money-back guarantee' 
-  }
+  },
+  // Icon fields for value propositions
+  value_icon_1: { type: 'string' as const, default: '⚡' },
+  value_icon_2: { type: 'string' as const, default: '📈' },
+  value_icon_3: { type: 'string' as const, default: '🤖' },
+  value_icon_4: { type: 'string' as const, default: '📊' },
+  value_icon_5: { type: 'string' as const, default: '🎯' },
+  value_icon_6: { type: 'string' as const, default: '🔗' }
 };
 
 // Value Proposition Interface
@@ -70,17 +85,26 @@ interface ValueProp {
 }
 
 // Parse value propositions
-const parseValueProps = (titles: string, descriptions: string): ValueProp[] => {
+const parseValueProps = (titles: string, descriptions: string, content: ValueStackCTAContent): ValueProp[] => {
   const titleList = titles.split('|').map(t => t.trim()).filter(Boolean);
   const descriptionList = descriptions.split('|').map(d => d.trim()).filter(Boolean);
   
-  const icons = ['⚡', '📈', '🤖', '📊', '🎯', '🔗', '💡', '🚀'];
+  // Get icons from content schema or fallback to defaults
+  const getIcon = (index: number): string => {
+    const iconFields: (keyof ValueStackCTAContent)[] = [
+      'value_icon_1', 'value_icon_2', 'value_icon_3', 
+      'value_icon_4', 'value_icon_5', 'value_icon_6'
+    ];
+    const fallbackIcons = ['⚡', '📈', '🤖', '📊', '🎯', '🔗', '💡', '🚀'];
+    
+    return content[iconFields[index] as keyof ValueStackCTAContent] as string || fallbackIcons[index % fallbackIcons.length];
+  };
   
   return titleList.map((title, index) => ({
     id: `value-${index}`,
     title,
     description: descriptionList[index] || 'No description provided.',
-    icon: icons[index % icons.length]
+    icon: getIcon(index)
   }));
 };
 
@@ -89,29 +113,74 @@ const ValuePropCard = React.memo(({
   valueProp, 
   index,
   colorTokens,
-  getTextStyle 
+  getTextStyle,
+  mode,
+  sectionId,
+  backgroundType,
+  sectionBackground,
+  onIconEdit,
+  onTitleEdit,
+  onDescriptionEdit
 }: {
   valueProp: ValueProp;
   index: number;
   colorTokens: any;
   getTextStyle: any;
+  mode: 'edit' | 'preview';
+  sectionId: string;
+  backgroundType: string;
+  sectionBackground: string;
+  onIconEdit: (index: number, value: string) => void;
+  onTitleEdit: (index: number, value: string) => void;
+  onDescriptionEdit: (index: number, value: string) => void;
 }) => {
   return (
     <div className="flex items-start space-x-4 p-6 bg-white rounded-xl border border-gray-200 hover:border-blue-300 hover:shadow-lg transition-all duration-300">
       
       {/* Icon */}
-      <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center text-2xl flex-shrink-0">
-        {valueProp.icon}
+      <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center flex-shrink-0">
+        <IconEditableText
+          mode={mode}
+          value={valueProp.icon}
+          onEdit={(value) => onIconEdit(index, value)}
+          backgroundType={backgroundType as any}
+          colorTokens={colorTokens}
+          iconSize="lg"
+          className="text-2xl"
+          sectionId={sectionId}
+          elementKey={`value_icon_${index + 1}`}
+          sectionBackground={sectionBackground}
+        />
       </div>
       
       {/* Content */}
       <div className="flex-1">
-        <h3 className="font-bold text-gray-900 mb-2">
-          {valueProp.title}
-        </h3>
-        <p className="text-gray-600 leading-relaxed">
-          {valueProp.description}
-        </p>
+        <EditableAdaptiveText
+          mode={mode}
+          value={valueProp.title}
+          onEdit={(value) => onTitleEdit(index, value)}
+          backgroundType={backgroundType as any}
+          colorTokens={colorTokens}
+          variant="body"
+          className="font-bold text-gray-900 mb-2 block"
+          sectionId={sectionId}
+          elementKey={`value_title_${index + 1}`}
+          sectionBackground={sectionBackground}
+          placeholder="Value proposition title"
+        />
+        <EditableAdaptiveText
+          mode={mode}
+          value={valueProp.description}
+          onEdit={(value) => onDescriptionEdit(index, value)}
+          backgroundType={backgroundType as any}
+          colorTokens={colorTokens}
+          variant="body"
+          className="text-gray-600 leading-relaxed block"
+          sectionId={sectionId}
+          elementKey={`value_description_${index + 1}`}
+          sectionBackground={sectionBackground}
+          placeholder="Value proposition description"
+        />
       </div>
       
       {/* Checkmark */}
@@ -147,7 +216,25 @@ export default function ValueStackCTA(props: LayoutComponentProps) {
   const bodyLgStyle = getTypographyStyle('body-lg');
 
   // Parse value propositions
-  const valueProps = parseValueProps(blockContent.value_propositions, blockContent.value_descriptions);
+  const valueProps = parseValueProps(blockContent.value_propositions, blockContent.value_descriptions, blockContent);
+
+  // Icon edit handlers
+  const handleIconEdit = (index: number, value: string) => {
+    const iconField = `value_icon_${index + 1}` as keyof ValueStackCTAContent;
+    handleContentUpdate(iconField, value);
+  };
+
+  const handleTitleEdit = (index: number, value: string) => {
+    const titles = blockContent.value_propositions.split('|').map(t => t.trim());
+    titles[index] = value;
+    handleContentUpdate('value_propositions', titles.join('|'));
+  };
+
+  const handleDescriptionEdit = (index: number, value: string) => {
+    const descriptions = blockContent.value_descriptions.split('|').map(d => d.trim());
+    descriptions[index] = value;
+    handleContentUpdate('value_descriptions', descriptions.join('|'));
+  };
 
   return (
     <LayoutSection
@@ -201,6 +288,13 @@ export default function ValueStackCTA(props: LayoutComponentProps) {
               index={index}
               colorTokens={colorTokens}
               getTextStyle={getTextStyle}
+              mode={mode}
+              sectionId={sectionId}
+              backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
+              sectionBackground={sectionBackground}
+              onIconEdit={handleIconEdit}
+              onTitleEdit={handleTitleEdit}
+              onDescriptionEdit={handleDescriptionEdit}
             />
           ))}
         </div>
@@ -285,7 +379,8 @@ export const componentMeta = {
   
   features: [
     'Stacked value propositions',
-    'Icon-enhanced benefits',
+    'Editable icons with visual picker',
+    'Editable value proposition text',
     'Gradient CTA section',
     'Guarantee display',
     'Checkmark validation'
@@ -296,6 +391,12 @@ export const componentMeta = {
     { key: 'subheadline', label: 'Supporting Text', type: 'textarea', required: false },
     { key: 'value_propositions', label: 'Value Proposition Titles (pipe separated)', type: 'textarea', required: true },
     { key: 'value_descriptions', label: 'Value Descriptions (pipe separated)', type: 'textarea', required: true },
+    { key: 'value_icon_1', label: 'Value Icon 1', type: 'text', required: false },
+    { key: 'value_icon_2', label: 'Value Icon 2', type: 'text', required: false },
+    { key: 'value_icon_3', label: 'Value Icon 3', type: 'text', required: false },
+    { key: 'value_icon_4', label: 'Value Icon 4', type: 'text', required: false },
+    { key: 'value_icon_5', label: 'Value Icon 5', type: 'text', required: false },
+    { key: 'value_icon_6', label: 'Value Icon 6', type: 'text', required: false },
     { key: 'cta_text', label: 'CTA Button Text', type: 'text', required: true },
     { key: 'final_cta_headline', label: 'Final CTA Headline', type: 'text', required: true },
     { key: 'final_cta_description', label: 'Final CTA Description', type: 'textarea', required: true },
