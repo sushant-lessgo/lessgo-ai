@@ -88,7 +88,10 @@ CONTENT-ONLY REGENERATION:
     }
 
     const aiResponse = await response.json();
-    // get().updateFromAIResponse(aiResponse); // Commented out - method not available
+    
+    // Apply the AI response to update the store content
+    const storeState = getState();
+    storeState.updateFromAIResponse(aiResponse);
 
     setState((state: EditStore) => {
       state.aiGeneration.isGenerating = false;
@@ -205,7 +208,10 @@ const handleDesignAndCopyRegeneration = async (
     }
 
     const aiResponse = await response.json();
-    // get().updateFromAIResponse(aiResponse); // Commented out - method not available
+    
+    // Apply the AI response to update the store content
+    const storeState = getState();
+    storeState.updateFromAIResponse(aiResponse);
 
     setState((state: EditStore) => {
       state.aiGeneration.isGenerating = false;

@@ -23,6 +23,7 @@ import { createUIActions } from '../hooks/editStore/uiActions';
 import { createFormsImageActions } from '../hooks/editStore/formsImageActions';
 import { createLayoutActions } from '../hooks/editStore/layoutActions';
 import { createCSSVariableActions } from '../hooks/editStore/cssVariableActions';
+import { createRegenerationActions } from '../hooks/editStore/regenerationActions';
 
 // Import storage utilities
 import { getStorageKey, trackProjectAccess, isStorageAvailable } from '@/utils/storage';
@@ -334,6 +335,7 @@ export function createEditStore(tokenId: string) {
             ...createFormsImageActions(set, get),
             ...createLayoutActions(set, get),
             ...createCSSVariableActions(set, get),
+            ...createRegenerationActions(set, get),
 
             // Token-specific actions
             loadFromOnboarding: () => {

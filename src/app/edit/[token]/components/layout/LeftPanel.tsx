@@ -1,11 +1,12 @@
 // app/edit/[token]/components/layout/LeftPanel.tsx - Updated with Modal Integration
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useEditStoreContext, useStoreState } from '@/components/EditProvider';
 import { useOnboardingStore } from '@/hooks/useOnboardingStore';
 import ConfirmedFieldTile from '@/app/create/[token]/components/ConfirmedFieldTile';
 import TaxonomyModalManager from '../modals/TaxonomyModalManager';
+import LoadingButtonBar from '@/components/shared/LoadingButtonBar';
 import { FIELD_DISPLAY_NAMES, CANONICAL_FIELD_NAMES, HIDDEN_FIELD_DISPLAY_NAMES, type CanonicalFieldName, type AnyFieldName } from '@/types/core/index';
 
 interface LeftPanelProps {
@@ -23,8 +24,11 @@ export function LeftPanel({ tokenId }: LeftPanelProps) {
     setLeftPanelWidth,
     toggleLeftPanel,
     regenerateAllContent,
+    regenerateContentOnly,
     updateOnboardingData,
-  } = storeState || {};
+    aiGeneration,
+    announceLiveRegion,
+  } = (storeState || {}) as any;
 
   const { 
     reopenFieldForEditing,
@@ -81,12 +85,36 @@ export function LeftPanel({ tokenId }: LeftPanelProps) {
   const [isResizing, setIsResizing] = useState(false);
   const [hasFieldChanges, setHasFieldChanges] = useState(false);
   const [originalFields, setOriginalFields] = useState<Record<string, string>>({});
-  const [isRegenerating, setIsRegenerating] = useState(false);
+  // Use store's aiGeneration state instead of local state
+  const isRegenerating = aiGeneration?.isGenerating && aiGeneration?.currentOperation === 'page';
   const [includeDesignRegeneration, setIncludeDesignRegeneration] = useState(false);
   const [showDesignWarning, setShowDesignWarning] = useState(false);
+  const [showCompletionMessage, setShowCompletionMessage] = useState(false);
   const [mounted, setMounted] = useState(false);
+  
+  // Track previous regeneration state for completion detection
+  const prevIsRegeneratingRef = useRef(false);
 
   useEffect(() => setMounted(true), []);
+
+  // Track regeneration completion for success feedback
+  useEffect(() => {
+    // Check if regeneration just completed
+    if (prevIsRegeneratingRef.current && !isRegenerating) {
+      // Regeneration just finished
+      setShowCompletionMessage(true);
+      
+      // Hide completion message after 3 seconds
+      const timer = setTimeout(() => {
+        setShowCompletionMessage(false);
+      }, 3000);
+      
+      return () => clearTimeout(timer);
+    }
+    
+    // Update the previous state
+    prevIsRegeneratingRef.current = isRegenerating || false;
+  }, [isRegenerating, announceLiveRegion]);
 
   const handleMouseDown = (e: React.MouseEvent) => {
     setIsResizing(true);
@@ -172,7 +200,6 @@ export function LeftPanel({ tokenId }: LeftPanelProps) {
   const handleRegenerateContent = async () => {
     if (!hasFieldChanges || isRegenerating) return;
     
-    setIsRegenerating(true);
     try {
       if (includeDesignRegeneration) {
         // Full regeneration: design + copy
@@ -190,45 +217,15 @@ export function LeftPanel({ tokenId }: LeftPanelProps) {
       // This creates a new baseline for future change detection
       const currentFields = { ...validatedFields, ...hiddenInferredFields };
       setOriginalFields(currentFields);
+      
+      // Announce success for accessibility
+      announceLiveRegion?.('Content regeneration completed successfully');
     } catch (error) {
       console.error('Regeneration failed:', error);
-    } finally {
-      setIsRegenerating(false);
+      announceLiveRegion?.('Content regeneration failed. Please try again.');
     }
   };
 
-  const regenerateContentOnly = async () => {
-    // Regenerate only the text content while preserving design structure
-   // console.log('Regenerating content only (preserving design)');
-    
-    try {
-      // Call the content-only regeneration endpoint
-      const response = await fetch('/api/regenerate-content', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          tokenId,
-          fields: { ...validatedFields, ...hiddenInferredFields },
-          preserveDesign: true
-        })
-      });
-      
-      if (!response.ok) {
-        throw new Error('Content regeneration failed');
-      }
-      
-      const result = await response.json();
-     // console.log('Content regeneration completed:', result);
-      
-      // Update the content in the store
-      // This should trigger a content update without changing layout/design
-      
-    } catch (error) {
-      console.error('Content-only regeneration failed:', error);
-      // Fallback to full regeneration if content-only fails
-      await regenerateAllContent?.();
-    }
-  };
 
   // Store original field values on mount
   useEffect(() => {
@@ -439,7 +436,16 @@ export function LeftPanel({ tokenId }: LeftPanelProps) {
           </div>
 
           {/* Scrollable Content */}
-          <div className={`flex-1 overflow-y-auto min-h-0 ${hasFieldChanges ? 'max-h-[calc(100vh-300px)]' : ''}`}>
+          <div className={`flex-1 overflow-y-auto min-h-0 ${hasFieldChanges ? 'max-h-[calc(100vh-300px)]' : ''} relative`}>
+            {/* Loading overlay during regeneration */}
+            {isRegenerating && (
+              <div className="absolute inset-0 bg-white bg-opacity-75 z-10 flex items-center justify-center">
+                <div className="text-center">
+                  <div className="w-8 h-8 border-3 border-blue-200 border-t-blue-600 rounded-full animate-spin mx-auto mb-3"></div>
+                  <p className="text-sm text-gray-600">Updating content...</p>
+                </div>
+              </div>
+            )}
             <div className="p-4 space-y-6">
               {/* Product Description Card - Read Only */}
               <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
@@ -486,12 +492,13 @@ export function LeftPanel({ tokenId }: LeftPanelProps) {
                           </div>
                           <button 
                             onClick={() => handleEditField(canonicalField)}
-                            className={`text-xs transition-colors flex items-center gap-1 ${
+                            disabled={isRegenerating}
+                            className={`text-xs transition-colors flex items-center gap-1 disabled:opacity-50 disabled:cursor-not-allowed ${
                               isPendingRevalidation
                                 ? 'text-amber-600 hover:text-amber-700 font-medium'
                                 : 'text-blue-600 hover:text-blue-700'
                             }`}
-                            title={isPendingRevalidation ? "Update this field" : "Edit this field"}
+                            title={isRegenerating ? "Cannot edit during regeneration" : (isPendingRevalidation ? "Update this field" : "Edit this field")}
                           >
                             {isPendingRevalidation ? '🔄 Update' : '✏️ Edit'}
                           </button>
@@ -538,8 +545,9 @@ export function LeftPanel({ tokenId }: LeftPanelProps) {
                             </div>
                             <button 
                               onClick={() => handleEditField(canonicalField)}
-                              className="text-xs text-blue-600 hover:text-blue-700 transition-colors flex items-center gap-1"
-                              title="Edit this field"
+                              disabled={isRegenerating}
+                              className="text-xs text-blue-600 hover:text-blue-700 transition-colors flex items-center gap-1 disabled:opacity-50 disabled:cursor-not-allowed"
+                              title={isRegenerating ? "Cannot edit during regeneration" : "Edit this field"}
                             >
                               ✏️ Edit
                             </button>
@@ -581,13 +589,17 @@ export function LeftPanel({ tokenId }: LeftPanelProps) {
                   <button
                     onClick={handleRegenerateContent}
                     disabled={isRegenerating}
-                    className="w-full py-4 px-4 rounded-lg font-medium text-base transition-all duration-200 bg-blue-600 hover:bg-blue-700 text-white shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                    className={`w-full py-4 px-4 rounded-lg font-medium text-base transition-all duration-200 shadow-md hover:shadow-lg disabled:cursor-not-allowed ${
+                      isRegenerating 
+                        ? 'bg-blue-500 text-white opacity-90' 
+                        : 'bg-blue-600 hover:bg-blue-700 text-white'
+                    }`}
                   >
                     {isRegenerating ? (
                       <div className="flex items-center justify-center space-x-2">
-                        <div className="w-4 h-4 border-2 border-gray-300 border-t-blue-600 rounded-full animate-spin"></div>
+                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
                         <span>
-                          {includeDesignRegeneration ? 'Regenerating Design + Content...' : 'Regenerating Content...'}
+                          {aiGeneration?.status || (includeDesignRegeneration ? 'Regenerating Design + Content...' : 'Regenerating Content...')}
                         </span>
                       </div>
                     ) : (
@@ -667,6 +679,27 @@ export function LeftPanel({ tokenId }: LeftPanelProps) {
                 Confirm
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Loading Bar Animation during Page Regeneration */}
+      {isRegenerating && (
+        <div className="fixed bottom-8 right-8 z-50 transition-all duration-200">
+          <LoadingButtonBar
+            label={aiGeneration?.status || (includeDesignRegeneration ? 'Regenerating design + content...' : 'Regenerating content...')}
+            duration={15000} // 15 seconds estimated duration
+            colorClass="bg-blue-600"
+          />
+        </div>
+      )}
+
+      {/* Completion Success Message */}
+      {showCompletionMessage && (
+        <div className="fixed bottom-8 right-8 z-50 transition-all duration-200">
+          <div className="bg-green-600 text-white px-6 py-3 rounded-lg shadow-lg flex items-center space-x-3">
+            <span className="text-lg">✓</span>
+            <span className="font-medium">Content regeneration completed!</span>
           </div>
         </div>
       )}
