@@ -205,6 +205,20 @@ export function EditableContent({
     return editableElement;
   }
 
+  // Preview mode - check if value contains HTML and render appropriately
+  const isHtmlContent = typeof value === 'string' && /<[^>]*>/g.test(value);
+  
+  if (isHtmlContent) {
+    // Render HTML content with dangerouslySetInnerHTML
+    return (
+      <Element 
+        className={className} 
+        style={previewStyle}
+        dangerouslySetInnerHTML={{ __html: value }}
+      />
+    );
+  }
+
   return (
     <Element className={className} style={previewStyle}>
       {children || value}
