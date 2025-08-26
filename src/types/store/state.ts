@@ -239,6 +239,11 @@ export interface UISlice {
     lastGenerated?: number;
     errors: string[];
     warnings: string[];
+    context?: {
+      type: 'section' | 'element' | 'page';
+      sectionId?: string;
+      elementId?: string;
+    } | null;
   };
   
   // Element Variations

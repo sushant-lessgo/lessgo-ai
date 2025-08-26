@@ -158,6 +158,7 @@ function createInitialState(tokenId: string): EditStore {
       status: '',
       errors: [] as string[],
       warnings: [] as string[],
+      context: null,
     },
     elementVariations: {
       visible: false,

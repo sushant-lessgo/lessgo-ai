@@ -15,6 +15,10 @@ export function createAIActions(set: any, get: any) {
         state.aiGeneration.currentOperation = 'section';
         state.aiGeneration.progress = 0;
         state.aiGeneration.status = 'Regenerating section content...';
+        state.aiGeneration.context = {
+          type: 'section',
+          sectionId: sectionId,
+        };
       });
 
       try {
@@ -111,6 +115,7 @@ export function createAIActions(set: any, get: any) {
             state.aiGeneration.currentOperation = null;
             state.aiGeneration.progress = 100;
             state.aiGeneration.status = 'Section regenerated successfully';
+            state.aiGeneration.context = null;
             state.persistence.isDirty = true;
             state.lastUpdated = Date.now();
             
@@ -140,6 +145,7 @@ export function createAIActions(set: any, get: any) {
         set((state: EditStore) => {
           state.aiGeneration.isGenerating = false;
           state.aiGeneration.currentOperation = null;
+          state.aiGeneration.context = null;
           state.aiGeneration.errors.push(error instanceof Error ? error.message : 'Regeneration failed');
         });
         

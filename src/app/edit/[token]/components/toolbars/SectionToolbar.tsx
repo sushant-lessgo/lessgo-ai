@@ -9,6 +9,7 @@ import { calculateArrowPosition } from '@/utils/toolbarPositioning';
 import { AdvancedActionsMenu } from './AdvancedActionsMenu';
 import { AddSectionButton } from '../content/SectionCRUD';
 import { showBackgroundModal } from '../ui/GlobalModals';
+import LoadingButtonBar from '@/components/shared/LoadingButtonBar';
 import type { SectionType } from '@/types/core/content';
 // import { getRestrictionSummary } from '@/utils/elementRestrictions'; // Preserved for future use
 
@@ -53,6 +54,7 @@ export function SectionToolbar({ sectionId, position, contextActions }: SectionT
     content,
     sections,
     announceLiveRegion,
+    aiGeneration,
   } = useEditStore();
 
   const { executeAction } = useToolbarActions();
@@ -219,6 +221,40 @@ export function SectionToolbar({ sectionId, position, contextActions }: SectionT
     },
   ];
 
+  // Check if this specific section is being regenerated
+  const isRegenerating = aiGeneration.isGenerating && 
+    aiGeneration.context?.type === 'section' && 
+    aiGeneration.context?.sectionId === sectionId;
+
+  // Check if regeneration just completed for this section
+  const [showCompletionMessage, setShowCompletionMessage] = useState(false);
+  const prevIsRegeneratingRef = useRef(false);
+
+  // Track regeneration state changes to show completion message
+  useEffect(() => {
+    // Check if regeneration just completed
+    if (prevIsRegeneratingRef.current && !isRegenerating) {
+      // Regeneration just finished
+      setShowCompletionMessage(true);
+      
+      // Hide completion message after 3 seconds
+      const timer = setTimeout(() => {
+        setShowCompletionMessage(false);
+      }, 3000);
+      
+      // Announce completion
+      announceLiveRegion('Section content regenerated successfully');
+      
+      // Store the timer to clear it on cleanup
+      return () => {
+        clearTimeout(timer);
+      };
+    }
+    
+    // Update the previous state
+    prevIsRegeneratingRef.current = isRegenerating;
+  }, [isRegenerating, announceLiveRegion]);
+
   // Enhanced Advanced Actions
   const advancedActions = [
     {
@@ -235,19 +271,60 @@ export function SectionToolbar({ sectionId, position, contextActions }: SectionT
       label: 'Regenerate Content',
       icon: 'refresh',
       handler: () => executeAction('regenerate-section', { sectionId }),
+      disabled: isRegenerating,
     },
   ];
 
   return (
     <>
-      <div 
-        ref={toolbarRef}
-        className="fixed z-50 bg-white border border-gray-200 rounded-lg shadow-lg transition-all duration-200"
-        style={{
-          left: position.x,
-          top: position.y,
-        }}
-      >
+      {/* Show loading bar when regenerating this section */}
+      {isRegenerating && (
+        <div 
+          className="fixed bottom-8 right-8 z-50 transition-all duration-200"
+        >
+          <div className="bg-white border border-gray-200 rounded-lg shadow-xl p-1">
+            <LoadingButtonBar
+              label="🔄 Regenerating section content..."
+              duration={4000}
+              colorClass="bg-[#006CFF]"
+            />
+          </div>
+        </div>
+      )}
+      
+      {/* Show completion message */}
+      {showCompletionMessage && (
+        <div 
+          className="fixed bottom-8 right-8 z-50 transition-all duration-300"
+          style={{
+            animation: 'slideInFromRight 0.3s ease-out',
+          }}
+        >
+          <div className="bg-[#006CFF] text-white rounded-lg shadow-xl p-4">
+            <div className="flex items-center space-x-3">
+              <div className="w-6 h-6 bg-white/20 rounded-full flex items-center justify-center">
+                <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                </svg>
+              </div>
+              <span className="text-sm font-medium">
+                Section content regenerated successfully!
+              </span>
+            </div>
+          </div>
+        </div>
+      )}
+      
+      {/* Original toolbar - only show when not regenerating */}
+      {!isRegenerating && !showCompletionMessage && (
+        <div 
+          ref={toolbarRef}
+          className="fixed z-50 bg-white border border-gray-200 rounded-lg shadow-lg transition-all duration-200"
+          style={{
+            left: position.x,
+            top: position.y,
+          }}
+        >
         {/* Arrow */}
         {arrowInfo && (
           <div 
@@ -328,9 +405,10 @@ export function SectionToolbar({ sectionId, position, contextActions }: SectionT
           </button>
         </div>
       </div>
+      )}
 
       {/* Advanced Actions Menu - Using the dedicated component */}
-      {showAdvanced && advancedTriggerRef.current && (
+      {showAdvanced && advancedTriggerRef.current && !isRegenerating && (
         <AdvancedActionsMenu
           ref={advancedRef}
           actions={advancedActions}
