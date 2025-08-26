@@ -5,6 +5,7 @@ import React from 'react';
 import { useLayoutComponent } from '@/hooks/useLayoutComponent';
 import { useTypography } from '@/hooks/useTypography';
 import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
+import { useImageToolbar } from '@/hooks/useImageToolbar';
 import { LayoutSection } from '@/components/layout/LayoutSection';
 import { 
   EditableAdaptiveHeadline, 
@@ -74,8 +75,8 @@ const CONTENT_SCHEMA = {
 };
 
 // Product Mockup Component
-const ProductMockup = React.memo(() => (
-  <div className="relative">
+const ProductMockup = React.memo(({ onClick }: { onClick?: (e: React.MouseEvent) => void }) => (
+  <div className="relative cursor-pointer" onClick={onClick}>
     {/* Main device mockup */}
     <div className="relative bg-gray-900 rounded-2xl shadow-2xl p-2 mx-auto max-w-lg">
       {/* Screen */}
@@ -179,6 +180,9 @@ export default function VisualCTAWithMockup(props: LayoutComponentProps) {
 
   const store = useEditStore();
   const showImageToolbar = store.showImageToolbar;
+
+  // Initialize image toolbar hook
+  const handleImageToolbar = useImageToolbar();
 
   // Add safe background type to prevent type errors
   const safeBackgroundType = props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'secondary');
@@ -304,14 +308,44 @@ export default function VisualCTAWithMockup(props: LayoutComponentProps) {
                   src={blockContent.mockup_image}
                   alt="Product Demo"
                   className="w-full h-auto rounded-2xl shadow-2xl cursor-pointer"
-                  data-image-id={`${sectionId}-mockup-image`}
+                  data-image-id={`${sectionId}-mockup_image`}
                   onMouseUp={(e) => {
-                        // Image toolbar is only available in edit mode
-                      }}
+                    if (mode === 'edit') {
+                      e.stopPropagation();
+                      e.preventDefault();
+                      const rect = e.currentTarget.getBoundingClientRect();
+                      const imageId = `${sectionId}-mockup_image`;
+                      const position = {
+                        x: rect.left + rect.width / 2,
+                        y: rect.top - 10
+                      };
+                      handleImageToolbar(imageId, position);
+                    }
+                  }}
+                  onClick={(e) => {
+                    if (mode === 'edit') {
+                      e.stopPropagation();
+                      e.preventDefault();
+                    }
+                  }}
                 />
               </div>
             ) : (
-              <ProductMockup />
+              <ProductMockup 
+                onClick={(e) => {
+                  if (mode === 'edit') {
+                    e.stopPropagation();
+                    e.preventDefault();
+                    const rect = e.currentTarget.getBoundingClientRect();
+                    const imageId = `${sectionId}-mockup_image`;
+                    const position = {
+                      x: rect.left + rect.width / 2,
+                      y: rect.top - 10
+                    };
+                    handleImageToolbar(imageId, position);
+                  }
+                }}
+              />
             )}
           </div>
         </div>
