@@ -40,7 +40,7 @@ const handleContentOnlyRegeneration = async (
   getState: () => EditStore, 
   setState: any
 ) => {
-  const state = getState();
+  const initialState = getState();
   
   try {
     setState((state: EditStore) => {
@@ -50,18 +50,18 @@ const handleContentOnlyRegeneration = async (
       state.isLoading = true;
     });
 
-    const updatedInputs = state.changeTracking.currentInputs;
+    const updatedInputs = initialState.changeTracking.currentInputs;
     const tempOnboardingStore = {
       ...useOnboardingStore.getState(),
       validatedFields: updatedInputs,
       hiddenInferredFields: extractHiddenFields(updatedInputs),
     };
 
-    const pageStoreView = createPageStoreView(state);
+    const pageStoreView = createPageStoreView(initialState);
     const designContext = {
-      sections: state.sections,
-      sectionLayouts: state.sectionLayouts,
-      theme: state.theme,
+      sections: initialState.sections,
+      sectionLayouts: initialState.sectionLayouts,
+      theme: initialState.theme,
     };
     
     const prompt = `${buildFullPrompt(tempOnboardingStore, pageStoreView as any)}
@@ -84,14 +84,25 @@ CONTENT-ONLY REGENERATION:
     });
 
     if (!response.ok) {
-      throw new Error(`Content regeneration failed: ${response.status}`);
+      const errorText = await response.text();
+      console.error('Content regeneration API error:', {
+        status: response.status,
+        statusText: response.statusText,
+        responseText: errorText,
+      });
+      throw new Error(`Content regeneration failed: ${response.status} - ${response.statusText}`);
     }
 
     const aiResponse = await response.json();
     
     // Apply the AI response to update the store content
-    const storeState = getState();
-    storeState.updateFromAIResponse(aiResponse);
+    // Call updateFromAIResponse directly via set/get pattern
+    const state = getState();
+    if (state.updateFromAIResponse) {
+      state.updateFromAIResponse(aiResponse);
+    } else {
+      console.error('updateFromAIResponse method not available - regeneration may not complete properly');
+    }
 
     setState((state: EditStore) => {
       state.aiGeneration.isGenerating = false;
@@ -112,18 +123,21 @@ CONTENT-ONLY REGENERATION:
 
     // Auto-save
     const { completeSaveDraft } = await import('@/utils/autoSaveDraft');
-    await completeSaveDraft(state.tokenId, {
+    await completeSaveDraft(initialState.tokenId, {
       description: 'Content-only regeneration',
     });
 
   } catch (error) {
+    console.error('Content-only regeneration failed:', error);
     setState((state: EditStore) => {
       state.aiGeneration.isGenerating = false;
       state.aiGeneration.currentOperation = null;
-      state.aiGeneration.errors.push(
-        error instanceof Error ? error.message : 'Content regeneration failed'
-      );
+      const errorMessage = error instanceof Error ? error.message : 'Content regeneration failed';
+      state.aiGeneration.errors.push(errorMessage);
       state.isLoading = false;
+      
+      // Add user-friendly error status
+      state.aiGeneration.status = `Error: ${errorMessage}`;
     });
     throw error;
   }
@@ -133,7 +147,7 @@ const handleDesignAndCopyRegeneration = async (
   getState: () => EditStore, 
   setState: any
 ) => {
-  const state = getState();
+  const initialState = getState();
   
   try {
     setState((state: EditStore) => {
@@ -143,8 +157,8 @@ const handleDesignAndCopyRegeneration = async (
       state.isLoading = true;
     });
 
-    const updatedInputs = state.changeTracking.currentInputs;
-    const currentSections = [...state.sections];
+    const updatedInputs = initialState.changeTracking.currentInputs;
+    const currentSections = [...initialState.sections];
 
     // Step 1: Regenerate background system
     setState((state: EditStore) => {
@@ -153,6 +167,16 @@ const handleDesignAndCopyRegeneration = async (
 
     const { generateCompleteBackgroundSystem } = await import('@/modules/Design/background/backgroundIntegration');
     const newBackgroundSystem = generateCompleteBackgroundSystem(updatedInputs);
+    
+    console.log('🎨 Design Regeneration - Generated new background system:', {
+      primary: newBackgroundSystem.primary,
+      secondary: newBackgroundSystem.secondary,
+      neutral: newBackgroundSystem.neutral,
+      divider: newBackgroundSystem.divider,
+      baseColor: newBackgroundSystem.baseColor,
+      accentColor: newBackgroundSystem.accentColor,
+      accentCSS: newBackgroundSystem.accentCSS,
+    });
 
     // Step 2: Regenerate section layouts (keeping same sections)
     setState((state: EditStore) => {
@@ -160,21 +184,51 @@ const handleDesignAndCopyRegeneration = async (
     });
 
     const { generateSectionLayouts } = await import('@/modules/sections/generateSectionLayouts');
+    // Create a mock EditStore instance that provides the needed methods
+    const mockEditStore = {
+      getState: () => ({
+        setSectionLayouts: (layouts: Record<string, string>) => {
+          setState((state: EditStore) => {
+            state.sectionLayouts = { ...state.sectionLayouts, ...layouts };
+          });
+        }
+      })
+    } as any;
+    
     // This updates the store's sectionLayouts internally
-    generateSectionLayouts(currentSections);
+    console.log('🎨 Design Regeneration - Generating layouts for sections:', currentSections);
+    generateSectionLayouts(currentSections, mockEditStore);
     const updatedState = getState();
     const newLayouts = updatedState.sectionLayouts;
+    
+    console.log('🎨 Design Regeneration - Updated section layouts:', newLayouts);
 
     // Step 3: Update theme with new background system
     setState((state: EditStore) => {
+      console.log('🎨 Design Regeneration - Updating theme colors. Before:', {
+        baseColor: state.theme.colors.baseColor,
+        accentColor: state.theme.colors.accentColor,
+        accentCSS: state.theme.colors.accentCSS,
+        sectionBackgrounds: state.theme.colors.sectionBackgrounds,
+      });
+      
       state.theme.colors.baseColor = newBackgroundSystem.baseColor;
       state.theme.colors.accentColor = newBackgroundSystem.accentColor;
+      state.theme.colors.accentCSS = newBackgroundSystem.accentCSS; // ✅ CRITICAL: This makes buttons/CTAs change color
       state.theme.colors.sectionBackgrounds = {
         primary: newBackgroundSystem.primary,
         secondary: newBackgroundSystem.secondary,
         neutral: newBackgroundSystem.neutral,
         divider: newBackgroundSystem.divider,
       };
+      
+      console.log('🎨 Design Regeneration - Updated theme colors. After:', {
+        baseColor: state.theme.colors.baseColor,
+        accentColor: state.theme.colors.accentColor,
+        accentCSS: state.theme.colors.accentCSS,
+        sectionBackgrounds: state.theme.colors.sectionBackgrounds,
+      });
+      
       state.aiGeneration.status = 'Generating copy with new design...';
     });
 
@@ -204,14 +258,25 @@ const handleDesignAndCopyRegeneration = async (
     });
 
     if (!response.ok) {
-      throw new Error(`Design + copy regeneration failed: ${response.status}`);
+      const errorText = await response.text();
+      console.error('Design + copy regeneration API error:', {
+        status: response.status,
+        statusText: response.statusText,
+        responseText: errorText,
+      });
+      throw new Error(`Design + copy regeneration failed: ${response.status} - ${response.statusText}`);
     }
 
     const aiResponse = await response.json();
     
     // Apply the AI response to update the store content
-    const storeState = getState();
-    storeState.updateFromAIResponse(aiResponse);
+    // Call updateFromAIResponse directly via set/get pattern
+    const state = getState();
+    if (state.updateFromAIResponse) {
+      state.updateFromAIResponse(aiResponse);
+    } else {
+      console.error('updateFromAIResponse method not available - regeneration may not complete properly');
+    }
 
     setState((state: EditStore) => {
       state.aiGeneration.isGenerating = false;
@@ -235,18 +300,21 @@ const handleDesignAndCopyRegeneration = async (
 
     // Auto-save
     const { completeSaveDraft } = await import('@/utils/autoSaveDraft');
-    await completeSaveDraft(state.tokenId, {
+    await completeSaveDraft(initialState.tokenId, {
       description: 'Design + copy regeneration',
     });
 
   } catch (error) {
+    console.error('Design + copy regeneration failed:', error);
     setState((state: EditStore) => {
       state.aiGeneration.isGenerating = false;
       state.aiGeneration.currentOperation = null;
-      state.aiGeneration.errors.push(
-        error instanceof Error ? error.message : 'Design + copy regeneration failed'
-      );
+      const errorMessage = error instanceof Error ? error.message : 'Design + copy regeneration failed';
+      state.aiGeneration.errors.push(errorMessage);
       state.isLoading = false;
+      
+      // Add user-friendly error status
+      state.aiGeneration.status = `Error: ${errorMessage}`;
     });
     throw error;
   }
@@ -255,10 +323,12 @@ const handleDesignAndCopyRegeneration = async (
 export function createRegenerationActions(set: any, get: () => EditStore): RegenerationActions {
   return {
     regenerateContentOnly: async () => {
+      console.log('🔄 RegenerationActions: regenerateContentOnly called');
       await handleContentOnlyRegeneration(get, set);
     },
 
     regenerateDesignAndCopy: async () => {
+      console.log('🎨 RegenerationActions: regenerateDesignAndCopy called');
       await handleDesignAndCopyRegeneration(get, set);
     },
 

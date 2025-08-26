@@ -19,16 +19,41 @@ export function LeftPanel({ tokenId }: LeftPanelProps) {
   const leftPanel = useStoreState(state => state.leftPanel);
   const onboardingData = useStoreState(state => state.onboardingData);
   
+  // Get store methods and state separately
   const storeState = store?.getState();
+  const storeActions = store ? {
+    setLeftPanelWidth: storeState?.setLeftPanelWidth,
+    toggleLeftPanel: storeState?.toggleLeftPanel,
+    regenerateAllContent: storeState?.regenerateAllContent,
+    regenerateDesignAndCopy: storeState?.regenerateDesignAndCopy, // ✅ CRITICAL: This is the method that does design regeneration
+    regenerateContentOnly: storeState?.regenerateContentOnly,
+    updateOnboardingData: storeState?.updateOnboardingData,
+    announceLiveRegion: storeState?.announceLiveRegion,
+  } : {};
+  
+  // Debug: log available methods
+  if (process.env.NODE_ENV === 'development') {
+    console.log('🔍 LeftPanel Store Methods Available:', {
+      regenerateAllContent: !!storeActions.regenerateAllContent,
+      regenerateDesignAndCopy: !!storeActions.regenerateDesignAndCopy,
+      regenerateContentOnly: !!storeActions.regenerateContentOnly,
+      hasStore: !!store,
+      hasStoreState: !!storeState,
+      storeMethodKeys: storeState ? Object.keys(storeState).filter(key => 
+        typeof (storeState as any)[key] === 'function' && key.includes('regenerate')
+      ) : []
+    });
+  }
   const {
     setLeftPanelWidth,
     toggleLeftPanel,
     regenerateAllContent,
+    regenerateDesignAndCopy,
     regenerateContentOnly,
     updateOnboardingData,
-    aiGeneration,
     announceLiveRegion,
-  } = (storeState || {}) as any;
+  } = storeActions;
+  const aiGeneration = storeState?.aiGeneration;
 
   const { 
     reopenFieldForEditing,
@@ -200,12 +225,21 @@ export function LeftPanel({ tokenId }: LeftPanelProps) {
   const handleRegenerateContent = async () => {
     if (!hasFieldChanges || isRegenerating) return;
     
+    console.log('🔄 Starting page regeneration:', {
+      includeDesignRegeneration,
+      hasRegenerateAllContent: !!regenerateAllContent,
+      hasRegenerateDesignAndCopy: !!regenerateDesignAndCopy,
+      hasRegenerateContentOnly: !!regenerateContentOnly,
+    });
+    
     try {
       if (includeDesignRegeneration) {
         // Full regeneration: design + copy
-        await regenerateAllContent?.();
+        console.log('🎨 Starting design + content regeneration');
+        await regenerateDesignAndCopy?.(); // ✅ FIXED: Now calls the correct method with design changes
       } else {
         // Copy-only regeneration
+        console.log('📝 Starting content-only regeneration');
         await regenerateContentOnly?.();
       }
       
