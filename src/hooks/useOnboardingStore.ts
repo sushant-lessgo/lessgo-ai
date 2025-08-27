@@ -12,6 +12,8 @@ import {
   DISPLAY_TO_CANONICAL
 } from "@/types/core/index";
 
+import { logger } from "@/lib/logger";
+
 // ✅ PHASE 2A: Type-safe interfaces using canonical types
 interface ConfirmedFieldData {
   value: string;
@@ -70,12 +72,12 @@ export const useOnboardingStore = create<OnboardingStore>((set, get) => ({
   
   // ✅ Type-safe setters
   setConfirmedFields: (fields) => {
-    console.log('Setting confirmed fields:', fields);
+    logger.debug('Setting confirmed fields:', fields);
     set({ confirmedFields: fields });
   },
   
   setValidatedFields: (fields) => {
-    // console.log('Setting validated fields:', fields);
+    // logger.debug('Setting validated fields:', fields);
     set({ validatedFields: fields });
   },
   
@@ -87,11 +89,11 @@ export const useOnboardingStore = create<OnboardingStore>((set, get) => ({
     const canonicalField = DISPLAY_TO_CANONICAL[displayField as keyof typeof DISPLAY_TO_CANONICAL];
     
     if (!canonicalField) {
-      console.error(`Unknown display field: "${displayField}". Available fields:`, Object.keys(DISPLAY_TO_CANONICAL));
+      logger.error(() => `Unknown display field: "${displayField}". Available fields:`, () => Object.keys(DISPLAY_TO_CANONICAL));
       return;
     }
     
-    console.log(`Confirming field: ${displayField} → ${canonicalField} = "${value}"`);
+    logger.debug(() => `Confirming field: ${displayField} → ${canonicalField} = "${value}"`);
     
     set((state) => {
       const newValidatedFields = {
@@ -108,12 +110,12 @@ export const useOnboardingStore = create<OnboardingStore>((set, get) => ({
         if (!newForceManualFields.includes('marketSubcategory')) {
           newForceManualFields.push('marketSubcategory');
         }
-        console.log(`Market Category changed to "${value}" - Market Subcategory needs revalidation`);
+        logger.debug(() => `Market Category changed to "${value}" - Market Subcategory needs revalidation`);
         
         // Mark subcategory as pending revalidation instead of deleting
         if (newValidatedFields['marketSubcategory']) {
           // Keep existing subcategory but mark as needing revalidation
-          console.log('Keeping existing subcategory visible for revalidation');
+          logger.debug('Keeping existing subcategory visible for revalidation');
         }
       }
 
@@ -135,7 +137,7 @@ export const useOnboardingStore = create<OnboardingStore>((set, get) => ({
   reopenFieldForEditing: (canonicalField) => {
     const displayField = FIELD_DISPLAY_NAMES[canonicalField];
     if (!displayField) {
-      console.error(`Unknown canonical field: "${canonicalField}". Available fields:`, Object.keys(FIELD_DISPLAY_NAMES));
+      logger.error(() => `Unknown canonical field: "${canonicalField}". Available fields:`, () => Object.keys(FIELD_DISPLAY_NAMES));
       return;
     }
     
@@ -156,9 +158,9 @@ export const useOnboardingStore = create<OnboardingStore>((set, get) => ({
         };
       });
       
-      console.log(`Reopened field "${canonicalField}" for editing at step ${fieldIndex} (forced manual)`);
+      logger.debug(() => `Reopened field "${canonicalField}" for editing at step ${fieldIndex} (forced manual)`);
     } else {
-      console.error(`Field "${canonicalField}" not found in field order`);
+      logger.error(() => `Field "${canonicalField}" not found in field order`);
     }
   },
 

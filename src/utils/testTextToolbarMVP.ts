@@ -1,3 +1,5 @@
+import { logger } from '@/lib/logger';
+
 // Test file for TextToolbarMVP - Step 4
 // Validates MVP feature set and functionality
 
@@ -106,31 +108,31 @@ const performanceTests = [
  * Test TextToolbarMVP functionality
  */
 export function testTextToolbarMVP() {
-  console.log('🧪 Testing TextToolbarMVP (Step 4)...\n');
+  logger.debug('🧪 Testing TextToolbarMVP (Step 4)...\n');
   
-  console.log('📋 MVP FEATURE TESTS:\n');
+  logger.debug('📋 MVP FEATURE TESTS:\n');
   mvpFeatureTests.forEach((test, index) => {
-    console.log(`${index + 1}. ${test.name}`);
+    logger.debug(`${index + 1}. ${test.name}`);
     test.steps.forEach((step, stepIndex) => {
-      console.log(`   ${stepIndex + 1}. ${step}`);
+      logger.debug(`   ${stepIndex + 1}. ${step}`);
     });
-    console.log(`   Expected: ${test.expected}\n`);
+    logger.debug(`   Expected: ${test.expected}\n`);
   });
   
-  console.log('🚫 REMOVED FEATURES CHECK:\n');
+  logger.debug('🚫 REMOVED FEATURES CHECK:\n');
   removedFeatureTests.forEach((test) => {
-    console.log(`${test.name}:`);
+    logger.debug(`${test.name}:`);
     test.notPresent.forEach((feature) => {
-      console.log(`   ❌ Should NOT see: ${feature}`);
+      logger.debug(`   ❌ Should NOT see: ${feature}`);
     });
-    console.log(`   Expected: ${test.expected}\n`);
+    logger.debug(`   Expected: ${test.expected}\n`);
   });
   
-  console.log('⚡ PERFORMANCE TESTS:\n');
+  logger.debug('⚡ PERFORMANCE TESTS:\n');
   performanceTests.forEach((test, index) => {
-    console.log(`${index + 1}. ${test.name}`);
-    console.log(`   Test: ${test.test}`);
-    console.log(`   Expected: ${test.expected}\n`);
+    logger.debug(`${index + 1}. ${test.name}`);
+    logger.debug(`   Test: ${test.test}`);
+    logger.debug(`   Expected: ${test.expected}\n`);
   });
   
   return {
@@ -149,43 +151,43 @@ export const mvpToolbarDebug = {
    * Check current format state
    */
   checkFormatState: () => {
-    console.log('📊 Current Format State Check:');
-    console.log('1. Select a text element');
-    console.log('2. Check toolbar buttons for active states');
-    console.log('3. Format states should match visual appearance');
-    console.log('4. Look for blue highlighting on active buttons');
+    logger.debug('📊 Current Format State Check:');
+    logger.debug('1. Select a text element');
+    logger.debug('2. Check toolbar buttons for active states');
+    logger.debug('3. Format states should match visual appearance');
+    logger.debug('4. Look for blue highlighting on active buttons');
   },
   
   /**
    * Test color picker functionality
    */
   testColorPicker: () => {
-    console.log('🎨 Color Picker Test:');
-    console.log('✅ Should see Basic colors: Black, Gray, White');
-    console.log('✅ Should see 6 Accent colors in 3×2 grid');
-    console.log('✅ Color preview should match selected color');
-    console.log('✅ Clicking color should close dropdown');
+    logger.debug('🎨 Color Picker Test:');
+    logger.debug('✅ Should see Basic colors: Black, Gray, White');
+    logger.debug('✅ Should see 6 Accent colors in 3×2 grid');
+    logger.debug('✅ Color preview should match selected color');
+    logger.debug('✅ Clicking color should close dropdown');
   },
   
   /**
    * Test font size presets
    */
   testFontSizes: () => {
-    console.log('📏 Font Size Presets Test:');
-    console.log('✅ Should see 6 size options');
-    console.log('✅ Button should show short labels: S, M, L, XL, 2XL, 3XL');
-    console.log('✅ Dropdown should show full labels + px values');
-    console.log('✅ Selected size should be highlighted');
+    logger.debug('📏 Font Size Presets Test:');
+    logger.debug('✅ Should see 6 size options');
+    logger.debug('✅ Button should show short labels: S, M, L, XL, 2XL, 3XL');
+    logger.debug('✅ Dropdown should show full labels + px values');
+    logger.debug('✅ Selected size should be highlighted');
   },
   
   /**
    * Verify toolbar dimensions
    */
   checkDimensions: () => {
-    console.log('📐 Toolbar Dimensions Check:');
-    console.log('Expected: 280px width × 52px height');
-    console.log('All controls should fit without overflow');
-    console.log('Use browser dev tools to inspect element');
+    logger.debug('📐 Toolbar Dimensions Check:');
+    logger.debug('Expected: 280px width × 52px height');
+    logger.debug('All controls should fit without overflow');
+    logger.debug('Use browser dev tools to inspect element');
   }
 };
 
@@ -232,9 +234,9 @@ if (typeof window !== 'undefined') {
   (window as any).testTextToolbarMVP = testTextToolbarMVP;
   (window as any).mvpToolbarDebug = mvpToolbarDebug;
   (window as any).integrationTests = integrationTests;
-  console.log('🧪 TextToolbarMVP Test available at window.testTextToolbarMVP()');
-  console.log('🔧 MVP Debug utils at window.mvpToolbarDebug');
-  console.log('🔄 Integration tests at window.integrationTests');
+  logger.debug('🧪 TextToolbarMVP Test available at window.testTextToolbarMVP()');
+  logger.debug('🔧 MVP Debug utils at window.mvpToolbarDebug');
+  logger.debug('🔄 Integration tests at window.integrationTests');
 }
 
 /**

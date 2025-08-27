@@ -1,6 +1,7 @@
 // utils/ctaHandler.ts - Utility function for handling CTA button clicks
 import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
 
+import { logger } from '@/lib/logger';
 /**
  * Creates a CTA click handler that opens external links based on ctaConfig
  * @param sectionId - The section ID to get ctaConfig from
@@ -47,7 +48,7 @@ export function createCTAClickHandler(sectionId: string, elementKey?: string) {
       }
     }
     
-    console.log('🔗 CTA Button clicked:', { ctaConfig, sectionId, elementKey, sectionData: sectionData?.elements });
+    logger.debug('🔗 CTA Button clicked:', { ctaConfig, sectionId, elementKey, sectionData: sectionData?.elements });
     
     if (ctaConfig?.type === 'link' && ctaConfig.url) {
       // Ensure URL has protocol - add https:// if missing
@@ -55,10 +56,10 @@ export function createCTAClickHandler(sectionId: string, elementKey?: string) {
       if (!url.match(/^https?:\/\//)) {
         url = `https://${url}`;
       }
-      console.log('🔗 Opening external link:', url);
+      logger.debug('🔗 Opening external link:', url);
       window.open(url, '_blank', 'noopener,noreferrer');
     } else if (ctaConfig?.type === 'form' && ctaConfig.formId) {
-      console.log('📝 Form CTA clicked:', ctaConfig.formId);
+      logger.debug('📝 Form CTA clicked:', ctaConfig.formId);
       // Handle form CTAs - could scroll to form or open modal based on behavior
       if (ctaConfig.behavior === 'scrollTo') {
         const formElement = document.getElementById(`form-${ctaConfig.formId}`);
@@ -67,11 +68,11 @@ export function createCTAClickHandler(sectionId: string, elementKey?: string) {
         }
       } else if (ctaConfig.behavior === 'openModal') {
         // Trigger form modal opening - this would need to be implemented
-        console.log('📝 Should open form modal for:', ctaConfig.formId);
+        logger.debug('📝 Should open form modal for:', ctaConfig.formId);
       }
     } else {
-      console.log('⚠️ No CTA config or URL found:', ctaConfig);
-      console.log('Available section elements:', Object.keys(sectionData?.elements || {}));
+      logger.debug('⚠️ No CTA config or URL found:', ctaConfig);
+      logger.debug('Available section elements:', Object.keys(sectionData?.elements || {}));
     }
   };
 }

@@ -3,6 +3,7 @@
 
 import React, { useEffect, useRef, useState, useLayoutEffect } from 'react';
 import { createPortal } from 'react-dom';
+import { logger } from '@/lib/logger';
 import { 
   initializeReadinessTracking, 
   recordEditorMount, 
@@ -52,7 +53,7 @@ function getOrCreateStableContainerNode(editorId: string): HTMLElement {
     globalAnchorContainerNodes.set(editorId, container);
     
     if (process.env.NODE_ENV === 'development') {
-      console.log(`🏗️ Created stable DOM container node for editor: ${editorId}`);
+      logger.debug(`🏗️ Created stable DOM container node for editor: ${editorId}`);
     }
   }
   
@@ -100,14 +101,14 @@ export function StableAnchorProvider({ children, editorId = 'default' }: StableA
     setAnchorReady(true);
 
     if (process.env.NODE_ENV === 'development') {
-      console.log(`⚓ [PROVIDER] Stable anchor mounted (editor: ${editorId}, refCount: ${refCount}, version: ${providerVersion}, instance: ${providerInstanceId.current})`);
+      logger.debug(`⚓ [PROVIDER] Stable anchor mounted (editor: ${editorId}, refCount: ${refCount}, version: ${providerVersion}, instance: ${providerInstanceId.current})`);
       
       // Phase A2: Log provider instance ID and map size every 500ms for 2s after mount
       const diagnosticInterval = setInterval(() => {
         const currentRefCount = globalAnchorRefCounts.get(editorId) || 0;
         const containerExists = !!globalAnchorContainerNodes.get(editorId);
         
-        console.log(`📊 [PROVIDER-DIAG] Instance ${providerInstanceId.current}:`, {
+        logger.debug(`📊 [PROVIDER-DIAG] Instance ${providerInstanceId.current}:`, {
           editorId,
           refCount: currentRefCount,
           containerExists,
@@ -120,7 +121,7 @@ export function StableAnchorProvider({ children, editorId = 'default' }: StableA
       // Stop diagnostics after 2 seconds
       setTimeout(() => {
         clearInterval(diagnosticInterval);
-        console.log(`🏁 [PROVIDER-DIAG] Diagnostics complete for provider ${providerInstanceId.current}`);
+        logger.debug(`🏁 [PROVIDER-DIAG] Diagnostics complete for provider ${providerInstanceId.current}`);
       }, 2000);
     }
 
@@ -134,7 +135,7 @@ export function StableAnchorProvider({ children, editorId = 'default' }: StableA
       globalAnchorRefCounts.set(editorId, newRefCount);
       
       if (process.env.NODE_ENV === 'development') {
-        console.log(`🧹 Stable anchor unmounted (editor: ${editorId}, refCount: ${newRefCount})`);
+        logger.debug(`🧹 Stable anchor unmounted (editor: ${editorId}, refCount: ${newRefCount})`);
       }
 
       // CRITICAL FIX: Never remove container when refCount hits 0
@@ -144,7 +145,7 @@ export function StableAnchorProvider({ children, editorId = 'default' }: StableA
         globalAnchorRefCounts.delete(editorId);
         
         if (process.env.NODE_ENV === 'development') {
-          console.log(`📌 RefCount 0 but keeping container alive for editor: ${editorId}`);
+          logger.debug(`📌 RefCount 0 but keeping container alive for editor: ${editorId}`);
         }
         
         // Keep the container in DOM - never remove it

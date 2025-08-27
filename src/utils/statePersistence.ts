@@ -3,6 +3,7 @@ import { debounce } from 'lodash';
 import { autoSaveDraft } from '@/utils/autoSaveDraft';
 import { VersionManager, type VersionSnapshot, type ConflictResolution } from '@/utils/versionManager';
 import { TypeGuards } from '@/utils/typeGuards';
+import { logger } from '@/lib/logger';
 import type { 
   InputVariables, 
   HiddenInferredFields, 
@@ -232,7 +233,7 @@ export class StatePersistenceManager {
       if (this.config.enableConflictDetection && this.state.serverVersion) {
         const conflictResult = await this.detectConflicts(data);
         if (conflictResult.hasConflict) {
-          console.warn('🔄 Save conflict detected');
+          logger.warn('🔄 Save conflict detected');
           this.metrics.conflictsDetected++;
           
           return {
@@ -299,7 +300,7 @@ export class StatePersistenceManager {
       this.state.retryCount++;
       this.metrics.failedSaves++;
 
-      console.error('❌ Save failed:', {
+      logger.error('❌ Save failed:', {
         saveId,
         type,
         error: errorMessage,
@@ -367,7 +368,7 @@ export class StatePersistenceManager {
       // Validate loaded data
       const validation = this.validateLoadData(serverData);
       if (!validation.isValid) {
-        console.warn('⚠️ Loaded data validation failed:', validation.errors);
+        logger.warn('⚠️ Loaded data validation failed:', validation.errors);
       }
 
       // Store server version for conflict detection
@@ -394,7 +395,7 @@ export class StatePersistenceManager {
       this.state.isLoading = false;
       this.state.loadError = errorMessage;
 
-      console.error('❌ Load failed:', {
+      logger.error('❌ Load failed:', {
         tokenId,
         error: errorMessage,
       });
@@ -420,7 +421,7 @@ export class StatePersistenceManager {
       // Get current server version for comparison
       const serverResponse = await fetch(`/api/loadDraft?tokenId=${localData.tokenId}`);
       if (!serverResponse.ok) {
-        console.warn('⚠️ Could not fetch server version for conflict detection');
+        logger.warn('⚠️ Could not fetch server version for conflict detection');
         return { hasConflict: false };
       }
 
@@ -430,7 +431,7 @@ export class StatePersistenceManager {
 
       // Simple conflict detection: server modified after our last save
       if (serverModified > localModified) {
-        console.log('🔄 Potential conflict detected:', {
+        logger.debug('🔄 Potential conflict detected:', {
           serverModified: new Date(serverModified).toISOString(),
           localLastSaved: new Date(localModified).toISOString(),
         });
@@ -448,7 +449,7 @@ export class StatePersistenceManager {
       return { hasConflict: false };
 
     } catch (error) {
-      console.warn('⚠️ Conflict detection failed:', error);
+      logger.warn('⚠️ Conflict detection failed:', error);
       return { hasConflict: false };
     }
   }
@@ -459,7 +460,7 @@ export class StatePersistenceManager {
     manualResolutions?: Record<string, any>
   ): Promise<{ success: boolean; mergedData?: any; error?: string }> {
     try {
-      console.log('🔧 Resolving conflict:', { conflictId, strategy });
+      logger.debug('🔧 Resolving conflict:', { conflictId, strategy });
 
       let mergedData: any;
 
@@ -614,7 +615,7 @@ export class StatePersistenceManager {
 
     const nextSave = this.state.saveQueue.shift();
     if (nextSave) {
-      console.log('📤 Processing queued save:', { id: nextSave.id, type: nextSave.type });
+      logger.debug('📤 Processing queued save:', { id: nextSave.id, type: nextSave.type });
       this.performSave(nextSave.data, nextSave.type, nextSave.priority);
     }
   }
@@ -715,7 +716,7 @@ export class StatePersistenceManager {
     this.clearSaveQueue();
     this.state.loadCache.clear();
     
-    console.log('🧹 State persistence manager destroyed');
+    logger.debug('🧹 State persistence manager destroyed');
   }
 }
 
@@ -754,16 +755,16 @@ if (process.env.NODE_ENV === 'development') {
       if (globalPersistenceManager) {
         const state = globalPersistenceManager.getState();
         state.serverVersion = { lastUpdated: Date.now() + 1000 };
-        console.log('🔄 Simulated conflict condition');
+        logger.debug('🔄 Simulated conflict condition');
       }
     },
     clearCache: () => {
       if (globalPersistenceManager) {
         (globalPersistenceManager as any).state.loadCache.clear();
-        console.log('🧹 Cache cleared');
+        logger.debug('🧹 Cache cleared');
       }
     },
   };
 
-  console.log('🔧 Persistence Manager debug utilities available at window.__persistenceDebug');
+  logger.debug('🔧 Persistence Manager debug utilities available at window.__persistenceDebug');
 }

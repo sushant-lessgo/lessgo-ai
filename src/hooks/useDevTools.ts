@@ -4,6 +4,7 @@ import { useEditStoreLegacy as useEditStore } from './useEditStoreLegacy';
 import { getDevTools, measurePerformance, withErrorTracking } from '@/utils/devTools';
 import type { DevToolsManager, ActionHistoryEntry, PerformanceEntry } from '@/utils/devTools';
 
+import { logger } from '@/lib/logger';
 /**
  * ===== HOOK TYPES =====
  */
@@ -164,7 +165,7 @@ const useDevToolsHook = (config: DevToolsHookConfig = {}): DevToolsHookReturn =>
       }
     }
 
-    console.log('🔍 Manual action tracked:', actionName, payload);
+    logger.debug('🔍 Manual action tracked:', actionName, payload);
   }, [finalConfig.trackActions]);
 
   const trackError = useCallback((error: Error, context: string = 'useDevTools') => {
@@ -198,7 +199,7 @@ const useDevToolsHook = (config: DevToolsHookConfig = {}): DevToolsHookReturn =>
     devTools.clearPerformanceLog?.();
     devTools.clearErrorLog?.();
 
-    console.log('🧹 Dev tools logs cleared');
+    logger.debug('🧹 Dev tools logs cleared');
   }, []);
 
   const exportLogs = useCallback(() => {
@@ -431,7 +432,7 @@ const useDebugRendersHook = (componentName: string, props?: Record<string, any>)
   });
 
   if (process.env.NODE_ENV === 'development') {
-    console.log(`🔄 ${componentName} render #${renderCount.current}`, {
+    logger.debug(`🔄 ${componentName} render #${renderCount.current}`, {
       props,
       renderCount: renderCount.current,
     });
@@ -474,7 +475,7 @@ if (process.env.NODE_ENV === 'development' && typeof window !== 'undefined') {
       debug?.clearPerformanceLog?.();
       debug?.clearErrorLog?.();
       console.clear();
-      console.log('🧹 All dev tools logs cleared');
+      logger.debug('🧹 All dev tools logs cleared');
     },
     
     export: () => {
@@ -487,19 +488,19 @@ if (process.env.NODE_ENV === 'development' && typeof window !== 'undefined') {
         errors: debug?.getErrorLog?.(),
       };
       
-      console.log('📦 Exported dev data:', data);
+      logger.debug('📦 Exported dev data:', data);
       
       // Copy to clipboard if possible
       if (navigator.clipboard) {
         navigator.clipboard.writeText(JSON.stringify(data, null, 2));
-        console.log('📋 Data copied to clipboard');
+        logger.debug('📋 Data copied to clipboard');
       }
       
       return data;
     },
     
     help: () => {
-      console.log(`
+      logger.debug(`
 🔧 Dev Tools Commands:
   __devToolsCommands.analyze()     - Analyze store state
   __devToolsCommands.validate()    - Validate store consistency  
@@ -521,8 +522,8 @@ if (process.env.NODE_ENV === 'development' && typeof window !== 'undefined') {
     },
   };
 
-  console.log('🛠️ Dev tools commands available at window.__devToolsCommands');
-  console.log('   Type __devToolsCommands.help() for help');
+  logger.debug('🛠️ Dev tools commands available at window.__devToolsCommands');
+  logger.debug('   Type __devToolsCommands.help() for help');
 }
 
 /**

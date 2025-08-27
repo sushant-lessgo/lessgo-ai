@@ -6,6 +6,7 @@ import { StyleOption } from './StyleOption';
 import { getBackgroundPreview } from './backgroundCompatibility';
 import type { BackgroundVariation, BackgroundSelectorMode } from '@/types/core';
 
+import { logger } from '@/lib/logger';
 interface StyleGridProps {
   variations: BackgroundVariation[];
   selectedVariation?: BackgroundVariation | null;
@@ -33,7 +34,7 @@ export function StyleGrid({
   searchQuery = '',
   filterBy = 'all',
 }: StyleGridProps) {
-  console.log('📋 StyleGrid received variations:', variations?.length || 0, variations);
+  logger.debug('📋 StyleGrid received variations:', variations?.length || 0, variations);
   const [sortBy, setSortBy] = useState<'default' | 'name' | 'archetype' | 'color'>('default');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
 
@@ -135,7 +136,7 @@ export function StyleGrid({
   }, [variations, mode]);
 
   const handleVariationClick = (variation: BackgroundVariation) => {
-    console.log('🕹️ [STYLEGRID DEBUG] handleVariationClick called with:', {
+    logger.debug('🕹️ [STYLEGRID DEBUG] handleVariationClick called with:', {
       variationId: variation.variationId,
       variationLabel: variation.variationLabel,
       tailwindClass: variation.tailwindClass,

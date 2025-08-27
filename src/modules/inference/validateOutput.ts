@@ -5,6 +5,7 @@ import { taxonomy, marketSubcategories, MarketCategory } from './taxonomy';
 // ✅ FIXED: Import canonical types
 import type { InputVariables } from '@/types/core/index';
 
+import { logger } from '@/lib/logger';
 export interface ValidationResult {
   field: string;
   value: string | null;
@@ -79,7 +80,7 @@ async function validateField(
     };
     
   } catch (error) {
-    console.error(`Error validating field ${fieldType}:`, error);
+    logger.error(`Error validating field ${fieldType}:`, error);
     return {
       field: displayName,
       value: null,
@@ -101,7 +102,7 @@ export async function validateInferredFields(raw: InputVariables): Promise<Recor
     landingPageGoals, // ✅ FIXED: Use canonical field name
   } = raw;
 
-  console.log('🔍 Starting semantic validation...');
+  logger.debug('🔍 Starting semantic validation...');
 
   // Validate market category first (needed for subcategory filtering)
   const categoryResult = await validateField('marketCategory', marketCategory, 'Market Category');
@@ -144,7 +145,7 @@ export async function validateInferredFields(raw: InputVariables): Promise<Recor
       result.confidence >= CONFIDENCE_THRESHOLDS.HIGH ? 'HIGH' :
       result.confidence >= CONFIDENCE_THRESHOLDS.MEDIUM ? 'MEDIUM' : 'LOW';
     
-    console.log(`🔍 ${field}: "${result.value}" (${confidenceLevel} - ${(result.confidence * 100).toFixed(1)}%)`);
+    logger.debug(`🔍 ${field}: "${result.value}" (${confidenceLevel} - ${(result.confidence * 100).toFixed(1)}%)`);
   });
 
   return results;

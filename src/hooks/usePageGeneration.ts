@@ -11,6 +11,7 @@ import { parseAiResponse } from '@/modules/prompt/parseAiResponse';
 import { autoSaveDraft } from '@/utils/autoSaveDraft';
 import { generateCompleteBackgroundSystem } from '@/modules/Design/background/backgroundIntegration';
 import { calculateSectionSpacing } from '@/modules/sections/objectionFlowEngine';
+import { logger } from '@/lib/logger';
 // Progress steps for UX - Customer psychology focused
 const PROGRESS_STEPS = [
   { id: 1, label: "Getting into your customer's mind...", duration: 800 },
@@ -98,13 +99,13 @@ export function usePageGeneration(tokenId: string) {
       const missingSections = requiredSections.filter(section => !sections.includes(section));
       
       if (missingSections.length > 0) {
-        console.warn('Adding missing required sections:', missingSections);
+        logger.warn('Adding missing required sections:', missingSections);
         sections.unshift(...missingSections);
       }
 
       return { sections, errors: [] };
     } catch (error) {
-      console.error('Section generation failed:', error);
+      logger.error('Section generation failed:', error);
       return { 
         sections: ['hero', 'features', 'testimonials', 'cta'], // Fallback sections
         errors: [`Section generation failed: ${error instanceof Error ? error.message : 'Unknown error'}`]
@@ -117,7 +118,7 @@ export function usePageGeneration(tokenId: string) {
   errors: string[] 
 }> => {
   try {
-    console.log('🎨 [GENERATE-DEBUG] Starting background generation for sections:', sections);
+    logger.debug('🎨 [GENERATE-DEBUG] Starting background generation for sections:', sections);
     
     // Prepare onboarding data for background generation
     const onboardingInput = {
@@ -134,15 +135,15 @@ export function usePageGeneration(tokenId: string) {
       ...onboardingStore.hiddenInferredFields
     };
     
-    console.log('🎨 [GENERATE-DEBUG] Onboarding input for background generation:', {
+    logger.debug(() => '🎨 [GENERATE-DEBUG] Onboarding input for background generation:', () => ({
       validatedFields: onboardingStore.validatedFields,
       hiddenInferredFields: onboardingStore.hiddenInferredFields,
       processedInput: onboardingInput
-    });
+    }));
     
     const backgroundSystem = generateCompleteBackgroundSystem(onboardingInput);
     
-    console.log('🎨 [GENERATE-DEBUG] Generated background system:', {
+    logger.debug(() => '🎨 [GENERATE-DEBUG] Generated background system:', () => ({
       primary: backgroundSystem.primary,
       secondary: backgroundSystem.secondary,
       neutral: backgroundSystem.neutral,
@@ -150,20 +151,20 @@ export function usePageGeneration(tokenId: string) {
       baseColor: backgroundSystem.baseColor,
       accentColor: backgroundSystem.accentColor,
       accentCSS: backgroundSystem.accentCSS
-    });
+    }));
 
     const editStore = getEditStore();
     const { updateTheme, getColorTokens } = editStore.getState();
     
     // Log theme before update
     const themeBefore = editStore.getState().theme;
-    console.log('🎨 [GENERATE-DEBUG] Theme before update:', {
+    logger.debug(() => '🎨 [GENERATE-DEBUG] Theme before update:', () => ({
       colors: themeBefore?.colors,
       typography: {
         headingFont: themeBefore?.typography?.headingFont,
         bodyFont: themeBefore?.typography?.bodyFont
       }
-    });
+    }));
     
     // Calculate text colors for each background type
     const calculateTextColors = () => {
@@ -184,7 +185,7 @@ export function usePageGeneration(tokenId: string) {
     };
     
     const textColors = calculateTextColors();
-    console.log('🎨 [GENERATE-DEBUG] Calculated text colors:', textColors);
+    logger.debug('🎨 [GENERATE-DEBUG] Calculated text colors:', textColors);
     
     updateTheme({
       colors: {
@@ -203,25 +204,25 @@ export function usePageGeneration(tokenId: string) {
     
     // Log theme after update
     const themeAfter = editStore.getState().theme;
-    console.log('🎨 [GENERATE-DEBUG] Theme after update:', {
+    logger.debug(() => '🎨 [GENERATE-DEBUG] Theme after update:', () => ({
       colors: themeAfter?.colors,
       typography: {
         headingFont: themeAfter?.typography?.headingFont,
         bodyFont: themeAfter?.typography?.bodyFont
       }
-    });
+    }));
     
     // Log color tokens
     try {
       const colorTokens = getColorTokens();
-      console.log('🎨 [GENERATE-DEBUG] Generated color tokens:', colorTokens);
+      logger.debug('🎨 [GENERATE-DEBUG] Generated color tokens:', colorTokens);
     } catch (error) {
-      console.warn('🎨 [GENERATE-DEBUG] Failed to generate color tokens:', error);
+      logger.warn('🎨 [GENERATE-DEBUG] Failed to generate color tokens:', error);
     }
 
     return { backgroundSystem, errors: [] };
   } catch (error) {
-    console.error('Theme generation failed:', error);
+    logger.error('Theme generation failed:', error);
     return { 
       backgroundSystem: null, 
       errors: [`Theme generation failed: ${error instanceof Error ? error.message : 'Unknown error'}`]
@@ -240,13 +241,13 @@ export function usePageGeneration(tokenId: string) {
       // Get fresh state after layout generation
       const { sectionLayouts } = editStore.getState();
       
-      console.log('🎯 Layout generation complete:', {
+      logger.debug(() => '🎯 Layout generation complete:', () => ({
         sections,
         sectionLayouts,
         layoutKeys: Object.keys(sectionLayouts),
         heroLayout: sectionLayouts.hero,
         allLayoutAssignments: Object.entries(sectionLayouts).map(([section, layout]) => `${section}: ${layout}`)
-      });
+      }));
       
       // Validate that all sections have layouts
       const missingLayouts = sections.filter(sectionId => !sectionLayouts[sectionId]);
@@ -254,12 +255,12 @@ export function usePageGeneration(tokenId: string) {
       
       if (missingLayouts.length > 0) {
         errors.push(`Some sections missing layouts: ${missingLayouts.join(', ')}`);
-        console.warn('Sections missing layouts:', missingLayouts);
+        logger.warn('Sections missing layouts:', missingLayouts);
       }
 
       return { layouts: sectionLayouts, errors };
     } catch (error) {
-      console.error('Layout generation failed:', error);
+      logger.error('Layout generation failed:', error);
       
       // Create fallback layouts
       const fallbackLayouts: Record<string, string> = {};
@@ -313,15 +314,15 @@ export function usePageGeneration(tokenId: string) {
       // Build the prompt
       const prompt = buildFullPrompt(onboardingStore, tempPageStore as any);
       
-      console.log('📝 Sending prompt to API:', {
+      logger.debug(() => '📝 Sending prompt to API:', () => ({
         promptLength: prompt.length,
         sections: tempPageStore.layout.sections,
         layouts: tempPageStore.layout.sectionLayouts,
         promptPreview: prompt.substring(0, 500) + '...'
-      });
+      }));
       
       // Call AI API
-      console.log('🌐 Making API call to /api/generate-landing');
+      logger.debug('🌐 Making API call to /api/generate-landing');
       const response = await fetch('/api/generate-landing', {
         method: 'POST',
         headers: {
@@ -331,17 +332,17 @@ export function usePageGeneration(tokenId: string) {
         body: JSON.stringify({ prompt })
       });
 
-      console.log('📡 API Response status:', response.status, response.statusText);
+      logger.debug('📡 API Response status:', response.status, response.statusText);
 
       if (!response.ok) {
         const errorText = await response.text();
-        console.error('❌ API Error response:', errorText);
+        logger.error('❌ API Error response:', errorText);
         throw new Error(`AI API failed: ${response.status} ${response.statusText}`);
       }
 
       const result = await response.json();
       
-      console.log('🌐 API Response received:', {
+      logger.debug('🌐 API Response received:', {
         success: result.success,
         hasContent: !!result.content,
         contentKeys: result.content ? Object.keys(result.content) : [],
@@ -361,7 +362,7 @@ export function usePageGeneration(tokenId: string) {
         });
       }
       
-      console.log('🎯 Content filtering:', {
+      logger.debug('🎯 Content filtering:', {
         requestedSections: sections,
         receivedSections: Object.keys(result.content || {}),
         filteredSections: Object.keys(filteredContent),
@@ -376,7 +377,7 @@ export function usePageGeneration(tokenId: string) {
       };
 
     } catch (error) {
-      console.error('AI copy generation failed:', error);
+      logger.error('AI copy generation failed:', error);
       
       // Generate minimal fallback content
       const fallbackContent: any = {};
@@ -404,10 +405,10 @@ export function usePageGeneration(tokenId: string) {
       const editStore = getEditStore();
       const storeState = editStore.getState();
       
-      console.log('Transferring data to token-scoped store:', { tokenId, result });
+      logger.debug('Transferring data to token-scoped store:', { tokenId, result });
 
       // CRITICAL FIX: Use proper initialization for first-time setup
-      console.log('🏗️ Initializing sections in EditStore:', {
+      logger.debug('🏗️ Initializing sections in EditStore:', {
         sections: result.sections,
         layouts: result.sectionLayouts,
         heroLayoutFromResult: result.sectionLayouts.hero,
@@ -450,7 +451,7 @@ export function usePageGeneration(tokenId: string) {
 
       // CRITICAL: Update content using the store's updateFromAIResponse method
       if (result.generatedContent) {
-        console.log('🤖 Updating store with AI content:', {
+        logger.debug('🤖 Updating store with AI content:', {
           contentKeys: Object.keys(result.generatedContent),
           sampleContent: Object.entries(result.generatedContent).slice(0, 2),
           success: result.success,
@@ -465,12 +466,12 @@ export function usePageGeneration(tokenId: string) {
           errors: result.errors
         });
       } else {
-        console.warn('⚠️ No generated content found in result:', result);
+        logger.warn('⚠️ No generated content found in result:', result);
       }
 
       // Debug: Verify store state after updates
       const storeAfterUpdate = storeState.export();
-      console.log('Store state after transfer:', {
+      logger.debug('Store state after transfer:', {
         tokenId,
         sections: storeState.sections.length,
         content: Object.keys(storeState.content).length,
@@ -491,14 +492,14 @@ export function usePageGeneration(tokenId: string) {
       });
 
     } catch (error) {
-      console.error('Data transfer failed:', error);
+      logger.error('Data transfer failed:', error);
       throw new Error(`Failed to prepare page data: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   };
 
   // Main generation function with animation
   const handleGeneratePage = async () => {
-    console.log('🚀 [GENERATE-DEBUG] handleGeneratePage called!', {
+    logger.debug('🚀 [GENERATE-DEBUG] handleGeneratePage called!', {
       tokenId,
       timestamp: new Date().toISOString(),
       onboardingData: {
@@ -507,7 +508,7 @@ export function usePageGeneration(tokenId: string) {
         featuresCount: onboardingStore.featuresFromAI.length
       }
     });
-    console.log('Starting page generation for token:', tokenId);
+    logger.debug('Starting page generation for token:', tokenId);
     
     setGenerationState(prev => ({
       ...prev,
@@ -535,7 +536,7 @@ export function usePageGeneration(tokenId: string) {
       
       const { sections, errors: sectionErrors } = await generateSections();
       allErrors.push(...sectionErrors);
-      console.log('Generated sections:', sections);
+      logger.debug('Generated sections:', sections);
       
       // Show sections appearing in wireframe
       setGenerationState(prev => ({
@@ -554,7 +555,7 @@ export function usePageGeneration(tokenId: string) {
       
       const { layouts, errors: layoutErrors } = await generateLayouts(sections);
       allErrors.push(...layoutErrors);
-      console.log('Generated layouts:', layouts);
+      logger.debug('Generated layouts:', layouts);
       
       // Show layouts appearing
       setGenerationState(prev => ({
@@ -578,10 +579,10 @@ export function usePageGeneration(tokenId: string) {
       
       
     
-    console.log('🎨 [GENERATE-DEBUG] About to generate theme and backgrounds...');
+    logger.debug('🎨 [GENERATE-DEBUG] About to generate theme and backgrounds...');
     const { backgroundSystem, errors: themeErrors } = await generateThemeAndBackgrounds(sections);
     allErrors.push(...themeErrors);
-    console.log('🎨 [GENERATE-DEBUG] Theme generation complete:', {
+    logger.debug('🎨 [GENERATE-DEBUG] Theme generation complete:', {
       backgroundSystem,
       themeErrors,
       hasErrors: themeErrors.length > 0
@@ -589,11 +590,11 @@ export function usePageGeneration(tokenId: string) {
     
     // Check if theme was actually applied to store
     const storeAfterTheme = getEditStore().getState();
-    console.log('🎨 [GENERATE-DEBUG] Store theme after generation:', {
+    logger.debug(() => '🎨 [GENERATE-DEBUG] Store theme after generation:', () => ({
       theme: storeAfterTheme.theme,
       colors: storeAfterTheme.theme?.colors,
       backgrounds: storeAfterTheme.theme?.colors?.sectionBackgrounds
-    });
+    }));
     
     await new Promise(resolve => setTimeout(resolve, 800)); // Short step
 
@@ -601,7 +602,7 @@ export function usePageGeneration(tokenId: string) {
       const { content, errors: copyErrors, warnings: copyWarnings, isPartial } = await generateCopy(sections, layouts);
       allErrors.push(...copyErrors);
       allWarnings.push(...copyWarnings);
-      console.log('Generated content:', content);
+      logger.debug('Generated content:', content);
       
       // Step 7: Finalize
       setGenerationState(prev => ({
@@ -621,7 +622,7 @@ export function usePageGeneration(tokenId: string) {
         isPartial: isPartial || allErrors.length > 0
       };
       
-      console.log('📊 Final generation result:', {
+      logger.debug('📊 Final generation result:', {
         success: result.success,
         sectionsCount: result.sections.length,
         sectionsArray: result.sections,
@@ -632,9 +633,9 @@ export function usePageGeneration(tokenId: string) {
       });
       
       // Transfer data to page store
-      console.log('🎨 [GENERATE-DEBUG] About to transfer data to store...');
+      logger.debug('🎨 [GENERATE-DEBUG] About to transfer data to store...');
       await transferDataToPageStore(result);
-      console.log('🎨 [GENERATE-DEBUG] Data transfer complete');
+      logger.debug('🎨 [GENERATE-DEBUG] Data transfer complete');
       
       await new Promise(resolve => setTimeout(resolve, PROGRESS_STEPS[6].duration));
       
@@ -651,7 +652,7 @@ export function usePageGeneration(tokenId: string) {
       // Add debug log right before navigation
       const finalEditStore = getEditStore();
       const finalStoreState = finalEditStore.getState();
-      console.log('🎨 [GENERATE-DEBUG] Final store state before navigation:', {
+      logger.debug('🎨 [GENERATE-DEBUG] Final store state before navigation:', {
         sections: finalStoreState.sections.length,
         content: Object.keys(finalStoreState.content).length,
         hasContent: Object.keys(finalStoreState.content).length > 0,
@@ -673,7 +674,7 @@ export function usePageGeneration(tokenId: string) {
       }, 5000);
       
     } catch (error) {
-      console.error('Page generation failed:', error);
+      logger.error('Page generation failed:', error);
       
       setGenerationState(prev => ({
         ...prev,

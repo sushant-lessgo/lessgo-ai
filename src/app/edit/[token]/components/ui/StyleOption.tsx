@@ -6,6 +6,7 @@ import { getBackgroundPreview } from './backgroundCompatibility';
 import { validateBackgroundVariation } from './backgroundValidation';
 import type { BackgroundVariation, BrandColors } from '@/types/core';
 
+import { logger } from '@/lib/logger';
 interface StyleOptionProps {
   variation: BackgroundVariation;
   isSelected?: boolean;
@@ -34,11 +35,11 @@ export function StyleOption({
   disabled = false,
 }: StyleOptionProps) {
   // Debug log at the top level to ensure it runs
-  console.log('🔎 TOP LEVEL StyleOption called with variation:', variation);
-  console.log('🔎 TOP LEVEL variation.tailwindClass:', variation.tailwindClass);
-  console.log('🔎 TOP LEVEL variation.fallbackClass:', (variation as any).fallbackClass);
-  console.log('🔎 TOP LEVEL variation.variationLabel:', variation.variationLabel);
-  console.log('🔎 TOP LEVEL variation.archetypeId:', variation.archetypeId);
+  logger.debug('🔎 TOP LEVEL StyleOption called with variation:', variation);
+  logger.debug('🔎 TOP LEVEL variation.tailwindClass:', variation.tailwindClass);
+  logger.debug('🔎 TOP LEVEL variation.fallbackClass:', (variation as any).fallbackClass);
+  logger.debug('🔎 TOP LEVEL variation.variationLabel:', variation.variationLabel);
+  logger.debug('🔎 TOP LEVEL variation.archetypeId:', variation.archetypeId);
   
   const [isHovered, setIsHovered] = useState(false);
   const [validationResult, setValidationResult] = useState<any>(null);
@@ -201,7 +202,7 @@ export function StyleOption({
     if (!bgClass) return { backgroundColor: '#f3f4f6' };
     
     // Debug logging to see what classes we're actually getting
-    console.log('🎨 StyleOption bgClass:', bgClass);
+    logger.debug('🎨 StyleOption bgClass:', bgClass);
     
     // Handle opacity syntax (e.g., bg-white/60, bg-blue-500/80)
     const opacityMatch = bgClass.match(/bg-([a-zA-Z]+-?\d*|white|black)\/(\d+)/);
@@ -218,7 +219,7 @@ export function StyleOption({
       const g = parseInt(hexColor.substr(3, 2), 16);
       const b = parseInt(hexColor.substr(5, 2), 16);
       
-      console.log('✅ Found opacity color:', `rgba(${r}, ${g}, ${b}, ${opacity})`);
+      logger.debug('✅ Found opacity color:', `rgba(${r}, ${g}, ${b}, ${opacity})`);
       return { backgroundColor: `rgba(${r}, ${g}, ${b}, ${opacity})` };
     }
 
@@ -226,7 +227,7 @@ export function StyleOption({
     const arbitraryColorMatch = bgClass.match(/bg-\[([#\w]+)\]/);
     if (arbitraryColorMatch) {
       const color = arbitraryColorMatch[1];
-      console.log('✅ Found arbitrary color:', color);
+      logger.debug('✅ Found arbitrary color:', color);
       return { backgroundColor: color };
     }
     
@@ -256,10 +257,10 @@ export function StyleOption({
         let viaColor = viaMatch?.[1];
         
         // Convert Tailwind color names to hex if needed
-        console.log('🎨 Converting gradient colors:', { fromColor, viaColor, toColor });
+        logger.debug('🎨 Converting gradient colors:', { fromColor, viaColor, toColor });
         if (!fromColor.startsWith('#')) {
           const convertedFrom = convertTailwindColorToHex(fromColor);
-          console.log('🎨 From color conversion:', `${fromColor} → ${convertedFrom}`);
+          logger.debug('🎨 From color conversion:', `${fromColor} → ${convertedFrom}`);
           fromColor = fromColor === 'white' ? '#ffffff' : 
                      fromColor === 'black' ? '#000000' : 
                      fromColor === 'transparent' ? 'transparent' :
@@ -267,7 +268,7 @@ export function StyleOption({
         }
         if (!toColor.startsWith('#')) {
           const convertedTo = convertTailwindColorToHex(toColor);
-          console.log('🎨 To color conversion:', `${toColor} → ${convertedTo}`);
+          logger.debug('🎨 To color conversion:', `${toColor} → ${convertedTo}`);
           toColor = toColor === 'white' ? '#ffffff' : 
                    toColor === 'black' ? '#000000' : 
                    toColor === 'transparent' ? 'transparent' :
@@ -275,7 +276,7 @@ export function StyleOption({
         }
         if (viaColor && !viaColor.startsWith('#')) {
           const convertedVia = convertTailwindColorToHex(viaColor);
-          console.log('🎨 Via color conversion:', `${viaColor} → ${convertedVia}`);
+          logger.debug('🎨 Via color conversion:', `${viaColor} → ${convertedVia}`);
           viaColor = viaColor === 'white' ? '#ffffff' : 
                     viaColor === 'black' ? '#000000' : 
                     viaColor === 'transparent' ? 'transparent' :
@@ -285,7 +286,7 @@ export function StyleOption({
         const colors = viaColor ? `${fromColor}, ${viaColor}, ${toColor}` : `${fromColor}, ${toColor}`;
         const gradient = `linear-gradient(${direction}, ${colors})`;
         
-        console.log('✅ Found standard hex gradient:', gradient);
+        logger.debug('✅ Found standard hex gradient:', gradient);
         return { background: gradient };
       }
     }
@@ -297,7 +298,7 @@ export function StyleOption({
         let gradient = inlineGradientMatch[1];
         // Replace underscores with spaces and handle percentage values
         gradient = gradient.replace(/_/g, ' ').replace(/(\d+)%/g, '$1%');
-        console.log('✅ Found inline gradient:', gradient);
+        logger.debug('✅ Found inline gradient:', gradient);
         return { background: gradient };
       }
     }
@@ -348,7 +349,7 @@ export function StyleOption({
             gradient = `linear-gradient(135deg, ${colors})`;
           }
           
-          console.log('✅ Found CSS variable gradient:', gradient);
+          logger.debug('✅ Found CSS variable gradient:', gradient);
           return { background: gradient };
         }
       }
@@ -497,7 +498,7 @@ export function StyleOption({
 
       if (colors.length >= 2) {
         const gradient = `linear-gradient(${direction}, ${colors.join(', ')})`;
-        console.log('🌈 Found gradient:', gradient);
+        logger.debug('🌈 Found gradient:', gradient);
         return { background: gradient };
       }
       return null;
@@ -517,7 +518,7 @@ export function StyleOption({
                          bgClass.endsWith(' ' + className) || 
                          bgClass.includes(' ' + className + ' ');
       if (exactMatch) {
-        console.log('✅ Found solid color match:', className, '→', color);
+        logger.debug('✅ Found solid color match:', className, '→', color);
         return { backgroundColor: color };
       }
     }
@@ -532,7 +533,7 @@ export function StyleOption({
     }
     
     // Final fallback
-    console.log('🔴 No match found for bgClass:', bgClass, '- falling back to gray');
+    logger.debug('🔴 No match found for bgClass:', bgClass, '- falling back to gray');
     return { backgroundColor: '#f3f4f6' };
   };
 
@@ -636,9 +637,9 @@ export function StyleOption({
         <div
           className="w-full h-full"
           style={(() => {
-            console.log('🔎 StyleOption variation object:', variation);
-            console.log('🔎 variation.tailwindClass:', variation.tailwindClass);
-            console.log('🔎 variation.fallbackClass:', (variation as any).fallbackClass);
+            logger.debug('🔎 StyleOption variation object:', variation);
+            logger.debug('🔎 variation.tailwindClass:', variation.tailwindClass);
+            logger.debug('🔎 variation.fallbackClass:', (variation as any).fallbackClass);
             // Use fallbackClass instead of tailwindClass for the new variation structure
             const bgClass = (variation as any).fallbackClass || variation.tailwindClass;
             return getBackgroundStyle(bgClass);

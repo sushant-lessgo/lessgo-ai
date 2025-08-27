@@ -10,6 +10,7 @@ import type { ElementSelection } from '@/types/core/ui';
 import type { ImageAsset } from '@/types/core/images';
 import type { SectionType } from '@/types/core/content';
 
+import { logger } from '@/lib/logger';
 /**
  * ===== UTILITY FUNCTIONS =====
  */
@@ -56,7 +57,7 @@ export function createContentActions(set: any, get: any): ContentActions {
     updateElementContent: (sectionId: string, elementKey: string, content: string | string[]) =>
       set((state: EditStore) => {
         const updateTime = Date.now();
-        console.log(`🔄 [${updateTime}] updateElementContent CALLED:`, {
+        logger.debug(`🔄 [${updateTime}] updateElementContent CALLED:`, {
           sectionId,
           elementKey,
           contentType: typeof content,
@@ -66,19 +67,19 @@ export function createContentActions(set: any, get: any): ContentActions {
         });
         
         if (!state.content[sectionId]) {
-          console.warn(`🔄 [${updateTime}] Section ${sectionId} not found`);
+          logger.warn(`🔄 [${updateTime}] Section ${sectionId} not found`);
           return;
         }
 
         // Check if element exists and handle different content structures
         if (!state.content[sectionId].elements) {
-          console.warn(`Elements not found in section ${sectionId}`);
+          logger.warn(`Elements not found in section ${sectionId}`);
           return;
         }
 
         // If element doesn't exist, create it (for cases like hero_image)
         if (!state.content[sectionId].elements[elementKey]) {
-          console.log(`Creating missing element: ${elementKey} in section ${sectionId}`);
+          logger.debug(`Creating missing element: ${elementKey} in section ${sectionId}`);
           state.content[sectionId].elements[elementKey] = {
             content: '',
             type: elementKey.includes('image') ? 'image' : 'text',
@@ -96,13 +97,13 @@ export function createContentActions(set: any, get: any): ContentActions {
         } else if (typeof content === 'string') {
           stringContent = content;
         } else {
-          console.warn('Unexpected content type, converting to string:', typeof content, content);
+          logger.warn('Unexpected content type, converting to string:', typeof content, content);
           stringContent = String(content);
         }
         
         // CRITICAL: Strip any object properties and ensure pure string
         if (typeof stringContent === 'object') {
-          console.error('CRITICAL: String content is actually an object! Converting...', stringContent);
+          logger.error('CRITICAL: String content is actually an object! Converting...', stringContent);
           stringContent = JSON.stringify(stringContent);
         }
         
@@ -119,7 +120,7 @@ export function createContentActions(set: any, get: any): ContentActions {
           // Ensure we store a pure string in the content property
           element.content = stringContent;
         } else {
-          console.warn(`Unexpected element structure for ${elementKey}:`, element);
+          logger.warn(`Unexpected element structure for ${elementKey}:`, element);
           return;
         }
         
@@ -142,7 +143,7 @@ export function createContentActions(set: any, get: any): ContentActions {
         
         state.lastUpdated = Date.now();
         
-        console.log(`🔄 [${updateTime}] updateElementContent COMPLETED:`, {
+        logger.debug(`🔄 [${updateTime}] updateElementContent COMPLETED:`, {
           sectionId,
           elementKey,
           oldValue: String(oldValue).substring(0, 50) + '...',
@@ -300,7 +301,7 @@ export function createContentActions(set: any, get: any): ContentActions {
     bulkUpdateSection: (sectionId: string, elements: Record<string, string | string[]>) =>
       set((state: EditStore) => {
         if (!state.content[sectionId]) {
-          console.warn(`Section ${sectionId} not found`);
+          logger.warn(`Section ${sectionId} not found`);
           return;
         }
 
@@ -322,57 +323,57 @@ export function createContentActions(set: any, get: any): ContentActions {
     selectVariation: (index: number) =>
       set((state: EditStore) => {
         // This is a placeholder - actual implementation would select from shown variations
-        console.log('Selecting variation:', index);
+        logger.debug('Selecting variation:', index);
       }),
 
     applySelectedVariation: () =>
       set((state: EditStore) => {
         // This is a placeholder - actual implementation would apply the selected variation
-        console.log('Applying selected variation');
+        logger.debug('Applying selected variation');
       }),
 
     // These methods are implemented in coreActions.ts but required by ContentActions interface
     setBackgroundType: (sectionId: string, backgroundType: BackgroundType) => {
-      console.warn('setBackgroundType should be called from coreActions');
+      logger.warn('setBackgroundType should be called from coreActions');
     },
 
     markAsCustomized: (sectionId: string) => {
-      console.warn('markAsCustomized should be called from coreActions');
+      logger.warn('markAsCustomized should be called from coreActions');
     },
 
     // These methods are implemented in aiActions.ts but required by ContentActions interface
     regenerateSection: async (sectionId: string, userGuidance?: string) => {
-      console.warn('regenerateSection should be called from aiActions');
+      logger.warn('regenerateSection should be called from aiActions');
     },
 
     regenerateElement: async (sectionId: string, elementKey: string, variationCount?: number) => {
-      console.warn('regenerateElement should be called from aiActions');
+      logger.warn('regenerateElement should be called from aiActions');
     },
 
     showElementVariations: (elementId: string, variations: string[]) => {
-      console.warn('showElementVariations should be called from aiActions');
+      logger.warn('showElementVariations should be called from aiActions');
     },
 
     hideElementVariations: () => {
-      console.warn('hideElementVariations should be called from aiActions');
+      logger.warn('hideElementVariations should be called from aiActions');
     },
 
     clearAIErrors: () => {
-      console.warn('clearAIErrors should be called from aiActions');
+      logger.warn('clearAIErrors should be called from aiActions');
     },
 
     // These methods are implemented in generationActions.ts but required by ContentActions interface
     regenerateAllContent: async () => {
-      console.warn('regenerateAllContent should be called from generationActions');
+      logger.warn('regenerateAllContent should be called from generationActions');
     },
 
     updateFromAIResponse: (aiResponse: any) => {
-      console.warn('updateFromAIResponse should be called from generationActions');
+      logger.warn('updateFromAIResponse should be called from generationActions');
     },
 
     // This method is implemented in coreActions.ts but required by ContentActions interface
     setSectionBackground: (sectionId: string, sectionBackground: any) => {
-      console.warn('setSectionBackground should be called from coreActions');
+      logger.warn('setSectionBackground should be called from coreActions');
     },
 
   };

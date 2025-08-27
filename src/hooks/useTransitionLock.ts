@@ -4,6 +4,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import type { ToolbarType } from '@/utils/selectionPriority';
 
+import { logger } from '@/lib/logger';
 interface TransitionState {
   isLocked: boolean;
   lockReason: string;
@@ -63,7 +64,7 @@ export function useTransitionLock(config: Partial<TransitionLockConfig> = {}) {
   // Unlock transition
   const unlock = useCallback((reason: string = 'manual') => {
     if (finalConfig.debug) {
-      console.log('🔓 Transition unlocked:', reason);
+      logger.debug('🔓 Transition unlocked:', reason);
     }
     
     clearTimers();
@@ -122,14 +123,14 @@ export function useTransitionLock(config: Partial<TransitionLockConfig> = {}) {
       // Allow if transitioning to the same toolbar that's locked
       if (toToolbar === transitionState.lockedToolbar) {
         if (finalConfig.debug) {
-          console.log('✅ Transition allowed (same as locked):', { fromToolbar, toToolbar, reason });
+          logger.debug('✅ Transition allowed (same as locked):', { fromToolbar, toToolbar, reason });
         }
         return true;
       }
       
       // Block other transitions during lock
       if (finalConfig.debug) {
-        console.log('❌ Transition blocked (locked):', { 
+        logger.debug('❌ Transition blocked (locked):', { 
           fromToolbar, 
           toToolbar, 
           reason,
@@ -145,7 +146,7 @@ export function useTransitionLock(config: Partial<TransitionLockConfig> = {}) {
     const timeSinceLastChange = now - lastStateChangeRef.current;
     if (timeSinceLastChange < finalConfig.debounceTime) {
       if (finalConfig.debug) {
-        console.log('❌ Transition blocked (debounce):', { 
+        logger.debug('❌ Transition blocked (debounce):', { 
           fromToolbar, 
           toToolbar, 
           timeSinceLastChange,
@@ -156,7 +157,7 @@ export function useTransitionLock(config: Partial<TransitionLockConfig> = {}) {
     }
     
     if (finalConfig.debug) {
-      console.log('✅ Transition allowed:', { fromToolbar, toToolbar, reason });
+      logger.debug('✅ Transition allowed:', { fromToolbar, toToolbar, reason });
     }
     
     lastStateChangeRef.current = now;
@@ -261,7 +262,7 @@ export function useLockStatusDebugger(transitionLock: ReturnType<typeof useTrans
       const { isLocked, lockReason, lockedToolbar, timeRemaining } = transitionLock;
       
       if (isLocked && timeRemaining > 0) {
-        console.log(`🔒 Lock Status: ${lockReason} (${lockedToolbar}) - ${timeRemaining}ms remaining`);
+        logger.debug(`🔒 Lock Status: ${lockReason} (${lockedToolbar}) - ${timeRemaining}ms remaining`);
       }
     }
   }, [transitionLock.isLocked, transitionLock.lockReason, transitionLock.lockedToolbar]);

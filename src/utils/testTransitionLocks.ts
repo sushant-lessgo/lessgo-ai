@@ -1,3 +1,5 @@
+import { logger } from '@/lib/logger';
+
 // Test file for transition lock system - Step 2
 import { 
   getActiveToolbar, 
@@ -69,55 +71,55 @@ const transitionScenarios = [
  * This simulates the transition lock system without actually running React hooks
  */
 export function testTransitionLocks() {
-  console.log('🧪 Testing Transition Lock System...\n');
+  logger.debug('🧪 Testing Transition Lock System...\n');
   
   let passed = 0;
   let failed = 0;
   
   transitionScenarios.forEach(scenario => {
-    console.log(`\n📋 Scenario: ${scenario.name}`);
+    logger.debug(`\n📋 Scenario: ${scenario.name}`);
     
     scenario.sequence.forEach((step, index) => {
-      console.log(`  ${index + 1}. ${step.step}`);
+      logger.debug(`  ${index + 1}. ${step.step}`);
       
       const editorSelection = createEditorSelection(step.selection as any);
       const result = getActiveToolbar(editorSelection);
       const resultStr = result || 'null';
       
       if (resultStr === step.expected) {
-        console.log(`     ✅ Expected ${step.expected}, got ${resultStr}`);
+        logger.debug(`     ✅ Expected ${step.expected}, got ${resultStr}`);
         passed++;
       } else {
-        console.log(`     ❌ Expected ${step.expected}, got ${resultStr}`);
+        logger.debug(`     ❌ Expected ${step.expected}, got ${resultStr}`);
         failed++;
       }
       
       if ('shouldLock' in step && step.shouldLock) {
-        console.log(`     🔒 Should trigger lock: ${'lockReason' in step ? step.lockReason : 'transition'}`);
+        logger.debug(`     🔒 Should trigger lock: ${'lockReason' in step ? step.lockReason : 'transition'}`);
       }
       
       if ('shouldBlock' in step && step.shouldBlock) {
-        console.log(`     ⛔ Should be blocked by debounce/lock`);
+        logger.debug(`     ⛔ Should be blocked by debounce/lock`);
       }
       
       if ('duringLock' in step && step.duringLock) {
-        console.log(`     🔒 During lock period - toolbar should remain locked`);
+        logger.debug(`     🔒 During lock period - toolbar should remain locked`);
       }
     });
   });
   
-  console.log(`\n🧪 Basic Priority Test Results: ${passed} passed, ${failed} failed`);
+  logger.debug(`\n🧪 Basic Priority Test Results: ${passed} passed, ${failed} failed`);
   
   if (failed === 0) {
-    console.log('🎉 All basic tests passed! Transition lock scenarios look correct.');
-    console.log('\n📝 Next: Test with actual React hooks in browser');
-    console.log('   1. Open dev tools console');
-    console.log('   2. Double-click text elements');
-    console.log('   3. Watch for lock messages like "🔒 Transition locked: text editing started"');
-    console.log('   4. Try clicking other elements during lock period');
-    console.log('   5. Verify toolbar stays locked for ~350ms');
+    logger.debug('🎉 All basic tests passed! Transition lock scenarios look correct.');
+    logger.debug('\n📝 Next: Test with actual React hooks in browser');
+    logger.debug('   1. Open dev tools console');
+    logger.debug('   2. Double-click text elements');
+    logger.debug('   3. Watch for lock messages like "🔒 Transition locked: text editing started"');
+    logger.debug('   4. Try clicking other elements during lock period');
+    logger.debug('   5. Verify toolbar stays locked for ~350ms');
   } else {
-    console.log('❌ Some basic tests failed. Check the logic before testing locks.');
+    logger.debug('❌ Some basic tests failed. Check the logic before testing locks.');
   }
   
   return { passed, failed };
@@ -166,6 +168,6 @@ export const transitionLockTestInstructions = `
 if (typeof window !== 'undefined') {
   (window as any).testTransitionLocks = testTransitionLocks;
   (window as any).transitionLockTestInstructions = transitionLockTestInstructions;
-  console.log('🧪 Transition Lock Test available at window.testTransitionLocks()');
-  console.log('📋 Test instructions at window.transitionLockTestInstructions');
+  logger.debug('🧪 Transition Lock Test available at window.testTransitionLocks()');
+  logger.debug('📋 Test instructions at window.transitionLockTestInstructions');
 }

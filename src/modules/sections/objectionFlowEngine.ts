@@ -1,5 +1,6 @@
 // objectionFlowEngine.ts - ✅ FIXED: Uses centralized taxonomy types
 import { sectionList, type SectionSpacing } from "./sectionList";
+import { logger } from '@/lib/logger';
 import type {
   AwarenessLevel,
   MarketSophisticationLevel,
@@ -300,7 +301,7 @@ function getBaseObjectionFlow(awareness: AwarenessLevel, sophistication: MarketS
   }
   
   // Ultimate fallback
-  console.warn(`⚠️ No flow found for ${flowKey}, using problem-aware+level-3`);
+  logger.warn(`⚠️ No flow found for ${flowKey}, using problem-aware+level-3`);
   return OBJECTION_FLOWS["problem-aware+level-3"];
 }
 

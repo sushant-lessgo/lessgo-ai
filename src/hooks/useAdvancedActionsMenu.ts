@@ -2,6 +2,7 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
 import type { AdvancedActionItem, AdvancedActionGroup } from '@/app/edit/[token]/components/toolbars/AdvancedActionsMenu';
 
+import { logger } from '@/lib/logger';
 export interface MenuPosition {
   x: number;
   y: number;
@@ -72,7 +73,7 @@ export function useAdvancedActionsMenu({
 
   // Group actions by their group property
   const groupActions = useCallback((actions: AdvancedActionItem[]): AdvancedActionGroup[] => {
-    console.log('🎯 groupActions called with:', actions);
+    logger.debug('🎯 groupActions called with:', actions);
     
     const groups = new Map<string, AdvancedActionItem[]>();
     
@@ -85,7 +86,7 @@ export function useAdvancedActionsMenu({
       groups.get(groupKey)!.push(action);
     });
     
-    console.log('🎯 Groups map:', Array.from(groups.entries()));
+    logger.debug('🎯 Groups map:', Array.from(groups.entries()));
 
     // Convert to array with proper labels based on toolbar type
     const result: AdvancedActionGroup[] = [];
@@ -115,7 +116,7 @@ export function useAdvancedActionsMenu({
       });
     }
 
-    console.log('🎯 Final grouped actions:', result);
+    logger.debug('🎯 Final grouped actions:', result);
     return result;
   }, [toolbarType]);
 
@@ -227,7 +228,7 @@ export function useAdvancedActionsMenu({
   // Handle click outside to close menu
   const handleClickOutside = useCallback((event: MouseEvent) => {
     const target = event.target as HTMLElement;
-    console.log('🎯 handleClickOutside called:', {
+    logger.debug('🎯 handleClickOutside called:', {
       target: target.tagName,
       targetClass: target.className,
       isInTrigger: triggerElement?.contains(target),
@@ -236,11 +237,11 @@ export function useAdvancedActionsMenu({
     
     // Don't close if clicking on the trigger element or menu
     if (triggerElement?.contains(target) || menuRef.current?.contains(target)) {
-      console.log('🎯 Click inside menu or trigger, not closing');
+      logger.debug('🎯 Click inside menu or trigger, not closing');
       return;
     }
 
-    console.log('🎯 Click outside, closing menu');
+    logger.debug('🎯 Click outside, closing menu');
     onClose();
   }, [triggerElement, onClose]);
 
@@ -295,7 +296,7 @@ export function useAdvancedActionsMenu({
   // Update grouped actions when actions change
   useEffect(() => {
     const grouped = groupActions(actions);
-    console.log('🎯 Setting grouped actions:', grouped);
+    logger.debug('🎯 Setting grouped actions:', grouped);
     setGroupedActions(grouped);
   }, [actions, groupActions]);
 
@@ -339,7 +340,7 @@ export function useAdvancedActionsMenu({
     }
   }, [isVisible]);
 
-  console.log('🎯 useAdvancedActionsMenu returning:', { 
+  logger.debug('🎯 useAdvancedActionsMenu returning:', { 
     position, 
     groupedActionsLength: groupedActions.length,
     groupedActions 

@@ -2,6 +2,7 @@
 import { useCallback, useEffect } from 'react';
 import { useEditStoreLegacy as useEditStore } from './useEditStoreLegacy';
 
+import { logger } from '@/lib/logger';
 export interface ClickTarget {
   element: HTMLElement;
   sectionId: string | null;
@@ -216,7 +217,7 @@ export function useEditor() {
     // Check if click is on an image - let image handlers work
     const isImageClick = target.tagName === 'IMG' && target.getAttribute('data-image-id');
     if (isImageClick) {
-      console.log('🖼️ handleEditorClick: Detected image click, allowing image handlers to work');
+      logger.debug('🖼️ handleEditorClick: Detected image click, allowing image handlers to work');
       return; // Don't interfere with image click handling
     }
     
@@ -491,7 +492,7 @@ export function useEditor() {
     element.onmouseup = null;
     element.onkeyup = null;
     
-    console.log('🔍 Disabled InlineTextEditor handlers:', {
+    logger.debug('🔍 Disabled InlineTextEditor handlers:', {
       onmouseup: !!originalOnMouseUp,
       onkeyup: !!originalOnKeyUp,
       element: element.className
@@ -502,7 +503,7 @@ export function useEditor() {
     
     // Set up proper input event handlers for text editing mode
     element.oninput = (e) => {
-      console.log('🔍 INPUT EVENT - Natural typing (no store updates during typing):', {
+      logger.debug('🔍 INPUT EVENT - Natural typing (no store updates during typing):', {
         selection: window.getSelection()?.toString(),
         rangeCount: window.getSelection()?.rangeCount,
         cursorPosition: window.getSelection()?.getRangeAt(0)?.startOffset,
@@ -512,7 +513,7 @@ export function useEditor() {
       
       // Just store the content for later - don't update store during typing
       element.dataset.pendingContent = element.textContent || '';
-      console.log('🔍 Content stored for later update:', { content: element.dataset.pendingContent });
+      logger.debug('🔍 Content stored for later update:', { content: element.dataset.pendingContent });
       
       // Mark that user has started typing - prevents cursor repositioning
       element.dataset.userHasTyped = 'true';
@@ -529,7 +530,7 @@ export function useEditor() {
       // Save pending content immediately on blur to prevent text loss
       if (element.dataset.pendingContent) {
         const finalContent = element.dataset.pendingContent;
-        console.log('🔍 Saving content on blur:', { finalContent, length: finalContent.length });
+        logger.debug('🔍 Saving content on blur:', { finalContent, length: finalContent.length });
         updateElementContent(sectionId, elementKey, finalContent);
       }
       
@@ -549,7 +550,7 @@ export function useEditor() {
       if (e.key === 'Enter' || e.key === 'Escape') {
         if (element.dataset.pendingContent) {
           const finalContent = element.dataset.pendingContent;
-          console.log('🔍 Saving content on key:', { key: e.key, finalContent });
+          logger.debug('🔍 Saving content on key:', { key: e.key, finalContent });
           updateElementContent(sectionId, elementKey, finalContent);
         }
       }
@@ -564,7 +565,7 @@ export function useEditor() {
       setTimeout(() => {
         // Check again to make sure user hasn't started typing
         if (element.dataset.userHasTyped) {
-          console.log('🔍 User has started typing - skipping cursor positioning');
+          logger.debug('🔍 User has started typing - skipping cursor positioning');
           return;
         }
         
@@ -598,7 +599,7 @@ export function useEditor() {
         selection?.removeAllRanges();
         selection?.addRange(range);
         
-        console.log('🔍 Initial cursor positioned at end');
+        logger.debug('🔍 Initial cursor positioned at end');
       }, 50);
     }
 
@@ -661,7 +662,7 @@ export function useEditor() {
     // Save any pending content changes before exiting
     if (element.dataset.pendingContent) {
       const finalContent = element.dataset.pendingContent;
-      console.log('🔍 Saving pending content on exit:', { finalContent, length: finalContent.length });
+      logger.debug('🔍 Saving pending content on exit:', { finalContent, length: finalContent.length });
       updateElementContent(sectionId, elementKey, finalContent);
       delete element.dataset.pendingContent;
     }
@@ -687,7 +688,7 @@ export function useEditor() {
       (element as any).onmouseup = handlers.onmouseup || null;
       (element as any).onkeyup = handlers.onkeyup || null;
       
-      console.log('🔍 Restored InlineTextEditor handlers:', {
+      logger.debug('🔍 Restored InlineTextEditor handlers:', {
         onmouseup: handlers.onmouseup,
         onkeyup: handlers.onkeyup
       });

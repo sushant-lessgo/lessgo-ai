@@ -8,6 +8,7 @@ import type { LayoutActions } from '@/types/store';
 import { pickFontFromOnboarding } from '@/modules/Design/fontSystem/pickFont';
 import type { FontTheme, TypographyState } from '@/types/core/index';
 
+import { logger } from '@/lib/logger';
 /**
  * ===== UTILITY FUNCTIONS =====
  */
@@ -66,7 +67,7 @@ export function createLayoutActions(set: any, get: any): LayoutActions {
         const insertPos = position ?? state.sections.length;
         
         // Enhanced debug logging for layoutActions.addSection
-        console.log('➕ LayoutActions adding section:', {
+        logger.debug('➕ LayoutActions adding section:', {
           sectionType,
           requestedPosition: position,
           insertPos,
@@ -122,7 +123,7 @@ export function createLayoutActions(set: any, get: any): LayoutActions {
         state.history.redoStack = [];
         
         // Final success logging
-        console.log('✅ LayoutActions section added successfully:', {
+        logger.debug('✅ LayoutActions section added successfully:', {
           sectionId,
           finalPosition: state.sections.indexOf(sectionId),
           afterSections: [...state.sections],
@@ -752,7 +753,7 @@ getTypographyForSection: (sectionId: string) => {
         return tokens;
       } else {
         // Fallback to basic generation
-        console.warn('🎨 [TOKENS-DEBUG] Using fallback color token generation - background system not fully integrated');
+        logger.warn('🎨 [TOKENS-DEBUG] Using fallback color token generation - background system not fully integrated');
         const fallbackInput = {
           baseColor: theme.colors.baseColor,
           accentColor: theme.colors.accentColor,
@@ -817,7 +818,7 @@ getTypographyForSection: (sectionId: string) => {
         state.lastUpdated = Date.now();
       });
       
-      console.log('🎨 [EDIT-DEBUG] Recalculated text colors:', newTextColors);
+      logger.debug('🎨 [EDIT-DEBUG] Recalculated text colors:', newTextColors);
     },
 
     initializeSections: (sectionIds: string[], sectionLayouts: Record<string, string>) =>
@@ -833,25 +834,25 @@ getTypographyForSection: (sectionId: string) => {
      */
     
     initializeNavigation: () => {
-      console.log('🧭 [NAV-DEBUG] initializeNavigation action called');
+      logger.debug('🧭 [NAV-DEBUG] initializeNavigation action called');
       
       const { initializeNavigation } = require('@/utils/sectionScanner');
       const state = get();
-      console.log('🧭 [NAV-DEBUG] Current store state:', {
+      logger.debug('🧭 [NAV-DEBUG] Current store state:', {
         hasSections: !!state.sections,
         sectionsLength: state.sections?.length || 0,
         hasNavigationConfig: !!state.navigationConfig
       });
       
       if (state.navigationConfig) {
-        console.log('🧭 [NAV-DEBUG] Navigation already configured, skipping');
+        logger.debug('🧭 [NAV-DEBUG] Navigation already configured, skipping');
         return;
       }
       
       const navItems = initializeNavigation(state);
       
       set((state: EditStore) => {
-        console.log('🧭 [NAV-DEBUG] Setting navigation config in store');
+        logger.debug('🧭 [NAV-DEBUG] Setting navigation config in store');
         
         // Find header section to determine max items
         const headerSection = state.sections.find(id => id.includes('header'));
@@ -859,7 +860,7 @@ getTypographyForSection: (sectionId: string) => {
         const { getMaxNavItemsForHeader } = require('@/utils/sectionScanner');
         const maxItems = getMaxNavItemsForHeader(headerLayout);
         
-        console.log('🧭 [NAV-DEBUG] Creating navigation config:', {
+        logger.debug('🧭 [NAV-DEBUG] Creating navigation config:', {
           navItemsCount: navItems.length,
           maxItems,
           headerSection,
@@ -875,7 +876,7 @@ getTypographyForSection: (sectionId: string) => {
         
         state.persistence.isDirty = true;
         
-        console.log('🧭 [NAV-DEBUG] Navigation config set:', state.navigationConfig);
+        logger.debug('🧭 [NAV-DEBUG] Navigation config set:', state.navigationConfig);
       });
     },
 
@@ -909,7 +910,7 @@ getTypographyForSection: (sectionId: string) => {
         state.navigationConfig.lastUpdated = Date.now();
         state.persistence.isDirty = true;
         
-        console.log('🧭 [STORE-DEBUG] Navigation item updated:', {
+        logger.debug('🧭 [STORE-DEBUG] Navigation item updated:', {
           itemId,
           updates,
           oldItem,
@@ -1132,7 +1133,7 @@ getTypographyForSection: (sectionId: string) => {
         state.socialMediaConfig.lastUpdated = Date.now();
         state.persistence.isDirty = true;
 
-        console.log('🔗 [SOCIAL-DEBUG] Added social media item:', newItem);
+        logger.debug('🔗 [SOCIAL-DEBUG] Added social media item:', newItem);
       }),
 
     updateSocialMediaItem: (itemId: string, updates: Partial<{ platform: string; url: string; icon: string }>) =>
@@ -1151,7 +1152,7 @@ getTypographyForSection: (sectionId: string) => {
         state.socialMediaConfig.lastUpdated = Date.now();
         state.persistence.isDirty = true;
 
-        console.log('🔗 [SOCIAL-DEBUG] Updated social media item:', updatedItem);
+        logger.debug('🔗 [SOCIAL-DEBUG] Updated social media item:', updatedItem);
       }),
 
     removeSocialMediaItem: (itemId: string) =>
@@ -1172,7 +1173,7 @@ getTypographyForSection: (sectionId: string) => {
         state.socialMediaConfig.lastUpdated = Date.now();
         state.persistence.isDirty = true;
 
-        console.log('🔗 [SOCIAL-DEBUG] Removed social media item:', removedItem);
+        logger.debug('🔗 [SOCIAL-DEBUG] Removed social media item:', removedItem);
       }),
 
     reorderSocialMediaItems: (newOrder: string[]) =>
@@ -1192,7 +1193,7 @@ getTypographyForSection: (sectionId: string) => {
         state.socialMediaConfig.lastUpdated = Date.now();
         state.persistence.isDirty = true;
 
-        console.log('🔗 [SOCIAL-DEBUG] Reordered social media items:', reorderedItems);
+        logger.debug('🔗 [SOCIAL-DEBUG] Reordered social media items:', reorderedItems);
       }),
 
   };

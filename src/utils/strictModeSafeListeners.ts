@@ -3,6 +3,7 @@
 
 import { TransactionId } from './bulletproofSuppression';
 
+import { logger } from '@/lib/logger';
 interface ListenerState {
   version: number;
   isAttached: boolean;
@@ -41,8 +42,8 @@ class StrictModeSafeListeners {
 
     // Check for double-attachment (StrictMode protection)
     if (this.listenerStates.has(upKey) || this.listenerStates.has(cancelKey)) {
-      console.warn(`⚠️ Attempted double listener attachment for ${txId} - StrictMode double-invoke?`);
-      console.warn('Current listener states:', {
+      logger.warn(`⚠️ Attempted double listener attachment for ${txId} - StrictMode double-invoke?`);
+      logger.warn('Current listener states:', {
         up: this.listenerStates.get(upKey),
         cancel: this.listenerStates.get(cancelKey),
       });
@@ -56,7 +57,7 @@ class StrictModeSafeListeners {
     if (process.env.NODE_ENV !== 'production') {
       const prevVersion = version - 1;
       if (prevVersion > 0 && version - prevVersion !== 1) {
-        console.error(`🚫 Listener version jumped: ${prevVersion} → ${version}`);
+        logger.error(`🚫 Listener version jumped: ${prevVersion} → ${version}`);
         console.assert(false, `Listener version discontinuity detected`);
       }
     }
@@ -64,19 +65,19 @@ class StrictModeSafeListeners {
     // Wrapped handlers that validate pointer ID
     const wrappedUp = (e: PointerEvent) => {
       if (e.pointerId === pointerId) {
-        console.log(`🎯 PointerUp matched: ${pointerId} (${txId})`);
+        logger.debug(`🎯 PointerUp matched: ${pointerId} (${txId})`);
         onPointerUp(e);
       } else {
-        console.log(`🚫 PointerUp ignored: ${e.pointerId} ≠ ${pointerId} (${txId})`);
+        logger.debug(`🚫 PointerUp ignored: ${e.pointerId} ≠ ${pointerId} (${txId})`);
       }
     };
 
     const wrappedCancel = (e: PointerEvent) => {
       if (e.pointerId === pointerId) {
-        console.log(`🚫 PointerCancel matched: ${pointerId} (${txId})`);
+        logger.debug(`🚫 PointerCancel matched: ${pointerId} (${txId})`);
         onPointerCancel(e);
       } else {
-        console.log(`🚫 PointerCancel ignored: ${e.pointerId} ≠ ${pointerId} (${txId})`);
+        logger.debug(`🚫 PointerCancel ignored: ${e.pointerId} ≠ ${pointerId} (${txId})`);
       }
     };
 
@@ -99,7 +100,7 @@ class StrictModeSafeListeners {
       pointerId,
     });
 
-    console.log(`🔗 Attached pointer listeners v${version} for ${txId} (pointer: ${pointerId})`);
+    logger.debug(`🔗 Attached pointer listeners v${version} for ${txId} (pointer: ${pointerId})`);
   }
 
   /**
@@ -115,12 +116,12 @@ class StrictModeSafeListeners {
 
     if (upState) {
       this.listenerStates.delete(upKey);
-      console.log(`🔗 Detached pointerup listener v${upState.version} for ${txId}`);
+      logger.debug(`🔗 Detached pointerup listener v${upState.version} for ${txId}`);
     }
 
     if (cancelState) {
       this.listenerStates.delete(cancelKey);
-      console.log(`🔗 Detached pointercancel listener v${cancelState.version} for ${txId}`);
+      logger.debug(`🔗 Detached pointercancel listener v${cancelState.version} for ${txId}`);
     }
 
     // Note: With { once: true }, listeners auto-detach after firing
@@ -177,7 +178,7 @@ class StrictModeSafeListeners {
    * @param reason - Reason for cleanup
    */
   emergencyCleanup(reason: string): void {
-    console.warn(`🚨 Emergency listener cleanup: ${reason}`, {
+    logger.warn(`🚨 Emergency listener cleanup: ${reason}`, {
       activeListeners: this.listenerStates.size,
       globalVersion: this.globalVersion,
     });
@@ -210,8 +211,8 @@ class StrictModeSafeListeners {
       // In normal operation, all active listeners should have the same version
       // (since they're attached together and detached together)
       if (uniqueVersions.size > 1) {
-        console.warn(`⚠️ Mixed listener versions detected:`, uniqueVersions);
-        console.log('Listener states:', this.getAllListenerStates());
+        logger.warn(`⚠️ Mixed listener versions detected:`, uniqueVersions);
+        logger.debug('Listener states:', this.getAllListenerStates());
       }
     }
   }

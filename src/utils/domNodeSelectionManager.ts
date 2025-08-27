@@ -1,3 +1,5 @@
+import { logger } from '@/lib/logger';
+
 // Fix 3: Selection handler architecture - attach once per DOM node using WeakMap
 // Prevents attach/detach thrashing by keying handlers to DOM nodes, not selection state
 
@@ -40,7 +42,7 @@ export function attachSelectionHandlerToNode(
   // Check if handler already exists for this node
   const existingHandler = nodeHandlers.get(node);
   if (existingHandler) {
-    console.log('🔄 [DOM-HANDLER] Handler already exists for node, reusing:', {
+    logger.debug('🔄 [DOM-HANDLER] Handler already exists for node, reusing:', {
       editorId,
       existingEditorId: existingHandler.editorId,
       componentOwner,
@@ -143,7 +145,7 @@ export function attachSelectionHandlerToNode(
   const currentCount = handlerCounts.get(editorId) || 0;
   handlerCounts.set(editorId, currentCount + 1);
   
-  console.log('✅ [DOM-HANDLER] Attached selection handler to DOM node:', {
+  logger.debug('✅ [DOM-HANDLER] Attached selection handler to DOM node:', {
     editorId,
     componentOwner,
     nodeType: node.tagName,
@@ -164,7 +166,7 @@ export function attachSelectionHandlerToNode(
 function cleanupNodeHandler(node: Element): void {
   const handler = nodeHandlers.get(node);
   if (!handler) {
-    console.warn('⚠️ [DOM-HANDLER] Attempted to cleanup non-existent handler for node:', {
+    logger.warn('⚠️ [DOM-HANDLER] Attempted to cleanup non-existent handler for node:', {
       nodeType: node.tagName,
       nodeId: node.id || 'no-id'
     });
@@ -186,7 +188,7 @@ function cleanupNodeHandler(node: Element): void {
     handlerCounts.set(handler.editorId, newCount);
   }
   
-  console.log('🧹 [DOM-HANDLER] Cleaned up selection handler from DOM node:', {
+  logger.debug('🧹 [DOM-HANDLER] Cleaned up selection handler from DOM node:', {
     editorId: handler.editorId,
     componentOwner: handler.componentOwner,
     nodeType: node.tagName,
@@ -222,5 +224,5 @@ if (process.env.NODE_ENV === 'development') {
     // Note: nodeHandlers WeakMap is not directly inspectable
   };
   
-  console.log('🔧 DOM Selection Handler debug utilities available at window.__domSelectionHandlers');
+  logger.debug('🔧 DOM Selection Handler debug utilities available at window.__domSelectionHandlers');
 }

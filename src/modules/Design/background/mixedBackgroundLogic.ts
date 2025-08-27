@@ -1,3 +1,5 @@
+import { logger } from '@/lib/logger';
+
 // mixedBackgroundLogic.ts - Copywriting Priority + Visual Rhythm Balance
 
 interface UserProfile {
@@ -154,7 +156,7 @@ function analyzeUserProfile(userProfile: UserProfile): string[] {
   // Universal tag
   profileTags.push('all');
   
-  console.log('👤 User profile tags:', profileTags);
+  logger.debug('👤 User profile tags:', profileTags);
   return profileTags;
 }
 
@@ -178,7 +180,7 @@ function getSectionCriticality(sectionId: string, userProfileTags: string[]): Se
   );
   
   if (hasProfileMatch) {
-    console.log(`🎯 Section "${sectionId}" is CONVERSION-CRITICAL for this user (${criticalSection.reasoning})`);
+    logger.debug(`🎯 Section "${sectionId}" is CONVERSION-CRITICAL for this user (${criticalSection.reasoning})`);
     return 'conversion-critical';
   }
   
@@ -192,31 +194,31 @@ export function getMixedSectionBackground(
   userProfile: UserProfile
 ): SectionBackgroundType {
   
-  console.log(`🎨 Determining background for section: ${sectionId}`);
+  logger.debug(`🎨 Determining background for section: ${sectionId}`);
   
   const currentIndex = allSections.indexOf(sectionId);
   const userProfileTags = analyzeUserProfile(userProfile);
   const sectionCriticality = getSectionCriticality(sectionId, userProfileTags);
   
-  console.log(`📊 Section "${sectionId}" criticality: ${sectionCriticality}`);
+  logger.debug(`📊 Section "${sectionId}" criticality: ${sectionCriticality}`);
   
   // ===== RULE 1: INTRINSIC OVERRIDES (Always respected) =====
   
   // Hero always gets primary (attention-grabbing)
   if (sectionId.includes('hero')) {
-    console.log(`🎯 ${sectionId} → PRIMARY (hero section override)`);
+    logger.debug(`🎯 ${sectionId} → PRIMARY (hero section override)`);
     return 'primary';
   }
   
   // CTA always gets primary (conversion focus)  
   if (sectionId.includes('cta')) {
-    console.log(`🎯 ${sectionId} → PRIMARY (CTA section override)`);
+    logger.debug(`🎯 ${sectionId} → PRIMARY (CTA section override)`);
     return 'primary';
   }
   
   // FAQ and separators always get divider
   if (sectionCriticality === 'separator') {
-    console.log(`🎯 ${sectionId} → DIVIDER (separator section)`);
+    logger.debug(`🎯 ${sectionId} → DIVIDER (separator section)`);
     return 'divider';
   }
   
@@ -258,7 +260,7 @@ export function getMixedSectionBackground(
     
     // ✅ VISUAL RHYTHM ENFORCEMENT: Max 2 consecutive highlights
     if (consecutiveHighlights >= 2) {
-      console.log(`🎯 ${sectionId} → NEUTRAL (FORCED: visual rhythm - ${consecutiveHighlights} consecutive highlights before)`);
+      logger.debug(`🎯 ${sectionId} → NEUTRAL (FORCED: visual rhythm - ${consecutiveHighlights} consecutive highlights before)`);
       return 'neutral';
     }
     
@@ -269,17 +271,17 @@ export function getMixedSectionBackground(
       
       // Only allow consecutive highlights if current is HIGH priority
       if (currentPriority === 'high') {
-        console.log(`🎯 ${sectionId} → SECONDARY (conversion-critical HIGH priority, allowing consecutive)`);
+        logger.debug(`🎯 ${sectionId} → SECONDARY (conversion-critical HIGH priority, allowing consecutive)`);
         return 'secondary';
       } else {
         // Medium/low priority sections get visual break after highlight
-        console.log(`🎯 ${sectionId} → NEUTRAL (conversion-critical but visual rhythm enforced)`);
+        logger.debug(`🎯 ${sectionId} → NEUTRAL (conversion-critical but visual rhythm enforced)`);
         return 'neutral';
       }
     }
     
     // Previous section was not highlighted, safe to highlight this one
-    console.log(`🎯 ${sectionId} → SECONDARY (conversion-critical, clear to highlight)`);
+    logger.debug(`🎯 ${sectionId} → SECONDARY (conversion-critical, clear to highlight)`);
     return 'secondary';
   }
   
@@ -296,19 +298,19 @@ export function getMixedSectionBackground(
         previousCriticality === 'conversion-critical';
       
       if (previousWasHighlighted) {
-        console.log(`🎯 ${sectionId} → NEUTRAL (supporting section, visual break after highlight)`);
+        logger.debug(`🎯 ${sectionId} → NEUTRAL (supporting section, visual break after highlight)`);
         return 'neutral';
       }
     }
     
     // Previous was not highlighted, this supporting section could be secondary for variety
     // But let's default to neutral to maintain clean visual rhythm
-    console.log(`🎯 ${sectionId} → NEUTRAL (supporting section, maintain rhythm)`);
+    logger.debug(`🎯 ${sectionId} → NEUTRAL (supporting section, maintain rhythm)`);
     return 'neutral';
   }
   
   // ===== FALLBACK =====
-  console.log(`🎯 ${sectionId} → NEUTRAL (fallback)`);
+  logger.debug(`🎯 ${sectionId} → NEUTRAL (fallback)`);
   return 'neutral';
 }
 
@@ -319,36 +321,36 @@ export function assignMixedBackgroundsToSections(
   userProfile: UserProfile
 ): Record<string, SectionBackgroundType> {
   
-  console.log('🎨 Assigning mixed backgrounds to all sections...');
-  console.log('Sections to process:', sections);
-  console.log('User profile:', userProfile);
+  logger.debug('🎨 Assigning mixed backgrounds to all sections...');
+  logger.debug('Sections to process:', sections);
+  logger.debug('User profile:', userProfile);
   
   const backgroundAssignments: Record<string, SectionBackgroundType> = {};
   const userProfileTags = analyzeUserProfile(userProfile);
   
   // ✅ PASS 1: Assign backgrounds with proper consecutive tracking
   sections.forEach((sectionId, index) => {
-    console.log(`\n🔄 Processing section ${index + 1}/${sections.length}: ${sectionId}`);
+    logger.debug(`\n🔄 Processing section ${index + 1}/${sections.length}: ${sectionId}`);
     
     const sectionCriticality = getSectionCriticality(sectionId, userProfileTags);
-    console.log(`📊 Section "${sectionId}" criticality: ${sectionCriticality}`);
+    logger.debug(`📊 Section "${sectionId}" criticality: ${sectionCriticality}`);
     
     // ===== RULE 1: INTRINSIC OVERRIDES =====
     if (sectionId.includes('hero')) {
       backgroundAssignments[sectionId] = 'primary';
-      console.log(`🎯 ${sectionId} → PRIMARY (hero section override)`);
+      logger.debug(`🎯 ${sectionId} → PRIMARY (hero section override)`);
       return;
     }
     
     if (sectionId.includes('cta')) {
       backgroundAssignments[sectionId] = 'primary';
-      console.log(`🎯 ${sectionId} → PRIMARY (CTA section override)`);
+      logger.debug(`🎯 ${sectionId} → PRIMARY (CTA section override)`);
       return;
     }
     
     if (sectionCriticality === 'separator') {
       backgroundAssignments[sectionId] = 'divider';
-      console.log(`🎯 ${sectionId} → DIVIDER (separator section)`);
+      logger.debug(`🎯 ${sectionId} → DIVIDER (separator section)`);
       return;
     }
     
@@ -360,7 +362,7 @@ export function assignMixedBackgroundsToSections(
       background: backgroundAssignments[s]
     }));
     
-    console.log('📊 Recent assignments:', recentAssignments);
+    logger.debug('📊 Recent assignments:', recentAssignments);
     
     let consecutiveHighlights = 0;
     for (let i = recentAssignments.length - 1; i >= 0; i--) {
@@ -372,13 +374,13 @@ export function assignMixedBackgroundsToSections(
       }
     }
     
-    console.log(`📊 Consecutive highlights before ${sectionId}: ${consecutiveHighlights}`);
+    logger.debug(`📊 Consecutive highlights before ${sectionId}: ${consecutiveHighlights}`);
     
     // ===== RULE 3: VISUAL RHYTHM ENFORCEMENT =====
     
     if (consecutiveHighlights >= 2) {
       backgroundAssignments[sectionId] = 'neutral';
-      console.log(`🎯 ${sectionId} → NEUTRAL (FORCED: ${consecutiveHighlights} consecutive highlights - visual rhythm enforced)`);
+      logger.debug(`🎯 ${sectionId} → NEUTRAL (FORCED: ${consecutiveHighlights} consecutive highlights - visual rhythm enforced)`);
       return;
     }
     
@@ -390,13 +392,13 @@ export function assignMixedBackgroundsToSections(
       if (consecutiveHighlights === 1 && currentPriority !== 'high') {
         // Medium/low priority sections give way to visual rhythm after 1 consecutive
         backgroundAssignments[sectionId] = 'neutral';
-        console.log(`🎯 ${sectionId} → NEUTRAL (conversion-critical but ${currentPriority} priority, visual rhythm enforced)`);
+        logger.debug(`🎯 ${sectionId} → NEUTRAL (conversion-critical but ${currentPriority} priority, visual rhythm enforced)`);
         return;
       }
       
       // Can be highlighted
       backgroundAssignments[sectionId] = 'secondary';
-      console.log(`🎯 ${sectionId} → SECONDARY (conversion-critical, ${currentPriority} priority)`);
+      logger.debug(`🎯 ${sectionId} → SECONDARY (conversion-critical, ${currentPriority} priority)`);
       return;
     }
     
@@ -404,13 +406,13 @@ export function assignMixedBackgroundsToSections(
     
     if (consecutiveHighlights >= 1) {
       backgroundAssignments[sectionId] = 'neutral';
-      console.log(`🎯 ${sectionId} → NEUTRAL (supporting section, visual break after ${consecutiveHighlights} highlights)`);
+      logger.debug(`🎯 ${sectionId} → NEUTRAL (supporting section, visual break after ${consecutiveHighlights} highlights)`);
       return;
     }
     
     // Default for supporting sections when no recent highlights
     backgroundAssignments[sectionId] = 'neutral';
-    console.log(`🎯 ${sectionId} → NEUTRAL (supporting section, default)`);
+    logger.debug(`🎯 ${sectionId} → NEUTRAL (supporting section, default)`);
   });
   
   // Log the final pattern for review
@@ -418,7 +420,7 @@ export function assignMixedBackgroundsToSections(
     `${section}(${backgroundAssignments[section]})`
   ).join(' → ');
   
-  console.log('\n🎨 Final background pattern:', pattern);
+  logger.debug('\n🎨 Final background pattern:', pattern);
   
   // Validate visual rhythm
   validateVisualRhythm(sections, backgroundAssignments);
@@ -432,7 +434,7 @@ function validateVisualRhythm(
   assignments: Record<string, SectionBackgroundType>
 ): void {
   
-  console.log('🔍 Validating visual rhythm...');
+  logger.debug('🔍 Validating visual rhythm...');
   
   let consecutiveHighlights = 0;
   let maxConsecutive = 0;
@@ -460,13 +462,13 @@ function validateVisualRhythm(
   });
   
   // Log the complete visual pattern
-  console.log('🎨 Visual pattern:', pattern.join(' → '));
+  logger.debug('🎨 Visual pattern:', pattern.join(' → '));
   
   if (violations.length > 0) {
-    console.warn('⚠️ Visual rhythm violations detected:', violations);
-    console.warn('💡 Consider increasing visual breaks between highlighted sections');
+    logger.warn('⚠️ Visual rhythm violations detected:', violations);
+    logger.warn('💡 Consider increasing visual breaks between highlighted sections');
   } else {
-    console.log('✅ Visual rhythm validation passed - good visual breathing');
+    logger.debug('✅ Visual rhythm validation passed - good visual breathing');
   }
   
   // ✅ ENHANCED METRICS
@@ -475,7 +477,7 @@ function validateVisualRhythm(
   const dividerCount = sections.filter(s => assignments[s] === 'divider').length;
   const highlightRatioPercent = Math.round((highlightCount / sections.length) * 100);
   
-  console.log(`📊 Background distribution:`, {
+  logger.debug(`📊 Background distribution:`, {
     highlights: highlightCount,
     neutrals: neutralCount,
     dividers: dividerCount,
@@ -486,16 +488,16 @@ function validateVisualRhythm(
   
   // ✅ RECOMMENDATIONS
   if (highlightRatioPercent > 70) {
-    console.warn('💡 Recommendation: Too many highlights (>70%). Consider making some sections neutral for better visual hierarchy.');
+    logger.warn('💡 Recommendation: Too many highlights (>70%). Consider making some sections neutral for better visual hierarchy.');
   }
   
   if (maxConsecutive > 2) {
-    console.warn('💡 Recommendation: Break up consecutive highlights with neutral sections for better readability.');
+    logger.warn('💡 Recommendation: Break up consecutive highlights with neutral sections for better readability.');
   }
 }
 
 // ===== INTEGRATION FUNCTION FOR EXISTING BACKGROUND SYSTEM =====
 export function updateBackgroundIntegrationWithMixedLogic() {
-  console.log('🔄 Mixed background logic is ready for integration');
-  console.log('To integrate: Replace getSectionBackgroundTypeWithContext calls with getMixedSectionBackground');
+  logger.debug('🔄 Mixed background logic is ready for integration');
+  logger.debug('To integrate: Replace getSectionBackgroundTypeWithContext calls with getMixedSectionBackground');
 }

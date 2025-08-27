@@ -3,6 +3,7 @@
 
 import type { ElementSelection } from '@/types/store';
 
+import { logger } from '@/lib/logger';
 export interface EditorSelection {
   // Text editing state (highest priority)
   isTextEditing: boolean;

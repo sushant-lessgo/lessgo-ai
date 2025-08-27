@@ -4,6 +4,7 @@
 import { logInteractionTimeline } from './interactionTracking';
 import { TransactionId } from './bulletproofSuppression';
 
+import { logger } from '@/lib/logger';
 interface OperationState {
   isFormatting: boolean;
   currentTxId: TransactionId | null;
@@ -39,10 +40,10 @@ class ReEntrancyGuard {
   beginFormatting(txId: TransactionId, operationName: string): boolean {
     // Check for re-entrancy
     if (this.state.isFormatting) {
-      console.error(`🚫 Re-entrancy blocked! Current: ${this.state.currentTxId}, Attempted: ${txId}`);
-      console.error(`🚫 Current operation: ${operationName}`);
-      console.error(`🚫 Operation stack:`, this.state.operationStack);
-      console.error(`🚫 Re-entry stack trace:`, new Error().stack);
+      logger.error(`🚫 Re-entrancy blocked! Current: ${this.state.currentTxId}, Attempted: ${txId}`);
+      logger.error(`🚫 Current operation: ${operationName}`);
+      logger.error(`🚫 Operation stack:`, this.state.operationStack);
+      logger.error(`🚫 Re-entry stack trace:`, new Error().stack);
       
       logInteractionTimeline('reentry-blocked', {
         currentTxId: this.state.currentTxId,
@@ -64,7 +65,7 @@ class ReEntrancyGuard {
       timestamp: Date.now(),
     });
 
-    console.log(`✅ Begin formatting: ${operationName} (${txId})`);
+    logger.debug(`✅ Begin formatting: ${operationName} (${txId})`);
     return true;
   }
 
@@ -75,12 +76,12 @@ class ReEntrancyGuard {
    */
   endFormatting(txId: TransactionId, operationName: string): void {
     if (!this.state.isFormatting) {
-      console.warn(`⚠️ End formatting called but no operation in progress: ${operationName} (${txId})`);
+      logger.warn(`⚠️ End formatting called but no operation in progress: ${operationName} (${txId})`);
       return;
     }
 
     if (this.state.currentTxId !== txId) {
-      console.error(`🚫 Transaction ID mismatch! Expected: ${this.state.currentTxId}, Got: ${txId}`);
+      logger.error(`🚫 Transaction ID mismatch! Expected: ${this.state.currentTxId}, Got: ${txId}`);
       console.assert(false, `Transaction ID mismatch in endFormatting`);
     }
 
@@ -94,7 +95,7 @@ class ReEntrancyGuard {
       timestamp: Date.now(),
     });
 
-    console.log(`✅ End formatting: ${operationName} (${txId})`);
+    logger.debug(`✅ End formatting: ${operationName} (${txId})`);
   }
 
   /**
@@ -125,7 +126,7 @@ class ReEntrancyGuard {
         return result;
       }
     } catch (error) {
-      console.error(`❌ Operation failed: ${operationName} (${txId})`, error);
+      logger.error(`❌ Operation failed: ${operationName} (${txId})`, error);
       this.endFormatting(txId, operationName);
       throw error;
     }
@@ -136,7 +137,7 @@ class ReEntrancyGuard {
    * @param reason - Reason for emergency cleanup
    */
   emergencyCleanup(reason: string): void {
-    console.warn(`🚨 Emergency re-entrancy cleanup: ${reason}`, {
+    logger.warn(`🚨 Emergency re-entrancy cleanup: ${reason}`, {
       wasFormatting: this.state.isFormatting,
       currentTxId: this.state.currentTxId,
       operationStack: [...this.state.operationStack],

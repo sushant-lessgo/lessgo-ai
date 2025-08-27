@@ -15,6 +15,7 @@ import { VariableThemeInjector } from '@/modules/Design/ColorSystem/VariableThem
 import { CSSVariableErrorBoundary } from '@/components/CSSVariableErrorBoundary';
 import { useFeatureFlags } from '@/utils/featureFlags';
 
+import { logger } from '@/lib/logger';
 // ... (font loading utility remains the same)
 const loadGoogleFonts = () => {
   if (document.querySelector('#google-fonts-preload')) {
@@ -163,10 +164,10 @@ export default function LandingPageRenderer({ className = '', tokenId }: Landing
     
     return backgroundSystem;
   } catch (error) {
-    console.error('=== BACKGROUND SYSTEM ERROR ===');
-    console.error('Error details:', error);
+    logger.error('=== BACKGROUND SYSTEM ERROR ===');
+    logger.error('Error details:', error);
     if (error instanceof Error) {
-      console.error('Error stack:', error.stack);
+      logger.error('Error stack:', error.stack);
     }
     return null;
   }
@@ -184,7 +185,7 @@ export default function LandingPageRenderer({ className = '', tokenId }: Landing
   const colorTokens = useMemo(() => {
    // console.log('🎨 Generating color tokens...');
     const tokens = getColorTokens();
-    console.log('✅ Color tokens generated:', {
+    logger.debug('✅ Color tokens generated:', {
       accent: tokens.accent,
       bgSecondary: tokens.bgSecondary,
       hasSophisticatedSecondary: tokens.bgSecondary?.includes('gradient')
@@ -200,7 +201,7 @@ export default function LandingPageRenderer({ className = '', tokenId }: Landing
 
   // ✅ ENHANCED: Get ordered sections with ALTERNATING background assignment
   
-  console.log('🔍 LandingPageRenderer Debug:', {
+  logger.debug('🔍 LandingPageRenderer Debug:', {
   sectionsFromStore: sections,
   sectionsCount: sections?.length,
   sectionLayoutsFromStore: sectionLayouts,
@@ -213,7 +214,7 @@ export default function LandingPageRenderer({ className = '', tokenId }: Landing
       return [];
     }
 
-    console.log('🔄 Processing sections with EDIT MODE ORDER preserved:', {
+    logger.debug('🔄 Processing sections with EDIT MODE ORDER preserved:', {
       hasDynamicSystem: !!dynamicBackgroundSystem,
       totalSections: sections.length,
       editModeOrder: sections,
@@ -276,7 +277,7 @@ const finalSections: OrderedSection[] = processedSections
   return { id: sectionId, order, background, layout, data };
 });
     // ✅ Log the final alternating pattern
-    console.log('🎨 Final alternating background pattern:', 
+    logger.debug('🎨 Final alternating background pattern:', 
       finalSections.map(s => `${s.id}: ${s.background}${s.alternatingInfo?.wasAlternated ? ' (alternated)' : ''}`).join(' → ')
     );
 
@@ -292,7 +293,7 @@ const finalSections: OrderedSection[] = processedSections
 
     // Use fallback if component not found
     if (!LayoutComponent) {
-      console.warn(`Layout component not found: ${sectionId}.${layout}`);
+      logger.warn(`Layout component not found: ${sectionId}.${layout}`);
       return (
         <MissingLayoutComponent 
           key={sectionId}
@@ -328,7 +329,7 @@ const finalSections: OrderedSection[] = processedSections
       const gradientMatch = cssClass.match(/bg-\[(linear-gradient\([^)]+\))\]/);
       if (gradientMatch) {
         const gradientCSS = gradientMatch[1].replace(/\s/g, ' '); // Normalize spaces
-        console.log('🎨 [LandingPageRenderer] Converting complex gradient to inline style:', {
+        logger.debug('🎨 [LandingPageRenderer] Converting complex gradient to inline style:', {
           originalClass: cssClass,
           extractedGradient: gradientCSS
         });
@@ -344,7 +345,7 @@ const finalSections: OrderedSection[] = processedSections
 
     // Enhanced background logging
     if (backgroundType === 'secondary') {
-      console.log(`🎨 Rendering secondary section ${sectionId}:`, {
+      logger.debug(`🎨 Rendering secondary section ${sectionId}:`, {
         backgroundCSS: sectionBackgroundCSS,
         themeSecondary: theme.colors.sectionBackgrounds.secondary,
         isFromAccentOptions: theme.colors.sectionBackgrounds.secondary?.includes('gradient'),
@@ -356,7 +357,7 @@ const finalSections: OrderedSection[] = processedSections
 
     // Enhanced logging for alternated sections
     if (alternatingInfo?.wasAlternated) {
-      console.log(`🔄 Rendering alternated section ${sectionId}:`, {
+      logger.debug(`🔄 Rendering alternated section ${sectionId}:`, {
         originallyWouldBe: 'secondary',
         actuallyIs: backgroundType,
         actualCSS: sectionBackgroundCSS,
@@ -365,7 +366,7 @@ const finalSections: OrderedSection[] = processedSections
       });
     }
     
-    console.log(`🎨 Section ${sectionId} CSS class:`, sectionBackgroundCSS);
+    logger.debug(`🎨 Section ${sectionId} CSS class:`, sectionBackgroundCSS);
 
     // Handle section-specific errors
     const sectionError = errors[sectionId];
@@ -395,7 +396,7 @@ const finalSections: OrderedSection[] = processedSections
     try {
       // Debug logging for hero section
       if (sectionId === 'hero') {
-        console.log('🎯 Rendering hero section with data:', {
+        logger.debug('🎯 Rendering hero section with data:', {
           mode,
           isEditable: mode === 'edit',
           data,
@@ -443,7 +444,7 @@ const finalSections: OrderedSection[] = processedSections
         );
       }
     } catch (error) {
-      console.error(`Error rendering section ${sectionId}:`, error);
+      logger.error(`Error rendering section ${sectionId}:`, error);
       
       if (mode === 'edit') {
         return (
@@ -541,7 +542,7 @@ const finalSections: OrderedSection[] = processedSections
   // Log feature flag status in development
   useEffect(() => {
     if (process.env.NODE_ENV === 'development' && featureFlags.enableMigrationDebug) {
-      console.log('🚩 Feature Flags Status:', {
+      logger.debug('🚩 Feature Flags Status:', {
         tokenId: effectiveTokenId,
         enableVariableMode: featureFlags.enableVariableMode,
         enableHybridMode: featureFlags.enableHybridMode,
@@ -745,7 +746,7 @@ const finalSections: OrderedSection[] = processedSections
     <CSSVariableErrorBoundary
       fallbackMode="legacy"
       onError={(error, errorInfo) => {
-        console.error('CSS Variable system failed, falling back to legacy mode:', error);
+        logger.error('CSS Variable system failed, falling back to legacy mode:', error);
         // Could track this error in analytics
         if (typeof window !== 'undefined' && (window as any).gtag) {
           (window as any).gtag('event', 'css_variable_system_error', {

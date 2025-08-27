@@ -4,6 +4,7 @@ import { bgVariations } from './bgVariations';
 import { accentOptions } from '../ColorSystem/accentOptions';
 import { selectAccentOption } from '../ColorSystem/selectAccentFromTags';
 import { getSecondaryBackground } from './simpleSecondaryBackgrounds';
+import { logger } from '@/lib/logger';
 import { 
   assignEnhancedBackgroundsToSections, 
   getEnhancedSectionBackground
@@ -49,20 +50,20 @@ export function selectPrimaryVariation(onboardingData: OnboardingDataInput): {
     const funnelResult = getTopVariationWithFunnel(funnelInput);
     const primaryVariationKey = funnelResult?.primaryVariation;
     
-    console.log('🔍 Funnel result debug:', {
+    logger.debug('🔍 Funnel result debug:', {
       inputData: funnelInput,
       primaryVariationKey,
       topVariations: funnelResult?.trace?.topVariations
     });
     
     if (!primaryVariationKey || typeof primaryVariationKey !== 'string' || !primaryVariationKey.includes('::')) {
-      console.warn('Invalid or missing primaryVariationKey from funnel, using smart fallback');
+      logger.warn('Invalid or missing primaryVariationKey from funnel, using smart fallback');
       return getSmartFallbackVariation(onboardingData);
     }
     
     const [archetypeId, themeId] = primaryVariationKey.split("::");
     
-    console.log('🔍 Looking for variation:', { archetypeId, themeId });
+    logger.debug('🔍 Looking for variation:', { archetypeId, themeId });
     
     const matchingVariation = bgVariations.find(
       variation => 
@@ -70,12 +71,12 @@ export function selectPrimaryVariation(onboardingData: OnboardingDataInput): {
         variation.themeId === themeId
     );
 
-    console.log('🔍 Found matching variations:', bgVariations.filter(v => 
+    logger.debug('🔍 Found matching variations:', bgVariations.filter(v => 
       v.archetypeId === archetypeId && v.themeId === themeId
     ).map(v => ({ id: v.variationId, class: v.tailwindClass })));
 
     if (!matchingVariation) {
-      console.warn(`No matching variation found for ${primaryVariationKey}, using fallback`);
+      logger.warn(`No matching variation found for ${primaryVariationKey}, using fallback`);
       return getSmartFallbackVariation(onboardingData);
     }
 
@@ -83,10 +84,10 @@ export function selectPrimaryVariation(onboardingData: OnboardingDataInput): {
     let cleanTailwindClass = matchingVariation.tailwindClass;
     if (cleanTailwindClass.includes("bg-[url('/noise.svg')]")) {
       cleanTailwindClass = cleanTailwindClass.replace("bg-[url('/noise.svg')] ", "").replace(" bg-blend-overlay", "");
-      console.log('🔧 Removed missing noise.svg from background class');
+      logger.debug('🔧 Removed missing noise.svg from background class');
     }
 
-    console.log('✅ Selected primary variation:', {
+    logger.debug('✅ Selected primary variation:', {
       variationId: matchingVariation.variationId,
       tailwindClass: cleanTailwindClass,
       baseColor: matchingVariation.baseColor,
@@ -99,7 +100,7 @@ export function selectPrimaryVariation(onboardingData: OnboardingDataInput): {
     };
     
   } catch (error) {
-    console.error('Error in funnel system:', error);
+    logger.error('Error in funnel system:', error);
     return getSmartFallbackVariation(onboardingData);
   }
 }
@@ -153,7 +154,7 @@ function getSmartFallbackVariation(onboardingData: OnboardingDataInput): {
   if (!selectedVariation) {
     const randomIndex = Math.floor(Math.random() * bgVariations.length); // Use all 412 variations
     selectedVariation = bgVariations[randomIndex];
-    console.log('🎨 [FALLBACK-DEBUG] Using improved fallback selection:', {
+    logger.debug('🎨 [FALLBACK-DEBUG] Using improved fallback selection:', {
       totalVariationsAvailable: bgVariations.length,
       selectedIndex: randomIndex,
       selectedVariation: selectedVariation.variationId
@@ -186,11 +187,11 @@ export function getAccentColor(baseColor: string, onboardingData: OnboardingData
       marketSophisticationLevel: onboardingData.marketSophisticationLevel
     };
 
-    console.log('🎨 Using smart color harmony accent selection system');
+    logger.debug('🎨 Using smart color harmony accent selection system');
     const smartAccent = getSmartAccentColor(baseColor, businessContext);
     
     if (smartAccent && smartAccent.confidence > 0.5) {
-      console.log('✅ Smart accent selection successful:', smartAccent);
+      logger.debug('✅ Smart accent selection successful:', smartAccent);
       return {
         accentColor: smartAccent.accentColor,
         accentCSS: smartAccent.accentCSS,
@@ -198,7 +199,7 @@ export function getAccentColor(baseColor: string, onboardingData: OnboardingData
     }
     
     // Fallback to old system if smart selection has low confidence
-    console.log('⚠️ Smart accent had low confidence, trying legacy system');
+    logger.debug('⚠️ Smart accent had low confidence, trying legacy system');
     
     // ✅ PHASE 5.2: Map canonical field names to selectAccentOption context
     const userContext = {
@@ -220,10 +221,10 @@ export function getAccentColor(baseColor: string, onboardingData: OnboardingData
       };
     }
   } catch (error) {
-    console.warn('Error in accent selection systems:', error);
+    logger.warn('Error in accent selection systems:', error);
   }
   
-  console.warn(`No accent options found for base color ${baseColor}, using fallback`);
+  logger.warn(`No accent options found for base color ${baseColor}, using fallback`);
   const fallbackOptions = accentOptions?.filter(option => option.baseColor === baseColor);
   if (fallbackOptions && fallbackOptions.length > 0) {
     const fallback = fallbackOptions[0];
@@ -292,7 +293,7 @@ export function generateCompleteBackgroundSystem(onboardingData: OnboardingDataI
     return result;
     
   } catch (error) {
-    console.error('❌ Failed to generate background system:', error);
+    logger.error('❌ Failed to generate background system:', error);
     
     const safeDefaults = {
       primary: "bg-gradient-to-br from-blue-500 to-blue-600",
@@ -531,7 +532,7 @@ export function validateEnhancedAssignments(
   
   const isValid = issues.length === 0;
   
-  console.log('✅ Enhanced Assignment Validation:', {
+  logger.debug('✅ Enhanced Assignment Validation:', {
     isValid,
     highlightRatio: Math.round(highlightRatio) + '%',
     maxConsecutive,

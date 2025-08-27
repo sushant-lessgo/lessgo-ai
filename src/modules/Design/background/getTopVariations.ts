@@ -1,6 +1,7 @@
 
 import { variationScoreMap } from './variationScoreMap';
 
+import { logger } from '@/lib/logger';
 type ScoreMap = Record<string, Record<string, 0 | 1 | 2 | 3>>;
 
 interface FunnelInput {
@@ -165,7 +166,7 @@ export function getTopVariationWithFunnel(input: FunnelInput): FunnelResult {
   const randomIndex = Math.floor(Math.random() * top15Variations.length);
 
   // Log variety improvements for debugging
-  console.log('🎨 [VARIETY-DEBUG] Background selection improvements:', {
+  logger.debug('🎨 [VARIETY-DEBUG] Background selection improvements:', {
     totalVariations: variationScores.length,
     topVariationsCount: top15Variations.length,
     selectedVariation: top15Variations[randomIndex],

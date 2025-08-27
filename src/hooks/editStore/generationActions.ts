@@ -10,6 +10,7 @@ import {
 } from '@/modules/Design/ColorSystem/colorTokens';
 import { pickFontFromOnboarding } from '@/modules/Design/fontSystem/pickFont';
 
+import { logger } from '@/lib/logger';
 // AI Generation Status type
 type AIGenerationStatus = {
   isGenerating: boolean;
@@ -37,7 +38,7 @@ export function createGenerationActions(set: any, get: any) {
   // ✅ Bulk section initialization method from PageStore
   initializeSections: (sectionIds: string[], sectionLayouts: Record<string, string>) =>
     set((state: EditStore) => {
-      console.log('🏗️ EditStore: Initializing sections:', { 
+      logger.debug('🏗️ EditStore: Initializing sections:', { 
         sectionIds, 
         sectionLayouts,
         heroLayout: sectionLayouts.hero,
@@ -56,7 +57,7 @@ export function createGenerationActions(set: any, get: any) {
         const themeColor = getSectionBackgroundType(sectionId, sectionIds, undefined, state.onboardingData as any);
         const backgroundType: BackgroundType = themeColor;
         
-        console.log(`🔧 Processing section ${sectionId}:`, {
+        logger.debug(`🔧 Processing section ${sectionId}:`, {
           availableLayout: sectionLayouts[sectionId],
           finalLayout: layout,
           isDefault: layout === 'default',
@@ -96,7 +97,7 @@ export function createGenerationActions(set: any, get: any) {
           },
         };
         
-        console.log(`✅ Section ${sectionId} initialized with layout: ${layout}, background: ${backgroundType}`);
+        logger.debug(`✅ Section ${sectionId} initialized with layout: ${layout}, background: ${backgroundType}`);
       });
       
       state.persistence.isDirty = true;
@@ -110,9 +111,9 @@ export function createGenerationActions(set: any, get: any) {
 
   // ✅ AI Response Processing from PageStore (adapted for EditStore structure)
   updateFromAIResponse: (aiResponse: any) => {
-    console.log('🔍 updateFromAIResponse RAW INPUT:', JSON.stringify(aiResponse, null, 2));
+    logger.debug('🔍 updateFromAIResponse RAW INPUT:', JSON.stringify(aiResponse, null, 2));
     set((state: EditStore) => {
-      console.log('🤖 EditStore: updateFromAIResponse called with:', {
+      logger.debug('🤖 EditStore: updateFromAIResponse called with:', {
         success: aiResponse.success,
         isPartial: aiResponse.isPartial,
         hasContent: !!aiResponse.content,
@@ -133,11 +134,11 @@ export function createGenerationActions(set: any, get: any) {
 
       // ✅ Get pre-selected sections that should already exist in the store
       const preSelectedSections = state.sections;
-      console.log('🔒 Pre-selected sections from store:', preSelectedSections);
+      logger.debug('🔒 Pre-selected sections from store:', preSelectedSections);
       
       // ✅ If no sections in store, this means sections weren't properly initialized
       if (preSelectedSections.length === 0) {
-        console.error('❌ CRITICAL: No sections found in store! Sections should be initialized before AI response.');
+        logger.error('❌ CRITICAL: No sections found in store! Sections should be initialized before AI response.');
         state.aiGeneration.errors.push('No sections initialized in store before AI response');
         return;
       }
@@ -147,7 +148,7 @@ export function createGenerationActions(set: any, get: any) {
 
       // ✅ Process AI content only for pre-selected sections
       if (aiResponse.content && typeof aiResponse.content === 'object') {
-        console.log('🎯 Processing AI response content:', {
+        logger.debug('🎯 Processing AI response content:', {
           contentKeys: Object.keys(aiResponse.content),
           totalSections: Object.keys(aiResponse.content).length,
           fullRawContent: JSON.stringify(aiResponse.content, null, 2),
@@ -163,22 +164,22 @@ export function createGenerationActions(set: any, get: any) {
         Object.entries(aiResponse.content).forEach(([sectionId, sectionData]: [string, any]) => {
           // ✅ Only process sections that were pre-selected by rules
           if (!preSelectedSections.includes(sectionId)) {
-            console.warn(`🚫 Ignoring section "${sectionId}" - not in pre-selected sections`);
+            logger.warn(`🚫 Ignoring section "${sectionId}" - not in pre-selected sections`);
             sectionsSkipped.push(sectionId);
             return;
           }
 
           if (!sectionData || typeof sectionData !== 'object') {
-            console.warn(`⚠️ Section ${sectionId} has invalid data format`);
+            logger.warn(`⚠️ Section ${sectionId} has invalid data format`);
             sectionsSkipped.push(sectionId);
             return;
           }
 
-          console.log(`✅ Processing pre-selected section: ${sectionId}`);
+          logger.debug(`✅ Processing pre-selected section: ${sectionId}`);
 
           // ✅ Section should already exist in content, but verify
           if (!state.content[sectionId]) {
-            console.error(`❌ CRITICAL: Section ${sectionId} not found in content store! This should not happen.`);
+            logger.error(`❌ CRITICAL: Section ${sectionId} not found in content store! This should not happen.`);
             // Create it as fallback, but this indicates a bug in initialization
             state.content[sectionId] = {
               id: sectionId,
@@ -216,7 +217,7 @@ export function createGenerationActions(set: any, get: any) {
           const generatedElements: string[] = [];
 
           // Update elements with AI-generated content
-          console.log(`📝 Processing elements for section ${sectionId}:`, {
+          logger.debug(`📝 Processing elements for section ${sectionId}:`, {
             elementKeys: Object.keys(sectionData),
             elementCount: Object.keys(sectionData).length,
             sectionDataType: typeof sectionData,
@@ -224,7 +225,7 @@ export function createGenerationActions(set: any, get: any) {
           });
           
           Object.entries(sectionData).forEach(([elementKey, elementValue]: [string, any]) => {
-            console.log(`🔍 Processing element: ${elementKey}`, {
+            logger.debug(`🔍 Processing element: ${elementKey}`, {
               elementKey,
               elementValue,
               elementType: typeof elementValue,
@@ -237,9 +238,9 @@ export function createGenerationActions(set: any, get: any) {
             if (elementValue !== undefined && elementValue !== null) {
               section.elements[elementKey] = elementValue;
               generatedElements.push(elementKey);
-              console.log(`  ✅ Added element: ${elementKey} = "${typeof elementValue === 'string' ? elementValue.substring(0, 50) + '...' : elementValue}"`);
+              logger.debug(`  ✅ Added element: ${elementKey} = "${typeof elementValue === 'string' ? elementValue.substring(0, 50) + '...' : elementValue}"`);
             } else {
-              console.log(`  ⚠️ Skipped null/undefined element: ${elementKey}`, {
+              logger.debug(`  ⚠️ Skipped null/undefined element: ${elementKey}`, {
                 reason: elementValue === undefined ? 'undefined' : 'null',
                 originalValue: elementValue
               });
@@ -259,18 +260,18 @@ export function createGenerationActions(set: any, get: any) {
             section.backgroundType = getSectionBackgroundType(sectionId, state.sections, undefined, state.onboardingData as any) as BackgroundType;
           }
 
-          console.log(`✅ Section ${sectionId} updated with ${generatedElements.length} elements`);
+          logger.debug(`✅ Section ${sectionId} updated with ${generatedElements.length} elements`);
           sectionsGenerated.push(sectionId);
           
           // Debug: Verify the section content was actually updated
-          console.log(`🔍 Verifying section ${sectionId} content:`, {
+          logger.debug(`🔍 Verifying section ${sectionId} content:`, {
             hasContent: !!state.content[sectionId],
             elementCount: Object.keys(state.content[sectionId]?.elements || {}).length,
             elements: Object.keys(state.content[sectionId]?.elements || {})
           });
         });
       } else {
-        console.error('❌ No AI content received or content is not an object:', {
+        logger.error('❌ No AI content received or content is not an object:', {
           hasContent: !!aiResponse.content,
           contentType: typeof aiResponse.content,
           aiResponse
@@ -281,7 +282,7 @@ export function createGenerationActions(set: any, get: any) {
       const missingSections = preSelectedSections.filter(sectionId => !sectionsGenerated.includes(sectionId));
       
       if (missingSections.length > 0) {
-        console.warn('⚠️ Some pre-selected sections were not returned by AI:', missingSections);
+        logger.warn('⚠️ Some pre-selected sections were not returned by AI:', missingSections);
         state.aiGeneration.warnings.push(`AI did not generate content for: ${missingSections.join(', ')}`);
       }
 
@@ -290,7 +291,7 @@ export function createGenerationActions(set: any, get: any) {
       const finalContentCount = Object.keys(state.content).length;
       
       if (finalSectionCount !== finalContentCount) {
-        console.error('❌ CRITICAL: Section/Content mismatch after AI response!', {
+        logger.error('❌ CRITICAL: Section/Content mismatch after AI response!', {
           sectionsInLayout: finalSectionCount,
           sectionsInContent: finalContentCount,
           layoutSections: [...state.sections], // Create a copy to avoid Proxy issues
@@ -313,7 +314,7 @@ export function createGenerationActions(set: any, get: any) {
       state.persistence.isDirty = true;
       
       // Final content check
-      console.log('✅ Final store content state after AI update:', {
+      logger.debug('✅ Final store content state after AI update:', {
         sections: [...state.sections], // Create a copy to avoid Proxy issues
         contentKeys: Object.keys(state.content),
         sampleContent: Object.entries(state.content).map(([id, section]) => ({
@@ -386,7 +387,7 @@ export function createGenerationActions(set: any, get: any) {
               draft.aiGeneration.progress = Math.round((completed / sections.length) * 100);
             });
           } catch (error) {
-            console.error(`Failed to regenerate section ${sectionId}:`, error);
+            logger.error(`Failed to regenerate section ${sectionId}:`, error);
             set((draft: EditStore) => {
               draft.aiGeneration.errors.push(`Failed to regenerate ${sectionId}: ${error instanceof Error ? error.message : 'Unknown error'}`);
             });
@@ -414,13 +415,13 @@ export function createGenerationActions(set: any, get: any) {
   // ✅ Background System Integration from PageStore
   updateFromBackgroundSystem: (backgroundSystem: BackgroundSystem) =>
     set((state: EditStore) => {
-      console.log('🔄 [STORE DEBUG] EditStore: BEFORE update:', {
+      logger.debug('🔄 [STORE DEBUG] EditStore: BEFORE update:', {
         oldPrimary: state.theme.colors.sectionBackgrounds.primary,
         oldSecondary: state.theme.colors.sectionBackgrounds.secondary,
         oldBaseColor: state.theme.colors.baseColor
       });
       
-      console.log('🔄 [STORE DEBUG] EditStore: Updating with new background system:', {
+      logger.debug('🔄 [STORE DEBUG] EditStore: Updating with new background system:', {
         newPrimary: backgroundSystem.primary,
         newSecondary: backgroundSystem.secondary,
         newBaseColor: backgroundSystem.baseColor,
@@ -438,7 +439,7 @@ export function createGenerationActions(set: any, get: any) {
       
       state.persistence.isDirty = true;
       
-      console.log('✅ [STORE DEBUG] EditStore: AFTER update:', {
+      logger.debug('✅ [STORE DEBUG] EditStore: AFTER update:', {
         actualPrimary: state.theme.colors.sectionBackgrounds.primary,
         actualSecondary: state.theme.colors.sectionBackgrounds.secondary,
         actualBaseColor: state.theme.colors.baseColor,
@@ -456,7 +457,7 @@ export function createGenerationActions(set: any, get: any) {
         state.persistence.isDirty = true;
       });
     } catch (error) {
-      console.error('Failed to update fonts from tone:', error);
+      logger.error('Failed to update fonts from tone:', error);
       set((state: EditStore) => {
         state.errors['fontUpdate'] = 'Failed to update fonts from tone';
       });
@@ -493,7 +494,7 @@ export function createGenerationActions(set: any, get: any) {
       // console.log('🎨 EditStore: Using integrated background system for color tokens:', backgroundSystemData);
       return generateColorTokensFromBackgroundSystem(backgroundSystemData);
     } else {
-      console.warn('EditStore: Using fallback color token generation - background system not fully integrated');
+      logger.warn('EditStore: Using fallback color token generation - background system not fully integrated');
       return generateColorTokens({
         baseColor: theme.colors.baseColor,
         accentColor: theme.colors.accentColor,

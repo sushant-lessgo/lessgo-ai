@@ -9,6 +9,7 @@ import TaxonomyModalManager from '../modals/TaxonomyModalManager';
 import LoadingButtonBar from '@/components/shared/LoadingButtonBar';
 import { FIELD_DISPLAY_NAMES, CANONICAL_FIELD_NAMES, HIDDEN_FIELD_DISPLAY_NAMES, type CanonicalFieldName, type AnyFieldName } from '@/types/core/index';
 
+import { logger } from '@/lib/logger';
 interface LeftPanelProps {
   tokenId: string;
 }
@@ -33,7 +34,7 @@ export function LeftPanel({ tokenId }: LeftPanelProps) {
   
   // Debug: log available methods
   if (process.env.NODE_ENV === 'development') {
-    console.log('🔍 LeftPanel Store Methods Available:', {
+    logger.debug('🔍 LeftPanel Store Methods Available:', {
       regenerateAllContent: !!storeActions.regenerateAllContent,
       regenerateDesignAndCopy: !!storeActions.regenerateDesignAndCopy,
       regenerateContentOnly: !!storeActions.regenerateContentOnly,
@@ -180,7 +181,7 @@ export function LeftPanel({ tokenId }: LeftPanelProps) {
       modalManager.openFieldModal(fieldName, currentValue);
       // Field changes will be detected by the useEffect watching validatedFields/hiddenInferredFields
     } else {
-      console.error('Modal manager not available');
+      logger.error('Modal manager not available');
       // Fallback to existing method (only works for canonical fields)
       if (!(hiddenInferredFields as any)[fieldName]) {
         reopenFieldForEditing(fieldName as CanonicalFieldName);
@@ -225,7 +226,7 @@ export function LeftPanel({ tokenId }: LeftPanelProps) {
   const handleRegenerateContent = async () => {
     if (!hasFieldChanges || isRegenerating) return;
     
-    console.log('🔄 Starting page regeneration:', {
+    logger.debug('🔄 Starting page regeneration:', {
       includeDesignRegeneration,
       hasRegenerateAllContent: !!regenerateAllContent,
       hasRegenerateDesignAndCopy: !!regenerateDesignAndCopy,
@@ -235,11 +236,11 @@ export function LeftPanel({ tokenId }: LeftPanelProps) {
     try {
       if (includeDesignRegeneration) {
         // Full regeneration: design + copy
-        console.log('🎨 Starting design + content regeneration');
+        logger.debug('🎨 Starting design + content regeneration');
         await regenerateDesignAndCopy?.(); // ✅ FIXED: Now calls the correct method with design changes
       } else {
         // Copy-only regeneration
-        console.log('📝 Starting content-only regeneration');
+        logger.debug('📝 Starting content-only regeneration');
         await regenerateContentOnly?.();
       }
       
@@ -255,7 +256,7 @@ export function LeftPanel({ tokenId }: LeftPanelProps) {
       // Announce success for accessibility
       announceLiveRegion?.('Content regeneration completed successfully');
     } catch (error) {
-      console.error('Regeneration failed:', error);
+      logger.error('Regeneration failed:', error);
       announceLiveRegion?.('Content regeneration failed. Please try again.');
     }
   };

@@ -161,6 +161,7 @@ import ZapierLikeBuilderPreview from '@/modules/UIBlocks/Integration/ZapierLikeB
 import ZigzagImageSteps from '@/modules/UIBlocks/HowItWorks/ZigzagImageSteps';
 
 
+import { logger } from '@/lib/logger';
 // Component registry type definition
 export type ComponentRegistry = Record<string, Record<string, React.ComponentType<any>>>;
 
@@ -424,13 +425,13 @@ export function getComponent(sectionIdOrType: string, layoutName: string): React
   
   const sectionComponents = componentRegistry[sectionType];
   if (!sectionComponents) {
-    console.warn(`No components found for section type: ${sectionType} (from: ${sectionIdOrType})`);
+    logger.warn(`No components found for section type: ${sectionType} (from: ${sectionIdOrType})`);
     return null;
   }
   
   const component = sectionComponents[layoutName];
   if (!component) {
-    console.warn(`No component found for layout: ${sectionType}.${layoutName}`);
+    logger.warn(`No component found for layout: ${sectionType}.${layoutName}`);
     return null;
   }
   

@@ -1,3 +1,5 @@
+import { logger } from '@/lib/logger';
+
 // Test file for selection priority system
 import { 
   getActiveToolbar, 
@@ -62,22 +64,22 @@ const scenarios: Array<{ name: string; selection: EditorSelection; expected: str
 
 // Run tests
 export function testSelectionPriority() {
-  console.log('🧪 Testing Selection Priority System...\n');
+  logger.debug('🧪 Testing Selection Priority System...\n');
   
   let passed = 0;
   let failed = 0;
   
   scenarios.forEach(scenario => {
-    console.log(`Testing: ${scenario.name}`);
+    logger.debug(`Testing: ${scenario.name}`);
     
     const result = getActiveToolbar(scenario.selection);
     const resultStr = result || 'null';
     
     if (resultStr === scenario.expected) {
-      console.log(`✅ PASS: Expected ${scenario.expected}, got ${resultStr}`);
+      logger.debug(`✅ PASS: Expected ${scenario.expected}, got ${resultStr}`);
       passed++;
     } else {
-      console.log(`❌ FAIL: Expected ${scenario.expected}, got ${resultStr}`);
+      logger.debug(`❌ FAIL: Expected ${scenario.expected}, got ${resultStr}`);
       debugSelection(scenario.selection, scenario.name);
       failed++;
     }
@@ -87,18 +89,18 @@ export function testSelectionPriority() {
     const shouldShowElement = shouldShowToolbar('element', scenario.selection);
     const shouldShowSection = shouldShowToolbar('section', scenario.selection);
     
-    console.log(`   Text toolbar visible: ${shouldShowText}`);
-    console.log(`   Element toolbar visible: ${shouldShowElement}`);
-    console.log(`   Section toolbar visible: ${shouldShowSection}`);
-    console.log('');
+    logger.debug(`   Text toolbar visible: ${shouldShowText}`);
+    logger.debug(`   Element toolbar visible: ${shouldShowElement}`);
+    logger.debug(`   Section toolbar visible: ${shouldShowSection}`);
+    logger.debug('');
   });
   
-  console.log(`\n🧪 Test Results: ${passed} passed, ${failed} failed`);
+  logger.debug(`\n🧪 Test Results: ${passed} passed, ${failed} failed`);
   
   if (failed === 0) {
-    console.log('🎉 All tests passed! Priority system working correctly.');
+    logger.debug('🎉 All tests passed! Priority system working correctly.');
   } else {
-    console.log('❌ Some tests failed. Check the logic.');
+    logger.debug('❌ Some tests failed. Check the logic.');
   }
   
   return { passed, failed };
@@ -107,5 +109,5 @@ export function testSelectionPriority() {
 // Run tests if called directly
 if (typeof window !== 'undefined') {
   (window as any).testSelectionPriority = testSelectionPriority;
-  console.log('🧪 Selection Priority Test available at window.testSelectionPriority()');
+  logger.debug('🧪 Selection Priority Test available at window.testSelectionPriority()');
 }

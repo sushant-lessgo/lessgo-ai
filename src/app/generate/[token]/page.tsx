@@ -9,6 +9,7 @@ import { OnboardingDebugPanel } from '@/app/create/[token]/components/Onboarding
 import EditTransitionModal from './components/EditTransitionModal';
 import PageRevealAnimation from './components/PageRevealAnimation';
 
+import { logger } from '@/lib/logger';
 export default function GeneratePage() {
   const params = useParams();
   const router = useRouter();
@@ -68,7 +69,7 @@ function GeneratePageContent({ tokenId }: { tokenId: string }) {
       await new Promise(resolve => setTimeout(resolve, 100));
       
       const currentState = store.getState();
-      console.log('🔍 Generate page checking store state:', {
+      logger.debug('🔍 Generate page checking store state:', {
         sections: currentState.sections.length,
         content: Object.keys(currentState.content).length,
         hasElements: Object.values(currentState.content).some((s: any) => s.elements && Object.keys(s.elements).length > 0)
@@ -99,7 +100,7 @@ function GeneratePageContent({ tokenId }: { tokenId: string }) {
           setDataLoaded(true);
           
         } catch (err) {
-          console.error('Failed to load page data:', err);
+          logger.error('Failed to load page data:', err);
           
           if (err instanceof Error && err.message.includes('regeneration required')) {
             setError('Page needs to be regenerated. Redirecting to setup...');
@@ -133,7 +134,7 @@ function GeneratePageContent({ tokenId }: { tokenId: string }) {
       
       // Log current state for debugging
       const currentState = store.getState();
-      console.log('📊 [GENERATE-DEBUG] Pre-navigation store state:', {
+      logger.debug('📊 [GENERATE-DEBUG] Pre-navigation store state:', {
         sections: currentState.sections.length,
         content: Object.keys(currentState.content).length,
         sectionsArray: currentState.sections,
@@ -167,18 +168,18 @@ function GeneratePageContent({ tokenId }: { tokenId: string }) {
                         );
       
       if (!hasContent) {
-        console.warn('⚠️ Sections exist but no content found. This might be a data loading issue.');
+        logger.warn('⚠️ Sections exist but no content found. This might be a data loading issue.');
         // Don't block navigation, but log the issue
       }
       
       // Step 1: Saving changes
       setTransitionProgress(25);
-      console.log('💾 [GENERATE-DEBUG] Saving data before navigation...');
+      logger.debug('💾 [GENERATE-DEBUG] Saving data before navigation...');
       await currentState.save();
       
       // Log theme after save
       const stateAfterSave = store.getState();
-      console.log('🎨 [GENERATE-DEBUG] Theme after save:', {
+      logger.debug('🎨 [GENERATE-DEBUG] Theme after save:', {
         colors: stateAfterSave.theme?.colors,
         backgroundsAfterSave: {
           primary: stateAfterSave.theme?.colors?.sectionBackgrounds?.primary,
@@ -200,12 +201,12 @@ function GeneratePageContent({ tokenId }: { tokenId: string }) {
       setTransitionProgress(75);
       
       const beforeModeSet = store.getState();
-console.log('🎯 Theme before setMode:', beforeModeSet.theme);
+logger.debug('🎯 Theme before setMode:', beforeModeSet.theme);
 
       // Set edit mode in the store
       currentState.setMode('edit');
       const afterModeSet = store.getState();
-console.log('🎯 Theme after setMode:', afterModeSet.theme);
+logger.debug('🎯 Theme after setMode:', afterModeSet.theme);
 
       // Small delay to ensure all async operations complete
       await new Promise(resolve => setTimeout(resolve, 300));
@@ -214,7 +215,7 @@ console.log('🎯 Theme after setMode:', afterModeSet.theme);
       setTransitionStep(3);
       setTransitionProgress(90);
       
-      console.log('✅ [GENERATE-DEBUG] Data saved, navigating to edit page...');
+      logger.debug('✅ [GENERATE-DEBUG] Data saved, navigating to edit page...');
       
       // Small delay for animation
       await new Promise(resolve => setTimeout(resolve, 200));
@@ -224,7 +225,7 @@ console.log('🎯 Theme after setMode:', afterModeSet.theme);
       // Navigate to edit page
       router.push(`/edit/${tokenId}`);
     } catch (error) {
-      console.error('❌ Failed to prepare for edit mode:', error);
+      logger.error('❌ Failed to prepare for edit mode:', error);
       setIsTransitioning(false);
       setError('Failed to save changes. Please try again.');
     }

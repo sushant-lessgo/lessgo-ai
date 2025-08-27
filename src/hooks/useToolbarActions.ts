@@ -12,6 +12,7 @@ import { useElementPicker } from './useElementPicker';
 import { useElementCRUD } from './useElementCRUD';
 import type { UniversalElementType } from '@/types/universalElements';
 import { UNIVERSAL_ELEMENTS } from '@/types/universalElements';
+import { logger } from '@/lib/logger';
 import { 
   validateElementAddition, 
   getElementRestrictions,
@@ -106,7 +107,7 @@ const { addElement } = useElementCRUD();
   
   const executeAction = useCallback(async (actionId: string, params?: any) => {
     if (!hasCapability(actionId)) {
-      console.warn(`Action ${actionId} is not available in current context`);
+      logger.warn(`Action ${actionId} is not available in current context`);
       return false;
     }
 
@@ -240,12 +241,12 @@ const { addElement } = useElementCRUD();
           break;
 
         default:
-          console.warn(`Unknown action: ${actionId}`);
+          logger.warn(`Unknown action: ${actionId}`);
           return false;
       }
 
       const duration = performance.now() - startTime;
-      console.log(`Action ${actionId} executed in ${duration.toFixed(2)}ms`);
+      logger.debug(`Action ${actionId} executed in ${duration.toFixed(2)}ms`);
       
       // Track change for auto-save
       if (result) {
@@ -260,7 +261,7 @@ const { addElement } = useElementCRUD();
       
       return result;
     } catch (error) {
-      console.error(`Error executing action ${actionId}:`, error);
+      logger.error(`Error executing action ${actionId}:`, error);
       return false;
     }
   }, [hasCapability, trackChange, triggerAutoSave]);
@@ -275,7 +276,7 @@ const { addElement } = useElementCRUD();
     const currentLayout = sectionLayouts[sectionId];
     
     if (!section || !currentLayout) {
-      console.error('Section or layout not found for:', sectionId, { section, currentLayout });
+      logger.error('Section or layout not found for:', sectionId, { section, currentLayout });
       return false;
     }
     
@@ -339,7 +340,7 @@ const { addElement } = useElementCRUD();
       }
     }
     
-    console.log('Layout change debug:', { 
+    logger.debug('Layout change debug:', { 
       sectionId, 
       currentLayout,
       determinedSectionType: sectionType,
@@ -358,7 +359,7 @@ const { addElement } = useElementCRUD();
   elementType?: UniversalElementType;
   position?: { x: number; y: number };
 }) => {
-  console.log('🎯 handleAddElement called:', params);
+  logger.debug('🎯 handleAddElement called:', params);
   const { sectionId, elementType, position } = params;
   
   // Get section information for restriction checking
@@ -367,7 +368,7 @@ const { addElement } = useElementCRUD();
   const sectionType = sectionId || 'content';
   const layoutType = sectionData?.layout;
   
-  console.log('🎯 Section data:', { 
+  logger.debug('🎯 Section data:', { 
     sectionType, 
     layoutType, 
     sectionData,
@@ -381,10 +382,10 @@ const { addElement } = useElementCRUD();
     const validation = validateElementAddition(elementType, sectionType, layoutType);
     
     if (!validation.allowed) {
-      console.warn(`Element addition blocked: ${validation.reason}`);
+      logger.warn(`Element addition blocked: ${validation.reason}`);
       // Could show user-friendly notification here
       if (validation.suggestion) {
-        console.info(`Suggestion: ${validation.suggestion}`);
+        logger.info(`Suggestion: ${validation.suggestion}`);
       }
       return false;
     }
@@ -397,11 +398,11 @@ const { addElement } = useElementCRUD();
       
       // Announce success
       const elementConfig = UNIVERSAL_ELEMENTS[elementType];
-      console.log(`Added ${elementConfig.label} element`);
+      logger.debug(`Added ${elementConfig.label} element`);
       
       return true;
     } catch (error) {
-      console.error('Failed to add element:', error);
+      logger.error('Failed to add element:', error);
       return false;
     }
   }
@@ -423,7 +424,7 @@ const { addElement } = useElementCRUD();
     const restrictions = getElementRestrictions(sectionType, layoutType);
     const restrictionSummary = getRestrictionSummary(sectionType, layoutType);
     
-    console.log('🎯 About to call showElementPicker with restrictions:', {
+    logger.debug('🎯 About to call showElementPicker with restrictions:', {
       restrictions,
       restrictionSummary,
       pickerPosition
@@ -516,7 +517,7 @@ const { addElement } = useElementCRUD();
       await regenerateSection(sectionId, userGuidance);
       return true;
     } catch (error) {
-      console.error('Section regeneration failed:', error);
+      logger.error('Section regeneration failed:', error);
       return false;
     }
   }, [regenerateSection]);
@@ -528,7 +529,7 @@ const { addElement } = useElementCRUD();
       duplicateSection(sectionId);
       return true;
     } catch (error) {
-      console.error('Section duplication failed:', error);
+      logger.error('Section duplication failed:', error);
       return false;
     }
   }, [duplicateSection]);
@@ -541,7 +542,7 @@ const { addElement } = useElementCRUD();
         removeSection(sectionId);
         return true;
       } catch (error) {
-        console.error('Section deletion failed:', error);
+        logger.error('Section deletion failed:', error);
         return false;
       }
     }
@@ -842,7 +843,7 @@ const { addElement } = useElementCRUD();
       await regenerateElement(elementSelection.sectionId, elementSelection.elementKey);
       return true;
     } catch (error) {
-      console.error('Text regeneration failed:', error);
+      logger.error('Text regeneration failed:', error);
       return false;
     }
   }, [regenerateElement]);
@@ -890,7 +891,7 @@ const { addElement } = useElementCRUD();
   }, [content, setSection]);
 
   const handleElementStyle = useCallback(async (params: { elementSelection: ElementSelection }) => {
-    console.log('Opening element styling options for:', params.elementSelection);
+    logger.debug('Opening element styling options for:', params.elementSelection);
     return true;
   }, []);
 
@@ -991,7 +992,7 @@ const { addElement } = useElementCRUD();
       await regenerateElement(elementSelection.sectionId, elementSelection.elementKey);
       return true;
     } catch (error) {
-      console.error('Element regeneration failed:', error);
+      logger.error('Element regeneration failed:', error);
       return false;
     }
   }, [regenerateElement]);
@@ -1041,12 +1042,12 @@ const { addElement } = useElementCRUD();
   }, [updateImageAsset]);
 
   const handleStockPhotos = useCallback(async (params: { imageId: string }) => {
-    console.log('Opening stock photo search for:', params.imageId);
+    logger.debug('Opening stock photo search for:', params.imageId);
     return true;
   }, []);
 
   const handleEditImage = useCallback(async (params: { imageId: string }) => {
-    console.log('Opening image editor for:', params.imageId);
+    logger.debug('Opening image editor for:', params.imageId);
     return true;
   }, []);
 
@@ -1204,7 +1205,7 @@ const { addElement } = useElementCRUD();
   }, [toggleFormFieldRequired]);
 
   const handleFormSettings = useCallback(async (params: { formId: string }) => {
-    console.log('Opening form settings for:', params.formId);
+    logger.debug('Opening form settings for:', params.formId);
     return true;
   }, []);
 
@@ -1224,7 +1225,7 @@ const { addElement } = useElementCRUD();
     const index = parseInt(selected || '0') - 1;
     
     if (index >= 0 && index < integrations.length) {
-      console.log(`Setting up ${integrations[index].name} integration for form:`, formId);
+      logger.debug(`Setting up ${integrations[index].name} integration for form:`, formId);
       return true;
     }
     return false;
@@ -1246,7 +1247,7 @@ const { addElement } = useElementCRUD();
     const index = parseInt(selected || '0') - 1;
     
     if (index >= 0 && index < styleOptions.length) {
-      console.log(`Opening ${styleOptions[index].name} for form:`, formId);
+      logger.debug(`Opening ${styleOptions[index].name} for form:`, formId);
       return true;
     }
     return false;

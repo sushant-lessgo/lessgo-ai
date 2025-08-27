@@ -1,5 +1,6 @@
 // hooks/editStore/sectionCRUDActions.ts - Store actions for section CRUD operations
 import type { EditStore } from '@/types/store';
+import { logger } from '@/lib/logger';
 // import type { string } from '@/types/store/state'; // Commented out - type not available
 
 /**
@@ -69,7 +70,7 @@ const validateSectionPosition = (sections: string[], position: number): number =
   
   // Enhanced debug logging for position validation
   if (originalPosition !== validatedPosition) {
-    console.log('🔧 Section position adjusted:', {
+    logger.debug('🔧 Section position adjusted:', {
       requested: originalPosition,
       adjusted: validatedPosition,
       reason: originalPosition < 0 ? 'below minimum' : originalPosition > maxPosition ? 'above maximum' : 'within bounds',
@@ -96,7 +97,7 @@ export function createSectionCRUDActions(set: any, get: any) {
         const targetPosition = position !== undefined ? validateSectionPosition(state.sections, position) : state.sections.length;
         
         // Enhanced debug logging for section addition
-        console.log('➕ Adding section:', {
+        logger.debug('➕ Adding section:', {
           sectionType,
           requestedPosition: position,
           targetPosition,
@@ -148,7 +149,7 @@ export function createSectionCRUDActions(set: any, get: any) {
         state.history.redoStack = [];
         
         // Final success logging
-        console.log('✅ Section added successfully:', {
+        logger.debug('✅ Section added successfully:', {
           newSectionId,
           finalPosition: state.sections.indexOf(newSectionId),
           afterSections: [...state.sections],
@@ -496,7 +497,7 @@ export function createSectionCRUDActions(set: any, get: any) {
       set((state: EditStore) => {
         // TODO: Archive functionality is not available in current SectionData structure
         // Implementation needed when isArchived property is added to SectionData type
-        console.warn('archiveSection: Not implemented - SectionData type needs isArchived property');
+        logger.warn('archiveSection: Not implemented - SectionData type needs isArchived property');
         return false;
       }),
 
@@ -507,7 +508,7 @@ export function createSectionCRUDActions(set: any, get: any) {
       set((state: EditStore) => {
         // TODO: Archive functionality is not available in current SectionData structure
         // Implementation needed when isArchived property is added to SectionData type
-        console.warn('restoreSection: Not implemented - SectionData type needs isArchived property');
+        logger.warn('restoreSection: Not implemented - SectionData type needs isArchived property');
         return false;
       }),
 
@@ -517,7 +518,7 @@ export function createSectionCRUDActions(set: any, get: any) {
     getArchivedSections: () => {
       // TODO: Archive functionality is not available in current SectionData structure
       // Implementation needed when isArchived property is added to SectionData type
-      console.warn('getArchivedSections: Not implemented - SectionData type needs isArchived property');
+      logger.warn('getArchivedSections: Not implemented - SectionData type needs isArchived property');
       return [];
     },
 
@@ -528,7 +529,7 @@ export function createSectionCRUDActions(set: any, get: any) {
       set((state: EditStore) => {
         // TODO: Archive functionality is not available in current SectionData structure
         // Implementation needed when isArchived property is added to SectionData type
-        console.warn('permanentlyDeleteArchivedSections: Not implemented - SectionData type needs isArchived property');
+        logger.warn('permanentlyDeleteArchivedSections: Not implemented - SectionData type needs isArchived property');
       }),
   };
 }

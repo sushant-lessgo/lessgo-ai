@@ -8,6 +8,7 @@ import { autoSaveDraft } from "@/utils/autoSaveDraft";
 import { useParams } from "next/navigation";
 import { DISPLAY_TO_CANONICAL, type CanonicalFieldName } from "@/types/core/index";
 
+import { logger } from '@/lib/logger';
 // ===== TYPE DEFINITIONS =====
 interface ValidationResult {
   value: string | null;
@@ -109,7 +110,7 @@ export default function InputStep({ onSuccess, onProcessingStart }: InputStepPro
         throw new Error(apiResult.error || 'API returned success: false');
       }
 
-      console.log('✅ API Response received:', {
+      logger.debug('✅ API Response received:', {
         hasRaw: !!apiResult.data.raw,
         hasValidated: !!apiResult.data.validated,
         validatedKeys: apiResult.data.validated ? Object.keys(apiResult.data.validated) : []
@@ -125,11 +126,11 @@ export default function InputStep({ onSuccess, onProcessingStart }: InputStepPro
         const unexpectedFields = receivedFields.filter(field => !EXPECTED_DISPLAY_FIELDS.includes(field));
         
         if (missingFields.length > 0) {
-          console.warn('⚠️ Missing expected fields from API:', missingFields);
+          logger.warn('⚠️ Missing expected fields from API:', missingFields);
         }
         
         if (unexpectedFields.length > 0) {
-          console.warn('⚠️ Unexpected fields from API:', unexpectedFields);
+          logger.warn('⚠️ Unexpected fields from API:', unexpectedFields);
         }
 
         // ✅ FIXED: Convert display names to canonical names using type-safe mapping
@@ -137,7 +138,7 @@ export default function InputStep({ onSuccess, onProcessingStart }: InputStepPro
           const canonicalFieldName = DISPLAY_TO_CANONICAL[displayFieldName as keyof typeof DISPLAY_TO_CANONICAL];
           
           if (!canonicalFieldName) {
-            console.warn(`⚠️ Unknown field from API: "${displayFieldName}"`);
+            logger.warn(`⚠️ Unknown field from API: "${displayFieldName}"`);
             return;
           }
 
@@ -152,7 +153,7 @@ export default function InputStep({ onSuccess, onProcessingStart }: InputStepPro
 
            // console.log(`📝 Stored ${canonicalFieldName}: "${validationResult.value}" (confidence: ${validationResult.confidence})`);
           } else {
-            console.warn(`⚠️ Skipping empty field: ${displayFieldName}`);
+            logger.warn(`⚠️ Skipping empty field: ${displayFieldName}`);
           }
         });
       }
@@ -174,9 +175,9 @@ export default function InputStep({ onSuccess, onProcessingStart }: InputStepPro
           confirmedFields, // Pass the AI-inferred fields with canonical names
           validatedFields: {}, // Start with empty validated fields
         });
-        console.log('✅ Auto-save completed');
+        logger.debug('✅ Auto-save completed');
       } catch (saveError) {
-        console.error('⚠️ Auto-save failed (non-critical):', saveError);
+        logger.error('⚠️ Auto-save failed (non-critical):', saveError);
         // Don't block the flow if auto-save fails
       }
 
@@ -191,7 +192,7 @@ export default function InputStep({ onSuccess, onProcessingStart }: InputStepPro
       });
 
     } catch (err) {
-      console.error('❌ InputStep error:', err);
+      logger.error('❌ InputStep error:', err);
       
       // User-friendly error messages
       let userErrorMessage = 'Something went wrong while processing your input.';

@@ -11,6 +11,7 @@ const getCSSVariableDefinitions = (system: any) => ''; // stub returns empty str
 import { migrationAdapter } from './migrationAdapter';
 import { cssVariablePerformanceMonitor, withPerformanceMonitoring } from '@/utils/cssVariablePerformance';
 import type { BackgroundSystem } from './colorTokens';
+import { logger } from '@/lib/logger';
 // import type { BusinessContext } from '@/types/core'; // Type not available
 type BusinessContext = any;
 
@@ -128,7 +129,7 @@ export function VariableThemeInjector({
       };
       
     } catch (error) {
-      console.error('VariableThemeInjector: Failed to generate variables:', error);
+      logger.error('VariableThemeInjector: Failed to generate variables:', error);
       
       return {
         phase,
@@ -208,7 +209,7 @@ export function VariableThemeInjector({
 
   // Error boundary for variable injection
   if (variableState.error && phase === 'variable') {
-    console.warn('VariableThemeInjector: Falling back to legacy mode due to error:', variableState.error);
+    logger.warn('VariableThemeInjector: Falling back to legacy mode due to error:', variableState.error);
     
     return (
       <div ref={containerRef} data-theme-mode="legacy-fallback">

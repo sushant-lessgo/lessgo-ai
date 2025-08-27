@@ -11,6 +11,7 @@ import type { MigrationFeatureFlags } from '@/utils/featureFlags';
 const generateVariableColorTokens = (colors: any) => ({ /* stub */ });
 import { migrationAdapter } from '@/modules/Design/ColorSystem/migrationAdapter';
 
+import { logger } from '@/lib/logger';
 /**
  * Creates CSS Variable Actions for EditStore
  */
@@ -33,7 +34,7 @@ export const createCSSVariableActions: CSSVariableActionCreator = (set, get) => 
         state.cssVariables.featureFlags.enableHybridMode = false;
       }
       
-      console.log(`🎨 CSS Variable phase changed to: ${phase}`);
+      logger.debug(`🎨 CSS Variable phase changed to: ${phase}`);
     });
   },
 
@@ -42,7 +43,7 @@ export const createCSSVariableActions: CSSVariableActionCreator = (set, get) => 
       state.cssVariables.phase = 'variable';
       state.cssVariables.featureFlags.enableVariableMode = true;
       state.cssVariables.metrics.lastUpdated = Date.now();
-      console.log('✅ CSS Variables enabled');
+      logger.debug('✅ CSS Variables enabled');
     });
   },
 
@@ -52,7 +53,7 @@ export const createCSSVariableActions: CSSVariableActionCreator = (set, get) => 
       state.cssVariables.featureFlags.enableVariableMode = false;
       state.cssVariables.featureFlags.enableHybridMode = false;
       state.cssVariables.metrics.lastUpdated = Date.now();
-      console.log('❌ CSS Variables disabled');
+      logger.debug('❌ CSS Variables disabled');
     });
   },
 
@@ -64,7 +65,7 @@ export const createCSSVariableActions: CSSVariableActionCreator = (set, get) => 
         ...flags
       };
       state.cssVariables.metrics.lastUpdated = Date.now();
-      console.log('🚩 Feature flags updated:', flags);
+      logger.debug('🚩 Feature flags updated:', flags);
     });
   },
 
@@ -73,7 +74,7 @@ export const createCSSVariableActions: CSSVariableActionCreator = (set, get) => 
       const currentValue = state.cssVariables.featureFlags[feature];
       state.cssVariables.featureFlags[feature] = !currentValue;
       state.cssVariables.metrics.lastUpdated = Date.now();
-      console.log(`🔄 Feature ${feature} toggled to:`, !currentValue);
+      logger.debug(`🔄 Feature ${feature} toggled to:`, !currentValue);
     });
   },
 
@@ -89,7 +90,7 @@ export const createCSSVariableActions: CSSVariableActionCreator = (set, get) => 
       state.cssVariables.metrics.variableCount = Object.keys(state.cssVariables.customColors).length;
       state.cssVariables.metrics.lastUpdated = Date.now();
       
-      console.log('🎨 Custom colors updated:', Object.keys(colors));
+      logger.debug('🎨 Custom colors updated:', Object.keys(colors));
     });
   },
 
@@ -98,7 +99,7 @@ export const createCSSVariableActions: CSSVariableActionCreator = (set, get) => 
       state.cssVariables.customColors[key] = value;
       state.cssVariables.metrics.variableCount = Object.keys(state.cssVariables.customColors).length;
       state.cssVariables.metrics.lastUpdated = Date.now();
-      console.log(`🎨 Custom color set: ${key} = ${value}`);
+      logger.debug(`🎨 Custom color set: ${key} = ${value}`);
     });
   },
 
@@ -107,7 +108,7 @@ export const createCSSVariableActions: CSSVariableActionCreator = (set, get) => 
       delete state.cssVariables.customColors[key];
       state.cssVariables.metrics.variableCount = Object.keys(state.cssVariables.customColors).length;
       state.cssVariables.metrics.lastUpdated = Date.now();
-      console.log(`🗑️ Custom color removed: ${key}`);
+      logger.debug(`🗑️ Custom color removed: ${key}`);
     });
   },
 
@@ -116,7 +117,7 @@ export const createCSSVariableActions: CSSVariableActionCreator = (set, get) => 
       state.cssVariables.customColors = {};
       state.cssVariables.metrics.variableCount = 0;
       state.cssVariables.metrics.lastUpdated = Date.now();
-      console.log('🧹 All custom colors cleared');
+      logger.debug('🧹 All custom colors cleared');
     });
   },
 
@@ -135,10 +136,10 @@ export const createCSSVariableActions: CSSVariableActionCreator = (set, get) => 
           draft.cssVariables.metrics.variableCount = Object.keys(generatedTokens).length;
           draft.cssVariables.metrics.lastUpdated = Date.now();
           
-          console.log('🔄 Variables regenerated from theme:', Object.keys(generatedTokens).length, 'variables');
+          logger.debug('🔄 Variables regenerated from theme:', Object.keys(generatedTokens).length, 'variables');
         }
       } catch (error) {
-        console.error('❌ Failed to regenerate variables:', error);
+        logger.error('❌ Failed to regenerate variables:', error);
       }
     });
   },
@@ -164,10 +165,10 @@ export const createCSSVariableActions: CSSVariableActionCreator = (set, get) => 
             ...variableBackgrounds
           };
           
-          console.log('🔄 Variables synced from theme');
+          logger.debug('🔄 Variables synced from theme');
         }
       } catch (error) {
-        console.error('❌ Failed to sync variables from theme:', error);
+        logger.error('❌ Failed to sync variables from theme:', error);
       }
     });
   },
@@ -191,15 +192,15 @@ export const createCSSVariableActions: CSSVariableActionCreator = (set, get) => 
           fallbackRequired: !cssVariables || !customProperties,
         };
         
-        console.log('🔍 Browser support detected:', state.cssVariables.browserSupport);
+        logger.debug('🔍 Browser support detected:', state.cssVariables.browserSupport);
         
         // Auto-adjust phase based on support
         if (!cssVariables && state.cssVariables.phase === 'variable') {
           state.cssVariables.phase = 'legacy';
-          console.log('⚠️ Falling back to legacy mode due to browser limitations');
+          logger.debug('⚠️ Falling back to legacy mode due to browser limitations');
         }
       } catch (error) {
-        console.error('❌ Failed to detect browser support:', error);
+        logger.error('❌ Failed to detect browser support:', error);
         // Assume no support on error
         state.cssVariables.browserSupport = {
           cssVariables: false,
@@ -240,14 +241,14 @@ export const createCSSVariableActions: CSSVariableActionCreator = (set, get) => 
         const estimatedSize = totalVariables * 0.1; // ~100 bytes per variable
         draft.cssVariables.metrics.cssSize = estimatedSize;
         
-        console.log('📊 Variable usage tracked:', {
+        logger.debug('📊 Variable usage tracked:', {
           total: totalVariables,
           custom: Object.keys(draft.cssVariables.customColors).length,
           generated: Object.keys(draft.cssVariables.generatedVariables).length,
           estimatedSize: `${estimatedSize.toFixed(1)}KB`
         });
       } catch (error) {
-        console.error('❌ Failed to track variable usage:', error);
+        logger.error('❌ Failed to track variable usage:', error);
       }
     });
   },
@@ -256,19 +257,19 @@ export const createCSSVariableActions: CSSVariableActionCreator = (set, get) => 
   toggleDebugMode: () => {
     set((state) => {
       state.cssVariables.debugMode = !state.cssVariables.debugMode;
-      console.log(`🐛 Debug mode ${state.cssVariables.debugMode ? 'enabled' : 'disabled'}`);
+      logger.debug(`🐛 Debug mode ${state.cssVariables.debugMode ? 'enabled' : 'disabled'}`);
     });
   },
 
   logVariableState: () => {
     const state = get();
     console.group('🎨 CSS Variable State');
-    console.log('Phase:', state.cssVariables.phase);
-    console.log('Feature Flags:', state.cssVariables.featureFlags);
-    console.log('Custom Colors:', state.cssVariables.customColors);
-    console.log('Generated Variables:', state.cssVariables.generatedVariables);
-    console.log('Browser Support:', state.cssVariables.browserSupport);
-    console.log('Metrics:', state.cssVariables.metrics);
+    logger.debug('Phase:', state.cssVariables.phase);
+    logger.debug('Feature Flags:', state.cssVariables.featureFlags);
+    logger.debug('Custom Colors:', state.cssVariables.customColors);
+    logger.debug('Generated Variables:', state.cssVariables.generatedVariables);
+    logger.debug('Browser Support:', state.cssVariables.browserSupport);
+    logger.debug('Metrics:', state.cssVariables.metrics);
     console.groupEnd();
   },
 
@@ -287,7 +288,7 @@ export const createCSSVariableActions: CSSVariableActionCreator = (set, get) => 
     
     const fullCSS = `:root {\n${cssText}\n}`;
     
-    console.log('📤 CSS Variables exported:', fullCSS);
+    logger.debug('📤 CSS Variables exported:', fullCSS);
     return fullCSS;
   },
 
@@ -296,7 +297,7 @@ export const createCSSVariableActions: CSSVariableActionCreator = (set, get) => 
     const state = get();
     
     try {
-      console.log('🚀 Starting migration to CSS variables...');
+      logger.debug('🚀 Starting migration to CSS variables...');
       
       set((draft) => {
         draft.cssVariables.phase = 'hybrid'; // Start with hybrid mode
@@ -316,10 +317,10 @@ export const createCSSVariableActions: CSSVariableActionCreator = (set, get) => 
         draft.cssVariables._cssVariableSlice.lastMigration = Date.now();
       });
       
-      console.log('✅ Migration to CSS variables completed');
+      logger.debug('✅ Migration to CSS variables completed');
       
     } catch (error) {
-      console.error('❌ Migration failed:', error);
+      logger.error('❌ Migration failed:', error);
       // Rollback on error
       set((draft) => {
         draft.cssVariables.phase = 'legacy';
@@ -332,7 +333,7 @@ export const createCSSVariableActions: CSSVariableActionCreator = (set, get) => 
 
   rollbackToLegacy: async () => {
     try {
-      console.log('🔄 Rolling back to legacy mode...');
+      logger.debug('🔄 Rolling back to legacy mode...');
       
       set((draft) => {
         draft.cssVariables.phase = 'legacy';
@@ -342,9 +343,9 @@ export const createCSSVariableActions: CSSVariableActionCreator = (set, get) => 
         draft.cssVariables.generatedVariables = {};
       });
       
-      console.log('✅ Rollback to legacy mode completed');
+      logger.debug('✅ Rollback to legacy mode completed');
     } catch (error) {
-      console.error('❌ Rollback failed:', error);
+      logger.error('❌ Rollback failed:', error);
       throw error;
     }
   },
@@ -353,11 +354,11 @@ export const createCSSVariableActions: CSSVariableActionCreator = (set, get) => 
     const state = get();
     
     try {
-      console.log('🔍 Validating CSS variable migration...');
+      logger.debug('🔍 Validating CSS variable migration...');
       
       // Check if browser supports CSS variables
       if (!state.cssVariables.browserSupport.cssVariables) {
-        console.warn('⚠️ Browser does not support CSS variables');
+        logger.warn('⚠️ Browser does not support CSS variables');
         return false;
       }
       
@@ -366,21 +367,21 @@ export const createCSSVariableActions: CSSVariableActionCreator = (set, get) => 
                           Object.keys(state.cssVariables.customColors).length > 0;
       
       if (!hasVariables) {
-        console.warn('⚠️ No CSS variables available');
+        logger.warn('⚠️ No CSS variables available');
         return false;
       }
       
       // Check if theme is compatible
       if (!state.theme?.colors?.sectionBackgrounds) {
-        console.warn('⚠️ Theme not compatible with CSS variables');
+        logger.warn('⚠️ Theme not compatible with CSS variables');
         return false;
       }
       
-      console.log('✅ Migration validation passed');
+      logger.debug('✅ Migration validation passed');
       return true;
       
     } catch (error) {
-      console.error('❌ Migration validation failed:', error);
+      logger.error('❌ Migration validation failed:', error);
       return false;
     }
   },

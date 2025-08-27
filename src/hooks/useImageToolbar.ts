@@ -2,6 +2,7 @@
 import React from 'react';
 import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
 
+import { logger } from '@/lib/logger';
 /**
  * Hook that provides a robust image toolbar function that works across different store implementations
  * Handles cases where showImageToolbar might not be available in the store
@@ -29,12 +30,12 @@ export function useImageToolbar() {
         } else if (storeState?.showToolbar) {
           storeState.showToolbar('image', imageId, position);
         } else {
-          console.warn('No toolbar function available for image:', imageId, 'Available functions:', Object.keys(storeState || {}));
+          logger.warn('No toolbar function available for image:', imageId, 'Available functions:', Object.keys(storeState || {}));
         }
       }
     } catch (error) {
-      console.error('Error showing image toolbar:', error);
-      console.warn('Falling back to console log for image toolbar request:', { imageId, position });
+      logger.error('Error showing image toolbar:', error);
+      logger.warn('Falling back to console log for image toolbar request:', { imageId, position });
     }
   }, [store]);
 

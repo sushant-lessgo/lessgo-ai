@@ -2,6 +2,7 @@
 
 import React from 'react';
 
+import { logger } from '@/lib/logger';
 // Enhanced Trust Indicators Component
 export function TrustIndicators({ 
   items = ['Free trial', 'No credit card'], 
@@ -59,7 +60,7 @@ export function CTAButton({
     if (typeof text === 'string') {
       return text;
     } else if (typeof text === 'object' && text !== null) {
-      console.warn('CTAButton text is an object, converting to string:', text);
+      logger.warn('CTAButton text is an object, converting to string:', text);
       // If it's an object with numeric keys (like the error describes), it might be a string-like object
       if (Array.isArray(text)) {
         return text.join(' ');

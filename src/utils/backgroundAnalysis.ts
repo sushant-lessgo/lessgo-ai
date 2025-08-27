@@ -3,6 +3,7 @@
 
 import { parseColor, calculateLuminance, RGB, analyzeColor, ColorAnalysis } from './colorUtils';
 
+import { logger } from '@/lib/logger';
 /**
  * Types of background patterns we can analyze
  */
@@ -401,7 +402,7 @@ export function analyzeBackground(cssClass: string): BackgroundAnalysis {
   try {
     // Handle empty or invalid input
     if (!cssClass || typeof cssClass !== 'string') {
-      console.warn('🔍 [BG-CYAN-DEBUG] Background analysis: Invalid CSS class:', typeof cssClass, cssClass);
+      logger.warn('🔍 [BG-CYAN-DEBUG] Background analysis: Invalid CSS class:', typeof cssClass, cssClass);
       return createFallbackAnalysis('Invalid CSS class provided');
     }
     
@@ -461,7 +462,7 @@ export function analyzeBackground(cssClass: string): BackgroundAnalysis {
     
     // Handle case where no valid colors were found
     if (rgbColors.length === 0) {
-      console.warn('🔍 No valid RGB colors found for:', cssClass, 'extracted colors:', colors);
+      logger.warn('🔍 No valid RGB colors found for:', cssClass, 'extracted colors:', colors);
       return createFallbackAnalysis('No valid colors found in CSS class');
     }
     
@@ -510,7 +511,7 @@ export function analyzeBackground(cssClass: string): BackgroundAnalysis {
     };
     
   } catch (error) {
-    console.warn('Background analysis failed:', error);
+    logger.warn('Background analysis failed:', error);
     return createFallbackAnalysis('Analysis failed due to error');
   }
 }
@@ -519,7 +520,7 @@ export function analyzeBackground(cssClass: string): BackgroundAnalysis {
  * Create a safe fallback analysis when parsing fails
  */
 function createFallbackAnalysis(reason: string): BackgroundAnalysis {
-  console.warn('⚠️ Using fallback background analysis:', reason);
+  logger.warn('⚠️ Using fallback background analysis:', reason);
   
   // Assume a neutral background
   const neutralColor: RGB = { r: 248, g: 250, b: 252 }; // gray-50

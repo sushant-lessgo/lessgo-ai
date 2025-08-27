@@ -1,3 +1,5 @@
+import { logger } from '@/lib/logger';
+
 // Interaction source tracking with bulletproof reset
 // Tracks where user interactions originate to prevent incorrect toolbar switching
 

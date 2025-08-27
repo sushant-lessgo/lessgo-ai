@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useOnboardingStore } from '@/hooks/useOnboardingStore';
+import { logger } from '@/lib/logger';
 
 export function OnboardingDebugPanel() {
   const [isOpen, setIsOpen] = useState(false);
@@ -209,7 +210,7 @@ export function OnboardingDebugPanel() {
       {/* Actions */}
       <div className="border-t p-2 space-y-1">
         <button
-          onClick={() => console.log('Full Onboarding Store State:', useOnboardingStore.getState())}
+          onClick={() => logger.dev('Full Onboarding Store State:', () => useOnboardingStore.getState())}
           className="w-full text-xs bg-gray-100 hover:bg-gray-200 py-1 rounded"
         >
           📄 Log Full Store to Console

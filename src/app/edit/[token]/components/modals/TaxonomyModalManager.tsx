@@ -17,6 +17,7 @@ import PricingModelModal from './PricingModelModal';
 import TextInputModal from './TextInputModal';
 import HiddenFieldModals from './HiddenFieldModals';
 
+import { logger } from '@/lib/logger';
 interface ModalState {
   isOpen: boolean;
   fieldName?: AnyFieldName;
@@ -72,7 +73,7 @@ export function TaxonomyModalManager() {
         try {
           openFieldModal(nextField);
         } catch (error) {
-          console.warn('Failed to open next modal from queue:', error);
+          logger.warn('Failed to open next modal from queue:', error);
         }
         setQueueTimeoutId(null);
       }, 150);
@@ -166,7 +167,7 @@ export function TaxonomyModalManager() {
     
     // Debug logging in development only
     if (process.env.NODE_ENV === 'development') {
-      console.log('🔍 Field Modal Routing:', { fieldName, modalType, isHidden: isHiddenField(fieldName) });
+      logger.debug('🔍 Field Modal Routing:', { fieldName, modalType, isHidden: isHiddenField(fieldName) });
     }
 
     return modalType;

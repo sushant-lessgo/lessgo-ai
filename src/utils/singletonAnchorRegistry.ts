@@ -3,6 +3,7 @@
 
 import type { AnchorInfo } from '@/hooks/useGlobalAnchor';
 
+import { logger } from '@/lib/logger';
 export interface SingletonAnchorRegistry {
   // Registry operations
   register: (key: string, anchor: AnchorInfo) => void;
@@ -32,7 +33,7 @@ export const singletonAnchorRegistry: SingletonAnchorRegistry = {
     registryStorage.set(normalizedKey, anchor);
     const newSize = registryStorage.size;
     
-    console.log(`🏪 [SINGLETON-REGISTRY] Register:`, {
+    logger.debug(`🏪 [SINGLETON-REGISTRY] Register:`, {
       key: normalizedKey,
       originalKey: key,
       registryId,
@@ -53,7 +54,7 @@ export const singletonAnchorRegistry: SingletonAnchorRegistry = {
     const newSize = registryStorage.size;
     
     if (existed) {
-      console.log(`🗑️ [SINGLETON-REGISTRY] Unregister:`, {
+      logger.debug(`🗑️ [SINGLETON-REGISTRY] Unregister:`, {
         key: normalizedKey,
         originalKey: key,
         registryId,
@@ -61,7 +62,7 @@ export const singletonAnchorRegistry: SingletonAnchorRegistry = {
         newSize
       });
     } else {
-      console.warn(`⚠️ [SINGLETON-REGISTRY] Unregister failed - key not found:`, {
+      logger.warn(`⚠️ [SINGLETON-REGISTRY] Unregister failed - key not found:`, {
         key: normalizedKey,
         originalKey: key,
         registryId,
@@ -83,7 +84,7 @@ export const singletonAnchorRegistry: SingletonAnchorRegistry = {
   clear: () => {
     const previousSize = registryStorage.size;
     registryStorage.clear();
-    console.log(`🧹 [SINGLETON-REGISTRY] Clear:`, {
+    logger.debug(`🧹 [SINGLETON-REGISTRY] Clear:`, {
       registryId,
       clearedCount: previousSize
     });
@@ -109,8 +110,8 @@ export const singletonAnchorRegistry: SingletonAnchorRegistry = {
 if (process.env.NODE_ENV === 'development') {
   (window as any).__singletonAnchorRegistry = singletonAnchorRegistry;
   
-  console.log(`🏪 [SINGLETON-REGISTRY] Created singleton with ID: ${registryId}`);
-  console.log('🔧 Debug utilities available at window.__singletonAnchorRegistry');
+  logger.debug(`🏪 [SINGLETON-REGISTRY] Created singleton with ID: ${registryId}`);
+  logger.debug('🔧 Debug utilities available at window.__singletonAnchorRegistry');
 }
 
 export default singletonAnchorRegistry;

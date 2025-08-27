@@ -1,6 +1,7 @@
 // utils/versionManager.ts - Version Control & Conflict Resolution System
 import type { ChangeEvent } from '@/middleware/autoSaveMiddleware';
 
+import { logger } from '@/lib/logger';
 /**
  * ===== VERSION MANAGEMENT TYPES =====
  */
@@ -88,7 +89,7 @@ const decompressSnapshot = (snapshot: VersionSnapshot): VersionSnapshot => {
         data: JSON.parse(snapshot.data),
       };
     } catch (error) {
-      console.error('Failed to decompress snapshot:', error);
+      logger.error('Failed to decompress snapshot:', error);
       return snapshot;
     }
   }
@@ -286,7 +287,7 @@ export class VersionManager {
       this.compressOldSnapshots();
     }
 
-    console.log('📸 Version snapshot created:', {
+    logger.debug('📸 Version snapshot created:', {
       id: snapshot.id,
       version: snapshot.version,
       description: snapshot.description,
@@ -311,7 +312,7 @@ export class VersionManager {
     if (this.history.snapshots.length > this.config.maxSnapshots) {
       const removed = this.history.snapshots.shift();
       this.history.currentIndex--;
-      console.log('🗑️ Removed old snapshot:', removed?.id);
+      logger.debug('🗑️ Removed old snapshot:', removed?.id);
     }
   }
 
@@ -353,14 +354,14 @@ export class VersionManager {
 
   undo(): VersionSnapshot | null {
     if (!this.canUndo()) {
-      console.warn('⚠️ Cannot undo: already at earliest version');
+      logger.warn('⚠️ Cannot undo: already at earliest version');
       return null;
     }
 
     this.history.currentIndex--;
     const snapshot = this.history.snapshots[this.history.currentIndex];
 
-    console.log('↶ Undo to version:', {
+    logger.debug('↶ Undo to version:', {
       version: snapshot.version,
       description: snapshot.description,
       timestamp: new Date(snapshot.timestamp).toLocaleString(),
@@ -371,14 +372,14 @@ export class VersionManager {
 
   redo(): VersionSnapshot | null {
     if (!this.canRedo()) {
-      console.warn('⚠️ Cannot redo: already at latest version');
+      logger.warn('⚠️ Cannot redo: already at latest version');
       return null;
     }
 
     this.history.currentIndex++;
     const snapshot = this.history.snapshots[this.history.currentIndex];
 
-    console.log('↷ Redo to version:', {
+    logger.debug('↷ Redo to version:', {
       version: snapshot.version,
       description: snapshot.description,
       timestamp: new Date(snapshot.timestamp).toLocaleString(),
@@ -434,7 +435,7 @@ export class VersionManager {
     // Store active conflict
     this.activeConflicts.set(conflictId, conflictResolution);
 
-    console.log('🔄 Conflict detected:', {
+    logger.debug('🔄 Conflict detected:', {
       conflictId,
       conflictType: conflictResolution.conflictType,
       fieldsCount: conflicts.length,
@@ -463,7 +464,7 @@ export class VersionManager {
 
     const autoMergeableFields = conflict.conflictedFields.filter(c => c.canAutoMerge);
     if (autoMergeableFields.length === 0) {
-      console.log('❌ No auto-mergeable conflicts found');
+      logger.debug('❌ No auto-mergeable conflicts found');
       return null;
     }
 
@@ -473,7 +474,7 @@ export class VersionManager {
       autoMergeableFields
     );
 
-    console.log('🔀 Auto-merged conflicts:', {
+    logger.debug('🔀 Auto-merged conflicts:', {
       conflictId,
       mergedFields: autoMergeableFields.length,
       totalFields: conflict.conflictedFields.length,
@@ -564,7 +565,7 @@ export class VersionManager {
     conflict.resolutionStrategy = 'manual';
     this.activeConflicts.delete(conflictId);
 
-    console.log('🔧 Manual conflict resolution completed:', {
+    logger.debug('🔧 Manual conflict resolution completed:', {
       conflictId,
       resolvedFields: Object.keys(resolutions).length,
     });
@@ -622,14 +623,14 @@ export class VersionManager {
       this.changeCounter = 0;
       this.activeConflicts.clear();
 
-      console.log('📥 Version history imported:', {
+      logger.debug('📥 Version history imported:', {
         snapshots: this.history.snapshots.length,
         currentIndex: this.history.currentIndex,
       });
 
       return true;
     } catch (error) {
-      console.error('❌ Failed to import version history:', error);
+      logger.error('❌ Failed to import version history:', error);
       return false;
     }
   }
@@ -640,7 +641,7 @@ export class VersionManager {
     this.changeCounter = 0;
     this.activeConflicts.clear();
 
-    console.log('🧹 Version history cleared');
+    logger.debug('🧹 Version history cleared');
   }
 }
 
@@ -660,5 +661,5 @@ if (process.env.NODE_ENV === 'development') {
     exportHistory: (manager: VersionManager) => manager.exportHistory(),
   };
 
-  console.log('🔧 Version Manager debug utilities available at window.__versionDebug');
+  logger.debug('🔧 Version Manager debug utilities available at window.__versionDebug');
 }

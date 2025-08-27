@@ -17,6 +17,7 @@ import { ElementDetector, ElementBoundaryVisualizer } from '../selection/Element
 import { useElementPicker } from '@/hooks/useElementPicker';
 import { ElementPicker } from '../content/ElementPicker';
 
+import { logger } from '@/lib/logger';
 interface MainContentProps {
   tokenId: string;
 }
@@ -219,7 +220,7 @@ React.useEffect(() => {
       if (typeof showSectionToolbar === 'function') {
         showSectionToolbar?.(sectionId, position);
       } else {
-        console.error('❌ showSectionToolbar is not a function:', typeof showSectionToolbar);
+        logger.error('❌ showSectionToolbar is not a function:', typeof showSectionToolbar);
         // Fallback: use direct store access
         const storeInstance = store?.getState();
         if (storeInstance && typeof storeInstance.showToolbar === 'function') {
@@ -273,7 +274,7 @@ React.useEffect(() => {
       if (typeof showElementToolbar === 'function') {
         showElementToolbar?.(elementId, position);
       } else {
-        console.error('❌ showElementToolbar is not a function:', typeof showElementToolbar);
+        logger.error('❌ showElementToolbar is not a function:', typeof showElementToolbar);
       }
     }, 0);
 
@@ -303,7 +304,7 @@ React.useEffect(() => {
 
  const executeContextualAction = (actionId: string, additionalParams?: any) => {
   if (!hasCapability(actionId)) {
-    console.warn(`Action ${actionId} is not available in current context`);
+    logger.warn(`Action ${actionId} is not available in current context`);
     return;
   }
 
@@ -311,7 +312,7 @@ React.useEffect(() => {
   const action = actions.find(a => a.id === actionId);
   
   if (!action?.enabled) {
-    console.warn(`Action ${actionId} is disabled`);
+    logger.warn(`Action ${actionId} is disabled`);
     return;
   }
 
@@ -354,7 +355,7 @@ React.useEffect(() => {
         // Delete element logic
         if (confirm('Are you sure you want to delete this element?')) {
           // Implementation for element deletion
-          console.log('Delete element:', selectedElement.elementKey);
+          logger.debug('Delete element:', selectedElement.elementKey);
         }
       }
       break;
@@ -362,19 +363,19 @@ React.useEffect(() => {
     case 'change-layout':
       if (selectedSection) {
         // Open layout picker modal
-        console.log('Open layout picker for section:', selectedSection);
+        logger.debug('Open layout picker for section:', selectedSection);
       }
       break;
       
     case 'add-element':
       if (selectedSection) {
         // Open element picker
-        console.log('Open element picker for section:', selectedSection);
+        logger.debug('Open element picker for section:', selectedSection);
       }
       break;
       
     default:
-      console.log('Execute action:', actionId, 'with params:', additionalParams);
+      logger.debug('Execute action:', actionId, 'with params:', additionalParams);
   }
   
   // Announce action execution

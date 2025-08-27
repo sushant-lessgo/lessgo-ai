@@ -16,6 +16,7 @@ import GenerationAnimation from './GenerationAnimation';
 import { CANONICAL_FIELD_NAMES, FIELD_DISPLAY_NAMES, type CanonicalFieldName } from "@/types/core/index";
 import LoadingState from './LoadingState';
 
+import { logger } from '@/lib/logger';
 // ===== TYPE DEFINITIONS =====
 interface ConfirmedFieldData {
   value: string;
@@ -172,12 +173,12 @@ export default function RightPanel() {
            // console.log('💾 Storing hiddenInferredFields:', hiddenInferredFields);
             setHiddenInferredFields(hiddenInferredFields);
           } else {
-            console.warn('⚠️ No hiddenInferredFields received from API');
+            logger.warn('⚠️ No hiddenInferredFields received from API');
           }
 
           setTimeout(() => setShowFeatureEditor(true), 2000);
         } catch (error) {
-          console.error('Error fetching features:', error);
+          logger.error('Error fetching features:', error);
           setTimeout(() => setShowFeatureEditor(true), 500);
         }
       };
@@ -189,7 +190,7 @@ export default function RightPanel() {
   // ✅ FIX: Redirect if generation is already completed to avoid infinite loops
   useEffect(() => {
     if (stepIndex === 999 && featuresFromAI.length > 0 && tokenId) {
-      console.log('Generation already completed, redirecting to generated page');
+      logger.debug('Generation already completed, redirecting to generated page');
       router.push(`/generate/${tokenId}`);
     }
   }, [stepIndex, featuresFromAI.length, router, tokenId]);
@@ -201,7 +202,7 @@ export default function RightPanel() {
 
   // Debug logging (remove in production)
   if (process.env.NODE_ENV === 'development') {
-    console.log('RightPanel Debug:', {
+    logger.debug('RightPanel Debug:', {
       currentCanonicalField,
       currentDisplayField,
       hasFieldData: !!currentFieldData,
@@ -277,7 +278,7 @@ export default function RightPanel() {
                     <div className="flex justify-end mt-8">
                       <Button
                         onClick={() => {
-                          console.log('🔴 [GENERATE-BUTTON] Button clicked!', {
+                          logger.debug('🔴 [GENERATE-BUTTON] Button clicked!', {
                             generatePage: typeof generatePage,
                             isGenerating,
                             tokenId,
@@ -285,10 +286,10 @@ export default function RightPanel() {
                             validatedFieldsCount: Object.keys(validatedFields).length
                           });
                           if (generatePage && typeof generatePage === 'function') {
-                            console.log('🔴 [GENERATE-BUTTON] Calling generatePage...');
+                            logger.debug('🔴 [GENERATE-BUTTON] Calling generatePage...');
                             generatePage();
                           } else {
-                            console.error('🔴 [GENERATE-BUTTON] generatePage is not a function!', generatePage);
+                            logger.error('🔴 [GENERATE-BUTTON] generatePage is not a function!', generatePage);
                           }
                         }}
                         disabled={isGenerating}

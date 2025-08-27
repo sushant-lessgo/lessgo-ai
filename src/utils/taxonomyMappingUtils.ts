@@ -1,3 +1,5 @@
+import { logger } from '@/lib/logger';
+
 // utils/taxonomyMappingUtils.ts
 // Auto-generates mappings from individual IDs to group IDs
 
@@ -13,13 +15,13 @@ import {
 export function generateItemToGroupMapping() {
   const mapping: Record<string, string> = {};
   
-  console.log('🗺️ Generating taxonomy item-to-group mappings...');
+  logger.debug('🗺️ Generating taxonomy item-to-group mappings...');
   
   // Map target audiences: individual audience ID → group ID
   targetAudienceGroups.forEach(group => {
     group.audiences.forEach(audience => {
       mapping[audience.id] = group.id;
-      console.log(`📍 Audience: ${audience.id} → ${group.id}`);
+      logger.debug(`📍 Audience: ${audience.id} → ${group.id}`);
     });
   });
   
@@ -27,11 +29,11 @@ export function generateItemToGroupMapping() {
   startupStageGroups.forEach(group => {
     group.stages.forEach(stage => {
       mapping[stage.id] = group.id;
-      console.log(`📍 Stage: ${stage.id} → ${group.id}`);
+      logger.debug(`📍 Stage: ${stage.id} → ${group.id}`);
     });
   });
   
-  console.log('✅ Taxonomy mappings generated:', Object.keys(mapping).length, 'mappings');
+  logger.debug('✅ Taxonomy mappings generated:', Object.keys(mapping).length, 'mappings');
   return mapping;
 }
 
@@ -51,7 +53,7 @@ export function mapItemToGroup(itemId: string): string {
   const groupId = mapping[itemId];
   
   if (!groupId) {
-    console.warn(`⚠️ No group mapping found for item: ${itemId}, using as-is`);
+    logger.warn(`⚠️ No group mapping found for item: ${itemId}, using as-is`);
     return itemId; // Return the original ID if no mapping found
   }
   
@@ -60,9 +62,9 @@ export function mapItemToGroup(itemId: string): string {
 
 // Helper function to map onboarding store data to funnel input format
 export function mapOnboardingDataToFunnelInput(validatedFields: any, hiddenInferredFields: any) {
-  console.log('🎯 Mapping onboarding data to funnel input format...');
-  console.log('Input validatedFields:', validatedFields);
-  console.log('Input hiddenInferredFields:', hiddenInferredFields);
+  logger.debug('🎯 Mapping onboarding data to funnel input format...');
+  logger.debug('Input validatedFields:', validatedFields);
+  logger.debug('Input hiddenInferredFields:', hiddenInferredFields);
   
   const funnelInput = {
     // Market Category: Use display value directly (variationScoreMap expects full names)
@@ -84,7 +86,7 @@ export function mapOnboardingDataToFunnelInput(validatedFields: any, hiddenInfer
     toneId: hiddenInferredFields.toneProfile || hiddenInferredFields.tone || 'confident-playful', // fallback
   };
   
-  console.log('✅ Mapped funnel input:', funnelInput);
+  logger.debug('✅ Mapped funnel input:', funnelInput);
   
   // Validate that we have meaningful values
   const emptyFields = Object.entries(funnelInput)
@@ -92,7 +94,7 @@ export function mapOnboardingDataToFunnelInput(validatedFields: any, hiddenInfer
     .map(([key]) => key);
     
   if (emptyFields.length > 0) {
-    console.warn('⚠️ Empty fields in funnel input:', emptyFields);
+    logger.warn('⚠️ Empty fields in funnel input:', emptyFields);
   }
   
   return funnelInput;
@@ -100,7 +102,7 @@ export function mapOnboardingDataToFunnelInput(validatedFields: any, hiddenInfer
 
 // Validation helper: Check if all required mappings exist
 export function validateTaxonomyMappings() {
-  console.log('🔍 Validating taxonomy mappings...');
+  logger.debug('🔍 Validating taxonomy mappings...');
   
   const mapping = getItemToGroupMapping();
   const issues: string[] = [];
@@ -126,11 +128,11 @@ export function validateTaxonomyMappings() {
   }
   
   if (issues.length > 0) {
-    console.error('❌ Taxonomy mapping validation failed:', issues);
+    logger.error('❌ Taxonomy mapping validation failed:', issues);
     return false;
   }
   
-  console.log('✅ Taxonomy mapping validation passed');
+  logger.debug('✅ Taxonomy mapping validation passed');
   return true;
 }
 
@@ -142,18 +144,18 @@ export function debugTaxonomyMappings() {
   
   console.group('👥 Target Audience Mappings');
   targetAudienceGroups.forEach(group => {
-    console.log(`Group: ${group.id} (${group.label})`);
+    logger.debug(`Group: ${group.id} (${group.label})`);
     group.audiences.forEach(audience => {
-      console.log(`  • ${audience.id} → ${mapping[audience.id] || 'MISSING'}`);
+      logger.debug(`  • ${audience.id} → ${mapping[audience.id] || 'MISSING'}`);
     });
   });
   console.groupEnd();
   
   console.group('🚀 Startup Stage Mappings');
   startupStageGroups.forEach(group => {
-    console.log(`Group: ${group.id} (${group.label})`);
+    logger.debug(`Group: ${group.id} (${group.label})`);
     group.stages.forEach(stage => {
-      console.log(`  • ${stage.id} → ${mapping[stage.id] || 'MISSING'}`);
+      logger.debug(`  • ${stage.id} → ${mapping[stage.id] || 'MISSING'}`);
     });
   });
   console.groupEnd();

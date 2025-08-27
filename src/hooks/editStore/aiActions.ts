@@ -1,6 +1,7 @@
 // hooks/editStore/aiActions.ts - AI generation and regeneration actions
 import type { EditStore } from '@/types/store';
 
+import { logger } from '@/lib/logger';
 /**
  * Consolidated AI actions for content generation and regeneration
  */
@@ -33,7 +34,7 @@ export function createAIActions(set: any, get: any) {
         const sectionType = sectionId.split('-')[0]; // Extract type from ID like "hero-123456"
         const layout = currentState.sectionLayouts?.[sectionId];
         
-        console.log('Regenerating section:', {
+        logger.debug('Regenerating section:', {
           sectionId,
           sectionType,
           layout,
@@ -63,7 +64,7 @@ export function createAIActions(set: any, get: any) {
         }
         
         const data = await response.json();
-        console.log('Section regeneration response:', data);
+        logger.debug('Section regeneration response:', data);
         
         // Update the section content
         set((state: EditStore) => {
@@ -141,7 +142,7 @@ export function createAIActions(set: any, get: any) {
         }
         
       } catch (error) {
-        console.error('Section regeneration error:', error);
+        logger.error('Section regeneration error:', error);
         set((state: EditStore) => {
           state.aiGeneration.isGenerating = false;
           state.aiGeneration.currentOperation = null;
@@ -215,7 +216,7 @@ export function createAIActions(set: any, get: any) {
         let element = section?.elements?.[elementKey] || section?.[elementKey];
         
         if (!section || !element) {
-          console.error('Element not found:', {
+          logger.error('Element not found:', {
             sectionId,
             elementKey,
             sectionExists: !!section,
@@ -240,7 +241,7 @@ export function createAIActions(set: any, get: any) {
         // Ensure currentContent is a string
         currentContent = String(currentContent || '');
         
-        console.log('Regenerate element request:', {
+        logger.debug('Regenerate element request:', {
           sectionId,
           elementKey,
           currentContent: currentContent.substring(0, 100) + '...',

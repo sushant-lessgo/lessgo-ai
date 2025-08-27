@@ -11,6 +11,7 @@ import { analyzeBackground } from '@/utils/backgroundAnalysis';
 import type { TextFormatState, AutoSaveConfig, InlineEditorConfig, TextSelection } from '@/app/edit/[token]/components/editor/InlineTextEditor';
 import type { BackgroundType } from '@/types/sectionBackground';
 
+import { logger } from '@/lib/logger';
 interface EditableContentProps {
   mode: 'edit' | 'preview';
   value: string;

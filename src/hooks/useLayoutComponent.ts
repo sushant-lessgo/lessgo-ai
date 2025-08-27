@@ -14,6 +14,7 @@ import { validateTextBackgroundContrast } from '@/utils/textContrastUtils';
 import { getSmartTextColor } from '@/utils/improvedTextColors';
 import { analyzeBackground } from '@/utils/backgroundAnalysis';
 
+import { logger } from '@/lib/logger';
 export interface UseLayoutComponentProps extends LayoutComponentProps {
   contentSchema: Record<string, { type: 'string' | 'array' | 'boolean' | 'number'; default: string | boolean | number }>;
 }
@@ -117,7 +118,7 @@ export function useLayoutComponent<T = Record<string, any>>({
       }
       
       if (!backgrounds) {
-        console.warn('No section backgrounds found in theme, using fallback');
+        logger.warn('No section backgrounds found in theme, using fallback');
         return 'bg-white';
       }
 
@@ -176,7 +177,7 @@ export function useLayoutComponent<T = Record<string, any>>({
     
     const backgrounds = theme?.colors?.sectionBackgrounds;
     if (!backgrounds) {
-      console.warn('No section backgrounds found in theme, using fallback');
+      logger.warn('No section backgrounds found in theme, using fallback');
       return 'bg-white';
     }
 
@@ -246,7 +247,7 @@ export function useLayoutComponent<T = Record<string, any>>({
     // If luminance >= 0.5, it's a light background, treat like neutral
     effectiveBackgroundType = luminance < 0.5 ? 'primary' : 'neutral';
     
-    console.log(`🎨 Custom background analysis for ${sectionId}:`, {
+    logger.debug(`🎨 Custom background analysis for ${sectionId}:`, {
       primaryColor,
       rgb: { r, g, b },
       luminance,

@@ -22,6 +22,7 @@ import { Info, Sparkles, Palette, Code } from 'lucide-react';
 import type { BackgroundValidationResult, BackgroundSelectorMode } from '@/types/core';
 import type { VariableBackgroundVariation as VarBgVariation } from '@/modules/Design/ColorSystem/migrationAdapter';
 
+import { logger } from '@/lib/logger';
 interface VariableBackgroundModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -197,7 +198,7 @@ export function VariableBackgroundModal({
         );
         setValidationResult(result);
       } catch (error) {
-        console.error('Validation failed:', error);
+        logger.error('Validation failed:', error);
         setValidationResult(null);
       } finally {
         setIsValidating(false);
@@ -222,7 +223,7 @@ export function VariableBackgroundModal({
 
   // Enhanced apply handler
   const handleApply = async () => {
-    console.log('🚀 [DEBUG] handleApply called:', {
+    logger.debug('🚀 [DEBUG] handleApply called:', {
       selectedBackground,
       previewBackground,
       selectedVariation,
@@ -240,7 +241,7 @@ export function VariableBackgroundModal({
 
     const success = await handleApplyBackground();
     if (success) {
-      console.log('✅ [DEBUG] Background applied successfully, closing modal');
+      logger.debug('✅ [DEBUG] Background applied successfully, closing modal');
       // Reset state after successful apply
       setSelectedBackground(null);
       setPreviewBackground(null);
@@ -251,7 +252,7 @@ export function VariableBackgroundModal({
       setHasInitialized(false);
       onClose();
     } else {
-      console.error('❌ [DEBUG] Background apply failed');
+      logger.error('❌ [DEBUG] Background apply failed');
     }
   };
 
@@ -333,7 +334,7 @@ export function VariableBackgroundModal({
               })()}
               selectedVariation={selectedVariation}
               onVariationSelect={(variation) => {
-                console.log('🎯 [DEBUG] Variation selected:', {
+                logger.debug('🎯 [DEBUG] Variation selected:', {
                   variationId: variation.variationId,
                   tailwindClass: variation.tailwindClass,
                   baseColor: variation.baseColor,
@@ -351,7 +352,7 @@ export function VariableBackgroundModal({
                   baseColor: variation.baseColor || currentBackgroundSystem.baseColor,
                 };
                 
-                console.log('🎯 [DEBUG] Setting background:', {
+                logger.debug('🎯 [DEBUG] Setting background:', {
                   newBackground,
                   primary: newBackground.primary,
                   baseColor: newBackground.baseColor
@@ -457,12 +458,12 @@ export function VariableBackgroundModal({
               <CustomBackgroundPicker
                 colors={null}
                 onColorsChange={(colors) => {
-                  console.log('🎨 [DEBUG] Custom colors changed:', colors);
+                  logger.debug('🎨 [DEBUG] Custom colors changed:', colors);
                   // Store custom colors for later use if needed
                   setCustomColorsState(colors as any);
                 }}
                 onBackgroundChange={(background) => {
-                  console.log('🎨 [CRITICAL DEBUG] Custom background changed:', {
+                  logger.debug('🎨 [CRITICAL DEBUG] Custom background changed:', {
                     background,
                     primary: background.primary,
                     secondary: background.secondary,
@@ -478,7 +479,7 @@ export function VariableBackgroundModal({
                   // Clear preview to avoid confusion
                   setPreviewBackground(null);
                   
-                  console.log('🎨 [CRITICAL DEBUG] setSelectedBackground called with:', {
+                  logger.debug('🎨 [CRITICAL DEBUG] setSelectedBackground called with:', {
                     selectedBackgroundSet: true,
                     previewBackgroundCleared: true
                   });

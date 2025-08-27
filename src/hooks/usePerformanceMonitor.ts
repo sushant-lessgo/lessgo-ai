@@ -6,6 +6,7 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { useEditStoreContext } from '@/components/EditProvider';
 
+import { logger } from '@/lib/logger';
 interface PerformanceEntry {
   name: string;
   startTime: number;
@@ -175,7 +176,7 @@ export function usePerformanceMonitor(options: UsePerformanceMonitorOptions = {}
 
     // Log slow operations
     if (entry.duration > slowThreshold) {
-      console.warn(`🐌 Slow operation detected: ${entry.name} took ${Math.round(entry.duration)}ms`, entry);
+      logger.warn(`🐌 Slow operation detected: ${entry.name} took ${Math.round(entry.duration)}ms`, entry);
     }
   }, [enabled, maxEntries, slowThreshold]);
 

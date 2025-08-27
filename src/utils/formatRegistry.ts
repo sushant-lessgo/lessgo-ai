@@ -1,3 +1,5 @@
+import { logger } from '@/lib/logger';
+
 // Format registry system to ensure single execution path and prevent handler duplication
 // Tracks active format handlers and validates system state
 
@@ -23,7 +25,7 @@ class FormatRegistry {
    */
   register(id: string, handler: Omit<FormatHandler, 'registeredAt'>): void {
     if (this.handlers.has(id)) {
-      console.warn(`🔄 Handler already registered: ${id}. Replacing...`);
+      logger.warn(`🔄 Handler already registered: ${id}. Replacing...`);
     }
 
     this.handlers.set(id, {
@@ -31,7 +33,7 @@ class FormatRegistry {
       registeredAt: Date.now(),
     });
 
-    console.log(`📝 Registered format handler: ${id} (${handler.type}) from ${handler.component}`);
+    logger.debug(`📝 Registered format handler: ${id} (${handler.type}) from ${handler.component}`);
     this.validateHandlerCounts();
   }
 
@@ -41,9 +43,9 @@ class FormatRegistry {
    */
   unregister(id: string): void {
     if (this.handlers.delete(id)) {
-      console.log(`🗑️ Unregistered format handler: ${id}`);
+      logger.debug(`🗑️ Unregistered format handler: ${id}`);
     } else {
-      console.warn(`⚠️ Attempted to unregister non-existent handler: ${id}`);
+      logger.warn(`⚠️ Attempted to unregister non-existent handler: ${id}`);
     }
     this.validateHandlerCounts();
   }
@@ -74,24 +76,24 @@ class FormatRegistry {
       legacy: this.getHandlerCount('legacy'),
     };
 
-    console.log(`📊 Handler counts:`, counts);
+    logger.debug(`📊 Handler counts:`, counts);
 
     if (process.env.NODE_ENV !== 'production') {
       // Check for legacy handlers (should be zero)
       if (counts.legacy > this.expectedHandlers.legacy) {
-        console.error(`🚫 Legacy handlers detected: ${counts.legacy}. Should be ${this.expectedHandlers.legacy}`);
+        logger.error(`🚫 Legacy handlers detected: ${counts.legacy}. Should be ${this.expectedHandlers.legacy}`);
         console.assert(false, `Legacy format handlers still active`);
       }
 
       // Check for excessive pointer handlers  
       if (counts.pointer > this.expectedHandlers.pointer) {
-        console.warn(`⚠️ Multiple pointer handlers: ${counts.pointer}. Expected: ${this.expectedHandlers.pointer}`);
+        logger.warn(`⚠️ Multiple pointer handlers: ${counts.pointer}. Expected: ${this.expectedHandlers.pointer}`);
         this.logDuplicateHandlers('pointer');
       }
 
       // Check for excessive keyboard handlers
       if (counts.keyboard > this.expectedHandlers.keyboard) {
-        console.warn(`⚠️ Multiple keyboard handlers: ${counts.keyboard}. Expected: ${this.expectedHandlers.keyboard}`);
+        logger.warn(`⚠️ Multiple keyboard handlers: ${counts.keyboard}. Expected: ${this.expectedHandlers.keyboard}`);
         this.logDuplicateHandlers('keyboard');
       }
     }
@@ -131,7 +133,7 @@ class FormatRegistry {
       );
 
       // Log state for visibility
-      console.log(`✅ Format registry state validated:`, {
+      logger.debug(`✅ Format registry state validated:`, {
         totalHandlers: this.handlers.size,
         ...counts,
       });
@@ -143,7 +145,7 @@ class FormatRegistry {
    * @param reason - Reason for cleanup
    */
   emergencyCleanup(reason: string): void {
-    console.warn(`🚨 Emergency format registry cleanup: ${reason}`, {
+    logger.warn(`🚨 Emergency format registry cleanup: ${reason}`, {
       handlerCount: this.handlers.size,
       handlers: Array.from(this.handlers.keys()),
     });

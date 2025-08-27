@@ -15,6 +15,7 @@ import { ImageToolbar } from '../toolbars/ImageToolbar';
 import { FormToolbar } from '../toolbars/FormToolbar';
 import { AdvancedActionsMenu } from '../toolbars/AdvancedActionsMenu';
 
+import { logger } from '@/lib/logger';
 export function FloatingToolbars() {
   // STEP 3: Use Priority Resolver with Global Anchor Management
   const {

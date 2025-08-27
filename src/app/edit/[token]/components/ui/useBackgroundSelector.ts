@@ -7,6 +7,7 @@ import { generateCompleteBackgroundSystem } from '@/modules/Design/background/ba
 import { getCompatibleBackgrounds } from './backgroundCompatibility';
 import type { BackgroundSystem, BackgroundVariation, BackgroundSelectorMode } from '@/types/core';
 
+import { logger } from '@/lib/logger';
 export function useBackgroundSelector(tokenId: string) {
   // Refs for cleanup and debouncing
   const debounceTimerRef = useRef<NodeJS.Timeout>();
@@ -62,13 +63,13 @@ export function useBackgroundSelector(tokenId: string) {
 
       // Fallback to generation with validation
       if (!onboardingData || Object.keys(onboardingData).length === 0) {
-        console.warn('No onboarding data available, using safe defaults');
+        logger.warn('No onboarding data available, using safe defaults');
         return getSafeDefaultBackground();
       }
 
       return generateCompleteBackgroundSystem(onboardingData as any);
     } catch (error) {
-      console.error('Failed to get current background system:', error);
+      logger.error('Failed to get current background system:', error);
       return getSafeDefaultBackground();
     }
   }, [theme, onboardingData]);
@@ -128,7 +129,7 @@ export function useBackgroundSelector(tokenId: string) {
           
           return results;
         } catch (error) {
-          console.error('Error getting compatible backgrounds:', error);
+          logger.error('Error getting compatible backgrounds:', error);
           if (!isUnmountedRef.current) {
             setIsLoading(false);
             setValidationErrors(prev => [...prev, 'Failed to load background options']);
@@ -168,7 +169,7 @@ export function useBackgroundSelector(tokenId: string) {
       return asyncCompatibleOptions;
       
     } catch (error) {
-      console.error('Error in compatibleOptions:', error);
+      logger.error('Error in compatibleOptions:', error);
       setValidationErrors(['Failed to load background options']);
       if (isLoading) {
         setIsLoading(false);
@@ -215,7 +216,7 @@ export function useBackgroundSelector(tokenId: string) {
       }
 
     } catch (error) {
-      console.error('Validation error:', error);
+      logger.error('Validation error:', error);
       errors.push('Validation failed - please try again');
     }
 
@@ -259,13 +260,13 @@ export function useBackgroundSelector(tokenId: string) {
 
   // Enhanced apply handler with better error handling
   const handleApplyBackground = useCallback(async (): Promise<boolean> => {
-    console.log('🎯 handleApplyBackground called');
+    logger.debug('🎯 handleApplyBackground called');
     // Priority: selectedBackground over previewBackground
     // selectedBackground is set when user clicks a variation
     // previewBackground is for hover preview (not currently used)
     const backgroundToApply = selectedBackground || previewBackground;
     
-    console.log('🎯 [CRITICAL DEBUG] Background to apply:', {
+    logger.debug('🎯 [CRITICAL DEBUG] Background to apply:', {
       selectedBackground: selectedBackground ? {
         primary: selectedBackground.primary,
         secondary: selectedBackground.secondary,
@@ -291,21 +292,21 @@ export function useBackgroundSelector(tokenId: string) {
     });
     
     if (!backgroundToApply) {
-      console.warn('⚠️ No background selected to apply');
+      logger.warn('⚠️ No background selected to apply');
       setValidationErrors(['No background selected']);
       return false;
     }
 
     const errors = validateSelection(backgroundToApply);
     if (errors.length > 0) {
-      console.warn('⚠️ Cannot apply background with validation errors:', errors);
+      logger.warn('⚠️ Cannot apply background with validation errors:', errors);
       setValidationErrors(errors);
       return false;
     }
 
     // Prevent multiple simultaneous applies
     if (isLoading) {
-      console.warn('⚠️ Already applying background, please wait');
+      logger.warn('⚠️ Already applying background, please wait');
       return false;
     }
 
@@ -316,7 +317,7 @@ export function useBackgroundSelector(tokenId: string) {
       // Update the store with timeout protection
       const updatePromise = new Promise<void>((resolve, reject) => {
         try {
-          console.log('🔄 [CRITICAL DEBUG] Calling updateFromBackgroundSystem with EXACT data:', {
+          logger.debug('🔄 [CRITICAL DEBUG] Calling updateFromBackgroundSystem with EXACT data:', {
             primary: backgroundToApply.primary,
             secondary: backgroundToApply.secondary,
             neutral: backgroundToApply.neutral,
@@ -327,10 +328,10 @@ export function useBackgroundSelector(tokenId: string) {
             timestamp: new Date().toISOString()
           });
           updateFromBackgroundSystem(backgroundToApply);
-          console.log('✅ updateFromBackgroundSystem completed successfully');
+          logger.debug('✅ updateFromBackgroundSystem completed successfully');
           resolve();
         } catch (error) {
-          console.error('❌ updateFromBackgroundSystem failed:', error);
+          logger.error('❌ updateFromBackgroundSystem failed:', error);
           reject(error);
         }
       });
@@ -342,23 +343,23 @@ export function useBackgroundSelector(tokenId: string) {
       await Promise.race([updatePromise, timeoutPromise]);
 
       // Trigger auto-save with timeout protection
-      console.log('🔄 Starting auto-save...');
+      logger.debug('🔄 Starting auto-save...');
       try {
         const savePromise = Promise.resolve(triggerAutoSave()).then(() => {
-          console.log('✅ Auto-save completed');
+          logger.debug('✅ Auto-save completed');
         });
         const saveTimeoutPromise = new Promise<never>((_, reject) => {
           setTimeout(() => reject(new Error('Save timeout')), 5000); // Reduced timeout
         });
 
         await Promise.race([savePromise, saveTimeoutPromise]);
-        console.log('🔄 Auto-save race completed');
+        logger.debug('🔄 Auto-save race completed');
       } catch (saveError) {
-        console.warn('⚠️ Auto-save failed, but background was applied:', saveError);
+        logger.warn('⚠️ Auto-save failed, but background was applied:', saveError);
         // Don't fail the whole operation if just auto-save fails
       }
 
-      console.log('✅ Background system applied successfully:', {
+      logger.debug('✅ Background system applied successfully:', {
         mode,
         baseColor: backgroundToApply.baseColor,
         accentColor: backgroundToApply.accentColor,
@@ -368,7 +369,7 @@ export function useBackgroundSelector(tokenId: string) {
       return true;
 
     } catch (error) {
-      console.error('❌ Failed to apply background system:', error);
+      logger.error('❌ Failed to apply background system:', error);
       
       if (!isUnmountedRef.current) {
         setValidationErrors(['Failed to apply background system. Please try again.']);
@@ -379,7 +380,7 @@ export function useBackgroundSelector(tokenId: string) {
       // Always reset loading state
       if (!isUnmountedRef.current) {
         setIsLoading(false);
-        console.log('🔄 Loading state reset');
+        logger.debug('🔄 Loading state reset');
       }
     }
   }, [selectedBackground, previewBackground, validateSelection, updateFromBackgroundSystem, triggerAutoSave, mode, isLoading]);
@@ -395,7 +396,7 @@ export function useBackgroundSelector(tokenId: string) {
       try {
         originalBackground = generateCompleteBackgroundSystem(onboardingData as any);
       } catch (error) {
-        console.warn('Failed to generate from onboarding data, using safe defaults:', error);
+        logger.warn('Failed to generate from onboarding data, using safe defaults:', error);
         originalBackground = getSafeDefaultBackground();
       }
 
@@ -431,7 +432,7 @@ export function useBackgroundSelector(tokenId: string) {
       }
 
     } catch (error) {
-      console.error('❌ Failed to reset to generated background:', error);
+      logger.error('❌ Failed to reset to generated background:', error);
       
       if (!isUnmountedRef.current) {
         setIsLoading(false);
@@ -458,7 +459,7 @@ export function useBackgroundSelector(tokenId: string) {
     const isNotLoading = !isLoading;
     const hasValidBackground = hasSelection && selectedBackground?.primary;
     
-    console.log('🔍 [DEBUG] canApply check:', {
+    logger.debug('🔍 [DEBUG] canApply check:', {
       hasSelection,
       hasNoErrors,
       isNotLoading,

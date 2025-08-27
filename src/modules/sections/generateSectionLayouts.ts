@@ -4,6 +4,7 @@ import type { LayoutPickerInput } from "./layoutPickerInput";
 import { getAudienceGroupForAudience, getStageGroupForStage } from '@/modules/inference/taxonomy';
 import type { EditStoreInstance } from '@/stores/editStore';
 
+import { logger } from '@/lib/logger';
 // Helper function to get fallback layouts for sections
 function getSectionFallback(sectionId: string): string {
   const sectionFallbacks: Record<string, string> = {
@@ -41,12 +42,12 @@ export function generateSectionLayouts(sectionIds: string[], editStore?: EditSto
   const setSectionLayouts = editStore 
     ? editStore.getState().setSectionLayouts
     : (() => {
-        console.warn('⚠️ No editStore provided to generateSectionLayouts, layouts will not be saved');
+        logger.warn('⚠️ No editStore provided to generateSectionLayouts, layouts will not be saved');
         return () => {};
       })();
 
-  console.log('🎨 Generating layouts for sections:', sectionIds);
-  console.log('📊 Onboarding data available:', {
+  logger.debug('🎨 Generating layouts for sections:', sectionIds);
+  logger.debug('📊 Onboarding data available:', {
     validatedFields: Object.keys(onboarding.validatedFields),
     hiddenInferredFields: Object.keys(onboarding.hiddenInferredFields),
     validatedFieldsValues: onboarding.validatedFields,
@@ -75,12 +76,12 @@ export function generateSectionLayouts(sectionIds: string[], editStore?: EditSto
     pricingCommitmentOption: undefined, // Can be added when this data becomes available
   };
 
-  console.log('🎯 Layout picker input prepared:', input);
+  logger.debug('🎯 Layout picker input prepared:', input);
 
   const layouts: Record<string, string> = {};
 
   sectionIds.forEach((sectionId) => {
-    console.log(`🔍 Processing section: "${sectionId}" (type: ${typeof sectionId})`);
+    logger.debug(`🔍 Processing section: "${sectionId}" (type: ${typeof sectionId})`);
     
     // Use intelligent layout picker functions that select from all 148+ available layouts
     const picker = layoutPickers[sectionId];
@@ -89,33 +90,33 @@ export function generateSectionLayouts(sectionIds: string[], editStore?: EditSto
         const selectedLayout = picker(input);
         if (selectedLayout && selectedLayout !== 'default') {
           layouts[sectionId] = selectedLayout;
-          console.log(`✅ Smart layout selected for ${sectionId}:`, layouts[sectionId]);
+          logger.debug(`✅ Smart layout selected for ${sectionId}:`, layouts[sectionId]);
         } else {
-          console.warn(`⚠️ Layout picker returned invalid layout for ${sectionId}:`, selectedLayout);
+          logger.warn(`⚠️ Layout picker returned invalid layout for ${sectionId}:`, selectedLayout);
           layouts[sectionId] = getSectionFallback(sectionId);
-          console.log(`🔧 Using fallback layout for ${sectionId}:`, layouts[sectionId]);
+          logger.debug(`🔧 Using fallback layout for ${sectionId}:`, layouts[sectionId]);
         }
       } catch (error) {
-        console.error(`❌ Layout picker error for ${sectionId}:`, error);
+        logger.error(`❌ Layout picker error for ${sectionId}:`, error);
         layouts[sectionId] = getSectionFallback(sectionId);
-        console.log(`🔧 Using fallback layout for ${sectionId}:`, layouts[sectionId]);
+        logger.debug(`🔧 Using fallback layout for ${sectionId}:`, layouts[sectionId]);
       }
     } else {
       // If section is not in layoutPickers, use the most universal layout for that section type
-      console.warn(`⚠️ No layout picker found for section: ${sectionId}`);
+      logger.warn(`⚠️ No layout picker found for section: ${sectionId}`);
       
       // Use section-specific fallback 
       layouts[sectionId] = getSectionFallback(sectionId);
-      console.log(`🔧 Section-specific fallback layout assigned for ${sectionId}:`, layouts[sectionId]);
+      logger.debug(`🔧 Section-specific fallback layout assigned for ${sectionId}:`, layouts[sectionId]);
     }
   });
 
-  console.log('🎨 Final layout assignments:', layouts);
-  console.log('🎨 About to call setSectionLayouts with:', {
+  logger.debug('🎨 Final layout assignments:', layouts);
+  logger.debug('🎨 About to call setSectionLayouts with:', {
     layoutCount: Object.keys(layouts).length,
     heroLayout: layouts.hero,
     allLayouts: Object.entries(layouts).map(([section, layout]) => `${section}: ${layout}`)
   });
   setSectionLayouts(layouts);
-  console.log('🎨 setSectionLayouts called successfully');
+  logger.debug('🎨 setSectionLayouts called successfully');
 }

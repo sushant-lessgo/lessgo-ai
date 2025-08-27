@@ -1,3 +1,5 @@
+import { logger } from '@/lib/logger';
+
 // CSS Variable Performance Monitoring
 // Tracks performance metrics for the CSS variable migration system
 
@@ -218,21 +220,21 @@ class CSSVariablePerformanceMonitor {
     const stats = this.getStats();
     
     console.group('📊 CSS Variable Performance Summary');
-    console.log('Total measurements:', this.metrics.length);
-    console.log('Average generation time:', `${stats.averages.variableGenerationTime.toFixed(2)}ms`);
-    console.log('Average injection time:', `${stats.averages.injectionTime.toFixed(2)}ms`);
-    console.log('Average render time:', `${stats.averages.renderTime.toFixed(2)}ms`);
-    console.log('Average CSS variables:', stats.averages.cssSize.variables);
-    console.log('Average CSS size:', `${(stats.averages.cssSize.estimated / 1024).toFixed(1)}KB`);
+    logger.debug('Total measurements:', this.metrics.length);
+    logger.debug('Average generation time:', `${stats.averages.variableGenerationTime.toFixed(2)}ms`);
+    logger.debug('Average injection time:', `${stats.averages.injectionTime.toFixed(2)}ms`);
+    logger.debug('Average render time:', `${stats.averages.renderTime.toFixed(2)}ms`);
+    logger.debug('Average CSS variables:', stats.averages.cssSize.variables);
+    logger.debug('Average CSS size:', `${(stats.averages.cssSize.estimated / 1024).toFixed(1)}KB`);
     
     if (stats.trends.improving) {
-      console.log('📈 Performance is improving');
+      logger.debug('📈 Performance is improving');
     } else if (stats.trends.degrading) {
-      console.log('📉 Performance is degrading');
+      logger.debug('📉 Performance is degrading');
     }
     
     if (stats.recent?.memoryUsage) {
-      console.log('Memory usage:', `${(stats.recent.memoryUsage.used / 1024 / 1024).toFixed(1)}MB (${stats.recent.memoryUsage.percentage.toFixed(1)}%)`);
+      logger.debug('Memory usage:', `${(stats.recent.memoryUsage.used / 1024 / 1024).toFixed(1)}MB (${stats.recent.memoryUsage.percentage.toFixed(1)}%)`);
     }
     
     console.groupEnd();

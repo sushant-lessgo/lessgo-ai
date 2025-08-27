@@ -7,6 +7,7 @@ import { InlineTextEditor, defaultEditorConfig } from '@/app/edit/[token]/compon
 import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
 import type { TextFormatState, AutoSaveConfig, InlineEditorConfig, TextSelection } from '@/app/edit/[token]/components/editor/InlineTextEditor';
 
+import { logger } from '@/lib/logger';
 interface EditablePageRendererProps {
   sectionId: string;
   sectionData: any;
@@ -191,7 +192,7 @@ export function EditablePageRenderer({
       </div>
     );
   } catch (error) {
-    console.error(`Error rendering section ${sectionId}:`, error);
+    logger.error(`Error rendering section ${sectionId}:`, error);
     
     if (mode === 'edit') {
       return (

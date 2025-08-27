@@ -2,6 +2,7 @@
 import type { EditStore, UISlice, ElementSelection, ToolbarAction, EditHistoryEntry } from '@/types/store';
 import type { UIActions } from '@/types/store';
 import type { AdvancedActionItem, AdvancedMenuState } from '@/types/store/state';
+import { logger } from '@/lib/logger';
 import type { 
   UndoableAction, 
   ActionHistoryItem, 
@@ -12,55 +13,55 @@ import type {
  * Helper function to parse image targetId (copied from ImageToolbar)
  */
 function parseImageTargetId(targetId: string) {
-  console.log('🔍 Parsing image targetId:', targetId);
+  logger.debug('🔍 Parsing image targetId:', targetId);
   
   // Check if targetId follows the "sectionId.elementKey" format (from showToolbar)
   if (targetId.includes('.')) {
     const [sectionId, elementKey] = targetId.split('.');
     const result = { sectionId, elementKey };
-    console.log('🎯 Dot notation parsed:', result);
+    logger.debug('🎯 Dot notation parsed:', result);
     return result;
   }
   
   // For hero images, targetId format is: sectionId-hero-image
   // For other images, targetId format might be: sectionId-elementKey
   const parts = targetId.split('-');
-  console.log('🔍 Split parts:', parts);
+  logger.debug('🔍 Split parts:', parts);
   
   // Check most specific patterns first (longest matches)
   if (parts.length >= 5 && parts[parts.length - 4] === 'image' && parts[parts.length - 3] === 'first' && parts[parts.length - 2] === 'hero') {
     // Image first hero case: "section123-image-first-hero-image" -> sectionId: "section123", elementKey: "image_first_hero_image"
     const sectionId = parts.slice(0, -4).join('-');
     const result = { sectionId, elementKey: 'image_first_hero_image' };
-    console.log('🎯 Image first hero image parsed:', result);
+    logger.debug('🎯 Image first hero image parsed:', result);
     return result;
   } else if (parts.length >= 4 && parts[parts.length - 3] === 'center' && parts[parts.length - 2] === 'hero') {
     // Center hero image case: "section123-center-hero-image" -> sectionId: "section123", elementKey: "center_hero_image"
     const sectionId = parts.slice(0, -3).join('-');
     const result = { sectionId, elementKey: 'center_hero_image' };
-    console.log('🎯 Center hero image parsed:', result);
+    logger.debug('🎯 Center hero image parsed:', result);
     return result;
   } else if (parts.length >= 4 && parts[parts.length - 3] === 'split' && parts[parts.length - 2] === 'hero') {
     // Split hero image case: "section123-split-hero-image" -> sectionId: "section123", elementKey: "split_hero_image"
     const sectionId = parts.slice(0, -3).join('-');
     const result = { sectionId, elementKey: 'split_hero_image' };
-    console.log('🎯 Split hero image parsed:', result);
+    logger.debug('🎯 Split hero image parsed:', result);
     return result;
   } else if (parts.length >= 3 && parts[parts.length - 2] === 'hero') {
     // Standard hero image case: "section123-hero-image" -> sectionId: "section123", elementKey: "hero_image"
     const sectionId = parts.slice(0, -2).join('-');
     const result = { sectionId, elementKey: 'hero_image' };
-    console.log('🎯 Hero image parsed:', result);
+    logger.debug('🎯 Hero image parsed:', result);
     return result;
   } else if (parts.length >= 2) {
     // Other image cases - assume format: "sectionId-elementKey"
     const sectionId = parts[0];
     const elementKey = parts.slice(1).join('-');
     const result = { sectionId, elementKey };
-    console.log('🎯 Other image parsed:', result);
+    logger.debug('🎯 Other image parsed:', result);
     return result;
   }
-  console.log('❌ Failed to parse image targetId');
+  logger.debug('❌ Failed to parse image targetId');
   return null;
 }
 
@@ -224,7 +225,7 @@ export function createUIActions(set: any, get: any): UIActions {
         state.isTextEditing = isEditing;
         state.textEditingElement = isEditing && element ? element : undefined;
         
-        console.log('📝 Text editing mode changed:', { 
+        logger.debug('📝 Text editing mode changed:', { 
           isEditing, 
           element,
           currentToolbar: state.toolbar.type 
@@ -239,7 +240,7 @@ export function createUIActions(set: any, get: any): UIActions {
       set((state: EditStore) => {
         state.formattingInProgress = isInProgress;
         
-        console.log('✨ Formatting in progress changed:', { 
+        logger.debug('✨ Formatting in progress changed:', { 
           isInProgress,
           timestamp: Date.now()
         });
@@ -330,7 +331,7 @@ export function createUIActions(set: any, get: any): UIActions {
             };
             state.selectedSection = parsedImage.sectionId;
           }
-          console.log('🎯 Image selection state set:', parsedImage);
+          logger.debug('🎯 Image selection state set:', parsedImage);
         } else if (type === 'form') {
           // For form toolbar, parse the targetId (could be complex like image)
           const [sectionId, elementKey] = targetId.split('.');
@@ -391,7 +392,7 @@ export function createUIActions(set: any, get: any): UIActions {
           try {
             await state.save();
           } catch (error) {
-            console.error('Auto-save failed:', error);
+            logger.error('Auto-save failed:', error);
           }
         }, 2000);
       }
@@ -622,12 +623,12 @@ export function createUIActions(set: any, get: any): UIActions {
       actions: AdvancedActionItem[]
     ) =>
       set((state: EditStore) => {
-        console.log('Advanced menu functionality not implemented in current store structure');
+        logger.debug('Advanced menu functionality not implemented in current store structure');
       }),
 
     hideAdvancedMenu: () =>
       set((state: EditStore) => {
-        console.log('Advanced menu functionality not implemented in current store structure');
+        logger.debug('Advanced menu functionality not implemented in current store structure');
       }),
 
     toggleAdvancedMenu: (
@@ -635,7 +636,7 @@ export function createUIActions(set: any, get: any): UIActions {
       triggerElement: HTMLElement,
       actions: AdvancedActionItem[]
     ) => {
-      console.log('Advanced menu functionality not implemented in current store structure');
+      logger.debug('Advanced menu functionality not implemented in current store structure');
     },
 
     /**
@@ -717,7 +718,7 @@ export function createUIActions(set: any, get: any): UIActions {
         
         state.persistence.isDirty = true;
         
-        console.log('🔄 Undo:', lastAction.description);
+        logger.debug('🔄 Undo:', lastAction.description);
       }),
 
     redo: () =>
@@ -778,7 +779,7 @@ export function createUIActions(set: any, get: any): UIActions {
         
         state.persistence.isDirty = true;
         
-        console.log('🔄 Redo:', actionToRedo.description);
+        logger.debug('🔄 Redo:', actionToRedo.description);
       }),
 
     canUndo: () => {
@@ -884,9 +885,9 @@ export function createUIActions(set: any, get: any): UIActions {
             if (state.selectedElement) {
               const elementId = `${state.selectedElement.sectionId}.${state.selectedElement.elementKey}`;
               // This would need to be handled by the toolbar component
-              console.log('Show advanced menu for element via keyboard:', elementId);
+              logger.debug('Show advanced menu for element via keyboard:', elementId);
             } else if (state.selectedSection) {
-              console.log('Show advanced menu for section via keyboard:', state.selectedSection);
+              logger.debug('Show advanced menu for section via keyboard:', state.selectedSection);
             }
             break;
             
@@ -1008,19 +1009,19 @@ export function createUIActions(set: any, get: any): UIActions {
     
     handleDragStart: (sectionId: string, event: DragEvent) => {
       // TODO: Implement drag start functionality
-      console.log('Drag start:', sectionId, event);
+      logger.debug('Drag start:', sectionId, event);
     },
 
     handleDragOver: (event: DragEvent) => {
       // TODO: Implement drag over functionality
       event.preventDefault();
-      console.log('Drag over:', event);
+      logger.debug('Drag over:', event);
     },
 
     handleDrop: (targetSectionId: string, position: 'before' | 'after', event: DragEvent) => {
       // TODO: Implement drop functionality
       event.preventDefault();
-      console.log('Drop:', targetSectionId, position, event);
+      logger.debug('Drop:', targetSectionId, position, event);
     },
 
     /**
@@ -1032,7 +1033,7 @@ export function createUIActions(set: any, get: any): UIActions {
       const duration = endTime - startTime;
       
       if (duration > 100) { // Log slow operations
-        console.warn(`🐌 Slow operation: ${operation} took ${duration.toFixed(2)}ms`);
+        logger.warn(`🐌 Slow operation: ${operation} took ${duration.toFixed(2)}ms`);
       }
       
       // Track in performance metrics if available

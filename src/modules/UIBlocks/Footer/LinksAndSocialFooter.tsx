@@ -8,6 +8,7 @@ import { FaTwitter, FaLinkedin, FaGithub, FaFacebook, FaInstagram, FaYoutube, Fa
 import HeaderLogo from '@/components/ui/HeaderLogo';
 import SocialMediaEditor from '@/components/social/SocialMediaEditor';
 
+import { logger } from '@/lib/logger';
 interface LinksAndSocialFooterContent {
   copyright?: string;
   company_name?: string;
@@ -50,7 +51,7 @@ const LinksAndSocialFooter: React.FC<LayoutComponentProps> = (props) => {
   
   // Debug logging
   useEffect(() => {
-    console.log('🔗 [FOOTER-DEBUG] LinksAndSocialFooter render:', {
+    logger.debug('🔗 [FOOTER-DEBUG] LinksAndSocialFooter render:', {
       mode,
       socialMediaConfig: store.socialMediaConfig,
       socialLinksCount: socialLinks.length,

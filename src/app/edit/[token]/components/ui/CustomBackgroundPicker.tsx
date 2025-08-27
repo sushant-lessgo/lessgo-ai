@@ -5,6 +5,7 @@
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { SolidColorPicker } from './ColorPicker/SolidColorPicker';
 import { GradientPicker } from './ColorPicker/GradientPicker';
+import { logger } from '@/lib/logger';
 import { 
   generateCustomColorScheme, 
   updateColorScheme,
@@ -29,7 +30,7 @@ export function CustomBackgroundPicker({
   onBackgroundChange,
   disabled = false 
 }: CustomBackgroundPickerProps) {
-  console.log('🎨 [CustomBackgroundPicker] Component rendered with props:', {
+  logger.debug('🎨 [CustomBackgroundPicker] Component rendered with props:', {
     hasColors: !!colors,
     hasOnColorsChange: !!onColorsChange,
     hasOnBackgroundChange: !!onBackgroundChange,
@@ -61,7 +62,7 @@ export function CustomBackgroundPicker({
 
   // Update parent when colors change (debounced)
   useEffect(() => {
-    console.log('🔄 [CustomBackgroundPicker] useEffect triggered with:', {
+    logger.debug('🔄 [CustomBackgroundPicker] useEffect triggered with:', {
       pickerMode,
       customBackground,
       localColors: {
@@ -80,7 +81,7 @@ export function CustomBackgroundPicker({
         const primaryCSS = generateBackgroundCSS(customBackground, pickerMode);
         const baseColor = extractBaseColor(localColors.primary);
         
-        console.log('🎨 [CustomBackgroundPicker] Generated CSS:', {
+        logger.debug('🎨 [CustomBackgroundPicker] Generated CSS:', {
           primaryCSS,
           baseColor,
           pickerMode,
@@ -102,7 +103,7 @@ export function CustomBackgroundPicker({
           accentCSS: `bg-[${localColors.primary}]` // Use proper Tailwind format for accent
         };
         
-        console.log('🎨 [CustomBackgroundPicker] Sending background system:', backgroundSystem);
+        logger.debug('🎨 [CustomBackgroundPicker] Sending background system:', backgroundSystem);
         onBackgroundChangeRef.current(backgroundSystem);
       }
     }, 300);
@@ -121,14 +122,14 @@ export function CustomBackgroundPicker({
 
   // Handle gradient change
   const handleGradientChange = useCallback((gradient: any) => {
-    console.log('🎨 [CustomBackgroundPicker] handleGradientChange called with:', gradient);
+    logger.debug('🎨 [CustomBackgroundPicker] handleGradientChange called with:', gradient);
     
     setCustomBackground({ gradient });
     
     // Extract primary color from first gradient stop
     if (gradient?.stops?.[0]?.color) {
       const updatedScheme = updateColorScheme(localColors, 'primary', gradient.stops[0].color, true);
-      console.log('🎨 [CustomBackgroundPicker] Updated color scheme:', updatedScheme);
+      logger.debug('🎨 [CustomBackgroundPicker] Updated color scheme:', updatedScheme);
       setLocalColors(updatedScheme);
     }
   }, [localColors]);
@@ -144,7 +145,7 @@ export function CustomBackgroundPicker({
 
   // Generate CSS for the background
   const generateBackgroundCSS = (custom: CustomBackground, mode: BackgroundPickerMode): string => {
-    console.log('🎨 [CustomBackgroundPicker] generateBackgroundCSS called:', {
+    logger.debug('🎨 [CustomBackgroundPicker] generateBackgroundCSS called:', {
       mode,
       custom,
       localColors
@@ -154,7 +155,7 @@ export function CustomBackgroundPicker({
       // Extract color value - handle both string and object formats
       const colorValue = custom.solid || localColors.primary;
       const cssClass = `bg-[${colorValue}]`;
-      console.log('🎨 [CustomBackgroundPicker] Generated solid CSS:', cssClass);
+      logger.debug('🎨 [CustomBackgroundPicker] Generated solid CSS:', cssClass);
       return cssClass;
     } else if (mode === 'gradient' && custom.gradient) {
       const { type, stops } = custom.gradient;
@@ -170,7 +171,7 @@ export function CustomBackgroundPicker({
         cssClass = `bg-[${localColors.primary}]`; // Fallback
       }
       
-      console.log('🎨 [CustomBackgroundPicker] Generated gradient CSS:', {
+      logger.debug('🎨 [CustomBackgroundPicker] Generated gradient CSS:', {
         type,
         stops,
         gradientStops,
@@ -182,7 +183,7 @@ export function CustomBackgroundPicker({
     
     // Fallback with proper format
     const fallbackClass = `bg-[${localColors.primary}]`;
-    console.log('🎨 [CustomBackgroundPicker] Using fallback CSS:', fallbackClass);
+    logger.debug('🎨 [CustomBackgroundPicker] Using fallback CSS:', fallbackClass);
     return fallbackClass;
   };
 
@@ -223,7 +224,7 @@ export function CustomBackgroundPicker({
       
       return 'blue'; // Final fallback
     } catch (error) {
-      console.warn('Error extracting base color:', error);
+      logger.warn('Error extracting base color:', error);
       return 'blue';
     }
   };
@@ -259,7 +260,7 @@ export function CustomBackgroundPicker({
             </button>
             <button
               onClick={() => {
-                console.log('🎨 [CustomBackgroundPicker] Switching to gradient mode');
+                logger.debug('🎨 [CustomBackgroundPicker] Switching to gradient mode');
                 setPickerMode('gradient');
               }}
               disabled={disabled}

@@ -11,6 +11,7 @@ import { useRef, useEffect, useCallback } from 'react';
 import { debounce } from 'lodash';
 import { suppressSelectionEvents, useSelectionGuard } from '@/utils/selectionGuard';
 
+import { logger } from '@/lib/logger';
 export interface SelectionPreserver {
   saveSelection: () => void;
   restoreSelection: () => void;
@@ -54,7 +55,7 @@ export function useSelectionPreserver(): SelectionPreserver {
       
       // Check if container is still connected to DOM
       if (!range.startContainer.isConnected || !range.endContainer.isConnected) {
-        console.warn('🎯 Range container disconnected from DOM');
+        logger.warn('🎯 Range container disconnected from DOM');
         savedRangeRef.current = null;
         return false;
       }
@@ -79,14 +80,14 @@ export function useSelectionPreserver(): SelectionPreserver {
       };
       
       if (!isInEditable(startContainer) || !isInEditable(endContainer)) {
-        console.warn('🎯 Range not within editable element');
+        logger.warn('🎯 Range not within editable element');
         savedRangeRef.current = null;
         return false;
       }
       
       return true;
     } catch (error) {
-      console.warn('🎯 Range validation failed:', error);
+      logger.warn('🎯 Range validation failed:', error);
       savedRangeRef.current = null;
       return false;
     }
@@ -102,12 +103,12 @@ export function useSelectionPreserver(): SelectionPreserver {
         const range = sel.getRangeAt(0).cloneRange();
         savedRangeRef.current = range;
         
-        console.log('🎯 Selection saved:', {
+        logger.debug('🎯 Selection saved:', {
           text: range.toString().substring(0, 50),
           isValid: validateSelection(),
         });
       } catch (error) {
-        console.warn('🎯 Failed to save selection:', error);
+        logger.warn('🎯 Failed to save selection:', error);
         savedRangeRef.current = null;
       }
     } else {
@@ -120,7 +121,7 @@ export function useSelectionPreserver(): SelectionPreserver {
    */
   const restoreSelection = useCallback(() => {
     if (!validateSelection()) {
-      console.warn('🎯 Cannot restore - invalid selection');
+      logger.warn('🎯 Cannot restore - invalid selection');
       return;
     }
     
@@ -135,12 +136,12 @@ export function useSelectionPreserver(): SelectionPreserver {
         sel.removeAllRanges();
         sel.addRange(range);
         
-        console.log('🎯 Selection restored:', {
+        logger.debug('🎯 Selection restored:', {
           text: range.toString().substring(0, 50),
           isValid: true,
         });
       } catch (error) {
-        console.warn('🎯 Failed to restore selection:', error);
+        logger.warn('🎯 Failed to restore selection:', error);
         savedRangeRef.current = null;
       }
     }
@@ -158,7 +159,7 @@ export function useSelectionPreserver(): SelectionPreserver {
    */
   const clearSelection = useCallback(() => {
     savedRangeRef.current = null;
-    console.log('🎯 Selection cleared');
+    logger.debug('🎯 Selection cleared');
   }, []);
 
   /**
@@ -199,11 +200,11 @@ export function useSelectionPreserver(): SelectionPreserver {
           try {
             const range = sel.getRangeAt(0).cloneRange();
             savedRangeRef.current = range;
-            console.log('🎯 Auto-saved selection:', {
+            logger.debug('🎯 Auto-saved selection:', {
               text: range.toString().substring(0, 50),
             });
           } catch (error) {
-            console.warn('🎯 Auto-save selection failed:', error);
+            logger.warn('🎯 Auto-save selection failed:', error);
           }
         }
       }
@@ -251,9 +252,9 @@ export function useScopedSelectionPreserver(elementRef: React.RefObject<HTMLElem
       if (elementRef.current.contains(range.commonAncestorContainer)) {
         try {
           savedRangeRef.current = range.cloneRange();
-          console.log('🎯 Scoped selection saved for element:', elementRef.current.dataset.elementKey);
+          logger.debug('🎯 Scoped selection saved for element:', elementRef.current.dataset.elementKey);
         } catch (error) {
-          console.warn('🎯 Failed to save scoped selection:', error);
+          logger.warn('🎯 Failed to save scoped selection:', error);
           savedRangeRef.current = null;
         }
       }
@@ -268,13 +269,13 @@ export function useScopedSelectionPreserver(elementRef: React.RefObject<HTMLElem
         if (elementRef.current.contains(savedRangeRef.current.commonAncestorContainer)) {
           sel.removeAllRanges();
           sel.addRange(savedRangeRef.current);
-          console.log('🎯 Scoped selection restored for element:', elementRef.current.dataset.elementKey);
+          logger.debug('🎯 Scoped selection restored for element:', elementRef.current.dataset.elementKey);
         } else {
-          console.warn('🎯 Saved range is no longer valid for element');
+          logger.warn('🎯 Saved range is no longer valid for element');
           savedRangeRef.current = null;
         }
       } catch (error) {
-        console.warn('🎯 Failed to restore scoped selection:', error);
+        logger.warn('🎯 Failed to restore scoped selection:', error);
         savedRangeRef.current = null;
       }
     }
@@ -298,7 +299,7 @@ export function useScopedSelectionPreserver(elementRef: React.RefObject<HTMLElem
 
   const cleanup = useCallback(() => {
     savedRangeRef.current = null;
-    console.log('🎯 Scoped selection preserver cleanup');
+    logger.debug('🎯 Scoped selection preserver cleanup');
   }, []);
 
   return {

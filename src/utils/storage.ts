@@ -1,3 +1,5 @@
+import { logger } from '@/lib/logger';
+
 /**
  * Storage utilities for multi-project token-scoped persistence
  * Handles localStorage management for isolated project stores
@@ -48,7 +50,7 @@ export function isStorageAvailable(): boolean {
     localStorage.removeItem(testKey);
     return true;
   } catch (error) {
-    console.warn('localStorage not available:', error);
+    logger.warn('localStorage not available:', error);
     return false;
   }
 }
@@ -79,7 +81,7 @@ export function getStorageMetadata(): StorageMetadata {
     
     // Validate metadata structure
     if (!metadata.projects || !Array.isArray(metadata.projects)) {
-      console.warn('Invalid metadata structure, resetting');
+      logger.warn('Invalid metadata structure, resetting');
       return {
         projects: [],
         lastCleanup: Date.now(),
@@ -89,7 +91,7 @@ export function getStorageMetadata(): StorageMetadata {
 
     return metadata;
   } catch (error) {
-    console.error('Failed to parse storage metadata:', error);
+    logger.error('Failed to parse storage metadata:', error);
     return {
       projects: [],
       lastCleanup: Date.now(),
@@ -107,7 +109,7 @@ export function updateStorageMetadata(metadata: StorageMetadata): void {
   try {
     localStorage.setItem(STORAGE_CONFIG.METADATA_KEY, JSON.stringify(metadata));
   } catch (error) {
-    console.error('Failed to update storage metadata:', error);
+    logger.error('Failed to update storage metadata:', error);
   }
 }
 
@@ -174,10 +176,10 @@ export function removeStoredProject(tokenId: string): boolean {
     metadata.totalProjects = Math.max(0, metadata.totalProjects - 1);
     updateStorageMetadata(metadata);
 
-    console.log(`🗑️ Removed project: ${tokenId}`);
+    logger.debug(`🗑️ Removed project: ${tokenId}`);
     return true;
   } catch (error) {
-    console.error(`Failed to remove project ${tokenId}:`, error);
+    logger.error(`Failed to remove project ${tokenId}:`, error);
     return false;
   }
 }
@@ -199,7 +201,7 @@ export function cleanupOldProjects(currentTokenId: string, force: boolean = fals
 
   if (!needsCleanup) return;
 
-  console.log(`🧹 Starting storage cleanup (${metadata.projects.length} projects)`);
+  logger.debug(`🧹 Starting storage cleanup (${metadata.projects.length} projects)`);
 
   try {
     // Sort projects by last accessed time (oldest first)
@@ -224,7 +226,7 @@ export function cleanupOldProjects(currentTokenId: string, force: boolean = fals
       if (key?.startsWith(STORAGE_CONFIG.PROJECT_KEY_PREFIX)) {
         const tokenId = key.replace(STORAGE_CONFIG.PROJECT_KEY_PREFIX, '');
         if (!storedTokens.includes(tokenId) && tokenId !== currentTokenId) {
-          console.log(`🧹 Removing orphaned key: ${key}`);
+          logger.debug(`🧹 Removing orphaned key: ${key}`);
           localStorage.removeItem(key);
         }
       }
@@ -235,10 +237,10 @@ export function cleanupOldProjects(currentTokenId: string, force: boolean = fals
     updatedMetadata.lastCleanup = now;
     updateStorageMetadata(updatedMetadata);
 
-    console.log(`✅ Cleanup complete. Removed ${filteredRemoveList.length} old projects`);
+    logger.debug(`✅ Cleanup complete. Removed ${filteredRemoveList.length} old projects`);
 
   } catch (error) {
-    console.error('Storage cleanup failed:', error);
+    logger.error('Storage cleanup failed:', error);
   }
 }
 
@@ -290,7 +292,7 @@ export function getStorageStats(): {
 export function switchToken(newTokenId: string, oldTokenId?: string): void {
   if (!isStorageAvailable()) return;
 
-  console.log(`🔄 Switching token: ${oldTokenId || 'none'} → ${newTokenId}`);
+  logger.debug(`🔄 Switching token: ${oldTokenId || 'none'} → ${newTokenId}`);
 
   // Track access to new token
   trackProjectAccess(newTokenId);
@@ -305,7 +307,7 @@ export function switchToken(newTokenId: string, oldTokenId?: string): void {
 export function clearAllProjects(): void {
   if (!isStorageAvailable()) return;
 
-  console.warn('🚨 Clearing all project data');
+  logger.warn('🚨 Clearing all project data');
 
   try {
     // Remove all project keys
@@ -319,9 +321,9 @@ export function clearAllProjects(): void {
 
     keysToRemove.forEach(key => localStorage.removeItem(key));
 
-    console.log(`✅ Cleared ${keysToRemove.length} project keys`);
+    logger.debug(`✅ Cleared ${keysToRemove.length} project keys`);
   } catch (error) {
-    console.error('Failed to clear all projects:', error);
+    logger.error('Failed to clear all projects:', error);
   }
 }
 

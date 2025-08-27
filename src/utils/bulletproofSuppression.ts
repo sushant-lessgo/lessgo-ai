@@ -1,6 +1,8 @@
 // Bulletproof suppression system with leak detection and transaction tracking
 // Prevents re-entrancy loops with comprehensive safety mechanisms
 
+import { logger } from '@/lib/logger';
+
 export type SuppressionToken = string;
 export type TransactionId = string;
 
@@ -28,7 +30,7 @@ class BulletproofSuppression {
       return `tx:${uuid}`;
     } catch (error) {
       // Fallback for environments without crypto.randomUUID()
-      console.warn('crypto.randomUUID() not available, using fallback TX ID generation');
+      logger.warn('crypto.randomUUID() not available, using fallback TX ID generation');
       return `tx:${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
     }
   }
@@ -41,7 +43,7 @@ class BulletproofSuppression {
   beginSuppression(token: SuppressionToken, txId: TransactionId): void {
     // Guard against double begin with same token
     if (this.state.activeTokens.has(token)) {
-      console.warn(`🔒 Double begin suppression blocked for token: ${token} (${txId})`);
+      logger.warn(`🔒 Double begin suppression blocked for token: ${token} (${txId})`);
       return;
     }
 
@@ -54,7 +56,7 @@ class BulletproofSuppression {
     }
     this.state.activeTransactions.get(txId)!.push(token);
 
-    console.log(`🔒 Begin suppression: ${token} (${txId}) [counter: ${this.state.counter}]`);
+    logger.debug(`🔒 Begin suppression: ${token} (${txId}) [counter: ${this.state.counter}]`);
   }
 
   /**
@@ -64,7 +66,7 @@ class BulletproofSuppression {
    */
   endSuppression(token: SuppressionToken, txId: TransactionId): void {
     if (!this.state.activeTokens.has(token)) {
-      console.warn(`🔓 Attempt to end non-existent suppression: ${token} (${txId})`);
+      logger.warn(`🔓 Attempt to end non-existent suppression: ${token} (${txId})`);
       return;
     }
 
@@ -83,7 +85,7 @@ class BulletproofSuppression {
       }
     }
 
-    console.log(`🔓 End suppression: ${token} (${txId}) [counter: ${this.state.counter}]`);
+    logger.debug(`🔓 End suppression: ${token} (${txId}) [counter: ${this.state.counter}]`);
   }
 
   /**
@@ -131,7 +133,7 @@ class BulletproofSuppression {
     txId: TransactionId,
     fn: () => T
   ): T {
-    console.log(`📤 Micro-window open: ${token} (${txId})`);
+    logger.debug(`📤 Micro-window open: ${token} (${txId})`);
     
     // Temporarily end suppression
     const wasActive = this.state.activeTokens.has(token);
@@ -141,13 +143,13 @@ class BulletproofSuppression {
 
     try {
       const result = fn();
-      console.log(`📥 Micro-window operation complete: ${token} (${txId})`);
+      logger.debug(`📥 Micro-window operation complete: ${token} (${txId})`);
       return result;
     } finally {
       // Immediately restore suppression
       if (wasActive) {
         this.beginSuppression(token, txId);
-        console.log(`🔒 Micro-window closed: ${token} (${txId})`);
+        logger.debug(`🔒 Micro-window closed: ${token} (${txId})`);
       }
     }
   }
@@ -175,7 +177,7 @@ class BulletproofSuppression {
    * @param reason - Reason for emergency cleanup
    */
   emergencyCleanup(reason: string): void {
-    console.warn(`🚨 Emergency suppression cleanup: ${reason}`, this.getState());
+    logger.warn(() => `🚨 Emergency suppression cleanup: ${reason}`, () => this.getState());
     
     this.state.counter = 0;
     this.state.activeTokens.clear();
@@ -190,13 +192,13 @@ class BulletproofSuppression {
     if (process.env.NODE_ENV !== 'production') {
       const txTokens = this.state.activeTransactions.get(txId);
       if (txTokens && txTokens.length > 0) {
-        console.error(`💧 Suppression leak detected! Transaction ${txId} has unfinished tokens:`, txTokens);
+        logger.error(() => `💧 Suppression leak detected! Transaction ${txId} has unfinished tokens:`, () => txTokens);
         console.assert(false, `Suppression leak in transaction ${txId}`);
       }
 
       // Global leak check
       if (this.state.counter < 0) {
-        console.error(`💧 Negative suppression counter: ${this.state.counter}`);
+        logger.error(() => `💧 Negative suppression counter: ${this.state.counter}`);
         console.assert(false, 'Negative suppression counter detected');
       }
     }

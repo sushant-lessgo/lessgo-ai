@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import { useParams } from "next/navigation";
 import { useOnboardingStore } from "@/hooks/useOnboardingStore";
 
+import { logger } from '@/lib/logger';
 // ✅ UPDATED: Use internal field names to match new API structure
 const FIELD_ORDER = [
   "marketCategory",
@@ -80,7 +81,7 @@ export default function StartPage() {
         setFeaturesFromAI(data.featuresFromAI || []);
         setHiddenInferredFields(data.hiddenInferredFields || {});
 
-        console.log("✅ Store populated from draft:", {
+        logger.debug("✅ Store populated from draft:", {
           inputText: data.inputText,
           stepIndex: data.stepIndex,
           confirmedFieldsCount: Object.keys(data.confirmedFields || {}).length,
@@ -89,7 +90,7 @@ export default function StartPage() {
         });
 
       } catch (err) {
-        console.error("❌ Draft load failed:", err);
+        logger.error("❌ Draft load failed:", err);
         // Don't reset on error - let user start fresh
       }
     };

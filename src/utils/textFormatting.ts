@@ -190,7 +190,7 @@ export function applyFormatToElement(element: HTMLElement, format: Partial<TextF
     const rule = formatRules[key as keyof TextFormatState];
     if (rule) {
       if (rule.validate && !rule.validate(value)) {
-        console.warn(`Invalid value for ${key}: ${value}`);
+        logger.warn(`Invalid value for ${key}: ${value}`);
         return;
       }
       
@@ -441,6 +441,7 @@ export const commonFormats = {
 
 import { sanitizeHTML, isValidFormattingHTML } from './htmlSanitization';
 
+import { logger } from '@/lib/logger';
 /**
  * Simple HTML sanitizer that doesn't cause infinite loops
  * This replaces the complex sanitizeHTML function that was hanging
@@ -549,7 +550,7 @@ export function formatSelectedText(options: Partial<TextFormatState>): PartialFo
     selection.removeAllRanges();
     selection.addRange(newRange);
     
-    console.log('✨ Applied partial text formatting:', {
+    logger.debug('✨ Applied partial text formatting:', {
       text: span.textContent?.substring(0, 50),
       appliedFormats: options,
     });
@@ -560,7 +561,7 @@ export function formatSelectedText(options: Partial<TextFormatState>): PartialFo
     // FIXED: Use simple, safe HTML cleanup instead of complex sanitizer
     const sanitizedHTML = simpleSanitizeHTML(rawHTML);
     
-    console.log('✨ Partial text formatting complete:', {
+    logger.debug('✨ Partial text formatting complete:', {
       rawHTML: rawHTML.substring(0, 100),
       sanitizedHTML: sanitizedHTML.substring(0, 100),
       isValid: isValidFormattingHTML(sanitizedHTML),
@@ -572,7 +573,7 @@ export function formatSelectedText(options: Partial<TextFormatState>): PartialFo
       affectedRange: range,
     };
   } catch (error) {
-    console.error('❌ Failed to format selected text:', error);
+    logger.error('❌ Failed to format selected text:', error);
     return { 
       success: false, 
       error: error instanceof Error ? error.message : 'Unknown formatting error' 
@@ -712,7 +713,7 @@ export function removeFormattingFromSelection(): PartialFormatResult {
       }
     });
 
-    console.log('🧹 Removed formatting from selection:', {
+    logger.debug('🧹 Removed formatting from selection:', {
       spansRemoved: spansToUnwrap.length,
     });
 
@@ -729,7 +730,7 @@ export function removeFormattingFromSelection(): PartialFormatResult {
       affectedRange: range,
     };
   } catch (error) {
-    console.error('❌ Failed to remove formatting:', error);
+    logger.error('❌ Failed to remove formatting:', error);
     return { 
       success: false, 
       error: error instanceof Error ? error.message : 'Unknown error removing formatting' 

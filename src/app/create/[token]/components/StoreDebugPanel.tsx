@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useEditStoreContext } from '@/components/EditProvider';
+import { logger } from '@/lib/logger';
 
 export function StoreDebugPanel() {
   // Early return for non-development environments
@@ -152,7 +153,7 @@ export function StoreDebugPanel() {
       {/* Actions */}
       <div className="border-t p-2 space-y-1">
         <button
-          onClick={() => console.log('Full Store State:', store.getState())}
+          onClick={() => logger.dev('Full Store State:', () => store.getState())}
           className="w-full text-xs bg-gray-100 hover:bg-gray-200 py-1 rounded"
         >
           📄 Log Full Store to Console

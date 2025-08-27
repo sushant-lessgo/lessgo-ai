@@ -1,3 +1,5 @@
+import { logger } from '@/lib/logger';
+
 // src/utils/readinessDetection.ts - Enhanced readiness detection with reversibility
 // Phase 1: Event-driven readiness system with watchdog and accessibility
 
@@ -69,7 +71,7 @@ export function initializeReadinessTracking(editorId: string = 'default'): void 
     startWatchdog(editorId);
     
     if (process.env.NODE_ENV === 'development') {
-      console.log(`🚀 Enhanced readiness tracking started for editor: ${editorId}`);
+      logger.debug(`🚀 Enhanced readiness tracking started for editor: ${editorId}`);
     }
   }
 }
@@ -88,7 +90,7 @@ export function setProviderMounted(editorId: string = 'default', mounted: boolea
     state.providerMounted = mounted;
     
     if (process.env.NODE_ENV === 'development') {
-      console.log(`🏗️ Provider ${mounted ? 'mounted' : 'unmounted'} for editor: ${editorId}`);
+      logger.debug(`🏗️ Provider ${mounted ? 'mounted' : 'unmounted'} for editor: ${editorId}`);
     }
     
     checkInteractiveReadiness(editorId, 'provider-mount');
@@ -109,7 +111,7 @@ export function setDataLoaded(editorId: string = 'default', loaded: boolean): vo
     state.dataLoaded = loaded;
     
     if (process.env.NODE_ENV === 'development') {
-      console.log(`📊 Data ${loaded ? 'loaded' : 'unloaded'} for editor: ${editorId}`);
+      logger.debug(`📊 Data ${loaded ? 'loaded' : 'unloaded'} for editor: ${editorId}`);
     }
     
     checkInteractiveReadiness(editorId, 'data-load');
@@ -129,7 +131,7 @@ export function recordEditorMount(editorId: string = 'default'): void {
   state.mountCount++;
   
   if (process.env.NODE_ENV === 'development') {
-    console.log(`🔄 Editor mount recorded: ${editorId} (count: ${state.mountCount})`);
+    logger.debug(`🔄 Editor mount recorded: ${editorId} (count: ${state.mountCount})`);
   }
   
   // Consider provider mounted after first mount
@@ -205,7 +207,7 @@ function checkInteractiveReadiness(editorId: string, reason: string): void {
     });
     
     // Invariant log: Always print readiness state changes
-    console.log(`🎯 [CONSERVATIVE] READINESS ${shouldBeInteractive ? 'GAINED' : 'LOST'} → INTERACTIVE: ${shouldBeInteractive}`, {
+    logger.debug(`🎯 [CONSERVATIVE] READINESS ${shouldBeInteractive ? 'GAINED' : 'LOST'} → INTERACTIVE: ${shouldBeInteractive}`, {
       editorId,
       reason,
       criteria: {
@@ -221,7 +223,7 @@ function checkInteractiveReadiness(editorId: string, reason: string): void {
     if (shouldBeInteractive && state.isHydrating) {
       // Gaining interactivity - always stop hydrating
       state.isHydrating = false;
-      console.log(`🎯 [CONSERVATIVE] Mode: edit (gained interactivity)`);
+      logger.debug(`🎯 [CONSERVATIVE] Mode: edit (gained interactivity)`);
     } else if (!shouldBeInteractive && !state.isHydrating) {
       // Losing interactivity - be conservative about falling back to loading
       const providerUnmounted = !state.providerMounted;
@@ -237,9 +239,9 @@ function checkInteractiveReadiness(editorId: string, reason: string): void {
               currentState.currentAnchorCount === 0 &&
               !currentState.isInteractive) {
             currentState.isHydrating = true;
-            console.log(`🎯 [CONSERVATIVE] Mode: loading (both provider unmounted and anchorCount === 0)`);
+            logger.debug(`🎯 [CONSERVATIVE] Mode: loading (both provider unmounted and anchorCount === 0)`);
           } else {
-            console.log(`🎯 [CONSERVATIVE] Mode: edit (kept - temporary state or conditions changed)`, {
+            logger.debug(`🎯 [CONSERVATIVE] Mode: edit (kept - temporary state or conditions changed)`, {
               providerMounted: currentState?.providerMounted,
               anchorCount: currentState?.currentAnchorCount,
               isInteractive: currentState?.isInteractive
@@ -247,7 +249,7 @@ function checkInteractiveReadiness(editorId: string, reason: string): void {
           }
         });
       } else {
-        console.log(`🎯 [CONSERVATIVE] Mode: edit (kept - not both conditions met)`, {
+        logger.debug(`🎯 [CONSERVATIVE] Mode: edit (kept - not both conditions met)`, {
           providerUnmounted,
           noAnchors,
           reason: providerUnmounted ? 'provider-unmounted' : noAnchors ? 'no-anchors' : 'neither'
@@ -283,7 +285,7 @@ function startWatchdog(editorId: string): void {
     if (currentState.currentAnchorCount === 0 && !currentState.hasShownZeroAnchorsWarning) {
       currentState.hasShownZeroAnchorsWarning = true;
       
-      console.warn('⏰ WATCHDOG: No anchors registered after 2 seconds — editor not ready', {
+      logger.warn('⏰ WATCHDOG: No anchors registered after 2 seconds — editor not ready', {
         editorId,
         elapsedTime: Date.now() - currentState.watchdogStartTime,
         criteria: {
@@ -296,7 +298,7 @@ function startWatchdog(editorId: string): void {
       // CRITICAL FIX: If provider is mounted but we're stuck waiting for dataLoaded,
       // force it to true after the watchdog timeout
       if (currentState.providerMounted && !currentState.dataLoaded) {
-        console.warn('⚠️ WATCHDOG INTERVENTION: Provider mounted but data never loaded - forcing dataLoaded: true');
+        logger.warn('⚠️ WATCHDOG INTERVENTION: Provider mounted but data never loaded - forcing dataLoaded: true');
         currentState.dataLoaded = true;
         checkInteractiveReadiness(editorId, 'watchdog-forced-data-loaded');
       }
@@ -390,7 +392,7 @@ function notifyInteractiveChange(editorId: string, isInteractive: boolean): void
       try {
         callback(isInteractive);
       } catch (error) {
-        console.error('Error in interactive change callback:', error);
+        logger.error('Error in interactive change callback:', error);
       }
     });
   }
@@ -425,7 +427,7 @@ export function cleanupReadinessTracking(editorId: string = 'default'): void {
   interactiveCallbacks.delete(editorId);
 
   if (process.env.NODE_ENV === 'development') {
-    console.log(`🧹 Readiness tracking cleaned up for editor: ${editorId}`);
+    logger.debug(`🧹 Readiness tracking cleaned up for editor: ${editorId}`);
   }
 }
 
@@ -438,7 +440,7 @@ export function forceInteractive(editorId: string = 'default', interactive: bool
     state.isInteractive = interactive;
     state.isHydrating = !interactive;
     
-    console.warn(`⚠️ Interactive state force-set to ${interactive} for editor: ${editorId}`);
+    logger.warn(`⚠️ Interactive state force-set to ${interactive} for editor: ${editorId}`);
     notifyInteractiveChange(editorId, interactive);
   }
 }

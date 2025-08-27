@@ -1,3 +1,5 @@
+import { logger } from '@/lib/logger';
+
 // src/utils/hydrationDetection.ts - Event-driven hydration detection
 // Replaces fixed timeout with criteria-driven approach
 
@@ -26,7 +28,7 @@ export function initializeHydrationTracking(editorId: string = 'default'): void 
     });
 
     if (process.env.NODE_ENV === 'development') {
-      console.log(`🚀 Hydration tracking started for editor: ${editorId}`);
+      logger.debug(`🚀 Hydration tracking started for editor: ${editorId}`);
     }
   }
 }
@@ -44,11 +46,11 @@ export function recordEditorMount(editorId: string = 'default'): void {
   state.mountCount++;
   
   if (process.env.NODE_ENV === 'development') {
-    console.log(`🔄 Editor mount recorded: ${editorId} (count: ${state.mountCount})`);
+    logger.debug(`🔄 Editor mount recorded: ${editorId} (count: ${state.mountCount})`);
     
     // In dev, we expect 2 mounts due to StrictMode
     if (state.mountCount >= 2) {
-      console.log(`✅ StrictMode double-mount detected for: ${editorId}`);
+      logger.debug(`✅ StrictMode double-mount detected for: ${editorId}`);
       checkHydrationComplete(editorId);
     }
   } else {
@@ -77,7 +79,7 @@ export function updateAnchorCount(editorId: string = 'default', currentCount: nu
           currentState.stabilityCheckFrame = null;
           
           if (process.env.NODE_ENV === 'development') {
-            console.log(`⚓ Anchor count stable at ${currentCount} for editor: ${editorId}`);
+            logger.debug(`⚓ Anchor count stable at ${currentCount} for editor: ${editorId}`);
           }
           
           checkHydrationComplete(editorId);
@@ -110,7 +112,7 @@ function checkHydrationComplete(editorId: string): void {
     state.isHydrating = false;
     
     if (process.env.NODE_ENV === 'development') {
-      console.log(`🎉 Hydration complete for editor: ${editorId}`, {
+      logger.debug(`🎉 Hydration complete for editor: ${editorId}`, {
         mountCount: state.mountCount,
         lastAnchorCount: state.lastAnchorCount,
         timeSinceInit: Date.now()
@@ -148,7 +150,7 @@ export function cleanupHydrationTracking(editorId: string = 'default'): void {
   hydrationStates.delete(editorId);
 
   if (process.env.NODE_ENV === 'development') {
-    console.log(`🧹 Hydration tracking cleaned up for editor: ${editorId}`);
+    logger.debug(`🧹 Hydration tracking cleaned up for editor: ${editorId}`);
   }
 }
 
@@ -186,7 +188,7 @@ function notifyHydrationComplete(editorId: string): void {
       try {
         callback();
       } catch (error) {
-        console.error('Error in hydration completion callback:', error);
+        logger.error('Error in hydration completion callback:', error);
       }
     });
   }
@@ -202,7 +204,7 @@ export function forceHydrationComplete(editorId: string = 'default'): void {
     notifyHydrationComplete(editorId);
     
     if (process.env.NODE_ENV === 'development') {
-      console.warn(`⚠️ Hydration force-completed for editor: ${editorId}`);
+      logger.warn(`⚠️ Hydration force-completed for editor: ${editorId}`);
     }
   }
 }

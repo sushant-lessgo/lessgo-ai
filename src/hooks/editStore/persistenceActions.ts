@@ -1,6 +1,7 @@
 // hooks/editStore/persistenceActions.ts - Simplified persistence and forms/images actions
 import type { EditStore, FormField, ImageAsset } from '@/types/store';
 
+import { logger } from '@/lib/logger';
 /**
  * Consolidated persistence actions for save/load operations plus forms and images
  */
@@ -52,7 +53,7 @@ export function createPersistenceActions(set: any, get: any) {
           state.persistence.metrics.lastSaveTime = Date.now();
         });
       } catch (error) {
-        console.error('❌ Save failed:', error);
+        logger.error('❌ Save failed:', error);
         set((state: EditStore) => {
           state.persistence.isSaving = false;
           state.persistence.saveError = error instanceof Error ? error.message : 'Save failed';
@@ -88,7 +89,7 @@ export function createPersistenceActions(set: any, get: any) {
             const sectionsInLayout = state.sections.length;
             
             if (sectionsInContent !== sectionsInLayout) {
-              console.warn('⚠️ Section/Content mismatch detected:', {
+              logger.warn('⚠️ Section/Content mismatch detected:', {
                 sectionsInLayout,
                 sectionsInContent,
                 sections: state.sections,
@@ -115,12 +116,12 @@ export function createPersistenceActions(set: any, get: any) {
           // Restore navigation configuration if available
           if (contentToLoad && contentToLoad.navigationConfig) {
             state.navigationConfig = contentToLoad.navigationConfig;
-            console.log('🧭 [NAV-DEBUG] Restored navigation config:', state.navigationConfig);
+            logger.debug('🧭 [NAV-DEBUG] Restored navigation config:', state.navigationConfig);
           }
           
           if (contentToLoad && contentToLoad.socialMediaConfig) {
             state.socialMediaConfig = contentToLoad.socialMediaConfig;
-            console.log('🔗 [SOCIAL-DEBUG] Restored social media config:', state.socialMediaConfig);
+            logger.debug('🔗 [SOCIAL-DEBUG] Restored social media config:', state.socialMediaConfig);
           }
           
           // Restore meta data
@@ -154,7 +155,7 @@ export function createPersistenceActions(set: any, get: any) {
         });
         
       } catch (error) {
-        console.error('❌ Error in loadFromDraft:', error);
+        logger.error('❌ Error in loadFromDraft:', error);
         set((state: EditStore) => {
           state.persistence.isLoading = false;
           state.persistence.loadError = error instanceof Error ? error.message : 'Failed to load draft';
@@ -332,7 +333,7 @@ export function createPersistenceActions(set: any, get: any) {
         try {
           await state.save();
         } catch (error) {
-          console.error('❌ TriggerAutoSave: Save failed:', error);
+          logger.error('❌ TriggerAutoSave: Save failed:', error);
           throw error;
         }
       } else {

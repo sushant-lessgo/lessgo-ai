@@ -9,6 +9,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { SlugModal } from '@/components/SlugModal';
 import posthog from "posthog-js";
 import { getTabManager, cleanupTabManager } from '@/utils/tabManager';
+import { logger } from '@/lib/logger';
 
 export default function PreviewPage() {
   const params = useParams();
@@ -89,7 +90,7 @@ function PreviewPageContent({ tokenId }: { tokenId: string }) {
 
   // Initialize and validate data
   useEffect(() => {
-    console.log('🎨 [PREVIEW-DEBUG] Preview page initializing with theme:', {
+    logger.debug(() => '🎨 [PREVIEW-DEBUG] Preview page initializing with theme:', () => ({
       sections: sections.length,
       content: Object.keys(content).length,
       theme: {
@@ -105,17 +106,17 @@ function PreviewPageContent({ tokenId }: { tokenId: string }) {
         validatedFields: Object.keys(onboardingData?.validatedFields || {}).length,
         hiddenInferredFields: Object.keys(onboardingData?.hiddenInferredFields || {}).length
       }
-    });
+    }));
     
     // Check if EditStore has data
     if (sections.length === 0) {
-      console.warn('🎨 [PREVIEW-DEBUG] No sections found in preview');
+      logger.warn('🎨 [PREVIEW-DEBUG] No sections found in preview');
       setError('No page data found. Please go back to edit mode.');
       setIsLoading(false);
       return;
     }
 
-    console.log('🎨 [PREVIEW-DEBUG] Preview ready with theme data:', {
+    logger.debug(() => '🎨 [PREVIEW-DEBUG] Preview ready with theme data:', () => ({
       backgroundsAvailable: {
         primary: theme?.colors?.sectionBackgrounds?.primary,
         secondary: theme?.colors?.sectionBackgrounds?.secondary,
@@ -127,7 +128,7 @@ function PreviewPageContent({ tokenId }: { tokenId: string }) {
         accentColor: theme?.colors?.accentColor,
         accentCSS: theme?.colors?.accentCSS
       }
-    });
+    }));
 
     setIsLoading(false);
   }, [sections.length, theme, content, title, onboardingData]);
@@ -252,7 +253,7 @@ function PreviewPageContent({ tokenId }: { tokenId: string }) {
 
       setShowSlugModal(false);
     } catch (err: any) {
-      console.error('Publish error:', err);
+      logger.error('Publish error:', err);
       setPublishError(err.message || 'Unexpected error');
     } finally {
       setPublishing(false);

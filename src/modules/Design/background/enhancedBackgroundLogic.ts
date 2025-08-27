@@ -25,6 +25,7 @@ type BaselineBackgroundType = 'primary-highlight' | 'secondary-highlight' | 'neu
 import { getSmartTextColor } from '@/utils/improvedTextColors';
 import { analyzeBackground } from '@/utils/backgroundAnalysis';
 
+import { logger } from '@/lib/logger';
 export function getTextColorForBackground(
   backgroundType: 'primary' | 'secondary' | 'neutral' | 'divider',
   colorTokens: any
@@ -449,7 +450,7 @@ function validateEnhancedPattern(
   const dividerCount = sections.filter(s => assignments[s] === 'divider').length;
   const highlightRatio = Math.round((highlightCount / sections.length) * 100);
   
-  console.log('📊 Enhanced Pattern Metrics:', {
+  logger.debug('📊 Enhanced Pattern Metrics:', {
     totalSections: sections.length,
     highlights: highlightCount,
     neutrals: neutralCount,
@@ -465,15 +466,15 @@ function validateEnhancedPattern(
   if (violations.length === 0) {
    // console.log('✅ Rhythm validation: PASSED - Excellent visual breathing');
   } else {
-    console.warn('⚠️ Rhythm violations:', violations);
+    logger.warn('⚠️ Rhythm violations:', violations);
   }
   
   if (highlightRatio >= 30 && highlightRatio <= 60) {
    // console.log('✅ Balance validation: PASSED - Good highlight/neutral ratio');
   } else if (highlightRatio > 60) {
-    console.warn('⚠️ Too many highlights - Consider more neutral sections');
+    logger.warn('⚠️ Too many highlights - Consider more neutral sections');
   } else {
-    console.warn('⚠️ Too few highlights - Consider upgrading key sections');
+    logger.warn('⚠️ Too few highlights - Consider upgrading key sections');
   }
   
  // console.log('🎯 Conversion-focused changes:', `${upgrades} upgrades, ${downgrades} rhythm downgrades`);

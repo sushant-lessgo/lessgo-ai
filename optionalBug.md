@@ -98,11 +98,7 @@ The optional element system needs to be consistent across:
 2. **Store Population**: ✅ Already working - stores only generated elements
 3. **UI Rendering**: ❌ Needs fix - should respect conditional logic
 
-### Proposed Fix
-Modify `extractLayoutContent` or `useLayoutComponent` to:
-1. Check which elements were actually AI-generated (using conditional logic)
-2. Only show defaults for elements that meet the conditional criteria
-3. Completely exclude optional elements that don't meet criteria
+
 
 ### Files to Investigate
 - `src/hooks/useLayoutComponent.ts` - Where defaults are applied
@@ -110,20 +106,3 @@ Modify `extractLayoutContent` or `useLayoutComponent` to:
 - `src/modules/sections/selectOptionalElements.ts` - Conditional logic (already correct)
 - `src/modules/sections/layoutElementSchema.ts` - Element definitions (already correct)
 
-## Test Case
-Create a user profile that triggers different optional element combinations and verify:
-1. AI generates only appropriate elements
-2. Store contains only generated elements  
-3. UI shows only generated elements (no defaults for excluded optionals)
-
-## Related Systems
-This bug likely affects all sections with optional elements, not just Hero. Each section type may have different optional elements that are incorrectly showing defaults.
-
-## Separation of Concerns
-This is a separate bug from the regeneration feature. Regeneration is working correctly - it regenerates whatever elements exist in the store. The issue is that the store/UI system is inconsistent about which elements should exist.
-
----
-
-**Status**: Documented for separate resolution
-**Priority**: Medium (affects UX consistency but doesn't break core functionality)
-**Type**: Logic inconsistency between generation and rendering systems

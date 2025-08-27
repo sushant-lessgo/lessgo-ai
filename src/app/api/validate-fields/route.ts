@@ -16,6 +16,7 @@ import {
 
 import type { InputVariables } from '@/types/core/index';
 
+import { logger } from '@/lib/logger';
 // ✅ FIXED: Use loose string schema for API input, validate later
 const RequestSchema = z.object({
   fields: z.object({

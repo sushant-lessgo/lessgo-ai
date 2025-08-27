@@ -5,6 +5,7 @@ import { EditProvider, useEditStoreContext } from '@/components/EditProvider';
 import { useOnboardingStore } from '@/hooks/useOnboardingStore';
 import LandingPageRenderer from '@/modules/generatedLanding/LandingPageRenderer';
 
+import { logger } from '@/lib/logger';
 interface PublishedPageData {
   id: string;
   userId: string;
@@ -29,7 +30,7 @@ function PublishedPageContent({ pageData }: { pageData: PublishedPageData }) {
   useEffect(() => {
     const loadPublishedData = async () => {
       try {
-        console.log('📄 Loading published page data:', {
+        logger.debug('📄 Loading published page data:', {
           slug: pageData.slug,
           hasContent: !!pageData.content,
           contentType: typeof pageData.content,
@@ -60,7 +61,7 @@ function PublishedPageContent({ pageData }: { pageData: PublishedPageData }) {
         // Wait a moment to let EditProvider's loading attempt complete
         await new Promise(resolve => setTimeout(resolve, 1000));
 
-        console.log('🔄 Loading published data into store after EditProvider initialization...');
+        logger.debug('🔄 Loading published data into store after EditProvider initialization...');
 
         // Use store.setState to update the store (Zustand with Immer)
         store.setState((state: any) => {
@@ -90,7 +91,7 @@ function PublishedPageContent({ pageData }: { pageData: PublishedPageData }) {
           state.mode = 'preview';
         });
 
-        console.log('✅ Published page data loaded successfully:', {
+        logger.debug('✅ Published page data loaded successfully:', {
           sectionsLoaded: sections?.length || 0,
           contentKeysLoaded: Object.keys(content || {}).length,
           themeLoaded: !!theme
@@ -98,7 +99,7 @@ function PublishedPageContent({ pageData }: { pageData: PublishedPageData }) {
 
         setIsLoaded(true);
       } catch (err) {
-        console.error('❌ Failed to load published page data:', err);
+        logger.error('❌ Failed to load published page data:', err);
         setError(err instanceof Error ? err.message : 'Failed to load published page');
       }
     };

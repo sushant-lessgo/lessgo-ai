@@ -8,6 +8,7 @@
 import React from 'react';
 import DebugPanel from './DebugPanel';
 import StorageMonitor from './StorageMonitor';
+import { logger } from '@/lib/logger';
 import usePerformanceMonitor from '@/hooks/usePerformanceMonitor';
 
 interface DevToolsProps {
@@ -174,14 +175,14 @@ if (process.env.NODE_ENV === 'development') {
         const start = performance.now();
         return () => {
           const end = performance.now();
-          console.log(`⏱️ ${name}: ${Math.round(end - start)}ms`);
+          logger.debug(`⏱️ ${name}: ${Math.round(end - start)}ms`);
         };
       },
       measureRender: (componentName: string) => {
         const start = performance.now();
         setTimeout(() => {
           const end = performance.now();
-          console.log(`🎨 ${componentName} render: ${Math.round(end - start)}ms`);
+          logger.debug(`🎨 ${componentName} render: ${Math.round(end - start)}ms`);
         }, 0);
       },
     },
@@ -193,10 +194,10 @@ if (process.env.NODE_ENV === 'development') {
           const manager = (window as any).__storeManagerDebug;
           if (manager) {
             const store = manager.getCurrentStore(tokenId);
-            console.log('🏪 Store inspection:', store?.getState());
+            logger.dev('🏪 Store inspection:', () => store?.getState());
           }
         } catch (error) {
-          console.error('Store inspection failed:', error);
+          logger.error('Store inspection failed:', error);
         }
       },
       export: (tokenId: string) => {
@@ -205,11 +206,11 @@ if (process.env.NODE_ENV === 'development') {
           if (manager) {
             const store = manager.getCurrentStore(tokenId);
             const exported = store?.getState().export();
-            console.log('📤 Store export:', exported);
+            logger.dev('📤 Store export:', () => exported);
             return exported;
           }
         } catch (error) {
-          console.error('Store export failed:', error);
+          logger.error('Store export failed:', error);
         }
       },
     },
@@ -219,27 +220,27 @@ if (process.env.NODE_ENV === 'development') {
       inspect: () => {
         const debug = (window as any).__storageDebug;
         if (debug) {
-          console.log('💾 Storage inspection:', debug.getStorageStats());
+          logger.debug('💾 Storage inspection:', debug.getStorageStats());
         }
       },
       cleanup: () => {
         const debug = (window as any).__storageManagerDebug;
         if (debug) {
           debug.forceCleanup();
-          console.log('🧹 Storage cleanup initiated');
+          logger.debug('🧹 Storage cleanup initiated');
         }
       },
       health: () => {
         const debug = (window as any).__storageManagerDebug;
         if (debug) {
-          console.log('🏥 Storage health:', debug.getHealthReport());
+          logger.debug('🏥 Storage health:', debug.getHealthReport());
         }
       },
     },
 
     // General utilities
     help: () => {
-      console.log(`
+      logger.debug(`
 🔧 DevTools Console Utilities:
 
 Performance:
@@ -264,7 +265,7 @@ Global Debug Objects:
     },
   };
 
-  console.log('🔧 DevTools console utilities loaded. Type __devTools.help() for usage info.');
+  logger.debug('🔧 DevTools console utilities loaded. Type __devTools.help() for usage info.');
 }
 
 export default DevTools;

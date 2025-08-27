@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import ConfirmedFieldTile from "./ConfirmedFieldTile";
 import { FIELD_DISPLAY_NAMES, CANONICAL_FIELD_NAMES, type CanonicalFieldName } from "@/types/core/index";
 
+import { logger } from '@/lib/logger';
 export default function LeftPanel() {
   const oneLiner = useOnboardingStore((s) => s.oneLiner);
   const validatedFields = useOnboardingStore((s) => s.validatedFields); // ✅ Only user-confirmed fields

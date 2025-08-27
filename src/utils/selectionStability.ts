@@ -1,3 +1,5 @@
+import { logger } from '@/lib/logger';
+
 // Phase 1.2: Selection stability guard - prevents selection handler thrashing
 // Tracks attachment/detachment frequency and auto-freezes problematic handlers
 
@@ -29,7 +31,7 @@ const TRACKING_WINDOW = 2000; // Up from 1000ms - 2 second window
 export function trackHandlerAttachment(editorId: string, componentOwner?: string): boolean {
   // Fix A: Disable stability guard completely in development
   if (process.env.NODE_ENV === 'development') {
-    console.log(`✅ [STABILITY-DEV] Allowing attachment unconditionally in development`, {
+    logger.debug(`✅ [STABILITY-DEV] Allowing attachment unconditionally in development`, {
       editorId,
       componentOwner,
       mode: 'development-bypass'
@@ -57,7 +59,7 @@ export function trackHandlerAttachment(editorId: string, componentOwner?: string
   
   // Phase B1: Allow first attach unconditionally - only freeze after successful attach
   if (!state.hasSuccessfulAttach) {
-    console.log(`🎯 [STABILITY] First attachment - allowing unconditionally`, {
+    logger.debug(`🎯 [STABILITY] First attachment - allowing unconditionally`, {
       editorId,
       componentOwner,
       attachmentCount: state.attachmentCount
@@ -70,7 +72,7 @@ export function trackHandlerAttachment(editorId: string, componentOwner?: string
       const shouldLogWarning = !state.lastFreezeWarning || (now - state.lastFreezeWarning) > 1000;
       
       if (shouldLogWarning) {
-        console.warn(`🚫 [STABILITY] Selection handler attachment blocked - frozen until ${new Date(state.frozenUntil).toISOString()}`, {
+        logger.warn(`🚫 [STABILITY] Selection handler attachment blocked - frozen until ${new Date(state.frozenUntil).toISOString()}`, {
           editorId,
           componentOwner,
           attachmentCount: state.attachmentCount,
@@ -112,7 +114,7 @@ export function trackHandlerAttachment(editorId: string, componentOwner?: string
       }
       
       state.autoRetryTimeoutId = setTimeout(() => {
-        console.log(`🔄 [STABILITY] Auto-retry scheduled - attempting to unfreeze`, {
+        logger.debug(`🔄 [STABILITY] Auto-retry scheduled - attempting to unfreeze`, {
           editorId,
           componentOwner: state.componentOwner,
           retryAfterMs: retryDelay
@@ -122,14 +124,14 @@ export function trackHandlerAttachment(editorId: string, componentOwner?: string
         if (state.isFrozen && Date.now() >= state.frozenUntil) {
           state.isFrozen = false;
           state.frozenUntil = 0;
-          console.log(`✅ [STABILITY] Auto-retry completed - handler unfrozen`, {
+          logger.debug(`✅ [STABILITY] Auto-retry completed - handler unfrozen`, {
             editorId,
             componentOwner: state.componentOwner
           });
         }
       }, retryDelay);
       
-      console.error(`🚨 [STABILITY] Selection handler thrashing detected - freezing for ${FREEZE_DURATION}ms`, {
+      logger.error(`🚨 [STABILITY] Selection handler thrashing detected - freezing for ${FREEZE_DURATION}ms`, {
         editorId,
         componentOwner: state.componentOwner,
         attachmentCount: state.attachmentCount,
@@ -145,7 +147,7 @@ export function trackHandlerAttachment(editorId: string, componentOwner?: string
         try {
           const devTools = (window as any).__REACT_DEVTOOLS_GLOBAL_HOOK__;
           if (devTools.getFiberRoots) {
-            console.error('🔍 [STABILITY] React DevTools available - check component tree for:', {
+            logger.error('🔍 [STABILITY] React DevTools available - check component tree for:', {
               editorId,
               componentOwner,
               hint: 'Look for components that re-render frequently or have unstable keys/props'
@@ -163,7 +165,7 @@ export function trackHandlerAttachment(editorId: string, componentOwner?: string
   // Phase B1: Mark first attach as successful
   if (!state.hasSuccessfulAttach) {
     state.hasSuccessfulAttach = true;
-    console.log(`✅ [STABILITY] First attachment successful - enabling stability tracking`, {
+    logger.debug(`✅ [STABILITY] First attachment successful - enabling stability tracking`, {
       editorId,
       componentOwner
     });
@@ -173,7 +175,7 @@ export function trackHandlerAttachment(editorId: string, componentOwner?: string
   const timeWindow = now - state.firstAttachTime;
   const attachmentsPerSecond = timeWindow > 0 ? (state.attachmentCount / (timeWindow / 1000)).toFixed(2) : '0';
   
-  console.log(`✅ [STABILITY] Selection handler attached successfully`, {
+  logger.debug(`✅ [STABILITY] Selection handler attached successfully`, {
     editorId,
     componentOwner,
     attachmentCount: state.attachmentCount,
@@ -195,7 +197,7 @@ export function trackHandlerDetachment(editorId: string, componentOwner?: string
   state.detachmentCount++;
   
   // Phase B1: Enhanced positive logging - show successful detachments
-  console.log(`🧹 [STABILITY] Selection handler detached successfully`, {
+  logger.debug(`🧹 [STABILITY] Selection handler detached successfully`, {
     editorId,
     componentOwner,
     detachmentCount: state.detachmentCount,
@@ -218,7 +220,7 @@ export function isHandlerFrozen(editorId: string): boolean {
     state.isFrozen = false;
     state.frozenUntil = 0;
     
-    console.log(`🔓 [STABILITY] Selection handler unfrozen`, {
+    logger.debug(`🔓 [STABILITY] Selection handler unfrozen`, {
       editorId,
       componentOwner: state.componentOwner
     });
@@ -245,7 +247,7 @@ export function unfreezeHandler(editorId: string): void {
   state.isFrozen = false;
   state.frozenUntil = 0;
   
-  console.log(`🔧 [STABILITY] Selection handler manually unfrozen`, {
+  logger.debug(`🔧 [STABILITY] Selection handler manually unfrozen`, {
     editorId,
     componentOwner: state.componentOwner
   });
@@ -285,7 +287,7 @@ export function resetStabilityTracking(): void {
   }
   
   stabilityStates.clear();
-  console.log('🔄 [STABILITY] All stability tracking reset');
+  logger.debug('🔄 [STABILITY] All stability tracking reset');
 }
 
 /**

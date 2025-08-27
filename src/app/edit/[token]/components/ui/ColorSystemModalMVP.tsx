@@ -9,6 +9,7 @@ import { ColorValidation } from './ColorValidation';
 import { validateWCAGContrast } from '@/utils/improvedTextColors';
 import type { ThemeColors } from '@/types/storeTypes';
 
+import { logger } from '@/lib/logger';
 interface ColorSystemModalMVPProps {
   isOpen: boolean;
   onClose: () => void;
@@ -53,7 +54,7 @@ export function ColorSystemModalMVP({ isOpen, onClose, tokenId }: ColorSystemMod
       // console.log('🎨 Current color tokens from getColorTokens():', tokens);
       return tokens;
     } catch (error) {
-      console.error('Error getting color tokens:', error);
+      logger.error('Error getting color tokens:', error);
       return null;
     }
   }, [getColorTokens]);
@@ -108,7 +109,7 @@ export function ColorSystemModalMVP({ isOpen, onClose, tokenId }: ColorSystemMod
     // Fallback to color tokens if theme doesn't have the values
     if (currentColorTokens) {
       const actualAccentCSS = currentColorTokens.ctaBg || currentColorTokens.accent;
-      console.log('🎨 Fallback to color tokens:', actualAccentCSS);
+      logger.debug('🎨 Fallback to color tokens:', actualAccentCSS);
       
       const colorMatch = actualAccentCSS.match(/bg-(\w+)-\d+/);
       const actualColorName = colorMatch ? colorMatch[1] : 'gray';
@@ -188,7 +189,7 @@ export function ColorSystemModalMVP({ isOpen, onClose, tokenId }: ColorSystemMod
     const validateColor = async () => {
       setIsValidating(true);
       try {
-        console.log('🔍 Validating CTA stand-out:', {
+        logger.debug('🔍 Validating CTA stand-out:', {
           ctaColor: displayColor.tailwindClass,
           background: primaryBackground
         });
@@ -201,7 +202,7 @@ export function ColorSystemModalMVP({ isOpen, onClose, tokenId }: ColorSystemMod
         
         const { score, level, message } = calculateStandoutScore(ratio);
         
-        console.log('✅ Stand-out result:', {
+        logger.debug('✅ Stand-out result:', {
           ratio,
           score,
           level,
@@ -215,7 +216,7 @@ export function ColorSystemModalMVP({ isOpen, onClose, tokenId }: ColorSystemMod
           contrastRatio: ratio 
         });
       } catch (error) {
-        console.error('Validation failed:', error);
+        logger.error('Validation failed:', error);
         setValidation(null);
       } finally {
         setIsValidating(false);
@@ -230,7 +231,7 @@ export function ColorSystemModalMVP({ isOpen, onClose, tokenId }: ColorSystemMod
   const handleApply = () => {
     if (!selectedColor) return;
 
-    console.log('🎨 [EDIT-DEBUG] Color update initiated:', {
+    logger.debug('🎨 [EDIT-DEBUG] Color update initiated:', {
       selectedColor: {
         name: selectedColor.name,
         value: selectedColor.value,
@@ -259,7 +260,7 @@ export function ColorSystemModalMVP({ isOpen, onClose, tokenId }: ColorSystemMod
       }
     };
     
-    console.log('🎨 [EDIT-DEBUG] Applying accent color update:', {
+    logger.debug('🎨 [EDIT-DEBUG] Applying accent color update:', {
       selectedColor,
       updatedTheme: updatedTheme.colors,
       beforeUpdate: theme?.colors,
@@ -277,9 +278,9 @@ export function ColorSystemModalMVP({ isOpen, onClose, tokenId }: ColorSystemMod
     setTimeout(() => {
       try {
         const colorTokens = getColorTokens();
-        console.log('🎨 [EDIT-DEBUG] Color tokens after accent update:', colorTokens);
+        logger.debug('🎨 [EDIT-DEBUG] Color tokens after accent update:', colorTokens);
       } catch (error) {
-        console.warn('🎨 [EDIT-DEBUG] Failed to get updated color tokens:', error);
+        logger.warn('🎨 [EDIT-DEBUG] Failed to get updated color tokens:', error);
       }
     }, 100);
     

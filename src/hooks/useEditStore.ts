@@ -9,6 +9,7 @@ import type { EditStoreInstance } from '@/stores/editStore';
 import type { EditStore } from '@/types/store';
 import { isStorageAvailable } from '@/utils/storage';
 
+import { logger } from '@/lib/logger';
 // Hook state for managing store lifecycle
 interface UseEditStoreState {
   store: EditStoreInstance | null;
@@ -98,7 +99,7 @@ export function useEditStore(
 
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      console.error(`❌ useEditStore: Failed to initialize store for token ${newTokenId}:`, error);
+      logger.error(`❌ useEditStore: Failed to initialize store for token ${newTokenId}:`, error);
       
       setState(prev => ({
         ...prev,
@@ -139,7 +140,7 @@ export function useEditStore(
     // Handle initialization result
     initPromise.catch(error => {
       // Error is already handled in initializeStore
-      console.warn('useEditStore initialization failed:', error);
+      logger.warn('useEditStore initialization failed:', error);
     });
 
     return () => {
@@ -157,7 +158,7 @@ export function useEditStore(
     if (preload && tokenId && typeof window !== 'undefined') {
       // Preload in the background without affecting state
       storeManager.preloadStore(tokenId).catch(error => {
-        console.warn('Store preloading failed:', error);
+        logger.warn('Store preloading failed:', error);
       });
     }
   }, [tokenId, preload]);
@@ -244,7 +245,7 @@ export function useCurrentEditStore(tokenId: string) {
         const existingStore = storeManager.getEditStore(tokenId);
         setStore(existingStore);
       } catch (error) {
-        console.warn('Failed to get current store:', error);
+        logger.warn('Failed to get current store:', error);
         setStore(null);
       }
     }
@@ -305,7 +306,7 @@ if (process.env.NODE_ENV === 'development') {
     isStorageAvailable,
   };
   
-  console.log('🔧 useEditStore debug utilities available at window.__useEditStoreDebug');
+  logger.debug('🔧 useEditStore debug utilities available at window.__useEditStoreDebug');
 }
 
 // Export types for consumer components
@@ -313,7 +314,7 @@ export type { EditStore, EditStoreInstance };
 
 // Legacy compatibility - export the factory function with warning
 export const createEditStore = (tokenId?: string) => {
-  console.warn(
+  logger.warn(
     'Direct createEditStore usage is deprecated. Use useEditStore hook instead.',
     'If you need direct store access, use storeManager.getEditStore(tokenId)'
   );

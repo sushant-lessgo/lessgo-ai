@@ -1,6 +1,7 @@
 // hooks/editStore/validationActions.ts - Validation and business logic actions
 import type { EditStore } from '@/types/store';
 import type { ValidationActions } from '@/types/store';
+import { logger } from '@/lib/logger';
 /**
  * ===== VALIDATION ACTIONS CREATOR =====
  */
@@ -15,7 +16,7 @@ export function createValidationActions(set: any, get: any): ValidationActions {
       const section = state.content[sectionId];
       
       if (!section) {
-        console.warn('⚠️ Section not found for validation:', sectionId);
+        logger.warn('⚠️ Section not found for validation:', sectionId);
         return false;
       }
       
@@ -132,7 +133,7 @@ export function createValidationActions(set: any, get: any): ValidationActions {
         }
       });
       
-      console.log(`🔍 Section validation for ${sectionId}:`, {
+      logger.debug(`🔍 Section validation for ${sectionId}:`, {
         isValid,
         errors: errors.length,
         warnings: warnings.length,
@@ -175,7 +176,7 @@ export function createValidationActions(set: any, get: any): ValidationActions {
         if (!isValid) overallValid = false;
       });
       
-      console.log('🔍 Page validation results:', {
+      logger.debug('🔍 Page validation results:', {
         overall: overallValid,
         sections: Object.keys(results).length,
         valid: Object.values(results).filter(Boolean).length,
@@ -210,7 +211,7 @@ export function createValidationActions(set: any, get: any): ValidationActions {
       
       const canPublish = Object.values(requirements).every(Boolean);
       
-      console.log('📋 Publish readiness check:', {
+      logger.debug('📋 Publish readiness check:', {
         canPublish,
         requirements,
       });
@@ -383,7 +384,7 @@ export function createValidationActions(set: any, get: any): ValidationActions {
       const priorityOrder = { high: 3, medium: 2, low: 1 };
       suggestions.sort((a, b) => priorityOrder[b.priority] - priorityOrder[a.priority]);
       
-      console.log('💡 Generated optimization suggestions:', suggestions.length);
+      logger.debug('💡 Generated optimization suggestions:', suggestions.length);
       
       return suggestions;
     },
@@ -589,7 +590,7 @@ export function createValidationActions(set: any, get: any): ValidationActions {
         (analysis.readability + analysis.engagement + analysis.clarity + analysis.actionability) / 4
       );
       
-      console.log('📊 Content quality analysis completed:', {
+      logger.debug('📊 Content quality analysis completed:', {
         overall: analysis.overall,
         wordCount: totalWordCount,
         issues: analysis.details.issues.length,
@@ -678,7 +679,7 @@ export function createValidationActions(set: any, get: any): ValidationActions {
         metrics.recommendations.push('Estimated load time is high - optimize images and content');
       }
       
-      console.log('⚡ Performance validation:', {
+      logger.debug('⚡ Performance validation:', {
         loadTime: `${metrics.estimatedLoadTime}s`,
         images: imageCount,
         elements: totalElements,
@@ -783,7 +784,7 @@ export function createValidationActions(set: any, get: any): ValidationActions {
       
       validation.score = Math.round((factors.filter(Boolean).length / factors.length) * 100);
       
-      console.log('🎯 Business logic validation:', {
+      logger.debug('🎯 Business logic validation:', {
         score: validation.score,
         conversionPath: validation.conversionPath,
         valueProposition: validation.valueProposition,
@@ -799,7 +800,7 @@ export function createValidationActions(set: any, get: any): ValidationActions {
      */
     
     runFullAudit: () => {
-      console.log('🔍 Running full page audit...');
+      logger.debug('🔍 Running full page audit...');
       
       const results = {
         timestamp: Date.now(),
@@ -822,7 +823,7 @@ export function createValidationActions(set: any, get: any): ValidationActions {
       
       const overallScore = Math.round(scores.reduce((a: number, b: number) => a + b, 0) / scores.length);
       
-      console.log('📋 Full audit completed:', {
+      logger.debug('📋 Full audit completed:', {
         overallScore,
         publishReady: results.publishReady,
         totalIssues: results.optimizations.length,

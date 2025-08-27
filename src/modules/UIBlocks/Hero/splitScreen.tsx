@@ -17,6 +17,7 @@ import EditableTrustIndicators from '@/components/layout/EditableTrustIndicators
 import AvatarEditableComponent from '@/components/ui/AvatarEditableComponent';
 import { LayoutComponentProps } from '@/types/storeTypes';
 import { createCTAClickHandler } from '@/utils/ctaHandler';
+import { logger } from '@/lib/logger';
 import { 
   parseCustomerAvatarData, 
   getCustomerAvatarUrl, 
@@ -385,10 +386,10 @@ export default function SplitScreen(props: LayoutComponentProps) {
   // Get reactive hero image URL directly from store using selector
   const store = useEditStore();
   const heroImageUrl = store.content[sectionId]?.elements?.split_hero_image?.content;
-  console.log('🔄 Store selector called for split hero image:', { sectionId, url: heroImageUrl, timestamp: Date.now() });
+  logger.debug('🔄 Store selector called for split hero image:', { sectionId, url: heroImageUrl, timestamp: Date.now() });
   
   const reactiveHeroImage = heroImageUrl || blockContent.split_hero_image;  
-  console.log('🎨 Final hero image URL:', reactiveHeroImage);
+  logger.debug('🎨 Final hero image URL:', reactiveHeroImage);
   
   // Use robust image toolbar hook
   const handleImageToolbar = useImageToolbar();

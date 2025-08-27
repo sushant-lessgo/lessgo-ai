@@ -1,3 +1,5 @@
+import { logger } from '@/lib/logger';
+
 // utils/autoSaveDraft.ts - Enhanced Version with Edit Store Integration
 import type { 
   FeatureItem, 
@@ -117,7 +119,7 @@ export async function autoSaveDraft(params: AutoSaveDraftParams): Promise<AutoSa
       });
       
       if (!validation.isValid) {
-        console.warn('⚠️ Save validation warnings:', validation.warnings);
+        logger.warn('⚠️ Save validation warnings:', validation.warnings);
         // Continue with warnings, but log them
       }
     }
@@ -167,7 +169,7 @@ if (includePageData) {
         if (serializationOptions.validateSerialization) {
           const validation = validate(serializedContent);
           if (!validation.isValid) {
-            console.warn('⚠️ Serialization validation failed:', validation.errors);
+            logger.warn('⚠️ Serialization validation failed:', validation.errors);
             payload.warnings = validation.errors;
           }
         }
@@ -192,7 +194,7 @@ if (includePageData) {
       pageData = editStoreState.export();
     }
   } catch (error) {
-    console.warn('⚠️ Could not get page data for save:', error);
+    logger.warn('⚠️ Could not get page data for save:', error);
   }
   
   if (pageData) {
@@ -223,7 +225,7 @@ if (includePageData) {
         };
       }
     } catch (error) {
-      console.warn('Could not get color tokens for theme values:', error);
+      logger.warn('Could not get color tokens for theme values:', error);
     }
 
     // Step 5: Apply compression if enabled and data is large enough
@@ -236,7 +238,7 @@ if (includePageData) {
         payload._compressionRequested = true;
         // Compression requested for large payload
       } catch (error) {
-        console.warn('⚠️ Compression failed:', error);
+        logger.warn('⚠️ Compression failed:', error);
       }
     }
 
@@ -245,7 +247,7 @@ if (includePageData) {
       try {
         const conflictCheck = await checkForConflicts(tokenId, lastSaved);
         if (conflictCheck.hasConflict) {
-          console.warn('🔄 Conflict detected during save:', conflictCheck);
+          logger.warn('🔄 Conflict detected during save:', conflictCheck);
           
           if (conflictResolution === 'overwrite') {
             payload._forceOverwrite = true;
@@ -269,7 +271,7 @@ if (includePageData) {
           }
         }
       } catch (error) {
-        console.warn('⚠️ Conflict detection failed, proceeding with save:', error);
+        logger.warn('⚠️ Conflict detection failed, proceeding with save:', error);
       }
     }
 
@@ -312,7 +314,7 @@ if (includePageData) {
     const saveTime = endTime - startTime;
     const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
     
-    console.error('❌ Auto-save failed:', {
+    logger.error('❌ Auto-save failed:', {
       error: errorMessage,
       saveTime: `${saveTime}ms`,
       tokenId,
@@ -394,7 +396,7 @@ async function checkForConflicts(tokenId: string, lastSaved: number): Promise<{
     const response = await fetch(`/api/loadDraft?tokenId=${encodeURIComponent(tokenId)}`);
     
     if (!response.ok) {
-      console.warn('⚠️ Could not check for conflicts - load failed');
+      logger.warn('⚠️ Could not check for conflicts - load failed');
       return { hasConflict: false };
     }
     
@@ -405,7 +407,7 @@ async function checkForConflicts(tokenId: string, lastSaved: number): Promise<{
     const hasConflict = serverModified > lastSaved;
     
     if (hasConflict) {
-      console.log('🔄 Conflict detected:', {
+      logger.debug('🔄 Conflict detected:', {
         serverModified: new Date(serverModified).toISOString(),
         localLastSaved: new Date(lastSaved).toISOString(),
         timeDiff: `${Math.round((serverModified - lastSaved) / 1000)}s`,
@@ -419,7 +421,7 @@ async function checkForConflicts(tokenId: string, lastSaved: number): Promise<{
     };
     
   } catch (error) {
-    console.warn('⚠️ Conflict detection failed:', error);
+    logger.warn('⚠️ Conflict detection failed:', error);
     return { hasConflict: false };
   }
 }
@@ -452,7 +454,7 @@ export async function batchSaveDrafts(
     enableParallelProcessing = false,
   } = options;
 
-  console.log('📦 Starting batch save:', {
+  logger.debug('📦 Starting batch save:', {
     itemCount: items.length,
     maxBatchSize,
     enableParallelProcessing,
@@ -515,7 +517,7 @@ export async function batchSaveDrafts(
       }
       
     } catch (error) {
-      console.error('❌ Batch save failed:', error);
+      logger.error('❌ Batch save failed:', error);
       
       // Add failed results for this batch
       batch.forEach(item => {
@@ -547,7 +549,7 @@ export async function batchSaveDrafts(
       .filter((item): item is BatchSaveItem => item !== null);
     
     if (failedItems.length > 0) {
-      console.log('🔄 Retrying failed saves:', { count: failedItems.length });
+      logger.debug('🔄 Retrying failed saves:', { count: failedItems.length });
       
       const retryResults = await batchSaveDrafts(failedItems, {
         ...options,
@@ -567,7 +569,7 @@ export async function batchSaveDrafts(
   const successCount = results.filter(r => r.result.success).length;
   const failureCount = results.length - successCount;
   
-  console.log('📦 Batch save completed:', {
+  logger.debug('📦 Batch save completed:', {
     total: results.length,
     successful: successCount,
     failed: failureCount,
@@ -671,14 +673,14 @@ export async function loadDraftWithDeserialization(tokenId: string): Promise<{
       // Validate before deserializing
       const validation = validate(data.finalContent);
       if (!validation.isValid) {
-        console.warn('⚠️ Deserialization validation failed:', validation.errors);
+        logger.warn('⚠️ Deserialization validation failed:', validation.errors);
         // Continue with warnings
       }
       
       // Deserialize into edit store
       deserialize(data.finalContent);
       
-      console.log('✅ Successfully loaded and deserialized content');
+      logger.debug('✅ Successfully loaded and deserialized content');
       return { success: true, data };
     } else {
       // Fallback to standard loading
@@ -688,11 +690,11 @@ export async function loadDraftWithDeserialization(tokenId: string): Promise<{
       
       await editStoreState.loadFromDraft(data, tokenId);
       
-      console.log('✅ Successfully loaded content (fallback method)');
+      logger.debug('✅ Successfully loaded content (fallback method)');
       return { success: true, data };
     }
   } catch (error) {
-    console.error('❌ Failed to load draft:', error);
+    logger.error('❌ Failed to load draft:', error);
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Unknown error',
@@ -805,7 +807,7 @@ if (process.env.NODE_ENV === 'development' && typeof window !== 'undefined') {
     
     // Test scenarios
     testSave: async (tokenId: string) => {
-      console.log('🧪 Testing auto-save...');
+      logger.debug('🧪 Testing auto-save...');
       return autoSaveDraft({
         tokenId,
         inputText: 'Test input',
@@ -820,7 +822,7 @@ if (process.env.NODE_ENV === 'development' && typeof window !== 'undefined') {
     },
     
     testBatchSave: async (tokenIds: string[]) => {
-      console.log('🧪 Testing batch save...');
+      logger.debug('🧪 Testing batch save...');
       const items = tokenIds.map((tokenId, index) => ({
         tokenId,
         data: {
@@ -836,7 +838,7 @@ if (process.env.NODE_ENV === 'development' && typeof window !== 'undefined') {
     },
     
     simulateConflict: async (tokenId: string) => {
-      console.log('🧪 Simulating conflict...');
+      logger.debug('🧪 Simulating conflict...');
       return autoSaveDraft({
         tokenId,
         lastSaved: Date.now() - 60000, // 1 minute ago
@@ -855,7 +857,7 @@ if (process.env.NODE_ENV === 'development' && typeof window !== 'undefined') {
     
     // Test serialization
     testSerialization: async (tokenId: string) => {
-      console.log('🧪 Testing serialization...');
+      logger.debug('🧪 Testing serialization...');
       const { useContentSerializer } = await import('@/hooks/useContentSerializer');
       const { serialize, validate, getSerializedSize } = useContentSerializer();
       
@@ -863,7 +865,7 @@ if (process.env.NODE_ENV === 'development' && typeof window !== 'undefined') {
       const validation = validate(serialized);
       const size = getSerializedSize();
       
-      console.log('📊 Serialization test results:', {
+      logger.debug('📊 Serialization test results:', {
         isValid: validation.isValid,
         errors: validation.errors,
         warnings: validation.warnings,
@@ -875,23 +877,23 @@ if (process.env.NODE_ENV === 'development' && typeof window !== 'undefined') {
     },
     
     testDeserialization: async (data: any) => {
-      console.log('🧪 Testing deserialization...');
+      logger.debug('🧪 Testing deserialization...');
       const { useContentSerializer } = await import('@/hooks/useContentSerializer');
       const { deserialize, validate } = useContentSerializer();
       
       const validation = validate(data);
       if (validation.isValid) {
         deserialize(data);
-        console.log('✅ Deserialization successful');
+        logger.debug('✅ Deserialization successful');
       } else {
-        console.error('❌ Deserialization failed:', validation.errors);
+        logger.error('❌ Deserialization failed:', validation.errors);
       }
       
       return validation;
     },
   };
   
-  console.log('🔧 Enhanced AutoSaveDraft debug utilities available at window.__autoSaveDraftDebug');
+  logger.debug('🔧 Enhanced AutoSaveDraft debug utilities available at window.__autoSaveDraftDebug');
 
   
 }

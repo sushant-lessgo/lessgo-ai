@@ -18,6 +18,7 @@ const generateVariableColorTokens = (colors: any) => ({
 import { migrationAdapter } from '@/modules/Design/ColorSystem/migrationAdapter';
 import { getMigrationFeatureFlags, determineMigrationPhase, type MigrationPhase } from '@/utils/featureFlags';
 import type { BackgroundSystem } from '@/modules/Design/ColorSystem/colorTokens';
+import { logger } from '@/lib/logger';
 // import type { VariableColorSystem, VariableColorTokens } from '@/modules/Design/ColorSystem/variableColorTokens'; // Disabled
 type VariableColorSystem = any;
 type VariableColorTokens = any;
@@ -101,7 +102,7 @@ export const createVariableActions: StateCreator<
       const actions = get();
       setTimeout(() => actions.generateVariableSystem(), 0);
       
-      console.log('🎨 Variable mode enabled:', state.variableMode.phase);
+      logger.debug('🎨 Variable mode enabled:', state.variableMode.phase);
     });
   },
 
@@ -113,7 +114,7 @@ export const createVariableActions: StateCreator<
       state.variableMode.variableColorSystem = undefined;
       state.variableMode.variableColorTokens = undefined;
       
-      console.log('🎨 Variable mode disabled');
+      logger.debug('🎨 Variable mode disabled');
     });
   },
 
@@ -176,7 +177,7 @@ export const createVariableActions: StateCreator<
         const backgroundSystem = currentState.theme?.colors?.sectionBackgrounds;
         
         if (!backgroundSystem) {
-          console.warn('No background system available for variable generation');
+          logger.warn('No background system available for variable generation');
           return;
         }
 
@@ -192,14 +193,14 @@ export const createVariableActions: StateCreator<
         const variableTokens = generateVariableColorTokens(variableSystem);
         state.variableMode.variableColorTokens = variableTokens;
         
-        console.log('🎨 Variable system generated:', {
+        logger.debug('🎨 Variable system generated:', {
           backgrounds: Object.keys(variableSystem.backgrounds).length,
           accents: Object.keys(variableSystem.accents).length,
           variables: Object.keys(variableTokens.cssVariables).length,
         });
         
       } catch (error) {
-        console.error('Failed to generate variable system:', error);
+        logger.error('Failed to generate variable system:', error);
         state.variableMode.variableColorSystem = undefined;
         state.variableMode.variableColorTokens = undefined;
       }
@@ -212,7 +213,7 @@ export const createVariableActions: StateCreator<
         const { variableColorSystem, customColors } = state.variableMode;
         
         if (!variableColorSystem) {
-          console.warn('No variable color system available for token update');
+          logger.warn('No variable color system available for token update');
           return;
         }
 
@@ -252,7 +253,7 @@ export const createVariableActions: StateCreator<
         state.variableMode.variableColorTokens = variableTokens;
         
       } catch (error) {
-        console.error('Failed to update variable tokens:', error);
+        logger.error('Failed to update variable tokens:', error);
       }
     });
   },
@@ -271,7 +272,7 @@ export const createVariableActions: StateCreator<
       
       return null;
     } catch (error) {
-      console.error('Background conversion failed:', error);
+      logger.error('Background conversion failed:', error);
       return null;
     }
   },
@@ -281,7 +282,7 @@ export const createVariableActions: StateCreator<
       const currentState = get();
       
       if (!currentState.variableMode.enabled) {
-        console.warn('Variable mode not enabled');
+        logger.warn('Variable mode not enabled');
         return;
       }
 
@@ -403,7 +404,7 @@ export const createVariableActions: StateCreator<
       const config = JSON.parse(configString);
       
       if (config.version !== '1.0') {
-        console.warn('Configuration version mismatch');
+        logger.warn('Configuration version mismatch');
         return false;
       }
       
@@ -419,7 +420,7 @@ export const createVariableActions: StateCreator<
       
       return true;
     } catch (error) {
-      console.error('Failed to import variable configuration:', error);
+      logger.error('Failed to import variable configuration:', error);
       return false;
     }
   },

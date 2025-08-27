@@ -4,6 +4,7 @@
 import { getMigrationFeatureFlags, determineMigrationPhase, checkBrowserCompatibility } from '@/utils/featureFlags';
 import type { FeatureFlagContext, MigrationPhase } from '@/utils/featureFlags';
 
+import { logger } from '@/lib/logger';
 export interface ValidationResult {
   success: boolean;
   phase: MigrationPhase;
@@ -143,7 +144,7 @@ function extractCSSVariablesFromDOM(): Record<string, string> {
     });
     
   } catch (error) {
-    console.warn('Failed to extract CSS variables from DOM:', error);
+    logger.warn('Failed to extract CSS variables from DOM:', error);
   }
   
   return cssVariables;
@@ -206,8 +207,8 @@ export function testCSSVariableInjection(tokenId: string): Promise<{
 export function logValidationResults(result: ValidationResult): void {
   console.group('🎨 CSS Variable System Validation');
   
-  console.log(`✅ Phase: ${result.phase}`);
-  console.log(`🎯 Success: ${result.success}`);
+  logger.debug(`✅ Phase: ${result.phase}`);
+  logger.debug(`🎯 Success: ${result.success}`);
   
   if (result.warnings.length > 0) {
     console.group('⚠️ Warnings:');
@@ -227,8 +228,8 @@ export function logValidationResults(result: ValidationResult): void {
     console.groupEnd();
   }
   
-  console.log('📊 CSS Variables found:', Object.keys(result.details.cssVariables).length);
-  console.log('🌐 Browser support:', result.details.browserSupport);
+  logger.debug('📊 CSS Variables found:', Object.keys(result.details.cssVariables).length);
+  logger.debug('🌐 Browser support:', result.details.browserSupport);
   
   console.groupEnd();
 }
@@ -237,7 +238,7 @@ export function logValidationResults(result: ValidationResult): void {
  * Run comprehensive validation
  */
 export async function runCSSVariableValidation(tokenId: string): Promise<ValidationResult> {
-  console.log('🔍 Starting CSS variable validation...');
+  logger.debug('🔍 Starting CSS variable validation...');
   
   // Run basic validation
   const result = validateCSSVariableSystem(tokenId);
@@ -251,7 +252,7 @@ export async function runCSSVariableValidation(tokenId: string): Promise<Validat
         result.errors.push('CSS variable injection test failed');
         result.details.recommendations.push('Check VariableThemeInjector integration');
       } else {
-        console.log(`✅ CSS variable injection test passed: ${injectionTest.variablesInjected} variables found`);
+        logger.debug(`✅ CSS variable injection test passed: ${injectionTest.variablesInjected} variables found`);
       }
     } catch (error) {
       result.warnings.push(`CSS variable injection test failed: ${error}`);

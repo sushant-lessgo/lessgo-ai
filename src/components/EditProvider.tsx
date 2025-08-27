@@ -11,6 +11,7 @@ import type { EditStoreInstance } from '@/stores/editStore';
 import type { EditStore } from '@/types/store';
 import { EditErrorBoundary } from './EditErrorBoundary';
 
+import { logger } from '@/lib/logger';
 // Context interfaces
 interface EditStoreContext {
   store: EditStoreInstance | null;
@@ -118,7 +119,7 @@ export function EditProvider({ children, tokenId, options = {} }: EditProviderPr
   
   useEffect(() => {
     if (previousTokenRef.current && previousTokenRef.current !== tokenId) {
-      console.log(`🔄 EditProvider: Token changed from ${previousTokenRef.current} to ${tokenId}`);
+      logger.debug(`🔄 EditProvider: Token changed from ${previousTokenRef.current} to ${tokenId}`);
     }
     previousTokenRef.current = tokenId;
   }, [tokenId]);
@@ -180,18 +181,18 @@ export function EditProvider({ children, tokenId, options = {} }: EditProviderPr
               const colorTokens = updatedState.getColorTokens?.();
               // console.log(`🎨 [EDIT-DEBUG] Color tokens after load:`, colorTokens);
             } catch (error) {
-              console.warn(`🎨 [EDIT-DEBUG] Failed to get color tokens:`, error);
+              logger.warn(`🎨 [EDIT-DEBUG] Failed to get color tokens:`, error);
             }
           } else {
-            console.warn('loadFromDraft action not found in store');
+            logger.warn('loadFromDraft action not found in store');
           }
         })
         .catch(error => {
-          console.error(`❌ EditProvider: Failed to load project data for token ${tokenId}:`, error);
+          logger.error(`❌ EditProvider: Failed to load project data for token ${tokenId}:`, error);
           // Don't show error for missing projects - they might be new projects
           if (!error.message.includes('404')) {
             // Only log non-404 errors
-            console.error('Project load error:', error);
+            logger.error('Project load error:', error);
           }
         });
     }
@@ -227,7 +228,7 @@ export function EditProvider({ children, tokenId, options = {} }: EditProviderPr
     <EditErrorBoundary 
       tokenId={tokenId}
       onError={(error, errorInfo) => {
-        console.error('🚨 EditProvider error boundary caught:', {
+        logger.error('🚨 EditProvider error boundary caught:', {
           error: error.message,
           tokenId,
           componentStack: errorInfo.componentStack,
@@ -387,7 +388,7 @@ if (process.env.NODE_ENV === 'development') {
     getContext: () => {
       try {
         // This won't work outside of React context, but useful for debugging
-        console.warn('Use React DevTools to inspect EditProvider context');
+        logger.warn('Use React DevTools to inspect EditProvider context');
         return null;
       } catch {
         return null;
@@ -397,7 +398,7 @@ if (process.env.NODE_ENV === 'development') {
     DefaultErrorComponent,
   };
   
-  console.log('🔧 EditProvider debug utilities available at window.__editProviderDebug');
+  logger.debug('🔧 EditProvider debug utilities available at window.__editProviderDebug');
 }
 
 // Export types for external use

@@ -1,3 +1,5 @@
+import { logger } from '@/lib/logger';
+
 // Phase 2.3: One-shot ready-but-hidden watchdog
 // Detects when toolbar should be visible but isn't
 
@@ -50,7 +52,7 @@ export function startToolbarWatchdog(options: ToolbarWatchdogOptions): void {
   
   if (!shouldBeVisible) {
     if (process.env.NODE_ENV === 'development') {
-      console.log('🐕 [WATCHDOG] Conditions not met, skipping:', {
+      logger.debug('🐕 [WATCHDOG] Conditions not met, skipping:', {
         anchorCount,
         hasCaret,
         hasElementClick,
@@ -65,7 +67,7 @@ export function startToolbarWatchdog(options: ToolbarWatchdogOptions): void {
   globalWatchdogState.timeoutId = window.setTimeout(() => {
     if (globalWatchdogState.interactionId === interactionId && globalWatchdogState.isActive) {
       // Log the issue
-      console.warn('🚨 [WATCHDOG] Toolbar should be visible but is hidden:', {
+      logger.warn('🚨 [WATCHDOG] Toolbar should be visible but is hidden:', {
         interactionId,
         anchorCount,
         hasCaret,
@@ -88,7 +90,7 @@ export function startToolbarWatchdog(options: ToolbarWatchdogOptions): void {
         selectedText: selection.toString().slice(0, 50)
       } : null;
 
-      console.warn('🚨 [WATCHDOG] Current selection state:', selectionInfo);
+      logger.warn('🚨 [WATCHDOG] Current selection state:', selectionInfo);
 
       // Auto-clear after logging
       globalWatchdogState.isActive = false;
@@ -100,7 +102,7 @@ export function startToolbarWatchdog(options: ToolbarWatchdogOptions): void {
   globalWatchdogState.interactionId = interactionId;
 
   if (process.env.NODE_ENV === 'development') {
-    console.log('🐕 [WATCHDOG] Started monitoring for interaction:', {
+    logger.debug('🐕 [WATCHDOG] Started monitoring for interaction:', {
       interactionId,
       anchorCount,
       hasCaret,
@@ -119,7 +121,7 @@ export function clearToolbarWatchdog(): void {
     globalWatchdogState.timeoutId = null;
 
     if (process.env.NODE_ENV === 'development' && globalWatchdogState.isActive) {
-      console.log('🐕 [WATCHDOG] Cleared for interaction:', globalWatchdogState.interactionId);
+      logger.debug('🐕 [WATCHDOG] Cleared for interaction:', globalWatchdogState.interactionId);
     }
   }
 
@@ -143,5 +145,5 @@ export function getWatchdogStatus() {
  */
 export function resetWatchdog(): void {
   clearToolbarWatchdog();
-  console.log('🐕 [WATCHDOG] State reset');
+  logger.debug('🐕 [WATCHDOG] State reset');
 }

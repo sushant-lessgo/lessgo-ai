@@ -2,6 +2,7 @@
 import React, { forwardRef, useEffect, useRef } from 'react';
 import { useAdvancedActionsMenu } from '@/hooks/useAdvancedActionsMenu';
 
+import { logger } from '@/lib/logger';
 export interface AdvancedActionItem {
   id: string;
   label: string;
@@ -30,7 +31,7 @@ export const AdvancedActionsMenu = forwardRef<HTMLDivElement, AdvancedActionsMen
   ({ actions, triggerElement, onClose, toolbarType, isVisible }, ref) => {
     const internalMenuRef = useRef<HTMLDivElement>(null);
     
-    console.log('🎯 AdvancedActionsMenu rendered with props:', {
+    logger.debug('🎯 AdvancedActionsMenu rendered with props:', {
       actions: actions?.length || 0,
       actionDetails: actions,
       hasTriggerElement: !!triggerElement,
@@ -53,7 +54,7 @@ export const AdvancedActionsMenu = forwardRef<HTMLDivElement, AdvancedActionsMen
       toolbarType,
     });
     
-    console.log('🎯 AdvancedActionsMenu received from hook:', {
+    logger.debug('🎯 AdvancedActionsMenu received from hook:', {
       groupedActionsLength: groupedActions?.length || 0,
       groupedActions
     });
@@ -73,7 +74,7 @@ export const AdvancedActionsMenu = forwardRef<HTMLDivElement, AdvancedActionsMen
         (ref as any).current = node;
       }
       
-      console.log('🎯 Combined ref set:', { 
+      logger.debug('🎯 Combined ref set:', { 
         node: !!node, 
         hookMenuRef: !!hookMenuRef?.current, 
         internalMenuRef: !!internalMenuRef.current 
@@ -101,18 +102,18 @@ export const AdvancedActionsMenu = forwardRef<HTMLDivElement, AdvancedActionsMen
     }, [isVisible, triggerElement, updatePosition]);
 
     if (!isVisible) {
-      console.log('🎯 AdvancedActionsMenu not visible, returning null');
+      logger.debug('🎯 AdvancedActionsMenu not visible, returning null');
       return null;
     }
     
-    console.log('🎯 AdvancedActionsMenu rendering menu with:', {
+    logger.debug('🎯 AdvancedActionsMenu rendering menu with:', {
       position,
       groupedActionsCount: groupedActions.length,
       groupedActionsDetails: groupedActions.map(g => ({ id: g.id, label: g.label, actionCount: g.actions.length }))
     });
     
     if (groupedActions.length === 0) {
-      console.warn('🚨 No grouped actions to render!');
+      logger.warn('🚨 No grouped actions to render!');
       return null;
     }
 
@@ -163,20 +164,20 @@ export const AdvancedActionsMenu = forwardRef<HTMLDivElement, AdvancedActionsMen
 
               {/* Group actions */}
               {group.actions.map((action) => {
-                console.log('🎨 Rendering action:', action.id, action.label);
+                logger.debug('🎨 Rendering action:', action.id, action.label);
                 return (
                   <button
                     key={action.id}
                     onClick={(e) => {
-                      console.log('🎨 Action clicked:', action.id);
+                      logger.debug('🎨 Action clicked:', action.id);
                       e.preventDefault();
                       e.stopPropagation();
                       if (!action.disabled) {
-                        console.log('🎨 Executing handler for:', action.id);
+                        logger.debug('🎨 Executing handler for:', action.id);
                         action.handler();
                         onClose();
                       } else {
-                        console.log('🎨 Action disabled:', action.id);
+                        logger.debug('🎨 Action disabled:', action.id);
                       }
                     }}
                     disabled={action.disabled}

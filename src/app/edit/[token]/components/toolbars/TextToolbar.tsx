@@ -7,6 +7,7 @@ import { useToolbarVisibility } from '@/hooks/useSelectionPriority';
 import { calculateArrowPosition } from '@/utils/toolbarPositioning';
 import { AdvancedActionsMenu } from './AdvancedActionsMenu';
 
+import { logger } from '@/lib/logger';
 interface TextToolbarProps {
   elementSelection: any;
   position: { x: number; y: number };
@@ -37,7 +38,7 @@ export function TextToolbar({ elementSelection, position, contextActions }: Text
   
   // Component lifecycle tracking with anchor info
   React.useEffect(() => {
-    console.log('📝 TextToolbar state (Step 3):', { 
+    logger.debug('📝 TextToolbar state (Step 3):', { 
       isVisible, 
       reason, 
       isTransitionLocked,
@@ -77,13 +78,13 @@ export function TextToolbar({ elementSelection, position, contextActions }: Text
 
   // STEP 1: Priority-based early returns
   if (!isVisible) {
-    console.log('📝 TextToolbar hidden by priority system:', reason);
+    logger.debug('📝 TextToolbar hidden by priority system:', reason);
     return null;
   }
 
   // Early return if elementSelection is invalid
   if (!elementSelection || !elementSelection.sectionId || !elementSelection.elementKey) {
-    console.warn('TextToolbar: Invalid elementSelection', elementSelection);
+    logger.warn('TextToolbar: Invalid elementSelection', elementSelection);
     return null;
   }
 
@@ -198,7 +199,7 @@ export function TextToolbar({ elementSelection, position, contextActions }: Text
       updateFormatStateFromSelection();
       
     } catch (error) {
-      console.error('Selection formatting failed:', error);
+      logger.error('Selection formatting failed:', error);
       // Fallback to element-level formatting
       toggleFormatElementLevel(format);
     }
@@ -335,7 +336,7 @@ export function TextToolbar({ elementSelection, position, contextActions }: Text
         toggleFormatElementLevel(format);
       }
     } catch (error) {
-      console.error('Partial formatting failed, using element-level:', error);
+      logger.error('Partial formatting failed, using element-level:', error);
       // Fallback to existing element-level formatting
       toggleFormatElementLevel(format);
     }
@@ -474,12 +475,12 @@ export function TextToolbar({ elementSelection, position, contextActions }: Text
       } else {
         // Element-level font size change - wrap entire content in span
         const currentHTML = targetElement.innerHTML;
-        console.log('📏 Element-level change, current HTML:', currentHTML);
+        logger.debug('📏 Element-level change, current HTML:', currentHTML);
         
         if (currentHTML && !currentHTML.includes('<span')) {
           // Wrap content in a span with the font size
           targetElement.innerHTML = `<span style="font-size: ${size}">${currentHTML}</span>`;
-          console.log('📏 Wrapped in new span:', targetElement.innerHTML);
+          logger.debug('📏 Wrapped in new span:', targetElement.innerHTML);
         } else if (currentHTML && currentHTML.includes('<span')) {
           // Update existing span or add new one
           const tempDiv = document.createElement('div');
@@ -489,16 +490,16 @@ export function TextToolbar({ elementSelection, position, contextActions }: Text
             // Single root span - update its font size
             spans[0].style.fontSize = size;
             targetElement.innerHTML = tempDiv.innerHTML;
-            console.log('📏 Updated existing span:', targetElement.innerHTML);
+            logger.debug('📏 Updated existing span:', targetElement.innerHTML);
           } else {
             // Multiple spans or nested structure - wrap all
             targetElement.innerHTML = `<span style="font-size: ${size}">${currentHTML}</span>`;
-            console.log('📏 Wrapped multiple spans:', targetElement.innerHTML);
+            logger.debug('📏 Wrapped multiple spans:', targetElement.innerHTML);
           }
         } else {
           // No content - just set style for future content
           targetElement.style.fontSize = size;
-          console.log('📏 Set element style for empty content');
+          logger.debug('📏 Set element style for empty content');
         }
         announceLiveRegion(`Font size changed to ${size}`);
       }
@@ -507,16 +508,16 @@ export function TextToolbar({ elementSelection, position, contextActions }: Text
       const currentHTML = targetElement.innerHTML;
       if (currentHTML) {
         targetElement.innerHTML = `<span style="font-size: ${size}">${currentHTML}</span>`;
-        console.log('📏 Non-partial mode, wrapped in span:', targetElement.innerHTML);
+        logger.debug('📏 Non-partial mode, wrapped in span:', targetElement.innerHTML);
       } else {
         targetElement.style.fontSize = size;
-        console.log('📏 Non-partial mode, set element style');
+        logger.debug('📏 Non-partial mode, set element style');
       }
       announceLiveRegion(`Font size changed to ${size}`);
     }
     
     const finalHTML = targetElement.innerHTML || targetElement.textContent || '';
-    console.log('📏 Final HTML to save:', finalHTML);
+    logger.debug('📏 Final HTML to save:', finalHTML);
     
     // Save content to store with HTML preserved
     updateElementContent(
@@ -872,7 +873,7 @@ export function TextToolbar({ elementSelection, position, contextActions }: Text
                   action={action}
                   elementSelection={elementSelection}
                   onValueChange={(value) => {
-                    console.log('🔧 TextDropdown onValueChange called:', { actionId: action.id, value });
+                    logger.debug('🔧 TextDropdown onValueChange called:', { actionId: action.id, value });
                     if (action.id === 'color') changeTextColor(value);
                     else if (action.id === 'size') changeFontSize(value);
                     else if (action.id === 'align') changeTextAlign(value);
@@ -941,7 +942,7 @@ function TextDropdown({ action, elementSelection, onValueChange }: {
   const [showDropdown, setShowDropdown] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   
-  console.log('🔧 TextDropdown render:', {
+  logger.debug('🔧 TextDropdown render:', {
     actionId: action.id,
     actionLabel: action.label,
     showDropdown,
@@ -1006,7 +1007,7 @@ function TextDropdown({ action, elementSelection, onValueChange }: {
     <div className="relative" ref={dropdownRef}>
       <button
         onClick={() => {
-          console.log('🔧 TextDropdown button clicked:', { actionId: action.id, currentShow: showDropdown });
+          logger.debug('🔧 TextDropdown button clicked:', { actionId: action.id, currentShow: showDropdown });
           setShowDropdown(!showDropdown);
         }}
         className="flex items-center space-x-1 px-2 py-1 text-xs rounded transition-colors text-gray-700 hover:bg-gray-100 hover:text-gray-900"
@@ -1025,7 +1026,7 @@ function TextDropdown({ action, elementSelection, onValueChange }: {
             <button
               key={option.value}
               onClick={() => {
-                console.log('🔧 TextDropdown option clicked:', { optionValue: option.value, actionId: action.id });
+                logger.debug('🔧 TextDropdown option clicked:', { optionValue: option.value, actionId: action.id });
                 onValueChange(option.value);
                 setShowDropdown(false);
               }}

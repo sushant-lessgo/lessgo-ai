@@ -4,6 +4,7 @@
 import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
 import { updateInteractiveColors, updateTextContrast, updateOverallIntensity } from './colorSemanticUpdates';
+import { logger } from '@/lib/logger';
 import type { 
   ColorTokens, 
   ColorIntensityLevel, 
@@ -48,7 +49,7 @@ export function useColorSystemSelector(tokenId: string) {
     try {
       return getColorTokens();
     } catch (error) {
-      console.error('Failed to get current color tokens:', error);
+      logger.error('Failed to get current color tokens:', error);
       // Return safe defaults
       return {
         accent: 'bg-blue-600',
@@ -106,7 +107,7 @@ export function useColorSystemSelector(tokenId: string) {
       
       return null;
     } catch (error) {
-      console.error('Failed to get current background system:', error);
+      logger.error('Failed to get current background system:', error);
       return null;
     }
   }, [theme]);
@@ -157,7 +158,7 @@ export function useColorSystemSelector(tokenId: string) {
       }
 
     } catch (error) {
-      console.error('Validation error:', error);
+      logger.error('Validation error:', error);
       errors.push('Validation failed - please try again');
     }
 
@@ -202,7 +203,7 @@ export function useColorSystemSelector(tokenId: string) {
       setPreviewTokens(updatedTokens);
       setValidationErrors([]);
     } catch (error) {
-      console.error('Failed to update accent color:', error);
+      logger.error('Failed to update accent color:', error);
       setValidationErrors(['Failed to update accent color']);
     }
   }, [currentBackgroundSystem, currentColorTokens]);
@@ -225,7 +226,7 @@ export function useColorSystemSelector(tokenId: string) {
       setPreviewTokens(updatedTokens);
       setValidationErrors([]);
     } catch (error) {
-      console.error('Failed to update text contrast:', error);
+      logger.error('Failed to update text contrast:', error);
       setValidationErrors(['Failed to update text contrast']);
     }
   }, [currentBackgroundSystem, previewTokens, currentColorTokens]);
@@ -242,7 +243,7 @@ export function useColorSystemSelector(tokenId: string) {
       setPreviewTokens(updatedTokens);
       setValidationErrors([]);
     } catch (error) {
-      console.error('Failed to update intensity:', error);
+      logger.error('Failed to update intensity:', error);
       setValidationErrors(['Failed to update intensity']);
     }
   }, [previewTokens, currentColorTokens]);
@@ -250,14 +251,14 @@ export function useColorSystemSelector(tokenId: string) {
   // Apply colors handler
   const handleApplyColors = useCallback(async (): Promise<boolean> => {
     if (!previewTokens) {
-      console.warn('No preview tokens to apply');
+      logger.warn('No preview tokens to apply');
       setValidationErrors(['No color changes to apply']);
       return false;
     }
 
     const errors = validateColors(previewTokens);
     if (errors.length > 0) {
-      console.warn('Cannot apply colors with validation errors:', errors);
+      logger.warn('Cannot apply colors with validation errors:', errors);
       setValidationErrors(errors);
       return false;
     }
@@ -285,7 +286,7 @@ export function useColorSystemSelector(tokenId: string) {
       // Trigger auto-save
       await triggerAutoSave();
 
-      console.log('✅ Color system applied successfully:', {
+      logger.debug('✅ Color system applied successfully:', {
         selectedAccent,
         textContrast,
         overallIntensity,
@@ -299,7 +300,7 @@ export function useColorSystemSelector(tokenId: string) {
       return true;
 
     } catch (error) {
-      console.error('❌ Failed to apply color system:', error);
+      logger.error('❌ Failed to apply color system:', error);
       
       if (!isUnmountedRef.current) {
         setIsLoading(false);
@@ -332,7 +333,7 @@ export function useColorSystemSelector(tokenId: string) {
       }
 
     } catch (error) {
-      console.error('❌ Failed to reset to generated colors:', error);
+      logger.error('❌ Failed to reset to generated colors:', error);
       
       if (!isUnmountedRef.current) {
         setIsLoading(false);

@@ -1,5 +1,6 @@
 // Test file for global anchor system - Step 3
 import type { ToolbarType } from '@/utils/selectionPriority';
+import { logger } from '@/lib/logger';
 
 // Mock scenarios for anchor management testing
 const anchorTestScenarios = [
@@ -73,38 +74,41 @@ const anchorTestScenarios = [
  * This provides guidance for manual testing since anchor system depends on DOM
  */
 export function testGlobalAnchor() {
-  console.log('🧪 Testing Global Anchor System (Step 3)...\n');
+  logger.dev('🧪 Testing Global Anchor System (Step 3)...\n');
   
-  console.log('📋 MANUAL TESTING SCENARIOS:\n');
+  logger.dev('📋 MANUAL TESTING SCENARIOS:\n');
   
   anchorTestScenarios.forEach((scenario, index) => {
-    console.log(`${index + 1}. ${scenario.name}`);
+    logger.dev(`${index + 1}. ${scenario.name}`);
     scenario.steps.forEach((step, stepIndex) => {
-      console.log(`   ${stepIndex + 1}. ${step.description}`);
-      console.log(`      Expected: ${step.expected}`);
+      logger.dev(`   ${stepIndex + 1}. ${step.description}`);
+      logger.dev(`      Expected: ${step.expected}`);
     });
-    console.log('');
+    logger.dev('');
   });
   
-  console.log('🧪 TESTING INSTRUCTIONS:\n');
-  console.log('1. Open browser dev tools console');
-  console.log('2. Run: npm run dev');
-  console.log('3. Navigate to the editor');
-  console.log('4. Execute: window.testGlobalAnchor()');
-  console.log('');
-  console.log('📊 WHAT TO LOOK FOR:\n');
-  console.log('✅ Console messages: "⚓ Registering anchor: text:hero.heading"');
-  console.log('✅ Console messages: "⚓ Position calculated: { x: 100, y: 50, placement: top }"');
-  console.log('✅ Toolbars positioned relative to their target elements');
-  console.log('✅ Arrows pointing to correct elements');
-  console.log('✅ No DOM query race conditions');
-  console.log('✅ Consistent positioning during transitions');
-  console.log('');
-  console.log('❌ PROBLEMS TO WATCH FOR:\n');
-  console.log('❌ Toolbars positioned incorrectly');
-  console.log('❌ Multiple DOM queries for same element');
-  console.log('❌ Anchors not cleaning up when elements removed');
-  console.log('❌ Position calculations failing');
+  logger.group('🧪 TESTING INSTRUCTIONS', () => {
+    logger.dev('1. Open browser dev tools console');
+    logger.dev('2. Run: npm run dev');
+    logger.dev('3. Navigate to the editor');
+    logger.dev('4. Execute: window.testGlobalAnchor()');
+  });
+  
+  logger.group('📊 WHAT TO LOOK FOR', () => {
+    logger.dev('✅ Console messages: "⚓ Registering anchor: text:hero.heading"');
+    logger.dev('✅ Console messages: "⚓ Position calculated: { x: 100, y: 50, placement: top }"');
+    logger.dev('✅ Toolbars positioned relative to their target elements');
+    logger.dev('✅ Arrows pointing to correct elements');
+    logger.dev('✅ No DOM query race conditions');
+    logger.dev('✅ Consistent positioning during transitions');
+  });
+  
+  logger.group('❌ PROBLEMS TO WATCH FOR', () => {
+    logger.dev('❌ Toolbars positioned incorrectly');
+    logger.dev('❌ Multiple DOM queries for same element');
+    logger.dev('❌ Anchors not cleaning up when elements removed');
+    logger.dev('❌ Position calculations failing');
+  });
   
   return {
     testCount: anchorTestScenarios.length,
@@ -122,34 +126,36 @@ export const anchorDebugUtils = {
    */
   showAllAnchors: () => {
     // This will be available when global anchor system is running
-    console.log('📍 Current Anchors:', (window as any).__globalAnchor?.getAllAnchors());
+    logger.dev('📍 Current Anchors:', () => (window as any).__globalAnchor?.getAllAnchors());
   },
   
   /**
    * Test anchor registration for current selection
    */
   testCurrentSelection: () => {
-    console.log('🎯 Testing anchor for current selection...');
-    console.log('1. Select an element (text, button, etc.)');
-    console.log('2. Check if anchor appears in registry');
-    console.log('3. Verify toolbar positions correctly');
+    logger.group('🎯 Testing anchor for current selection', () => {
+      logger.dev('1. Select an element (text, button, etc.)');
+      logger.dev('2. Check if anchor appears in registry');
+      logger.dev('3. Verify toolbar positions correctly');
+    });
   },
   
   /**
    * Monitor anchor updates
    */
   monitorAnchorUpdates: () => {
-    console.log('📡 Monitoring anchor updates...');
-    console.log('Watch for console messages starting with "⚓"');
-    console.log('Updates should happen every ~100ms for visible elements');
+    logger.group('📡 Monitoring anchor updates', () => {
+      logger.dev('Watch for console messages starting with "⚓"');
+      logger.dev('Updates should happen every ~100ms for visible elements');
+    });
   },
   
   /**
    * Test position calculations
    */
   testPositionCalculation: (toolbarType: ToolbarType, sectionId: string, elementKey?: string) => {
-    console.log('📐 Testing position calculation for:', { toolbarType, sectionId, elementKey });
-    console.log('Expected: Position object with x, y, placement, and arrow');
+    logger.dev('📐 Testing position calculation for:', { toolbarType, sectionId, elementKey });
+    logger.dev('Expected: Position object with x, y, placement, and arrow');
   }
 };
 
@@ -163,12 +169,12 @@ export const anchorPerformanceTests = {
    */
   testUpdatePerformance: () => {
     const startTime = performance.now();
-    console.log('⏱️ Testing anchor update performance...');
+    logger.dev('⏱️ Testing anchor update performance...');
     
     setTimeout(() => {
       const endTime = performance.now();
-      console.log(`⏱️ Anchor updates completed in ${endTime - startTime}ms`);
-      console.log('Expected: < 5ms per update cycle');
+      logger.dev(`⏱️ Anchor updates completed in ${endTime - startTime}ms`);
+      logger.dev('Expected: < 5ms per update cycle');
     }, 1000);
   },
   
@@ -176,10 +182,11 @@ export const anchorPerformanceTests = {
    * Test memory usage
    */
   testMemoryUsage: () => {
-    console.log('💾 Monitor memory usage:');
-    console.log('1. Check anchor registry size periodically');
-    console.log('2. Verify stale anchors are cleaned up');
-    console.log('3. No memory leaks from abandoned elements');
+    logger.group('💾 Monitor memory usage', () => {
+      logger.dev('1. Check anchor registry size periodically');
+      logger.dev('2. Verify stale anchors are cleaned up');
+      logger.dev('3. No memory leaks from abandoned elements');
+    });
   }
 };
 
@@ -188,9 +195,9 @@ if (typeof window !== 'undefined') {
   (window as any).testGlobalAnchor = testGlobalAnchor;
   (window as any).anchorDebugUtils = anchorDebugUtils;
   (window as any).anchorPerformanceTests = anchorPerformanceTests;
-  console.log('🧪 Global Anchor Test available at window.testGlobalAnchor()');
-  console.log('🔧 Debug utils at window.anchorDebugUtils');
-  console.log('⏱️ Performance tests at window.anchorPerformanceTests');
+  logger.dev('🧪 Global Anchor Test available at window.testGlobalAnchor()');
+  logger.dev('🔧 Debug utils at window.anchorDebugUtils');
+  logger.dev('⏱️ Performance tests at window.anchorPerformanceTests');
 }
 
 /**

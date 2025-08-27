@@ -3,6 +3,7 @@
 
 import type { EditStore } from '@/types/store';
 
+import { logger } from '@/lib/logger';
 export type EditorMode = 'preview' | 'edit' | 'loading';
 
 /**
@@ -12,13 +13,13 @@ export type EditorMode = 'preview' | 'edit' | 'loading';
 export function selectEditorMode(state: EditStore | undefined | null): EditorMode {
   // Guard against undefined/null state
   if (!state || typeof state !== 'object') {
-    console.warn('⚠️ [MODE-SELECTOR] Invalid state passed to selectEditorMode:', state);
+    logger.warn('⚠️ [MODE-SELECTOR] Invalid state passed to selectEditorMode:', state);
     return 'loading';
   }
   
   // Guard against missing mode property
   if (!('mode' in state) || typeof state.mode !== 'string') {
-    console.warn('⚠️ [MODE-SELECTOR] State missing mode property:', { state, hasMode: 'mode' in state });
+    logger.warn('⚠️ [MODE-SELECTOR] State missing mode property:', { state, hasMode: 'mode' in state });
     return 'loading';
   }
   
@@ -53,7 +54,7 @@ export function debugModeConsistency(
     const mismatch = modeFromMainContent !== modeFromFloatingToolbars;
     
     if (mismatch) {
-      console.warn(`⚠️ [MODE-MISMATCH] Detected mode inconsistency in ${componentName}:`, {
+      logger.warn(`⚠️ [MODE-MISMATCH] Detected mode inconsistency in ${componentName}:`, {
         modeFromMainContent,
         modeFromFloatingToolbars,
         component: componentName,
@@ -61,7 +62,7 @@ export function debugModeConsistency(
         solution: 'Use selectEditorMode() consistently'
       });
     } else if (Math.random() < 0.1) { // 10% sampling to avoid spam
-      console.log(`✅ [MODE-UNIFIED] Mode consistent across components:`, {
+      logger.debug(`✅ [MODE-UNIFIED] Mode consistent across components:`, {
         mode: modeFromMainContent,
         component: componentName,
         verified: true
@@ -77,5 +78,5 @@ if (process.env.NODE_ENV === 'development') {
     debugModeConsistency
   };
   
-  console.log('🔧 Unified Mode Selector debug utilities available at window.__unifiedModeSelector');
+  logger.debug('🔧 Unified Mode Selector debug utilities available at window.__unifiedModeSelector');
 }

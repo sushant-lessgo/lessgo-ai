@@ -38,6 +38,7 @@ import {
 } from './interactionTracking';
 import { pointerTracker } from './pointerTracking';
 
+import { logger } from '@/lib/logger';
 // Import store for formatting state management
 let storeSetFormattingInProgress: ((isInProgress: boolean, opId?: string) => void) | null = null;
 
@@ -48,7 +49,7 @@ function getStoreAction() {
       const { useEditStore } = require('@/hooks/useEditStore');
       storeSetFormattingInProgress = useEditStore.getState().setFormattingInProgress;
     } catch (error) {
-      console.error('Failed to connect to store:', error);
+      logger.error('Failed to connect to store:', error);
     }
   }
   return storeSetFormattingInProgress;
@@ -98,7 +99,7 @@ class BulletproofFormatExecutor {
       logInteractionTimeline(`formatting-state:${isInProgress}`, { txId });
       action(isInProgress, txId);
     } else {
-      console.warn('⚠️ Store action not available for formatting state');
+      logger.warn('⚠️ Store action not available for formatting state');
       // CRITICAL: Don't continue formatting without store connection
       throw new Error('Cannot proceed with formatting - store not available');
     }
@@ -130,7 +131,7 @@ class BulletproofFormatExecutor {
   ): TransactionId | null {
     // Primary button check
     if (e.button !== 0) {
-      console.log(`🚫 Non-primary button ignored: ${e.button}`);
+      logger.debug(`🚫 Non-primary button ignored: ${e.button}`);
       return null;
     }
 
@@ -189,7 +190,7 @@ class BulletproofFormatExecutor {
       }) as TransactionId;
 
     } catch (error) {
-      console.error(`❌ Phase 1 failed for ${config.formatName}:`, error);
+      logger.error(`❌ Phase 1 failed for ${config.formatName}:`, error);
       logInteractionTimeline(`${config.formatName}:phase1:error`, { 
         txId, 
         error: error instanceof Error ? error.message : String(error)
@@ -214,20 +215,20 @@ class BulletproofFormatExecutor {
     const startTime = performance.now();
     
     // Structured logging - Phase 2 START
-    console.log(`[${config.formatName.toUpperCase()}] tx=${txId} v=${MODULE_VERSION} phase2=START`);
+    logger.debug(`[${config.formatName.toUpperCase()}] tx=${txId} v=${MODULE_VERSION} phase2=START`);
 
     try {
       // Preflight checks in order with fast-fail
       const preflightResult = this.runPreflightChecks(txId, config);
       if (!preflightResult.success) {
-        console.log(`[${config.formatName.toUpperCase()}] tx=${txId} phase2=ABORT reason=${preflightResult.reason}`);
+        logger.debug(`[${config.formatName.toUpperCase()}] tx=${txId} phase2=ABORT reason=${preflightResult.reason}`);
         this.rollbackAndExit(txId, config, preflightResult.reason);
         return;
       }
 
       // Check movement threshold
       if (pointerTracker.movedTooFar(e.clientX, e.clientY)) {
-        console.log(`[${config.formatName.toUpperCase()}] tx=${txId} phase2=ABORT reason=moved-too-far`);
+        logger.debug(`[${config.formatName.toUpperCase()}] tx=${txId} phase2=ABORT reason=moved-too-far`);
         this.rollbackAndExit(txId, config, 'moved-too-far');
         return;
       }
@@ -239,7 +240,7 @@ class BulletproofFormatExecutor {
         this.setFormattingState(true, txId, config.setFormattingInProgress);
       } catch (storeError) {
         // CRITICAL: If we can't set formatting state, abort immediately
-        console.error(`❌ Cannot access store - aborting format for ${config.formatName}:`, storeError);
+        logger.error(`❌ Cannot access store - aborting format for ${config.formatName}:`, storeError);
         this.cleanupTransaction(txId, config, 'store-unavailable');
         return;
       }
@@ -250,7 +251,7 @@ class BulletproofFormatExecutor {
       });
 
     } catch (error) {
-      console.error(`❌ Phase 2 failed for ${config.formatName}:`, error);
+      logger.error(`❌ Phase 2 failed for ${config.formatName}:`, error);
       logInteractionTimeline(`${config.formatName}:phase2:error`, { 
         txId, 
         error: error instanceof Error ? error.message : String(error)
@@ -261,19 +262,19 @@ class BulletproofFormatExecutor {
         const { setGlobalFormattingState } = require('@/utils/colorSystemGuard');
         setGlobalFormattingState(false);
       } catch (error) {
-        console.warn('Could not clear global formatting state:', error);
+        logger.warn('Could not clear global formatting state:', error);
       }
       
       // Clear formatting state before cleanup
       try {
         this.setFormattingState(false, txId, config.setFormattingInProgress);
       } catch (storeError) {
-        console.warn('Could not clear formatting state:', storeError);
+        logger.warn('Could not clear formatting state:', storeError);
       }
       
       // Structured logging - Phase 2 COMPLETE
       const duration = Math.round(performance.now() - startTime);
-      console.log(`[${config.formatName.toUpperCase()}] tx=${txId} phase2=COMMIT duration=${duration}ms`);
+      logger.debug(`[${config.formatName.toUpperCase()}] tx=${txId} phase2=COMMIT duration=${duration}ms`);
       
       this.cleanupTransaction(txId, config, 'phase2-complete');
     }
@@ -292,7 +293,7 @@ class BulletproofFormatExecutor {
     // 1. Check transaction validity (prevent stale commits)
     if (config.currentTxId && config.currentTxId !== txId) {
       // Single-line log that prints both expected and received TX IDs for instant mismatch detection
-      console.log(`[${config.formatName.toUpperCase()}] TX_MISMATCH expected=${config.currentTxId} received=${txId}`);
+      logger.debug(`[${config.formatName.toUpperCase()}] TX_MISMATCH expected=${config.currentTxId} received=${txId}`);
       return { success: false, reason: 'stale-transaction' };
     }
 
@@ -308,12 +309,12 @@ class BulletproofFormatExecutor {
       // We can't call the hook here, so let's check DOM for anchors instead
       const anchors = document.querySelectorAll('[data-toolbar-anchor]');
       if (anchors.length === 0) {
-        console.log(`[${txId}] PREFLIGHT FAIL: anchorCount=0 - no stable toolbar anchors`);
+        logger.debug(`[${txId}] PREFLIGHT FAIL: anchorCount=0 - no stable toolbar anchors`);
         return { success: false, reason: 'no-toolbar-anchor' };
       }
     } catch (error) {
       // If we can't check anchors, allow the operation to continue
-      console.warn('Could not check anchor count:', error);
+      logger.warn('Could not check anchor count:', error);
     }
 
     // 3. Check element is editable
@@ -345,9 +346,9 @@ class BulletproofFormatExecutor {
     if (config.rollbackFormat) {
       try {
         config.rollbackFormat();
-        console.log(`✅ Rollback executed for ${config.formatName}`);
+        logger.debug(`✅ Rollback executed for ${config.formatName}`);
       } catch (error) {
-        console.error(`❌ Rollback failed for ${config.formatName}:`, error);
+        logger.error(`❌ Rollback failed for ${config.formatName}:`, error);
       }
     }
 
@@ -463,7 +464,7 @@ class BulletproofFormatExecutor {
       logInteractionTimeline(`${config.formatName}:cleanup:complete`, { txId });
 
     } catch (error) {
-      console.error(`❌ Cleanup failed for ${config.formatName} (${txId}):`, error);
+      logger.error(`❌ Cleanup failed for ${config.formatName} (${txId}):`, error);
       
       // Emergency cleanup as last resort
       executeEmergencyCleanup('error-recovery', {
@@ -493,7 +494,7 @@ class BulletproofFormatExecutor {
    * @param reason - Reason for emergency cleanup
    */
   emergencyCleanupAll(reason: string): void {
-    console.warn(`🚨 Emergency cleanup of ${this.activeTransactions.size} active transactions: ${reason}`);
+    logger.warn(`🚨 Emergency cleanup of ${this.activeTransactions.size} active transactions: ${reason}`);
 
     for (const txId of this.activeTransactions) {
       try {
@@ -505,7 +506,7 @@ class BulletproofFormatExecutor {
           formatAction: () => {},
         }, reason);
       } catch (error) {
-        console.error(`Failed to cleanup transaction ${txId}:`, error);
+        logger.error(`Failed to cleanup transaction ${txId}:`, error);
       }
     }
 

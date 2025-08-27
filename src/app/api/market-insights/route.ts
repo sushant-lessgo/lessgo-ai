@@ -4,6 +4,7 @@ import { generateFeatures } from "@/modules/inference/generateFeatures";
 import { validateInferredFields } from "@/modules/inference/validateOutput";
 import { generateMockHiddenInferredFields } from '@/modules/mock/mockDataGenerators';
 
+import { logger } from '@/lib/logger';
 type FeatureItem = {
   feature: string;
   benefit: string;

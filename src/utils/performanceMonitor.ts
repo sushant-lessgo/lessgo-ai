@@ -2,6 +2,7 @@
 
 import React from 'react';
 
+import { logger } from '@/lib/logger';
 interface PerformanceMetric {
   operation: string;
   startTime: number;
@@ -53,7 +54,7 @@ class PerformanceMonitor {
     
     // Log slow operations
     if (duration > this.slowThreshold) {
-      console.warn(`⚠️ Slow operation detected: ${metric.operation} took ${duration.toFixed(2)}ms`);
+      logger.warn(`⚠️ Slow operation detected: ${metric.operation} took ${duration.toFixed(2)}ms`);
     }
     
     // Trim metrics if too many
@@ -96,14 +97,14 @@ class PerformanceMonitor {
   logStats(): void {
     const stats = this.getStats();
     console.group('📊 Performance Stats');
-    console.log('Total operations:', stats.totalOperations);
-    console.log('Average duration:', `${stats.averageDuration.toFixed(2)}ms`);
-    console.log('Slow operations:', stats.slowOperations.length);
+    logger.debug('Total operations:', stats.totalOperations);
+    logger.debug('Average duration:', `${stats.averageDuration.toFixed(2)}ms`);
+    logger.debug('Slow operations:', stats.slowOperations.length);
     
     if (stats.slowOperations.length > 0) {
       console.group('🐌 Slow Operations');
       stats.slowOperations.forEach(op => {
-        console.log(`${op.operation}: ${op.duration.toFixed(2)}ms`);
+        logger.debug(`${op.operation}: ${op.duration.toFixed(2)}ms`);
       });
       console.groupEnd();
     }
@@ -157,7 +158,7 @@ export function useRenderTracking(componentName: string, props?: any) {
     
     React.useEffect(() => {
       if (renderCount.current > 1) {
-        console.log(`🔄 ${componentName} re-rendered (${renderCount.current} times)`);
+        logger.debug(`🔄 ${componentName} re-rendered (${renderCount.current} times)`);
         
         if (props && lastProps.current) {
           const changedProps = Object.keys(props).filter(
@@ -165,7 +166,7 @@ export function useRenderTracking(componentName: string, props?: any) {
           );
           
           if (changedProps.length > 0) {
-            console.log(`📝 Changed props in ${componentName}:`, changedProps);
+            logger.debug(`📝 Changed props in ${componentName}:`, changedProps);
           }
         }
       }
@@ -181,7 +182,7 @@ export function useRenderTracking(componentName: string, props?: any) {
 export function logMemoryUsage(label: string = 'Memory Usage') {
   if (process.env.NODE_ENV === 'development' && 'memory' in performance) {
     const memory = (performance as any).memory;
-    console.log(`🧠 ${label}:`, {
+    logger.debug(`🧠 ${label}:`, {
       used: `${(memory.usedJSHeapSize / 1048576).toFixed(2)} MB`,
       total: `${(memory.totalJSHeapSize / 1048576).toFixed(2)} MB`,
       limit: `${(memory.jsHeapSizeLimit / 1048576).toFixed(2)} MB`,

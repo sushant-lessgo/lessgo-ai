@@ -1,3 +1,5 @@
+import { logger } from '@/lib/logger';
+
 interface BusinessContext {
   industry: string
   productType: string
@@ -14,7 +16,7 @@ export function generateMockResponse(prompt: string): any {
   const businessContext = extractBusinessContext(prompt)
   const requestedSections = extractRequestedSections(prompt)
   
-  console.log('🎭 Mock Generator:', {
+  logger.debug('🎭 Mock Generator:', {
     requestedSections,
     businessContext,
     promptLength: prompt.length,
@@ -34,7 +36,7 @@ export function generateMockResponse(prompt: string): any {
  * ✅ NEW: Extracts which sections are actually requested in the prompt
  */
 function extractRequestedSections(prompt: string): string[] {
-  console.log('🔍 Mock generator: Extracting sections from prompt')
+  logger.debug('🔍 Mock generator: Extracting sections from prompt')
   
   // First, try to extract from pageStore sections (most reliable)
   const pageStoreSectionsPatterns = [
@@ -50,7 +52,7 @@ function extractRequestedSections(prompt: string): string[] {
   for (const pattern of pageStoreSectionsPatterns) {
     const match = prompt.match(pattern)
     if (match) {
-      console.log('🎯 Pattern matched:', pattern.toString(), 'Match:', match[0].substring(0, 100))
+      logger.debug('🎯 Pattern matched:', pattern.toString(), 'Match:', match[0].substring(0, 100))
       try {
         const sectionsArray = match[1]
           .split(',')
@@ -58,11 +60,11 @@ function extractRequestedSections(prompt: string): string[] {
           .filter(s => s.length > 0)
         
         if (sectionsArray.length > 0 && sectionsArray.length <= 10) {
-          console.log('✅ Extracted sections from pageStore pattern:', sectionsArray)
+          logger.debug('✅ Extracted sections from pageStore pattern:', sectionsArray)
           return sectionsArray
         }
       } catch (error) {
-        console.warn('Failed to parse sections from pageStore match:', error)
+        logger.warn('Failed to parse sections from pageStore match:', error)
       }
     }
   }
@@ -70,21 +72,21 @@ function extractRequestedSections(prompt: string): string[] {
   // Look for JSON structure in the prompt which shows requested sections
   const jsonMatch = prompt.match(/\{[\s\S]*?\}/g)
   if (!jsonMatch) {
-    console.warn('❌ No JSON structure found in prompt, using fallback sections')
+    logger.warn('❌ No JSON structure found in prompt, using fallback sections')
     return ['hero', 'features', 'cta'] // Safe fallback
   }
   
-  console.log('📋 Found JSON structures in prompt:', jsonMatch.length)
+  logger.debug('📋 Found JSON structures in prompt:', jsonMatch.length)
 
   const jsonString = jsonMatch[jsonMatch.length - 1] // Get the last JSON block (likely the output format)
   
-  console.log('🔍 Found JSON string to parse:', jsonString.substring(0, 200) + '...')
+  logger.debug('🔍 Found JSON string to parse:', jsonString.substring(0, 200) + '...')
   
   try {
     // Try to parse the JSON to extract section names
     const jsonObj = JSON.parse(jsonString)
     const sections = Object.keys(jsonObj)
-    console.log('📋 Extracted sections from JSON:', sections)
+    logger.debug('📋 Extracted sections from JSON:', sections)
     
     // Filter to only known valid sections to prevent returning too many
     const validSections = [
@@ -97,11 +99,11 @@ function extractRequestedSections(prompt: string): string[] {
     const filteredSections = sections.filter(s => validSections.includes(s))
     
     if (filteredSections.length > 0 && filteredSections.length <= 12) { // Reasonable limit
-      console.log('✅ Extracted sections from prompt JSON:', filteredSections)
+      logger.debug('✅ Extracted sections from prompt JSON:', filteredSections)
       return filteredSections
     }
   } catch (error) {
-    console.warn('Failed to parse JSON from prompt, trying regex extraction')
+    logger.warn('Failed to parse JSON from prompt, trying regex extraction')
   }
 
   // Fallback: Extract section names from prompt text  
@@ -114,13 +116,13 @@ function extractRequestedSections(prompt: string): string[] {
   }
 
   if (sections.length > 0 && sections.length <= 12) { // Reasonable limit
-    console.log('✅ Extracted sections from prompt regex:', sections)
+    logger.debug('✅ Extracted sections from prompt regex:', sections)
     return sections
   }
 
   // Final fallback - only essential sections
-  console.warn('Could not extract sections from prompt, using minimal safe defaults')
-  console.log('📝 Prompt preview (first 500 chars):', prompt.substring(0, 500))
+  logger.warn('Could not extract sections from prompt, using minimal safe defaults')
+  logger.debug('📝 Prompt preview (first 500 chars):', prompt.substring(0, 500))
   return ['hero', 'problem', 'features', 'cta'] // Only 4 essential sections
 }
 
@@ -551,9 +553,9 @@ function generateMockContent(context: BusinessContext, requestedSections: string
   requestedSections.forEach(sectionId => {
     if (allSectionTemplates[sectionId]) {
       mockContent[sectionId] = allSectionTemplates[sectionId]
-      console.log(`✅ Generated mock content for: ${sectionId}`)
+      logger.debug(`✅ Generated mock content for: ${sectionId}`)
     } else {
-      console.warn(`⚠️ No mock template found for section: ${sectionId}`)
+      logger.warn(`⚠️ No mock template found for section: ${sectionId}`)
       // Provide basic fallback content
       mockContent[sectionId] = {
         headline: `${sectionId.charAt(0).toUpperCase() + sectionId.slice(1)} Section`,
@@ -562,6 +564,6 @@ function generateMockContent(context: BusinessContext, requestedSections: string
     }
   })
 
-  console.log('🎭 Final mock content sections:', Object.keys(mockContent))
+  logger.debug('🎭 Final mock content sections:', Object.keys(mockContent))
   return mockContent
 }

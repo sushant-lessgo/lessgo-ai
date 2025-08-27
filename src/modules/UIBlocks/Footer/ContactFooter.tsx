@@ -10,6 +10,7 @@ import { FaEnvelope, FaPhone, FaMapMarkerAlt, FaTwitter, FaLinkedin, FaGithub, F
 import HeaderLogo from '@/components/ui/HeaderLogo';
 import SocialMediaEditor from '@/components/social/SocialMediaEditor';
 
+import { logger } from '@/lib/logger';
 interface ContactFooterContent {
   copyright?: string;
   newsletter_title?: string;
@@ -67,7 +68,7 @@ const ContactFooter: React.FC<LayoutComponentProps> = (props) => {
   
   // Debug logging
   useEffect(() => {
-    console.log('🔗 [FOOTER-DEBUG] ContactFooter render:', {
+    logger.debug('🔗 [FOOTER-DEBUG] ContactFooter render:', {
       mode,
       socialMediaConfig: store.socialMediaConfig,
       socialLinksCount: socialLinks.length,

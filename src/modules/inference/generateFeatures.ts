@@ -3,6 +3,7 @@
 // ✅ FIXED: Import canonical types
 import type { InputVariables, FeatureItem } from '@/types/core/index';
 
+import { logger } from '@/lib/logger';
 // ✅ FIXED: Use InputVariables interface directly (has canonical field names)
 export async function generateFeatures(inputData: InputVariables): Promise<FeatureItem[]> {
   const {
@@ -52,7 +53,7 @@ Generate between 4-6 features that would be most compelling for this specific us
     
     // If primary fails, try secondary provider
     if (!result.success) {
-      console.warn(`Primary AI provider (${useOpenAI ? 'OpenAI' : 'Nebius'}) failed, trying secondary...`);
+      logger.warn(`Primary AI provider (${useOpenAI ? 'OpenAI' : 'Nebius'}) failed, trying secondary...`);
       result = await callAIProvider(prompt, !useOpenAI);
     }
 
@@ -87,11 +88,11 @@ Generate between 4-6 features that would be most compelling for this specific us
       throw new Error("No valid features found in AI response");
     }
 
-    console.log(`✅ Generated ${validatedFeatures.length} features successfully`);
+    logger.debug(`✅ Generated ${validatedFeatures.length} features successfully`);
     return validatedFeatures;
 
   } catch (error) {
-    console.error("Error generating features:", error);
+    logger.error("Error generating features:", error);
     throw error;
   }
 }
@@ -111,7 +112,7 @@ async function callAIProvider(prompt: string, useOpenAI: boolean) {
       : "mistralai/Mixtral-8x7B-Instruct-v0.1";
 
     if (!apiKey) {
-      console.error(`Missing API key for ${useOpenAI ? 'OpenAI' : 'Nebius'}`);
+      logger.error(`Missing API key for ${useOpenAI ? 'OpenAI' : 'Nebius'}`);
       return { success: false, error: "Missing API key" };
     }
 
@@ -143,14 +144,14 @@ async function callAIProvider(prompt: string, useOpenAI: boolean) {
     const result = await response.json();
 
     if (!response.ok) {
-      console.error(`${useOpenAI ? "OpenAI" : "Nebius"} API Error:`, result);
+      logger.error(`${useOpenAI ? "OpenAI" : "Nebius"} API Error:`, result);
       return { success: false, error: result };
     }
 
     return { success: true, data: result };
 
   } catch (error) {
-    console.error(`Error calling ${useOpenAI ? 'OpenAI' : 'Nebius'}:`, error);
+    logger.error(`Error calling ${useOpenAI ? 'OpenAI' : 'Nebius'}:`, error);
     return { success: false, error };
   }
 }

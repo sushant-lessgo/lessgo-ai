@@ -1,3 +1,5 @@
+import { logger } from '@/lib/logger';
+
 // src/utils/toolbarDiagnostics.ts - Comprehensive toolbar diagnostic system
 // Provides detailed debugging info for toolbar visibility issues
 
@@ -138,7 +140,7 @@ function flushComponentDiagnostics(component: string): void {
         priority: '📊'
       }[diagnostic.phase];
       
-      console.log(
+      logger.debug(
         `${icon} ${phaseIcon} [${component}] ${diagnostic.phase.toUpperCase()}:`,
         diagnostic.data
       );
