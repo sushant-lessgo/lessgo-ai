@@ -13,6 +13,9 @@ import { getTextColorForBackground } from '@/modules/Design/background/enhancedB
 import { validateTextBackgroundContrast } from '@/utils/textContrastUtils';
 import { getSmartTextColor } from '@/utils/improvedTextColors';
 import { analyzeBackground } from '@/utils/backgroundAnalysis';
+import { getExcludedOptionalElements } from '@/modules/sections/selectOptionalElements';
+import { mapStoreToVariables } from '@/modules/sections/elementDetermination';
+import { useOnboardingStore } from '@/hooks/useOnboardingStore';
 
 import { logger } from '@/lib/logger';
 export interface UseLayoutComponentProps extends LayoutComponentProps {
@@ -51,16 +54,37 @@ export function useLayoutComponent<T = Record<string, any>>({
   // Get content for this section with type safety
   const sectionContent = content[sectionId];
   const elements = sectionContent?.elements || {} as Partial<StoreElementTypes>;
+  const layout = sectionContent?.layout;
+
+  // Get excluded optional elements for this section
+  let excludedElements: string[] = [];
+  if (layout) {
+    // Get the section type from sectionId (e.g., "Hero" from "Hero-123")
+    const sectionType = sectionId.split('-')[0];
+    
+    // Get the stores data to compute variables
+    const onboardingData = useOnboardingStore.getState();
+    const editStore = useEditStore.getState();
+    const pageStore = {
+      layout: editStore.layout,
+      meta: editStore.meta
+    };
+    const variables = mapStoreToVariables(onboardingData, pageStore as any);
+    
+    // Get excluded elements based on the current variables
+    excludedElements = getExcludedOptionalElements(sectionType, layout, variables);
+  }
 
   // Extract content with type safety and defaults
   // console.log(`🔍 useLayoutComponent extracting content for ${sectionId}:`, {
   //   elements: elements,
   //   elementKeys: Object.keys(elements),
   //   firstElement: Object.values(elements)[0],
-  //   contentSchema: Object.keys(contentSchema)
+  //   contentSchema: Object.keys(contentSchema),
+  //   excludedElements
   // });
   
-  const blockContent = extractLayoutContent(elements, contentSchema, sectionContent?.layout) as T;
+  const blockContent = extractLayoutContent(elements, contentSchema, layout, excludedElements) as T;
   
   // console.log(`📦 Extracted blockContent for ${sectionId}:`, {
   //   blockContent,

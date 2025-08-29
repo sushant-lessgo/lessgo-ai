@@ -44,6 +44,7 @@ export type SectionElementRequirements = {
   mandatoryElements: string[];
   optionalElements: string[];
   allElements: string[];
+  excludedElements: string[];
 };
 
 // Complete elements map for all sections
@@ -118,6 +119,7 @@ export function getRequiredElements(
   mandatory: string[];
   optional: string[];
   all: string[];
+  excluded: string[];
 } {
   return getAllLayoutElements(sectionType, layout, variables);
 }
@@ -144,6 +146,7 @@ export function getSectionElementRequirements(
     mandatoryElements: elements.mandatory,
     optionalElements: elements.optional,
     allElements: elements.all,
+    excludedElements: elements.excluded,
   };
 }
 

@@ -1,312 +1,88 @@
- ⚪ Using empty for optional element "roi_metric_3"
- 🔍 extractLayoutContent DEBUG: element "roi_label_3" is undefined Object
- ⚪ Using empty for optional element "roi_label_3"
- 🔍 extractLayoutContent DEBUG: element "roi_description" is undefined Object
- ⚪ Using empty for optional element "roi_description"
- 🔍 extractLayoutContent DEBUG: element "show_roi_summary" is undefined Object
- ⚪ Using empty for optional element "show_roi_summary"
- 🔍 extractLayoutContent DEBUG: element "highlight_titles" is undefined Object
- ✅ Using default for mandatory element "highlight_titles": Intelligent Auto-Prioritization|Dynamic Context Switching|Predictive Resource Allocation|Real-Time Quality Assurance
- 🔍 extractLayoutContent DEBUG: element "highlight_descriptions" is undefined Object
- ✅ Using default for mandatory element "highlight_descriptions": Our AI analyzes your workflow patterns and automatically prioritizes tasks based on deadlines, dependencies, and business impact, ensuring critical work never falls through the cracks.|The system seamlessly adapts to changing priorities and contexts, maintaining efficiency even when your focus needs to shift between different projects or urgent requests.|Advanced algorithms predict resource needs and automatically allocate team capacity, preventing bottlenecks before they occur and optimizing productivity across all initiatives.|Built-in quality checks run continuously in the background, catching potential issues early and maintaining high standards without slowing down your workflow.
- 🔍 extractLayoutContent DEBUG: element "mechanism_name" is undefined Object
- ⚪ Using empty for optional element "mechanism_name"
- 🔍 extractLayoutContent DEBUG: element "footer_text" is undefined Object
- ⚪ Using empty for optional element "footer_text"
- 🔍 extractLayoutContent DEBUG: element "highlight_icon_1" is undefined Object
- ⚪ Using empty for optional element "highlight_icon_1"
- 🔍 extractLayoutContent DEBUG: element "highlight_icon_2" is undefined Object
- ⚪ Using empty for optional element "highlight_icon_2"
- 🔍 extractLayoutContent DEBUG: element "highlight_icon_3" is undefined Object
- ⚪ Using empty for optional element "highlight_icon_3"
- 🔍 extractLayoutContent DEBUG: element "highlight_icon_4" is undefined Object
- ⚪ Using empty for optional element "highlight_icon_4"
- 🔍 extractLayoutContent DEBUG: element "highlight_titles" is undefined Object
- ✅ Using default for mandatory element "highlight_titles": Intelligent Auto-Prioritization|Dynamic Context Switching|Predictive Resource Allocation|Real-Time Quality Assurance
- 🔍 extractLayoutContent DEBUG: element "highlight_descriptions" is undefined Object
- ✅ Using default for mandatory element "highlight_descriptions": Our AI analyzes your workflow patterns and automatically prioritizes tasks based on deadlines, dependencies, and business impact, ensuring critical work never falls through the cracks.|The system seamlessly adapts to changing priorities and contexts, maintaining efficiency even when your focus needs to shift between different projects or urgent requests.|Advanced algorithms predict resource needs and automatically allocate team capacity, preventing bottlenecks before they occur and optimizing productivity across all initiatives.|Built-in quality checks run continuously in the background, catching potential issues early and maintaining high standards without slowing down your workflow.
- 🔍 extractLayoutContent DEBUG: element "mechanism_name" is undefined Object
- ⚪ Using empty for optional element "mechanism_name"
- 🔍 extractLayoutContent DEBUG: element "footer_text" is undefined Object
- ⚪ Using empty for optional element "footer_text"
- 🔍 extractLayoutContent DEBUG: element "highlight_icon_1" is undefined Object
- ⚪ Using empty for optional element "highlight_icon_1"
- 🔍 extractLayoutContent DEBUG: element "highlight_icon_2" is undefined Object
- ⚪ Using empty for optional element "highlight_icon_2"
- 🔍 extractLayoutContent DEBUG: element "highlight_icon_3" is undefined Object
- ⚪ Using empty for optional element "highlight_icon_3"
- 🔍 extractLayoutContent DEBUG: element "highlight_icon_4" is undefined Object
- ⚪ Using empty for optional element "highlight_icon_4"
- 🔍 extractLayoutContent DEBUG: element "timeframes" is undefined Object
- ⚪ Using empty for optional element "timeframes"
- 🔍 extractLayoutContent DEBUG: element "titles" is undefined Object
- ⚪ Using empty for optional element "titles"
- 🔍 extractLayoutContent DEBUG: element "descriptions" is undefined Object
- ⚪ Using empty for optional element "descriptions"
- 🔍 extractLayoutContent DEBUG: element "metrics" is undefined Object
- ⚪ Using empty for optional element "metrics"
- 🔍 extractLayoutContent DEBUG: element "subheadline" is undefined Object
- ⚪ Using empty for optional element "subheadline"
- 🔍 extractLayoutContent DEBUG: element "timeline_period" is undefined Object
- ⚪ Using empty for optional element "timeline_period"
- 🔍 extractLayoutContent DEBUG: element "metric_icon" is undefined Object
- ⚪ Using empty for optional element "metric_icon"
- 🔍 extractLayoutContent DEBUG: element "timeline_icon" is undefined Object
- ⚪ Using empty for optional element "timeline_icon"
- 🔍 extractLayoutContent DEBUG: element "success_icon" is undefined Object
- ⚪ Using empty for optional element "success_icon"
- 🔍 extractLayoutContent DEBUG: element "timeframes" is undefined Object
- ⚪ Using empty for optional element "timeframes"
- 🔍 extractLayoutContent DEBUG: element "titles" is undefined Object
- ⚪ Using empty for optional element "titles"
- 🔍 extractLayoutContent DEBUG: element "descriptions" is undefined Object
- ⚪ Using empty for optional element "descriptions"
- 🔍 extractLayoutContent DEBUG: element "metrics" is undefined Object
- ⚪ Using empty for optional element "metrics"
- 🔍 extractLayoutContent DEBUG: element "subheadline" is undefined Object
- ⚪ Using empty for optional element "subheadline"
- 🔍 extractLayoutContent DEBUG: element "timeline_period" is undefined Object
- ⚪ Using empty for optional element "timeline_period"
- 🔍 extractLayoutContent DEBUG: element "metric_icon" is undefined Object
- ⚪ Using empty for optional element "metric_icon"
- 🔍 extractLayoutContent DEBUG: element "timeline_icon" is undefined Object
- ⚪ Using empty for optional element "timeline_icon"
- 🔍 extractLayoutContent DEBUG: element "success_icon" is undefined Object
- ⚪ Using empty for optional element "success_icon"
- 🔍 extractLayoutContent DEBUG: element "before_situations" is undefined Object
- ⚪ Using empty for optional element "before_situations"
- 🔍 extractLayoutContent DEBUG: element "after_outcomes" is undefined Object
- ⚪ Using empty for optional element "after_outcomes"
- 🔍 extractLayoutContent DEBUG: element "customer_companies" is undefined Object
- ⚪ Using empty for optional element "customer_companies"
- 🔍 extractLayoutContent DEBUG: element "timeframes" is undefined Object
- ⚪ Using empty for optional element "timeframes"
- 🔍 extractLayoutContent DEBUG: element "metrics" is undefined Object
- ⚪ Using empty for optional element "metrics"
- 🔍 extractLayoutContent DEBUG: element "subheadline" is undefined Object
- ⚪ Using empty for optional element "subheadline"
- 🔍 extractLayoutContent DEBUG: element "supporting_text" is undefined Object
- ⚪ Using empty for optional element "supporting_text"
- 🔍 extractLayoutContent DEBUG: element "cta_text" is undefined Object
- ⚪ Using empty for optional element "cta_text"
- 🔍 extractLayoutContent DEBUG: element "trust_items" is undefined Object
- ⚪ Using empty for optional element "trust_items"
- 🔍 extractLayoutContent DEBUG: element "results_title" is undefined Object
- ⚪ Using empty for optional element "results_title"
- 🔍 extractLayoutContent DEBUG: element "time_saved_stat" is undefined Object
- ⚪ Using empty for optional element "time_saved_stat"
- 🔍 extractLayoutContent DEBUG: element "time_saved_label" is undefined Object
- ⚪ Using empty for optional element "time_saved_label"
- 🔍 extractLayoutContent DEBUG: element "efficiency_stat" is undefined Object
- ⚪ Using empty for optional element "efficiency_stat"
- 🔍 extractLayoutContent DEBUG: element "efficiency_label" is undefined Object
- ⚪ Using empty for optional element "efficiency_label"
- 🔍 extractLayoutContent DEBUG: element "time_to_results_stat" is undefined Object
- ⚪ Using empty for optional element "time_to_results_stat"
- 🔍 extractLayoutContent DEBUG: element "time_to_results_label" is undefined Object
- ⚪ Using empty for optional element "time_to_results_label"
- 🔍 extractLayoutContent DEBUG: element "roi_stat" is undefined Object
- ⚪ Using empty for optional element "roi_stat"
- 🔍 extractLayoutContent DEBUG: element "roi_label" is undefined Object
- ⚪ Using empty for optional element "roi_label"
- 🔍 extractLayoutContent DEBUG: element "guarantee_text" is undefined Object
- ⚪ Using empty for optional element "guarantee_text"
- 🔍 extractLayoutContent DEBUG: element "implementation_text" is undefined Object
- ⚪ Using empty for optional element "implementation_text"
- 🔍 extractLayoutContent DEBUG: element "before_icon" is undefined Object
- ⚪ Using empty for optional element "before_icon"
- 🔍 extractLayoutContent DEBUG: element "after_icon" is undefined Object
- ⚪ Using empty for optional element "after_icon"
- 🔍 extractLayoutContent DEBUG: element "metrics_icon" is undefined Object
- ⚪ Using empty for optional element "metrics_icon"
- 🔍 extractLayoutContent DEBUG: element "guarantee_icon" is undefined Object
- ⚪ Using empty for optional element "guarantee_icon"
- 🔍 extractLayoutContent DEBUG: element "implementation_icon" is undefined Object
- ⚪ Using empty for optional element "implementation_icon"
- 🔍 extractLayoutContent DEBUG: element "before_situations" is undefined Object
- ⚪ Using empty for optional element "before_situations"
- 🔍 extractLayoutContent DEBUG: element "after_outcomes" is undefined Object
- ⚪ Using empty for optional element "after_outcomes"
- 🔍 extractLayoutContent DEBUG: element "customer_companies" is undefined Object
- ⚪ Using empty for optional element "customer_companies"
- 🔍 extractLayoutContent DEBUG: element "timeframes" is undefined Object
- ⚪ Using empty for optional element "timeframes"
- 🔍 extractLayoutContent DEBUG: element "metrics" is undefined Object
- ⚪ Using empty for optional element "metrics"
- 🔍 extractLayoutContent DEBUG: element "subheadline" is undefined Object
- ⚪ Using empty for optional element "subheadline"
- 🔍 extractLayoutContent DEBUG: element "supporting_text" is undefined Object
- ⚪ Using empty for optional element "supporting_text"
- 🔍 extractLayoutContent DEBUG: element "cta_text" is undefined Object
- ⚪ Using empty for optional element "cta_text"
- 🔍 extractLayoutContent DEBUG: element "trust_items" is undefined Object
- ⚪ Using empty for optional element "trust_items"
- 🔍 extractLayoutContent DEBUG: element "results_title" is undefined Object
- ⚪ Using empty for optional element "results_title"
- 🔍 extractLayoutContent DEBUG: element "time_saved_stat" is undefined Object
- ⚪ Using empty for optional element "time_saved_stat"
- 🔍 extractLayoutContent DEBUG: element "time_saved_label" is undefined Object
- ⚪ Using empty for optional element "time_saved_label"
- 🔍 extractLayoutContent DEBUG: element "efficiency_stat" is undefined Object
- ⚪ Using empty for optional element "efficiency_stat"
- 🔍 extractLayoutContent DEBUG: element "efficiency_label" is undefined Object
- ⚪ Using empty for optional element "efficiency_label"
- 🔍 extractLayoutContent DEBUG: element "time_to_results_stat" is undefined Object
- ⚪ Using empty for optional element "time_to_results_stat"
- 🔍 extractLayoutContent DEBUG: element "time_to_results_label" is undefined Object
- ⚪ Using empty for optional element "time_to_results_label"
- 🔍 extractLayoutContent DEBUG: element "roi_stat" is undefined Object
- ⚪ Using empty for optional element "roi_stat"
- 🔍 extractLayoutContent DEBUG: element "roi_label" is undefined Object
- ⚪ Using empty for optional element "roi_label"
- 🔍 extractLayoutContent DEBUG: element "guarantee_text" is undefined Object
- ⚪ Using empty for optional element "guarantee_text"
- 🔍 extractLayoutContent DEBUG: element "implementation_text" is undefined Object
- ⚪ Using empty for optional element "implementation_text"
- 🔍 extractLayoutContent DEBUG: element "before_icon" is undefined Object
- ⚪ Using empty for optional element "before_icon"
- 🔍 extractLayoutContent DEBUG: element "after_icon" is undefined Object
- ⚪ Using empty for optional element "after_icon"
- 🔍 extractLayoutContent DEBUG: element "metrics_icon" is undefined Object
- ⚪ Using empty for optional element "metrics_icon"
- 🔍 extractLayoutContent DEBUG: element "guarantee_icon" is undefined Object
- ⚪ Using empty for optional element "guarantee_icon"
- 🔍 extractLayoutContent DEBUG: element "implementation_icon" is undefined Object
- ⚪ Using empty for optional element "implementation_icon"
- 🔍 extractLayoutContent DEBUG: element "subheadline" is undefined Object
- ⚪ Using empty for optional element "subheadline"
- 🔍 extractLayoutContent DEBUG: element "them_headline" is undefined Object
- ⚪ Using empty for optional element "them_headline"
- 🔍 extractLayoutContent DEBUG: element "them_points" is undefined Object
- ⚪ Using empty for optional element "them_points"
- 🔍 extractLayoutContent DEBUG: element "you_headline" is undefined Object
- ⚪ Using empty for optional element "you_headline"
- 🔍 extractLayoutContent DEBUG: element "you_points" is undefined Object
- ⚪ Using empty for optional element "you_points"
- 🔍 extractLayoutContent DEBUG: element "cta_text" is undefined Object
- ⚪ Using empty for optional element "cta_text"
- 🔍 extractLayoutContent DEBUG: element "subheadline" is undefined Object
- ⚪ Using empty for optional element "subheadline"
- 🔍 extractLayoutContent DEBUG: element "them_headline" is undefined Object
- ⚪ Using empty for optional element "them_headline"
- 🔍 extractLayoutContent DEBUG: element "them_points" is undefined Object
- ⚪ Using empty for optional element "them_points"
- 🔍 extractLayoutContent DEBUG: element "you_headline" is undefined Object
- ⚪ Using empty for optional element "you_headline"
- 🔍 extractLayoutContent DEBUG: element "you_points" is undefined Object
- ⚪ Using empty for optional element "you_points"
- 🔍 extractLayoutContent DEBUG: element "cta_text" is undefined Object
- ⚪ Using empty for optional element "cta_text"
- 🔍 extractLayoutContent DEBUG: element "subheadline" is undefined Object
- ⚪ Using empty for optional element "subheadline"
- 🔍 extractLayoutContent DEBUG: element "question_1" is undefined Object
- ⚪ Using empty for optional element "question_1"
- 🔍 extractLayoutContent DEBUG: element "answer_1" is undefined Object
- ⚪ Using empty for optional element "answer_1"
- 🔍 extractLayoutContent DEBUG: element "question_2" is undefined Object
- ⚪ Using empty for optional element "question_2"
- 🔍 extractLayoutContent DEBUG: element "answer_2" is undefined Object
- ⚪ Using empty for optional element "answer_2"
- 🔍 extractLayoutContent DEBUG: element "question_3" is undefined Object
- ⚪ Using empty for optional element "question_3"
- 🔍 extractLayoutContent DEBUG: element "answer_3" is undefined Object
- ⚪ Using empty for optional element "answer_3"
- 🔍 extractLayoutContent DEBUG: element "question_4" is undefined Object
- ⚪ Using empty for optional element "question_4"
- 🔍 extractLayoutContent DEBUG: element "answer_4" is undefined Object
- ⚪ Using empty for optional element "answer_4"
- 🔍 extractLayoutContent DEBUG: element "question_5" is undefined Object
- ⚪ Using empty for optional element "question_5"
- 🔍 extractLayoutContent DEBUG: element "answer_5" is undefined Object
- ⚪ Using empty for optional element "answer_5"
- 🔍 extractLayoutContent DEBUG: element "question_6" is undefined Object
- ⚪ Using empty for optional element "question_6"
- 🔍 extractLayoutContent DEBUG: element "answer_6" is undefined Object
- ⚪ Using empty for optional element "answer_6"
- 🔍 extractLayoutContent DEBUG: element "subheadline" is undefined Object
- ⚪ Using empty for optional element "subheadline"
- 🔍 extractLayoutContent DEBUG: element "question_1" is undefined Object
- ⚪ Using empty for optional element "question_1"
- 🔍 extractLayoutContent DEBUG: element "answer_1" is undefined Object
- ⚪ Using empty for optional element "answer_1"
- 🔍 extractLayoutContent DEBUG: element "question_2" is undefined Object
- ⚪ Using empty for optional element "question_2"
- 🔍 extractLayoutContent DEBUG: element "answer_2" is undefined Object
- ⚪ Using empty for optional element "answer_2"
- 🔍 extractLayoutContent DEBUG: element "question_3" is undefined Object
- ⚪ Using empty for optional element "question_3"
- 🔍 extractLayoutContent DEBUG: element "answer_3" is undefined Object
- ⚪ Using empty for optional element "answer_3"
- 🔍 extractLayoutContent DEBUG: element "question_4" is undefined Object
- ⚪ Using empty for optional element "question_4"
- 🔍 extractLayoutContent DEBUG: element "answer_4" is undefined Object
- ⚪ Using empty for optional element "answer_4"
- 🔍 extractLayoutContent DEBUG: element "question_5" is undefined Object
- ⚪ Using empty for optional element "question_5"
- 🔍 extractLayoutContent DEBUG: element "answer_5" is undefined Object
- ⚪ Using empty for optional element "answer_5"
- 🔍 extractLayoutContent DEBUG: element "question_6" is undefined Object
- ⚪ Using empty for optional element "question_6"
- 🔍 extractLayoutContent DEBUG: element "answer_6" is undefined Object
- ⚪ Using empty for optional element "answer_6"
- 🔍 extractLayoutContent DEBUG: element "trust_items" is undefined Object
- ⚪ Using empty for optional element "trust_items"
- 🔍 extractLayoutContent DEBUG: element "trust_item_1" is undefined Object
- ⚪ Using empty for optional element "trust_item_1"
- 🔍 extractLayoutContent DEBUG: element "trust_item_2" is undefined Object
- ⚪ Using empty for optional element "trust_item_2"
- 🔍 extractLayoutContent DEBUG: element "trust_item_3" is undefined Object
- ⚪ Using empty for optional element "trust_item_3"
- 🔍 extractLayoutContent DEBUG: element "trust_item_4" is undefined Object
- ⚪ Using empty for optional element "trust_item_4"
- 🔍 extractLayoutContent DEBUG: element "trust_item_5" is undefined Object
- ⚪ Using empty for optional element "trust_item_5"
- 🔍 extractLayoutContent DEBUG: element "customer_count" is undefined Object
- ⚪ Using empty for optional element "customer_count"
- 🔍 extractLayoutContent DEBUG: element "customer_label" is undefined Object
- ⚪ Using empty for optional element "customer_label"
- 🔍 extractLayoutContent DEBUG: element "rating_stat" is undefined Object
- ⚪ Using empty for optional element "rating_stat"
- 🔍 extractLayoutContent DEBUG: element "uptime_stat" is undefined Object
- ⚪ Using empty for optional element "uptime_stat"
- 🔍 extractLayoutContent DEBUG: element "uptime_label" is undefined Object
- ⚪ Using empty for optional element "uptime_label"
- 🔍 extractLayoutContent DEBUG: element "trust_items" is undefined Object
- ⚪ Using empty for optional element "trust_items"
- 🔍 extractLayoutContent DEBUG: element "trust_item_1" is undefined Object
- ⚪ Using empty for optional element "trust_item_1"
- 🔍 extractLayoutContent DEBUG: element "trust_item_2" is undefined Object
- ⚪ Using empty for optional element "trust_item_2"
- 🔍 extractLayoutContent DEBUG: element "trust_item_3" is undefined Object
- ⚪ Using empty for optional element "trust_item_3"
- 🔍 extractLayoutContent DEBUG: element "trust_item_4" is undefined Object
- ⚪ Using empty for optional element "trust_item_4"
- 🔍 extractLayoutContent DEBUG: element "trust_item_5" is undefined Object
- ⚪ Using empty for optional element "trust_item_5"
- 🔍 extractLayoutContent DEBUG: element "customer_count" is undefined Object
- ⚪ Using empty for optional element "customer_count"
- 🔍 extractLayoutContent DEBUG: element "customer_label" is undefined Object
- ⚪ Using empty for optional element "customer_label"
- 🔍 extractLayoutContent DEBUG: element "rating_stat" is undefined Object
- ⚪ Using empty for optional element "rating_stat"
- 🔍 extractLayoutContent DEBUG: element "uptime_stat" is undefined Object
- ⚪ Using empty for optional element "uptime_stat"
- 🔍 extractLayoutContent DEBUG: element "uptime_label" is undefined Object
- ⚪ Using empty for optional element "uptime_label"
- 🔍 extractLayoutContent DEBUG: element "company_name" is undefined Object
- ⚪ Using empty for optional element "company_name"
- 🔍 extractLayoutContent DEBUG: element "tagline" is undefined Object
- ⚪ Using empty for optional element "tagline"
- 🔍 extractLayoutContent DEBUG: element "copyright" is undefined Object
- ✅ Using default for mandatory element "copyright": © 2025 Your Company. All rights reserved.
- 🔍 extractLayoutContent DEBUG: element "company_name" is undefined Object
- ⚪ Using empty for optional element "company_name"
- 🔍 extractLayoutContent DEBUG: element "tagline" is undefined Object
- ⚪ Using empty for optional element "tagline"
- 🔍 extractLayoutContent DEBUG: element "copyright" is undefined Object
- ✅ Using default for mandatory element "copyright": © 2025 Your Company. All rights reserved.
- [2025-08-29T08:09:41.470Z] DEBUG: 🚩 Feature Flags Status: {
-  "tokenId": "L0lf8wH3hiiQ",
+ 🧭 [NAV-DEBUG] Adding section to navigation: Object
+ 🧭 [NAV-DEBUG] Analyzing section: Object
+ 🧭 [NAV-DEBUG] Adding section to navigation: Object
+ 🧭 [NAV-DEBUG] Analyzing section: Object
+ 🧭 [NAV-DEBUG] Adding section to navigation: Object
+ 🧭 [NAV-DEBUG] Analyzing section: Object
+ 🧭 [NAV-DEBUG] Adding section to navigation: Object
+ 🧭 [NAV-DEBUG] Analyzing section: Object
+ 🧭 [NAV-DEBUG] Adding section to navigation: Object
+ 🧭 [NAV-DEBUG] Analyzing section: Object
+ 🧭 [NAV-DEBUG] Custom section, skipping: cta
+ 🧭 [NAV-DEBUG] Skipping header/footer section: footer
+ 🧭 [NAV-DEBUG] Found section infos: Array(6)
+ 🧭 [NAV-DEBUG] Top sections after sorting: Array(5)
+ 🧭 [NAV-DEBUG] Final navigation items: Array(6)
+ 🧭 [NAV-DEBUG] Generated navigation items: Array(6)
+ [2025-08-29T17:19:18.848Z] DEBUG: 🧭 [NAV-DEBUG] Setting navigation config in store
+ [2025-08-29T17:19:18.848Z] DEBUG: 🧭 [NAV-DEBUG] Creating navigation config: {
+  "navItemsCount": 6,
+  "maxItems": 6,
+  "headerSection": "header",
+  "headerLayout": "CenteredLogoHeader"
+}
+ [2025-08-29T17:19:18.849Z] DEBUG: 🧭 [NAV-DEBUG] Navigation config set: {
+  "items": [
+    {
+      "id": "nav-home",
+      "label": "Home",
+      "link": "#",
+      "isAutoGenerated": true,
+      "order": 0
+    },
+    {
+      "id": "nav-features",
+      "label": "Features",
+      "link": "#features",
+      "sectionId": "features",
+      "isAutoGenerated": true,
+      "order": 1
+    },
+    {
+      "id": "nav-results",
+      "label": "Results",
+      "link": "#results",
+      "sectionId": "results",
+      "isAutoGenerated": true,
+      "order": 2
+    },
+    {
+      "id": "nav-howItWorks",
+      "label": "How It Works",
+      "link": "#howItWorks",
+      "sectionId": "howItWorks",
+      "isAutoGenerated": true,
+      "order": 3
+    },
+    {
+      "id": "nav-socialProof",
+      "label": "Social Proof",
+      "link": "#socialProof",
+      "sectionId": "socialProof",
+      "isAutoGenerated": true,
+      "order": 4
+    },
+    {
+      "id": "nav-uniqueMechanism",
+      "label": "Technology",
+      "link": "#uniqueMechanism",
+      "sectionId": "uniqueMechanism",
+      "isAutoGenerated": true,
+      "order": 5
+    }
+  ],
+  "autoConfigured": true,
+  "maxItems": 6,
+  "lastUpdated": 1756487958849
+}
+ [2025-08-29T17:19:18.852Z] DEBUG: 🔗 [FOOTER-DEBUG] LinksAndSocialFooter render: {
+  "mode": "preview",
+  "socialLinksCount": 0,
+  "socialLinks": [],
+  "sectionId": "footer"
+}
+ [2025-08-29T17:19:18.855Z] DEBUG: 🚩 Feature Flags Status: {
+  "tokenId": "RP_HHItlGuhp",
   "enableVariableMode": true,
   "enableHybridMode": true,
   "enableLegacyFallbacks": true,
@@ -314,50 +90,69 @@
   "rolloutPercentage": 100,
   "staffAccess": true
 }
- [2025-08-29T08:09:41.516Z] DEBUG: 🔍 Starting CSS variable validation...
- [2025-08-29T08:09:41.517Z] DEBUG: 🔍 Starting CSS variable validation...
- [2025-08-29T08:09:41.517Z] DEBUG: 🔍 Starting CSS variable validation...
- [2025-08-29T08:09:41.520Z] DEBUG: 🔍 LandingPageRenderer Debug: {
+ [2025-08-29T17:19:18.858Z] DEBUG: 🧭 [NAV-DEBUG] initializeNavigation action called
+ [2025-08-29T17:19:18.858Z] DEBUG: 🧭 [NAV-DEBUG] Current store state: {
+  "hasSections": true,
+  "sectionsLength": 10,
+  "hasNavigationConfig": true
+}
+ [2025-08-29T17:19:18.859Z] DEBUG: 🧭 [NAV-DEBUG] Navigation already configured, skipping
+ [2025-08-29T17:19:18.860Z] DEBUG: 🔗 [FOOTER-DEBUG] LinksAndSocialFooter render: {
+  "mode": "preview",
+  "socialLinksCount": 0,
+  "socialLinks": [],
+  "sectionId": "footer"
+}
+ [2025-08-29T17:19:18.861Z] DEBUG: 🚩 Feature Flags Status: {
+  "tokenId": "RP_HHItlGuhp",
+  "enableVariableMode": true,
+  "enableHybridMode": true,
+  "enableLegacyFallbacks": true,
+  "shouldUseVariableSystem": true,
+  "rolloutPercentage": 100,
+  "staffAccess": true
+}
+ [2025-08-29T17:19:18.862Z] DEBUG: 🔍 LandingPageRenderer Debug: {
   "sectionsFromStore": [
     "header",
     "hero",
     "features",
     "uniqueMechanism",
+    "howItWorks",
     "results",
-    "testimonials",
-    "comparisonTable",
-    "faq",
+    "socialProof",
+    "founderNote",
     "cta",
     "footer"
   ],
   "sectionsCount": 10,
   "sectionLayoutsFromStore": {
-    "cta": "CenteredHeadlineCTA",
-    "faq": "InlineQnAList",
-    "hero": "leftCopyRightImage",
-    "footer": "LinksAndSocialFooter",
-    "header": "NavWithCTAHeader",
-    "results": "TimelineResults",
-    "features": "MetricTiles",
-    "testimonials": "BeforeAfterQuote",
-    "comparisonTable": "YouVsThemHighlight",
-    "uniqueMechanism": "StackedHighlights"
+    "header": "CenteredLogoHeader",
+    "hero": "splitScreen",
+    "features": "Timeline",
+    "uniqueMechanism": "SingleBigIdea",
+    "howItWorks": "ZigzagImageSteps",
+    "results": "EmojiOutcomeGrid",
+    "socialProof": "UserCountBar",
+    "founderNote": "FounderCardWithQuote",
+    "cta": "CTAWithBadgeRow",
+    "footer": "LinksAndSocialFooter"
   },
   "layoutsCount": 10,
   "sectionLayouts": {
-    "cta": "CenteredHeadlineCTA",
-    "faq": "InlineQnAList",
-    "hero": "leftCopyRightImage",
-    "footer": "LinksAndSocialFooter",
-    "header": "NavWithCTAHeader",
-    "results": "TimelineResults",
-    "features": "MetricTiles",
-    "testimonials": "BeforeAfterQuote",
-    "comparisonTable": "YouVsThemHighlight",
-    "uniqueMechanism": "StackedHighlights"
+    "header": "CenteredLogoHeader",
+    "hero": "splitScreen",
+    "features": "Timeline",
+    "uniqueMechanism": "SingleBigIdea",
+    "howItWorks": "ZigzagImageSteps",
+    "results": "EmojiOutcomeGrid",
+    "socialProof": "UserCountBar",
+    "founderNote": "FounderCardWithQuote",
+    "cta": "CTAWithBadgeRow",
+    "footer": "LinksAndSocialFooter"
   }
 }
- [2025-08-29T08:09:41.520Z] DEBUG: 🔄 Processing sections with EDIT MODE ORDER preserved: {
+ [2025-08-29T17:19:18.862Z] DEBUG: 🔄 Processing sections with EDIT MODE ORDER preserved: {
   "hasDynamicSystem": true,
   "totalSections": 10,
   "editModeOrder": [
@@ -365,16 +160,16 @@
     "hero",
     "features",
     "uniqueMechanism",
+    "howItWorks",
     "results",
-    "testimonials",
-    "comparisonTable",
-    "faq",
+    "socialProof",
+    "founderNote",
     "cta",
     "footer"
   ],
   "preservedOrder": "Using edit mode positions instead of sectionList metadata order"
 }
- [2025-08-29T08:09:41.520Z] DEBUG: 📊 Enhanced Pattern Metrics: {
+ [2025-08-29T17:19:18.862Z] DEBUG: 📊 Enhanced Pattern Metrics: {
   "totalSections": 10,
   "highlights": 3,
   "neutrals": 6,
@@ -385,8 +180,8 @@
   "downgrades": 1,
   "violations": 0
 }
- [2025-08-29T08:09:41.521Z] DEBUG: 🎨 Final alternating background pattern: header: neutral → hero: primary-highlight → features: secondary-highlight → uniqueMechanism: neutral → results: neutral → testimonials: neutral → comparisonTable: neutral → faq: divider-zone → cta: primary-highlight → footer: neutral
- [2025-08-29T08:09:41.521Z] DEBUG: 🔄 Processing sections with EDIT MODE ORDER preserved: {
+ [2025-08-29T17:19:18.862Z] DEBUG: 🎨 Final alternating background pattern: header: neutral → hero: primary-highlight → features: secondary-highlight → uniqueMechanism: neutral → howItWorks: neutral → results: neutral → socialProof: divider-zone → founderNote: neutral → cta: primary-highlight → footer: neutral
+ [2025-08-29T17:19:18.862Z] DEBUG: 🔄 Processing sections with EDIT MODE ORDER preserved: {
   "hasDynamicSystem": true,
   "totalSections": 10,
   "editModeOrder": [
@@ -394,16 +189,16 @@
     "hero",
     "features",
     "uniqueMechanism",
+    "howItWorks",
     "results",
-    "testimonials",
-    "comparisonTable",
-    "faq",
+    "socialProof",
+    "founderNote",
     "cta",
     "footer"
   ],
   "preservedOrder": "Using edit mode positions instead of sectionList metadata order"
 }
- [2025-08-29T08:09:41.521Z] DEBUG: 📊 Enhanced Pattern Metrics: {
+ [2025-08-29T17:19:18.862Z] DEBUG: 📊 Enhanced Pattern Metrics: {
   "totalSections": 10,
   "highlights": 3,
   "neutrals": 6,
@@ -414,661 +209,553 @@
   "downgrades": 1,
   "violations": 0
 }
- [2025-08-29T08:09:41.521Z] DEBUG: 🎨 Final alternating background pattern: header: neutral → hero: primary-highlight → features: secondary-highlight → uniqueMechanism: neutral → results: neutral → testimonials: neutral → comparisonTable: neutral → faq: divider-zone → cta: primary-highlight → footer: neutral
- [2025-08-29T08:09:41.521Z] DEBUG: 🎨 Section header CSS class: bg-white
- [2025-08-29T08:09:41.521Z] DEBUG: 🎨 Section hero CSS class: bg-white
- [2025-08-29T08:09:41.521Z] DEBUG: 🎯 Rendering hero section with data: {
+ [2025-08-29T17:19:18.862Z] DEBUG: 🎨 Final alternating background pattern: header: neutral → hero: primary-highlight → features: secondary-highlight → uniqueMechanism: neutral → howItWorks: neutral → results: neutral → socialProof: divider-zone → founderNote: neutral → cta: primary-highlight → footer: neutral
+ [2025-08-29T17:19:18.863Z] DEBUG: 🎨 Section header CSS class: bg-white
+ [2025-08-29T17:19:18.863Z] DEBUG: 🎨 Section hero CSS class: bg-white
+ [2025-08-29T17:19:18.863Z] DEBUG: 🎯 Rendering hero section with data: {
   "mode": "preview",
   "isEditable": false,
   "data": {
     "id": "hero",
-    "layout": "leftCopyRightImage",
+    "layout": "splitScreen",
     "elements": {
-      "cta_text": "Start Your Journey",
-      "headline": "Revolutionary SaaS Platform Solution",
-      "subheadline": "The most advanced saas platform platform available",
-      "supporting_text": "Perfect for businesses looking to scale their software operations."
+      "headline": "Transform Your AI/Technology Operations",
+      "subheadline": "Trusted by leading ai/technology companies worldwide",
+      "cta_text": "Get Started Now",
+      "supporting_text": "Perfect for businesses looking to scale their ai/technology operations.",
+      "split_hero_image": "/hero-placeholder.jpg"
     },
+    "backgroundType": "primary",
     "aiMetadata": {
+      "lastGenerated": 1756487955121,
       "aiGenerated": true,
       "isCustomized": false,
-      "lastGenerated": 1756454969782,
       "aiGeneratedElements": [
         "headline",
         "subheadline",
         "cta_text",
-        "supporting_text"
+        "supporting_text",
+        "split_hero_image"
       ]
     },
     "editMetadata": {
-      "isEditing": false,
-      "isMovable": true,
       "isSelected": false,
-      "isDeletable": false,
-      "isDuplicable": true,
-      "lastModified": 1756454969781,
+      "isEditing": false,
+      "lastModified": 1756487955120,
       "lastModifiedBy": "user",
+      "isDeletable": false,
+      "isMovable": true,
+      "isDuplicable": true,
       "validationStatus": {
-        "errors": [],
         "isValid": true,
+        "errors": [],
         "warnings": [],
-        "lastValidated": 1756454969781,
-        "missingRequired": []
+        "missingRequired": [],
+        "lastValidated": 1756487955120
       },
       "completionPercentage": 100
-    },
-    "backgroundType": "primary"
+    }
   },
   "elements": {
-    "cta_text": "Start Your Journey",
-    "headline": "Revolutionary SaaS Platform Solution",
-    "subheadline": "The most advanced saas platform platform available",
-    "supporting_text": "Perfect for businesses looking to scale their software operations."
+    "headline": "Transform Your AI/Technology Operations",
+    "subheadline": "Trusted by leading ai/technology companies worldwide",
+    "cta_text": "Get Started Now",
+    "supporting_text": "Perfect for businesses looking to scale their ai/technology operations.",
+    "split_hero_image": "/hero-placeholder.jpg"
   }
 }
- [2025-08-29T08:09:41.521Z] DEBUG: 🎨 Rendering secondary section features: {
+ [2025-08-29T17:19:18.863Z] DEBUG: 🎨 Rendering secondary section features: {
   "backgroundCSS": "bg-gray-50/70",
   "themeSecondary": "bg-gray-50/70",
   "isFromAccentOptions": false,
   "accentColor": "cyan",
   "baseColor": "white"
 }
- [2025-08-29T08:09:41.521Z] DEBUG: 🎨 Section features CSS class: bg-gray-50/70
- [2025-08-29T08:09:41.521Z] DEBUG: 🎨 Section uniqueMechanism CSS class: bg-white
- [2025-08-29T08:09:41.521Z] DEBUG: 🎨 Section results CSS class: bg-white
- [2025-08-29T08:09:41.521Z] DEBUG: 🎨 Section testimonials CSS class: bg-white
- [2025-08-29T08:09:41.522Z] DEBUG: 🎨 Section comparisonTable CSS class: bg-white
- [2025-08-29T08:09:41.522Z] DEBUG: 🎨 Section faq CSS class: bg-gray-100/50
- [2025-08-29T08:09:41.522Z] DEBUG: 🎨 Section cta CSS class: bg-white
- [2025-08-29T08:09:41.522Z] DEBUG: 🎨 Section footer CSS class: bg-white
- [2025-08-29T08:09:41.522Z] DEBUG: 🔍 LandingPageRenderer Debug: {
+ [2025-08-29T17:19:18.863Z] DEBUG: 🎨 Section features CSS class: bg-gray-50/70
+ [2025-08-29T17:19:18.863Z] DEBUG: 🎨 Section uniqueMechanism CSS class: bg-white
+ [2025-08-29T17:19:18.863Z] DEBUG: 🎨 Section howItWorks CSS class: bg-white
+ [2025-08-29T17:19:18.863Z] DEBUG: 🎨 Section results CSS class: bg-white
+ [2025-08-29T17:19:18.863Z] DEBUG: 🎨 Section socialProof CSS class: bg-gray-100/50
+ [2025-08-29T17:19:18.864Z] DEBUG: 🎨 Section founderNote CSS class: bg-white
+ [2025-08-29T17:19:18.864Z] DEBUG: 🎨 Section cta CSS class: bg-white
+ [2025-08-29T17:19:18.864Z] DEBUG: 🎨 Section footer CSS class: bg-white
+ [2025-08-29T17:19:18.865Z] DEBUG: 🔍 LandingPageRenderer Debug: {
   "sectionsFromStore": [
     "header",
     "hero",
     "features",
     "uniqueMechanism",
+    "howItWorks",
     "results",
-    "testimonials",
-    "comparisonTable",
-    "faq",
+    "socialProof",
+    "founderNote",
     "cta",
     "footer"
   ],
   "sectionsCount": 10,
   "sectionLayoutsFromStore": {
-    "cta": "CenteredHeadlineCTA",
-    "faq": "InlineQnAList",
-    "hero": "leftCopyRightImage",
-    "footer": "LinksAndSocialFooter",
-    "header": "NavWithCTAHeader",
-    "results": "TimelineResults",
-    "features": "MetricTiles",
-    "testimonials": "BeforeAfterQuote",
-    "comparisonTable": "YouVsThemHighlight",
-    "uniqueMechanism": "StackedHighlights"
+    "header": "CenteredLogoHeader",
+    "hero": "splitScreen",
+    "features": "Timeline",
+    "uniqueMechanism": "SingleBigIdea",
+    "howItWorks": "ZigzagImageSteps",
+    "results": "EmojiOutcomeGrid",
+    "socialProof": "UserCountBar",
+    "founderNote": "FounderCardWithQuote",
+    "cta": "CTAWithBadgeRow",
+    "footer": "LinksAndSocialFooter"
   },
   "layoutsCount": 10,
   "sectionLayouts": {
-    "cta": "CenteredHeadlineCTA",
-    "faq": "InlineQnAList",
-    "hero": "leftCopyRightImage",
-    "footer": "LinksAndSocialFooter",
-    "header": "NavWithCTAHeader",
-    "results": "TimelineResults",
-    "features": "MetricTiles",
-    "testimonials": "BeforeAfterQuote",
-    "comparisonTable": "YouVsThemHighlight",
-    "uniqueMechanism": "StackedHighlights"
+    "header": "CenteredLogoHeader",
+    "hero": "splitScreen",
+    "features": "Timeline",
+    "uniqueMechanism": "SingleBigIdea",
+    "howItWorks": "ZigzagImageSteps",
+    "results": "EmojiOutcomeGrid",
+    "socialProof": "UserCountBar",
+    "founderNote": "FounderCardWithQuote",
+    "cta": "CTAWithBadgeRow",
+    "footer": "LinksAndSocialFooter"
   }
 }
- [2025-08-29T08:09:41.522Z] DEBUG: 🎨 Section header CSS class: bg-white
- [2025-08-29T08:09:41.522Z] DEBUG: 🎨 Section hero CSS class: bg-white
- [2025-08-29T08:09:41.522Z] DEBUG: 🎯 Rendering hero section with data: {
+ [2025-08-29T17:19:18.865Z] DEBUG: 🎨 Section header CSS class: bg-white
+ [2025-08-29T17:19:18.865Z] DEBUG: 🎨 Section hero CSS class: bg-white
+ [2025-08-29T17:19:18.865Z] DEBUG: 🎯 Rendering hero section with data: {
   "mode": "preview",
   "isEditable": false,
   "data": {
     "id": "hero",
-    "layout": "leftCopyRightImage",
+    "layout": "splitScreen",
     "elements": {
-      "cta_text": "Start Your Journey",
-      "headline": "Revolutionary SaaS Platform Solution",
-      "subheadline": "The most advanced saas platform platform available",
-      "supporting_text": "Perfect for businesses looking to scale their software operations."
+      "headline": "Transform Your AI/Technology Operations",
+      "subheadline": "Trusted by leading ai/technology companies worldwide",
+      "cta_text": "Get Started Now",
+      "supporting_text": "Perfect for businesses looking to scale their ai/technology operations.",
+      "split_hero_image": "/hero-placeholder.jpg"
     },
+    "backgroundType": "primary",
     "aiMetadata": {
+      "lastGenerated": 1756487955121,
       "aiGenerated": true,
       "isCustomized": false,
-      "lastGenerated": 1756454969782,
       "aiGeneratedElements": [
         "headline",
         "subheadline",
         "cta_text",
-        "supporting_text"
+        "supporting_text",
+        "split_hero_image"
       ]
     },
     "editMetadata": {
-      "isEditing": false,
-      "isMovable": true,
       "isSelected": false,
-      "isDeletable": false,
-      "isDuplicable": true,
-      "lastModified": 1756454969781,
+      "isEditing": false,
+      "lastModified": 1756487955120,
       "lastModifiedBy": "user",
+      "isDeletable": false,
+      "isMovable": true,
+      "isDuplicable": true,
       "validationStatus": {
-        "errors": [],
         "isValid": true,
+        "errors": [],
         "warnings": [],
-        "lastValidated": 1756454969781,
-        "missingRequired": []
+        "missingRequired": [],
+        "lastValidated": 1756487955120
       },
       "completionPercentage": 100
-    },
-    "backgroundType": "primary"
+    }
   },
   "elements": {
-    "cta_text": "Start Your Journey",
-    "headline": "Revolutionary SaaS Platform Solution",
-    "subheadline": "The most advanced saas platform platform available",
-    "supporting_text": "Perfect for businesses looking to scale their software operations."
+    "headline": "Transform Your AI/Technology Operations",
+    "subheadline": "Trusted by leading ai/technology companies worldwide",
+    "cta_text": "Get Started Now",
+    "supporting_text": "Perfect for businesses looking to scale their ai/technology operations.",
+    "split_hero_image": "/hero-placeholder.jpg"
   }
 }
- [2025-08-29T08:09:41.522Z] DEBUG: 🎨 Rendering secondary section features: {
+ [2025-08-29T17:19:18.865Z] DEBUG: 🎨 Rendering secondary section features: {
   "backgroundCSS": "bg-gray-50/70",
   "themeSecondary": "bg-gray-50/70",
   "isFromAccentOptions": false,
   "accentColor": "cyan",
   "baseColor": "white"
 }
- [2025-08-29T08:09:41.522Z] DEBUG: 🎨 Section features CSS class: bg-gray-50/70
- [2025-08-29T08:09:41.522Z] DEBUG: 🎨 Section uniqueMechanism CSS class: bg-white
- [2025-08-29T08:09:41.522Z] DEBUG: 🎨 Section results CSS class: bg-white
- [2025-08-29T08:09:41.523Z] DEBUG: 🎨 Section testimonials CSS class: bg-white
- [2025-08-29T08:09:41.523Z] DEBUG: 🎨 Section comparisonTable CSS class: bg-white
- [2025-08-29T08:09:41.523Z] DEBUG: 🎨 Section faq CSS class: bg-gray-100/50
- [2025-08-29T08:09:41.523Z] DEBUG: 🎨 Section cta CSS class: bg-white
- [2025-08-29T08:09:41.523Z] DEBUG: 🎨 Section footer CSS class: bg-white
+ [2025-08-29T17:19:18.865Z] DEBUG: 🎨 Section features CSS class: bg-gray-50/70
+ [2025-08-29T17:19:18.865Z] DEBUG: 🎨 Section uniqueMechanism CSS class: bg-white
+ [2025-08-29T17:19:18.865Z] DEBUG: 🎨 Section howItWorks CSS class: bg-white
+ [2025-08-29T17:19:18.865Z] DEBUG: 🎨 Section results CSS class: bg-white
+ [2025-08-29T17:19:18.865Z] DEBUG: 🎨 Section socialProof CSS class: bg-gray-100/50
+ [2025-08-29T17:19:18.866Z] DEBUG: 🎨 Section founderNote CSS class: bg-white
+ [2025-08-29T17:19:18.866Z] DEBUG: 🎨 Section cta CSS class: bg-white
+ [2025-08-29T17:19:18.866Z] DEBUG: 🎨 Section footer CSS class: bg-white
  🔍 extractLayoutContent DEBUG: element "nav_item_1" is undefined Object
  ✅ Using default for mandatory element "nav_item_1": Home
  🔍 extractLayoutContent DEBUG: element "nav_item_2" is undefined Object
- ⚪ Using empty for optional element "nav_item_2"
+ ✅ Using default for mandatory element "nav_item_2": Products
  🔍 extractLayoutContent DEBUG: element "nav_item_3" is undefined Object
- ⚪ Using empty for optional element "nav_item_3"
+ ❌ Using empty for excluded optional element "nav_item_3"
  🔍 extractLayoutContent DEBUG: element "nav_item_4" is undefined Object
- ⚪ Using empty for optional element "nav_item_4"
+ ❌ Using empty for excluded optional element "nav_item_4"
  🔍 extractLayoutContent DEBUG: element "nav_item_5" is undefined Object
- ⚪ Using empty for optional element "nav_item_5"
+ ❌ Using empty for excluded optional element "nav_item_5"
  🔍 extractLayoutContent DEBUG: element "nav_item_6" is undefined Object
- ⚪ Using empty for optional element "nav_item_6"
+ ❌ Using empty for excluded optional element "nav_item_6"
  🔍 extractLayoutContent DEBUG: element "nav_link_1" is undefined Object
- ⚪ Using empty for optional element "nav_link_1"
+ ❌ Using empty for excluded optional element "nav_link_1"
  🔍 extractLayoutContent DEBUG: element "nav_link_2" is undefined Object
- ⚪ Using empty for optional element "nav_link_2"
+ ❌ Using empty for excluded optional element "nav_link_2"
  🔍 extractLayoutContent DEBUG: element "nav_link_3" is undefined Object
- ⚪ Using empty for optional element "nav_link_3"
+ ❌ Using empty for excluded optional element "nav_link_3"
  🔍 extractLayoutContent DEBUG: element "nav_link_4" is undefined Object
- ⚪ Using empty for optional element "nav_link_4"
+ ❌ Using empty for excluded optional element "nav_link_4"
  🔍 extractLayoutContent DEBUG: element "nav_link_5" is undefined Object
- ⚪ Using empty for optional element "nav_link_5"
+ ❌ Using empty for excluded optional element "nav_link_5"
  🔍 extractLayoutContent DEBUG: element "nav_link_6" is undefined Object
- ⚪ Using empty for optional element "nav_link_6"
+ ❌ Using empty for excluded optional element "nav_link_6"
  🔍 extractLayoutContent DEBUG: element "nav_item_1" is undefined Object
  ✅ Using default for mandatory element "nav_item_1": Home
  🔍 extractLayoutContent DEBUG: element "nav_item_2" is undefined Object
- ⚪ Using empty for optional element "nav_item_2"
+ ✅ Using default for mandatory element "nav_item_2": Products
  🔍 extractLayoutContent DEBUG: element "nav_item_3" is undefined Object
- ⚪ Using empty for optional element "nav_item_3"
+ ❌ Using empty for excluded optional element "nav_item_3"
  🔍 extractLayoutContent DEBUG: element "nav_item_4" is undefined Object
- ⚪ Using empty for optional element "nav_item_4"
+ ❌ Using empty for excluded optional element "nav_item_4"
  🔍 extractLayoutContent DEBUG: element "nav_item_5" is undefined Object
- ⚪ Using empty for optional element "nav_item_5"
+ ❌ Using empty for excluded optional element "nav_item_5"
  🔍 extractLayoutContent DEBUG: element "nav_item_6" is undefined Object
- ⚪ Using empty for optional element "nav_item_6"
+ ❌ Using empty for excluded optional element "nav_item_6"
  🔍 extractLayoutContent DEBUG: element "nav_link_1" is undefined Object
- ⚪ Using empty for optional element "nav_link_1"
+ ❌ Using empty for excluded optional element "nav_link_1"
  🔍 extractLayoutContent DEBUG: element "nav_link_2" is undefined Object
- ⚪ Using empty for optional element "nav_link_2"
+ ❌ Using empty for excluded optional element "nav_link_2"
  🔍 extractLayoutContent DEBUG: element "nav_link_3" is undefined Object
- ⚪ Using empty for optional element "nav_link_3"
+ ❌ Using empty for excluded optional element "nav_link_3"
  🔍 extractLayoutContent DEBUG: element "nav_link_4" is undefined Object
- ⚪ Using empty for optional element "nav_link_4"
+ ❌ Using empty for excluded optional element "nav_link_4"
  🔍 extractLayoutContent DEBUG: element "nav_link_5" is undefined Object
- ⚪ Using empty for optional element "nav_link_5"
+ ❌ Using empty for excluded optional element "nav_link_5"
  🔍 extractLayoutContent DEBUG: element "nav_link_6" is undefined Object
- ⚪ Using empty for optional element "nav_link_6"
+ ❌ Using empty for excluded optional element "nav_link_6"
  🔍 extractLayoutContent DEBUG: element "badge_text" is undefined Object
- ⚪ Using empty for optional element "badge_text"
+ 🎨 Using default for asset element "badge_text": 
  🔍 extractLayoutContent DEBUG: element "trust_items" is undefined Object
- ⚪ Using empty for optional element "trust_items"
+ 🎨 Using default for asset element "trust_items": Free 14-day trial|No credit card required|Cancel anytime
  🔍 extractLayoutContent DEBUG: element "trust_item_1" is undefined Object
- ⚪ Using empty for optional element "trust_item_1"
+ 🎨 Using default for asset element "trust_item_1": Free 14-day trial
  🔍 extractLayoutContent DEBUG: element "trust_item_2" is undefined Object
- ⚪ Using empty for optional element "trust_item_2"
+ 🎨 Using default for asset element "trust_item_2": No credit card required
  🔍 extractLayoutContent DEBUG: element "trust_item_3" is undefined Object
- ⚪ Using empty for optional element "trust_item_3"
+ 🎨 Using default for asset element "trust_item_3": Cancel anytime
  🔍 extractLayoutContent DEBUG: element "trust_item_4" is undefined Object
- ⚪ Using empty for optional element "trust_item_4"
+ 🎨 Using default for asset element "trust_item_4": 
  🔍 extractLayoutContent DEBUG: element "trust_item_5" is undefined Object
- ⚪ Using empty for optional element "trust_item_5"
- 🔍 extractLayoutContent DEBUG: element "hero_image" is undefined Object
- ⚪ Using empty for optional element "hero_image"
+ 🎨 Using default for asset element "trust_item_5": 
  🔍 extractLayoutContent DEBUG: element "customer_count" is undefined Object
- ⚪ Using empty for optional element "customer_count"
+ 🎨 Using default for asset element "customer_count": 500+ happy customers
  🔍 extractLayoutContent DEBUG: element "rating_value" is undefined Object
- ⚪ Using empty for optional element "rating_value"
+ 🎨 Using default for asset element "rating_value": 4.9/5
  🔍 extractLayoutContent DEBUG: element "rating_count" is undefined Object
- ⚪ Using empty for optional element "rating_count"
+ 🎨 Using default for asset element "rating_count": from 127 reviews
  🔍 extractLayoutContent DEBUG: element "show_social_proof" is undefined Object
- ⚪ Using empty for optional element "show_social_proof"
+ 🎨 Using default for asset element "show_social_proof": true
  🔍 extractLayoutContent DEBUG: element "show_customer_avatars" is undefined Object
- ⚪ Using empty for optional element "show_customer_avatars"
+ 🎨 Using default for asset element "show_customer_avatars": true
  🔍 extractLayoutContent DEBUG: element "avatar_count" is undefined Object
- ⚪ Using empty for optional element "avatar_count"
+ 🎨 Using default for asset element "avatar_count": 4
  🔍 extractLayoutContent DEBUG: element "customer_names" is undefined Object
- ⚪ Using empty for optional element "customer_names"
+ 🎨 Using default for asset element "customer_names": Sarah Chen|Alex Rivera|Jordan Kim|Maya Patel
  🔍 extractLayoutContent DEBUG: element "avatar_urls" is undefined Object
- ⚪ Using empty for optional element "avatar_urls"
+ 🎨 Using default for asset element "avatar_urls": {}
+ [2025-08-29T17:19:18.878Z] DEBUG: 🔄 Store selector called for split hero image: {
+  "sectionId": "hero",
+  "timestamp": 1756487958878
+}
+ [2025-08-29T17:19:18.878Z] DEBUG: 🎨 Final hero image URL: /hero-placeholder.jpg
  🔍 extractLayoutContent DEBUG: element "badge_text" is undefined Object
- ⚪ Using empty for optional element "badge_text"
+ 🎨 Using default for asset element "badge_text": 
  🔍 extractLayoutContent DEBUG: element "trust_items" is undefined Object
- ⚪ Using empty for optional element "trust_items"
+ 🎨 Using default for asset element "trust_items": Free 14-day trial|No credit card required|Cancel anytime
  🔍 extractLayoutContent DEBUG: element "trust_item_1" is undefined Object
- ⚪ Using empty for optional element "trust_item_1"
+ 🎨 Using default for asset element "trust_item_1": Free 14-day trial
  🔍 extractLayoutContent DEBUG: element "trust_item_2" is undefined Object
- ⚪ Using empty for optional element "trust_item_2"
+ 🎨 Using default for asset element "trust_item_2": No credit card required
  🔍 extractLayoutContent DEBUG: element "trust_item_3" is undefined Object
- ⚪ Using empty for optional element "trust_item_3"
+ 🎨 Using default for asset element "trust_item_3": Cancel anytime
  🔍 extractLayoutContent DEBUG: element "trust_item_4" is undefined Object
- ⚪ Using empty for optional element "trust_item_4"
+ 🎨 Using default for asset element "trust_item_4": 
  🔍 extractLayoutContent DEBUG: element "trust_item_5" is undefined Object
- ⚪ Using empty for optional element "trust_item_5"
- 🔍 extractLayoutContent DEBUG: element "hero_image" is undefined Object
- ⚪ Using empty for optional element "hero_image"
+ 🎨 Using default for asset element "trust_item_5": 
  🔍 extractLayoutContent DEBUG: element "customer_count" is undefined Object
- ⚪ Using empty for optional element "customer_count"
+ 🎨 Using default for asset element "customer_count": 500+ happy customers
  🔍 extractLayoutContent DEBUG: element "rating_value" is undefined Object
- ⚪ Using empty for optional element "rating_value"
+ 🎨 Using default for asset element "rating_value": 4.9/5
  🔍 extractLayoutContent DEBUG: element "rating_count" is undefined Object
- ⚪ Using empty for optional element "rating_count"
+ 🎨 Using default for asset element "rating_count": from 127 reviews
  🔍 extractLayoutContent DEBUG: element "show_social_proof" is undefined Object
- ⚪ Using empty for optional element "show_social_proof"
+ 🎨 Using default for asset element "show_social_proof": true
  🔍 extractLayoutContent DEBUG: element "show_customer_avatars" is undefined Object
- ⚪ Using empty for optional element "show_customer_avatars"
+ 🎨 Using default for asset element "show_customer_avatars": true
  🔍 extractLayoutContent DEBUG: element "avatar_count" is undefined Object
- ⚪ Using empty for optional element "avatar_count"
+ 🎨 Using default for asset element "avatar_count": 4
  🔍 extractLayoutContent DEBUG: element "customer_names" is undefined Object
- ⚪ Using empty for optional element "customer_names"
+ 🎨 Using default for asset element "customer_names": Sarah Chen|Alex Rivera|Jordan Kim|Maya Patel
  🔍 extractLayoutContent DEBUG: element "avatar_urls" is undefined Object
- ⚪ Using empty for optional element "avatar_urls"
- 🔍 extractLayoutContent DEBUG: element "feature_metrics" is undefined Object
- ⚪ Using empty for optional element "feature_metrics"
- 🔍 extractLayoutContent DEBUG: element "metric_labels" is undefined Object
- ✅ Using default for mandatory element "metric_labels": faster processing|annual savings|accuracy rate|revenue increase
- 🔍 extractLayoutContent DEBUG: element "metric_icon_1" is undefined Object
- ⚪ Using empty for optional element "metric_icon_1"
- 🔍 extractLayoutContent DEBUG: element "metric_icon_2" is undefined Object
- ⚪ Using empty for optional element "metric_icon_2"
- 🔍 extractLayoutContent DEBUG: element "metric_icon_3" is undefined Object
- ⚪ Using empty for optional element "metric_icon_3"
- 🔍 extractLayoutContent DEBUG: element "metric_icon_4" is undefined Object
- ⚪ Using empty for optional element "metric_icon_4"
+ 🎨 Using default for asset element "avatar_urls": {}
+ [2025-08-29T17:19:18.886Z] DEBUG: 🔄 Store selector called for split hero image: {
+  "sectionId": "hero",
+  "timestamp": 1756487958886
+}
+ [2025-08-29T17:19:18.886Z] DEBUG: 🎨 Final hero image URL: /hero-placeholder.jpg
+ 🔍 extractLayoutContent DEBUG: element "step_numbers" is undefined Object
+ 🎨 Using default for asset element "step_numbers": 01|02|03|04
+ 🔍 isElementMandatory check: Object
+ 🔍 extractLayoutContent DEBUG: element "step_titles" is undefined Object
+ 🎨 Using default for asset element "step_titles": Connect Your Tools|Set Up Triggers|Define Actions|Monitor & Optimize
+ 🔍 isElementMandatory check: Object
+ 🔍 extractLayoutContent DEBUG: element "step_descriptions" is undefined Object
+ 🎨 Using default for asset element "step_descriptions": Integrate with your existing tools and platforms through our extensive library of pre-built connectors or custom API integrations.|Choose from dozens of event triggers or create custom conditions that initiate your automated workflows exactly when needed.|Build powerful automation sequences with our visual workflow builder. No coding required - just drag, drop, and configure.|Track performance metrics in real-time and use AI-powered insights to continuously improve your automation efficiency.
+ 🔍 extractLayoutContent DEBUG: element "step_durations" is undefined Object
+ 🎨 Using default for asset element "step_durations": 5 mins|10 mins|15 mins|Ongoing
  🔍 extractLayoutContent DEBUG: element "supporting_text" is undefined Object
- ⚪ Using empty for optional element "supporting_text"
+ 🎨 Using default for asset element "supporting_text": 
  🔍 extractLayoutContent DEBUG: element "trust_items" is undefined Object
- ⚪ Using empty for optional element "trust_items"
- 🔍 extractLayoutContent DEBUG: element "roi_summary_title" is undefined Object
- ⚪ Using empty for optional element "roi_summary_title"
- 🔍 extractLayoutContent DEBUG: element "roi_metric_1" is undefined Object
- ⚪ Using empty for optional element "roi_metric_1"
- 🔍 extractLayoutContent DEBUG: element "roi_label_1" is undefined Object
- ⚪ Using empty for optional element "roi_label_1"
- 🔍 extractLayoutContent DEBUG: element "roi_metric_2" is undefined Object
- ⚪ Using empty for optional element "roi_metric_2"
- 🔍 extractLayoutContent DEBUG: element "roi_label_2" is undefined Object
- ⚪ Using empty for optional element "roi_label_2"
- 🔍 extractLayoutContent DEBUG: element "roi_metric_3" is undefined Object
- ⚪ Using empty for optional element "roi_metric_3"
- 🔍 extractLayoutContent DEBUG: element "roi_label_3" is undefined Object
- ⚪ Using empty for optional element "roi_label_3"
- 🔍 extractLayoutContent DEBUG: element "roi_description" is undefined Object
- ⚪ Using empty for optional element "roi_description"
- 🔍 extractLayoutContent DEBUG: element "show_roi_summary" is undefined Object
- ⚪ Using empty for optional element "show_roi_summary"
- 🔍 extractLayoutContent DEBUG: element "feature_metrics" is undefined Object
- ⚪ Using empty for optional element "feature_metrics"
- 🔍 extractLayoutContent DEBUG: element "metric_labels" is undefined Object
- ✅ Using default for mandatory element "metric_labels": faster processing|annual savings|accuracy rate|revenue increase
- 🔍 extractLayoutContent DEBUG: element "metric_icon_1" is undefined Object
- ⚪ Using empty for optional element "metric_icon_1"
- 🔍 extractLayoutContent DEBUG: element "metric_icon_2" is undefined Object
- ⚪ Using empty for optional element "metric_icon_2"
- 🔍 extractLayoutContent DEBUG: element "metric_icon_3" is undefined Object
- ⚪ Using empty for optional element "metric_icon_3"
- 🔍 extractLayoutContent DEBUG: element "metric_icon_4" is undefined Object
- ⚪ Using empty for optional element "metric_icon_4"
+ 🎨 Using default for asset element "trust_items": 
+ 🔍 extractLayoutContent DEBUG: element "step_benefit_1" is undefined Object
+ 🎨 Using default for asset element "step_benefit_1": Automated
+ 🔍 extractLayoutContent DEBUG: element "step_benefit_2" is undefined Object
+ 🎨 Using default for asset element "step_benefit_2": Time-saving
+ 🔍 extractLayoutContent DEBUG: element "step_benefit_icon_1" is undefined Object
+ 🎨 Using default for asset element "step_benefit_icon_1": ✅
+ 🔍 extractLayoutContent DEBUG: element "step_benefit_icon_2" is undefined Object
+ 🎨 Using default for asset element "step_benefit_icon_2": ⏱️
+ 🔍 extractLayoutContent DEBUG: element "process_summary_title" is undefined Object
+ 🎨 Using default for asset element "process_summary_title": Complete Setup in Under 30 Minutes
+ 🔍 extractLayoutContent DEBUG: element "process_summary_description" is undefined Object
+ 🎨 Using default for asset element "process_summary_description": Get your automated workflows up and running quickly with our intuitive process
+ 🔍 extractLayoutContent DEBUG: element "show_process_summary" is undefined Object
+ 🎨 Using default for asset element "show_process_summary": true
+ 🔍 extractLayoutContent DEBUG: element "step_numbers" is undefined Object
+ 🎨 Using default for asset element "step_numbers": 01|02|03|04
+ 🔍 isElementMandatory check: Object
+ 🔍 extractLayoutContent DEBUG: element "step_titles" is undefined Object
+ 🎨 Using default for asset element "step_titles": Connect Your Tools|Set Up Triggers|Define Actions|Monitor & Optimize
+ 🔍 isElementMandatory check: Object
+ 🔍 extractLayoutContent DEBUG: element "step_descriptions" is undefined Object
+ 🎨 Using default for asset element "step_descriptions": Integrate with your existing tools and platforms through our extensive library of pre-built connectors or custom API integrations.|Choose from dozens of event triggers or create custom conditions that initiate your automated workflows exactly when needed.|Build powerful automation sequences with our visual workflow builder. No coding required - just drag, drop, and configure.|Track performance metrics in real-time and use AI-powered insights to continuously improve your automation efficiency.
+ 🔍 extractLayoutContent DEBUG: element "step_durations" is undefined Object
+ 🎨 Using default for asset element "step_durations": 5 mins|10 mins|15 mins|Ongoing
  🔍 extractLayoutContent DEBUG: element "supporting_text" is undefined Object
- ⚪ Using empty for optional element "supporting_text"
+ 🎨 Using default for asset element "supporting_text": 
  🔍 extractLayoutContent DEBUG: element "trust_items" is undefined Object
- ⚪ Using empty for optional element "trust_items"
- 🔍 extractLayoutContent DEBUG: element "roi_summary_title" is undefined Object
- ⚪ Using empty for optional element "roi_summary_title"
- 🔍 extractLayoutContent DEBUG: element "roi_metric_1" is undefined Object
- ⚪ Using empty for optional element "roi_metric_1"
- 🔍 extractLayoutContent DEBUG: element "roi_label_1" is undefined Object
- ⚪ Using empty for optional element "roi_label_1"
- 🔍 extractLayoutContent DEBUG: element "roi_metric_2" is undefined Object
- ⚪ Using empty for optional element "roi_metric_2"
- 🔍 extractLayoutContent DEBUG: element "roi_label_2" is undefined Object
- ⚪ Using empty for optional element "roi_label_2"
- 🔍 extractLayoutContent DEBUG: element "roi_metric_3" is undefined Object
- ⚪ Using empty for optional element "roi_metric_3"
- 🔍 extractLayoutContent DEBUG: element "roi_label_3" is undefined Object
- ⚪ Using empty for optional element "roi_label_3"
- 🔍 extractLayoutContent DEBUG: element "roi_description" is undefined Object
- ⚪ Using empty for optional element "roi_description"
- 🔍 extractLayoutContent DEBUG: element "show_roi_summary" is undefined Object
- ⚪ Using empty for optional element "show_roi_summary"
- 🔍 extractLayoutContent DEBUG: element "highlight_titles" is undefined Object
- ✅ Using default for mandatory element "highlight_titles": Intelligent Auto-Prioritization|Dynamic Context Switching|Predictive Resource Allocation|Real-Time Quality Assurance
- 🔍 extractLayoutContent DEBUG: element "highlight_descriptions" is undefined Object
- ✅ Using default for mandatory element "highlight_descriptions": Our AI analyzes your workflow patterns and automatically prioritizes tasks based on deadlines, dependencies, and business impact, ensuring critical work never falls through the cracks.|The system seamlessly adapts to changing priorities and contexts, maintaining efficiency even when your focus needs to shift between different projects or urgent requests.|Advanced algorithms predict resource needs and automatically allocate team capacity, preventing bottlenecks before they occur and optimizing productivity across all initiatives.|Built-in quality checks run continuously in the background, catching potential issues early and maintaining high standards without slowing down your workflow.
- 🔍 extractLayoutContent DEBUG: element "mechanism_name" is undefined Object
- ⚪ Using empty for optional element "mechanism_name"
- 🔍 extractLayoutContent DEBUG: element "footer_text" is undefined Object
- ⚪ Using empty for optional element "footer_text"
- 🔍 extractLayoutContent DEBUG: element "highlight_icon_1" is undefined Object
- ⚪ Using empty for optional element "highlight_icon_1"
- 🔍 extractLayoutContent DEBUG: element "highlight_icon_2" is undefined Object
- ⚪ Using empty for optional element "highlight_icon_2"
- 🔍 extractLayoutContent DEBUG: element "highlight_icon_3" is undefined Object
- ⚪ Using empty for optional element "highlight_icon_3"
- 🔍 extractLayoutContent DEBUG: element "highlight_icon_4" is undefined Object
- ⚪ Using empty for optional element "highlight_icon_4"
- 🔍 extractLayoutContent DEBUG: element "highlight_titles" is undefined Object
- ✅ Using default for mandatory element "highlight_titles": Intelligent Auto-Prioritization|Dynamic Context Switching|Predictive Resource Allocation|Real-Time Quality Assurance
- 🔍 extractLayoutContent DEBUG: element "highlight_descriptions" is undefined Object
- ✅ Using default for mandatory element "highlight_descriptions": Our AI analyzes your workflow patterns and automatically prioritizes tasks based on deadlines, dependencies, and business impact, ensuring critical work never falls through the cracks.|The system seamlessly adapts to changing priorities and contexts, maintaining efficiency even when your focus needs to shift between different projects or urgent requests.|Advanced algorithms predict resource needs and automatically allocate team capacity, preventing bottlenecks before they occur and optimizing productivity across all initiatives.|Built-in quality checks run continuously in the background, catching potential issues early and maintaining high standards without slowing down your workflow.
- 🔍 extractLayoutContent DEBUG: element "mechanism_name" is undefined Object
- ⚪ Using empty for optional element "mechanism_name"
- 🔍 extractLayoutContent DEBUG: element "footer_text" is undefined Object
- ⚪ Using empty for optional element "footer_text"
- 🔍 extractLayoutContent DEBUG: element "highlight_icon_1" is undefined Object
- ⚪ Using empty for optional element "highlight_icon_1"
- 🔍 extractLayoutContent DEBUG: element "highlight_icon_2" is undefined Object
- ⚪ Using empty for optional element "highlight_icon_2"
- 🔍 extractLayoutContent DEBUG: element "highlight_icon_3" is undefined Object
- ⚪ Using empty for optional element "highlight_icon_3"
- 🔍 extractLayoutContent DEBUG: element "highlight_icon_4" is undefined Object
- ⚪ Using empty for optional element "highlight_icon_4"
- 🔍 extractLayoutContent DEBUG: element "timeframes" is undefined Object
- ⚪ Using empty for optional element "timeframes"
- 🔍 extractLayoutContent DEBUG: element "titles" is undefined Object
- ⚪ Using empty for optional element "titles"
+ 🎨 Using default for asset element "trust_items": 
+ 🔍 extractLayoutContent DEBUG: element "step_benefit_1" is undefined Object
+ 🎨 Using default for asset element "step_benefit_1": Automated
+ 🔍 extractLayoutContent DEBUG: element "step_benefit_2" is undefined Object
+ 🎨 Using default for asset element "step_benefit_2": Time-saving
+ 🔍 extractLayoutContent DEBUG: element "step_benefit_icon_1" is undefined Object
+ 🎨 Using default for asset element "step_benefit_icon_1": ✅
+ 🔍 extractLayoutContent DEBUG: element "step_benefit_icon_2" is undefined Object
+ 🎨 Using default for asset element "step_benefit_icon_2": ⏱️
+ 🔍 extractLayoutContent DEBUG: element "process_summary_title" is undefined Object
+ 🎨 Using default for asset element "process_summary_title": Complete Setup in Under 30 Minutes
+ 🔍 extractLayoutContent DEBUG: element "process_summary_description" is undefined Object
+ 🎨 Using default for asset element "process_summary_description": Get your automated workflows up and running quickly with our intuitive process
+ 🔍 extractLayoutContent DEBUG: element "show_process_summary" is undefined Object
+ 🎨 Using default for asset element "show_process_summary": true
+ 🔍 extractLayoutContent DEBUG: element "advantages" is undefined Object
+ 🎨 Using default for asset element "advantages": Proprietary AI Engine|Real-time Processing|Scalable Architecture|Advanced Security|Edge Computing|Quantum-Ready
+ 🔍 extractLayoutContent DEBUG: element "advantage_descriptions" is undefined Object
+ 🎨 Using default for asset element "advantage_descriptions": Advanced machine learning models custom-built for your industry|Process millions of data points in milliseconds|Seamlessly scale from startup to enterprise without rebuilding|Bank-level encryption and security protocols protect your data|Process data at the edge for ultra-low latency|Future-proof architecture ready for quantum computing evolution
+ 🔍 extractLayoutContent DEBUG: element "advantage_icon_1" is undefined Object
+ 🎨 Using default for asset element "advantage_icon_1": 🤖
+ 🔍 extractLayoutContent DEBUG: element "advantage_icon_2" is undefined Object
+ 🎨 Using default for asset element "advantage_icon_2": ⚡
+ 🔍 extractLayoutContent DEBUG: element "advantage_icon_3" is undefined Object
+ 🎨 Using default for asset element "advantage_icon_3": 💯
+ 🔍 extractLayoutContent DEBUG: element "advantage_icon_4" is undefined Object
+ 🎨 Using default for asset element "advantage_icon_4": 🔒
+ 🔍 extractLayoutContent DEBUG: element "advantage_icon_5" is undefined Object
+ 🎨 Using default for asset element "advantage_icon_5": 🚀
+ 🔍 extractLayoutContent DEBUG: element "advantage_icon_6" is undefined Object
+ 🎨 Using default for asset element "advantage_icon_6": 🔮
+ 🔍 extractLayoutContent DEBUG: element "advantages" is undefined Object
+ 🎨 Using default for asset element "advantages": Proprietary AI Engine|Real-time Processing|Scalable Architecture|Advanced Security|Edge Computing|Quantum-Ready
+ 🔍 extractLayoutContent DEBUG: element "advantage_descriptions" is undefined Object
+ 🎨 Using default for asset element "advantage_descriptions": Advanced machine learning models custom-built for your industry|Process millions of data points in milliseconds|Seamlessly scale from startup to enterprise without rebuilding|Bank-level encryption and security protocols protect your data|Process data at the edge for ultra-low latency|Future-proof architecture ready for quantum computing evolution
+ 🔍 extractLayoutContent DEBUG: element "advantage_icon_1" is undefined Object
+ 🎨 Using default for asset element "advantage_icon_1": 🤖
+ 🔍 extractLayoutContent DEBUG: element "advantage_icon_2" is undefined Object
+ 🎨 Using default for asset element "advantage_icon_2": ⚡
+ 🔍 extractLayoutContent DEBUG: element "advantage_icon_3" is undefined Object
+ 🎨 Using default for asset element "advantage_icon_3": 💯
+ 🔍 extractLayoutContent DEBUG: element "advantage_icon_4" is undefined Object
+ 🎨 Using default for asset element "advantage_icon_4": 🔒
+ 🔍 extractLayoutContent DEBUG: element "advantage_icon_5" is undefined Object
+ 🎨 Using default for asset element "advantage_icon_5": 🚀
+ 🔍 extractLayoutContent DEBUG: element "advantage_icon_6" is undefined Object
+ 🎨 Using default for asset element "advantage_icon_6": 🔮
+ 🎯 extractLayoutContent: Found existing "step_titles": Object
+ 🎯 extractLayoutContent: Found existing "step_descriptions": Object
+ 🔍 extractLayoutContent DEBUG: element "step_visuals" is undefined Object
+ 🎨 Using default for asset element "step_visuals": /step-discover.jpg|/step-design.jpg|/step-refine.jpg|/step-share.jpg
+ 🔍 extractLayoutContent DEBUG: element "supporting_text" is undefined Object
+ 🎨 Using default for asset element "supporting_text": 
+ 🔍 extractLayoutContent DEBUG: element "cta_text" is undefined Object
+ 🎨 Using default for asset element "cta_text": 
+ 🔍 extractLayoutContent DEBUG: element "trust_items" is undefined Object
+ 🎨 Using default for asset element "trust_items": 
+ 🔍 extractLayoutContent DEBUG: element "flow_summary_heading" is undefined Object
+ 🎨 Using default for asset element "flow_summary_heading": Unleash Your Creative Potential
+ 🔍 extractLayoutContent DEBUG: element "flow_feature_1_icon" is undefined Object
+ 🎨 Using default for asset element "flow_feature_1_icon": 💖
+ 🔍 extractLayoutContent DEBUG: element "flow_feature_1_text" is undefined Object
+ 🎨 Using default for asset element "flow_feature_1_text": Creative freedom
+ 🔍 extractLayoutContent DEBUG: element "flow_feature_2_icon" is undefined Object
+ 🎨 Using default for asset element "flow_feature_2_icon": ⚡
+ 🔍 extractLayoutContent DEBUG: element "flow_feature_2_text" is undefined Object
+ 🎨 Using default for asset element "flow_feature_2_text": Professional quality
+ 🔍 extractLayoutContent DEBUG: element "flow_feature_3_icon" is undefined Object
+ 🎨 Using default for asset element "flow_feature_3_icon": 👥
+ 🔍 extractLayoutContent DEBUG: element "flow_feature_3_text" is undefined Object
+ 🎨 Using default for asset element "flow_feature_3_text": Community driven
+ 🔍 extractLayoutContent DEBUG: element "flow_summary_description" is undefined Object
+ 🎨 Using default for asset element "flow_summary_description": Join thousands of creators who've transformed their ideas into stunning visual content
+ 🔍 extractLayoutContent DEBUG: element "show_flow_summary" is undefined Object
+ 🎨 Using default for asset element "show_flow_summary": true
+ 🎯 extractLayoutContent: Found existing "step_titles": Object
+ 🎯 extractLayoutContent: Found existing "step_descriptions": Object
+ 🔍 extractLayoutContent DEBUG: element "step_visuals" is undefined Object
+ 🎨 Using default for asset element "step_visuals": /step-discover.jpg|/step-design.jpg|/step-refine.jpg|/step-share.jpg
+ 🔍 extractLayoutContent DEBUG: element "supporting_text" is undefined Object
+ 🎨 Using default for asset element "supporting_text": 
+ 🔍 extractLayoutContent DEBUG: element "cta_text" is undefined Object
+ 🎨 Using default for asset element "cta_text": 
+ 🔍 extractLayoutContent DEBUG: element "trust_items" is undefined Object
+ 🎨 Using default for asset element "trust_items": 
+ 🔍 extractLayoutContent DEBUG: element "flow_summary_heading" is undefined Object
+ 🎨 Using default for asset element "flow_summary_heading": Unleash Your Creative Potential
+ 🔍 extractLayoutContent DEBUG: element "flow_feature_1_icon" is undefined Object
+ 🎨 Using default for asset element "flow_feature_1_icon": 💖
+ 🔍 extractLayoutContent DEBUG: element "flow_feature_1_text" is undefined Object
+ 🎨 Using default for asset element "flow_feature_1_text": Creative freedom
+ 🔍 extractLayoutContent DEBUG: element "flow_feature_2_icon" is undefined Object
+ 🎨 Using default for asset element "flow_feature_2_icon": ⚡
+ 🔍 extractLayoutContent DEBUG: element "flow_feature_2_text" is undefined Object
+ 🎨 Using default for asset element "flow_feature_2_text": Professional quality
+ 🔍 extractLayoutContent DEBUG: element "flow_feature_3_icon" is undefined Object
+ 🎨 Using default for asset element "flow_feature_3_icon": 👥
+ 🔍 extractLayoutContent DEBUG: element "flow_feature_3_text" is undefined Object
+ 🎨 Using default for asset element "flow_feature_3_text": Community driven
+ 🔍 extractLayoutContent DEBUG: element "flow_summary_description" is undefined Object
+ 🎨 Using default for asset element "flow_summary_description": Join thousands of creators who've transformed their ideas into stunning visual content
+ 🔍 extractLayoutContent DEBUG: element "show_flow_summary" is undefined Object
+ 🎨 Using default for asset element "show_flow_summary": true
+ 🔍 extractLayoutContent DEBUG: element "emojis" is undefined Object
+ 🎨 Using default for asset element "emojis": 🚀|💰|⚡|🎯|📈|⭐
+ 🔍 extractLayoutContent DEBUG: element "outcomes" is undefined Object
+ 🎨 Using default for asset element "outcomes": Faster Launch|Higher Revenue|Lightning Speed|Perfect Accuracy|Exponential Growth|5-Star Results
  🔍 extractLayoutContent DEBUG: element "descriptions" is undefined Object
- ⚪ Using empty for optional element "descriptions"
- 🔍 extractLayoutContent DEBUG: element "metrics" is undefined Object
- ⚪ Using empty for optional element "metrics"
+ 🎨 Using default for asset element "descriptions": Get your products to market 3x faster with streamlined workflows|Increase revenue by up to 200% with optimized processes|Process data in milliseconds instead of hours|Achieve 99.9% accuracy with AI-powered validation|Scale your business exponentially with automated systems|Delight customers and earn consistent 5-star reviews
  🔍 extractLayoutContent DEBUG: element "subheadline" is undefined Object
- ⚪ Using empty for optional element "subheadline"
- 🔍 extractLayoutContent DEBUG: element "timeline_period" is undefined Object
- ⚪ Using empty for optional element "timeline_period"
- 🔍 extractLayoutContent DEBUG: element "metric_icon" is undefined Object
- ⚪ Using empty for optional element "metric_icon"
- 🔍 extractLayoutContent DEBUG: element "timeline_icon" is undefined Object
- ⚪ Using empty for optional element "timeline_icon"
- 🔍 extractLayoutContent DEBUG: element "success_icon" is undefined Object
- ⚪ Using empty for optional element "success_icon"
- 🔍 extractLayoutContent DEBUG: element "timeframes" is undefined Object
- ⚪ Using empty for optional element "timeframes"
- 🔍 extractLayoutContent DEBUG: element "titles" is undefined Object
- ⚪ Using empty for optional element "titles"
+ 🎨 Using default for asset element "subheadline": Real outcomes that creators and founders love seeing in their business
+ 🔍 extractLayoutContent DEBUG: element "footer_text" is undefined Object
+ 🎨 Using default for asset element "footer_text": Join 10,000+ creators already seeing these results
+ 🔍 extractLayoutContent DEBUG: element "emojis" is undefined Object
+ 🎨 Using default for asset element "emojis": 🚀|💰|⚡|🎯|📈|⭐
+ 🔍 extractLayoutContent DEBUG: element "outcomes" is undefined Object
+ 🎨 Using default for asset element "outcomes": Faster Launch|Higher Revenue|Lightning Speed|Perfect Accuracy|Exponential Growth|5-Star Results
  🔍 extractLayoutContent DEBUG: element "descriptions" is undefined Object
- ⚪ Using empty for optional element "descriptions"
- 🔍 extractLayoutContent DEBUG: element "metrics" is undefined Object
- ⚪ Using empty for optional element "metrics"
+ 🎨 Using default for asset element "descriptions": Get your products to market 3x faster with streamlined workflows|Increase revenue by up to 200% with optimized processes|Process data in milliseconds instead of hours|Achieve 99.9% accuracy with AI-powered validation|Scale your business exponentially with automated systems|Delight customers and earn consistent 5-star reviews
  🔍 extractLayoutContent DEBUG: element "subheadline" is undefined Object
- ⚪ Using empty for optional element "subheadline"
- 🔍 extractLayoutContent DEBUG: element "timeline_period" is undefined Object
- ⚪ Using empty for optional element "timeline_period"
- 🔍 extractLayoutContent DEBUG: element "metric_icon" is undefined Object
- ⚪ Using empty for optional element "metric_icon"
- 🔍 extractLayoutContent DEBUG: element "timeline_icon" is undefined Object
- ⚪ Using empty for optional element "timeline_icon"
- 🔍 extractLayoutContent DEBUG: element "success_icon" is undefined Object
- ⚪ Using empty for optional element "success_icon"
- 🔍 extractLayoutContent DEBUG: element "before_situations" is undefined Object
- ⚪ Using empty for optional element "before_situations"
- 🔍 extractLayoutContent DEBUG: element "after_outcomes" is undefined Object
- ⚪ Using empty for optional element "after_outcomes"
- 🔍 extractLayoutContent DEBUG: element "customer_companies" is undefined Object
- ⚪ Using empty for optional element "customer_companies"
- 🔍 extractLayoutContent DEBUG: element "timeframes" is undefined Object
- ⚪ Using empty for optional element "timeframes"
- 🔍 extractLayoutContent DEBUG: element "metrics" is undefined Object
- ⚪ Using empty for optional element "metrics"
+ 🎨 Using default for asset element "subheadline": Real outcomes that creators and founders love seeing in their business
+ 🔍 extractLayoutContent DEBUG: element "footer_text" is undefined Object
+ 🎨 Using default for asset element "footer_text": Join 10,000+ creators already seeing these results
  🔍 extractLayoutContent DEBUG: element "subheadline" is undefined Object
- ⚪ Using empty for optional element "subheadline"
- 🔍 extractLayoutContent DEBUG: element "supporting_text" is undefined Object
- ⚪ Using empty for optional element "supporting_text"
- 🔍 extractLayoutContent DEBUG: element "cta_text" is undefined Object
- ⚪ Using empty for optional element "cta_text"
- 🔍 extractLayoutContent DEBUG: element "trust_items" is undefined Object
- ⚪ Using empty for optional element "trust_items"
- 🔍 extractLayoutContent DEBUG: element "results_title" is undefined Object
- ⚪ Using empty for optional element "results_title"
- 🔍 extractLayoutContent DEBUG: element "time_saved_stat" is undefined Object
- ⚪ Using empty for optional element "time_saved_stat"
- 🔍 extractLayoutContent DEBUG: element "time_saved_label" is undefined Object
- ⚪ Using empty for optional element "time_saved_label"
- 🔍 extractLayoutContent DEBUG: element "efficiency_stat" is undefined Object
- ⚪ Using empty for optional element "efficiency_stat"
- 🔍 extractLayoutContent DEBUG: element "efficiency_label" is undefined Object
- ⚪ Using empty for optional element "efficiency_label"
- 🔍 extractLayoutContent DEBUG: element "time_to_results_stat" is undefined Object
- ⚪ Using empty for optional element "time_to_results_stat"
- 🔍 extractLayoutContent DEBUG: element "time_to_results_label" is undefined Object
- ⚪ Using empty for optional element "time_to_results_label"
- 🔍 extractLayoutContent DEBUG: element "roi_stat" is undefined Object
- ⚪ Using empty for optional element "roi_stat"
- 🔍 extractLayoutContent DEBUG: element "roi_label" is undefined Object
- ⚪ Using empty for optional element "roi_label"
- 🔍 extractLayoutContent DEBUG: element "guarantee_text" is undefined Object
- ⚪ Using empty for optional element "guarantee_text"
- 🔍 extractLayoutContent DEBUG: element "implementation_text" is undefined Object
- ⚪ Using empty for optional element "implementation_text"
- 🔍 extractLayoutContent DEBUG: element "before_icon" is undefined Object
- ⚪ Using empty for optional element "before_icon"
- 🔍 extractLayoutContent DEBUG: element "after_icon" is undefined Object
- ⚪ Using empty for optional element "after_icon"
- 🔍 extractLayoutContent DEBUG: element "metrics_icon" is undefined Object
- ⚪ Using empty for optional element "metrics_icon"
- 🔍 extractLayoutContent DEBUG: element "guarantee_icon" is undefined Object
- ⚪ Using empty for optional element "guarantee_icon"
- 🔍 extractLayoutContent DEBUG: element "implementation_icon" is undefined Object
- ⚪ Using empty for optional element "implementation_icon"
- 🔍 extractLayoutContent DEBUG: element "before_situations" is undefined Object
- ⚪ Using empty for optional element "before_situations"
- 🔍 extractLayoutContent DEBUG: element "after_outcomes" is undefined Object
- ⚪ Using empty for optional element "after_outcomes"
- 🔍 extractLayoutContent DEBUG: element "customer_companies" is undefined Object
- ⚪ Using empty for optional element "customer_companies"
- 🔍 extractLayoutContent DEBUG: element "timeframes" is undefined Object
- ⚪ Using empty for optional element "timeframes"
- 🔍 extractLayoutContent DEBUG: element "metrics" is undefined Object
- ⚪ Using empty for optional element "metrics"
+ 🎨 Using default for asset element "subheadline": Trusted by professionals worldwide to streamline their workflow and boost productivity.
+ 🔍 extractLayoutContent DEBUG: element "user_metrics" is undefined Object
+ 🎨 Using default for asset element "user_metrics": 50,000+|2.5M+|99.9%|4.8/5
+ 🔍 extractLayoutContent DEBUG: element "metric_labels" is undefined Object
+ 🎨 Using default for asset element "metric_labels": Active Users|Tasks Completed|Uptime|User Rating
+ 🔍 extractLayoutContent DEBUG: element "growth_indicators" is undefined Object
+ 🎨 Using default for asset element "growth_indicators": +25%|+180%|+0.1%|+0.2
  🔍 extractLayoutContent DEBUG: element "subheadline" is undefined Object
- ⚪ Using empty for optional element "subheadline"
- 🔍 extractLayoutContent DEBUG: element "supporting_text" is undefined Object
- ⚪ Using empty for optional element "supporting_text"
- 🔍 extractLayoutContent DEBUG: element "cta_text" is undefined Object
- ⚪ Using empty for optional element "cta_text"
- 🔍 extractLayoutContent DEBUG: element "trust_items" is undefined Object
- ⚪ Using empty for optional element "trust_items"
- 🔍 extractLayoutContent DEBUG: element "results_title" is undefined Object
- ⚪ Using empty for optional element "results_title"
- 🔍 extractLayoutContent DEBUG: element "time_saved_stat" is undefined Object
- ⚪ Using empty for optional element "time_saved_stat"
- 🔍 extractLayoutContent DEBUG: element "time_saved_label" is undefined Object
- ⚪ Using empty for optional element "time_saved_label"
- 🔍 extractLayoutContent DEBUG: element "efficiency_stat" is undefined Object
- ⚪ Using empty for optional element "efficiency_stat"
- 🔍 extractLayoutContent DEBUG: element "efficiency_label" is undefined Object
- ⚪ Using empty for optional element "efficiency_label"
- 🔍 extractLayoutContent DEBUG: element "time_to_results_stat" is undefined Object
- ⚪ Using empty for optional element "time_to_results_stat"
- 🔍 extractLayoutContent DEBUG: element "time_to_results_label" is undefined Object
- ⚪ Using empty for optional element "time_to_results_label"
- 🔍 extractLayoutContent DEBUG: element "roi_stat" is undefined Object
- ⚪ Using empty for optional element "roi_stat"
- 🔍 extractLayoutContent DEBUG: element "roi_label" is undefined Object
- ⚪ Using empty for optional element "roi_label"
- 🔍 extractLayoutContent DEBUG: element "guarantee_text" is undefined Object
- ⚪ Using empty for optional element "guarantee_text"
- 🔍 extractLayoutContent DEBUG: element "implementation_text" is undefined Object
- ⚪ Using empty for optional element "implementation_text"
- 🔍 extractLayoutContent DEBUG: element "before_icon" is undefined Object
- ⚪ Using empty for optional element "before_icon"
- 🔍 extractLayoutContent DEBUG: element "after_icon" is undefined Object
- ⚪ Using empty for optional element "after_icon"
- 🔍 extractLayoutContent DEBUG: element "metrics_icon" is undefined Object
- ⚪ Using empty for optional element "metrics_icon"
- 🔍 extractLayoutContent DEBUG: element "guarantee_icon" is undefined Object
- ⚪ Using empty for optional element "guarantee_icon"
- 🔍 extractLayoutContent DEBUG: element "implementation_icon" is undefined Object
- ⚪ Using empty for optional element "implementation_icon"
- 🔍 extractLayoutContent DEBUG: element "subheadline" is undefined Object
- ⚪ Using empty for optional element "subheadline"
- 🔍 extractLayoutContent DEBUG: element "them_headline" is undefined Object
- ⚪ Using empty for optional element "them_headline"
- 🔍 extractLayoutContent DEBUG: element "them_points" is undefined Object
- ⚪ Using empty for optional element "them_points"
- 🔍 extractLayoutContent DEBUG: element "you_headline" is undefined Object
- ⚪ Using empty for optional element "you_headline"
- 🔍 extractLayoutContent DEBUG: element "you_points" is undefined Object
- ⚪ Using empty for optional element "you_points"
- 🔍 extractLayoutContent DEBUG: element "cta_text" is undefined Object
- ⚪ Using empty for optional element "cta_text"
- 🔍 extractLayoutContent DEBUG: element "subheadline" is undefined Object
- ⚪ Using empty for optional element "subheadline"
- 🔍 extractLayoutContent DEBUG: element "them_headline" is undefined Object
- ⚪ Using empty for optional element "them_headline"
- 🔍 extractLayoutContent DEBUG: element "them_points" is undefined Object
- ⚪ Using empty for optional element "them_points"
- 🔍 extractLayoutContent DEBUG: element "you_headline" is undefined Object
- ⚪ Using empty for optional element "you_headline"
- 🔍 extractLayoutContent DEBUG: element "you_points" is undefined Object
- ⚪ Using empty for optional element "you_points"
- 🔍 extractLayoutContent DEBUG: element "cta_text" is undefined Object
- ⚪ Using empty for optional element "cta_text"
- 🔍 extractLayoutContent DEBUG: element "subheadline" is undefined Object
- ⚪ Using empty for optional element "subheadline"
- 🔍 extractLayoutContent DEBUG: element "question_1" is undefined Object
- ⚪ Using empty for optional element "question_1"
- 🔍 extractLayoutContent DEBUG: element "answer_1" is undefined Object
- ⚪ Using empty for optional element "answer_1"
- 🔍 extractLayoutContent DEBUG: element "question_2" is undefined Object
- ⚪ Using empty for optional element "question_2"
- 🔍 extractLayoutContent DEBUG: element "answer_2" is undefined Object
- ⚪ Using empty for optional element "answer_2"
- 🔍 extractLayoutContent DEBUG: element "question_3" is undefined Object
- ⚪ Using empty for optional element "question_3"
- 🔍 extractLayoutContent DEBUG: element "answer_3" is undefined Object
- ⚪ Using empty for optional element "answer_3"
- 🔍 extractLayoutContent DEBUG: element "question_4" is undefined Object
-rrweb-plugin-console-record.js:2447 ⚪ Using empty for optional element "question_4"
-rrweb-plugin-console-record.js:2447 🔍 extractLayoutContent DEBUG: element "answer_4" is undefined Object
-rrweb-plugin-console-record.js:2447 ⚪ Using empty for optional element "answer_4"
-rrweb-plugin-console-record.js:2447 🔍 extractLayoutContent DEBUG: element "question_5" is undefined Object
-rrweb-plugin-console-record.js:2447 ⚪ Using empty for optional element "question_5"
-rrweb-plugin-console-record.js:2447 🔍 extractLayoutContent DEBUG: element "answer_5" is undefined Object
-rrweb-plugin-console-record.js:2447 ⚪ Using empty for optional element "answer_5"
-rrweb-plugin-console-record.js:2447 🔍 extractLayoutContent DEBUG: element "question_6" is undefined Object
-rrweb-plugin-console-record.js:2447 ⚪ Using empty for optional element "question_6"
-rrweb-plugin-console-record.js:2447 🔍 extractLayoutContent DEBUG: element "answer_6" is undefined Object
-rrweb-plugin-console-record.js:2447 ⚪ Using empty for optional element "answer_6"
-rrweb-plugin-console-record.js:2447 🔍 extractLayoutContent DEBUG: element "subheadline" is undefined Object
-rrweb-plugin-console-record.js:2447 ⚪ Using empty for optional element "subheadline"
-rrweb-plugin-console-record.js:2447 🔍 extractLayoutContent DEBUG: element "question_1" is undefined Object
-rrweb-plugin-console-record.js:2447 ⚪ Using empty for optional element "question_1"
-rrweb-plugin-console-record.js:2447 🔍 extractLayoutContent DEBUG: element "answer_1" is undefined Object
-rrweb-plugin-console-record.js:2447 ⚪ Using empty for optional element "answer_1"
-rrweb-plugin-console-record.js:2447 🔍 extractLayoutContent DEBUG: element "question_2" is undefined Object
-rrweb-plugin-console-record.js:2447 ⚪ Using empty for optional element "question_2"
-rrweb-plugin-console-record.js:2447 🔍 extractLayoutContent DEBUG: element "answer_2" is undefined Object
-rrweb-plugin-console-record.js:2447 ⚪ Using empty for optional element "answer_2"
-rrweb-plugin-console-record.js:2447 🔍 extractLayoutContent DEBUG: element "question_3" is undefined Object
-rrweb-plugin-console-record.js:2447 ⚪ Using empty for optional element "question_3"
-rrweb-plugin-console-record.js:2447 🔍 extractLayoutContent DEBUG: element "answer_3" is undefined Object
-rrweb-plugin-console-record.js:2447 ⚪ Using empty for optional element "answer_3"
-rrweb-plugin-console-record.js:2447 🔍 extractLayoutContent DEBUG: element "question_4" is undefined Object
-rrweb-plugin-console-record.js:2447 ⚪ Using empty for optional element "question_4"
-rrweb-plugin-console-record.js:2447 🔍 extractLayoutContent DEBUG: element "answer_4" is undefined Object
-rrweb-plugin-console-record.js:2447 ⚪ Using empty for optional element "answer_4"
-rrweb-plugin-console-record.js:2447 🔍 extractLayoutContent DEBUG: element "question_5" is undefined Object
-rrweb-plugin-console-record.js:2447 ⚪ Using empty for optional element "question_5"
-rrweb-plugin-console-record.js:2447 🔍 extractLayoutContent DEBUG: element "answer_5" is undefined Object
-rrweb-plugin-console-record.js:2447 ⚪ Using empty for optional element "answer_5"
-rrweb-plugin-console-record.js:2447 🔍 extractLayoutContent DEBUG: element "question_6" is undefined Object
-rrweb-plugin-console-record.js:2447 ⚪ Using empty for optional element "question_6"
-rrweb-plugin-console-record.js:2447 🔍 extractLayoutContent DEBUG: element "answer_6" is undefined Object
-rrweb-plugin-console-record.js:2447 ⚪ Using empty for optional element "answer_6"
-rrweb-plugin-console-record.js:2447 🔍 extractLayoutContent DEBUG: element "trust_items" is undefined Object
-rrweb-plugin-console-record.js:2447 ⚪ Using empty for optional element "trust_items"
-rrweb-plugin-console-record.js:2447 🔍 extractLayoutContent DEBUG: element "trust_item_1" is undefined Object
-rrweb-plugin-console-record.js:2447 ⚪ Using empty for optional element "trust_item_1"
-rrweb-plugin-console-record.js:2447 🔍 extractLayoutContent DEBUG: element "trust_item_2" is undefined Object
-rrweb-plugin-console-record.js:2447 ⚪ Using empty for optional element "trust_item_2"
-rrweb-plugin-console-record.js:2447 🔍 extractLayoutContent DEBUG: element "trust_item_3" is undefined Object
-rrweb-plugin-console-record.js:2447 ⚪ Using empty for optional element "trust_item_3"
-rrweb-plugin-console-record.js:2447 🔍 extractLayoutContent DEBUG: element "trust_item_4" is undefined Object
-rrweb-plugin-console-record.js:2447 ⚪ Using empty for optional element "trust_item_4"
-rrweb-plugin-console-record.js:2447 🔍 extractLayoutContent DEBUG: element "trust_item_5" is undefined Object
-rrweb-plugin-console-record.js:2447 ⚪ Using empty for optional element "trust_item_5"
-rrweb-plugin-console-record.js:2447 🔍 extractLayoutContent DEBUG: element "customer_count" is undefined Object
-rrweb-plugin-console-record.js:2447 ⚪ Using empty for optional element "customer_count"
-rrweb-plugin-console-record.js:2447 🔍 extractLayoutContent DEBUG: element "customer_label" is undefined Object
-rrweb-plugin-console-record.js:2447 ⚪ Using empty for optional element "customer_label"
-rrweb-plugin-console-record.js:2447 🔍 extractLayoutContent DEBUG: element "rating_stat" is undefined Object
-rrweb-plugin-console-record.js:2447 ⚪ Using empty for optional element "rating_stat"
-rrweb-plugin-console-record.js:2447 🔍 extractLayoutContent DEBUG: element "uptime_stat" is undefined Object
-rrweb-plugin-console-record.js:2447 ⚪ Using empty for optional element "uptime_stat"
-rrweb-plugin-console-record.js:2447 🔍 extractLayoutContent DEBUG: element "uptime_label" is undefined Object
-rrweb-plugin-console-record.js:2447 ⚪ Using empty for optional element "uptime_label"
-rrweb-plugin-console-record.js:2447 🔍 extractLayoutContent DEBUG: element "trust_items" is undefined Object
-rrweb-plugin-console-record.js:2447 ⚪ Using empty for optional element "trust_items"
-rrweb-plugin-console-record.js:2447 🔍 extractLayoutContent DEBUG: element "trust_item_1" is undefined Object
-rrweb-plugin-console-record.js:2447 ⚪ Using empty for optional element "trust_item_1"
-rrweb-plugin-console-record.js:2447 🔍 extractLayoutContent DEBUG: element "trust_item_2" is undefined Object
-rrweb-plugin-console-record.js:2447 ⚪ Using empty for optional element "trust_item_2"
-rrweb-plugin-console-record.js:2447 🔍 extractLayoutContent DEBUG: element "trust_item_3" is undefined Object
-rrweb-plugin-console-record.js:2447 ⚪ Using empty for optional element "trust_item_3"
-rrweb-plugin-console-record.js:2447 🔍 extractLayoutContent DEBUG: element "trust_item_4" is undefined Object
-rrweb-plugin-console-record.js:2447 ⚪ Using empty for optional element "trust_item_4"
-rrweb-plugin-console-record.js:2447 🔍 extractLayoutContent DEBUG: element "trust_item_5" is undefined Object
-rrweb-plugin-console-record.js:2447 ⚪ Using empty for optional element "trust_item_5"
-rrweb-plugin-console-record.js:2447 🔍 extractLayoutContent DEBUG: element "customer_count" is undefined Object
-rrweb-plugin-console-record.js:2447 ⚪ Using empty for optional element "customer_count"
-rrweb-plugin-console-record.js:2447 🔍 extractLayoutContent DEBUG: element "customer_label" is undefined Object
-rrweb-plugin-console-record.js:2447 ⚪ Using empty for optional element "customer_label"
-rrweb-plugin-console-record.js:2447 🔍 extractLayoutContent DEBUG: element "rating_stat" is undefined Object
-rrweb-plugin-console-record.js:2447 ⚪ Using empty for optional element "rating_stat"
-rrweb-plugin-console-record.js:2447 🔍 extractLayoutContent DEBUG: element "uptime_stat" is undefined Object
-rrweb-plugin-console-record.js:2447 ⚪ Using empty for optional element "uptime_stat"
-rrweb-plugin-console-record.js:2447 🔍 extractLayoutContent DEBUG: element "uptime_label" is undefined Object
-rrweb-plugin-console-record.js:2447 ⚪ Using empty for optional element "uptime_label"
-rrweb-plugin-console-record.js:2447 🔍 extractLayoutContent DEBUG: element "company_name" is undefined Object
-rrweb-plugin-console-record.js:2447 ⚪ Using empty for optional element "company_name"
-rrweb-plugin-console-record.js:2447 🔍 extractLayoutContent DEBUG: element "tagline" is undefined Object
-rrweb-plugin-console-record.js:2447 ⚪ Using empty for optional element "tagline"
-rrweb-plugin-console-record.js:2447 🔍 extractLayoutContent DEBUG: element "copyright" is undefined Object
-rrweb-plugin-console-record.js:2447 ✅ Using default for mandatory element "copyright": © 2025 Your Company. All rights reserved.
-rrweb-plugin-console-record.js:2447 🔍 extractLayoutContent DEBUG: element "company_name" is undefined Object
-rrweb-plugin-console-record.js:2447 ⚪ Using empty for optional element "company_name"
-rrweb-plugin-console-record.js:2447 🔍 extractLayoutContent DEBUG: element "tagline" is undefined Object
-rrweb-plugin-console-record.js:2447 ⚪ Using empty for optional element "tagline"
-rrweb-plugin-console-record.js:2447 🔍 extractLayoutContent DEBUG: element "copyright" is undefined Object
-rrweb-plugin-console-record.js:2447 ✅ Using default for mandatory element "copyright": © 2025 Your Company. All rights reserved.
-rrweb-plugin-console-record.js:2447 [2025-08-29T08:09:41.561Z] DEBUG: 🚩 Feature Flags Status: {
-  "tokenId": "L0lf8wH3hiiQ",
+ 🎨 Using default for asset element "subheadline": Trusted by professionals worldwide to streamline their workflow and boost productivity.
+ 🔍 extractLayoutContent DEBUG: element "user_metrics" is undefined Object
+ 🎨 Using default for asset element "user_metrics": 50,000+|2.5M+|99.9%|4.8/5
+ 🔍 extractLayoutContent DEBUG: element "metric_labels" is undefined Object
+ 🎨 Using default for asset element "metric_labels": Active Users|Tasks Completed|Uptime|User Rating
+ 🔍 extractLayoutContent DEBUG: element "growth_indicators" is undefined Object
+ 🎨 Using default for asset element "growth_indicators": +25%|+180%|+0.1%|+0.2
+ 🔍 extractLayoutContent DEBUG: element "founder_bio" is undefined Object
+ ❌ Using empty for excluded optional element "founder_bio"
+ 🔍 extractLayoutContent DEBUG: element "founder_bio" is undefined Object
+ ❌ Using empty for excluded optional element "founder_bio"
+ 🔍 extractLayoutContent DEBUG: element "trust_item_1" is undefined Object
+ 🎨 Using default for asset element "trust_item_1": SOC 2 Compliant
+ 🔍 extractLayoutContent DEBUG: element "trust_item_2" is undefined Object
+ 🎨 Using default for asset element "trust_item_2": GDPR Ready
+ 🔍 extractLayoutContent DEBUG: element "trust_item_3" is undefined Object
+ 🎨 Using default for asset element "trust_item_3": 99.9% Uptime
+ 🔍 extractLayoutContent DEBUG: element "trust_item_4" is undefined Object
+ 🎨 Using default for asset element "trust_item_4": 24/7 Support
+ 🔍 extractLayoutContent DEBUG: element "trust_item_5" is undefined Object
+ 🎨 Using default for asset element "trust_item_5": 
+ 🔍 extractLayoutContent DEBUG: element "customer_count" is undefined Object
+ 🎨 Using default for asset element "customer_count": 10,000+ businesses worldwide
+ 🔍 extractLayoutContent DEBUG: element "rating_value" is undefined Object
+ 🎨 Using default for asset element "rating_value": 4.9/5
+ 🔍 extractLayoutContent DEBUG: element "rating_count" is undefined Object
+ 🎨 Using default for asset element "rating_count": from 2,847 reviews
+ 🔍 extractLayoutContent DEBUG: element "show_social_proof" is undefined Object
+ 🎨 Using default for asset element "show_social_proof": true
+ 🔍 extractLayoutContent DEBUG: element "show_customer_avatars" is undefined Object
+ 🎨 Using default for asset element "show_customer_avatars": true
+ 🔍 extractLayoutContent DEBUG: element "avatar_count" is undefined Object
+ 🎨 Using default for asset element "avatar_count": 4
+ 🔍 extractLayoutContent DEBUG: element "customer_names" is undefined Object
+ 🎨 Using default for asset element "customer_names": Sarah Chen|Alex Rivera|Jordan Kim|Maya Patel
+ 🔍 extractLayoutContent DEBUG: element "avatar_urls" is undefined Object
+ 🎨 Using default for asset element "avatar_urls": {}
+ 🔍 extractLayoutContent DEBUG: element "trust_item_1" is undefined Object
+ 🎨 Using default for asset element "trust_item_1": SOC 2 Compliant
+ 🔍 extractLayoutContent DEBUG: element "trust_item_2" is undefined Object
+ 🎨 Using default for asset element "trust_item_2": GDPR Ready
+ 🔍 extractLayoutContent DEBUG: element "trust_item_3" is undefined Object
+ 🎨 Using default for asset element "trust_item_3": 99.9% Uptime
+ 🔍 extractLayoutContent DEBUG: element "trust_item_4" is undefined Object
+ 🎨 Using default for asset element "trust_item_4": 24/7 Support
+ 🔍 extractLayoutContent DEBUG: element "trust_item_5" is undefined Object
+ 🎨 Using default for asset element "trust_item_5": 
+ 🔍 extractLayoutContent DEBUG: element "customer_count" is undefined Object
+ 🎨 Using default for asset element "customer_count": 10,000+ businesses worldwide
+ 🔍 extractLayoutContent DEBUG: element "rating_value" is undefined Object
+ 🎨 Using default for asset element "rating_value": 4.9/5
+ 🔍 extractLayoutContent DEBUG: element "rating_count" is undefined Object
+ 🎨 Using default for asset element "rating_count": from 2,847 reviews
+ 🔍 extractLayoutContent DEBUG: element "show_social_proof" is undefined Object
+ 🎨 Using default for asset element "show_social_proof": true
+ 🔍 extractLayoutContent DEBUG: element "show_customer_avatars" is undefined Object
+ 🎨 Using default for asset element "show_customer_avatars": true
+ 🔍 extractLayoutContent DEBUG: element "avatar_count" is undefined Object
+ 🎨 Using default for asset element "avatar_count": 4
+ 🔍 extractLayoutContent DEBUG: element "customer_names" is undefined Object
+ 🎨 Using default for asset element "customer_names": Sarah Chen|Alex Rivera|Jordan Kim|Maya Patel
+ 🔍 extractLayoutContent DEBUG: element "avatar_urls" is undefined Object
+ 🎨 Using default for asset element "avatar_urls": {}
+ 🔍 extractLayoutContent DEBUG: element "company_name" is undefined Object
+ ❌ Using empty for excluded optional element "company_name"
+ 🔍 extractLayoutContent DEBUG: element "tagline" is undefined Object
+ ❌ Using empty for excluded optional element "tagline"
+ 🔍 extractLayoutContent DEBUG: element "copyright" is undefined Object
+ ✅ Using default for mandatory element "copyright": © 2025 Your Company. All rights reserved.
+ 🔍 extractLayoutContent DEBUG: element "company_name" is undefined Object
+ ❌ Using empty for excluded optional element "company_name"
+ 🔍 extractLayoutContent DEBUG: element "tagline" is undefined Object
+ ❌ Using empty for excluded optional element "tagline"
+ 🔍 extractLayoutContent DEBUG: element "copyright" is undefined Object
+ ✅ Using default for mandatory element "copyright": © 2025 Your Company. All rights reserved.
+ [2025-08-29T17:19:18.918Z] DEBUG: 🚩 Feature Flags Status: {
+  "tokenId": "RP_HHItlGuhp",
   "enableVariableMode": true,
   "enableHybridMode": true,
   "enableLegacyFallbacks": true,
@@ -1076,66 +763,718 @@ rrweb-plugin-console-record.js:2447 [2025-08-29T08:09:41.561Z] DEBUG: 🚩 Featu
   "rolloutPercentage": 100,
   "staffAccess": true
 }
-rrweb-plugin-console-record.js:2447 [2025-08-29T08:09:41.562Z] DEBUG: 🔍 Starting CSS variable validation...
+ [2025-08-29T17:19:18.968Z] DEBUG: 🔍 LandingPageRenderer Debug: {
+  "sectionsFromStore": [
+    "header",
+    "hero",
+    "features",
+    "uniqueMechanism",
+    "howItWorks",
+    "results",
+    "socialProof",
+    "founderNote",
+    "cta",
+    "footer"
+  ],
+  "sectionsCount": 10,
+  "sectionLayoutsFromStore": {
+    "cta": "CTAWithBadgeRow",
+    "hero": "splitScreen",
+    "footer": "LinksAndSocialFooter",
+    "header": "CenteredLogoHeader",
+    "results": "EmojiOutcomeGrid",
+    "features": "Timeline",
+    "howItWorks": "ZigzagImageSteps",
+    "founderNote": "FounderCardWithQuote",
+    "socialProof": "UserCountBar",
+    "uniqueMechanism": "SingleBigIdea"
+  },
+  "layoutsCount": 10,
+  "sectionLayouts": {
+    "cta": "CTAWithBadgeRow",
+    "hero": "splitScreen",
+    "footer": "LinksAndSocialFooter",
+    "header": "CenteredLogoHeader",
+    "results": "EmojiOutcomeGrid",
+    "features": "Timeline",
+    "howItWorks": "ZigzagImageSteps",
+    "founderNote": "FounderCardWithQuote",
+    "socialProof": "UserCountBar",
+    "uniqueMechanism": "SingleBigIdea"
+  }
+}
+ [2025-08-29T17:19:18.969Z] DEBUG: 🔄 Processing sections with EDIT MODE ORDER preserved: {
+  "hasDynamicSystem": true,
+  "totalSections": 10,
+  "editModeOrder": [
+    "header",
+    "hero",
+    "features",
+    "uniqueMechanism",
+    "howItWorks",
+    "results",
+    "socialProof",
+    "founderNote",
+    "cta",
+    "footer"
+  ],
+  "preservedOrder": "Using edit mode positions instead of sectionList metadata order"
+}
+ [2025-08-29T17:19:18.969Z] DEBUG: 📊 Enhanced Pattern Metrics: {
+  "totalSections": 10,
+  "highlights": 3,
+  "neutrals": 6,
+  "dividers": 1,
+  "highlightRatio": "30%",
+  "maxConsecutive": 2,
+  "upgrades": 0,
+  "downgrades": 1,
+  "violations": 0
+}
+ [2025-08-29T17:19:18.969Z] DEBUG: 🎨 Final alternating background pattern: header: neutral → hero: primary-highlight → features: secondary-highlight → uniqueMechanism: neutral → howItWorks: neutral → results: neutral → socialProof: divider-zone → founderNote: neutral → cta: primary-highlight → footer: neutral
+ [2025-08-29T17:19:18.969Z] DEBUG: 🔄 Processing sections with EDIT MODE ORDER preserved: {
+  "hasDynamicSystem": true,
+  "totalSections": 10,
+  "editModeOrder": [
+    "header",
+    "hero",
+    "features",
+    "uniqueMechanism",
+    "howItWorks",
+    "results",
+    "socialProof",
+    "founderNote",
+    "cta",
+    "footer"
+  ],
+  "preservedOrder": "Using edit mode positions instead of sectionList metadata order"
+}
+ [2025-08-29T17:19:18.969Z] DEBUG: 📊 Enhanced Pattern Metrics: {
+  "totalSections": 10,
+  "highlights": 3,
+  "neutrals": 6,
+  "dividers": 1,
+  "highlightRatio": "30%",
+  "maxConsecutive": 2,
+  "upgrades": 0,
+  "downgrades": 1,
+  "violations": 0
+}
+ [2025-08-29T17:19:18.969Z] DEBUG: 🎨 Final alternating background pattern: header: neutral → hero: primary-highlight → features: secondary-highlight → uniqueMechanism: neutral → howItWorks: neutral → results: neutral → socialProof: divider-zone → founderNote: neutral → cta: primary-highlight → footer: neutral
+ [2025-08-29T17:19:18.970Z] DEBUG: 🎨 Section header CSS class: bg-white
+ [2025-08-29T17:19:18.970Z] DEBUG: 🎨 Section hero CSS class: bg-[#e6f0ff]
+ [2025-08-29T17:19:18.970Z] DEBUG: 🎯 Rendering hero section with data: {
+  "mode": "preview",
+  "isEditable": false,
+  "data": {
+    "id": "hero",
+    "layout": "splitScreen",
+    "elements": {
+      "cta_text": "Get Started Now",
+      "headline": "Transform Your AI/Technology Operations",
+      "subheadline": "Trusted by leading ai/technology companies worldwide",
+      "supporting_text": "Perfect for businesses looking to scale their ai/technology operations.",
+      "split_hero_image": "/hero-placeholder.jpg"
+    },
+    "aiMetadata": {
+      "aiGenerated": true,
+      "isCustomized": false,
+      "lastGenerated": 1756487955121,
+      "aiGeneratedElements": [
+        "headline",
+        "subheadline",
+        "cta_text",
+        "supporting_text",
+        "split_hero_image"
+      ]
+    },
+    "editMetadata": {
+      "isEditing": false,
+      "isMovable": true,
+      "isSelected": false,
+      "isDeletable": false,
+      "isDuplicable": true,
+      "lastModified": 1756487955120,
+      "lastModifiedBy": "user",
+      "validationStatus": {
+        "errors": [],
+        "isValid": true,
+        "warnings": [],
+        "lastValidated": 1756487955120,
+        "missingRequired": []
+      },
+      "completionPercentage": 100
+    },
+    "backgroundType": "primary"
+  },
+  "elements": {
+    "cta_text": "Get Started Now",
+    "headline": "Transform Your AI/Technology Operations",
+    "subheadline": "Trusted by leading ai/technology companies worldwide",
+    "supporting_text": "Perfect for businesses looking to scale their ai/technology operations.",
+    "split_hero_image": "/hero-placeholder.jpg"
+  }
+}
+ [2025-08-29T17:19:18.970Z] DEBUG: 🎨 Rendering secondary section features: {
+  "backgroundCSS": "bg-blue-50/70",
+  "themeSecondary": "bg-blue-50/70",
+  "isFromAccentOptions": false,
+  "accentColor": "orange",
+  "baseColor": "blue"
+}
+ [2025-08-29T17:19:18.970Z] DEBUG: 🎨 Section features CSS class: bg-blue-50/70
+ [2025-08-29T17:19:18.970Z] DEBUG: 🎨 Section uniqueMechanism CSS class: bg-white
+ [2025-08-29T17:19:18.970Z] DEBUG: 🎨 Section howItWorks CSS class: bg-white
+ [2025-08-29T17:19:18.970Z] DEBUG: 🎨 Section results CSS class: bg-white
+ [2025-08-29T17:19:18.970Z] DEBUG: 🎨 Section socialProof CSS class: bg-blue-100/50
+ [2025-08-29T17:19:18.970Z] DEBUG: 🎨 Section founderNote CSS class: bg-white
+ [2025-08-29T17:19:18.971Z] DEBUG: 🎨 Section cta CSS class: bg-[#e6f0ff]
+ [2025-08-29T17:19:18.971Z] DEBUG: 🎨 Section footer CSS class: bg-white
+ [2025-08-29T17:19:18.971Z] DEBUG: 🔍 LandingPageRenderer Debug: {
+  "sectionsFromStore": [
+    "header",
+    "hero",
+    "features",
+    "uniqueMechanism",
+    "howItWorks",
+    "results",
+    "socialProof",
+    "founderNote",
+    "cta",
+    "footer"
+  ],
+  "sectionsCount": 10,
+  "sectionLayoutsFromStore": {
+    "cta": "CTAWithBadgeRow",
+    "hero": "splitScreen",
+    "footer": "LinksAndSocialFooter",
+    "header": "CenteredLogoHeader",
+    "results": "EmojiOutcomeGrid",
+    "features": "Timeline",
+    "howItWorks": "ZigzagImageSteps",
+    "founderNote": "FounderCardWithQuote",
+    "socialProof": "UserCountBar",
+    "uniqueMechanism": "SingleBigIdea"
+  },
+  "layoutsCount": 10,
+  "sectionLayouts": {
+    "cta": "CTAWithBadgeRow",
+    "hero": "splitScreen",
+    "footer": "LinksAndSocialFooter",
+    "header": "CenteredLogoHeader",
+    "results": "EmojiOutcomeGrid",
+    "features": "Timeline",
+    "howItWorks": "ZigzagImageSteps",
+    "founderNote": "FounderCardWithQuote",
+    "socialProof": "UserCountBar",
+    "uniqueMechanism": "SingleBigIdea"
+  }
+}
+ [2025-08-29T17:19:18.971Z] DEBUG: 🎨 Section header CSS class: bg-white
+ [2025-08-29T17:19:18.971Z] DEBUG: 🎨 Section hero CSS class: bg-[#e6f0ff]
+ [2025-08-29T17:19:18.971Z] DEBUG: 🎯 Rendering hero section with data: {
+  "mode": "preview",
+  "isEditable": false,
+  "data": {
+    "id": "hero",
+    "layout": "splitScreen",
+    "elements": {
+      "cta_text": "Get Started Now",
+      "headline": "Transform Your AI/Technology Operations",
+      "subheadline": "Trusted by leading ai/technology companies worldwide",
+      "supporting_text": "Perfect for businesses looking to scale their ai/technology operations.",
+      "split_hero_image": "/hero-placeholder.jpg"
+    },
+    "aiMetadata": {
+      "aiGenerated": true,
+      "isCustomized": false,
+      "lastGenerated": 1756487955121,
+      "aiGeneratedElements": [
+        "headline",
+        "subheadline",
+        "cta_text",
+        "supporting_text",
+        "split_hero_image"
+      ]
+    },
+    "editMetadata": {
+      "isEditing": false,
+      "isMovable": true,
+      "isSelected": false,
+      "isDeletable": false,
+      "isDuplicable": true,
+      "lastModified": 1756487955120,
+      "lastModifiedBy": "user",
+      "validationStatus": {
+        "errors": [],
+        "isValid": true,
+        "warnings": [],
+        "lastValidated": 1756487955120,
+        "missingRequired": []
+      },
+      "completionPercentage": 100
+    },
+    "backgroundType": "primary"
+  },
+  "elements": {
+    "cta_text": "Get Started Now",
+    "headline": "Transform Your AI/Technology Operations",
+    "subheadline": "Trusted by leading ai/technology companies worldwide",
+    "supporting_text": "Perfect for businesses looking to scale their ai/technology operations.",
+    "split_hero_image": "/hero-placeholder.jpg"
+  }
+}
+ [2025-08-29T17:19:18.971Z] DEBUG: 🎨 Rendering secondary section features: {
+  "backgroundCSS": "bg-blue-50/70",
+  "themeSecondary": "bg-blue-50/70",
+  "isFromAccentOptions": false,
+  "accentColor": "orange",
+  "baseColor": "blue"
+}
+ [2025-08-29T17:19:18.971Z] DEBUG: 🎨 Section features CSS class: bg-blue-50/70
+ [2025-08-29T17:19:18.972Z] DEBUG: 🎨 Section uniqueMechanism CSS class: bg-white
+ [2025-08-29T17:19:18.972Z] DEBUG: 🎨 Section howItWorks CSS class: bg-white
+ [2025-08-29T17:19:18.972Z] DEBUG: 🎨 Section results CSS class: bg-white
+ [2025-08-29T17:19:18.972Z] DEBUG: 🎨 Section socialProof CSS class: bg-blue-100/50
+ [2025-08-29T17:19:18.972Z] DEBUG: 🎨 Section founderNote CSS class: bg-white
+ [2025-08-29T17:19:18.972Z] DEBUG: 🎨 Section cta CSS class: bg-[#e6f0ff]
+ [2025-08-29T17:19:18.972Z] DEBUG: 🎨 Section footer CSS class: bg-white
+ 🔍 extractLayoutContent DEBUG: element "nav_item_1" is undefined Object
+ ✅ Using default for mandatory element "nav_item_1": Home
+ 🔍 extractLayoutContent DEBUG: element "nav_item_2" is undefined Object
+ ✅ Using default for mandatory element "nav_item_2": Products
+ 🔍 extractLayoutContent DEBUG: element "nav_item_3" is undefined Object
+ ❌ Using empty for excluded optional element "nav_item_3"
+ 🔍 extractLayoutContent DEBUG: element "nav_item_4" is undefined Object
+ ❌ Using empty for excluded optional element "nav_item_4"
+ 🔍 extractLayoutContent DEBUG: element "nav_item_5" is undefined Object
+ ❌ Using empty for excluded optional element "nav_item_5"
+ 🔍 extractLayoutContent DEBUG: element "nav_item_6" is undefined Object
+ ❌ Using empty for excluded optional element "nav_item_6"
+ 🔍 extractLayoutContent DEBUG: element "nav_link_1" is undefined Object
+ ❌ Using empty for excluded optional element "nav_link_1"
+ 🔍 extractLayoutContent DEBUG: element "nav_link_2" is undefined Object
+ ❌ Using empty for excluded optional element "nav_link_2"
+ 🔍 extractLayoutContent DEBUG: element "nav_link_3" is undefined Object
+ ❌ Using empty for excluded optional element "nav_link_3"
+ 🔍 extractLayoutContent DEBUG: element "nav_link_4" is undefined Object
+ ❌ Using empty for excluded optional element "nav_link_4"
+ 🔍 extractLayoutContent DEBUG: element "nav_link_5" is undefined Object
+ ❌ Using empty for excluded optional element "nav_link_5"
+ 🔍 extractLayoutContent DEBUG: element "nav_link_6" is undefined Object
+ ❌ Using empty for excluded optional element "nav_link_6"
+ 🔍 extractLayoutContent DEBUG: element "nav_item_1" is undefined Object
+ ✅ Using default for mandatory element "nav_item_1": Home
+ 🔍 extractLayoutContent DEBUG: element "nav_item_2" is undefined Object
+ ✅ Using default for mandatory element "nav_item_2": Products
+ 🔍 extractLayoutContent DEBUG: element "nav_item_3" is undefined Object
+ ❌ Using empty for excluded optional element "nav_item_3"
+ 🔍 extractLayoutContent DEBUG: element "nav_item_4" is undefined Object
+ ❌ Using empty for excluded optional element "nav_item_4"
+ 🔍 extractLayoutContent DEBUG: element "nav_item_5" is undefined Object
+ ❌ Using empty for excluded optional element "nav_item_5"
+ 🔍 extractLayoutContent DEBUG: element "nav_item_6" is undefined Object
+ ❌ Using empty for excluded optional element "nav_item_6"
+ 🔍 extractLayoutContent DEBUG: element "nav_link_1" is undefined Object
+ ❌ Using empty for excluded optional element "nav_link_1"
+ 🔍 extractLayoutContent DEBUG: element "nav_link_2" is undefined Object
+ ❌ Using empty for excluded optional element "nav_link_2"
+ 🔍 extractLayoutContent DEBUG: element "nav_link_3" is undefined Object
+ ❌ Using empty for excluded optional element "nav_link_3"
+ 🔍 extractLayoutContent DEBUG: element "nav_link_4" is undefined Object
+ ❌ Using empty for excluded optional element "nav_link_4"
+ 🔍 extractLayoutContent DEBUG: element "nav_link_5" is undefined Object
+ ❌ Using empty for excluded optional element "nav_link_5"
+ 🔍 extractLayoutContent DEBUG: element "nav_link_6" is undefined Object
+ ❌ Using empty for excluded optional element "nav_link_6"
+ 🔍 extractLayoutContent DEBUG: element "badge_text" is undefined Object
+ 🎨 Using default for asset element "badge_text": 
+ 🔍 extractLayoutContent DEBUG: element "trust_items" is undefined Object
+ 🎨 Using default for asset element "trust_items": Free 14-day trial|No credit card required|Cancel anytime
+ 🔍 extractLayoutContent DEBUG: element "trust_item_1" is undefined Object
+ 🎨 Using default for asset element "trust_item_1": Free 14-day trial
+ 🔍 extractLayoutContent DEBUG: element "trust_item_2" is undefined Object
+ 🎨 Using default for asset element "trust_item_2": No credit card required
+ 🔍 extractLayoutContent DEBUG: element "trust_item_3" is undefined Object
+ 🎨 Using default for asset element "trust_item_3": Cancel anytime
+ 🔍 extractLayoutContent DEBUG: element "trust_item_4" is undefined Object
+ 🎨 Using default for asset element "trust_item_4": 
+ 🔍 extractLayoutContent DEBUG: element "trust_item_5" is undefined Object
+ 🎨 Using default for asset element "trust_item_5": 
+ 🔍 extractLayoutContent DEBUG: element "customer_count" is undefined Object
+ 🎨 Using default for asset element "customer_count": 500+ happy customers
+ 🔍 extractLayoutContent DEBUG: element "rating_value" is undefined Object
+ 🎨 Using default for asset element "rating_value": 4.9/5
+ 🔍 extractLayoutContent DEBUG: element "rating_count" is undefined Object
+ 🎨 Using default for asset element "rating_count": from 127 reviews
+ 🔍 extractLayoutContent DEBUG: element "show_social_proof" is undefined Object
+ 🎨 Using default for asset element "show_social_proof": true
+ 🔍 extractLayoutContent DEBUG: element "show_customer_avatars" is undefined Object
+ 🎨 Using default for asset element "show_customer_avatars": true
+ 🔍 extractLayoutContent DEBUG: element "avatar_count" is undefined Object
+ 🎨 Using default for asset element "avatar_count": 4
+ 🔍 extractLayoutContent DEBUG: element "customer_names" is undefined Object
+ 🎨 Using default for asset element "customer_names": Sarah Chen|Alex Rivera|Jordan Kim|Maya Patel
+ 🔍 extractLayoutContent DEBUG: element "avatar_urls" is undefined Object
+ 🎨 Using default for asset element "avatar_urls": {}
+ [2025-08-29T17:19:18.980Z] DEBUG: 🔄 Store selector called for split hero image: {
+  "sectionId": "hero",
+  "timestamp": 1756487958980
+}
+ [2025-08-29T17:19:18.980Z] DEBUG: 🎨 Final hero image URL: /hero-placeholder.jpg
+ 🔍 extractLayoutContent DEBUG: element "badge_text" is undefined Object
+ 🎨 Using default for asset element "badge_text": 
+ 🔍 extractLayoutContent DEBUG: element "trust_items" is undefined Object
+ 🎨 Using default for asset element "trust_items": Free 14-day trial|No credit card required|Cancel anytime
+ 🔍 extractLayoutContent DEBUG: element "trust_item_1" is undefined Object
+ 🎨 Using default for asset element "trust_item_1": Free 14-day trial
+ 🔍 extractLayoutContent DEBUG: element "trust_item_2" is undefined Object
+ 🎨 Using default for asset element "trust_item_2": No credit card required
+ 🔍 extractLayoutContent DEBUG: element "trust_item_3" is undefined Object
+ 🎨 Using default for asset element "trust_item_3": Cancel anytime
+ 🔍 extractLayoutContent DEBUG: element "trust_item_4" is undefined Object
+ 🎨 Using default for asset element "trust_item_4": 
+ 🔍 extractLayoutContent DEBUG: element "trust_item_5" is undefined Object
+ 🎨 Using default for asset element "trust_item_5": 
+ 🔍 extractLayoutContent DEBUG: element "customer_count" is undefined Object
+ 🎨 Using default for asset element "customer_count": 500+ happy customers
+ 🔍 extractLayoutContent DEBUG: element "rating_value" is undefined Object
+ 🎨 Using default for asset element "rating_value": 4.9/5
+ 🔍 extractLayoutContent DEBUG: element "rating_count" is undefined Object
+ 🎨 Using default for asset element "rating_count": from 127 reviews
+ 🔍 extractLayoutContent DEBUG: element "show_social_proof" is undefined Object
+ 🎨 Using default for asset element "show_social_proof": true
+ 🔍 extractLayoutContent DEBUG: element "show_customer_avatars" is undefined Object
+ 🎨 Using default for asset element "show_customer_avatars": true
+ 🔍 extractLayoutContent DEBUG: element "avatar_count" is undefined Object
+ 🎨 Using default for asset element "avatar_count": 4
+ 🔍 extractLayoutContent DEBUG: element "customer_names" is undefined Object
+ 🎨 Using default for asset element "customer_names": Sarah Chen|Alex Rivera|Jordan Kim|Maya Patel
+ 🔍 extractLayoutContent DEBUG: element "avatar_urls" is undefined Object
+ 🎨 Using default for asset element "avatar_urls": {}
+ [2025-08-29T17:19:18.982Z] DEBUG: 🔄 Store selector called for split hero image: {
+  "sectionId": "hero",
+  "timestamp": 1756487958982
+}
+ [2025-08-29T17:19:18.983Z] DEBUG: 🎨 Final hero image URL: /hero-placeholder.jpg
+ 🔍 extractLayoutContent DEBUG: element "step_numbers" is undefined Object
+ 🎨 Using default for asset element "step_numbers": 01|02|03|04
+ 🔍 isElementMandatory check: Object
+ 🔍 extractLayoutContent DEBUG: element "step_titles" is undefined Object
+ 🎨 Using default for asset element "step_titles": Connect Your Tools|Set Up Triggers|Define Actions|Monitor & Optimize
+ 🔍 isElementMandatory check: Object
+ 🔍 extractLayoutContent DEBUG: element "step_descriptions" is undefined Object
+ 🎨 Using default for asset element "step_descriptions": Integrate with your existing tools and platforms through our extensive library of pre-built connectors or custom API integrations.|Choose from dozens of event triggers or create custom conditions that initiate your automated workflows exactly when needed.|Build powerful automation sequences with our visual workflow builder. No coding required - just drag, drop, and configure.|Track performance metrics in real-time and use AI-powered insights to continuously improve your automation efficiency.
+ 🔍 extractLayoutContent DEBUG: element "step_durations" is undefined Object
+ 🎨 Using default for asset element "step_durations": 5 mins|10 mins|15 mins|Ongoing
+ 🔍 extractLayoutContent DEBUG: element "supporting_text" is undefined Object
+ 🎨 Using default for asset element "supporting_text": 
+ 🔍 extractLayoutContent DEBUG: element "trust_items" is undefined Object
+ 🎨 Using default for asset element "trust_items": 
+ 🔍 extractLayoutContent DEBUG: element "step_benefit_1" is undefined Object
+ 🎨 Using default for asset element "step_benefit_1": Automated
+ 🔍 extractLayoutContent DEBUG: element "step_benefit_2" is undefined Object
+ 🎨 Using default for asset element "step_benefit_2": Time-saving
+ 🔍 extractLayoutContent DEBUG: element "step_benefit_icon_1" is undefined Object
+ 🎨 Using default for asset element "step_benefit_icon_1": ✅
+ 🔍 extractLayoutContent DEBUG: element "step_benefit_icon_2" is undefined Object
+ 🎨 Using default for asset element "step_benefit_icon_2": ⏱️
+ 🔍 extractLayoutContent DEBUG: element "process_summary_title" is undefined Object
+ 🎨 Using default for asset element "process_summary_title": Complete Setup in Under 30 Minutes
+ 🔍 extractLayoutContent DEBUG: element "process_summary_description" is undefined Object
+ 🎨 Using default for asset element "process_summary_description": Get your automated workflows up and running quickly with our intuitive process
+ 🔍 extractLayoutContent DEBUG: element "show_process_summary" is undefined Object
+ 🎨 Using default for asset element "show_process_summary": true
+ 🔍 extractLayoutContent DEBUG: element "step_numbers" is undefined Object
+ 🎨 Using default for asset element "step_numbers": 01|02|03|04
+ 🔍 isElementMandatory check: Object
+ 🔍 extractLayoutContent DEBUG: element "step_titles" is undefined Object
+ 🎨 Using default for asset element "step_titles": Connect Your Tools|Set Up Triggers|Define Actions|Monitor & Optimize
+ 🔍 isElementMandatory check: Object
+ 🔍 extractLayoutContent DEBUG: element "step_descriptions" is undefined Object
+ 🎨 Using default for asset element "step_descriptions": Integrate with your existing tools and platforms through our extensive library of pre-built connectors or custom API integrations.|Choose from dozens of event triggers or create custom conditions that initiate your automated workflows exactly when needed.|Build powerful automation sequences with our visual workflow builder. No coding required - just drag, drop, and configure.|Track performance metrics in real-time and use AI-powered insights to continuously improve your automation efficiency.
+ 🔍 extractLayoutContent DEBUG: element "step_durations" is undefined Object
+ 🎨 Using default for asset element "step_durations": 5 mins|10 mins|15 mins|Ongoing
+ 🔍 extractLayoutContent DEBUG: element "supporting_text" is undefined Object
+ 🎨 Using default for asset element "supporting_text": 
+ 🔍 extractLayoutContent DEBUG: element "trust_items" is undefined Object
+ 🎨 Using default for asset element "trust_items": 
+ 🔍 extractLayoutContent DEBUG: element "step_benefit_1" is undefined Object
+ 🎨 Using default for asset element "step_benefit_1": Automated
+ 🔍 extractLayoutContent DEBUG: element "step_benefit_2" is undefined Object
+ 🎨 Using default for asset element "step_benefit_2": Time-saving
+ 🔍 extractLayoutContent DEBUG: element "step_benefit_icon_1" is undefined Object
+ 🎨 Using default for asset element "step_benefit_icon_1": ✅
+ 🔍 extractLayoutContent DEBUG: element "step_benefit_icon_2" is undefined Object
+ 🎨 Using default for asset element "step_benefit_icon_2": ⏱️
+ 🔍 extractLayoutContent DEBUG: element "process_summary_title" is undefined Object
+ 🎨 Using default for asset element "process_summary_title": Complete Setup in Under 30 Minutes
+ 🔍 extractLayoutContent DEBUG: element "process_summary_description" is undefined Object
+ 🎨 Using default for asset element "process_summary_description": Get your automated workflows up and running quickly with our intuitive process
+ 🔍 extractLayoutContent DEBUG: element "show_process_summary" is undefined Object
+ 🎨 Using default for asset element "show_process_summary": true
+ 🔍 extractLayoutContent DEBUG: element "advantages" is undefined Object
+ 🎨 Using default for asset element "advantages": Proprietary AI Engine|Real-time Processing|Scalable Architecture|Advanced Security|Edge Computing|Quantum-Ready
+ 🔍 extractLayoutContent DEBUG: element "advantage_descriptions" is undefined Object
+ 🎨 Using default for asset element "advantage_descriptions": Advanced machine learning models custom-built for your industry|Process millions of data points in milliseconds|Seamlessly scale from startup to enterprise without rebuilding|Bank-level encryption and security protocols protect your data|Process data at the edge for ultra-low latency|Future-proof architecture ready for quantum computing evolution
+ 🔍 extractLayoutContent DEBUG: element "advantage_icon_1" is undefined Object
+ 🎨 Using default for asset element "advantage_icon_1": 🤖
+ 🔍 extractLayoutContent DEBUG: element "advantage_icon_2" is undefined Object
+ 🎨 Using default for asset element "advantage_icon_2": ⚡
+ 🔍 extractLayoutContent DEBUG: element "advantage_icon_3" is undefined Object
+ 🎨 Using default for asset element "advantage_icon_3": 💯
+ 🔍 extractLayoutContent DEBUG: element "advantage_icon_4" is undefined Object
+ 🎨 Using default for asset element "advantage_icon_4": 🔒
+ 🔍 extractLayoutContent DEBUG: element "advantage_icon_5" is undefined Object
+ 🎨 Using default for asset element "advantage_icon_5": 🚀
+ 🔍 extractLayoutContent DEBUG: element "advantage_icon_6" is undefined Object
+ 🎨 Using default for asset element "advantage_icon_6": 🔮
+ 🔍 extractLayoutContent DEBUG: element "advantages" is undefined Object
+ 🎨 Using default for asset element "advantages": Proprietary AI Engine|Real-time Processing|Scalable Architecture|Advanced Security|Edge Computing|Quantum-Ready
+ 🔍 extractLayoutContent DEBUG: element "advantage_descriptions" is undefined Object
+ 🎨 Using default for asset element "advantage_descriptions": Advanced machine learning models custom-built for your industry|Process millions of data points in milliseconds|Seamlessly scale from startup to enterprise without rebuilding|Bank-level encryption and security protocols protect your data|Process data at the edge for ultra-low latency|Future-proof architecture ready for quantum computing evolution
+ 🔍 extractLayoutContent DEBUG: element "advantage_icon_1" is undefined Object
+ 🎨 Using default for asset element "advantage_icon_1": 🤖
+ 🔍 extractLayoutContent DEBUG: element "advantage_icon_2" is undefined Object
+ 🎨 Using default for asset element "advantage_icon_2": ⚡
+ 🔍 extractLayoutContent DEBUG: element "advantage_icon_3" is undefined Object
+ 🎨 Using default for asset element "advantage_icon_3": 💯
+ 🔍 extractLayoutContent DEBUG: element "advantage_icon_4" is undefined Object
+ 🎨 Using default for asset element "advantage_icon_4": 🔒
+ 🔍 extractLayoutContent DEBUG: element "advantage_icon_5" is undefined Object
+ 🎨 Using default for asset element "advantage_icon_5": 🚀
+ 🔍 extractLayoutContent DEBUG: element "advantage_icon_6" is undefined Object
+ 🎨 Using default for asset element "advantage_icon_6": 🔮
+ 🎯 extractLayoutContent: Found existing "step_titles": Object
+ 🎯 extractLayoutContent: Found existing "step_descriptions": Object
+ 🔍 extractLayoutContent DEBUG: element "step_visuals" is undefined Object
+ 🎨 Using default for asset element "step_visuals": /step-discover.jpg|/step-design.jpg|/step-refine.jpg|/step-share.jpg
+ 🔍 extractLayoutContent DEBUG: element "supporting_text" is undefined Object
+ 🎨 Using default for asset element "supporting_text": 
+ 🔍 extractLayoutContent DEBUG: element "cta_text" is undefined Object
+ 🎨 Using default for asset element "cta_text": 
+ 🔍 extractLayoutContent DEBUG: element "trust_items" is undefined Object
+ 🎨 Using default for asset element "trust_items": 
+ 🔍 extractLayoutContent DEBUG: element "flow_summary_heading" is undefined Object
+ 🎨 Using default for asset element "flow_summary_heading": Unleash Your Creative Potential
+ 🔍 extractLayoutContent DEBUG: element "flow_feature_1_icon" is undefined Object
+ 🎨 Using default for asset element "flow_feature_1_icon": 💖
+ 🔍 extractLayoutContent DEBUG: element "flow_feature_1_text" is undefined Object
+ 🎨 Using default for asset element "flow_feature_1_text": Creative freedom
+ 🔍 extractLayoutContent DEBUG: element "flow_feature_2_icon" is undefined Object
+ 🎨 Using default for asset element "flow_feature_2_icon": ⚡
+ 🔍 extractLayoutContent DEBUG: element "flow_feature_2_text" is undefined Object
+ 🎨 Using default for asset element "flow_feature_2_text": Professional quality
+ 🔍 extractLayoutContent DEBUG: element "flow_feature_3_icon" is undefined Object
+ 🎨 Using default for asset element "flow_feature_3_icon": 👥
+ 🔍 extractLayoutContent DEBUG: element "flow_feature_3_text" is undefined Object
+ 🎨 Using default for asset element "flow_feature_3_text": Community driven
+ 🔍 extractLayoutContent DEBUG: element "flow_summary_description" is undefined Object
+ 🎨 Using default for asset element "flow_summary_description": Join thousands of creators who've transformed their ideas into stunning visual content
+ 🔍 extractLayoutContent DEBUG: element "show_flow_summary" is undefined Object
+ 🎨 Using default for asset element "show_flow_summary": true
+ 🎯 extractLayoutContent: Found existing "step_titles": Object
+ 🎯 extractLayoutContent: Found existing "step_descriptions": Object
+ 🔍 extractLayoutContent DEBUG: element "step_visuals" is undefined Object
+ 🎨 Using default for asset element "step_visuals": /step-discover.jpg|/step-design.jpg|/step-refine.jpg|/step-share.jpg
+ 🔍 extractLayoutContent DEBUG: element "supporting_text" is undefined Object
+ 🎨 Using default for asset element "supporting_text": 
+ 🔍 extractLayoutContent DEBUG: element "cta_text" is undefined Object
+ 🎨 Using default for asset element "cta_text": 
+ 🔍 extractLayoutContent DEBUG: element "trust_items" is undefined Object
+ 🎨 Using default for asset element "trust_items": 
+ 🔍 extractLayoutContent DEBUG: element "flow_summary_heading" is undefined Object
+ 🎨 Using default for asset element "flow_summary_heading": Unleash Your Creative Potential
+ 🔍 extractLayoutContent DEBUG: element "flow_feature_1_icon" is undefined Object
+ 🎨 Using default for asset element "flow_feature_1_icon": 💖
+ 🔍 extractLayoutContent DEBUG: element "flow_feature_1_text" is undefined Object
+ 🎨 Using default for asset element "flow_feature_1_text": Creative freedom
+ 🔍 extractLayoutContent DEBUG: element "flow_feature_2_icon" is undefined Object
+ 🎨 Using default for asset element "flow_feature_2_icon": ⚡
+ 🔍 extractLayoutContent DEBUG: element "flow_feature_2_text" is undefined Object
+ 🎨 Using default for asset element "flow_feature_2_text": Professional quality
+ 🔍 extractLayoutContent DEBUG: element "flow_feature_3_icon" is undefined Object
+ 🎨 Using default for asset element "flow_feature_3_icon": 👥
+ 🔍 extractLayoutContent DEBUG: element "flow_feature_3_text" is undefined Object
+ 🎨 Using default for asset element "flow_feature_3_text": Community driven
+ 🔍 extractLayoutContent DEBUG: element "flow_summary_description" is undefined Object
+ 🎨 Using default for asset element "flow_summary_description": Join thousands of creators who've transformed their ideas into stunning visual content
+ 🔍 extractLayoutContent DEBUG: element "show_flow_summary" is undefined Object
+ 🎨 Using default for asset element "show_flow_summary": true
+ 🔍 extractLayoutContent DEBUG: element "emojis" is undefined Object
+ 🎨 Using default for asset element "emojis": 🚀|💰|⚡|🎯|📈|⭐
+ 🔍 extractLayoutContent DEBUG: element "outcomes" is undefined Object
+ 🎨 Using default for asset element "outcomes": Faster Launch|Higher Revenue|Lightning Speed|Perfect Accuracy|Exponential Growth|5-Star Results
+ 🔍 extractLayoutContent DEBUG: element "descriptions" is undefined Object
+ 🎨 Using default for asset element "descriptions": Get your products to market 3x faster with streamlined workflows|Increase revenue by up to 200% with optimized processes|Process data in milliseconds instead of hours|Achieve 99.9% accuracy with AI-powered validation|Scale your business exponentially with automated systems|Delight customers and earn consistent 5-star reviews
+ 🔍 extractLayoutContent DEBUG: element "subheadline" is undefined Object
+ 🎨 Using default for asset element "subheadline": Real outcomes that creators and founders love seeing in their business
+ 🔍 extractLayoutContent DEBUG: element "footer_text" is undefined Object
+ 🎨 Using default for asset element "footer_text": Join 10,000+ creators already seeing these results
+ 🔍 extractLayoutContent DEBUG: element "emojis" is undefined Object
+ 🎨 Using default for asset element "emojis": 🚀|💰|⚡|🎯|📈|⭐
+ 🔍 extractLayoutContent DEBUG: element "outcomes" is undefined Object
+ 🎨 Using default for asset element "outcomes": Faster Launch|Higher Revenue|Lightning Speed|Perfect Accuracy|Exponential Growth|5-Star Results
+ 🔍 extractLayoutContent DEBUG: element "descriptions" is undefined Object
+ 🎨 Using default for asset element "descriptions": Get your products to market 3x faster with streamlined workflows|Increase revenue by up to 200% with optimized processes|Process data in milliseconds instead of hours|Achieve 99.9% accuracy with AI-powered validation|Scale your business exponentially with automated systems|Delight customers and earn consistent 5-star reviews
+ 🔍 extractLayoutContent DEBUG: element "subheadline" is undefined Object
+ 🎨 Using default for asset element "subheadline": Real outcomes that creators and founders love seeing in their business
+ 🔍 extractLayoutContent DEBUG: element "footer_text" is undefined Object
+ 🎨 Using default for asset element "footer_text": Join 10,000+ creators already seeing these results
+ 🔍 extractLayoutContent DEBUG: element "subheadline" is undefined Object
+ 🎨 Using default for asset element "subheadline": Trusted by professionals worldwide to streamline their workflow and boost productivity.
+ 🔍 extractLayoutContent DEBUG: element "user_metrics" is undefined Object
+ 🎨 Using default for asset element "user_metrics": 50,000+|2.5M+|99.9%|4.8/5
+ 🔍 extractLayoutContent DEBUG: element "metric_labels" is undefined Object
+ 🎨 Using default for asset element "metric_labels": Active Users|Tasks Completed|Uptime|User Rating
+ 🔍 extractLayoutContent DEBUG: element "growth_indicators" is undefined Object
+ 🎨 Using default for asset element "growth_indicators": +25%|+180%|+0.1%|+0.2
+ 🔍 extractLayoutContent DEBUG: element "subheadline" is undefined Object
+ 🎨 Using default for asset element "subheadline": Trusted by professionals worldwide to streamline their workflow and boost productivity.
+ 🔍 extractLayoutContent DEBUG: element "user_metrics" is undefined Object
+ 🎨 Using default for asset element "user_metrics": 50,000+|2.5M+|99.9%|4.8/5
+ 🔍 extractLayoutContent DEBUG: element "metric_labels" is undefined Object
+ 🎨 Using default for asset element "metric_labels": Active Users|Tasks Completed|Uptime|User Rating
+ 🔍 extractLayoutContent DEBUG: element "growth_indicators" is undefined Object
+ 🎨 Using default for asset element "growth_indicators": +25%|+180%|+0.1%|+0.2
+ 🔍 extractLayoutContent DEBUG: element "founder_bio" is undefined Object
+ ❌ Using empty for excluded optional element "founder_bio"
+ 🔍 extractLayoutContent DEBUG: element "founder_bio" is undefined Object
+ ❌ Using empty for excluded optional element "founder_bio"
+ 🔍 extractLayoutContent DEBUG: element "trust_item_1" is undefined Object
+ 🎨 Using default for asset element "trust_item_1": SOC 2 Compliant
+ 🔍 extractLayoutContent DEBUG: element "trust_item_2" is undefined Object
+ 🎨 Using default for asset element "trust_item_2": GDPR Ready
+ 🔍 extractLayoutContent DEBUG: element "trust_item_3" is undefined Object
+ 🎨 Using default for asset element "trust_item_3": 99.9% Uptime
+ 🔍 extractLayoutContent DEBUG: element "trust_item_4" is undefined Object
+ 🎨 Using default for asset element "trust_item_4": 24/7 Support
+ 🔍 extractLayoutContent DEBUG: element "trust_item_5" is undefined Object
+ 🎨 Using default for asset element "trust_item_5": 
+ 🔍 extractLayoutContent DEBUG: element "customer_count" is undefined Object
+ 🎨 Using default for asset element "customer_count": 10,000+ businesses worldwide
+ 🔍 extractLayoutContent DEBUG: element "rating_value" is undefined Object
+ 🎨 Using default for asset element "rating_value": 4.9/5
+ 🔍 extractLayoutContent DEBUG: element "rating_count" is undefined Object
+ 🎨 Using default for asset element "rating_count": from 2,847 reviews
+ 🔍 extractLayoutContent DEBUG: element "show_social_proof" is undefined Object
+ 🎨 Using default for asset element "show_social_proof": true
+ 🔍 extractLayoutContent DEBUG: element "show_customer_avatars" is undefined Object
+ 🎨 Using default for asset element "show_customer_avatars": true
+ 🔍 extractLayoutContent DEBUG: element "avatar_count" is undefined Object
+ 🎨 Using default for asset element "avatar_count": 4
+ 🔍 extractLayoutContent DEBUG: element "customer_names" is undefined Object
+ 🎨 Using default for asset element "customer_names": Sarah Chen|Alex Rivera|Jordan Kim|Maya Patel
+ 🔍 extractLayoutContent DEBUG: element "avatar_urls" is undefined Object
+ 🎨 Using default for asset element "avatar_urls": {}
+ 🔍 extractLayoutContent DEBUG: element "trust_item_1" is undefined Object
+ 🎨 Using default for asset element "trust_item_1": SOC 2 Compliant
+ 🔍 extractLayoutContent DEBUG: element "trust_item_2" is undefined Object
+ 🎨 Using default for asset element "trust_item_2": GDPR Ready
+rrweb-plugin-console-record.js:2447 🔍 extractLayoutContent DEBUG: element "trust_item_3" is undefined Object
+rrweb-plugin-console-record.js:2447 🎨 Using default for asset element "trust_item_3": 99.9% Uptime
+rrweb-plugin-console-record.js:2447 🔍 extractLayoutContent DEBUG: element "trust_item_4" is undefined Object
+rrweb-plugin-console-record.js:2447 🎨 Using default for asset element "trust_item_4": 24/7 Support
+rrweb-plugin-console-record.js:2447 🔍 extractLayoutContent DEBUG: element "trust_item_5" is undefined Object
+rrweb-plugin-console-record.js:2447 🎨 Using default for asset element "trust_item_5": 
+rrweb-plugin-console-record.js:2447 🔍 extractLayoutContent DEBUG: element "customer_count" is undefined Object
+rrweb-plugin-console-record.js:2447 🎨 Using default for asset element "customer_count": 10,000+ businesses worldwide
+rrweb-plugin-console-record.js:2447 🔍 extractLayoutContent DEBUG: element "rating_value" is undefined Object
+rrweb-plugin-console-record.js:2447 🎨 Using default for asset element "rating_value": 4.9/5
+rrweb-plugin-console-record.js:2447 🔍 extractLayoutContent DEBUG: element "rating_count" is undefined Object
+rrweb-plugin-console-record.js:2447 🎨 Using default for asset element "rating_count": from 2,847 reviews
+rrweb-plugin-console-record.js:2447 🔍 extractLayoutContent DEBUG: element "show_social_proof" is undefined Object
+rrweb-plugin-console-record.js:2447 🎨 Using default for asset element "show_social_proof": true
+rrweb-plugin-console-record.js:2447 🔍 extractLayoutContent DEBUG: element "show_customer_avatars" is undefined Object
+rrweb-plugin-console-record.js:2447 🎨 Using default for asset element "show_customer_avatars": true
+rrweb-plugin-console-record.js:2447 🔍 extractLayoutContent DEBUG: element "avatar_count" is undefined Object
+rrweb-plugin-console-record.js:2447 🎨 Using default for asset element "avatar_count": 4
+rrweb-plugin-console-record.js:2447 🔍 extractLayoutContent DEBUG: element "customer_names" is undefined Object
+rrweb-plugin-console-record.js:2447 🎨 Using default for asset element "customer_names": Sarah Chen|Alex Rivera|Jordan Kim|Maya Patel
+rrweb-plugin-console-record.js:2447 🔍 extractLayoutContent DEBUG: element "avatar_urls" is undefined Object
+rrweb-plugin-console-record.js:2447 🎨 Using default for asset element "avatar_urls": {}
+rrweb-plugin-console-record.js:2447 🔍 extractLayoutContent DEBUG: element "company_name" is undefined Object
+rrweb-plugin-console-record.js:2447 ❌ Using empty for excluded optional element "company_name"
+rrweb-plugin-console-record.js:2447 🔍 extractLayoutContent DEBUG: element "tagline" is undefined Object
+rrweb-plugin-console-record.js:2447 ❌ Using empty for excluded optional element "tagline"
+rrweb-plugin-console-record.js:2447 🔍 extractLayoutContent DEBUG: element "copyright" is undefined Object
+rrweb-plugin-console-record.js:2447 ✅ Using default for mandatory element "copyright": © 2025 Your Company. All rights reserved.
+rrweb-plugin-console-record.js:2447 🔍 extractLayoutContent DEBUG: element "company_name" is undefined Object
+rrweb-plugin-console-record.js:2447 ❌ Using empty for excluded optional element "company_name"
+rrweb-plugin-console-record.js:2447 🔍 extractLayoutContent DEBUG: element "tagline" is undefined Object
+rrweb-plugin-console-record.js:2447 ❌ Using empty for excluded optional element "tagline"
+rrweb-plugin-console-record.js:2447 🔍 extractLayoutContent DEBUG: element "copyright" is undefined Object
+rrweb-plugin-console-record.js:2447 ✅ Using default for mandatory element "copyright": © 2025 Your Company. All rights reserved.
+rrweb-plugin-console-record.js:2447 [2025-08-29T17:19:19.013Z] DEBUG: 🚩 Feature Flags Status: {
+  "tokenId": "RP_HHItlGuhp",
+  "enableVariableMode": true,
+  "enableHybridMode": true,
+  "enableLegacyFallbacks": true,
+  "shouldUseVariableSystem": true,
+  "rolloutPercentage": 100,
+  "staffAccess": true
+}
+rrweb-plugin-console-record.js:2447 [2025-08-29T17:19:19.033Z] DEBUG: 🔍 Starting CSS variable validation...
+rrweb-plugin-console-record.js:2447 [2025-08-29T17:19:19.034Z] DEBUG: 🔍 Starting CSS variable validation...
+rrweb-plugin-console-record.js:2447 [2025-08-29T17:19:19.034Z] DEBUG: 🔍 Starting CSS variable validation...
+rrweb-plugin-console-record.js:2447 [2025-08-29T17:19:19.034Z] DEBUG: 🔍 Starting CSS variable validation...
 rrweb-plugin-console-record.js:2447 🎨 CSS Variable System Validation
-rrweb-plugin-console-record.js:2447 [2025-08-29T08:09:41.622Z] DEBUG: ✅ Phase: hybrid
-rrweb-plugin-console-record.js:2447 [2025-08-29T08:09:41.622Z] DEBUG: 🎯 Success: true
+rrweb-plugin-console-record.js:2447 [2025-08-29T17:19:19.141Z] DEBUG: ✅ Phase: hybrid
+rrweb-plugin-console-record.js:2447 [2025-08-29T17:19:19.141Z] DEBUG: 🎯 Success: true
 rrweb-plugin-console-record.js:2447 ⚠️ Warnings:
 rrweb-plugin-console-record.js:2447 ❌ Errors:
 rrweb-plugin-console-record.js:2447 💡 Recommendations:
 rrweb-plugin-console-record.js:2447 Check VariableThemeInjector integration
 rrweb-plugin-console-record.js:2447 Check VariableThemeInjector integration
-rrweb-plugin-console-record.js:2447 [2025-08-29T08:09:41.622Z] DEBUG: 📊 CSS Variables found: 0
-rrweb-plugin-console-record.js:2447 [2025-08-29T08:09:41.623Z] DEBUG: 🌐 Browser support: {
+rrweb-plugin-console-record.js:2447 [2025-08-29T17:19:19.141Z] DEBUG: 📊 CSS Variables found: 0
+rrweb-plugin-console-record.js:2447 [2025-08-29T17:19:19.141Z] DEBUG: 🌐 Browser support: {
   "supportsCSSVariables": true,
   "supportsBackdropFilter": true,
   "supportsGridLayout": true,
   "recommendsLegacyMode": false
 }
 rrweb-plugin-console-record.js:2447 🎨 CSS Variable System Validation
-rrweb-plugin-console-record.js:2447 [2025-08-29T08:09:41.623Z] DEBUG: ✅ Phase: hybrid
-rrweb-plugin-console-record.js:2447 [2025-08-29T08:09:41.623Z] DEBUG: 🎯 Success: true
+rrweb-plugin-console-record.js:2447 [2025-08-29T17:19:19.142Z] DEBUG: ✅ Phase: hybrid
+rrweb-plugin-console-record.js:2447 [2025-08-29T17:19:19.142Z] DEBUG: 🎯 Success: true
 rrweb-plugin-console-record.js:2447 ⚠️ Warnings:
 rrweb-plugin-console-record.js:2447 ❌ Errors:
 rrweb-plugin-console-record.js:2447 💡 Recommendations:
 rrweb-plugin-console-record.js:2447 Check VariableThemeInjector integration
 rrweb-plugin-console-record.js:2447 Check VariableThemeInjector integration
-rrweb-plugin-console-record.js:2447 [2025-08-29T08:09:41.623Z] DEBUG: 📊 CSS Variables found: 0
-rrweb-plugin-console-record.js:2447 [2025-08-29T08:09:41.623Z] DEBUG: 🌐 Browser support: {
+rrweb-plugin-console-record.js:2447 [2025-08-29T17:19:19.142Z] DEBUG: 📊 CSS Variables found: 0
+rrweb-plugin-console-record.js:2447 [2025-08-29T17:19:19.142Z] DEBUG: 🌐 Browser support: {
   "supportsCSSVariables": true,
   "supportsBackdropFilter": true,
   "supportsGridLayout": true,
   "recommendsLegacyMode": false
 }
 rrweb-plugin-console-record.js:2447 🎨 CSS Variable System Validation
-rrweb-plugin-console-record.js:2447 [2025-08-29T08:09:41.624Z] DEBUG: ✅ Phase: hybrid
-rrweb-plugin-console-record.js:2447 [2025-08-29T08:09:41.624Z] DEBUG: 🎯 Success: true
+rrweb-plugin-console-record.js:2447 [2025-08-29T17:19:19.142Z] DEBUG: ✅ Phase: hybrid
+rrweb-plugin-console-record.js:2447 [2025-08-29T17:19:19.142Z] DEBUG: 🎯 Success: true
 rrweb-plugin-console-record.js:2447 ⚠️ Warnings:
 rrweb-plugin-console-record.js:2447 ❌ Errors:
 rrweb-plugin-console-record.js:2447 💡 Recommendations:
 rrweb-plugin-console-record.js:2447 Check VariableThemeInjector integration
 rrweb-plugin-console-record.js:2447 Check VariableThemeInjector integration
-rrweb-plugin-console-record.js:2447 [2025-08-29T08:09:41.624Z] DEBUG: 📊 CSS Variables found: 0
-rrweb-plugin-console-record.js:2447 [2025-08-29T08:09:41.624Z] DEBUG: 🌐 Browser support: {
+rrweb-plugin-console-record.js:2447 [2025-08-29T17:19:19.143Z] DEBUG: 📊 CSS Variables found: 0
+rrweb-plugin-console-record.js:2447 [2025-08-29T17:19:19.143Z] DEBUG: 🌐 Browser support: {
   "supportsCSSVariables": true,
   "supportsBackdropFilter": true,
   "supportsGridLayout": true,
   "recommendsLegacyMode": false
 }
 rrweb-plugin-console-record.js:2447 🎨 CSS Variable System Validation
-rrweb-plugin-console-record.js:2447 [2025-08-29T08:09:41.670Z] DEBUG: ✅ Phase: hybrid
-rrweb-plugin-console-record.js:2447 [2025-08-29T08:09:41.670Z] DEBUG: 🎯 Success: true
+rrweb-plugin-console-record.js:2447 [2025-08-29T17:19:19.143Z] DEBUG: ✅ Phase: hybrid
+rrweb-plugin-console-record.js:2447 [2025-08-29T17:19:19.143Z] DEBUG: 🎯 Success: true
 rrweb-plugin-console-record.js:2447 ⚠️ Warnings:
 rrweb-plugin-console-record.js:2447 ❌ Errors:
 rrweb-plugin-console-record.js:2447 💡 Recommendations:
 rrweb-plugin-console-record.js:2447 Check VariableThemeInjector integration
 rrweb-plugin-console-record.js:2447 Check VariableThemeInjector integration
-rrweb-plugin-console-record.js:2447 [2025-08-29T08:09:41.671Z] DEBUG: 📊 CSS Variables found: 0
-rrweb-plugin-console-record.js:2447 [2025-08-29T08:09:41.671Z] DEBUG: 🌐 Browser support: {
+rrweb-plugin-console-record.js:2447 [2025-08-29T17:19:19.143Z] DEBUG: 📊 CSS Variables found: 0
+rrweb-plugin-console-record.js:2447 [2025-08-29T17:19:19.143Z] DEBUG: 🌐 Browser support: {
   "supportsCSSVariables": true,
   "supportsBackdropFilter": true,
   "supportsGridLayout": true,
   "recommendsLegacyMode": false
 }
-rrweb-plugin-console-record.js:2447 [Fast Refresh] rebuilding
-rrweb-plugin-console-record.js:2447 [Fast Refresh] done in 961ms

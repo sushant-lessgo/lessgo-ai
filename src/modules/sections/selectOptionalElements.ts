@@ -2223,11 +2223,41 @@ export function selectOptionalElements(
 }
 
 /**
+ * Gets optional elements that should be EXCLUDED from the UI
+ * Used by components to hide optional elements that don't meet criteria
+ * @param sectionType - The section type  
+ * @param layoutName - The layout name
+ * @param variables - Object containing all decision variables
+ * @returns Array of optional element names to exclude from UI
+ */
+export function getExcludedOptionalElements(
+  sectionType: string,
+  layoutName: string,
+  variables: Variables
+): string[] {
+  // Get all optional elements from schema
+  const layoutSchema = layoutElementSchema[layoutName];
+  if (!layoutSchema) {
+    return [];
+  }
+  
+  const allOptionalElements = layoutSchema
+    .filter(element => !element.mandatory)
+    .map(element => element.element);
+  
+  // Get the optional elements that SHOULD be included
+  const includedOptionalElements = selectOptionalElements(sectionType, layoutName, variables);
+  
+  // Return the ones that should be EXCLUDED
+  return allOptionalElements.filter(elem => !includedOptionalElements.includes(elem));
+}
+
+/**
  * Gets all elements (mandatory + selected optional) for a layout
  * @param sectionType - The section type
  * @param layoutName - The layout name
  * @param variables - Object containing all decision variables
- * @returns Object with mandatory and optional elements
+ * @returns Object with mandatory, optional, all, and excluded elements
  */
 export function getAllLayoutElements(
   sectionType: string,
@@ -2237,10 +2267,11 @@ export function getAllLayoutElements(
   mandatory: string[];
   optional: string[];
   all: string[];
+  excluded: string[];
 } {
   const layoutSchema = layoutElementSchema[layoutName];
   if (!layoutSchema) {
-    return { mandatory: [], optional: [], all: [] };
+    return { mandatory: [], optional: [], all: [], excluded: [] };
   }
 
   const mandatory = layoutSchema
@@ -2249,8 +2280,11 @@ export function getAllLayoutElements(
 
   const optional = selectOptionalElements(sectionType, layoutName, variables);
   const all = [...mandatory, ...optional];
+  
+  // Get excluded elements (optional elements NOT selected)
+  const excluded = getExcludedOptionalElements(sectionType, layoutName, variables);
 
-  return { mandatory, optional, all };
+  return { mandatory, optional, all, excluded };
 }
 
 /**

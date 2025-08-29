@@ -349,11 +349,22 @@ function isElementMandatory(layout: string, elementKey: string): boolean {
   return isMandatory;
 }
 
+// Helper to check if an element exists in the schema at all
+function isElementInSchema(layout: string, elementKey: string): boolean {
+  const schema = layoutElementSchema[layout];
+  if (!schema) {
+    return false;
+  }
+  
+  return schema.some(el => el.element === elementKey);
+}
+
 // Generic content extractor for any layout
 export const extractLayoutContent = <T extends Record<string, any>>(
   elements: Partial<StoreElementTypes>,
   contentSchema: { [K in keyof T]: { type: 'string' | 'array' | 'boolean' | 'number'; default: T[K] } },
-  layout?: string  // Optional layout name to check mandatory/optional elements
+  layout?: string,  // Optional layout name to check mandatory/optional elements
+  excludedElements?: string[]  // Optional list of elements to explicitly exclude
 ): T => {
   const result = {} as T;
   
@@ -366,34 +377,54 @@ export const extractLayoutContent = <T extends Record<string, any>>(
   for (const [key, config] of Object.entries(contentSchema)) {
     const elementValue = elements[key as keyof StoreElementTypes];
     
-    // CRITICAL FIX: For undefined elements, distinguish mandatory from optional
+    // CRITICAL FIX: For undefined elements, distinguish between three categories
     if (elementValue === undefined) {
       const isMandatory = layout ? isElementMandatory(layout, key) : false;
+      const isInSchema = layout ? isElementInSchema(layout, key) : false;
+      const isExcluded = excludedElements?.includes(key) || false;
       
       // DEBUG: Log what's happening with undefined elements
       console.log(`🔍 extractLayoutContent DEBUG: element "${key}" is undefined`, {
         layout,
         isMandatory,
+        isInSchema,
+        isExcluded,
         hasLayout: !!layout,
         defaultValue: config.default
       });
       
       if (isMandatory) {
-        // For mandatory elements, provide default values so they render properly
+        // Category 1: Mandatory elements - always use default values
         if (config.type === 'string') {
           result[key as keyof T] = config.default as T[keyof T];
         } else if (config.type === 'array') {
           result[key as keyof T] = config.default as T[keyof T];
         }
         console.log(`✅ Using default for mandatory element "${key}":`, config.default);
-      } else {
-        // For optional elements, provide empty values to hide them without TypeErrors
+      } else if (isInSchema && isExcluded) {
+        // Category 2: Optional elements IN SCHEMA that are excluded - use empty values to hide
         if (config.type === 'string') {
           result[key as keyof T] = '' as T[keyof T];
         } else if (config.type === 'array') {
           result[key as keyof T] = [] as T[keyof T];
         }
-        console.log(`⚪ Using empty for optional element "${key}"`);
+        console.log(`❌ Using empty for excluded optional element "${key}"`);
+      } else {
+        // Category 3: Elements NOT IN SCHEMA (assets) OR optional elements that are included - use default values
+        if (config.type === 'string') {
+          result[key as keyof T] = config.default as T[keyof T];
+        } else if (config.type === 'array') {
+          result[key as keyof T] = config.default as T[keyof T];
+        } else if (config.type === 'boolean') {
+          result[key as keyof T] = config.default as T[keyof T];
+        } else if (config.type === 'number') {
+          result[key as keyof T] = config.default as T[keyof T];
+        }
+        if (!isInSchema) {
+          console.log(`🎨 Using default for asset element "${key}":`, config.default);
+        } else {
+          console.log(`✨ Using default for included optional element "${key}":`, config.default);
+        }
       }
       continue;
     }
