@@ -312,7 +312,8 @@ function generateMockContent(context: BusinessContext, requestedSections: string
       headline: randomChoice(contentVariations.headlines),
       subheadline: randomChoice(contentVariations.subheadlines),
       cta_text: randomChoice(contentVariations.ctaTexts),
-      supporting_text: `Perfect for ${targetAudience.toLowerCase()} looking to scale their ${industry.toLowerCase()} operations.`
+      supporting_text: `Perfect for ${targetAudience.toLowerCase()} looking to scale their ${industry.toLowerCase()} operations.`,
+      split_hero_image: '/hero-placeholder.jpg'
     },
 
     problem: {
