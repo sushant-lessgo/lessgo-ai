@@ -3,6 +3,9 @@ export type StringElement = string;
 export type ArrayElement = string[];
 export type ContentElement = StringElement | ArrayElement;
 
+// Import layout element schema for mandatory/optional checking
+import { layoutElementSchema } from '@/modules/sections/layoutElementSchema';
+
 // Store element definitions based on layoutElementSchema
 export interface StoreElementTypes {
   // Single string elements (most common)
@@ -319,10 +322,38 @@ export interface LayoutComponentProps {
   sectionBackgroundCSS?: string; // ✅ NEW: CSS class calculated in renderer
 }
 
+/**
+ * Check if an element is mandatory based on layout schema
+ */
+function isElementMandatory(layout: string, elementKey: string): boolean {
+  const schema = layoutElementSchema[layout];
+  if (!schema) {
+    console.log(`⚠️ isElementMandatory: No schema found for layout "${layout}"`);
+    return false;
+  }
+  
+  const element = schema.find(el => el.element === elementKey);
+  const isMandatory = element?.mandatory ?? false;
+  
+  // DEBUG: Log mandatory checks for step elements
+  if (elementKey === 'step_titles' || elementKey === 'step_descriptions') {
+    console.log(`🔍 isElementMandatory check:`, {
+      layout,
+      elementKey,
+      found: !!element,
+      isMandatory,
+      schemaKeys: Object.keys(layoutElementSchema).filter(k => k.includes('Step')).slice(0, 5)
+    });
+  }
+  
+  return isMandatory;
+}
+
 // Generic content extractor for any layout
 export const extractLayoutContent = <T extends Record<string, any>>(
   elements: Partial<StoreElementTypes>,
-  contentSchema: { [K in keyof T]: { type: 'string' | 'array' | 'boolean' | 'number'; default: T[K] } }
+  contentSchema: { [K in keyof T]: { type: 'string' | 'array' | 'boolean' | 'number'; default: T[K] } },
+  layout?: string  // Optional layout name to check mandatory/optional elements
 ): T => {
   const result = {} as T;
   
@@ -334,6 +365,50 @@ export const extractLayoutContent = <T extends Record<string, any>>(
   
   for (const [key, config] of Object.entries(contentSchema)) {
     const elementValue = elements[key as keyof StoreElementTypes];
+    
+    // CRITICAL FIX: For undefined elements, distinguish mandatory from optional
+    if (elementValue === undefined) {
+      const isMandatory = layout ? isElementMandatory(layout, key) : false;
+      
+      // DEBUG: Log what's happening with undefined elements
+      console.log(`🔍 extractLayoutContent DEBUG: element "${key}" is undefined`, {
+        layout,
+        isMandatory,
+        hasLayout: !!layout,
+        defaultValue: config.default
+      });
+      
+      if (isMandatory) {
+        // For mandatory elements, provide default values so they render properly
+        if (config.type === 'string') {
+          result[key as keyof T] = config.default as T[keyof T];
+        } else if (config.type === 'array') {
+          result[key as keyof T] = config.default as T[keyof T];
+        }
+        console.log(`✅ Using default for mandatory element "${key}":`, config.default);
+      } else {
+        // For optional elements, provide empty values to hide them without TypeErrors
+        if (config.type === 'string') {
+          result[key as keyof T] = '' as T[keyof T];
+        } else if (config.type === 'array') {
+          result[key as keyof T] = [] as T[keyof T];
+        }
+        console.log(`⚪ Using empty for optional element "${key}"`);
+      }
+      continue;
+    }
+    
+    // Element exists in content, so include it (with default if empty)
+    // DEBUG: Log existing elements for step_titles specifically
+    if (key === 'step_titles' || key === 'step_descriptions') {
+      console.log(`🎯 extractLayoutContent: Found existing "${key}":`, {
+        elementValue,
+        layout,
+        valueType: typeof elementValue,
+        isStringEmpty: typeof elementValue === 'string' && elementValue === '',
+        defaultValue: config.default
+      });
+    }
     
     if (config.type === 'string') {
       result[key as keyof T] = getStringContent(elementValue, config.default) as T[keyof T];

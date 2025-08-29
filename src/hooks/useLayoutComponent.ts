@@ -60,7 +60,7 @@ export function useLayoutComponent<T = Record<string, any>>({
   //   contentSchema: Object.keys(contentSchema)
   // });
   
-  const blockContent = extractLayoutContent(elements, contentSchema) as T;
+  const blockContent = extractLayoutContent(elements, contentSchema, sectionContent?.layout) as T;
   
   // console.log(`📦 Extracted blockContent for ${sectionId}:`, {
   //   blockContent,
