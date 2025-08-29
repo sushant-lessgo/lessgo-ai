@@ -52,7 +52,7 @@ function extractRequestedSections(prompt: string): string[] {
   for (const pattern of pageStoreSectionsPatterns) {
     const match = prompt.match(pattern)
     if (match) {
-      logger.debug('🎯 Pattern matched:', pattern.toString(), 'Match:', match[0].substring(0, 100))
+      logger.debug('🎯 Pattern matched:', { pattern: pattern.toString(), match: match[0].substring(0, 100) })
       try {
         const sectionsArray = match[1]
           .split(',')

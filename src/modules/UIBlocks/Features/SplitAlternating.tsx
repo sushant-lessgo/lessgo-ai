@@ -163,7 +163,7 @@ const FeatureRow = React.memo(({
           <div className="flex items-start space-x-4">
             <div className="flex-shrink-0 w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-lg">
               <IconEditableText
-                mode={mode}
+                mode={mode as 'edit' | 'preview'}
                 value={getFeatureIcon(index)}
                 onEdit={(value) => {
                   const iconField = `feature_icon_${index + 1}` as keyof SplitAlternatingContent;

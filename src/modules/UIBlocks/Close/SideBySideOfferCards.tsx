@@ -250,7 +250,6 @@ export default function SideBySideOfferCards(props: LayoutComponentProps) {
                 value={blockContent.feature_check_icon || '✅'}
                 onEdit={(value) => handleContentUpdate('feature_check_icon', value)}
                 className="text-green-500 text-lg mt-0.5 flex-shrink-0"
-                fallback={<svg className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>}
               />
               <span className="text-gray-700">{feature}</span>
             </div>
@@ -406,7 +405,6 @@ export default function SideBySideOfferCards(props: LayoutComponentProps) {
                       value={blockContent.info_icon || 'ℹ️'}
                       onEdit={(value) => handleContentUpdate('info_icon', value)}
                       className="text-blue-600 text-lg"
-                      fallback={<svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>}
                     />
                     <span className="font-semibold text-blue-900">Good to Know</span>
                   </div>
@@ -450,7 +448,6 @@ export default function SideBySideOfferCards(props: LayoutComponentProps) {
                                 value={blockContent.feature_check_icon || '✅'}
                                 onEdit={(value) => handleContentUpdate('feature_check_icon', value)}
                                 className="text-green-500 text-xl mx-auto"
-                                fallback={<svg className="w-6 h-6 text-green-500 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>}
                               />
                             ) : (
                               <IconEditableText
@@ -458,7 +455,6 @@ export default function SideBySideOfferCards(props: LayoutComponentProps) {
                                 value={blockContent.feature_unavailable_icon || '❌'}
                                 onEdit={(value) => handleContentUpdate('feature_unavailable_icon', value)}
                                 className="text-gray-300 text-xl mx-auto"
-                                fallback={<svg className="w-6 h-6 text-gray-300 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>}
                               />
                             )}
                           </td>
@@ -480,7 +476,6 @@ export default function SideBySideOfferCards(props: LayoutComponentProps) {
                       value={blockContent.guarantee_shield_icon || '🛡️'}
                       onEdit={(value) => handleContentUpdate('guarantee_shield_icon', value)}
                       className="text-white text-3xl"
-                      fallback={<svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>}
                     />
                   </div>
                   <div className="text-center">
@@ -505,7 +500,6 @@ export default function SideBySideOfferCards(props: LayoutComponentProps) {
                       value={blockContent.proven_icon || '✅'}
                       onEdit={(value) => handleContentUpdate('proven_icon', value)}
                       className="text-blue-600 text-xl"
-                      fallback={<svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>}
                     />
                   </div>
                   <div className="font-semibold text-gray-900">Proven Results</div>
@@ -519,7 +513,6 @@ export default function SideBySideOfferCards(props: LayoutComponentProps) {
                       value={blockContent.setup_icon || '⚡'}
                       onEdit={(value) => handleContentUpdate('setup_icon', value)}
                       className="text-green-600 text-xl"
-                      fallback={<svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>}
                     />
                   </div>
                   <div className="font-semibold text-gray-900">Quick Setup</div>
@@ -533,7 +526,6 @@ export default function SideBySideOfferCards(props: LayoutComponentProps) {
                       value={blockContent.support_icon || '💬'}
                       onEdit={(value) => handleContentUpdate('support_icon', value)}
                       className="text-purple-600 text-xl"
-                      fallback={<svg className="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z" /></svg>}
                     />
                   </div>
                   <div className="font-semibold text-gray-900">Expert Support</div>
@@ -547,7 +539,6 @@ export default function SideBySideOfferCards(props: LayoutComponentProps) {
                       value={blockContent.security_icon || '🔒'}
                       onEdit={(value) => handleContentUpdate('security_icon', value)}
                       className="text-orange-600 text-xl"
-                      fallback={<svg className="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>}
                     />
                   </div>
                   <div className="font-semibold text-gray-900">Secure & Reliable</div>

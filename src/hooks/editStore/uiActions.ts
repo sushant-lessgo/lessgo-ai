@@ -1009,7 +1009,7 @@ export function createUIActions(set: any, get: any): UIActions {
     
     handleDragStart: (sectionId: string, event: DragEvent) => {
       // TODO: Implement drag start functionality
-      logger.debug('Drag start:', sectionId, event);
+      logger.debug('Drag start:', { sectionId, event });
     },
 
     handleDragOver: (event: DragEvent) => {
@@ -1021,7 +1021,7 @@ export function createUIActions(set: any, get: any): UIActions {
     handleDrop: (targetSectionId: string, position: 'before' | 'after', event: DragEvent) => {
       // TODO: Implement drop functionality
       event.preventDefault();
-      logger.debug('Drop:', targetSectionId, position, event);
+      logger.debug('Drop:', { targetSectionId, position, event });
     },
 
     /**

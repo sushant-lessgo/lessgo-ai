@@ -356,7 +356,7 @@ export default function ValueReinforcementBlock(props: LayoutComponentProps) {
         value={iconValue as string || ''}
         onEdit={(value) => handleContentUpdate(iconField as keyof ValueReinforcementBlockContent, value)}
         className="text-white text-2xl"
-        fallback={fallbackIcons[iconName as keyof typeof fallbackIcons] || fallbackIcons['trending-up']}
+        
       />
     );
   };
@@ -390,7 +390,6 @@ export default function ValueReinforcementBlock(props: LayoutComponentProps) {
             value={blockContent.before_cross_icon || '❌'}
             onEdit={(value) => handleContentUpdate('before_cross_icon', value)}
             className="text-red-500 text-sm"
-            fallback={<svg className="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>}
           />
         </div>
         <p className="text-gray-600 text-sm">{before}</p>
@@ -403,7 +402,6 @@ export default function ValueReinforcementBlock(props: LayoutComponentProps) {
           value={blockContent.arrow_icon || '➡️'}
           onEdit={(value) => handleContentUpdate('arrow_icon', value)}
           className="text-blue-500 text-xl"
-          fallback={<svg className="w-8 h-8 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" /></svg>}
         />
       </div>
       
@@ -415,7 +413,6 @@ export default function ValueReinforcementBlock(props: LayoutComponentProps) {
             value={blockContent.after_check_icon || '✅'}
             onEdit={(value) => handleContentUpdate('after_check_icon', value)}
             className="text-green-500 text-sm"
-            fallback={<svg className="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>}
           />
         </div>
         <p className="text-gray-700 text-sm font-medium">{after}</p>
@@ -710,7 +707,6 @@ export default function ValueReinforcementBlock(props: LayoutComponentProps) {
                       value={blockContent.urgency_clock_icon || '⏰'}
                       onEdit={(value) => handleContentUpdate('urgency_clock_icon', value)}
                       className="text-orange-600 text-lg"
-                      fallback={<svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>}
                     />
                     <span className="font-semibold">{blockContent.urgency_text}</span>
                   </div>
@@ -723,7 +719,6 @@ export default function ValueReinforcementBlock(props: LayoutComponentProps) {
                       value={blockContent.guarantee_shield_icon || '🛡️'}
                       onEdit={(value) => handleContentUpdate('guarantee_shield_icon', value)}
                       className="text-green-600 text-lg"
-                      fallback={<svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>}
                     />
                     <span className="font-semibold">{blockContent.risk_reversal}</span>
                   </div>

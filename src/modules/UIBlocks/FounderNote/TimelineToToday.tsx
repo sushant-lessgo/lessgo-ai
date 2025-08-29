@@ -218,7 +218,7 @@ export default function TimelineToToday(props: LayoutComponentProps) {
   const timelineItems = [];
   for (let i = 0; i < timelineData.length; i += 4) {
     if (i + 3 < timelineData.length) {
-      const itemIndex = timelineItems.length;
+      const itemIndex: number = timelineItems.length;
       const fallbackIcon = timelineData[i + 1]?.trim().split(' ')[0] || '📅';
       const icon = getTimelineIcon(itemIndex) || fallbackIcon;
       

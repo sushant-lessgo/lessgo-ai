@@ -30,7 +30,7 @@ export function useImageToolbar() {
         } else if (storeState?.showToolbar) {
           storeState.showToolbar('image', imageId, position);
         } else {
-          logger.warn('No toolbar function available for image:', imageId, 'Available functions:', Object.keys(storeState || {}));
+          logger.warn('No toolbar function available for image:', { imageId, availableFunctions: Object.keys(storeState || {}) });
         }
       }
     } catch (error) {

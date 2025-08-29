@@ -165,7 +165,7 @@ const useDevToolsHook = (config: DevToolsHookConfig = {}): DevToolsHookReturn =>
       }
     }
 
-    logger.debug('🔍 Manual action tracked:', actionName, payload);
+    logger.debug('🔍 Manual action tracked:', { actionName, payload });
   }, [finalConfig.trackActions]);
 
   const trackError = useCallback((error: Error, context: string = 'useDevTools') => {

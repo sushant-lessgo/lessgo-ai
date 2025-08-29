@@ -375,7 +375,7 @@ React.useEffect(() => {
       break;
       
     default:
-      logger.debug('Execute action:', actionId, 'with params:', additionalParams);
+      logger.debug('Execute action:', { actionId, additionalParams });
   }
   
   // Announce action execution

@@ -236,7 +236,7 @@ const FlipCard = React.memo(({
             <div className="space-y-3">
               <div className="flex items-center space-x-2">
                 <IconEditableText
-                  mode={mode}
+                  mode={mode as 'edit' | 'preview'}
                   value={blockContent.flip_feature_1_icon || '⚡'}
                   onEdit={(value) => handleContentUpdate('flip_feature_1_icon', value)}
                   backgroundType={backgroundType as any}
@@ -250,7 +250,7 @@ const FlipCard = React.memo(({
               </div>
               <div className="flex items-center space-x-2">
                 <IconEditableText
-                  mode={mode}
+                  mode={mode as 'edit' | 'preview'}
                   value={blockContent.flip_feature_2_icon || '✅'}
                   onEdit={(value) => handleContentUpdate('flip_feature_2_icon', value)}
                   backgroundType={backgroundType as any}
@@ -359,14 +359,14 @@ export default function CardFlipSteps(props: LayoutComponentProps) {
       sectionType="CardFlipSteps"
       backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
       sectionBackground={sectionBackground}
-      mode={mode}
+      mode={mode as 'edit' | 'preview'}
       className={props.className}
     >
       <div className="max-w-6xl mx-auto">
         
         <div className="text-center mb-16">
           <EditableAdaptiveHeadline
-            mode={mode}
+            mode={mode as 'edit' | 'preview'}
             value={blockContent.headline || ''}
             onEdit={(value) => handleContentUpdate('headline', value)}
             level="h2"
@@ -380,7 +380,7 @@ export default function CardFlipSteps(props: LayoutComponentProps) {
 
           {(blockContent.subheadline || mode === 'edit') && (
             <EditableAdaptiveText
-              mode={mode}
+              mode={mode as 'edit' | 'preview'}
               value={blockContent.subheadline || ''}
               onEdit={(value) => handleContentUpdate('subheadline', value)}
               backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
@@ -402,7 +402,7 @@ export default function CardFlipSteps(props: LayoutComponentProps) {
               
               <div className="space-y-4">
                 <EditableAdaptiveText
-                  mode={mode}
+                  mode={mode as 'edit' | 'preview'}
                   value={blockContent.step_titles || ''}
                   onEdit={(value) => handleContentUpdate('step_titles', value)}
                   backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
@@ -416,7 +416,7 @@ export default function CardFlipSteps(props: LayoutComponentProps) {
                 />
                 
                 <EditableAdaptiveText
-                  mode={mode}
+                  mode={mode as 'edit' | 'preview'}
                   value={blockContent.step_descriptions || ''}
                   onEdit={(value) => handleContentUpdate('step_descriptions', value)}
                   backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
@@ -430,7 +430,7 @@ export default function CardFlipSteps(props: LayoutComponentProps) {
                 />
                 
                 <EditableAdaptiveText
-                  mode={mode}
+                  mode={mode as 'edit' | 'preview'}
                   value={blockContent.step_actions || ''}
                   onEdit={(value) => handleContentUpdate('step_actions', value)}
                   backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
@@ -459,7 +459,7 @@ export default function CardFlipSteps(props: LayoutComponentProps) {
                 onFlip={() => toggleFlip(index)}
                 showImageToolbar={showImageToolbar}
                 sectionId={sectionId}
-                mode={mode}
+                mode={mode as 'edit' | 'preview'}
                 blockContent={blockContent}
                 handleContentUpdate={handleContentUpdate}
                 backgroundType={backgroundType}
@@ -477,8 +477,8 @@ export default function CardFlipSteps(props: LayoutComponentProps) {
                 {(blockContent.guide_indicator_1_text && blockContent.guide_indicator_1_text !== '___REMOVED___') && (
                   <div className="relative group/guide-indicator-1 flex items-center space-x-2">
                     <IconEditableText
-                      mode={mode}
-                      value={getGuideIndicatorIcon(0)}
+                      mode={mode as 'edit' | 'preview'}
+                      value={getGuideIndicatorIcon(0) as string || '📋'}
                       onEdit={(value) => handleGuideIndicatorIconEdit(0, value)}
                       backgroundType={backgroundType as any}
                       colorTokens={colorTokens}
@@ -488,7 +488,7 @@ export default function CardFlipSteps(props: LayoutComponentProps) {
                       elementKey="guide_indicator_1_icon"
                     />
                     <EditableAdaptiveText
-                      mode={mode}
+                      mode={mode as 'edit' | 'preview'}
                       value={blockContent.guide_indicator_1_text || ''}
                       onEdit={(value) => handleContentUpdate('guide_indicator_1_text', value)}
                       backgroundType={backgroundType}
@@ -523,8 +523,8 @@ export default function CardFlipSteps(props: LayoutComponentProps) {
                 {(blockContent.guide_indicator_2_text && blockContent.guide_indicator_2_text !== '___REMOVED___') && (
                   <div className="relative group/guide-indicator-2 flex items-center space-x-2">
                     <IconEditableText
-                      mode={mode}
-                      value={getGuideIndicatorIcon(1)}
+                      mode={mode as 'edit' | 'preview'}
+                      value={getGuideIndicatorIcon(1) as string || '🔍'}
                       onEdit={(value) => handleGuideIndicatorIconEdit(1, value)}
                       backgroundType={backgroundType as any}
                       colorTokens={colorTokens}
@@ -534,7 +534,7 @@ export default function CardFlipSteps(props: LayoutComponentProps) {
                       elementKey="guide_indicator_2_icon"
                     />
                     <EditableAdaptiveText
-                      mode={mode}
+                      mode={mode as 'edit' | 'preview'}
                       value={blockContent.guide_indicator_2_text || ''}
                       onEdit={(value) => handleContentUpdate('guide_indicator_2_text', value)}
                       backgroundType={backgroundType}
@@ -569,8 +569,8 @@ export default function CardFlipSteps(props: LayoutComponentProps) {
                 {(blockContent.guide_indicator_3_text && blockContent.guide_indicator_3_text !== '___REMOVED___') && (
                   <div className="relative group/guide-indicator-3 flex items-center space-x-2">
                     <IconEditableText
-                      mode={mode}
-                      value={getGuideIndicatorIcon(2)}
+                      mode={mode as 'edit' | 'preview'}
+                      value={getGuideIndicatorIcon(2) as string || '✅'}
                       onEdit={(value) => handleGuideIndicatorIconEdit(2, value)}
                       backgroundType={backgroundType as any}
                       colorTokens={colorTokens}
@@ -580,7 +580,7 @@ export default function CardFlipSteps(props: LayoutComponentProps) {
                       elementKey="guide_indicator_3_icon"
                     />
                     <EditableAdaptiveText
-                      mode={mode}
+                      mode={mode as 'edit' | 'preview'}
                       value={blockContent.guide_indicator_3_text || ''}
                       onEdit={(value) => handleContentUpdate('guide_indicator_3_text', value)}
                       backgroundType={backgroundType}
@@ -613,7 +613,7 @@ export default function CardFlipSteps(props: LayoutComponentProps) {
               {(blockContent.guide_heading || mode === 'edit') && (
                 <div className="relative group/guide-heading">
                   <EditableAdaptiveText
-                    mode={mode}
+                    mode={mode as 'edit' | 'preview'}
                     value={blockContent.guide_heading || ''}
                     onEdit={(value) => handleContentUpdate('guide_heading', value)}
                     backgroundType={backgroundType}
@@ -645,7 +645,7 @@ export default function CardFlipSteps(props: LayoutComponentProps) {
               {(blockContent.guide_description || mode === 'edit') && (
                 <div className="relative group/guide-desc">
                   <EditableAdaptiveText
-                    mode={mode}
+                    mode={mode as 'edit' | 'preview'}
                     value={blockContent.guide_description || ''}
                     onEdit={(value) => handleContentUpdate('guide_description', value)}
                     backgroundType={backgroundType}
@@ -681,7 +681,7 @@ export default function CardFlipSteps(props: LayoutComponentProps) {
           <div className="text-center space-y-6">
             {(blockContent.supporting_text || mode === 'edit') && (
               <EditableAdaptiveText
-                mode={mode}
+                mode={mode as 'edit' | 'preview'}
                 value={blockContent.supporting_text || ''}
                 onEdit={(value) => handleContentUpdate('supporting_text', value)}
                 backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}

@@ -518,7 +518,7 @@ export function StyleOption({
                          bgClass.endsWith(' ' + className) || 
                          bgClass.includes(' ' + className + ' ');
       if (exactMatch) {
-        logger.debug('✅ Found solid color match:', className, '→', color);
+        logger.debug('✅ Found solid color match:', { className, color });
         return { backgroundColor: color };
       }
     }
@@ -533,7 +533,7 @@ export function StyleOption({
     }
     
     // Final fallback
-    logger.debug('🔴 No match found for bgClass:', bgClass, '- falling back to gray');
+    logger.debug('🔴 No match found for bgClass:', { bgClass, fallback: 'gray' });
     return { backgroundColor: '#f3f4f6' };
   };
 

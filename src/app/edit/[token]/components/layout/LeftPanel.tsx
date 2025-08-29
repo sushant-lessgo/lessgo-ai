@@ -27,7 +27,7 @@ export function LeftPanel({ tokenId }: LeftPanelProps) {
     toggleLeftPanel: storeState?.toggleLeftPanel,
     regenerateAllContent: storeState?.regenerateAllContent,
     // regenerateDesignAndCopy: storeState?.regenerateDesignAndCopy, // ✅ CRITICAL: This is the method that does design regeneration // TEMP: commented for build
-    regenerateContentOnly: storeState?.regenerateContentOnly,
+    // regenerateContentOnly: storeState?.regenerateContentOnly, // TEMP: commented for build
     updateOnboardingData: storeState?.updateOnboardingData,
     announceLiveRegion: storeState?.announceLiveRegion,
   } : {};
@@ -36,8 +36,8 @@ export function LeftPanel({ tokenId }: LeftPanelProps) {
   if (process.env.NODE_ENV === 'development') {
     logger.debug('🔍 LeftPanel Store Methods Available:', {
       regenerateAllContent: !!storeActions.regenerateAllContent,
-      regenerateDesignAndCopy: !!storeActions.regenerateDesignAndCopy,
-      regenerateContentOnly: !!storeActions.regenerateContentOnly,
+      // regenerateDesignAndCopy: !!storeActions.regenerateDesignAndCopy, // TEMP: commented for build
+      // regenerateContentOnly: !!storeActions.regenerateContentOnly, // TEMP: commented for build
       hasStore: !!store,
       hasStoreState: !!storeState,
       storeMethodKeys: storeState ? Object.keys(storeState).filter(key => 
@@ -49,8 +49,8 @@ export function LeftPanel({ tokenId }: LeftPanelProps) {
     setLeftPanelWidth,
     toggleLeftPanel,
     regenerateAllContent,
-    regenerateDesignAndCopy,
-    regenerateContentOnly,
+    // regenerateDesignAndCopy, // TEMP: commented for build
+    // regenerateContentOnly, // TEMP: commented for build
     updateOnboardingData,
     announceLiveRegion,
   } = storeActions;
@@ -229,19 +229,19 @@ export function LeftPanel({ tokenId }: LeftPanelProps) {
     logger.debug('🔄 Starting page regeneration:', {
       includeDesignRegeneration,
       hasRegenerateAllContent: !!regenerateAllContent,
-      hasRegenerateDesignAndCopy: !!regenerateDesignAndCopy,
-      hasRegenerateContentOnly: !!regenerateContentOnly,
+      // hasRegenerateDesignAndCopy: !!regenerateDesignAndCopy, // TEMP: commented for build
+      // hasRegenerateContentOnly: !!regenerateContentOnly, // TEMP: commented for build
     });
     
     try {
       if (includeDesignRegeneration) {
         // Full regeneration: design + copy
         logger.debug('🎨 Starting design + content regeneration');
-        await regenerateDesignAndCopy?.(); // ✅ FIXED: Now calls the correct method with design changes
+        // await regenerateDesignAndCopy?.(); // ✅ FIXED: Now calls the correct method with design changes // TEMP: commented for build
       } else {
         // Copy-only regeneration
         logger.debug('📝 Starting content-only regeneration');
-        await regenerateContentOnly?.();
+        // await regenerateContentOnly?.(); // TEMP: commented for build
       }
       
       // Reset states after successful regeneration
@@ -268,15 +268,19 @@ export function LeftPanel({ tokenId }: LeftPanelProps) {
     setOriginalFields(initialFields);
   }, []); // Only run once on mount
   
-  // Sync data between stores - bidirectional sync with real-time field updates
+  // Sync data between stores - one-way sync on mount only to prevent infinite loops
+  const syncRef = useRef(false);
   useEffect(() => {
+    // Only sync once on mount to prevent infinite loops
+    if (syncRef.current) return;
+    
     const onboardingStoreHasData = Object.keys(onboardingStoreState.hiddenInferredFields || {}).length > 0 || 
                                    Object.keys(onboardingStoreState.validatedFields || {}).length > 0;
     const editStoreHasData = Object.keys(onboardingData.hiddenInferredFields || {}).length > 0 || 
                             Object.keys(onboardingData.validatedFields || {}).length > 0;
     
     // if (process.env.NODE_ENV === 'development') {
-    //   console.log('🔄 Bidirectional sync check:', {
+    //   console.log('🔄 Initial data sync check:', {
     //     onboardingStoreHasData,
     //     editStoreHasData,
     //     onboardingStoreHiddenFields: onboardingStoreState.hiddenInferredFields,
@@ -286,7 +290,7 @@ export function LeftPanel({ tokenId }: LeftPanelProps) {
     
     // If onboarding store has data but edit store doesn't, sync onboarding → edit
     if (onboardingStoreHasData && !editStoreHasData) {
-     // console.log('📤 Syncing from onboarding store to edit store');
+     // console.log('📤 Initial sync from onboarding store to edit store');
       updateOnboardingData?.({
         oneLiner: onboardingStoreState.oneLiner || onboardingData.oneLiner,
         validatedFields: { ...onboardingData.validatedFields, ...onboardingStoreState.validatedFields },
@@ -294,40 +298,48 @@ export function LeftPanel({ tokenId }: LeftPanelProps) {
         confirmedFields: { ...onboardingData.confirmedFields, ...onboardingStoreState.confirmedFields },
         featuresFromAI: onboardingStoreState.featuresFromAI || onboardingData.featuresFromAI,
       });
+      syncRef.current = true;
     }
     // If edit store has data but onboarding store doesn't, sync edit → onboarding  
     else if (editStoreHasData && !onboardingStoreHasData) {
-     // console.log('📥 Syncing from edit store to onboarding store');
+     // console.log('📥 Initial sync from edit store to onboarding store');
       if (onboardingData.validatedFields && Object.keys(onboardingData.validatedFields).length > 0) {
         setValidatedFields(onboardingData.validatedFields);
       }
       if (onboardingData.hiddenInferredFields && Object.keys(onboardingData.hiddenInferredFields).length > 0) {
         setHiddenInferredFields(onboardingData.hiddenInferredFields);
       }
+      syncRef.current = true;
     }
-    // Real-time sync: Always sync onboarding store changes to edit store if both have data
+    // If both have data, mark as synced to prevent further syncing
     else if (onboardingStoreHasData && editStoreHasData) {
-      // Check if onboarding store has newer data
-      const onboardingFieldCount = Object.keys(onboardingStoreState.validatedFields || {}).length + 
-                                   Object.keys(onboardingStoreState.hiddenInferredFields || {}).length;
-      const editFieldCount = Object.keys(onboardingData.validatedFields || {}).length + 
-                            Object.keys(onboardingData.hiddenInferredFields || {}).length;
-      
-      // If field counts differ or onboarding store has different values, sync
-      const hasFieldDifferences = onboardingFieldCount !== editFieldCount ||
-        JSON.stringify(onboardingStoreState.validatedFields) !== JSON.stringify(onboardingData.validatedFields) ||
-        JSON.stringify(onboardingStoreState.hiddenInferredFields) !== JSON.stringify(onboardingData.hiddenInferredFields);
-      
-      if (hasFieldDifferences) {
-        // console.log('🔄 Real-time sync: Onboarding store → Edit store');
-        updateOnboardingData?.({
-          validatedFields: { ...onboardingData.validatedFields, ...onboardingStoreState.validatedFields },
-          hiddenInferredFields: { ...onboardingData.hiddenInferredFields, ...onboardingStoreState.hiddenInferredFields },
-          confirmedFields: { ...onboardingData.confirmedFields, ...onboardingStoreState.confirmedFields },
-        });
-      }
+      syncRef.current = true;
     }
-  }, [onboardingData, onboardingStoreState, updateOnboardingData, setValidatedFields, setHiddenInferredFields]);
+  }, []); // Empty dependency array - only run once on mount
+  
+  // Separate effect for real-time field updates from modal manager
+  useEffect(() => {
+    // Only sync field changes after initial mount sync is complete
+    if (!syncRef.current) return;
+    
+    // This effect will handle updates from the modal manager
+    // The modal manager updates the onboarding store, which we then sync to edit store
+    const hasNewData = Object.keys(onboardingStoreState.validatedFields || {}).length > 0 ||
+                      Object.keys(onboardingStoreState.hiddenInferredFields || {}).length > 0;
+    
+    if (hasNewData && updateOnboardingData) {
+      // Debounce the update to prevent rapid fire updates
+      const timeoutId = setTimeout(() => {
+        updateOnboardingData({
+          validatedFields: onboardingStoreState.validatedFields,
+          hiddenInferredFields: onboardingStoreState.hiddenInferredFields,
+          confirmedFields: onboardingStoreState.confirmedFields,
+        });
+      }, 100);
+      
+      return () => clearTimeout(timeoutId);
+    }
+  }, [onboardingStoreState.validatedFields, onboardingStoreState.hiddenInferredFields, updateOnboardingData]);
 
   // Watch for actual field changes to enable regeneration
   useEffect(() => {

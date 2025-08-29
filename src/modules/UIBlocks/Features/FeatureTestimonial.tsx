@@ -7,6 +7,7 @@ import {
   EditableAdaptiveHeadline, 
   EditableAdaptiveText
 } from '@/components/layout/EditableContent';
+import IconEditableText from '@/components/ui/IconEditableText';
 import { 
   CTAButton,
   TrustIndicators 
@@ -165,7 +166,9 @@ const FeatureCard = React.memo(({
   mode,
   colorTokens,
   mutedTextColor,
-  h3Style
+  h3Style,
+  handleContentUpdate,
+  backgroundType
 }: {
   title: string;
   description: string;
@@ -180,6 +183,8 @@ const FeatureCard = React.memo(({
   colorTokens: any;
   mutedTextColor: string;
   h3Style: React.CSSProperties;
+  handleContentUpdate: (key: any, value: string) => void;
+  backgroundType: any;
 }) => {
   
   const AvatarPlaceholder = () => (
@@ -197,8 +202,8 @@ const FeatureCard = React.memo(({
         <div className="flex items-start space-x-4 mb-4">
           <div className={`flex-shrink-0 w-12 h-12 rounded-xl ${colorTokens.ctaBg} flex items-center justify-center shadow-lg`}>
             <IconEditableText
-              mode={mode}
-              value={getFeatureIcon(index)}
+              mode={mode as 'edit' | 'preview'}
+              value={`✨`}
               onEdit={(value) => {
                 const iconField = `feature_icon_${index + 1}` as keyof FeatureTestimonialContent;
                 handleContentUpdate(iconField, value);
@@ -276,6 +281,12 @@ export default function FeatureTestimonial(props: LayoutComponentProps) {
   const h2Style = getTypographyStyle('h2');
   const h3Style = getTypographyStyle('h3');
   const bodyLgStyle = getTypographyStyle('body-lg');
+  
+  // Helper function to get feature icon
+  const getFeatureIcon = (index: number) => {
+    const iconField = `feature_icon_${index + 1}` as keyof FeatureTestimonialContent;
+    return blockContent[iconField] || '✨';
+  };
 
   const featureTitles = blockContent.feature_titles 
     ? blockContent.feature_titles.split('|').map(item => item.trim()).filter(Boolean)
@@ -472,8 +483,10 @@ export default function FeatureTestimonial(props: LayoutComponentProps) {
                 sectionId={sectionId}
                 mode={mode}
                 colorTokens={colorTokens}
+                backgroundType={backgroundType}
                 mutedTextColor={mutedTextColor}
                 h3Style={h3Style}
+                handleContentUpdate={handleContentUpdate}
               />
             ))}
           </div>

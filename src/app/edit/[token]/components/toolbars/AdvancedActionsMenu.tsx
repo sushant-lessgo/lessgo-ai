@@ -164,7 +164,7 @@ export const AdvancedActionsMenu = forwardRef<HTMLDivElement, AdvancedActionsMen
 
               {/* Group actions */}
               {group.actions.map((action) => {
-                logger.debug('🎨 Rendering action:', action.id, action.label);
+                logger.debug('🎨 Rendering action:', { actionId: action.id, label: action.label });
                 return (
                   <button
                     key={action.id}

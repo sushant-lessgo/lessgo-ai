@@ -202,7 +202,7 @@ export default function AnimatedProcessLine(props: LayoutComponentProps) {
         }`}>
           <IconEditableText
             mode={mode}
-            value={getStepIcon(index)}
+            value={getStepIcon(index) as string || `${index + 1}`}
             onEdit={(value) => handleStepIconEdit(index, value)}
             backgroundType={backgroundType as any}
             colorTokens={colorTokens}
@@ -379,7 +379,7 @@ export default function AnimatedProcessLine(props: LayoutComponentProps) {
                       <div className="relative group/process-indicator-1 flex items-center space-x-2">
                         <IconEditableText
                           mode={mode}
-                          value={getProcessIndicatorIcon(0)}
+                          value={getProcessIndicatorIcon(0) as string || '🔄'}
                           onEdit={(value) => handleProcessIndicatorIconEdit(0, value)}
                           backgroundType={backgroundType as any}
                           colorTokens={colorTokens}
@@ -401,7 +401,7 @@ export default function AnimatedProcessLine(props: LayoutComponentProps) {
                           data-section-id={sectionId}
                           data-element-key="process_indicator_1_text"
                         />
-                        {mode === 'edit' && (
+                        {(mode as any) === 'edit' && (
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
@@ -425,7 +425,7 @@ export default function AnimatedProcessLine(props: LayoutComponentProps) {
                       <div className="relative group/process-indicator-2 flex items-center space-x-2">
                         <IconEditableText
                           mode={mode}
-                          value={getProcessIndicatorIcon(1)}
+                          value={getProcessIndicatorIcon(1) as string || '✓'}
                           onEdit={(value) => handleProcessIndicatorIconEdit(1, value)}
                           backgroundType={backgroundType as any}
                           colorTokens={colorTokens}
@@ -447,7 +447,7 @@ export default function AnimatedProcessLine(props: LayoutComponentProps) {
                           data-section-id={sectionId}
                           data-element-key="process_indicator_2_text"
                         />
-                        {mode === 'edit' && (
+                        {(mode as any) === 'edit' && (
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
@@ -471,7 +471,7 @@ export default function AnimatedProcessLine(props: LayoutComponentProps) {
                       <div className="relative group/process-indicator-3 flex items-center space-x-2">
                         <IconEditableText
                           mode={mode}
-                          value={getProcessIndicatorIcon(2)}
+                          value={getProcessIndicatorIcon(2) as string || '🎯'}
                           onEdit={(value) => handleProcessIndicatorIconEdit(2, value)}
                           backgroundType={backgroundType as any}
                           colorTokens={colorTokens}
@@ -493,7 +493,7 @@ export default function AnimatedProcessLine(props: LayoutComponentProps) {
                           data-section-id={sectionId}
                           data-element-key="process_indicator_3_text"
                         />
-                        {mode === 'edit' && (
+                        {(mode as any) === 'edit' && (
                           <button
                             onClick={(e) => {
                               e.stopPropagation();

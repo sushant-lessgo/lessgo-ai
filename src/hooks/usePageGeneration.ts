@@ -332,7 +332,7 @@ export function usePageGeneration(tokenId: string) {
         body: JSON.stringify({ prompt })
       });
 
-      logger.debug('📡 API Response status:', response.status, response.statusText);
+      logger.debug('📡 API Response status:', { status: response.status, statusText: response.statusText });
 
       if (!response.ok) {
         const errorText = await response.text();

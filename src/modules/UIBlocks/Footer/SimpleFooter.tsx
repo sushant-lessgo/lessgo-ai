@@ -37,9 +37,8 @@ const SimpleFooter: React.FC<LayoutComponentProps> = (props) => {
       sectionBackground={sectionBackground}
       mode={mode}
       className="bg-gray-50 border-t"
-      innerClassName="py-8"
     >
-      <div className="flex items-center justify-center gap-4">
+      <div className="flex items-center justify-center gap-4 py-8">
         <HeaderLogo 
           mode={mode}
           className="h-8 w-auto object-contain"

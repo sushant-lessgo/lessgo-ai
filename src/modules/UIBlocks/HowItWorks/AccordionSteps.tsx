@@ -266,7 +266,7 @@ export default function AccordionSteps(props: LayoutComponentProps) {
               <div className="flex items-center space-x-2 text-green-600">
                 <IconEditableText
                   mode={mode}
-                  value={getStepIndicatorIcon(0)}
+                  value={getStepIndicatorIcon(0) as string || '1'}
                   onEdit={(value) => handleStepIndicatorIconEdit(0, value)}
                   backgroundType={backgroundType as any}
                   colorTokens={colorTokens}
@@ -280,7 +280,7 @@ export default function AccordionSteps(props: LayoutComponentProps) {
               <div className="flex items-center space-x-2 text-blue-600">
                 <IconEditableText
                   mode={mode}
-                  value={getStepIndicatorIcon(1)}
+                  value={getStepIndicatorIcon(1) as string || '2'}
                   onEdit={(value) => handleStepIndicatorIconEdit(1, value)}
                   backgroundType={backgroundType as any}
                   colorTokens={colorTokens}
@@ -294,7 +294,7 @@ export default function AccordionSteps(props: LayoutComponentProps) {
               <div className="flex items-center space-x-2 text-purple-600">
                 <IconEditableText
                   mode={mode}
-                  value={getStepIndicatorIcon(2)}
+                  value={getStepIndicatorIcon(2) as string || '3'}
                   onEdit={(value) => handleStepIndicatorIconEdit(2, value)}
                   backgroundType={backgroundType as any}
                   colorTokens={colorTokens}
@@ -432,7 +432,7 @@ export default function AccordionSteps(props: LayoutComponentProps) {
                   mode={mode}
                   value={blockContent.tech_specs_heading || ''}
                   onEdit={(value) => handleContentUpdate('tech_specs_heading', value)}
-                  backgroundType="dark"
+                  backgroundType="secondary"
                   colorTokens={colorTokens}
                   variant="body"
                   className="text-xl font-semibold mb-6 text-white"
@@ -449,7 +449,7 @@ export default function AccordionSteps(props: LayoutComponentProps) {
                     mode={mode}
                     value={blockContent.tech_spec_1_value || ''}
                     onEdit={(value) => handleContentUpdate('tech_spec_1_value', value)}
-                    backgroundType="dark"
+                    backgroundType="secondary"
                     colorTokens={colorTokens}
                     variant="body"
                     className="text-3xl font-bold text-blue-400 mb-2"
@@ -462,7 +462,7 @@ export default function AccordionSteps(props: LayoutComponentProps) {
                     mode={mode}
                     value={blockContent.tech_spec_1_label || ''}
                     onEdit={(value) => handleContentUpdate('tech_spec_1_label', value)}
-                    backgroundType="dark"
+                    backgroundType="secondary"
                     colorTokens={colorTokens}
                     variant="body"
                     className="text-gray-300 text-sm"
@@ -477,7 +477,7 @@ export default function AccordionSteps(props: LayoutComponentProps) {
                     mode={mode}
                     value={blockContent.tech_spec_2_value || ''}
                     onEdit={(value) => handleContentUpdate('tech_spec_2_value', value)}
-                    backgroundType="dark"
+                    backgroundType="secondary"
                     colorTokens={colorTokens}
                     variant="body"
                     className="text-3xl font-bold text-green-400 mb-2"
@@ -490,7 +490,7 @@ export default function AccordionSteps(props: LayoutComponentProps) {
                     mode={mode}
                     value={blockContent.tech_spec_2_label || ''}
                     onEdit={(value) => handleContentUpdate('tech_spec_2_label', value)}
-                    backgroundType="dark"
+                    backgroundType="secondary"
                     colorTokens={colorTokens}
                     variant="body"
                     className="text-gray-300 text-sm"
@@ -505,7 +505,7 @@ export default function AccordionSteps(props: LayoutComponentProps) {
                     mode={mode}
                     value={blockContent.tech_spec_3_value || ''}
                     onEdit={(value) => handleContentUpdate('tech_spec_3_value', value)}
-                    backgroundType="dark"
+                    backgroundType="secondary"
                     colorTokens={colorTokens}
                     variant="body"
                     className="text-3xl font-bold text-purple-400 mb-2"
@@ -518,7 +518,7 @@ export default function AccordionSteps(props: LayoutComponentProps) {
                     mode={mode}
                     value={blockContent.tech_spec_3_label || ''}
                     onEdit={(value) => handleContentUpdate('tech_spec_3_label', value)}
-                    backgroundType="dark"
+                    backgroundType="secondary"
                     colorTokens={colorTokens}
                     variant="body"
                     className="text-gray-300 text-sm"
@@ -535,7 +535,7 @@ export default function AccordionSteps(props: LayoutComponentProps) {
                   mode={mode}
                   value={blockContent.tech_specs_description || ''}
                   onEdit={(value) => handleContentUpdate('tech_specs_description', value)}
-                  backgroundType="dark"
+                  backgroundType="secondary"
                   colorTokens={colorTokens}
                   variant="body"
                   className="mt-6 text-gray-300 max-w-2xl mx-auto"

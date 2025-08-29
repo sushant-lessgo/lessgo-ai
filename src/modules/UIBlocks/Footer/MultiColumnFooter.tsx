@@ -39,9 +39,8 @@ const MultiColumnFooter: React.FC<LayoutComponentProps> = (props) => {
       sectionBackground={sectionBackground}
       mode={mode}
       className="bg-gray-50 border-t"
-      innerClassName="py-16"
     >
-      <div className="flex flex-col items-center text-center gap-6 mb-12">
+      <div className="flex flex-col items-center text-center gap-6 mb-12 py-16">
         <div className="mb-4">
           <HeaderLogo 
             mode={mode}

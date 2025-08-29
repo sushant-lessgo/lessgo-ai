@@ -188,7 +188,7 @@ export default function Tabbed(props: LayoutComponentProps) {
             sectionBackground={sectionBackground}
           />
 
-          {(blockContent.subheadline || mode === 'edit') && (
+          {(blockContent.subheadline || (mode as any) === 'edit') && (
             <EditableAdaptiveText
               mode={mode}
               value={blockContent.subheadline || ''}
@@ -205,7 +205,7 @@ export default function Tabbed(props: LayoutComponentProps) {
           )}
         </div>
 
-        {mode === 'edit' ? (
+        {(mode as any) === 'edit' ? (
           <div className="space-y-8">
             <div className="p-6 border border-gray-200 rounded-lg bg-gray-50">
               <h4 className="font-semibold text-gray-700 mb-4">Tab Content</h4>
@@ -296,11 +296,11 @@ export default function Tabbed(props: LayoutComponentProps) {
                   </p>
                   
                   <div className="flex flex-wrap gap-4">
-                    {(blockContent.benefit_1 || mode === 'edit') && blockContent.benefit_1 !== '___REMOVED___' && (
+                    {(blockContent.benefit_1 || (mode as any) === 'edit') && blockContent.benefit_1 !== '___REMOVED___' && (
                       <div className="flex items-center space-x-2 group/benefit-item relative">
                         <div className={`w-10 h-10 rounded-lg ${colorTokens.ctaBg} flex items-center justify-center`}>
                           <IconEditableText
-                            mode={mode}
+                            mode={mode as 'edit' | 'preview'}
                             value={blockContent.benefit_icon_1 || '⚡'}
                             onEdit={(value) => handleContentUpdate('benefit_icon_1', value)}
                             backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
@@ -311,7 +311,7 @@ export default function Tabbed(props: LayoutComponentProps) {
                             elementKey="benefit_icon_1"
                           />
                         </div>
-                        {mode === 'edit' ? (
+                        {(mode as any) === 'edit' ? (
                           <EditableAdaptiveText
                             mode={mode}
                             value={blockContent.benefit_1 || ''}
@@ -328,7 +328,7 @@ export default function Tabbed(props: LayoutComponentProps) {
                         ) : (
                           <span className="text-sm font-medium text-gray-700">{blockContent.benefit_1}</span>
                         )}
-                        {mode === 'edit' && (
+                        {(mode as any) === 'edit' && (
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
@@ -345,11 +345,11 @@ export default function Tabbed(props: LayoutComponentProps) {
                       </div>
                     )}
                     
-                    {(blockContent.benefit_2 || mode === 'edit') && blockContent.benefit_2 !== '___REMOVED___' && (
+                    {(blockContent.benefit_2 || (mode as any) === 'edit') && blockContent.benefit_2 !== '___REMOVED___' && (
                       <div className="flex items-center space-x-2 group/benefit-item relative">
                         <div className={`w-10 h-10 rounded-lg ${colorTokens.ctaBg} flex items-center justify-center`}>
                           <IconEditableText
-                            mode={mode}
+                            mode={mode as 'edit' | 'preview'}
                             value={blockContent.benefit_icon_2 || '✅'}
                             onEdit={(value) => handleContentUpdate('benefit_icon_2', value)}
                             backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
@@ -360,7 +360,7 @@ export default function Tabbed(props: LayoutComponentProps) {
                             elementKey="benefit_icon_2"
                           />
                         </div>
-                        {mode === 'edit' ? (
+                        {(mode as any) === 'edit' ? (
                           <EditableAdaptiveText
                             mode={mode}
                             value={blockContent.benefit_2 || ''}
@@ -377,7 +377,7 @@ export default function Tabbed(props: LayoutComponentProps) {
                         ) : (
                           <span className="text-sm font-medium text-gray-700">{blockContent.benefit_2}</span>
                         )}
-                        {mode === 'edit' && (
+                        {(mode as any) === 'edit' && (
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
@@ -431,9 +431,9 @@ export default function Tabbed(props: LayoutComponentProps) {
           </div>
         )}
 
-        {(blockContent.cta_text || blockContent.trust_items || mode === 'edit') && (
+        {(blockContent.cta_text || blockContent.trust_items || (mode as any) === 'edit') && (
           <div className="text-center space-y-6 mt-16">
-            {(blockContent.supporting_text || mode === 'edit') && (
+            {(blockContent.supporting_text || (mode as any) === 'edit') && (
               <EditableAdaptiveText
                 mode={mode}
                 value={blockContent.supporting_text || ''}

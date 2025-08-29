@@ -250,7 +250,7 @@ export default function FoundersBeliefStack(props: LayoutComponentProps) {
       const fallbackIcon = titleWithIcon.split(' ')[0] || '💡';
       const title = titleWithIcon.split(' ').slice(1).join(' ') || 'Belief';
       const description = beliefData[i + 1]?.trim() || '';
-      const itemIndex = beliefItems.length;
+      const itemIndex: number = beliefItems.length;
       const icon = getBeliefIcon(itemIndex) || fallbackIcon;
       
       beliefItems.push({ icon, title, description, index: itemIndex });
@@ -496,7 +496,7 @@ export default function FoundersBeliefStack(props: LayoutComponentProps) {
                         <EditableAdaptiveText
                           mode={mode}
                           value={(blockContent as any)[value.key] || ''}
-                          onEdit={(value) => handleContentUpdate(value.key as keyof FoundersBeliefStackContent, value)}
+                          onEdit={(newValue) => handleContentUpdate(value.key as keyof FoundersBeliefStackContent, newValue)}
                           backgroundType="neutral"
                           colorTokens={colorTokens}
                           variant="body"

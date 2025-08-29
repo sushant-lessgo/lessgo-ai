@@ -34,7 +34,7 @@ export function StyleGrid({
   searchQuery = '',
   filterBy = 'all',
 }: StyleGridProps) {
-  logger.debug('📋 StyleGrid received variations:', variations?.length || 0, variations);
+  logger.debug('📋 StyleGrid received variations:', { count: variations?.length || 0, variations });
   const [sortBy, setSortBy] = useState<'default' | 'name' | 'archetype' | 'color'>('default');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
 

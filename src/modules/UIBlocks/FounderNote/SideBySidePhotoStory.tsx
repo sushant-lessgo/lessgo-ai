@@ -212,10 +212,10 @@ const PhotoStoryPlaceholder = React.memo(({
                       iconSize="sm"
                       className="text-xs"
                       sectionId={sectionId || 'placeholder'}
-                      elementKey={type === 'primary' ? 'placeholder_icon_1' : 'placeholder_icon_2'}
+                      elementKey={(type as any) === 'primary' ? 'placeholder_icon_1' : 'placeholder_icon_2'}
                     />
                   ) : (
-                    <span className="text-xs">{icon || (type === 'primary' ? '🎨' : '✨')}</span>
+                    <span className="text-xs">{icon || ((type as any) === 'primary' ? '🎨' : '✨')}</span>
                   )}
                 </div>
                 <div className="bg-gradient-to-br from-purple-100 to-pink-100 rounded h-12 flex items-center justify-center">

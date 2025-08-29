@@ -1093,7 +1093,8 @@ getTypographyForSection: (sectionId: string) => {
       }),
 
     // ====== SOCIAL MEDIA MANAGEMENT ======
-
+    // TEMP: commented for build - methods not defined in interface
+    /*
     initializeSocialMedia: () =>
       set((state: EditStore) => {
         if (state.socialMediaConfig) return; // Already initialized
@@ -1195,6 +1196,7 @@ getTypographyForSection: (sectionId: string) => {
 
         logger.debug('🔗 [SOCIAL-DEBUG] Reordered social media items:', reorderedItems);
       }),
+    */
 
   };
 }

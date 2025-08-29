@@ -278,21 +278,28 @@ function useStoreState<T>(
   const store = useStore();
   const [state, setState] = useState(() => selector(store.getState()));
   
+  // Separate effect for initial state to prevent re-render loop
+  const initializedRef = useRef(false);
   useEffect(() => {
-    // Get initial state (in case data was loaded after initial render)
-    const currentState = selector(store.getState());
-    setState(prev => {
-      if (equalityFn && equalityFn(prev, currentState)) {
-        return prev;
-      }
-      return currentState;
-    });
-    
+    if (!initializedRef.current) {
+      // Get initial state (in case data was loaded after initial render)
+      const currentState = selector(store.getState());
+      setState(prev => {
+        if (equalityFn ? equalityFn(prev, currentState) : prev === currentState) {
+          return prev;
+        }
+        return currentState;
+      });
+      initializedRef.current = true;
+    }
+  }, [store]); // Only depend on store instance
+  
+  useEffect(() => {
     // Subscribe to future changes
     const unsubscribe = store.subscribe((newState: any) => {
       const selectedState = selector(newState);
       setState(current => {
-        if (equalityFn && equalityFn(current, selectedState)) {
+        if (equalityFn ? equalityFn(current, selectedState) : current === selectedState) {
           return current;
         }
         return selectedState;

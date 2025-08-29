@@ -130,7 +130,7 @@ const TimelineStep = React.memo(({
             {blockContent.use_step_icons && getStepIcon(index) ? (
               <IconEditableText
                 mode={mode}
-                value={getStepIcon(index)}
+                value={getStepIcon(index) as string}
                 onEdit={(value) => handleStepIconEdit(index, value)}
                 backgroundType={backgroundType as any}
                 colorTokens={colorTokens}
@@ -168,54 +168,6 @@ const TimelineStep = React.memo(({
               {description}
             </p>
             
-            {blockContent.show_step_features !== false && (
-              <div className="flex items-center space-x-4">
-                {(blockContent.step_feature_1_text && blockContent.step_feature_1_text !== '___REMOVED___') && (
-                  <div className="relative group/step-feature-1 flex items-center space-x-2 text-green-600">
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                    </svg>
-                    <span className="text-sm">{blockContent.step_feature_1_text}</span>
-                    {mode === 'edit' && (
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleContentUpdate('step_feature_1_text', '___REMOVED___');
-                        }}
-                        className="opacity-0 group-hover/step-feature-1:opacity-100 ml-1 text-red-500 hover:text-red-700 transition-opacity duration-200"
-                        title="Remove feature 1"
-                      >
-                        <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                      </button>
-                    )}
-                  </div>
-                )}
-                {(blockContent.step_feature_2_text && blockContent.step_feature_2_text !== '___REMOVED___') && (
-                  <div className="relative group/step-feature-2 flex items-center space-x-2 text-blue-600">
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192L5.636 18.364M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z" />
-                    </svg>
-                    <span className="text-sm">{blockContent.step_feature_2_text}</span>
-                    {mode === 'edit' && (
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleContentUpdate('step_feature_2_text', '___REMOVED___');
-                        }}
-                        className="opacity-0 group-hover/step-feature-2:opacity-100 ml-1 text-red-500 hover:text-red-700 transition-opacity duration-200"
-                        title="Remove feature 2"
-                      >
-                        <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                      </button>
-                    )}
-                  </div>
-                )}
-              </div>
-            )}
           </div>
         </div>
       </div>
@@ -261,9 +213,9 @@ export default function VerticalTimeline(props: LayoutComponentProps) {
     handleContentUpdate(iconField, value);
   };
 
-  const getStepIcon = (index: number) => {
+  const getStepIcon = (index: number): string => {
     const iconFields = ['step_icon_1', 'step_icon_2', 'step_icon_3', 'step_icon_4'];
-    return blockContent[iconFields[index] as keyof VerticalTimelineContent] || '';
+    return (blockContent[iconFields[index] as keyof VerticalTimelineContent] as string) || '';
   };
 
   const steps = stepTitles.map((title, index) => ({
@@ -396,7 +348,7 @@ export default function VerticalTimeline(props: LayoutComponentProps) {
         )}
 
         {/* Process Summary */}
-        {blockContent.show_process_summary !== false && (
+        {(
           <div className="mt-16 bg-gradient-to-r from-blue-50 via-indigo-50 to-purple-50 rounded-2xl p-8 border border-blue-100">
             <div className="text-center">
               <div className="flex justify-center items-center space-x-4 mb-6">
@@ -406,8 +358,8 @@ export default function VerticalTimeline(props: LayoutComponentProps) {
                   </svg>
                   <EditableAdaptiveText
                     mode={mode}
-                    value={blockContent.process_time_label || ''}
-                    onEdit={(value) => handleContentUpdate('process_time_label', value)}
+                    value={'' /* blockContent.process_time_label || '' */}
+                    onEdit={(value) => {/* handleContentUpdate('process_time_label', value) */}}
                     backgroundType={backgroundType}
                     colorTokens={colorTokens}
                     variant="body"

@@ -120,9 +120,8 @@ const CenteredLogoHeader: React.FC<LayoutComponentProps> = (props) => {
       sectionBackground={sectionBackground}
       mode={mode}
       className="sticky top-0 z-50 bg-white/95 backdrop-blur-sm border-b"
-      innerClassName="py-4"
     >
-      <nav className="flex items-center justify-between">
+      <nav className="flex items-center justify-between py-4">
         {mode === 'preview' ? (
           // Preview Mode: Clickable navigation
           <>

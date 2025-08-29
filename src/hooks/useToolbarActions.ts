@@ -276,7 +276,7 @@ const { addElement } = useElementCRUD();
     const currentLayout = sectionLayouts[sectionId];
     
     if (!section || !currentLayout) {
-      logger.error('Section or layout not found for:', sectionId, { section, currentLayout });
+      logger.error('Section or layout not found for:', { sectionId, section, currentLayout });
       return false;
     }
     

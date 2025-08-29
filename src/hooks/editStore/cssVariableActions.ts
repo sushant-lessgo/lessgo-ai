@@ -136,7 +136,7 @@ export const createCSSVariableActions: CSSVariableActionCreator = (set, get) => 
           draft.cssVariables.metrics.variableCount = Object.keys(generatedTokens).length;
           draft.cssVariables.metrics.lastUpdated = Date.now();
           
-          logger.debug('🔄 Variables regenerated from theme:', Object.keys(generatedTokens).length, 'variables');
+          logger.debug('🔄 Variables regenerated from theme:', { count: Object.keys(generatedTokens).length, type: 'variables' });
         }
       } catch (error) {
         logger.error('❌ Failed to regenerate variables:', error);

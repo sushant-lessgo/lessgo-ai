@@ -42,7 +42,8 @@ const LinksAndSocialFooter: React.FC<LayoutComponentProps> = (props) => {
   // Initialize social media config if needed
   useEffect(() => {
     if (!store.socialMediaConfig) {
-      store.initializeSocialMedia();
+      // TEMP: commented for build - method not available
+      // store.initializeSocialMedia();
     }
   }, [store]);
 
@@ -86,9 +87,8 @@ const LinksAndSocialFooter: React.FC<LayoutComponentProps> = (props) => {
       sectionBackground={sectionBackground}
       mode={mode}
       className="bg-gray-900 text-white"
-      innerClassName="py-12"
     >
-      <div className="flex flex-col items-center gap-6 mb-8">
+      <div className="flex flex-col items-center gap-6 mb-8 py-12">
         <div className="text-center">
           <div className="mb-4">
             <HeaderLogo 

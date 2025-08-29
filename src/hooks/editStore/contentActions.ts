@@ -97,7 +97,7 @@ export function createContentActions(set: any, get: any): ContentActions {
         } else if (typeof content === 'string') {
           stringContent = content;
         } else {
-          logger.warn('Unexpected content type, converting to string:', typeof content, content);
+          logger.warn('Unexpected content type, converting to string:', { type: typeof content, content });
           stringContent = String(content);
         }
         

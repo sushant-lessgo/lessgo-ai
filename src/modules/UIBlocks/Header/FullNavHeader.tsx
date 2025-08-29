@@ -152,9 +152,8 @@ const FullNavHeader: React.FC<LayoutComponentProps> = (props) => {
       sectionBackground={sectionBackground}
       mode={mode}
       className="sticky top-0 z-50 bg-white/95 backdrop-blur-sm border-b"
-      innerClassName="py-4"
     >
-      <nav className="flex items-center justify-between">
+      <nav className="flex items-center justify-between py-4">
         <HeaderLogo 
           mode={mode}
           className="h-12 w-auto object-contain"
