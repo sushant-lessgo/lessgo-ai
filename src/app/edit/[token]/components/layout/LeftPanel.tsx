@@ -291,12 +291,22 @@ export function LeftPanel({ tokenId }: LeftPanelProps) {
     // If onboarding store has data but edit store doesn't, sync onboarding → edit
     if (onboardingStoreHasData && !editStoreHasData) {
      // console.log('📤 Initial sync from onboarding store to edit store');
+      // Clear pending revalidation fields during initial sync to prevent false "needs update" states
+      if (onboardingStoreState.pendingRevalidationFields && onboardingStoreState.pendingRevalidationFields.length > 0) {
+        onboardingStoreState.pendingRevalidationFields.forEach(field => {
+          removePendingRevalidationField(field);
+        });
+        logger.debug('🧹 Cleared pending revalidation fields during initial sync:', onboardingStoreState.pendingRevalidationFields);
+      }
+      
       updateOnboardingData?.({
         oneLiner: onboardingStoreState.oneLiner || onboardingData.oneLiner,
         validatedFields: { ...onboardingData.validatedFields, ...onboardingStoreState.validatedFields },
         hiddenInferredFields: { ...onboardingData.hiddenInferredFields, ...onboardingStoreState.hiddenInferredFields },
         confirmedFields: { ...onboardingData.confirmedFields, ...onboardingStoreState.confirmedFields },
         featuresFromAI: onboardingStoreState.featuresFromAI || onboardingData.featuresFromAI,
+        // Ensure pending revalidation fields are cleared in edit store too
+        pendingRevalidationFields: [],
       });
       syncRef.current = true;
     }

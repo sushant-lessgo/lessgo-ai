@@ -34,7 +34,7 @@ type OnboardingStore = {
   setOneLiner: (input: string) => void;
   setConfirmedFields: (fields: Partial<Record<CanonicalFieldName, ConfirmedFieldData>>) => void; // ✅ Type-safe
   setValidatedFields: (fields: Partial<InputVariables>) => void; // ✅ Type-safe
-  confirmField: (displayField: string, value: string) => void; // Accepts display name, converts internally
+  confirmField: (displayField: string, value: string, options?: { skipDependencyValidation?: boolean }) => void; // Accepts display name, converts internally
   setHiddenInferredFields: (fields: HiddenInferredFields) => void;
   setStepIndex: (index: number) => void;
   setFeaturesFromAI: (features: FeatureItem[]) => void;
@@ -84,7 +84,8 @@ export const useOnboardingStore = create<OnboardingStore>((set, get) => ({
   setHiddenInferredFields: (fields) => set({ hiddenInferredFields: fields }),
 
   // ✅ FIXED: Move value from confirmedFields → validatedFields using canonical names
-  confirmField: (displayField, value) => {
+  confirmField: (displayField, value, options = {}) => {
+    const { skipDependencyValidation = false } = options;
     // Convert display name to canonical name using types/index.ts mapping
     const canonicalField = DISPLAY_TO_CANONICAL[displayField as keyof typeof DISPLAY_TO_CANONICAL];
     
@@ -101,10 +102,11 @@ export const useOnboardingStore = create<OnboardingStore>((set, get) => ({
         [canonicalField]: value, // ✅ Add to validated fields with canonical name
       };
 
-      // ✅ BUG FIX: Handle field dependencies - invalidate dependent fields
+      // ✅ BUG FIX: Handle field dependencies - invalidate dependent fields (only if not skipping)
       let newForceManualFields = [...state.forceManualFields];
+      let shouldAddPendingRevalidation = false;
       
-      if (canonicalField === 'marketCategory') {
+      if (!skipDependencyValidation && canonicalField === 'marketCategory') {
         // Market Category changed - mark Market Subcategory as needing update instead of deleting
         // Keep the subcategory visible but mark it as pending revalidation
         if (!newForceManualFields.includes('marketSubcategory')) {
@@ -116,14 +118,15 @@ export const useOnboardingStore = create<OnboardingStore>((set, get) => ({
         if (newValidatedFields['marketSubcategory']) {
           // Keep existing subcategory but mark as needing revalidation
           logger.debug('Keeping existing subcategory visible for revalidation');
+          shouldAddPendingRevalidation = true;
         }
       }
 
       return {
         validatedFields: newValidatedFields,
         forceManualFields: newForceManualFields,
-        // Add subcategory to pending revalidation if market category changed
-        ...(canonicalField === 'marketCategory' && {
+        // Add subcategory to pending revalidation if market category changed and dependency validation is enabled
+        ...(shouldAddPendingRevalidation && {
           pendingRevalidationFields: [
             ...state.pendingRevalidationFields.filter(f => f !== 'marketSubcategory'),
             'marketSubcategory'

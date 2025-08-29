@@ -389,7 +389,7 @@ export default function VideoWalkthrough(props: LayoutComponentProps) {
                         data-section-id={sectionId}
                         data-element-key="video_info_1_text"
                       />
-                      {mode === 'edit' && (
+                      {(mode as string) === 'edit' && (
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
@@ -423,7 +423,7 @@ export default function VideoWalkthrough(props: LayoutComponentProps) {
                         data-section-id={sectionId}
                         data-element-key="video_info_2_text"
                       />
-                      {mode === 'edit' && (
+                      {(mode as string) === 'edit' && (
                         <button
                           onClick={(e) => {
                             e.stopPropagation();

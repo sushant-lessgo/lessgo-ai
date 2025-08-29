@@ -251,9 +251,9 @@ export default function ZigzagImageSteps(props: LayoutComponentProps) {
     handleContentUpdate(iconField, value);
   };
 
-  const getFlowFeatureIcon = (index: number) => {
+  const getFlowFeatureIcon = (index: number): string => {
     const iconFields = ['flow_feature_1_icon', 'flow_feature_2_icon', 'flow_feature_3_icon'];
-    return blockContent[iconFields[index] as keyof ZigzagImageStepsContent] || ['💖', '⚡', '👥'][index];
+    return (blockContent[iconFields[index] as keyof ZigzagImageStepsContent] as string) || (['💖', '⚡', '👥'][index] as string);
   };
   
   return (

@@ -22,6 +22,9 @@ interface VerticalTimelineContent {
   supporting_text?: string;
   cta_text?: string;
   trust_items?: string;
+  process_steps_label?: string;
+  process_summary_heading?: string;
+  process_summary_description?: string;
   // Optional step icon overrides
   step_icon_1?: string;
   step_icon_2?: string;

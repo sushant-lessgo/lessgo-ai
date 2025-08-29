@@ -81,8 +81,8 @@ export default function RightPanel() {
     if (currentFieldData.confidence >= 0.85 && !validatedFields[currentCanonicalField] && !isForceManual) {
      // console.log(`Auto-confirming ${currentDisplayField} with confidence ${currentFieldData.confidence}`);
       
-      // Move from confirmedFields → validatedFields
-      confirmField(currentDisplayField!, currentFieldData.value);
+      // Move from confirmedFields → validatedFields (skip dependency validation for auto-confirmation)
+      confirmField(currentDisplayField!, currentFieldData.value, { skipDependencyValidation: true });
       
       // Auto-advance to next field after a brief delay
       setTimeout(() => {

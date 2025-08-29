@@ -179,7 +179,8 @@ const IntegrationCard = React.memo(({
   mode,
   onLogoEdit,
   sectionId,
-  integrationIndex
+  integrationIndex,
+  logoUrl
 }: { 
   integration: Integration; 
   isActive: boolean; 
@@ -295,7 +296,7 @@ const FeaturedQuote = React.memo(({
     </div>
   </div>
 ));
-FeaturedQuote.displayName = 'FeaturedQuote';
+IntegrationCard.displayName = 'IntegrationCard';
 
 // Company Logo Component
 const CompanyLogo = React.memo(({ 
