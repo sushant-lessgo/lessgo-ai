@@ -560,7 +560,7 @@ export default function LeftCopyRightImage(props: LayoutComponentProps) {
             {(blockContent.show_social_proof !== false) && (
               <div className="flex items-center space-x-6 pt-4">
                 {blockContent.customer_count && blockContent.customer_count !== '___REMOVED___' && (
-                  <div className="relative group/customer-item flex items-center space-x-2">
+                  <div className="relative group flex items-center space-x-2">
                     {blockContent.show_customer_avatars !== false && (
                       <div className="flex -space-x-2">
                         {customerAvatars.map((customer, i) => (
@@ -597,7 +597,7 @@ export default function LeftCopyRightImage(props: LayoutComponentProps) {
                           e.stopPropagation();
                           handleContentUpdate('customer_count', '___REMOVED___');
                         }}
-                        className="opacity-0 group-hover/customer-item:opacity-100 ml-2 p-1 rounded-full bg-white/80 hover:bg-white text-red-500 hover:text-red-700 transition-all duration-200 relative z-10 shadow-sm"
+                        className="opacity-0 group-hover:opacity-100 ml-2 text-red-500 hover:text-red-700 transition-opacity duration-200"
                         title="Remove customer count"
                       >
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -609,36 +609,34 @@ export default function LeftCopyRightImage(props: LayoutComponentProps) {
                 )}
                 
                 {blockContent.rating_value && blockContent.rating_value !== '___REMOVED___' && (
-                  <div className="relative group/rating-item flex items-center space-x-1">
+                  <div className="relative group flex items-center space-x-1">
                     {renderStars(blockContent.rating_value)}
-                    <div className="flex items-center space-x-1 ml-2">
-                      <EditableAdaptiveText
-                        mode={mode}
-                        value={blockContent.rating_value || ''}
-                        onEdit={(value) => handleContentUpdate('rating_value', value)}
-                        backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
-                        colorTokens={colorTokens}
-                        variant="body"
-                        className="text-sm"
-                        placeholder="4.9/5"
-                        sectionBackground={sectionBackground}
-                        data-section-id={sectionId}
-                        data-element-key="rating_value"
-                      />
-                      <EditableAdaptiveText
-                        mode={mode}
-                        value={blockContent.rating_count || ''}
-                        onEdit={(value) => handleContentUpdate('rating_count', value)}
-                        backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
-                        colorTokens={colorTokens}
-                        variant="body"
-                        className="text-sm"
-                        placeholder="from 127 reviews"
-                        sectionBackground={sectionBackground}
-                        data-section-id={sectionId}
-                        data-element-key="rating_count"
-                      />
-                    </div>
+                    <EditableAdaptiveText
+                      mode={mode}
+                      value={blockContent.rating_value || ''}
+                      onEdit={(value) => handleContentUpdate('rating_value', value)}
+                      backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
+                      colorTokens={colorTokens}
+                      variant="body"
+                      className="text-sm ml-2"
+                      placeholder="4.9/5"
+                      sectionBackground={sectionBackground}
+                      data-section-id={sectionId}
+                      data-element-key="rating_value"
+                    />
+                    <EditableAdaptiveText
+                      mode={mode}
+                      value={blockContent.rating_count || ''}
+                      onEdit={(value) => handleContentUpdate('rating_count', value)}
+                      backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
+                      colorTokens={colorTokens}
+                      variant="body"
+                      className="text-sm"
+                      placeholder="from 127 reviews"
+                      sectionBackground={sectionBackground}
+                      data-section-id={sectionId}
+                      data-element-key="rating_count"
+                    />
                     
                     {/* Remove button for rating section */}
                     {mode === 'edit' && (
@@ -648,7 +646,7 @@ export default function LeftCopyRightImage(props: LayoutComponentProps) {
                           handleContentUpdate('rating_value', '___REMOVED___');
                           handleContentUpdate('rating_count', '___REMOVED___');
                         }}
-                        className="opacity-0 group-hover/rating-item:opacity-100 ml-2 p-1 rounded-full bg-white/80 hover:bg-white text-red-500 hover:text-red-700 transition-all duration-200 relative z-10 shadow-sm"
+                        className="opacity-0 group-hover:opacity-100 ml-2 text-red-500 hover:text-red-700 transition-opacity duration-200"
                         title="Remove rating section"
                       >
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
