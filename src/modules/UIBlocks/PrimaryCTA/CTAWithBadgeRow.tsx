@@ -431,7 +431,7 @@ export default function CTAWithBadgeRow(props: LayoutComponentProps) {
                       e.stopPropagation();
                       handleContentUpdate('customer_count', '___REMOVED___');
                     }}
-                    className="opacity-0 group-hover/customer-item:opacity-100 ml-1 text-red-500 hover:text-red-700 transition-opacity duration-200"
+                    className="opacity-0 group-hover/customer-item:opacity-100 ml-2 text-red-500 hover:text-red-700 transition-opacity duration-200"
                     title="Remove customer count"
                   >
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -482,7 +482,7 @@ export default function CTAWithBadgeRow(props: LayoutComponentProps) {
                       handleContentUpdate('rating_value', '___REMOVED___');
                       handleContentUpdate('rating_count', '___REMOVED___');
                     }}
-                    className="opacity-0 group-hover/rating-item:opacity-100 ml-2 p-1 rounded-full bg-white/80 hover:bg-white text-red-500 hover:text-red-700 transition-all duration-200 relative z-10 shadow-sm"
+                    className="opacity-0 group-hover/rating-item:opacity-100 ml-2 text-red-500 hover:text-red-700 transition-opacity duration-200"
                     title="Remove rating section"
                   >
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

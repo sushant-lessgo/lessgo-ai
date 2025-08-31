@@ -651,7 +651,7 @@ export default function ValueReinforcementBlock(props: LayoutComponentProps) {
                             handleContentUpdate(`stat_${index + 1}` as keyof ValueReinforcementBlockContent, '___REMOVED___');
                             handleContentUpdate(`label_${index + 1}` as keyof ValueReinforcementBlockContent, '___REMOVED___');
                           }}
-                          className="opacity-0 group-hover/stat-item:opacity-100 absolute -top-2 -right-2 p-1 rounded-full bg-white/80 hover:bg-white text-red-500 hover:text-red-700 transition-all duration-200 shadow-sm"
+                          className="opacity-0 group-hover/stat-item:opacity-100 ml-2 text-red-500 hover:text-red-700 transition-opacity duration-200"
                           title="Remove this stat"
                         >
                           <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">

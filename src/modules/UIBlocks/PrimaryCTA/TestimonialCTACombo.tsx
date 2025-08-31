@@ -266,7 +266,7 @@ export default function TestimonialCTACombo(props: LayoutComponentProps) {
                           e.stopPropagation();
                           handleContentUpdate('customer_count', '___REMOVED___');
                         }}
-                        className="opacity-0 group-hover/customer-item:opacity-100 absolute -top-2 -right-2 p-1 rounded-full bg-white/80 hover:bg-white text-red-500 hover:text-red-700 transition-all duration-200 shadow-sm"
+                        className="opacity-0 group-hover/customer-item:opacity-100 ml-2 text-red-500 hover:text-red-700 transition-opacity duration-200"
                         title="Remove customer count"
                       >
                         <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -304,7 +304,7 @@ export default function TestimonialCTACombo(props: LayoutComponentProps) {
                           e.stopPropagation();
                           handleContentUpdate('average_rating', '___REMOVED___');
                         }}
-                        className="opacity-0 group-hover/rating-item:opacity-100 absolute -top-2 -right-2 p-1 rounded-full bg-white/80 hover:bg-white text-red-500 hover:text-red-700 transition-all duration-200 shadow-sm"
+                        className="opacity-0 group-hover/rating-item:opacity-100 ml-2 text-red-500 hover:text-red-700 transition-opacity duration-200"
                         title="Remove average rating"
                       >
                         <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -342,7 +342,7 @@ export default function TestimonialCTACombo(props: LayoutComponentProps) {
                           e.stopPropagation();
                           handleContentUpdate('uptime_percentage', '___REMOVED___');
                         }}
-                        className="opacity-0 group-hover/uptime-item:opacity-100 absolute -top-2 -right-2 p-1 rounded-full bg-white/80 hover:bg-white text-red-500 hover:text-red-700 transition-all duration-200 shadow-sm"
+                        className="opacity-0 group-hover/uptime-item:opacity-100 ml-2 text-red-500 hover:text-red-700 transition-opacity duration-200"
                         title="Remove uptime percentage"
                       >
                         <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
