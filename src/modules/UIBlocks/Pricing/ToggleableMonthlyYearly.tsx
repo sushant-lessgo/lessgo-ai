@@ -547,9 +547,9 @@ export default function ToggleableMonthlyYearly(props: LayoutComponentProps) {
                 <div className="space-y-6">
                   <div className="grid md:grid-cols-4 gap-6">
                     {[1, 2, 3, 4].map((index) => {
-                      const featureTitle = blockContent[`platform_feature_${index}_title` as keyof ToggleableMonthlyYearlyContent] || '';
-                      const featureDesc = blockContent[`platform_feature_${index}_desc` as keyof ToggleableMonthlyYearlyContent] || '';
-                      const featureIcon = blockContent[`platform_feature_${index}_icon` as keyof ToggleableMonthlyYearlyContent] || ['✅', '🛡️', '💬', '⚡'][index - 1] || '🎯';
+                      const featureTitle = String(blockContent[`platform_feature_${index}_title` as keyof ToggleableMonthlyYearlyContent] || '');
+                      const featureDesc = String(blockContent[`platform_feature_${index}_desc` as keyof ToggleableMonthlyYearlyContent] || '');
+                      const featureIcon = String(blockContent[`platform_feature_${index}_icon` as keyof ToggleableMonthlyYearlyContent] || ['✅', '🛡️', '💬', '⚡'][index - 1] || '🎯');
                       
                       return (
                         <div key={index} className="text-center relative group/platform-feature">

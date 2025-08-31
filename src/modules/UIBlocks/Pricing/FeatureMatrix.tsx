@@ -533,9 +533,9 @@ export default function FeatureMatrix(props: LayoutComponentProps) {
                 <div className="space-y-6">
                   <div className="grid md:grid-cols-4 gap-6">
                     {[1, 2, 3, 4].map((index) => {
-                      const featureTitle = blockContent[`enterprise_feature_${index}_title` as keyof FeatureMatrixContent] || '';
-                      const featureDesc = blockContent[`enterprise_feature_${index}_desc` as keyof FeatureMatrixContent] || '';
-                      const featureIcon = blockContent[`enterprise_feature_${index}_icon` as keyof FeatureMatrixContent] || 'default';
+                      const featureTitle = String(blockContent[`enterprise_feature_${index}_title` as keyof FeatureMatrixContent] || '');
+                      const featureDesc = String(blockContent[`enterprise_feature_${index}_desc` as keyof FeatureMatrixContent] || '');
+                      const featureIcon = String(blockContent[`enterprise_feature_${index}_icon` as keyof FeatureMatrixContent] || 'default');
                       
                       return (
                         <div key={index} className="text-center relative group/enterprise-feature">

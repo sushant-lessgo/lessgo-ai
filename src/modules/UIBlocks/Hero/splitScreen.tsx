@@ -4,6 +4,7 @@ import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
 import { useImageToolbar } from '@/hooks/useImageToolbar';
 import { useTypography } from '@/hooks/useTypography';
 import { LayoutSection } from '@/components/layout/LayoutSection';
+import { getUIBlockSpacing, RESPONSIVE_GAP, RESPONSIVE_PADDING } from '@/config/spacingConfig';
 import { 
   EditableAdaptiveHeadline, 
   EditableAdaptiveText, 
@@ -404,10 +405,10 @@ export default function SplitScreen(props: LayoutComponentProps) {
       className={props.className}
     >
       <div className="min-h-screen flex items-center">
-        <div className="w-full grid lg:grid-cols-2 gap-0 min-h-[700px]">
+        <div className="w-full grid lg:grid-cols-2 gap-4 md:gap-8 lg:gap-12 min-h-[700px]">
           
-          <div className="flex items-center justify-center p-8 lg:p-12">
-            <div className="max-w-lg space-y-8">
+          <div className="flex items-center justify-center p-8 md:p-10 lg:p-16">
+            <div className="max-w-lg space-y-8 md:space-y-10 lg:space-y-12">
               
               {(blockContent.badge_text || mode === 'edit') && (
                 <div>
@@ -424,18 +425,20 @@ export default function SplitScreen(props: LayoutComponentProps) {
                 </div>
               )}
 
-              <EditableAdaptiveHeadline
-                mode={mode}
-                value={blockContent.headline || ''}
-                onEdit={(value) => handleContentUpdate('headline', value)}
-                level="h1"
-                backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
-                colorTokens={colorTokens}
-                style={heroTypographyStyle}
-                sectionId={sectionId}
-                elementKey="headline"
-                sectionBackground={sectionBackground}
-              />
+              <div className="mb-2">
+                <EditableAdaptiveHeadline
+                  mode={mode}
+                  value={blockContent.headline || ''}
+                  onEdit={(value) => handleContentUpdate('headline', value)}
+                  level="h1"
+                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
+                  colorTokens={colorTokens}
+                  style={heroTypographyStyle}
+                  sectionId={sectionId}
+                  elementKey="headline"
+                  sectionBackground={sectionBackground}
+                />
+              </div>
 
               {(blockContent.subheadline || mode === 'edit') && (
                 <EditableAdaptiveText
@@ -469,7 +472,7 @@ export default function SplitScreen(props: LayoutComponentProps) {
                 />
               )}
 
-              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6 sm:gap-8 mt-4">
                 
                 <CTAButton
                   text={blockContent.cta_text}
@@ -531,9 +534,9 @@ export default function SplitScreen(props: LayoutComponentProps) {
               </div>
 
               {(blockContent.show_social_proof !== false) && (
-                <div className="flex flex-col space-y-4 pt-4">
+                <div className="flex flex-col space-y-6 pt-8 md:pt-10">
                   {blockContent.customer_count && blockContent.customer_count !== '___REMOVED___' && (
-                    <div className="relative group/customer-count flex items-center space-x-2">
+                    <div className="relative group/customer-count flex items-center space-x-3">
                       {blockContent.show_customer_avatars !== false && (
                         <div className="flex -space-x-2">
                           {customerAvatars.map((customer, i) => (
@@ -582,9 +585,9 @@ export default function SplitScreen(props: LayoutComponentProps) {
                   )}
                   
                   {blockContent.rating_value && blockContent.rating_value !== '___REMOVED___' && (
-                    <div className="relative group/rating-section flex items-center space-x-1">
+                    <div className="relative group/rating-section flex items-center space-x-2">
                       {renderStars(blockContent.rating_value)}
-                      <div className="flex items-center space-x-1 ml-2">
+                      <div className="flex items-center space-x-2 ml-3">
                         <EditableAdaptiveText
                           mode={mode}
                           value={blockContent.rating_value || ''}
@@ -636,7 +639,7 @@ export default function SplitScreen(props: LayoutComponentProps) {
             </div>
           </div>
 
-          <div className="flex items-center justify-center p-4 lg:p-8">
+          <div className="flex items-center justify-center p-4 md:p-6 lg:p-8">
             {reactiveHeroImage && reactiveHeroImage !== '' ? (
               <div className="relative w-full h-full min-h-[600px]">
                 <img

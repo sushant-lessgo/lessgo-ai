@@ -352,8 +352,8 @@ const PricingCard = ({
               // Edit mode: Show all 8 potential feature slots
               Array.from({ length: 8 }, (_, featureIndex) => {
                 const featureKey = `tier_${index + 1}_feature_${featureIndex + 1}` as keyof TierCardsContent;
-                const feature = blockContent[featureKey] || '';
-                const isVisible = feature && typeof feature === 'string' && feature !== '___REMOVED___' && feature.trim() !== '';
+                const feature = String(blockContent[featureKey] || '');
+                const isVisible = feature && feature !== '___REMOVED___' && feature.trim() !== '';
                 
                 return (isVisible || mode === 'edit') ? (
                   <li key={featureIndex} className={`flex items-start group/feature-item relative ${!isVisible ? 'opacity-60 hover:opacity-100 transition-opacity' : ''}`}>

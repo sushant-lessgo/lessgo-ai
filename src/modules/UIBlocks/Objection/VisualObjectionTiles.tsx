@@ -171,7 +171,7 @@ export default function VisualObjectionTiles(props: LayoutComponentProps) {
                   }}
                   backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
                   colorTokens={colorTokens}
-                  variant="headline"
+                  variant="body"
                   className="text-lg font-bold text-gray-900 mb-3 text-center"
                   placeholder="Enter objection"
                   sectionBackground={sectionBackground}
@@ -219,7 +219,7 @@ export default function VisualObjectionTiles(props: LayoutComponentProps) {
             onEdit={(value) => handleContentUpdate('bottom_cta_title', value)}
             backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
             colorTokens={colorTokens}
-            variant="headline"
+            variant="body"
             className="text-xl font-bold text-gray-900 mb-4"
             placeholder="Enter CTA title"
             sectionBackground={sectionBackground}

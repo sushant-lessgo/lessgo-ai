@@ -533,8 +533,8 @@ export default function CardWithTestimonial(props: LayoutComponentProps) {
                 <div className="space-y-6">
                   <div className="grid md:grid-cols-4 gap-6">
                     {[1, 2, 3, 4].map((index) => {
-                      const metricValue = blockContent[`social_metric_${index}` as keyof CardWithTestimonialContent] || '';
-                      const metricLabel = blockContent[`social_metric_${index}_label` as keyof CardWithTestimonialContent] || '';
+                      const metricValue = String(blockContent[`social_metric_${index}` as keyof CardWithTestimonialContent] || '');
+                      const metricLabel = String(blockContent[`social_metric_${index}_label` as keyof CardWithTestimonialContent] || '');
                       
                       return (
                         <div key={index} className="text-center relative group/social-metric">

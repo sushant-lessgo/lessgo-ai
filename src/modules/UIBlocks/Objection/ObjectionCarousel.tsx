@@ -181,7 +181,7 @@ export default function ObjectionCarousel(props: LayoutComponentProps) {
                         }}
                         backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
                         colorTokens={colorTokens}
-                        variant="headline"
+                        variant="body"
                         className="text-2xl lg:text-3xl font-bold text-gray-900 mb-8 leading-tight"
                         placeholder="Enter question"
                         sectionBackground={sectionBackground}

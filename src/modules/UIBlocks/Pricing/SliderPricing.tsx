@@ -443,7 +443,7 @@ export default function SliderPricing(props: LayoutComponentProps) {
                   elementKey="cta_text"
                 />
                 
-                {(blockContent.pricing_note || mode === 'edit') && (
+                {(blockContent.pricing_note || (mode as string) === 'edit') && (
                   <EditableAdaptiveText
                     mode={mode}
                     value={blockContent.pricing_note || ''}

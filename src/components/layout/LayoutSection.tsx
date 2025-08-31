@@ -1,6 +1,7 @@
 import React, { forwardRef } from 'react';
 import type { BackgroundType } from '@/types/sectionBackground';
 import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
+import { ComponentDensity, getUIBlockSpacing, combineSpacing } from '@/config/spacingConfig';
 
 interface LayoutSectionProps {
   sectionId: string;
@@ -10,6 +11,7 @@ interface LayoutSectionProps {
   mode: 'edit' | 'preview';
   className?: string;
   children: React.ReactNode;
+  componentDensity?: ComponentDensity;
   editModeInfo?: {
     componentName: string;
     description?: string;
@@ -25,6 +27,7 @@ export const LayoutSection = forwardRef<HTMLElement, LayoutSectionProps>(({
   mode,
   className = '',
   children,
+  componentDensity,
   editModeInfo,
 }, ref) => {
   
@@ -33,18 +36,18 @@ export const LayoutSection = forwardRef<HTMLElement, LayoutSectionProps>(({
   const sectionSpacing = store.sectionSpacing;
   const spacingValue = sectionSpacing?.[sectionId];
   
-  // Map spacing values to Tailwind classes
+  // Enhanced spacing with responsive values
   const getSpacingClass = (spacing?: string): string => {
     switch (spacing) {
       case 'compact':
-        return 'py-12'; // 48px
+        return 'py-8 md:py-10 lg:py-12'; // 32px -> 40px -> 48px
       case 'spacious':
-        return 'py-24'; // 96px
+        return 'py-16 md:py-20 lg:py-24'; // 64px -> 80px -> 96px
       case 'extra':
-        return 'py-32'; // 128px
+        return 'py-20 md:py-24 lg:py-32'; // 80px -> 96px -> 128px
       case 'normal':
       default:
-        return 'py-16'; // 64px (default)
+        return 'py-12 md:py-14 lg:py-16'; // 48px -> 56px -> 64px
     }
   };
   

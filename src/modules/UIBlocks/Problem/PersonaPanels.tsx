@@ -365,7 +365,7 @@ export default function PersonaPanels(props: LayoutComponentProps) {
             sectionBackground={sectionBackground}
           />
 
-          {(blockContent.subheadline || mode === 'edit') && (
+          {(blockContent.subheadline || (mode as string) === 'edit') && (
             <EditableAdaptiveText
               mode={mode}
               value={blockContent.subheadline || ''}
@@ -381,7 +381,7 @@ export default function PersonaPanels(props: LayoutComponentProps) {
             />
           )}
 
-          {(blockContent.intro_text || mode === 'edit') && (
+          {(blockContent.intro_text || (mode as string) === 'edit') && (
             <div className="max-w-4xl mx-auto mb-8">
               <EditableAdaptiveText
                 mode={mode}
@@ -400,7 +400,7 @@ export default function PersonaPanels(props: LayoutComponentProps) {
           )}
         </div>
 
-        {mode === 'edit' ? (
+        {(mode as string) === 'edit' ? (
           <div className="space-y-8">
             <div className="p-6 border border-gray-200 rounded-lg bg-gray-50">
               <h4 className="font-semibold text-gray-700 mb-4">Persona Panels Content</h4>
@@ -505,7 +505,7 @@ export default function PersonaPanels(props: LayoutComponentProps) {
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={solution.icon} />
                         </svg>
                       </div>
-                      {mode === 'edit' && (
+                      {(mode as string) === 'edit' && (
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
@@ -562,9 +562,9 @@ export default function PersonaPanels(props: LayoutComponentProps) {
           </>
         )}
 
-        {(blockContent.supporting_text || blockContent.trust_items || mode === 'edit') && (
+        {(blockContent.supporting_text || blockContent.trust_items || (mode as string) === 'edit') && (
           <div className="text-center space-y-6 mt-12">
-            {(blockContent.supporting_text || mode === 'edit') && (
+            {(blockContent.supporting_text || (mode as string) === 'edit') && (
               <EditableAdaptiveText
                 mode={mode}
                 value={blockContent.supporting_text || ''}

@@ -248,7 +248,8 @@ const FeaturedQuote = React.memo(({
   mode,
   onAvatarEdit,
   sectionId,
-  integrationIndex
+  integrationIndex,
+  avatarUrl
 }: { 
   integration: Integration; 
   colorTokens: any;

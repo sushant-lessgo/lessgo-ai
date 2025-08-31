@@ -29,6 +29,12 @@ interface CollapsedCardsContent {
   problem_icon_4?: string;
   problem_icon_5?: string;
   problem_icon_6?: string;
+  summary_stat_1?: string;
+  summary_stat_1_label?: string;
+  summary_stat_2?: string;
+  summary_stat_2_label?: string;
+  summary_stat_3?: string;
+  summary_stat_3_label?: string;
 }
 
 const CONTENT_SCHEMA = {
@@ -77,7 +83,13 @@ const CONTENT_SCHEMA = {
   problem_icon_3: { type: 'string' as const, default: '💬' },
   problem_icon_4: { type: 'string' as const, default: '⚙️' },
   problem_icon_5: { type: 'string' as const, default: '👥' },
-  problem_icon_6: { type: 'string' as const, default: '🎯' }
+  problem_icon_6: { type: 'string' as const, default: '🎯' },
+  summary_stat_1: { type: 'string' as const, default: '73%' },
+  summary_stat_1_label: { type: 'string' as const, default: 'of businesses struggle with this' },
+  summary_stat_2: { type: 'string' as const, default: '45%' },
+  summary_stat_2_label: { type: 'string' as const, default: 'see immediate improvement' },
+  summary_stat_3: { type: 'string' as const, default: '2.5x' },
+  summary_stat_3_label: { type: 'string' as const, default: 'faster results with our solution' }
 };
 
 export default function CollapsedCards(props: LayoutComponentProps) {
@@ -269,7 +281,7 @@ export default function CollapsedCards(props: LayoutComponentProps) {
             sectionBackground={sectionBackground}
           />
 
-          {(blockContent.subheadline || mode === 'edit') && (
+          {(blockContent.subheadline || (mode as string) === 'edit') && (
             <EditableAdaptiveText
               mode={mode}
               value={blockContent.subheadline || ''}
@@ -285,7 +297,7 @@ export default function CollapsedCards(props: LayoutComponentProps) {
             />
           )}
 
-          {(blockContent.intro_text || mode === 'edit') && (
+          {(blockContent.intro_text || (mode as string) === 'edit') && (
             <div className="max-w-3xl mx-auto mb-8">
               <EditableAdaptiveText
                 mode={mode}
@@ -304,7 +316,7 @@ export default function CollapsedCards(props: LayoutComponentProps) {
           )}
         </div>
 
-        {mode === 'edit' ? (
+        {(mode as string) === 'edit' ? (
           <div className="space-y-8">
             <div className="p-6 border border-gray-200 rounded-lg bg-gray-50">
               <h4 className="font-semibold text-gray-700 mb-4">Collapsed Cards Content</h4>
@@ -407,7 +419,7 @@ export default function CollapsedCards(props: LayoutComponentProps) {
                         data-section-id={sectionId}
                         data-element-key="summary_stat_1"
                       />
-                      {mode === 'edit' && (
+                      {(mode as string) === 'edit' && (
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
@@ -452,7 +464,7 @@ export default function CollapsedCards(props: LayoutComponentProps) {
                         data-section-id={sectionId}
                         data-element-key="summary_stat_2"
                       />
-                      {mode === 'edit' && (
+                      {(mode as string) === 'edit' && (
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
@@ -497,7 +509,7 @@ export default function CollapsedCards(props: LayoutComponentProps) {
                         data-section-id={sectionId}
                         data-element-key="summary_stat_3"
                       />
-                      {mode === 'edit' && (
+                      {(mode as string) === 'edit' && (
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
@@ -587,9 +599,9 @@ export default function CollapsedCards(props: LayoutComponentProps) {
           </>
         )}
 
-        {(blockContent.supporting_text || blockContent.trust_items || mode === 'edit') && (
+        {(blockContent.supporting_text || blockContent.trust_items || (mode as string) === 'edit') && (
           <div className="text-center space-y-6 mt-12">
-            {(blockContent.supporting_text || mode === 'edit') && (
+            {(blockContent.supporting_text || (mode as string) === 'edit') && (
               <EditableAdaptiveText
                 mode={mode}
                 value={blockContent.supporting_text || ''}

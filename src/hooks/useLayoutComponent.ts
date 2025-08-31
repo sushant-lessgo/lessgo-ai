@@ -66,8 +66,19 @@ export function useLayoutComponent<T = Record<string, any>>({
     const onboardingData = useOnboardingStore.getState();
     const editStore = useEditStore.getState();
     const pageStore = {
-      layout: editStore.layout,
-      meta: editStore.meta
+      layout: {
+        sections: editStore.sections,
+        sectionLayouts: editStore.sectionLayouts,
+      },
+      meta: {
+        onboardingData: {
+          oneLiner: onboardingData.oneLiner || '',
+          validatedFields: onboardingData.validatedFields || {},
+          featuresFromAI: onboardingData.featuresFromAI || [],
+          targetAudience: onboardingData.validatedFields?.targetAudience,
+          businessType: onboardingData.validatedFields?.marketCategory,
+        }
+      }
     };
     const variables = mapStoreToVariables(onboardingData, pageStore as any);
     

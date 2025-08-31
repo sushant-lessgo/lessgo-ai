@@ -197,7 +197,7 @@ export default function BoldGuaranteePanel(props: LayoutComponentProps) {
                 primaryText: 'text-white',
                 mutedText: 'text-green-50'
               }}
-              variant="headline"
+              variant="body"
               style={{...h1Style, fontSize: 'clamp(2rem, 5vw, 2.5rem)'}} 
               className="mb-4"
               placeholder="Enter main guarantee"
@@ -273,7 +273,7 @@ export default function BoldGuaranteePanel(props: LayoutComponentProps) {
                   }}
                   backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
                   colorTokens={colorTokens}
-                  variant="headline"
+                  variant="body"
                   style={{...h3Style}}
                   className="text-gray-900"
                   placeholder="Enter guarantee title"
@@ -323,7 +323,7 @@ export default function BoldGuaranteePanel(props: LayoutComponentProps) {
               onEdit={(value) => handleContentUpdate('risk_section_title', value)}
               backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
               colorTokens={colorTokens}
-              variant="headline"
+              variant="body"
               style={{...h2Style}}
               className="text-gray-900 mb-4"
               placeholder="Enter risk section title"

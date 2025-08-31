@@ -1,6 +1,7 @@
 import React from 'react';
 import { useLayoutComponent } from '@/hooks/useLayoutComponent';
 import { LayoutSection } from '@/components/layout/LayoutSection';
+import { RESPONSIVE_GAP } from '@/config/spacingConfig';
 import { 
   EditableAdaptiveHeadline, 
   EditableAdaptiveText
@@ -133,7 +134,7 @@ export default function SideBySideSplit(props: LayoutComponentProps) {
     >
       <div className="max-w-7xl mx-auto">
         
-        <div className="text-center mb-16">
+        <div className="text-center mb-8 md:mb-12 lg:mb-16">
           <EditableAdaptiveHeadline
             mode={mode}
             value={blockContent.headline || ''}
@@ -245,7 +246,7 @@ export default function SideBySideSplit(props: LayoutComponentProps) {
         ) : (
           <>
             {/* Main Split Section */}
-            <div className="grid lg:grid-cols-2 gap-12 mb-16">
+            <div className="grid lg:grid-cols-2 gap-6 md:gap-8 lg:gap-12 mb-8 md:mb-12 lg:mb-16">
               
               {/* Problem Side */}
               <div className="relative">
@@ -256,9 +257,9 @@ export default function SideBySideSplit(props: LayoutComponentProps) {
                   </div>
                 </div>
                 
-                <div className="bg-gradient-to-br from-red-50 to-orange-50 rounded-2xl p-8 border-2 border-red-200 h-full">
+                <div className="bg-gradient-to-br from-red-50 to-orange-50 rounded-2xl p-6 md:p-8 border-2 border-red-200 h-full">
                   {/* Problem Header */}
-                  <div className="text-center mb-8">
+                  <div className="text-center mb-6 md:mb-8">
                     <div className="w-16 h-16 bg-red-500 rounded-full flex items-center justify-center mx-auto mb-4 group/icon-edit relative">
                       <IconEditableText
                         mode={mode}
@@ -276,14 +277,14 @@ export default function SideBySideSplit(props: LayoutComponentProps) {
                   </div>
                   
                   {/* Problem Description */}
-                  <div className="mb-8">
+                  <div className="mb-6 md:mb-8">
                     <p className="text-gray-700 leading-relaxed">
                       {blockContent.problem_description}
                     </p>
                   </div>
                   
                   {/* Problem Points */}
-                  <div className="space-y-4">
+                  <div className="space-y-3 md:space-y-4">
                     {problemPoints.map((point, index) => (
                       <div key={index} className="flex items-start space-x-3">
                         <div className="w-6 h-6 bg-red-500 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
@@ -297,7 +298,7 @@ export default function SideBySideSplit(props: LayoutComponentProps) {
                   </div>
                   
                   {/* Downward Arrow */}
-                  <div className="flex justify-center mt-8">
+                  <div className="flex justify-center mt-6 md:mt-8">
                     <div className="w-8 h-8 text-red-500">
                       <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
@@ -316,9 +317,9 @@ export default function SideBySideSplit(props: LayoutComponentProps) {
                   </div>
                 </div>
                 
-                <div className="bg-gradient-to-br from-green-50 to-blue-50 rounded-2xl p-8 border-2 border-green-200 h-full">
+                <div className="bg-gradient-to-br from-green-50 to-blue-50 rounded-2xl p-6 md:p-8 border-2 border-green-200 h-full">
                   {/* Solution Header */}
-                  <div className="text-center mb-8">
+                  <div className="text-center mb-6 md:mb-8">
                     <div className="w-16 h-16 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-4 group/icon-edit relative">
                       <IconEditableText
                         mode={mode}
@@ -336,14 +337,14 @@ export default function SideBySideSplit(props: LayoutComponentProps) {
                   </div>
                   
                   {/* Solution Description */}
-                  <div className="mb-8">
+                  <div className="mb-6 md:mb-8">
                     <p className="text-gray-700 leading-relaxed">
                       {blockContent.solution_preview}
                     </p>
                   </div>
                   
                   {/* Solution Points */}
-                  <div className="space-y-4">
+                  <div className="space-y-3 md:space-y-4">
                     {solutionPoints.map((point, index) => (
                       <div key={index} className="flex items-start space-x-3">
                         <div className="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
@@ -357,7 +358,7 @@ export default function SideBySideSplit(props: LayoutComponentProps) {
                   </div>
                   
                   {/* Upward Arrow */}
-                  <div className="flex justify-center mt-8">
+                  <div className="flex justify-center mt-6 md:mt-8">
                     <div className="w-8 h-8 text-green-500">
                       <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 10l7-7m0 0l7 7m-7-7v18" />

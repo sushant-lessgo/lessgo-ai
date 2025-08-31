@@ -490,7 +490,7 @@ export default function MiniStackedCards(props: LayoutComponentProps) {
             sectionBackground={sectionBackground}
           />
 
-          {(blockContent.subheadline || mode === 'edit') && (
+          {(blockContent.subheadline || (mode as string) === 'edit') && (
             <EditableAdaptiveText
               mode={mode}
               value={blockContent.subheadline || ''}
@@ -508,7 +508,7 @@ export default function MiniStackedCards(props: LayoutComponentProps) {
           )}
         </div>
 
-        {mode === 'edit' ? (
+        {(mode as string) === 'edit' ? (
           <div className="space-y-8">
             <div className="p-6 border border-gray-200 rounded-lg bg-gray-50">
               <h4 style={h4Style} className="font-semibold text-gray-700 mb-4">Mini Stacked Cards Content</h4>
@@ -588,17 +588,17 @@ export default function MiniStackedCards(props: LayoutComponentProps) {
             </div>
 
             {/* Additional Features Comparison */}
-            {((blockContent.show_plans_features !== false && plansFeatures.length > 0) || mode === 'edit') && (
+            {((blockContent.show_plans_features !== false && plansFeatures.length > 0) || (mode as string) === 'edit') && (
               <div className="bg-white rounded-xl border border-gray-200 p-8 mb-12">
                 <h3 style={h3Style} className="font-semibold text-gray-900 text-center mb-8">All plans include</h3>
                 
-                {mode === 'edit' ? (
+                {(mode as string) === 'edit' ? (
                   <div className="space-y-6">
                     <div className="grid md:grid-cols-3 gap-6">
                       {[1, 2, 3].map((index) => {
-                        const featureTitle = blockContent[`plans_feature_${index}_title` as keyof MiniStackedCardsContent] || '';
-                        const featureDesc = blockContent[`plans_feature_${index}_desc` as keyof MiniStackedCardsContent] || '';
-                        const featureIcon = blockContent[`plans_feature_${index}` as keyof MiniStackedCardsContent] || 'default';
+                        const featureTitle = String(blockContent[`plans_feature_${index}_title` as keyof MiniStackedCardsContent] || '');
+                        const featureDesc = String(blockContent[`plans_feature_${index}_desc` as keyof MiniStackedCardsContent] || '');
+                        const featureIcon = String(blockContent[`plans_feature_${index}` as keyof MiniStackedCardsContent] || 'default');
                         
                         return (
                           <div key={index} className="text-center relative group/plans-feature">
@@ -674,16 +674,16 @@ export default function MiniStackedCards(props: LayoutComponentProps) {
             )}
 
             {/* FAQ Section */}
-            {((blockContent.show_faq !== false && faqItems.length > 0) || mode === 'edit') && (
+            {((blockContent.show_faq !== false && faqItems.length > 0) || (mode as string) === 'edit') && (
               <div className="bg-gray-50 rounded-xl p-8 border border-gray-100 mb-12">
                 <h3 style={h3Style} className="font-semibold text-gray-900 text-center mb-8">Frequently Asked Questions</h3>
                 
-                {mode === 'edit' ? (
+                {(mode as string) === 'edit' ? (
                   <div className="space-y-6">
                     <div className="grid md:grid-cols-2 gap-6">
                       {[1, 2, 3, 4].map((index) => {
-                        const question = blockContent[`faq_question_${index}` as keyof MiniStackedCardsContent] || '';
-                        const answer = blockContent[`faq_answer_${index}` as keyof MiniStackedCardsContent] || '';
+                        const question = String(blockContent[`faq_question_${index}` as keyof MiniStackedCardsContent] || '');
+                        const answer = String(blockContent[`faq_answer_${index}` as keyof MiniStackedCardsContent] || '');
                         
                         return (
                           <div key={index} className="relative group/faq-item">
@@ -752,13 +752,13 @@ export default function MiniStackedCards(props: LayoutComponentProps) {
             )}
 
             {/* Trust Indicators */}
-            {((blockContent.show_trust_bar !== false && trustBarItems.length > 0) || mode === 'edit') && (
+            {((blockContent.show_trust_bar !== false && trustBarItems.length > 0) || (mode as string) === 'edit') && (
               <div className="text-center bg-blue-50 rounded-xl p-6 border border-blue-100">
-                {mode === 'edit' ? (
+                {(mode as string) === 'edit' ? (
                   <div className="space-y-4">
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                       {[1, 2, 3, 4].map((index) => {
-                        const trustItem = blockContent[`trust_item_${index}` as keyof MiniStackedCardsContent] || '';
+                        const trustItem = String(blockContent[`trust_item_${index}` as keyof MiniStackedCardsContent] || '');
                         
                         return (
                           <div key={index} className="flex items-center space-x-2 relative group/trust-item justify-center">
@@ -816,9 +816,9 @@ export default function MiniStackedCards(props: LayoutComponentProps) {
           </>
         )}
 
-        {(blockContent.supporting_text || blockContent.trust_items || mode === 'edit') && (
+        {(blockContent.supporting_text || blockContent.trust_items || (mode as string) === 'edit') && (
           <div className="text-center space-y-6 mt-12">
-            {(blockContent.supporting_text || mode === 'edit') && (
+            {(blockContent.supporting_text || (mode as string) === 'edit') && (
               <EditableAdaptiveText
                 mode={mode}
                 value={blockContent.supporting_text || ''}

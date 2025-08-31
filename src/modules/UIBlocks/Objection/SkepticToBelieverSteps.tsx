@@ -226,7 +226,7 @@ export default function SkepticToBelieverSteps(props: LayoutComponentProps) {
                         }}
                         backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
                         colorTokens={colorTokens}
-                        variant="headline"
+                        variant="body"
                         className="text-xl font-bold text-gray-900 mb-4"
                         placeholder="Enter step title"
                         sectionBackground={sectionBackground}
@@ -307,7 +307,7 @@ export default function SkepticToBelieverSteps(props: LayoutComponentProps) {
               onEdit={(value) => handleContentUpdate('success_title', value)}
               backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
               colorTokens={colorTokens}
-              variant="headline"
+              variant="body"
               className="text-2xl font-bold text-green-900 mb-4"
               placeholder="Enter success title"
               sectionBackground={sectionBackground}
@@ -337,7 +337,7 @@ export default function SkepticToBelieverSteps(props: LayoutComponentProps) {
                   onEdit={(value) => handleContentUpdate('stat_1_value', value)}
                   backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
                   colorTokens={colorTokens}
-                  variant="headline"
+                  variant="body"
                   className="text-3xl font-bold text-green-900 mb-2"
                   placeholder="Stat 1 value"
                   sectionBackground={sectionBackground}
@@ -365,7 +365,7 @@ export default function SkepticToBelieverSteps(props: LayoutComponentProps) {
                   onEdit={(value) => handleContentUpdate('stat_2_value', value)}
                   backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
                   colorTokens={colorTokens}
-                  variant="headline"
+                  variant="body"
                   className="text-3xl font-bold text-green-900 mb-2"
                   placeholder="Stat 2 value"
                   sectionBackground={sectionBackground}
@@ -393,7 +393,7 @@ export default function SkepticToBelieverSteps(props: LayoutComponentProps) {
                   onEdit={(value) => handleContentUpdate('stat_3_value', value)}
                   backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
                   colorTokens={colorTokens}
-                  variant="headline"
+                  variant="body"
                   className="text-3xl font-bold text-green-900 mb-2"
                   placeholder="Stat 3 value"
                   sectionBackground={sectionBackground}
