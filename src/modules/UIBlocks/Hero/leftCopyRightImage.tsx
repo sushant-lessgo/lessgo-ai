@@ -560,7 +560,7 @@ export default function LeftCopyRightImage(props: LayoutComponentProps) {
             {(blockContent.show_social_proof !== false) && (
               <div className="flex items-center space-x-6 pt-4">
                 {blockContent.customer_count && blockContent.customer_count !== '___REMOVED___' && (
-                  <div className="relative group flex items-center space-x-2">
+                  <div className="relative group/customer-count flex items-center space-x-2">
                     {blockContent.show_customer_avatars !== false && (
                       <div className="flex -space-x-2">
                         {customerAvatars.map((customer, i) => (
@@ -597,7 +597,7 @@ export default function LeftCopyRightImage(props: LayoutComponentProps) {
                           e.stopPropagation();
                           handleContentUpdate('customer_count', '___REMOVED___');
                         }}
-                        className="opacity-0 group-hover:opacity-100 ml-2 text-red-500 hover:text-red-700 transition-opacity duration-200"
+                        className="opacity-0 group-hover/customer-count:opacity-100 ml-2 text-red-500 hover:text-red-700 transition-opacity duration-200"
                         title="Remove customer count"
                       >
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -609,7 +609,7 @@ export default function LeftCopyRightImage(props: LayoutComponentProps) {
                 )}
                 
                 {blockContent.rating_value && blockContent.rating_value !== '___REMOVED___' && (
-                  <div className="relative group flex items-center space-x-1">
+                  <div className="relative group/rating-section flex items-center space-x-1">
                     {renderStars(blockContent.rating_value)}
                     <EditableAdaptiveText
                       mode={mode}
@@ -646,7 +646,7 @@ export default function LeftCopyRightImage(props: LayoutComponentProps) {
                           handleContentUpdate('rating_value', '___REMOVED___');
                           handleContentUpdate('rating_count', '___REMOVED___');
                         }}
-                        className="opacity-0 group-hover:opacity-100 ml-2 text-red-500 hover:text-red-700 transition-opacity duration-200"
+                        className="opacity-0 group-hover/rating-section:opacity-100 ml-2 text-red-500 hover:text-red-700 transition-opacity duration-200"
                         title="Remove rating section"
                       >
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

@@ -24,6 +24,8 @@ module.exports = {
   'top-1',
   'right-1',
   'group-hover:opacity-100',
+  'group-hover/customer-count:opacity-100',
+  'group-hover/rating-section:opacity-100',
   'group-focus-within:opacity-100',
   'opacity-0',
   'transition-opacity',

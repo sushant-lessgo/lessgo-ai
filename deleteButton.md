@@ -16,11 +16,11 @@ Initial attempts used `bg-white/80` which made buttons invisible against white/l
 
 ## The Solution
 
-### Pattern to Use: Standard Group Hover
+### Pattern to Use: Named Group Hover (Only Working Solution)
 
 ```jsx
-// ✅ CORRECT PATTERN
-<div className="relative group flex items-center space-x-2">
+// ✅ CORRECT PATTERN - Named Groups for Hover Isolation
+<div className="relative group/customer-count flex items-center space-x-2">
   {/* Your content elements */}
   <EditableAdaptiveText ... />
   
@@ -29,10 +29,10 @@ Initial attempts used `bg-white/80` which made buttons invisible against white/l
     <button
       onClick={(e) => {
         e.stopPropagation();
-        handleContentUpdate('field_name', '___REMOVED___');
+        handleContentUpdate('customer_count', '___REMOVED___');
       }}
-      className="opacity-0 group-hover:opacity-100 ml-2 text-red-500 hover:text-red-700 transition-opacity duration-200"
-      title="Remove this item"
+      className="opacity-0 group-hover/customer-count:opacity-100 ml-2 text-red-500 hover:text-red-700 transition-opacity duration-200"
+      title="Remove customer count"
     >
       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -44,21 +44,40 @@ Initial attempts used `bg-white/80` which made buttons invisible against white/l
 
 ### Key Requirements
 
-1. **Container must have `group` class**: The parent container wrapping both content and delete button needs `className="relative group ..."`
+1. **Container must have named group class**: The parent container wrapping both content and delete button needs `className="relative group/unique-name ..."`
 
-2. **Use standard group-hover**: Button should use `opacity-0 group-hover:opacity-100` (NOT named groups like `group-hover/name:opacity-100`)
+2. **Use named group-hover**: Button should use `opacity-0 group-hover/unique-name:opacity-100` to prevent section-wide hover activation
 
 3. **No background on button**: Use only text color styling: `text-red-500 hover:text-red-700`
 
 4. **Simple transition**: Use `transition-opacity duration-200` for smooth appearance
 
+5. **Required Safelist Configuration**: Add the named group patterns to `tailwind.config.js` safelist
+
+## Required Safelist Configuration
+
+### ⚠️ CRITICAL: Add Named Groups to Tailwind Safelist
+
+Named group patterns must be explicitly added to `tailwind.config.js` safelist or they won't be compiled:
+
+```js
+// tailwind.config.js
+safelist: [
+  // ... other entries
+  'group-hover:opacity-100',
+  'group-hover/customer-count:opacity-100',
+  'group-hover/rating-section:opacity-100',
+  // Add more patterns as needed
+]
+```
+
 ## Common Pitfalls to Avoid
 
-### ❌ DON'T: Use Named Groups
+### ❌ DON'T: Use Standard Groups (Causes Section-Wide Hover)
 ```jsx
-// This won't work - Tailwind JIT doesn't compile it
-<div className="group/customer-item">
-  <button className="group-hover/customer-item:opacity-100">
+// This causes entire section to trigger hover
+<div className="group">
+  <button className="group-hover:opacity-100">
 ```
 
 ### ❌ DON'T: Use Peer Selectors
@@ -91,8 +110,9 @@ Initial attempts used `bg-white/80` which made buttons invisible against white/l
 
 When adding delete buttons to UI blocks:
 
-- [ ] Parent container has `className="relative group ..."`
-- [ ] Delete button uses `opacity-0 group-hover:opacity-100`
+- [ ] Parent container has `className="relative group/unique-name ..."`
+- [ ] Delete button uses `opacity-0 group-hover/unique-name:opacity-100`
+- [ ] Add the pattern to tailwind.config.js safelist: `'group-hover/unique-name:opacity-100'`
 - [ ] Button styling is minimal: `ml-2 text-red-500 hover:text-red-700 transition-opacity duration-200`
 - [ ] Button is a direct child of the group container (not deeply nested)
 - [ ] Button only appears in edit mode: `{mode === 'edit' && (...)}`
@@ -113,20 +133,82 @@ Based on our investigation, these files use incorrect delete button patterns:
 8. `src/modules/UIBlocks/Features/MiniCards.tsx`
 9. `src/components/layout/EditableTrustIndicators.tsx`
 
-## Example Fix Applied
+## Migration Steps
 
-### Before (Broken):
+### Step 1: Update Group Classes
 ```jsx
-<div className="relative group/rating-item flex items-center">
-  <EditableAdaptiveText className="peer" />
-  <button className="opacity-0 peer-hover:opacity-100 bg-white/80">
+// Before (causes section-wide hover)
+<div className="relative group flex items-center">
+
+// After (isolated hover)
+<div className="relative group/customer-count flex items-center">
 ```
 
-### After (Working):
+### Step 2: Update Hover Classes
 ```jsx
-<div className="relative group flex items-center">
-  <EditableAdaptiveText />
-  <button className="opacity-0 group-hover:opacity-100 text-red-500">
+// Before (section-wide activation)
+className="opacity-0 group-hover:opacity-100 ml-2 text-red-500"
+
+// After (isolated activation)
+className="opacity-0 group-hover/customer-count:opacity-100 ml-2 text-red-500"
+```
+
+### Step 3: Add to Safelist
+```js
+// tailwind.config.js
+safelist: [
+  'group-hover/customer-count:opacity-100',
+  // Add each unique pattern you use
+]
+```
+
+## Real Working Example (leftCopyRightImage.tsx)
+
+### Customer Count Delete Button:
+```jsx
+<div className="relative group/customer-count flex items-center space-x-2">
+  {/* Avatars and customer count text */}
+  <EditableAdaptiveText ... />
+  
+  {mode === 'edit' && (
+    <button
+      onClick={(e) => {
+        e.stopPropagation();
+        handleContentUpdate('customer_count', '___REMOVED___');
+      }}
+      className="opacity-0 group-hover/customer-count:opacity-100 ml-2 text-red-500 hover:text-red-700 transition-opacity duration-200"
+      title="Remove customer count"
+    >
+      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+      </svg>
+    </button>
+  )}
+</div>
+```
+
+### Rating Section Delete Button:
+```jsx
+<div className="relative group/rating-section flex items-center space-x-1">
+  {/* Stars and rating text */}
+  <EditableAdaptiveText ... />
+  
+  {mode === 'edit' && (
+    <button
+      onClick={(e) => {
+        e.stopPropagation();
+        handleContentUpdate('rating_value', '___REMOVED___');
+        handleContentUpdate('rating_count', '___REMOVED___');
+      }}
+      className="opacity-0 group-hover/rating-section:opacity-100 ml-2 text-red-500 hover:text-red-700 transition-opacity duration-200"
+      title="Remove rating section"
+    >
+      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+      </svg>
+    </button>
+  )}
+</div>
 ```
 
 ## Testing
@@ -140,7 +222,8 @@ To verify the fix works:
 
 ## Why This Works
 
-1. **Standard patterns**: Uses Tailwind patterns that are guaranteed to be in the safelist
-2. **Simple DOM structure**: Doesn't rely on component internals or complex sibling relationships
-3. **Visible styling**: Red text color is visible on all backgrounds without needing background colors
-4. **Reliable hover**: Entire row is hoverable, not just tiny text areas
+1. **Hover Isolation**: Named groups (`group/customer-count`) create isolated hover scopes that prevent section-wide activation
+2. **Safelist Compilation**: Explicitly adding patterns to safelist ensures Tailwind JIT compiles the CSS
+3. **Simple DOM structure**: Doesn't rely on component internals or complex sibling relationships
+4. **Visible styling**: Red text color is visible on all backgrounds without needing background colors
+5. **Precise targeting**: Each delete button only responds to hover on its specific content area

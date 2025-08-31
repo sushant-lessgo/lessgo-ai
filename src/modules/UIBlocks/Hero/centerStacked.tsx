@@ -537,7 +537,7 @@ export default function CenterStacked(props: LayoutComponentProps) {
           {(blockContent.show_social_proof !== false) && (
             <div className="flex flex-col sm:flex-row items-center justify-center space-y-4 sm:space-y-0 sm:space-x-8 pt-4">
               {blockContent.customer_count && blockContent.customer_count !== '___REMOVED___' && (
-                <div className="flex items-center space-x-2 relative group/customer-item">
+                <div className="flex items-center space-x-2 relative group/customer-count">
                   {blockContent.show_customer_avatars !== false && (
                     <div className="flex -space-x-2">
                       {customerAvatars.map((customer, i) => (
@@ -574,7 +574,7 @@ export default function CenterStacked(props: LayoutComponentProps) {
                         e.stopPropagation();
                         handleContentUpdate('customer_count', '___REMOVED___');
                       }}
-                      className="opacity-0 group-hover/customer-item:opacity-100 ml-1 text-red-500 hover:text-red-700 transition-opacity duration-200"
+                      className="opacity-0 group-hover/customer-count:opacity-100 ml-2 text-red-500 hover:text-red-700 transition-opacity duration-200"
                       title="Remove customer count"
                     >
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -586,7 +586,7 @@ export default function CenterStacked(props: LayoutComponentProps) {
               )}
               
               {blockContent.rating_value && blockContent.rating_value !== '___REMOVED___' && (
-                <div className="relative group/rating-item flex items-center space-x-1">
+                <div className="relative group/rating-section flex items-center space-x-1">
                   {renderStars(blockContent.rating_value)}
                   <div className="flex items-center space-x-1 ml-2">
                     <EditableAdaptiveText
@@ -625,7 +625,7 @@ export default function CenterStacked(props: LayoutComponentProps) {
                         handleContentUpdate('rating_value', '___REMOVED___');
                         handleContentUpdate('rating_count', '___REMOVED___');
                       }}
-                      className="opacity-0 group-hover/rating-item:opacity-100 ml-2 p-1 rounded-full bg-white/80 hover:bg-white text-red-500 hover:text-red-700 transition-all duration-200 relative z-10 shadow-sm"
+                      className="opacity-0 group-hover/rating-section:opacity-100 ml-2 text-red-500 hover:text-red-700 transition-opacity duration-200"
                       title="Remove rating section"
                     >
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
