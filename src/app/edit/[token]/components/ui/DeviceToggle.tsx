@@ -20,7 +20,6 @@ export function DeviceToggle() {
           key={device.id}
           onClick={() => {
             // setGlobalSettings({ deviceMode: device.id as any });
-            console.log('Device mode changed to:', device.id);
           }}
           className={`
             px-3 py-1.5 text-sm font-medium rounded-md transition-colors

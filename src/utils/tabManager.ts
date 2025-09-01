@@ -78,7 +78,7 @@ class TabManager {
       });
 
     } catch (error) {
-      console.warn('BroadcastChannel not supported:', error);
+      // BroadcastChannel not supported - graceful degradation
     }
   }
 

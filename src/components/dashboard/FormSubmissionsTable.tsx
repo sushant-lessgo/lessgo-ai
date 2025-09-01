@@ -37,7 +37,7 @@ export default function FormSubmissionsTable({ submissions }: FormSubmissionsTab
       setCopiedField(fieldKey)
       setTimeout(() => setCopiedField(null), 2000)
     } catch (err) {
-      console.error('Failed to copy:', err)
+      // Silently handle copy failure
     }
   }
 

@@ -388,7 +388,6 @@ function UniversalButton({
     if (typeof content === 'string') {
       return content;
     } else if (typeof content === 'object' && content !== null) {
-      console.warn('Button content is an object, converting to string:', content);
       // If it's an object with numeric keys (like the error describes), it might be a string-like object
       if (Array.isArray(content)) {
         return (content as string[]).join(' ');
@@ -464,7 +463,6 @@ function UniversalLink({
     if (typeof content === 'string') {
       return content;
     } else if (typeof content === 'object' && content !== null) {
-      console.warn('Link content is an object, converting to string:', content);
       // If it's an object with numeric keys (like the error describes), it might be a string-like object
       if (Array.isArray(content)) {
         return (content as string[]).join(' ');

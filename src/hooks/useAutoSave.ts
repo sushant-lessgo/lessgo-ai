@@ -285,8 +285,6 @@ export const useAutoSave = (config: Partial<AutoSaveHookConfig> = {}): UseAutoSa
   const triggerSave = useCallback(() => {
     if (finalConfig.enableAutoSave && isOnlineRef.current) {
       store.triggerAutoSave();
-    } else {
-      console.warn('Auto-save is disabled or offline');
     }
   }, [store, finalConfig.enableAutoSave]);
 
@@ -324,7 +322,6 @@ const forceSave = useCallback(async () => {
       finalConfig.onVersionCreated?.(snapshot);
     }
   } catch (error) {
-    console.error('Force save failed:', error);
     throw error;
   }
 }, [store, finalConfig]);
@@ -347,7 +344,6 @@ const loadWithDeserialization = useCallback(async (tokenId: string): Promise<boo
     const result = await loadDraftWithDeserialization(tokenId);
     return result.success;
   } catch (error) {
-    console.error('Load with deserialization failed:', error);
     return false;
   }
 }, []);
@@ -380,7 +376,6 @@ const exportSerializedState = useCallback(async () => {
     const { serialize } = useContentSerializer();
     return serialize();
   } catch (error) {
-    console.error('Export serialized state failed:', error);
     return null;
   }
 }, []);
@@ -391,7 +386,6 @@ const getSerializationStatus = useCallback((): SerializationStatus => {
 
   const undo = useCallback(async (): Promise<boolean> => {
     if (!finalConfig.enableVersioning || !versionManagerRef.current) {
-      console.warn('Versioning is disabled');
       return false;
     }
 
@@ -411,10 +405,8 @@ const getSerializationStatus = useCallback((): SerializationStatus => {
       // Create a snapshot of the current state before undo for redo
       changeCountRef.current = 0; // Reset change counter
       
-      console.log('↶ Undo completed successfully');
       return true;
     } catch (error) {
-      console.error('Failed to apply undo:', error);
       // Revert the undo in version manager
       versionManagerRef.current.redo();
       return false;
@@ -423,7 +415,6 @@ const getSerializationStatus = useCallback((): SerializationStatus => {
 
   const redo = useCallback(async (): Promise<boolean> => {
     if (!finalConfig.enableVersioning || !versionManagerRef.current) {
-      console.warn('Versioning is disabled');
       return false;
     }
 
@@ -442,10 +433,8 @@ const getSerializationStatus = useCallback((): SerializationStatus => {
 
       changeCountRef.current = 0; // Reset change counter
       
-      console.log('↷ Redo completed successfully');
       return true;
     } catch (error) {
-      console.error('Failed to apply redo:', error);
       // Revert the redo in version manager
       versionManagerRef.current.undo();
       return false;
@@ -454,7 +443,6 @@ const getSerializationStatus = useCallback((): SerializationStatus => {
 
   const createSnapshot = useCallback((description: string): string => {
     if (!finalConfig.enableVersioning || !versionManagerRef.current) {
-      console.warn('Versioning is disabled');
       return '';
     }
 
@@ -503,7 +491,6 @@ const getSerializationStatus = useCallback((): SerializationStatus => {
         break;
     }
 
-    console.log('🔧 Conflict resolved:', { conflictId, strategy });
   }, [store, versionManagerRef.current]);
 
   const getActiveConflicts = useCallback((): ConflictResolution[] => {
@@ -512,12 +499,10 @@ const getSerializationStatus = useCallback((): SerializationStatus => {
 
   const enableAutoSave = useCallback(() => {
     // This would update the config - simplified implementation
-    console.log('✅ Auto-save enabled');
   }, []);
 
   const disableAutoSave = useCallback(() => {
-    // This would update the config - simplified implementation  
-    console.log('⏸️ Auto-save disabled');
+    // This would update the config - simplified implementation
   }, []);
 
   const clearSaveError = useCallback(() => {
@@ -762,7 +747,6 @@ if (process.env.NODE_ENV === 'development') {
   (window as any).__autoSaveHookDebug = {
     getHookInstance: () => {
       // This would need to be set up with React DevTools or similar
-      console.log('Auto-save hook debugging - check React DevTools');
     },
   };
 }

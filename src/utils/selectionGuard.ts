@@ -67,7 +67,6 @@ export function withSelectionGuard<T extends (...args: any[]) => any>(
       // If the function returns a promise, handle it
       if (result && typeof result.then === 'function') {
         return result.catch((error: Error) => {
-          console.error('🛡️ Error in guarded formatting function:', error);
           restoreSelectionEvents();
           throw error;
         });
@@ -75,7 +74,6 @@ export function withSelectionGuard<T extends (...args: any[]) => any>(
       
       return result;
     } catch (error) {
-      console.error('🛡️ Error in guarded formatting function:', error);
       restoreSelectionEvents();
       throw error;
     }
@@ -133,12 +131,10 @@ export function initializeSelectionGuard(): void {
   // Add global error handler to restore selection events if something goes wrong
   if (typeof window !== 'undefined') {
     window.addEventListener('error', () => {
-      console.warn('🛡️ Global error detected, restoring selection events');
       restoreSelectionEvents();
     });
     
     window.addEventListener('unhandledrejection', () => {
-      console.warn('🛡️ Unhandled rejection detected, restoring selection events');
       restoreSelectionEvents();
     });
   }

@@ -4,7 +4,8 @@
       "Bash(curl:*)",
       "Bash(/dev/null)",
       "Bash(npm run lint:*)",
-      "Bash(npm run build:*)"
+      "Bash(npm run build:*)",
+      "Read(C:\\c\\Users\\susha\\lessgo-ai/**)"
     ],
     "deny": [],
     "ask": [],

@@ -57,9 +57,6 @@ class CSSVariablePerformanceMonitor {
       const end = performance.now();
       const duration = end - start;
       
-      // if (process.env.NODE_ENV === 'development') {
-      //   console.log(`⏱️ ${operation}: ${duration.toFixed(2)}ms`);
-      // }
       
       return duration;
     };
@@ -123,11 +120,6 @@ class CSSVariablePerformanceMonitor {
       warnings.push(`CSS size is ${(metrics.cssSize.estimated / 1024).toFixed(1)}KB (threshold: ${(this.thresholds.maxCSSSize / 1024).toFixed(1)}KB)`);
     }
 
-    if (warnings.length > 0) {
-      console.group('⚠️ CSS Variable Performance Warnings');
-      warnings.forEach(warning => console.warn(warning));
-      console.groupEnd();
-    }
   }
 
   /**

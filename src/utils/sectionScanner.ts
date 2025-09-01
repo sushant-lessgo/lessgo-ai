@@ -142,32 +142,17 @@ export function scanSectionsForNavigation(
   content: Record<string, any>,
   maxItems: number = 5
 ): NavigationItem[] {
-  console.log('🧭 [NAV-DEBUG] Scanning sections...', {
-    sectionsCount: sections.length,
-    sections: sections,
-    layouts: sectionLayouts,
-    maxItems
-  });
-
   const sectionInfos: SectionInfo[] = [];
   
   // Analyze each section
   for (const sectionId of sections) {
     // Skip header and footer sections
     if (sectionId.includes('header') || sectionId.includes('footer')) {
-      console.log('🧭 [NAV-DEBUG] Skipping header/footer section:', sectionId);
       continue;
     }
     
     const layout = sectionLayouts[sectionId] || '';
     const sectionType = extractSectionType(sectionId, layout);
-    
-    console.log('🧭 [NAV-DEBUG] Analyzing section:', {
-      sectionId,
-      layout,
-      sectionType,
-      hasContent: !!content[sectionId]
-    });
     
     if (sectionType !== 'custom') {
       const priorityInfo = SECTION_PRIORITIES[sectionType];
@@ -175,13 +160,6 @@ export function scanSectionsForNavigation(
         // Check if this section type already exists
         const existingSection = sectionInfos.find(s => s.type === sectionType);
         if (!existingSection) {
-          console.log('🧭 [NAV-DEBUG] Adding section to navigation:', {
-            sectionId,
-            sectionType,
-            label: priorityInfo.label,
-            priority: priorityInfo.priority
-          });
-          
           sectionInfos.push({
             id: sectionId,
             type: sectionType,
@@ -189,25 +167,15 @@ export function scanSectionsForNavigation(
             label: priorityInfo.label,
             priority: priorityInfo.priority,
           });
-        } else {
-          console.log('🧭 [NAV-DEBUG] Section type already exists, skipping:', sectionType);
         }
-      } else {
-        console.log('🧭 [NAV-DEBUG] No priority info found for section type:', sectionType);
       }
-    } else {
-      console.log('🧭 [NAV-DEBUG] Custom section, skipping:', sectionId);
     }
   }
-  
-  console.log('🧭 [NAV-DEBUG] Found section infos:', sectionInfos);
   
   // Sort by priority and take top N items (minus 1 to account for Home)
   sectionInfos.sort((a, b) => a.priority - b.priority);
   const adjustedMaxItems = Math.max(1, maxItems - 1); // Reserve one slot for Home
   const topSections = sectionInfos.slice(0, adjustedMaxItems);
-  
-  console.log('🧭 [NAV-DEBUG] Top sections after sorting:', topSections);
   
   // Always add Home as the first item
   const homeItem: NavigationItem = {
@@ -230,8 +198,6 @@ export function scanSectionsForNavigation(
   
   // Combine Home with section navigation items
   const navItems = [homeItem, ...sectionNavItems];
-  
-  console.log('🧭 [NAV-DEBUG] Final navigation items:', navItems);
   
   return navItems;
 }
@@ -262,27 +228,14 @@ export function getDefaultNavLabel(sectionType: string): string {
  * Initialize navigation for the first time
  */
 export function initializeNavigation(state: EditStore): NavigationItem[] {
-  console.log('🧭 [NAV-DEBUG] Initializing navigation...', {
-    sections: state.sections,
-    sectionLayouts: state.sectionLayouts,
-    hasContent: !!state.content
-  });
-
   // Find header section and its layout
   const headerSection = state.sections.find(id => id.includes('header'));
   if (!headerSection) {
-    console.log('🧭 [NAV-DEBUG] No header section found, using default');
     return [];
   }
   
   const headerLayout = state.sectionLayouts[headerSection] || 'MinimalNavHeader';
   const maxItems = getMaxNavItemsForHeader(headerLayout);
-  
-  console.log('🧭 [NAV-DEBUG] Header config:', {
-    headerSection,
-    headerLayout,
-    maxItems
-  });
   
   // Scan sections and generate navigation
   const navItems = scanSectionsForNavigation(
@@ -291,8 +244,6 @@ export function initializeNavigation(state: EditStore): NavigationItem[] {
     state.content,
     maxItems
   );
-  
-  console.log('🧭 [NAV-DEBUG] Generated navigation items:', navItems);
   
   return navItems;
 }

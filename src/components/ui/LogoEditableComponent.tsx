@@ -77,7 +77,6 @@ const LogoEditableComponent: React.FC<LogoEditableComponentProps> = ({
       const previewUrl = URL.createObjectURL(file);
       onLogoChange(previewUrl);
     } catch (error) {
-      console.error('Error uploading logo:', error);
       alert('Failed to upload logo. Please try again.');
     } finally {
       setIsUploading(false);

@@ -63,7 +63,6 @@ export function useSmartTextColors(backgroundType: 'primary' | 'secondary' | 'ne
         const analysis = analyzeBackground(backgroundCSS);
         return { isLightBackground: analysis.isLight };
       } catch (error) {
-        console.warn('Failed to analyze background, using fallback detection:', error);
         // Fallback to improved string matching that includes black
         const isDark = backgroundCSS.includes('black') || 
                        backgroundCSS.includes('gray-800') || 
@@ -83,15 +82,6 @@ export function useSmartTextColors(backgroundType: 'primary' | 'secondary' | 'ne
       if (hasGoodContrast(backgroundCSS, bodyColor, 'AA')) return 'good';
       return 'poor';
     })();
-    
-    console.log(`🎨 Smart text colors for ${backgroundType}:`, {
-      backgroundCSS,
-      headingColor,
-      bodyColor,
-      mutedColor,
-      isLightBackground: calculatedIsLight,
-      contrastRating
-    });
     
     return {
       heading: headingColor,
@@ -151,7 +141,6 @@ export function useSmartCTAColors(): SmartCTAColors {
         hover: tokens.ctaHover || 'bg-blue-700'
       };
     } catch (error) {
-      console.error('Error getting CTA color tokens:', error);
       // Fallback colors
       return {
         background: 'bg-blue-600',

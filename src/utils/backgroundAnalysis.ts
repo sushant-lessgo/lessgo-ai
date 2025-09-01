@@ -226,25 +226,19 @@ const TAILWIND_COLORS: Record<string, string> = {
 function extractTailwindColors(cssClass: string): string[] {
   const colors: string[] = [];
   
-  // console.log('🔍 extractTailwindColors input:', cssClass);
-  
   // Match patterns like bg-blue-500, from-purple-600, to-white, etc.
   const colorMatches = cssClass.match(/(?:bg-|from-|via-|to-)([a-z]+-\d+|[a-z]+)/g);
-  
-  // console.log('🔍 extractTailwindColors regex matches for', cssClass, ':', colorMatches);
   
   if (colorMatches) {
     for (const match of colorMatches) {
       const colorName = match.replace(/^(?:bg-|from-|via-|to-)/, '');
       const colorValue = TAILWIND_COLORS[colorName];
-      // console.log('🔍 processing match:', match, '→ colorName:', colorName, '→ colorValue:', colorValue);
       if (colorValue && colorValue !== 'transparent') {
         colors.push(colorValue);
       }
     }
   }
   
-  // console.log('🔍 final extracted colors:', colors);
   return colors;
 }
 
@@ -407,7 +401,6 @@ export function analyzeBackground(cssClass: string): BackgroundAnalysis {
     }
     
     const cleanClass = cssClass.trim().toLowerCase();
-    // console.log('🔍 Background analysis starting for:', cssClass, '→', cleanClass);
     
     // Check for effects that might affect readability
     const hasBlur = cleanClass.includes('blur-');
@@ -428,16 +421,13 @@ export function analyzeBackground(cssClass: string): BackgroundAnalysis {
       // Handle Tailwind classes
       colors = extractTailwindColors(cleanClass);
       type = 'solid';
-      // console.log('🔍 Extracted Tailwind colors:', colors);
     }
     
     // If no colors found, try to extract from CSS values
     if (colors.length === 0) {
-      // console.log('🔍 No Tailwind colors found, trying CSS values...');
       const colorMatches = cleanClass.match(/#[a-f0-9]{3,6}|rgba?\([^)]+\)/g);
       if (colorMatches) {
         colors = colorMatches;
-        // console.log('🔍 Found CSS colors:', colorMatches);
       }
     }
     
@@ -466,8 +456,6 @@ export function analyzeBackground(cssClass: string): BackgroundAnalysis {
       return createFallbackAnalysis('No valid colors found in CSS class');
     }
     
-    // console.log('🔍 Successfully parsed RGB colors:', rgbColors.length, 'colors');
-    
     // Calculate dominant and average colors
     const dominantColor = findDominantColor(rgbColors);
     const averageColor = calculateAverageColor(rgbColors);
@@ -475,14 +463,6 @@ export function analyzeBackground(cssClass: string): BackgroundAnalysis {
     // Calculate luminance values
     const dominantLuminance = calculateLuminance(dominantColor);
     const averageLuminance = calculateLuminance(averageColor);
-    
-    // console.log('🔍 Luminance calculation:', {
-    //   dominantColor,
-    //   averageColor,
-    //   dominantLuminance: dominantLuminance.toFixed(3),
-    //   averageLuminance: averageLuminance.toFixed(3),
-    //   shouldBeLight: averageLuminance > 0.5
-    // });
     
     // Determine if background has high contrast (big difference between colors)
     const luminances = rgbColors.map(calculateLuminance);

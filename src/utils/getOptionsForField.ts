@@ -11,7 +11,6 @@ export function getOptionsForField(displayFieldName: string): readonly string[] 
   const canonicalFieldName = DISPLAY_TO_CANONICAL[displayFieldName as keyof typeof DISPLAY_TO_CANONICAL];
 
   if (!canonicalFieldName) {
-    console.warn(`Unknown display field name: ${displayFieldName}`);
     return [];
   }
 
@@ -50,7 +49,6 @@ export function getOptionsForField(displayFieldName: string): readonly string[] 
       return taxonomy.landingGoalTypes.map(goal => goal.label);
 
     default:
-      console.warn(`No options defined for field: ${canonicalFieldName}`);
       return [];
   }
 }
@@ -61,7 +59,6 @@ export function getGroupedOptionsForField(displayFieldName: string): Record<stri
   const canonicalFieldName = DISPLAY_TO_CANONICAL[displayFieldName as keyof typeof DISPLAY_TO_CANONICAL];
 
   if (!canonicalFieldName) {
-    console.warn(`Unknown display field name: ${displayFieldName}`);
     return null;
   }
 
@@ -155,6 +152,5 @@ export function getOptionsByCanonicalName(canonicalFieldName: CanonicalFieldName
 
 // ✅ NEW: Legacy support function for backward compatibility
 export function getOptionsByInternalName(internalFieldName: string, parentCategory?: string): readonly string[] {
-  console.warn(`getOptionsByInternalName is deprecated. Use getOptionsByCanonicalName instead. Field: ${internalFieldName}`);
   return getOptionsByCanonicalName(internalFieldName as CanonicalFieldName, parentCategory);
 }

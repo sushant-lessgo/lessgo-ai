@@ -335,7 +335,6 @@ export function generateAccentCandidates(
 ): AccentCandidate[] {
   const baseRgb = parseColor(baseColorStr);
   if (!baseRgb) {
-    console.warn('Could not parse base color:', baseColorStr);
     return [];
   }
   
@@ -619,13 +618,6 @@ export function getSmartAccentColor(
       scoredOptions.sort((a: any, b: any) => b.score - a.score);
       const bestOption = scoredOptions[0];
       
-      console.log('✅ Using curated accent option:', {
-        baseColor: baseColorStr,
-        selectedAccent: bestOption.accentColor,
-        score: bestOption.score,
-        tailwind: bestOption.tailwind
-      });
-      
       return {
         accentColor: bestOption.accentColor,
         accentCSS: bestOption.tailwind, // Use the optimized tailwind class from accentOptions
@@ -633,11 +625,10 @@ export function getSmartAccentColor(
       };
     }
   } catch (error) {
-    console.warn('Could not load accent options, falling back to dynamic generation');
+    // Fallback to dynamic generation
   }
   
-  // ✅ FALLBACK: Dynamic generation for unknown base colors
-  console.log('⚠️ No curated options for base color:', baseColorStr, '- using dynamic generation');
+  // FALLBACK: Dynamic generation for unknown base colors
   
   const context = mapBusinessContext(businessContext);
   

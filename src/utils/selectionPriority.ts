@@ -41,28 +41,17 @@ const toolbarCache = new Map<string, { result: ToolbarType; timestamp: number }>
 const CACHE_TTL = 100; // 100ms cache
 
 export function getActiveToolbar(selection: EditorSelection): ToolbarType {
-  // console.log('📊 getActiveToolbar called with selection:', {
-  //   mode: selection.mode,
-  //   isTextEditing: selection.isTextEditing,
-  //   textEditingElement: selection.textEditingElement,
-  //   selectedElement: selection.selectedElement,
-  //   selectedSection: selection.selectedSection,
-  //   toolbarType: selection.toolbarType
-  // });
-
   // Create cache key from selection state (include toolbarType)
   const cacheKey = `${selection.mode}-${selection.isTextEditing}-${selection.textEditingElement?.elementKey}-${selection.selectedElement?.elementKey}-${selection.selectedSection}-${selection.toolbarType}`;
   
   // Check cache
   const cached = toolbarCache.get(cacheKey);
   if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
-    // console.log('📊 Returning cached result:', cached.result);
     return cached.result;
   }
   
   // Not in edit mode - no toolbar
   if (selection.mode !== 'edit') {
-    // console.log('📊 Not in edit mode, returning null');
     toolbarCache.set(cacheKey, { result: null, timestamp: Date.now() });
     return null;
   }
@@ -72,28 +61,19 @@ export function getActiveToolbar(selection: EditorSelection): ToolbarType {
   // Priority 1: Text editing always wins
   if (selection.isTextEditing && selection.textEditingElement) {
     result = 'text';
-    // console.log('📊 Priority 1: Text editing active, result:', result);
   }
   // Priority 2: Check explicit toolbar type for specialized toolbars (image, form)
   else if (selection.toolbarType === 'image' || selection.toolbarType === 'form') {
     result = selection.toolbarType;
-    // console.log('📊 Priority 2: Explicit toolbar type found, result:', result);
   }
   // Priority 3: Element selection - generic element toolbar
   else if (selection.selectedElement) {
     result = 'element';
-    // console.log('📊 Priority 3: Element selection active, result:', result);
   }
   // Priority 4: Section selection
   else if (selection.selectedSection) {
     result = 'section';
-    // console.log('📊 Priority 4: Section selection active, result:', result);
   }
-  else {
-    // console.log('📊 No active selection, result: null');
-  }
-  
-  // console.log('📊 Final getActiveToolbar result:', result);
   
   // Cache result
   toolbarCache.set(cacheKey, { result, timestamp: Date.now() });
@@ -180,12 +160,6 @@ export function getToolbarTarget(selection: EditorSelection): {
 } {
   const toolbarType = getActiveToolbar(selection);
   
-  // console.log('🎯 getToolbarTarget called with:', {
-  //   toolbarType,
-  //   selectedElement: selection.selectedElement,
-  //   toolbarTypeFromSelection: selection.toolbarType
-  // });
-  
   switch (toolbarType) {
     case 'text':
       return {
@@ -246,13 +220,4 @@ export function getToolbarTarget(selection: EditorSelection): {
  */
 export function debugSelection(selection: EditorSelection, context: string = '') {
   // DISABLED - This function was causing infinite render loops
-  // if (process.env.NODE_ENV === 'development') {
-  //   console.group(`🎯 Selection Debug ${context}`);
-  //   console.log('Mode:', selection.mode);
-  //   console.log('Text Editing:', selection.isTextEditing, selection.textEditingElement);
-  //   console.log('Selected Element:', selection.selectedElement);
-  //   console.log('Selected Section:', selection.selectedSection);
-  //   console.log('Active Toolbar:', getActiveToolbar(selection));
-  //   console.groupEnd();
-  // }
 }

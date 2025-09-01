@@ -62,15 +62,6 @@ export function updateSelectionState(editorId: string = 'default', hasSelection:
   state.hasLiveSelection = hasSelection;
   
   const isActive = getActivityState(editorId).isActivelyEditing;
-  
-  if (process.env.NODE_ENV === 'development' && wasActive !== isActive) {
-    console.log(`📝 Editor activity changed: ${editorId}`, {
-      wasActive,
-      isActive,
-      reason: 'selection',
-      hasLiveSelection: hasSelection
-    });
-  }
 }
 
 /**
@@ -83,15 +74,6 @@ export function updateCompositionState(editorId: string = 'default', isComposing
   state.isComposing = isComposing;
   
   const isActive = getActivityState(editorId).isActivelyEditing;
-  
-  if (process.env.NODE_ENV === 'development' && wasActive !== isActive) {
-    console.log(`🎌 Editor activity changed: ${editorId}`, {
-      wasActive,
-      isActive,
-      reason: 'composition',
-      isComposing
-    });
-  }
 }
 
 /**
@@ -104,9 +86,6 @@ export function updatePointerCaptureState(editorId: string = 'default', captureA
   state.pointerCaptureActive = captureActive;
   
   const isActive = getActivityState(editorId).isActivelyEditing;
-  
-  if (process.env.NODE_ENV === 'development' && wasActive !== isActive) {
-    console.log(`👆 Editor activity changed: ${editorId}`, {
       wasActive,
       isActive,
       reason: 'pointer_capture',
@@ -126,12 +105,6 @@ export function recordPointerDown(editorId: string = 'default'): void {
   
   const isActive = getActivityState(editorId).isActivelyEditing;
   
-  if (process.env.NODE_ENV === 'development' && !wasActive && isActive) {
-    console.log(`🖱️ Editor activity started: ${editorId}`, {
-      reason: 'pointer_down',
-      timestamp: state.lastPointerDownTime
-    });
-  }
 }
 
 /**
@@ -161,9 +134,6 @@ export function getDetailedActivityState(editorId: string = 'default') {
 export function cleanupActivityTracking(editorId: string = 'default'): void {
   activityStates.delete(editorId);
 
-  if (process.env.NODE_ENV === 'development') {
-    console.log(`🧹 Activity tracking cleaned up for editor: ${editorId}`);
-  }
 }
 
 /**
@@ -178,9 +148,6 @@ export function resetActivityState(editorId: string = 'default'): void {
     state.lastPointerDownTime = 0;
     state.isActivelyEditing = false;
 
-    if (process.env.NODE_ENV === 'development') {
-      console.log(`🔄 Activity state reset for editor: ${editorId}`);
-    }
   }
 }
 

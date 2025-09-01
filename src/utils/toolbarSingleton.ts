@@ -14,9 +14,6 @@ export function assertToolbarSingleton(componentName: string = 'FloatingToolbars
   
   if (g[SINGLETON_KEY]) {
     logger.error(`❌ Duplicate ${componentName} mounted! Another instance is already active.`);
-    if (process.env.NODE_ENV === 'development') {
-      console.trace('Duplicate mount stack trace:');
-    }
     
     // In development, throw to make it obvious
     if (process.env.NODE_ENV === 'development') {
