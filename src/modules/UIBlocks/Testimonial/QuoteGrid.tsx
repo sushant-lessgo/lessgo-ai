@@ -218,7 +218,7 @@ const TestimonialCard = React.memo(({
       
       {/* Testimonial Quote */}
       <div className="mb-6">
-        {mode !== 'preview' ? (
+        {mode === 'edit' ? (
           <div 
             contentEditable
             suppressContentEditableWarning
@@ -245,7 +245,7 @@ const TestimonialCard = React.memo(({
         <div className="flex-1">
           {/* Customer Name */}
           <div className="mb-1">
-            {mode !== 'preview' ? (
+            {mode === 'edit' ? (
               <div 
                 contentEditable
                 suppressContentEditableWarning
@@ -264,9 +264,9 @@ const TestimonialCard = React.memo(({
           </div>
           
           {/* Customer Title */}
-          {(testimonial.customerTitle || mode !== 'preview') && (
+          {(testimonial.customerTitle || mode === 'edit') && (
             <div className="mb-1">
-              {mode !== 'preview' ? (
+              {mode === 'edit' ? (
                 <div 
                   contentEditable
                   suppressContentEditableWarning
@@ -286,9 +286,9 @@ const TestimonialCard = React.memo(({
           )}
           
           {/* Customer Company */}
-          {(testimonial.customerCompany || mode !== 'preview') && (
+          {(testimonial.customerCompany || mode === 'edit') && (
             <div>
-              {mode !== 'preview' ? (
+              {mode === 'edit' ? (
                 <div 
                   contentEditable
                   suppressContentEditableWarning
@@ -449,7 +449,7 @@ export default function QuoteGrid(props: LayoutComponentProps) {
                 elementKey="verification_icon"
               />
             </div>
-            {mode !== 'preview' ? (
+            {mode === 'edit' ? (
               <div 
                 contentEditable
                 suppressContentEditableWarning

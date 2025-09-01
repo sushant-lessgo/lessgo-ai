@@ -1,11 +1,12 @@
 // api/regenerate-content/route.ts - NEW FILE
 
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { parseAiResponse } from "@/modules/prompt/parseAiResponse";
 import { generateMockResponse } from "@/modules/prompt/mockResponseGenerator";
 import { logger } from '@/lib/logger';
+import { withAIRateLimit } from '@/lib/rateLimit';
 
-export async function POST(req: Request) {
+async function regenerateContentHandler(req: NextRequest) {
   try {
     const { prompt, preserveDesign, currentDesign, updatedInputs, newDesign } = await req.json();
 
@@ -144,3 +145,6 @@ async function callAIProvider(prompt: string, useOpenAI: boolean, model: string)
     return { success: false, error };
   }
 }
+
+// Apply rate limiting to the POST handler
+export const POST = withAIRateLimit(regenerateContentHandler);

@@ -310,7 +310,7 @@ export default function LetterStyleBlock(props: LayoutComponentProps) {
             </div>
 
             {/* P.S. Section */}
-            {(blockContent.ps_text || mode !== 'preview') && (
+            {(blockContent.ps_text || mode === 'edit') && (
               <div className="mt-8 pt-6 border-t border-gray-200">
                 <EditableAdaptiveText
                   mode={mode}
@@ -330,7 +330,7 @@ export default function LetterStyleBlock(props: LayoutComponentProps) {
 
             {/* Trust Indicators */}
             <div className="mt-8 pt-6 border-t border-gray-200">
-              {mode !== 'preview' ? (
+              {mode === 'edit' ? (
                 <EditableTrustIndicators
                   mode={mode}
                   trustItems={[

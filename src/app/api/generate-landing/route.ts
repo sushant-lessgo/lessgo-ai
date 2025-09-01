@@ -1,9 +1,10 @@
-import { NextResponse } from "next/server"
+import { NextRequest, NextResponse } from "next/server"
 import { parseAiResponse } from "@/modules/prompt/parseAiResponse"
 import { generateMockResponse } from "@/modules/prompt/mockResponseGenerator"
 import { logger } from '@/lib/logger'
+import { withAIRateLimit } from '@/lib/rateLimit'
 
-export async function POST(req: Request) {
+async function generateLandingHandler(req: NextRequest) {
   logger.dev("🚀 /api/generate-landing route called")
   try {
     const { prompt } = await req.json()
@@ -94,6 +95,9 @@ export async function POST(req: Request) {
     }
   }
 }
+
+// Apply rate limiting to the POST handler
+export const POST = withAIRateLimit(generateLandingHandler);
 
 async function callAIProvider(prompt: string, useOpenAI: boolean, model: string) {
   try {

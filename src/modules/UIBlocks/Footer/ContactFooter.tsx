@@ -140,7 +140,7 @@ const ContactFooter: React.FC<LayoutComponentProps> = (props) => {
           </div>
           
           {/* Social Media Links */}
-          {(socialLinks.length > 0 || mode !== 'preview') && (
+          {(socialLinks.length > 0 || mode === 'edit') && (
             <div className="mt-6 pt-4 border-t border-gray-700">
               <div className="flex items-center gap-4">
                 {socialLinks.map((social) => {
@@ -153,14 +153,14 @@ const ContactFooter: React.FC<LayoutComponentProps> = (props) => {
                       rel="noopener noreferrer"
                       className="text-gray-400 hover:text-white transition-colors"
                       aria-label={social.platform}
-                      onClick={(e) => mode !== 'preview' ? e.preventDefault() : undefined}
+                      onClick={(e) => mode === 'edit' ? e.preventDefault() : undefined}
                     >
                       <IconComponent className="w-5 h-5" />
                     </a>
                   );
                 })}
                 
-                {mode !== 'preview' && (
+                {mode === 'edit' && (
                   <button
                     onClick={() => setShowSocialEditor(true)}
                     className="flex items-center gap-1 px-2 py-1 bg-blue-600 text-white text-xs rounded-md hover:bg-blue-700 transition-colors"

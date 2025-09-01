@@ -99,7 +99,7 @@ export default function MythVsRealityGrid(props: LayoutComponentProps) {
             sectionBackground={sectionBackground}
           />
 
-          {(blockContent.subheadline || mode !== 'preview') && (
+          {(blockContent.subheadline || mode === 'edit') && (
             <EditableAdaptiveText
               mode={mode}
               value={blockContent.subheadline || ''}
@@ -179,7 +179,7 @@ export default function MythVsRealityGrid(props: LayoutComponentProps) {
         </div>
 
         {/* Edit Mode: Instructions */}
-        {mode !== 'preview' && (
+        {mode === 'edit' && (
           <div className="mt-8 p-4 bg-blue-50 border border-blue-200 rounded-lg">
             <p style={{...bodyStyle, fontSize: '0.875rem'}} className="text-blue-800">
               <strong>Edit Myth vs Reality Pairs:</strong> Use format "Myth: [misconception]|Reality: [truth]|Myth: [next misconception]|Reality: [next truth]"

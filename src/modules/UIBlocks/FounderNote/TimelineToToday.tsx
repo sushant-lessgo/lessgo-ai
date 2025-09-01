@@ -142,9 +142,9 @@ const TimelineItem = React.memo(({
       <div className="flex items-start justify-between mb-3">
         <div className="flex items-center space-x-3">
           <div className="text-2xl relative group/icon-edit">
-            {mode !== 'preview' ? (
+            {mode === 'edit' ? (
               <IconEditableText
-                mode={mode}
+                mode={(mode || 'preview') as 'preview' | 'edit'}
                 value={icon}
                 onEdit={(value) => onIconEdit?.(index || 0, value)}
                 backgroundType={backgroundType as any}
@@ -264,7 +264,7 @@ export default function TimelineToToday(props: LayoutComponentProps) {
       sectionType="TimelineToToday"
       backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
       sectionBackground={sectionBackground}
-      mode={mode}
+      mode={(mode || 'preview') as 'preview' | 'edit'}
       className={props.className}
     >
       <div className="max-w-4xl mx-auto">
@@ -272,7 +272,7 @@ export default function TimelineToToday(props: LayoutComponentProps) {
         {/* Header */}
         <div className="text-center mb-12">
           <EditableAdaptiveHeadline
-            mode={mode}
+            mode={(mode || 'preview') as 'preview' | 'edit'}
             value={blockContent.headline || ''}
             onEdit={(value) => handleContentUpdate('headline', value)}
             level="h2"
@@ -285,7 +285,7 @@ export default function TimelineToToday(props: LayoutComponentProps) {
           />
 
           <EditableAdaptiveText
-            mode={mode}
+            mode={(mode || 'preview') as 'preview' | 'edit'}
             value={blockContent.intro_text || ''}
             onEdit={(value) => handleContentUpdate('intro_text', value)}
             backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
@@ -301,14 +301,14 @@ export default function TimelineToToday(props: LayoutComponentProps) {
 
         {/* Timeline */}
         <div className="relative">
-          {mode !== 'preview' ? (
+          {mode === 'edit' ? (
             <div className="bg-gray-50 rounded-lg p-6 mb-8">
               <h4 className="font-semibold text-gray-900 mb-3">Timeline Items</h4>
               <p className="text-sm text-gray-600 mb-3">
                 Format: Year|Icon Title|Description|Stats (repeat for each milestone)
               </p>
               <EditableAdaptiveText
-                mode={mode}
+                mode={(mode || 'preview') as 'preview' | 'edit'}
                 value={blockContent.timeline_items || ''}
                 onEdit={(value) => handleContentUpdate('timeline_items', value)}
                 backgroundType="neutral"
@@ -334,7 +334,7 @@ export default function TimelineToToday(props: LayoutComponentProps) {
                   isLast={index === timelineItems.length - 1}
                   colorTokens={colorTokens}
                   dynamicTextColors={dynamicTextColors}
-                  mode={mode}
+                  mode={(mode || 'preview') as 'preview' | 'edit'}
                   onIconEdit={handleTimelineIconEdit}
                   index={item.index}
                   sectionId={sectionId}
@@ -349,9 +349,9 @@ export default function TimelineToToday(props: LayoutComponentProps) {
         <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-8 text-center">
           <div className="max-w-3xl mx-auto">
             <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center text-white text-2xl font-bold mx-auto mb-6 shadow-lg relative group/icon-edit">
-              {mode !== 'preview' ? (
+              {mode === 'edit' ? (
                 <IconEditableText
-                  mode={mode}
+                  mode={(mode || 'preview') as 'preview' | 'edit'}
                   value={blockContent.current_state_icon || '🎯'}
                   onEdit={(value) => handleContentUpdate('current_state_icon', value)}
                   backgroundType={'primary' as any}
@@ -367,7 +367,7 @@ export default function TimelineToToday(props: LayoutComponentProps) {
             </div>
             
             <EditableAdaptiveHeadline
-              mode={mode}
+              mode={(mode || 'preview') as 'preview' | 'edit'}
               value={blockContent.current_state_heading || ''}
               onEdit={(value) => handleContentUpdate('current_state_heading', value)}
               level="h3"
@@ -381,7 +381,7 @@ export default function TimelineToToday(props: LayoutComponentProps) {
             />
             
             <EditableAdaptiveText
-              mode={mode}
+              mode={(mode || 'preview') as 'preview' | 'edit'}
               value={blockContent.current_milestone || ''}
               onEdit={(value) => handleContentUpdate('current_milestone', value)}
               backgroundType="neutral"
@@ -396,9 +396,9 @@ export default function TimelineToToday(props: LayoutComponentProps) {
 
             {/* Stats Grid */}
             <div className="mb-8">
-              {mode !== 'preview' ? (
+              {mode === 'edit' ? (
                 <EditableTrustIndicators
-                  mode={mode}
+                  mode={(mode || 'preview') as 'preview' | 'edit'}
                   trustItems={[
                     blockContent.trust_item_1 || '',
                     blockContent.trust_item_2 || '',
@@ -470,7 +470,7 @@ export default function TimelineToToday(props: LayoutComponentProps) {
                 </div>
                 <div className="text-left">
                   <EditableAdaptiveText
-                    mode={mode}
+                    mode={(mode || 'preview') as 'preview' | 'edit'}
                     value={blockContent.founder_name || ''}
                     onEdit={(value) => handleContentUpdate('founder_name', value)}
                     backgroundType="neutral"
@@ -483,7 +483,7 @@ export default function TimelineToToday(props: LayoutComponentProps) {
                     sectionBackground="bg-blue-50"
                   />
                   <EditableAdaptiveText
-                    mode={mode}
+                    mode={(mode || 'preview') as 'preview' | 'edit'}
                     value={`Founder, ${blockContent.company_name || 'Company'}`}
                     onEdit={(value) => {
                       const name = value.replace('Founder, ', '');

@@ -76,7 +76,7 @@ function GeneratePageContent({ tokenId }: { tokenId: string }) {
       });
       
       // Set preview mode
-      if (currentState.mode !== 'preview') {
+      if (currentState.mode === 'edit') {
         currentState.setMode('preview');
       }
 

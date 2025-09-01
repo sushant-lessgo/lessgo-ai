@@ -310,7 +310,7 @@ export default function SocialProofStrip(props: LayoutComponentProps) {
                         {company.name}
                       </span>
                       {/* Delete Company Button */}
-                      {mode !== 'preview' && (
+                      {mode === 'edit' && (
                         <button
                           onClick={(e) => {
                             e.preventDefault();
@@ -335,7 +335,7 @@ export default function SocialProofStrip(props: LayoutComponentProps) {
               })}
               
               {/* Add Company Button (Edit Mode Only) */}
-              {mode !== 'preview' && (
+              {mode === 'edit' && (
                 <div className="flex items-center justify-center px-4 py-2 bg-white/10 backdrop-blur-sm rounded-lg border-2 border-dashed border-white/20 hover:border-white/30 transition-all duration-300">
                   <button
                     onClick={(e) => {

@@ -5,11 +5,12 @@ import type { NextRequest } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { PublishSchema, sanitizeForLogging } from '@/lib/validation';
 import { createSecureResponse, validateSlug, sanitizeHtmlContent, verifyProjectAccess } from '@/lib/security';
+import { withPublishRateLimit } from '@/lib/rateLimit';
 
 
 
 
-export async function POST(req: NextRequest) {
+async function publishHandler(req: NextRequest) {
   const protocol = process.env.NODE_ENV === 'production' ? 'https' : 'http';
   const host = req.headers.get("host") || "localhost:3000";
   const baseUrl = `${protocol}://${host}`;
@@ -131,5 +132,5 @@ export async function POST(req: NextRequest) {
   }
 }
 
-
-
+// Apply rate limiting to the POST handler
+export const POST = withPublishRateLimit(publishHandler);

@@ -398,7 +398,7 @@ export default function ImageFirst(props: LayoutComponentProps) {
                   className="w-full h-full object-cover rounded-2xl shadow-2xl cursor-pointer"
                   data-image-id={`${sectionId}-image-first-hero-image`}
                   onMouseUp={(e) => {
-                    if (mode !== 'preview') {
+                    if (mode === 'edit') {
                       e.stopPropagation();
                       e.preventDefault();
                       const rect = e.currentTarget.getBoundingClientRect();
@@ -417,7 +417,7 @@ export default function ImageFirst(props: LayoutComponentProps) {
 
           <div className="max-w-4xl mx-auto text-center space-y-8">
             
-            {(blockContent.badge_text || mode !== 'preview') && (
+            {(blockContent.badge_text || mode === 'edit') && (
               <div>
                 <AccentBadge
                   mode={mode}
@@ -445,7 +445,7 @@ export default function ImageFirst(props: LayoutComponentProps) {
               sectionBackground={sectionBackground}
             />
 
-            {(blockContent.subheadline || mode !== 'preview') && (
+            {(blockContent.subheadline || mode === 'edit') && (
               <EditableAdaptiveText
                 mode={mode}
                 value={blockContent.subheadline || ''}
@@ -474,7 +474,7 @@ export default function ImageFirst(props: LayoutComponentProps) {
                 onClick={createCTAClickHandler(sectionId, "cta_text")}
               />
 
-              {mode !== 'preview' ? (
+              {mode === 'edit' ? (
                 <EditableTrustIndicators
                   mode={mode}
                   trustItems={[
@@ -523,7 +523,7 @@ export default function ImageFirst(props: LayoutComponentProps) {
               )}
             </div>
 
-            {(blockContent.supporting_text || mode !== 'preview') && (
+            {(blockContent.supporting_text || mode === 'edit') && (
               <EditableAdaptiveText
                 mode={mode}
                 value={blockContent.supporting_text || ''}
@@ -573,7 +573,7 @@ export default function ImageFirst(props: LayoutComponentProps) {
                     />
                     
                     {/* Remove button for customer count */}
-                    {mode !== 'preview' && (
+                    {mode === 'edit' && (
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
@@ -623,7 +623,7 @@ export default function ImageFirst(props: LayoutComponentProps) {
                     </div>
                     
                     {/* Remove button for rating section */}
-                    {mode !== 'preview' && (
+                    {mode === 'edit' && (
                       <button
                         onClick={(e) => {
                           e.stopPropagation();

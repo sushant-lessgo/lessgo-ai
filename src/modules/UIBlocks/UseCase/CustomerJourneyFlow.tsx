@@ -85,7 +85,7 @@ export default function CustomerJourneyFlow(props: LayoutComponentProps) {
             ))}
           </div>
         </div>
-        {(blockContent.footer_title || blockContent.footer_description || mode !== 'preview') && (
+        {(blockContent.footer_title || blockContent.footer_description || mode === 'edit') && (
           <div className="mt-16 bg-blue-50 rounded-2xl p-8 text-center border border-blue-200">
             <EditableAdaptiveHeadline
               mode={mode}

@@ -111,7 +111,7 @@ export default function VisualObjectionTiles(props: LayoutComponentProps) {
             sectionBackground={sectionBackground}
           />
 
-          {(blockContent.subheadline || mode !== 'preview') && (
+          {(blockContent.subheadline || mode === 'edit') && (
             <EditableAdaptiveText
               mode={mode}
               value={blockContent.subheadline || ''}
@@ -240,7 +240,7 @@ export default function VisualObjectionTiles(props: LayoutComponentProps) {
             data-element-key="bottom_cta_text"
           />
           <div className="flex items-center justify-center space-x-4 flex-wrap gap-2">
-            {mode !== 'preview' ? (
+            {mode === 'edit' ? (
               <EditableAdaptiveText
                 mode={mode}
                 value={blockContent.bottom_cta_button_1 || ''}
@@ -259,7 +259,7 @@ export default function VisualObjectionTiles(props: LayoutComponentProps) {
                 {blockContent.bottom_cta_button_1 || 'Get Answers'}
               </button>
             )}
-            {mode !== 'preview' ? (
+            {mode === 'edit' ? (
               <EditableAdaptiveText
                 mode={mode}
                 value={blockContent.bottom_cta_button_2 || ''}
@@ -282,7 +282,7 @@ export default function VisualObjectionTiles(props: LayoutComponentProps) {
         </div>
 
         {/* Edit Mode: Instructions */}
-        {mode !== 'preview' && (
+        {mode === 'edit' && (
           <div className="mt-8 p-4 bg-blue-50 border border-blue-200 rounded-lg">
             <p className="text-blue-800 text-sm">
               <strong>Edit Objection Tiles:</strong> Use format "[emoji]|"[objection]"|[answer]|[next emoji]|"[next objection]"|[next answer]"

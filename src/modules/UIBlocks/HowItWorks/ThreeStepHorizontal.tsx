@@ -76,7 +76,7 @@ const ModeWrapper = ({
   elementKey: string;
   onEdit?: (value: string) => void;
 }) => {
-  if (mode !== 'preview' && onEdit) {
+  if (mode === 'edit' && onEdit) {
     return (
       <div 
         contentEditable
@@ -200,7 +200,7 @@ const StepCard = ({
 
         {/* Step Title */}
         <div className="mb-4">
-          {mode !== 'preview' ? (
+          {mode === 'edit' ? (
             <div 
               contentEditable
               suppressContentEditableWarning
@@ -220,7 +220,7 @@ const StepCard = ({
 
         {/* Step Description */}
         <div>
-          {mode !== 'preview' ? (
+          {mode === 'edit' ? (
             <div 
               contentEditable
               suppressContentEditableWarning
@@ -340,7 +340,7 @@ export default function ThreeStepHorizontal(props: ThreeStepHorizontalProps) {
         </div>
 
         {/* Optional Conclusion Text */}
-        {(blockContent.conclusion_text || mode !== 'preview') && (
+        {(blockContent.conclusion_text || mode === 'edit') && (
           <div className="mt-16 text-center">
             <ModeWrapper
               mode={mode}
@@ -349,9 +349,9 @@ export default function ThreeStepHorizontal(props: ThreeStepHorizontalProps) {
               onEdit={(value) => handleContentUpdate('conclusion_text', value)}
             >
               <p 
-                className={`max-w-2xl mx-auto ${colorTokens.textSecondary} ${!blockContent.conclusion_text && mode !== 'preview' ? 'opacity-50' : ''}`}
+                className={`max-w-2xl mx-auto ${colorTokens.textSecondary} ${!blockContent.conclusion_text && mode === 'edit' ? 'opacity-50' : ''}`}
               >
-                {blockContent.conclusion_text || (mode !== 'preview' ? 'Add optional conclusion text to summarize the process...' : '')}
+                {blockContent.conclusion_text || (mode === 'edit' ? 'Add optional conclusion text to summarize the process...' : '')}
               </p>
             </ModeWrapper>
           </div>

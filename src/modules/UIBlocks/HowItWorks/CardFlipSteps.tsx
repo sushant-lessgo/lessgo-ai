@@ -378,7 +378,7 @@ export default function CardFlipSteps(props: LayoutComponentProps) {
             sectionBackground={sectionBackground}
           />
 
-          {(blockContent.subheadline || mode !== 'preview') && (
+          {(blockContent.subheadline || mode === 'edit') && (
             <EditableAdaptiveText
               mode={mode as 'edit' | 'preview'}
               value={blockContent.subheadline || ''}
@@ -395,7 +395,7 @@ export default function CardFlipSteps(props: LayoutComponentProps) {
           )}
         </div>
 
-        {mode !== 'preview' ? (
+        {mode === 'edit' ? (
           <div className="space-y-8">
             <div className="p-6 border border-gray-200 rounded-lg bg-gray-50">
               <h4 className="font-semibold text-gray-700 mb-4">Card Flip Content</h4>
@@ -500,7 +500,7 @@ export default function CardFlipSteps(props: LayoutComponentProps) {
                       data-section-id={sectionId}
                       data-element-key="guide_indicator_1_text"
                     />
-                    {mode !== 'preview' && (
+                    {mode === 'edit' && (
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
@@ -546,7 +546,7 @@ export default function CardFlipSteps(props: LayoutComponentProps) {
                       data-section-id={sectionId}
                       data-element-key="guide_indicator_2_text"
                     />
-                    {mode !== 'preview' && (
+                    {mode === 'edit' && (
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
@@ -592,7 +592,7 @@ export default function CardFlipSteps(props: LayoutComponentProps) {
                       data-section-id={sectionId}
                       data-element-key="guide_indicator_3_text"
                     />
-                    {mode !== 'preview' && (
+                    {mode === 'edit' && (
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
@@ -610,7 +610,7 @@ export default function CardFlipSteps(props: LayoutComponentProps) {
                 )}
               </div>
               
-              {(blockContent.guide_heading || mode !== 'preview') && (
+              {(blockContent.guide_heading || mode === 'edit') && (
                 <div className="relative group/guide-heading">
                   <EditableAdaptiveText
                     mode={mode as 'edit' | 'preview'}
@@ -625,7 +625,7 @@ export default function CardFlipSteps(props: LayoutComponentProps) {
                     data-section-id={sectionId}
                     data-element-key="guide_heading"
                   />
-                  {mode !== 'preview' && (
+                  {mode === 'edit' && (
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
@@ -642,7 +642,7 @@ export default function CardFlipSteps(props: LayoutComponentProps) {
                 </div>
               )}
               
-              {(blockContent.guide_description || mode !== 'preview') && (
+              {(blockContent.guide_description || mode === 'edit') && (
                 <div className="relative group/guide-desc">
                   <EditableAdaptiveText
                     mode={mode as 'edit' | 'preview'}
@@ -657,7 +657,7 @@ export default function CardFlipSteps(props: LayoutComponentProps) {
                     data-section-id={sectionId}
                     data-element-key="guide_description"
                   />
-                  {mode !== 'preview' && (
+                  {mode === 'edit' && (
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
@@ -677,9 +677,9 @@ export default function CardFlipSteps(props: LayoutComponentProps) {
           </div>
         )}
 
-        {(blockContent.cta_text || blockContent.trust_items || mode !== 'preview') && (
+        {(blockContent.cta_text || blockContent.trust_items || mode === 'edit') && (
           <div className="text-center space-y-6">
-            {(blockContent.supporting_text || mode !== 'preview') && (
+            {(blockContent.supporting_text || mode === 'edit') && (
               <EditableAdaptiveText
                 mode={mode as 'edit' | 'preview'}
                 value={blockContent.supporting_text || ''}

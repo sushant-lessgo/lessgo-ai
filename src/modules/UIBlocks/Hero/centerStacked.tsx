@@ -398,7 +398,7 @@ export default function CenterStacked(props: LayoutComponentProps) {
       <div className="max-w-4xl mx-auto text-center">
         <div className="flex flex-col items-center space-y-8 min-h-[600px] justify-center">
           
-          {(blockContent.badge_text || mode !== 'preview') && (
+          {(blockContent.badge_text || mode === 'edit') && (
             <div>
               <AccentBadge
                 mode={mode}
@@ -426,7 +426,7 @@ export default function CenterStacked(props: LayoutComponentProps) {
             sectionBackground={sectionBackground}
           />
 
-          {(blockContent.subheadline || mode !== 'preview') && (
+          {(blockContent.subheadline || mode === 'edit') && (
             <EditableAdaptiveText
               mode={mode}
               value={blockContent.subheadline || ''}
@@ -467,7 +467,7 @@ export default function CenterStacked(props: LayoutComponentProps) {
               }}
             />
 
-            {mode !== 'preview' ? (
+            {mode === 'edit' ? (
               <EditableTrustIndicators
                 mode={mode}
                 trustItems={[
@@ -516,7 +516,7 @@ export default function CenterStacked(props: LayoutComponentProps) {
             )}
           </div>
 
-          {(blockContent.supporting_text || mode !== 'preview') && (
+          {(blockContent.supporting_text || mode === 'edit') && (
             <EditableAdaptiveText
               mode={mode}
               value={blockContent.supporting_text || ''}
@@ -566,7 +566,7 @@ export default function CenterStacked(props: LayoutComponentProps) {
                   />
                   
                   {/* Remove button for customer count - exact same as trust indicators */}
-                  {mode !== 'preview' && (
+                  {mode === 'edit' && (
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
@@ -616,7 +616,7 @@ export default function CenterStacked(props: LayoutComponentProps) {
                   </div>
                   
                   {/* Remove button for rating section */}
-                  {mode !== 'preview' && (
+                  {mode === 'edit' && (
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
@@ -645,7 +645,7 @@ export default function CenterStacked(props: LayoutComponentProps) {
                   className="w-full h-full object-cover rounded-2xl shadow-2xl cursor-pointer"
                   data-image-id={`${sectionId}-center-hero-image`}
                   onMouseUp={(e) => {
-                    if (mode !== 'preview') {
+                    if (mode === 'edit') {
                       e.stopPropagation();
                       e.preventDefault();
                       const rect = e.currentTarget.getBoundingClientRect();

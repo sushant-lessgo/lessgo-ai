@@ -1,8 +1,9 @@
 import { auth } from '@clerk/nextjs/server';
 import { prisma } from '@/lib/prisma';
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { DraftSaveSchema, sanitizeForLogging } from '@/lib/validation';
 import { createSecureResponse, verifyProjectAccess } from '@/lib/security';
+import { withDraftRateLimit } from '@/lib/rateLimit';
 
 const DEMO_TOKEN = 'lessgodemomockdata';
 
@@ -42,7 +43,7 @@ interface ProjectContent {
 
 // In your api/saveDraft/route.ts file, replace your existing POST function with this:
 
-export async function POST(req: Request) {
+async function saveDraftHandler(req: NextRequest) {
   try {
     // A01: Broken Access Control - Authentication required
     const { userId: clerkId } = await auth();
@@ -185,3 +186,6 @@ export async function POST(req: Request) {
     );
   }
 }
+
+// Apply rate limiting to the POST handler
+export const POST = withDraftRateLimit(saveDraftHandler);

@@ -239,7 +239,7 @@ export default function ProblemChecklist(props: LayoutComponentProps) {
             sectionBackground={sectionBackground}
           />
 
-          {(blockContent.subheadline || mode !== 'preview') && (
+          {(blockContent.subheadline || mode === 'edit') && (
             <EditableAdaptiveText
               mode={mode}
               value={blockContent.subheadline || ''}
@@ -255,7 +255,7 @@ export default function ProblemChecklist(props: LayoutComponentProps) {
             />
           )}
 
-          {(blockContent.intro_text || mode !== 'preview') && (
+          {(blockContent.intro_text || mode === 'edit') && (
             <div className="max-w-3xl mx-auto mb-8">
               <EditableAdaptiveText
                 mode={mode}
@@ -274,7 +274,7 @@ export default function ProblemChecklist(props: LayoutComponentProps) {
           )}
         </div>
 
-        {mode !== 'preview' ? (
+        {mode === 'edit' ? (
           <div className="space-y-8">
             <div className="p-6 border border-gray-200 rounded-lg bg-gray-50">
               <h4 className="font-semibold text-gray-700 mb-4">Problem Checklist Content</h4>
@@ -448,7 +448,7 @@ export default function ProblemChecklist(props: LayoutComponentProps) {
                         data-section-id={sectionId}
                         data-element-key="result_stat_1"
                       />
-                      {mode !== 'preview' && (
+                      {mode === 'edit' && (
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
@@ -493,7 +493,7 @@ export default function ProblemChecklist(props: LayoutComponentProps) {
                         data-section-id={sectionId}
                         data-element-key="result_stat_2"
                       />
-                      {mode !== 'preview' && (
+                      {mode === 'edit' && (
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
@@ -538,7 +538,7 @@ export default function ProblemChecklist(props: LayoutComponentProps) {
                         data-section-id={sectionId}
                         data-element-key="result_stat_3"
                       />
-                      {mode !== 'preview' && (
+                      {mode === 'edit' && (
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
@@ -609,7 +609,7 @@ export default function ProblemChecklist(props: LayoutComponentProps) {
                           data-section-id={sectionId}
                           data-element-key={`encouragement_tip_${index + 1}`}
                         />
-                        {mode !== 'preview' && (
+                        {mode === 'edit' && (
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
@@ -633,9 +633,9 @@ export default function ProblemChecklist(props: LayoutComponentProps) {
           </>
         )}
 
-        {(blockContent.supporting_text || blockContent.trust_items || mode !== 'preview') && (
+        {(blockContent.supporting_text || blockContent.trust_items || mode === 'edit') && (
           <div className="text-center space-y-6 mt-12">
-            {(blockContent.supporting_text || mode !== 'preview') && (
+            {(blockContent.supporting_text || mode === 'edit') && (
               <EditableAdaptiveText
                 mode={mode}
                 value={blockContent.supporting_text || ''}

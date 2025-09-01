@@ -74,7 +74,7 @@ const ModeWrapper = ({
   elementKey: string;
   onEdit?: (value: string) => void;
 }) => {
-  if (mode !== 'preview' && onEdit) {
+  if (mode === 'edit' && onEdit) {
     return (
       <div 
         contentEditable
@@ -202,7 +202,7 @@ const StatBlock = ({
       
       {/* Stat Value */}
       <div className="mb-4">
-        {mode !== 'preview' ? (
+        {mode === 'edit' ? (
           <div 
             contentEditable
             suppressContentEditableWarning
@@ -222,7 +222,7 @@ const StatBlock = ({
       
       {/* Stat Label */}
       <div className="mb-3">
-        {mode !== 'preview' ? (
+        {mode === 'edit' ? (
           <div 
             contentEditable
             suppressContentEditableWarning
@@ -241,9 +241,9 @@ const StatBlock = ({
       </div>
       
       {/* Optional Description */}
-      {(stat.description || mode !== 'preview') && (
+      {(stat.description || mode === 'edit') && (
         <div>
-          {mode !== 'preview' ? (
+          {mode === 'edit' ? (
             <div 
               contentEditable
               suppressContentEditableWarning
@@ -339,7 +339,7 @@ export default function StatBlocks(props: StatBlocksProps) {
           />
 
           {/* Optional Subheadline */}
-          {(blockContent.subheadline || mode !== 'preview') && (
+          {(blockContent.subheadline || mode === 'edit') && (
             <EditableAdaptiveText
               mode={mode}
               value={blockContent.subheadline || ''}

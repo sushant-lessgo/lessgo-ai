@@ -335,7 +335,7 @@ export default function FeatureMatrix(props: LayoutComponentProps) {
             sectionBackground={sectionBackground}
           />
 
-          {(blockContent.subheadline || mode !== 'preview') && (
+          {(blockContent.subheadline || mode === 'edit') && (
             <EditableAdaptiveText
               mode={mode}
               value={blockContent.subheadline || ''}
@@ -353,7 +353,7 @@ export default function FeatureMatrix(props: LayoutComponentProps) {
           )}
         </div>
 
-        {mode !== 'preview' ? (
+        {mode === 'edit' ? (
           <div className="space-y-8">
             <div className="p-6 border border-gray-200 rounded-lg bg-gray-50">
               <h4 style={h4Style} className="font-semibold text-gray-700 mb-4">Feature Matrix Content</h4>
@@ -511,7 +511,7 @@ export default function FeatureMatrix(props: LayoutComponentProps) {
         )}
 
         {/* Enterprise Features Highlight */}
-        {((blockContent.show_enterprise_features !== false && enterpriseFeatures.length > 0) || mode !== 'preview') && (
+        {((blockContent.show_enterprise_features !== false && enterpriseFeatures.length > 0) || mode === 'edit') && (
           <div className="bg-gradient-to-r from-gray-900 to-gray-800 rounded-2xl p-8 text-white mt-12 mb-12">
             <div className="text-center">
               <EditableAdaptiveText
@@ -529,7 +529,7 @@ export default function FeatureMatrix(props: LayoutComponentProps) {
                 data-element-key="enterprise_section_title"
               />
               
-              {mode !== 'preview' ? (
+              {mode === 'edit' ? (
                 <div className="space-y-6">
                   <div className="grid md:grid-cols-4 gap-6">
                     {[1, 2, 3, 4].map((index) => {
@@ -610,9 +610,9 @@ export default function FeatureMatrix(props: LayoutComponentProps) {
           </div>
         )}
 
-        {(blockContent.supporting_text || blockContent.trust_items || mode !== 'preview') && (
+        {(blockContent.supporting_text || blockContent.trust_items || mode === 'edit') && (
           <div className="text-center space-y-6">
-            {(blockContent.supporting_text || mode !== 'preview') && (
+            {(blockContent.supporting_text || mode === 'edit') && (
               <EditableAdaptiveText
                 mode={mode}
                 value={blockContent.supporting_text || ''}

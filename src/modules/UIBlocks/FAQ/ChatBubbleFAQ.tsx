@@ -164,7 +164,7 @@ export default function ChatBubbleFAQ(props: LayoutComponentProps) {
             sectionBackground={sectionBackground}
           />
           
-          {(blockContent.subheadline || mode !== 'preview') && (
+          {(blockContent.subheadline || mode === 'edit') && (
             <EditableAdaptiveText
               mode={mode}
               value={blockContent.subheadline || ''}
@@ -211,7 +211,7 @@ export default function ChatBubbleFAQ(props: LayoutComponentProps) {
                 />
               ) : (
                 <>
-                  {mode !== 'preview' ? (
+                  {mode === 'edit' ? (
                     <EditableAdaptiveText
                       mode={mode}
                       value={blockContent.support_avatar || ''}
@@ -228,7 +228,7 @@ export default function ChatBubbleFAQ(props: LayoutComponentProps) {
                   ) : (
                     blockContent.support_avatar || 'A'
                   )}
-                  {mode !== 'preview' && (
+                  {mode === 'edit' && (
                     <button
                       onClick={() => handleContentUpdate('support_avatar_icon', '👤')}
                       className="opacity-0 group-hover/avatar-icon:opacity-100 absolute -top-1 -right-1 w-4 h-4 bg-blue-500 text-white rounded-full text-xs flex items-center justify-center hover:bg-blue-600 transition-all duration-200"
@@ -330,7 +330,7 @@ export default function ChatBubbleFAQ(props: LayoutComponentProps) {
                 </div>
 
                 {/* Support Answer (Left aligned) */}
-                {(item.answer || mode !== 'preview') && (
+                {(item.answer || mode === 'edit') && (
                   <div className="flex justify-start">
                     <div className="max-w-[85%]">
                       <div className="bg-gray-100 dark:bg-gray-700 rounded-2xl rounded-bl-md px-4 py-3">
@@ -356,7 +356,7 @@ export default function ChatBubbleFAQ(props: LayoutComponentProps) {
                 )}
                 
                 {/* Remove button */}
-                {mode !== 'preview' && (
+                {mode === 'edit' && (
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
@@ -375,7 +375,7 @@ export default function ChatBubbleFAQ(props: LayoutComponentProps) {
             ))}
             
             {/* Add new chat item button */}
-            {mode !== 'preview' && faqItems.length < 5 && (
+            {mode === 'edit' && faqItems.length < 5 && (
               <button
                 onClick={() => {
                   // Find the first empty slot
@@ -409,7 +409,7 @@ export default function ChatBubbleFAQ(props: LayoutComponentProps) {
                 </div>
                 
                 {/* Remove typing indicator button */}
-                {mode !== 'preview' && (
+                {mode === 'edit' && (
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
@@ -470,9 +470,9 @@ export default function ChatBubbleFAQ(props: LayoutComponentProps) {
         </div>
 
         {/* Call-to-Action */}
-        {blockContent.show_cta_section !== false && (blockContent.cta_text || blockContent.button_text || mode !== 'preview') && (
+        {blockContent.show_cta_section !== false && (blockContent.cta_text || blockContent.button_text || mode === 'edit') && (
           <div className="text-center mt-8 relative group/cta-section">
-            {(blockContent.cta_text || mode !== 'preview') && (
+            {(blockContent.cta_text || mode === 'edit') && (
               <div className="mb-3 relative group/cta-text">
                 <EditableAdaptiveText
                   mode={mode}
@@ -490,7 +490,7 @@ export default function ChatBubbleFAQ(props: LayoutComponentProps) {
               </div>
             )}
             
-            {(blockContent.button_text || mode !== 'preview') && (
+            {(blockContent.button_text || mode === 'edit') && (
               <div className="relative group/button-text inline-block">
                 <button 
                   className="px-6 py-2 rounded-full text-white font-medium hover:opacity-90 transition-opacity"
@@ -518,7 +518,7 @@ export default function ChatBubbleFAQ(props: LayoutComponentProps) {
             )}
             
             {/* Remove CTA section button */}
-            {mode !== 'preview' && (
+            {mode === 'edit' && (
               <button
                 onClick={(e) => {
                   e.stopPropagation();

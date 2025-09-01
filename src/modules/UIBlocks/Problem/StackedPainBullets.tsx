@@ -132,7 +132,7 @@ const PainPointItem = ({
         </div>
         
         {/* Optional Description */}
-        {(painPoint.description || mode !== 'preview') && (
+        {(painPoint.description || mode === 'edit') && (
           <div>
             <EditableAdaptiveText
               mode={mode}
@@ -141,7 +141,7 @@ const PainPointItem = ({
               backgroundType={backgroundType}
               colorTokens={colorTokens}
               variant="body"
-              className={`text-gray-600 leading-relaxed ${!painPoint.description && mode !== 'preview' ? 'opacity-50 italic' : ''}`}
+              className={`text-gray-600 leading-relaxed ${!painPoint.description && mode === 'edit' ? 'opacity-50 italic' : ''}`}
               placeholder="Add optional description to elaborate on this pain point..."
               sectionBackground={sectionBackground}
               data-section-id={sectionId}
@@ -217,7 +217,7 @@ export default function StackedPainBullets(props: LayoutComponentProps) {
           />
 
           {/* Optional Subheadline */}
-          {(blockContent.subheadline || mode !== 'preview') && (
+          {(blockContent.subheadline || mode === 'edit') && (
             <EditableAdaptiveText
               mode={mode}
               value={blockContent.subheadline || ''}

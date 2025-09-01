@@ -5,13 +5,14 @@ import { inferFields } from '@/modules/inference/inferFields';
 import { validateInferredFields, ValidationResult } from '@/modules/inference/validateOutput';
 import { generateMockInferredFields, generateMockValidationResults } from '@/modules/mock/mockDataGenerators';
 import { logger } from '@/lib/logger';
+import { withAIRateLimit } from '@/lib/rateLimit';
 
 const RequestSchema = z.object({
   input: z.string().min(1),
   includeValidation: z.boolean().optional().default(true),
 });
 
-export async function POST(req: NextRequest) {
+async function inferFieldsHandler(req: NextRequest) {
   try {
     const body = await req.json();
     const { input, includeValidation } = RequestSchema.parse(body);
@@ -123,3 +124,6 @@ export async function POST(req: NextRequest) {
     }
   }
 }
+
+// Apply rate limiting to the POST handler
+export const POST = withAIRateLimit(inferFieldsHandler);

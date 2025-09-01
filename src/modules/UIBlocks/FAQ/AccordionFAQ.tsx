@@ -211,7 +211,7 @@ const FAQAccordionItem = React.memo(({
       </div>
       
       {/* Remove button */}
-      {mode !== 'preview' && (
+      {mode === 'edit' && (
         <button
           onClick={(e) => {
             e.stopPropagation();
@@ -305,7 +305,7 @@ export default function AccordionFAQ(props: LayoutComponentProps) {
           />
 
           {/* Subheadline */}
-          {(blockContent.subheadline || mode !== 'preview') && (
+          {(blockContent.subheadline || mode === 'edit') && (
             <EditableAdaptiveText
               mode={mode}
               value={blockContent.subheadline || ''}
@@ -352,7 +352,7 @@ export default function AccordionFAQ(props: LayoutComponentProps) {
           ))}
           
           {/* Add new FAQ button */}
-          {mode !== 'preview' && faqItems.length < 5 && (
+          {mode === 'edit' && faqItems.length < 5 && (
             <button
               onClick={() => {
                 // Find the first empty slot

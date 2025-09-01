@@ -214,7 +214,7 @@ export default function MediaMentions(props: LayoutComponentProps) {
             sectionBackground={sectionBackground}
           />
 
-          {(blockContent.subheadline || mode !== 'preview') && (
+          {(blockContent.subheadline || mode === 'edit') && (
             <EditableAdaptiveText
               mode={mode}
               value={blockContent.subheadline || ''}
@@ -250,7 +250,7 @@ export default function MediaMentions(props: LayoutComponentProps) {
                   companyName={outlet.name}
                   size="md"
                 />
-                {mode !== 'preview' ? (
+                {mode === 'edit' ? (
                   <div className="flex items-center justify-center gap-2 text-center">
                     <span style={{...bodyStyle, fontSize: '0.875rem'}} className={`${dynamicTextColors?.body || 'text-gray-700'} flex-1`}>
                       {outlet.name}
@@ -284,7 +284,7 @@ export default function MediaMentions(props: LayoutComponentProps) {
           })}
           
           {/* Add Outlet Button (Edit Mode Only) */}
-          {mode !== 'preview' && (
+          {mode === 'edit' && (
             <div className="flex flex-col items-center space-y-3 p-6 bg-white/10 backdrop-blur-sm rounded-xl border-2 border-dashed border-white/20 hover:border-white/30 transition-all duration-300">
               <button
                 onClick={(e) => {

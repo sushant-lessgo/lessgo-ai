@@ -164,7 +164,7 @@ const FeatureCard = React.memo(({
               className="group-hover:scale-110 transition-transform duration-300"
             />
           )}
-          {mode !== 'preview' && !item.iconOverride && (
+          {mode === 'edit' && !item.iconOverride && (
             <button
               onClick={() => onIconEdit && onIconEdit(item.index, '🎯')}
               className="absolute -top-1 -right-1 w-5 h-5 bg-blue-600 text-white rounded-full text-xs hover:bg-blue-700 transition-colors opacity-0 group-hover:opacity-100"
@@ -311,7 +311,7 @@ export default function IconGrid(props: LayoutComponentProps) {
           </div>
 
           {/* ✅ ENHANCED: Subheadline with Dynamic Text Color */}
-          {(blockContent.subheadline || mode !== 'preview') && (
+          {(blockContent.subheadline || mode === 'edit') && (
             <div style={{ textAlign: 'center' }}>
               <EditableAdaptiveText
                 mode={mode}

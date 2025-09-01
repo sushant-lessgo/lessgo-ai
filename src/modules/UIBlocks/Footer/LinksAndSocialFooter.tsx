@@ -126,10 +126,10 @@ const LinksAndSocialFooter: React.FC<LayoutComponentProps> = (props) => {
                 rel="noopener noreferrer"
                 className="text-gray-400 hover:text-white transition-colors relative"
                 aria-label={social.platform}
-                onClick={(e) => mode !== 'preview' ? e.preventDefault() : undefined}
+                onClick={(e) => mode === 'edit' ? e.preventDefault() : undefined}
               >
                 <IconComponent className="w-5 h-5" />
-                {mode !== 'preview' && (
+                {mode === 'edit' && (
                   <span className="absolute -top-6 left-1/2 transform -translate-x-1/2 text-xs text-gray-500 whitespace-nowrap">
                     {social.platform}
                   </span>
@@ -138,7 +138,7 @@ const LinksAndSocialFooter: React.FC<LayoutComponentProps> = (props) => {
             );
           })}
           
-          {mode !== 'preview' && (
+          {mode === 'edit' && (
             <button
               onClick={() => setShowSocialEditor(true)}
               className="flex items-center gap-1 px-2 py-1 bg-blue-600 text-white text-xs rounded-md hover:bg-blue-700 transition-colors"

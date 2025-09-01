@@ -92,7 +92,7 @@ const StatComparisonCard = ({
       
       {/* Metric Label */}
       <div className="mb-6 text-center">
-        {mode !== 'preview' ? (
+        {mode === 'edit' ? (
           <div 
             contentEditable
             suppressContentEditableWarning
@@ -132,7 +132,7 @@ const StatComparisonCard = ({
             <span className="text-sm font-medium text-red-800">Before</span>
           </div>
           
-          {mode !== 'preview' ? (
+          {mode === 'edit' ? (
             <div 
               contentEditable
               suppressContentEditableWarning
@@ -186,7 +186,7 @@ const StatComparisonCard = ({
             <span className="text-sm font-medium text-green-800">After</span>
           </div>
           
-          {mode !== 'preview' ? (
+          {mode === 'edit' ? (
             <div 
               contentEditable
               suppressContentEditableWarning
@@ -219,7 +219,7 @@ const StatComparisonCard = ({
             sectionId={sectionId}
             elementKey="improvement_icon"
           />
-          {mode !== 'preview' ? (
+          {mode === 'edit' ? (
             <div 
               contentEditable
               suppressContentEditableWarning
@@ -310,7 +310,7 @@ export default function BeforeAfterStats(props: BeforeAfterStatsProps) {
           />
 
           {/* Optional Subheadline */}
-          {(blockContent.subheadline || mode !== 'preview') && (
+          {(blockContent.subheadline || mode === 'edit') && (
             <EditableAdaptiveText
               mode={mode}
               value={blockContent.subheadline || ''}
@@ -326,12 +326,12 @@ export default function BeforeAfterStats(props: BeforeAfterStatsProps) {
           )}
 
           {/* Time Period Badge */}
-          {(blockContent.time_period || mode !== 'preview') && (
+          {(blockContent.time_period || mode === 'edit') && (
             <div className="inline-flex items-center px-4 py-2 bg-blue-50 border border-blue-200 rounded-full text-blue-800">
               <svg className="w-4 h-4 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
-              {mode !== 'preview' ? (
+              {mode === 'edit' ? (
                 <div 
                   contentEditable
                   suppressContentEditableWarning
@@ -370,7 +370,7 @@ export default function BeforeAfterStats(props: BeforeAfterStatsProps) {
         </div>
 
         {/* Results Footer */}
-        {(blockContent.footer_text || mode !== 'preview') && (
+        {(blockContent.footer_text || mode === 'edit') && (
           <div className="mt-16 text-center">
             <div className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-full text-green-800">
               <svg className="w-5 h-5 mr-2 text-green-600" fill="currentColor" viewBox="0 0 20 20">

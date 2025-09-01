@@ -160,7 +160,7 @@ export default function QuoteStyleAnswers(props: LayoutComponentProps) {
             sectionBackground={sectionBackground}
           />
           
-          {(blockContent.subheadline || mode !== 'preview') && (
+          {(blockContent.subheadline || mode === 'edit') && (
             <EditableAdaptiveText
               mode={mode}
               value={blockContent.subheadline || ''}
@@ -228,7 +228,7 @@ export default function QuoteStyleAnswers(props: LayoutComponentProps) {
                 )}
                 
                 {/* Answer */}
-                {(item.answer || mode !== 'preview') && (
+                {(item.answer || mode === 'edit') && (
                   <blockquote className="mb-4">
                     <EditableAdaptiveText
                       mode={mode}
@@ -289,7 +289,7 @@ export default function QuoteStyleAnswers(props: LayoutComponentProps) {
               </div>
               
               {/* Remove button */}
-              {mode !== 'preview' && (
+              {mode === 'edit' && (
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
@@ -310,7 +310,7 @@ export default function QuoteStyleAnswers(props: LayoutComponentProps) {
           ))}
           
           {/* Add new expert quote button */}
-          {mode !== 'preview' && faqItems.length < 3 && (
+          {mode === 'edit' && faqItems.length < 3 && (
             <button
               onClick={() => {
                 // Find the first empty slot

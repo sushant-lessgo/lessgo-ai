@@ -119,7 +119,7 @@ const TimelineMilestone = ({
         
         {/* Timeframe Badge */}
         <div className="mb-4">
-          {mode !== 'preview' ? (
+          {mode === 'edit' ? (
             <div 
               contentEditable
               suppressContentEditableWarning
@@ -137,7 +137,7 @@ const TimelineMilestone = ({
 
         {/* Title */}
         <div className="mb-3">
-          {mode !== 'preview' ? (
+          {mode === 'edit' ? (
             <div 
               contentEditable
               suppressContentEditableWarning
@@ -157,7 +157,7 @@ const TimelineMilestone = ({
 
         {/* Description */}
         <div className="mb-4">
-          {mode !== 'preview' ? (
+          {mode === 'edit' ? (
             <div 
               contentEditable
               suppressContentEditableWarning
@@ -176,7 +176,7 @@ const TimelineMilestone = ({
         </div>
 
         {/* Optional Metric */}
-        {(milestone.metric || mode !== 'preview') && (
+        {(milestone.metric || mode === 'edit') && (
           <div className="inline-flex items-center px-4 py-2 bg-green-50 border border-green-200 rounded-lg">
             <IconEditableText
               mode={mode}
@@ -189,7 +189,7 @@ const TimelineMilestone = ({
               sectionId={sectionId}
               elementKey="metric_icon"
             />
-            {mode !== 'preview' ? (
+            {mode === 'edit' ? (
               <div 
                 contentEditable
                 suppressContentEditableWarning
@@ -285,7 +285,7 @@ export default function TimelineResults(props: TimelineResultsProps) {
           />
 
           {/* Optional Subheadline */}
-          {(blockContent.subheadline || mode !== 'preview') && (
+          {(blockContent.subheadline || mode === 'edit') && (
             <EditableAdaptiveText
               mode={mode}
               value={blockContent.subheadline || ''}
@@ -301,7 +301,7 @@ export default function TimelineResults(props: TimelineResultsProps) {
           )}
 
           {/* Timeline Period */}
-          {(blockContent.timeline_period || mode !== 'preview') && (
+          {(blockContent.timeline_period || mode === 'edit') && (
             <div className="inline-flex items-center px-4 py-2 bg-indigo-50 border border-indigo-200 rounded-full text-indigo-800">
               <IconEditableText
                 mode={mode}
@@ -314,7 +314,7 @@ export default function TimelineResults(props: TimelineResultsProps) {
                 sectionId={sectionId}
                 elementKey="timeline_icon"
               />
-              {mode !== 'preview' ? (
+              {mode === 'edit' ? (
                 <div 
                   contentEditable
                   suppressContentEditableWarning

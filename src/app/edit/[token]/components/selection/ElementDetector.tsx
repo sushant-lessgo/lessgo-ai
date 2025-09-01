@@ -234,12 +234,12 @@ export function ElementDetector({ sectionId, children }: ElementDetectorProps) {
     <div
       ref={sectionRef}
       data-section-id={sectionId}
-      className={`element-detector-section ${mode !== 'preview' ? 'edit-mode' : ''}`}
+      className={`element-detector-section ${mode === 'edit' ? 'edit-mode' : ''}`}
       onClick={handleNestedElementClick}
     >
       {children}
       
-      {mode !== 'preview' && <ElementDetectorStyles />}
+      {mode === 'edit' && <ElementDetectorStyles />}
     </div>
   );
 }

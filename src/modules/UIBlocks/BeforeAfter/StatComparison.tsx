@@ -283,7 +283,7 @@ export default function StatComparison(props: LayoutComponentProps) {
             sectionBackground={sectionBackground}
           />
 
-          {(blockContent.subheadline || mode !== 'preview') && (
+          {(blockContent.subheadline || mode === 'edit') && (
             <EditableAdaptiveText
               mode={mode}
               value={blockContent.subheadline || ''}
@@ -327,7 +327,7 @@ export default function StatComparison(props: LayoutComponentProps) {
             </div>
 
             <div className="grid gap-4">
-              {mode !== 'preview' ? (
+              {mode === 'edit' ? (
                 <EditableAdaptiveText
                   mode={mode}
                   value={blockContent.before_stats || ''}
@@ -393,7 +393,7 @@ export default function StatComparison(props: LayoutComponentProps) {
             </div>
 
             <div className="grid gap-4">
-              {mode !== 'preview' ? (
+              {mode === 'edit' ? (
                 <EditableAdaptiveText
                   mode={mode}
                   value={blockContent.after_stats || ''}
@@ -566,7 +566,7 @@ export default function StatComparison(props: LayoutComponentProps) {
                     />
                     
                     {/* Remove button */}
-                    {mode !== 'preview' && (
+                    {mode === 'edit' && (
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
@@ -631,7 +631,7 @@ export default function StatComparison(props: LayoutComponentProps) {
                     />
                     
                     {/* Remove button */}
-                    {mode !== 'preview' && (
+                    {mode === 'edit' && (
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
@@ -696,7 +696,7 @@ export default function StatComparison(props: LayoutComponentProps) {
                     />
                     
                     {/* Remove button */}
-                    {mode !== 'preview' && (
+                    {mode === 'edit' && (
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
@@ -717,7 +717,7 @@ export default function StatComparison(props: LayoutComponentProps) {
             </div>
             
             {/* Remove entire summary section button */}
-            {mode !== 'preview' && (
+            {mode === 'edit' && (
               <button
                 onClick={(e) => {
                   e.stopPropagation();
@@ -735,7 +735,7 @@ export default function StatComparison(props: LayoutComponentProps) {
         )}
         
         {/* Add summary section back button */}
-        {mode !== 'preview' && blockContent.show_summary_section === 'false' && (
+        {mode === 'edit' && blockContent.show_summary_section === 'false' && (
           <div className="mb-12 text-center">
             <button
               onClick={() => handleContentUpdate('show_summary_section', 'true')}
@@ -749,9 +749,9 @@ export default function StatComparison(props: LayoutComponentProps) {
           </div>
         )}
 
-        {(blockContent.cta_text || blockContent.trust_items || mode !== 'preview') && (
+        {(blockContent.cta_text || blockContent.trust_items || mode === 'edit') && (
           <div className="text-center space-y-6">
-            {(blockContent.supporting_text || mode !== 'preview') && (
+            {(blockContent.supporting_text || mode === 'edit') && (
               <EditableAdaptiveText
                 mode={mode}
                 value={blockContent.supporting_text || ''}

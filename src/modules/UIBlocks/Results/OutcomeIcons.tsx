@@ -179,7 +179,7 @@ const OutcomeCard = ({
 
       {/* Title */}
       <div className="mb-4">
-        {mode !== 'preview' ? (
+        {mode === 'edit' ? (
           <div 
             contentEditable
             suppressContentEditableWarning
@@ -199,7 +199,7 @@ const OutcomeCard = ({
 
       {/* Description */}
       <div>
-        {mode !== 'preview' ? (
+        {mode === 'edit' ? (
           <div 
             contentEditable
             suppressContentEditableWarning
@@ -286,7 +286,7 @@ export default function OutcomeIcons(props: OutcomeIconsProps) {
           />
 
           {/* Optional Subheadline */}
-          {(blockContent.subheadline || mode !== 'preview') && (
+          {(blockContent.subheadline || mode === 'edit') && (
             <EditableAdaptiveText
               mode={mode}
               value={blockContent.subheadline || ''}
@@ -324,7 +324,7 @@ export default function OutcomeIcons(props: OutcomeIconsProps) {
         </div>
 
         {/* Outcome Promise Footer */}
-        {(blockContent.footer_text || mode !== 'preview') && (
+        {(blockContent.footer_text || mode === 'edit') && (
           <div className="mt-16 text-center">
             <div className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-full text-blue-800">
               <svg className="w-5 h-5 mr-2 text-blue-600" fill="currentColor" viewBox="0 0 20 20">

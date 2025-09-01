@@ -202,9 +202,9 @@ const PhotoStoryPlaceholder = React.memo(({
               </div>
               <div className="grid grid-cols-2 gap-2">
                 <div className="bg-gradient-to-br from-blue-100 to-purple-100 rounded h-12 flex items-center justify-center relative group/icon-edit">
-                  {mode !== 'preview' ? (
+                  {mode === 'edit' ? (
                     <IconEditableText
-                      mode={mode}
+                      mode={(mode || 'preview') as 'preview' | 'edit'}
                       value={icon || '🎨'}
                       onEdit={(value) => onIconEdit?.(value)}
                       backgroundType={backgroundType as any}
@@ -325,9 +325,9 @@ export default function SideBySidePhotoStory(props: LayoutComponentProps) {
         
         {/* Header */}
         <div className="text-center mb-12">
-          {(blockContent.badge_text || blockContent.badge_icon || mode !== 'preview') && (
+          {(blockContent.badge_text || blockContent.badge_icon || mode === 'edit') && (
             <div className="mb-6 flex justify-center">
-              {mode !== 'preview' ? (
+              {mode === 'edit' ? (
                 <div className="flex items-center space-x-2">
                   <div className="relative group/icon-edit">
                     <IconEditableText
@@ -444,7 +444,7 @@ export default function SideBySidePhotoStory(props: LayoutComponentProps) {
             />
 
             {/* Trust Indicators */}
-            {mode !== 'preview' ? (
+            {mode === 'edit' ? (
               <EditableTrustIndicators
                 mode={mode}
                 trustItems={[
@@ -549,14 +549,14 @@ export default function SideBySidePhotoStory(props: LayoutComponentProps) {
               {/* Stats */}
               <div className="bg-white rounded-lg shadow-md p-4 space-y-3">
                 <h4 className="font-semibold text-gray-900 text-sm mb-3">Impact So Far</h4>
-                {mode !== 'preview' ? (
+                {mode === 'edit' ? (
                   <div className="space-y-2">
                     {[
                       { key: 'story_stat_1', placeholder: '25,000+ creators' },
                       { key: 'story_stat_2', placeholder: '500,000+ projects' },
                       { key: 'story_stat_3', placeholder: '$50M+ creator earnings' }
                     ].map((stat, index) => (
-                      ((blockContent as any)[stat.key] || mode !== 'preview') && (
+                      ((blockContent as any)[stat.key] || mode === 'edit') && (
                         <div key={index} className="relative group/stat-item flex items-center space-x-2">
                           <EditableAdaptiveText
                             mode={mode}
@@ -573,7 +573,7 @@ export default function SideBySidePhotoStory(props: LayoutComponentProps) {
                           />
                           
                           {/* Remove button */}
-                          {mode !== 'preview' && (blockContent as any)[stat.key] && (blockContent as any)[stat.key] !== '___REMOVED___' && (
+                          {mode === 'edit' && (blockContent as any)[stat.key] && (blockContent as any)[stat.key] !== '___REMOVED___' && (
                             <button
                               onClick={(e) => {
                                 e.stopPropagation();
@@ -610,7 +610,7 @@ export default function SideBySidePhotoStory(props: LayoutComponentProps) {
 
         {/* Bottom Stats Bar */}
         <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-8">
-          {mode !== 'preview' ? (
+          {mode === 'edit' ? (
             <div className="space-y-4">
               <h4 className="text-center font-semibold text-gray-900 mb-4">Story Statistics</h4>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -620,7 +620,7 @@ export default function SideBySidePhotoStory(props: LayoutComponentProps) {
                   { key: 'story_stat_3', placeholder: '$50M+ creator earnings' },
                   { key: 'story_stat_4', placeholder: '150+ countries' }
                 ].map((stat, index) => (
-                  ((blockContent as any)[stat.key] || mode !== 'preview') && (
+                  ((blockContent as any)[stat.key] || mode === 'edit') && (
                     <div key={index} className="relative group/stat-item text-center">
                       <EditableAdaptiveText
                         mode={mode}
@@ -637,7 +637,7 @@ export default function SideBySidePhotoStory(props: LayoutComponentProps) {
                       />
                       
                       {/* Remove button */}
-                      {mode !== 'preview' && (blockContent as any)[stat.key] && (blockContent as any)[stat.key] !== '___REMOVED___' && (
+                      {mode === 'edit' && (blockContent as any)[stat.key] && (blockContent as any)[stat.key] !== '___REMOVED___' && (
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
@@ -657,7 +657,7 @@ export default function SideBySidePhotoStory(props: LayoutComponentProps) {
               </div>
               
               {/* Add button */}
-              {mode !== 'preview' && storyStats.length < 4 && (
+              {mode === 'edit' && storyStats.length < 4 && (
                 <div className="text-center">
                   <button
                     onClick={() => {

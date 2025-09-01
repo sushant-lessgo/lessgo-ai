@@ -304,7 +304,7 @@ export default function StoryBlockWithPullquote(props: LayoutComponentProps) {
               
               {/* Quote mark */}
               <div className="text-6xl text-blue-500 opacity-20 font-serif leading-none mb-4 relative group/icon-edit">
-                {mode !== 'preview' ? (
+                {mode === 'edit' ? (
                   <IconEditableText
                     mode={mode}
                     value={blockContent.quote_icon || '"'}
@@ -411,7 +411,7 @@ export default function StoryBlockWithPullquote(props: LayoutComponentProps) {
           
           {/* Trust Stats */}
           <div className="max-w-2xl mx-auto">
-            {mode !== 'preview' ? (
+            {mode === 'edit' ? (
               <EditableTrustIndicators
                 mode={mode}
                 trustItems={[

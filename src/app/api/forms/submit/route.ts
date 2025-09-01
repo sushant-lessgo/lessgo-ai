@@ -3,6 +3,7 @@ import { prisma } from '@/lib/prisma';
 import { ConvertKitIntegration, mapFormDataToSubscriber } from '@/lib/integrations/convertkit';
 import { FormSubmissionSchema, sanitizeForLogging } from '@/lib/validation';
 import { createSecureResponse } from '@/lib/security';
+import { withFormRateLimit } from '@/lib/rateLimit';
 import { z } from 'zod';
 
 interface FormSubmissionRequest {
@@ -13,7 +14,7 @@ interface FormSubmissionRequest {
 }
 
 
-export async function POST(request: NextRequest) {
+async function formSubmitHandler(request: NextRequest) {
   try {
     const body = await request.json();
     
@@ -205,3 +206,6 @@ export async function GET(request: NextRequest) {
 
   return createSecureResponse(formConfig);
 }
+
+// Apply rate limiting to the POST handler
+export const POST = withFormRateLimit(formSubmitHandler);

@@ -103,7 +103,7 @@ export function EditLayout({ tokenId }: EditLayoutProps) {
 
   // Prevent context menu in edit mode for cleaner UX
   const handleContextMenu = useCallback((event: React.MouseEvent) => {
-    if (mode !== 'preview') {
+    if (mode === 'edit') {
       event.preventDefault();
     }
   }, [mode]);

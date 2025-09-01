@@ -149,7 +149,7 @@ export default function LiteVsProVsEnterprise(props: LayoutComponentProps) {
             className="mb-4"
           />
           
-          {(blockContent.subheadline || mode !== 'preview') && (
+          {(blockContent.subheadline || mode === 'edit') && (
             <EditableAdaptiveText
               value={blockContent.subheadline || 'Add subheadline...'}
               onEdit={(value) => handleContentUpdate('subheadline', value)}
@@ -158,7 +158,7 @@ export default function LiteVsProVsEnterprise(props: LayoutComponentProps) {
               variant="body"
               sectionBackground={sectionBackground}
               colorTokens={colorTokens}
-              className={`max-w-2xl mx-auto ${!blockContent.subheadline && mode !== 'preview' ? 'opacity-50' : ''}`}
+              className={`max-w-2xl mx-auto ${!blockContent.subheadline && mode === 'edit' ? 'opacity-50' : ''}`}
             />
           )}
         </div>
@@ -183,7 +183,7 @@ export default function LiteVsProVsEnterprise(props: LayoutComponentProps) {
 
               <div className="p-8">
                 {/* Tier Name */}
-                {mode !== 'preview' ? (
+                {mode === 'edit' ? (
                   <input
                     type="text"
                     value={name}
@@ -198,7 +198,7 @@ export default function LiteVsProVsEnterprise(props: LayoutComponentProps) {
                 )}
 
                 {/* Price */}
-                {mode !== 'preview' ? (
+                {mode === 'edit' ? (
                   <input
                     type="text"
                     value={tierPrices[tierIndex]}
@@ -217,7 +217,7 @@ export default function LiteVsProVsEnterprise(props: LayoutComponentProps) {
                 )}
 
                 {/* Description */}
-                {mode !== 'preview' ? (
+                {mode === 'edit' ? (
                   <textarea
                     value={tierDescriptions[tierIndex]}
                     onChange={(e) => handleTierDescriptionUpdate(tierIndex, e.target.value)}
@@ -260,7 +260,7 @@ export default function LiteVsProVsEnterprise(props: LayoutComponentProps) {
                     ? `bg-primary text-white hover:opacity-90`
                     : `${colorTokens.bgNeutral || 'bg-gray-50'} border-2 border-gray-200 ${colorTokens.textPrimary || 'text-gray-900'} hover:border-primary`
                 }`}>
-                  {mode !== 'preview' ? (
+                  {mode === 'edit' ? (
                     <input
                       type="text"
                       value={tierCtas[tierIndex]}

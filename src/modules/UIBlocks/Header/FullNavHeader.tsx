@@ -115,7 +115,7 @@ const FullNavHeader: React.FC<LayoutComponentProps> = (props) => {
     console.log('🧭 [NAV-DEBUG] Navigation click:', { link, mode });
     
     // In edit mode, don't navigate - let text editing work
-    if (mode !== 'preview') {
+    if (mode === 'edit') {
       return;
     }
     

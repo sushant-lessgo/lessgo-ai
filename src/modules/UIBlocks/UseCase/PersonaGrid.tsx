@@ -162,7 +162,7 @@ const PersonaAvatar = React.memo(({
       </div>
       
       {/* Icon Override Button for Edit Mode */}
-      {mode !== 'preview' && !iconOverride && (
+      {mode === 'edit' && !iconOverride && (
         <button
           onClick={() => onIconEdit(index, '👤')}
           className="absolute top-0 right-0 w-6 h-6 bg-blue-600 text-white rounded-full text-xs opacity-0 group-hover:opacity-100 transition-opacity"
@@ -366,7 +366,7 @@ export default function PersonaGrid(props: LayoutComponentProps) {
         </div>
 
         {/* Universal Appeal */}
-        {(blockContent.footer_text || mode !== 'preview') && (
+        {(blockContent.footer_text || mode === 'edit') && (
           <div className="mt-16 text-center">
             <div className="inline-flex items-center px-6 py-3 bg-blue-50 border border-blue-200 rounded-full">
               <svg className="w-5 h-5 mr-2 text-blue-600" fill="currentColor" viewBox="0 0 20 20">

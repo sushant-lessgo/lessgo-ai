@@ -141,7 +141,7 @@ export default function SideBySideBlocks(props: LayoutComponentProps) {
           />
 
           {/* ✅ ENHANCED: Optional Subheadline with Dynamic Text Color */}
-          {(blockContent.subheadline || mode !== 'preview') && (
+          {(blockContent.subheadline || mode === 'edit') && (
             <EditableAdaptiveText
               mode={mode}
               value={blockContent.subheadline || ''}
@@ -214,7 +214,7 @@ export default function SideBySideBlocks(props: LayoutComponentProps) {
                 sectionBackground={sectionBackground}
               />
               
-              {mode !== 'preview' && (
+              {mode === 'edit' && (
                 <div className="mt-4 text-center">
                   {blockContent.before_icon ? (
                     <button
@@ -289,7 +289,7 @@ export default function SideBySideBlocks(props: LayoutComponentProps) {
                 sectionBackground={sectionBackground}
               />
               
-              {mode !== 'preview' && (
+              {mode === 'edit' && (
                 <div className="mt-4 text-center">
                   {blockContent.after_icon ? (
                     <button
@@ -313,10 +313,10 @@ export default function SideBySideBlocks(props: LayoutComponentProps) {
         </div>
 
         {/* ✅ NEW: Optional CTA and Trust Section */}
-        {(blockContent.cta_text || blockContent.trust_items || mode !== 'preview') && (
+        {(blockContent.cta_text || blockContent.trust_items || mode === 'edit') && (
           <div className="text-center space-y-6">
             {/* Optional Supporting Text */}
-            {(blockContent.supporting_text || mode !== 'preview') && (
+            {(blockContent.supporting_text || mode === 'edit') && (
               <EditableAdaptiveText
                 mode={mode}
                 value={blockContent.supporting_text || ''}

@@ -1,5 +1,6 @@
 // app/api/validate-fields/route.ts - ✅ PHASE 4: API Layer Migration Complete
 import { NextRequest } from 'next/server';
+import { withAIRateLimit } from '@/lib/rateLimit';
 import { z } from 'zod';
 import { validateInferredFields, ValidationResult } from '@/modules/inference/validateOutput';
 import { generateMockValidationResults } from '@/modules/mock/mockDataGenerators';
@@ -85,7 +86,7 @@ function validateAndCastFields(fields: Record<string, string>): {
   return { success: true, data: validatedFields, errors: [] };
 }
 
-export async function POST(req: NextRequest) {
+async function validateFieldsHandler(req: NextRequest) {
   try {
     const body = await req.json();
     const { fields } = RequestSchema.parse(body);
@@ -175,3 +176,6 @@ export async function POST(req: NextRequest) {
     }
   }
 }
+
+// Apply rate limiting to the POST handler
+export const POST = withAIRateLimit(validateFieldsHandler);

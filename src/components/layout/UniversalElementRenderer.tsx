@@ -302,7 +302,7 @@ function UniversalList({
             element="span"
             placeholder="List item..."
           />
-          {mode !== 'preview' && (
+          {mode === 'edit' && (
             <div className="absolute right-0 top-0 opacity-0 group-hover:opacity-100 transition-opacity">
               <button
                 onClick={() => handleRemoveItem(index)}
@@ -315,7 +315,7 @@ function UniversalList({
           )}
         </li>
       ))}
-      {mode !== 'preview' && (
+      {mode === 'edit' && (
         <li>
           <button
             onClick={handleAddItem}
@@ -544,7 +544,7 @@ function UniversalImage({
     return baseClasses.concat(className.split(' ')).filter(Boolean).join(' ');
   }, [props.size, props.rounded, props.shadow, className]);
 
-  if (mode !== 'preview' && !src) {
+  if (mode === 'edit' && !src) {
     return (
       <div
         className={`border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center min-h-24 ${className}`}
@@ -680,7 +680,7 @@ function UniversalSpacer({
     height: spacerHeight,
   };
 
-  if (mode !== 'preview' && showInEdit) {
+  if (mode === 'edit' && showInEdit) {
     return (
       <div
         className={`border border-dashed border-gray-300 bg-gray-50 flex items-center justify-center ${className}`}

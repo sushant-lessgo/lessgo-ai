@@ -218,7 +218,7 @@ export default function TestimonialFAQs(props: LayoutComponentProps) {
             sectionBackground={sectionBackground}
           />
           
-          {(blockContent.subheadline || mode !== 'preview') && (
+          {(blockContent.subheadline || mode === 'edit') && (
             <EditableAdaptiveText
               mode={mode}
               value={blockContent.subheadline || ''}
@@ -264,7 +264,7 @@ export default function TestimonialFAQs(props: LayoutComponentProps) {
               </div>
               
               {/* Testimonial Answer */}
-              {(item.answer || mode !== 'preview') && (
+              {(item.answer || mode === 'edit') && (
                 <div className="mb-6">
                   <span className="text-2xl opacity-10">"</span>
                   <EditableAdaptiveText
@@ -345,7 +345,7 @@ export default function TestimonialFAQs(props: LayoutComponentProps) {
                 {/* Star Rating */}
                 <div className="ml-auto flex items-center gap-1 relative group/rating">
                   {renderStars(item.rating, item.index)}
-                  {mode !== 'preview' && (
+                  {mode === 'edit' && (
                     <EditableAdaptiveText
                       mode={mode}
                       value={item.rating}
@@ -364,7 +364,7 @@ export default function TestimonialFAQs(props: LayoutComponentProps) {
               </div>
               
               {/* Remove button */}
-              {mode !== 'preview' && (
+              {mode === 'edit' && (
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
@@ -387,7 +387,7 @@ export default function TestimonialFAQs(props: LayoutComponentProps) {
           ))}
           
           {/* Add new testimonial FAQ button */}
-          {mode !== 'preview' && testimonialItems.length < 3 && (
+          {mode === 'edit' && testimonialItems.length < 3 && (
             <button
               onClick={() => {
                 // Find the first empty slot
@@ -486,7 +486,7 @@ export default function TestimonialFAQs(props: LayoutComponentProps) {
             </div>
             
             {/* Remove trust section button */}
-            {mode !== 'preview' && (
+            {mode === 'edit' && (
               <button
                 onClick={(e) => {
                   e.stopPropagation();

@@ -133,9 +133,9 @@ const WinItem = ({
       <div className="flex-1 min-w-0">
         
         {/* Category Tag */}
-        {(win.category || mode !== 'preview') && (
+        {(win.category || mode === 'edit') && (
           <div className="mb-2">
-            {mode !== 'preview' ? (
+            {mode === 'edit' ? (
               <div 
                 contentEditable
                 suppressContentEditableWarning
@@ -154,7 +154,7 @@ const WinItem = ({
 
         {/* Win Title */}
         <div className="mb-2">
-          {mode !== 'preview' ? (
+          {mode === 'edit' ? (
             <div 
               contentEditable
               suppressContentEditableWarning
@@ -173,9 +173,9 @@ const WinItem = ({
         </div>
 
         {/* Optional Description */}
-        {(win.description || mode !== 'preview') && (
+        {(win.description || mode === 'edit') && (
           <div>
-            {mode !== 'preview' ? (
+            {mode === 'edit' ? (
               <div 
                 contentEditable
                 suppressContentEditableWarning
@@ -264,7 +264,7 @@ export default function StackedWinsList(props: StackedWinsListProps) {
           />
 
           {/* Optional Subheadline */}
-          {(blockContent.subheadline || mode !== 'preview') && (
+          {(blockContent.subheadline || mode === 'edit') && (
             <EditableAdaptiveText
               mode={mode}
               value={blockContent.subheadline || ''}
@@ -280,7 +280,7 @@ export default function StackedWinsList(props: StackedWinsListProps) {
           )}
 
           {/* Win Count Badge */}
-          {(blockContent.win_count || mode !== 'preview') && (
+          {(blockContent.win_count || mode === 'edit') && (
             <div className="inline-flex items-center px-4 py-2 bg-green-50 border border-green-200 rounded-full text-green-800">
               <IconEditableText
                 mode={mode}
@@ -293,7 +293,7 @@ export default function StackedWinsList(props: StackedWinsListProps) {
                 sectionId={sectionId}
                 elementKey="badge_icon"
               />
-              {mode !== 'preview' ? (
+              {mode === 'edit' ? (
                 <div 
                   contentEditable
                   suppressContentEditableWarning
@@ -330,7 +330,7 @@ export default function StackedWinsList(props: StackedWinsListProps) {
         </div>
 
         {/* Momentum Footer */}
-        {(blockContent.footer_title || blockContent.footer_text || mode !== 'preview') && (
+        {(blockContent.footer_title || blockContent.footer_text || mode === 'edit') && (
           <div className="mt-16 text-center">
             <div className="inline-flex items-center px-6 py-4 bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-2xl">
               <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-emerald-600 rounded-full flex items-center justify-center mr-4">

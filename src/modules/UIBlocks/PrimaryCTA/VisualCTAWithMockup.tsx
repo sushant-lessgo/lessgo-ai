@@ -310,7 +310,7 @@ export default function VisualCTAWithMockup(props: LayoutComponentProps) {
                   className="w-full h-auto rounded-2xl shadow-2xl cursor-pointer"
                   data-image-id={`${sectionId}-mockup_image`}
                   onMouseUp={(e) => {
-                    if (mode !== 'preview') {
+                    if (mode === 'edit') {
                       e.stopPropagation();
                       e.preventDefault();
                       const rect = e.currentTarget.getBoundingClientRect();
@@ -323,7 +323,7 @@ export default function VisualCTAWithMockup(props: LayoutComponentProps) {
                     }
                   }}
                   onClick={(e) => {
-                    if (mode !== 'preview') {
+                    if (mode === 'edit') {
                       e.stopPropagation();
                       e.preventDefault();
                     }
@@ -333,7 +333,7 @@ export default function VisualCTAWithMockup(props: LayoutComponentProps) {
             ) : (
               <ProductMockup 
                 onClick={(e) => {
-                  if (mode !== 'preview') {
+                  if (mode === 'edit') {
                     e.stopPropagation();
                     e.preventDefault();
                     const rect = e.currentTarget.getBoundingClientRect();

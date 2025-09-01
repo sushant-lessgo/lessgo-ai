@@ -198,7 +198,7 @@ const PersonaPanel = ({
         
         {/* Persona Info */}
         <div>
-          {mode !== 'preview' ? (
+          {mode === 'edit' ? (
             <>
               <div 
                 contentEditable
@@ -240,7 +240,7 @@ const PersonaPanel = ({
           <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
           </svg>
-          {mode !== 'preview' ? (
+          {mode === 'edit' ? (
             <div 
               contentEditable
               suppressContentEditableWarning
@@ -257,7 +257,7 @@ const PersonaPanel = ({
 
       {/* Result Description */}
       <div className="mb-6">
-        {mode !== 'preview' ? (
+        {mode === 'edit' ? (
           <div 
             contentEditable
             suppressContentEditableWarning
@@ -278,7 +278,7 @@ const PersonaPanel = ({
       {/* Key Benefits */}
       <div>
         <h4 className="font-semibold text-gray-800 mb-3 text-sm">Key Benefits:</h4>
-        {mode !== 'preview' ? (
+        {mode === 'edit' ? (
           <div 
             contentEditable
             suppressContentEditableWarning
@@ -400,7 +400,7 @@ export default function PersonaResultPanels(props: PersonaResultPanelsProps) {
           />
 
           {/* Optional Subheadline */}
-          {(blockContent.subheadline || mode !== 'preview') && (
+          {(blockContent.subheadline || mode === 'edit') && (
             <EditableAdaptiveText
               mode={mode}
               value={blockContent.subheadline || ''}
@@ -441,7 +441,7 @@ export default function PersonaResultPanels(props: PersonaResultPanelsProps) {
         </div>
 
         {/* Universal Success Footer */}
-        {(blockContent.footer_text || mode !== 'preview') && (
+        {(blockContent.footer_text || mode === 'edit') && (
           <div className="mt-16 text-center">
             <div className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-gray-50 to-slate-50 border border-gray-200 rounded-full text-gray-800">
               <svg className="w-5 h-5 mr-2 text-gray-600" fill="currentColor" viewBox="0 0 20 20">

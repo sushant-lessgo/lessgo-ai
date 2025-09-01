@@ -414,7 +414,7 @@ export default function CardWithTestimonial(props: LayoutComponentProps) {
             sectionBackground={sectionBackground}
           />
 
-          {(blockContent.subheadline || mode !== 'preview') && (
+          {(blockContent.subheadline || mode === 'edit') && (
             <EditableAdaptiveText
               mode={mode}
               value={blockContent.subheadline || ''}
@@ -432,7 +432,7 @@ export default function CardWithTestimonial(props: LayoutComponentProps) {
           )}
         </div>
 
-        {mode !== 'preview' ? (
+        {mode === 'edit' ? (
           <div className="space-y-8">
             <div className="p-6 border border-gray-200 rounded-lg bg-gray-50">
               <h4 style={getTypographyStyle('h4')} className="font-semibold text-gray-700 mb-4">Pricing with Testimonials Content</h4>
@@ -524,12 +524,12 @@ export default function CardWithTestimonial(props: LayoutComponentProps) {
         )}
 
         {/* Social Proof Section */}
-        {((blockContent.show_social_proof !== false && socialMetrics.length > 0) || mode !== 'preview') && (
+        {((blockContent.show_social_proof !== false && socialMetrics.length > 0) || mode === 'edit') && (
           <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl p-8 border border-blue-100 mb-12">
             <div className="text-center">
               <h3 style={h3Style} className="font-semibold text-gray-900 mb-6">Trusted by thousands of businesses</h3>
               
-              {mode !== 'preview' ? (
+              {mode === 'edit' ? (
                 <div className="space-y-6">
                   <div className="grid md:grid-cols-4 gap-6">
                     {[1, 2, 3, 4].map((index) => {
@@ -603,7 +603,7 @@ export default function CardWithTestimonial(props: LayoutComponentProps) {
         )}
 
         {/* Money-back Guarantee */}
-        {((blockContent.show_guarantee !== false && (blockContent.guarantee_title || blockContent.guarantee_description)) || mode !== 'preview') && (
+        {((blockContent.show_guarantee !== false && (blockContent.guarantee_title || blockContent.guarantee_description)) || mode === 'edit') && (
           <div className="bg-green-50 rounded-2xl p-8 border border-green-200 mb-12 relative group/guarantee">
             <div className="flex items-center justify-center space-x-4">
               <div className="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center text-white">
@@ -643,7 +643,7 @@ export default function CardWithTestimonial(props: LayoutComponentProps) {
             </div>
             
             {/* Remove button */}
-            {mode !== 'preview' && (
+            {mode === 'edit' && (
               <button
                 onClick={(e) => {
                   e.stopPropagation();
@@ -661,9 +661,9 @@ export default function CardWithTestimonial(props: LayoutComponentProps) {
           </div>
         )}
 
-        {(blockContent.supporting_text || blockContent.trust_items || mode !== 'preview') && (
+        {(blockContent.supporting_text || blockContent.trust_items || mode === 'edit') && (
           <div className="text-center space-y-6">
-            {(blockContent.supporting_text || mode !== 'preview') && (
+            {(blockContent.supporting_text || mode === 'edit') && (
               <EditableAdaptiveText
                 mode={mode}
                 value={blockContent.supporting_text || ''}

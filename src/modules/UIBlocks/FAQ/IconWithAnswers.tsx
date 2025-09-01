@@ -159,7 +159,7 @@ export default function IconWithAnswers(props: LayoutComponentProps) {
             sectionBackground={sectionBackground}
           />
           
-          {(blockContent.subheadline || mode !== 'preview') && (
+          {(blockContent.subheadline || mode === 'edit') && (
             <EditableAdaptiveText
               mode={mode}
               value={blockContent.subheadline || ''}
@@ -226,7 +226,7 @@ export default function IconWithAnswers(props: LayoutComponentProps) {
                     />
                   </div>
                   
-                  {(item.answer || mode !== 'preview') && (
+                  {(item.answer || mode === 'edit') && (
                     <div className="relative group/answer">
                       <EditableAdaptiveText
                         mode={mode}
@@ -247,7 +247,7 @@ export default function IconWithAnswers(props: LayoutComponentProps) {
               </div>
               
               {/* Remove button */}
-              {mode !== 'preview' && (
+              {mode === 'edit' && (
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
@@ -267,7 +267,7 @@ export default function IconWithAnswers(props: LayoutComponentProps) {
           ))}
           
           {/* Add new FAQ button */}
-          {mode !== 'preview' && faqItems.length < 5 && (
+          {mode === 'edit' && faqItems.length < 5 && (
             <button
               onClick={() => {
                 // Find the first empty slot
@@ -312,7 +312,7 @@ export default function IconWithAnswers(props: LayoutComponentProps) {
             </div>
             
             {/* Remove help section button */}
-            {mode !== 'preview' && (
+            {mode === 'edit' && (
               <button
                 onClick={(e) => {
                   e.stopPropagation();

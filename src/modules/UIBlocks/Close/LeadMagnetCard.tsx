@@ -278,7 +278,7 @@ export default function LeadMagnetCard(props: LayoutComponentProps) {
             sectionBackground={sectionBackground}
           />
 
-          {(blockContent.subheadline || mode !== 'preview') && (
+          {(blockContent.subheadline || mode === 'edit') && (
             <EditableAdaptiveText
               mode={mode}
               value={blockContent.subheadline || ''}
@@ -296,7 +296,7 @@ export default function LeadMagnetCard(props: LayoutComponentProps) {
           )}
         </div>
 
-        {mode !== 'preview' ? (
+        {mode === 'edit' ? (
           <div className="space-y-8">
             <div className="p-6 border border-gray-200 rounded-lg bg-gray-50">
               <h4 className="font-semibold text-gray-700 mb-4">Lead Magnet Content</h4>
@@ -381,7 +381,7 @@ export default function LeadMagnetCard(props: LayoutComponentProps) {
                   </div>
                   
                   {/* Social Proof */}
-                  {(blockContent.social_proof || mode !== 'preview') && (
+                  {(blockContent.social_proof || (mode as string) !== 'preview') && (
                     <div className="bg-white bg-opacity-10 rounded-lg p-4 mb-6 relative group/social-proof">
                       <div className="flex items-center justify-center space-x-2">
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -403,7 +403,7 @@ export default function LeadMagnetCard(props: LayoutComponentProps) {
                       </div>
                       
                       {/* Remove button for social proof */}
-                      {mode !== 'preview' && (
+                      {(mode as string) !== 'preview' && (
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
@@ -639,9 +639,9 @@ export default function LeadMagnetCard(props: LayoutComponentProps) {
           </div>
         </div>
 
-        {(blockContent.supporting_text || blockContent.trust_items || mode !== 'preview') && (
+        {(blockContent.supporting_text || blockContent.trust_items || mode === 'edit') && (
           <div className="text-center space-y-6">
-            {(blockContent.supporting_text || mode !== 'preview') && (
+            {(blockContent.supporting_text || mode === 'edit') && (
               <EditableAdaptiveText
                 mode={mode}
                 value={blockContent.supporting_text || ''}
@@ -657,9 +657,9 @@ export default function LeadMagnetCard(props: LayoutComponentProps) {
               />
             )}
 
-            {(trustItems.length > 0 || mode !== 'preview') && (
+            {(trustItems.length > 0 || mode === 'edit') && (
               <div>
-                {mode !== 'preview' ? (
+                {mode === 'edit' ? (
                   <EditableTrustIndicators
                     mode={mode}
                     trustItems={[

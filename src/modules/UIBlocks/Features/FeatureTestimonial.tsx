@@ -372,7 +372,7 @@ export default function FeatureTestimonial(props: LayoutComponentProps) {
             sectionBackground={sectionBackground}
           />
 
-          {(blockContent.subheadline || mode !== 'preview') && (
+          {(blockContent.subheadline || mode === 'edit') && (
             <EditableAdaptiveText
               mode={mode}
               value={blockContent.subheadline || ''}
@@ -390,7 +390,7 @@ export default function FeatureTestimonial(props: LayoutComponentProps) {
           )}
         </div>
 
-        {mode !== 'preview' ? (
+        {mode === 'edit' ? (
           <div className="space-y-8">
             <div className="p-6 border border-gray-200 rounded-lg bg-gray-50">
               <h4 className="font-semibold text-gray-700 mb-4">Feature & Testimonial Content</h4>
@@ -493,7 +493,7 @@ export default function FeatureTestimonial(props: LayoutComponentProps) {
         )}
 
         {/* Trust Banner - Editable */}
-        {blockContent.show_trust_banner !== false && (blockContent.trust_banner_title || mode !== 'preview') && (
+        {blockContent.show_trust_banner !== false && (blockContent.trust_banner_title || mode === 'edit') && (
           <div className="mt-12 bg-gradient-to-r from-gray-50 to-gray-100 rounded-2xl p-8 border border-gray-200">
             <div className="text-center">
               <EditableAdaptiveText
@@ -516,7 +516,7 @@ export default function FeatureTestimonial(props: LayoutComponentProps) {
               
               <div className="flex flex-wrap justify-center gap-8">
                 {/* Trust Metric 1 */}
-                {(blockContent.trust_metric_1 || mode !== 'preview') && blockContent.trust_metric_1 !== '___REMOVED___' && (
+                {(blockContent.trust_metric_1 || mode === 'edit') && blockContent.trust_metric_1 !== '___REMOVED___' && (
                   <div className="text-center group/trust-item relative">
                     <EditableAdaptiveText
                       mode={mode}
@@ -544,7 +544,7 @@ export default function FeatureTestimonial(props: LayoutComponentProps) {
                       data-section-id={sectionId}
                       data-element-key="trust_label_1"
                     />
-                    {mode !== 'preview' && (
+                    {mode === 'edit' && (
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
@@ -563,7 +563,7 @@ export default function FeatureTestimonial(props: LayoutComponentProps) {
                 )}
                 
                 {/* Trust Metric 2 */}
-                {(blockContent.trust_metric_2 || mode !== 'preview') && blockContent.trust_metric_2 !== '___REMOVED___' && (
+                {(blockContent.trust_metric_2 || mode === 'edit') && blockContent.trust_metric_2 !== '___REMOVED___' && (
                   <div className="text-center group/trust-item relative">
                     <EditableAdaptiveText
                       mode={mode}
@@ -591,7 +591,7 @@ export default function FeatureTestimonial(props: LayoutComponentProps) {
                       data-section-id={sectionId}
                       data-element-key="trust_label_2"
                     />
-                    {mode !== 'preview' && (
+                    {mode === 'edit' && (
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
@@ -610,7 +610,7 @@ export default function FeatureTestimonial(props: LayoutComponentProps) {
                 )}
                 
                 {/* Trust Metric 3 */}
-                {(blockContent.trust_metric_3 || mode !== 'preview') && blockContent.trust_metric_3 !== '___REMOVED___' && (
+                {(blockContent.trust_metric_3 || mode === 'edit') && blockContent.trust_metric_3 !== '___REMOVED___' && (
                   <div className="text-center group/trust-item relative">
                     <EditableAdaptiveText
                       mode={mode}
@@ -638,7 +638,7 @@ export default function FeatureTestimonial(props: LayoutComponentProps) {
                       data-section-id={sectionId}
                       data-element-key="trust_label_3"
                     />
-                    {mode !== 'preview' && (
+                    {mode === 'edit' && (
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
@@ -657,7 +657,7 @@ export default function FeatureTestimonial(props: LayoutComponentProps) {
                 )}
                 
                 {/* Trust Metric 4 */}
-                {(blockContent.trust_metric_4 || mode !== 'preview') && blockContent.trust_metric_4 !== '___REMOVED___' && (
+                {(blockContent.trust_metric_4 || mode === 'edit') && blockContent.trust_metric_4 !== '___REMOVED___' && (
                   <div className="text-center group/trust-item relative">
                     <EditableAdaptiveText
                       mode={mode}
@@ -685,7 +685,7 @@ export default function FeatureTestimonial(props: LayoutComponentProps) {
                       data-section-id={sectionId}
                       data-element-key="trust_label_4"
                     />
-                    {mode !== 'preview' && (
+                    {mode === 'edit' && (
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
@@ -707,9 +707,9 @@ export default function FeatureTestimonial(props: LayoutComponentProps) {
           </div>
         )}
 
-        {(blockContent.cta_text || blockContent.trust_items || mode !== 'preview') && (
+        {(blockContent.cta_text || blockContent.trust_items || mode === 'edit') && (
           <div className="text-center space-y-6 mt-16">
-            {(blockContent.supporting_text || mode !== 'preview') && (
+            {(blockContent.supporting_text || mode === 'edit') && (
               <EditableAdaptiveText
                 mode={mode}
                 value={blockContent.supporting_text || ''}
@@ -738,9 +738,9 @@ export default function FeatureTestimonial(props: LayoutComponentProps) {
                   />
                 )}
 
-                {(trustItems.length > 0 || mode !== 'preview') && (
+                {(trustItems.length > 0 || mode === 'edit') && (
                   <div>
-                    {mode !== 'preview' ? (
+                    {mode === 'edit' ? (
                       <EditableTrustIndicators
                         mode={mode}
                         trustItems={[

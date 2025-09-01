@@ -61,7 +61,7 @@ const ModeWrapper = ({
   elementKey: string;
   onEdit?: (value: string) => void;
 }) => {
-  if (mode !== 'preview' && onEdit) {
+  if (mode === 'edit' && onEdit) {
     return (
       <div 
         contentEditable
@@ -178,7 +178,7 @@ const SecurityChecklistItem = ({
       <div className="flex-1">
         {/* Security Item */}
         <div className="mb-2">
-          {mode !== 'preview' ? (
+          {mode === 'edit' ? (
             <div 
               contentEditable
               suppressContentEditableWarning
@@ -197,9 +197,9 @@ const SecurityChecklistItem = ({
         </div>
         
         {/* Optional Description */}
-        {(securityItem.description || mode !== 'preview') && (
+        {(securityItem.description || mode === 'edit') && (
           <div>
-            {mode !== 'preview' ? (
+            {mode === 'edit' ? (
               <div 
                 contentEditable
                 suppressContentEditableWarning
@@ -299,7 +299,7 @@ export default function SecurityChecklist(props: SecurityChecklistProps) {
         </div>
 
         {/* Optional Compliance Note */}
-        {(blockContent.compliance_note || mode !== 'preview') && (
+        {(blockContent.compliance_note || mode === 'edit') && (
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
             <div className="flex items-start space-x-4">
               <div className="flex-shrink-0 w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center text-white">
@@ -318,9 +318,9 @@ export default function SecurityChecklist(props: SecurityChecklistProps) {
                   onEdit={(value) => handleContentUpdate('compliance_note', value)}
                 >
                   <p 
-                    className={`text-blue-800 leading-relaxed ${!blockContent.compliance_note && mode !== 'preview' ? 'opacity-50 italic' : ''}`}
+                    className={`text-blue-800 leading-relaxed ${!blockContent.compliance_note && mode === 'edit' ? 'opacity-50 italic' : ''}`}
                   >
-                    {blockContent.compliance_note || (mode !== 'preview' ? 'Add compliance note (e.g., We maintain SOC 2 Type II compliance and undergo annual security audits...)' : '')}
+                    {blockContent.compliance_note || (mode === 'edit' ? 'Add compliance note (e.g., We maintain SOC 2 Type II compliance and undergo annual security audits...)' : '')}
                   </p>
                 </ModeWrapper>
               </div>

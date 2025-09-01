@@ -177,7 +177,7 @@ const TimelineStep = React.memo(({
             </p>
             
             <div className="mt-4 flex items-center space-x-4">
-              {(blockContent.step_benefit_1 || mode !== 'preview') && blockContent.step_benefit_1 !== '___REMOVED___' && (
+              {(blockContent.step_benefit_1 || mode === 'edit') && blockContent.step_benefit_1 !== '___REMOVED___' && (
                 <div className="flex items-center space-x-2 text-green-600 group/benefit-item relative">
                   <IconEditableText
                     mode={mode}
@@ -190,7 +190,7 @@ const TimelineStep = React.memo(({
                     sectionId={sectionId}
                     elementKey="step_benefit_icon_1"
                   />
-                  {mode !== 'preview' ? (
+                  {mode === 'edit' ? (
                     <EditableAdaptiveText
                       mode={mode}
                       value={blockContent.step_benefit_1 || ''}
@@ -207,7 +207,7 @@ const TimelineStep = React.memo(({
                   ) : (
                     <span className="text-sm">{blockContent.step_benefit_1}</span>
                   )}
-                  {mode !== 'preview' && (
+                  {mode === 'edit' && (
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
@@ -223,7 +223,7 @@ const TimelineStep = React.memo(({
                   )}
                 </div>
               )}
-              {(blockContent.step_benefit_2 || mode !== 'preview') && blockContent.step_benefit_2 !== '___REMOVED___' && (
+              {(blockContent.step_benefit_2 || mode === 'edit') && blockContent.step_benefit_2 !== '___REMOVED___' && (
                 <div className="flex items-center space-x-2 text-blue-600 group/benefit-item relative">
                   <IconEditableText
                     mode={mode}
@@ -236,7 +236,7 @@ const TimelineStep = React.memo(({
                     sectionId={sectionId}
                     elementKey="step_benefit_icon_2"
                   />
-                  {mode !== 'preview' ? (
+                  {mode === 'edit' ? (
                     <EditableAdaptiveText
                       mode={mode}
                       value={blockContent.step_benefit_2 || ''}
@@ -253,7 +253,7 @@ const TimelineStep = React.memo(({
                   ) : (
                     <span className="text-sm">{blockContent.step_benefit_2}</span>
                   )}
-                  {mode !== 'preview' && (
+                  {mode === 'edit' && (
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
@@ -354,7 +354,7 @@ export default function Timeline(props: LayoutComponentProps) {
             sectionBackground={sectionBackground}
           />
 
-          {(blockContent.subheadline || mode !== 'preview') && (
+          {(blockContent.subheadline || mode === 'edit') && (
             <EditableAdaptiveText
               mode={mode}
               value={blockContent.subheadline || ''}
@@ -372,7 +372,7 @@ export default function Timeline(props: LayoutComponentProps) {
           )}
         </div>
 
-        {mode !== 'preview' ? (
+        {mode === 'edit' ? (
           <div className="space-y-8">
             <div className="p-6 border border-gray-200 rounded-lg bg-gray-50">
               <h4 className="font-semibold text-gray-700 mb-4">Timeline Steps</h4>
@@ -460,7 +460,7 @@ export default function Timeline(props: LayoutComponentProps) {
         )}
 
         {/* Process Summary - Editable */}
-        {blockContent.show_process_summary !== false && (blockContent.process_summary_title || mode !== 'preview') && (
+        {blockContent.show_process_summary !== false && (blockContent.process_summary_title || mode === 'edit') && (
           <div className="mt-12 bg-gradient-to-r from-blue-50 via-indigo-50 to-purple-50 rounded-2xl p-8 border border-blue-100">
             <div className="text-center">
               <div className="flex justify-center space-x-8 mb-6">
@@ -492,7 +492,7 @@ export default function Timeline(props: LayoutComponentProps) {
                 data-element-key="process_summary_title"
               />
               
-              {(blockContent.process_summary_description || mode !== 'preview') && blockContent.process_summary_description !== '___REMOVED___' && (
+              {(blockContent.process_summary_description || mode === 'edit') && blockContent.process_summary_description !== '___REMOVED___' && (
                 <div className="group/summary-description relative">
                   <EditableAdaptiveText
                     mode={mode}
@@ -507,7 +507,7 @@ export default function Timeline(props: LayoutComponentProps) {
                     data-section-id={sectionId}
                     data-element-key="process_summary_description"
                   />
-                  {mode !== 'preview' && (
+                  {mode === 'edit' && (
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
@@ -527,9 +527,9 @@ export default function Timeline(props: LayoutComponentProps) {
           </div>
         )}
 
-        {(blockContent.cta_text || blockContent.trust_items || mode !== 'preview') && (
+        {(blockContent.cta_text || blockContent.trust_items || mode === 'edit') && (
           <div className="text-center space-y-6 mt-16">
-            {(blockContent.supporting_text || mode !== 'preview') && (
+            {(blockContent.supporting_text || mode === 'edit') && (
               <EditableAdaptiveText
                 mode={mode}
                 value={blockContent.supporting_text || ''}

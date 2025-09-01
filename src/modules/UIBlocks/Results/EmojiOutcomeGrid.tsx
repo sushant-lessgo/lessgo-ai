@@ -95,7 +95,7 @@ const OutcomeCard = ({
 
       {/* Outcome Title */}
       <div className="mb-4">
-        {mode !== 'preview' ? (
+        {mode === 'edit' ? (
           <div 
             contentEditable
             suppressContentEditableWarning
@@ -115,7 +115,7 @@ const OutcomeCard = ({
 
       {/* Description */}
       <div>
-        {mode !== 'preview' ? (
+        {mode === 'edit' ? (
           <div 
             contentEditable
             suppressContentEditableWarning
@@ -207,7 +207,7 @@ export default function EmojiOutcomeGrid(props: EmojiOutcomeGridProps) {
           />
 
           {/* Optional Subheadline */}
-          {(blockContent.subheadline || mode !== 'preview') && (
+          {(blockContent.subheadline || mode === 'edit') && (
             <EditableAdaptiveText
               mode={mode}
               value={blockContent.subheadline || ''}
@@ -260,11 +260,11 @@ export default function EmojiOutcomeGrid(props: EmojiOutcomeGridProps) {
         </div>
 
         {/* Footer Section */}
-        {(blockContent.footer_text || mode !== 'preview') && (
+        {(blockContent.footer_text || mode === 'edit') && (
           <div className="mt-16 text-center">
             <div className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-purple-50 to-pink-50 border border-purple-200 rounded-full text-purple-800">
               <span className="text-xl mr-2">🎯</span>
-              {mode !== 'preview' ? (
+              {mode === 'edit' ? (
                 <div 
                   contentEditable
                   suppressContentEditableWarning

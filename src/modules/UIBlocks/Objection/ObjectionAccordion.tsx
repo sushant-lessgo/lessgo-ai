@@ -154,7 +154,7 @@ const ObjectionAccordionItem = React.memo(({
             
             {/* Objection Title */}
             <div className="flex-1">
-              {mode !== 'preview' ? (
+              {mode === 'edit' ? (
                 <div 
                   contentEditable
                   suppressContentEditableWarning
@@ -213,7 +213,7 @@ const ObjectionAccordionItem = React.memo(({
             
             {/* Response Text */}
             <div className="flex-1">
-              {mode !== 'preview' ? (
+              {mode === 'edit' ? (
                 <div 
                   contentEditable
                   suppressContentEditableWarning
@@ -325,7 +325,7 @@ export default function ObjectionAccordion(props: LayoutComponentProps) {
           />
 
           {/* Subheadline */}
-          {(blockContent.subheadline || mode !== 'preview') && (
+          {(blockContent.subheadline || mode === 'edit') && (
             <EditableAdaptiveText
               mode={mode}
               value={blockContent.subheadline || ''}
