@@ -89,11 +89,7 @@ export function useSelectionPriority() {
       if (current.selectedElement && !current.isTextEditing) {
         // Determine the correct toolbar type based on explicit toolbar setting
         const correctToolbarType = editorSelection.toolbarType || 'element';
-        // console.log('🔒 Locking transition for element change:', {
-        //   elementKey: current.selectedElement.elementKey,
-        //   toolbarType: correctToolbarType,
-        //   explicitType: editorSelection.toolbarType
-        // });
+        // Transition locked for element change
         
         transitionLock.lockForElementChange({
           sectionId: current.selectedElement.sectionId,
@@ -126,21 +122,7 @@ export function useSelectionPriority() {
   
   // Debug logging with transition info - DISABLED to prevent infinite loops
   // The timeRemaining property changes every millisecond, causing render loops
-  // if (process.env.NODE_ENV === 'development') {
-  //   const selectionKey = `${mode}-${isTextEditing}-${selectedElement?.elementKey}-${selectedSection}-${transitionLock.isLocked}`;
-  //   if (useSelectionPriority.lastSelectionKey !== selectionKey) {
-  //     useSelectionPriority.lastSelectionKey = selectionKey;
-  //     debugSelection(editorSelection, 'useSelectionPriority');
-  //     
-  //     if (transitionLock.isLocked) {
-  //       console.log('🔒 Transition lock active:', {
-  //         lockedToolbar: transitionLock.lockedToolbar,
-  //         reason: transitionLock.lockReason,
-  //         timeRemaining: transitionLock.timeRemaining,
-  //       });
-  //     }
-  //   }
-  // }
+  // Debug selection logging removed for production
   
   // Memoize the return value to prevent object identity churn
   return useMemo(() => ({

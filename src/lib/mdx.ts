@@ -1,6 +1,7 @@
 import fs from "fs";
 import path from "path";
 import matter from "gray-matter";
+import { logger } from '@/lib/logger';
 
 const postsDirectory = path.join(process.cwd(), "src/content/blog");
 
@@ -26,7 +27,7 @@ export function getAllPosts() {
         },
       };
     } catch (err) {
-      console.error(`❌ Failed to read or parse ${fileName}:`, err);
+      logger.error(`Failed to read or parse ${fileName}:`, err);
       return null;
     }
   }).filter(Boolean); // remove nulls
@@ -48,7 +49,7 @@ export function getPostBySlug(slug: string) {
       content,
     };
   } catch (err) {
-    console.error(`❌ Failed to read blog post with slug "${slug}":`, err);
+    logger.error(`Failed to read blog post with slug "${slug}":`, err);
     return null;
   }
 }

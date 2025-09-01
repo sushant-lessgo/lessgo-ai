@@ -1,5 +1,6 @@
 // services/pexelsApi.ts - Pexels API integration service
 import type { ImageAsset } from '@/types/core/images';
+import { logger } from '@/lib/logger';
 
 // Pexels API types
 export interface PexelsPhoto {
@@ -123,7 +124,7 @@ class PexelsApiService {
       
       return data.photos.map(this.convertToStockPhoto);
     } catch (error) {
-      console.error('Error searching Pexels photos:', error);
+      logger.error('Error searching Pexels photos:', error);
       throw error;
     }
   }
@@ -146,7 +147,7 @@ class PexelsApiService {
       const data: PexelsCuratedResponse = await response.json();
       return data.photos.map(this.convertToStockPhoto);
     } catch (error) {
-      console.error('Error fetching curated photos:', error);
+      logger.error('Error fetching curated photos:', error);
       throw error;
     }
   }
@@ -164,7 +165,7 @@ class PexelsApiService {
       const data: PexelsPhoto = await response.json();
       return this.convertToStockPhoto(data);
     } catch (error) {
-      console.error('Error fetching photo:', error);
+      logger.error('Error fetching photo:', error);
       throw error;
     }
   }

@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import { OpenAI } from 'openai';
 import { openai, mistral } from '@/lib/openaiClient';
+import { logger } from '@/lib/logger';
 
 const model = process.env.USE_OPENAI === 'true' ? 'openai' : 'mistral';
 
@@ -61,7 +62,7 @@ export async function inferFields(input: string): Promise<InferredFields> {
     const parsed = JSON.parse(raw);
     return InferredFieldsSchema.parse(parsed);
   } catch (error) {
-    console.warn(`[inferFields] ${model} failed, trying fallback`, error);
+    logger.warn(`[inferFields] ${model} failed, trying fallback`, error);
 
     try {
       const fallback = model === 'openai' ? mistral : openai;
@@ -72,7 +73,7 @@ export async function inferFields(input: string): Promise<InferredFields> {
       const parsed = JSON.parse(raw);
       return InferredFieldsSchema.parse(parsed);
     } catch (fallbackError) {
-      console.error('[inferFields] Fallback failed:', fallbackError);
+      logger.error('[inferFields] Fallback failed:', fallbackError);
       throw new Error('Inference failed from both models');
     }
   }

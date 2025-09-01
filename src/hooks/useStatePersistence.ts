@@ -10,6 +10,7 @@ import {
   type PersistenceState,
   type PersistenceMetrics
 } from '@/utils/statePersistence';
+import { logger } from '@/lib/logger';
 
 /**
  * ===== HOOK TYPES =====
@@ -117,7 +118,7 @@ export function useStatePersistence(options: UseStatePersistenceOptions): UseSta
   useEffect(() => {
     if (!persistenceManagerRef.current) {
       persistenceManagerRef.current = getPersistenceManager(config);
-      console.log('🔧 State persistence hook initialized');
+      logger.debug('State persistence hook initialized');
     }
 
     return () => {
@@ -176,7 +177,7 @@ export function useStatePersistence(options: UseStatePersistenceOptions): UseSta
         // Update edit store auto-save state
         editStore.clearAutoSaveError();
         onSaveSuccess?.(result);
-        console.log('✅ Manual save successful');
+        logger.debug('Manual save successful');
       } else {
         onSaveError?.(result.error || 'Save failed');
         
@@ -209,7 +210,7 @@ export function useStatePersistence(options: UseStatePersistenceOptions): UseSta
       if (result.success) {
         editStore.clearAutoSaveError();
         onSaveSuccess?.(result);
-        console.log('✅ Force save successful');
+        logger.debug('Force save successful');
       } else {
         onSaveError?.(result.error || 'Force save failed');
       }
@@ -252,7 +253,7 @@ export function useStatePersistence(options: UseStatePersistenceOptions): UseSta
         lastEditStateRef.current = editStore.export();
         
         onLoadSuccess?.(result);
-        console.log('✅ Load successful:', { fromCache: result.fromCache });
+        logger.debug('Load successful:', { fromCache: result.fromCache });
       } else {
         onLoadError?.(result.error || 'Load failed');
       }
@@ -288,7 +289,7 @@ export function useStatePersistence(options: UseStatePersistenceOptions): UseSta
       // Apply snapshot data to edit store
       editStore.loadFromDraft(snapshot.data);
       lastEditStateRef.current = snapshot.data;
-      console.log('↶ Undo applied:', snapshot.description);
+      logger.debug('Undo applied:', snapshot.description);
     }
   }, [editStore]);
 
@@ -300,7 +301,7 @@ export function useStatePersistence(options: UseStatePersistenceOptions): UseSta
       // Apply snapshot data to edit store
       editStore.loadFromDraft(snapshot.data);
       lastEditStateRef.current = snapshot.data;
-      console.log('↷ Redo applied:', snapshot.description);
+      logger.debug('Redo applied:', snapshot.description);
     }
   }, [editStore]);
 
@@ -327,12 +328,12 @@ export function useStatePersistence(options: UseStatePersistenceOptions): UseSta
         // Trigger save with resolved data
         await saveManual(`Conflict resolved: ${strategy}`);
         
-        console.log('🔧 Conflict resolved:', { conflictId, strategy });
+        logger.debug('Conflict resolved:', { conflictId, strategy });
       }
       
       updateLocalState();
     } catch (error) {
-      console.error('❌ Conflict resolution failed:', error);
+      logger.error('Conflict resolution failed:', error);
       onSaveError?.(error instanceof Error ? error.message : 'Conflict resolution failed');
     }
   }, [editStore, saveManual, updateLocalState, onSaveError]);
@@ -352,7 +353,7 @@ export function useStatePersistence(options: UseStatePersistenceOptions): UseSta
 
     const hasChanged = hasEditStoreChanged();
     if (hasChanged && editStore.isDirty) {
-      console.log('📝 Edit store changed, triggering auto-save');
+      logger.debug('Edit store changed, triggering auto-save');
       saveAuto();
     }
   }, [editStore.isDirty, editStore.lastUpdated, hasEditStoreChanged, saveAuto, autoSaveEnabled]);
@@ -363,7 +364,7 @@ export function useStatePersistence(options: UseStatePersistenceOptions): UseSta
 
     backgroundSaveTimerRef.current = setInterval(() => {
       if (editStore.isDirty && !persistenceState.isSaving) {
-        console.log('⏰ Background save triggered');
+        logger.debug('Background save triggered');
         const data = getCurrentEditData();
         persistenceManagerRef.current?.saveAuto(data);
         updateLocalState();
@@ -399,7 +400,7 @@ export function useStatePersistence(options: UseStatePersistenceOptions): UseSta
   // Initial load effect
   useEffect(() => {
     if (tokenId) {
-      console.log('🔄 Initial load for token:', tokenId);
+      logger.debug('Initial load for token:', tokenId);
       loadFromServer(true);
     }
   }, [tokenId]); // Only run when tokenId changes
@@ -507,7 +508,7 @@ export function useConflictResolution(tokenId: string) {
     autoSaveEnabled: false,
     backgroundSaveEnabled: false,
     onConflictDetected: (conflictData) => {
-      console.log('🔄 Conflict detected in hook:', conflictData);
+      logger.debug('Conflict detected in hook:', conflictData);
       setConflicts(persistence.getActiveConflicts());
     },
   });
@@ -539,7 +540,7 @@ if (process.env.NODE_ENV === 'development') {
       // Trigger a fake edit to test auto-save
       const editStore = useEditStore.getState();
       editStore.updateElementContent('test-section', 'test-element', 'Debug content change');
-      console.log('🧪 Simulated edit change');
+      logger.debug('Simulated edit change');
     },
     triggerManualSave: async () => {
       const manager = getPersistenceManager();
@@ -552,9 +553,9 @@ if (process.env.NODE_ENV === 'development') {
       const editStore = useEditStore.getState();
       const data = editStore.export();
       manager.saveAuto(data);
-      console.log('🧪 Triggered background save');
+      logger.debug('Triggered background save');
     },
   };
 
-  console.log('🔧 State Persistence Hook debug utilities available at window.__statePersistenceHookDebug');
+  logger.debug('State Persistence Hook debug utilities available at window.__statePersistenceHookDebug');
 }

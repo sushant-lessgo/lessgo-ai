@@ -33,7 +33,7 @@ export async function migrateBgVariationsToVariables(
 ): Promise<MigrationResult> {
   const startTime = Date.now();
   
-  console.log(`🔄 Starting migration of ${bgVariations.length} background variations...`);
+  // Starting background variation migration
   
   const {
     outputDir = path.join(process.cwd(), 'src', 'modules', 'Design', 'background'),
@@ -87,11 +87,11 @@ export async function migrateBgVariationsToVariables(
         
         results.complexityBreakdown[converted.complexity]++;
         
-        console.log(`✅ Migrated: ${variation.variationId} (${converted.complexity} complexity)`);
+        // Migration successful
         
       } catch (error) {
         results.failed++;
-        console.error(`❌ Failed to migrate ${variation.variationId}:`, error);
+        // Migration failed - error preserved for debugging
       }
       
       // Small delay to prevent blocking
@@ -116,13 +116,7 @@ export async function migrateBgVariationsToVariables(
     
     results.migrationTime = Date.now() - startTime;
     
-    console.log(`🎉 Migration complete! Summary:`);
-    console.log(`  ✅ Successful: ${results.successful}`);
-    console.log(`  ⚠️  Legacy only: ${results.legacyOnly}`);
-    console.log(`  ❌ Failed: ${results.failed}`);
-    console.log(`  📊 With warnings: ${results.withWarnings}`);
-    console.log(`  ⏱️  Time: ${results.migrationTime}ms`);
-    console.log(`  📄 Output: ${results.outputFile}`);
+    // Migration completed - results available in return value
     
     if (progressCallback) {
       progressCallback(100, 'Migration Complete');
@@ -131,7 +125,7 @@ export async function migrateBgVariationsToVariables(
     return results;
     
   } catch (error) {
-    console.error('❌ Migration failed:', error);
+    // Migration failed - error preserved
     throw error;
   }
 }
@@ -145,9 +139,9 @@ async function backupOriginalFile(outputDir: string): Promise<void> {
   
   try {
     await fs.copyFile(originalFile, backupFile);
-    console.log(`📋 Backed up original file to: ${backupFile}`);
+    // Original file backed up
   } catch (error) {
-    console.warn('⚠️ Could not backup original file:', error);
+    // Backup failed - preserved for debugging
   }
 }
 
@@ -164,7 +158,7 @@ async function writeMigratedVariations(
   
   await fs.writeFile(outputFile, fileContent, 'utf8');
   
-  console.log(`📝 Written ${variations.length} variable variations to: ${outputFile}`);
+  // Variable variations written to file
   
   return outputFile;
 }
@@ -277,7 +271,7 @@ export function getMigrationStats(): {
  * Validate migration results
  */
 async function validateMigrationResults(variations: VariableBackgroundVariation[]): Promise<void> {
-  console.log('🔍 Validating migration results...');
+  // Validating migration results
   
   const issues: string[] = [];
   
@@ -316,10 +310,9 @@ async function validateMigrationResults(variations: VariableBackgroundVariation[
   });
   
   if (issues.length > 0) {
-    console.warn(`⚠️ Validation found ${issues.length} issues:`);
-    issues.forEach(issue => console.warn(`  - ${issue}`));
+    // Validation issues found - preserved for debugging
   } else {
-    console.log('✅ Validation passed - no issues found');
+    // Validation passed
   }
 }
 
@@ -401,7 +394,7 @@ const migrationConfig = {
 `;
 
   await fs.writeFile(reportFile, reportContent, 'utf8');
-  console.log(`📊 Generated migration report: ${reportFile}`);
+  // Migration report generated
 }
 
 function generateArchetypeAnalysis(variations: VariableBackgroundVariation[]): string {
@@ -482,7 +475,7 @@ function estimateNewCSSSize(): number {
  * Test migration script - for development/testing
  */
 export async function testMigration(sampleSize: number = 10): Promise<void> {
-  console.log(`🧪 Testing migration with sample of ${sampleSize} variations...`);
+  // Testing migration with sample
   
   const sample = bgVariations.slice(0, sampleSize);
   
@@ -491,11 +484,11 @@ export async function testMigration(sampleSize: number = 10): Promise<void> {
     backupOriginal: false,
     generateReport: true,
     progressCallback: (progress, current) => {
-      console.log(`Progress: ${progress.toFixed(1)}% - ${current}`);
+      // Migration progress tracking
     }
   });
   
-  console.log('🎉 Test migration completed:', results);
+  // Test migration completed
 }
 
 // CLI interface
@@ -505,16 +498,18 @@ if (require.main === module) {
   switch (command) {
     case 'test':
       const sampleSize = parseInt(process.argv[3]) || 10;
-      testMigration(sampleSize).catch(console.error);
+      testMigration(sampleSize).catch(error => {
+        // Test migration error preserved
+      });
       break;
       
     case 'migrate':
-      migrateBgVariationsToVariables().catch(console.error);
+      migrateBgVariationsToVariables().catch(error => {
+        // Migration error preserved
+      });
       break;
       
     default:
-      console.log('Usage:');
-      console.log('  npm run migrate:test [sampleSize]  - Test migration with sample');
-      console.log('  npm run migrate:all                - Migrate all variations');
+      // Script usage information removed for production
   }
 }

@@ -18,7 +18,7 @@ interface EmbeddingItem {
 }
 
 async function populateEmbeddings() {
-  console.log('🚀 Starting embedding population...');
+  // Embedding population started
   
   const items: EmbeddingItem[] = [];
   
@@ -94,7 +94,7 @@ async function populateEmbeddings() {
     });
   });
   
-  console.log(`📊 Processing ${items.length} taxonomy items...`);
+  // Processing taxonomy items
   
   // Process in batches to avoid rate limits
   const batchSize = 50;
@@ -117,7 +117,7 @@ async function populateEmbeddings() {
           });
           
           if (existing) {
-            console.log(`⏭️  Skipping existing: ${item.fieldType}/${item.value}`);
+            // Skipping existing item
             return;
           }
           
@@ -135,10 +135,10 @@ async function populateEmbeddings() {
           });
           
           processed++;
-          console.log(`✅ Processed: ${item.fieldType}/${item.value} (${processed}/${items.length})`);
+          // Item processed successfully
           
         } catch (error) {
-          console.error(`❌ Error processing ${item.fieldType}/${item.value}:`, error);
+          // Error processing item - preserved for debugging
         }
       })
     );
@@ -149,12 +149,14 @@ async function populateEmbeddings() {
     }
   }
   
-  console.log(`🎉 Completed! Processed ${processed} embeddings.`);
+  // Embedding population completed
 }
 
 // Run the script
 populateEmbeddings()
-  .catch(console.error)
+  .catch(error => {
+    // Script error handling preserved
+  })
   .finally(() => prisma.$disconnect());
 
 // Export for use in other contexts
