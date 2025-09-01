@@ -340,5 +340,4 @@ if (process.env.NODE_ENV === 'development') {
     hasStoredProject,
   };
   
-  // console.log('🔧 Storage debug utilities available at window.__storageDebug');
 }

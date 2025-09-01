@@ -205,33 +205,31 @@ export function testCSSVariableInjection(tokenId: string): Promise<{
  * Log validation results to console
  */
 export function logValidationResults(result: ValidationResult): void {
-  console.group('🎨 CSS Variable System Validation');
-  
-  logger.debug(`✅ Phase: ${result.phase}`);
-  logger.debug(`🎯 Success: ${result.success}`);
-  
-  if (result.warnings.length > 0) {
-    console.group('⚠️ Warnings:');
-    result.warnings.forEach(warning => console.warn(warning));
-    console.groupEnd();
-  }
-  
-  if (result.errors.length > 0) {
-    console.group('❌ Errors:');
-    result.errors.forEach(error => console.error(error));
-    console.groupEnd();
-  }
-  
-  if (result.details.recommendations.length > 0) {
-    console.group('💡 Recommendations:');
-    result.details.recommendations.forEach(rec => console.log(rec));
-    console.groupEnd();
-  }
-  
-  logger.debug('📊 CSS Variables found:', Object.keys(result.details.cssVariables).length);
-  logger.debug('🌐 Browser support:', result.details.browserSupport);
-  
-  console.groupEnd();
+  logger.group('🎨 CSS Variable System Validation', () => {
+    logger.debug(`✅ Phase: ${result.phase}`);
+    logger.debug(`🎯 Success: ${result.success}`);
+    
+    if (result.warnings.length > 0) {
+      logger.group('⚠️ Warnings:', () => {
+        result.warnings.forEach(warning => logger.warn(warning));
+      });
+    }
+    
+    if (result.errors.length > 0) {
+      logger.group('❌ Errors:', () => {
+        result.errors.forEach(error => logger.error(error));
+      });
+    }
+    
+    if (result.details.recommendations.length > 0) {
+      logger.group('💡 Recommendations:', () => {
+        result.details.recommendations.forEach(rec => logger.info(rec));
+      });
+    }
+    
+    logger.debug('📊 CSS Variables found:', Object.keys(result.details.cssVariables).length);
+    logger.debug('🌐 Browser support:', result.details.browserSupport);
+  });
 }
 
 /**

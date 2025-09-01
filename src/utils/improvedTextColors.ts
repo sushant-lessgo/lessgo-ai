@@ -12,6 +12,7 @@ import {
   getSafeColorFallback 
 } from './colorUtils';
 import { getSmartAccentColor } from './colorHarmony';
+import { logger } from '@/lib/logger';
 
 /**
  * Text color configuration options
@@ -102,7 +103,7 @@ export function getEnhancedTextColors(
     };
     
   } catch (error) {
-    console.error('Enhanced text color generation failed:', error);
+    logger.error('Enhanced text color generation failed:', error);
     return createSafeTextColorFallback(backgroundType, businessContext);
   }
 }
@@ -258,7 +259,7 @@ function createSafeTextColorFallback(
   businessContext: BusinessColorContext
 ): EnhancedTextColors {
   
-  console.warn('Using safe text color fallback for background type:', backgroundType);
+  logger.warn('Using safe text color fallback for background type:', backgroundType);
   
   // Determine if this is likely a light or dark background
   const isDarkBackground = backgroundType === 'primary'; // Assume primary might be dark
@@ -320,8 +321,8 @@ export function getTextColorForBackground(
   );
   
   // Log warnings if in development
-  if (process.env.NODE_ENV === 'development' && enhancedColors.validation.warnings.length > 0) {
-    console.warn(`Text color warnings for ${backgroundType}:`, enhancedColors.validation.warnings);
+  if (enhancedColors.validation.warnings.length > 0) {
+    logger.warn(`Text color warnings for ${backgroundType}:`, enhancedColors.validation.warnings);
   }
   
   return {
@@ -381,16 +382,16 @@ export function getSmartTextColor(
         const hexColor = `#${toHex(rgb.r)}${toHex(rgb.g)}${toHex(rgb.b)}`;
         cleanBackground = `bg-[${hexColor}]`;
       }
-      console.warn('🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string:', { 
+      logger.dev('🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string:', () => ({ 
         originalRGB: backgroundColor, 
         convertedCSS: cleanBackground 
-      });
+      }));
     }
   }
   
   // Ensure we have a string
   if (typeof cleanBackground !== 'string') {
-    console.warn('🔧 [SMART-TEXT-FIX] Invalid background type, using fallback:', typeof cleanBackground);
+    logger.warn('🔧 [SMART-TEXT-FIX] Invalid background type, using fallback:', typeof cleanBackground);
     cleanBackground = 'bg-white';
   }
   
@@ -401,18 +402,6 @@ export function getSmartTextColor(
   const textColors = getTextColorsFromBackground(backgroundAnalysis, {});
   
   // Debug logging (commented out for production)
-  // console.log('🎨 [TEXT-COLOR-DEBUG] getSmartTextColor called:', { 
-  //   originalBackground: backgroundColor, 
-  //   cleanBackground, 
-  //   textType, 
-  //   backgroundAnalysis: {
-  //     dominantColor: backgroundAnalysis.dominantColor,
-  //     isLight: backgroundAnalysis.isLight,
-  //     isDark: backgroundAnalysis.isDark,
-  //     confidence: backgroundAnalysis.confidence
-  //   },
-  //   selectedColor: textColors[textType] || textColors.body 
-  // });
   
   // Return the requested text type
   switch (textType) {
@@ -435,13 +424,6 @@ export function validateWCAGContrast(
 ): { ratio: number; meetsAA: boolean; meetsAAA: boolean } {
   try {
     const validation = validateColorAccessibility(foregroundColor, backgroundColor);
-    // console.log('🔍 WCAG validation result:', {
-    //   foreground: foregroundColor,
-    //   background: backgroundColor,
-    //   contrastRatio: validation.contrastRatio,
-    //   isValid: validation.isValid,
-    //   level: validation.level
-    // });
     
     return {
       ratio: validation.contrastRatio,
@@ -449,7 +431,7 @@ export function validateWCAGContrast(
       meetsAAA: validation.contrastRatio >= 7.0
     };
   } catch (error) {
-    console.warn('WCAG validation failed:', error);
+    logger.warn('WCAG validation failed:', error);
     return { ratio: 0, meetsAA: false, meetsAAA: false };
   }
 }
@@ -479,7 +461,7 @@ export function isLightBackground(backgroundColor: string): boolean {
     const analysis = analyzeBackground(backgroundColor);
     return analysis.isLight;
   } catch (error) {
-    console.warn('Background analysis failed:', error);
+    logger.warn('Background analysis failed:', error);
     return true; // Default to light
   }
 }

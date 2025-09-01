@@ -17,7 +17,7 @@ let isComposing = false;
  */
 export function setInteractionSource(source: InteractionSource): void {
   interactionSource = source;
-  // console.log('🎯 Interaction source set:', source, new Date().toISOString());
+  logger.dev('🎯 Interaction source set:', source);
 }
 
 /**
@@ -134,11 +134,9 @@ export function logInteractionTimeline(
   event: string,
   details?: Record<string, any>
 ): void {
-  // if (process.env.NODE_ENV === 'development') {
-  //   console.log(`📊 [${new Date().toISOString()}] ${event}`, {
-  //     interactionSource,
-  //     isComposing,
-  //     ...details
-  //   });
-  // }
+  logger.dev(`📊 ${event}`, () => ({
+    interactionSource,
+    isComposing,
+    ...details
+  }));
 }

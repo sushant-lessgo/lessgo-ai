@@ -1,6 +1,8 @@
 // Selection snapshot system for robust selection preservation during formatting
 // More reliable than simple Range cloning
 
+import { logger } from '@/lib/logger';
+
 export interface SelectionSnapshot {
   startContainer: Node;
   startOffset: number;
@@ -63,13 +65,13 @@ export function captureSelectionSnapshot(editorElement?: HTMLElement | null): Se
  */
 export function restoreFromSnapshot(snapshot: SelectionSnapshot): boolean {
   if (!snapshot.isValid) {
-    console.warn('🚫 Cannot restore invalid selection snapshot');
+    logger.warn('🚫 Cannot restore invalid selection snapshot');
     return false;
   }
 
   // Validate nodes are still in DOM
   if (!document.contains(snapshot.startContainer) || !document.contains(snapshot.endContainer)) {
-    console.warn('🚫 Cannot restore selection - nodes no longer in DOM');
+    logger.warn('🚫 Cannot restore selection - nodes no longer in DOM');
     return false;
   }
 
@@ -77,7 +79,7 @@ export function restoreFromSnapshot(snapshot: SelectionSnapshot): boolean {
   if (snapshot.editorElement && 
       (!snapshot.editorElement.contains(snapshot.startContainer) || 
        !snapshot.editorElement.contains(snapshot.endContainer))) {
-    console.warn('🚫 Cannot restore selection - outside editor boundary');
+    logger.warn('🚫 Cannot restore selection - outside editor boundary');
     return false;
   }
 
@@ -92,10 +94,10 @@ export function restoreFromSnapshot(snapshot: SelectionSnapshot): boolean {
     selection.removeAllRanges();
     selection.addRange(range);
 
-    console.log('✅ Selection restored from snapshot:', { hash: snapshot.hash });
+    logger.debug('✅ Selection restored from snapshot:', { hash: snapshot.hash });
     return true;
   } catch (error) {
-    console.error('❌ Failed to restore selection snapshot:', error);
+    logger.error('❌ Failed to restore selection snapshot:', error);
     return false;
   }
 }

@@ -1,5 +1,6 @@
 // utils/modalEmergencyReset.ts - Emergency modal state reset utilities
 import { bodyScrollLock } from './bodyScrollLock';
+import { logger } from '@/lib/logger';
 
 export const modalEmergencyReset = {
   /**
@@ -7,7 +8,7 @@ export const modalEmergencyReset = {
    * This function can be called from browser console: window.__emergencyModalReset()
    */
   reset(): void {
-    console.log('🚨 Emergency modal reset triggered');
+    logger.warn('🚨 Emergency modal reset triggered');
     
     // 1. Force unlock body scroll
     bodyScrollLock.forceUnlock();
@@ -34,7 +35,7 @@ export const modalEmergencyReset = {
       try {
         (window as any).__taxonomyModalManager.closeModal();
       } catch (error) {
-        console.warn('Failed to close taxonomy modal:', error);
+        logger.warn('Failed to close taxonomy modal:', error);
       }
     }
     
@@ -42,7 +43,7 @@ export const modalEmergencyReset = {
     const stuckModals = document.querySelectorAll('[role="dialog"]');
     stuckModals.forEach(modal => {
       if (modal.parentNode) {
-        console.log('Removing stuck modal:', modal);
+        logger.debug('Removing stuck modal:', modal);
         modal.parentNode.removeChild(modal);
       }
     });
@@ -51,13 +52,13 @@ export const modalEmergencyReset = {
     try {
       document.body.focus();
     } catch (error) {
-      console.warn('Failed to reset focus:', error);
+      logger.warn('Failed to reset focus:', error);
     }
     
     // 7. Re-enable pointer events
     document.body.style.pointerEvents = 'auto';
     
-    console.log('✅ Emergency modal reset completed');
+    logger.info('✅ Emergency modal reset completed');
   },
 
   /**
@@ -72,7 +73,7 @@ export const modalEmergencyReset = {
    */
   enableDiagnosticMode(): void {
     (window as any).__modalDiagnosticMode = true;
-    console.log('🔍 Modal diagnostic mode enabled');
+    logger.info('🔍 Modal diagnostic mode enabled');
   }
 };
 

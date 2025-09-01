@@ -1,5 +1,6 @@
 // components/ui/PersistenceStatusIndicator.tsx - User Feedback Component for Save/Load Status
 import React, { useState, useEffect } from 'react';
+import { logger } from '@/lib/logger';
 import { 
   CheckCircle, 
   AlertCircle, 
@@ -485,11 +486,11 @@ export function PersistenceStatusExamples() {
       failedSaves: 1,
       averageSaveTime: 245,
     },
-    onManualSave: () => console.log('Manual save'),
-    onForceSave: () => console.log('Force save'),
-    onRetry: () => console.log('Retry'),
-    onResolveConflicts: () => console.log('Resolve conflicts'),
-    onShowHistory: () => console.log('Show history'),
+    onManualSave: () => logger.debug('Manual save'),
+    onForceSave: () => logger.debug('Force save'),
+    onRetry: () => logger.debug('Retry'),
+    onResolveConflicts: () => logger.debug('Resolve conflicts'),
+    onShowHistory: () => logger.debug('Show history'),
   };
 
   return (
@@ -598,7 +599,7 @@ export function PersistenceStatusWithHook({ tokenId }: { tokenId: string }) {
           persistence.resolveConflict(conflicts[0].conflictId, 'manual');
         }
       }}
-      onShowHistory={() => console.log('Show version history')}
+      onShowHistory={() => logger.debug('Show version history')}
       variant="compact"
       showMetrics={true}
       showActions={true}
@@ -664,20 +665,20 @@ if (process.env.NODE_ENV === 'development') {
     createTestComponent: (state: string) => {
       const testState = (window as any).__persistenceStatusDebug.testStates[state];
       if (!testState) {
-        console.error('Unknown test state:', state);
+        logger.error('Unknown test state:', state);
         return;
       }
       
-      console.log('🧪 Test component created for state:', state, testState);
+      logger.debug('🧪 Test component created for state:', state, testState);
       return testState;
     },
     
     // Simulate state changes
     simulateStateChange: (fromState: string, toState: string) => {
-      console.log(`🔄 Simulating state change: ${fromState} → ${toState}`);
+      logger.debug(`🔄 Simulating state change: ${fromState} → ${toState}`);
       // This would trigger actual state updates in a real implementation
     },
   };
   
-  console.log('🔧 Persistence Status Indicator debug utilities available at window.__persistenceStatusDebug');
+  logger.dev('🔧 Persistence Status Indicator debug utilities available at window.__persistenceStatusDebug');
 }

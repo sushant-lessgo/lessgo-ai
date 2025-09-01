@@ -2,6 +2,7 @@
 import React from 'react';
 import { useSmartTextColors } from '@/hooks/useSmartTextColors';
 import type { BackgroundType } from '@/types/sectionBackground';
+import { logger } from '@/lib/logger';
 
 interface SmartTextSectionProps {
   children: React.ReactNode;
@@ -29,11 +30,11 @@ export function SmartTextSection({
   const smartColors = useSmartTextColors(themeColorType);
   
   // Debug logging
-  console.log(`🎨 SmartTextSection for ${sectionId}:`, {
+  logger.dev(`🎨 SmartTextSection for ${sectionId}:`, () => ({
     backgroundType,
     sectionBackgroundCSS,
     smartColors
-  });
+  }));
   
   return (
     <section 

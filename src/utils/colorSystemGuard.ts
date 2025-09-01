@@ -2,6 +2,7 @@
 // Prevents render storms during formatting operations
 
 import type { ColorTokens } from '@/types/core';
+import { logger } from '@/lib/logger';
 
 // Global formatting state - accessible without circular imports
 let globalFormattingInProgress = false;
@@ -10,9 +11,7 @@ let cachedColorTokens: ColorTokens | null = null;
 // Set formatting state from anywhere
 export function setGlobalFormattingState(inProgress: boolean) {
   globalFormattingInProgress = inProgress;
-  if (process.env.NODE_ENV === 'development') {
-    console.log(`🛡️ Global formatting state: ${inProgress}`);
-  }
+  logger.dev(`🛡️ Global formatting state: ${inProgress}`);
 }
 
 // Check if formatting is in progress
@@ -59,9 +58,7 @@ const FALLBACK_COLOR_TOKENS: ColorTokens = {
 export function guardedGetColorTokens(originalGetColorTokens: () => ColorTokens | null): ColorTokens {
   // QUARANTINE: Block during formatting
   if (globalFormattingInProgress) {
-    if (process.env.NODE_ENV === 'development') {
-      console.log('🚫 getColorTokens blocked - formatting in progress');
-    }
+    logger.dev('🚫 getColorTokens blocked - formatting in progress');
     // Return cached tokens if available, otherwise fallback
     return cachedColorTokens || FALLBACK_COLOR_TOKENS;
   }
@@ -77,7 +74,7 @@ export function guardedGetColorTokens(originalGetColorTokens: () => ColorTokens 
       return cachedColorTokens || FALLBACK_COLOR_TOKENS;
     }
   } catch (error) {
-    console.error('Color tokens generation failed:', error);
+    logger.error('Color tokens generation failed:', error);
     return cachedColorTokens || FALLBACK_COLOR_TOKENS;
   }
 }

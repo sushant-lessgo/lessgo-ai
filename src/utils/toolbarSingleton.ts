@@ -1,6 +1,8 @@
 // utils/toolbarSingleton.ts - Cross-bundle singleton guard for FloatingToolbars
 // Prevents multiple instances from mounting even across HMR/bundles
 
+import { logger } from '@/lib/logger';
+
 const SINGLETON_KEY = '__ENHANCED_TOOLBAR_MOUNTED__';
 
 /**
@@ -11,8 +13,10 @@ export function assertToolbarSingleton(componentName: string = 'FloatingToolbars
   const g = globalThis as any;
   
   if (g[SINGLETON_KEY]) {
-    console.error(`❌ Duplicate ${componentName} mounted! Another instance is already active.`);
-    console.trace('Duplicate mount stack trace:');
+    logger.error(`❌ Duplicate ${componentName} mounted! Another instance is already active.`);
+    if (process.env.NODE_ENV === 'development') {
+      console.trace('Duplicate mount stack trace:');
+    }
     
     // In development, throw to make it obvious
     if (process.env.NODE_ENV === 'development') {
@@ -21,12 +25,12 @@ export function assertToolbarSingleton(componentName: string = 'FloatingToolbars
   }
   
   g[SINGLETON_KEY] = true;
-  console.log(`✅ ${componentName} singleton registered`);
+  logger.debug(`✅ ${componentName} singleton registered`);
   
   // Return cleanup function
   return () => {
     g[SINGLETON_KEY] = false;
-    console.log(`🧹 ${componentName} singleton unregistered`);
+    logger.debug(`🧹 ${componentName} singleton unregistered`);
   };
 }
 

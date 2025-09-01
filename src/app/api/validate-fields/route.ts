@@ -90,7 +90,7 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const { fields } = RequestSchema.parse(body);
 
-   // console.log('🔍 Starting validation for fields:', Object.keys(fields));
+    logger.debug('🔍 Starting validation for fields:', () => Object.keys(fields));
     
     // ✅ NEW: Validate and cast fields to proper types
     const validationResult = validateAndCastFields(fields);
@@ -110,11 +110,11 @@ export async function POST(req: NextRequest) {
     const token = authHeader.replace("Bearer ", "").trim();
 
     if (process.env.NEXT_PUBLIC_USE_MOCK_GPT === "true" || token === DEMO_TOKEN) {
-     // console.log("Using mock data for field validation (avoiding embeddings API)");
+      logger.debug("Using mock data for field validation (avoiding embeddings API)");
       
       // ✅ FIXED: Pass the validated InputVariables to mock generator
       const mockValidationResults = generateMockValidationResults(validatedFields);
-      // console.log('✅ Mock validation completed');
+      logger.debug('✅ Mock validation completed');
 
       return Response.json({ 
         success: true, 
@@ -125,7 +125,7 @@ export async function POST(req: NextRequest) {
     // Production: Real semantic validation - REAL EMBEDDINGS API
     // ✅ FIXED: Pass properly typed InputVariables
     const validationResults = await validateInferredFields(validatedFields);
-    // console.log('✅ Validation completed');
+    logger.debug('✅ Validation completed');
 
     return Response.json({ 
       success: true, 
@@ -143,7 +143,7 @@ export async function POST(req: NextRequest) {
       const body = await req.json();
       const { fields } = body;
       
-      // console.log("Validation failed, using mock fallback");
+      logger.warn("Validation failed, using mock fallback");
       
       // ✅ Try to validate fields for mock fallback
       const validationResult = validateAndCastFields(fields);
