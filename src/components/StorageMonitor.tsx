@@ -47,7 +47,7 @@ export function StorageMonitor({
     try {
       await storageManager.forceCleanup();
     } catch (error) {
-      console.error('❌ Manual cleanup failed:', error);
+      // Manual cleanup failed - silent
     } finally {
       setIsCleaningUp(false);
     }

@@ -88,9 +88,6 @@ export function useGlobalAnchor(config: Partial<GlobalAnchorConfig> = {}) {
     const key = getAnchorKey(toolbarType, sectionId, elementKey);
     const now = Date.now();
     
-    if (finalConfig.debug) {
-      console.log('⚓ Registering anchor:', { key, toolbarType, sectionId, elementKey });
-    }
     
     setAnchors(prev => ({
       ...prev,
@@ -261,9 +258,6 @@ export function useGlobalAnchor(config: Partial<GlobalAnchorConfig> = {}) {
         }
       });
       
-      if (removedCount > 0 && finalConfig.debug) {
-        console.log(`⚓ Cleaned up ${removedCount} stale anchors`);
-      }
       
       return cleaned;
     });

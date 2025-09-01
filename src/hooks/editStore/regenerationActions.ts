@@ -168,15 +168,6 @@ const handleDesignAndCopyRegeneration = async (
     const { generateCompleteBackgroundSystem } = await import('@/modules/Design/background/backgroundIntegration');
     const newBackgroundSystem = generateCompleteBackgroundSystem(updatedInputs);
     
-    console.log('🎨 Design Regeneration - Generated new background system:', {
-      primary: newBackgroundSystem.primary,
-      secondary: newBackgroundSystem.secondary,
-      neutral: newBackgroundSystem.neutral,
-      divider: newBackgroundSystem.divider,
-      baseColor: newBackgroundSystem.baseColor,
-      accentColor: newBackgroundSystem.accentColor,
-      accentCSS: newBackgroundSystem.accentCSS,
-    });
 
     // Step 2: Regenerate section layouts (keeping same sections)
     setState((state: EditStore) => {
@@ -220,12 +211,6 @@ const handleDesignAndCopyRegeneration = async (
         divider: newBackgroundSystem.divider,
       };
       
-      console.log('🎨 Design Regeneration - Updated theme colors. After:', {
-        baseColor: state.theme.colors.baseColor,
-        accentColor: state.theme.colors.accentColor,
-        accentCSS: state.theme.colors.accentCSS,
-        sectionBackgrounds: state.theme.colors.sectionBackgrounds,
-      });
       
       state.aiGeneration.status = 'Generating copy with new design...';
     });

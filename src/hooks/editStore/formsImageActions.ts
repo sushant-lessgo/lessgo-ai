@@ -530,11 +530,6 @@ export function createFormsImageActions(set: any, get: any): FormsImageActions {
         
         const optimizedUrl = url.toString();
         
-        console.log('✅ Image optimized:', {
-          original: imageUrl,
-          optimized: optimizedUrl,
-          options,
-        });
         
         return optimizedUrl;
         
