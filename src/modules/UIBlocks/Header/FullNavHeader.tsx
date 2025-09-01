@@ -6,6 +6,7 @@ import { LayoutComponentProps } from '@/types/storeTypes';
 import HeaderLogo from '@/components/ui/HeaderLogo';
 import NavigationEditor from '@/components/navigation/NavigationEditor';
 import type { NavigationItem } from '@/types/store/state';
+import { logger } from '@/lib/logger';
 
 interface FullNavHeaderContent {
   logo?: string;
@@ -68,10 +69,10 @@ const FullNavHeader: React.FC<LayoutComponentProps> = (props) => {
     });
     
     if (!store.navigationConfig) {
-      console.log('🧭 [NAV-DEBUG] Calling initializeNavigation from FullNavHeader');
+      logger.dev('🧭 [NAV-DEBUG] Calling initializeNavigation from FullNavHeader');
       store.initializeNavigation();
     } else {
-      console.log('🧭 [NAV-DEBUG] Navigation already exists:', store.navigationConfig);
+      logger.dev('🧭 [NAV-DEBUG] Navigation already exists:', () => store.navigationConfig);
     }
   }, [store]);
 
@@ -85,11 +86,11 @@ const FullNavHeader: React.FC<LayoutComponentProps> = (props) => {
     });
     
     if (store.navigationConfig?.items && store.navigationConfig.items.length > 0) {
-      console.log('🧭 [NAV-DEBUG] Using navigation config items:', store.navigationConfig.items);
+      logger.dev('🧭 [NAV-DEBUG] Using navigation config items:', () => store.navigationConfig?.items);
       return store.navigationConfig.items.slice(0, 7); // Max 7 for FullNavHeader
     }
     
-    console.log('🧭 [NAV-DEBUG] Falling back to legacy content schema');
+    logger.dev('🧭 [NAV-DEBUG] Falling back to legacy content schema');
     
     // Fallback to legacy content schema
     const fallbackItems = [

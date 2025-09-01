@@ -669,7 +669,7 @@ if (process.env.NODE_ENV === 'development') {
         return;
       }
       
-      logger.debug('🧪 Test component created for state:', state, testState);
+      logger.debug('🧪 Test component created for state:', { state, testState });
       return testState;
     },
     

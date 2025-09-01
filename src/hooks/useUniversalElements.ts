@@ -18,6 +18,7 @@ import type {
   ValidationWarning,
 } from '@/types/universalElements';
 import { UNIVERSAL_ELEMENTS } from '@/types/universalElements';
+import { logger } from '@/lib/logger';
 import type { EditableElement } from '@/types/core/content';
 
 const generateElementKey = (type: UniversalElementType): string => {
@@ -40,7 +41,7 @@ export function useUniversalElements() {
   const trackChange = store.trackChange || (() => {});
   const triggerAutoSave = store.triggerAutoSave || (() => {});
   const announceLiveRegion = store.announceLiveRegion || ((message: string) => {
-    console.log('Live region announcement:', message);
+    logger.dev('Live region announcement:', message);
   });
 
   // Element Creation

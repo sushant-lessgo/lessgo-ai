@@ -1,3 +1,5 @@
+import { logger } from '@/lib/logger';
+
 type Props = {
     value: string
     onChange: (value: string) => void
@@ -38,16 +40,16 @@ type Props = {
 
     const handleBlur = (e: React.FocusEvent<HTMLDivElement>) => {
       const newValue = e.currentTarget.innerText.trim();
-      console.log('📝 EditableText handleBlur called');
-      console.log('📝 Original value:', value);
-      console.log('📝 New value:', newValue);
+      logger.dev('📝 EditableText handleBlur called');
+      logger.dev('📝 Original value:', () => value);
+      logger.dev('📝 New value:', () => newValue);
       
       // Only call onChange if value actually changed to prevent unnecessary re-renders
       if (newValue !== value) {
-        console.log('📝 EditableText: Value changed, calling onChange');
+        logger.dev('📝 EditableText: Value changed, calling onChange');
         onChange(newValue);
       } else {
-        console.log('📝 EditableText: Value unchanged, skipping onChange');
+        logger.dev('📝 EditableText: Value unchanged, skipping onChange');
       }
     };
 

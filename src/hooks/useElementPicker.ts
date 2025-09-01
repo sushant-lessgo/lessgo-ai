@@ -4,6 +4,7 @@ import React, { useState, useCallback } from 'react';
 import { useElementCRUD } from './useElementCRUD';
 import { useEditStoreLegacy as useEditStore } from './useEditStoreLegacy';
 import type { UniversalElementType } from '@/types/universalElements';
+import { logger } from '@/lib/logger';
 
 // Global state to ensure all instances share the same state
 let globalElementPickerState = {
@@ -57,7 +58,7 @@ export function useElementPicker() {
   
   // Fallback for announceLiveRegion if it doesn't exist
   const announceLiveRegion = store.announceLiveRegion || ((message: string) => {
-    console.log('Live region announcement:', message);
+    logger.dev('Live region announcement:', message);
   });
 
   // Show element picker
@@ -66,7 +67,7 @@ export function useElementPicker() {
     position: { x: number; y: number },
     options: ElementPickerOptions = {}
   ) => {
-    console.log('🎯 showElementPicker called:', { sectionId, position, options });
+    logger.dev('🎯 showElementPicker called:', { sectionId, position, options });
     
     // Update global state
     globalElementPickerState = {
@@ -82,7 +83,7 @@ export function useElementPicker() {
 
   // Hide element picker
   const hideElementPicker = useCallback(() => {
-    console.log('🎯 hideElementPicker called');
+    logger.dev('🎯 hideElementPicker called');
     
     // Update global state
     globalElementPickerState = {
@@ -104,7 +105,7 @@ export function useElementPicker() {
       announceLiveRegion(`Added ${elementType} element`);
       return elementKey;
     } catch (error) {
-      console.error('Failed to add element:', error);
+      logger.error('Failed to add element:', error);
       announceLiveRegion('Failed to add element');
     }
   }, [state.sectionId, state.options, addElement, hideElementPicker, announceLiveRegion]);

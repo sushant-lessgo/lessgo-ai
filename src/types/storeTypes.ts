@@ -5,6 +5,7 @@ export type ContentElement = StringElement | ArrayElement;
 
 // Import layout element schema for mandatory/optional checking
 import { layoutElementSchema } from '@/modules/sections/layoutElementSchema';
+import { logger } from '@/lib/logger';
 
 // Store element definitions based on layoutElementSchema
 export interface StoreElementTypes {
@@ -328,7 +329,7 @@ export interface LayoutComponentProps {
 function isElementMandatory(layout: string, elementKey: string): boolean {
   const schema = layoutElementSchema[layout];
   if (!schema) {
-    console.log(`⚠️ isElementMandatory: No schema found for layout "${layout}"`);
+    logger.dev(`⚠️ isElementMandatory: No schema found for layout "${layout}"`);
     return false;
   }
   
@@ -337,7 +338,7 @@ function isElementMandatory(layout: string, elementKey: string): boolean {
   
   // DEBUG: Log mandatory checks for step elements
   if (elementKey === 'step_titles' || elementKey === 'step_descriptions') {
-    console.log(`🔍 isElementMandatory check:`, {
+    logger.dev(`🔍 isElementMandatory check:`, {
       layout,
       elementKey,
       found: !!element,
@@ -370,7 +371,7 @@ export const extractLayoutContent = <T extends Record<string, any>>(
   
   // Guard against null or undefined contentSchema
   if (!contentSchema || typeof contentSchema !== 'object') {
-    console.error('extractLayoutContent: contentSchema is null or undefined', { contentSchema });
+    logger.error('extractLayoutContent: contentSchema is null or undefined', { contentSchema });
     return result;
   }
   
@@ -384,7 +385,7 @@ export const extractLayoutContent = <T extends Record<string, any>>(
       const isExcluded = excludedElements?.includes(key) || false;
       
       // DEBUG: Log what's happening with undefined elements
-      console.log(`🔍 extractLayoutContent DEBUG: element "${key}" is undefined`, {
+      logger.dev(`🔍 extractLayoutContent DEBUG: element "${key}" is undefined`, {
         layout,
         isMandatory,
         isInSchema,
@@ -400,7 +401,7 @@ export const extractLayoutContent = <T extends Record<string, any>>(
         } else if (config.type === 'array') {
           result[key as keyof T] = config.default as T[keyof T];
         }
-        console.log(`✅ Using default for mandatory element "${key}":`, config.default);
+        logger.dev(`✅ Using default for mandatory element "${key}":`, config.default);
       } else if (isInSchema && isExcluded) {
         // Category 2: Optional elements IN SCHEMA that are excluded - use empty values to hide
         if (config.type === 'string') {
@@ -408,7 +409,7 @@ export const extractLayoutContent = <T extends Record<string, any>>(
         } else if (config.type === 'array') {
           result[key as keyof T] = [] as T[keyof T];
         }
-        console.log(`❌ Using empty for excluded optional element "${key}"`);
+        logger.dev(`❌ Using empty for excluded optional element "${key}"`);
       } else {
         // Category 3: Elements NOT IN SCHEMA (assets) OR optional elements that are included - use default values
         if (config.type === 'string') {
@@ -421,9 +422,9 @@ export const extractLayoutContent = <T extends Record<string, any>>(
           result[key as keyof T] = config.default as T[keyof T];
         }
         if (!isInSchema) {
-          console.log(`🎨 Using default for asset element "${key}":`, config.default);
+          logger.dev(`🎨 Using default for asset element "${key}":`, config.default);
         } else {
-          console.log(`✨ Using default for included optional element "${key}":`, config.default);
+          logger.dev(`✨ Using default for included optional element "${key}":`, config.default);
         }
       }
       continue;
@@ -432,7 +433,7 @@ export const extractLayoutContent = <T extends Record<string, any>>(
     // Element exists in content, so include it (with default if empty)
     // DEBUG: Log existing elements for step_titles specifically
     if (key === 'step_titles' || key === 'step_descriptions') {
-      console.log(`🎯 extractLayoutContent: Found existing "${key}":`, {
+      logger.dev(`🎯 extractLayoutContent: Found existing "${key}":`, {
         elementValue,
         layout,
         valueType: typeof elementValue,

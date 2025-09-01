@@ -165,7 +165,8 @@ const StatBlock = ({
   onValueEdit,
   onLabelEdit,
   onDescriptionEdit,
-  onStatIconEdit
+  onStatIconEdit,
+  getStatIcon
 }: {
   stat: StatItem;
   index: number;
@@ -175,6 +176,7 @@ const StatBlock = ({
   onLabelEdit: (index: number, value: string) => void;
   onDescriptionEdit: (index: number, value: string) => void;
   onStatIconEdit: (index: number, value: string) => void;
+  getStatIcon: (index: number) => string;
 }) => {
   const { getTextStyle } = useTypography();
   
@@ -371,6 +373,7 @@ export default function StatBlocks(props: StatBlocksProps) {
               onLabelEdit={handleLabelEdit}
               onDescriptionEdit={handleDescriptionEdit}
               onStatIconEdit={handleStatIconEdit}
+              getStatIcon={getStatIcon}
             />
           ))}
         </div>

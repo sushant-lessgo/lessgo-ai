@@ -17,6 +17,7 @@ import {
   isEditorHydrating,
   getHydrationState 
 } from './hydrationDetection';
+import { logger } from '@/lib/logger';
 
 export type CleanupReason = 
   | 'component-unmount'
@@ -61,7 +62,7 @@ class EmergencyCleanupSystem {
     const hydrationState = getHydrationState(editorId);
     
     if (process.env.NODE_ENV === 'development') {
-      console.log(`🔍 Emergency cleanup evaluation: ${reason}`, {
+      logger.dev(`🔍 Emergency cleanup evaluation: ${reason}`, {
         shouldRun: cleanupDecision.shouldRun,
         reasoning: cleanupDecision.reasoning,
         isHydrating,
@@ -74,7 +75,7 @@ class EmergencyCleanupSystem {
     // Skip cleanup during hydration or when not actively editing
     if (!cleanupDecision.shouldRun) {
       if (process.env.NODE_ENV === 'development') {
-        console.log(`⏭️ Emergency cleanup skipped: ${reason}`, {
+        logger.dev(`⏭️ Emergency cleanup skipped: ${reason}`, {
           reasoning: cleanupDecision.reasoning,
           editorId
         });
@@ -90,7 +91,7 @@ class EmergencyCleanupSystem {
       return;
     }
     
-    console.warn(`🚨 EMERGENCY CLEANUP INITIATED: ${reason}`, {
+    logger.warn(`🚨 EMERGENCY CLEANUP INITIATED: ${reason}`, {
       details,
       editorId,
       activityState,
@@ -111,11 +112,11 @@ class EmergencyCleanupSystem {
       // Record cleanup stats
       this.recordCleanup(reason, timestamp, systemStatesBefore, editorId);
 
-      console.warn(`✅ Emergency cleanup completed: ${reason}`, { editorId });
+      logger.warn(`✅ Emergency cleanup completed: ${reason}`, { editorId });
       logInteractionTimeline('emergency-cleanup-complete', { reason, editorId, timestamp });
 
     } catch (error) {
-      console.error(`❌ Emergency cleanup failed: ${reason}`, error);
+      logger.error(`❌ Emergency cleanup failed: ${reason}`, error);
       logInteractionTimeline('emergency-cleanup-failed', { 
         reason, 
         editorId, 
@@ -137,49 +138,49 @@ class EmergencyCleanupSystem {
     // 1. Stop any active pointer tracking first
     try {
       pointerTracker.cleanup();
-      console.log(`✅ Pointer tracker cleaned`);
+      logger.dev(`✅ Pointer tracker cleaned`);
     } catch (error) {
-      console.error(`❌ Pointer tracker cleanup failed:`, error);
+      logger.error(`❌ Pointer tracker cleanup failed:`, error);
     }
 
     // 2. Clear interaction source
     try {
       clearInteractionSource();
-      console.log(`✅ Interaction source cleared`);
+      logger.dev(`✅ Interaction source cleared`);
     } catch (error) {
-      console.error(`❌ Interaction source cleanup failed:`, error);
+      logger.error(`❌ Interaction source cleanup failed:`, error);
     }
 
     // 3. Emergency cleanup listeners
     try {
       emergencyCleanupListeners(reason);
-      console.log(`✅ Listeners cleaned`);
+      logger.dev(`✅ Listeners cleaned`);
     } catch (error) {
-      console.error(`❌ Listener cleanup failed:`, error);
+      logger.error(`❌ Listener cleanup failed:`, error);
     }
 
     // 4. Clear suppression state
     try {
       emergencyCleanupSuppression(reason);
-      console.log(`✅ Suppression state cleaned`);
+      logger.dev(`✅ Suppression state cleaned`);
     } catch (error) {
-      console.error(`❌ Suppression cleanup failed:`, error);
+      logger.error(`❌ Suppression cleanup failed:`, error);
     }
 
     // 5. Clear re-entrancy guard
     try {
       emergencyCleanupReEntrancy(reason);
-      console.log(`✅ Re-entrancy guard cleaned`);
+      logger.dev(`✅ Re-entrancy guard cleaned`);
     } catch (error) {
-      console.error(`❌ Re-entrancy cleanup failed:`, error);
+      logger.error(`❌ Re-entrancy cleanup failed:`, error);
     }
 
     // 6. Clean format registry
     try {
       emergencyCleanupRegistry(reason);
-      console.log(`✅ Format registry cleaned`);
+      logger.dev(`✅ Format registry cleaned`);
     } catch (error) {
-      console.error(`❌ Format registry cleanup failed:`, error);
+      logger.error(`❌ Format registry cleanup failed:`, error);
     }
   }
 
@@ -188,7 +189,7 @@ class EmergencyCleanupSystem {
    * @param editorId - Editor instance ID
    */
   private lastResortCleanup(editorId: string): void {
-    console.error(`🆘 LAST RESORT CLEANUP - Normal cleanup failed`);
+    logger.error(`🆘 LAST RESORT CLEANUP - Normal cleanup failed`);
     
     try {
       // Try to clear any global state that might be stuck
@@ -201,9 +202,9 @@ class EmergencyCleanupSystem {
         clearTimeout(i);
       }
       
-      console.warn(`🆘 Last resort cleanup attempted`);
+      logger.warn(`🆘 Last resort cleanup attempted`);
     } catch (error) {
-      console.error(`❌ Last resort cleanup also failed:`, error);
+      logger.error(`❌ Last resort cleanup also failed:`, error);
     }
   }
 
@@ -221,7 +222,7 @@ class EmergencyCleanupSystem {
         pointer: this.safeCapture(() => pointerTracker.getState()),
       };
     } catch (error) {
-      console.error(`Failed to capture system states:`, error);
+      logger.error(`Failed to capture system states:`, error);
       return {
         suppression: 'capture-failed',
         reEntrancy: 'capture-failed',

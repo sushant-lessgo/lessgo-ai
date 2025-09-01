@@ -13,6 +13,7 @@ import {
   updateStorageMetadata,
   getStorageMetadata
 } from './storage';
+import { logger } from '@/lib/logger';
 
 // Storage manager state
 interface StorageManagerState {
@@ -74,7 +75,7 @@ class StorageManager {
     if (!isStorageAvailable()) return;
     
     if (this.state.isCleanupRunning && !force) {
-      console.log('🧹 Storage cleanup already running, skipping');
+      logger.dev('🧹 Storage cleanup already running, skipping');
       return;
     }
 
@@ -118,7 +119,7 @@ class StorageManager {
    * Perform deep cleanup
    */
   private async performDeepCleanup(stats: ReturnType<typeof getStorageStats>): Promise<void> {
-    console.log('🔧 Performing deep storage cleanup');
+    logger.dev('🔧 Performing deep storage cleanup');
 
     // Use the existing cleanup function with current token
     const currentTokens = getStoredProjectTokens();
@@ -143,7 +144,7 @@ class StorageManager {
    * Perform aggressive cleanup when quota is nearly full
    */
   private async performAggressiveCleanup(stats: ReturnType<typeof getStorageStats>): Promise<void> {
-    console.log('🚨 Performing aggressive storage cleanup due to quota limits');
+    logger.dev('🚨 Performing aggressive storage cleanup due to quota limits');
 
     const metadata = getStorageMetadata();
     
@@ -154,7 +155,7 @@ class StorageManager {
     const projectsToRemove = sortedProjects.slice(3); // Remove all but top 3
 
     for (const project of projectsToRemove) {
-      console.log(`🗑️ Aggressively removing project: ${project.tokenId}`);
+      logger.dev(`🗑️ Aggressively removing project: ${project.tokenId}`);
       removeStoredProject(project.tokenId);
     }
 
@@ -167,7 +168,7 @@ class StorageManager {
           const isKnownProject = sortedProjects.slice(0, 3).some(p => p.tokenId === tokenId);
           
           if (!isKnownProject) {
-            console.log(`🧹 Removing orphaned aggressive cleanup key: ${key}`);
+            logger.dev(`🧹 Removing orphaned aggressive cleanup key: ${key}`);
             localStorage.removeItem(key);
           }
         }
@@ -181,7 +182,7 @@ class StorageManager {
   private async cleanupCorruptedEntries(): Promise<void> {
     if (!isStorageAvailable()) return;
 
-    console.log('🔍 Checking for corrupted storage entries');
+    logger.dev('🔍 Checking for corrupted storage entries');
     
     for (let i = 0; i < localStorage.length; i++) {
       const key = localStorage.key(i);
@@ -206,7 +207,7 @@ class StorageManager {
   private handleStorageEvent(event: StorageEvent): void {
     if (!event.key?.startsWith(STORAGE_CONFIG.PROJECT_KEY_PREFIX)) return;
     
-    console.log('📡 Storage event detected from other tab:', {
+    logger.dev('📡 Storage event detected from other tab:', {
       key: event.key,
       oldValue: event.oldValue ? 'exists' : 'null',
       newValue: event.newValue ? 'exists' : 'null'
@@ -256,7 +257,7 @@ class StorageManager {
   public setQuotaThresholds(warning: number, error: number): void {
     this.state.quotaWarningThreshold = warning;
     this.state.quotaErrorThreshold = error;
-    console.log(`📊 Updated quota thresholds: warning=${warning}KB, error=${error}KB`);
+    logger.dev(`📊 Updated quota thresholds: warning=${warning}KB, error=${error}KB`);
   }
 
   /**
@@ -318,7 +319,7 @@ class StorageManager {
       window.removeEventListener('beforeunload', this.handleBeforeUnload.bind(this));
     }
 
-    console.log('🛑 Storage Manager destroyed');
+    logger.dev('🛑 Storage Manager destroyed');
   }
 }
 

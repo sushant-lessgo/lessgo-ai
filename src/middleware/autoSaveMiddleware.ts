@@ -2,6 +2,7 @@
 import { StateCreator } from 'zustand';
 import { debounce } from 'lodash';
 import { autoSaveDraft } from '@/utils/autoSaveDraft';
+import { logger } from '@/lib/logger';
 
 /**
  * ===== AUTO-SAVE MIDDLEWARE TYPES =====
@@ -172,12 +173,12 @@ export const autoSaveMiddleware = <T extends Record<string, any>>(
                     draft.isSaving = false;
                   });
                   
-                  console.warn('🔄 Auto-save conflict detected - manual resolution required');
+                  logger.warn('🔄 Auto-save conflict detected - manual resolution required');
                   return;
                 }
               }
             } catch (conflictError) {
-              console.warn('⚠️ Conflict detection failed, proceeding with save:', conflictError);
+              logger.warn('⚠️ Conflict detection failed, proceeding with save:', conflictError);
             }
           }
           
@@ -219,7 +220,7 @@ export const autoSaveMiddleware = <T extends Record<string, any>>(
             }
           });
           
-          console.log('✅ Auto-save successful:', {
+          logger.dev('✅ Auto-save successful:', {
             saveTime: `${saveTime}ms`,
             changesCount: state.queuedChanges.length,
             totalSaves: (state.performance?.saveCount || 0) + 1,
@@ -246,11 +247,11 @@ export const autoSaveMiddleware = <T extends Record<string, any>>(
             }
           });
           
-          console.error('❌ Auto-save failed:', error);
+          logger.error('❌ Auto-save failed:', error);
           
           // Retry logic for failed saves
           if ((state.performance?.failedSaves || 0) < finalConfig.retryAttempts) {
-            console.log(`🔄 Retrying auto-save in ${finalConfig.retryDelay}ms...`);
+            logger.dev(`🔄 Retrying auto-save in ${finalConfig.retryDelay}ms...`);
             
             setTimeout(() => {
               if (get().isDirty && !get().isSaving) {
@@ -389,7 +390,7 @@ export const autoSaveMiddleware = <T extends Record<string, any>>(
             } else if (strategy === 'auto-merge' && data) {
               // Merge server data with local changes
               // This would be implemented based on your specific merge logic
-              console.log('🔀 Auto-merging conflicts:', { localChanges: state.queuedChanges, serverData: data });
+              logger.dev('🔀 Auto-merging conflicts:', { localChanges: state.queuedChanges, serverData: data });
               
               state.conflictResolution.hasConflict = false;
               state.conflictResolution.conflictData = undefined;
@@ -399,7 +400,7 @@ export const autoSaveMiddleware = <T extends Record<string, any>>(
               
             } else if (strategy === 'manual') {
               // Keep conflict state for manual resolution
-              console.log('🔧 Manual conflict resolution required');
+              logger.dev('🔧 Manual conflict resolution required');
             }
           });
         },
@@ -501,5 +502,5 @@ if (process.env.NODE_ENV === 'development') {
     },
   };
   
-  console.log('🔧 Auto-save debug utilities available at window.__autoSaveDebug');
+  logger.dev('🔧 Auto-save debug utilities available at window.__autoSaveDebug');
 }

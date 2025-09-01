@@ -1,5 +1,6 @@
 // lib/embeddings.ts
 import { PrismaClient } from '@prisma/client';
+import { logger } from '@/lib/logger';
 
 const prisma = new PrismaClient();
 
@@ -11,7 +12,7 @@ export async function generateEmbedding(text: string): Promise<number[]> {
       throw new Error('OPENAI_API_KEY not found in environment');
     }
 
-    console.log('🔑 Generating embedding for:', text.substring(0, 50) + '...');
+    logger.dev('🔑 Generating embedding for:', () => text.substring(0, 50) + '...');
 
     const response = await fetch('https://api.openai.com/v1/embeddings', {
       method: 'POST',

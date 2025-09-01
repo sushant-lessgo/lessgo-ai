@@ -12,6 +12,7 @@ import type { FormField } from "@/types/core/index";
 import type { EditStore, SectionData } from '@/types/store';
 import type { Theme } from '@/types/core/index';
 import { defaultCSSVariableState } from '@/types/store/cssVariables';
+import { logger } from '@/lib/logger';
 
 // Import existing action creators
 import { createCoreActions } from '../hooks/editStore/coreActions';
@@ -339,7 +340,7 @@ export function createEditStore(tokenId: string) {
 
             // Token-specific actions
             loadFromOnboarding: () => {
-              console.warn('loadFromOnboarding: Not yet implemented - needs onboarding store integration');
+              logger.warn('loadFromOnboarding: Not yet implemented - needs onboarding store integration');
             },
 
             updateOnboardingData: (data: Partial<any>) => {
@@ -358,7 +359,7 @@ export function createEditStore(tokenId: string) {
 
             // Token-aware reset function
             reset: () => {
-              console.log(`🔄 Resetting store for token: ${tokenId}`);
+              logger.dev(`🔄 Resetting store for token: ${tokenId}`);
               set(createInitialState(tokenId));
             },
 

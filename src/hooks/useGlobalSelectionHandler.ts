@@ -8,6 +8,7 @@ import {
   logInteractionTimeline,
   isInEditorContext 
 } from '@/utils/interactionTracking';
+import { logger } from '@/lib/logger';
 
 interface GlobalSelectionHandlerOptions {
   editorId: string;
@@ -59,7 +60,7 @@ export function useGlobalSelectionHandler({
       
       // Check if focus is moving within editor context
       if (e.relatedTarget && isInEditorContext(e.relatedTarget, editorId)) {
-        console.log('🔍 Focus staying within editor context');
+        logger.dev('🔍 Focus staying within editor context');
         return;
       }
       

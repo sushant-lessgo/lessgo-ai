@@ -7,6 +7,7 @@ import { type EditStore } from '@/types/store';
 import { switchToken, cleanupOldProjects, trackProjectAccess, isStorageAvailable } from '@/utils/storage';
 import { storageManager } from '@/utils/storageManager';
 import { createEditStore, type EditStoreInstance } from './editStore';
+import { logger } from '@/lib/logger';
 
 // Store instance cache
 interface StoreCache {
@@ -32,7 +33,7 @@ class EditStoreManager {
         
         // Trigger storage cleanup check
         storageManager.performMaintenanceCleanup().catch(error => {
-          console.warn('Storage cleanup failed:', error);
+          logger.warn('Storage cleanup failed:', error);
         });
       }, 5 * 60 * 1000);
     }
@@ -68,7 +69,7 @@ class EditStoreManager {
         
         // Trigger maintenance cleanup on token switch
         storageManager.performMaintenanceCleanup().catch(error => {
-          console.warn('Maintenance cleanup failed on token switch:', error);
+          logger.warn('Maintenance cleanup failed on token switch:', error);
         });
       }
     }
@@ -111,7 +112,7 @@ class EditStoreManager {
       return store;
 
     } catch (error) {
-      console.error(`❌ Store Manager: Failed to create store for token ${tokenId}:`, error);
+      logger.error(`❌ Store Manager: Failed to create store for token ${tokenId}:`, error);
       throw new Error(`Failed to create store for token ${tokenId}: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }
@@ -121,7 +122,7 @@ class EditStoreManager {
    */
   public removeFromCache(tokenId: string): void {
     if (this.storeCache[tokenId]) {
-      console.log(`🗑️ Store Manager: Removing ${tokenId} from memory cache`);
+      logger.dev(`🗑️ Store Manager: Removing ${tokenId} from memory cache`);
       delete this.storeCache[tokenId];
     }
 
@@ -134,7 +135,7 @@ class EditStoreManager {
    * Completely destroy a store (remove from memory and localStorage)
    */
   public destroyStore(tokenId: string): void {
-    console.log(`💥 Store Manager: Destroying store ${tokenId}`);
+    logger.dev(`💥 Store Manager: Destroying store ${tokenId}`);
     
     // Remove from cache
     this.removeFromCache(tokenId);
@@ -155,7 +156,7 @@ class EditStoreManager {
       return; // No cleanup needed
     }
 
-    console.log(`🧹 Store Manager: Memory cache cleanup (${cacheEntries.length} stores cached)`);
+    logger.dev(`🧹 Store Manager: Memory cache cleanup (${cacheEntries.length} stores cached)`);
 
     // Sort by last accessed time (oldest first)
     const sortedEntries = cacheEntries.sort(([, a], [, b]) => a.lastAccessed - b.lastAccessed);
@@ -170,7 +171,7 @@ class EditStoreManager {
       }
     }
 
-    console.log(`✅ Store Manager: Removed ${storesToRemove.length} stores from memory cache`);
+    logger.dev(`✅ Store Manager: Removed ${storesToRemove.length} stores from memory cache`);
   }
 
   /**
@@ -257,7 +258,7 @@ class EditStoreManager {
         checkReady();
         setTimeout(() => {
           if (!this.isStoreInitialized(tokenId)) {
-            console.warn(`⚠️ Store Manager: Preload timeout for ${tokenId}`);
+            logger.warn(`⚠️ Store Manager: Preload timeout for ${tokenId}`);
             resolve(store); // Resolve anyway
           }
         }, 5000);
