@@ -102,11 +102,11 @@ export function createGenerationActions(set: any, get: any) {
       
       state.persistence.isDirty = true;
       
-      // console.log('📊 Initialization complete:', {
-      //   sectionsCount: state.sections.length,
-      //   contentCount: Object.keys(state.content).length,
-      //   layoutsCount: Object.keys(state.sectionLayouts).length
-      // });
+      logger.debug('📊 Initialization complete:', () => ({
+        sectionsCount: state.sections.length,
+        contentCount: Object.keys(state.content).length,
+        layoutsCount: Object.keys(state.sectionLayouts).length
+      }));
     }),
 
   // ✅ AI Response Processing from PageStore (adapted for EditStore structure)
@@ -300,16 +300,16 @@ export function createGenerationActions(set: any, get: any) {
         state.aiGeneration.errors.push(`Section/Content count mismatch: ${finalSectionCount} layout vs ${finalContentCount} content`);
       }
 
-      // console.log('📊 updateFromAIResponse Summary:', {
-      //   preSelectedSections: preSelectedSections.length,
-      //   sectionsFromAI: Object.keys(aiResponse.content || {}).length,
-      //   sectionsProcessed: sectionsGenerated.length,
-      //   sectionsSkipped: sectionsSkipped.length,
-      //   missingSections: missingSections.length,
-      //   finalStoreSections: state.sections.length,
-      //   finalContentSections: Object.keys(state.content).length,
-      //   isSuccessful: sectionsGenerated.length > 0
-      // });
+      logger.debug('📊 updateFromAIResponse Summary:', () => ({
+        preSelectedSections: preSelectedSections.length,
+        sectionsFromAI: Object.keys(aiResponse.content || {}).length,
+        sectionsProcessed: sectionsGenerated.length,
+        sectionsSkipped: sectionsSkipped.length,
+        missingSections: missingSections.length,
+        finalStoreSections: state.sections.length,
+        finalContentSections: Object.keys(state.content).length,
+        isSuccessful: sectionsGenerated.length > 0
+      }));
 
       state.persistence.isDirty = true;
       
@@ -491,7 +491,7 @@ export function createGenerationActions(set: any, get: any) {
         accentCSS: theme.colors.accentCSS
       };
 
-      // console.log('🎨 EditStore: Using integrated background system for color tokens:', backgroundSystemData);
+      logger.debug('🎨 EditStore: Using integrated background system for color tokens:', backgroundSystemData);
       return generateColorTokensFromBackgroundSystem(backgroundSystemData);
     } else {
       logger.warn('EditStore: Using fallback color token generation - background system not fully integrated');

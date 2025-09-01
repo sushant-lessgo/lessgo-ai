@@ -1,6 +1,7 @@
 // app/edit/[token]/components/editor/InlineTextEditor.tsx - Core Inline Text Editor
 import React, { useRef, useState, useCallback, useEffect, useMemo } from 'react';
 import { debounce } from 'lodash';
+import { logger } from '@/lib/logger';
 import { useTextToolbarIntegration } from '@/hooks/useTextToolbarIntegration';
 import { useInlineEditorAutoSave } from '@/hooks/useInlineEditorAutoSave';
 import { useTextSelection } from '@/hooks/useTextSelection';
@@ -263,7 +264,7 @@ export function InlineTextEditor({
               selection.addRange(newRange);
             }
           } catch (error) {
-            console.warn('Failed to restore cursor position:', error);
+            logger.warn('Failed to restore cursor position:', error);
           }
         }
       });
@@ -304,7 +305,7 @@ export function InlineTextEditor({
     try {
       restoreSelectionEvents();
     } catch (error) {
-      console.warn('📝 Selection guard cleanup failed:', error);
+      logger.warn('📝 Selection guard cleanup failed:', error);
     }
     
     // Clear any active selections
@@ -349,9 +350,9 @@ export function InlineTextEditor({
     selectionRef.current = null;
     
     } catch (error) {
-      console.error(`📝 [${exitTime}] ERROR in exitTextEditingMode:`, error);
+      logger.error(`📝 [${exitTime}] ERROR in exitTextEditingMode:`, error);
       // Don't throw error to prevent cascading failures
-      console.error(`📝 [${exitTime}] Continuing with cleanup despite error`);
+      logger.error(`📝 [${exitTime}] Continuing with cleanup despite error`);
     } finally {
       // Always clear the exiting flag to prevent permanent lock
       setTimeout(() => {
@@ -364,7 +365,7 @@ export function InlineTextEditor({
 
   // Event handlers
   const handleFocus = useCallback(() => {
-    // console.log('📝 InlineTextEditor handleFocus called');
+    logger.dev('📝 InlineTextEditor handleFocus called');
     setIsEditing(true);
     // Mark as actively typing to prevent store updates during typing
     if (editorRef.current) {
@@ -383,7 +384,7 @@ export function InlineTextEditor({
   }, [onFocus]);
 
   const handleBlur = useCallback((e: React.FocusEvent) => {
-    // console.log('📝 InlineTextEditor handleBlur called');
+    logger.dev('📝 InlineTextEditor handleBlur called');
     logInteractionTimeline('focusout', { 
       relatedTarget: e.relatedTarget?.nodeName,
       interactionSource: getInteractionSource()
@@ -409,12 +410,12 @@ export function InlineTextEditor({
     // Check if element is in text editing mode or actively typing - if so, don't interfere
     if (editorRef.current?.hasAttribute('data-editing') || 
         editorRef.current?.dataset.activelyTyping === 'true') {
-      // console.log('📝 InlineTextEditor: Skipping selection change - element in text editing mode or actively typing');
+      logger.dev('📝 InlineTextEditor: Skipping selection change - element in text editing mode or actively typing');
       return;
     }
     
     const selection = getSelection();
-    // console.log('📝 InlineTextEditor selection changed:', { selection, isCollapsed: selection?.isCollapsed });
+    logger.dev('📝 InlineTextEditor selection changed:', () => ({ selection, isCollapsed: selection?.isCollapsed }));
     
     setCurrentSelection(selection);
     selectionRef.current = selection;
@@ -462,7 +463,7 @@ export function InlineTextEditor({
           
           // Add timeout safety net
           const timeoutId = setTimeout(() => {
-            console.error(`🔑 [${escTime}] TIMEOUT: Local ESC handler taking too long, forcing cleanup`);
+            logger.error(`🔑 [${escTime}] TIMEOUT: Local ESC handler taking too long, forcing cleanup`);
             if (editorRef.current) {
               editorRef.current.dataset.exiting = 'false';
             }
@@ -473,7 +474,7 @@ export function InlineTextEditor({
           
           clearTimeout(timeoutId);
         } catch (error) {
-          console.error(`🔑 [${escTime}] ERROR in ESC handler:`, error);
+          logger.error(`🔑 [${escTime}] ERROR in ESC handler:`, error);
           // Force clear exiting flag on error
           if (editorRef.current) {
             editorRef.current.dataset.exiting = 'false';
@@ -593,7 +594,7 @@ export function InlineTextEditor({
           
           // Add timeout safety net
           const timeoutId = setTimeout(() => {
-            console.error(`📝 [${globalEscTime}] TIMEOUT: ESC handler taking too long, forcing cleanup`);
+            logger.error(`📝 [${globalEscTime}] TIMEOUT: ESC handler taking too long, forcing cleanup`);
             if (editorRef.current) {
               editorRef.current.dataset.exiting = 'false';
             }
@@ -603,7 +604,7 @@ export function InlineTextEditor({
           
           clearTimeout(timeoutId);
         } catch (error) {
-          console.error(`📝 [${globalEscTime}] ERROR in global ESC handler:`, error);
+          logger.error(`📝 [${globalEscTime}] ERROR in global ESC handler:`, error);
           // Force clear exiting flag on error
           if (editorRef.current) {
             editorRef.current.dataset.exiting = 'false';
@@ -769,7 +770,7 @@ export function InlineTextEditor({
         logInteractionTimeline('compositionend');
       }}
       onClick={(e) => {
-        // console.log('📝 InlineTextEditor clicked');
+        logger.dev('📝 InlineTextEditor clicked');
         // Don't prevent default - we want normal click behavior
       }}
       className={`

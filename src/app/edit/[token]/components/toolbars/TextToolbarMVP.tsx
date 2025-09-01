@@ -2,6 +2,7 @@
 // Clean, focused toolbar with only essential features + partial selection support
 import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { debounce } from 'lodash';
+import { logger } from '@/lib/logger';
 import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
 import { useToolbarVisibility } from '@/hooks/useSelectionPriority';
 import { useSelectionPreserver } from '@/hooks/useSelectionPreserver';
@@ -112,7 +113,7 @@ export function TextToolbarMVP({ elementSelection, position, contextActions }: T
   }
 
   if (!elementSelection || !elementSelection.sectionId || !elementSelection.elementKey) {
-    console.warn('TextToolbarMVP: Invalid elementSelection', elementSelection);
+    logger.warn('TextToolbarMVP: Invalid elementSelection', elementSelection);
     return null;
   }
 
@@ -427,7 +428,7 @@ export function TextToolbarMVP({ elementSelection, position, contextActions }: T
       debouncedFormat.cancel();
       // Perform hard cleanup of selection state
       cleanupSelection();
-      // DISABLED to prevent log spam: console.log('🧹 TextToolbarMVP cleanup completed');
+      logger.dev('🧹 TextToolbarMVP cleanup completed');
     };
   }, [debouncedFormat, cleanupSelection]);
 

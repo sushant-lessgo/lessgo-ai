@@ -3,6 +3,7 @@ import type { EditStore } from '@/types/store';
 import type { FormsImageActions } from '@/types/store';
 import type { FormField } from '@/types/core/forms';
 import { createFormActions } from './formActions';
+import { logger } from '@/lib/logger';
 /**
  * ===== UTILITY FUNCTIONS =====
  */
@@ -38,15 +39,15 @@ export function createFormsImageActions(set: any, get: any): FormsImageActions {
     },
     linkButtonToForm: (sectionId: string, formId: string, behavior: 'scrollTo' | 'openModal') => {
       // Legacy method - stub for now
-      console.warn('linkButtonToForm is legacy, needs migration');
+      logger.warn('linkButtonToForm is legacy, needs migration');
     },
     unlinkButtonFromForm: (sectionId: string) => {
       // Legacy method - stub for now  
-      console.warn('unlinkButtonFromForm is legacy, needs migration');
+      logger.warn('unlinkButtonFromForm is legacy, needs migration');
     },
     getFormsByPlacement: (placement: 'hero' | 'cta-section') => {
       // Legacy method - return empty for now
-      console.warn('getFormsByPlacement is legacy, needs migration');
+      logger.warn('getFormsByPlacement is legacy, needs migration');
       return [];
     },
     /**
@@ -85,7 +86,7 @@ export function createFormsImageActions(set: any, get: any): FormsImageActions {
         state.persistence.isDirty = true;
       });
       
-      console.log('✅ Form created:', formId);
+      logger.debug('✅ Form created:', formId);
       return formId;
     },
     
@@ -149,7 +150,7 @@ export function createFormsImageActions(set: any, get: any): FormsImageActions {
         }
         
         state.persistence.isDirty = true;
-        console.log('✅ Form field added:', { formId, fieldType, fieldId });
+        logger.debug('✅ Form field added:', { formId, fieldType, fieldId });
       }),
     
     updateFormField: (formId: string, fieldId: string, properties: any) =>
@@ -177,7 +178,7 @@ export function createFormsImageActions(set: any, get: any): FormsImageActions {
             state.history.redoStack = [];
             state.persistence.isDirty = true;
             
-            console.log('✅ Form field updated:', { formId, fieldId, properties });
+            logger.debug('✅ Form field updated:', { formId, fieldId, properties });
           }
         }
       }),
@@ -212,7 +213,7 @@ export function createFormsImageActions(set: any, get: any): FormsImageActions {
             state.history.redoStack = [];
             state.persistence.isDirty = true;
             
-            console.log('✅ Form field deleted:', { formId, fieldId });
+            logger.debug('✅ Form field deleted:', { formId, fieldId });
           }
         }
       }),
@@ -247,7 +248,7 @@ export function createFormsImageActions(set: any, get: any): FormsImageActions {
           state.history.redoStack = [];
           state.persistence.isDirty = true;
           
-          console.log('✅ Form settings updated:', { formId, settings });
+          logger.debug('✅ Form settings updated:', { formId, settings });
         }
       }),
     
@@ -285,7 +286,7 @@ export function createFormsImageActions(set: any, get: any): FormsImageActions {
             state.history.redoStack = [];
             state.persistence.isDirty = true;
             
-            console.log('✅ Form integration connected:', { formId, integration });
+            logger.debug('✅ Form integration connected:', { formId, integration });
           }
         }
       }),
@@ -349,7 +350,7 @@ export function createFormsImageActions(set: any, get: any): FormsImageActions {
           });
         }, 1000);
         
-        console.log('✅ Image uploaded successfully:', imageUrl);
+        logger.debug('✅ Image uploaded successfully:', imageUrl);
         return imageUrl;
         
       } catch (error) {
@@ -358,7 +359,7 @@ export function createFormsImageActions(set: any, get: any): FormsImageActions {
           state.errors['image-upload'] = error instanceof Error ? error.message : 'Upload failed';
         });
         
-        console.error('❌ Image upload failed:', error);
+        logger.error('❌ Image upload failed:', error);
         throw error;
       }
     },
@@ -381,7 +382,7 @@ export function createFormsImageActions(set: any, get: any): FormsImageActions {
         state.history.redoStack = [];
       });
       
-      console.log('✅ Image replaced:', { sectionId, elementKey, imageUrl });
+      logger.debug('✅ Image replaced:', { sectionId, elementKey, imageUrl });
     },
     
     searchStockPhotos: async (query: string, targetElement?: { sectionId: string; elementKey: string }) => {
@@ -438,7 +439,7 @@ export function createFormsImageActions(set: any, get: any): FormsImageActions {
           });
         }
         
-        console.log('✅ Stock photo search completed:', { query, resultCount: mockResults.length });
+        logger.debug('✅ Stock photo search completed:', { query, resultCount: mockResults.length });
         
       } catch (error) {
         set((state: EditStore) => {
@@ -446,7 +447,7 @@ export function createFormsImageActions(set: any, get: any): FormsImageActions {
           state.errors['stock-search'] = error instanceof Error ? error.message : 'Search failed';
         });
         
-        console.error('❌ Stock photo search failed:', error);
+        logger.error('❌ Stock photo search failed:', error);
         throw error;
       }
     },
@@ -456,7 +457,7 @@ export function createFormsImageActions(set: any, get: any): FormsImageActions {
       const photo = state.images.stockPhotos.searchResults.find((p: any) => p.id === photoId);
       
       if (!photo) {
-        console.warn('⚠️ Photo not found:', photoId);
+        logger.warn('⚠️ Photo not found:', photoId);
         return;
       }
       
@@ -477,7 +478,7 @@ export function createFormsImageActions(set: any, get: any): FormsImageActions {
       // Hide search results
       get().hideStockPhotoSearch();
       
-      console.log('✅ Stock photo selected:', { photoId, imageUrl });
+      logger.debug('✅ Stock photo selected:', { photoId, imageUrl });
       return imageUrl;
     },
     
@@ -499,11 +500,11 @@ export function createFormsImageActions(set: any, get: any): FormsImageActions {
           altText = 'Product showcase and demonstration';
         }
         
-        console.log('✅ Alt text generated:', altText);
+        logger.debug('✅ Alt text generated:', altText);
         return altText;
         
       } catch (error) {
-        console.error('❌ Alt text generation failed:', error);
+        logger.error('❌ Alt text generation failed:', error);
         return 'Image description not available';
       }
     },
@@ -562,7 +563,7 @@ export function createFormsImageActions(set: any, get: any): FormsImageActions {
         }
       }
       
-      console.log('📁 Bulk upload completed:', { 
+      logger.debug('📁 Bulk upload completed:', { 
         successful: results.length, 
         failed: errors.length 
       });
@@ -615,7 +616,7 @@ export function createFormsImageActions(set: any, get: any): FormsImageActions {
           state.loadingStates['optimize-images'] = false;
         });
         
-        console.log('🚀 Bulk image optimization completed:', {
+        logger.debug('🚀 Bulk image optimization completed:', {
           successful: results.length,
           failed: errors.length,
         });
@@ -755,7 +756,7 @@ export function createFormsImageActions(set: any, get: any): FormsImageActions {
         version: '1.0',
       };
       
-      console.log('📤 Form exported:', formId);
+      logger.debug('📤 Form exported:', formId);
       return exportData;
     },
     
@@ -837,7 +838,7 @@ export function createFormsImageActions(set: any, get: any): FormsImageActions {
         state.history.redoStack = [];
       });
       
-      console.log('📥 Form imported:', formId);
+      logger.debug('📥 Form imported:', formId);
       return formId;
     },
 
@@ -870,7 +871,7 @@ export function createFormsImageActions(set: any, get: any): FormsImageActions {
         });
         
       } catch (error) {
-        console.error('❌ Failed to get image metadata:', error);
+        logger.error('❌ Failed to get image metadata:', error);
         throw error;
       }
     },
@@ -905,11 +906,11 @@ export function createFormsImageActions(set: any, get: any): FormsImageActions {
           });
         }
         
-        console.log('🎨 Image variations generated:', results.length);
+        logger.debug('🎨 Image variations generated:', results.length);
         return results;
         
       } catch (error) {
-        console.error('❌ Failed to generate image variations:', error);
+        logger.error('❌ Failed to generate image variations:', error);
         throw error;
       }
     },
@@ -938,7 +939,7 @@ export function createFormsImageActions(set: any, get: any): FormsImageActions {
           });
         });
         
-        console.log('🧹 Cleaned up unused images:', unusedImages.length);
+        logger.debug('🧹 Cleaned up unused images:', unusedImages.length);
       }
       
       return unusedImages;

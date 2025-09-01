@@ -127,7 +127,7 @@ export function EditProvider({ children, tokenId, options = {} }: EditProviderPr
   // Auto-load project data after store initialization
   useEffect(() => {
     if (store && isInitialized && !isHydrating && !hasLoadedDataRef.current.has(tokenId)) {
-      // console.log(`📥 [EDIT-DEBUG] EditProvider: Loading project data for token ${tokenId}`);
+      logger.debug(`📥 [EDIT-DEBUG] EditProvider: Loading project data for token ${tokenId}`);
       hasLoadedDataRef.current.add(tokenId);
       
       // Log current theme state before loading
