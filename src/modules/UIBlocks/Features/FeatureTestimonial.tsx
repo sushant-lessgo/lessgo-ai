@@ -390,7 +390,7 @@ export default function FeatureTestimonial(props: LayoutComponentProps) {
           )}
         </div>
 
-        {mode === 'edit' ? (
+        {mode !== 'preview' ? (
           <div className="space-y-8">
             <div className="p-6 border border-gray-200 rounded-lg bg-gray-50">
               <h4 className="font-semibold text-gray-700 mb-4">Feature & Testimonial Content</h4>
@@ -544,7 +544,7 @@ export default function FeatureTestimonial(props: LayoutComponentProps) {
                       data-section-id={sectionId}
                       data-element-key="trust_label_1"
                     />
-                    {mode === 'edit' && (
+                    {mode !== 'preview' && (
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
@@ -591,7 +591,7 @@ export default function FeatureTestimonial(props: LayoutComponentProps) {
                       data-section-id={sectionId}
                       data-element-key="trust_label_2"
                     />
-                    {mode === 'edit' && (
+                    {mode !== 'preview' && (
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
@@ -638,7 +638,7 @@ export default function FeatureTestimonial(props: LayoutComponentProps) {
                       data-section-id={sectionId}
                       data-element-key="trust_label_3"
                     />
-                    {mode === 'edit' && (
+                    {mode !== 'preview' && (
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
@@ -685,7 +685,7 @@ export default function FeatureTestimonial(props: LayoutComponentProps) {
                       data-section-id={sectionId}
                       data-element-key="trust_label_4"
                     />
-                    {mode === 'edit' && (
+                    {mode !== 'preview' && (
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
@@ -740,7 +740,7 @@ export default function FeatureTestimonial(props: LayoutComponentProps) {
 
                 {(trustItems.length > 0 || mode === 'edit') && (
                   <div>
-                    {mode === 'edit' ? (
+                    {mode !== 'preview' ? (
                       <EditableTrustIndicators
                         mode={mode}
                         trustItems={[

@@ -61,7 +61,7 @@ const ModeWrapper = ({
   elementKey: string;
   onEdit?: (value: string) => void;
 }) => {
-  if (mode === 'edit' && onEdit) {
+  if (mode !== 'preview' && onEdit) {
     return (
       <div 
         contentEditable
@@ -178,7 +178,7 @@ const SecurityChecklistItem = ({
       <div className="flex-1">
         {/* Security Item */}
         <div className="mb-2">
-          {mode === 'edit' ? (
+          {mode !== 'preview' ? (
             <div 
               contentEditable
               suppressContentEditableWarning
@@ -199,7 +199,7 @@ const SecurityChecklistItem = ({
         {/* Optional Description */}
         {(securityItem.description || mode === 'edit') && (
           <div>
-            {mode === 'edit' ? (
+            {mode !== 'preview' ? (
               <div 
                 contentEditable
                 suppressContentEditableWarning
@@ -320,7 +320,7 @@ export default function SecurityChecklist(props: SecurityChecklistProps) {
                   <p 
                     className={`text-blue-800 leading-relaxed ${!blockContent.compliance_note && mode === 'edit' ? 'opacity-50 italic' : ''}`}
                   >
-                    {blockContent.compliance_note || (mode === 'edit' ? 'Add compliance note (e.g., We maintain SOC 2 Type II compliance and undergo annual security audits...)' : '')}
+                    {blockContent.compliance_note || (mode !== 'preview' ? 'Add compliance note (e.g., We maintain SOC 2 Type II compliance and undergo annual security audits...)' : '')}
                   </p>
                 </ModeWrapper>
               </div>

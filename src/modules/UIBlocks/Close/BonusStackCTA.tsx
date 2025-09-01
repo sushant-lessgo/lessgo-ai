@@ -322,7 +322,7 @@ export default function BonusStackCTA(props: LayoutComponentProps) {
           </div>
         </div>
 
-        {mode === 'edit' ? (
+        {mode !== 'preview' ? (
           <div className="space-y-8">
             <div className="p-6 border border-gray-200 rounded-lg bg-gray-50">
               <h4 className="font-semibold text-gray-700 mb-4">Bonus Stack CTA Content</h4>
@@ -607,7 +607,7 @@ export default function BonusStackCTA(props: LayoutComponentProps) {
 
             {(trustItems.length > 0 || mode === 'edit') && (
               <div className="mt-6">
-                {mode === 'edit' ? (
+                {mode !== 'preview' ? (
                   <EditableTrustIndicators
                     mode={mode}
                     trustItems={[

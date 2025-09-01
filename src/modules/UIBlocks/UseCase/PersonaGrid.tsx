@@ -162,7 +162,7 @@ const PersonaAvatar = React.memo(({
       </div>
       
       {/* Icon Override Button for Edit Mode */}
-      {mode === 'edit' && !iconOverride && (
+      {mode !== 'preview' && !iconOverride && (
         <button
           onClick={() => onIconEdit(index, '👤')}
           className="absolute top-0 right-0 w-6 h-6 bg-blue-600 text-white rounded-full text-xs opacity-0 group-hover:opacity-100 transition-opacity"

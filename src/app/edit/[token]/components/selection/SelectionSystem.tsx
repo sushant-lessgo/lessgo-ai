@@ -83,7 +83,7 @@ export function SelectionSystem({ children }: SelectionSystemProps) {
       }
     };
 
-    if (mode === 'edit' && (selectedSection || selectedElement)) {
+    if (mode !== 'preview' && (selectedSection || selectedElement)) {
       // Small delay to ensure DOM is updated
       const timer = setTimeout(focusSelectedElement, 50);
       return () => clearTimeout(timer);
@@ -95,7 +95,7 @@ export function SelectionSystem({ children }: SelectionSystemProps) {
       {children}
       
       {/* Selection Indicators */}
-      {mode === 'edit' && (
+      {mode !== 'preview' && (
         <>
           <SelectionStyles />
           <SelectionIndicators />

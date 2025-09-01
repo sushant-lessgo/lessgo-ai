@@ -188,7 +188,7 @@ export default function AnimatedUpgradePath(props: LayoutComponentProps) {
                   </div>
 
                   {/* Title */}
-                  {mode === 'edit' ? (
+                  {mode !== 'preview' ? (
                     <input
                       type="text"
                       value={title}
@@ -207,7 +207,7 @@ export default function AnimatedUpgradePath(props: LayoutComponentProps) {
                   )}
 
                   {/* Description */}
-                  {mode === 'edit' ? (
+                  {mode !== 'preview' ? (
                     <textarea
                       value={stageDescriptions[index]}
                       onChange={(e) => handleStageDescriptionUpdate(index, e.target.value)}

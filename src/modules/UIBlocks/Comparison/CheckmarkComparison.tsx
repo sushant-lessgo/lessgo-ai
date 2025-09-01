@@ -142,7 +142,7 @@ export default function CheckmarkComparison(props: LayoutComponentProps) {
                       index === highlightIndex ? `bg-primary rounded-t-lg` : ''
                     }`}
                   >
-                    {mode === 'edit' ? (
+                    {mode !== 'preview' ? (
                       <input
                         type="text"
                         value={header}
@@ -168,7 +168,7 @@ export default function CheckmarkComparison(props: LayoutComponentProps) {
               {featureLabels.map((label, rowIndex) => (
                 <tr key={rowIndex} className={`border-b border-gray-200`}>
                   <td className="p-4">
-                    {mode === 'edit' ? (
+                    {mode !== 'preview' ? (
                       <input
                         type="text"
                         value={label}

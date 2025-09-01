@@ -345,7 +345,7 @@ export default function QuoteBackedAnswers(props: LayoutComponentProps) {
         </div>
 
         {/* Edit Mode: Instructions */}
-        {mode === 'edit' && (
+        {mode !== 'preview' && (
           <div className="mt-8 p-4 bg-blue-50 border border-blue-200 rounded-lg">
             <p className="text-blue-800 text-sm">
               <strong>Edit Quote Blocks:</strong> Use format "[quote]|[author name, title]|[next quote]|[next author]"

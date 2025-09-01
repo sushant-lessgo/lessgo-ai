@@ -74,7 +74,7 @@ const ModeWrapper = ({
   elementKey: string;
   onEdit?: (value: string) => void;
 }) => {
-  if (mode === 'edit' && onEdit) {
+  if (mode !== 'preview' && onEdit) {
     return (
       <div 
         contentEditable
@@ -202,7 +202,7 @@ const StatBlock = ({
       
       {/* Stat Value */}
       <div className="mb-4">
-        {mode === 'edit' ? (
+        {mode !== 'preview' ? (
           <div 
             contentEditable
             suppressContentEditableWarning
@@ -222,7 +222,7 @@ const StatBlock = ({
       
       {/* Stat Label */}
       <div className="mb-3">
-        {mode === 'edit' ? (
+        {mode !== 'preview' ? (
           <div 
             contentEditable
             suppressContentEditableWarning
@@ -243,7 +243,7 @@ const StatBlock = ({
       {/* Optional Description */}
       {(stat.description || mode === 'edit') && (
         <div>
-          {mode === 'edit' ? (
+          {mode !== 'preview' ? (
             <div 
               contentEditable
               suppressContentEditableWarning

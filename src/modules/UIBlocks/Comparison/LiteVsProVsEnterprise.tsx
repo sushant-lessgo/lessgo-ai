@@ -183,7 +183,7 @@ export default function LiteVsProVsEnterprise(props: LayoutComponentProps) {
 
               <div className="p-8">
                 {/* Tier Name */}
-                {mode === 'edit' ? (
+                {mode !== 'preview' ? (
                   <input
                     type="text"
                     value={name}
@@ -198,7 +198,7 @@ export default function LiteVsProVsEnterprise(props: LayoutComponentProps) {
                 )}
 
                 {/* Price */}
-                {mode === 'edit' ? (
+                {mode !== 'preview' ? (
                   <input
                     type="text"
                     value={tierPrices[tierIndex]}
@@ -217,7 +217,7 @@ export default function LiteVsProVsEnterprise(props: LayoutComponentProps) {
                 )}
 
                 {/* Description */}
-                {mode === 'edit' ? (
+                {mode !== 'preview' ? (
                   <textarea
                     value={tierDescriptions[tierIndex]}
                     onChange={(e) => handleTierDescriptionUpdate(tierIndex, e.target.value)}
@@ -260,7 +260,7 @@ export default function LiteVsProVsEnterprise(props: LayoutComponentProps) {
                     ? `bg-primary text-white hover:opacity-90`
                     : `${colorTokens.bgNeutral || 'bg-gray-50'} border-2 border-gray-200 ${colorTokens.textPrimary || 'text-gray-900'} hover:border-primary`
                 }`}>
-                  {mode === 'edit' ? (
+                  {mode !== 'preview' ? (
                     <input
                       type="text"
                       value={tierCtas[tierIndex]}

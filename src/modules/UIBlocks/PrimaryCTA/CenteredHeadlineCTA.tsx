@@ -225,7 +225,7 @@ export default function CenteredHeadlineCTA(props: LayoutComponentProps) {
         {/* Trust Indicators */}
         {(trustItems.length > 0 || mode === 'edit') && (
           <div className="mb-8">
-            {mode === 'edit' ? (
+            {mode !== 'preview' ? (
               <EditableTrustIndicators
                 mode={mode}
                 trustItems={[
@@ -278,7 +278,7 @@ export default function CenteredHeadlineCTA(props: LayoutComponentProps) {
         <div className="flex flex-col sm:flex-row items-center justify-center space-y-4 sm:space-y-0 sm:space-x-12 pt-8 border-t border-gray-200">
           {(blockContent.customer_count || mode === 'edit') && (
             <div className="text-center relative group/customer-item">
-              {mode === 'edit' ? (
+              {mode !== 'preview' ? (
                 <div>
                   <EditableAdaptiveText
                     mode={mode}
@@ -333,7 +333,7 @@ export default function CenteredHeadlineCTA(props: LayoutComponentProps) {
           
           {(blockContent.rating_stat || mode === 'edit') && blockContent.rating_stat !== '___REMOVED___' && (
             <div className="relative group/rating-item">
-              {mode === 'edit' ? (
+              {mode !== 'preview' ? (
                 <div className="flex items-center space-x-1">
                   {[1,2,3,4,5].map(i => (
                     <svg key={i} className="w-4 h-4 text-yellow-400 fill-current" viewBox="0 0 20 20">
@@ -383,7 +383,7 @@ export default function CenteredHeadlineCTA(props: LayoutComponentProps) {
 
           {(blockContent.uptime_stat || mode === 'edit') && blockContent.uptime_stat !== '___REMOVED___' && (
             <div className="text-center relative group/uptime-item">
-              {mode === 'edit' ? (
+              {mode !== 'preview' ? (
                 <div>
                   <EditableAdaptiveText
                     mode={mode}

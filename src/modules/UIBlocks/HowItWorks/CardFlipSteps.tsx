@@ -395,7 +395,7 @@ export default function CardFlipSteps(props: LayoutComponentProps) {
           )}
         </div>
 
-        {mode === 'edit' ? (
+        {mode !== 'preview' ? (
           <div className="space-y-8">
             <div className="p-6 border border-gray-200 rounded-lg bg-gray-50">
               <h4 className="font-semibold text-gray-700 mb-4">Card Flip Content</h4>
@@ -500,7 +500,7 @@ export default function CardFlipSteps(props: LayoutComponentProps) {
                       data-section-id={sectionId}
                       data-element-key="guide_indicator_1_text"
                     />
-                    {mode === 'edit' && (
+                    {mode !== 'preview' && (
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
@@ -546,7 +546,7 @@ export default function CardFlipSteps(props: LayoutComponentProps) {
                       data-section-id={sectionId}
                       data-element-key="guide_indicator_2_text"
                     />
-                    {mode === 'edit' && (
+                    {mode !== 'preview' && (
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
@@ -592,7 +592,7 @@ export default function CardFlipSteps(props: LayoutComponentProps) {
                       data-section-id={sectionId}
                       data-element-key="guide_indicator_3_text"
                     />
-                    {mode === 'edit' && (
+                    {mode !== 'preview' && (
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
@@ -625,7 +625,7 @@ export default function CardFlipSteps(props: LayoutComponentProps) {
                     data-section-id={sectionId}
                     data-element-key="guide_heading"
                   />
-                  {mode === 'edit' && (
+                  {mode !== 'preview' && (
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
@@ -657,7 +657,7 @@ export default function CardFlipSteps(props: LayoutComponentProps) {
                     data-section-id={sectionId}
                     data-element-key="guide_description"
                   />
-                  {mode === 'edit' && (
+                  {mode !== 'preview' && (
                     <button
                       onClick={(e) => {
                         e.stopPropagation();

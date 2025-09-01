@@ -346,7 +346,7 @@ export default function VisualStoryline(props: LayoutComponentProps) {
         <div className="space-y-8 mb-16">
           {steps.map((step, index) => (
             <div key={index}>
-              {mode === 'edit' ? (
+              {mode !== 'preview' ? (
                 <div className="space-y-4 p-6 border border-gray-200 rounded-lg bg-gray-50">
                   <h4 className="font-semibold text-gray-700">Step {index + 1}</h4>
                   
@@ -472,7 +472,7 @@ export default function VisualStoryline(props: LayoutComponentProps) {
             </div>
             
             {/* Remove button */}
-            {mode === 'edit' && (
+            {mode !== 'preview' && (
               <button
                 onClick={(e) => {
                   e.stopPropagation();
@@ -490,7 +490,7 @@ export default function VisualStoryline(props: LayoutComponentProps) {
         )}
         
         {/* Add journey summary back button */}
-        {mode === 'edit' && blockContent.show_journey_summary === 'false' && (
+        {mode !== 'preview' && blockContent.show_journey_summary === 'false' && (
           <div className="mb-12 text-center">
             <button
               onClick={() => handleContentUpdate('show_journey_summary', 'true')}

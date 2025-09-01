@@ -327,7 +327,7 @@ export default function StatComparison(props: LayoutComponentProps) {
             </div>
 
             <div className="grid gap-4">
-              {mode === 'edit' ? (
+              {mode !== 'preview' ? (
                 <EditableAdaptiveText
                   mode={mode}
                   value={blockContent.before_stats || ''}
@@ -393,7 +393,7 @@ export default function StatComparison(props: LayoutComponentProps) {
             </div>
 
             <div className="grid gap-4">
-              {mode === 'edit' ? (
+              {mode !== 'preview' ? (
                 <EditableAdaptiveText
                   mode={mode}
                   value={blockContent.after_stats || ''}
@@ -566,7 +566,7 @@ export default function StatComparison(props: LayoutComponentProps) {
                     />
                     
                     {/* Remove button */}
-                    {mode === 'edit' && (
+                    {mode !== 'preview' && (
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
@@ -631,7 +631,7 @@ export default function StatComparison(props: LayoutComponentProps) {
                     />
                     
                     {/* Remove button */}
-                    {mode === 'edit' && (
+                    {mode !== 'preview' && (
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
@@ -696,7 +696,7 @@ export default function StatComparison(props: LayoutComponentProps) {
                     />
                     
                     {/* Remove button */}
-                    {mode === 'edit' && (
+                    {mode !== 'preview' && (
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
@@ -717,7 +717,7 @@ export default function StatComparison(props: LayoutComponentProps) {
             </div>
             
             {/* Remove entire summary section button */}
-            {mode === 'edit' && (
+            {mode !== 'preview' && (
               <button
                 onClick={(e) => {
                   e.stopPropagation();
@@ -735,7 +735,7 @@ export default function StatComparison(props: LayoutComponentProps) {
         )}
         
         {/* Add summary section back button */}
-        {mode === 'edit' && blockContent.show_summary_section === 'false' && (
+        {mode !== 'preview' && blockContent.show_summary_section === 'false' && (
           <div className="mb-12 text-center">
             <button
               onClick={() => handleContentUpdate('show_summary_section', 'true')}

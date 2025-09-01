@@ -154,7 +154,7 @@ const ObjectionAccordionItem = React.memo(({
             
             {/* Objection Title */}
             <div className="flex-1">
-              {mode === 'edit' ? (
+              {mode !== 'preview' ? (
                 <div 
                   contentEditable
                   suppressContentEditableWarning
@@ -213,7 +213,7 @@ const ObjectionAccordionItem = React.memo(({
             
             {/* Response Text */}
             <div className="flex-1">
-              {mode === 'edit' ? (
+              {mode !== 'preview' ? (
                 <div 
                   contentEditable
                   suppressContentEditableWarning

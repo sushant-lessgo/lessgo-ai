@@ -163,7 +163,7 @@ const BeliefCard = React.memo(({
       
       {/* Icon */}
       <div className={`w-12 h-12 bg-gradient-to-br ${cardColors[index % cardColors.length]} rounded-lg flex items-center justify-center text-white text-xl mb-4 shadow-md relative group/icon-edit`}>
-        {mode === 'edit' ? (
+        {mode !== 'preview' ? (
           <IconEditableText
             mode={(mode || 'preview') as 'preview' | 'edit'}
             value={icon}
@@ -351,7 +351,7 @@ export default function FoundersBeliefStack(props: LayoutComponentProps) {
 
         {/* Beliefs Grid */}
         <div className="mb-12">
-          {mode === 'edit' ? (
+          {mode !== 'preview' ? (
             <div className="bg-gray-50 rounded-lg p-6 mb-8">
               <h4 className="font-semibold text-gray-900 mb-3">Belief Items</h4>
               <p className="text-sm text-gray-600 mb-3">
@@ -480,7 +480,7 @@ export default function FoundersBeliefStack(props: LayoutComponentProps) {
             sectionBackground={sectionBackground}
           />
           
-          {mode === 'edit' ? (
+          {mode !== 'preview' ? (
             <div className="space-y-4">
               <div className="flex flex-wrap justify-center gap-4">
                 {[
@@ -577,7 +577,7 @@ export default function FoundersBeliefStack(props: LayoutComponentProps) {
           />
           
           {/* Trust Indicators */}
-          {mode === 'edit' ? (
+          {mode !== 'preview' ? (
             <EditableTrustIndicators
               mode={mode}
               trustItems={[

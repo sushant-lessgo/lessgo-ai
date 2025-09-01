@@ -413,7 +413,7 @@ export default function BoldGuaranteePanel(props: LayoutComponentProps) {
         </div>
 
         {/* Edit Mode: Instructions */}
-        {mode === 'edit' && (
+        {mode !== 'preview' && (
           <div className="mt-8 p-4 bg-blue-50 border border-blue-200 rounded-lg">
             <p style={{...bodyStyle, fontSize: '0.875rem'}} className="text-blue-800">
               <strong>Edit Additional Guarantees:</strong> Use format "[guarantee title]|[guarantee description]|[next title]|[next description]"

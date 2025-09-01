@@ -298,7 +298,7 @@ export default function ZigzagImageSteps(props: LayoutComponentProps) {
           )}
         </div>
 
-        {mode === 'edit' ? (
+        {mode !== 'preview' ? (
           <div className="space-y-8">
             <div className="p-6 border border-gray-200 rounded-lg bg-gray-50">
               <h4 className="font-semibold text-gray-700 mb-4">Zigzag Step Content</h4>
@@ -370,7 +370,7 @@ export default function ZigzagImageSteps(props: LayoutComponentProps) {
                     data-section-id={sectionId}
                     data-element-key="flow_summary_heading"
                   />
-                  {mode === 'edit' && (
+                  {mode !== 'preview' && (
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
@@ -414,7 +414,7 @@ export default function ZigzagImageSteps(props: LayoutComponentProps) {
                       data-section-id={sectionId}
                       data-element-key="flow_feature_1_text"
                     />
-                    {mode === 'edit' && (
+                    {mode !== 'preview' && (
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
@@ -462,7 +462,7 @@ export default function ZigzagImageSteps(props: LayoutComponentProps) {
                       data-section-id={sectionId}
                       data-element-key="flow_feature_2_text"
                     />
-                    {mode === 'edit' && (
+                    {mode !== 'preview' && (
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
@@ -510,7 +510,7 @@ export default function ZigzagImageSteps(props: LayoutComponentProps) {
                       data-section-id={sectionId}
                       data-element-key="flow_feature_3_text"
                     />
-                    {mode === 'edit' && (
+                    {mode !== 'preview' && (
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
@@ -543,7 +543,7 @@ export default function ZigzagImageSteps(props: LayoutComponentProps) {
                     data-section-id={sectionId}
                     data-element-key="flow_summary_description"
                   />
-                  {mode === 'edit' && (
+                  {mode !== 'preview' && (
                     <button
                       onClick={(e) => {
                         e.stopPropagation();

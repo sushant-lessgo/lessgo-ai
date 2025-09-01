@@ -506,7 +506,7 @@ export default function LeftCopyRightImage(props: LayoutComponentProps) {
               />
 
               {/* ✅ ENHANCED: Trust Indicators with Dynamic Color */}
-              {mode === 'edit' ? (
+              {mode !== 'preview' ? (
                 <EditableTrustIndicators
                   mode={mode}
                   trustItems={[
@@ -590,7 +590,7 @@ export default function LeftCopyRightImage(props: LayoutComponentProps) {
                     />
                     
                     {/* Remove button for customer count */}
-                    {mode === 'edit' && (
+                    {mode !== 'preview' && (
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
@@ -638,7 +638,7 @@ export default function LeftCopyRightImage(props: LayoutComponentProps) {
                     />
                     
                     {/* Remove button for rating section */}
-                    {mode === 'edit' && (
+                    {mode !== 'preview' && (
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
@@ -670,7 +670,7 @@ export default function LeftCopyRightImage(props: LayoutComponentProps) {
                   className="w-full h-full object-cover rounded-2xl shadow-2xl cursor-pointer"
                   data-image-id={`${sectionId}-hero-image`}
                   onMouseUp={(e) => {
-                    if (mode === 'edit') {
+                    if (mode !== 'preview') {
                       e.stopPropagation();
                       e.preventDefault();
                       const rect = e.currentTarget.getBoundingClientRect();
@@ -681,7 +681,7 @@ export default function LeftCopyRightImage(props: LayoutComponentProps) {
                     }
                   }}
                   onClick={(e) => {
-                    if (mode === 'edit') {
+                    if (mode !== 'preview') {
                       e.stopPropagation();
                       e.preventDefault();
                     }

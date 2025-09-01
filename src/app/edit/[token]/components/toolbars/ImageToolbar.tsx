@@ -5,7 +5,7 @@ import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
 import { useToolbarActions } from '@/hooks/useToolbarActions';
 import { calculateArrowPosition } from '@/utils/toolbarPositioning';
 import { AdvancedActionsMenu } from './AdvancedActionsMenu';
-import { pexelsApi, type StockPhoto } from '@/services/pexelsApi';
+import type { StockPhoto } from '@/services/pexelsApi';
 import { TextInputModal } from '../modals/TextInputModal';
 import { SimpleImageEditor } from '@/components/ui/SimpleImageEditor';
 
@@ -467,8 +467,22 @@ function StockPhotosPanel({ position, onClose, onSelectImage }: {
     setIsSearching(true);
     setError(null);
     try {
-      const photos = await pexelsApi.getFeaturedPhotos(12);
-      setSearchResults(photos);
+      const response = await fetch('/api/images/search', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ searchType: 'curated', per_page: 12 })
+      });
+      
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+      
+      const data = await response.json();
+      if (!data.success) {
+        throw new Error(data.error || 'Failed to load photos');
+      }
+      
+      setSearchResults(data.photos);
     } catch (err) {
       console.error('Error loading featured photos:', err);
       const errorMessage = err instanceof Error ? err.message : 'Failed to load photos. Please check your API key.';
@@ -489,12 +503,27 @@ function StockPhotosPanel({ position, onClose, onSelectImage }: {
     setError(null);
     
     try {
-      const photos = await pexelsApi.searchPhotos({
-        query: query.trim(),
-        per_page: 12,
-        orientation: 'landscape',
+      const response = await fetch('/api/images/search', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          searchType: 'search',
+          query: query.trim(),
+          per_page: 12,
+          orientation: 'landscape'
+        })
       });
-      setSearchResults(photos);
+      
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+      
+      const data = await response.json();
+      if (!data.success) {
+        throw new Error(data.error || 'Search failed');
+      }
+      
+      setSearchResults(data.photos);
     } catch (err) {
       setError('Search failed. Please try again.');
       console.error('Error searching photos:', err);
@@ -510,29 +539,34 @@ function StockPhotosPanel({ position, onClose, onSelectImage }: {
     setSearchQuery('');
     
     try {
-      let photos: StockPhoto[];
+      let requestBody;
       
-      switch (category) {
-        case 'business':
-          photos = await pexelsApi.searchBusinessPhotos();
-          break;
-        case 'tech':
-          photos = await pexelsApi.searchTechPhotos();
-          break;
-        case 'people':
-          photos = await pexelsApi.searchPeoplePhotos();
-          break;
-        case 'nature':
-          photos = await pexelsApi.searchNaturePhotos();
-          break;
-        case 'lifestyle':
-          photos = await pexelsApi.searchLifestylePhotos();
-          break;
-        default:
-          photos = await pexelsApi.getFeaturedPhotos(12);
+      if (category === 'featured') {
+        requestBody = { searchType: 'curated', per_page: 12 };
+      } else {
+        requestBody = {
+          searchType: category,
+          query: category,
+          per_page: 12
+        };
       }
       
-      setSearchResults(photos);
+      const response = await fetch('/api/images/search', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(requestBody)
+      });
+      
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+      
+      const data = await response.json();
+      if (!data.success) {
+        throw new Error(data.error || 'Failed to load category photos');
+      }
+      
+      setSearchResults(data.photos);
     } catch (err) {
       setError('Failed to load category photos.');
       console.error('Error loading category photos:', err);

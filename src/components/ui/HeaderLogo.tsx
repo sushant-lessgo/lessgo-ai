@@ -86,7 +86,7 @@ const HeaderLogo: React.FC<HeaderLogoProps> = ({
   };
 
   // In edit mode, show editable logo with upload functionality
-  if (mode === 'edit') {
+  if (mode !== 'preview') {
     return (
       <div 
         className={`${className} relative cursor-pointer`}

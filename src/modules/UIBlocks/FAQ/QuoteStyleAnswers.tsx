@@ -289,7 +289,7 @@ export default function QuoteStyleAnswers(props: LayoutComponentProps) {
               </div>
               
               {/* Remove button */}
-              {mode === 'edit' && (
+              {mode !== 'preview' && (
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
@@ -310,7 +310,7 @@ export default function QuoteStyleAnswers(props: LayoutComponentProps) {
           ))}
           
           {/* Add new expert quote button */}
-          {mode === 'edit' && faqItems.length < 3 && (
+          {mode !== 'preview' && faqItems.length < 3 && (
             <button
               onClick={() => {
                 // Find the first empty slot

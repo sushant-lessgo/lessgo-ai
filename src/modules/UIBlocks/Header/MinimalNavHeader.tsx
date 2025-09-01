@@ -102,7 +102,7 @@ const MinimalNavHeader: React.FC<LayoutComponentProps> = (props) => {
     console.log('🧭 [NAV-DEBUG] MinimalNav click:', { link, mode });
     
     // In edit mode, don't navigate - let text editing work
-    if (mode === 'edit') {
+    if (mode !== 'preview') {
       return;
     }
     

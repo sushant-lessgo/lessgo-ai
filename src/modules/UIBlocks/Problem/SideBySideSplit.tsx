@@ -165,7 +165,7 @@ export default function SideBySideSplit(props: LayoutComponentProps) {
           )}
         </div>
 
-        {mode === 'edit' ? (
+        {mode !== 'preview' ? (
           <div className="space-y-8">
             <div className="p-6 border border-gray-200 rounded-lg bg-gray-50">
               <h4 className="font-semibold text-gray-700 mb-4">Side-by-Side Split Content</h4>
@@ -441,7 +441,7 @@ export default function SideBySideSplit(props: LayoutComponentProps) {
                       data-section-id={sectionId}
                       data-element-key="bottom_stat_1"
                     />
-                    {mode === 'edit' && (
+                    {mode !== 'preview' && (
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
@@ -488,7 +488,7 @@ export default function SideBySideSplit(props: LayoutComponentProps) {
                       data-section-id={sectionId}
                       data-element-key="bottom_stat_2"
                     />
-                    {mode === 'edit' && (
+                    {mode !== 'preview' && (
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
@@ -535,7 +535,7 @@ export default function SideBySideSplit(props: LayoutComponentProps) {
                       data-section-id={sectionId}
                       data-element-key="bottom_stat_3"
                     />
-                    {mode === 'edit' && (
+                    {mode !== 'preview' && (
                       <button
                         onClick={(e) => {
                           e.stopPropagation();

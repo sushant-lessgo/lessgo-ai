@@ -198,7 +198,7 @@ const PersonaPanel = ({
         
         {/* Persona Info */}
         <div>
-          {mode === 'edit' ? (
+          {mode !== 'preview' ? (
             <>
               <div 
                 contentEditable
@@ -240,7 +240,7 @@ const PersonaPanel = ({
           <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
           </svg>
-          {mode === 'edit' ? (
+          {mode !== 'preview' ? (
             <div 
               contentEditable
               suppressContentEditableWarning
@@ -257,7 +257,7 @@ const PersonaPanel = ({
 
       {/* Result Description */}
       <div className="mb-6">
-        {mode === 'edit' ? (
+        {mode !== 'preview' ? (
           <div 
             contentEditable
             suppressContentEditableWarning
@@ -278,7 +278,7 @@ const PersonaPanel = ({
       {/* Key Benefits */}
       <div>
         <h4 className="font-semibold text-gray-800 mb-3 text-sm">Key Benefits:</h4>
-        {mode === 'edit' ? (
+        {mode !== 'preview' ? (
           <div 
             contentEditable
             suppressContentEditableWarning

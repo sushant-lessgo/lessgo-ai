@@ -401,7 +401,7 @@ export default function PersonaJourney(props: LayoutComponentProps) {
         </div>
 
         <div className="mb-12">
-          {mode === 'edit' ? (
+          {mode !== 'preview' ? (
             <div className="space-y-4 p-6 border border-gray-200 rounded-lg bg-gray-50">
               <h4 className="font-semibold text-gray-700">Persona Information</h4>
               
@@ -463,7 +463,7 @@ export default function PersonaJourney(props: LayoutComponentProps) {
 
         <div className="grid lg:grid-cols-3 gap-8 mb-12">
           
-          {mode === 'edit' ? (
+          {mode !== 'preview' ? (
             <>
               <div className="space-y-4 p-6 border border-gray-200 rounded-lg bg-gray-50">
                 <h4 className="font-semibold text-gray-700">Before Phase</h4>
@@ -777,7 +777,7 @@ export default function PersonaJourney(props: LayoutComponentProps) {
             </div>
             
             {/* Remove button */}
-            {mode === 'edit' && (
+            {mode !== 'preview' && (
               <button
                 onClick={(e) => {
                   e.stopPropagation();
@@ -795,7 +795,7 @@ export default function PersonaJourney(props: LayoutComponentProps) {
         )}
         
         {/* Add summary section back button */}
-        {mode === 'edit' && blockContent.show_summary_section === 'false' && (
+        {mode !== 'preview' && blockContent.show_summary_section === 'false' && (
           <div className="mb-12 text-center">
             <button
               onClick={() => handleContentUpdate('show_summary_section', 'true')}

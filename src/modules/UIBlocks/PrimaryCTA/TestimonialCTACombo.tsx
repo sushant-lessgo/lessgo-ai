@@ -260,7 +260,7 @@ export default function TestimonialCTACombo(props: LayoutComponentProps) {
                     </div>
                     
                     {/* Remove button for customer count */}
-                    {mode === 'edit' && (
+                    {mode !== 'preview' && (
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
@@ -298,7 +298,7 @@ export default function TestimonialCTACombo(props: LayoutComponentProps) {
                     </div>
                     
                     {/* Remove button for average rating */}
-                    {mode === 'edit' && (
+                    {mode !== 'preview' && (
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
@@ -336,7 +336,7 @@ export default function TestimonialCTACombo(props: LayoutComponentProps) {
                     </div>
                     
                     {/* Remove button for uptime */}
-                    {mode === 'edit' && (
+                    {mode !== 'preview' && (
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
@@ -368,7 +368,7 @@ export default function TestimonialCTACombo(props: LayoutComponentProps) {
             {/* Rating */}
             <div className="mb-4 relative group/rating-item">
               <StarRating rating={rating} />
-              {mode === 'edit' && (
+              {mode !== 'preview' && (
                 <div className="flex items-center space-x-2 mt-2">
                   <EditableAdaptiveText
                     mode={mode}

@@ -432,7 +432,7 @@ export default function CardWithTestimonial(props: LayoutComponentProps) {
           )}
         </div>
 
-        {mode === 'edit' ? (
+        {mode !== 'preview' ? (
           <div className="space-y-8">
             <div className="p-6 border border-gray-200 rounded-lg bg-gray-50">
               <h4 style={getTypographyStyle('h4')} className="font-semibold text-gray-700 mb-4">Pricing with Testimonials Content</h4>
@@ -529,7 +529,7 @@ export default function CardWithTestimonial(props: LayoutComponentProps) {
             <div className="text-center">
               <h3 style={h3Style} className="font-semibold text-gray-900 mb-6">Trusted by thousands of businesses</h3>
               
-              {mode === 'edit' ? (
+              {mode !== 'preview' ? (
                 <div className="space-y-6">
                   <div className="grid md:grid-cols-4 gap-6">
                     {[1, 2, 3, 4].map((index) => {
@@ -643,7 +643,7 @@ export default function CardWithTestimonial(props: LayoutComponentProps) {
             </div>
             
             {/* Remove button */}
-            {mode === 'edit' && (
+            {mode !== 'preview' && (
               <button
                 onClick={(e) => {
                   e.stopPropagation();

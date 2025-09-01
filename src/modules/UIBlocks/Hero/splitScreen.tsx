@@ -484,7 +484,7 @@ export default function SplitScreen(props: LayoutComponentProps) {
                   onClick={createCTAClickHandler(sectionId, "cta_text")}
                 />
 
-                {mode === 'edit' ? (
+                {mode !== 'preview' ? (
                   <EditableTrustIndicators
                     mode={mode}
                     trustItems={[
@@ -567,7 +567,7 @@ export default function SplitScreen(props: LayoutComponentProps) {
                       />
                       
                       {/* Remove button for customer count */}
-                      {mode === 'edit' && (
+                      {mode !== 'preview' && (
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
@@ -617,7 +617,7 @@ export default function SplitScreen(props: LayoutComponentProps) {
                       </div>
                       
                       {/* Remove button for rating section */}
-                      {mode === 'edit' && (
+                      {mode !== 'preview' && (
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
@@ -648,7 +648,7 @@ export default function SplitScreen(props: LayoutComponentProps) {
                   className="w-full h-full object-cover rounded-2xl shadow-2xl cursor-pointer"
                   data-image-id={`${sectionId}-split-hero-image`}
                   onMouseUp={(e) => {
-                    if (mode === 'edit') {
+                    if (mode !== 'preview') {
                       e.stopPropagation();
                       e.preventDefault();
                       const rect = e.currentTarget.getBoundingClientRect();

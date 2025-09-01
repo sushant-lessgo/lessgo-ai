@@ -309,7 +309,7 @@ export default function IconCircleSteps(props: LayoutComponentProps) {
           )}
         </div>
 
-        {mode === 'edit' ? (
+        {mode !== 'preview' ? (
           <div className="space-y-8">
             <div className="p-6 border border-gray-200 rounded-lg bg-gray-50">
               <h4 className="font-semibold text-gray-700 mb-4">Step Content</h4>
@@ -400,7 +400,7 @@ export default function IconCircleSteps(props: LayoutComponentProps) {
                       data-section-id={sectionId}
                       data-element-key="summary_stat_1_text"
                     />
-                    {mode === 'edit' && (
+                    {mode !== 'preview' && (
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
@@ -438,7 +438,7 @@ export default function IconCircleSteps(props: LayoutComponentProps) {
                       data-section-id={sectionId}
                       data-element-key="summary_stat_2_text"
                     />
-                    {mode === 'edit' && (
+                    {mode !== 'preview' && (
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
@@ -476,7 +476,7 @@ export default function IconCircleSteps(props: LayoutComponentProps) {
                       data-section-id={sectionId}
                       data-element-key="summary_stat_3_text"
                     />
-                    {mode === 'edit' && (
+                    {mode !== 'preview' && (
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
@@ -509,7 +509,7 @@ export default function IconCircleSteps(props: LayoutComponentProps) {
                     data-section-id={sectionId}
                     data-element-key="summary_card_heading"
                   />
-                  {mode === 'edit' && (
+                  {mode !== 'preview' && (
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
@@ -541,7 +541,7 @@ export default function IconCircleSteps(props: LayoutComponentProps) {
                     data-section-id={sectionId}
                     data-element-key="summary_card_description"
                   />
-                  {mode === 'edit' && (
+                  {mode !== 'preview' && (
                     <button
                       onClick={(e) => {
                         e.stopPropagation();

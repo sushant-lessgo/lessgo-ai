@@ -95,7 +95,7 @@ const OutcomeCard = ({
 
       {/* Outcome Title */}
       <div className="mb-4">
-        {mode === 'edit' ? (
+        {mode !== 'preview' ? (
           <div 
             contentEditable
             suppressContentEditableWarning
@@ -115,7 +115,7 @@ const OutcomeCard = ({
 
       {/* Description */}
       <div>
-        {mode === 'edit' ? (
+        {mode !== 'preview' ? (
           <div 
             contentEditable
             suppressContentEditableWarning
@@ -264,7 +264,7 @@ export default function EmojiOutcomeGrid(props: EmojiOutcomeGridProps) {
           <div className="mt-16 text-center">
             <div className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-purple-50 to-pink-50 border border-purple-200 rounded-full text-purple-800">
               <span className="text-xl mr-2">🎯</span>
-              {mode === 'edit' ? (
+              {mode !== 'preview' ? (
                 <div 
                   contentEditable
                   suppressContentEditableWarning

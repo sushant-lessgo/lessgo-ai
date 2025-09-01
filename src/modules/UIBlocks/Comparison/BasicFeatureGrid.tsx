@@ -234,7 +234,7 @@ export default function BasicFeatureGrid(props: LayoutComponentProps) {
                         </div>
                       )}
                       <div style={bodyStyle} className="font-semibold">
-                        {mode === 'edit' && competitor.isPrimary ? (
+                        {mode !== 'preview' && competitor.isPrimary ? (
                           <div 
                             style={bodyStyle}
                             contentEditable

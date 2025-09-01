@@ -153,14 +153,14 @@ const ContactFooter: React.FC<LayoutComponentProps> = (props) => {
                       rel="noopener noreferrer"
                       className="text-gray-400 hover:text-white transition-colors"
                       aria-label={social.platform}
-                      onClick={(e) => mode === 'edit' ? e.preventDefault() : undefined}
+                      onClick={(e) => mode !== 'preview' ? e.preventDefault() : undefined}
                     >
                       <IconComponent className="w-5 h-5" />
                     </a>
                   );
                 })}
                 
-                {mode === 'edit' && (
+                {mode !== 'preview' && (
                   <button
                     onClick={() => setShowSocialEditor(true)}
                     className="flex items-center gap-1 px-2 py-1 bg-blue-600 text-white text-xs rounded-md hover:bg-blue-700 transition-colors"

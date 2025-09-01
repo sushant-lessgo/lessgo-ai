@@ -270,7 +270,7 @@ export default function MockupWithCTA(props: LayoutComponentProps) {
               )}
 
               {/* Browser URL - Only show in edit mode */}
-              {mode === 'edit' && (
+              {mode !== 'preview' && (
                 <div className="mt-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
                   <label className="block text-sm font-medium text-gray-700 mb-2">Browser URL (shown in mockup)</label>
                   <EditableAdaptiveText

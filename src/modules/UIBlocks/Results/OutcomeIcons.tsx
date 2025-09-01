@@ -179,7 +179,7 @@ const OutcomeCard = ({
 
       {/* Title */}
       <div className="mb-4">
-        {mode === 'edit' ? (
+        {mode !== 'preview' ? (
           <div 
             contentEditable
             suppressContentEditableWarning
@@ -199,7 +199,7 @@ const OutcomeCard = ({
 
       {/* Description */}
       <div>
-        {mode === 'edit' ? (
+        {mode !== 'preview' ? (
           <div 
             contentEditable
             suppressContentEditableWarning

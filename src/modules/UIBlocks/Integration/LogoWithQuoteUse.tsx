@@ -326,7 +326,7 @@ const CompanyLogo = React.memo(({
       size="md"
     />
     <div className="text-center w-full">
-      {mode === 'edit' ? (
+      {mode !== 'preview' ? (
         <div className="flex items-center justify-center gap-2">
           <div 
             contentEditable
@@ -541,7 +541,7 @@ export default function LogoWithQuoteUse(props: LayoutComponentProps) {
             ))}
             
             {/* Add Company Button (Edit Mode Only) */}
-            {mode === 'edit' && (
+            {mode !== 'preview' && (
               <div className={`flex flex-col items-center justify-center space-y-2 p-4 rounded-lg border-2 border-dashed border-gray-300 hover:border-gray-400 transition-colors duration-200 ${colorTokens.bgSecondary}`}>
                 <button
                   onClick={(e) => {

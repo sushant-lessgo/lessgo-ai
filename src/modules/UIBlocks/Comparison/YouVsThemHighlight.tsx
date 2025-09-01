@@ -157,7 +157,7 @@ export default function YouVsThemHighlight(props: LayoutComponentProps) {
               {themPoints.map((point, index) => (
                 <li key={index} className="flex items-start">
                   <span className="text-red-500 mr-3 mt-1 flex-shrink-0">✗</span>
-                  {mode === 'edit' ? (
+                  {mode !== 'preview' ? (
                     <input
                       type="text"
                       value={point}
@@ -200,7 +200,7 @@ export default function YouVsThemHighlight(props: LayoutComponentProps) {
               {youPoints.map((point, index) => (
                 <li key={index} className="flex items-start">
                   <span className={`text-primary mr-3 mt-1 flex-shrink-0`}>✓</span>
-                  {mode === 'edit' ? (
+                  {mode !== 'preview' ? (
                     <input
                       type="text"
                       value={point}

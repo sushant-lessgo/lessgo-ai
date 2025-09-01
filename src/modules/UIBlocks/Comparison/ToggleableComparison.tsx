@@ -139,7 +139,7 @@ export default function ToggleableComparison(props: LayoutComponentProps) {
                     : `${colorTokens.textSecondary} hover:${colorTokens.textPrimary}`
                 }`}
               >
-                {mode === 'edit' ? (
+                {mode !== 'preview' ? (
                   <input
                     type="text"
                     value={label}

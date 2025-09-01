@@ -277,7 +277,7 @@ export default function VerticalTimeline(props: LayoutComponentProps) {
           )}
         </div>
 
-        {mode === 'edit' ? (
+        {mode !== 'preview' ? (
           <div className="space-y-8">
             <div className="p-6 border border-gray-200 rounded-lg bg-gray-50">
               <h4 className="font-semibold text-gray-700 mb-4">Timeline Steps</h4>
@@ -372,7 +372,7 @@ export default function VerticalTimeline(props: LayoutComponentProps) {
                     data-section-id={sectionId}
                     data-element-key="process_time_label"
                   />
-                  {mode === 'edit' && (
+                  {mode !== 'preview' && (
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
@@ -406,7 +406,7 @@ export default function VerticalTimeline(props: LayoutComponentProps) {
                     data-section-id={sectionId}
                     data-element-key="process_steps_label"
                   />
-                  {mode === 'edit' && (
+                  {mode !== 'preview' && (
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
@@ -438,7 +438,7 @@ export default function VerticalTimeline(props: LayoutComponentProps) {
                     data-section-id={sectionId}
                     data-element-key="process_summary_heading"
                   />
-                  {mode === 'edit' && (
+                  {mode !== 'preview' && (
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
@@ -470,7 +470,7 @@ export default function VerticalTimeline(props: LayoutComponentProps) {
                     data-section-id={sectionId}
                     data-element-key="process_summary_description"
                   />
-                  {mode === 'edit' && (
+                  {mode !== 'preview' && (
                     <button
                       onClick={(e) => {
                         e.stopPropagation();

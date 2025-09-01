@@ -211,7 +211,7 @@ export default function ChatBubbleFAQ(props: LayoutComponentProps) {
                 />
               ) : (
                 <>
-                  {mode === 'edit' ? (
+                  {mode !== 'preview' ? (
                     <EditableAdaptiveText
                       mode={mode}
                       value={blockContent.support_avatar || ''}
@@ -228,7 +228,7 @@ export default function ChatBubbleFAQ(props: LayoutComponentProps) {
                   ) : (
                     blockContent.support_avatar || 'A'
                   )}
-                  {mode === 'edit' && (
+                  {mode !== 'preview' && (
                     <button
                       onClick={() => handleContentUpdate('support_avatar_icon', '👤')}
                       className="opacity-0 group-hover/avatar-icon:opacity-100 absolute -top-1 -right-1 w-4 h-4 bg-blue-500 text-white rounded-full text-xs flex items-center justify-center hover:bg-blue-600 transition-all duration-200"
@@ -356,7 +356,7 @@ export default function ChatBubbleFAQ(props: LayoutComponentProps) {
                 )}
                 
                 {/* Remove button */}
-                {mode === 'edit' && (
+                {mode !== 'preview' && (
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
@@ -375,7 +375,7 @@ export default function ChatBubbleFAQ(props: LayoutComponentProps) {
             ))}
             
             {/* Add new chat item button */}
-            {mode === 'edit' && faqItems.length < 5 && (
+            {mode !== 'preview' && faqItems.length < 5 && (
               <button
                 onClick={() => {
                   // Find the first empty slot
@@ -409,7 +409,7 @@ export default function ChatBubbleFAQ(props: LayoutComponentProps) {
                 </div>
                 
                 {/* Remove typing indicator button */}
-                {mode === 'edit' && (
+                {mode !== 'preview' && (
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
@@ -518,7 +518,7 @@ export default function ChatBubbleFAQ(props: LayoutComponentProps) {
             )}
             
             {/* Remove CTA section button */}
-            {mode === 'edit' && (
+            {mode !== 'preview' && (
               <button
                 onClick={(e) => {
                   e.stopPropagation();

@@ -151,7 +151,7 @@ export function EditableContent({
 
   // Use inline editor in edit mode if enabled and required props are provided
   if (
-    mode === 'edit' && 
+    mode !== 'preview' && 
     enableInlineEditor && 
     sectionId && 
     elementKey
@@ -184,7 +184,7 @@ export function EditableContent({
   }
   
   // Fallback to original simple contentEditable for edit mode
-  if (mode === 'edit') {
+  if (mode !== 'preview') {
     const editableElement = (
       <Element
         contentEditable

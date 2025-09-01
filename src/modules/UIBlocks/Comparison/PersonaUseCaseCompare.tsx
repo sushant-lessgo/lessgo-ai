@@ -189,7 +189,7 @@ export default function PersonaUseCaseCompare(props: LayoutComponentProps) {
                   sectionId={sectionId}
                   elementKey={`persona_icon_${index + 1}`}
                 />
-                {mode === 'edit' ? (
+                {mode !== 'preview' ? (
                   <input
                     type="text"
                     value={label}
@@ -204,7 +204,7 @@ export default function PersonaUseCaseCompare(props: LayoutComponentProps) {
                   <span className="mt-2 font-medium">{label}</span>
                 )}
               </div>
-              {mode === 'edit' ? (
+              {mode !== 'preview' ? (
                 <textarea
                   value={personaDescriptions[index]}
                   onChange={(e) => {

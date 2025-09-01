@@ -318,7 +318,7 @@ export default function ObjectionCarousel(props: LayoutComponentProps) {
             }}
             className="text-blue-600 hover:text-blue-700 font-medium text-sm transition-colors duration-200"
           >
-            {mode === 'edit' ? (
+            {mode !== 'preview' ? (
               <EditableAdaptiveText
                 mode={mode}
                 value={blockContent.autoplay_button_text || ''}
@@ -339,7 +339,7 @@ export default function ObjectionCarousel(props: LayoutComponentProps) {
         </div>
 
         {/* Edit Mode: Instructions */}
-        {mode === 'edit' && (
+        {mode !== 'preview' && (
           <div className="mt-8 p-4 bg-blue-50 border border-blue-200 rounded-lg">
             <p className="text-blue-800 text-sm">
               <strong>Edit Objection Slides:</strong> Use format "[question]|[answer]|[emoji]|[next question]|[next answer]|[next emoji]"

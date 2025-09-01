@@ -119,7 +119,7 @@ const TimelineMilestone = ({
         
         {/* Timeframe Badge */}
         <div className="mb-4">
-          {mode === 'edit' ? (
+          {mode !== 'preview' ? (
             <div 
               contentEditable
               suppressContentEditableWarning
@@ -137,7 +137,7 @@ const TimelineMilestone = ({
 
         {/* Title */}
         <div className="mb-3">
-          {mode === 'edit' ? (
+          {mode !== 'preview' ? (
             <div 
               contentEditable
               suppressContentEditableWarning
@@ -157,7 +157,7 @@ const TimelineMilestone = ({
 
         {/* Description */}
         <div className="mb-4">
-          {mode === 'edit' ? (
+          {mode !== 'preview' ? (
             <div 
               contentEditable
               suppressContentEditableWarning
@@ -189,7 +189,7 @@ const TimelineMilestone = ({
               sectionId={sectionId}
               elementKey="metric_icon"
             />
-            {mode === 'edit' ? (
+            {mode !== 'preview' ? (
               <div 
                 contentEditable
                 suppressContentEditableWarning
@@ -314,7 +314,7 @@ export default function TimelineResults(props: TimelineResultsProps) {
                 sectionId={sectionId}
                 elementKey="timeline_icon"
               />
-              {mode === 'edit' ? (
+              {mode !== 'preview' ? (
                 <div 
                   contentEditable
                   suppressContentEditableWarning

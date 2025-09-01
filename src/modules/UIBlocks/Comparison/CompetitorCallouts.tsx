@@ -191,7 +191,7 @@ export default function CompetitorCallouts(props: LayoutComponentProps) {
               <div className="grid md:grid-cols-3 gap-6 items-center">
                 {/* Competitor Info */}
                 <div className="md:col-span-1">
-                  {mode === 'edit' ? (
+                  {mode !== 'preview' ? (
                     <input
                       type="text"
                       value={name}
@@ -219,7 +219,7 @@ export default function CompetitorCallouts(props: LayoutComponentProps) {
                         elementKey={`issue_icon_${index + 1}`}
                       />
                     </div>
-                    {mode === 'edit' ? (
+                    {mode !== 'preview' ? (
                       <textarea
                         value={competitorIssues[index]}
                         onChange={(e) => handleCompetitorIssueUpdate(index, e.target.value)}
@@ -261,7 +261,7 @@ export default function CompetitorCallouts(props: LayoutComponentProps) {
                         elementKey={`solution_icon_${index + 1}`}
                       />
                     </div>
-                    {mode === 'edit' ? (
+                    {mode !== 'preview' ? (
                       <textarea
                         value={ourSolutions[index]}
                         onChange={(e) => handleOurSolutionUpdate(index, e.target.value)}

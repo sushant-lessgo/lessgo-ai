@@ -92,7 +92,7 @@ const StatComparisonCard = ({
       
       {/* Metric Label */}
       <div className="mb-6 text-center">
-        {mode === 'edit' ? (
+        {mode !== 'preview' ? (
           <div 
             contentEditable
             suppressContentEditableWarning
@@ -132,7 +132,7 @@ const StatComparisonCard = ({
             <span className="text-sm font-medium text-red-800">Before</span>
           </div>
           
-          {mode === 'edit' ? (
+          {mode !== 'preview' ? (
             <div 
               contentEditable
               suppressContentEditableWarning
@@ -186,7 +186,7 @@ const StatComparisonCard = ({
             <span className="text-sm font-medium text-green-800">After</span>
           </div>
           
-          {mode === 'edit' ? (
+          {mode !== 'preview' ? (
             <div 
               contentEditable
               suppressContentEditableWarning
@@ -219,7 +219,7 @@ const StatComparisonCard = ({
             sectionId={sectionId}
             elementKey="improvement_icon"
           />
-          {mode === 'edit' ? (
+          {mode !== 'preview' ? (
             <div 
               contentEditable
               suppressContentEditableWarning
@@ -331,7 +331,7 @@ export default function BeforeAfterStats(props: BeforeAfterStatsProps) {
               <svg className="w-4 h-4 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
-              {mode === 'edit' ? (
+              {mode !== 'preview' ? (
                 <div 
                   contentEditable
                   suppressContentEditableWarning

@@ -303,7 +303,7 @@ const InteractiveSlider = React.memo(({
             />
             
             {/* Remove button */}
-            {mode === 'edit' && (
+            {mode !== 'preview' && (
               <button
                 onClick={(e) => {
                   e.stopPropagation();
@@ -433,7 +433,7 @@ export default function BeforeAfterSlider(props: LayoutComponentProps) {
           />
           
           {/* Add interaction hint back button */}
-          {mode === 'edit' && blockContent.show_interaction_hint === 'false' && (
+          {mode !== 'preview' && blockContent.show_interaction_hint === 'false' && (
             <div className="text-center mt-4">
               <button
                 onClick={() => handleContentUpdate('show_interaction_hint', 'true')}

@@ -31,7 +31,13 @@ export const verifyProjectAccess = async (
 
 // A02: Cryptographic Failures - Environment validation
 export const validateEnvironmentSecrets = (): { valid: boolean; missing: string[] } => {
-  const required = ['DATABASE_URL', 'CLERK_SECRET_KEY'];
+  const required = [
+    'DATABASE_URL', 
+    'CLERK_SECRET_KEY',
+    'OPENAI_API_KEY',
+    'PEXELS_API_KEY',
+    'NEBIUS_API_KEY'
+  ];
   const missing = required.filter(key => !process.env[key]);
   
   return {

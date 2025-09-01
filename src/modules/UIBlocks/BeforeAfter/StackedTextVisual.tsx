@@ -309,7 +309,7 @@ export default function StackedTextVisual(props: StackedTextVisualProps) {
             </div>
             
             {/* Remove button */}
-            {mode === 'edit' && (
+            {mode !== 'preview' && (
               <button
                 onClick={(e) => {
                   e.stopPropagation();
@@ -328,7 +328,7 @@ export default function StackedTextVisual(props: StackedTextVisualProps) {
         )}
         
         {/* Add summary box button */}
-        {mode === 'edit' && !blockContent.summary_text && blockContent.show_summary_box === 'false' && (
+        {mode !== 'preview' && !blockContent.summary_text && blockContent.show_summary_box === 'false' && (
           <div className="mt-8 text-center">
             <button
               onClick={() => {

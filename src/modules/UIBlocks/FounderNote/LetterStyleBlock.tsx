@@ -330,7 +330,7 @@ export default function LetterStyleBlock(props: LayoutComponentProps) {
 
             {/* Trust Indicators */}
             <div className="mt-8 pt-6 border-t border-gray-200">
-              {mode === 'edit' ? (
+              {mode !== 'preview' ? (
                 <EditableTrustIndicators
                   mode={mode}
                   trustItems={[

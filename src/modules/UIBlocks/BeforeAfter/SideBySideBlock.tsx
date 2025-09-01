@@ -214,7 +214,7 @@ export default function SideBySideBlocks(props: LayoutComponentProps) {
                 sectionBackground={sectionBackground}
               />
               
-              {mode === 'edit' && (
+              {mode !== 'preview' && (
                 <div className="mt-4 text-center">
                   {blockContent.before_icon ? (
                     <button
@@ -289,7 +289,7 @@ export default function SideBySideBlocks(props: LayoutComponentProps) {
                 sectionBackground={sectionBackground}
               />
               
-              {mode === 'edit' && (
+              {mode !== 'preview' && (
                 <div className="mt-4 text-center">
                   {blockContent.after_icon ? (
                     <button

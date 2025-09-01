@@ -80,8 +80,8 @@ class PexelsApiService {
   private apiKey: string | null = null;
 
   constructor() {
-    // Access key from environment variable
-    this.apiKey = process.env.NEXT_PUBLIC_PEXELS_API_KEY || null;
+    // Access key from environment variable (server-side only)
+    this.apiKey = process.env.PEXELS_API_KEY || null;
   }
 
   setApiKey(key: string) {

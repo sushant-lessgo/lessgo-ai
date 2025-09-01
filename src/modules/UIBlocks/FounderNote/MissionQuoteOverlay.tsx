@@ -229,7 +229,7 @@ export default function MissionQuoteOverlay(props: LayoutComponentProps) {
             {/* Badge */}
             {(blockContent.badge_text || blockContent.badge_icon || mode === 'edit') && (
               <div className="flex items-center justify-center space-x-2">
-                {mode === 'edit' ? (
+                {mode !== 'preview' ? (
                   <div className="flex items-center space-x-2">
                     <div className="relative group/icon-edit">
                       <IconEditableText
@@ -340,7 +340,7 @@ export default function MissionQuoteOverlay(props: LayoutComponentProps) {
             </div>
 
             {/* Mission Stats */}
-            {mode === 'edit' ? (
+            {mode !== 'preview' ? (
               <div className="bg-black bg-opacity-30 rounded-lg p-6 max-w-3xl mx-auto">
                 <h4 className="text-white font-semibold mb-4 text-center">Mission Statistics</h4>
                 <div className="space-y-3">
@@ -465,7 +465,7 @@ export default function MissionQuoteOverlay(props: LayoutComponentProps) {
 
               {/* Trust Indicators */}
               <div className="lg:text-right">
-                {mode === 'edit' ? (
+                {mode !== 'preview' ? (
                   <EditableTrustIndicators
                     mode={mode}
                     trustItems={[

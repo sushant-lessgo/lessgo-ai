@@ -128,7 +128,7 @@ const HighlightCard = ({
         <div className="flex-1">
           {/* Highlight Title */}
           <div className="mb-4">
-            {mode === 'edit' ? (
+            {mode !== 'preview' ? (
               <div 
                 contentEditable
                 suppressContentEditableWarning
@@ -148,7 +148,7 @@ const HighlightCard = ({
           
           {/* Highlight Description */}
           <div>
-            {mode === 'edit' ? (
+            {mode !== 'preview' ? (
               <div 
                 contentEditable
                 suppressContentEditableWarning

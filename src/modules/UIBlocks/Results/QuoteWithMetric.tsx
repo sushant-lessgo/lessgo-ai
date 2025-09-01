@@ -145,7 +145,7 @@ const QuoteCard = ({
         </div>
 
         {/* Quote Text */}
-        {mode === 'edit' ? (
+        {mode !== 'preview' ? (
           <div 
             contentEditable
             suppressContentEditableWarning
@@ -171,7 +171,7 @@ const QuoteCard = ({
           
           {/* Author Details */}
           <div>
-            {mode === 'edit' ? (
+            {mode !== 'preview' ? (
               <>
                 <div 
                   contentEditable
@@ -225,7 +225,7 @@ const QuoteCard = ({
       <div className="bg-gradient-to-r from-blue-50 to-indigo-50 px-8 py-6 border-t border-gray-100">
         <div className="text-center">
           {/* Metric Value */}
-          {mode === 'edit' ? (
+          {mode !== 'preview' ? (
             <div 
               contentEditable
               suppressContentEditableWarning
@@ -243,7 +243,7 @@ const QuoteCard = ({
           )}
 
           {/* Metric Label */}
-          {mode === 'edit' ? (
+          {mode !== 'preview' ? (
             <div 
               contentEditable
               suppressContentEditableWarning

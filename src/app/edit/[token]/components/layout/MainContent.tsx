@@ -564,12 +564,12 @@ const handleAddSection = (afterSectionId?: string) => {
           {sections.length > 0 && (
             <div className={cn(
               "space-y-0", 
-              mode === 'edit' && "space-y-4" // Add spacing in edit mode
+              mode !== 'preview' && "space-y-4" // Add spacing in edit mode
             )}>
               {sections.map((sectionId, index) => (
                 <div key={sectionId} className={cn(
                   "relative group transition-all duration-200",
-                  mode === 'edit' && [
+                  mode !== 'preview' && [
                     "rounded-lg border border-transparent hover:border-primary/20",
                     "hover:shadow-sm px-4 py-2 -mx-4 -my-2",
                     selectedSection === sectionId && "border-primary/40 shadow-md bg-primary/5"
@@ -604,7 +604,7 @@ const handleAddSection = (afterSectionId?: string) => {
                           : 'hover:ring-1 hover:ring-gray-300'
                         }
                       `}
-                      draggable={mode === 'edit'}
+                      draggable={mode !== 'preview'}
                       // DISABLED: Using unified click handler from useEditor instead
                       // onClick={(e) => handleSectionClick(sectionId, e)}
                       onDragStart={(e) => handleSectionDragStart(sectionId, e)}
@@ -628,7 +628,7 @@ const handleAddSection = (afterSectionId?: string) => {
                       />
 
                       {/* Section Overlay (Edit Mode) */}
-                      {mode === 'edit' && (
+                      {mode !== 'preview' && (
                         <div className="absolute inset-0 pointer-events-none">
                           {/* Section Label */}
                           <div className="absolute top-2 left-2 opacity-0 group-hover:opacity-100 transition-opacity">

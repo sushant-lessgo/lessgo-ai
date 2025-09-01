@@ -191,7 +191,7 @@ const FeatureRow = React.memo(({
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                 </svg>
-                {mode === 'edit' ? (
+                {mode !== 'preview' ? (
                   <EditableAdaptiveText
                     mode={mode as 'preview' | 'edit'}
                     value={blockContent.benefit_1 || ''}
@@ -208,7 +208,7 @@ const FeatureRow = React.memo(({
                 ) : (
                   <span className="text-sm font-medium">{blockContent.benefit_1}</span>
                 )}
-                {mode === 'edit' && (
+                {mode !== 'preview' && (
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
@@ -229,7 +229,7 @@ const FeatureRow = React.memo(({
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                 </svg>
-                {mode === 'edit' ? (
+                {mode !== 'preview' ? (
                   <EditableAdaptiveText
                     mode={mode as 'preview' | 'edit'}
                     value={blockContent.benefit_2 || ''}
@@ -246,7 +246,7 @@ const FeatureRow = React.memo(({
                 ) : (
                   <span className="text-sm font-medium">{blockContent.benefit_2}</span>
                 )}
-                {mode === 'edit' && (
+                {mode !== 'preview' && (
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
@@ -379,7 +379,7 @@ export default function SplitAlternating(props: LayoutComponentProps) {
         </div>
 
         <div className="space-y-24">
-          {mode === 'edit' ? (
+          {mode !== 'preview' ? (
             <div className="space-y-8">
               <div className="p-6 border border-gray-200 rounded-lg bg-gray-50">
                 <h4 className="font-semibold text-gray-700 mb-4">Feature Content</h4>

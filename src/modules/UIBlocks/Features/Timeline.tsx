@@ -190,7 +190,7 @@ const TimelineStep = React.memo(({
                     sectionId={sectionId}
                     elementKey="step_benefit_icon_1"
                   />
-                  {mode === 'edit' ? (
+                  {mode !== 'preview' ? (
                     <EditableAdaptiveText
                       mode={mode}
                       value={blockContent.step_benefit_1 || ''}
@@ -207,7 +207,7 @@ const TimelineStep = React.memo(({
                   ) : (
                     <span className="text-sm">{blockContent.step_benefit_1}</span>
                   )}
-                  {mode === 'edit' && (
+                  {mode !== 'preview' && (
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
@@ -236,7 +236,7 @@ const TimelineStep = React.memo(({
                     sectionId={sectionId}
                     elementKey="step_benefit_icon_2"
                   />
-                  {mode === 'edit' ? (
+                  {mode !== 'preview' ? (
                     <EditableAdaptiveText
                       mode={mode}
                       value={blockContent.step_benefit_2 || ''}
@@ -253,7 +253,7 @@ const TimelineStep = React.memo(({
                   ) : (
                     <span className="text-sm">{blockContent.step_benefit_2}</span>
                   )}
-                  {mode === 'edit' && (
+                  {mode !== 'preview' && (
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
@@ -372,7 +372,7 @@ export default function Timeline(props: LayoutComponentProps) {
           )}
         </div>
 
-        {mode === 'edit' ? (
+        {mode !== 'preview' ? (
           <div className="space-y-8">
             <div className="p-6 border border-gray-200 rounded-lg bg-gray-50">
               <h4 className="font-semibold text-gray-700 mb-4">Timeline Steps</h4>
@@ -507,7 +507,7 @@ export default function Timeline(props: LayoutComponentProps) {
                     data-section-id={sectionId}
                     data-element-key="process_summary_description"
                   />
-                  {mode === 'edit' && (
+                  {mode !== 'preview' && (
                     <button
                       onClick={(e) => {
                         e.stopPropagation();

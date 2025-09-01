@@ -91,7 +91,7 @@ const CenteredLogoHeader: React.FC<LayoutComponentProps> = (props) => {
     e.stopPropagation();
     
     // In edit mode, don't navigate - let text editing work
-    if (mode === 'edit') {
+    if (mode !== 'preview') {
       return;
     }
     

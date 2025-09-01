@@ -142,7 +142,7 @@ const TimelineItem = React.memo(({
       <div className="flex items-start justify-between mb-3">
         <div className="flex items-center space-x-3">
           <div className="text-2xl relative group/icon-edit">
-            {mode === 'edit' ? (
+            {mode !== 'preview' ? (
               <IconEditableText
                 mode={(mode || 'preview') as 'preview' | 'edit'}
                 value={icon}
@@ -301,7 +301,7 @@ export default function TimelineToToday(props: LayoutComponentProps) {
 
         {/* Timeline */}
         <div className="relative">
-          {mode === 'edit' ? (
+          {mode !== 'preview' ? (
             <div className="bg-gray-50 rounded-lg p-6 mb-8">
               <h4 className="font-semibold text-gray-900 mb-3">Timeline Items</h4>
               <p className="text-sm text-gray-600 mb-3">
@@ -349,7 +349,7 @@ export default function TimelineToToday(props: LayoutComponentProps) {
         <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-8 text-center">
           <div className="max-w-3xl mx-auto">
             <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center text-white text-2xl font-bold mx-auto mb-6 shadow-lg relative group/icon-edit">
-              {mode === 'edit' ? (
+              {mode !== 'preview' ? (
                 <IconEditableText
                   mode={(mode || 'preview') as 'preview' | 'edit'}
                   value={blockContent.current_state_icon || '🎯'}
@@ -396,7 +396,7 @@ export default function TimelineToToday(props: LayoutComponentProps) {
 
             {/* Stats Grid */}
             <div className="mb-8">
-              {mode === 'edit' ? (
+              {mode !== 'preview' ? (
                 <EditableTrustIndicators
                   mode={(mode || 'preview') as 'preview' | 'edit'}
                   trustItems={[

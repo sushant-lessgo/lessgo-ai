@@ -353,7 +353,7 @@ export default function FeatureMatrix(props: LayoutComponentProps) {
           )}
         </div>
 
-        {mode === 'edit' ? (
+        {mode !== 'preview' ? (
           <div className="space-y-8">
             <div className="p-6 border border-gray-200 rounded-lg bg-gray-50">
               <h4 style={h4Style} className="font-semibold text-gray-700 mb-4">Feature Matrix Content</h4>
@@ -529,7 +529,7 @@ export default function FeatureMatrix(props: LayoutComponentProps) {
                 data-element-key="enterprise_section_title"
               />
               
-              {mode === 'edit' ? (
+              {mode !== 'preview' ? (
                 <div className="space-y-6">
                   <div className="grid md:grid-cols-4 gap-6">
                     {[1, 2, 3, 4].map((index) => {

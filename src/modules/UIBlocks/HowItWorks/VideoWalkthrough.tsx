@@ -284,7 +284,7 @@ export default function VideoWalkthrough(props: LayoutComponentProps) {
           )}
         </div>
 
-        {mode === 'edit' ? (
+        {mode !== 'preview' ? (
           <div className="space-y-8">
             <div className="p-6 border border-gray-200 rounded-lg bg-gray-50">
               <h4 className="font-semibold text-gray-700 mb-4">Video Content</h4>
@@ -476,7 +476,7 @@ export default function VideoWalkthrough(props: LayoutComponentProps) {
                     data-section-id={sectionId}
                     data-element-key="demo_stats_heading"
                   />
-                  {mode === 'edit' && (
+                  {mode !== 'preview' && (
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
@@ -529,7 +529,7 @@ export default function VideoWalkthrough(props: LayoutComponentProps) {
                       data-section-id={sectionId}
                       data-element-key="demo_stat_1_description"
                     />
-                    {mode === 'edit' && (
+                    {mode !== 'preview' && (
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
@@ -581,7 +581,7 @@ export default function VideoWalkthrough(props: LayoutComponentProps) {
                       data-section-id={sectionId}
                       data-element-key="demo_stat_2_description"
                     />
-                    {mode === 'edit' && (
+                    {mode !== 'preview' && (
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
@@ -633,7 +633,7 @@ export default function VideoWalkthrough(props: LayoutComponentProps) {
                       data-section-id={sectionId}
                       data-element-key="demo_stat_3_description"
                     />
-                    {mode === 'edit' && (
+                    {mode !== 'preview' && (
                       <button
                         onClick={(e) => {
                           e.stopPropagation();

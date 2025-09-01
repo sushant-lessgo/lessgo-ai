@@ -241,7 +241,7 @@ export default function TextListTransformation(props: LayoutComponentProps) {
             </div>
 
             <div className="space-y-4">
-              {mode === 'edit' ? (
+              {mode !== 'preview' ? (
                 <EditableAdaptiveText
                   mode={mode}
                   value={blockContent.before_list || ''}
@@ -330,7 +330,7 @@ export default function TextListTransformation(props: LayoutComponentProps) {
             </div>
 
             <div className="space-y-4">
-              {mode === 'edit' ? (
+              {mode !== 'preview' ? (
                 <EditableAdaptiveText
                   mode={mode}
                   value={blockContent.after_list || ''}

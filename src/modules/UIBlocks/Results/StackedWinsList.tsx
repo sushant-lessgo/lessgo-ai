@@ -135,7 +135,7 @@ const WinItem = ({
         {/* Category Tag */}
         {(win.category || mode === 'edit') && (
           <div className="mb-2">
-            {mode === 'edit' ? (
+            {mode !== 'preview' ? (
               <div 
                 contentEditable
                 suppressContentEditableWarning
@@ -154,7 +154,7 @@ const WinItem = ({
 
         {/* Win Title */}
         <div className="mb-2">
-          {mode === 'edit' ? (
+          {mode !== 'preview' ? (
             <div 
               contentEditable
               suppressContentEditableWarning
@@ -175,7 +175,7 @@ const WinItem = ({
         {/* Optional Description */}
         {(win.description || mode === 'edit') && (
           <div>
-            {mode === 'edit' ? (
+            {mode !== 'preview' ? (
               <div 
                 contentEditable
                 suppressContentEditableWarning
@@ -293,7 +293,7 @@ export default function StackedWinsList(props: StackedWinsListProps) {
                 sectionId={sectionId}
                 elementKey="badge_icon"
               />
-              {mode === 'edit' ? (
+              {mode !== 'preview' ? (
                 <div 
                   contentEditable
                   suppressContentEditableWarning

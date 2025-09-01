@@ -469,7 +469,7 @@ export default function ValueReinforcementBlock(props: LayoutComponentProps) {
           </div>
         </div>
 
-        {mode === 'edit' ? (
+        {mode !== 'preview' ? (
           <div className="space-y-8">
             <div className="p-6 border border-gray-200 rounded-lg bg-gray-50">
               <h4 className="font-semibold text-gray-700 mb-4">Value Reinforcement Content</h4>
@@ -614,7 +614,7 @@ export default function ValueReinforcementBlock(props: LayoutComponentProps) {
               <div className="grid md:grid-cols-4 gap-8">
                 {socialProofData.map((item, index) => (
                   <div key={index} className="text-center relative group/stat-item">
-                    {mode === 'edit' ? (
+                    {mode !== 'preview' ? (
                       <div className="space-y-2">
                         <EditableAdaptiveText
                           mode={mode}
@@ -748,7 +748,7 @@ export default function ValueReinforcementBlock(props: LayoutComponentProps) {
 
             {(trustItems.length > 0 || mode === 'edit') && (
               <div className="mt-8">
-                {mode === 'edit' ? (
+                {mode !== 'preview' ? (
                   <EditableTrustIndicators
                     mode={mode}
                     trustItems={[

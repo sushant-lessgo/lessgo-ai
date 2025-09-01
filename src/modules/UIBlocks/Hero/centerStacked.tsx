@@ -467,7 +467,7 @@ export default function CenterStacked(props: LayoutComponentProps) {
               }}
             />
 
-            {mode === 'edit' ? (
+            {mode !== 'preview' ? (
               <EditableTrustIndicators
                 mode={mode}
                 trustItems={[
@@ -566,7 +566,7 @@ export default function CenterStacked(props: LayoutComponentProps) {
                   />
                   
                   {/* Remove button for customer count - exact same as trust indicators */}
-                  {mode === 'edit' && (
+                  {mode !== 'preview' && (
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
@@ -616,7 +616,7 @@ export default function CenterStacked(props: LayoutComponentProps) {
                   </div>
                   
                   {/* Remove button for rating section */}
-                  {mode === 'edit' && (
+                  {mode !== 'preview' && (
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
@@ -645,7 +645,7 @@ export default function CenterStacked(props: LayoutComponentProps) {
                   className="w-full h-full object-cover rounded-2xl shadow-2xl cursor-pointer"
                   data-image-id={`${sectionId}-center-hero-image`}
                   onMouseUp={(e) => {
-                    if (mode === 'edit') {
+                    if (mode !== 'preview') {
                       e.stopPropagation();
                       e.preventDefault();
                       const rect = e.currentTarget.getBoundingClientRect();
