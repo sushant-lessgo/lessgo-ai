@@ -8,6 +8,7 @@
 import React, { Component, ReactNode } from 'react';
 import { storeManager } from '@/stores/storeManager';
 import { storageManager } from '@/utils/storageManager';
+import { logger } from '@/lib/logger';
 
 interface EditErrorBoundaryProps {
   children: ReactNode;
@@ -89,7 +90,7 @@ class EditErrorBoundary extends Component<EditErrorBoundaryProps, EditErrorBound
     const { errorType, retryCount, tokenId } = this.state;
     
     if (retryCount >= this.maxRetries) {
-      console.log('🛑 Max retry attempts reached, giving up automatic recovery');
+      logger.info('🛑 Max retry attempts reached, giving up automatic recovery');
       return;
     }
 
@@ -107,7 +108,7 @@ class EditErrorBoundary extends Component<EditErrorBoundaryProps, EditErrorBound
           await this.recoverFromRenderError();
           break;
         default:
-          console.warn('⚠️ Unknown error type, attempting generic recovery');
+          logger.warn('⚠️ Unknown error type, attempting generic recovery');
           await this.genericRecovery();
       }
 
@@ -117,7 +118,7 @@ class EditErrorBoundary extends Component<EditErrorBoundaryProps, EditErrorBound
       }, 1000 * (retryCount + 1)); // Exponential backoff
 
     } catch (recoveryError) {
-      console.error('❌ Recovery attempt failed:', recoveryError);
+      logger.error('❌ Recovery attempt failed:', () => recoveryError);
       this.setState({ isRecovering: false });
     }
   };
@@ -126,7 +127,7 @@ class EditErrorBoundary extends Component<EditErrorBoundaryProps, EditErrorBound
    * Recover from store-related errors
    */
   private recoverFromStoreError = async () => {
-    console.log('🔧 Attempting store error recovery');
+    logger.info('🔧 Attempting store error recovery');
     
     const tokenId = this.props.tokenId;
     if (!tokenId) {
@@ -282,7 +283,7 @@ class EditErrorBoundary extends Component<EditErrorBoundaryProps, EditErrorBound
       // Refresh page
       window.location.reload();
     } catch (error) {
-      console.error('❌ Hard reset failed:', error);
+      logger.error('❌ Hard reset failed:', () => error);
     }
   };
 

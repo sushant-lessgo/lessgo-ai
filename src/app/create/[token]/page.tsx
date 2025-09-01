@@ -16,7 +16,6 @@ const FIELD_ORDER = [
   "pricingModel",
 ];
 
-// console.log("outside startpage working");
 
 export default function StartPage() {
   const params = useParams();
@@ -32,25 +31,19 @@ export default function StartPage() {
     reset,
   } = useOnboardingStore();
   
-  // console.log("StartPage mounted");
- // console.log("params:", params);
- // console.log("tokenId:", tokenId);
 
   useEffect(() => {
     if (!tokenId) return;
 
     const loadDraft = async () => {
       try {
-      //  console.log("Calling loadDraft for token:", tokenId);
         const res = await fetch(`/api/loadDraft?tokenId=${tokenId}`);
         
         if (!res.ok) {
-        //  console.log("No existing draft found, starting fresh");
           return;
         }
         
         const data = await res.json();
-      //  console.log("Loaded draft data:", data);
 
         // ✅ FIXED: Use new API response structure
         setOneLiner(data.inputText || "");

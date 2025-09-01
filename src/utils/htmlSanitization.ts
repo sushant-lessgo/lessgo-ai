@@ -5,6 +5,8 @@
  * For production use, replace with DOMPurify for comprehensive security.
  */
 
+import { logger } from '@/lib/logger';
+
 // Allowed HTML tags for text formatting
 const ALLOWED_TAGS = new Set([
   'span',
@@ -70,7 +72,7 @@ export function sanitizeHTML(html: string, options: SanitizationOptions = {}): s
 
     return tempDiv.innerHTML;
   } catch (error) {
-    console.warn('HTML sanitization failed, returning plain text:', error);
+    logger.warn('HTML sanitization failed, returning plain text:', () => error);
     // Fallback: strip all HTML tags
     return html.replace(/<[^>]*>/g, '');
   }
@@ -266,7 +268,7 @@ export function optimizeFormattingHTML(html: string): string {
     
     return tempDiv.innerHTML;
   } catch (error) {
-    console.warn('HTML optimization failed:', error);
+    logger.warn('HTML optimization failed:', () => error);
     return html;
   }
 }
@@ -316,7 +318,7 @@ export function sanitizeWithDOMPurify(html: string): string {
   //   ALLOWED_CSS: ['font-weight', 'font-style', 'text-decoration', 'color', 'font-size', 'font-family']
   // });
   
-  console.warn('DOMPurify not available, using basic sanitization');
+  logger.warn('DOMPurify not available, using basic sanitization');
   return sanitizeHTML(html);
 }
 

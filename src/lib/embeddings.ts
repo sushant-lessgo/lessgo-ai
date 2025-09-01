@@ -28,7 +28,7 @@ export async function generateEmbedding(text: string): Promise<number[]> {
 
     if (!response.ok) {
       const errorData = await response.json();
-      console.error('OpenAI API Error:', errorData);
+      logger.error('OpenAI API Error:', () => errorData);
       throw new Error(`OpenAI API Error: ${response.status} - ${JSON.stringify(errorData)}`);
     }
 
@@ -38,11 +38,11 @@ export async function generateEmbedding(text: string): Promise<number[]> {
       throw new Error('Invalid response format from OpenAI embeddings API');
     }
 
-    console.log('✅ Embedding generated successfully');
+    logger.debug('✅ Embedding generated successfully');
     return result.data[0].embedding;
     
   } catch (error) {
-    console.error('Error generating embedding:', error);
+    logger.error('Error generating embedding:', () => error);
     throw error;
   }
 }
@@ -86,7 +86,7 @@ export async function findSemanticMatches(
     });
     
     if (taxonomyEmbeddings.length === 0) {
-      console.warn(`No embeddings found for field type: ${fieldType}`);
+      logger.warn(`No embeddings found for field type: ${fieldType}`);
       return [];
     }
     
@@ -103,7 +103,7 @@ export async function findSemanticMatches(
       .slice(0, topK);
       
   } catch (error) {
-    console.error('Error finding semantic matches:', error);
+    logger.error('Error finding semantic matches:', () => error);
     return [];
   }
 }

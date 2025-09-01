@@ -261,9 +261,6 @@ export function EditableHeadline({
   const { getTextStyle } = useTypography();
   const finalColorClass = dynamicColor || colorClass || 'text-gray-900';
   
-  // console.log('🎨 [HEADLINE-DEBUG] EditableHeadline:', {
-  //   mode, colorClass, dynamicColor, finalColorClass, level, value: value?.substring(0, 50)
-  // });
   
   // Enhanced format state for headlines
   const headlineFormatState = useMemo(() => {
@@ -293,7 +290,6 @@ export function EditableHeadline({
   }, [level, colorClass, formatState, textStyle?.textAlign, getTextStyle]);
   
   // Debug logging for headline color issues (reduced)
-  // console.log('🎨 [HEADLINE-DEBUG] EditableHeadline state:', { finalColorClass, headlineFormatStateColor: headlineFormatState.color });
   
   const headlineEditorConfig: Partial<InlineEditorConfig> = useMemo(() => ({
     enterKeyBehavior: 'save',
@@ -576,9 +572,6 @@ export function EditableAdaptiveHeadline({
 }) {
   
   // Debug logging (reduced)
-  // console.log('🎨 [HEADLINE-DEBUG] EditableAdaptiveHeadline:', {
-  //   elementKey, sectionId, backgroundType, sectionBackground: props.sectionBackground
-  // });
   
   const getAdaptiveTextColor = () => {
     // ✅ PRIORITY: Check for stored text colors from colorTokens first
@@ -598,7 +591,6 @@ export function EditableAdaptiveHeadline({
       if (storedTextColors && storedTextColors.heading) {
         const smartColor = storedTextColors.heading;
         const colorClass = hexToTailwindClass(smartColor);
-        // console.log(`🎨 Using stored headline color for ${backgroundType} (mapped to ${storageKey}):`, { smartColor, colorClass }); // Disabled to prevent log spam
         return { class: colorClass, value: smartColor };
       }
     }
@@ -650,11 +642,6 @@ export function EditableAdaptiveHeadline({
   
   const adaptiveColor = getAdaptiveTextColor();
   
-  // console.log('🎨 [HEADLINE-DEBUG] Adaptive color result:', {
-  //   colorClass: adaptiveColor.class,
-  //   colorValue: adaptiveColor.value,
-  //   sectionBackground: props.sectionBackground
-  // });
   
   return (
     <EditableHeadline
@@ -723,7 +710,6 @@ export function EditableAdaptiveText({
       if (storedTextColors && storedTextColors[textType]) {
         const smartColor = storedTextColors[textType];
         const colorClass = hexToTailwindClass(smartColor);
-        // console.log(`🎨 Using stored ${textType} color for ${backgroundType} (mapped to ${storageKey}):`, { smartColor, colorClass }); // Disabled to prevent log spam
         return { class: colorClass, value: smartColor };
       }
     }

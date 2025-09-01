@@ -8,6 +8,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
 import type { MVPForm, MVPFormField } from '@/types/core/forms';
+import { logger } from '@/lib/logger';
 
 interface FormRendererProps {
   form: MVPForm;
@@ -121,7 +122,7 @@ export function FormRenderer({ form, mode = 'inline', className = '', userId, pu
       setIsSubmitted(true);
       setFormData({});
     } catch (error) {
-      console.error('Form submission error:', error);
+      logger.error('Form submission error:', () => error);
       setSubmitError(error instanceof Error ? error.message : 'Failed to submit form');
     } finally {
       setIsSubmitting(false);

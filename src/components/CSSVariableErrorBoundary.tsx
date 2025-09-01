@@ -4,6 +4,7 @@
 'use client';
 
 import React from 'react';
+import { logger } from '@/lib/logger';
 
 interface CSSVariableErrorBoundaryProps {
   children: React.ReactNode;
@@ -46,8 +47,8 @@ export class CSSVariableErrorBoundary extends React.Component<
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
     // Log the error
-    console.error('CSS Variable System Error:', error);
-    console.error('Error Info:', errorInfo);
+    logger.error('CSS Variable System Error:', () => error);
+    logger.error('Error Info:', () => errorInfo);
 
     // Update state with error information
     this.setState({
@@ -86,7 +87,7 @@ export class CSSVariableErrorBoundary extends React.Component<
 
         // Log performance entry if Performance Observer is available
         if ('PerformanceObserver' in window) {
-          console.warn('CSS Variable system encountered an error and fell back to legacy mode');
+          logger.warn('CSS Variable system encountered an error and fell back to legacy mode');
         }
       } catch (perfError) {
         // Ignore performance logging errors
@@ -106,7 +107,7 @@ export class CSSVariableErrorBoundary extends React.Component<
     if (this.state.hasError) {
       if (this.state.fallbackMode === 'minimal') {
         // Minimal fallback - just render children without variable wrapper
-        console.warn('CSS Variable Error Boundary: Using minimal fallback mode');
+        logger.warn('CSS Variable Error Boundary: Using minimal fallback mode');
         return (
           <div data-css-variable-fallback="minimal">
             {this.props.children}
@@ -198,7 +199,7 @@ export function useCSSVariableErrorBoundary() {
   }, []);
 
   const captureError = React.useCallback((error: Error) => {
-    console.error('CSS Variable Hook Error:', error);
+    logger.error('CSS Variable Hook Error:', () => error);
     setError(error);
   }, []);
 

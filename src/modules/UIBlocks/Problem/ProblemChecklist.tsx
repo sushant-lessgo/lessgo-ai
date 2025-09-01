@@ -448,7 +448,7 @@ export default function ProblemChecklist(props: LayoutComponentProps) {
                         data-section-id={sectionId}
                         data-element-key="result_stat_1"
                       />
-                      {mode === 'edit' && (
+                      {mode !== 'preview' && (
                         <button
                           onClick={(e) => {
                             e.stopPropagation();

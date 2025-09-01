@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Plus, X, GripVertical, Settings } from 'lucide-react';
 import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
 import type { MVPForm, MVPFormField, MVPFormFieldType, MVPFormIntegration } from '@/types/core/forms';
+import { logger } from '@/lib/logger';
 
 interface FormBuilderProps {
   isOpen: boolean;
@@ -112,7 +113,7 @@ export function FormBuilder({ isOpen, onClose, editingFormId }: FormBuilderProps
       }
       onClose();
     } catch (error) {
-      console.error('Error saving form:', error);
+      logger.error('Error saving form:', () => error);
     } finally {
       setIsSaving(false);
     }

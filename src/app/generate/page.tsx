@@ -12,6 +12,7 @@ import LandingPageRenderer from "@/modules/generatedLanding/LandingPageRenderer"
 import type { GPTOutput } from "@/modules/prompt/types";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { SlugModal } from '@/components/SlugModal';
+import { logger } from '@/lib/logger';
 
 
 export default function PreviewPage() {
@@ -52,14 +53,14 @@ const isPublishDisabled =
             setTokenId(parsed.tokenId || null);
              setInputText(parsed.inputText || "");
           } catch (e) {
-            console.error("Failed to parse preview data:", e);
+            logger.error("Failed to parse preview data:", () => e);
             setError("Failed to parse preview data. The data might be corrupted.");
           }
         } else {
           setError("No preview data found in localStorage. Please return to the main page and try again.");
         }
       } catch (e) {
-        console.error("Error accessing localStorage:", e);
+        logger.error("Error accessing localStorage:", () => e);
         setError("Error accessing localStorage. This might be due to browser restrictions or private browsing mode.");
       }
     };
@@ -89,7 +90,7 @@ useEffect(() => {
   try {
     parsedTheme = JSON.parse(data.theme || '{}');
   } catch (err) {
-    console.warn("Failed to parse theme from data.theme:", err);
+    logger.warn("Failed to parse theme from data.theme:", () => err);
   }
 
   useThemeStore.setState({
@@ -170,7 +171,7 @@ const htmlContent = previewElement.innerHTML;
 
     setShowSlugModal(false);
   } catch (err: any) {
-    console.error('Publish error:', err);
+    logger.error('Publish error:', () => err);
     setPublishError(err.message || 'Unexpected error');
   } finally {
     setPublishing(false);

@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { logger } from '@/lib/logger';
 import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
 import { Plus } from 'lucide-react';
 import type { ElementSelection } from '@/types/store/state';
@@ -69,7 +70,7 @@ export function ButtonConfigurationModal({
             formId: savedConfig.formId || '',
             behavior: savedConfig.behavior || 'scrollTo',
           });
-          console.log('Loaded saved button config:', savedConfig);
+          logger.dev('Loaded saved button config:', () => savedConfig);
         } else {
           // Default configuration
           setConfig({
@@ -84,7 +85,7 @@ export function ButtonConfigurationModal({
   }, [elementSelection, content]);
 
   const handleSave = async () => {
-    console.log('🔧 handleSave called');
+    logger.dev('🔧 handleSave called');
     const newErrors: Record<string, string> = {};
 
     if (!config.text.trim()) {
@@ -103,11 +104,11 @@ export function ButtonConfigurationModal({
     setErrors(newErrors);
 
     if (Object.keys(newErrors).length > 0) {
-      console.log('🔧 Validation errors:', newErrors);
+      logger.dev('🔧 Validation errors:', () => newErrors);
       return;
     }
 
-    console.log('🔧 Validation passed, updating content');
+    logger.dev('🔧 Validation passed, updating content');
     setIsSaving(true);
 
     try {
@@ -161,15 +162,15 @@ export function ButtonConfigurationModal({
           }
         });
         
-        console.log('🔧 Button configuration saved:', config);
-        console.log('🔧 CTA config created:', ctaConfig);
+        logger.dev('🔧 Button configuration saved:', () => config);
+        logger.dev('🔧 CTA config created:', () => ctaConfig);
       }
 
       // Clear any existing errors first
       setErrors({});
       
       // Show success message using DOM manipulation
-      console.log('🔧 Setting showSuccess to true');
+      logger.dev('🔧 Setting showSuccess to true');
       setShowSuccess(true);
       setIsSaving(false);
       
@@ -230,7 +231,7 @@ export function ButtonConfigurationModal({
       
       // Close after showing the message
       setTimeout(() => {
-        console.log('🔧 Timeout triggered, closing modal');
+        logger.dev('🔧 Timeout triggered, closing modal');
         if (document.getElementById('button-config-success')) {
           document.body.removeChild(successDiv);
         }
@@ -240,7 +241,7 @@ export function ButtonConfigurationModal({
         onClose();
       }, 2000);
     } catch (error) {
-      console.error('🔧 Error saving configuration:', error);
+      logger.error('🔧 Error saving configuration:', () => error);
       setIsSaving(false);
     }
   };

@@ -6,6 +6,7 @@ import { isEditorHydrating, getHydrationState } from '@/utils/hydrationDetection
 import { getActivityState } from '@/utils/editorActivityState';
 import { exportDiagnostics } from '@/utils/toolbarDiagnostics';
 import { useGlobalAnchor } from '@/hooks/useGlobalAnchor';
+import { logger } from '@/lib/logger';
 
 interface DebugLEDProps {
   editorId?: string;
@@ -91,7 +92,7 @@ export function DebugLED({
 
   const exportDiagnosticsData = () => {
     const data = exportDiagnostics();
-    console.log('🔍 Exported diagnostics data:', data);
+    logger.dev('🔍 Exported diagnostics data:', () => data);
     
     // Download as JSON file
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });

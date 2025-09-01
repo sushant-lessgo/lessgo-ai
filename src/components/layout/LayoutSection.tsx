@@ -2,6 +2,7 @@ import React, { forwardRef } from 'react';
 import type { BackgroundType } from '@/types/sectionBackground';
 import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
 import { ComponentDensity, getUIBlockSpacing, combineSpacing } from '@/config/spacingConfig';
+import { logger } from '@/lib/logger';
 
 interface LayoutSectionProps {
   sectionId: string;
@@ -59,11 +60,11 @@ export const LayoutSection = forwardRef<HTMLElement, LayoutSectionProps>(({
     const gradientMatch = cssClass.match(/bg-\[(linear-gradient\([^)]+\))\]/);
     if (gradientMatch) {
       const gradientCSS = gradientMatch[1];
-      console.log('🎨 [LayoutSection] Converting complex gradient to inline style:', {
+      logger.dev('🎨 [LayoutSection] Converting complex gradient to inline style:', () => ({
         sectionId,
         originalClass: cssClass,
         extractedGradient: gradientCSS
-      });
+      }));
       return { background: gradientCSS };
     }
     
@@ -71,11 +72,11 @@ export const LayoutSection = forwardRef<HTMLElement, LayoutSectionProps>(({
     const radialMatch = cssClass.match(/bg-\[(radial-gradient\([^)]+\))\]/);
     if (radialMatch) {
       const gradientCSS = radialMatch[1];
-      console.log('🎨 [LayoutSection] Converting radial gradient to inline style:', {
+      logger.dev('🎨 [LayoutSection] Converting radial gradient to inline style:', () => ({
         sectionId,
         originalClass: cssClass,
         extractedGradient: gradientCSS
-      });
+      }));
       return { background: gradientCSS };
     }
     

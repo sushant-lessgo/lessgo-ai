@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
 import { FormRenderer } from './FormRenderer';
+import { logger } from '@/lib/logger';
 
 interface ButtonConfig {
   type: 'link' | 'form';
@@ -48,7 +49,7 @@ export function FormConnectedButton({ buttonConfig, className, children, onClick
         if (buttonConfig.formId) {
           const form = getFormById(buttonConfig.formId);
           if (!form) {
-            console.warn('Form not found:', buttonConfig.formId);
+            logger.warn('Form not found:', () => buttonConfig.formId);
             return;
           }
 

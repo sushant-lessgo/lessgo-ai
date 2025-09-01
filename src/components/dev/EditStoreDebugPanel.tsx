@@ -2,6 +2,7 @@
 import React, { useState, useMemo } from 'react';
 import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
 import { useDevTools } from '@/hooks/useDevTools';
+import { logger } from '@/lib/logger';
 
 export function EditStoreDebugPanel() {
   const [isOpen, setIsOpen] = useState(false);
@@ -332,7 +333,7 @@ export function EditStoreDebugPanel() {
       <div className="border-t p-2 space-y-1">
         <div className="grid grid-cols-2 gap-1">
           <button
-            onClick={() => console.log('Edit Store State:', store)}
+            onClick={() => logger.dev('Edit Store State:', () => store)}
             className="text-xs bg-gray-100 hover:bg-gray-200 py-1 rounded"
           >
             📄 Log Store
