@@ -29,7 +29,6 @@ export function StorageMonitor({
         const report = storageManager.getHealthReport();
         setHealthReport(report);
       } catch (error) {
-        console.warn('Failed to get storage health report:', error);
       }
     };
 
@@ -47,7 +46,6 @@ export function StorageMonitor({
     setIsCleaningUp(true);
     try {
       await storageManager.forceCleanup();
-      console.log('✅ Manual storage cleanup completed');
     } catch (error) {
       console.error('❌ Manual cleanup failed:', error);
     } finally {
@@ -216,7 +214,6 @@ export function useStorageMonitor(interval: number = 30000) {
         const newReport = storageManager.getHealthReport();
         setReport(newReport);
       } catch (error) {
-        console.warn('Failed to get storage report:', error);
       }
     };
 

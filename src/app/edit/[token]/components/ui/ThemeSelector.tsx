@@ -28,7 +28,6 @@ export function ThemeSelector() {
     //     accentColor,
     //   },
     // });
-    console.log('Theme would change to:', baseColor, accentColor);
   };
 
   return (

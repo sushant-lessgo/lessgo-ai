@@ -215,7 +215,7 @@ const ModeWrapper = ({
   elementKey: string;
   onEdit?: (value: string) => void;
 }) => {
-  if (mode === 'edit' && onEdit) {
+  if (mode !== 'preview' && onEdit) {
     return (
       <div 
         contentEditable
@@ -287,7 +287,7 @@ const PricingCard = ({
         
         {/* Tier Name */}
         <div className="text-center mb-6">
-          {mode === 'edit' ? (
+          {mode !== 'preview' ? (
             <div 
               contentEditable
               suppressContentEditableWarning
@@ -307,7 +307,7 @@ const PricingCard = ({
 
         {/* Price */}
         <div className="text-center mb-6">
-          {mode === 'edit' ? (
+          {mode !== 'preview' ? (
             <div 
               contentEditable
               suppressContentEditableWarning
@@ -327,7 +327,7 @@ const PricingCard = ({
 
         {/* Description */}
         <div className="text-center mb-8">
-          {mode === 'edit' ? (
+          {mode !== 'preview' ? (
             <div 
               contentEditable
               suppressContentEditableWarning
@@ -348,14 +348,14 @@ const PricingCard = ({
         {/* Features List */}
         <div className="mb-8">
           <ul className="space-y-3">
-            {mode === 'edit' ? (
+            {mode !== 'preview' ? (
               // Edit mode: Show all 8 potential feature slots
               Array.from({ length: 8 }, (_, featureIndex) => {
                 const featureKey = `tier_${index + 1}_feature_${featureIndex + 1}` as keyof TierCardsContent;
                 const feature = String(blockContent[featureKey] || '');
                 const isVisible = feature && feature !== '___REMOVED___' && feature.trim() !== '';
                 
-                return (isVisible || mode === 'edit') ? (
+                return (isVisible || mode !== 'preview') ? (
                   <li key={featureIndex} className={`flex items-start group/feature-item relative ${!isVisible ? 'opacity-60 hover:opacity-100 transition-opacity' : ''}`}>
                     {isVisible ? (
                       // Checkmark icon for features with content
@@ -383,7 +383,7 @@ const PricingCard = ({
                         data-element-key={featureKey}
                       />
                       {/* Remove button */}
-                      {isVisible && mode === 'edit' && (
+                      {isVisible && mode !== 'preview' && (
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
@@ -419,7 +419,7 @@ const PricingCard = ({
 
         {/* CTA Button */}
         <div className="mt-auto">
-          {mode === 'edit' ? (
+          {mode !== 'preview' ? (
             <div 
               contentEditable
               suppressContentEditableWarning
@@ -576,9 +576,9 @@ export default function TierCards(props: TierCardsProps) {
         </div>
 
         {/* Trust Indicators */}
-        {((blockContent.show_trust_footer !== false && trustFooterItems.length > 0) || mode === 'edit') && (
+        {((blockContent.show_trust_footer !== false && trustFooterItems.length > 0) || mode !== 'preview') && (
           <div className="mt-12 text-center">
-            {mode === 'edit' ? (
+            {mode !== 'preview' ? (
               <div className="space-y-4">
                 <div className="flex flex-wrap justify-center items-center gap-6">
                   {[1, 2, 3].map((index) => {

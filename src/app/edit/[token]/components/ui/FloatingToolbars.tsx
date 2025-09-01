@@ -32,7 +32,6 @@ export function FloatingToolbars() {
   
   // Debug logging - only on actual changes
   useEffect(() => {
-    // console.log('🎪🎪🎪 FloatingToolbars state changed:', {
     //   activeToolbar,
     //   hasActiveToolbar,
     //   toolbarTarget,
@@ -45,7 +44,6 @@ export function FloatingToolbars() {
     shouldShowToolbar('text');
     shouldShowToolbar('image');
     shouldShowToolbar('form');
-    // console.log('🎪 shouldShowToolbar results preserved but not logged');
   }, [activeToolbar, hasActiveToolbar, toolbar, toolbarTarget, editorSelection, shouldShowToolbar]);
 
 
@@ -103,7 +101,6 @@ export function FloatingToolbars() {
         const isImageActive = activeToolbar === 'image';
         const allConditions = shouldShow && hasTargetId && isImageActive;
         
-        // console.log('🖼️ ImageToolbar render check:', {
         //   shouldShow,
         //   hasTargetId,
         //   targetId: toolbarTarget.targetId,

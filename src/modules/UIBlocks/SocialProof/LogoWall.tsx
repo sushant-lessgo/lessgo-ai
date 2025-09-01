@@ -184,7 +184,7 @@ const CompanyLogoPlaceholder = React.memo(({
       
       {/* Company Name */}
       <div className="text-center">
-        {mode === 'edit' ? (
+        {mode !== 'preview' ? (
           <div 
             contentEditable
             suppressContentEditableWarning
@@ -263,7 +263,7 @@ export default function LogoWall(props: LayoutComponentProps) {
           />
 
           {/* Subheadline */}
-          {(blockContent.subheadline || mode === 'edit') && (
+          {(blockContent.subheadline || mode !== 'preview') && (
             <EditableAdaptiveText
               mode={mode}
               value={blockContent.subheadline || ''}
@@ -301,7 +301,7 @@ export default function LogoWall(props: LayoutComponentProps) {
                 
                 {/* Company Name */}
                 <div className="text-center mt-3">
-                  {mode === 'edit' ? (
+                  {mode !== 'preview' ? (
                     <div className="flex items-center justify-center gap-2">
                       <div 
                         contentEditable
@@ -341,7 +341,7 @@ export default function LogoWall(props: LayoutComponentProps) {
           })}
           
           {/* Add Company Button (Edit Mode Only) */}
-          {mode === 'edit' && (
+          {mode !== 'preview' && (
             <div className="p-6 bg-white/20 backdrop-blur-sm rounded-lg border-2 border-dashed border-gray-300 hover:border-gray-400 transition-all duration-300 flex flex-col items-center justify-center min-h-[120px]">
               <button
                 onClick={(e) => {
@@ -376,7 +376,7 @@ export default function LogoWall(props: LayoutComponentProps) {
             {/* Stat 1 */}
             {blockContent.stat_1_number && blockContent.stat_1_number !== '___REMOVED___' && (
               <div className="relative group/stat-item">
-                {mode === 'edit' ? (
+                {mode !== 'preview' ? (
                   <div className="space-y-2">
                     <EditableAdaptiveText
                       mode={mode}
@@ -414,7 +414,7 @@ export default function LogoWall(props: LayoutComponentProps) {
                 )}
                 
                 {/* Remove button */}
-                {mode === 'edit' && (
+                {mode !== 'preview' && (
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
@@ -435,7 +435,7 @@ export default function LogoWall(props: LayoutComponentProps) {
             {/* Stat 2 */}
             {blockContent.stat_2_number && blockContent.stat_2_number !== '___REMOVED___' && (
               <div className="relative group/stat-item">
-                {mode === 'edit' ? (
+                {mode !== 'preview' ? (
                   <div className="space-y-2">
                     <EditableAdaptiveText
                       mode={mode}
@@ -472,7 +472,7 @@ export default function LogoWall(props: LayoutComponentProps) {
                 )}
                 
                 {/* Remove button */}
-                {mode === 'edit' && (
+                {mode !== 'preview' && (
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
@@ -493,7 +493,7 @@ export default function LogoWall(props: LayoutComponentProps) {
             {/* Stat 3 */}
             {blockContent.stat_3_number && blockContent.stat_3_number !== '___REMOVED___' && (
               <div className="relative group/stat-item">
-                {mode === 'edit' ? (
+                {mode !== 'preview' ? (
                   <div className="space-y-2">
                     <EditableAdaptiveText
                       mode={mode}
@@ -530,7 +530,7 @@ export default function LogoWall(props: LayoutComponentProps) {
                 )}
                 
                 {/* Remove button */}
-                {mode === 'edit' && (
+                {mode !== 'preview' && (
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
@@ -558,7 +558,7 @@ export default function LogoWall(props: LayoutComponentProps) {
                 <path fillRule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
               </svg>
               
-              {mode === 'edit' ? (
+              {mode !== 'preview' ? (
                 <EditableAdaptiveText
                   mode={mode}
                   value={blockContent.trust_badge_text || ''}
@@ -577,7 +577,7 @@ export default function LogoWall(props: LayoutComponentProps) {
               )}
               
               {/* Remove button */}
-              {mode === 'edit' && (
+              {mode !== 'preview' && (
                 <button
                   onClick={(e) => {
                     e.stopPropagation();

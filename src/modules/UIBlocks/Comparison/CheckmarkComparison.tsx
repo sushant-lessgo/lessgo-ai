@@ -112,14 +112,14 @@ export default function CheckmarkComparison(props: LayoutComponentProps) {
             sectionBackground={sectionBackground}
           />
           
-          {(blockContent.subheadline || mode === 'edit') && (
+          {(blockContent.subheadline || mode !== 'preview') && (
             <EditableAdaptiveText
               mode={mode}
               value={blockContent.subheadline || 'Add subheadline...'}
               onEdit={(value) => handleContentUpdate('subheadline', value)}
               backgroundType={backgroundType === 'custom' ? 'secondary' : backgroundType}
               colorTokens={colorTokens}
-              className={`max-w-3xl mx-auto ${!blockContent.subheadline && mode === 'edit' ? 'opacity-50' : ''}`}
+              className={`max-w-3xl mx-auto ${!blockContent.subheadline && mode !== 'preview' ? 'opacity-50' : ''}`}
               sectionId={sectionId}
               elementKey="subheadline"
               variant="body"
@@ -142,7 +142,7 @@ export default function CheckmarkComparison(props: LayoutComponentProps) {
                       index === highlightIndex ? `bg-primary rounded-t-lg` : ''
                     }`}
                   >
-                    {mode === 'edit' ? (
+                    {mode !== 'preview' ? (
                       <input
                         type="text"
                         value={header}
@@ -168,7 +168,7 @@ export default function CheckmarkComparison(props: LayoutComponentProps) {
               {featureLabels.map((label, rowIndex) => (
                 <tr key={rowIndex} className={`border-b border-gray-200`}>
                   <td className="p-4">
-                    {mode === 'edit' ? (
+                    {mode !== 'preview' ? (
                       <input
                         type="text"
                         value={label}

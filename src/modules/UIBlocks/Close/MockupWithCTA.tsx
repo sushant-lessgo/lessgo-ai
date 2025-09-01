@@ -203,7 +203,7 @@ export default function MockupWithCTA(props: LayoutComponentProps) {
             />
 
             {/* Subheadline */}
-            {(blockContent.subheadline || mode === 'edit') && (
+            {(blockContent.subheadline || mode !== 'preview') && (
               <EditableAdaptiveText
                 mode={mode}
                 value={blockContent.subheadline || ''}
@@ -234,7 +234,7 @@ export default function MockupWithCTA(props: LayoutComponentProps) {
             {/* Urgency and Guarantee Text */}
             <div className="space-y-3">
               {/* Urgency Text */}
-              {(blockContent.urgency_text || mode === 'edit') && (
+              {(blockContent.urgency_text || mode !== 'preview') && (
                 <EditableAdaptiveText
                   mode={mode}
                   value={blockContent.urgency_text || ''}
@@ -252,7 +252,7 @@ export default function MockupWithCTA(props: LayoutComponentProps) {
               )}
 
               {/* Guarantee Text */}
-              {(blockContent.guarantee_text || mode === 'edit') && (
+              {(blockContent.guarantee_text || mode !== 'preview') && (
                 <EditableAdaptiveText
                   mode={mode}
                   value={blockContent.guarantee_text || ''}
@@ -270,7 +270,7 @@ export default function MockupWithCTA(props: LayoutComponentProps) {
               )}
 
               {/* Browser URL - Only show in edit mode */}
-              {mode === 'edit' && (
+              {mode !== 'preview' && (
                 <div className="mt-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
                   <label className="block text-sm font-medium text-gray-700 mb-2">Browser URL (shown in mockup)</label>
                   <EditableAdaptiveText

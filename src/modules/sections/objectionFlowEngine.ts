@@ -245,39 +245,30 @@ const SECTION_PRIORITIES: Record<string, { tier: number, profiles: string[] }> =
 
 // ===== MAIN FUNCTION =====
 export function getSectionsFromObjectionFlows(input: FlowInput): string[] {
-  // console.log('🧠 Starting Objection Flow Analysis:', input);
   
   // Step 1: Get base flow
   const baseFlow = getBaseObjectionFlow(input.awarenessLevel, input.marketSophisticationLevel);
- // console.log('📋 Base Flow:', baseFlow);
   
   // Step 2: Apply stage-based substitutions
   const stageAdjustedFlow = applyStageSubstitutions(baseFlow.sections, input.startupStage);
- // console.log('🔄 Stage Adjusted:', stageAdjustedFlow);
   
   // Step 3: Apply goal modifiers
   const goalAdjustedFlow = applyGoalModifiers(stageAdjustedFlow, input.landingGoal);
-  // console.log('🎯 Goal Adjusted:', goalAdjustedFlow);
   
   // Step 4: Apply audience modifiers
   const audienceAdjustedFlow = applyAudienceModifiers(goalAdjustedFlow, input.targetAudience);
-  // console.log('👥 Audience Adjusted:', audienceAdjustedFlow);
   
   // Step 5: Always add FAQ (copywriter best practice)
   const withFAQ = addFAQSection(audienceAdjustedFlow);
- // console.log('❓ With FAQ:', withFAQ);
   
   // Step 6: Apply 8-section cap with smart prioritization
   const finalFlow = applySectionCap(withFAQ, input);
-  // console.log('✂️ Final Capped Flow:', finalFlow);
   
   // Step 7: Order sections properly
   const orderedFlow = orderSections(finalFlow);
-  // console.log('📊 Final Ordered Flow:', orderedFlow);
   
   // Step 8: Add header at the beginning and footer at the end
   const withHeaderFooter = ['header', ...orderedFlow, 'footer'];
-  // console.log('🎯 With Header and Footer:', withHeaderFooter);
   
   return withHeaderFooter;
 }
@@ -289,14 +280,12 @@ function getBaseObjectionFlow(awareness: AwarenessLevel, sophistication: MarketS
   
   // Check if we have exact match
   if (OBJECTION_FLOWS[flowKey]) {
-   // console.log(`✅ Found exact flow: ${flowKey}`);
     return OBJECTION_FLOWS[flowKey];
   }
   
   // Use fallback
   const fallbackKey = FALLBACK_MAPPINGS[flowKey];
   if (fallbackKey && OBJECTION_FLOWS[fallbackKey]) {
-    // console.log(`🔄 Using fallback: ${flowKey} → ${fallbackKey}`);
     return OBJECTION_FLOWS[fallbackKey];
   }
   
@@ -315,7 +304,6 @@ function applyStageSubstitutions(sections: string[], stage: StartupStage): strin
     if (availability.unavailable.includes(section)) {
       const substitute = availability.substitutions[section];
       if (substitute) {
-      //  console.log(`🔄 Stage substitution: ${section} → ${substitute} (${stage})`);
         return substitute;
       }
     }
@@ -326,7 +314,6 @@ function applyStageSubstitutions(sections: string[], stage: StartupStage): strin
   const uniqueSections = [...new Set(substitutedSections)];
   
   if (uniqueSections.length !== substitutedSections.length) {
-   // console.log(`🔧 Removed ${substitutedSections.length - uniqueSections.length} duplicate sections from substitutions`);
   }
   
   return uniqueSections;
@@ -353,14 +340,11 @@ function applyGoalModifiers(sections: string[], goal: LandingGoalType): string[]
         const insertIndex = modifiedSections.indexOf(insertAfter);
         if (insertIndex !== -1) {
           modifiedSections.splice(insertIndex + 1, 0, sectionToAdd);
-         // console.log(`➕ Goal modifier: Added ${sectionToAdd} after ${insertAfter}`);
         } else {
           modifiedSections.push(sectionToAdd);
-         // console.log(`➕ Goal modifier: Added ${sectionToAdd} at end`);
         }
       } else {
         modifiedSections.push(sectionToAdd);
-       // console.log(`➕ Goal modifier: Added ${sectionToAdd}`);
       }
     }
   });
@@ -381,7 +365,6 @@ function applyAudienceModifiers(sections: string[], targetAudience: string): str
   modifier.add.forEach(sectionToAdd => {
     if (!modifiedSections.includes(sectionToAdd)) {
       modifiedSections.push(sectionToAdd);
-     // console.log(`👥 Audience modifier: Added ${sectionToAdd} for ${audienceType}`);
     }
   });
   
@@ -402,10 +385,8 @@ function addFAQSection(sections: string[]): string[] {
     const ctaIndex = sections.indexOf(SECTION_IDS.cta);
     if (ctaIndex !== -1) {
       sections.splice(ctaIndex, 0, SECTION_IDS.faq);
-     // console.log(`❓ Added FAQ before CTA`);
     } else {
       sections.push(SECTION_IDS.faq);
-     // console.log(`❓ Added FAQ at end`);
     }
   }
   return sections;
@@ -414,11 +395,9 @@ function addFAQSection(sections: string[]): string[] {
 function applySectionCap(sections: string[], input: FlowInput): string[] {
   if (sections.length <= 8) return sections;
   
- // console.log(`✂️ Applying section cap: ${sections.length} → 8 sections`);
   
   // Determine user profile for prioritization
   const userProfile = determineUserProfile(input);
- // console.log(`👤 User profile: ${userProfile}`);
   
   // Score each section based on priority for this profile
   const sectionScores = sections.map(section => ({
@@ -430,7 +409,6 @@ function applySectionCap(sections: string[], input: FlowInput): string[] {
   sectionScores.sort((a, b) => b.score - a.score);
   const cappedSections = sectionScores.slice(0, 8).map(item => item.section);
   
- // console.log('📊 Section priorities:', sectionScores.map(s => `${s.section}: ${s.score}`));
   
   return cappedSections;
 }

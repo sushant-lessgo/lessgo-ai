@@ -112,7 +112,6 @@ export function useGlobalAnchor(config: Partial<GlobalAnchorConfig> = {}) {
   // Unregister an anchor
   const unregisterAnchor = useCallback((key: string) => {
     if (finalConfig.debug) {
-      console.log('⚓ Unregistering anchor:', key);
     }
     
     setAnchors(prev => {
@@ -157,7 +156,6 @@ export function useGlobalAnchor(config: Partial<GlobalAnchorConfig> = {}) {
     const anchor = anchors[anchorKey];
     if (!anchor || anchor.isStale) {
       if (finalConfig.debug) {
-        console.warn('⚓ Cannot calculate position for stale/missing anchor:', anchorKey);
       }
       return null;
     }
@@ -257,7 +255,6 @@ export function useGlobalAnchor(config: Partial<GlobalAnchorConfig> = {}) {
         ) {
           removedCount++;
           if (finalConfig.debug) {
-            console.log('⚓ Removing stale anchor:', key);
           }
         } else {
           cleaned[key] = anchor;

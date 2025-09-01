@@ -149,7 +149,7 @@ export function EditablePageRenderer({
         className={`
           relative transition-all duration-200
           ${isSelected ? 'ring-2 ring-blue-500' : ''}
-          ${mode === 'edit' ? 'cursor-pointer' : ''}
+          ${mode !== 'preview' ? 'cursor-pointer' : ''}
         `}
         data-section-id={sectionId}
         data-layout={layout}
@@ -169,7 +169,7 @@ export function EditablePageRenderer({
         />
         
         {/* AI Generation Badges */}
-        {mode === 'edit' && sectionData?.aiMetadata && (
+        {mode !== 'preview' && sectionData?.aiMetadata && (
           <div className="absolute top-2 right-2 z-10 flex space-x-1">
             {sectionData.aiMetadata.aiGenerated && !sectionData.aiMetadata.isCustomized && (
               <span className="inline-flex items-center px-2 py-1 text-xs font-medium bg-blue-500 text-white rounded shadow-sm">
@@ -194,7 +194,7 @@ export function EditablePageRenderer({
   } catch (error) {
     logger.error(`Error rendering section ${sectionId}:`, error);
     
-    if (mode === 'edit') {
+    if (mode !== 'preview') {
       return (
         <section className="py-8 px-4 bg-red-50 border-l-4 border-red-400">
           <div className="max-w-6xl mx-auto">
@@ -259,7 +259,6 @@ const EnhancedLayoutWrapper: React.FC<{
   }, [sectionId, backgroundType]);
 
   // Debug what props we're passing to the layout component
-  // console.log(`🏧 Rendering layout for ${sectionId}:`, {
   //   LayoutComponent: LayoutComponent.name,
   //   props: originalProps,
   //   sectionDataStructure: {
@@ -278,12 +277,11 @@ const EnhancedLayoutWrapper: React.FC<{
   // Simplified rendering - no universal elements needed
   // All elements are handled by their native UIBlock components
   return (
-    <div className={mode === 'edit' ? 'relative' : ''} data-section-id={sectionId}>
+    <div className={mode !== 'preview' ? 'relative' : ''} data-section-id={sectionId}>
       {RenderedLayout}
       
       {/* Editing overlay for each element - with delay to ensure DOM is ready */}
       {sectionData?.elements && Object.entries(sectionData.elements).map(([elementKey, elementData]: [string, any]) => {
-        // console.log(`🗺️ Creating overlay for ${sectionId}.${elementKey}:`, {
         //   type: elementData.type,
         //   content: typeof elementData.content === 'string' ? elementData.content.slice(0, 50) : typeof elementData.content,
         //   hasContent: !!elementData.content,
@@ -336,7 +334,6 @@ const ElementEditingOverlay: React.FC<{
   
   // Debug: Log overlay mount
   React.useEffect(() => {
-    // console.log(`🎯 ElementEditingOverlay mounted for ${sectionId}.${elementKey}:`, {
     //   type: elementData.type,
     //   content: elementData.content,
     //   mode
@@ -371,7 +368,6 @@ const ElementEditingOverlay: React.FC<{
         elementKey: el.getAttribute('data-element-key')
       }));
       
-      // console.log(`🎯 Element targeting for ${sectionId}.${elementKey}:`, {
       //   found: !!element,
       //   selector: selectors.find(s => document.querySelector(s)),
       //   elementTag: element?.tagName,
@@ -391,7 +387,6 @@ const ElementEditingOverlay: React.FC<{
   
   // Handle text selection changes
   const handleSelectionChange = React.useCallback((selection: TextSelection | null) => {
-    // console.log('🔤 handleSelectionChange called:', { selection, isCollapsed: selection?.isCollapsed });
     
     if (selection && !selection.isCollapsed) {
       // Calculate position for the text toolbar
@@ -401,7 +396,6 @@ const ElementEditingOverlay: React.FC<{
         y: rect.top - 10
       };
       
-      // console.log('🔤 Text selection detected, but using unified toolbar system instead');
       
       // DISABLED: Using unified toolbar system from useEditor instead
       // showTextToolbar(position);
@@ -410,11 +404,9 @@ const ElementEditingOverlay: React.FC<{
 
   const handleClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-    // console.log(`🖱️ Element clicked: ${elementKey}`, { type: elementData.type });
     
     // DISABLED: Don't set isEditing here - let useEditor handle all text editing
     // This prevents conflicts between editing systems
-    // console.log(`🖱️ Click handled by useEditor system for: ${elementKey}`);
     
     onElementClick(e);
   };
@@ -422,7 +414,6 @@ const ElementEditingOverlay: React.FC<{
   const handleSave = () => {
     setIsEditing(false);
     if (editValue !== elementData.content) {
-      // console.log(`💾 Saving content for ${elementKey}:`, { old: elementData.content, new: editValue });
       onContentUpdate(editValue);
     }
   };
@@ -469,7 +460,6 @@ const ElementEditingOverlay: React.FC<{
   
   // Don't render the overlay editor - let useEditor system handle it
   if (isEditing && targetElement) {
-    // console.log(`📝 Editing disabled for ${elementKey} - using unified useEditor system instead`);
     return null;
   }
   
@@ -487,16 +477,14 @@ const EditableTextContent: React.FC<{
   const [value, setValue] = React.useState(content);
 
   const handleDoubleClick = () => {
-    // console.log('🖱️ Double click on text element:', { mode, elementType });
-    // if (mode === 'edit') {
+    // if (mode !== 'preview') {
     //   setIsEditing(true);
     // }
   };
 
   const handleClick = (e: React.MouseEvent) => {
-    // console.log('🖱️ Single click on text element:', { mode, elementType });
     // e.stopPropagation();
-    // if (mode === 'edit') {
+    // if (mode !== 'preview') {
     //   setIsEditing(true);
     // }
   };
@@ -524,7 +512,6 @@ const EditableTextContent: React.FC<{
   }
 
   if (isEditing) {
-    // console.log('📝 Text editor active for:', { elementType, content, value });
     return (
       <input
         type="text"
@@ -561,7 +548,7 @@ const EditableButtonContent: React.FC<{
   const [value, setValue] = React.useState(content);
 
   const handleClick = (e: React.MouseEvent) => {
-    if (mode === 'edit') {
+    if (mode !== 'preview') {
       e.preventDefault();
       setIsEditing(true);
     }
@@ -585,7 +572,7 @@ const EditableButtonContent: React.FC<{
     }
   };
 
-  if (isEditing && mode === 'edit') {
+  if (isEditing && mode !== 'preview') {
     return (
       <input
         type="text"
@@ -606,9 +593,9 @@ const EditableButtonContent: React.FC<{
         ${colorTokens?.ctaBg || 'bg-blue-600'} 
         ${colorTokens?.ctaText || 'text-white'} 
         px-6 py-2 rounded-lg font-medium transition-colors
-        ${mode === 'edit' ? 'hover:opacity-80 cursor-pointer' : ''}
+        ${mode !== 'preview' ? 'hover:opacity-80 cursor-pointer' : ''}
       `}
-      disabled={mode === 'edit'}
+      disabled={mode !== 'preview'}
     >
       {content || 'Button Text'}
     </button>
@@ -621,7 +608,7 @@ const EditableImageContent: React.FC<{
   mode: 'edit' | 'preview';
 }> = ({ content, onUpdate, mode }) => {
   const handleClick = () => {
-    if (mode === 'edit') {
+    if (mode !== 'preview') {
       // Open image picker/uploader
       const newImageUrl = prompt('Enter image URL:', content);
       if (newImageUrl) {
@@ -637,7 +624,7 @@ const EditableImageContent: React.FC<{
         className={`
           w-full h-48 bg-gray-200 border-2 border-dashed border-gray-300 
           flex items-center justify-center cursor-pointer hover:bg-gray-100 transition-colors
-          ${mode === 'edit' ? 'cursor-pointer' : ''}
+          ${mode !== 'preview' ? 'cursor-pointer' : ''}
         `}
       >
         <div className="text-center text-gray-500">
@@ -653,7 +640,7 @@ const EditableImageContent: React.FC<{
   return (
     <div
       onClick={handleClick}
-      className={`relative group ${mode === 'edit' ? 'cursor-pointer' : ''}`}
+      className={`relative group ${mode !== 'preview' ? 'cursor-pointer' : ''}`}
     >
       <img
         src={content}
@@ -664,7 +651,7 @@ const EditableImageContent: React.FC<{
           target.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZGRkIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzk5OSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPkltYWdlIG5vdCBmb3VuZDwvdGV4dD48L3N2Zz4=';
         }}
       />
-      {mode === 'edit' && (
+      {mode !== 'preview' && (
         <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-200 flex items-center justify-center opacity-0 group-hover:opacity-100">
           <div className="bg-white px-3 py-1 rounded text-sm font-medium">
             Click to change image
@@ -686,7 +673,7 @@ const EditableListContent: React.FC<{
   );
 
   const handleClick = () => {
-    if (mode === 'edit') {
+    if (mode !== 'preview') {
       setIsEditing(true);
     }
   };
@@ -716,7 +703,7 @@ const EditableListContent: React.FC<{
     setItems(Array.isArray(content) ? content : [content]);
   };
 
-  if (isEditing && mode === 'edit') {
+  if (isEditing && mode !== 'preview') {
     return (
       <div className="space-y-2">
         {items.map((item, index) => (
@@ -762,7 +749,7 @@ const EditableListContent: React.FC<{
   return (
     <ul
       onClick={handleClick}
-      className={`space-y-1 ${mode === 'edit' ? 'cursor-pointer hover:bg-blue-50 hover:bg-opacity-50 rounded p-1 transition-colors' : ''}`}
+      className={`space-y-1 ${mode !== 'preview' ? 'cursor-pointer hover:bg-blue-50 hover:bg-opacity-50 rounded p-1 transition-colors' : ''}`}
     >
       {items.map((item, index) => (
         <li key={index} className="flex items-center space-x-2">
@@ -770,7 +757,7 @@ const EditableListContent: React.FC<{
           <span>{item}</span>
         </li>
       ))}
-      {mode === 'edit' && (
+      {mode !== 'preview' && (
         <li className="text-sm text-gray-500 italic">Click to edit list</li>
       )}
     </ul>

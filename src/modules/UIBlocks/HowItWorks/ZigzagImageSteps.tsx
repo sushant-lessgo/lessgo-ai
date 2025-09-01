@@ -281,7 +281,7 @@ export default function ZigzagImageSteps(props: LayoutComponentProps) {
             sectionBackground={sectionBackground}
           />
 
-          {(blockContent.subheadline || mode === 'edit') && (
+          {(blockContent.subheadline || mode !== 'preview') && (
             <EditableAdaptiveText
               mode={mode}
               value={blockContent.subheadline || ''}
@@ -298,7 +298,7 @@ export default function ZigzagImageSteps(props: LayoutComponentProps) {
           )}
         </div>
 
-        {mode === 'edit' ? (
+        {mode !== 'preview' ? (
           <div className="space-y-8">
             <div className="p-6 border border-gray-200 rounded-lg bg-gray-50">
               <h4 className="font-semibold text-gray-700 mb-4">Zigzag Step Content</h4>
@@ -355,7 +355,7 @@ export default function ZigzagImageSteps(props: LayoutComponentProps) {
         {blockContent.show_flow_summary !== false && (
           <div className="mt-16 bg-gradient-to-r from-pink-50 via-purple-50 to-indigo-50 rounded-2xl p-8 border border-pink-100">
             <div className="text-center">
-              {(blockContent.flow_summary_heading || mode === 'edit') && (
+              {(blockContent.flow_summary_heading || mode !== 'preview') && (
                 <div className="relative group/summary-heading">
                   <EditableAdaptiveText
                     mode={mode}
@@ -370,7 +370,7 @@ export default function ZigzagImageSteps(props: LayoutComponentProps) {
                     data-section-id={sectionId}
                     data-element-key="flow_summary_heading"
                   />
-                  {mode === 'edit' && (
+                  {mode !== 'preview' && (
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
@@ -414,7 +414,7 @@ export default function ZigzagImageSteps(props: LayoutComponentProps) {
                       data-section-id={sectionId}
                       data-element-key="flow_feature_1_text"
                     />
-                    {mode === 'edit' && (
+                    {mode !== 'preview' && (
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
@@ -462,7 +462,7 @@ export default function ZigzagImageSteps(props: LayoutComponentProps) {
                       data-section-id={sectionId}
                       data-element-key="flow_feature_2_text"
                     />
-                    {mode === 'edit' && (
+                    {mode !== 'preview' && (
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
@@ -510,7 +510,7 @@ export default function ZigzagImageSteps(props: LayoutComponentProps) {
                       data-section-id={sectionId}
                       data-element-key="flow_feature_3_text"
                     />
-                    {mode === 'edit' && (
+                    {mode !== 'preview' && (
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
@@ -528,7 +528,7 @@ export default function ZigzagImageSteps(props: LayoutComponentProps) {
                 )}
               </div>
               
-              {(blockContent.flow_summary_description || mode === 'edit') && (
+              {(blockContent.flow_summary_description || mode !== 'preview') && (
                 <div className="relative group/summary-desc">
                   <EditableAdaptiveText
                     mode={mode}
@@ -543,7 +543,7 @@ export default function ZigzagImageSteps(props: LayoutComponentProps) {
                     data-section-id={sectionId}
                     data-element-key="flow_summary_description"
                   />
-                  {mode === 'edit' && (
+                  {mode !== 'preview' && (
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
@@ -563,9 +563,9 @@ export default function ZigzagImageSteps(props: LayoutComponentProps) {
           </div>
         )}
 
-        {(blockContent.cta_text || blockContent.trust_items || mode === 'edit') && (
+        {(blockContent.cta_text || blockContent.trust_items || mode !== 'preview') && (
           <div className="text-center space-y-6 mt-16">
-            {(blockContent.supporting_text || mode === 'edit') && (
+            {(blockContent.supporting_text || mode !== 'preview') && (
               <EditableAdaptiveText
                 mode={mode}
                 value={blockContent.supporting_text || ''}

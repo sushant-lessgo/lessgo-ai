@@ -44,62 +44,52 @@ export function ImageToolbar({ targetId, position, contextActions }: ImageToolba
 
   // Helper function to parse targetId and extract section/element info
   const parseTargetId = (targetId: string) => {
-    console.log('🔍 Parsing targetId:', targetId);
     
     // Check if targetId follows the "sectionId.elementKey" format (from showToolbar)
     if (targetId.includes('.')) {
       const [sectionId, elementKey] = targetId.split('.');
       const result = { sectionId, elementKey };
-      console.log('🎯 Dot notation parsed:', result);
       return result;
     }
     
     // For hero images, targetId format is: sectionId-hero-image
     // For other images, targetId format might be: sectionId-elementKey
     const parts = targetId.split('-');
-    console.log('🔍 Split parts:', parts);
     
     // Check most specific patterns first (longest matches)
     if (parts.length >= 5 && parts[parts.length - 4] === 'image' && parts[parts.length - 3] === 'first' && parts[parts.length - 2] === 'hero') {
       // Image first hero case: "section123-image-first-hero-image" -> sectionId: "section123", elementKey: "image_first_hero_image"
       const sectionId = parts.slice(0, -4).join('-');
       const result = { sectionId, elementKey: 'image_first_hero_image' };
-      console.log('🎯 Image first hero image parsed:', result);
       return result;
     } else if (parts.length >= 4 && parts[parts.length - 3] === 'center' && parts[parts.length - 2] === 'hero') {
       // Center hero image case: "section123-center-hero-image" -> sectionId: "section123", elementKey: "center_hero_image"
       const sectionId = parts.slice(0, -3).join('-');
       const result = { sectionId, elementKey: 'center_hero_image' };
-      console.log('🎯 Center hero image parsed:', result);
       return result;
     } else if (parts.length >= 4 && parts[parts.length - 3] === 'split' && parts[parts.length - 2] === 'hero') {
       // Split hero image case: "section123-split-hero-image" -> sectionId: "section123", elementKey: "split_hero_image"
       const sectionId = parts.slice(0, -3).join('-');
       const result = { sectionId, elementKey: 'split_hero_image' };
-      console.log('🎯 Split hero image parsed:', result);
       return result;
     } else if (parts.length >= 3 && parts[parts.length - 2] === 'hero') {
       // Standard hero image case: "section123-hero-image" -> sectionId: "section123", elementKey: "hero_image"
       const sectionId = parts.slice(0, -2).join('-');
       const result = { sectionId, elementKey: 'hero_image' };
-      console.log('🎯 Hero image parsed:', result);
       return result;
     } else if (parts.length >= 2) {
       // Other image cases - assume format: "sectionId-elementKey"
       const sectionId = parts[0];
       const elementKey = parts.slice(1).join('-');
       const result = { sectionId, elementKey };
-      console.log('🎯 Other image parsed:', result);
       return result;
     }
-    console.log('❌ Failed to parse targetId');
     return null;
   };
 
   // Calculate arrow position
   const targetElement = document.querySelector(`[data-image-id="${targetId}"]`);
   console.log('🖼️ Looking for target element with selector:', `[data-image-id="${targetId}"]`);
-  console.log('🖼️ Found target element:', targetElement);
   
   const arrowInfo = targetElement ? calculateArrowPosition(
     position,
@@ -107,7 +97,6 @@ export function ImageToolbar({ targetId, position, contextActions }: ImageToolba
     { width: 340, height: 48 }
   ) : null;
   
-  console.log('🖼️ Arrow info calculated:', arrowInfo);
 
 
 
@@ -160,7 +149,6 @@ export function ImageToolbar({ targetId, position, contextActions }: ImageToolba
           const targetInfo = parseTargetId(targetId);
           if (targetInfo) {
             updateElementContent(targetInfo.sectionId, targetInfo.elementKey, previewUrl);
-            console.log('✅ Image uploaded and updated successfully');
           } else {
             console.error('❌ Could not parse targetId:', targetId);
           }
@@ -194,15 +182,12 @@ export function ImageToolbar({ targetId, position, contextActions }: ImageToolba
       e.preventDefault();
       e.stopPropagation();
     }
-    console.log('🔍 Opening stock photos panel');
     setShowStockPhotos(true);
-    console.log('📸 Opening stock photo search');
   };
 
   // Handle image editing
   const handleImageEditor = () => {
     setShowEditor(true);
-    console.log('✏️ Opening image editor');
   };
 
   const handleImageEditorSave = (editedImageUrl: string) => {
@@ -210,7 +195,6 @@ export function ImageToolbar({ targetId, position, contextActions }: ImageToolba
     const targetInfo = parseTargetId(targetId);
     if (targetInfo) {
       updateElementContent(targetInfo.sectionId, targetInfo.elementKey, editedImageUrl);
-      console.log('✅ Image edited and updated successfully');
     } else {
       console.error('❌ Could not parse targetId for edited image:', targetId);
     }
@@ -227,7 +211,6 @@ export function ImageToolbar({ targetId, position, contextActions }: ImageToolba
 
   const handleAltTextSave = (newAltText: string) => {
     executeAction('update-alt-text', { imageId: targetId, altText: newAltText });
-    console.log('💬 Alt text updated');
     setShowAltTextModal(false);
   };
 
@@ -291,7 +274,6 @@ export function ImageToolbar({ targetId, position, contextActions }: ImageToolba
             targetElement.remove();
           }
           
-          console.log('🗑️ Image deleted');
           
           // Hide toolbar since image is deleted
           hideElementToolbar();
@@ -304,7 +286,6 @@ export function ImageToolbar({ targetId, position, contextActions }: ImageToolba
 
 
 
-  console.log('🖼️ ImageToolbar about to render with position:', position);
 
   return (
     <>
@@ -378,7 +359,6 @@ export function ImageToolbar({ targetId, position, contextActions }: ImageToolba
             y: Math.max(10, Math.min(position.y + 60, window.innerHeight - 320)),
           }}
           onClose={() => {
-            console.log('🎯 Closing stock photos panel');
             setShowStockPhotos(false);
           }}
           onSelectImage={(stockPhoto) => {
@@ -386,7 +366,6 @@ export function ImageToolbar({ targetId, position, contextActions }: ImageToolba
             const targetInfo = parseTargetId(targetId);
             if (targetInfo) {
               updateElementContent(targetInfo.sectionId, targetInfo.elementKey, stockPhoto.url);
-              console.log('✅ Stock photo selected and updated successfully');
             } else {
               console.error('❌ Could not parse targetId for stock photo:', targetId);
             }

@@ -224,7 +224,7 @@ export default function SegmentedFAQTabs(props: LayoutComponentProps) {
             sectionBackground={sectionBackground}
           />
           
-          {(blockContent.subheadline || mode === 'edit') && (
+          {(blockContent.subheadline || mode !== 'preview') && (
             <EditableAdaptiveText
               mode={mode}
               value={blockContent.subheadline || ''}
@@ -261,7 +261,7 @@ export default function SegmentedFAQTabs(props: LayoutComponentProps) {
                   color: activeTab === index ? colorTokens.ctaText : undefined
                 }}
               >
-                {mode === 'edit' ? (
+                {mode !== 'preview' ? (
                   <EditableAdaptiveText
                     mode={mode}
                     value={label}
@@ -308,7 +308,7 @@ export default function SegmentedFAQTabs(props: LayoutComponentProps) {
                 />
               </div>
               
-              {(item.answer || mode === 'edit') && (
+              {(item.answer || mode !== 'preview') && (
                 <EditableAdaptiveText
                   mode={mode}
                   value={item.answer}
@@ -325,7 +325,7 @@ export default function SegmentedFAQTabs(props: LayoutComponentProps) {
               )}
               
               {/* Remove button */}
-              {mode === 'edit' && (
+              {mode !== 'preview' && (
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
@@ -344,7 +344,7 @@ export default function SegmentedFAQTabs(props: LayoutComponentProps) {
           ))}
           
           {/* Add new item to current tab */}
-          {mode === 'edit' && tabs[activeTab].items.length < 4 && (
+          {mode !== 'preview' && tabs[activeTab].items.length < 4 && (
             <button
               onClick={() => {
                 const tabNumber = activeTab + 1;

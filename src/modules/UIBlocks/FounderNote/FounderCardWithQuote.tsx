@@ -161,7 +161,7 @@ export default function FounderCardWithQuote(props: LayoutComponentProps) {
             </div>
 
             {/* Optional Founder Bio */}
-            {(blockContent.founder_bio || mode === 'edit') && (
+            {(blockContent.founder_bio || mode !== 'preview') && (
               <div className="mt-8 pt-8 border-t border-gray-200">
                 <EditableAdaptiveText
                   mode={mode}

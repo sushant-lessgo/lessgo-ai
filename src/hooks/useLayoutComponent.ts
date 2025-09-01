@@ -29,7 +29,6 @@ export function useLayoutComponent<T = Record<string, any>>({
   contentSchema 
 }: UseLayoutComponentProps) {
   
-  // console.log(`🔍 useLayoutComponent DEBUG for ${sectionId}:`, {
   //   backgroundType,
   //   sectionBackgroundCSS,
   //   hasSectionBackgroundCSS: !!sectionBackgroundCSS
@@ -87,7 +86,6 @@ export function useLayoutComponent<T = Record<string, any>>({
   }
 
   // Extract content with type safety and defaults
-  // console.log(`🔍 useLayoutComponent extracting content for ${sectionId}:`, {
   //   elements: elements,
   //   elementKeys: Object.keys(elements),
   //   firstElement: Object.values(elements)[0],
@@ -97,7 +95,6 @@ export function useLayoutComponent<T = Record<string, any>>({
   
   const blockContent = extractLayoutContent(elements, contentSchema, layout, excludedElements) as T;
   
-  // console.log(`📦 Extracted blockContent for ${sectionId}:`, {
   //   blockContent,
   //   headlineType: typeof blockContent.headline,
   //   headlineValue: blockContent.headline
@@ -109,12 +106,11 @@ export function useLayoutComponent<T = Record<string, any>>({
   // ✅ FIXED: Always use store backgroundType in edit mode for live updates
   const getSectionBackground = () => {
     // ✅ In edit mode, ALWAYS calculate from current store backgroundType
-    if (mode === 'edit') {
+    if (mode !== 'preview') {
       const currentBackgroundType = sectionContent?.backgroundType || backgroundType;
       const customBackground = sectionContent?.sectionBackground;
       const backgrounds = theme?.colors?.sectionBackgrounds;
       
-      // console.log(`🔍 EDIT MODE Background calc for ${sectionId}:`, {
       //   sectionContentExists: !!sectionContent,
       //   storedBackgroundType: sectionContent?.backgroundType,
       //   propsBackgroundType: backgroundType,
@@ -145,7 +141,6 @@ export function useLayoutComponent<T = Record<string, any>>({
           }
         }
         
-        // console.log(`🎨 useLayoutComponent CUSTOM: Generated CSS for ${sectionId}:`, {
         //   custom,
         //   generatedCSS: customCSS
         // });
@@ -170,7 +165,6 @@ export function useLayoutComponent<T = Record<string, any>>({
         }
       })();
       
-      // console.log(`🎨 useLayoutComponent EDIT MODE: Recalculated CSS for ${sectionId}:`, {
       //   storedBackgroundType: currentBackgroundType,
       //   calculatedCSS: editModeCSS
       // });
@@ -179,7 +173,6 @@ export function useLayoutComponent<T = Record<string, any>>({
     
     // ✅ In preview mode, use the CSS class from renderer for performance
     if (sectionBackgroundCSS) {
-      // console.log(`🎨 useLayoutComponent: Using CSS from renderer for ${sectionId}:`, sectionBackgroundCSS);
       return sectionBackgroundCSS;
     }
     
@@ -206,7 +199,6 @@ export function useLayoutComponent<T = Record<string, any>>({
         }
       }
       
-      // console.log(`🎨 useLayoutComponent FALLBACK CUSTOM: Generated CSS for ${sectionId}:`, customCSS);
       return customCSS;
     }
     
@@ -229,7 +221,6 @@ export function useLayoutComponent<T = Record<string, any>>({
       }
     })();
     
-    // console.log(`🎨 useLayoutComponent: Using fallback CSS for ${sectionId}:`, fallbackCSS);
     return fallbackCSS;
   };
 
@@ -293,7 +284,6 @@ export function useLayoutComponent<T = Record<string, any>>({
   // ✅ ENHANCED: Use new smart text color system with WCAG validation
   const sectionBackground = getSectionBackground();
   
-  // console.log(`🎨 Final sectionBackground for ${sectionId}:`, sectionBackground);
   
   // Map background types to storage keys
   const mapBackgroundTypeToStorageKey = (bgType: string): string => {
@@ -319,7 +309,6 @@ export function useLayoutComponent<T = Record<string, any>>({
       const storageKey = mapBackgroundTypeToStorageKey(currentBackgroundType);
       const storedColors = theme.colors.textColors[storageKey as keyof typeof theme.colors.textColors];
       if (storedColors && storedColors[type]) {
-        // console.log(`🎨 Using stored text color for ${type} on ${currentBackgroundType} (mapped to ${storageKey}):`, storedColors[type]);
         return storedColors[type];
       }
     }
@@ -352,7 +341,6 @@ export function useLayoutComponent<T = Record<string, any>>({
   
   // Debug log for text color mode
   if ((theme as any)?.textColorMode === 'manual') {
-    // console.log(`🎨 Using manual text color overrides for ${sectionId}:`, {
     //   mode: (theme as any).textColorMode,
     //   overrides: (theme as any).textColorOverrides,
     //   contrastLevel: (theme as any).textContrastLevel,
@@ -391,7 +379,6 @@ export function useLayoutComponent<T = Record<string, any>>({
                                effectiveBackgroundType;
   const dynamicTextColors = getTextColorForBackground(legacyBackgroundType, colorTokens);
 
-  // console.log(`🎨 Dynamic text colors for ${sectionId} (${backgroundType}):`, {
   //   backgroundType,
   //   original: dynamicTextColors,
   //   validated: validatedTextColors,
@@ -434,7 +421,6 @@ export function useLayoutComponent<T = Record<string, any>>({
   };
 
   // Debug logging
-  // console.log(`Layout Component ${sectionId}:`, {
   //   backgroundType,
   //   sectionBackground: getSectionBackground(),
   //   mode,

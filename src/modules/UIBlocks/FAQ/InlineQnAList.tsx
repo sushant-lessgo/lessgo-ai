@@ -138,7 +138,7 @@ export default function InlineQnAList(props: LayoutComponentProps) {
             sectionBackground={sectionBackground}
           />
           
-          {(blockContent.subheadline || mode === 'edit') && (
+          {(blockContent.subheadline || mode !== 'preview') && (
             <EditableAdaptiveText
               mode={mode}
               value={blockContent.subheadline || ''}
@@ -180,7 +180,7 @@ export default function InlineQnAList(props: LayoutComponentProps) {
                 />
               </div>
               
-              {(item.answer || mode === 'edit') && (
+              {(item.answer || mode !== 'preview') && (
                 <EditableAdaptiveText
                   mode={mode}
                   value={item.answer}
@@ -197,7 +197,7 @@ export default function InlineQnAList(props: LayoutComponentProps) {
               )}
               
               {/* Remove button */}
-              {mode === 'edit' && (
+              {mode !== 'preview' && (
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
@@ -216,7 +216,7 @@ export default function InlineQnAList(props: LayoutComponentProps) {
           ))}
           
           {/* Add new FAQ button */}
-          {mode === 'edit' && faqItems.length < 6 && (
+          {mode !== 'preview' && faqItems.length < 6 && (
             <button
               onClick={() => {
                 // Find the first empty slot

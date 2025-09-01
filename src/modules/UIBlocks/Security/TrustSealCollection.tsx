@@ -133,7 +133,7 @@ export default function TrustSealCollection(props: LayoutComponentProps) {
           sectionBackground={sectionBackground}
         />
 
-        {mode === 'edit' ? (
+        {mode !== 'preview' ? (
           <EditableTrustIndicators
             mode={mode}
             trustItems={[

@@ -77,7 +77,6 @@ export function useModalManager(): ModalManagerHook {
       confirmField(displayName, value);
     } else if ((hiddenInferredFields as any)[fieldName] !== undefined) {
       // Field exists in hiddenInferredFields - update via updateHiddenField
-      console.warn('updateHiddenField not available - field update skipped');
     } else {
       // New field - add to validatedFields
       const displayName = getDisplayNameForField(fieldName);

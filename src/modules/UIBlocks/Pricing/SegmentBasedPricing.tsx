@@ -354,7 +354,7 @@ export default function SegmentBasedPricing(props: LayoutComponentProps) {
             sectionBackground={sectionBackground}
           />
 
-          {(blockContent.subheadline || mode === 'edit') && (
+          {(blockContent.subheadline || mode !== 'preview') && (
             <EditableAdaptiveText
               mode={mode}
               value={blockContent.subheadline || ''}
@@ -372,7 +372,7 @@ export default function SegmentBasedPricing(props: LayoutComponentProps) {
           )}
         </div>
 
-        {mode === 'edit' ? (
+        {mode !== 'preview' ? (
           <div className="space-y-8">
             <div className="p-6 border border-gray-200 rounded-lg bg-gray-50">
               <h4 style={h4Style} className="font-semibold text-gray-700 mb-4">Segment-Based Pricing Content</h4>
@@ -478,7 +478,7 @@ export default function SegmentBasedPricing(props: LayoutComponentProps) {
         )}
 
         {/* Segment Comparison Summary */}
-        {((blockContent.show_segment_comparison !== false && (blockContent.segment_comparison_title || blockContent.segment_comparison_desc)) || mode === 'edit') && (
+        {((blockContent.show_segment_comparison !== false && (blockContent.segment_comparison_title || blockContent.segment_comparison_desc)) || mode !== 'preview') && (
           <div className="bg-gradient-to-r from-gray-50 to-white rounded-2xl p-8 border border-gray-100 mb-12">
             <div className="text-center">
               <EditableAdaptiveText
@@ -541,9 +541,9 @@ export default function SegmentBasedPricing(props: LayoutComponentProps) {
           </div>
         )}
 
-        {(blockContent.supporting_text || blockContent.trust_items || mode === 'edit') && (
+        {(blockContent.supporting_text || blockContent.trust_items || mode !== 'preview') && (
           <div className="text-center space-y-6">
-            {(blockContent.supporting_text || mode === 'edit') && (
+            {(blockContent.supporting_text || mode !== 'preview') && (
               <EditableAdaptiveText
                 mode={mode}
                 value={blockContent.supporting_text || ''}

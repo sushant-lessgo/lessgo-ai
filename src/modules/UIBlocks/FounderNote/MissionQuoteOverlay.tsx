@@ -227,9 +227,9 @@ export default function MissionQuoteOverlay(props: LayoutComponentProps) {
           <div className="text-center space-y-8">
             
             {/* Badge */}
-            {(blockContent.badge_text || blockContent.badge_icon || mode === 'edit') && (
+            {(blockContent.badge_text || blockContent.badge_icon || mode !== 'preview') && (
               <div className="flex items-center justify-center space-x-2">
-                {mode === 'edit' ? (
+                {mode !== 'preview' ? (
                   <div className="flex items-center space-x-2">
                     <div className="relative group/icon-edit">
                       <IconEditableText
@@ -340,7 +340,7 @@ export default function MissionQuoteOverlay(props: LayoutComponentProps) {
             </div>
 
             {/* Mission Stats */}
-            {mode === 'edit' ? (
+            {mode !== 'preview' ? (
               <div className="bg-black bg-opacity-30 rounded-lg p-6 max-w-3xl mx-auto">
                 <h4 className="text-white font-semibold mb-4 text-center">Mission Statistics</h4>
                 <div className="space-y-3">
@@ -350,7 +350,7 @@ export default function MissionQuoteOverlay(props: LayoutComponentProps) {
                     { key: 'mission_stat_3', placeholder: '100+ countries served' },
                     { key: 'mission_stat_4', placeholder: 'Additional statistic...' }
                   ].map((stat, index) => (
-                    ((blockContent as any)[stat.key] || mode === 'edit') && (
+                    ((blockContent as any)[stat.key] || mode !== 'preview') && (
                       <div key={index} className="relative group/stat-item flex items-center space-x-2">
                         <EditableAdaptiveText
                           mode={mode}
@@ -367,7 +367,7 @@ export default function MissionQuoteOverlay(props: LayoutComponentProps) {
                         />
                         
                         {/* Remove button */}
-                        {mode === 'edit' && (blockContent as any)[stat.key] && (blockContent as any)[stat.key] !== '___REMOVED___' && (
+                        {mode !== 'preview' && (blockContent as any)[stat.key] && (blockContent as any)[stat.key] !== '___REMOVED___' && (
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
@@ -386,7 +386,7 @@ export default function MissionQuoteOverlay(props: LayoutComponentProps) {
                   ))}
                   
                   {/* Add button */}
-                  {mode === 'edit' && missionStats.length < 4 && (
+                  {mode !== 'preview' && missionStats.length < 4 && (
                     <button
                       onClick={() => {
                         const emptyIndex = [
@@ -465,7 +465,7 @@ export default function MissionQuoteOverlay(props: LayoutComponentProps) {
 
               {/* Trust Indicators */}
               <div className="lg:text-right">
-                {mode === 'edit' ? (
+                {mode !== 'preview' ? (
                   <EditableTrustIndicators
                     mode={mode}
                     trustItems={[

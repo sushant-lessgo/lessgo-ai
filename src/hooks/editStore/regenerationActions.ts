@@ -196,12 +196,10 @@ const handleDesignAndCopyRegeneration = async (
     } as any;
     
     // This updates the store's sectionLayouts internally
-    console.log('🎨 Design Regeneration - Generating layouts for sections:', currentSections);
     generateSectionLayouts(currentSections, mockEditStore);
     const updatedState = getState();
     const newLayouts = updatedState.sectionLayouts;
     
-    console.log('🎨 Design Regeneration - Updated section layouts:', newLayouts);
 
     // Step 3: Update theme with new background system
     setState((state: EditStore) => {
@@ -323,12 +321,10 @@ const handleDesignAndCopyRegeneration = async (
 export function createRegenerationActions(set: any, get: () => EditStore): RegenerationActions {
   return {
     regenerateContentOnly: async () => {
-      console.log('🔄 RegenerationActions: regenerateContentOnly called');
       await handleContentOnlyRegeneration(get, set);
     },
 
     regenerateDesignAndCopy: async () => {
-      console.log('🎨 RegenerationActions: regenerateDesignAndCopy called');
       await handleDesignAndCopyRegeneration(get, set);
     },
 

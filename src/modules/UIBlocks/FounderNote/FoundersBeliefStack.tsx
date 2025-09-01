@@ -163,9 +163,9 @@ const BeliefCard = React.memo(({
       
       {/* Icon */}
       <div className={`w-12 h-12 bg-gradient-to-br ${cardColors[index % cardColors.length]} rounded-lg flex items-center justify-center text-white text-xl mb-4 shadow-md relative group/icon-edit`}>
-        {mode === 'edit' ? (
+        {mode !== 'preview' ? (
           <IconEditableText
-            mode={mode}
+            mode={(mode || 'preview') as 'preview' | 'edit'}
             value={icon}
             onEdit={(value) => onIconEdit?.(index, value)}
             backgroundType={backgroundType as any}
@@ -351,7 +351,7 @@ export default function FoundersBeliefStack(props: LayoutComponentProps) {
 
         {/* Beliefs Grid */}
         <div className="mb-12">
-          {mode === 'edit' ? (
+          {mode !== 'preview' ? (
             <div className="bg-gray-50 rounded-lg p-6 mb-8">
               <h4 className="font-semibold text-gray-900 mb-3">Belief Items</h4>
               <p className="text-sm text-gray-600 mb-3">
@@ -480,7 +480,7 @@ export default function FoundersBeliefStack(props: LayoutComponentProps) {
             sectionBackground={sectionBackground}
           />
           
-          {mode === 'edit' ? (
+          {mode !== 'preview' ? (
             <div className="space-y-4">
               <div className="flex flex-wrap justify-center gap-4">
                 {[
@@ -490,7 +490,7 @@ export default function FoundersBeliefStack(props: LayoutComponentProps) {
                   { key: 'company_value_4', placeholder: 'Customer Success' },
                   { key: 'company_value_5', placeholder: 'Additional value...' }
                 ].map((value, index) => (
-                  ((blockContent as any)[value.key] || mode === 'edit') && (blockContent as any)[value.key] !== '___REMOVED___' && (
+                  ((blockContent as any)[value.key] || mode !== 'preview') && (blockContent as any)[value.key] !== '___REMOVED___' && (
                     <div key={index} className="relative group/value-item">
                       <div className="bg-white rounded-full px-6 py-3 shadow-md border border-gray-100 flex items-center space-x-2">
                         <EditableAdaptiveText
@@ -508,7 +508,7 @@ export default function FoundersBeliefStack(props: LayoutComponentProps) {
                         />
                         
                         {/* Remove button */}
-                        {mode === 'edit' && (blockContent as any)[value.key] && (blockContent as any)[value.key] !== '___REMOVED___' && (
+                        {mode !== 'preview' && (blockContent as any)[value.key] && (blockContent as any)[value.key] !== '___REMOVED___' && (
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
@@ -529,7 +529,7 @@ export default function FoundersBeliefStack(props: LayoutComponentProps) {
               </div>
               
               {/* Add button */}
-              {mode === 'edit' && companyValues.length < 5 && (
+              {mode !== 'preview' && companyValues.length < 5 && (
                 <button
                   onClick={() => {
                     const emptyIndex = [
@@ -577,7 +577,7 @@ export default function FoundersBeliefStack(props: LayoutComponentProps) {
           />
           
           {/* Trust Indicators */}
-          {mode === 'edit' ? (
+          {mode !== 'preview' ? (
             <EditableTrustIndicators
               mode={mode}
               trustItems={[

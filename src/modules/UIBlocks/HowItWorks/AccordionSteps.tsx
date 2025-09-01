@@ -337,7 +337,7 @@ export default function AccordionSteps(props: LayoutComponentProps) {
             sectionBackground={sectionBackground}
           />
 
-          {(blockContent.subheadline || mode === 'edit') && (
+          {(blockContent.subheadline || mode !== 'preview') && (
             <EditableAdaptiveText
               mode={mode}
               value={blockContent.subheadline || ''}
@@ -354,7 +354,7 @@ export default function AccordionSteps(props: LayoutComponentProps) {
           )}
         </div>
 
-        {mode === 'edit' ? (
+        {mode !== 'preview' ? (
           <div className="space-y-8">
             <div className="p-6 border border-gray-200 rounded-lg bg-gray-50">
               <h4 className="font-semibold text-gray-700 mb-4">Accordion Step Content</h4>
@@ -427,7 +427,7 @@ export default function AccordionSteps(props: LayoutComponentProps) {
         {blockContent.show_tech_specs !== false && (
           <div className="bg-gradient-to-r from-gray-900 to-gray-800 rounded-2xl p-8 text-white mb-12">
             <div className="text-center">
-              {(blockContent.tech_specs_heading || mode === 'edit') && (
+              {(blockContent.tech_specs_heading || mode !== 'preview') && (
                 <EditableAdaptiveText
                   mode={mode}
                   value={blockContent.tech_specs_heading || ''}
@@ -530,7 +530,7 @@ export default function AccordionSteps(props: LayoutComponentProps) {
                 </div>
               </div>
               
-              {(blockContent.tech_specs_description || mode === 'edit') && (
+              {(blockContent.tech_specs_description || mode !== 'preview') && (
                 <EditableAdaptiveText
                   mode={mode}
                   value={blockContent.tech_specs_description || ''}
@@ -549,9 +549,9 @@ export default function AccordionSteps(props: LayoutComponentProps) {
           </div>
         )}
 
-        {(blockContent.cta_text || blockContent.trust_items || mode === 'edit') && (
+        {(blockContent.cta_text || blockContent.trust_items || mode !== 'preview') && (
           <div className="text-center space-y-6">
-            {(blockContent.supporting_text || mode === 'edit') && (
+            {(blockContent.supporting_text || mode !== 'preview') && (
               <EditableAdaptiveText
                 mode={mode}
                 value={blockContent.supporting_text || ''}

@@ -102,22 +102,17 @@ const MinimalNavHeader: React.FC<LayoutComponentProps> = (props) => {
     console.log('🧭 [NAV-DEBUG] MinimalNav click:', { link, mode });
     
     // In edit mode, don't navigate - let text editing work
-    if (mode === 'edit') {
-      console.log('🧭 [NAV-DEBUG] In edit mode, skipping navigation');
+    if (mode !== 'preview') {
       return;
     }
     
     if (link.startsWith('#')) {
-      console.log('🧭 [NAV-DEBUG] Scrolling to section:', link);
       const element = document.querySelector(link);
       if (element) {
         element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        console.log('🧭 [NAV-DEBUG] Scroll initiated');
       } else {
-        console.log('🧭 [NAV-DEBUG] Element not found:', link);
       }
     } else {
-      console.log('🧭 [NAV-DEBUG] External link, opening:', link);
       window.open(link, '_blank');
     }
   };

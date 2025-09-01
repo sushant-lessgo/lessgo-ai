@@ -168,7 +168,7 @@ export default function LogoGrid(props: LayoutComponentProps) {
           />
 
           {/* Subheadline */}
-          {(blockContent.subheadline || mode === 'edit') && (
+          {(blockContent.subheadline || mode !== 'preview') && (
             <EditableAdaptiveText
               mode={mode}
               value={blockContent.subheadline || ''}
@@ -209,7 +209,7 @@ export default function LogoGrid(props: LayoutComponentProps) {
                 
                 {/* Integration Name */}
                 <div className="text-center">
-                  {mode === 'edit' ? (
+                  {mode !== 'preview' ? (
                     <div className="flex items-center justify-center gap-2">
                       <div 
                         contentEditable
@@ -250,7 +250,7 @@ export default function LogoGrid(props: LayoutComponentProps) {
           })}
           
           {/* Add Integration Button (Edit Mode Only) */}
-          {mode === 'edit' && (
+          {mode !== 'preview' && (
             <div className="p-6 bg-white/20 backdrop-blur-sm rounded-lg border-2 border-dashed border-gray-300 hover:border-gray-400 transition-all duration-300 flex flex-col items-center justify-center min-h-[120px]">
               <button
                 onClick={(e) => {

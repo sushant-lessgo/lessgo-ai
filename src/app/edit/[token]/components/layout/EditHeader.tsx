@@ -28,7 +28,6 @@ export function EditHeader({ tokenId }: EditHeaderProps) {
   }
 
   const handleBackgroundSelector = () => {
-    console.log('handleBackgroundSelector clicked');
     setShowBackgroundModal(true);
   };
 

@@ -49,7 +49,6 @@ export function BaseModal({
       try {
         document.removeEventListener('keydown', handleEscape);
       } catch (error) {
-        console.warn('Failed to remove escape key listener:', error);
       }
     };
   }, [isOpen, closeOnEscape, onClose]);
@@ -61,7 +60,6 @@ export function BaseModal({
       try {
         previousFocusRef.current = document.activeElement as HTMLElement;
       } catch (error) {
-        console.warn('Failed to store previous focus:', error);
       }
       
       // Focus modal with error handling
@@ -79,7 +77,6 @@ export function BaseModal({
             }
           }
         } catch (error) {
-          console.warn('Failed to focus modal:', error);
         }
       }, 100);
       
@@ -91,7 +88,6 @@ export function BaseModal({
           previousFocusRef.current.focus();
         }
       } catch (error) {
-        console.warn('Failed to restore focus:', error);
       }
     }
   }, [isOpen]);
@@ -135,7 +131,6 @@ export function BaseModal({
         try {
           document.removeEventListener('keydown', handleKeyDown as any);
         } catch (error) {
-          console.warn('Failed to remove focus trap listener:', error);
         }
       };
     }

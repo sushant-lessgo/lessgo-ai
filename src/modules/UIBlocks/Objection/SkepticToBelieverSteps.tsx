@@ -148,7 +148,7 @@ export default function SkepticToBelieverSteps(props: LayoutComponentProps) {
             sectionBackground={sectionBackground}
           />
 
-          {(blockContent.subheadline || mode === 'edit') && (
+          {(blockContent.subheadline || mode !== 'preview') && (
             <EditableAdaptiveText
               mode={mode}
               value={blockContent.subheadline || ''}
@@ -419,7 +419,7 @@ export default function SkepticToBelieverSteps(props: LayoutComponentProps) {
         </div>
 
         {/* Edit Mode: Instructions */}
-        {mode === 'edit' && (
+        {mode !== 'preview' && (
           <div className="mt-8 p-4 bg-blue-50 border border-blue-200 rounded-lg">
             <p className="text-blue-800 text-sm">
               <strong>Edit Conversion Steps:</strong> Use format "[step title]|[skeptical thought]|[step description]|[next title]|[next thought]|[next description]"

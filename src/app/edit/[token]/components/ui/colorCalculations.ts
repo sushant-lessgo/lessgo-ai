@@ -91,7 +91,6 @@ export function calculateSecondaryColor(primary: string): string {
     
     return hslToHex(h, newSaturation, newLightness);
   } catch (error) {
-    console.warn('Failed to calculate secondary color:', error);
     return '#F8FAFC'; // Light gray fallback
   }
 }
@@ -117,7 +116,6 @@ export function calculateNeutralColor(primary: string): string {
     
     return hslToHex(neutralHue, 0.05, 0.97); // Very light, barely tinted
   } catch (error) {
-    console.warn('Failed to calculate neutral color:', error);
     return '#FFFFFF'; // White fallback
   }
 }
@@ -136,7 +134,6 @@ export function calculateDividerColor(primary: string, neutral: string): string 
     
     return hslToHex(primaryH, dividerSaturation, dividerLightness);
   } catch (error) {
-    console.warn('Failed to calculate divider color:', error);
     return '#E5E7EB'; // Light gray fallback
   }
 }
@@ -153,7 +150,6 @@ export function validateColorContrast(foreground: string, background: string): b
     const contrast = Math.abs(fgL - bgL);
     return contrast > 0.3; // Minimum contrast threshold
   } catch (error) {
-    console.warn('Failed to validate color contrast:', error);
     return true; // Assume valid if calculation fails
   }
 }

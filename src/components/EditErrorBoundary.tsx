@@ -141,14 +141,12 @@ class EditErrorBoundary extends Component<EditErrorBoundaryProps, EditErrorBound
       // Clear any corrupted localStorage for this token
       const storageKey = `edit-store-${tokenId}`;
       if (typeof window !== 'undefined' && localStorage.getItem(storageKey)) {
-        console.log('🗑️ Clearing potentially corrupted localStorage');
         localStorage.removeItem(storageKey);
       }
 
       // Trigger storage cleanup
       await storageManager.performMaintenanceCleanup(true);
       
-      console.log('✅ Store error recovery completed');
     } catch (error) {
       console.error('❌ Store recovery failed:', error);
       throw error;
@@ -159,7 +157,6 @@ class EditErrorBoundary extends Component<EditErrorBoundaryProps, EditErrorBound
    * Recover from storage-related errors
    */
   private recoverFromStorageError = async () => {
-    console.log('🔧 Attempting storage error recovery');
 
     try {
       // Force storage cleanup
@@ -175,7 +172,6 @@ class EditErrorBoundary extends Component<EditErrorBoundaryProps, EditErrorBound
         }
       }
 
-      console.log('✅ Storage error recovery completed');
     } catch (error) {
       console.error('❌ Storage recovery failed:', error);
       throw error;
@@ -186,12 +182,10 @@ class EditErrorBoundary extends Component<EditErrorBoundaryProps, EditErrorBound
    * Recover from render-related errors
    */
   private recoverFromRenderError = async () => {
-    console.log('🔧 Attempting render error recovery');
 
     try {
       // For chunk loading errors, we might need to refresh
       if (this.state.error?.name === 'ChunkLoadError') {
-        console.log('🔄 Chunk load error detected, will suggest page refresh');
       }
 
       // Clear any cached data that might be causing render issues
@@ -202,7 +196,6 @@ class EditErrorBoundary extends Component<EditErrorBoundaryProps, EditErrorBound
         );
       }
 
-      console.log('✅ Render error recovery completed');
     } catch (error) {
       console.error('❌ Render recovery failed:', error);
       throw error;
@@ -213,7 +206,6 @@ class EditErrorBoundary extends Component<EditErrorBoundaryProps, EditErrorBound
    * Generic recovery attempt
    */
   private genericRecovery = async () => {
-    console.log('🔧 Attempting generic error recovery');
 
     try {
       // Basic cleanup
@@ -226,7 +218,6 @@ class EditErrorBoundary extends Component<EditErrorBoundaryProps, EditErrorBound
         delete (window as any).__storeManagerDebug;
       }
 
-      console.log('✅ Generic error recovery completed');
     } catch (error) {
       console.error('❌ Generic recovery failed:', error);
       throw error;

@@ -21,17 +21,12 @@ export function PreviewButton({ tokenId }: PreviewButtonProps) {
     const button = buttonRef.current;
     if (button) {
       const nativeClickHandler = (e: MouseEvent) => {
-        console.log('🔵 Native click event fired!', e);
       };
       
       const mouseDownHandler = (e: MouseEvent) => {
-        console.log('🔵 Native mousedown event fired!', e);
-        console.log('🔍 mousedown defaultPrevented:', e.defaultPrevented);
       };
       
       const mouseUpHandler = (e: MouseEvent) => {
-        console.log('🔵 Native mouseup event fired!', e);
-        console.log('🔍 mouseup defaultPrevented:', e.defaultPrevented);
       };
       
       button.addEventListener('click', nativeClickHandler);

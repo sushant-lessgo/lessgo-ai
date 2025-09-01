@@ -2,7 +2,7 @@ import React from 'react';
 import { EditableAdaptiveText } from '@/components/layout/EditableContent';
 
 interface EditableTrustIndicatorsProps {
-  mode: 'view' | 'edit' | 'preview';
+  mode: 'preview' | 'edit';
   trustItems: string[];
   onTrustItemChange: (index: number, value: string) => void;
   onAddTrustItem?: () => void;
@@ -70,7 +70,7 @@ export function EditableTrustIndicators({
     }
   };
 
-  if (mode === 'view' && validItems.length === 0) {
+  if (mode === 'preview' && validItems.length === 0) {
     return null;
   }
 
@@ -97,7 +97,7 @@ export function EditableTrustIndicators({
               <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
             </svg>
             
-            {mode === 'edit' ? (
+            {mode !== 'preview' ? (
               <div className="flex items-center space-x-1">
                 <EditableAdaptiveText
                   mode={mode}
@@ -136,7 +136,7 @@ export function EditableTrustIndicators({
       </div>
 
       {/* Add button - only show in edit mode */}
-      {mode === 'edit' && showAddButton && validItems.length < maxItems && (
+      {mode !== 'preview' && showAddButton && validItems.length < maxItems && (
         <button
           onClick={handleAddItem}
           className="flex items-center space-x-1 text-sm text-blue-600 hover:text-blue-800 transition-colors mt-2 self-start"

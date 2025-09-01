@@ -267,7 +267,7 @@ export default function VideoWalkthrough(props: LayoutComponentProps) {
             sectionBackground={sectionBackground}
           />
 
-          {(blockContent.subheadline || mode === 'edit') && (
+          {(blockContent.subheadline || mode !== 'preview') && (
             <EditableAdaptiveText
               mode={mode}
               value={blockContent.subheadline || ''}
@@ -284,7 +284,7 @@ export default function VideoWalkthrough(props: LayoutComponentProps) {
           )}
         </div>
 
-        {mode === 'edit' ? (
+        {mode !== 'preview' ? (
           <div className="space-y-8">
             <div className="p-6 border border-gray-200 rounded-lg bg-gray-50">
               <h4 className="font-semibold text-gray-700 mb-4">Video Content</h4>
@@ -461,7 +461,7 @@ export default function VideoWalkthrough(props: LayoutComponentProps) {
         {blockContent.show_demo_stats !== false && (
           <div className="bg-gradient-to-r from-gray-50 to-white rounded-2xl p-8 border border-gray-100 mb-12">
             <div className="text-center">
-              {(blockContent.demo_stats_heading || mode === 'edit') && (
+              {(blockContent.demo_stats_heading || mode !== 'preview') && (
                 <div className="relative group/demo-heading">
                   <EditableAdaptiveText
                     mode={mode}
@@ -476,7 +476,7 @@ export default function VideoWalkthrough(props: LayoutComponentProps) {
                     data-section-id={sectionId}
                     data-element-key="demo_stats_heading"
                   />
-                  {mode === 'edit' && (
+                  {mode !== 'preview' && (
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
@@ -529,7 +529,7 @@ export default function VideoWalkthrough(props: LayoutComponentProps) {
                       data-section-id={sectionId}
                       data-element-key="demo_stat_1_description"
                     />
-                    {mode === 'edit' && (
+                    {mode !== 'preview' && (
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
@@ -581,7 +581,7 @@ export default function VideoWalkthrough(props: LayoutComponentProps) {
                       data-section-id={sectionId}
                       data-element-key="demo_stat_2_description"
                     />
-                    {mode === 'edit' && (
+                    {mode !== 'preview' && (
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
@@ -633,7 +633,7 @@ export default function VideoWalkthrough(props: LayoutComponentProps) {
                       data-section-id={sectionId}
                       data-element-key="demo_stat_3_description"
                     />
-                    {mode === 'edit' && (
+                    {mode !== 'preview' && (
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
@@ -655,9 +655,9 @@ export default function VideoWalkthrough(props: LayoutComponentProps) {
           </div>
         )}
 
-        {(blockContent.cta_text || blockContent.trust_items || mode === 'edit') && (
+        {(blockContent.cta_text || blockContent.trust_items || mode !== 'preview') && (
           <div className="text-center space-y-6">
-            {(blockContent.supporting_text || mode === 'edit') && (
+            {(blockContent.supporting_text || mode !== 'preview') && (
               <EditableAdaptiveText
                 mode={mode}
                 value={blockContent.supporting_text || ''}

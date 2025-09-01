@@ -186,7 +186,7 @@ export default function BasicFeatureGrid(props: LayoutComponentProps) {
           />
 
           {/* Subheadline */}
-          {(blockContent.subheadline || mode === 'edit') && (
+          {(blockContent.subheadline || mode !== 'preview') && (
             <EditableAdaptiveText
               mode={mode}
               value={blockContent.subheadline || ''}
@@ -234,7 +234,7 @@ export default function BasicFeatureGrid(props: LayoutComponentProps) {
                         </div>
                       )}
                       <div style={bodyStyle} className="font-semibold">
-                        {mode === 'edit' && competitor.isPrimary ? (
+                        {mode !== 'preview' && competitor.isPrimary ? (
                           <div 
                             style={bodyStyle}
                             contentEditable

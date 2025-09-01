@@ -56,12 +56,10 @@ export function useEditStore(
    */
   const initializeStore = async (newTokenId: string): Promise<EditStoreInstance> => {
     try {
-      // console.log(`🎯 useEditStore: Initializing store for token ${newTokenId}`);
       
       // Check if we're switching tokens
       const isTokenSwitch = currentTokenRef.current && currentTokenRef.current !== newTokenId;
       if (isTokenSwitch && resetOnTokenChange) {
-        // console.log(`🔄 useEditStore: Token switch detected: ${currentTokenRef.current} → ${newTokenId}`);
       }
 
       // Get store from manager

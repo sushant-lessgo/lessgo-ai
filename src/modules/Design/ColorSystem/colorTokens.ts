@@ -127,7 +127,6 @@ export function generateColorTokens({
       try {
         return validateWCAGContrast(smartAccentCSS, bg, 'AA');
       } catch (error) {
-        console.warn('WCAG validation failed for', smartAccentCSS, 'on', bg, error);
         return false;
       }
     });
@@ -150,17 +149,14 @@ export function generateColorTokens({
         safeCTABg = workingCandidateBg;
         const candidateTextHex = getSmartTextColor(workingCandidateBg, 'body');
         safeCTAText = hexToTailwindClass(candidateTextHex);
-        // console.log('✅ Using brand-safe accent color for CTA:', safeCTABg, 'with text:', safeCTAText);
       } else {
         // ✅ IMPROVED: Use branded fallback instead of generic gray
         const brandedFallback = accentColor ? `bg-${accentColor}-500` : smartAccentCSS;
         safeCTABg = brandedFallback;
         const fallbackTextHex = getSmartTextColor(brandedFallback, 'body');
         safeCTAText = hexToTailwindClass(fallbackTextHex);
-        // console.log('✅ Using branded fallback for CTA:', safeCTABg, 'with text:', safeCTAText);
       }
     } else {
-      // console.log('✅ Using original accent color for CTA:', safeCTABg, 'with text:', safeCTAText);
     }
     
     return { safeCTABg, safeCTAText };
@@ -169,7 +165,6 @@ export function generateColorTokens({
   const { safeCTABg, safeCTAText } = validateCTAColors();
 
   // Debug logging (reduced)
-  // console.log('🎨 [TOKENS-DEBUG] Generated tokens:', { safeCTABg, safeCTAText });
 
   return {
     // 🎨 CTA & Interactive Elements - Uses validated accent colors for clean, consistent buttons
@@ -272,7 +267,6 @@ export function generateColorTokensFromBackgroundSystem(backgroundSystem: {
   accentColor: string;
   accentCSS: string;
 }) {
-  // console.log('🎨 Generating color tokens from background system:', backgroundSystem);
   
   return generateColorTokens({
     baseColor: backgroundSystem.baseColor,

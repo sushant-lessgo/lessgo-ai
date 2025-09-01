@@ -289,7 +289,7 @@ export function generateDiagnosticReport(
 
   // Determine if element toolbar should show
   const shouldElementToolbarShow = (
-    selection.mode === 'edit' &&
+    selection.mode !== 'preview' &&
     !!selection.selectedElement &&
     selection.anchorCount > 0 &&
     selection.priorityResult.shouldShowToolbar.element &&

@@ -145,7 +145,7 @@ const QuoteCard = ({
         </div>
 
         {/* Quote Text */}
-        {mode === 'edit' ? (
+        {mode !== 'preview' ? (
           <div 
             contentEditable
             suppressContentEditableWarning
@@ -171,7 +171,7 @@ const QuoteCard = ({
           
           {/* Author Details */}
           <div>
-            {mode === 'edit' ? (
+            {mode !== 'preview' ? (
               <>
                 <div 
                   contentEditable
@@ -225,7 +225,7 @@ const QuoteCard = ({
       <div className="bg-gradient-to-r from-blue-50 to-indigo-50 px-8 py-6 border-t border-gray-100">
         <div className="text-center">
           {/* Metric Value */}
-          {mode === 'edit' ? (
+          {mode !== 'preview' ? (
             <div 
               contentEditable
               suppressContentEditableWarning
@@ -243,7 +243,7 @@ const QuoteCard = ({
           )}
 
           {/* Metric Label */}
-          {mode === 'edit' ? (
+          {mode !== 'preview' ? (
             <div 
               contentEditable
               suppressContentEditableWarning
@@ -352,7 +352,7 @@ export default function QuoteWithMetric(props: QuoteWithMetricProps) {
           />
 
           {/* Optional Subheadline */}
-          {(blockContent.subheadline || mode === 'edit') && (
+          {(blockContent.subheadline || mode !== 'preview') && (
             <EditableAdaptiveText
               mode={mode}
               value={blockContent.subheadline || ''}
@@ -393,7 +393,7 @@ export default function QuoteWithMetric(props: QuoteWithMetricProps) {
         </div>
 
         {/* Credibility Footer */}
-        {(blockContent.footer_text || mode === 'edit') && (
+        {(blockContent.footer_text || mode !== 'preview') && (
           <div className="mt-16 text-center">
             <div className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-emerald-50 to-green-50 border border-emerald-200 rounded-full text-emerald-800">
               <IconEditableText

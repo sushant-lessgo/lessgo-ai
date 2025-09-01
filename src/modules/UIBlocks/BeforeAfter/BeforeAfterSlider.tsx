@@ -303,7 +303,7 @@ const InteractiveSlider = React.memo(({
             />
             
             {/* Remove button */}
-            {mode === 'edit' && (
+            {mode !== 'preview' && (
               <button
                 onClick={(e) => {
                   e.stopPropagation();
@@ -384,7 +384,7 @@ export default function BeforeAfterSlider(props: LayoutComponentProps) {
             sectionBackground={sectionBackground}
           />
 
-          {(blockContent.subheadline || mode === 'edit') && (
+          {(blockContent.subheadline || mode !== 'preview') && (
             <EditableAdaptiveText
               mode={mode}
               value={blockContent.subheadline || ''}
@@ -433,7 +433,7 @@ export default function BeforeAfterSlider(props: LayoutComponentProps) {
           />
           
           {/* Add interaction hint back button */}
-          {mode === 'edit' && blockContent.show_interaction_hint === 'false' && (
+          {mode !== 'preview' && blockContent.show_interaction_hint === 'false' && (
             <div className="text-center mt-4">
               <button
                 onClick={() => handleContentUpdate('show_interaction_hint', 'true')}
@@ -526,9 +526,9 @@ export default function BeforeAfterSlider(props: LayoutComponentProps) {
           </div>
         </div>
 
-        {(blockContent.cta_text || blockContent.trust_items || mode === 'edit') && (
+        {(blockContent.cta_text || blockContent.trust_items || mode !== 'preview') && (
           <div className="text-center space-y-6">
-            {(blockContent.supporting_text || mode === 'edit') && (
+            {(blockContent.supporting_text || mode !== 'preview') && (
               <EditableAdaptiveText
                 mode={mode}
                 value={blockContent.supporting_text || ''}

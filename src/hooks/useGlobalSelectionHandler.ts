@@ -79,13 +79,11 @@ export function useGlobalSelectionHandler({
       signal 
     });
     
-    // console.log('🎯 Global selection handler attached', { editorId });
     
     // Cleanup function - AbortController automatically removes all listeners
     return () => {
       controller.abort();
       controllerRef.current = null;
-      // console.log('🧹 Global selection handler cleaned up', { editorId });
     };
   }, [editorId, onSelectionChange, onFocusOut, enabled]);
   

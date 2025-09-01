@@ -64,19 +64,16 @@ export function ElementToolbar({ elementSelection, position, contextActions }: E
   // NOW WE CAN DO CONDITIONAL RETURNS AFTER ALL HOOKS ARE CALLED
   
   // STEP 1: Priority-based early returns
-  // console.log('🔧 ElementToolbar priority check:', {
   //   isVisible,
   //   reason,
   //   condition: !isVisible
   // });
   
   if (!isVisible) {
-    // console.log('🔧 ElementToolbar hidden by priority system:', reason);
     return null;
   }
   
   // Don't show element toolbar if image or form toolbar is explicitly active
-  // console.log('🔧 ElementToolbar toolbar state check:', {
   //   toolbarType: toolbar?.type,
   //   toolbarVisible: toolbar?.visible,
   //   toolbarTargetId: toolbar?.targetId,
@@ -84,11 +81,9 @@ export function ElementToolbar({ elementSelection, position, contextActions }: E
   // });
   
   if (toolbar?.type === 'image' || toolbar?.type === 'form') {
-    // console.log('🔧🔧🔧 ElementToolbar hidden: specialized toolbar active:', toolbar.type);
     return null;
   }
   
-  // console.log('🔧 ElementToolbar proceeding to render with toolbar type:', toolbar?.type);
 
   // Enter text editing mode using unified system
   const handleEditText = (e?: React.MouseEvent) => {

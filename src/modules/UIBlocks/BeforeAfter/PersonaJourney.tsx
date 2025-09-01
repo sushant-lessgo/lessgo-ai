@@ -382,7 +382,7 @@ export default function PersonaJourney(props: LayoutComponentProps) {
             sectionBackground={sectionBackground}
           />
 
-          {(blockContent.subheadline || mode === 'edit') && (
+          {(blockContent.subheadline || mode !== 'preview') && (
             <EditableAdaptiveText
               mode={mode}
               value={blockContent.subheadline || ''}
@@ -401,7 +401,7 @@ export default function PersonaJourney(props: LayoutComponentProps) {
         </div>
 
         <div className="mb-12">
-          {mode === 'edit' ? (
+          {mode !== 'preview' ? (
             <div className="space-y-4 p-6 border border-gray-200 rounded-lg bg-gray-50">
               <h4 className="font-semibold text-gray-700">Persona Information</h4>
               
@@ -463,7 +463,7 @@ export default function PersonaJourney(props: LayoutComponentProps) {
 
         <div className="grid lg:grid-cols-3 gap-8 mb-12">
           
-          {mode === 'edit' ? (
+          {mode !== 'preview' ? (
             <>
               <div className="space-y-4 p-6 border border-gray-200 rounded-lg bg-gray-50">
                 <h4 className="font-semibold text-gray-700">Before Phase</h4>
@@ -777,7 +777,7 @@ export default function PersonaJourney(props: LayoutComponentProps) {
             </div>
             
             {/* Remove button */}
-            {mode === 'edit' && (
+            {mode !== 'preview' && (
               <button
                 onClick={(e) => {
                   e.stopPropagation();
@@ -795,7 +795,7 @@ export default function PersonaJourney(props: LayoutComponentProps) {
         )}
         
         {/* Add summary section back button */}
-        {mode === 'edit' && blockContent.show_summary_section === 'false' && (
+        {mode !== 'preview' && blockContent.show_summary_section === 'false' && (
           <div className="mb-12 text-center">
             <button
               onClick={() => handleContentUpdate('show_summary_section', 'true')}
@@ -809,9 +809,9 @@ export default function PersonaJourney(props: LayoutComponentProps) {
           </div>
         )}
 
-        {(blockContent.cta_text || blockContent.trust_items || mode === 'edit') && (
+        {(blockContent.cta_text || blockContent.trust_items || mode !== 'preview') && (
           <div className="text-center space-y-6">
-            {(blockContent.supporting_text || mode === 'edit') && (
+            {(blockContent.supporting_text || mode !== 'preview') && (
               <EditableAdaptiveText
                 mode={mode}
                 value={blockContent.supporting_text || ''}

@@ -144,12 +144,12 @@ export default function AnimatedUpgradePath(props: LayoutComponentProps) {
             sectionBackground={sectionBackground}
           />
           
-          {(blockContent.subheadline || mode === 'edit') && (
+          {(blockContent.subheadline || mode !== 'preview') && (
             <EditableAdaptiveText
               value={blockContent.subheadline || 'Add subheadline...'}
               mode={mode}
               onEdit={(value) => handleContentUpdate('subheadline', value)}
-              className={`max-w-2xl mx-auto ${!blockContent.subheadline && mode === 'edit' ? 'opacity-50' : ''}`}
+              className={`max-w-2xl mx-auto ${!blockContent.subheadline && mode !== 'preview' ? 'opacity-50' : ''}`}
               backgroundType={backgroundType === 'custom' ? 'secondary' : (backgroundType || 'secondary')}
               colorTokens={colorTokens}
               variant="body"
@@ -188,7 +188,7 @@ export default function AnimatedUpgradePath(props: LayoutComponentProps) {
                   </div>
 
                   {/* Title */}
-                  {mode === 'edit' ? (
+                  {mode !== 'preview' ? (
                     <input
                       type="text"
                       value={title}
@@ -207,7 +207,7 @@ export default function AnimatedUpgradePath(props: LayoutComponentProps) {
                   )}
 
                   {/* Description */}
-                  {mode === 'edit' ? (
+                  {mode !== 'preview' ? (
                     <textarea
                       value={stageDescriptions[index]}
                       onChange={(e) => handleStageDescriptionUpdate(index, e.target.value)}
@@ -244,14 +244,14 @@ export default function AnimatedUpgradePath(props: LayoutComponentProps) {
         </div>
 
         {/* CTA Section */}
-        {(blockContent.cta_text || mode === 'edit') && (
+        {(blockContent.cta_text || mode !== 'preview') && (
           <div className="text-center mt-12">
             <button className={`bg-primary text-white px-8 py-4 rounded-lg font-semibold hover:opacity-90 transition-opacity inline-flex items-center`}>
               <EditableAdaptiveText
                 value={blockContent.cta_text || 'Add CTA text...'}
                 mode={mode}
                 onEdit={(value) => handleContentUpdate('cta_text', value)}
-                className={!blockContent.cta_text && mode === 'edit' ? 'opacity-75' : ''}
+                className={!blockContent.cta_text && mode !== 'preview' ? 'opacity-75' : ''}
                 backgroundType="secondary"
                 colorTokens={{ ...colorTokens, textPrimary: 'text-white' }}
                 variant="body"

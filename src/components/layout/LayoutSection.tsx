@@ -103,7 +103,7 @@ export const LayoutSection = forwardRef<HTMLElement, LayoutSectionProps>(({
       </section>
 
       {/* Edit Mode Indicators */}
-      {mode === 'edit' && editModeInfo && (
+      {mode !== 'preview' && editModeInfo && (
         <div className="bg-blue-50 border-t border-blue-200 px-4 py-3">
           <div className="max-w-7xl mx-auto">
             <div className="flex items-start text-blue-700">

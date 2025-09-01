@@ -83,7 +83,7 @@ const IconEditableText: React.FC<IconEditableTextProps> = ({
     ${className} 
     ${sizeClasses[iconSize]} 
     flex items-center justify-center text-center cursor-text
-    ${mode === 'edit' ? 'hover:bg-gray-50 rounded border border-transparent hover:border-gray-200' : ''}
+    ${mode !== 'preview' ? 'hover:bg-gray-50 rounded border border-transparent hover:border-gray-200' : ''}
   `.trim();
 
   if (mode === 'preview') {
@@ -117,7 +117,7 @@ const IconEditableText: React.FC<IconEditableTextProps> = ({
       />
       
       {/* Icon picker trigger button */}
-      {mode === 'edit' && showIconButton && (
+      {showIconButton && (
         <button
           ref={iconButtonRef}
           onClick={handleIconButtonClick}

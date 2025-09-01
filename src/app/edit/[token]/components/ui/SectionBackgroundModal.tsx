@@ -85,16 +85,12 @@ export function SectionBackgroundModal({ isOpen, onClose, sectionId }: SectionBa
       if (section.backgroundType === 'custom' && section.sectionBackground?.type === 'custom') {
         // Use the existing custom background
         initBackground = section.sectionBackground;
-        console.log('🎨 Initializing with existing custom background:', initBackground);
-        console.log('🎨 Custom solid color:', initBackground.custom?.solid);
-        console.log('🎨 Custom gradient:', initBackground.custom?.gradient);
       } else {
         // Use theme background
         initBackground = {
           type: 'theme',
           themeColor: (section.backgroundType as ThemeColorType) || 'neutral'
         };
-        console.log('🎨 Initializing with theme background:', initBackground);
       }
       
       setLocalBackground(initBackground);
@@ -102,10 +98,8 @@ export function SectionBackgroundModal({ isOpen, onClose, sectionId }: SectionBa
       // ✅ Set picker mode based on custom background type
       if (initBackground.type === 'custom' && initBackground.custom?.gradient) {
         setPickerMode('gradient');
-        console.log('🎨 Setting picker mode to gradient');
       } else {
         setPickerMode('solid');
-        console.log('🎨 Setting picker mode to solid');
       }
     }
   }, [isOpen, section]);
@@ -154,7 +148,6 @@ export function SectionBackgroundModal({ isOpen, onClose, sectionId }: SectionBa
 
   // Handle theme color selection
   const handleThemeColorChange = useCallback((themeColor: ThemeColorType) => {
-    console.log('🎨 Theme color changed to:', themeColor);
     setLocalBackground(prev => ({
       ...prev,
       themeColor
@@ -185,32 +178,27 @@ export function SectionBackgroundModal({ isOpen, onClose, sectionId }: SectionBa
       // For theme backgrounds, update the backgroundType field (this is what controls visual rendering)
       if (setBackgroundType) {
         setBackgroundType(sectionId, localBackground.themeColor as any);
-        console.log('✅ setBackgroundType called with:', localBackground.themeColor);
       } else {
         console.error('❌ setBackgroundType function not available');
       }
     } else if (localBackground.type === 'custom' && localBackground.custom) {
       // ✅ NEW: Handle custom backgrounds
-      console.log('🎨 Applying custom background:', localBackground.custom);
       
       // For custom backgrounds, we need to set a special backgroundType and store the custom data
       if (setBackgroundType) {
         // Set backgroundType to 'custom' so components know to look for custom background data
         setBackgroundType(sectionId, 'custom' as any);
-        console.log('✅ setBackgroundType called with: custom');
       }
       
       // Save the custom background data
       if (setSectionBackground) {
         setSectionBackground(sectionId, localBackground);
-        console.log('✅ setSectionBackground called with custom data:', localBackground);
       }
     }
     
     // Always save to the new sectionBackground format for future compatibility
     if (setSectionBackground) {
       setSectionBackground(sectionId, localBackground);
-      console.log('✅ setSectionBackground called for future compatibility');
     }
     
     onClose();
@@ -223,11 +211,9 @@ export function SectionBackgroundModal({ isOpen, onClose, sectionId }: SectionBa
   
   
   if (!isOpen) {
-    console.log('🎯 Modal not open, returning null');
     return null;
   }
   
-  console.log('🎯 Modal is open, rendering content');
   
   const modalContent = (
     <div className="fixed inset-0 z-50 overflow-y-auto">
@@ -315,7 +301,6 @@ export function SectionBackgroundModal({ isOpen, onClose, sectionId }: SectionBa
                     }
                   ].map((themeOption) => {
                     const isSelected = localBackground.themeColor === themeOption.key;
-                    console.log('🎨 Theme option:', themeOption.key, 'isSelected:', isSelected, 'localBackground.themeColor:', localBackground.themeColor);
                     return (
                     <button
                       key={themeOption.key}

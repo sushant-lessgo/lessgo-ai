@@ -229,7 +229,7 @@ export function useToolbarVisibility() {
   const toolbar = useToolbarState();
   
   return useMemo(() => {
-    return mode === 'edit' && toolbar.visible && toolbar.type && toolbar.targetId;
+    return mode !== 'preview' && toolbar.visible && toolbar.type && toolbar.targetId;
   }, [mode, toolbar.visible, toolbar.type, toolbar.targetId]);
 }
 

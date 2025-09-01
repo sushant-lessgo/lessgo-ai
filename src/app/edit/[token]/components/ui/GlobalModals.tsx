@@ -15,13 +15,11 @@ let modalState = {
 const modalEvents = new EventTarget();
 
 export function showBackgroundModal(sectionId: string) {
-  console.log('🎯 showBackgroundModal called for:', sectionId);
   modalState.backgroundModal = { isOpen: true, sectionId };
   modalEvents.dispatchEvent(new Event('stateChange'));
 }
 
 export function hideBackgroundModal() {
-  console.log('🎯 hideBackgroundModal called');
   modalState.backgroundModal = { isOpen: false, sectionId: null };
   modalEvents.dispatchEvent(new Event('stateChange'));
 }
@@ -31,7 +29,6 @@ export function GlobalModals() {
   
   useEffect(() => {
     const handleStateChange = () => {
-      console.log('🎯 GlobalModals state changed:', modalState);
       setState({ ...modalState });
     };
     
@@ -39,7 +36,6 @@ export function GlobalModals() {
     return () => modalEvents.removeEventListener('stateChange', handleStateChange);
   }, []);
   
-  // console.log('🎯 GlobalModals rendering with state:', state);
   
   return (
     <>

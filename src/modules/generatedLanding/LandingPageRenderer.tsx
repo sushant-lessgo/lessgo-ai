@@ -83,7 +83,7 @@ const MissingLayoutComponent: React.FC<{ sectionId: string; layout: string }> = 
             <br />
             Layout: <code className="bg-yellow-200 px-2 py-1 rounded">{layout}</code>
           </p>
-          {mode === 'edit' && (
+          {mode !== 'preview' && (
             <p className="text-sm text-yellow-600">
               This layout component needs to be implemented.
             </p>
@@ -367,7 +367,7 @@ const finalSections: OrderedSection[] = processedSections
 
     // Handle section-specific errors
     const sectionError = errors[sectionId];
-    if (sectionError && mode === 'edit') {
+    if (sectionError && mode !== 'preview') {
       return (
         <section key={sectionId} className="py-8 px-4 bg-red-50 border-l-4 border-red-400">
           <div className="max-w-6xl mx-auto">
@@ -395,7 +395,7 @@ const finalSections: OrderedSection[] = processedSections
       if (sectionId === 'hero') {
         logger.debug('🎯 Rendering hero section with data:', {
           mode,
-          isEditable: mode === 'edit',
+          isEditable: mode !== 'preview',
           data,
           ctaConfig: data?.ctaConfig,
           elements: data?.elements
@@ -414,7 +414,7 @@ const finalSections: OrderedSection[] = processedSections
               backgroundType={backgroundType}
               sectionBackgroundCSS={sectionBackgroundCSS}
               className=""
-              isEditable={mode === 'edit'}
+              isEditable={mode !== 'preview'}
               {...(data || {})}
             />
           </div>
@@ -434,7 +434,7 @@ const finalSections: OrderedSection[] = processedSections
               backgroundType={backgroundType}
               sectionBackgroundCSS={sectionBackgroundCSS}
               className=""
-              isEditable={mode === 'edit'}
+              isEditable={mode !== 'preview'}
               {...(data || {})}
             />
           </SmartTextSection>
@@ -443,7 +443,7 @@ const finalSections: OrderedSection[] = processedSections
     } catch (error) {
       logger.error(`Error rendering section ${sectionId}:`, error);
       
-      if (mode === 'edit') {
+      if (mode !== 'preview') {
         return (
           <section key={sectionId} className="py-8 px-4 bg-red-50">
             <div className="max-w-6xl mx-auto text-center">
@@ -477,7 +477,7 @@ const finalSections: OrderedSection[] = processedSections
           </div>
           <h3 className="text-lg font-medium text-gray-900 mb-2">No Sections to Display</h3>
           <p className="text-gray-500">
-            {mode === 'edit' 
+            {mode !== 'preview' 
               ? 'Add sections to start building your landing page.' 
               : 'This landing page is empty.'
             }
@@ -613,7 +613,7 @@ const finalSections: OrderedSection[] = processedSections
       {orderedSections.map(renderSection)}
 
       {/* ✅ Enhanced Edit Mode Indicators with Alternating Info */}
-      {mode === 'edit' && (
+      {mode !== 'preview' && (
         <div className="fixed bottom-4 right-4 z-50 space-y-2">
           <div className="bg-blue-600 text-white px-3 py-2 rounded-lg shadow-lg text-sm font-medium">
             ✏️ Edit Mode Active
@@ -650,7 +650,7 @@ const finalSections: OrderedSection[] = processedSections
       )}
 
       {/* ✅ Enhanced Development Info with Alternating Pattern */}
-      {mode === 'edit' && process.env.NODE_ENV === 'development' && (
+      {mode !== 'preview' && process.env.NODE_ENV === 'development' && (
         <div className="bg-gray-900 text-white p-4 text-xs font-mono">
           <div className="max-w-6xl mx-auto">
             <div className="grid grid-cols-2 md:grid-cols-6 gap-4">

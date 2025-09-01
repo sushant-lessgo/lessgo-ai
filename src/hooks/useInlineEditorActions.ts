@@ -59,7 +59,6 @@ export function useInlineEditorActions() {
     // Validate format
     const validation = validateFormat(formatUpdate);
     if (!validation.valid) {
-      console.warn('Invalid format:', validation.errors);
       announceLiveRegion(`Invalid format: ${validation.errors.join(', ')}`);
       return false;
     }
@@ -69,7 +68,6 @@ export function useInlineEditorActions() {
       try {
         await animateFormatChange(element, format, currentValue, active as string);
       } catch (error) {
-        console.warn('Animation failed, applying directly:', error);
         executeFormat({ type: format as any, value: active });
       }
     } else {

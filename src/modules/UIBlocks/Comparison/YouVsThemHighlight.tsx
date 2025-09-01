@@ -115,14 +115,14 @@ export default function YouVsThemHighlight(props: LayoutComponentProps) {
             sectionBackground={sectionBackground}
           />
           
-          {(blockContent.subheadline || mode === 'edit') && (
+          {(blockContent.subheadline || mode !== 'preview') && (
             <EditableAdaptiveText
               mode={mode}
               value={blockContent.subheadline || 'Add subheadline...'}
               onEdit={(value) => handleContentUpdate('subheadline', value)}
               backgroundType={backgroundType === 'custom' ? 'secondary' : backgroundType}
               colorTokens={colorTokens}
-              className={`max-w-2xl mx-auto ${!blockContent.subheadline && mode === 'edit' ? 'opacity-50' : ''}`}
+              className={`max-w-2xl mx-auto ${!blockContent.subheadline && mode !== 'preview' ? 'opacity-50' : ''}`}
               sectionId={sectionId}
               elementKey="subheadline"
               variant="body"
@@ -157,7 +157,7 @@ export default function YouVsThemHighlight(props: LayoutComponentProps) {
               {themPoints.map((point, index) => (
                 <li key={index} className="flex items-start">
                   <span className="text-red-500 mr-3 mt-1 flex-shrink-0">✗</span>
-                  {mode === 'edit' ? (
+                  {mode !== 'preview' ? (
                     <input
                       type="text"
                       value={point}
@@ -200,7 +200,7 @@ export default function YouVsThemHighlight(props: LayoutComponentProps) {
               {youPoints.map((point, index) => (
                 <li key={index} className="flex items-start">
                   <span className={`text-primary mr-3 mt-1 flex-shrink-0`}>✓</span>
-                  {mode === 'edit' ? (
+                  {mode !== 'preview' ? (
                     <input
                       type="text"
                       value={point}
@@ -220,7 +220,7 @@ export default function YouVsThemHighlight(props: LayoutComponentProps) {
         </div>
 
         {/* CTA Section */}
-        {(blockContent.cta_text || mode === 'edit') && (
+        {(blockContent.cta_text || mode !== 'preview') && (
           <div className="text-center">
             <button className={`${'bg-primary'} text-white px-8 py-4 rounded-lg font-semibold hover:opacity-90 transition-opacity`}>
               <EditableAdaptiveText
@@ -229,7 +229,7 @@ export default function YouVsThemHighlight(props: LayoutComponentProps) {
                 onEdit={(value) => handleContentUpdate('cta_text', value)}
                 backgroundType={backgroundType === 'custom' ? 'secondary' : backgroundType}
                 colorTokens={{ ...colorTokens, textPrimary: 'text-white' }}
-                className={!blockContent.cta_text && mode === 'edit' ? 'opacity-75' : ''}
+                className={!blockContent.cta_text && mode !== 'preview' ? 'opacity-75' : ''}
                 sectionId={sectionId}
                 elementKey="cta_text"
                 variant="body"

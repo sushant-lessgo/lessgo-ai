@@ -128,7 +128,7 @@ const HighlightCard = ({
         <div className="flex-1">
           {/* Highlight Title */}
           <div className="mb-4">
-            {mode === 'edit' ? (
+            {mode !== 'preview' ? (
               <div 
                 contentEditable
                 suppressContentEditableWarning
@@ -148,7 +148,7 @@ const HighlightCard = ({
           
           {/* Highlight Description */}
           <div>
-            {mode === 'edit' ? (
+            {mode !== 'preview' ? (
               <div 
                 contentEditable
                 suppressContentEditableWarning
@@ -241,7 +241,7 @@ export default function StackedHighlights(props: StackedHighlightsProps) {
           />
 
           {/* Optional Mechanism Name */}
-          {(blockContent.mechanism_name || mode === 'edit') && (
+          {(blockContent.mechanism_name || mode !== 'preview') && (
             <div className="inline-flex items-center px-4 py-2 bg-blue-100 border border-blue-300 rounded-full">
               {blockContent.mechanism_name && (
                 <svg className="w-4 h-4 mr-2 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
@@ -284,7 +284,7 @@ export default function StackedHighlights(props: StackedHighlightsProps) {
         </div>
 
         {/* Unique Value Proposition */}
-        {(blockContent.footer_text || mode === 'edit') && (
+        {(blockContent.footer_text || mode !== 'preview') && (
           <div className="mt-16 text-center">
             <div className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-200 rounded-full">
               <svg className="w-5 h-5 mr-2 text-blue-600" fill="currentColor" viewBox="0 0 20 20">

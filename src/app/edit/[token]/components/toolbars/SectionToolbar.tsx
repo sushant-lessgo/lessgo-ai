@@ -33,7 +33,6 @@ export function SectionToolbar({ sectionId, position, contextActions }: SectionT
 
   // STEP 1: Priority-based early returns
   if (!isVisible) {
-    console.log('🏗️ SectionToolbar hidden by priority system:', reason);
     return null;
   }
   
@@ -138,7 +137,6 @@ export function SectionToolbar({ sectionId, position, contextActions }: SectionT
 
   // Handle Add Element action - Use the enhanced action with restrictions
   const handleAddElement = () => {
-    console.log('🎯 SectionToolbar handleAddElement clicked for section:', sectionId);
     
     const buttonElement = document.querySelector('[data-action="add-element"]');
     let pickerPosition = { x: 0, y: 0 };
@@ -149,9 +147,7 @@ export function SectionToolbar({ sectionId, position, contextActions }: SectionT
         x: rect.left,
         y: rect.bottom + 8, // Position below the button
       };
-      console.log('🎯 Button found, position calculated:', pickerPosition);
     } else {
-      console.warn('🎯 Add element button not found!');
     }
     
     // Use the executeAction which includes restriction logic
@@ -262,7 +258,6 @@ export function SectionToolbar({ sectionId, position, contextActions }: SectionT
       label: 'Background Settings',
       icon: 'palette',
       handler: () => {
-        console.log('Background settings clicked for section:', sectionId);
         showBackgroundModal(sectionId);
       },
     },
@@ -386,8 +381,6 @@ export function SectionToolbar({ sectionId, position, contextActions }: SectionT
             onClick={(e) => {
               e.stopPropagation();
               e.preventDefault();
-              console.log('🎯 Advanced trigger clicked, current state:', showAdvanced);
-              console.log('🎯 Advanced actions:', advancedActions);
               setShowAdvanced(!showAdvanced);
             }}
             onMouseDown={(e) => {

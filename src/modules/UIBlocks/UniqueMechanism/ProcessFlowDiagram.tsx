@@ -161,7 +161,7 @@ export default function ProcessFlowDiagram(props: LayoutComponentProps) {
         </div>
 
         {/* Key Benefits */}
-        {(blockContent.benefits_title || blockContent.benefit_titles || mode === 'edit') && (
+        {(blockContent.benefits_title || blockContent.benefit_titles || mode !== 'preview') && (
           <div className="mt-16 bg-blue-50 rounded-2xl p-8 border border-blue-200">
             <EditableAdaptiveHeadline
               mode={mode}

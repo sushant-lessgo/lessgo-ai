@@ -105,7 +105,7 @@ export default function StackedTextVisual(props: StackedTextVisualProps) {
           />
 
           {/* Optional Subheadline */}
-          {(blockContent.subheadline || mode === 'edit') && (
+          {(blockContent.subheadline || mode !== 'preview') && (
             <EditableAdaptiveText
               mode={mode}
               value={blockContent.subheadline || ''}
@@ -206,7 +206,7 @@ export default function StackedTextVisual(props: StackedTextVisualProps) {
               </div>
               
               {/* Optional Transition Text */}
-              {(blockContent.transition_text || mode === 'edit') && (
+              {(blockContent.transition_text || mode !== 'preview') && (
                 <EditableAdaptiveText
                   mode={mode}
                   value={blockContent.transition_text || ''}
@@ -289,7 +289,7 @@ export default function StackedTextVisual(props: StackedTextVisualProps) {
         </div>
 
         {/* Optional Summary Box */}
-        {(blockContent.show_summary_box !== 'false' && (blockContent.summary_text || mode === 'edit')) && (
+        {(blockContent.show_summary_box !== 'false' && (blockContent.summary_text || mode !== 'preview')) && (
           <div className="mt-8 p-6 bg-gradient-to-r from-blue-50 via-indigo-50 to-purple-50 rounded-2xl border border-blue-100 relative group/summary-item">
             <div className="text-center">
               <EditableAdaptiveText
@@ -309,7 +309,7 @@ export default function StackedTextVisual(props: StackedTextVisualProps) {
             </div>
             
             {/* Remove button */}
-            {mode === 'edit' && (
+            {mode !== 'preview' && (
               <button
                 onClick={(e) => {
                   e.stopPropagation();
@@ -328,7 +328,7 @@ export default function StackedTextVisual(props: StackedTextVisualProps) {
         )}
         
         {/* Add summary box button */}
-        {mode === 'edit' && !blockContent.summary_text && blockContent.show_summary_box === 'false' && (
+        {mode !== 'preview' && !blockContent.summary_text && blockContent.show_summary_box === 'false' && (
           <div className="mt-8 text-center">
             <button
               onClick={() => {

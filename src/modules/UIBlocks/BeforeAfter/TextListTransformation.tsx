@@ -195,7 +195,7 @@ export default function TextListTransformation(props: LayoutComponentProps) {
             sectionBackground={sectionBackground}
           />
 
-          {(blockContent.subheadline || mode === 'edit') && (
+          {(blockContent.subheadline || mode !== 'preview') && (
             <EditableAdaptiveText
               mode={mode}
               value={blockContent.subheadline || ''}
@@ -241,7 +241,7 @@ export default function TextListTransformation(props: LayoutComponentProps) {
             </div>
 
             <div className="space-y-4">
-              {mode === 'edit' ? (
+              {mode !== 'preview' ? (
                 <EditableAdaptiveText
                   mode={mode}
                   value={blockContent.before_list || ''}
@@ -330,7 +330,7 @@ export default function TextListTransformation(props: LayoutComponentProps) {
             </div>
 
             <div className="space-y-4">
-              {mode === 'edit' ? (
+              {mode !== 'preview' ? (
                 <EditableAdaptiveText
                   mode={mode}
                   value={blockContent.after_list || ''}
@@ -387,9 +387,9 @@ export default function TextListTransformation(props: LayoutComponentProps) {
           </div>
         </div>
 
-        {(blockContent.cta_text || blockContent.trust_items || mode === 'edit') && (
+        {(blockContent.cta_text || blockContent.trust_items || mode !== 'preview') && (
           <div className="text-center space-y-6">
-            {(blockContent.supporting_text || mode === 'edit') && (
+            {(blockContent.supporting_text || mode !== 'preview') && (
               <EditableAdaptiveText
                 mode={mode}
                 value={blockContent.supporting_text || ''}

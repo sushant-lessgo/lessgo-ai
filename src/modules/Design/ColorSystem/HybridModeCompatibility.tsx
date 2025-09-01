@@ -130,7 +130,6 @@ export function HybridModeCompatibility({
           fallbackStrategy
         };
       } catch (error) {
-        console.warn('Background conversion failed:', error);
         return {
           legacy: background,
           fallbackStrategy: 'legacy' as const
@@ -234,7 +233,6 @@ export function HybridModeCompatibility({
       // Auto-fallback to legacy mode if too many errors
       const recentErrors = errorLog.filter(log => Date.now() - log.timestamp < 300000); // 5 minutes
       if (recentErrors.length > 3) {
-        console.warn('Too many compatibility errors, considering fallback to legacy mode');
         // Could trigger automatic mode switch here
       }
     };

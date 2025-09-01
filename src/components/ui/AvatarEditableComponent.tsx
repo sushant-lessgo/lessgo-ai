@@ -156,7 +156,7 @@ const AvatarEditableComponent: React.FC<AvatarEditableComponentProps> = ({
         )}
         
         {/* Overlay for upload hint */}
-        {mode === 'edit' && showUploadButton && (
+        {showUploadButton && (
           <div className="absolute inset-0 bg-black bg-opacity-50 transition-opacity duration-200 flex items-center justify-center rounded-full">
             <div className="text-white text-center">
               <svg className="w-4 h-4 mx-auto mb-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

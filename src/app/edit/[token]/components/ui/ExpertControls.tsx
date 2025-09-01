@@ -404,7 +404,6 @@ export function ExpertControls({
               // Reset to semantic controls (Tier 1)
               if (window.confirm('Reset all tokens to semantic defaults? This cannot be undone.')) {
                 // This would trigger semantic controls reset
-                console.log('Reset to semantic defaults');
               }
             }}
             disabled={disabled}
@@ -422,7 +421,6 @@ export function ExpertControls({
             onClick={() => {
               // Reset to original generated
               if (window.confirm('Reset all tokens to original AI-generated defaults? This cannot be undone.')) {
-                console.log('Reset to generated defaults');
               }
             }}
             disabled={disabled}

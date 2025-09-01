@@ -164,7 +164,7 @@ const FeatureCard = React.memo(({
               className="group-hover:scale-110 transition-transform duration-300"
             />
           )}
-          {mode === 'edit' && !item.iconOverride && (
+          {mode !== 'preview' && !item.iconOverride && (
             <button
               onClick={() => onIconEdit && onIconEdit(item.index, '🎯')}
               className="absolute -top-1 -right-1 w-5 h-5 bg-blue-600 text-white rounded-full text-xs hover:bg-blue-700 transition-colors opacity-0 group-hover:opacity-100"
@@ -216,7 +216,6 @@ FeatureCard.displayName = 'FeatureCard';
 
 export default function IconGrid(props: LayoutComponentProps) {
   
-  // console.log('🎯 IconGrid component rendering with props:', props);
   
   // ✅ ENHANCED: Use the abstraction hook with background type support
   const {
@@ -234,7 +233,6 @@ export default function IconGrid(props: LayoutComponentProps) {
     contentSchema: CONTENT_SCHEMA
   });
   
-  // console.log('🎯 IconGrid hook result:', { sectionId, mode });
 
   // Parse feature data
   const featureItems = parseFeatureData(blockContent.feature_titles, blockContent.feature_descriptions, blockContent);
@@ -273,9 +271,7 @@ export default function IconGrid(props: LayoutComponentProps) {
           (parentDiv as HTMLElement).style.setProperty('text-align', 'center', 'important');
         }
         
-        console.log('✅ FORCED HEADLINE TO CENTER via direct DOM targeting');
       } else {
-        console.log('❌ Still could not find headline element');
       }
     }, 1000); // Longer timeout
     
@@ -315,7 +311,7 @@ export default function IconGrid(props: LayoutComponentProps) {
           </div>
 
           {/* ✅ ENHANCED: Subheadline with Dynamic Text Color */}
-          {(blockContent.subheadline || mode === 'edit') && (
+          {(blockContent.subheadline || mode !== 'preview') && (
             <div style={{ textAlign: 'center' }}>
               <EditableAdaptiveText
                 mode={mode}

@@ -328,7 +328,7 @@ export default function VideoNoteWithTranscript(props: LayoutComponentProps) {
             {/* Transcript Header */}
             <div className="flex items-center space-x-2 pb-4 border-b border-gray-200">
               <div className="relative group/icon-edit">
-                {mode === 'edit' ? (
+                {mode !== 'preview' ? (
                   <IconEditableText
                     mode={mode}
                     value={blockContent.transcript_icon || '📄'}
@@ -378,7 +378,7 @@ export default function VideoNoteWithTranscript(props: LayoutComponentProps) {
 
             {/* Trust Indicators */}
             <div className="pt-4 border-t border-gray-200">
-              {mode === 'edit' ? (
+              {mode !== 'preview' ? (
                 <EditableTrustIndicators
                   mode={mode}
                   trustItems={[
@@ -430,7 +430,7 @@ export default function VideoNoteWithTranscript(props: LayoutComponentProps) {
             <div className="bg-blue-50 rounded-lg p-6">
               <div className="flex items-center space-x-2 mb-2">
                 <div className="relative group/icon-edit">
-                  {mode === 'edit' ? (
+                  {mode !== 'preview' ? (
                     <IconEditableText
                       mode={mode}
                       value={blockContent.secondary_cta_icon || '🚀'}

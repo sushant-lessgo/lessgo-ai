@@ -915,7 +915,7 @@ export function createUIActions(set: any, get: any): UIActions {
           case 'Delete':
           case 'Backspace':
             event.preventDefault();
-            if (state.selectedSection && state.mode === 'edit') {
+            if (state.selectedSection && state.mode !== 'preview') {
               if (confirm('Are you sure you want to delete this section?')) {
                 get().removeSection(state.selectedSection);
               }

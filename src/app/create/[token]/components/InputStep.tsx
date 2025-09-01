@@ -83,7 +83,6 @@ export default function InputStep({ onSuccess, onProcessingStart }: InputStepPro
       const setOneLiner = useOnboardingStore.getState().setOneLiner;
       setOneLiner(input);
 
-     // console.log('🚀 Submitting input:', input.substring(0, 100) + '...');
 
       // ===== API CALL =====
       const response = await fetch('/api/infer-fields', {
@@ -151,7 +150,6 @@ export default function InputStep({ onSuccess, onProcessingStart }: InputStepPro
               alternatives: validationResult.alternatives?.filter(alt => alt && alt.trim()) || [],
             };
 
-           // console.log(`📝 Stored ${canonicalFieldName}: "${validationResult.value}" (confidence: ${validationResult.confidence})`);
           } else {
             logger.warn(`⚠️ Skipping empty field: ${displayFieldName}`);
           }
@@ -164,7 +162,6 @@ export default function InputStep({ onSuccess, onProcessingStart }: InputStepPro
         throw new Error('No valid fields were extracted from your input. Please try rephrasing your idea.');
       }
 
-     // console.log(`✅ Successfully processed ${fieldCount} fields:`, Object.keys(confirmedFields));
 
       // ===== AUTO-SAVE =====
       try {

@@ -52,11 +52,9 @@ export function getSectionsFromRules({
   const validMarketCategory = marketCategory || "Software";
 
   if (!awarenessLevel) {
-    console.warn('⚠️ Missing awarenessLevel, using fallback: solution-aware');
   }
   
   if (!marketSophisticationLevel) {
-    console.warn('⚠️ Missing marketSophisticationLevel, using fallback: level-3');
   }
 
   // ✅ FIXED: Prepare input for objection flow engine using proper taxonomy types
@@ -69,12 +67,10 @@ export function getSectionsFromRules({
     marketCategory: validMarketCategory as MarketCategory
   };
 
-  console.log('🧠 Objection Flow Input:', flowInput);
 
   // ✅ Use objection flow engine
   const selectedSections = getSectionsFromObjectionFlows(flowInput);
 
-  console.log('✅ Objection Flow Selected Sections:', selectedSections);
   
   return selectedSections;
 }

@@ -149,12 +149,12 @@ export default function PersonaUseCaseCompare(props: LayoutComponentProps) {
             level="h1"
           />
           
-          {(blockContent.subheadline || mode === 'edit') && (
+          {(blockContent.subheadline || mode !== 'preview') && (
             <EditableAdaptiveText
               mode={mode}
               value={blockContent.subheadline || 'Add subheadline...'}
               onEdit={(value) => handleContentUpdate('subheadline', value)}
-              className={`max-w-3xl mx-auto ${!blockContent.subheadline && mode === 'edit' ? 'opacity-50' : ''}`}
+              className={`max-w-3xl mx-auto ${!blockContent.subheadline && mode !== 'preview' ? 'opacity-50' : ''}`}
               backgroundType={backgroundType === 'custom' ? 'secondary' : backgroundType}
               sectionBackground={sectionBackground}
               colorTokens={colorTokens}
@@ -189,7 +189,7 @@ export default function PersonaUseCaseCompare(props: LayoutComponentProps) {
                   sectionId={sectionId}
                   elementKey={`persona_icon_${index + 1}`}
                 />
-                {mode === 'edit' ? (
+                {mode !== 'preview' ? (
                   <input
                     type="text"
                     value={label}
@@ -204,7 +204,7 @@ export default function PersonaUseCaseCompare(props: LayoutComponentProps) {
                   <span className="mt-2 font-medium">{label}</span>
                 )}
               </div>
-              {mode === 'edit' ? (
+              {mode !== 'preview' ? (
                 <textarea
                   value={personaDescriptions[index]}
                   onChange={(e) => {

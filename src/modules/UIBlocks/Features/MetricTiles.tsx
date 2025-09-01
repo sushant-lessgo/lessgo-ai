@@ -305,7 +305,7 @@ export default function MetricTiles(props: LayoutComponentProps) {
             sectionBackground={sectionBackground}
           />
 
-          {(blockContent.subheadline || mode === 'edit') && (
+          {(blockContent.subheadline || mode !== 'preview') && (
             <EditableAdaptiveText
               mode={mode}
               value={blockContent.subheadline || ''}
@@ -323,7 +323,7 @@ export default function MetricTiles(props: LayoutComponentProps) {
           )}
         </div>
 
-        {mode === 'edit' ? (
+        {mode !== 'preview' ? (
           <div className="space-y-8">
             <div className="p-6 border border-gray-200 rounded-lg bg-gray-50">
               <h4 className="font-semibold text-gray-700 mb-4">Metric Content</h4>
@@ -409,7 +409,7 @@ export default function MetricTiles(props: LayoutComponentProps) {
         )}
 
         {/* ROI Summary - Editable */}
-        {blockContent.show_roi_summary !== false && (blockContent.roi_summary_title || mode === 'edit') && (
+        {blockContent.show_roi_summary !== false && (blockContent.roi_summary_title || mode !== 'preview') && (
           <div className="mt-12 bg-gradient-to-r from-blue-50 via-indigo-50 to-purple-50 rounded-2xl p-8 border border-blue-100">
             <div className="text-center">
               <EditableAdaptiveText
@@ -432,7 +432,7 @@ export default function MetricTiles(props: LayoutComponentProps) {
               
               <div className="grid md:grid-cols-3 gap-8">
                 {/* ROI Metric 1 */}
-                {(blockContent.roi_metric_1 || mode === 'edit') && blockContent.roi_metric_1 !== '___REMOVED___' && (
+                {(blockContent.roi_metric_1 || mode !== 'preview') && blockContent.roi_metric_1 !== '___REMOVED___' && (
                   <div className="text-center group/roi-item relative">
                     <EditableAdaptiveText
                       mode={mode}
@@ -460,7 +460,7 @@ export default function MetricTiles(props: LayoutComponentProps) {
                       data-section-id={sectionId}
                       data-element-key="roi_label_1"
                     />
-                    {mode === 'edit' && (
+                    {mode !== 'preview' && (
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
@@ -479,7 +479,7 @@ export default function MetricTiles(props: LayoutComponentProps) {
                 )}
                 
                 {/* ROI Metric 2 */}
-                {(blockContent.roi_metric_2 || mode === 'edit') && blockContent.roi_metric_2 !== '___REMOVED___' && (
+                {(blockContent.roi_metric_2 || mode !== 'preview') && blockContent.roi_metric_2 !== '___REMOVED___' && (
                   <div className="text-center group/roi-item relative">
                     <EditableAdaptiveText
                       mode={mode}
@@ -507,7 +507,7 @@ export default function MetricTiles(props: LayoutComponentProps) {
                       data-section-id={sectionId}
                       data-element-key="roi_label_2"
                     />
-                    {mode === 'edit' && (
+                    {mode !== 'preview' && (
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
@@ -526,7 +526,7 @@ export default function MetricTiles(props: LayoutComponentProps) {
                 )}
                 
                 {/* ROI Metric 3 */}
-                {(blockContent.roi_metric_3 || mode === 'edit') && blockContent.roi_metric_3 !== '___REMOVED___' && (
+                {(blockContent.roi_metric_3 || mode !== 'preview') && blockContent.roi_metric_3 !== '___REMOVED___' && (
                   <div className="text-center group/roi-item relative">
                     <EditableAdaptiveText
                       mode={mode}
@@ -554,7 +554,7 @@ export default function MetricTiles(props: LayoutComponentProps) {
                       data-section-id={sectionId}
                       data-element-key="roi_label_3"
                     />
-                    {mode === 'edit' && (
+                    {mode !== 'preview' && (
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
@@ -573,7 +573,7 @@ export default function MetricTiles(props: LayoutComponentProps) {
                 )}
               </div>
               
-              {(blockContent.roi_description || mode === 'edit') && blockContent.roi_description !== '___REMOVED___' && (
+              {(blockContent.roi_description || mode !== 'preview') && blockContent.roi_description !== '___REMOVED___' && (
                 <div className="mt-6 group/roi-description relative">
                   <EditableAdaptiveText
                     mode={mode}
@@ -588,7 +588,7 @@ export default function MetricTiles(props: LayoutComponentProps) {
                     data-section-id={sectionId}
                     data-element-key="roi_description"
                   />
-                  {mode === 'edit' && (
+                  {mode !== 'preview' && (
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
@@ -608,9 +608,9 @@ export default function MetricTiles(props: LayoutComponentProps) {
           </div>
         )}
 
-        {(blockContent.cta_text || blockContent.trust_items || mode === 'edit') && (
+        {(blockContent.cta_text || blockContent.trust_items || mode !== 'preview') && (
           <div className="text-center space-y-6 mt-16">
-            {(blockContent.supporting_text || mode === 'edit') && (
+            {(blockContent.supporting_text || mode !== 'preview') && (
               <EditableAdaptiveText
                 mode={mode}
                 value={blockContent.supporting_text || ''}

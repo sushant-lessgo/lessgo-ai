@@ -336,7 +336,7 @@ export default function CTAWithBadgeRow(props: LayoutComponentProps) {
 
         {/* Trust Indicators */}
         <div className="mb-8">
-          {mode === 'edit' ? (
+          {mode !== 'preview' ? (
             <EditableTrustIndicators
               mode={mode}
               trustItems={[
@@ -425,7 +425,7 @@ export default function CTAWithBadgeRow(props: LayoutComponentProps) {
                 />
                 
                 {/* Remove button for customer count */}
-                {mode === 'edit' && (
+                {mode !== 'preview' && (
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
@@ -475,7 +475,7 @@ export default function CTAWithBadgeRow(props: LayoutComponentProps) {
                 </div>
                 
                 {/* Remove button for rating section */}
-                {mode === 'edit' && (
+                {mode !== 'preview' && (
                   <button
                     onClick={(e) => {
                       e.stopPropagation();

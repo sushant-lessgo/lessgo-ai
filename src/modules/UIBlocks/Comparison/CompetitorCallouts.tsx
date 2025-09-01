@@ -167,7 +167,7 @@ export default function CompetitorCallouts(props: LayoutComponentProps) {
             className="mb-4"
           />
           
-          {(blockContent.subheadline || mode === 'edit') && (
+          {(blockContent.subheadline || mode !== 'preview') && (
             <EditableAdaptiveText
               value={blockContent.subheadline || 'Add subheadline...'}
               onEdit={(value) => handleContentUpdate('subheadline', value)}
@@ -176,7 +176,7 @@ export default function CompetitorCallouts(props: LayoutComponentProps) {
               variant="body"
               sectionBackground={sectionBackground}
               colorTokens={colorTokens}
-              className={`max-w-3xl mx-auto ${!blockContent.subheadline && mode === 'edit' ? 'opacity-50' : ''}`}
+              className={`max-w-3xl mx-auto ${!blockContent.subheadline && mode !== 'preview' ? 'opacity-50' : ''}`}
             />
           )}
         </div>
@@ -191,7 +191,7 @@ export default function CompetitorCallouts(props: LayoutComponentProps) {
               <div className="grid md:grid-cols-3 gap-6 items-center">
                 {/* Competitor Info */}
                 <div className="md:col-span-1">
-                  {mode === 'edit' ? (
+                  {mode !== 'preview' ? (
                     <input
                       type="text"
                       value={name}
@@ -219,7 +219,7 @@ export default function CompetitorCallouts(props: LayoutComponentProps) {
                         elementKey={`issue_icon_${index + 1}`}
                       />
                     </div>
-                    {mode === 'edit' ? (
+                    {mode !== 'preview' ? (
                       <textarea
                         value={competitorIssues[index]}
                         onChange={(e) => handleCompetitorIssueUpdate(index, e.target.value)}
@@ -261,7 +261,7 @@ export default function CompetitorCallouts(props: LayoutComponentProps) {
                         elementKey={`solution_icon_${index + 1}`}
                       />
                     </div>
-                    {mode === 'edit' ? (
+                    {mode !== 'preview' ? (
                       <textarea
                         value={ourSolutions[index]}
                         onChange={(e) => handleOurSolutionUpdate(index, e.target.value)}
@@ -281,7 +281,7 @@ export default function CompetitorCallouts(props: LayoutComponentProps) {
         </div>
 
         {/* Trust Badge */}
-        {(blockContent.trust_badge || mode === 'edit') && (
+        {(blockContent.trust_badge || mode !== 'preview') && (
           <div className="text-center mt-12">
             <div className={`inline-flex items-center bg-primary bg-opacity-10 px-6 py-3 rounded-full`}>
               <svg className={`w-5 h-5 text-primary mr-2`} fill="currentColor" viewBox="0 0 20 20">
@@ -295,7 +295,7 @@ export default function CompetitorCallouts(props: LayoutComponentProps) {
                 variant="body"
                 sectionBackground={sectionBackground}
                 colorTokens={colorTokens}
-                className={`font-medium ${!blockContent.trust_badge && mode === 'edit' ? 'opacity-50' : ''}`}
+                className={`font-medium ${!blockContent.trust_badge && mode !== 'preview' ? 'opacity-50' : ''}`}
               />
             </div>
           </div>

@@ -86,7 +86,6 @@ export function BackgroundSystemModal({ isOpen, onClose, tokenId }: BackgroundSy
 
   // Handle modal close with cleanup
   const handleCancel = () => {
-    console.log('BackgroundSystemModal: handleCancel called');
     setSelectedBackground(null);
     setPreviewBackground(null);
     setValidationResult(null);

@@ -166,7 +166,7 @@ export default function MethodologyBreakdown(props: LayoutComponentProps) {
         </div>
 
         {/* Results Section */}
-        {(blockContent.results_title || blockContent.result_metrics || mode === 'edit') && (
+        {(blockContent.results_title || blockContent.result_metrics || mode !== 'preview') && (
           <div className="mt-16 text-center">
             <EditableAdaptiveHeadline
               mode={mode}

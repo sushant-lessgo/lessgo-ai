@@ -112,7 +112,7 @@ export default function ToggleableComparison(props: LayoutComponentProps) {
             className="mb-4"
           />
           
-          {(blockContent.subheadline || mode === 'edit') && (
+          {(blockContent.subheadline || mode !== 'preview') && (
             <EditableAdaptiveText
               value={blockContent.subheadline || 'Add subheadline...'}
               onEdit={(value) => handleContentUpdate('subheadline', value)}
@@ -121,7 +121,7 @@ export default function ToggleableComparison(props: LayoutComponentProps) {
               variant="body"
               sectionBackground={sectionBackground}
               colorTokens={colorTokens}
-              className={`max-w-2xl mx-auto ${!blockContent.subheadline && mode === 'edit' ? 'opacity-50' : ''}`}
+              className={`max-w-2xl mx-auto ${!blockContent.subheadline && mode !== 'preview' ? 'opacity-50' : ''}`}
             />
           )}
         </div>
@@ -139,7 +139,7 @@ export default function ToggleableComparison(props: LayoutComponentProps) {
                     : `${colorTokens.textSecondary} hover:${colorTokens.textPrimary}`
                 }`}
               >
-                {mode === 'edit' ? (
+                {mode !== 'preview' ? (
                   <input
                     type="text"
                     value={label}

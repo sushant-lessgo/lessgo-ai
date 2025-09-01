@@ -391,7 +391,7 @@ export default function ToggleableMonthlyYearly(props: LayoutComponentProps) {
             sectionBackground={sectionBackground}
           />
 
-          {(blockContent.subheadline || mode === 'edit') && (
+          {(blockContent.subheadline || mode !== 'preview') && (
             <EditableAdaptiveText
               mode={mode}
               value={blockContent.subheadline || ''}
@@ -440,7 +440,7 @@ export default function ToggleableMonthlyYearly(props: LayoutComponentProps) {
           </div>
         </div>
 
-        {mode === 'edit' ? (
+        {mode !== 'preview' ? (
           <div className="space-y-8">
             <div className="p-6 border border-gray-200 rounded-lg bg-gray-50">
               <h4 className="font-semibold text-gray-700 mb-4">Pricing Plans Content</h4>
@@ -526,7 +526,7 @@ export default function ToggleableMonthlyYearly(props: LayoutComponentProps) {
         )}
 
         {/* Trust & Support */}
-        {((blockContent.show_platform_features !== false && platformFeatures.length > 0) || mode === 'edit') && (
+        {((blockContent.show_platform_features !== false && platformFeatures.length > 0) || mode !== 'preview') && (
           <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl p-8 border border-blue-100 mb-12">
             <div className="text-center">
               <EditableAdaptiveText
@@ -543,7 +543,7 @@ export default function ToggleableMonthlyYearly(props: LayoutComponentProps) {
                 data-element-key="platform_features_title"
               />
               
-              {mode === 'edit' ? (
+              {mode !== 'preview' ? (
                 <div className="space-y-6">
                   <div className="grid md:grid-cols-4 gap-6">
                     {[1, 2, 3, 4].map((index) => {
@@ -632,9 +632,9 @@ export default function ToggleableMonthlyYearly(props: LayoutComponentProps) {
           </div>
         )}
 
-        {(blockContent.supporting_text || blockContent.trust_items || mode === 'edit') && (
+        {(blockContent.supporting_text || blockContent.trust_items || mode !== 'preview') && (
           <div className="text-center space-y-6">
-            {(blockContent.supporting_text || mode === 'edit') && (
+            {(blockContent.supporting_text || mode !== 'preview') && (
               <EditableAdaptiveText
                 mode={mode}
                 value={blockContent.supporting_text || ''}

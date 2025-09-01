@@ -399,7 +399,6 @@ export default function LeftCopyRightImage(props: LayoutComponentProps) {
   const handleImageToolbar = useImageToolbar();
   
 
-  // console.log(`🎨 LeftCopyRightImage rendering with dynamic colors:`, {
   //   backgroundType: props.backgroundType,
   //   backgroundCSS: sectionBackground,
   //   headingColor: dynamicTextColors?.heading,
@@ -428,7 +427,7 @@ export default function LeftCopyRightImage(props: LayoutComponentProps) {
           <div className="order-2 lg:order-1 space-y-6">
             
             {/* ✅ ENHANCED: Optional Badge with Accent Colors */}
-            {(blockContent.badge_text || mode === 'edit') && (
+            {(blockContent.badge_text || mode !== 'preview') && (
               <div>
                 <AccentBadge
                   mode={mode}
@@ -458,7 +457,7 @@ export default function LeftCopyRightImage(props: LayoutComponentProps) {
             />
 
             {/* ✅ ENHANCED: Subheadline with Dynamic Text Color */}
-            {(blockContent.subheadline || mode === 'edit') && (
+            {(blockContent.subheadline || mode !== 'preview') && (
               <EditableAdaptiveText
                 mode={mode}
                 value={blockContent.subheadline || ''}
@@ -476,7 +475,7 @@ export default function LeftCopyRightImage(props: LayoutComponentProps) {
             )}
 
             {/* ✅ ENHANCED: Supporting Text with Dynamic Text Color */}
-            {(blockContent.supporting_text || mode === 'edit') && (
+            {(blockContent.supporting_text || mode !== 'preview') && (
               <EditableAdaptiveText
                 mode={mode}
                 value={blockContent.supporting_text || ''}
@@ -507,7 +506,7 @@ export default function LeftCopyRightImage(props: LayoutComponentProps) {
               />
 
               {/* ✅ ENHANCED: Trust Indicators with Dynamic Color */}
-              {mode === 'edit' ? (
+              {mode !== 'preview' ? (
                 <EditableTrustIndicators
                   mode={mode}
                   trustItems={[
@@ -591,7 +590,7 @@ export default function LeftCopyRightImage(props: LayoutComponentProps) {
                     />
                     
                     {/* Remove button for customer count */}
-                    {mode === 'edit' && (
+                    {mode !== 'preview' && (
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
@@ -639,7 +638,7 @@ export default function LeftCopyRightImage(props: LayoutComponentProps) {
                     />
                     
                     {/* Remove button for rating section */}
-                    {mode === 'edit' && (
+                    {mode !== 'preview' && (
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
@@ -671,7 +670,7 @@ export default function LeftCopyRightImage(props: LayoutComponentProps) {
                   className="w-full h-full object-cover rounded-2xl shadow-2xl cursor-pointer"
                   data-image-id={`${sectionId}-hero-image`}
                   onMouseUp={(e) => {
-                    if (mode === 'edit') {
+                    if (mode !== 'preview') {
                       e.stopPropagation();
                       e.preventDefault();
                       const rect = e.currentTarget.getBoundingClientRect();
@@ -682,10 +681,9 @@ export default function LeftCopyRightImage(props: LayoutComponentProps) {
                     }
                   }}
                   onClick={(e) => {
-                    if (mode === 'edit') {
+                    if (mode !== 'preview') {
                       e.stopPropagation();
                       e.preventDefault();
-                      console.log('🖼️ Image onClick - prevented bubbling');
                     }
                   }}
                 />

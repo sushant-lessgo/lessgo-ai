@@ -186,14 +186,14 @@ const FeatureRow = React.memo(({
           </div>
           
           <div className="flex items-center space-x-4 pl-16">
-            {(blockContent.benefit_1 || mode === 'edit') && blockContent.benefit_1 !== '___REMOVED___' && (
+            {(blockContent.benefit_1 || mode !== 'preview') && blockContent.benefit_1 !== '___REMOVED___' && (
               <div className="flex items-center space-x-2 text-green-600 group/benefit-item relative">
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                 </svg>
-                {mode === 'edit' ? (
+                {mode !== 'preview' ? (
                   <EditableAdaptiveText
-                    mode={mode}
+                    mode={mode as 'preview' | 'edit'}
                     value={blockContent.benefit_1 || ''}
                     onEdit={(value) => handleContentUpdate('benefit_1', value)}
                     backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
@@ -208,7 +208,7 @@ const FeatureRow = React.memo(({
                 ) : (
                   <span className="text-sm font-medium">{blockContent.benefit_1}</span>
                 )}
-                {mode === 'edit' && (
+                {mode !== 'preview' && (
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
@@ -224,14 +224,14 @@ const FeatureRow = React.memo(({
                 )}
               </div>
             )}
-            {(blockContent.benefit_2 || mode === 'edit') && blockContent.benefit_2 !== '___REMOVED___' && (
+            {(blockContent.benefit_2 || mode !== 'preview') && blockContent.benefit_2 !== '___REMOVED___' && (
               <div className="flex items-center space-x-2 text-green-600 group/benefit-item relative">
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                 </svg>
-                {mode === 'edit' ? (
+                {mode !== 'preview' ? (
                   <EditableAdaptiveText
-                    mode={mode}
+                    mode={mode as 'preview' | 'edit'}
                     value={blockContent.benefit_2 || ''}
                     onEdit={(value) => handleContentUpdate('benefit_2', value)}
                     backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
@@ -246,7 +246,7 @@ const FeatureRow = React.memo(({
                 ) : (
                   <span className="text-sm font-medium">{blockContent.benefit_2}</span>
                 )}
-                {mode === 'edit' && (
+                {mode !== 'preview' && (
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
@@ -341,14 +341,14 @@ export default function SplitAlternating(props: LayoutComponentProps) {
       sectionType="SplitAlternating"
       backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
       sectionBackground={sectionBackground}
-      mode={mode}
+      mode={mode as 'preview' | 'edit'}
       className={props.className}
     >
       <div className="max-w-6xl mx-auto">
         
         <div className="text-center mb-16">
           <EditableAdaptiveHeadline
-            mode={mode}
+            mode={mode as 'preview' | 'edit'}
             value={blockContent.headline || ''}
             onEdit={(value) => handleContentUpdate('headline', value)}
             level="h2"
@@ -360,9 +360,9 @@ export default function SplitAlternating(props: LayoutComponentProps) {
             sectionBackground={sectionBackground}
           />
 
-          {(blockContent.subheadline || mode === 'edit') && (
+          {(blockContent.subheadline || mode !== 'preview') && (
             <EditableAdaptiveText
-              mode={mode}
+              mode={mode as 'preview' | 'edit'}
               value={blockContent.subheadline || ''}
               onEdit={(value) => handleContentUpdate('subheadline', value)}
               backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
@@ -379,14 +379,14 @@ export default function SplitAlternating(props: LayoutComponentProps) {
         </div>
 
         <div className="space-y-24">
-          {mode === 'edit' ? (
+          {mode !== 'preview' ? (
             <div className="space-y-8">
               <div className="p-6 border border-gray-200 rounded-lg bg-gray-50">
                 <h4 className="font-semibold text-gray-700 mb-4">Feature Content</h4>
                 
                 <div className="space-y-4">
                   <EditableAdaptiveText
-                    mode={mode}
+                    mode={mode as 'preview' | 'edit'}
                     value={blockContent.feature_titles || ''}
                     onEdit={(value) => handleContentUpdate('feature_titles', value)}
                     backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
@@ -400,7 +400,7 @@ export default function SplitAlternating(props: LayoutComponentProps) {
                   />
                   
                   <EditableAdaptiveText
-                    mode={mode}
+                    mode={mode as 'preview' | 'edit'}
                     value={blockContent.feature_descriptions || ''}
                     onEdit={(value) => handleContentUpdate('feature_descriptions', value)}
                     backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
@@ -424,7 +424,7 @@ export default function SplitAlternating(props: LayoutComponentProps) {
                 index={index}
                 showImageToolbar={showImageToolbar}
                 sectionId={sectionId}
-                mode={mode}
+                mode={mode as 'preview' | 'edit'}
                 h2Style={h2Style}
                 bodyLgStyle={bodyLgStyle}
                 blockContent={blockContent}
@@ -437,11 +437,11 @@ export default function SplitAlternating(props: LayoutComponentProps) {
           )}
         </div>
 
-        {(blockContent.cta_text || blockContent.trust_items || mode === 'edit') && (
+        {(blockContent.cta_text || blockContent.trust_items || mode !== 'preview') && (
           <div className="text-center space-y-6 mt-16">
-            {(blockContent.supporting_text || mode === 'edit') && (
+            {(blockContent.supporting_text || mode !== 'preview') && (
               <EditableAdaptiveText
-                mode={mode}
+                mode={mode as 'preview' | 'edit'}
                 value={blockContent.supporting_text || ''}
                 onEdit={(value) => handleContentUpdate('supporting_text', value)}
                 backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}

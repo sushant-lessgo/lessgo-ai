@@ -161,7 +161,6 @@ function getSmartFallbackVariation(onboardingData: OnboardingDataInput): {
     });
   }
   
- // console.log('Smart fallback selected:', selectedVariation);
   
   return {
     variationId: selectedVariation.variationId,
@@ -260,24 +259,19 @@ export function calculateOtherBackgrounds(baseColor: string): {
 }
 
 export function generateCompleteBackgroundSystem(onboardingData: OnboardingDataInput): BackgroundSystem {
- // console.log('🎨 Generating complete background system with enhanced baseline-first logic...');
   
   try {
     // Step 1: Select primary variation (hero sections)
     const primaryVariation = selectPrimaryVariation(onboardingData);
-   // console.log('✅ Primary variation selected:', primaryVariation);
     
     // Step 2: Get accent color (for CTAs, buttons, highlights)
     const accentResult = getAccentColor(primaryVariation.baseColor, onboardingData);
-   // console.log('✅ Accent color selected:', accentResult);
     
     // Step 3: Get simple secondary background (one-to-one mapping)
     const secondaryBackground = getSecondaryBackground(primaryVariation.baseColor);
-   // console.log('✅ Simple secondary background selected:', secondaryBackground);
     
     // Step 4: Calculate other backgrounds
     const otherBackgrounds = calculateOtherBackgrounds(primaryVariation.baseColor);
-   // console.log('✅ Other backgrounds calculated:', otherBackgrounds);
 
     const result = {
       primary: primaryVariation.tailwindClass,          // From bgVariations (bold gradients)
@@ -289,7 +283,6 @@ export function generateCompleteBackgroundSystem(onboardingData: OnboardingDataI
       accentCSS: accentResult.accentCSS,               // For CTAs/highlights
     };
 
-   // console.log('🎉 Background system generation complete:', result);
     return result;
     
   } catch (error) {
@@ -305,7 +298,6 @@ export function generateCompleteBackgroundSystem(onboardingData: OnboardingDataI
       accentCSS: "bg-purple-500", // ✅ Use 500 shade for safe defaults
     };
     
-   // console.log('🔧 Using safe default backgrounds:', safeDefaults);
     return safeDefaults;
   }
 }
@@ -318,7 +310,6 @@ export function getEnhancedSectionBackgroundType(
   onboardingData: OnboardingDataInput
 ): 'primary' | 'secondary' | 'neutral' | 'divider' {
   
- // console.log('🎨 Using Enhanced Baseline-First Background Assignment...');
   
   // ✅ PHASE 5.2: Map canonical fields to enhanced background logic user profile
  const userProfile = {
@@ -337,7 +328,6 @@ export function assignEnhancedBackgroundsToAllSections(
   onboardingData: OnboardingDataInput
 ): Record<string, 'primary' | 'secondary' | 'neutral' | 'divider'> {
   
- // console.log('🎨 Assigning enhanced backgrounds using baseline-first logic...');
   
   // ✅ PHASE 5.2: Map canonical fields to enhanced background logic user profile
  const userProfile = {
@@ -427,7 +417,6 @@ export function compareBackgroundAssignments(
   changes: Array<{section: string, from: string, to: string, reason: string}>;
 } {
   
-  // console.log('🔍 Comparing Enhanced vs Legacy Background Assignments...');
   
   // Get enhanced assignments
   const enhanced = assignEnhancedBackgroundsToAllSections(sections, onboardingData);
@@ -468,10 +457,6 @@ export function compareBackgroundAssignments(
     }
   });
   
- // console.log('📊 Background Assignment Comparison:');
- // console.log('Enhanced:', Object.entries(enhanced).map(([k,v]) => `${k}:${v}`).join(', '));
- // console.log('Legacy:', Object.entries(legacy).map(([k,v]) => `${k}:${v}`).join(', '));
- // console.log('Changes:', changes);
   
   return { enhanced, legacy, changes };
 }

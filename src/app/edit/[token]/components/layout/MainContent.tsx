@@ -110,7 +110,6 @@ export function MainContent({ tokenId }: MainContentProps) {
   }, [addSection, sectionLayouts, setActiveSection, announceLiveRegion, storeState]);
   
   // Debug: check if functions exist
-  // console.log('🔍 Store functions available:', {
   //   showSectionToolbar: typeof showSectionToolbar,
   //   showElementToolbar: typeof showElementToolbar,
   //   availableFunctions: Object.keys(store).filter(key => typeof store[key] === 'function').slice(0, 20)
@@ -135,7 +134,6 @@ export function MainContent({ tokenId }: MainContentProps) {
   
   // Debug logging for selection system
   React.useEffect(() => {
-    // console.log('🎯 MainContent mode:', mode);
   }, [mode]);
 
 const {
@@ -149,7 +147,6 @@ const {
 
 // Debug logging for element picker state
 React.useEffect(() => {
-  // console.log('🎯 ElementPicker state changed:', {
   //   isPickerVisible,
   //   pickerSectionId,
   //   pickerPosition,
@@ -162,7 +159,6 @@ React.useEffect(() => {
   // Debug logging for sections rendering (throttled)
   React.useEffect(() => {
     const timeoutId = setTimeout(() => {
-      // console.log('🖼️ MainContent render:', {
       //   sectionsLength: sections.length,
       //   sections: sections,
       //   contentKeys: Object.keys(content),
@@ -236,7 +232,6 @@ React.useEffect(() => {
 // Enhanced element click handler with smart positioning
 // Enhanced element click handler with full context analysis
   const handleElementClick = (sectionId: string, elementKey: string, event: React.MouseEvent) => {
-    // console.log('🎯 Element clicked:', sectionId, elementKey, 'mode:', mode);
     if (mode !== 'edit') return;
 
     const startTime = performance.now();
@@ -278,7 +273,6 @@ React.useEffect(() => {
       }
     }, 0);
 
-    // console.log('🎯 Element selected, toolbar should show:', { elementId, position });
 
     trackPerformance?.('element-selection', startTime);
     
@@ -510,7 +504,7 @@ const handleAddSection = (afterSectionId?: string) => {
   // Handle escape key for clearing selection
  useEffect(() => {
   const handleKeyDown = (event: KeyboardEvent) => {
-    if (event.key === 'Escape' && mode === 'edit') {
+    if (event.key === 'Escape' && mode !== 'preview') {
       clearSelection();
       hideElementPicker(); // ADD THIS LINE
       announceLiveRegion?.('Cleared selection');
@@ -570,12 +564,12 @@ const handleAddSection = (afterSectionId?: string) => {
           {sections.length > 0 && (
             <div className={cn(
               "space-y-0", 
-              mode === 'edit' && "space-y-4" // Add spacing in edit mode
+              mode !== 'preview' && "space-y-4" // Add spacing in edit mode
             )}>
               {sections.map((sectionId, index) => (
                 <div key={sectionId} className={cn(
                   "relative group transition-all duration-200",
-                  mode === 'edit' && [
+                  mode !== 'preview' && [
                     "rounded-lg border border-transparent hover:border-primary/20",
                     "hover:shadow-sm px-4 py-2 -mx-4 -my-2",
                     selectedSection === sectionId && "border-primary/40 shadow-md bg-primary/5"
@@ -610,7 +604,7 @@ const handleAddSection = (afterSectionId?: string) => {
                           : 'hover:ring-1 hover:ring-gray-300'
                         }
                       `}
-                      draggable={mode === 'edit'}
+                      draggable={mode !== 'preview'}
                       // DISABLED: Using unified click handler from useEditor instead
                       // onClick={(e) => handleSectionClick(sectionId, e)}
                       onDragStart={(e) => handleSectionDragStart(sectionId, e)}
@@ -634,7 +628,7 @@ const handleAddSection = (afterSectionId?: string) => {
                       />
 
                       {/* Section Overlay (Edit Mode) */}
-                      {mode === 'edit' && (
+                      {mode !== 'preview' && (
                         <div className="absolute inset-0 pointer-events-none">
                           {/* Section Label */}
                           <div className="absolute top-2 left-2 opacity-0 group-hover:opacity-100 transition-opacity">

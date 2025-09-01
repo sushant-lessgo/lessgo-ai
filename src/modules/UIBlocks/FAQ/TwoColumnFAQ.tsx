@@ -150,7 +150,7 @@ export default function TwoColumnFAQ(props: LayoutComponentProps) {
             sectionBackground={sectionBackground}
           />
           
-          {(blockContent.subheadline || mode === 'edit') && (
+          {(blockContent.subheadline || mode !== 'preview') && (
             <EditableAdaptiveText
               mode={mode}
               value={blockContent.subheadline || ''}
@@ -192,7 +192,7 @@ export default function TwoColumnFAQ(props: LayoutComponentProps) {
                   data-element-key={`left_question_${item.index}`}
                 />
                 
-                {(item.answer || mode === 'edit') && (
+                {(item.answer || mode !== 'preview') && (
                   <EditableAdaptiveText
                     mode={mode}
                     value={item.answer}
@@ -209,7 +209,7 @@ export default function TwoColumnFAQ(props: LayoutComponentProps) {
                 )}
                 
                 {/* Remove button */}
-                {mode === 'edit' && (
+                {mode !== 'preview' && (
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
@@ -228,7 +228,7 @@ export default function TwoColumnFAQ(props: LayoutComponentProps) {
             ))}
             
             {/* Add button for left column */}
-            {mode === 'edit' && leftItems.length < 3 && (
+            {mode !== 'preview' && leftItems.length < 3 && (
               <button
                 onClick={() => {
                   for (let i = 1; i <= 3; i++) {
@@ -269,7 +269,7 @@ export default function TwoColumnFAQ(props: LayoutComponentProps) {
                   data-element-key={`right_question_${item.index}`}
                 />
                 
-                {(item.answer || mode === 'edit') && (
+                {(item.answer || mode !== 'preview') && (
                   <EditableAdaptiveText
                     mode={mode}
                     value={item.answer}
@@ -286,7 +286,7 @@ export default function TwoColumnFAQ(props: LayoutComponentProps) {
                 )}
                 
                 {/* Remove button */}
-                {mode === 'edit' && (
+                {mode !== 'preview' && (
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
@@ -305,7 +305,7 @@ export default function TwoColumnFAQ(props: LayoutComponentProps) {
             ))}
             
             {/* Add button for right column */}
-            {mode === 'edit' && rightItems.length < 3 && (
+            {mode !== 'preview' && rightItems.length < 3 && (
               <button
                 onClick={() => {
                   for (let i = 1; i <= 3; i++) {

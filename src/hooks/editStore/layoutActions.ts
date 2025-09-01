@@ -570,7 +570,6 @@ resetTypographyToGenerated: () =>
     
     state.history.redoStack = [];
     
-    // console.log('🔄 Reset typography to LessGo-generated fonts', {
     //   originalFont,
     //   headingFont: originalFont.headingFont,
     //   bodyFont: originalFont.bodyFont,
@@ -645,7 +644,6 @@ getTypographyForSection: (sectionId: string) => {
         
         state.history.redoStack = [];
         
-        // console.log('🔄 Reset to original LessGo-generated design', {
         //   originalBackgroundSystem,
         //   sectionsReset: Object.keys(state.content).length,
         // });
@@ -698,7 +696,6 @@ getTypographyForSection: (sectionId: string) => {
           return cache;
         }
         
-        // console.log('🎨 [TOKENS-DEBUG] getColorTokens called with theme:', {
         //   baseColor: theme.colors.baseColor,
         //   accentColor: theme.colors.accentColor,
         //   accentCSS: theme.colors.accentCSS,
@@ -710,7 +707,6 @@ getTypographyForSection: (sectionId: string) => {
         theme.colors.sectionBackgrounds.primary && 
         theme.colors.sectionBackgrounds.secondary;
 
-      // console.log('🎨 [TOKENS-DEBUG] Background system completeness check:', {
       //   hasCompleteBackgroundSystem,
       //   hasPrimary: !!theme.colors.sectionBackgrounds.primary,
       //   hasSecondary: !!theme.colors.sectionBackgrounds.secondary,
@@ -729,7 +725,6 @@ getTypographyForSection: (sectionId: string) => {
           accentCSS: theme.colors.accentCSS
         };
 
-        // console.log('🎨 [TOKENS-DEBUG] Using integrated background system for color tokens:', backgroundSystemData); // Disabled
         
         // Pass stored text colors to avoid recalculation
         const tokens = generateColorTokens({
@@ -745,7 +740,6 @@ getTypographyForSection: (sectionId: string) => {
           storedTextColors: theme.colors.textColors // Use stored text colors
         });
         
-        // console.log('🎨 [TOKENS-DEBUG] Generated integrated tokens with stored text colors:', tokens); // Disabled
         
         // Cache the result
         cache = tokens;
@@ -761,9 +755,7 @@ getTypographyForSection: (sectionId: string) => {
           sectionBackgrounds: theme.colors.sectionBackgrounds,
           storedTextColors: theme.colors.textColors // Use stored text colors even in fallback
         };
-        // console.log('🎨 [TOKENS-DEBUG] Fallback input:', fallbackInput);
         const tokens = generateColorTokens(fallbackInput);
-        // console.log('🎨 [TOKENS-DEBUG] Generated fallback tokens:', tokens);
         
         // Cache the result
         cache = tokens;
@@ -778,7 +770,6 @@ getTypographyForSection: (sectionId: string) => {
         // Update the theme with the new color tokens
         // This method would integrate the color tokens back into the theme structure
         // For now, we'll add a placeholder that developers can extend
-        // console.log('🎨 Updating color tokens:', newTokens);
         
         // Track the change for auto-save
         state.queuedChanges.push({

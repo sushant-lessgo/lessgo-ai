@@ -148,7 +148,7 @@ const LogoEditableComponent: React.FC<LogoEditableComponentProps> = ({
         
         {/* Overlay for upload hint */}
         {/* Overlay for upload hint - only show on hover and in edit mode */}
-        {mode === 'edit' && showUploadButton && (
+        {showUploadButton && (
           <div className="absolute inset-0 bg-black bg-opacity-40 transition-opacity duration-200 flex items-center justify-center">
             <div className="text-white text-center">
               <svg className="w-6 h-6 mx-auto mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">

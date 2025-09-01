@@ -283,7 +283,7 @@ export default function MiniCards(props: LayoutComponentProps) {
             sectionBackground={sectionBackground}
           />
 
-          {(blockContent.subheadline || mode === 'edit') && (
+          {(blockContent.subheadline || mode !== 'preview') && (
             <EditableAdaptiveText
               mode={mode}
               value={blockContent.subheadline || ''}
@@ -301,7 +301,7 @@ export default function MiniCards(props: LayoutComponentProps) {
           )}
         </div>
 
-        {mode === 'edit' ? (
+        {mode !== 'preview' ? (
           <div className="space-y-8">
             <div className="p-6 border border-gray-200 rounded-lg bg-gray-50">
               <h4 className="font-semibold text-gray-700 mb-4">Feature Content</h4>
@@ -382,12 +382,12 @@ export default function MiniCards(props: LayoutComponentProps) {
                   {features.length} Core Features
                 </span>
               </div>
-              {(blockContent.summary_item_1 || mode === 'edit') && blockContent.summary_item_1 !== '___REMOVED___' && (
+              {(blockContent.summary_item_1 || mode !== 'preview') && blockContent.summary_item_1 !== '___REMOVED___' && (
                 <>
                   <div className="w-px h-6 bg-gray-200" />
                   <div className="flex items-center space-x-2 group/summary-item relative">
                     <div className="w-2 h-2 rounded-full bg-blue-500" />
-                    {mode === 'edit' ? (
+                    {mode !== 'preview' ? (
                       <EditableAdaptiveText
                         mode={mode}
                         value={blockContent.summary_item_1 || ''}
@@ -406,7 +406,7 @@ export default function MiniCards(props: LayoutComponentProps) {
                         {blockContent.summary_item_1}
                       </span>
                     )}
-                    {mode === 'edit' && (
+                    {mode !== 'preview' && (
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
@@ -423,12 +423,12 @@ export default function MiniCards(props: LayoutComponentProps) {
                   </div>
                 </>
               )}
-              {(blockContent.summary_item_2 || mode === 'edit') && blockContent.summary_item_2 !== '___REMOVED___' && (
+              {(blockContent.summary_item_2 || mode !== 'preview') && blockContent.summary_item_2 !== '___REMOVED___' && (
                 <>
                   <div className="w-px h-6 bg-gray-200" />
                   <div className="flex items-center space-x-2 group/summary-item relative">
                     <div className="w-2 h-2 rounded-full bg-purple-500" />
-                    {mode === 'edit' ? (
+                    {mode !== 'preview' ? (
                       <EditableAdaptiveText
                         mode={mode}
                         value={blockContent.summary_item_2 || ''}
@@ -447,7 +447,7 @@ export default function MiniCards(props: LayoutComponentProps) {
                         {blockContent.summary_item_2}
                       </span>
                     )}
-                    {mode === 'edit' && (
+                    {mode !== 'preview' && (
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
@@ -464,12 +464,12 @@ export default function MiniCards(props: LayoutComponentProps) {
                   </div>
                 </>
               )}
-              {(blockContent.summary_item_3 || mode === 'edit') && blockContent.summary_item_3 !== '___REMOVED___' && blockContent.summary_item_3?.trim() !== '' && (
+              {(blockContent.summary_item_3 || mode !== 'preview') && blockContent.summary_item_3 !== '___REMOVED___' && blockContent.summary_item_3?.trim() !== '' && (
                 <>
                   <div className="w-px h-6 bg-gray-200" />
                   <div className="flex items-center space-x-2 group/summary-item relative">
                     <div className="w-2 h-2 rounded-full bg-orange-500" />
-                    {mode === 'edit' ? (
+                    {mode !== 'preview' ? (
                       <EditableAdaptiveText
                         mode={mode}
                         value={blockContent.summary_item_3 || ''}
@@ -488,7 +488,7 @@ export default function MiniCards(props: LayoutComponentProps) {
                         {blockContent.summary_item_3}
                       </span>
                     )}
-                    {mode === 'edit' && (
+                    {mode !== 'preview' && (
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
@@ -509,9 +509,9 @@ export default function MiniCards(props: LayoutComponentProps) {
           </div>
         )}
 
-        {(blockContent.cta_text || blockContent.trust_items || mode === 'edit') && (
+        {(blockContent.cta_text || blockContent.trust_items || mode !== 'preview') && (
           <div className="text-center space-y-6 mt-16">
-            {(blockContent.supporting_text || mode === 'edit') && (
+            {(blockContent.supporting_text || mode !== 'preview') && (
               <EditableAdaptiveText
                 mode={mode}
                 value={blockContent.supporting_text || ''}

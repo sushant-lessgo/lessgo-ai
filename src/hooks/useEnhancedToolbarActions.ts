@@ -92,7 +92,6 @@ export function useEnhancedToolbarActions() {
       // Show element picker
       // This would trigger the ElementPicker component to show
       // Implementation depends on your UI state management
-      console.log('Show element picker for section:', sectionId);
       return true;
     }
 
@@ -353,7 +352,6 @@ export function useEnhancedToolbarActions() {
     }
     
     // In a real implementation, this would trigger UI to show style options
-    console.log('Open style settings for:', elementSelection, 'styleType:', styleType);
     
     return true;
   }, [elementConfigs, announceLiveRegion]);

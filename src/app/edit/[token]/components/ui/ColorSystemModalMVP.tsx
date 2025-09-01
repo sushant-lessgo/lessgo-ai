@@ -51,7 +51,6 @@ export function ColorSystemModalMVP({ isOpen, onClose, tokenId }: ColorSystemMod
   const currentColorTokens = useMemo(() => {
     try {
       const tokens = getColorTokens();
-      // console.log('🎨 Current color tokens from getColorTokens():', tokens);
       return tokens;
     } catch (error) {
       logger.error('Error getting color tokens:', error);
@@ -65,7 +64,6 @@ export function ColorSystemModalMVP({ isOpen, onClose, tokenId }: ColorSystemMod
   // Get primary background for validation (only check against main background)
   const primaryBackground = useMemo(() => {
     const primary = theme?.colors?.sectionBackgrounds?.primary || 'bg-white';
-    // console.log('🎨 Primary background for validation:', primary);
     return primary;
   }, [theme?.colors?.sectionBackgrounds?.primary]);
 
@@ -93,7 +91,6 @@ export function ColorSystemModalMVP({ isOpen, onClose, tokenId }: ColorSystemMod
   const getCurrentColor = useMemo(() => {
     // Always check theme first since it's updated immediately when we apply changes
     if (theme?.colors?.accentCSS && theme?.colors?.accentColor) {
-      // console.log('🎨 Using theme accent color:', {
       //   accentColor: theme.colors.accentColor,
       //   accentCSS: theme.colors.accentCSS
       // });
@@ -134,7 +131,6 @@ export function ColorSystemModalMVP({ isOpen, onClose, tokenId }: ColorSystemMod
   };
 
   // Debug logging after all values are defined
-  // console.log('🎨 Theme colors:', {
   //   accentColor: currentAccentColor,
   //   accentCSS: currentAccentCSS,
   //   themeColors: theme?.colors,

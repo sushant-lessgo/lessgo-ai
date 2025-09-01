@@ -22,7 +22,6 @@ export default function PromptForm({ onSuccess }: PromptFormProps) {
 
     try {
       const token = localStorage.getItem("lessgo_token") || ""
-      console.log("Token:", token)
       const res = await fetch("/api/generate-landing", {
         method: "POST",
         headers: {
@@ -31,9 +30,6 @@ export default function PromptForm({ onSuccess }: PromptFormProps) {
         },
         body: JSON.stringify({ productIdea: input }),
       })
-// const res = await fetch("/api/test", { method: "POST" })
-// const data1 = await res.json()
-// console.log("Test data:", data1)
     
       if (!res.ok) throw new Error("API call failed")
     

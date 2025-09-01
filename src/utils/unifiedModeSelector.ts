@@ -24,7 +24,7 @@ export function selectEditorMode(state: EditStore | undefined | null): EditorMod
   }
   
   // Primary mode determination logic
-  if (state.mode === 'edit') {
+  if (state.mode !== 'preview') {
     return 'edit';
   } else if (state.mode === 'preview') {
     return 'preview';

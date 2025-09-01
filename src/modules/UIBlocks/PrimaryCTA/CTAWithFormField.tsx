@@ -176,7 +176,6 @@ export default function CTAWithFormField(props: LayoutComponentProps) {
     setIsValid(valid);
     if (valid) {
       // Handle form submission
-      console.log('Form submitted with email:', email);
     }
   };
 
@@ -253,7 +252,7 @@ export default function CTAWithFormField(props: LayoutComponentProps) {
                         <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                       </svg>
                     </div>
-                    {mode === 'edit' ? (
+                    {mode !== 'preview' ? (
                       <div className="flex items-center space-x-2 flex-1">
                         <EditableAdaptiveText
                           mode={mode}
@@ -301,7 +300,7 @@ export default function CTAWithFormField(props: LayoutComponentProps) {
               })}
               
               {/* Add benefit button - only show in edit mode */}
-              {mode === 'edit' && benefits.length < 5 && (
+              {mode !== 'preview' && benefits.length < 5 && (
                 <button
                   onClick={() => {
                     // Find first empty slot and add placeholder
@@ -388,9 +387,9 @@ export default function CTAWithFormField(props: LayoutComponentProps) {
             </form>
 
             {/* Trust Indicators */}
-            {(trustItems.length > 0 || mode === 'edit') && (
+            {(trustItems.length > 0 || mode !== 'preview') && (
               <div className="mt-6 pt-6 border-t border-gray-200">
-                {mode === 'edit' ? (
+                {mode !== 'preview' ? (
                   <EditableTrustIndicators
                     mode={mode}
                     trustItems={[

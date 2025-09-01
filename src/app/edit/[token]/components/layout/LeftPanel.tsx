@@ -84,7 +84,6 @@ export function LeftPanel({ tokenId }: LeftPanelProps) {
   
   // Debug: Log when fields are available (only in development)
   if (process.env.NODE_ENV === 'development') {
-    // console.log('🔍 LeftPanel Data Sources (Detailed):', {
     //   editStore: {
     //     oneLiner: onboardingData.oneLiner,
     //     validatedFields: onboardingData.validatedFields,
@@ -280,7 +279,6 @@ export function LeftPanel({ tokenId }: LeftPanelProps) {
                             Object.keys(onboardingData.validatedFields || {}).length > 0;
     
     // if (process.env.NODE_ENV === 'development') {
-    //   console.log('🔄 Initial data sync check:', {
     //     onboardingStoreHasData,
     //     editStoreHasData,
     //     onboardingStoreHiddenFields: onboardingStoreState.hiddenInferredFields,
@@ -290,7 +288,6 @@ export function LeftPanel({ tokenId }: LeftPanelProps) {
     
     // If onboarding store has data but edit store doesn't, sync onboarding → edit
     if (onboardingStoreHasData && !editStoreHasData) {
-     // console.log('📤 Initial sync from onboarding store to edit store');
       // Clear pending revalidation fields during initial sync to prevent false "needs update" states
       if (onboardingStoreState.pendingRevalidationFields && onboardingStoreState.pendingRevalidationFields.length > 0) {
         onboardingStoreState.pendingRevalidationFields.forEach(field => {
@@ -312,7 +309,6 @@ export function LeftPanel({ tokenId }: LeftPanelProps) {
     }
     // If edit store has data but onboarding store doesn't, sync edit → onboarding  
     else if (editStoreHasData && !onboardingStoreHasData) {
-     // console.log('📥 Initial sync from edit store to onboarding store');
       if (onboardingData.validatedFields && Object.keys(onboardingData.validatedFields).length > 0) {
         setValidatedFields(onboardingData.validatedFields);
       }
