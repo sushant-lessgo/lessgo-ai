@@ -40,15 +40,12 @@ export const validateEnvironmentSecrets = (): { valid: boolean; missing: string[
   };
 };
 
-// A03: Injection - HTML sanitization for published content
+// A03: Injection - HTML sanitization for published content using DOMPurify
+import { sanitizePublishedContent } from './htmlSanitizer';
+
 export const sanitizeHtmlContent = (html: string): string => {
-  // Basic HTML sanitization - remove script tags and dangerous attributes
-  return html
-    .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
-    .replace(/on\w+="[^"]*"/gi, '') // Remove event handlers
-    .replace(/javascript:/gi, '') // Remove javascript: protocols
-    .replace(/vbscript:/gi, '') // Remove vbscript: protocols
-    .replace(/data:text\/html/gi, ''); // Remove data:text/html
+  // Enhanced HTML sanitization using DOMPurify with strict security profile
+  return sanitizePublishedContent(html);
 };
 
 // A09: Security Logging - Create secure response with logging

@@ -307,19 +307,13 @@ function optimizeFormattingNode(node: Node): void {
 }
 
 /**
- * DOMPurify integration placeholder
- * Replace this with actual DOMPurify when it's installed
+ * DOMPurify integration - now fully implemented with enhanced security
  */
+import { sanitizeFormattingContent } from '@/lib/htmlSanitizer';
+
 export function sanitizeWithDOMPurify(html: string): string {
-  // TODO: Implement when DOMPurify is added
-  // return DOMPurify.sanitize(html, {
-  //   ALLOWED_TAGS: ['span', 'b', 'strong', 'i', 'em', 'u'],
-  //   ALLOWED_ATTR: ['style'],
-  //   ALLOWED_CSS: ['font-weight', 'font-style', 'text-decoration', 'color', 'font-size', 'font-family']
-  // });
-  
-  logger.warn('DOMPurify not available, using basic sanitization');
-  return sanitizeHTML(html);
+  // Use the new DOMPurify-based sanitization with formatting profile
+  return sanitizeFormattingContent(html);
 }
 
 // Export the main sanitization function

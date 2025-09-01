@@ -12,6 +12,8 @@ import type { TextFormatState, AutoSaveConfig, InlineEditorConfig, TextSelection
 import type { BackgroundType } from '@/types/sectionBackground';
 
 import { logger } from '@/lib/logger';
+import { sanitizeFormattingContent } from '@/lib/htmlSanitizer';
+
 interface EditableContentProps {
   mode: 'edit' | 'preview';
   value: string;
@@ -210,12 +212,13 @@ export function EditableContent({
   const isHtmlContent = typeof value === 'string' && /<[^>]*>/g.test(value);
   
   if (isHtmlContent) {
-    // Render HTML content with dangerouslySetInnerHTML
+    // Render HTML content with DOMPurify sanitization
+    const sanitizedHtml = sanitizeFormattingContent(value);
     return (
       <Element 
         className={className} 
         style={previewStyle}
-        dangerouslySetInnerHTML={{ __html: value }}
+        dangerouslySetInnerHTML={{ __html: sanitizedHtml }}
       />
     );
   }
