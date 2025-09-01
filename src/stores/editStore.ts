@@ -309,7 +309,6 @@ export function createEditStore(tokenId: string) {
     throw new Error('Token ID is required to create EditStore');
   }
 
-  // console.log(`🏭 Creating EditStore factory for token: ${tokenId}`);
 
   // Track project access
   if (isStorageAvailable()) {
@@ -395,34 +394,10 @@ export function createEditStore(tokenId: string) {
             }),
             onRehydrateStorage: () => (state) => {
               if (state) {
-                // console.log(`🔄 [STORE-DEBUG] EditStore rehydrated for token ${tokenId}:`, {
-                //   sections: state.sections?.length || 0,
-                //   content: Object.keys(state.content || {}).length,
-                //   tokenId: state.tokenId,
-                //   hasTheme: !!state.theme,
-                //   themeDetails: {
-                //     colors: state.theme?.colors,
-                //     typography: {
-                //       headingFont: state.theme?.typography?.headingFont,
-                //       bodyFont: state.theme?.typography?.bodyFont
-                //     },
-                //     backgroundsFromStorage: {
-                //       primary: state.theme?.colors?.sectionBackgrounds?.primary,
-                //       secondary: state.theme?.colors?.sectionBackgrounds?.secondary,
-                //       neutral: state.theme?.colors?.sectionBackgrounds?.neutral,
-                //       divider: state.theme?.colors?.sectionBackgrounds?.divider
-                //     }
-                //   },
-                //   onboardingData: {
-                //     hasOneLiner: !!state.onboardingData?.oneLiner,
-                //     validatedFieldsCount: Object.keys(state.onboardingData?.validatedFields || {}).length,
-                //     hiddenFieldsCount: Object.keys(state.onboardingData?.hiddenInferredFields || {}).length
-                //   }
-                // });
                 
                 // Ensure tokenId matches (in case of storage corruption)
                 if (state.tokenId !== tokenId) {
-                  console.warn(`⚠️ [STORE-DEBUG] Token mismatch in storage: expected ${tokenId}, got ${state.tokenId}`);
+                  logger.warn(`⚠️ [STORE-DEBUG] Token mismatch in storage: expected ${tokenId}, got ${state.tokenId}`);
                   state.tokenId = tokenId;
                   state.id = tokenId;
                 }
@@ -437,7 +412,6 @@ export function createEditStore(tokenId: string) {
                   };
                 }
               } else {
-                // console.log(`🔄 [STORE-DEBUG] No stored data found for token ${tokenId}, using defaults`);
               }
             },
             // Add error handling for corrupted storage
@@ -447,7 +421,7 @@ export function createEditStore(tokenId: string) {
                   const item = localStorage.getItem(name);
                   return item ? JSON.parse(item) : null;
                 } catch (error) {
-                  console.error(`Failed to parse stored data for ${name}:`, error);
+                  logger.error(`Failed to parse stored data for ${name}:`, () => error);
                   // Clear corrupted data
                   localStorage.removeItem(name);
                   return null;
@@ -457,7 +431,7 @@ export function createEditStore(tokenId: string) {
                 try {
                   localStorage.setItem(name, JSON.stringify(value));
                 } catch (error) {
-                  console.error(`Failed to store data for ${name}:`, error);
+                  logger.error(`Failed to store data for ${name}:`, () => error);
                   // Could implement storage quota handling here
                 }
               },
@@ -490,5 +464,4 @@ if (process.env.NODE_ENV === 'development') {
     createInitialState,
   };
   
-  // console.log('🔧 Edit Store Factory debug utilities available at window.__editStoreFactory');
 }

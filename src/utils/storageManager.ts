@@ -82,11 +82,9 @@ class StorageManager {
     this.state.isCleanupRunning = true;
     
     try {
-      // console.log('🧹 Storage Manager: Starting maintenance cleanup');
       
       // Check storage quota
       const stats = getStorageStats();
-      // console.log('📊 Storage stats:', stats);
 
       // Trigger cleanup if needed
       const needsCleanup = 
@@ -101,15 +99,14 @@ class StorageManager {
 
       // Check for quota issues
       if (stats.currentSizeKB > this.state.quotaErrorThreshold) {
-        console.warn('⚠️ Storage quota approaching limit, performing aggressive cleanup');
+        logger.warn('⚠️ Storage quota approaching limit, performing aggressive cleanup');
         await this.performAggressiveCleanup(stats);
       }
 
       this.state.lastCleanupTime = Date.now();
-      // console.log('✅ Storage maintenance cleanup completed');
 
     } catch (error) {
-      console.error('❌ Storage maintenance cleanup failed:', error);
+      logger.error('❌ Storage maintenance cleanup failed:', () => error);
     } finally {
       this.state.isCleanupRunning = false;
     }
@@ -194,7 +191,7 @@ class StorageManager {
             JSON.parse(value); // Test if valid JSON
           }
         } catch (error) {
-          console.warn(`🗑️ Removing corrupted storage entry: ${key}`);
+          logger.warn(`🗑️ Removing corrupted storage entry: ${key}`);
           localStorage.removeItem(key);
         }
       }
@@ -339,5 +336,4 @@ if (process.env.NODE_ENV === 'development') {
     setQuotaThresholds: (w: number, e: number) => storageManager.setQuotaThresholds(w, e),
   };
   
-  // console.log('🔧 Storage Manager debug utilities available at window.__storageManagerDebug');
 }

@@ -4,6 +4,7 @@
 import { getEnhancedTextColors, BusinessColorContext } from './improvedTextColors';
 import { getSmartAccentColor } from './colorHarmony';
 import { validateBrandColors, BrandColors, BrandIntegrationOptions } from './brandColorSystem';
+import { logger } from '@/lib/logger';
 
 /**
  * Feature flags for color system components
@@ -86,7 +87,7 @@ export class ColorSystemManager {
 
         // Log debug info if enabled
         if (this.config.flags.enableColorDebugging) {
-          console.log('🎨 Enhanced Color System Result:', {
+          logger.dev('🎨 Enhanced Color System Result:', () => ({
             backgroundType,
             backgroundCSS,
             textColors: {
@@ -96,7 +97,7 @@ export class ColorSystemManager {
             },
             validation: enhancedResult.validation,
             confidence: enhancedResult.validation.confidence
-          });
+          }));
         }
 
         // Check if result meets quality threshold
@@ -109,12 +110,12 @@ export class ColorSystemManager {
             confidence: enhancedResult.validation.confidence
           };
         } else if (this.config.fallbackToLegacy) {
-          console.warn('Enhanced system low confidence, falling back to legacy');
+          logger.warn('Enhanced system low confidence, falling back to legacy');
           return this.getLegacyTextColors(backgroundType, backgroundCSS, businessContext);
         }
       }
     } catch (error) {
-      console.error('Enhanced color system failed:', error);
+      logger.error('Enhanced color system failed:', () => error);
       
       if (this.config.fallbackToLegacy) {
         return this.getLegacyTextColors(backgroundType, backgroundCSS, businessContext);
@@ -156,7 +157,7 @@ export class ColorSystemManager {
           };
         }
       } catch (error) {
-        console.warn('Brand color validation failed:', error);
+        logger.warn('Brand color validation failed:', () => error);
       }
     }
 
@@ -170,11 +171,11 @@ export class ColorSystemManager {
         const smartAccent = getSmartAccentColor(baseColor, businessContext);
         
         if (this.config.flags.enableColorDebugging) {
-          console.log('🎨 Smart Accent Color Result:', {
+          logger.dev('🎨 Smart Accent Color Result:', () => ({
             baseColor,
             businessContext,
             result: smartAccent
-          });
+          }));
         }
 
         if (smartAccent.confidence > 0.5) {
@@ -187,7 +188,7 @@ export class ColorSystemManager {
         }
       }
     } catch (error) {
-      console.error('Smart accent color system failed:', error);
+      logger.error('Smart accent color system failed:', () => error);
     }
 
     // Fallback to legacy
@@ -212,7 +213,7 @@ export class ColorSystemManager {
         requireWCAG: this.config.flags.useAccessibilityValidation ? 'AA' : undefined
       });
     } catch (error) {
-      console.error('Brand color validation failed:', error);
+      logger.error('Brand color validation failed:', () => error);
       return null;
     }
   }
@@ -326,7 +327,7 @@ export class ColorSystemManager {
         const result = this.legacySystem.getTextColorForBackground(backgroundType, { bgPrimary: backgroundCSS });
         return { ...result, source: 'legacy' };
       } catch (error) {
-        console.warn('Legacy system failed:', error);
+        logger.warn('Legacy system failed:', () => error);
       }
     }
 
@@ -351,7 +352,7 @@ export class ColorSystemManager {
         const result = this.legacySystem.getAccentColor(baseColor, businessContext);
         return { ...result, source: 'legacy' };
       } catch (error) {
-        console.warn('Legacy accent system failed:', error);
+        logger.warn('Legacy accent system failed:', () => error);
       }
     }
 

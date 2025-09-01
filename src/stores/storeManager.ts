@@ -60,7 +60,6 @@ class EditStoreManager {
     // Update current token tracking
     const previousTokenId = this.currentTokenId;
     if (this.currentTokenId !== tokenId) {
-      // console.log(`📝 Store Manager: Switching from ${previousTokenId || 'none'} to ${tokenId}`);
       this.currentTokenId = tokenId;
       
       // Handle storage cleanup and tracking
@@ -84,12 +83,10 @@ class EditStoreManager {
         trackProjectAccess(tokenId);
       }
       
-      // console.log(`♻️ Store Manager: Using cached store for token ${tokenId}`);
       return cacheEntry.store;
     }
 
     // Create new store instance
-    // console.log(`🏗️ Store Manager: Creating new store for token ${tokenId}`);
     
     try {
       const store = createEditStore(tokenId);
@@ -211,7 +208,6 @@ class EditStoreManager {
   public markStoreInitialized(tokenId: string): void {
     if (this.storeCache[tokenId]) {
       this.storeCache[tokenId].isInitialized = true;
-      // console.log(`✅ Store Manager: Store ${tokenId} marked as initialized`);
     }
   }
 
@@ -226,7 +222,6 @@ class EditStoreManager {
    * Switch to a different token (useful for navigation)
    */
   public switchToToken(newTokenId: string, oldTokenId?: string): EditStoreInstance {
-    // console.log(`🔄 Store Manager: Switch requested from ${oldTokenId || 'unknown'} to ${newTokenId}`);
     
     // Update previous token tracking
     if (oldTokenId && this.storeCache[oldTokenId]) {
@@ -282,7 +277,6 @@ class EditStoreManager {
     this.storeCache = {};
     this.currentTokenId = null;
     
-    // console.log('🛑 Store Manager destroyed');
   }
 }
 
@@ -304,5 +298,4 @@ if (process.env.NODE_ENV === 'development') {
     getCurrentToken: () => storeManager.getCurrentTokenId(),
   };
   
-  // console.log('🔧 Store Manager debug utilities available at window.__storeManagerDebug');
 }

@@ -2,6 +2,7 @@
 // Customer avatar editing component following LogoEditableComponent pattern
 
 import React, { useState, useRef } from 'react';
+import { logger } from '@/lib/logger';
 
 interface AvatarEditableComponentProps {
   mode: 'edit' | 'preview';
@@ -82,7 +83,7 @@ const AvatarEditableComponent: React.FC<AvatarEditableComponentProps> = ({
       const previewUrl = URL.createObjectURL(file);
       onAvatarChange(previewUrl);
     } catch (error) {
-      console.error('Error uploading avatar:', error);
+      logger.error('Error uploading avatar:', () => error);
       alert('Failed to upload avatar. Please try again.');
     } finally {
       setIsUploading(false);
