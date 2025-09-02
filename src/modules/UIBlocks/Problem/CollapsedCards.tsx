@@ -97,7 +97,9 @@ export default function CollapsedCards(props: LayoutComponentProps) {
     contentSchema: CONTENT_SCHEMA
   });
 
-  const [expandedCard, setExpandedCard] = useState<number | null>(null);
+  const [expandedCard, setExpandedCard] = useState<number | null>(
+    mode !== 'preview' ? 0 : null
+  );
 
   const problemTitles = blockContent.problem_titles 
     ? blockContent.problem_titles.split('|').map(item => item.trim()).filter(Boolean)
@@ -281,7 +283,8 @@ export default function CollapsedCards(props: LayoutComponentProps) {
         >
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
-              <div className={`w-12 h-12 rounded-lg ${isExpanded ? 'bg-red-500' : 'bg-gray-100'} flex items-center justify-center ${isExpanded ? 'text-white' : 'text-gray-600'} transition-colors duration-300 group/icon-edit relative`}>
+              <div className={`w-12 h-12 rounded-lg ${isExpanded ? 'bg-red-500' : 'bg-gray-100'} flex items-center justify-center ${isExpanded ? 'text-white' : 'text-gray-600'} transition-colors duration-300 group/icon-edit relative`}
+                onClick={(e) => e.stopPropagation()}>
                 <IconEditableText
                   mode={mode}
                   value={getProblemIcon(index)}
@@ -297,7 +300,7 @@ export default function CollapsedCards(props: LayoutComponentProps) {
                   elementKey={`problem_icon_${index + 1}`}
                 />
               </div>
-              <div>
+              <div onClick={(e) => e.stopPropagation()}>
                 <EditableAdaptiveText
                   mode={mode}
                   value={problem.title}
@@ -323,6 +326,7 @@ export default function CollapsedCards(props: LayoutComponentProps) {
                   sectionBackground={sectionBackground}
                   sectionId={sectionId}
                   elementKey={`expand_label_${index + 1}`}
+                  onClick={(e: any) => e.stopPropagation()}
                 />
               </div>
             </div>
