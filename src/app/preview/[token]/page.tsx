@@ -79,14 +79,38 @@ function PreviewPageContent({ tokenId }: { tokenId: string }) {
 
   // Validate publish readiness
   const isPublishReady = useMemo(() => {
-    // Skip CTA validation when using mock GPT
-    if (process.env.NEXT_PUBLIC_USE_MOCK_GPT === 'true') {
-      return true;
+    // Find the hero section (section ID includes 'hero')
+    const heroSectionId = sections.find(id => id.includes('hero'));
+    if (!heroSectionId) {
+      return false; // No hero section found
     }
     
-    const heroContent = content.hero?.elements;
-    return !!(heroContent?.cta_text && (heroContent?.cta_url || heroContent?.cta_embed));
-  }, [content.hero?.elements]);
+    const heroContent = content[heroSectionId]?.elements;
+    if (!heroContent) {
+      return false; // No hero content found
+    }
+    
+    // Check if CTA is configured properly
+    // Option 1: Check if cta_text exists and has button configuration
+    if (heroContent.cta_text) {
+      // Check if button config exists in metadata
+      const buttonConfig = heroContent.cta_text?.metadata?.buttonConfig;
+      if (buttonConfig) {
+        return !!(buttonConfig.type === 'link' ? buttonConfig.url : buttonConfig.formId);
+      }
+      
+      // Check legacy format (cta_url or cta_embed directly in elements)
+      return !!(heroContent.cta_url || heroContent.cta_embed);
+    }
+    
+    // Option 2: Check if section has cta configuration
+    const sectionCta = (content[heroSectionId] as any)?.cta;
+    if (sectionCta) {
+      return !!(sectionCta.type === 'link' ? sectionCta.url : sectionCta.formId);
+    }
+    
+    return false;
+  }, [sections, content]);
 
   // Initialize and validate data
   useEffect(() => {

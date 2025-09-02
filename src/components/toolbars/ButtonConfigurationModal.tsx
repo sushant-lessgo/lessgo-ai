@@ -148,11 +148,32 @@ export function ButtonConfigurationModal({
         };
 
         // Update the element in store using setSection, including ctaConfig
+        const updatedElements = {
+          ...currentSection.elements,
+          [elementSelection.elementKey]: updatedElement
+        };
+        
+        // Also store cta_url or cta_embed directly in elements for backward compatibility
+        if (config.type === 'link' && config.url) {
+          updatedElements.cta_url = {
+            type: 'text' as const,
+            content: config.url,
+            isEditable: false,
+            editMode: 'inline' as const,
+            metadata: {}
+          };
+        } else if (config.type === 'form' && config.formId) {
+          updatedElements.cta_embed = {
+            type: 'text' as const,
+            content: `form:${config.formId}`,
+            isEditable: false,
+            editMode: 'inline' as const,
+            metadata: { behavior: config.behavior }
+          };
+        }
+        
         setSection(elementSelection.sectionId, {
-          elements: {
-            ...currentSection.elements,
-            [elementSelection.elementKey]: updatedElement
-          },
+          elements: updatedElements,
           // Also save ctaConfig at section level for easy access by CTA handler
           cta: {
             ...ctaConfig,
