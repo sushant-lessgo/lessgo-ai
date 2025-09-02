@@ -1,49 +1,54 @@
-index.js:625 Uncaught ModuleBuildError: Module build failed (from ./node_modules/next/dist/build/webpack/loaders/next-swc-loader.js):
-Error: 
-  × Expected ';', '}' or <eof>
-    ╭─[C:\Users\susha\lessgo-ai\src\hooks\useSmartTextColors.ts:83:1]
- 83 │           return 'poor';
- 84 │         })();
- 85 │         
- 86 │ ╭─▶       backgroundCSS,
- 87 │ │         headingColor,
- 88 │ │         bodyColor,
- 89 │ │         mutedColor,
- 90 │ ├─▶       isLightBackground: calculatedIsLight,
-    · ╰───                       ─
-    · ╰──── This is the expression part of an expression statement
- 91 │           contrastRating
- 92 │         });
- 92 │         
-    ╰────
-
-
-Caused by:
-    Syntax Error
-    at processResult (file://C:\Users\susha\lessgo-ai\node_modules\next\dist\compiled\webpack\bundle5.js:28:400590)
-    at <unknown> (file://C:\Users\susha\lessgo-ai\node_modules\next\dist\compiled\webpack\bundle5.js:28:402302)
-    at <unknown> (file://C:\Users\susha\lessgo-ai\node_modules\next\dist\compiled\loader-runner\LoaderRunner.js:1:8645)
-    at <unknown> (file://C:\Users\susha\lessgo-ai\node_modules\next\dist\compiled\loader-runner\LoaderRunner.js:1:5019)
-    at r.callback (file://C:\Users\susha\lessgo-ai\node_modules\next\dist\compiled\loader-runner\LoaderRunner.js:1:4039)
-hydration-error-info.js:63 ./src/hooks/useSmartTextColors.ts
-Error: 
-  × Expected ';', '}' or <eof>
-    ╭─[C:\Users\susha\lessgo-ai\src\hooks\useSmartTextColors.ts:83:1]
- 83 │           return 'poor';
- 84 │         })();
- 85 │         
- 86 │ ╭─▶       backgroundCSS,
- 87 │ │         headingColor,
- 88 │ │         bodyColor,
- 89 │ │         mutedColor,
- 90 │ ├─▶       isLightBackground: calculatedIsLight,
-    · ╰───                       ─
-    · ╰──── This is the expression part of an expression statement
- 91 │           contrastRating
- 92 │         });
- 92 │         
-    ╰────
-
-Caused by:
-    Syntax Error
-console.error @ hydration-error-info.js:63
+immer.mjs:64 Uncaught Error: [Immer] Immer only supports setting array indices and the 'length' property
+    at die (immer.mjs:64:11)
+    at arrayTraps.set (immer.mjs:505:5)
+    at eval (contentActions.ts:121:26)
+    at eval (immer.mjs:580:56)
+    at Immer2.produce (immer.mjs:593:20)
+    at curriedProduce (immer.mjs:580:23)
+    at setState (vanilla.mjs:9:55)
+    at eval (middleware.mjs:376:7)
+    at store.setState (immer.mjs:11:12)
+    at updateElementContent (contentActions.ts:58:7)
+    at handleContentUpdate (useLayoutComponent.ts:392:5)
+    at addPainPoint (StackedPainBullets.tsx:222:5)
+    at HTMLUnknownElement.callCallback (react-dom.development.js:20565:14)
+    at Object.invokeGuardedCallbackImpl (react-dom.development.js:20614:16)
+    at invokeGuardedCallback (react-dom.development.js:20689:29)
+    at invokeGuardedCallbackAndCatchFirstError (react-dom.development.js:20703:25)
+    at executeDispatch (react-dom.development.js:32128:3)
+    at processDispatchQueueItemsInOrder (react-dom.development.js:32160:7)
+    at processDispatchQueue (react-dom.development.js:32173:5)
+    at dispatchEventsForPlugins (react-dom.development.js:32184:3)
+    at eval (react-dom.development.js:32374:12)
+    at batchedUpdates$1 (react-dom.development.js:24953:12)
+    at batchedUpdates (react-dom.development.js:28844:12)
+    at dispatchEventForPluginEventSystem (react-dom.development.js:32373:3)
+    at dispatchEvent (react-dom.development.js:30141:5)
+    at dispatchDiscreteEvent (react-dom.development.js:30112:5)
+react-dom.development.js:20724 Uncaught Error: [Immer] Immer only supports setting array indices and the 'length' property
+    at die (immer.mjs:64:11)
+    at arrayTraps.set (immer.mjs:505:5)
+    at eval (contentActions.ts:121:26)
+    at eval (immer.mjs:580:56)
+    at Immer2.produce (immer.mjs:593:20)
+    at curriedProduce (immer.mjs:580:23)
+    at setState (vanilla.mjs:9:55)
+    at eval (middleware.mjs:376:7)
+    at store.setState (immer.mjs:11:12)
+    at updateElementContent (contentActions.ts:58:7)
+    at handleContentUpdate (useLayoutComponent.ts:392:5)
+    at addPainPoint (StackedPainBullets.tsx:222:5)
+    at HTMLUnknownElement.callCallback (react-dom.development.js:20565:14)
+    at Object.invokeGuardedCallbackImpl (react-dom.development.js:20614:16)
+    at invokeGuardedCallback (react-dom.development.js:20689:29)
+    at invokeGuardedCallbackAndCatchFirstError (react-dom.development.js:20703:25)
+    at executeDispatch (react-dom.development.js:32128:3)
+    at processDispatchQueueItemsInOrder (react-dom.development.js:32160:7)
+    at processDispatchQueue (react-dom.development.js:32173:5)
+    at dispatchEventsForPlugins (react-dom.development.js:32184:3)
+    at eval (react-dom.development.js:32374:12)
+    at batchedUpdates$1 (react-dom.development.js:24953:12)
+    at batchedUpdates (react-dom.development.js:28844:12)
+    at dispatchEventForPluginEventSystem (react-dom.development.js:32373:3)
+    at dispatchEvent (react-dom.development.js:30141:5)
+    at dispatchDiscreteEvent (react-dom.development.js:30112:5)

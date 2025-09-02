@@ -318,7 +318,7 @@ function generateMockContent(context: BusinessContext, requestedSections: string
 
     problem: {
       headline: "The Challenge Most Teams Face",
-      pain_points: randomChoices(contentVariations.problemStatements, 4),
+      pain_points: randomChoices(contentVariations.problemStatements, 4).join('|'),
       emotional_hook: "You're not alone in feeling overwhelmed by these challenges.",
       supporting_text: "These issues are costing you time, money, and growth opportunities every day."
     },

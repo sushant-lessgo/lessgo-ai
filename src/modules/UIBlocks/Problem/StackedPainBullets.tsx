@@ -77,7 +77,9 @@ const PainPointItem = ({
   blockContent,
   handleContentUpdate,
   onPointEdit,
-  onDescriptionEdit
+  onDescriptionEdit,
+  onRemove,
+  canRemove
 }: {
   painPoint: PainPoint;
   index: number;
@@ -90,6 +92,8 @@ const PainPointItem = ({
   handleContentUpdate: (field: keyof StackedPainBulletsContent, value: any) => void;
   onPointEdit: (index: number, value: string) => void;
   onDescriptionEdit: (index: number, value: string) => void;
+  onRemove: (index: number) => void;
+  canRemove: boolean;
 }) => {
   return (
     <div className="group flex items-start space-x-4 p-6 bg-white rounded-lg border border-red-200 hover:border-red-300 hover:shadow-md transition-all duration-300">
@@ -151,6 +155,25 @@ const PainPointItem = ({
         )}
       </div>
       
+      {/* Remove Button (Edit Mode Only) */}
+      {mode === 'edit' && canRemove && (
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            if (painPoint.point.trim() && !confirm('Are you sure you want to remove this pain point?')) {
+              return;
+            }
+            onRemove(index);
+          }}
+          className="opacity-0 group-hover:opacity-100 flex-shrink-0 p-1 rounded-full bg-white/80 hover:bg-white text-red-500 hover:text-red-700 transition-all duration-200 shadow-sm ml-2"
+          title="Remove this pain point"
+        >
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      )}
+      
       {/* Emphasis Indicator */}
       <div className="flex-shrink-0 w-2 h-2 bg-red-400 rounded-full group-hover:bg-red-500 transition-colors duration-300"></div>
     </div>
@@ -188,6 +211,70 @@ export default function StackedPainBullets(props: LayoutComponentProps) {
     const descriptions = blockContent.pain_descriptions ? blockContent.pain_descriptions.split('|') : [];
     descriptions[index] = value;
     handleContentUpdate('pain_descriptions', descriptions.join('|'));
+  };
+
+  // Add new pain point
+  const addPainPoint = () => {
+    const points = blockContent.pain_points.split('|');
+    if (points.length >= 6) return; // Maximum 6 pain points
+    
+    const newPoints = [...points, 'New pain point'];
+    
+    // Update pain points
+    handleContentUpdate('pain_points', newPoints.join('|'));
+    
+    // Set icon based on new length - use setTimeout to avoid Immer conflicts
+    setTimeout(() => {
+      const iconNumber = newPoints.length;
+      switch(iconNumber) {
+        case 1:
+          handleContentUpdate('pain_icon_1', '⚠️');
+          break;
+        case 2:
+          handleContentUpdate('pain_icon_2', '⚠️');
+          break;
+        case 3:
+          handleContentUpdate('pain_icon_3', '⚠️');
+          break;
+        case 4:
+          handleContentUpdate('pain_icon_4', '⚠️');
+          break;
+        case 5:
+          handleContentUpdate('pain_icon_5', '⚠️');
+          break;
+        case 6:
+          handleContentUpdate('pain_icon_6', '⚠️');
+          break;
+      }
+    }, 0);
+  };
+
+  // Remove pain point
+  const removePainPoint = (index: number) => {
+    const points = blockContent.pain_points.split('|');
+    if (points.length <= 1) return; // Keep at least 1 pain point
+    
+    const newPoints = points.filter((_, i) => i !== index);
+    handleContentUpdate('pain_points', newPoints.join('|'));
+    
+    // Remove corresponding description if it exists
+    if (blockContent.pain_descriptions) {
+      const descriptions = blockContent.pain_descriptions.split('|');
+      const newDescriptions = descriptions.filter((_, i) => i !== index);
+      handleContentUpdate('pain_descriptions', newDescriptions.join('|'));
+    }
+    
+    // Shift icons down to maintain continuity
+    for (let i = index + 1; i < points.length; i++) {
+      const currentIconField = `pain_icon_${i + 1}` as keyof StackedPainBulletsContent;
+      const nextIconField = `pain_icon_${i}` as keyof StackedPainBulletsContent;
+      const iconValue = blockContent[currentIconField] || '⚠️';
+      handleContentUpdate(nextIconField, iconValue);
+    }
+    
+    // Clear the last icon slot
+    const lastIconField = `pain_icon_${points.length}` as keyof StackedPainBulletsContent;
+    handleContentUpdate(lastIconField, '⚠️');
   };
 
 
@@ -250,9 +337,26 @@ export default function StackedPainBullets(props: LayoutComponentProps) {
               handleContentUpdate={handleContentUpdate}
               onPointEdit={handlePointEdit}
               onDescriptionEdit={handleDescriptionEdit}
+              onRemove={removePainPoint}
+              canRemove={painPoints.length > 1}
             />
           ))}
         </div>
+
+        {/* Add Pain Point Button */}
+        {mode === 'edit' && painPoints.length < 6 && (
+          <div className="mt-6 flex justify-center">
+            <button
+              onClick={addPainPoint}
+              className="flex items-center space-x-2 px-4 py-2 text-sm text-red-600 hover:text-red-800 border border-red-200 hover:border-red-300 rounded-lg hover:bg-red-50 transition-all duration-200"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+              </svg>
+              <span>Add Pain Point</span>
+            </button>
+          </div>
+        )}
 
         {/* Emotional Conclusion */}
         <div className="mt-12 text-center">
