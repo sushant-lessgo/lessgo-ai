@@ -74,6 +74,13 @@ getTypographyForSection: (sectionId: string) => FontTheme;
   reorderNavItems: (newOrder: string[]) => void;
   updateNavigationOnSectionChange: () => void;
   setNavigationMaxItems: (maxItems: number) => void;
+  
+  // Social Media Management
+  initializeSocialMedia: () => void;
+  addSocialMediaItem: (platform: string, url: string, icon: string) => void;
+  updateSocialMediaItem: (itemId: string, updates: Partial<{ platform: string; url: string; icon: string }>) => void;
+  removeSocialMediaItem: (itemId: string) => void;
+  reorderSocialMediaItems: (newOrder: string[]) => void;
 }
 
 /**

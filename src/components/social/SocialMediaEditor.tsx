@@ -8,6 +8,7 @@ import { createPortal } from 'react-dom';
 import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
 import type { SocialMediaItem } from '@/types/store/state';
 import { FaTwitter, FaLinkedin, FaGithub, FaFacebook, FaInstagram, FaYoutube, FaTiktok, FaDiscord, FaMedium, FaDribbble, FaGlobe } from 'react-icons/fa';
+import { processSocialMediaUrl, getDisplayUrl } from '@/utils/urlHelpers';
 
 interface SocialMediaEditorProps {
   isVisible: boolean;
@@ -49,6 +50,7 @@ const SocialMediaEditor: React.FC<SocialMediaEditorProps> = ({
     url: '',
     icon: '',
   });
+  const [urlError, setUrlError] = useState<string>('');
   
   // Refs for UX improvements
   const editFormRef = useRef<HTMLDivElement>(null);
@@ -73,7 +75,7 @@ const SocialMediaEditor: React.FC<SocialMediaEditorProps> = ({
   // Initialize social media config if needed
   useEffect(() => {
     if (isVisible && !store.socialMediaConfig) {
-      // store.initializeSocialMedia(); // TEMP: commented for build - method not available
+      store.initializeSocialMedia();
     }
   }, [isVisible, store]);
 
@@ -87,20 +89,31 @@ const SocialMediaEditor: React.FC<SocialMediaEditorProps> = ({
   const handleSaveItem = () => {
     if (!formData.platform.trim() || !formData.url.trim() || !formData.icon) return;
 
-    // TEMP: commented for build - methods not available
-    // if (editingItem) {
-    //   store.updateSocialMediaItem(editingItem.id, {
-    //     platform: formData.platform,
-    //     url: formData.url,
-    //     icon: formData.icon,
-    //   });
-    // } else {
-    //   store.addSocialMediaItem(
-    //     formData.platform,
-    //     formData.url,
-    //     formData.icon
-    //   );
-    // }
+    // Normalize and validate the URL
+    const { url: normalizedUrl, isValid, error } = processSocialMediaUrl(
+      formData.url,
+      formData.platform
+    );
+
+    if (!isValid) {
+      // You could show an error message here if needed
+      console.error('Invalid URL:', error);
+      return;
+    }
+
+    if (editingItem) {
+      store.updateSocialMediaItem(editingItem.id, {
+        platform: formData.platform,
+        url: normalizedUrl,
+        icon: formData.icon,
+      });
+    } else {
+      store.addSocialMediaItem(
+        formData.platform,
+        normalizedUrl,
+        formData.icon
+      );
+    }
 
     resetForm();
   };
@@ -117,7 +130,7 @@ const SocialMediaEditor: React.FC<SocialMediaEditorProps> = ({
   };
 
   const handleDeleteItem = (itemId: string) => {
-    // store.removeSocialMediaItem(itemId); // TEMP: commented for build - method not available
+    store.removeSocialMediaItem(itemId);
   };
 
   const handlePlatformChange = (platformName: string) => {
@@ -135,6 +148,7 @@ const SocialMediaEditor: React.FC<SocialMediaEditorProps> = ({
     setFormData({ platform: '', url: '', icon: '' });
     setEditingItem(null);
     setShowAddForm(false);
+    setUrlError('');
   };
 
   const handleClose = () => {
@@ -187,7 +201,7 @@ const SocialMediaEditor: React.FC<SocialMediaEditorProps> = ({
                       <IconComponent className="w-5 h-5 text-gray-600" />
                       <div className="flex-1">
                         <div className="font-medium text-gray-900">{item.platform}</div>
-                        <div className="text-sm text-gray-500 truncate">{item.url}</div>
+                        <div className="text-sm text-gray-500 truncate">{getDisplayUrl(item.url)}</div>
                       </div>
                     </div>
                     <div className="flex items-center gap-2">
@@ -196,7 +210,7 @@ const SocialMediaEditor: React.FC<SocialMediaEditorProps> = ({
                           onClick={() => {
                             const newOrder = [...socialItems];
                             [newOrder[index], newOrder[index - 1]] = [newOrder[index - 1], newOrder[index]];
-                            // store.reorderSocialMediaItems(newOrder.map(item => item.id)); // TEMP: commented for build - method not available
+                            store.reorderSocialMediaItems(newOrder.map(item => item.id));
                           }}
                           className="p-1 text-gray-400 hover:text-gray-600"
                           title="Move up"
@@ -211,7 +225,7 @@ const SocialMediaEditor: React.FC<SocialMediaEditorProps> = ({
                           onClick={() => {
                             const newOrder = [...socialItems];
                             [newOrder[index], newOrder[index + 1]] = [newOrder[index + 1], newOrder[index]];
-                            // store.reorderSocialMediaItems(newOrder.map(item => item.id)); // TEMP: commented for build - method not available
+                            store.reorderSocialMediaItems(newOrder.map(item => item.id));
                           }}
                           className="p-1 text-gray-400 hover:text-gray-600"
                           title="Move down"
@@ -278,18 +292,35 @@ const SocialMediaEditor: React.FC<SocialMediaEditorProps> = ({
                     URL
                   </label>
                   <input
-                    type="url"
+                    type="text"
                     value={formData.url}
-                    onChange={(e) => setFormData({ ...formData, url: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    onChange={(e) => {
+                      setFormData({ ...formData, url: e.target.value });
+                      setUrlError(''); // Clear error on change
+                    }}
+                    onBlur={() => {
+                      if (formData.url) {
+                        const { isValid, error } = processSocialMediaUrl(formData.url, formData.platform);
+                        setUrlError(!isValid ? (error || 'Invalid URL') : '');
+                      }
+                    }}
+                    className={`w-full px-3 py-2 border ${urlError ? 'border-red-500' : 'border-gray-300'} rounded-md focus:outline-none focus:ring-2 ${urlError ? 'focus:ring-red-500' : 'focus:ring-blue-500'}`}
                     placeholder={getCurrentPlatformPlaceholder()}
                   />
+                  {urlError && (
+                    <p className="mt-1 text-sm text-red-600">{urlError}</p>
+                  )}
+                  {formData.url && !urlError && (
+                    <p className="mt-1 text-sm text-gray-500">
+                      Will be saved as: {processSocialMediaUrl(formData.url, formData.platform).url}
+                    </p>
+                  )}
                 </div>
 
                 <div className="flex gap-2">
                   <button
                     onClick={handleSaveItem}
-                    disabled={!formData.platform.trim() || !formData.url.trim() || !formData.icon}
+                    disabled={!formData.platform.trim() || !formData.url.trim() || !formData.icon || !!urlError}
                     className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {editingItem ? 'Update' : 'Add'}

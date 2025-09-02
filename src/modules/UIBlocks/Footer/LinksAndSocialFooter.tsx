@@ -7,6 +7,7 @@ import { LayoutComponentProps } from '@/types/storeTypes';
 import { FaTwitter, FaLinkedin, FaGithub, FaFacebook, FaInstagram, FaYoutube, FaTiktok, FaDiscord, FaMedium, FaDribbble, FaGlobe } from 'react-icons/fa';
 import HeaderLogo from '@/components/ui/HeaderLogo';
 import SocialMediaEditor from '@/components/social/SocialMediaEditor';
+import { normalizeUrl, isValidUrl } from '@/utils/urlHelpers';
 
 import { logger } from '@/lib/logger';
 interface LinksAndSocialFooterContent {
@@ -42,8 +43,7 @@ const LinksAndSocialFooter: React.FC<LayoutComponentProps> = (props) => {
   // Initialize social media config if needed
   useEffect(() => {
     if (!store.socialMediaConfig) {
-      // TEMP: commented for build - method not available
-      // store.initializeSocialMedia();
+      store.initializeSocialMedia();
     }
   }, [store]);
 
@@ -118,10 +118,14 @@ const LinksAndSocialFooter: React.FC<LayoutComponentProps> = (props) => {
         <div className="flex items-center gap-4">
           {socialLinks.map((social, index) => {
             const IconComponent = getIconComponent(social.icon);
+            // Ensure URL is normalized and valid
+            const normalizedUrl = normalizeUrl(social.url);
+            const validUrl = isValidUrl(normalizedUrl) ? normalizedUrl : '#';
+            
             return (
               <a
                 key={social.id}
-                href={social.url}
+                href={validUrl}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-gray-400 hover:text-white transition-colors relative"

@@ -9,6 +9,7 @@ import { pickFontFromOnboarding } from '@/modules/Design/fontSystem/pickFont';
 import type { FontTheme, TypographyState } from '@/types/core/index';
 
 import { logger } from '@/lib/logger';
+import { normalizeUrl } from '@/utils/urlHelpers';
 /**
  * ===== UTILITY FUNCTIONS =====
  */
@@ -1084,8 +1085,6 @@ getTypographyForSection: (sectionId: string) => {
       }),
 
     // ====== SOCIAL MEDIA MANAGEMENT ======
-    // TEMP: commented for build - methods not defined in interface
-    /*
     initializeSocialMedia: () =>
       set((state: EditStore) => {
         if (state.socialMediaConfig) return; // Already initialized
@@ -1113,10 +1112,13 @@ getTypographyForSection: (sectionId: string) => {
           return; // Don't add if at limit
         }
 
+        // Normalize the URL to ensure it has a protocol
+        const normalizedUrl = normalizeUrl(url);
+
         const newItem = {
           id: `social-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
           platform,
-          url,
+          url: normalizedUrl,
           icon,
           order: state.socialMediaConfig.items.length,
         };
@@ -1135,9 +1137,15 @@ getTypographyForSection: (sectionId: string) => {
         const itemIndex = state.socialMediaConfig.items.findIndex(item => item.id === itemId);
         if (itemIndex === -1) return;
         
+        // Normalize URL if it's being updated
+        const normalizedUpdates = { ...updates };
+        if (updates.url) {
+          normalizedUpdates.url = normalizeUrl(updates.url);
+        }
+        
         const updatedItem = {
           ...state.socialMediaConfig.items[itemIndex],
-          ...updates,
+          ...normalizedUpdates,
         };
 
         state.socialMediaConfig.items[itemIndex] = updatedItem;
@@ -1187,7 +1195,6 @@ getTypographyForSection: (sectionId: string) => {
 
         logger.debug('🔗 [SOCIAL-DEBUG] Reordered social media items:', reorderedItems);
       }),
-    */
 
   };
 }
