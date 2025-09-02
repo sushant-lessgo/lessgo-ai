@@ -454,7 +454,7 @@ export default function RatingCards(props: LayoutComponentProps) {
               onEdit={(value) => handleContentUpdate('platforms_title', value)}
               backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
               colorTokens={colorTokens}
-              variant="h3"
+              variant="body"
               style={h3Style}
               className="font-semibold text-gray-900 mb-6"
               placeholder="Platforms section title..."

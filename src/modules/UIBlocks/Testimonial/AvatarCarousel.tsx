@@ -479,7 +479,7 @@ export default function AvatarCarousel(props: LayoutComponentProps) {
               onEdit={(value) => handleContentUpdate('community_title', value)}
               backgroundType={safeBackgroundType}
               colorTokens={colorTokens}
-              variant="h3"
+              variant="body"
               style={h3Style}
               className="font-semibold text-gray-900 mb-6"
               placeholder="Community section title..."

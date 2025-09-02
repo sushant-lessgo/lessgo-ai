@@ -384,7 +384,7 @@ export default function LogoWall(props: LayoutComponentProps) {
                       onEdit={(value) => handleContentUpdate('stat_1_number', value)}
                       backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
                       colorTokens={colorTokens}
-                      variant="display"
+                      variant="body"
                       className="text-3xl font-bold"
                       placeholder="500+"
                       sectionBackground={sectionBackground}
@@ -443,7 +443,7 @@ export default function LogoWall(props: LayoutComponentProps) {
                       onEdit={(value) => handleContentUpdate('stat_2_number', value)}
                       backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
                       colorTokens={colorTokens}
-                      variant="display"
+                      variant="body"
                       className="text-3xl font-bold"
                       placeholder="50+"
                       sectionBackground={sectionBackground}
@@ -501,7 +501,7 @@ export default function LogoWall(props: LayoutComponentProps) {
                       onEdit={(value) => handleContentUpdate('stat_3_number', value)}
                       backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
                       colorTokens={colorTokens}
-                      variant="display"
+                      variant="body"
                       className="text-3xl font-bold"
                       placeholder="15+"
                       sectionBackground={sectionBackground}

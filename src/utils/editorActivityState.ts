@@ -86,12 +86,6 @@ export function updatePointerCaptureState(editorId: string = 'default', captureA
   state.pointerCaptureActive = captureActive;
   
   const isActive = getActivityState(editorId).isActivelyEditing;
-      wasActive,
-      isActive,
-      reason: 'pointer_capture',
-      captureActive
-    });
-  }
 }
 
 /**

@@ -180,6 +180,7 @@ const TestimonialCard = React.memo(({
   sectionId,
   sectionBackground,
   backgroundType,
+  blockContent,
   handleContentUpdate
 }: {
   testimonial: Testimonial;
@@ -194,7 +195,8 @@ const TestimonialCard = React.memo(({
   onRatingEdit: (value: string) => void;
   sectionId: string;
   sectionBackground: any;
-  backgroundType: string;
+  backgroundType: "custom" | "neutral" | "primary" | "secondary" | "divider" | "theme" | undefined;
+  blockContent: any;
   handleContentUpdate: (key: string, value: string) => void;
 }) => {
   
@@ -317,7 +319,7 @@ const TestimonialCard = React.memo(({
             mode={mode}
             value={ratingValue || ''}
             onEdit={onRatingEdit}
-            backgroundType={backgroundType}
+            backgroundType={backgroundType || "neutral"}
             colorTokens={colorTokens}
             variant="body"
             className="text-sm font-medium"
@@ -427,7 +429,8 @@ export default function QuoteGrid(props: LayoutComponentProps) {
               onRatingEdit={(value) => handleContentUpdate('rating_value', value)}
               sectionId={sectionId}
               sectionBackground={sectionBackground}
-              backgroundType={backgroundType}
+              backgroundType={backgroundType || "neutral"}
+              blockContent={blockContent}
               handleContentUpdate={handleContentUpdate}
             />
           ))}
@@ -441,7 +444,7 @@ export default function QuoteGrid(props: LayoutComponentProps) {
                 mode={mode}
                 value={blockContent.verification_icon || '✅'}
                 onEdit={(value) => handleContentUpdate('verification_icon', value)}
-                backgroundType={backgroundType}
+                backgroundType={backgroundType || "neutral"}
                 colorTokens={colorTokens}
                 iconSize="md"
                 className="text-xl text-green-600"

@@ -458,7 +458,7 @@ export default function VideoTestimonials(props: LayoutComponentProps) {
               onEdit={(value) => handleContentUpdate('industry_leaders_title', value)}
               backgroundType={safeBackgroundType}
               colorTokens={colorTokens}
-              variant="h3"
+              variant="body"
               style={h3Style}
               className="font-semibold text-gray-900 mb-6"
               placeholder="Industry leaders title..."

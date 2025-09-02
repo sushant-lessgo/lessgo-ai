@@ -396,7 +396,7 @@ export function analyzeBackground(cssClass: string): BackgroundAnalysis {
   try {
     // Handle empty or invalid input
     if (!cssClass || typeof cssClass !== 'string') {
-      logger.warn('🔍 [BG-CYAN-DEBUG] Background analysis: Invalid CSS class:', typeof cssClass, cssClass);
+      logger.warn('🔍 [BG-CYAN-DEBUG] Background analysis: Invalid CSS class:', `type: ${typeof cssClass}, value: ${cssClass}`);
       return createFallbackAnalysis('Invalid CSS class provided');
     }
     
@@ -452,7 +452,7 @@ export function analyzeBackground(cssClass: string): BackgroundAnalysis {
     
     // Handle case where no valid colors were found
     if (rgbColors.length === 0) {
-      logger.warn('🔍 No valid RGB colors found for:', cssClass, 'extracted colors:', colors);
+      logger.warn('🔍 No valid RGB colors found for:', `class: ${cssClass}, extracted colors: ${JSON.stringify(colors)}`);
       return createFallbackAnalysis('No valid colors found in CSS class');
     }
     

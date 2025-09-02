@@ -27,7 +27,7 @@ export type {
   MetaActions,
   AutoSaveActions,
   GenerationActions,
-  RegenerationActions,
+  // RegenerationActions,
 } from './actions';
 
 /**
@@ -193,7 +193,7 @@ export interface EditStore extends
   ValidationActions,
   MetaActions,
   GenerationActions,
-  RegenerationActions,
+  // RegenerationActions,
   CSSVariableSlice,
   AutoSaveMiddlewareState {
   

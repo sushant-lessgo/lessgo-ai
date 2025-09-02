@@ -71,6 +71,8 @@ const StatComparisonCard = ({
   index, 
   mode, 
   sectionId,
+  blockContent,
+  handleContentUpdate,
   onMetricEdit,
   onBeforeEdit,
   onAfterEdit,
@@ -80,6 +82,8 @@ const StatComparisonCard = ({
   index: number;
   mode: 'edit' | 'preview';
   sectionId: string;
+  blockContent: any;
+  handleContentUpdate: (key: string, value: string) => void;
   onMetricEdit: (index: number, value: string) => void;
   onBeforeEdit: (index: number, value: string) => void;
   onAfterEdit: (index: number, value: string) => void;
@@ -361,6 +365,8 @@ export default function BeforeAfterStats(props: BeforeAfterStatsProps) {
               index={index}
               mode={mode}
               sectionId={sectionId}
+              blockContent={blockContent}
+              handleContentUpdate={handleContentUpdate}
               onMetricEdit={handleMetricEdit}
               onBeforeEdit={handleBeforeEdit}
               onAfterEdit={handleAfterEdit}

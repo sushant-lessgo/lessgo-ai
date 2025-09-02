@@ -386,7 +386,7 @@ export default function PullQuoteStack(props: LayoutComponentProps) {
                   onEdit={(value) => handleContentUpdate('struggle_title', value)}
                   backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
                   colorTokens={colorTokens}
-                  variant="h2"
+                  variant="body"
                   style={h2Style}
                   className="font-bold mb-6 text-white"
                   placeholder="Struggle section title..."

@@ -189,7 +189,7 @@ const StatBlock = ({
           <IconEditableText
             mode={mode}
             value={getStatIcon(index)}
-            onEdit={(value) => handleStatIconEdit(index, value)}
+            onEdit={(value) => onStatIconEdit(index, value)}
             backgroundType="neutral"
             colorTokens={{}}
             iconSize="lg"

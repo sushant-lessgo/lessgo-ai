@@ -33,7 +33,7 @@ export function generateItemToGroupMapping() {
     });
   });
   
-  logger.debug('✅ Taxonomy mappings generated:', Object.keys(mapping).length, 'mappings');
+  logger.debug('✅ Taxonomy mappings generated:', `${Object.keys(mapping).length} mappings`);
   return mapping;
 }
 

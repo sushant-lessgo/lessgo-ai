@@ -154,6 +154,7 @@ const PersonaPanel = ({
   index, 
   mode, 
   sectionId,
+  iconValue,
   onPersonaEdit,
   onRoleEdit,
   onMetricEdit,
@@ -165,6 +166,7 @@ const PersonaPanel = ({
   index: number;
   mode: 'edit' | 'preview';
   sectionId: string;
+  iconValue: string;
   onPersonaEdit: (index: number, value: string) => void;
   onRoleEdit: (index: number, value: string) => void;
   onMetricEdit: (index: number, value: string) => void;
@@ -185,8 +187,8 @@ const PersonaPanel = ({
         <div className={`w-16 h-16 ${colors.accent} rounded-2xl flex items-center justify-center text-white group-hover:scale-110 transition-transform duration-300`}>
           <IconEditableText
             mode={mode}
-            value={getPersonaIcon(panel.persona)}
-            onEdit={(value) => handlePersonaIconEdit(index, value)}
+            value={iconValue}
+            onEdit={(value) => onPersonaIconEdit(index, value)}
             backgroundType="neutral"
             colorTokens={{}}
             iconSize="lg"
@@ -430,6 +432,7 @@ export default function PersonaResultPanels(props: PersonaResultPanelsProps) {
               index={index}
               mode={mode}
               sectionId={sectionId}
+              iconValue={getPersonaIcon(index)}
               onPersonaEdit={handlePersonaEdit}
               onRoleEdit={handleRoleEdit}
               onMetricEdit={handleMetricEdit}

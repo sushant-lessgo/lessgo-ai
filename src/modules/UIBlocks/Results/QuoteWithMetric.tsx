@@ -104,6 +104,8 @@ const QuoteCard = ({
   index, 
   mode, 
   sectionId,
+  blockContent,
+  handleContentUpdate,
   onQuoteEdit,
   onAuthorEdit,
   onCompanyEdit,
@@ -115,6 +117,8 @@ const QuoteCard = ({
   index: number;
   mode: 'edit' | 'preview';
   sectionId: string;
+  blockContent: any;
+  handleContentUpdate: (key: string, value: string) => void;
   onQuoteEdit: (index: number, value: string) => void;
   onAuthorEdit: (index: number, value: string) => void;
   onCompanyEdit: (index: number, value: string) => void;
@@ -382,6 +386,8 @@ export default function QuoteWithMetric(props: QuoteWithMetricProps) {
               index={index}
               mode={mode}
               sectionId={sectionId}
+              blockContent={blockContent}
+              handleContentUpdate={handleContentUpdate}
               onQuoteEdit={handleQuoteEdit}
               onAuthorEdit={handleAuthorEdit}
               onCompanyEdit={handleCompanyEdit}
