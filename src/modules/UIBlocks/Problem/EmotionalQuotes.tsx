@@ -127,19 +127,111 @@ export default function EmotionalQuotes(props: LayoutComponentProps) {
     return blockContent[iconFields[index] as keyof EmotionalQuotesContent] || '💡';
   };
 
-  const QuoteCard = ({ quote, index, isActive }: {
+  // Add new quote
+  const addQuote = () => {
+    const currentCount = Math.max(
+      emotionalQuotes.length,
+      quoteAttributions.length,
+      quoteCategories.length
+    );
+    
+    if (currentCount >= 5) return; // Maximum 5 quotes
+    
+    // Update all coordinated lists
+    const newQuotes = [...emotionalQuotes, 'Add your customer quote here...'];
+    const newAttributions = [...quoteAttributions, 'New Customer'];
+    const newCategories = [...quoteCategories, 'Challenge Category'];
+    
+    handleContentUpdate('emotional_quotes', newQuotes.join('|'));
+    
+    // Use setTimeout to avoid Immer conflicts
+    setTimeout(() => {
+      handleContentUpdate('quote_attributions', newAttributions.join('|'));
+      handleContentUpdate('quote_categories', newCategories.join('|'));
+      
+      // Set default icon
+      const iconNumber = newQuotes.length;
+      const iconField = `category_icon_${iconNumber}` as keyof EmotionalQuotesContent;
+      handleContentUpdate(iconField, '💡');
+    }, 0);
+  };
+
+  // Remove quote
+  const removeQuote = (index: number) => {
+    const currentCount = Math.max(
+      emotionalQuotes.length,
+      quoteAttributions.length,
+      quoteCategories.length
+    );
+    
+    if (currentCount <= 1) return; // Keep at least 1 quote
+    
+    // Reset active quote if it's being removed
+    if (activeQuote === index) {
+      setActiveQuote(0);
+    } else if (activeQuote > index) {
+      setActiveQuote(activeQuote - 1);
+    }
+    
+    // Filter out the removed index from all lists
+    const newQuotes = emotionalQuotes.filter((_, i) => i !== index);
+    const newAttributions = quoteAttributions.filter((_, i) => i !== index);
+    const newCategories = quoteCategories.filter((_, i) => i !== index);
+    
+    handleContentUpdate('emotional_quotes', newQuotes.join('|'));
+    
+    // Use setTimeout to avoid Immer conflicts
+    setTimeout(() => {
+      handleContentUpdate('quote_attributions', newAttributions.join('|'));
+      handleContentUpdate('quote_categories', newCategories.join('|'));
+      
+      // Shift icons down
+      for (let i = index + 1; i < currentCount; i++) {
+        const currentIconField = `category_icon_${i + 1}` as keyof EmotionalQuotesContent;
+        const nextIconField = `category_icon_${i}` as keyof EmotionalQuotesContent;
+        const iconValue = blockContent[currentIconField] || '💡';
+        handleContentUpdate(nextIconField, iconValue);
+      }
+      
+      // Clear the last icon slot
+      const lastIconField = `category_icon_${currentCount}` as keyof EmotionalQuotesContent;
+      handleContentUpdate(lastIconField, '💡');
+    }, 0);
+  };
+
+  const QuoteCard = ({ quote, index, isActive, onRemove, canRemove }: {
     quote: typeof quotes[0];
     index: number;
     isActive: boolean;
+    onRemove: (index: number) => void;
+    canRemove: boolean;
   }) => (
     <div 
-      className={`bg-white rounded-2xl p-8 border-2 transition-all duration-300 cursor-pointer ${
+      className={`group bg-white rounded-2xl p-8 border-2 transition-all duration-300 cursor-pointer relative ${
         isActive 
           ? 'border-blue-300 shadow-xl scale-105' 
           : 'border-gray-200 hover:border-gray-300 hover:shadow-lg'
       }`}
       onClick={() => setActiveQuote(index)}
     >
+      {/* Remove Button (Edit Mode Only) */}
+      {mode !== 'preview' && canRemove && (
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            if (quote.text.trim() && !confirm('Are you sure you want to remove this quote?')) {
+              return;
+            }
+            onRemove(index);
+          }}
+          className="opacity-0 group-hover:opacity-100 absolute top-4 right-4 p-1 rounded-full bg-white/80 hover:bg-white text-red-500 hover:text-red-700 transition-all duration-200 shadow-sm z-10"
+          title="Remove this quote"
+        >
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      )}
       {/* Quote Icon */}
       <div className="mb-6">
         <svg className="w-12 h-12 text-gray-400" fill="currentColor" viewBox="0 0 32 32">
@@ -316,16 +408,33 @@ export default function EmotionalQuotes(props: LayoutComponentProps) {
         ) : (
           <>
             {/* Quote Cards Grid */}
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-8">
               {quotes.map((quote, index) => (
                 <QuoteCard
                   key={index}
                   quote={quote}
                   index={index}
                   isActive={activeQuote === index}
+                  onRemove={removeQuote}
+                  canRemove={quotes.length > 1}
                 />
               ))}
             </div>
+
+            {/* Add Quote Button */}
+            {mode !== 'preview' && quotes.length < 5 && (
+              <div className="mb-16 flex justify-center">
+                <button
+                  onClick={addQuote}
+                  className="flex items-center space-x-2 px-4 py-2 text-sm text-blue-600 hover:text-blue-800 border border-blue-200 hover:border-blue-300 rounded-lg hover:bg-blue-50 transition-all duration-200"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                  </svg>
+                  <span>Add Quote</span>
+                </button>
+              </div>
+            )}
 
             {/* Featured Quote Display */}
             {quotes[activeQuote] && (

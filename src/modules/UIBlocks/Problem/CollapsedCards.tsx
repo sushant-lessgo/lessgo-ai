@@ -29,12 +29,6 @@ interface CollapsedCardsContent {
   problem_icon_4?: string;
   problem_icon_5?: string;
   problem_icon_6?: string;
-  summary_stat_1?: string;
-  summary_stat_1_label?: string;
-  summary_stat_2?: string;
-  summary_stat_2_label?: string;
-  summary_stat_3?: string;
-  summary_stat_3_label?: string;
 }
 
 const CONTENT_SCHEMA = {
@@ -83,13 +77,7 @@ const CONTENT_SCHEMA = {
   problem_icon_3: { type: 'string' as const, default: '💬' },
   problem_icon_4: { type: 'string' as const, default: '⚙️' },
   problem_icon_5: { type: 'string' as const, default: '👥' },
-  problem_icon_6: { type: 'string' as const, default: '🎯' },
-  summary_stat_1: { type: 'string' as const, default: '73%' },
-  summary_stat_1_label: { type: 'string' as const, default: 'of businesses struggle with this' },
-  summary_stat_2: { type: 'string' as const, default: '45%' },
-  summary_stat_2_label: { type: 'string' as const, default: 'see immediate improvement' },
-  summary_stat_3: { type: 'string' as const, default: '2.5x' },
-  summary_stat_3_label: { type: 'string' as const, default: 'faster results with our solution' }
+  problem_icon_6: { type: 'string' as const, default: '🎯' }
 };
 
 export default function CollapsedCards(props: LayoutComponentProps) {
@@ -155,15 +143,132 @@ export default function CollapsedCards(props: LayoutComponentProps) {
     setExpandedCard(expandedCard === index ? null : index);
   };
 
-  const ProblemCard = ({ problem, index }: {
+  // Add new problem card
+  const addProblemCard = () => {
+    const currentCount = Math.max(
+      problemTitles.length,
+      problemDescriptions.length,
+      expandLabels.length,
+      problemImpacts.length,
+      solutionHints.length
+    );
+    
+    if (currentCount >= 6) return; // Maximum 6 problem cards
+    
+    // Update all coordinated lists
+    const newTitles = [...problemTitles, 'New Problem'];
+    const newDescriptions = [...problemDescriptions, 'Describe this problem in detail...'];
+    const newLabels = [...expandLabels, 'Learn More'];
+    const newImpacts = [...problemImpacts, 'Impact of this problem...'];
+    const newHints = [...solutionHints, 'How our solution helps...'];
+    
+    handleContentUpdate('problem_titles', newTitles.join('|'));
+    
+    // Use setTimeout to avoid Immer conflicts
+    setTimeout(() => {
+      handleContentUpdate('problem_descriptions', newDescriptions.join('|'));
+      handleContentUpdate('expand_labels', newLabels.join('|'));
+      handleContentUpdate('problem_impacts', newImpacts.join('|'));
+      handleContentUpdate('solution_hints', newHints.join('|'));
+      
+      // Set default icon
+      const iconNumber = newTitles.length;
+      const iconField = `problem_icon_${iconNumber}` as keyof CollapsedCardsContent;
+      handleContentUpdate(iconField, '⚙️');
+    }, 0);
+  };
+
+  // Remove problem card
+  const removeProblemCard = (index: number) => {
+    const currentCount = Math.max(
+      problemTitles.length,
+      problemDescriptions.length,
+      expandLabels.length,
+      problemImpacts.length,
+      solutionHints.length
+    );
+    
+    if (currentCount <= 1) return; // Keep at least 1 card
+    
+    // Close expanded card if it's being removed
+    if (expandedCard === index) {
+      setExpandedCard(null);
+    } else if (expandedCard !== null && expandedCard > index) {
+      setExpandedCard(expandedCard - 1);
+    }
+    
+    // Filter out the removed index from all lists
+    const newTitles = problemTitles.filter((_, i) => i !== index);
+    const newDescriptions = problemDescriptions.filter((_, i) => i !== index);
+    const newLabels = expandLabels.filter((_, i) => i !== index);
+    const newImpacts = problemImpacts.filter((_, i) => i !== index);
+    const newHints = solutionHints.filter((_, i) => i !== index);
+    
+    handleContentUpdate('problem_titles', newTitles.join('|'));
+    
+    // Use setTimeout to avoid Immer conflicts
+    setTimeout(() => {
+      handleContentUpdate('problem_descriptions', newDescriptions.join('|'));
+      handleContentUpdate('expand_labels', newLabels.join('|'));
+      handleContentUpdate('problem_impacts', newImpacts.join('|'));
+      handleContentUpdate('solution_hints', newHints.join('|'));
+      
+      // Shift icons down
+      for (let i = index + 1; i < currentCount; i++) {
+        const currentIconField = `problem_icon_${i + 1}` as keyof CollapsedCardsContent;
+        const nextIconField = `problem_icon_${i}` as keyof CollapsedCardsContent;
+        const iconValue = blockContent[currentIconField] || '⚙️';
+        handleContentUpdate(nextIconField, iconValue);
+      }
+      
+      // Clear the last icon slot
+      const lastIconField = `problem_icon_${currentCount}` as keyof CollapsedCardsContent;
+      handleContentUpdate(lastIconField, '⚙️');
+    }, 0);
+  };
+
+  // Individual field edit handlers
+  const handleTitleEdit = (index: number, value: string) => {
+    const titles = blockContent.problem_titles.split('|');
+    titles[index] = value;
+    handleContentUpdate('problem_titles', titles.join('|'));
+  };
+
+  const handleDescriptionEdit = (index: number, value: string) => {
+    const descriptions = blockContent.problem_descriptions?.split('|') || [];
+    descriptions[index] = value;
+    handleContentUpdate('problem_descriptions', descriptions.join('|'));
+  };
+
+  const handleImpactEdit = (index: number, value: string) => {
+    const impacts = blockContent.problem_impacts?.split('|') || [];
+    impacts[index] = value;
+    handleContentUpdate('problem_impacts', impacts.join('|'));
+  };
+
+  const handleSolutionEdit = (index: number, value: string) => {
+    const solutions = blockContent.solution_hints?.split('|') || [];
+    solutions[index] = value;
+    handleContentUpdate('solution_hints', solutions.join('|'));
+  };
+
+  const handleExpandLabelEdit = (index: number, value: string) => {
+    const labels = blockContent.expand_labels?.split('|') || [];
+    labels[index] = value;
+    handleContentUpdate('expand_labels', labels.join('|'));
+  };
+
+  const ProblemCard = ({ problem, index, onRemove, canRemove }: {
     problem: typeof problemCards[0];
     index: number;
+    onRemove: (index: number) => void;
+    canRemove: boolean;
   }) => {
     const isExpanded = expandedCard === index;
     
     return (
       <div 
-        className={`bg-white rounded-xl border-2 transition-all duration-300 overflow-hidden ${
+        className={`group bg-white rounded-xl border-2 transition-all duration-300 overflow-hidden ${
           isExpanded 
             ? 'border-red-300 shadow-xl' 
             : 'border-gray-200 hover:border-gray-300 hover:shadow-md'
@@ -193,17 +298,60 @@ export default function CollapsedCards(props: LayoutComponentProps) {
                 />
               </div>
               <div>
-                <h3 className="text-lg font-semibold text-gray-900">{problem.title}</h3>
-                <span className={`text-sm ${mutedTextColor}`}>
-                  {isExpanded ? 'Tap to collapse' : problem.expandLabel}
-                </span>
+                <EditableAdaptiveText
+                  mode={mode}
+                  value={problem.title}
+                  onEdit={(value) => handleTitleEdit(index, value)}
+                  backgroundType={backgroundType as any}
+                  colorTokens={colorTokens}
+                  variant="body"
+                  className="text-lg font-semibold text-gray-900"
+                  placeholder="Problem title"
+                  sectionBackground={sectionBackground}
+                  sectionId={sectionId}
+                  elementKey={`problem_title_${index + 1}`}
+                />
+                <EditableAdaptiveText
+                  mode={mode}
+                  value={isExpanded ? 'Tap to collapse' : problem.expandLabel}
+                  onEdit={(value) => handleExpandLabelEdit(index, value)}
+                  backgroundType={backgroundType as any}
+                  colorTokens={colorTokens}
+                  variant="body"
+                  className={`text-sm ${mutedTextColor}`}
+                  placeholder="Expand label"
+                  sectionBackground={sectionBackground}
+                  sectionId={sectionId}
+                  elementKey={`expand_label_${index + 1}`}
+                />
               </div>
             </div>
             
-            <div className={`transform transition-transform duration-300 ${isExpanded ? 'rotate-180' : ''}`}>
-              <svg className="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-              </svg>
+            <div className="flex items-center space-x-2">
+              {/* Remove Button (Edit Mode Only) */}
+              {mode !== 'preview' && canRemove && (
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (problem.title.trim() && !confirm('Are you sure you want to remove this problem card?')) {
+                      return;
+                    }
+                    onRemove(index);
+                  }}
+                  className="opacity-0 group-hover:opacity-100 p-1 rounded-full bg-white/80 hover:bg-white text-red-500 hover:text-red-700 transition-all duration-200 shadow-sm"
+                  title="Remove this problem card"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              )}
+              
+              <div className={`transform transition-transform duration-300 ${isExpanded ? 'rotate-180' : ''}`}>
+                <svg className="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </div>
             </div>
           </div>
         </div>
@@ -216,9 +364,19 @@ export default function CollapsedCards(props: LayoutComponentProps) {
             
             {/* Problem Description */}
             <div className="mb-6">
-              <p className="text-gray-700 leading-relaxed">
-                {problem.description}
-              </p>
+              <EditableAdaptiveText
+                mode={mode}
+                value={problem.description}
+                onEdit={(value) => handleDescriptionEdit(index, value)}
+                backgroundType={backgroundType as any}
+                colorTokens={colorTokens}
+                variant="body"
+                className="text-gray-700 leading-relaxed"
+                placeholder="Describe this problem in detail..."
+                sectionBackground={sectionBackground}
+                sectionId={sectionId}
+                elementKey={`problem_description_${index + 1}`}
+              />
             </div>
 
             {/* Impact Section */}
@@ -230,7 +388,19 @@ export default function CollapsedCards(props: LayoutComponentProps) {
                   </svg>
                   <div>
                     <h4 className="font-semibold text-red-900 mb-2">The Real Impact:</h4>
-                    <p className="text-red-800 text-sm">{problem.impact}</p>
+                    <EditableAdaptiveText
+                      mode={mode}
+                      value={problem.impact}
+                      onEdit={(value) => handleImpactEdit(index, value)}
+                      backgroundType={backgroundType as any}
+                      colorTokens={colorTokens}
+                      variant="body"
+                      className="text-red-800 text-sm"
+                      placeholder="Impact of this problem..."
+                      sectionBackground={sectionBackground}
+                      sectionId={sectionId}
+                      elementKey={`problem_impact_${index + 1}`}
+                    />
                   </div>
                 </div>
               </div>
@@ -245,7 +415,19 @@ export default function CollapsedCards(props: LayoutComponentProps) {
                   </svg>
                   <div>
                     <h4 className="font-semibold text-green-900 mb-2">There's a Solution:</h4>
-                    <p className="text-green-800 text-sm">{problem.solutionHint}</p>
+                    <EditableAdaptiveText
+                      mode={mode}
+                      value={problem.solutionHint}
+                      onEdit={(value) => handleSolutionEdit(index, value)}
+                      backgroundType={backgroundType as any}
+                      colorTokens={colorTokens}
+                      variant="body"
+                      className="text-green-800 text-sm"
+                      placeholder="How our solution helps..."
+                      sectionBackground={sectionBackground}
+                      sectionId={sectionId}
+                      elementKey={`solution_hint_${index + 1}`}
+                    />
                   </div>
                 </div>
               </div>
@@ -255,7 +437,7 @@ export default function CollapsedCards(props: LayoutComponentProps) {
       </div>
     );
   };
-  
+
   return (
     <LayoutSection
       sectionId={sectionId}
@@ -316,7 +498,7 @@ export default function CollapsedCards(props: LayoutComponentProps) {
           )}
         </div>
 
-        {(mode as string) === 'edit' ? (
+        {false && (mode as string) === 'edit' ? (
           <div className="space-y-8">
             <div className="p-6 border border-gray-200 rounded-lg bg-gray-50">
               <h4 className="font-semibold text-gray-700 mb-4">Collapsed Cards Content</h4>
@@ -383,219 +565,32 @@ export default function CollapsedCards(props: LayoutComponentProps) {
         ) : (
           <>
             {/* Problem Cards */}
-            <div className="space-y-4 mb-16">
+            <div className="space-y-4 mb-8">
               {problemCards.map((problem, index) => (
                 <ProblemCard
                   key={index}
                   problem={problem}
                   index={index}
+                  onRemove={removeProblemCard}
+                  canRemove={problemCards.length > 1}
                 />
               ))}
             </div>
 
-            {/* Summary Section */}
-            <div className="bg-gradient-to-r from-orange-50 to-red-50 rounded-2xl p-8 border border-orange-200 mb-16">
-              <div className="text-center">
-                <h3 className="text-2xl font-bold text-gray-900 mb-6">
-                  Recognize Any of These Challenges?
-                </h3>
-                <p className="text-lg text-gray-700 leading-relaxed mb-8 max-w-3xl mx-auto">
-                  If you found yourself nodding along to any of these problems, you're not alone. These are the most common challenges we hear from business owners every day.
-                </p>
-                
-                <div className="grid md:grid-cols-3 gap-6">
-                  <div className="bg-white rounded-lg p-6 border border-orange-200 group/stat-item relative">
-                    <div className="flex items-center justify-between mb-2">
-                      <EditableAdaptiveText
-                        mode={mode}
-                        value={blockContent.summary_stat_1 || ''}
-                        onEdit={(value) => handleContentUpdate('summary_stat_1', value)}
-                        backgroundType={backgroundType}
-                        colorTokens={colorTokens}
-                        variant="body"
-                        className="text-3xl font-bold text-orange-600"
-                        placeholder="73%"
-                        sectionBackground={sectionBackground}
-                        data-section-id={sectionId}
-                        data-element-key="summary_stat_1"
-                      />
-                      {(mode as string) === 'edit' && (
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleContentUpdate('summary_stat_1', '___REMOVED___');
-                            handleContentUpdate('summary_stat_1_label', '___REMOVED___');
-                          }}
-                          className="opacity-0 group-hover/stat-item:opacity-100 ml-2 p-1 rounded-full bg-white/80 hover:bg-white text-red-500 hover:text-red-700 transition-all duration-200 relative z-10 shadow-sm"
-                          title="Remove this statistic"
-                        >
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                          </svg>
-                        </button>
-                      )}
-                    </div>
-                    <EditableAdaptiveText
-                      mode={mode}
-                      value={blockContent.summary_stat_1_label || ''}
-                      onEdit={(value) => handleContentUpdate('summary_stat_1_label', value)}
-                      backgroundType={backgroundType}
-                      colorTokens={colorTokens}
-                      variant="body"
-                      className="text-sm text-gray-600"
-                      placeholder="of businesses struggle with at least 3 of these issues"
-                      sectionBackground={sectionBackground}
-                      data-section-id={sectionId}
-                      data-element-key="summary_stat_1_label"
-                    />
-                  </div>
-                  <div className="bg-white rounded-lg p-6 border border-orange-200 group/stat-item relative">
-                    <div className="flex items-center justify-between mb-2">
-                      <EditableAdaptiveText
-                        mode={mode}
-                        value={blockContent.summary_stat_2 || ''}
-                        onEdit={(value) => handleContentUpdate('summary_stat_2', value)}
-                        backgroundType={backgroundType}
-                        colorTokens={colorTokens}
-                        variant="body"
-                        className="text-3xl font-bold text-red-600"
-                        placeholder="$47K"
-                        sectionBackground={sectionBackground}
-                        data-section-id={sectionId}
-                        data-element-key="summary_stat_2"
-                      />
-                      {(mode as string) === 'edit' && (
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleContentUpdate('summary_stat_2', '___REMOVED___');
-                            handleContentUpdate('summary_stat_2_label', '___REMOVED___');
-                          }}
-                          className="opacity-0 group-hover/stat-item:opacity-100 ml-2 p-1 rounded-full bg-white/80 hover:bg-white text-red-500 hover:text-red-700 transition-all duration-200 relative z-10 shadow-sm"
-                          title="Remove this statistic"
-                        >
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                          </svg>
-                        </button>
-                      )}
-                    </div>
-                    <EditableAdaptiveText
-                      mode={mode}
-                      value={blockContent.summary_stat_2_label || ''}
-                      onEdit={(value) => handleContentUpdate('summary_stat_2_label', value)}
-                      backgroundType={backgroundType}
-                      colorTokens={colorTokens}
-                      variant="body"
-                      className="text-sm text-gray-600"
-                      placeholder="average annual cost of inefficient processes"
-                      sectionBackground={sectionBackground}
-                      data-section-id={sectionId}
-                      data-element-key="summary_stat_2_label"
-                    />
-                  </div>
-                  <div className="bg-white rounded-lg p-6 border border-orange-200 group/stat-item relative">
-                    <div className="flex items-center justify-between mb-2">
-                      <EditableAdaptiveText
-                        mode={mode}
-                        value={blockContent.summary_stat_3 || ''}
-                        onEdit={(value) => handleContentUpdate('summary_stat_3', value)}
-                        backgroundType={backgroundType}
-                        colorTokens={colorTokens}
-                        variant="body"
-                        className="text-3xl font-bold text-green-600"
-                        placeholder="2.5x"
-                        sectionBackground={sectionBackground}
-                        data-section-id={sectionId}
-                        data-element-key="summary_stat_3"
-                      />
-                      {(mode as string) === 'edit' && (
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleContentUpdate('summary_stat_3', '___REMOVED___');
-                            handleContentUpdate('summary_stat_3_label', '___REMOVED___');
-                          }}
-                          className="opacity-0 group-hover/stat-item:opacity-100 ml-2 p-1 rounded-full bg-white/80 hover:bg-white text-red-500 hover:text-red-700 transition-all duration-200 relative z-10 shadow-sm"
-                          title="Remove this statistic"
-                        >
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                          </svg>
-                        </button>
-                      )}
-                    </div>
-                    <EditableAdaptiveText
-                      mode={mode}
-                      value={blockContent.summary_stat_3_label || ''}
-                      onEdit={(value) => handleContentUpdate('summary_stat_3_label', value)}
-                      backgroundType={backgroundType}
-                      colorTokens={colorTokens}
-                      variant="body"
-                      className="text-sm text-gray-600"
-                      placeholder="faster growth when these problems are solved"
-                      sectionBackground={sectionBackground}
-                      data-section-id={sectionId}
-                      data-element-key="summary_stat_3_label"
-                    />
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Call to Resolution */}
-            <div className="text-center bg-blue-50 rounded-2xl p-8 border border-blue-200">
-              <h3 className="text-2xl font-bold text-gray-900 mb-4">
-                The Good News: These Problems Have Solutions
-              </h3>
-              <p className={`text-lg ${mutedTextColor} max-w-3xl mx-auto mb-8`}>
-                Every challenge you just read about has been solved by businesses just like yours. The tools, processes, and strategies exist—you just need to know where to find them.
-              </p>
-              
-              <div className="flex items-center justify-center space-x-8">
-                <div className="text-center">
-                  <div className="w-16 h-16 bg-blue-500 rounded-full flex items-center justify-center mx-auto mb-3">
-                    <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-                    </svg>
-                  </div>
-                  <div className="font-semibold text-gray-900">Identify</div>
-                  <div className={`text-sm ${mutedTextColor}`}>The core issues</div>
-                </div>
-                
-                <div className="text-gray-400">
-                  <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+            {/* Add Problem Card Button */}
+            {mode !== 'preview' && problemCards.length < 6 && (
+              <div className="mb-16 flex justify-center">
+                <button
+                  onClick={addProblemCard}
+                  className="flex items-center space-x-2 px-4 py-2 text-sm text-red-600 hover:text-red-800 border border-red-200 hover:border-red-300 rounded-lg hover:bg-red-50 transition-all duration-200"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
                   </svg>
-                </div>
-                
-                <div className="text-center">
-                  <div className="w-16 h-16 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-3">
-                    <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                    </svg>
-                  </div>
-                  <div className="font-semibold text-gray-900">Solve</div>
-                  <div className={`text-sm ${mutedTextColor}`}>With proven solutions</div>
-                </div>
-                
-                <div className="text-gray-400">
-                  <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                  </svg>
-                </div>
-                
-                <div className="text-center">
-                  <div className="w-16 h-16 bg-purple-500 rounded-full flex items-center justify-center mx-auto mb-3">
-                    <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                    </svg>
-                  </div>
-                  <div className="font-semibold text-gray-900">Thrive</div>
-                  <div className={`text-sm ${mutedTextColor}`}>Beyond the problems</div>
-                </div>
+                  <span>Add Problem Card</span>
+                </button>
               </div>
-            </div>
+            )}
           </>
         )}
 
