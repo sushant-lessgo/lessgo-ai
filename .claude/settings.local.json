@@ -20,7 +20,8 @@
       "Read(C:\\c\\Users\\susha\\lessgo-ai/**)",
       "Read(C:\\c\\Users\\susha\\lessgo-ai/**)",
       "Read(C:\\c\\Users\\susha\\lessgo-ai/**)",
-      "Read(C:\\c\\Users\\susha\\lessgo-ai/**)"
+      "Read(C:\\c\\Users\\susha\\lessgo-ai/**)",
+      "Bash(npm run dev:*)"
     ],
     "deny": [],
     "ask": [],

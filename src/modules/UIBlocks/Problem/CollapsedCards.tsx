@@ -277,14 +277,10 @@ export default function CollapsedCards(props: LayoutComponentProps) {
         }`}
       >
         {/* Card Header */}
-        <div 
-          className="p-6 cursor-pointer"
-          onClick={() => toggleCard(index)}
-        >
+        <div className="p-6">
           <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <div className={`w-12 h-12 rounded-lg ${isExpanded ? 'bg-red-500' : 'bg-gray-100'} flex items-center justify-center ${isExpanded ? 'text-white' : 'text-gray-600'} transition-colors duration-300 group/icon-edit relative`}
-                onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center space-x-4 flex-1">
+              <div className={`w-12 h-12 rounded-lg ${isExpanded ? 'bg-red-500' : 'bg-gray-100'} flex items-center justify-center ${isExpanded ? 'text-white' : 'text-gray-600'} transition-colors duration-300 group/icon-edit relative`}>
                 <IconEditableText
                   mode={mode}
                   value={getProblemIcon(index)}
@@ -300,34 +296,37 @@ export default function CollapsedCards(props: LayoutComponentProps) {
                   elementKey={`problem_icon_${index + 1}`}
                 />
               </div>
-              <div onClick={(e) => e.stopPropagation()}>
-                <EditableAdaptiveText
-                  mode={mode}
-                  value={problem.title}
-                  onEdit={(value) => handleTitleEdit(index, value)}
-                  backgroundType={backgroundType as any}
-                  colorTokens={colorTokens}
-                  variant="body"
-                  className="text-lg font-semibold text-gray-900"
-                  placeholder="Problem title"
-                  sectionBackground={sectionBackground}
-                  sectionId={sectionId}
-                  elementKey={`problem_title_${index + 1}`}
-                />
-                <EditableAdaptiveText
-                  mode={mode}
-                  value={isExpanded ? 'Tap to collapse' : problem.expandLabel}
-                  onEdit={(value) => handleExpandLabelEdit(index, value)}
-                  backgroundType={backgroundType as any}
-                  colorTokens={colorTokens}
-                  variant="body"
-                  className={`text-sm ${mutedTextColor}`}
-                  placeholder="Expand label"
-                  sectionBackground={sectionBackground}
-                  sectionId={sectionId}
-                  elementKey={`expand_label_${index + 1}`}
-                  onClick={(e: any) => e.stopPropagation()}
-                />
+              <div className="flex-1">
+                <div className="mb-1">
+                  <EditableAdaptiveText
+                    mode={mode}
+                    value={problem.title}
+                    onEdit={(value) => handleTitleEdit(index, value)}
+                    backgroundType={backgroundType as any}
+                    colorTokens={colorTokens}
+                    variant="body"
+                    className="text-lg font-semibold text-gray-900"
+                    placeholder="Problem title"
+                    sectionBackground={sectionBackground}
+                    sectionId={sectionId}
+                    elementKey={`problem_title_${index + 1}`}
+                  />
+                </div>
+                <div>
+                  <EditableAdaptiveText
+                    mode={mode}
+                    value={isExpanded ? 'Tap to collapse' : problem.expandLabel}
+                    onEdit={(value) => handleExpandLabelEdit(index, value)}
+                    backgroundType={backgroundType as any}
+                    colorTokens={colorTokens}
+                    variant="body"
+                    className={`text-sm ${mutedTextColor}`}
+                    placeholder="Expand label"
+                    sectionBackground={sectionBackground}
+                    sectionId={sectionId}
+                    elementKey={`expand_label_${index + 1}`}
+                  />
+                </div>
               </div>
             </div>
             
@@ -351,19 +350,32 @@ export default function CollapsedCards(props: LayoutComponentProps) {
                 </button>
               )}
               
-              <div className={`transform transition-transform duration-300 ${isExpanded ? 'rotate-180' : ''}`}>
-                <svg className="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                </svg>
-              </div>
+              {/* Dedicated Toggle Button */}
+              <button
+                onClick={() => toggleCard(index)}
+                className="p-2 rounded-lg hover:bg-gray-100 transition-colors duration-200 cursor-pointer"
+                title={isExpanded ? 'Collapse card' : 'Expand card'}
+                aria-label={isExpanded ? 'Collapse card' : 'Expand card'}
+              >
+                <div className={`transform transition-transform duration-300 ${isExpanded ? 'rotate-180' : ''}`}>
+                  <svg className="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </div>
+              </button>
             </div>
           </div>
         </div>
 
         {/* Expanded Content */}
-        <div className={`transition-all duration-300 ease-in-out ${
-          isExpanded ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
-        } overflow-hidden`}>
+        <div 
+          className={`${
+            isExpanded ? '' : 'hidden'
+          }`}
+          style={{
+            transition: isExpanded ? 'none' : 'none',
+          }}
+        >
           <div className="px-6 pb-6 border-t border-gray-100">
             
             {/* Problem Description */}
