@@ -1,5 +1,7 @@
 import React from 'react';
 import { useLayoutComponent } from '@/hooks/useLayoutComponent';
+import { useImageToolbar } from '@/hooks/useImageToolbar';
+import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
 import { LayoutSection } from '@/components/layout/LayoutSection';
 import { 
   EditableAdaptiveHeadline, 
@@ -16,9 +18,8 @@ interface BeforeImageAfterTextContent {
   headline: string;
   before_description: string;
   after_description: string;
+  before_after_image?: string;
   image_caption?: string;
-  problem_emphasis?: string;
-  solution_preview?: string;
   subheadline?: string;
   supporting_text?: string;
   trust_items?: string;
@@ -30,27 +31,23 @@ interface BeforeImageAfterTextContent {
 const CONTENT_SCHEMA = {
   headline: { 
     type: 'string' as const, 
-    default: 'From Chaos to Clarity: See the Difference' 
+    default: '' 
   },
   before_description: { 
     type: 'string' as const, 
-    default: 'Scattered information, missed deadlines, endless manual work, frustrated team members, and constant firefighting. Every day feels like an uphill battle against inefficiency.' 
+    default: '' 
   },
   after_description: { 
     type: 'string' as const, 
-    default: 'Streamlined workflows, automated processes, clear visibility, happy team members, and strategic focus. Every day brings measurable progress and growth.' 
+    default: '' 
+  },
+  before_after_image: {
+    type: 'image' as const,
+    default: ''
   },
   image_caption: { 
     type: 'string' as const, 
-    default: 'Transform your daily experience from overwhelming chaos to organized success' 
-  },
-  problem_emphasis: { 
-    type: 'string' as const, 
-    default: 'Does this look familiar? You\'re spending more time managing problems than growing your business.' 
-  },
-  solution_preview: { 
-    type: 'string' as const, 
-    default: 'Imagine having this level of organization and control in your business operations.' 
+    default: '' 
   },
   subheadline: { 
     type: 'string' as const, 
@@ -85,6 +82,14 @@ export default function BeforeImageAfterText(props: LayoutComponentProps) {
     ...props,
     contentSchema: CONTENT_SCHEMA
   });
+
+  // Use image toolbar hook for image editing
+  const handleImageToolbar = useImageToolbar();
+
+  // Get reactive image URL directly from store for real-time updates
+  const store = useEditStore();
+  const imageUrl = store.content[sectionId]?.elements?.before_after_image?.content;
+  const reactiveImage = imageUrl || blockContent.before_after_image;
 
   const trustItems = blockContent.trust_items 
     ? blockContent.trust_items.split('|').map(item => item.trim()).filter(Boolean)
@@ -270,6 +275,57 @@ export default function BeforeImageAfterText(props: LayoutComponentProps) {
 
         {mode !== 'preview' ? (
           <div className="space-y-8">
+            {/* Image Upload/Preview Section */}
+            <div className="p-6 border border-gray-200 rounded-lg bg-gray-50">
+              <h4 className="font-semibold text-gray-700 mb-4">Before/After Image</h4>
+              <div className="relative">
+                {reactiveImage && reactiveImage !== '' ? (
+                  <div className="relative">
+                    <img
+                      src={reactiveImage}
+                      alt={blockContent.image_caption || 'Before and After Comparison'}
+                      className="w-full h-auto max-h-96 object-contain rounded-lg border border-gray-300 cursor-pointer"
+                      data-image-id={`${sectionId}-before-after-image`}
+                      onMouseUp={(e) => {
+                        e.stopPropagation();
+                        e.preventDefault();
+                        const rect = e.currentTarget.getBoundingClientRect();
+                        handleImageToolbar(`${sectionId}.before_after_image`, {
+                          x: rect.left + rect.width / 2,
+                          y: rect.top - 10
+                        });
+                      }}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        e.preventDefault();
+                      }}
+                    />
+                    <div className="absolute top-2 right-2 bg-white bg-opacity-90 px-2 py-1 rounded text-xs text-gray-600">
+                      Click image to edit
+                    </div>
+                  </div>
+                ) : (
+                  <div 
+                    className="w-full h-64 bg-gray-100 rounded-lg border-2 border-dashed border-gray-300 flex flex-col items-center justify-center cursor-pointer hover:bg-gray-50 transition-colors"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      const rect = e.currentTarget.getBoundingClientRect();
+                      handleImageToolbar(`${sectionId}.before_after_image`, {
+                        x: rect.left + rect.width / 2,
+                        y: rect.top - 10
+                      });
+                    }}
+                  >
+                    <svg className="w-12 h-12 text-gray-400 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                    <p className="text-sm text-gray-600 mb-1">Click to upload before/after image</p>
+                    <p className="text-xs text-gray-500">Recommended: Split image showing before & after states</p>
+                  </div>
+                )}
+              </div>
+            </div>
+
             <div className="p-6 border border-gray-200 rounded-lg bg-gray-50">
               <h4 className="font-semibold text-gray-700 mb-4">Before/After Content</h4>
               
@@ -319,128 +375,98 @@ export default function BeforeImageAfterText(props: LayoutComponentProps) {
             </div>
           </div>
         ) : (
-          <>
+          <div className="space-y-12">
             {/* Visual Before/After Comparison */}
-            <div className="mb-16">
+            {reactiveImage && reactiveImage !== '' ? (
+              <div className="relative w-full">
+                <img
+                  src={reactiveImage}
+                  alt={blockContent.image_caption || 'Before and After Comparison'}
+                  className="w-full h-auto rounded-2xl shadow-lg cursor-pointer"
+                  data-image-id={`${sectionId}-before-after-image`}
+                  onMouseUp={(e) => {
+                    if (mode !== 'preview') {
+                      e.stopPropagation();
+                      e.preventDefault();
+                      const rect = e.currentTarget.getBoundingClientRect();
+                      handleImageToolbar(`${sectionId}.before_after_image`, {
+                        x: rect.left + rect.width / 2,
+                        y: rect.top - 10
+                      });
+                    }
+                  }}
+                  onClick={(e) => {
+                    if (mode !== 'preview') {
+                      e.stopPropagation();
+                      e.preventDefault();
+                    }
+                  }}
+                />
+                {blockContent.image_caption && (
+                  <div className="mt-4 text-center">
+                    <EditableAdaptiveText
+                      mode={mode}
+                      value={blockContent.image_caption}
+                      onEdit={(value) => handleContentUpdate('image_caption', value)}
+                      backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
+                      colorTokens={colorTokens}
+                      variant="body"
+                      className="text-sm"
+                      sectionId={sectionId}
+                      elementKey="image_caption"
+                      sectionBackground={sectionBackground}
+                    />
+                  </div>
+                )}
+              </div>
+            ) : mode !== 'preview' ? (
+              <div className="bg-gray-100 rounded-2xl p-12 text-center">
+                <p className="text-gray-500">No image uploaded yet. Click to add a before/after comparison image.</p>
+              </div>
+            ) : (
               <BeforeAfterImage />
-            </div>
+            )}
 
-            {/* Text Descriptions */}
-            <div className="grid lg:grid-cols-2 gap-12 mb-16">
-              
-              {/* Before Text */}
-              <div className="bg-red-50 rounded-2xl p-8 border border-red-200">
-                <div className="flex items-center mb-6">
-                  <div className="w-12 h-12 bg-red-500 rounded-xl flex items-center justify-center mr-4">
-                    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
-                    </svg>
-                  </div>
-                  <h3 className="text-xl font-bold text-gray-900">Your Current Reality</h3>
-                </div>
-                <p className="text-gray-700 leading-relaxed mb-6">
-                  {blockContent.before_description}
-                </p>
-                {blockContent.problem_emphasis && (
-                  <div className="bg-red-100 rounded-lg p-4 border border-red-200">
-                    <p className="text-red-800 font-medium text-sm">
-                      {blockContent.problem_emphasis}
-                    </p>
-                  </div>
-                )}
+            {/* Before/After Descriptions */}
+            <div className="grid lg:grid-cols-2 gap-8">
+              {/* Before Description */}
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold text-gray-800">Before</h3>
+                <EditableAdaptiveText
+                  mode={mode}
+                  value={blockContent.before_description || ''}
+                  onEdit={(value) => handleContentUpdate('before_description', value)}
+                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
+                  colorTokens={colorTokens}
+                  variant="body"
+                  className="text-gray-700 leading-relaxed"
+                  sectionId={sectionId}
+                  elementKey="before_description"
+                  sectionBackground={sectionBackground}
+                />
               </div>
 
-              {/* After Text */}
-              <div className="bg-green-50 rounded-2xl p-8 border border-green-200">
-                <div className="flex items-center mb-6">
-                  <div className="w-12 h-12 bg-green-500 rounded-xl flex items-center justify-center mr-4">
-                    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                    </svg>
-                  </div>
-                  <h3 className="text-xl font-bold text-gray-900">Your Ideal Future</h3>
-                </div>
-                <p className="text-gray-700 leading-relaxed mb-6">
-                  {blockContent.after_description}
-                </p>
-                {blockContent.solution_preview && (
-                  <div className="bg-green-100 rounded-lg p-4 border border-green-200">
-                    <p className="text-green-800 font-medium text-sm">
-                      {blockContent.solution_preview}
-                    </p>
-                  </div>
-                )}
+              {/* After Description */}
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold text-gray-800">After</h3>
+                <EditableAdaptiveText
+                  mode={mode}
+                  value={blockContent.after_description || ''}
+                  onEdit={(value) => handleContentUpdate('after_description', value)}
+                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
+                  colorTokens={colorTokens}
+                  variant="body"
+                  className="text-gray-700 leading-relaxed"
+                  sectionId={sectionId}
+                  elementKey="after_description"
+                  sectionBackground={sectionBackground}
+                />
               </div>
             </div>
-
-            {/* Emotional Connection */}
-            <div className="text-center bg-gray-50 rounded-2xl p-8 border border-gray-100">
-              <h3 className="text-xl font-semibold text-gray-900 mb-6">
-                The Transformation is Real
-              </h3>
-              <p className={`text-lg ${mutedTextColor} max-w-3xl mx-auto mb-8`}>
-                Thousands of businesses have already made this transformation. The question isn't whether it's possible—it's when you'll decide to make the change.
-              </p>
-              
-              <div className="grid md:grid-cols-3 gap-8">
-                <div className="text-center">
-                  <div className="w-16 h-16 mx-auto mb-4 bg-blue-100 rounded-full flex items-center justify-center group/icon-edit relative">
-                    <IconEditableText
-                      mode={mode}
-                      value={blockContent.transformation_icon_1 || '⚡'}
-                      onEdit={(value) => handleContentUpdate('transformation_icon_1', value)}
-                      backgroundType={backgroundType as any}
-                      colorTokens={{...colorTokens, textPrimary: 'text-blue-600'}}
-                      iconSize="xl"
-                      className="text-3xl text-blue-600"
-                      sectionId={sectionId}
-                      elementKey="transformation_icon_1"
-                    />
-                  </div>
-                  <div className="font-semibold text-gray-900">Faster</div>
-                  <div className={`text-sm ${mutedTextColor}`}>2.5x productivity increase</div>
-                </div>
-                
-                <div className="text-center">
-                  <div className="w-16 h-16 mx-auto mb-4 bg-green-100 rounded-full flex items-center justify-center group/icon-edit relative">
-                    <IconEditableText
-                      mode={mode}
-                      value={blockContent.transformation_icon_2 || '✓'}
-                      onEdit={(value) => handleContentUpdate('transformation_icon_2', value)}
-                      backgroundType={backgroundType as any}
-                      colorTokens={{...colorTokens, textPrimary: 'text-green-600'}}
-                      iconSize="xl"
-                      className="text-3xl text-green-600"
-                      sectionId={sectionId}
-                      elementKey="transformation_icon_2"
-                    />
-                  </div>
-                  <div className="font-semibold text-gray-900">Smarter</div>
-                  <div className={`text-sm ${mutedTextColor}`}>Data-driven decisions</div>
-                </div>
-                
-                <div className="text-center">
-                  <div className="w-16 h-16 mx-auto mb-4 bg-purple-100 rounded-full flex items-center justify-center group/icon-edit relative">
-                    <IconEditableText
-                      mode={mode}
-                      value={blockContent.transformation_icon_3 || '💖'}
-                      onEdit={(value) => handleContentUpdate('transformation_icon_3', value)}
-                      backgroundType={backgroundType as any}
-                      colorTokens={{...colorTokens, textPrimary: 'text-purple-600'}}
-                      iconSize="xl"
-                      className="text-3xl text-purple-600"
-                      sectionId={sectionId}
-                      elementKey="transformation_icon_3"
-                    />
-                  </div>
-                  <div className="font-semibold text-gray-900">Happier</div>
-                  <div className={`text-sm ${mutedTextColor}`}>Stress-free operations</div>
-                </div>
-              </div>
-            </div>
-          </>
+          </div>
         )}
 
+        {/* Supporting Text and Trust Items - shown in both modes */}
         {(blockContent.supporting_text || blockContent.trust_items || mode === 'edit') && (
           <div className="text-center space-y-6 mt-12">
             {(blockContent.supporting_text || mode === 'edit') && (
@@ -485,22 +511,20 @@ export const componentMeta = {
   contentFields: [
     { key: 'headline', label: 'Main Headline', type: 'text', required: true },
     { key: 'subheadline', label: 'Subheadline', type: 'textarea', required: false },
+    { key: 'before_after_image', label: 'Before/After Comparison Image', type: 'image', required: false },
     { key: 'before_description', label: 'Before Description (Current Problems)', type: 'textarea', required: true },
     { key: 'after_description', label: 'After Description (Desired Outcomes)', type: 'textarea', required: true },
     { key: 'image_caption', label: 'Image Caption', type: 'text', required: false },
-    { key: 'problem_emphasis', label: 'Problem Emphasis Text', type: 'text', required: false },
-    { key: 'solution_preview', label: 'Solution Preview Text', type: 'text', required: false },
     { key: 'supporting_text', label: 'Supporting Text', type: 'textarea', required: false },
     { key: 'trust_items', label: 'Trust Indicators (pipe separated)', type: 'text', required: false }
   ],
   
   features: [
-    'Interactive before/after visual comparison',
-    'Detailed text descriptions for both states',
-    'Emotional connection elements',
-    'Transformation statistics display',
-    'Problem emphasis and solution preview',
-    'Trust and credibility indicators'
+    'Editable before/after image',
+    'Side-by-side before/after descriptions',
+    'Optional supporting text',
+    'Trust and credibility indicators',
+    'Clean, simple layout'
   ],
   
   useCases: [
