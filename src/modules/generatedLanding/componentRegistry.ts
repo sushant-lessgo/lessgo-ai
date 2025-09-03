@@ -82,7 +82,7 @@ import MythVsRealityGrid from '@/modules/UIBlocks/Objection/MythVsRealityGrid';
 import ObjectionAccordion from '@/modules/UIBlocks/Objection/ObjectionAccordion';
 import ObjectionCarousel from '@/modules/UIBlocks/Objection/ObjectionCarousel';
 import OutcomeIcons from '@/modules/UIBlocks/Results/OutcomeIcons';
-import PainMeterChart from '@/modules/UIBlocks/Problem/PainMeterChart';
+// TODO: Disabled for MVP - import PainMeterChart from '@/modules/UIBlocks/Problem/PainMeterChart';
 import PenetrationTestResults from '@/modules/UIBlocks/Security/PenetrationTestResults';
 import PersonaGrid from '@/modules/UIBlocks/UseCase/PersonaGrid';
 import PersonaJourney from '@/modules/UIBlocks/BeforeAfter/PersonaJourney';
@@ -242,7 +242,7 @@ export const componentRegistry: ComponentRegistry = {
     SideBySideSplit: SideBySideSplit,
     EmotionalQuotes: EmotionalQuotes,
     CollapsedCards: CollapsedCards,
-    PainMeterChart: PainMeterChart,
+    // TODO: Disabled for MVP - PainMeterChart: PainMeterChart,
     PersonaPanels: PersonaPanels,
     ProblemChecklist: ProblemChecklist,
   },

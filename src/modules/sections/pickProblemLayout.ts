@@ -6,7 +6,7 @@ export type ProblemLayout =
   | "SideBySideSplit"
   | "EmotionalQuotes"
   | "CollapsedCards"
-  | "PainMeterChart"
+  // TODO: Disabled for MVP | "PainMeterChart"
   | "PersonaPanels"
   | "ProblemChecklist";
 
@@ -59,14 +59,14 @@ export function pickProblemLayout(input: LayoutPickerInput): ProblemLayout {
     return "PersonaPanels";
   }
 
-  // 4. Quantifiable problems that can be measured
-  if (
-    (problemType === "lost-revenue-or-inefficiency" || problemType === "time-freedom-or-automation") &&
-    (targetAudience === "businesses" || targetAudience === "marketers") &&
-    copyIntent === "pain-led"
-  ) {
-    return "PainMeterChart";
-  }
+  // TODO: Disabled for MVP - 4. Quantifiable problems that can be measured
+  // if (
+  //   (problemType === "lost-revenue-or-inefficiency" || problemType === "time-freedom-or-automation") &&
+  //   (targetAudience === "businesses" || targetAudience === "marketers") &&
+  //   copyIntent === "pain-led"
+  // ) {
+  //   return "PainMeterChart";
+  // }
 
   // 5. Visual before/after for creative or design problems
   if (
@@ -85,7 +85,7 @@ export function pickProblemLayout(input: LayoutPickerInput): ProblemLayout {
     SideBySideSplit: 0,
     EmotionalQuotes: 0,
     CollapsedCards: 0,
-    PainMeterChart: 0,
+    // TODO: Disabled for MVP - PainMeterChart: 0,
     PersonaPanels: 0,
     ProblemChecklist: 0,
   };
@@ -94,7 +94,7 @@ export function pickProblemLayout(input: LayoutPickerInput): ProblemLayout {
   if (copyIntent === "pain-led") {
     scores.StackedPainBullets += 5;
     scores.EmotionalQuotes += 5;
-    scores.PainMeterChart += 4;
+    // TODO: Disabled for MVP - scores.PainMeterChart += 4;
     scores.PersonaPanels += 4;
     scores.ProblemChecklist += 3;
   } else if (copyIntent === "desire-led") {
@@ -106,14 +106,14 @@ export function pickProblemLayout(input: LayoutPickerInput): ProblemLayout {
 
   // Problem Type Scoring (High Weight: 3-4 points)
   if (problemType === "lost-revenue-or-inefficiency") {
-    scores.PainMeterChart += 4;
+    // TODO: Disabled for MVP - scores.PainMeterChart += 4;
     scores.StackedPainBullets += 4;
     scores.PersonaPanels += 3;
     scores.CollapsedCards += 2;
   } else if (problemType === "burnout-or-overload") {
     scores.EmotionalQuotes += 4;
     scores.StackedPainBullets += 3;
-    scores.PainMeterChart += 2;
+    // TODO: Disabled for MVP - scores.PainMeterChart += 2;
   } else if (problemType === "manual-repetition") {
     scores.StackedPainBullets += 4;
     scores.ProblemChecklist += 3;
@@ -127,7 +127,7 @@ export function pickProblemLayout(input: LayoutPickerInput): ProblemLayout {
     scores.SideBySideSplit += 3;
     scores.EmotionalQuotes += 2;
   } else if (problemType === "time-freedom-or-automation") {
-    scores.PainMeterChart += 4;
+    // TODO: Disabled for MVP - scores.PainMeterChart += 4;
     scores.StackedPainBullets += 3;
     scores.SideBySideSplit += 2;
   } else if (problemType === "professional-image-or-branding") {
@@ -141,7 +141,7 @@ export function pickProblemLayout(input: LayoutPickerInput): ProblemLayout {
     scores.StackedPainBullets += 4;
     scores.PersonaPanels += 4;
     scores.EmotionalQuotes += 3;
-    scores.PainMeterChart += 2;
+    // TODO: Disabled for MVP - scores.PainMeterChart += 2;
   } else if (awarenessLevel === "problem-aware") {
     scores.SideBySideSplit += 4;
     scores.BeforeImageAfterText += 4;
@@ -162,13 +162,13 @@ export function pickProblemLayout(input: LayoutPickerInput): ProblemLayout {
     scores.CollapsedCards += 4;
     scores.PersonaPanels += 4;
     scores.ProblemChecklist += 3;
-    scores.PainMeterChart += 2;
+    // TODO: Disabled for MVP - scores.PainMeterChart += 2;
   } else if (targetAudience === "builders") {
     scores.StackedPainBullets += 4;
     scores.CollapsedCards += 3;
     scores.ProblemChecklist += 2;
   } else if (targetAudience === "businesses") {
-    scores.PainMeterChart += 4;
+    // TODO: Disabled for MVP - scores.PainMeterChart += 4;
     scores.PersonaPanels += 4;
     scores.StackedPainBullets += 3;
     scores.CollapsedCards += 2;
@@ -179,7 +179,7 @@ export function pickProblemLayout(input: LayoutPickerInput): ProblemLayout {
     scores.PersonaPanels += 2;
   } else if (targetAudience === "marketers") {
     scores.BeforeImageAfterText += 4;
-    scores.PainMeterChart += 3;
+    // TODO: Disabled for MVP - scores.PainMeterChart += 3;
     scores.SideBySideSplit += 3;
     scores.PersonaPanels += 2;
   }
@@ -189,7 +189,7 @@ export function pickProblemLayout(input: LayoutPickerInput): ProblemLayout {
     scores.StackedPainBullets += 3;
     scores.EmotionalQuotes += 3;
     scores.BeforeImageAfterText += 2;
-    scores.PainMeterChart += 2;
+    // TODO: Disabled for MVP - scores.PainMeterChart += 2;
   } else if (marketSophisticationLevel === "level-3") {
     scores.PersonaPanels += 3;
     scores.SideBySideSplit += 3;
@@ -208,10 +208,10 @@ export function pickProblemLayout(input: LayoutPickerInput): ProblemLayout {
   } else if (toneProfile === "confident-playful") {
     scores.BeforeImageAfterText += 3;
     scores.SideBySideSplit += 3;
-    scores.PainMeterChart += 2;
+    // TODO: Disabled for MVP - scores.PainMeterChart += 2;
   } else if (toneProfile === "bold-persuasive") {
     scores.StackedPainBullets += 3;
-    scores.PainMeterChart += 3;
+    // TODO: Disabled for MVP - scores.PainMeterChart += 3;
     scores.EmotionalQuotes += 2;
   } else if (toneProfile === "minimal-technical") {
     scores.CollapsedCards += 3;
@@ -230,7 +230,7 @@ export function pickProblemLayout(input: LayoutPickerInput): ProblemLayout {
     scores.BeforeImageAfterText += 2;
   } else if (startupStage === "traction") {
     scores.PersonaPanels += 3;
-    scores.PainMeterChart += 2;
+    // TODO: Disabled for MVP - scores.PainMeterChart += 2;
     scores.SideBySideSplit += 2;
   } else if (startupStage === "growth") {
     scores.CollapsedCards += 3;
@@ -248,7 +248,7 @@ export function pickProblemLayout(input: LayoutPickerInput): ProblemLayout {
     scores.SideBySideSplit += 2;
     scores.EmotionalQuotes += 1;
   } else if (marketCategory === "Marketing & Sales Tools") {
-    scores.PainMeterChart += 2;
+    // TODO: Disabled for MVP - scores.PainMeterChart += 2;
     scores.BeforeImageAfterText += 2;
     scores.PersonaPanels += 1;
   } else if (marketCategory === "Work & Productivity Tools") {
@@ -258,13 +258,13 @@ export function pickProblemLayout(input: LayoutPickerInput): ProblemLayout {
     scores.CollapsedCards += 2;
     scores.StackedPainBullets += 1;
   } else if (marketCategory === "Data & Analytics Tools") {
-    scores.PainMeterChart += 2;
+    // TODO: Disabled for MVP - scores.PainMeterChart += 2;
     scores.CollapsedCards += 1;
   }
 
   // Landing Goal Scoring (Low Weight: 1-2 points)
   if (landingPageGoals === "buy-now" || landingPageGoals === "subscribe") {
-    scores.PainMeterChart += 2;
+    // TODO: Disabled for MVP - scores.PainMeterChart += 2;
     scores.StackedPainBullets += 2;
     scores.EmotionalQuotes += 1;
   } else if (landingPageGoals === "free-trial" || landingPageGoals === "demo") {
@@ -287,7 +287,7 @@ export function pickProblemLayout(input: LayoutPickerInput): ProblemLayout {
     scores.CollapsedCards += 1;
   } else if (pricingModel === "tiered") {
     scores.PersonaPanels += 2;
-    scores.PainMeterChart += 1;
+    // TODO: Disabled for MVP - scores.PainMeterChart += 1;
   }
 
   // Find the highest scoring layout

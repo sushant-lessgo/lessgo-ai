@@ -133,7 +133,7 @@ export const layoutRegistry = {
     "SideBySideSplit",
     "EmotionalQuotes",
     "CollapsedCards",
-    "PainMeterChart",
+    // TODO: "PainMeterChart", - Disabled for MVP due to complex UX. Great copywriting potential for post-MVP.
     "PersonaPanels",
     "ProblemChecklist",
   ] as const,
