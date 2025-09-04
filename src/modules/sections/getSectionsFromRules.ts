@@ -10,6 +10,7 @@ import type {
   StartupStage,
   MarketCategory
 } from '@/types/core/index';
+import { logger } from '@/lib/logger';
 
 // ✅ FIXED: Use centralized type interfaces instead of generic Record types
 type RuleInput = {
@@ -23,11 +24,11 @@ export function getSectionsFromRules({
   hiddenInferredFields,
   featuresFromAI,
 }: RuleInput): string[] {
-  console.log('🔍 Section Rules Debug - Input:', {
+  logger.dev('🔍 Section Rules Debug - Input:', () => ({
     validatedFields,
     hiddenInferredFields,
     featuresCount: featuresFromAI.length
-  });
+  }));
 
   // ✅ FIXED: Extract fields using canonical field names with proper undefined handling
   const {

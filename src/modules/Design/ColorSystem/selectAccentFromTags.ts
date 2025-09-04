@@ -1,6 +1,7 @@
 import { shortlistTags } from './shortlistTags';
 import { accentOptions } from './accentOptions';
 import { hasGoodContrast } from '@/utils/textContrastUtils';
+import { logger } from '@/lib/logger';
 import type { 
   MarketCategory,
   TargetAudience, 
@@ -48,11 +49,11 @@ export function selectAccentOption(userContext: UserContext, baseColor: string):
   // Use contrast-validated options, fallback to all options if none pass
   const finalOptions = contrastValidated.length > 0 ? contrastValidated : options;
   
-  console.log(`🎨 Accent selection for ${baseColor}:`, {
+  logger.dev(`🎨 Accent selection for ${baseColor}:`, () => ({
     totalOptions: options.length,
     contrastValidated: contrastValidated.length,
     usingValidated: contrastValidated.length > 0
-  });
+  }));
 
   // Rank options by how many tags they match
   const scored = finalOptions
@@ -75,7 +76,7 @@ export function selectAccentOption(userContext: UserContext, baseColor: string):
     
     if (fallbackScored.length === 0) return null;
     
-    console.log(`⚠️ Using fallback accent selection for ${baseColor}`);
+    logger.dev(() => `⚠️ Using fallback accent selection for ${baseColor}`);
     return fallbackScored[0]; // Return best fallback match
   }
 
@@ -85,11 +86,11 @@ export function selectAccentOption(userContext: UserContext, baseColor: string):
 
   const selectedOption = topMatches[Math.floor(Math.random() * topMatches.length)];
   
-  console.log(`✅ Selected accent for ${baseColor}:`, {
+  logger.dev(`✅ Selected accent for ${baseColor}:`, () => ({
     accentColor: selectedOption.accentColor,
     matchCount: selectedOption.matchCount,
     totalTopMatches: topMatches.length
-  });
+  }));
 
   return selectedOption;
 }

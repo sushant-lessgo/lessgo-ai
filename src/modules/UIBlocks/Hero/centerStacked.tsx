@@ -4,6 +4,7 @@ import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
 import { useImageToolbar } from '@/hooks/useImageToolbar';
 import { useTypography } from '@/hooks/useTypography';
 import { LayoutSection } from '@/components/layout/LayoutSection';
+import { logger } from '@/lib/logger';
 import { 
   EditableAdaptiveHeadline, 
   EditableAdaptiveText, 
@@ -458,7 +459,7 @@ export default function CenterStacked(props: LayoutComponentProps) {
                 const sectionData = content[sectionId];
                 const ctaConfig = (sectionData as any)?.ctaConfig;
                 
-                console.log('🔗 CTA Button clicked:', { ctaConfig, sectionId });
+                logger.debug('🔗 CTA Button clicked:', () => ({ ctaConfig, sectionId }));
                 
                 if (ctaConfig?.type === 'link' && ctaConfig.url) {
                   window.open(ctaConfig.url, '_blank', 'noopener,noreferrer');

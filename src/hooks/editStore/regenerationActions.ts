@@ -5,6 +5,7 @@ import { buildFullPrompt } from '@/modules/prompt/buildPrompt';
 import type { EditStore, APIRequest } from '@/types/store';
 import type { RegenerationActions } from '@/types/store/actions';
 import type { CanonicalFieldName, InputVariables, HiddenInferredFields } from '@/types/core/index';
+import { logger } from '@/lib/logger';
 
 const generateId = () => `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 
@@ -194,12 +195,12 @@ const handleDesignAndCopyRegeneration = async (
 
     // Step 3: Update theme with new background system
     setState((state: EditStore) => {
-      console.log('🎨 Design Regeneration - Updating theme colors. Before:', {
+      logger.dev('🎨 Design Regeneration - Updating theme colors. Before:', () => ({
         baseColor: state.theme.colors.baseColor,
         accentColor: state.theme.colors.accentColor,
         accentCSS: state.theme.colors.accentCSS,
         sectionBackgrounds: state.theme.colors.sectionBackgrounds,
-      });
+      }));
       
       state.theme.colors.baseColor = newBackgroundSystem.baseColor;
       state.theme.colors.accentColor = newBackgroundSystem.accentColor;

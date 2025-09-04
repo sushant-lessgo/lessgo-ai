@@ -17,6 +17,7 @@ import {
   BackgroundValidation,
   ThemeColorType
 } from '@/types/core';
+import { logger } from '@/lib/logger';
 
 interface SectionBackgroundModalProps {
   isOpen: boolean;
@@ -25,7 +26,7 @@ interface SectionBackgroundModalProps {
 }
 
 export function SectionBackgroundModal({ isOpen, onClose, sectionId }: SectionBackgroundModalProps) {
-  console.log('🎯 SectionBackgroundModal render:', { isOpen, sectionId });
+  logger.dev('🎯 SectionBackgroundModal render:', () => ({ isOpen, sectionId }));
   
   const { content, setBackgroundType, setSectionBackground, theme, sections, onboardingData } = useEditStore();
   
@@ -41,39 +42,39 @@ export function SectionBackgroundModal({ isOpen, onClose, sectionId }: SectionBa
   // Use stored type if available (user may have customized), otherwise use calculated
   const currentThemeColor = (storedBackgroundType as ThemeColorType) || calculatedBackgroundType;
   
-  console.log('🎯 Background comparison:', {
+  logger.dev('🎯 Background comparison:', () => ({
     sectionId,
     calculatedBackgroundType,
     storedBackgroundType,
     currentThemeColor,
     hasOnboardingData: !!onboardingData,
     sectionsCount: sections?.length
-  });
+  }));
   
   // Create background object for modal state - check for existing custom background
   const currentBackground: SectionBackground = section?.backgroundType === 'custom' && section?.sectionBackground?.type === 'custom'
     ? section.sectionBackground  // Use existing custom background
     : { type: 'theme' as BackgroundType, themeColor: currentThemeColor }; // Default to theme
   
-  console.log('🔧 currentBackground calculation:', {
+  logger.dev('🔧 currentBackground calculation:', () => ({
     hasCustomBackground: section?.backgroundType === 'custom' && section?.sectionBackground?.type === 'custom',
     sectionBackgroundType: section?.backgroundType,
     sectionBackgroundData: section?.sectionBackground,
     resultingCurrentBackground: currentBackground
-  });
+  }));
   
   // Local state for background editing
   const [pickerMode, setPickerMode] = useState<BackgroundPickerMode>('solid');
   const [localBackground, setLocalBackground] = useState<SectionBackground>(currentBackground);
   
-  console.log('🎯 Modal initialized with:', { 
+  logger.dev('🎯 Modal initialized with:', () => ({ 
     sectionId,
     finalThemeColor: currentThemeColor,
     localBackground,
     themeColors: theme?.colors?.sectionBackgrounds,
     sectionBackgroundType: section?.backgroundType,
     sectionBackgroundData: section?.sectionBackground
-  });
+  }));
   const [validation, setValidation] = useState<BackgroundValidation | null>(null);
   
   // Initialize local state when modal opens
@@ -164,7 +165,7 @@ export function SectionBackgroundModal({ isOpen, onClose, sectionId }: SectionBa
   
   // Apply changes
   const handleApply = useCallback(() => {
-    console.log('🔥 Apply clicked!', { 
+    logger.dev('🔥 Apply clicked!', () => ({ 
       sectionId, 
       localBackground,
       backgroundType: localBackground.type,
@@ -172,7 +173,7 @@ export function SectionBackgroundModal({ isOpen, onClose, sectionId }: SectionBa
       customBackground: localBackground.custom,
       setBackgroundType: !!setBackgroundType,
       setSectionBackground: !!setSectionBackground 
-    });
+    }));
     
     if (localBackground.type === 'theme' && localBackground.themeColor) {
       // For theme backgrounds, update the backgroundType field (this is what controls visual rendering)
@@ -373,12 +374,12 @@ export function SectionBackgroundModal({ isOpen, onClose, sectionId }: SectionBa
                     <SolidColorPicker
                       value={(() => {
                         const solidColor = localBackground.custom?.solid || '#ffffff';
-                        console.log('🎨 Passing value to SolidColorPicker:', {
+                        logger.dev('🎨 Passing value to SolidColorPicker:', () => ({
                           solidData: localBackground.custom?.solid,
                           solidDataType: typeof localBackground.custom?.solid,
                           finalColor: solidColor,
                           valueObject: { color: solidColor }
-                        });
+                        }));
                         return { color: solidColor };
                       })()}
                       onChange={(background) => handleBackgroundChange({ solid: background.color })}

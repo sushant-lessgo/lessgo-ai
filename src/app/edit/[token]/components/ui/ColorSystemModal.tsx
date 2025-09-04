@@ -15,6 +15,7 @@ import { BackgroundContextPreview } from './BackgroundContextPreview';
 import { AccessibilityPreview } from './AccessibilityPreview';
 import { ColorModalActions } from './ColorModalActions';
 import type { ColorTokens, ColorSelectorTier } from '@/types/core';
+import { logger } from '@/lib/logger';
 
 interface ColorSystemModalProps {
   isOpen: boolean;
@@ -64,7 +65,7 @@ export function ColorSystemModal({ isOpen, onClose, tokenId }: ColorSystemModalP
   // Handle individual token changes for expert mode
   const handleTokenChange = (tokenKey: keyof ColorTokens, value: string) => {
     // This would integrate with the existing store update mechanism
-    console.log(`Token change: ${tokenKey} = ${value}`);
+    logger.dev(`Token change: ${tokenKey} = ${value}`);
   };
 
   // Handle color family selection from grid

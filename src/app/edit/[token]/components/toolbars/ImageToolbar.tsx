@@ -8,6 +8,7 @@ import { AdvancedActionsMenu } from './AdvancedActionsMenu';
 import type { StockPhoto } from '@/services/pexelsApi';
 import { TextInputModal } from '../modals/TextInputModal';
 import { SimpleImageEditor } from '@/components/ui/SimpleImageEditor';
+import { logger } from '@/lib/logger';
 
 interface ImageToolbarProps {
   targetId: string;
@@ -16,11 +17,11 @@ interface ImageToolbarProps {
 }
 
 export function ImageToolbar({ targetId, position, contextActions }: ImageToolbarProps) {
-  console.log('🖼️🖼️🖼️ ImageToolbar component initialized with props:', {
+  logger.dev('🖼️🖼️🖼️ ImageToolbar component initialized with props:', () => ({
     targetId,
     position, 
     contextActions
-  });
+  }));
 
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [showUploader, setShowUploader] = useState(false);
@@ -89,7 +90,7 @@ export function ImageToolbar({ targetId, position, contextActions }: ImageToolba
 
   // Calculate arrow position
   const targetElement = document.querySelector(`[data-image-id="${targetId}"]`);
-  console.log('🖼️ Looking for target element with selector:', `[data-image-id="${targetId}"]`);
+  logger.dev('🖼️ Looking for target element with selector:', () => `[data-image-id="${targetId}"]`);
   
   const arrowInfo = targetElement ? calculateArrowPosition(
     position,
@@ -289,7 +290,7 @@ export function ImageToolbar({ targetId, position, contextActions }: ImageToolba
 
   return (
     <>
-      {console.log('🖼️ ImageToolbar JSX rendering now!')}
+      {logger.dev(() => '🖼️ ImageToolbar JSX rendering now!')}
       <div 
         ref={toolbarRef}
         className="fixed bg-white border border-gray-200 rounded-lg shadow-lg transition-all duration-200"
@@ -351,7 +352,7 @@ export function ImageToolbar({ targetId, position, contextActions }: ImageToolba
       {/* Stock Photos Panel */}
       {showStockPhotos && typeof window !== 'undefined' && (
         <>
-          {console.log('🎨 Rendering stock photos portal, showStockPhotos:', showStockPhotos)}
+          {logger.dev('🎨 Rendering stock photos portal, showStockPhotos:', () => showStockPhotos)}
           {createPortal(
             <StockPhotosPanel
           position={{

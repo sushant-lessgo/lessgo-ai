@@ -42,7 +42,7 @@ const CONTENT_SCHEMA = {
     default: '' 
   },
   before_after_image: {
-    type: 'image' as const,
+    type: 'string' as const,
     default: ''
   },
   image_caption: { 
@@ -89,7 +89,7 @@ export default function BeforeImageAfterText(props: LayoutComponentProps) {
   // Get reactive image URL directly from store for real-time updates
   const store = useEditStore();
   const imageUrl = store.content[sectionId]?.elements?.before_after_image?.content;
-  const reactiveImage = imageUrl || blockContent.before_after_image;
+  const reactiveImage = (typeof imageUrl === 'string' ? imageUrl : blockContent.before_after_image) as string;
 
   const trustItems = blockContent.trust_items 
     ? blockContent.trust_items.split('|').map(item => item.trim()).filter(Boolean)

@@ -62,11 +62,11 @@ const FullNavHeader: React.FC<LayoutComponentProps> = (props) => {
   
   // Initialize navigation if not already done
   useEffect(() => {
-    console.log('🧭 [NAV-DEBUG] FullNavHeader useEffect:', {
+    logger.dev('🧭 [NAV-DEBUG] FullNavHeader useEffect:', () => ({
       hasNavigationConfig: !!store.navigationConfig,
       sectionsLength: store.sections?.length || 0,
       sections: store.sections
-    });
+    }));
     
     if (!store.navigationConfig) {
       logger.dev('🧭 [NAV-DEBUG] Calling initializeNavigation from FullNavHeader');
@@ -78,12 +78,12 @@ const FullNavHeader: React.FC<LayoutComponentProps> = (props) => {
 
   // Get navigation items from store, fallback to legacy content - direct store access
   const getNavItems = (): NavigationItem[] => {
-    console.log('🧭 [NAV-DEBUG] Getting navigation items', {
+    logger.dev('🧭 [NAV-DEBUG] Getting navigation items', () => ({
       hasNavigationConfig: !!store.navigationConfig,
       navigationItems: store.navigationConfig?.items?.length || 0,
       lastUpdated: store.navigationConfig?.lastUpdated,
       blockContent
-    });
+    }));
     
     if (store.navigationConfig?.items && store.navigationConfig.items.length > 0) {
       logger.dev('🧭 [NAV-DEBUG] Using navigation config items:', () => store.navigationConfig?.items);
@@ -112,7 +112,7 @@ const FullNavHeader: React.FC<LayoutComponentProps> = (props) => {
     e.preventDefault();
     e.stopPropagation();
     
-    console.log('🧭 [NAV-DEBUG] Navigation click:', { link, mode });
+    logger.dev('🧭 [NAV-DEBUG] Navigation click:', () => ({ link, mode }));
     
     // In edit mode, don't navigate - let text editing work
     if (mode !== 'preview') {

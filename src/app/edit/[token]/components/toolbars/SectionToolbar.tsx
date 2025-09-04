@@ -11,6 +11,7 @@ import { AddSectionButton } from '../content/SectionCRUD';
 import { showBackgroundModal } from '../ui/GlobalModals';
 import LoadingButtonBar from '@/components/shared/LoadingButtonBar';
 import type { SectionType } from '@/types/core/content';
+import { logger } from '@/lib/logger';
 // import { getRestrictionSummary } from '@/utils/elementRestrictions'; // Preserved for future use
 
 interface SectionToolbarProps {
@@ -38,15 +39,15 @@ export function SectionToolbar({ sectionId, position, contextActions }: SectionT
   
   // Debug mounting/unmounting
   useEffect(() => {
-    console.log(`🟢 SectionToolbar[${instanceId.current}] MOUNTED for section:`, sectionId);
+    logger.dev(`🟢 SectionToolbar[${instanceId.current}] MOUNTED for section:`, () => sectionId);
     return () => {
-      console.log(`🔴 SectionToolbar[${instanceId.current}] UNMOUNTING for section:`, sectionId);
+      logger.dev(`🔴 SectionToolbar[${instanceId.current}] UNMOUNTING for section:`, () => sectionId);
     };
   }, []);
   
   // Debug state changes
   useEffect(() => {
-    console.log(`🔍 SectionToolbar[${instanceId.current}] - showAdvanced changed to:`, showAdvanced);
+    logger.dev(`🔍 SectionToolbar[${instanceId.current}] - showAdvanced changed to:`, () => showAdvanced);
   }, [showAdvanced]);
 
   const {
@@ -151,7 +152,7 @@ export function SectionToolbar({ sectionId, position, contextActions }: SectionT
     }
     
     // Use the executeAction which includes restriction logic
-    console.log('🎯 Calling executeAction with params:', { sectionId, position: pickerPosition });
+    logger.dev('🎯 Calling executeAction with params:', () => ({ sectionId, position: pickerPosition }));
     executeAction('add-element', { 
       sectionId, 
       position: pickerPosition 

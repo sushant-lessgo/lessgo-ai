@@ -6,6 +6,7 @@ import { LayoutComponentProps } from '@/types/storeTypes';
 import HeaderLogo from '@/components/ui/HeaderLogo';
 import NavigationEditor from '@/components/navigation/NavigationEditor';
 import type { NavigationItem } from '@/types/store/state';
+import { logger } from '@/lib/logger';
 
 interface MinimalNavHeaderContent {
   logo?: string;
@@ -99,7 +100,7 @@ const MinimalNavHeader: React.FC<LayoutComponentProps> = (props) => {
     e.preventDefault();
     e.stopPropagation();
     
-    console.log('🧭 [NAV-DEBUG] MinimalNav click:', { link, mode });
+    logger.dev('🧭 [NAV-DEBUG] MinimalNav click:', () => ({ link, mode }));
     
     // In edit mode, don't navigate - let text editing work
     if (mode !== 'preview') {
