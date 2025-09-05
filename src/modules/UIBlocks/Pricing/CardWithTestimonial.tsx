@@ -290,7 +290,7 @@ export default function CardWithTestimonial(props: LayoutComponentProps) {
     tier: typeof pricingTiers[0];
     index: number;
   }) => (
-    <div className={`bg-white rounded-2xl shadow-lg border-2 transition-all duration-300 hover:shadow-xl ${
+    <div className={`bg-white rounded-2xl shadow-lg border-2 transition-all duration-300 hover:shadow-xl relative group/tier-${index} ${
       tier.isPopular 
         ? `border-primary scale-105` 
         : 'border-gray-200 hover:border-gray-300'
@@ -306,25 +306,132 @@ export default function CardWithTestimonial(props: LayoutComponentProps) {
       <div className="p-8">
         {/* Tier Header */}
         <div className="text-center mb-6">
-          <h3 style={h3Style} className="font-bold text-gray-900 mb-2">{tier.name}</h3>
-          <p className={`text-sm ${mutedTextColor} mb-4`}>{tier.description}</p>
+          {/* Editable Tier Name */}
+          {mode !== 'preview' ? (
+            <div 
+              contentEditable
+              suppressContentEditableWarning
+              onBlur={(e) => {
+                const names = blockContent.tier_names.split('|');
+                names[index] = e.currentTarget.textContent || '';
+                handleContentUpdate('tier_names', names.join('|'));
+              }}
+              className="outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-1 min-h-[24px] cursor-text hover:bg-gray-50 font-bold text-gray-900 mb-2"
+              style={h3Style}
+            >
+              {tier.name}
+            </div>
+          ) : (
+            <h3 style={h3Style} className="font-bold text-gray-900 mb-2">{tier.name}</h3>
+          )}
+          
+          {/* Editable Tier Description */}
+          {mode !== 'preview' ? (
+            <div 
+              contentEditable
+              suppressContentEditableWarning
+              onBlur={(e) => {
+                const descriptions = blockContent.tier_descriptions.split('|');
+                descriptions[index] = e.currentTarget.textContent || '';
+                handleContentUpdate('tier_descriptions', descriptions.join('|'));
+              }}
+              className={`outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-1 min-h-[24px] cursor-text hover:bg-gray-50 text-sm ${mutedTextColor} mb-4`}
+            >
+              {tier.description}
+            </div>
+          ) : (
+            <p className={`text-sm ${mutedTextColor} mb-4`}>{tier.description}</p>
+          )}
           
           {/* Price Display */}
           <div className="mb-6">
-            <div style={{...getTypographyStyle('h2'), fontSize: 'clamp(2rem, 4vw, 2.5rem)'}} className="font-bold text-gray-900 mb-2">{tier.price}</div>
+            {/* Editable Tier Price */}
+            {mode !== 'preview' ? (
+              <div 
+                contentEditable
+                suppressContentEditableWarning
+                onBlur={(e) => {
+                  const prices = blockContent.tier_prices.split('|');
+                  prices[index] = e.currentTarget.textContent || '';
+                  handleContentUpdate('tier_prices', prices.join('|'));
+                }}
+                className="outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-1 min-h-[24px] cursor-text hover:bg-gray-50 font-bold text-gray-900 mb-2"
+                style={{...getTypographyStyle('h2'), fontSize: 'clamp(2rem, 4vw, 2.5rem)'}}
+              >
+                {tier.price}
+              </div>
+            ) : (
+              <div style={{...getTypographyStyle('h2'), fontSize: 'clamp(2rem, 4vw, 2.5rem)'}} className="font-bold text-gray-900 mb-2">{tier.price}</div>
+            )}
           </div>
         </div>
 
         {/* Features */}
         <div className="space-y-3 mb-8">
           {tier.features.map((feature, featureIndex) => (
-            <div key={featureIndex} className="flex items-start space-x-3">
+            <div key={featureIndex} className="flex items-start space-x-3 group/feature relative">
               <svg className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
               </svg>
-              <span className="text-gray-700 text-sm">{feature}</span>
+              {mode !== 'preview' ? (
+                <div
+                  contentEditable
+                  suppressContentEditableWarning
+                  onBlur={(e) => {
+                    const featureLists = blockContent.feature_lists.split('|');
+                    const currentFeatures = featureLists[index] ? featureLists[index].split(',').map(f => f.trim()) : [];
+                    currentFeatures[featureIndex] = e.currentTarget.textContent || '';
+                    featureLists[index] = currentFeatures.join(',');
+                    handleContentUpdate('feature_lists', featureLists.join('|'));
+                  }}
+                  className="text-gray-700 text-sm outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-1 cursor-text hover:bg-gray-100 flex-1"
+                >
+                  {feature}
+                </div>
+              ) : (
+                <span className="text-gray-700 text-sm flex-1">{feature}</span>
+              )}
+              
+              {/* Remove feature button - only in edit mode */}
+              {mode === 'edit' && tier.features.length > 1 && (
+                <button
+                  onClick={() => {
+                    const featureLists = blockContent.feature_lists.split('|');
+                    const currentFeatures = featureLists[index] ? featureLists[index].split(',').map(f => f.trim()) : [];
+                    currentFeatures.splice(featureIndex, 1);
+                    featureLists[index] = currentFeatures.join(',');
+                    handleContentUpdate('feature_lists', featureLists.join('|'));
+                  }}
+                  className="opacity-0 group-hover/feature:opacity-100 text-red-500 hover:text-red-700 transition-opacity duration-200"
+                  title="Remove this feature"
+                >
+                  <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              )}
             </div>
           ))}
+          
+          {/* Add feature button - only in edit mode */}
+          {mode === 'edit' && (
+            <button
+              onClick={() => {
+                const featureLists = blockContent.feature_lists.split('|');
+                const currentFeatures = featureLists[index] ? featureLists[index].split(',').map(f => f.trim()) : [];
+                currentFeatures.push('New feature');
+                featureLists[index] = currentFeatures.join(',');
+                handleContentUpdate('feature_lists', featureLists.join('|'));
+              }}
+              className="flex items-center space-x-2 text-blue-600 hover:text-blue-800 text-sm font-medium transition-colors duration-200"
+              title="Add new feature"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+              </svg>
+              <span>Add feature</span>
+            </button>
+          )}
         </div>
 
         {/* CTA Button */}
@@ -340,8 +447,8 @@ export default function CardWithTestimonial(props: LayoutComponentProps) {
         </div>
 
         {/* Testimonial */}
-        {tier.testimonial.quote && (
-          <div className="bg-gray-50 rounded-xl p-6 border border-gray-100">
+        {(tier.testimonial.quote || mode === 'edit') && (
+          <div className="bg-gray-50 rounded-xl p-6 border border-gray-100 relative group/testimonial">
             <div className="flex items-start space-x-4">
               {/* Avatar */}
               <div className={`w-12 h-12 rounded-full ${colorTokens.ctaBg} flex items-center justify-center text-white font-semibold text-sm flex-shrink-0`}>
@@ -352,7 +459,7 @@ export default function CardWithTestimonial(props: LayoutComponentProps) {
                     className="w-12 h-12 rounded-full object-cover"
                   />
                 ) : (
-                  getAvatarPlaceholder(tier.testimonial.name)
+                  getAvatarPlaceholder(tier.testimonial.name || 'U')
                 )}
               </div>
               
@@ -370,20 +477,131 @@ export default function CardWithTestimonial(props: LayoutComponentProps) {
                 )}
                 
                 {/* Quote */}
-                <blockquote className="text-gray-700 text-sm mb-3 italic">
-                  "{tier.testimonial.quote}"
-                </blockquote>
+                {mode !== 'preview' ? (
+                  <div
+                    contentEditable
+                    suppressContentEditableWarning
+                    onBlur={(e) => {
+                      const quotes = blockContent.testimonial_quotes.split('|');
+                      quotes[index] = e.currentTarget.textContent || '';
+                      handleContentUpdate('testimonial_quotes', quotes.join('|'));
+                    }}
+                    className="text-gray-700 text-sm mb-3 italic outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-1 cursor-text hover:bg-gray-100"
+                    data-placeholder='Click to add testimonial quote...'
+                  >
+                    {tier.testimonial.quote ? `"${tier.testimonial.quote}"` : ''}
+                  </div>
+                ) : (
+                  <blockquote className="text-gray-700 text-sm mb-3 italic">
+                    "{tier.testimonial.quote}"
+                  </blockquote>
+                )}
                 
                 {/* Attribution */}
                 <div>
-                  <div className="font-semibold text-gray-900 text-sm">{tier.testimonial.name}</div>
-                  {tier.testimonial.company && (
-                    <div className={`text-xs ${mutedTextColor}`}>{tier.testimonial.company}</div>
+                  {/* Editable Name */}
+                  {mode !== 'preview' ? (
+                    <div
+                      contentEditable
+                      suppressContentEditableWarning
+                      onBlur={(e) => {
+                        const names = blockContent.testimonial_names.split('|');
+                        names[index] = e.currentTarget.textContent || '';
+                        handleContentUpdate('testimonial_names', names.join('|'));
+                      }}
+                      className="font-semibold text-gray-900 text-sm outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-1 cursor-text hover:bg-gray-100"
+                      data-placeholder='Customer name'
+                    >
+                      {tier.testimonial.name}
+                    </div>
+                  ) : (
+                    <div className="font-semibold text-gray-900 text-sm">{tier.testimonial.name}</div>
+                  )}
+                  
+                  {/* Editable Company */}
+                  {(tier.testimonial.company || mode === 'edit') && (
+                    mode !== 'preview' ? (
+                      <div
+                        contentEditable
+                        suppressContentEditableWarning
+                        onBlur={(e) => {
+                          const companies = blockContent.testimonial_companies.split('|');
+                          companies[index] = e.currentTarget.textContent || '';
+                          handleContentUpdate('testimonial_companies', companies.join('|'));
+                        }}
+                        className={`text-xs ${mutedTextColor} outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-1 cursor-text hover:bg-gray-100`}
+                        data-placeholder='Company name'
+                      >
+                        {tier.testimonial.company}
+                      </div>
+                    ) : (
+                      tier.testimonial.company && (
+                        <div className={`text-xs ${mutedTextColor}`}>{tier.testimonial.company}</div>
+                      )
+                    )
                   )}
                 </div>
               </div>
             </div>
+            
+            {/* Remove testimonial button - only in edit mode */}
+            {mode === 'edit' && (
+              <button
+                onClick={() => {
+                  const quotes = blockContent.testimonial_quotes.split('|');
+                  const names = blockContent.testimonial_names.split('|');
+                  const companies = blockContent.testimonial_companies.split('|');
+                  
+                  quotes[index] = '';
+                  names[index] = '';
+                  companies[index] = '';
+                  
+                  handleContentUpdate('testimonial_quotes', quotes.join('|'));
+                  handleContentUpdate('testimonial_names', names.join('|'));
+                  handleContentUpdate('testimonial_companies', companies.join('|'));
+                }}
+                className="opacity-0 group-hover/testimonial:opacity-100 absolute -top-2 -right-2 text-red-500 hover:text-red-700 transition-opacity duration-200 z-10"
+                title="Clear testimonial"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            )}
           </div>
+        )}
+        
+        {/* Remove tier button - only in edit mode and when we have more than 1 tier */}
+        {mode === 'edit' && pricingTiers.length > 1 && (
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              const removeFromPipeList = (value: string, indexToRemove: number) => {
+                const items = value.split('|');
+                items.splice(indexToRemove, 1);
+                return items.join('|');
+              };
+              
+              handleContentUpdate('tier_names', removeFromPipeList(blockContent.tier_names, index));
+              handleContentUpdate('tier_prices', removeFromPipeList(blockContent.tier_prices, index));
+              handleContentUpdate('tier_descriptions', removeFromPipeList(blockContent.tier_descriptions, index));
+              handleContentUpdate('cta_texts', removeFromPipeList(blockContent.cta_texts, index));
+              handleContentUpdate('testimonial_quotes', removeFromPipeList(blockContent.testimonial_quotes, index));
+              handleContentUpdate('testimonial_names', removeFromPipeList(blockContent.testimonial_names, index));
+              handleContentUpdate('testimonial_companies', removeFromPipeList(blockContent.testimonial_companies, index));
+              handleContentUpdate('feature_lists', removeFromPipeList(blockContent.feature_lists, index));
+              
+              if (blockContent.popular_tiers) {
+                handleContentUpdate('popular_tiers', removeFromPipeList(blockContent.popular_tiers, index));
+              }
+            }}
+            className={`opacity-0 group-hover/tier-${index}:opacity-100 absolute -top-2 -right-2 text-red-500 hover:text-red-700 transition-opacity duration-200 z-20`}
+            title="Remove this pricing tier"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
         )}
       </div>
     </div>
@@ -432,96 +650,63 @@ export default function CardWithTestimonial(props: LayoutComponentProps) {
           )}
         </div>
 
-        {mode !== 'preview' ? (
-          <div className="space-y-8">
-            <div className="p-6 border border-gray-200 rounded-lg bg-gray-50">
-              <h4 style={getTypographyStyle('h4')} className="font-semibold text-gray-700 mb-4">Pricing with Testimonials Content</h4>
-              
-              <div className="space-y-4">
-                <EditableAdaptiveText
-                  mode={mode}
-                  value={blockContent.tier_names || ''}
-                  onEdit={(value) => handleContentUpdate('tier_names', value)}
-                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
-                  colorTokens={colorTokens}
-                  variant="body"
-                  className="mb-2"
-                  placeholder="Tier names (pipe separated)"
-                  sectionId={sectionId}
-                  elementKey="tier_names"
-                  sectionBackground={sectionBackground}
-                />
-                
-                <EditableAdaptiveText
-                  mode={mode}
-                  value={blockContent.tier_prices || ''}
-                  onEdit={(value) => handleContentUpdate('tier_prices', value)}
-                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
-                  colorTokens={colorTokens}
-                  variant="body"
-                  className="mb-2"
-                  placeholder="Tier prices (pipe separated)"
-                  sectionId={sectionId}
-                  elementKey="tier_prices"
-                  sectionBackground={sectionBackground}
-                />
-                
-                <EditableAdaptiveText
-                  mode={mode}
-                  value={blockContent.testimonial_quotes || ''}
-                  onEdit={(value) => handleContentUpdate('testimonial_quotes', value)}
-                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
-                  colorTokens={colorTokens}
-                  variant="body"
-                  className="mb-2"
-                  placeholder="Testimonial quotes (pipe separated)"
-                  sectionId={sectionId}
-                  elementKey="testimonial_quotes"
-                  sectionBackground={sectionBackground}
-                />
-                
-                <EditableAdaptiveText
-                  mode={mode}
-                  value={blockContent.testimonial_names || ''}
-                  onEdit={(value) => handleContentUpdate('testimonial_names', value)}
-                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
-                  colorTokens={colorTokens}
-                  variant="body"
-                  className="mb-2"
-                  placeholder="Testimonial names (pipe separated)"
-                  sectionId={sectionId}
-                  elementKey="testimonial_names"
-                  sectionBackground={sectionBackground}
-                />
-                
-                <EditableAdaptiveText
-                  mode={mode}
-                  value={blockContent.feature_lists || ''}
-                  onEdit={(value) => handleContentUpdate('feature_lists', value)}
-                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
-                  colorTokens={colorTokens}
-                  variant="body"
-                  className="mb-2"
-                  placeholder="Feature lists (pipe separated tiers, comma separated features)"
-                  sectionId={sectionId}
-                  elementKey="feature_lists"
-                  sectionBackground={sectionBackground}
-                />
-              </div>
+        <div className="grid lg:grid-cols-3 gap-8 mb-16 relative">
+          {/* Add tier button - only in edit mode and when we have less than 3 tiers */}
+          {mode === 'edit' && pricingTiers.length < 3 && (
+            <div className="flex items-center justify-center">
+              <button
+                onClick={() => {
+                  const names = blockContent.tier_names.split('|');
+                  const prices = blockContent.tier_prices.split('|');
+                  const descriptions = blockContent.tier_descriptions.split('|');
+                  const ctas = blockContent.cta_texts.split('|');
+                  const popularLabels = blockContent.popular_tiers ? blockContent.popular_tiers.split('|') : [];
+                  const testimonialQuotesArr = blockContent.testimonial_quotes.split('|');
+                  const testimonialNamesArr = blockContent.testimonial_names.split('|');
+                  const testimonialCompaniesArr = blockContent.testimonial_companies.split('|');
+                  const featureListsArr = blockContent.feature_lists.split('|');
+                  
+                  const tierNumber = names.length + 1;
+                  names.push(tierNumber === 1 ? 'Starter' : tierNumber === 2 ? 'Professional' : 'Enterprise');
+                  prices.push(tierNumber === 1 ? '$29/month' : tierNumber === 2 ? '$79/month' : 'Custom Pricing');
+                  descriptions.push(tierNumber === 1 ? 'Perfect for getting started' : tierNumber === 2 ? 'For growing teams' : 'Enterprise solutions');
+                  ctas.push(tierNumber === 3 ? 'Contact Sales' : 'Start Free Trial');
+                  popularLabels.push(tierNumber === 2 ? 'true' : 'false');
+                  testimonialQuotesArr.push('Great product that delivered results for our team.');
+                  testimonialNamesArr.push('John Doe');
+                  testimonialCompaniesArr.push('Example Co.');
+                  featureListsArr.push('Basic feature,Another feature');
+                  
+                  handleContentUpdate('tier_names', names.join('|'));
+                  handleContentUpdate('tier_prices', prices.join('|'));
+                  handleContentUpdate('tier_descriptions', descriptions.join('|'));
+                  handleContentUpdate('cta_texts', ctas.join('|'));
+                  handleContentUpdate('popular_tiers', popularLabels.join('|'));
+                  handleContentUpdate('testimonial_quotes', testimonialQuotesArr.join('|'));
+                  handleContentUpdate('testimonial_names', testimonialNamesArr.join('|'));
+                  handleContentUpdate('testimonial_companies', testimonialCompaniesArr.join('|'));
+                  handleContentUpdate('feature_lists', featureListsArr.join('|'));
+                }}
+                className="px-6 py-4 bg-blue-100 hover:bg-blue-200 text-blue-700 rounded-lg font-medium transition-all duration-300 border border-blue-300 hover:border-blue-400 flex items-center space-x-2"
+                title="Add new pricing tier"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                </svg>
+                <span>Add Tier</span>
+              </button>
             </div>
-          </div>
-        ) : (
-          <div className="grid lg:grid-cols-3 gap-8 mb-16">
-            {pricingTiers.map((tier, index) => (
-              <div key={index} className="relative">
-                <PricingCardWithTestimonial
-                  tier={tier}
-                  index={index}
-                />
-              </div>
-            ))}
-          </div>
-        )}
+          )}
+          
+          {pricingTiers.map((tier, index) => (
+            <div key={index} className="relative">
+              <PricingCardWithTestimonial
+                tier={tier}
+                index={index}
+              />
+            </div>
+          ))}
+        </div>
 
         {/* Social Proof Section */}
         {((blockContent.show_social_proof !== false && socialMetrics.length > 0) || mode === 'edit') && (
@@ -575,7 +760,7 @@ export default function CardWithTestimonial(props: LayoutComponentProps) {
                                 handleContentUpdate(`social_metric_${index}`, '___REMOVED___');
                                 handleContentUpdate(`social_metric_${index}_label`, '___REMOVED___');
                               }}
-                              className="opacity-0 group-hover/social-metric:opacity-100 absolute -top-2 -right-2 p-1 rounded-full bg-white/80 hover:bg-white text-red-500 hover:text-red-700 transition-all duration-200 z-10 shadow-sm"
+                              className="opacity-0 group-hover/social-metric:opacity-100 absolute -top-2 -right-2 text-red-500 hover:text-red-700 transition-opacity duration-200 z-10"
                               title="Remove this metric"
                             >
                               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -650,7 +835,7 @@ export default function CardWithTestimonial(props: LayoutComponentProps) {
                   handleContentUpdate('guarantee_title', '___REMOVED___');
                   handleContentUpdate('guarantee_description', '___REMOVED___');
                 }}
-                className="opacity-0 group-hover/guarantee:opacity-100 absolute -top-2 -right-2 p-1 rounded-full bg-white/80 hover:bg-white text-red-500 hover:text-red-700 transition-all duration-200 z-10 shadow-sm"
+                className="opacity-0 group-hover/guarantee:opacity-100 absolute -top-2 -right-2 text-red-500 hover:text-red-700 transition-opacity duration-200 z-10"
                 title="Remove guarantee section"
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
