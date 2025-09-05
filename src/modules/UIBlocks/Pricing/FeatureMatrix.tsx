@@ -356,9 +356,53 @@ export default function FeatureMatrix(props: LayoutComponentProps) {
         <>
           {/* Plan Headers */}
           <div className="grid lg:grid-cols-4 gap-6 mb-8">
-            <div className="hidden lg:block"></div>
+            <div className="hidden lg:block">
+              {/* Add tier button - only in edit mode and when we have less than 3 tiers */}
+              {mode === 'edit' && tiers.length < 3 && (
+                <div className="flex items-center justify-center h-full">
+                  <button
+                    onClick={() => {
+                      // Add a new tier with default values
+                      const names = blockContent.tier_names.split('|');
+                      const prices = blockContent.tier_prices.split('|');
+                      const descriptions = blockContent.tier_descriptions.split('|');
+                      const ctas = blockContent.cta_texts.split('|');
+                      const popularLabels = blockContent.popular_tiers ? blockContent.popular_tiers.split('|') : [];
+                      
+                      // Add smart defaults
+                      const tierNumber = names.length + 1;
+                      names.push(tierNumber === 1 ? 'Starter' : tierNumber === 2 ? 'Professional' : 'Enterprise');
+                      prices.push(tierNumber === 1 ? '$29/month' : tierNumber === 2 ? '$79/month' : 'Custom');
+                      descriptions.push(tierNumber === 1 ? 'Perfect for getting started' : tierNumber === 2 ? 'For growing teams' : 'Enterprise solutions');
+                      ctas.push(tierNumber === 3 ? 'Contact Sales' : 'Start Free Trial');
+                      popularLabels.push(tierNumber === 2 ? 'true' : 'false');
+                      
+                      handleContentUpdate('tier_names', names.join('|'));
+                      handleContentUpdate('tier_prices', prices.join('|'));
+                      handleContentUpdate('tier_descriptions', descriptions.join('|'));
+                      handleContentUpdate('cta_texts', ctas.join('|'));
+                      handleContentUpdate('popular_tiers', popularLabels.join('|'));
+                      
+                      // Add to availability matrix with default '✗' for all features
+                      const availabilityMatrix = blockContent.feature_availability.split(';').map(tier => tier.split('|'));
+                      const featureCount = availabilityMatrix[0]?.length || 0;
+                      const newTierColumn = Array(featureCount).fill('✗');
+                      availabilityMatrix.push(newTierColumn);
+                      handleContentUpdate('feature_availability', availabilityMatrix.map(tier => tier.join('|')).join(';'));
+                    }}
+                    className="px-4 py-3 bg-blue-100 hover:bg-blue-200 text-blue-700 rounded-lg font-medium transition-all duration-300 border border-blue-300 hover:border-blue-400 flex items-center space-x-2"
+                    title="Add new pricing tier"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                    </svg>
+                    <span>Add Tier</span>
+                  </button>
+                </div>
+              )}
+            </div>
             {tiers.map((tier, index) => (
-              <div key={index} className={`bg-white rounded-xl border-2 p-6 text-center relative group/tier-header ${
+              <div key={index} className={`bg-white rounded-xl border-2 p-6 text-center relative group/tier-header-${index} ${
                 tier.isPopular 
                   ? `border-primary relative` 
                   : 'border-gray-200'
@@ -433,6 +477,41 @@ export default function FeatureMatrix(props: LayoutComponentProps) {
                   sectionId={sectionId}
                   elementKey={`cta_${index}`}
                 />
+                
+                {/* Remove tier button - only in edit mode and when we have more than 2 tiers */}
+                {mode === 'edit' && tiers.length > 2 && (
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      // Remove this tier from all pipe-separated fields
+                      const removeFromPipeList = (value: string, indexToRemove: number) => {
+                        const items = value.split('|');
+                        items.splice(indexToRemove, 1);
+                        return items.join('|');
+                      };
+                      
+                      handleContentUpdate('tier_names', removeFromPipeList(blockContent.tier_names, index));
+                      handleContentUpdate('tier_prices', removeFromPipeList(blockContent.tier_prices, index));
+                      handleContentUpdate('tier_descriptions', removeFromPipeList(blockContent.tier_descriptions, index));
+                      handleContentUpdate('cta_texts', removeFromPipeList(blockContent.cta_texts, index));
+                      
+                      if (blockContent.popular_tiers) {
+                        handleContentUpdate('popular_tiers', removeFromPipeList(blockContent.popular_tiers, index));
+                      }
+                      
+                      // Update feature availability matrix by removing this tier's column
+                      const availabilityMatrix = blockContent.feature_availability.split(';').map(tier => tier.split('|'));
+                      availabilityMatrix.splice(index, 1);
+                      handleContentUpdate('feature_availability', availabilityMatrix.map(tier => tier.join('|')).join(';'));
+                    }}
+                    className={`opacity-0 group-hover/tier-header-${index}:opacity-100 absolute -top-2 -right-2 text-red-500 hover:text-red-700 transition-opacity duration-200 z-10`}
+                    title="Remove this pricing tier"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                )}
               </div>
             ))}
           </div>
@@ -485,7 +564,7 @@ export default function FeatureMatrix(props: LayoutComponentProps) {
                         setActiveCategory(Math.max(0, categories.length - 1));
                       }
                     }}
-                    className="opacity-0 group-hover/category-tab:opacity-100 absolute -top-2 -right-2 p-1 rounded-full bg-red-500 hover:bg-red-600 text-white transition-all duration-200 z-10"
+                    className="opacity-0 group-hover/category-tab:opacity-100 absolute -top-2 -right-2 text-red-500 hover:text-red-700 transition-opacity duration-200 z-10"
                     title="Remove this category"
                   >
                     <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -602,7 +681,7 @@ export default function FeatureMatrix(props: LayoutComponentProps) {
                               handleContentUpdate('feature_descriptions', descriptions.join('|'));
                               handleContentUpdate('feature_availability', availabilityMatrix.map(tier => tier.join('|')).join(';'));
                             }}
-                            className="opacity-0 group-hover/feature-row:opacity-100 absolute -top-1 -right-1 p-1 rounded-full bg-red-500 hover:bg-red-600 text-white transition-all duration-200 z-10"
+                            className="opacity-0 group-hover/feature-row:opacity-100 absolute -top-1 -right-1 text-red-500 hover:text-red-700 transition-opacity duration-200 z-10"
                             title="Remove this feature"
                           >
                             <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -756,7 +835,7 @@ export default function FeatureMatrix(props: LayoutComponentProps) {
                                 handleContentUpdate(`enterprise_feature_${index}_desc`, '___REMOVED___');
                                 handleContentUpdate(`enterprise_feature_${index}_icon`, '___REMOVED___');
                               }}
-                              className="opacity-0 group-hover/enterprise-feature:opacity-100 absolute -top-2 -right-2 p-1 rounded-full bg-white/20 hover:bg-white/30 text-red-400 hover:text-red-300 transition-all duration-200 z-10"
+                              className="opacity-0 group-hover/enterprise-feature:opacity-100 absolute -top-2 -right-2 text-red-400 hover:text-red-300 transition-opacity duration-200 z-10"
                               title="Remove this feature"
                             >
                               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
