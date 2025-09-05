@@ -33,6 +33,8 @@ module.exports = {
   'group-hover/uptime-item:opacity-100',
   'group-hover/social-proof:opacity-100',
   'group-hover/stat-item:opacity-100',
+  'group-hover/feature-item:opacity-100',
+  'group-hover/trust-footer-item:opacity-100',
   'group-focus-within:opacity-100',
   'opacity-0',
   'transition-opacity',

@@ -112,6 +112,7 @@ const CONTENT_SCHEMA = {
   show_trust_footer: { type: 'boolean' as const, default: true }
 };
 
+
 // Helper function to get tier features from individual fields
 const getTierFeatures = (tierIndex: number, blockContent: TierCardsContent): string[] => {
   const features = [];
@@ -247,6 +248,8 @@ const PricingCard = ({
   onFeatureEdit,
   onRemove,
   showRemoveButton,
+  onAddFeature,
+  onRemoveFeature,
   blockContent,
   handleContentUpdate,
   colorTokens,
@@ -263,6 +266,8 @@ const PricingCard = ({
   onFeatureEdit: (tierIndex: number, featureIndex: number, value: string) => void;
   onRemove?: () => void;
   showRemoveButton?: boolean;
+  onAddFeature?: () => void;
+  onRemoveFeature?: (featureKey: keyof TierCardsContent) => void;
   blockContent: TierCardsContent;
   handleContentUpdate: (key: keyof TierCardsContent, value: string) => void;
   colorTokens: any;
@@ -371,58 +376,60 @@ const PricingCard = ({
         <div className="mb-8">
           <ul className="space-y-3">
             {mode !== 'preview' ? (
-              // Edit mode: Show all 8 potential feature slots
-              Array.from({ length: 8 }, (_, featureIndex) => {
-                const featureKey = `tier_${index + 1}_feature_${featureIndex + 1}` as keyof TierCardsContent;
-                const feature = String(blockContent[featureKey] || '');
-                const isVisible = feature && feature !== '___REMOVED___' && feature.trim() !== '';
+              // Edit mode: Show only existing features (like EditableTrustIndicators)
+              (() => {
+                const features = [];
+                for (let i = 1; i <= 8; i++) {
+                  const featureKey = `tier_${index + 1}_feature_${i}` as keyof TierCardsContent;
+                  const feature = String(blockContent[featureKey] || '');
+                  
+                  if (feature && feature.trim() !== '' && feature !== '___REMOVED___') {
+                    features.push({
+                      key: featureKey,
+                      value: feature,
+                      index: i
+                    });
+                  }
+                }
                 
-                return (isVisible || mode === 'edit') ? (
-                  <li key={featureIndex} className={`flex items-start group/feature-item relative ${!isVisible ? 'opacity-60 hover:opacity-100 transition-opacity' : ''}`}>
-                    {isVisible ? (
-                      // Checkmark icon for features with content
-                      <svg className="w-5 h-5 text-green-500 mr-3 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                      </svg>
-                    ) : (
-                      // Plus icon for empty slots
-                      <svg className="w-5 h-5 text-gray-400 hover:text-green-500 mr-3 mt-0.5 flex-shrink-0 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                      </svg>
-                    )}
+                return features.map((featureData, displayIndex) => (
+                  <li key={featureData.index} className="flex items-start group/feature-item relative">
+                    <svg className="w-5 h-5 text-green-500 mr-3 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                    </svg>
                     <div className="flex-1 min-w-0 relative">
                       <EditableAdaptiveText
                         mode={mode}
-                        value={feature}
-                        onEdit={(value) => onFeatureEdit(index, featureIndex + 1, value)}
+                        value={featureData.value}
+                        onEdit={(value) => onFeatureEdit(index, featureData.index, value)}
                         backgroundType="neutral"
                         colorTokens={colorTokens}
                         variant="body"
-                        className={isVisible ? "text-gray-700" : "text-gray-400 italic"}
-                        placeholder={isVisible ? `Feature ${featureIndex + 1}` : "Click to add feature"}
+                        className="text-gray-700"
+                        placeholder={`Feature ${featureData.index}`}
                         sectionBackground={sectionBackground}
                         data-section-id={sectionId}
-                        data-element-key={featureKey}
+                        data-element-key={featureData.key}
                       />
-                      {/* Remove button */}
-                      {isVisible && mode === 'edit' && (
+                      {/* Remove button - always allow removal */}
+                      {mode === 'edit' && onRemoveFeature && (
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
-                            handleContentUpdate(featureKey, '___REMOVED___');
+                            onRemoveFeature(featureData.key);
                           }}
-                          className="opacity-0 group-hover/feature-item:opacity-100 absolute -top-1 -right-1 p-1 rounded-full bg-white/80 hover:bg-white text-red-500 hover:text-red-700 transition-all duration-200 shadow-sm z-10"
+                          className="opacity-0 group-hover/feature-item:opacity-100 ml-2 text-red-500 hover:text-red-700 transition-opacity duration-200"
                           title="Remove this feature"
                         >
-                          <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                           </svg>
                         </button>
                       )}
                     </div>
                   </li>
-                ) : null;
-              }).filter(Boolean)
+                ));
+              })()
             ) : (
               // Preview mode: Show only visible features  
               tier.features.map((feature, featureIndex) => (
@@ -437,6 +444,33 @@ const PricingCard = ({
               ))
             )}
           </ul>
+          
+          {/* Add feature button - simple like EditableTrustIndicators */}
+          {mode !== 'preview' && onAddFeature && (
+            (() => {
+              // Count current features to check if we can add more
+              let featureCount = 0;
+              for (let i = 1; i <= 8; i++) {
+                const featureKey = `tier_${index + 1}_feature_${i}` as keyof TierCardsContent;
+                const feature = String(blockContent[featureKey] || '');
+                if (feature && feature.trim() !== '' && feature !== '___REMOVED___') {
+                  featureCount++;
+                }
+              }
+              
+              return featureCount < 8 ? (
+                <button
+                  onClick={onAddFeature}
+                  className="flex items-center space-x-1 text-sm text-blue-600 hover:text-blue-800 transition-colors mt-3 self-start"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                  </svg>
+                  <span>Add feature</span>
+                </button>
+              ) : null;
+            })()
+          )}
         </div>
 
         {/* CTA Button */}
@@ -546,6 +580,47 @@ export default function TierCards(props: TierCardsProps) {
   const handleFeatureEdit = (tierIndex: number, featureIndex: number, value: string) => {
     const featureKey = `tier_${tierIndex + 1}_feature_${featureIndex}` as keyof TierCardsContent;
     handleContentUpdate(featureKey, value);
+  };
+
+  // Add a feature to a specific tier (simplified)
+  const handleAddTierFeature = (tierIndex: number) => {
+    // Find the first empty slot
+    for (let i = 1; i <= 8; i++) {
+      const featureKey = `tier_${tierIndex + 1}_feature_${i}` as keyof TierCardsContent;
+      const existingValue = blockContent[featureKey];
+      
+      if (!existingValue || (typeof existingValue === 'string' && (existingValue.trim() === '' || existingValue === '___REMOVED___'))) {
+        // Smart defaults based on tier position
+        const getSmartDefault = (tierIdx: number): string => {
+          const tierBasedDefaults = {
+            0: [ // Starter tier
+              'Basic support', 'Core features', 'Standard templates', 'Email integration',
+              'Basic reporting', 'Mobile access', 'Community forum', 'Standard security'
+            ],
+            1: [ // Professional tier  
+              'Priority support', 'Advanced features', 'Custom workflows', 'API access',
+              'Advanced reporting', 'Team collaboration', 'Integration hub', 'Enhanced security'
+            ],
+            2: [ // Enterprise tier
+              'Dedicated support', 'Enterprise features', 'Custom development', 'White-label',
+              'Advanced analytics', 'SSO integration', 'SLA guarantee', 'Enterprise security'
+            ]
+          };
+          
+          const defaults = tierBasedDefaults[tierIdx as keyof typeof tierBasedDefaults];
+          return defaults ? defaults[i - 1] || `Feature ${i}` : `Feature ${i}`;
+        };
+        
+        const defaultValue = getSmartDefault(tierIndex);
+        handleContentUpdate(featureKey, defaultValue);
+        break;
+      }
+    }
+  };
+
+  // Remove a feature from a specific tier (simplified)
+  const handleRemoveTierFeature = (tierIndex: number, featureKey: keyof TierCardsContent) => {
+    handleContentUpdate(featureKey, '___REMOVED___');
   };
 
   // Add a new tier
@@ -693,6 +768,8 @@ export default function TierCards(props: TierCardsProps) {
               onFeatureEdit={handleFeatureEdit}
               onRemove={() => handleRemoveTier(index)}
               showRemoveButton={tierCount > 1}
+              onAddFeature={() => handleAddTierFeature(index)}
+              onRemoveFeature={(featureKey) => handleRemoveTierFeature(index, featureKey)}
               blockContent={blockContent}
               handleContentUpdate={handleContentUpdate}
               colorTokens={colorTokens}
@@ -773,6 +850,9 @@ export const componentMeta = {
   features: [
     'Flexible tier count (1-3 tiers)',
     'Add/remove tiers dynamically in edit mode',
+    'Simple add/remove features per tier (up to 8 features)',
+    'Clean edit mode showing only existing features',
+    'Add feature button at bottom of each tier',
     'Automatic text color adaptation based on background type',
     'Editable tier names, prices, descriptions, and CTAs',
     'Intelligent feature generation based on tier names',
