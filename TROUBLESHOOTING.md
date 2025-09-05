@@ -228,6 +228,61 @@ await document.fonts.load('16px "Font Name"');
 // Then apply
 ```
 
+## 🟤 Tailwind JIT Compilation Issues
+
+### 11. Classes Not Applied Despite Being in Code (TierCards Spacing)
+**What Happened**: Spacing classes like `gap-16`, `gap-20`, `mr-3.5` weren't applying even though they were in the component code
+**The Trap**: 
+- Tailwind JIT only generates CSS for classes it can detect
+- Custom/uncommon utilities need to be explicitly safelisted
+- No visual indication that CSS isn't generated - styles just don't work
+
+**Symptoms**:
+- Class appears in DevTools but has no CSS rules
+- Spacing/styling changes don't reflect in browser
+- Works in development sometimes, breaks in production
+
+**Real Fix**:
+```javascript
+// tailwind.config.js
+safelist: [
+  // ✅ Gap utilities for spacing
+  'gap-8',
+  'gap-16', 
+  'gap-20',
+  
+  // ✅ Margin utilities for internal spacing
+  'mr-1',
+  'mr-3', 
+  'mr-3.5',
+  'mr-6',
+  
+  // ✅ Named group patterns (also need safelisting)
+  'group-hover/feature-item:opacity-100',
+  'group-hover/trust-footer-item:opacity-100',
+],
+```
+
+**How to Debug**:
+```javascript
+// Check if CSS rule exists
+const element = document.querySelector('.gap-20');
+const styles = getComputedStyle(element);
+console.log('Gap value:', styles.gap); // Should show '5rem' if working
+
+// Search for class in generated CSS
+fetch('/_next/static/css/[hash].css')
+  .then(r => r.text())
+  .then(css => console.log('Has gap-20:', css.includes('gap-20')));
+```
+
+**Files That Required Safelist Updates**:
+- `tailwind.config.js` - Main safelist configuration
+- `TierCards.tsx` - Uses gap and margin utilities
+- `deleteButton.md` - Documents group-hover patterns that need safelisting
+
+**Pattern**: Any utility class that's not commonly used or detected during content scanning needs explicit safelisting.
+
 ## Debug Commands That Actually Help
 
 ### For Text Editing Issues

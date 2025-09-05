@@ -41,6 +41,17 @@ module.exports = {
   'duration-200',
   'ease-in-out',
   
+  // ✅ Gap utilities for spacing
+  'gap-8',
+  'gap-16', 
+  'gap-20',
+  
+  // ✅ Margin utilities for internal spacing
+  'mr-1',
+  'mr-3', 
+  'mr-3.5',
+  'mr-6',
+  
   // ✅ Variable-based structural classes (NEW - replaces massive color patterns)
   'bg-pattern-primary',
   'bg-pattern-secondary', 

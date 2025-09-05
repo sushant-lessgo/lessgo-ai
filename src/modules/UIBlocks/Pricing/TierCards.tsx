@@ -7,6 +7,7 @@ import { LayoutSection } from '@/components/layout/LayoutSection';
 import { 
   EditableAdaptiveText
 } from '@/components/layout/EditableContent';
+import { CTAButton } from '@/components/layout/ComponentRegistry';
 import { 
   LayoutComponentProps, 
   extractLayoutContent,
@@ -475,30 +476,14 @@ const PricingCard = ({
 
         {/* CTA Button */}
         <div className="mt-auto">
-          {mode !== 'preview' ? (
-            <div 
-              contentEditable
-              suppressContentEditableWarning
-              onBlur={(e) => onCtaEdit(index, e.currentTarget.textContent || '')}
-              className={`outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 min-h-[24px] cursor-text w-full text-center py-3 px-6 rounded-lg font-semibold transition-all duration-200 ${
-                tier.isPopular
-                  ? 'bg-blue-600 text-white hover:bg-blue-700'
-                  : 'bg-gray-900 text-white hover:bg-gray-800'
-              }`}
-            >
-              {tier.ctaText}
-            </div>
-          ) : (
-            <button 
-              className={`w-full py-3 px-6 rounded-lg font-semibold transition-all duration-200 hover:transform hover:scale-105 focus:outline-none focus:ring-4 ${
-                tier.isPopular
-                  ? 'bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-300 shadow-lg'
-                  : 'bg-gray-900 text-white hover:bg-gray-800 focus:ring-gray-300'
-              }`}
-            >
-              {tier.ctaText}
-            </button>
-          )}
+          <CTAButton
+            text={tier.ctaText}
+            colorTokens={colorTokens}
+            className="w-full shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200"
+            variant={tier.isPopular ? "primary" : "secondary"}
+            sectionId={sectionId}
+            elementKey={`tier_${index}_cta`}
+          />
         </div>
       </div>
     </div>
@@ -702,7 +687,7 @@ export default function TierCards(props: TierCardsProps) {
     >
       <div className="max-w-7xl mx-auto">
         {/* Header Section */}
-        <div className="text-center mb-16">
+        <div className="text-center mb-20">
           <ModeWrapper
             mode={mode}
             sectionId={sectionId}
@@ -780,10 +765,10 @@ export default function TierCards(props: TierCardsProps) {
 
         {/* Trust Indicators */}
         {((blockContent.show_trust_footer !== false && trustFooterItems.length > 0) || mode === 'edit') && (
-          <div className="mt-12 text-center">
+          <div className="mt-24 text-center">
             {mode !== 'preview' ? (
               <div className="space-y-4">
-                <div className="flex flex-wrap justify-center items-center gap-6">
+                <div className="flex flex-wrap justify-center items-center gap-16">
                   {[1, 2, 3].map((index) => {
                     const trustItem = blockContent[`trust_item_${index}` as keyof TierCardsContent] || '';
                     
@@ -823,10 +808,10 @@ export default function TierCards(props: TierCardsProps) {
                 </div>
               </div>
             ) : (
-              <div className="flex flex-wrap justify-center items-center space-x-6 text-sm text-gray-500">
+              <div className="flex flex-wrap justify-center items-center gap-20 text-sm text-gray-500">
                 {trustFooterItems.map((item, index) => (
                   <div key={index} className="flex items-center">
-                    <svg className="w-4 h-4 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                    <svg className="w-4 h-4 text-green-500 mr-3.5" fill="currentColor" viewBox="0 0 20 20">
                       <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                     </svg>
                     {item}
