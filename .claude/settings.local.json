@@ -65,7 +65,8 @@
       "Read(/C:\\Users\\susha\\lessgo-ai\\src\\modules\\UIBlocks\\Problem/**)",
       "Read(/C:\\Users\\susha\\lessgo-ai\\src\\modules\\UIBlocks\\Problem/**)",
       "Bash(git push:*)",
-      "Bash(git checkout:*)"
+      "Bash(git checkout:*)",
+      "Bash(npm run:*)"
     ],
     "deny": [],
     "ask": [],

@@ -353,162 +353,328 @@ export default function FeatureMatrix(props: LayoutComponentProps) {
           )}
         </div>
 
-        {mode !== 'preview' ? (
-          <div className="space-y-8">
-            <div className="p-6 border border-gray-200 rounded-lg bg-gray-50">
-              <h4 style={h4Style} className="font-semibold text-gray-700 mb-4">Feature Matrix Content</h4>
-              
-              <div className="space-y-4">
-                <EditableAdaptiveText
-                  mode={mode}
-                  value={blockContent.tier_names || ''}
-                  onEdit={(value) => handleContentUpdate('tier_names', value)}
-                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
-                  colorTokens={colorTokens}
-                  variant="body"
-                  className="mb-2"
-                  placeholder="Tier names (pipe separated)"
-                  sectionId={sectionId}
-                  elementKey="tier_names"
-                  sectionBackground={sectionBackground}
-                />
+        <>
+          {/* Plan Headers */}
+          <div className="grid lg:grid-cols-4 gap-6 mb-8">
+            <div className="hidden lg:block"></div>
+            {tiers.map((tier, index) => (
+              <div key={index} className={`bg-white rounded-xl border-2 p-6 text-center relative group/tier-header ${
+                tier.isPopular 
+                  ? `border-primary relative` 
+                  : 'border-gray-200'
+              }`}>
+                {tier.isPopular && (
+                  <div className={`absolute -top-3 left-1/2 transform -translate-x-1/2 ${colorTokens.ctaBg} text-white px-4 py-1 rounded-full text-sm font-semibold`}>
+                    Most Popular
+                  </div>
+                )}
                 
-                <EditableAdaptiveText
-                  mode={mode}
-                  value={blockContent.feature_categories || ''}
-                  onEdit={(value) => handleContentUpdate('feature_categories', value)}
-                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
-                  colorTokens={colorTokens}
-                  variant="body"
-                  className="mb-2"
-                  placeholder="Feature categories (pipe separated)"
-                  sectionId={sectionId}
-                  elementKey="feature_categories"
-                  sectionBackground={sectionBackground}
-                />
+                {/* Editable Tier Name */}
+                {mode !== 'preview' ? (
+                  <div 
+                    contentEditable
+                    suppressContentEditableWarning
+                    onBlur={(e) => {
+                      const names = blockContent.tier_names.split('|');
+                      names[index] = e.currentTarget.textContent || '';
+                      handleContentUpdate('tier_names', names.join('|'));
+                    }}
+                    className="outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-1 min-h-[24px] cursor-text hover:bg-gray-50 font-bold text-gray-900 mb-2"
+                    style={h3Style}
+                  >
+                    {tier.name}
+                  </div>
+                ) : (
+                  <h3 style={h3Style} className="font-bold text-gray-900 mb-2">{tier.name}</h3>
+                )}
                 
-                <EditableAdaptiveText
-                  mode={mode}
-                  value={blockContent.feature_names || ''}
-                  onEdit={(value) => handleContentUpdate('feature_names', value)}
-                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
-                  colorTokens={colorTokens}
-                  variant="body"
-                  className="mb-2"
-                  placeholder="Feature names (pipe separated)"
-                  sectionId={sectionId}
-                  elementKey="feature_names"
-                  sectionBackground={sectionBackground}
-                />
+                {/* Editable Tier Price */}
+                {mode !== 'preview' ? (
+                  <div 
+                    contentEditable
+                    suppressContentEditableWarning
+                    onBlur={(e) => {
+                      const prices = blockContent.tier_prices.split('|');
+                      prices[index] = e.currentTarget.textContent || '';
+                      handleContentUpdate('tier_prices', prices.join('|'));
+                    }}
+                    className="outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-1 min-h-[24px] cursor-text hover:bg-gray-50 font-bold text-gray-900 mb-2"
+                    style={getTypographyStyle('h2')}
+                  >
+                    {tier.price}
+                  </div>
+                ) : (
+                  <div style={getTypographyStyle('h2')} className="font-bold text-gray-900 mb-2">{tier.price}</div>
+                )}
                 
-                <EditableAdaptiveText
-                  mode={mode}
-                  value={blockContent.feature_availability || ''}
-                  onEdit={(value) => handleContentUpdate('feature_availability', value)}
-                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
+                {/* Editable Tier Description */}
+                {mode !== 'preview' ? (
+                  <div 
+                    contentEditable
+                    suppressContentEditableWarning
+                    onBlur={(e) => {
+                      const descriptions = blockContent.tier_descriptions.split('|');
+                      descriptions[index] = e.currentTarget.textContent || '';
+                      handleContentUpdate('tier_descriptions', descriptions.join('|'));
+                    }}
+                    className={`outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-1 min-h-[24px] cursor-text hover:bg-gray-50 text-sm ${mutedTextColor} mb-4`}
+                  >
+                    {tier.description}
+                  </div>
+                ) : (
+                  <p className={`text-sm ${mutedTextColor} mb-4`}>{tier.description}</p>
+                )}
+                
+                <CTAButton
+                  text={tier.ctaText}
                   colorTokens={colorTokens}
-                  variant="body"
-                  className="mb-2"
-                  placeholder="Feature availability matrix (tiers separated by semicolon, features by pipe)"
+                  className="w-full"
+                  variant={tier.isPopular ? "primary" : "secondary"}
                   sectionId={sectionId}
-                  elementKey="feature_availability"
-                  sectionBackground={sectionBackground}
+                  elementKey={`cta_${index}`}
                 />
               </div>
-            </div>
+            ))}
           </div>
-        ) : (
-          <>
-            {/* Plan Headers */}
-            <div className="grid lg:grid-cols-4 gap-6 mb-8">
-              <div className="hidden lg:block"></div>
-              {tiers.map((tier, index) => (
-                <div key={index} className={`bg-white rounded-xl border-2 p-6 text-center ${
-                  tier.isPopular 
-                    ? `border-primary relative` 
-                    : 'border-gray-200'
-                }`}>
-                  {tier.isPopular && (
-                    <div className={`absolute -top-3 left-1/2 transform -translate-x-1/2 ${colorTokens.ctaBg} text-white px-4 py-1 rounded-full text-sm font-semibold`}>
-                      Most Popular
-                    </div>
-                  )}
-                  
-                  <h3 style={h3Style} className="font-bold text-gray-900 mb-2">{tier.name}</h3>
-                  <div style={getTypographyStyle('h2')} className="font-bold text-gray-900 mb-2">{tier.price}</div>
-                  <p className={`text-sm ${mutedTextColor} mb-4`}>{tier.description}</p>
-                  
-                  <CTAButton
-                    text={tier.ctaText}
-                    colorTokens={colorTokens}
-                    className="w-full"
-                    variant={tier.isPopular ? "primary" : "secondary"}
-                    sectionId={sectionId}
-                    elementKey={`cta_${index}`}
-                  />
-                </div>
-              ))}
-            </div>
 
-            {/* Category Tabs */}
-            <div className="flex flex-wrap justify-center gap-2 mb-8">
-              {featureCategories.map((category, index) => (
-                <button
-                  key={index}
-                  onClick={() => setActiveCategory(index)}
-                  className={`px-6 py-3 rounded-lg font-medium transition-all duration-300 ${
-                    activeCategory === index
-                      ? `${colorTokens.ctaBg} text-white shadow-lg`
-                      : 'bg-white text-gray-700 border border-gray-200 hover:border-gray-300 hover:shadow-md'
-                  }`}
-                >
-                  {category}
-                </button>
-              ))}
-            </div>
+          {/* Category Tabs */}
+          <div className="flex flex-wrap justify-center gap-2 mb-8">
+            {featureCategories.map((category, index) => (
+              <div key={index} className="relative group/category-tab">
+                {mode !== 'preview' ? (
+                  <div
+                    contentEditable
+                    suppressContentEditableWarning
+                    onBlur={(e) => {
+                      const categories = blockContent.feature_categories.split('|');
+                      categories[index] = e.currentTarget.textContent || '';
+                      handleContentUpdate('feature_categories', categories.join('|'));
+                    }}
+                    onClick={() => setActiveCategory(index)}
+                    className={`px-6 py-3 rounded-lg font-medium transition-all duration-300 cursor-pointer outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 ${
+                      activeCategory === index
+                        ? `${colorTokens.ctaBg} text-white shadow-lg`
+                        : 'bg-white text-gray-700 border border-gray-200 hover:border-gray-300 hover:shadow-md'
+                    }`}
+                  >
+                    {category}
+                  </div>
+                ) : (
+                  <button
+                    onClick={() => setActiveCategory(index)}
+                    className={`px-6 py-3 rounded-lg font-medium transition-all duration-300 ${
+                      activeCategory === index
+                        ? `${colorTokens.ctaBg} text-white shadow-lg`
+                        : 'bg-white text-gray-700 border border-gray-200 hover:border-gray-300 hover:shadow-md'
+                    }`}
+                  >
+                    {category}
+                  </button>
+                )}
+                
+                {/* Remove category button - only in edit mode */}
+                {mode === 'edit' && featureCategories.length > 1 && (
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      const categories = blockContent.feature_categories.split('|');
+                      categories.splice(index, 1);
+                      handleContentUpdate('feature_categories', categories.join('|'));
+                      // Adjust active category if needed
+                      if (activeCategory >= categories.length) {
+                        setActiveCategory(Math.max(0, categories.length - 1));
+                      }
+                    }}
+                    className="opacity-0 group-hover/category-tab:opacity-100 absolute -top-2 -right-2 p-1 rounded-full bg-red-500 hover:bg-red-600 text-white transition-all duration-200 z-10"
+                    title="Remove this category"
+                  >
+                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                )}
+              </div>
+            ))}
+            
+            {/* Add category button - only in edit mode */}
+            {mode === 'edit' && (
+              <button
+                onClick={() => {
+                  const categories = blockContent.feature_categories.split('|');
+                  categories.push(`Category ${categories.length + 1}`);
+                  handleContentUpdate('feature_categories', categories.join('|'));
+                }}
+                className="px-4 py-3 bg-blue-100 hover:bg-blue-200 text-blue-700 rounded-lg font-medium transition-all duration-300 border border-blue-300 hover:border-blue-400"
+                title="Add new category"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                </svg>
+              </button>
+            )}
+          </div>
 
-            {/* Feature Comparison Table */}
-            <div className="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-lg">
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead className="bg-gray-50">
-                    <tr>
-                      <th className="text-left p-4 font-semibold text-gray-900 min-w-[250px]">
-                        {activeFeatures.name || featureCategories[activeCategory]}
+          {/* Feature Comparison Table */}
+          <div className="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-lg">
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="text-left p-4 font-semibold text-gray-900 min-w-[250px]">
+                      {activeFeatures.name || featureCategories[activeCategory]}
+                    </th>
+                    {tiers.map((tier, index) => (
+                      <th key={index} className={`text-center p-4 font-semibold ${
+                        tier.isPopular ? colorTokens.ctaText : 'text-gray-900'
+                      }`}>
+                        {tier.name}
                       </th>
-                      {tiers.map((tier, index) => (
-                        <th key={index} className={`text-center p-4 font-semibold ${
-                          tier.isPopular ? colorTokens.ctaText : 'text-gray-900'
-                        }`}>
-                          {tier.name}
-                        </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {activeFeatures.features.map((feature, featureIndex) => (
+                    <tr key={featureIndex} className="border-t border-gray-100 hover:bg-gray-50 transition-colors duration-200 group/feature-row">
+                      <td className="p-4 relative">
+                        <div>
+                          {/* Editable Feature Name */}
+                          {mode !== 'preview' ? (
+                            <div
+                              contentEditable
+                              suppressContentEditableWarning
+                              onBlur={(e) => {
+                                const names = blockContent.feature_names.split('|');
+                                names[feature.globalIndex] = e.currentTarget.textContent || '';
+                                handleContentUpdate('feature_names', names.join('|'));
+                              }}
+                              className="font-medium text-gray-900 outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-1 cursor-text hover:bg-gray-100"
+                            >
+                              {feature.name}
+                            </div>
+                          ) : (
+                            <div className="font-medium text-gray-900">{feature.name}</div>
+                          )}
+                          
+                          {/* Editable Feature Description */}
+                          {mode !== 'preview' ? (
+                            <div
+                              contentEditable
+                              suppressContentEditableWarning
+                              onBlur={(e) => {
+                                const descriptions = blockContent.feature_descriptions ? blockContent.feature_descriptions.split('|') : [];
+                                descriptions[feature.globalIndex] = e.currentTarget.textContent || '';
+                                handleContentUpdate('feature_descriptions', descriptions.join('|'));
+                              }}
+                              className={`text-sm ${mutedTextColor} mt-1 outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-1 cursor-text hover:bg-gray-100`}
+                              data-placeholder="Add feature description..."
+                            >
+                              {feature.description}
+                            </div>
+                          ) : (
+                            feature.description && (
+                              <div className={`text-sm ${mutedTextColor} mt-1`}>{feature.description}</div>
+                            )
+                          )}
+                        </div>
+                        
+                        {/* Remove feature button - only in edit mode */}
+                        {mode === 'edit' && (
+                          <button
+                            onClick={() => {
+                              const names = blockContent.feature_names.split('|');
+                              const descriptions = blockContent.feature_descriptions ? blockContent.feature_descriptions.split('|') : [];
+                              const availabilityMatrix = blockContent.feature_availability.split(';').map(tier => tier.split('|'));
+                              
+                              // Remove from names and descriptions
+                              names.splice(feature.globalIndex, 1);
+                              if (descriptions.length > feature.globalIndex) {
+                                descriptions.splice(feature.globalIndex, 1);
+                              }
+                              
+                              // Remove from availability matrix
+                              availabilityMatrix.forEach(tier => {
+                                if (tier.length > feature.globalIndex) {
+                                  tier.splice(feature.globalIndex, 1);
+                                }
+                              });
+                              
+                              handleContentUpdate('feature_names', names.join('|'));
+                              handleContentUpdate('feature_descriptions', descriptions.join('|'));
+                              handleContentUpdate('feature_availability', availabilityMatrix.map(tier => tier.join('|')).join(';'));
+                            }}
+                            className="opacity-0 group-hover/feature-row:opacity-100 absolute -top-1 -right-1 p-1 rounded-full bg-red-500 hover:bg-red-600 text-white transition-all duration-200 z-10"
+                            title="Remove this feature"
+                          >
+                            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                          </button>
+                        )}
+                      </td>
+                      {tiers.map((tier, tierIndex) => (
+                        <td key={tierIndex} className="text-center p-4">
+                          {mode !== 'preview' ? (
+                            <div
+                              contentEditable
+                              suppressContentEditableWarning
+                              onBlur={(e) => {
+                                const availabilityMatrix = blockContent.feature_availability.split(';').map(tier => tier.split('|'));
+                                if (availabilityMatrix[tierIndex] && availabilityMatrix[tierIndex][feature.globalIndex] !== undefined) {
+                                  availabilityMatrix[tierIndex][feature.globalIndex] = e.currentTarget.textContent || '✗';
+                                  handleContentUpdate('feature_availability', availabilityMatrix.map(tier => tier.join('|')).join(';'));
+                                }
+                              }}
+                              className="outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-2 py-1 cursor-text hover:bg-gray-100 min-h-[20px] text-sm font-medium text-gray-900"
+                              data-placeholder="✓/✗"
+                            >
+                              {tier.features[feature.globalIndex] || '✗'}
+                            </div>
+                          ) : (
+                            renderFeatureValue(tier.features[feature.globalIndex] || '✗')
+                          )}
+                        </td>
                       ))}
                     </tr>
-                  </thead>
-                  <tbody>
-                    {activeFeatures.features.map((feature, featureIndex) => (
-                      <tr key={featureIndex} className="border-t border-gray-100 hover:bg-gray-50 transition-colors duration-200">
-                        <td className="p-4">
-                          <div>
-                            <div className="font-medium text-gray-900">{feature.name}</div>
-                            {feature.description && (
-                              <div className={`text-sm ${mutedTextColor} mt-1`}>{feature.description}</div>
-                            )}
-                          </div>
-                        </td>
-                        {tiers.map((tier, tierIndex) => (
-                          <td key={tierIndex} className="text-center p-4">
-                            {renderFeatureValue(tier.features[feature.globalIndex] || '✗')}
-                          </td>
-                        ))}
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+                  ))}
+                  
+                  {/* Add feature row - only in edit mode */}
+                  {mode === 'edit' && (
+                    <tr className="border-t border-gray-100">
+                      <td colSpan={tiers.length + 1} className="p-4 text-center">
+                        <button
+                          onClick={() => {
+                            const names = blockContent.feature_names.split('|');
+                            const descriptions = blockContent.feature_descriptions ? blockContent.feature_descriptions.split('|') : [];
+                            const availabilityMatrix = blockContent.feature_availability.split(';').map(tier => tier.split('|'));
+                            
+                            // Add new feature
+                            names.push(`New Feature ${names.length + 1}`);
+                            descriptions.push('');
+                            
+                            // Add to availability matrix
+                            availabilityMatrix.forEach(tier => {
+                              tier.push('✗');
+                            });
+                            
+                            handleContentUpdate('feature_names', names.join('|'));
+                            handleContentUpdate('feature_descriptions', descriptions.join('|'));
+                            handleContentUpdate('feature_availability', availabilityMatrix.map(tier => tier.join('|')).join(';'));
+                          }}
+                          className="px-4 py-2 bg-blue-100 hover:bg-blue-200 text-blue-700 rounded-lg font-medium transition-all duration-300 border border-blue-300 hover:border-blue-400 flex items-center space-x-2 mx-auto"
+                        >
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                          </svg>
+                          <span>Add Feature</span>
+                        </button>
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
             </div>
-          </>
-        )}
+          </div>
+        </>
 
         {/* Enterprise Features Highlight */}
         {((blockContent.show_enterprise_features !== false && enterpriseFeatures.length > 0) || mode === 'edit') && (
@@ -552,24 +718,34 @@ export default function FeatureMatrix(props: LayoutComponentProps) {
                               elementKey={`enterprise_feature_${index}_icon`}
                             />
                           </div>
-                          <div 
-                            contentEditable
-                            suppressContentEditableWarning
-                            onBlur={(e) => handleContentUpdate(`enterprise_feature_${index}_title`, e.currentTarget.textContent || '')}
-                            className="outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-1 min-h-[20px] cursor-text hover:bg-gray-700 font-semibold text-white mb-2"
-                            data-placeholder={`Feature ${index} title`}
-                          >
-                            {featureTitle}
-                          </div>
-                          <div 
-                            contentEditable
-                            suppressContentEditableWarning
-                            onBlur={(e) => handleContentUpdate(`enterprise_feature_${index}_desc`, e.currentTarget.textContent || '')}
-                            className="outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-1 min-h-[20px] cursor-text hover:bg-gray-700 text-gray-300 text-sm"
-                            data-placeholder={`Feature ${index} description`}
-                          >
-                            {featureDesc}
-                          </div>
+                          
+                          <EditableAdaptiveText
+                            mode={mode}
+                            value={featureTitle}
+                            onEdit={(value) => handleContentUpdate(`enterprise_feature_${index}_title`, value)}
+                            backgroundType="primary"
+                            colorTokens={colorTokens}
+                            variant="body"
+                            className="font-semibold text-white mb-2"
+                            placeholder={`Feature ${index} title`}
+                            sectionId={sectionId}
+                            elementKey={`enterprise_feature_${index}_title`}
+                            sectionBackground={sectionBackground}
+                          />
+                          
+                          <EditableAdaptiveText
+                            mode={mode}
+                            value={featureDesc}
+                            onEdit={(value) => handleContentUpdate(`enterprise_feature_${index}_desc`, value)}
+                            backgroundType="primary"
+                            colorTokens={colorTokens}
+                            variant="body"
+                            className="text-gray-300 text-sm"
+                            placeholder={`Feature ${index} description`}
+                            sectionId={sectionId}
+                            elementKey={`enterprise_feature_${index}_desc`}
+                            sectionBackground={sectionBackground}
+                          />
                           
                           {/* Remove button */}
                           {(featureTitle || featureDesc) && (
