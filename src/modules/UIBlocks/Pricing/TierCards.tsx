@@ -29,6 +29,7 @@ interface PricingTier {
 // Content interface for TierCards layout
 interface TierCardsContent {
   headline: string;
+  tier_count?: string;
   tier_names: string;
   tier_prices: string;
   tier_descriptions: string;
@@ -70,6 +71,7 @@ interface TierCardsContent {
 // Content schema for TierCards layout
 const CONTENT_SCHEMA = {
   headline: { type: 'string' as const, default: 'Choose Your Plan' },
+  tier_count: { type: 'string' as const, default: '3' },
   tier_names: { type: 'string' as const, default: 'Starter|Professional|Enterprise' },
   tier_prices: { type: 'string' as const, default: '$29/month|$79/month|Contact Us' },
   tier_descriptions: { type: 'string' as const, default: 'Perfect for small teams getting started|For growing businesses that need more power|Custom solutions for large organizations' },
@@ -243,6 +245,8 @@ const PricingCard = ({
   onDescriptionEdit,
   onCtaEdit,
   onFeatureEdit,
+  onRemove,
+  showRemoveButton,
   blockContent,
   handleContentUpdate,
   colorTokens,
@@ -257,6 +261,8 @@ const PricingCard = ({
   onDescriptionEdit: (index: number, value: string) => void;
   onCtaEdit: (index: number, value: string) => void;
   onFeatureEdit: (tierIndex: number, featureIndex: number, value: string) => void;
+  onRemove?: () => void;
+  showRemoveButton?: boolean;
   blockContent: TierCardsContent;
   handleContentUpdate: (key: keyof TierCardsContent, value: string) => void;
   colorTokens: any;
@@ -284,6 +290,22 @@ const PricingCard = ({
           ? 'border-blue-500 shadow-blue-100' 
           : 'border-gray-200 hover:border-blue-300'
       } transition-all duration-300 hover:shadow-xl`}>
+        
+        {/* Remove Button - Only in edit mode and when allowed */}
+        {mode === 'edit' && showRemoveButton && onRemove && (
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onRemove();
+            }}
+            className="absolute -top-2 -right-2 p-2 rounded-full bg-red-500 hover:bg-red-600 text-white transition-all duration-200 z-30 shadow-lg"
+            title="Remove this pricing tier"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        )}
         
         {/* Tier Name */}
         <div className="text-center mb-6">
@@ -467,6 +489,9 @@ export default function TierCards(props: TierCardsProps) {
     contentSchema: CONTENT_SCHEMA
   });
 
+  // Get tier count (default to 3 for backward compatibility)
+  const tierCount = parseInt(blockContent.tier_count || '3') || 3;
+
   // Parse pricing data
   const pricingTiers = parsePricingData(
     blockContent.tier_names,
@@ -476,7 +501,7 @@ export default function TierCards(props: TierCardsProps) {
     blockContent,
     blockContent.feature_lists,
     blockContent.popular_labels
-  );
+  ).slice(0, tierCount);
 
   // Helper function to get trust items
   const getTrustFooterItems = () => {
@@ -523,6 +548,74 @@ export default function TierCards(props: TierCardsProps) {
     handleContentUpdate(featureKey, value);
   };
 
+  // Add a new tier
+  const handleAddTier = () => {
+    if (tierCount >= 3) return; // Max 3 tiers
+    
+    const newCount = tierCount + 1;
+    handleContentUpdate('tier_count', newCount.toString());
+    
+    // Add default values for the new tier
+    const names = blockContent.tier_names.split('|');
+    const prices = blockContent.tier_prices.split('|');
+    const descriptions = blockContent.tier_descriptions.split('|');
+    const ctas = blockContent.cta_texts.split('|');
+    const popularLabels = blockContent.popular_labels ? blockContent.popular_labels.split('|') : [];
+    
+    // Add smart defaults based on position
+    if (names.length < newCount) {
+      names.push(newCount === 1 ? 'Basic' : newCount === 2 ? 'Professional' : 'Enterprise');
+    }
+    if (prices.length < newCount) {
+      prices.push(newCount === 1 ? '$19/month' : newCount === 2 ? '$49/month' : '$99/month');
+    }
+    if (descriptions.length < newCount) {
+      descriptions.push(newCount === 1 ? 'Perfect for getting started' : newCount === 2 ? 'For growing teams' : 'For large organizations');
+    }
+    if (ctas.length < newCount) {
+      ctas.push(newCount === 3 ? 'Contact Sales' : 'Start Free Trial');
+    }
+    if (popularLabels.length < newCount) {
+      popularLabels.push(newCount === 2 ? 'true' : 'false'); // Make middle tier popular
+    }
+    
+    handleContentUpdate('tier_names', names.join('|'));
+    handleContentUpdate('tier_prices', prices.join('|'));
+    handleContentUpdate('tier_descriptions', descriptions.join('|'));
+    handleContentUpdate('cta_texts', ctas.join('|'));
+    handleContentUpdate('popular_labels', popularLabels.join('|'));
+  };
+
+  // Remove a tier
+  const handleRemoveTier = (indexToRemove: number) => {
+    if (tierCount <= 1) return; // Keep at least 1 tier
+    
+    const newCount = tierCount - 1;
+    handleContentUpdate('tier_count', newCount.toString());
+    
+    // Remove the tier from all pipe-separated fields
+    const removeFromPipeList = (value: string) => {
+      const items = value.split('|');
+      items.splice(indexToRemove, 1);
+      return items.join('|');
+    };
+    
+    handleContentUpdate('tier_names', removeFromPipeList(blockContent.tier_names));
+    handleContentUpdate('tier_prices', removeFromPipeList(blockContent.tier_prices));
+    handleContentUpdate('tier_descriptions', removeFromPipeList(blockContent.tier_descriptions));
+    handleContentUpdate('cta_texts', removeFromPipeList(blockContent.cta_texts));
+    
+    if (blockContent.popular_labels) {
+      handleContentUpdate('popular_labels', removeFromPipeList(blockContent.popular_labels));
+    }
+    
+    // Clear features for the removed tier
+    for (let i = 1; i <= 8; i++) {
+      const featureKey = `tier_${indexToRemove + 1}_feature_${i}` as keyof TierCardsContent;
+      handleContentUpdate(featureKey, '');
+    }
+  };
+
   return (
     <LayoutSection
       sectionId={sectionId}
@@ -549,8 +642,39 @@ export default function TierCards(props: TierCardsProps) {
           </ModeWrapper>
         </div>
 
+        {/* Tier Management Controls - Only in edit mode */}
+        {mode === 'edit' && (
+          <div className="mb-8 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-2">
+                <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
+                </svg>
+                <span className="text-sm font-medium text-gray-700">
+                  Pricing Tiers: {tierCount} {tierCount === 1 ? 'tier' : 'tiers'}
+                </span>
+              </div>
+              {tierCount < 3 && (
+                <button
+                  onClick={handleAddTier}
+                  className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium text-sm transition-colors duration-200 flex items-center space-x-2"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                  </svg>
+                  <span>Add Tier</span>
+                </button>
+              )}
+            </div>
+            <p className="text-xs text-gray-600 mt-2">
+              You can have between 1-3 pricing tiers. {tierCount === 3 ? 'Maximum tiers reached.' : `${3 - tierCount} more tier${3 - tierCount === 1 ? '' : 's'} available.`}
+            </p>
+          </div>
+        )}
+
         {/* Pricing Cards Grid */}
         <div className={`grid gap-8 ${
+          pricingTiers.length === 1 ? 'max-w-md mx-auto' :
           pricingTiers.length === 2 ? 'md:grid-cols-2 max-w-4xl mx-auto' :
           pricingTiers.length === 3 ? 'md:grid-cols-3 max-w-6xl mx-auto' :
           'md:grid-cols-2 lg:grid-cols-4 max-w-7xl mx-auto'
@@ -567,6 +691,8 @@ export default function TierCards(props: TierCardsProps) {
               onDescriptionEdit={handleDescriptionEdit}
               onCtaEdit={handleCtaEdit}
               onFeatureEdit={handleFeatureEdit}
+              onRemove={() => handleRemoveTier(index)}
+              showRemoveButton={tierCount > 1}
               blockContent={blockContent}
               handleContentUpdate={handleContentUpdate}
               colorTokens={colorTokens}
@@ -642,9 +768,11 @@ export default function TierCards(props: TierCardsProps) {
 export const componentMeta = {
   name: 'TierCards',
   category: 'Pricing',
-  description: 'Pricing tier cards with adaptive text colors and popular tier highlighting',
-  tags: ['pricing', 'tiers', 'cards', 'features', 'adaptive-colors'],
+  description: 'Flexible pricing tier cards with 1-3 tiers, adaptive text colors and popular tier highlighting',
+  tags: ['pricing', 'tiers', 'cards', 'features', 'adaptive-colors', 'flexible'],
   features: [
+    'Flexible tier count (1-3 tiers)',
+    'Add/remove tiers dynamically in edit mode',
     'Automatic text color adaptation based on background type',
     'Editable tier names, prices, descriptions, and CTAs',
     'Intelligent feature generation based on tier names',
@@ -659,6 +787,7 @@ export const componentMeta = {
   },
   contentSchema: {
     headline: 'Main heading text',
+    tier_count: 'Number of pricing tiers to display (1-3)',
     tier_names: 'Pipe-separated list of tier names',
     tier_prices: 'Pipe-separated list of tier prices',
     tier_descriptions: 'Pipe-separated list of tier descriptions',
