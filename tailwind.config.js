@@ -49,6 +49,7 @@ module.exports = {
   'group-hover/feature:opacity-100',
   'group-hover/testimonial:opacity-100',
   'group-hover/social-metric:opacity-100',
+  'group-hover/social-proof-section:opacity-100',
   'group-hover/guarantee:opacity-100',
   'group-focus-within:opacity-100',
   'opacity-0',

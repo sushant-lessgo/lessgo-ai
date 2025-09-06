@@ -39,6 +39,7 @@ interface CardWithTestimonialContent {
   social_metric_4?: string;
   social_metric_4_label?: string;
   show_social_proof?: boolean;
+  social_proof_title?: string;
   // Guarantee section
   guarantee_title?: string;
   guarantee_description?: string;
@@ -142,6 +143,10 @@ const CONTENT_SCHEMA = {
   show_social_proof: { 
     type: 'boolean' as const, 
     default: true 
+  },
+  social_proof_title: { 
+    type: 'string' as const, 
+    default: 'Trusted by thousands of businesses' 
   },
   // Guarantee section
   guarantee_title: { 
@@ -447,7 +452,7 @@ export default function CardWithTestimonial(props: LayoutComponentProps) {
         </div>
 
         {/* Testimonial */}
-        {(tier.testimonial.quote || mode === 'edit') && (
+        {((tier.testimonial.quote && tier.testimonial.quote !== '___REMOVED___') || (mode === 'edit' && tier.testimonial.quote !== '___REMOVED___')) && (
           <div className="bg-gray-50 rounded-xl p-6 border border-gray-100 relative group/testimonial">
             <div className="flex items-start space-x-4">
               {/* Avatar */}
@@ -459,7 +464,7 @@ export default function CardWithTestimonial(props: LayoutComponentProps) {
                     className="w-12 h-12 rounded-full object-cover"
                   />
                 ) : (
-                  getAvatarPlaceholder(tier.testimonial.name || 'U')
+                  getAvatarPlaceholder(tier.testimonial.name === '___REMOVED___' ? '' : (tier.testimonial.name || 'U'))
                 )}
               </div>
               
@@ -489,7 +494,7 @@ export default function CardWithTestimonial(props: LayoutComponentProps) {
                     className="text-gray-700 text-sm mb-3 italic outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-1 cursor-text hover:bg-gray-100"
                     data-placeholder='Click to add testimonial quote...'
                   >
-                    {tier.testimonial.quote ? `"${tier.testimonial.quote}"` : ''}
+                    {tier.testimonial.quote && tier.testimonial.quote !== '___REMOVED___' ? `"${tier.testimonial.quote}"` : ''}
                   </div>
                 ) : (
                   <blockquote className="text-gray-700 text-sm mb-3 italic">
@@ -512,7 +517,7 @@ export default function CardWithTestimonial(props: LayoutComponentProps) {
                       className="font-semibold text-gray-900 text-sm outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-1 cursor-text hover:bg-gray-100"
                       data-placeholder='Customer name'
                     >
-                      {tier.testimonial.name}
+                      {tier.testimonial.name === '___REMOVED___' ? '' : (tier.testimonial.name || '')}
                     </div>
                   ) : (
                     <div className="font-semibold text-gray-900 text-sm">{tier.testimonial.name}</div>
@@ -532,7 +537,7 @@ export default function CardWithTestimonial(props: LayoutComponentProps) {
                         className={`text-xs ${mutedTextColor} outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-1 cursor-text hover:bg-gray-100`}
                         data-placeholder='Company name'
                       >
-                        {tier.testimonial.company}
+                        {tier.testimonial.company === '___REMOVED___' ? '' : (tier.testimonial.company || '')}
                       </div>
                     ) : (
                       tier.testimonial.company && (
@@ -552,9 +557,9 @@ export default function CardWithTestimonial(props: LayoutComponentProps) {
                   const names = blockContent.testimonial_names.split('|');
                   const companies = blockContent.testimonial_companies.split('|');
                   
-                  quotes[index] = '';
-                  names[index] = '';
-                  companies[index] = '';
+                  quotes[index] = '___REMOVED___';
+                  names[index] = '___REMOVED___';
+                  companies[index] = '___REMOVED___';
                   
                   handleContentUpdate('testimonial_quotes', quotes.join('|'));
                   handleContentUpdate('testimonial_names', names.join('|'));
@@ -709,10 +714,23 @@ export default function CardWithTestimonial(props: LayoutComponentProps) {
         </div>
 
         {/* Social Proof Section */}
-        {((blockContent.show_social_proof !== false && socialMetrics.length > 0) || mode === 'edit') && (
-          <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl p-8 border border-blue-100 mb-12">
+        {((blockContent.show_social_proof !== false && socialMetrics.length > 0) || (mode === 'edit' && blockContent.social_proof_title !== '___REMOVED___' && socialMetrics.some(m => m.value && m.value !== '___REMOVED___'))) && (
+          <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl p-8 border border-blue-100 mb-12 relative group/social-proof-section">
             <div className="text-center">
-              <h3 style={h3Style} className="font-semibold text-gray-900 mb-6">Trusted by thousands of businesses</h3>
+              <EditableAdaptiveText
+                mode={mode}
+                value={blockContent.social_proof_title === '___REMOVED___' ? '' : (blockContent.social_proof_title || '')}
+                onEdit={(value) => handleContentUpdate('social_proof_title', value)}
+                backgroundType={backgroundType}
+                colorTokens={colorTokens}
+                variant="body"
+                style={h3Style}
+                className="font-semibold text-gray-900 mb-6"
+                placeholder="Trusted by thousands of businesses"
+                sectionBackground={sectionBackground}
+                data-section-id={sectionId}
+                data-element-key="social_proof_title"
+              />
               
               {mode !== 'preview' ? (
                 <div className="space-y-6">
@@ -784,11 +802,36 @@ export default function CardWithTestimonial(props: LayoutComponentProps) {
                 </div>
               )}
             </div>
+            
+            {/* Remove social proof section button - only in edit mode */}
+            {mode === 'edit' && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleContentUpdate('show_social_proof', false);
+                  handleContentUpdate('social_proof_title', '___REMOVED___');
+                  handleContentUpdate('social_metric_1', '___REMOVED___');
+                  handleContentUpdate('social_metric_1_label', '___REMOVED___');
+                  handleContentUpdate('social_metric_2', '___REMOVED___');
+                  handleContentUpdate('social_metric_2_label', '___REMOVED___');
+                  handleContentUpdate('social_metric_3', '___REMOVED___');
+                  handleContentUpdate('social_metric_3_label', '___REMOVED___');
+                  handleContentUpdate('social_metric_4', '___REMOVED___');
+                  handleContentUpdate('social_metric_4_label', '___REMOVED___');
+                }}
+                className="opacity-0 group-hover/social-proof-section:opacity-100 absolute -top-2 -right-2 text-red-500 hover:text-red-700 transition-opacity duration-200 z-10"
+                title="Remove social proof section"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            )}
           </div>
         )}
 
         {/* Money-back Guarantee */}
-        {((blockContent.show_guarantee !== false && (blockContent.guarantee_title || blockContent.guarantee_description)) || mode === 'edit') && (
+        {((blockContent.show_guarantee !== false && (blockContent.guarantee_title && blockContent.guarantee_title !== '___REMOVED___') || (blockContent.guarantee_description && blockContent.guarantee_description !== '___REMOVED___')) || (mode === 'edit' && (blockContent.guarantee_title !== '___REMOVED___' || blockContent.guarantee_description !== '___REMOVED___'))) && (
           <div className="bg-green-50 rounded-2xl p-8 border border-green-200 mb-12 relative group/guarantee">
             <div className="flex items-center justify-center space-x-4">
               <div className="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center text-white">
@@ -799,7 +842,7 @@ export default function CardWithTestimonial(props: LayoutComponentProps) {
               <div className="text-center">
                 <EditableAdaptiveText
                   mode={mode}
-                  value={blockContent.guarantee_title || ''}
+                  value={blockContent.guarantee_title === '___REMOVED___' ? '' : (blockContent.guarantee_title || '')}
                   onEdit={(value) => handleContentUpdate('guarantee_title', value)}
                   backgroundType={backgroundType}
                   colorTokens={colorTokens}
@@ -813,7 +856,7 @@ export default function CardWithTestimonial(props: LayoutComponentProps) {
                 />
                 <EditableAdaptiveText
                   mode={mode}
-                  value={blockContent.guarantee_description || ''}
+                  value={blockContent.guarantee_description === '___REMOVED___' ? '' : (blockContent.guarantee_description || '')}
                   onEdit={(value) => handleContentUpdate('guarantee_description', value)}
                   backgroundType={backgroundType}
                   colorTokens={colorTokens}
@@ -910,6 +953,7 @@ export const componentMeta = {
     { key: 'social_metric_4', label: 'Social Metric 4 Value', type: 'text', required: false },
     { key: 'social_metric_4_label', label: 'Social Metric 4 Label', type: 'text', required: false },
     { key: 'show_social_proof', label: 'Show Social Proof Section', type: 'boolean', required: false },
+    { key: 'social_proof_title', label: 'Social Proof Section Title', type: 'text', required: false },
     { key: 'guarantee_title', label: 'Guarantee Title', type: 'text', required: false },
     { key: 'guarantee_description', label: 'Guarantee Description', type: 'text', required: false },
     { key: 'show_guarantee', label: 'Show Guarantee Section', type: 'boolean', required: false },
