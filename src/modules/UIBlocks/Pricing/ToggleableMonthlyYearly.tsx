@@ -258,6 +258,7 @@ export default function ToggleableMonthlyYearly(props: LayoutComponentProps) {
     ].filter(feature => 
       feature.title !== '___REMOVED___' && 
       feature.description !== '___REMOVED___' && 
+      feature.icon !== '___REMOVED___' &&
       feature.title.trim() !== '' && 
       feature.description.trim() !== ''
     );
@@ -267,6 +268,20 @@ export default function ToggleableMonthlyYearly(props: LayoutComponentProps) {
 
 
   const platformFeatures = getPlatformFeatures();
+  
+  // Check if any platform features exist (for edit mode)
+  const hasAnyPlatformFeatures = () => {
+    for (let i = 1; i <= 4; i++) {
+      const title = blockContent[`platform_feature_${i}_title` as keyof ToggleableMonthlyYearlyContent];
+      const desc = blockContent[`platform_feature_${i}_desc` as keyof ToggleableMonthlyYearlyContent];
+      
+      if (title !== '___REMOVED___' && title && title !== '' ||
+          desc !== '___REMOVED___' && desc && desc !== '') {
+        return true;
+      }
+    }
+    return false;
+  };
 
   const calculateSavings = (monthlyPrice: string, yearlyPrice: string) => {
     const monthly = parseFloat(monthlyPrice.replace(/[^0-9.]/g, ''));
@@ -288,7 +303,7 @@ export default function ToggleableMonthlyYearly(props: LayoutComponentProps) {
     const savingsPercent = calculateSavings(tier.monthlyPrice, tier.yearlyPrice);
     
     return (
-      <div className={`relative bg-white rounded-2xl shadow-lg border-2 transition-all duration-300 hover:shadow-xl ${
+      <div className={`relative bg-white rounded-2xl shadow-lg border-2 transition-all duration-300 hover:shadow-xl group/pricing-card ${
         tier.isPopular 
           ? `border-primary scale-105` 
           : 'border-gray-200 hover:border-gray-300'
@@ -308,59 +323,208 @@ export default function ToggleableMonthlyYearly(props: LayoutComponentProps) {
           </div>
         )}
 
+        {/* Remove tier button - only in edit mode and when we have at least 1 tier */}
+        {mode === 'edit' && pricingTiers.length >= 1 && (
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              // Remove this tier from all pipe-separated fields
+              const removeFromPipeList = (value: string, indexToRemove: number) => {
+                const items = value.split('|');
+                items.splice(indexToRemove, 1);
+                return items.join('|');
+              };
+              
+              handleContentUpdate('tier_names', removeFromPipeList(blockContent.tier_names, index));
+              handleContentUpdate('monthly_prices', removeFromPipeList(blockContent.monthly_prices, index));
+              handleContentUpdate('yearly_prices', removeFromPipeList(blockContent.yearly_prices, index));
+              handleContentUpdate('tier_descriptions', removeFromPipeList(blockContent.tier_descriptions, index));
+              handleContentUpdate('cta_texts', removeFromPipeList(blockContent.cta_texts, index));
+              handleContentUpdate('feature_lists', removeFromPipeList(blockContent.feature_lists, index));
+              
+              if (blockContent.popular_tiers) {
+                handleContentUpdate('popular_tiers', removeFromPipeList(blockContent.popular_tiers, index));
+              }
+            }}
+            className="opacity-0 group-hover/pricing-card:opacity-100 absolute top-2 right-2 text-red-500 hover:text-red-700 transition-opacity duration-200 z-10"
+            title="Remove this pricing tier"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        )}
+
         <div className="p-8">
           {/* Tier Header */}
           <div className="text-center mb-6">
-            <h3 className="text-xl font-bold text-gray-900 mb-2">{tier.name}</h3>
-            <p className={`text-sm ${mutedTextColor} mb-4`}>{tier.description}</p>
+            {/* Editable Tier Name */}
+            {mode !== 'preview' ? (
+              <div 
+                contentEditable
+                suppressContentEditableWarning
+                onBlur={(e) => {
+                  const names = blockContent.tier_names.split('|');
+                  names[index] = e.currentTarget.textContent || '';
+                  handleContentUpdate('tier_names', names.join('|'));
+                }}
+                className="text-xl font-bold text-gray-900 mb-2 outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-1 cursor-text hover:bg-gray-50"
+              >
+                {tier.name}
+              </div>
+            ) : (
+              <h3 className="text-xl font-bold text-gray-900 mb-2">{tier.name}</h3>
+            )}
+            
+            {/* Editable Tier Description */}
+            {mode !== 'preview' ? (
+              <div 
+                contentEditable
+                suppressContentEditableWarning
+                onBlur={(e) => {
+                  const descriptions = blockContent.tier_descriptions.split('|');
+                  descriptions[index] = e.currentTarget.textContent || '';
+                  handleContentUpdate('tier_descriptions', descriptions.join('|'));
+                }}
+                className={`text-sm ${mutedTextColor} mb-4 outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-1 cursor-text hover:bg-gray-50`}
+              >
+                {tier.description}
+              </div>
+            ) : (
+              <p className={`text-sm ${mutedTextColor} mb-4`}>{tier.description}</p>
+            )}
             
             {/* Price Display */}
             <div className="mb-4">
-              <div className="flex items-baseline justify-center">
-                <span style={{fontSize: 'clamp(2rem, 4vw, 2.5rem)'}} className="font-bold text-gray-900">
-                  {currentPrice.includes('$') ? currentPrice.split('$')[1] : currentPrice}
-                </span>
-                {currentPrice.includes('$') && (
-                  <span style={{fontSize: 'clamp(2rem, 4vw, 2.5rem)'}} className="font-bold text-gray-900">$</span>
-                )}
-                {!currentPrice.toLowerCase().includes('contact') && (
-                  <span className={`text-lg ${mutedTextColor} ml-1`}>
-                    /{billingCycle === 'monthly' ? 'month' : 'year'}
-                  </span>
-                )}
-              </div>
-              
-              {billingCycle === 'yearly' && !currentPrice.toLowerCase().includes('contact') && (
-                <div className={`text-sm ${mutedTextColor} mt-1`}>
-                  ${Math.round(parseFloat(currentPrice.replace(/[^0-9.]/g, '')) / 12)}/month billed annually
-                </div>
+              {mode !== 'preview' ? (
+                <>
+                  <div className="text-sm text-gray-500 mb-1">Monthly Price:</div>
+                  <div 
+                    contentEditable
+                    suppressContentEditableWarning
+                    onBlur={(e) => {
+                      const prices = blockContent.monthly_prices.split('|');
+                      prices[index] = e.currentTarget.textContent || '';
+                      handleContentUpdate('monthly_prices', prices.join('|'));
+                    }}
+                    className="font-bold text-gray-900 text-2xl mb-2 outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-1 cursor-text hover:bg-gray-50"
+                  >
+                    {tier.monthlyPrice}
+                  </div>
+                  <div className="text-sm text-gray-500 mb-1">Yearly Price:</div>
+                  <div 
+                    contentEditable
+                    suppressContentEditableWarning
+                    onBlur={(e) => {
+                      const prices = blockContent.yearly_prices.split('|');
+                      prices[index] = e.currentTarget.textContent || '';
+                      handleContentUpdate('yearly_prices', prices.join('|'));
+                    }}
+                    className="font-bold text-gray-900 text-2xl mb-2 outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-1 cursor-text hover:bg-gray-50"
+                  >
+                    {tier.yearlyPrice}
+                  </div>
+                  <div className="text-sm text-gray-400 italic">Current: {billingCycle === 'monthly' ? 'Monthly' : 'Yearly'} View</div>
+                </>
+              ) : (
+                <>
+                  <div className="flex items-baseline justify-center">
+                    <span style={{fontSize: 'clamp(2rem, 4vw, 2.5rem)'}} className="font-bold text-gray-900">
+                      {currentPrice}
+                    </span>
+                    {!currentPrice.toLowerCase().includes('contact') && (
+                      <span className={`text-lg ${mutedTextColor} ml-1`}>
+                        /{billingCycle === 'monthly' ? 'month' : 'year'}
+                      </span>
+                    )}
+                  </div>
+                  
+                  {billingCycle === 'yearly' && !currentPrice.toLowerCase().includes('contact') && (
+                    <div className={`text-sm ${mutedTextColor} mt-1`}>
+                      ${Math.round(parseFloat(currentPrice.replace(/[^0-9.]/g, '')) / 12)}/month billed annually
+                    </div>
+                  )}
+                </>
               )}
             </div>
           </div>
 
           {/* Features */}
           <div className="space-y-3 mb-8">
-            {tier.features.map((feature, featureIndex) => (
-              <div key={featureIndex} className="flex items-start space-x-3">
-                <svg className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                </svg>
-                <span className="text-gray-700 text-sm">{feature}</span>
-              </div>
-            ))}
+            {mode !== 'preview' ? (
+              <>
+                <div className="text-sm text-gray-500 mb-2">Features (comma-separated):</div>
+                <div 
+                  contentEditable
+                  suppressContentEditableWarning
+                  onBlur={(e) => {
+                    const features = blockContent.feature_lists.split('|');
+                    features[index] = e.currentTarget.textContent || '';
+                    handleContentUpdate('feature_lists', features.join('|'));
+                  }}
+                  className="text-gray-700 text-sm outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded p-2 cursor-text hover:bg-gray-50 border border-gray-200 min-h-[100px]"
+                >
+                  {tier.features.join(', ')}
+                </div>
+              </>
+            ) : (
+              tier.features.map((feature, featureIndex) => (
+                <div key={featureIndex} className="flex items-start space-x-3">
+                  <svg className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                  <span className="text-gray-700 text-sm">{feature}</span>
+                </div>
+              ))
+            )}
           </div>
 
           {/* CTA Button */}
-          <CTAButton
-            text={tier.ctaText}
-            colorTokens={colorTokens}
-            className={`w-full shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200 ${
-              tier.isPopular ? '' : 'opacity-90'
-            }`}
-            variant={tier.isPopular ? "primary" : "secondary"}
-            sectionId={sectionId}
-            elementKey={`cta_${index}`}
-          />
+          {mode !== 'preview' ? (
+            <>
+              <div className="text-sm text-gray-500 mb-2">Button Text:</div>
+              <div 
+                contentEditable
+                suppressContentEditableWarning
+                onBlur={(e) => {
+                  const ctas = blockContent.cta_texts.split('|');
+                  ctas[index] = e.currentTarget.textContent || '';
+                  handleContentUpdate('cta_texts', ctas.join('|'));
+                }}
+                className="text-center font-medium py-3 px-6 rounded-lg bg-blue-500 text-white outline-none focus:ring-2 focus:ring-blue-600 focus:ring-opacity-50 cursor-text hover:bg-blue-600"
+              >
+                {tier.ctaText}
+              </div>
+              
+              {/* Popular tier toggle */}
+              <div className="mt-4 flex items-center justify-center">
+                <label className="flex items-center cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={tier.isPopular}
+                    onChange={(e) => {
+                      const popular = blockContent.popular_tiers ? blockContent.popular_tiers.split('|') : [];
+                      popular[index] = e.target.checked ? 'true' : 'false';
+                      handleContentUpdate('popular_tiers', popular.join('|'));
+                    }}
+                    className="mr-2"
+                  />
+                  <span className="text-sm text-gray-600">Mark as Popular</span>
+                </label>
+              </div>
+            </>
+          ) : (
+            <CTAButton
+              text={tier.ctaText}
+              colorTokens={colorTokens}
+              className={`w-full shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200 ${
+                tier.isPopular ? '' : 'opacity-90'
+              }`}
+              variant={tier.isPopular ? "primary" : "secondary"}
+              sectionId={sectionId}
+              elementKey={`cta_${index}`}
+            />
+          )}
         </div>
       </div>
     );
@@ -440,81 +604,59 @@ export default function ToggleableMonthlyYearly(props: LayoutComponentProps) {
           </div>
         </div>
 
-        {mode !== 'preview' ? (
-          <div className="space-y-8">
-            <div className="p-6 border border-gray-200 rounded-lg bg-gray-50">
-              <h4 className="font-semibold text-gray-700 mb-4">Pricing Plans Content</h4>
-              
-              <div className="space-y-4">
-                <EditableAdaptiveText
-                  mode={mode}
-                  value={blockContent.tier_names || ''}
-                  onEdit={(value) => handleContentUpdate('tier_names', value)}
-                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
-                  colorTokens={colorTokens}
-                  variant="body"
-                  className="mb-2"
-                  placeholder="Tier names (pipe separated)"
-                  sectionId={sectionId}
-                  elementKey="tier_names"
-                  sectionBackground={sectionBackground}
-                />
-                
-                <EditableAdaptiveText
-                  mode={mode}
-                  value={blockContent.monthly_prices || ''}
-                  onEdit={(value) => handleContentUpdate('monthly_prices', value)}
-                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
-                  colorTokens={colorTokens}
-                  variant="body"
-                  className="mb-2"
-                  placeholder="Monthly prices (pipe separated)"
-                  sectionId={sectionId}
-                  elementKey="monthly_prices"
-                  sectionBackground={sectionBackground}
-                />
-                
-                <EditableAdaptiveText
-                  mode={mode}
-                  value={blockContent.yearly_prices || ''}
-                  onEdit={(value) => handleContentUpdate('yearly_prices', value)}
-                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
-                  colorTokens={colorTokens}
-                  variant="body"
-                  className="mb-2"
-                  placeholder="Yearly prices (pipe separated)"
-                  sectionId={sectionId}
-                  elementKey="yearly_prices"
-                  sectionBackground={sectionBackground}
-                />
-                
-                <EditableAdaptiveText
-                  mode={mode}
-                  value={blockContent.feature_lists || ''}
-                  onEdit={(value) => handleContentUpdate('feature_lists', value)}
-                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
-                  colorTokens={colorTokens}
-                  variant="body"
-                  className="mb-2"
-                  placeholder="Feature lists (pipe separated tiers, comma separated features)"
-                  sectionId={sectionId}
-                  elementKey="feature_lists"
-                  sectionBackground={sectionBackground}
-                />
-              </div>
+        {/* Pricing Cards Grid */}
+        <div className="grid lg:grid-cols-3 gap-8 mb-12">
+          {pricingTiers.map((tier, index) => (
+            <PricingCard
+              key={index}
+              tier={tier}
+              index={index}
+            />
+          ))}
+          
+          {/* Add tier button - only in edit mode and when we have less than 3 tiers */}
+          {mode === 'edit' && pricingTiers.length < 3 && (
+            <div className="flex items-center justify-center">
+              <button
+                onClick={() => {
+                  // Add a new tier with default values
+                  const names = blockContent.tier_names.split('|');
+                  const monthlyPrices = blockContent.monthly_prices.split('|');
+                  const yearlyPrices = blockContent.yearly_prices.split('|');
+                  const descriptions = blockContent.tier_descriptions.split('|');
+                  const ctas = blockContent.cta_texts.split('|');
+                  const features = blockContent.feature_lists.split('|');
+                  const popularLabels = blockContent.popular_tiers ? blockContent.popular_tiers.split('|') : [];
+                  
+                  // Add smart defaults
+                  const tierNumber = names.length + 1;
+                  names.push(tierNumber === 1 ? 'Starter' : tierNumber === 2 ? 'Professional' : 'Enterprise');
+                  monthlyPrices.push(tierNumber === 1 ? '$29' : tierNumber === 2 ? '$79' : '$199');
+                  yearlyPrices.push(tierNumber === 1 ? '$290' : tierNumber === 2 ? '$790' : '$1990');
+                  descriptions.push(tierNumber === 1 ? 'Perfect for getting started' : tierNumber === 2 ? 'For growing teams' : 'Enterprise solutions');
+                  ctas.push(tierNumber === 3 ? 'Contact Sales' : 'Start Free Trial');
+                  features.push('Feature 1,Feature 2,Feature 3');
+                  popularLabels.push(tierNumber === 2 ? 'true' : 'false');
+                  
+                  handleContentUpdate('tier_names', names.join('|'));
+                  handleContentUpdate('monthly_prices', monthlyPrices.join('|'));
+                  handleContentUpdate('yearly_prices', yearlyPrices.join('|'));
+                  handleContentUpdate('tier_descriptions', descriptions.join('|'));
+                  handleContentUpdate('cta_texts', ctas.join('|'));
+                  handleContentUpdate('feature_lists', features.join('|'));
+                  handleContentUpdate('popular_tiers', popularLabels.join('|'));
+                }}
+                className="px-6 py-4 bg-blue-100 hover:bg-blue-200 text-blue-700 rounded-xl font-medium transition-all duration-300 border-2 border-dashed border-blue-300 hover:border-blue-400 flex flex-col items-center justify-center space-y-2 min-h-[400px]"
+                title="Add new pricing tier"
+              >
+                <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                </svg>
+                <span>Add Pricing Tier</span>
+              </button>
             </div>
-          </div>
-        ) : (
-          <div className="grid lg:grid-cols-3 gap-8 mb-12">
-            {pricingTiers.map((tier, index) => (
-              <PricingCard
-                key={index}
-                tier={tier}
-                index={index}
-              />
-            ))}
-          </div>
-        )}
+          )}
+        </div>
 
         {/* Billing Note */}
         {blockContent.billing_note && (
@@ -526,12 +668,12 @@ export default function ToggleableMonthlyYearly(props: LayoutComponentProps) {
         )}
 
         {/* Trust & Support */}
-        {((blockContent.show_platform_features !== false && platformFeatures.length > 0) || mode === 'edit') && (
-          <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl p-8 border border-blue-100 mb-12">
+        {((blockContent.show_platform_features !== false && platformFeatures.length > 0) || (mode === 'edit' && blockContent.show_platform_features !== false && hasAnyPlatformFeatures())) && (
+          <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl p-8 border border-blue-100 mb-12 relative group/platform-features-section">
             <div className="text-center">
               <EditableAdaptiveText
                 mode={mode}
-                value={blockContent.platform_features_title || ''}
+                value={blockContent.platform_features_title === '___REMOVED___' ? '' : (blockContent.platform_features_title || '')}
                 onEdit={(value) => handleContentUpdate('platform_features_title', value)}
                 backgroundType={backgroundType}
                 colorTokens={colorTokens}
@@ -547,9 +689,23 @@ export default function ToggleableMonthlyYearly(props: LayoutComponentProps) {
                 <div className="space-y-6">
                   <div className="grid md:grid-cols-4 gap-6">
                     {[1, 2, 3, 4].map((index) => {
-                      const featureTitle = String(blockContent[`platform_feature_${index}_title` as keyof ToggleableMonthlyYearlyContent] || '');
-                      const featureDesc = String(blockContent[`platform_feature_${index}_desc` as keyof ToggleableMonthlyYearlyContent] || '');
-                      const featureIcon = String(blockContent[`platform_feature_${index}_icon` as keyof ToggleableMonthlyYearlyContent] || ['✅', '🛡️', '💬', '⚡'][index - 1] || '🎯');
+                      const rawTitle = blockContent[`platform_feature_${index}_title` as keyof ToggleableMonthlyYearlyContent];
+                      const rawDesc = blockContent[`platform_feature_${index}_desc` as keyof ToggleableMonthlyYearlyContent];
+                      const rawIcon = blockContent[`platform_feature_${index}_icon` as keyof ToggleableMonthlyYearlyContent];
+                      
+                      const featureTitle = rawTitle === '___REMOVED___' ? '' : String(rawTitle || '');
+                      const featureDesc = rawDesc === '___REMOVED___' ? '' : String(rawDesc || '');
+                      const featureIcon = rawIcon === '___REMOVED___' ? '' : String(rawIcon || ['✅', '🛡️', '💬', '⚡'][index - 1] || '🎯');
+                      
+                      // Skip completely removed features
+                      if (rawTitle === '___REMOVED___' && rawDesc === '___REMOVED___') {
+                        return null;
+                      }
+                      
+                      // Also skip if both are empty
+                      if (!featureTitle && !featureDesc) {
+                        return null;
+                      }
                       
                       return (
                         <div key={index} className="text-center relative group/platform-feature">
@@ -602,7 +758,7 @@ export default function ToggleableMonthlyYearly(props: LayoutComponentProps) {
                                 handleContentUpdate(`platform_feature_${index}_desc`, '___REMOVED___');
                                 handleContentUpdate(`platform_feature_${index}`, '___REMOVED___');
                               }}
-                              className="opacity-0 group-hover/platform-feature:opacity-100 absolute -top-2 -right-2 p-1 rounded-full bg-white/80 hover:bg-white text-red-500 hover:text-red-700 transition-all duration-200 z-10 shadow-sm"
+                              className="opacity-0 group-hover/platform-feature:opacity-100 absolute -top-2 -right-2 text-red-500 hover:text-red-700 transition-opacity duration-200 z-10"
                               title="Remove this feature"
                             >
                               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -612,7 +768,7 @@ export default function ToggleableMonthlyYearly(props: LayoutComponentProps) {
                           )}
                         </div>
                       );
-                    })}
+                    }).filter(Boolean)}
                   </div>
                 </div>
               ) : (
@@ -629,6 +785,35 @@ export default function ToggleableMonthlyYearly(props: LayoutComponentProps) {
                 </div>
               )}
             </div>
+            
+            {/* Remove platform features section button - only in edit mode */}
+            {mode === 'edit' && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleContentUpdate('show_platform_features', String(false));
+                  handleContentUpdate('platform_features_title', '___REMOVED___');
+                  handleContentUpdate('platform_feature_1_title', '___REMOVED___');
+                  handleContentUpdate('platform_feature_1_desc', '___REMOVED___');
+                  handleContentUpdate('platform_feature_1_icon', '___REMOVED___');
+                  handleContentUpdate('platform_feature_2_title', '___REMOVED___');
+                  handleContentUpdate('platform_feature_2_desc', '___REMOVED___');
+                  handleContentUpdate('platform_feature_2_icon', '___REMOVED___');
+                  handleContentUpdate('platform_feature_3_title', '___REMOVED___');
+                  handleContentUpdate('platform_feature_3_desc', '___REMOVED___');
+                  handleContentUpdate('platform_feature_3_icon', '___REMOVED___');
+                  handleContentUpdate('platform_feature_4_title', '___REMOVED___');
+                  handleContentUpdate('platform_feature_4_desc', '___REMOVED___');
+                  handleContentUpdate('platform_feature_4_icon', '___REMOVED___');
+                }}
+                className="opacity-0 group-hover/platform-features-section:opacity-100 absolute -top-2 -right-2 text-red-500 hover:text-red-700 transition-opacity duration-200 z-10"
+                title="Remove platform features section"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            )}
           </div>
         )}
 

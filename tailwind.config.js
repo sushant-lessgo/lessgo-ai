@@ -51,6 +51,10 @@ module.exports = {
   'group-hover/social-metric:opacity-100',
   'group-hover/social-proof-section:opacity-100',
   'group-hover/guarantee:opacity-100',
+  // ToggleableMonthlyYearly specific patterns
+  'group-hover/pricing-card:opacity-100',
+  'group-hover/platform-feature:opacity-100',
+  'group-hover/platform-features-section:opacity-100',
   'group-focus-within:opacity-100',
   'opacity-0',
   'transition-opacity',
