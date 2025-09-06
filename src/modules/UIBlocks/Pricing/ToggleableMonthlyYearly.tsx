@@ -659,11 +659,21 @@ export default function ToggleableMonthlyYearly(props: LayoutComponentProps) {
         </div>
 
         {/* Billing Note */}
-        {blockContent.billing_note && (
+        {(blockContent.billing_note || mode === 'edit') && (
           <div className="text-center mb-8">
-            <p className={`text-sm ${mutedTextColor}`}>
-              {blockContent.billing_note}
-            </p>
+            <EditableAdaptiveText
+              mode={mode}
+              value={blockContent.billing_note || ''}
+              onEdit={(value) => handleContentUpdate('billing_note', value)}
+              backgroundType={backgroundType}
+              colorTokens={colorTokens}
+              variant="body"
+              className={`text-sm ${mutedTextColor}`}
+              placeholder="All plans include 14-day free trial. No credit card required."
+              sectionBackground={sectionBackground}
+              data-section-id={sectionId}
+              data-element-key="billing_note"
+            />
           </div>
         )}
 
