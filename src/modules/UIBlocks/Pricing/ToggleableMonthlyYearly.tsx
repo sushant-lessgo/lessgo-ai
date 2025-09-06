@@ -11,6 +11,7 @@ import {
   TrustIndicators 
 } from '@/components/layout/ComponentRegistry';
 import { LayoutComponentProps } from '@/types/storeTypes';
+import { logger } from '@/lib/logger';
 
 interface ToggleableMonthlyYearlyContent {
   headline: string;
@@ -302,12 +303,132 @@ export default function ToggleableMonthlyYearly(props: LayoutComponentProps) {
     const currentPrice = billingCycle === 'monthly' ? tier.monthlyPrice : tier.yearlyPrice;
     const savingsPercent = calculateSavings(tier.monthlyPrice, tier.yearlyPrice);
     
+    // Helper to check if event comes from an editable element
+    const isFromEditable = (el: EventTarget | null): boolean => {
+      return el instanceof HTMLElement && (
+        el.closest('[contenteditable="true"]') !== null ||
+        el.closest('[data-editable="true"]') !== null
+      );
+    };
+    
+    // Store original values to detect actual changes
+    const originalValues = {
+      tierName: tier.name,
+      tierDescription: tier.description,
+      monthlyPrice: tier.monthlyPrice,
+      yearlyPrice: tier.yearlyPrice,
+      features: tier.features.join(', '),
+      ctaText: tier.ctaText
+    };
+    
+    // Helper to handle content updates with change detection
+    const handleSmartContentUpdate = (key: string, newValue: string, originalValue: string, updateFn: () => void) => {
+      // Only update if the value actually changed
+      if (newValue !== originalValue) {
+        logger.debug(`💾 Content changed for ${key}`, {
+          tierIndex: index,
+          oldValue: originalValue,
+          newValue: newValue,
+          changed: true
+        });
+        // Small delay to prevent mid-interaction regeneration
+        setTimeout(() => {
+          updateFn();
+        }, 100);
+      } else {
+        logger.debug(`🚫 No content change for ${key} - skipping update`, {
+          tierIndex: index,
+          value: newValue,
+          changed: false
+        });
+      }
+    };
+    
     return (
-      <div className={`relative bg-white rounded-2xl shadow-lg border-2 transition-all duration-300 hover:shadow-xl group/pricing-card ${
-        tier.isPopular 
-          ? `border-primary scale-105` 
-          : 'border-gray-200 hover:border-gray-300'
-      }`}>
+      <div 
+        className={`relative bg-white rounded-2xl shadow-lg border-2 transition-all duration-300 hover:shadow-xl group/pricing-card ${
+          tier.isPopular 
+            ? `border-primary scale-105` 
+            : 'border-gray-200 hover:border-gray-300'
+        }`}
+        onMouseDown={(e) => {
+          // Don't trigger section selection if clicking on editable content
+          if (isFromEditable(e.target)) {
+            logger.debug('🛡️ PricingCard Container - MouseDown BLOCKED (from editable)', {
+              tierIndex: index,
+              tierName: tier.name
+            });
+            return;
+          }
+          logger.debug('🎯 PricingCard Container - MouseDown', {
+            tierIndex: index,
+            tierName: tier.name,
+            target: (e.target as HTMLElement).tagName,
+            targetClass: (e.target as HTMLElement).className,
+            currentTarget: (e.currentTarget as HTMLElement).tagName,
+            isContentEditable: (e.target as HTMLElement).contentEditable,
+            timestamp: Date.now()
+          });
+        }}
+        onClick={(e) => {
+          // Don't trigger section selection if clicking on editable content
+          if (isFromEditable(e.target)) {
+            logger.debug('🛡️ PricingCard Container - Click BLOCKED (from editable)', {
+              tierIndex: index,
+              tierName: tier.name
+            });
+            return;
+          }
+          logger.debug('🎯 PricingCard Container - Click', {
+            tierIndex: index,
+            tierName: tier.name,
+            target: (e.target as HTMLElement).tagName,
+            targetClass: (e.target as HTMLElement).className,
+            currentTarget: (e.currentTarget as HTMLElement).tagName,
+            isContentEditable: (e.target as HTMLElement).contentEditable,
+            eventPhase: e.eventPhase,
+            bubbles: e.bubbles,
+            timestamp: Date.now()
+          });
+        }}
+        onFocusCapture={(e) => {
+          // THIS IS THE KEY FIX - Don't trigger section selection if focusing on editable content
+          if (isFromEditable(e.target)) {
+            logger.debug('🛡️ PricingCard Container - FocusCapture BLOCKED (from editable)', {
+              tierIndex: index,
+              tierName: tier.name
+            });
+            return;
+          }
+          logger.debug('🔍 PricingCard Container - FocusCapture', {
+            tierIndex: index,
+            tierName: tier.name,
+            target: (e.target as HTMLElement).tagName,
+            targetClass: (e.target as HTMLElement).className,
+            relatedTarget: e.relatedTarget ? (e.relatedTarget as HTMLElement).tagName : 'null',
+            timestamp: Date.now()
+          });
+        }}
+        onBlurCapture={(e) => {
+          // Also gate blur capture for consistency
+          if (isFromEditable(e.target)) {
+            logger.debug('🛡️ PricingCard Container - BlurCapture BLOCKED (from editable)', {
+              tierIndex: index,
+              tierName: tier.name
+            });
+            return;
+          }
+          logger.debug('💨 PricingCard Container - BlurCapture', {
+            tierIndex: index,
+            tierName: tier.name,
+            target: (e.target as HTMLElement).tagName,
+            targetClass: (e.target as HTMLElement).className,
+            relatedTarget: e.relatedTarget ? (e.relatedTarget as HTMLElement).tagName : 'null',
+            relatedTargetClass: e.relatedTarget ? (e.relatedTarget as HTMLElement).className : 'null',
+            timestamp: Date.now()
+          });
+        }}
+      >
         
         {/* Popular Badge */}
         {tier.isPopular && (
@@ -362,11 +483,66 @@ export default function ToggleableMonthlyYearly(props: LayoutComponentProps) {
             {mode !== 'preview' ? (
               <div 
                 contentEditable
+                data-editable="true"
                 suppressContentEditableWarning
+                onFocus={(e) => {
+                  logger.debug('🎯 Tier Name - Focus event', {
+                    tierIndex: index,
+                    tierName: tier.name,
+                    target: e.target,
+                    currentTarget: e.currentTarget,
+                    relatedTarget: e.relatedTarget,
+                    timestamp: Date.now()
+                  });
+                }}
+                onMouseDown={(e) => {
+                  e.stopPropagation(); // Prevent section selection trigger
+                  logger.debug('🖱️ Tier Name - MouseDown event', {
+                    tierIndex: index,
+                    tierName: tier.name,
+                    button: e.button,
+                    clientX: e.clientX,
+                    clientY: e.clientY,
+                    target: e.target,
+                    currentTarget: e.currentTarget,
+                    defaultPrevented: e.defaultPrevented,
+                    timestamp: Date.now()
+                  });
+                }}
+                onClick={(e) => {
+                  e.stopPropagation(); // Prevent bubbling to container
+                  logger.debug('👆 Tier Name - Click event', {
+                    tierIndex: index,
+                    tierName: tier.name,
+                    target: e.target,
+                    currentTarget: e.currentTarget,
+                    bubbles: e.bubbles,
+                    defaultPrevented: e.defaultPrevented,
+                    timestamp: Date.now()
+                  });
+                }}
                 onBlur={(e) => {
-                  const names = blockContent.tier_names.split('|');
-                  names[index] = e.currentTarget.textContent || '';
-                  handleContentUpdate('tier_names', names.join('|'));
+                  const newValue = e.currentTarget.textContent || '';
+                  logger.debug('💨 Tier Name - Blur event', {
+                    tierIndex: index,
+                    target: e.target,
+                    currentTarget: e.currentTarget,
+                    relatedTarget: e.relatedTarget,
+                    oldValue: originalValues.tierName,
+                    newValue: newValue,
+                    timestamp: Date.now()
+                  });
+                  
+                  handleSmartContentUpdate(
+                    'tier_names',
+                    newValue,
+                    originalValues.tierName,
+                    () => {
+                      const names = blockContent.tier_names.split('|');
+                      names[index] = newValue;
+                      handleContentUpdate('tier_names', names.join('|'));
+                    }
+                  );
                 }}
                 className="text-xl font-bold text-gray-900 mb-2 outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-1 cursor-text hover:bg-gray-50"
               >
@@ -380,11 +556,58 @@ export default function ToggleableMonthlyYearly(props: LayoutComponentProps) {
             {mode !== 'preview' ? (
               <div 
                 contentEditable
+                data-editable="true"
                 suppressContentEditableWarning
+                onFocus={(e) => {
+                  logger.debug('🎯 Tier Description - Focus event', {
+                    tierIndex: index,
+                    target: e.target,
+                    currentTarget: e.currentTarget,
+                    relatedTarget: e.relatedTarget,
+                    timestamp: Date.now()
+                  });
+                }}
+                onMouseDown={(e) => {
+                  e.stopPropagation(); // Prevent section selection trigger
+                  logger.debug('🖱️ Tier Description - MouseDown event', {
+                    tierIndex: index,
+                    button: e.button,
+                    target: e.target,
+                    currentTarget: e.currentTarget,
+                    timestamp: Date.now()
+                  });
+                }}
+                onClick={(e) => {
+                  e.stopPropagation(); // Prevent bubbling to container
+                  logger.debug('👆 Tier Description - Click event', {
+                    tierIndex: index,
+                    target: e.target,
+                    currentTarget: e.currentTarget,
+                    timestamp: Date.now()
+                  });
+                }}
                 onBlur={(e) => {
-                  const descriptions = blockContent.tier_descriptions.split('|');
-                  descriptions[index] = e.currentTarget.textContent || '';
-                  handleContentUpdate('tier_descriptions', descriptions.join('|'));
+                  const newValue = e.currentTarget.textContent || '';
+                  logger.debug('💨 Tier Description - Blur event', {
+                    tierIndex: index,
+                    target: e.target,
+                    currentTarget: e.currentTarget,
+                    relatedTarget: e.relatedTarget,
+                    oldValue: originalValues.tierDescription,
+                    newValue: newValue,
+                    timestamp: Date.now()
+                  });
+                  
+                  handleSmartContentUpdate(
+                    'tier_descriptions',
+                    newValue,
+                    originalValues.tierDescription,
+                    () => {
+                      const descriptions = blockContent.tier_descriptions.split('|');
+                      descriptions[index] = newValue;
+                      handleContentUpdate('tier_descriptions', descriptions.join('|'));
+                    }
+                  );
                 }}
                 className={`text-sm ${mutedTextColor} mb-4 outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-1 cursor-text hover:bg-gray-50`}
               >
@@ -401,11 +624,58 @@ export default function ToggleableMonthlyYearly(props: LayoutComponentProps) {
                   <div className="text-sm text-gray-500 mb-1">Monthly Price:</div>
                   <div 
                     contentEditable
+                    data-editable="true"
                     suppressContentEditableWarning
+                    onFocus={(e) => {
+                      logger.debug('🎯 Monthly Price - Focus event', {
+                        tierIndex: index,
+                        price: tier.monthlyPrice,
+                        target: e.target,
+                        currentTarget: e.currentTarget,
+                        relatedTarget: e.relatedTarget,
+                        timestamp: Date.now()
+                      });
+                    }}
+                    onMouseDown={(e) => {
+                      e.stopPropagation(); // Prevent section selection trigger
+                      logger.debug('🖱️ Monthly Price - MouseDown event', {
+                        tierIndex: index,
+                        price: tier.monthlyPrice,
+                        button: e.button,
+                        target: e.target,
+                        timestamp: Date.now()
+                      });
+                    }}
+                    onClick={(e) => {
+                      e.stopPropagation(); // Prevent bubbling to container
+                      logger.debug('👆 Monthly Price - Click event', {
+                        tierIndex: index,
+                        price: tier.monthlyPrice,
+                        target: e.target,
+                        timestamp: Date.now()
+                      });
+                    }}
                     onBlur={(e) => {
-                      const prices = blockContent.monthly_prices.split('|');
-                      prices[index] = e.currentTarget.textContent || '';
-                      handleContentUpdate('monthly_prices', prices.join('|'));
+                      const newValue = e.currentTarget.textContent || '';
+                      logger.debug('💨 Monthly Price - Blur event', {
+                        tierIndex: index,
+                        target: e.target,
+                        relatedTarget: e.relatedTarget,
+                        oldValue: originalValues.monthlyPrice,
+                        newValue: newValue,
+                        timestamp: Date.now()
+                      });
+                      
+                      handleSmartContentUpdate(
+                        'monthly_prices',
+                        newValue,
+                        originalValues.monthlyPrice,
+                        () => {
+                          const prices = blockContent.monthly_prices.split('|');
+                          prices[index] = newValue;
+                          handleContentUpdate('monthly_prices', prices.join('|'));
+                        }
+                      );
                     }}
                     className="font-bold text-gray-900 text-2xl mb-2 outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-1 cursor-text hover:bg-gray-50"
                   >
@@ -414,11 +684,58 @@ export default function ToggleableMonthlyYearly(props: LayoutComponentProps) {
                   <div className="text-sm text-gray-500 mb-1">Yearly Price:</div>
                   <div 
                     contentEditable
+                    data-editable="true"
                     suppressContentEditableWarning
+                    onFocus={(e) => {
+                      logger.debug('🎯 Yearly Price - Focus event', {
+                        tierIndex: index,
+                        price: tier.yearlyPrice,
+                        target: e.target,
+                        currentTarget: e.currentTarget,
+                        relatedTarget: e.relatedTarget,
+                        timestamp: Date.now()
+                      });
+                    }}
+                    onMouseDown={(e) => {
+                      e.stopPropagation(); // Prevent section selection trigger
+                      logger.debug('🖱️ Yearly Price - MouseDown event', {
+                        tierIndex: index,
+                        price: tier.yearlyPrice,
+                        button: e.button,
+                        target: e.target,
+                        timestamp: Date.now()
+                      });
+                    }}
+                    onClick={(e) => {
+                      e.stopPropagation(); // Prevent bubbling to container
+                      logger.debug('👆 Yearly Price - Click event', {
+                        tierIndex: index,
+                        price: tier.yearlyPrice,
+                        target: e.target,
+                        timestamp: Date.now()
+                      });
+                    }}
                     onBlur={(e) => {
-                      const prices = blockContent.yearly_prices.split('|');
-                      prices[index] = e.currentTarget.textContent || '';
-                      handleContentUpdate('yearly_prices', prices.join('|'));
+                      const newValue = e.currentTarget.textContent || '';
+                      logger.debug('💨 Yearly Price - Blur event', {
+                        tierIndex: index,
+                        target: e.target,
+                        relatedTarget: e.relatedTarget,
+                        oldValue: originalValues.yearlyPrice,
+                        newValue: newValue,
+                        timestamp: Date.now()
+                      });
+                      
+                      handleSmartContentUpdate(
+                        'yearly_prices',
+                        newValue,
+                        originalValues.yearlyPrice,
+                        () => {
+                          const prices = blockContent.yearly_prices.split('|');
+                          prices[index] = newValue;
+                          handleContentUpdate('yearly_prices', prices.join('|'));
+                        }
+                      );
                     }}
                     className="font-bold text-gray-900 text-2xl mb-2 outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-1 cursor-text hover:bg-gray-50"
                   >
@@ -456,11 +773,56 @@ export default function ToggleableMonthlyYearly(props: LayoutComponentProps) {
                 <div className="text-sm text-gray-500 mb-2">Features (comma-separated):</div>
                 <div 
                   contentEditable
+                  data-editable="true"
                   suppressContentEditableWarning
+                  onFocus={(e) => {
+                    logger.debug('🎯 Features List - Focus event', {
+                      tierIndex: index,
+                      features: tier.features,
+                      target: e.target,
+                      currentTarget: e.currentTarget,
+                      relatedTarget: e.relatedTarget,
+                      timestamp: Date.now()
+                    });
+                  }}
+                  onMouseDown={(e) => {
+                    e.stopPropagation(); // Prevent section selection trigger
+                    logger.debug('🖱️ Features List - MouseDown event', {
+                      tierIndex: index,
+                      button: e.button,
+                      target: e.target,
+                      timestamp: Date.now()
+                    });
+                  }}
+                  onClick={(e) => {
+                    e.stopPropagation(); // Prevent bubbling to container
+                    logger.debug('👆 Features List - Click event', {
+                      tierIndex: index,
+                      target: e.target,
+                      timestamp: Date.now()
+                    });
+                  }}
                   onBlur={(e) => {
-                    const features = blockContent.feature_lists.split('|');
-                    features[index] = e.currentTarget.textContent || '';
-                    handleContentUpdate('feature_lists', features.join('|'));
+                    const newValue = e.currentTarget.textContent || '';
+                    logger.debug('💨 Features List - Blur event', {
+                      tierIndex: index,
+                      target: e.target,
+                      relatedTarget: e.relatedTarget,
+                      oldValue: originalValues.features,
+                      newValue: newValue,
+                      timestamp: Date.now()
+                    });
+                    
+                    handleSmartContentUpdate(
+                      'feature_lists',
+                      newValue,
+                      originalValues.features,
+                      () => {
+                        const features = blockContent.feature_lists.split('|');
+                        features[index] = newValue;
+                        handleContentUpdate('feature_lists', features.join('|'));
+                      }
+                    );
                   }}
                   className="text-gray-700 text-sm outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded p-2 cursor-text hover:bg-gray-50 border border-gray-200 min-h-[100px]"
                 >
@@ -485,11 +847,56 @@ export default function ToggleableMonthlyYearly(props: LayoutComponentProps) {
               <div className="text-sm text-gray-500 mb-2">Button Text:</div>
               <div 
                 contentEditable
+                data-editable="true"
                 suppressContentEditableWarning
+                onFocus={(e) => {
+                  logger.debug('🎯 CTA Button Text - Focus event', {
+                    tierIndex: index,
+                    ctaText: tier.ctaText,
+                    target: e.target,
+                    currentTarget: e.currentTarget,
+                    relatedTarget: e.relatedTarget,
+                    timestamp: Date.now()
+                  });
+                }}
+                onMouseDown={(e) => {
+                  e.stopPropagation(); // Prevent section selection trigger
+                  logger.debug('🖱️ CTA Button Text - MouseDown event', {
+                    tierIndex: index,
+                    button: e.button,
+                    target: e.target,
+                    timestamp: Date.now()
+                  });
+                }}
+                onClick={(e) => {
+                  e.stopPropagation(); // Prevent bubbling to container
+                  logger.debug('👆 CTA Button Text - Click event', {
+                    tierIndex: index,
+                    target: e.target,
+                    timestamp: Date.now()
+                  });
+                }}
                 onBlur={(e) => {
-                  const ctas = blockContent.cta_texts.split('|');
-                  ctas[index] = e.currentTarget.textContent || '';
-                  handleContentUpdate('cta_texts', ctas.join('|'));
+                  const newValue = e.currentTarget.textContent || '';
+                  logger.debug('💨 CTA Button Text - Blur event', {
+                    tierIndex: index,
+                    target: e.target,
+                    relatedTarget: e.relatedTarget,
+                    oldValue: originalValues.ctaText,
+                    newValue: newValue,
+                    timestamp: Date.now()
+                  });
+                  
+                  handleSmartContentUpdate(
+                    'cta_texts',
+                    newValue,
+                    originalValues.ctaText,
+                    () => {
+                      const ctas = blockContent.cta_texts.split('|');
+                      ctas[index] = newValue;
+                      handleContentUpdate('cta_texts', ctas.join('|'));
+                    }
+                  );
                 }}
                 className="text-center font-medium py-3 px-6 rounded-lg bg-blue-500 text-white outline-none focus:ring-2 focus:ring-blue-600 focus:ring-opacity-50 cursor-text hover:bg-blue-600"
               >

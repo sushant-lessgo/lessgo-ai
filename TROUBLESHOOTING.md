@@ -100,7 +100,132 @@ if (position.x + width > window.innerWidth) {
 
 ## 🟡 Field Editing Issues
 
-### 5. Auto-confirmed Fields Can't Be Edited (fe67ca0)
+### 5. ContentEditable Focus Loss in Pricing Cards (toggleableMonthlyYearly)
+**What Happened**: Clicking on contentEditable fields in pricing cards would immediately lose focus, making them uneditable
+**The Trap**: 
+- Global document click handler intercepted ALL clicks to trigger section selection
+- Blur events from previous fields triggered unnecessary page regeneration
+- Multiple event handlers competed for the same interactions
+
+**Symptoms**:
+- Click on pricing field → focus immediately lost
+- Works on 2nd or 3rd click but not first click
+- Only happened in toggleableMonthlyYearly, not in tierCards
+- Console showed `extractLayoutContent` sweeps after every click
+
+**Failed Attempts** (3 iterations):
+1. First attempt - Added `stopPropagation()` to onMouseDown only (didn't work - global handler still fired)
+2. Second attempt - Added container-level guards (partially worked - global handler still processed clicks)
+3. Final fix - Required THREE layers of protection
+
+**Root Cause Analysis**:
+The issue had multiple layers:
+1. **Global document click handler** in `useEditor.ts` listening to ALL clicks for section selection
+2. **Container-level event bubbling** from pricing card to section selection machinery  
+3. **Blur event regeneration** - switching fields triggered unnecessary `extractLayoutContent` sweeps
+
+**Real Fix** (Multi-layer solution):
+```typescript
+// LAYER 1: Global handler guard (useEditor.ts)
+const handleEditorClick = useCallback((event: MouseEvent) => {
+  // CRITICAL FIX: Don't process section selection for editable content
+  const isEditableClick = 
+    target.closest('[contenteditable="true"]') ||
+    target.closest('[data-editable="true"]') ||
+    target.contentEditable === 'true';
+  
+  if (isEditableClick) {
+    return; // Stop section selection
+  }
+  // ... rest of handler
+}, []);
+
+// LAYER 2: Container guards (PricingCard container)
+const isFromEditable = (el: EventTarget | null): boolean => {
+  return el instanceof HTMLElement && (
+    el.closest('[contenteditable="true"]') !== null ||
+    el.closest('[data-editable="true"]') !== null
+  );
+};
+
+onFocusCapture={(e) => {
+  if (isFromEditable(e.target)) return; // Block container handlers
+}}
+
+// LAYER 3: Smart blur handlers (prevent unnecessary regeneration)
+const originalValues = {
+  tierName: tier.name,
+  monthlyPrice: tier.monthlyPrice,
+  // ... store all original values
+};
+
+const handleSmartContentUpdate = (key, newValue, originalValue, updateFn) => {
+  if (newValue !== originalValue) {
+    // Only update if content actually changed, with delay
+    setTimeout(() => updateFn(), 100);
+  } else {
+    // Skip unnecessary updates that cause regeneration
+  }
+};
+
+onBlur={(e) => {
+  const newValue = e.currentTarget.textContent || '';
+  handleSmartContentUpdate('field', newValue, originalValues.field, () => {
+    // Only runs if value changed
+    handleContentUpdate('field', newValue);
+  });
+}}
+```
+
+**Files Modified**:
+- `src/hooks/useEditor.ts` - Added contentEditable guard to global click handler
+- `src/modules/UIBlocks/Pricing/toggleableMonthlyYearly.tsx` - Added 3-layer protection system
+
+**Why This Pattern Works**:
+1. **Global guard** prevents section selection from triggering at document level
+2. **Container guards** prevent event bubbling to trigger section machinery  
+3. **Smart blur handlers** prevent unnecessary regeneration when switching fields
+4. **Change detection** ensures updates only happen when content actually changes
+5. **Timing delays** prevent mid-interaction regeneration
+
+**How to Debug Similar Issues**:
+```javascript
+// Check if global handler is processing contentEditable clicks
+const clicks = [];
+document.addEventListener('click', (e) => {
+  if (e.target.contentEditable === 'true') {
+    clicks.push(e);
+    console.log('ContentEditable clicks reaching document:', clicks.length);
+  }
+});
+
+// Monitor for unnecessary regeneration
+let regenerationCount = 0;
+const observer = new MutationObserver(() => {
+  regenerationCount++;
+  if (regenerationCount > 5) {
+    console.error('EXCESSIVE REGENERATION DETECTED');
+  }
+});
+```
+
+**Prevention Pattern**:
+Always add contentEditable guards to global event handlers:
+```typescript
+// In any global document listener
+document.addEventListener('click', (event) => {
+  const target = event.target as HTMLElement;
+  
+  // Always check for contentEditable first
+  if (target.closest('[contenteditable="true"]')) {
+    return; // Let contentEditable handle its own events
+  }
+  
+  // Your normal handler logic...
+});
+```
+
+### 6. Auto-confirmed Fields Can't Be Edited (fe67ca0)
 **What Happened**: Fields with high confidence couldn't be manually edited
 **The Trap**: 
 - Auto-confirmation logic blocked manual edits
@@ -365,10 +490,12 @@ setContent(newContent);
 ## Files That Have Caused Most Issues
 
 1. **InlineTextEditor.tsx** - 15+ bug fixes
-2. **TextToolbarMVP.tsx** - 10+ iterations
+2. **TextToolbarMVP.tsx** - 10+ iterations  
 3. **useOnboardingStore.ts** - Field confirmation logic
 4. **FloatingToolbars.tsx** - Positioning bugs
 5. **EditableText.tsx** - Content sync issues
+6. **useEditor.ts** - Global click handler conflicts with contentEditable
+7. **toggleableMonthlyYearly.tsx** - Focus loss from event handler conflicts
 
 ## Emergency Nuclear Options
 

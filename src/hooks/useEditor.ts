@@ -214,6 +214,17 @@ export function useEditor() {
       return;
     }
 
+    // CRITICAL FIX: Check if click is on editable content - don't interfere with editing
+    const isEditableClick = 
+      target.closest('[contenteditable="true"]') ||
+      target.closest('[data-editable="true"]') ||
+      target.contentEditable === 'true';
+    
+    if (isEditableClick) {
+      // Don't process section selection for editable content
+      return;
+    }
+
     // Check if click is on an image - let image handlers work
     const isImageClick = target.tagName === 'IMG' && target.getAttribute('data-image-id');
     if (isImageClick) {
