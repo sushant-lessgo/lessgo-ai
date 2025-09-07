@@ -150,33 +150,14 @@ export default function CallToQuotePlan(props: LayoutComponentProps) {
           <h3 style={h3Style} className="font-semibold text-gray-900 mb-3">{option.title}</h3>
         )}
         
-        {mode !== 'preview' ? (
-          <div
-            contentEditable
-            suppressContentEditableWarning
-            onBlur={(e) => {
-              const ctas = blockContent.contact_ctas.split('|');
-              ctas[index] = e.currentTarget.textContent || '';
-              handleContentUpdate('contact_ctas', ctas.join('|'));
-            }}
-            className={`w-full inline-flex items-center justify-center font-semibold rounded-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 focus:outline-none focus:ring-4 focus:ring-blue-500 focus:ring-opacity-50 px-8 py-4 text-lg outline-none cursor-text hover:bg-opacity-90 ${
-              index === 0 
-                ? `${colorTokens.ctaBg || 'bg-blue-600'} ${colorTokens.ctaText || 'text-white'}`
-                : `${colorTokens.surfaceElevated || 'bg-gray-100'} ${colorTokens.textPrimary || 'text-gray-900'}`
-            }`}
-          >
-            {option.cta}
-          </div>
-        ) : (
-          <CTAButton
-            text={option.cta}
-            colorTokens={colorTokens}
-            className="w-full"
-            variant={index === 0 ? "primary" : "secondary"}
-            sectionId={sectionId}
-            elementKey={`contact_${index}`}
-          />
-        )}
+        <CTAButton
+          text={option.cta}
+          colorTokens={colorTokens}
+          className="w-full"
+          variant={index === 0 ? "primary" : "secondary"}
+          sectionId={sectionId}
+          elementKey={`contact_cta_${index}`}
+        />
       </div>
       
       {/* Remove contact card button - only in edit mode and when we have more than 1 card */}
