@@ -195,7 +195,25 @@ export default function SliderPricing(props: LayoutComponentProps) {
       <div className="space-y-3">
         <div className="flex justify-between items-center">
           <span className="text-gray-600">{units} {blockContent.unit_label}</span>
-          <span className="font-medium">${(units * unitPrice).toFixed(2)}</span>
+          <div className="flex items-center space-x-2">
+            {mode !== 'preview' ? (
+              <div className="flex items-center space-x-1">
+                <span>$</span>
+                <div 
+                  contentEditable
+                  suppressContentEditableWarning
+                  onBlur={(e) => handleContentUpdate('unit_price', e.currentTarget.textContent || '')}
+                  className="font-medium outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-1 cursor-text hover:bg-gray-100 min-w-[40px] text-center"
+                  data-placeholder="12"
+                >
+                  {unitPrice}
+                </div>
+                <span>/user</span>
+              </div>
+            ) : (
+              <span className="font-medium">${(units * unitPrice).toFixed(2)}</span>
+            )}
+          </div>
         </div>
         
         {currentDiscount > 0 && (
@@ -271,86 +289,7 @@ export default function SliderPricing(props: LayoutComponentProps) {
           )}
         </div>
 
-        {mode !== 'preview' ? (
-          <div className="space-y-8">
-            <div className="p-6 border border-gray-200 rounded-lg bg-gray-50">
-              <h4 className="font-semibold text-gray-700 mb-4">Slider Pricing Content</h4>
-              
-              <div className="space-y-4">
-                <EditableAdaptiveText
-                  mode={mode}
-                  value={blockContent.pricing_type || ''}
-                  onEdit={(value) => handleContentUpdate('pricing_type', value)}
-                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
-                  colorTokens={colorTokens}
-                  variant="body"
-                  className="mb-2"
-                  placeholder="Pricing type (per-seat, usage-based, etc.)"
-                  sectionId={sectionId}
-                  elementKey="pricing_type"
-                  sectionBackground={sectionBackground}
-                />
-                
-                <EditableAdaptiveText
-                  mode={mode}
-                  value={blockContent.unit_price || ''}
-                  onEdit={(value) => handleContentUpdate('unit_price', value)}
-                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
-                  colorTokens={colorTokens}
-                  variant="body"
-                  className="mb-2"
-                  placeholder="Price per unit"
-                  sectionId={sectionId}
-                  elementKey="unit_price"
-                  sectionBackground={sectionBackground}
-                />
-                
-                <EditableAdaptiveText
-                  mode={mode}
-                  value={blockContent.unit_label || ''}
-                  onEdit={(value) => handleContentUpdate('unit_label', value)}
-                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
-                  colorTokens={colorTokens}
-                  variant="body"
-                  className="mb-2"
-                  placeholder="Unit label (team members, API calls, etc.)"
-                  sectionId={sectionId}
-                  elementKey="unit_label"
-                  sectionBackground={sectionBackground}
-                />
-                
-                <EditableAdaptiveText
-                  mode={mode}
-                  value={blockContent.tier_breakpoints || ''}
-                  onEdit={(value) => handleContentUpdate('tier_breakpoints', value)}
-                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
-                  colorTokens={colorTokens}
-                  variant="body"
-                  className="mb-2"
-                  placeholder="Volume discount breakpoints (pipe separated)"
-                  sectionId={sectionId}
-                  elementKey="tier_breakpoints"
-                  sectionBackground={sectionBackground}
-                />
-                
-                <EditableAdaptiveText
-                  mode={mode}
-                  value={blockContent.tier_discounts || ''}
-                  onEdit={(value) => handleContentUpdate('tier_discounts', value)}
-                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
-                  colorTokens={colorTokens}
-                  variant="body"
-                  className="mb-2"
-                  placeholder="Volume discount percentages (pipe separated)"
-                  sectionId={sectionId}
-                  elementKey="tier_discounts"
-                  sectionBackground={sectionBackground}
-                />
-              </div>
-            </div>
-          </div>
-        ) : (
-          <div className="grid lg:grid-cols-2 gap-12 mb-12">
+        <div className="grid lg:grid-cols-2 gap-12 mb-12">
             
             {/* Pricing Calculator */}
             <div className="space-y-8">
@@ -359,7 +298,19 @@ export default function SliderPricing(props: LayoutComponentProps) {
               <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl p-8 border border-blue-200">
                 <div className="text-center mb-6">
                   <div className="text-4xl font-bold text-gray-900 mb-2">{units}</div>
-                  <div className="text-lg text-gray-600">{blockContent.unit_label}</div>
+                  {mode !== 'preview' ? (
+                    <div 
+                      contentEditable
+                      suppressContentEditableWarning
+                      onBlur={(e) => handleContentUpdate('unit_label', e.currentTarget.textContent || '')}
+                      className="text-lg text-gray-600 outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-2 py-1 cursor-text hover:bg-blue-100 transition-colors"
+                      data-placeholder="Unit label (e.g. team members, users)"
+                    >
+                      {blockContent.unit_label}
+                    </div>
+                  ) : (
+                    <div className="text-lg text-gray-600">{blockContent.unit_label}</div>
+                  )}
                 </div>
                 
                 <div className="relative mb-6">
@@ -414,14 +365,62 @@ export default function SliderPricing(props: LayoutComponentProps) {
 
               {/* Included Features */}
               <div className="bg-white rounded-xl border border-gray-200 p-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Everything Included</h3>
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-semibold text-gray-900">Everything Included</h3>
+                  {mode === 'edit' && (
+                    <button
+                      onClick={() => {
+                        const features = blockContent.included_features.split(',');
+                        features.push('New feature');
+                        handleContentUpdate('included_features', features.join(','));
+                      }}
+                      className="text-xs px-2 py-1 bg-blue-100 hover:bg-blue-200 text-blue-700 rounded font-medium transition-colors"
+                      title="Add feature"
+                    >
+                      + Add
+                    </button>
+                  )}
+                </div>
                 <div className="space-y-3">
                   {includedFeatures.map((feature, index) => (
-                    <div key={index} className="flex items-center space-x-3">
+                    <div key={index} className="flex items-center space-x-3 group/feature relative">
                       <svg className="w-5 h-5 text-green-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                       </svg>
-                      <span className="text-gray-700">{feature}</span>
+                      {mode !== 'preview' ? (
+                        <div 
+                          contentEditable
+                          suppressContentEditableWarning
+                          onBlur={(e) => {
+                            const features = blockContent.included_features.split(',');
+                            features[index] = e.currentTarget.textContent || '';
+                            handleContentUpdate('included_features', features.join(','));
+                          }}
+                          className="text-gray-700 flex-1 outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-1 cursor-text hover:bg-gray-100"
+                          data-placeholder="Feature name"
+                        >
+                          {feature}
+                        </div>
+                      ) : (
+                        <span className="text-gray-700 flex-1">{feature}</span>
+                      )}
+                      
+                      {/* Remove feature button - only in edit mode */}
+                      {mode === 'edit' && includedFeatures.length > 1 && (
+                        <button
+                          onClick={() => {
+                            const features = blockContent.included_features.split(',');
+                            features.splice(index, 1);
+                            handleContentUpdate('included_features', features.join(','));
+                          }}
+                          className="opacity-0 group-hover/feature:opacity-100 text-red-500 hover:text-red-700 transition-opacity duration-200 ml-2"
+                          title="Remove this feature"
+                        >
+                          <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                          </svg>
+                        </button>
+                      )}
                     </div>
                   ))}
                 </div>
@@ -460,33 +459,111 @@ export default function SliderPricing(props: LayoutComponentProps) {
                 )}
               </div>
             </div>
-          </div>
-        )}
+        </div>
 
         {/* Volume Pricing Tiers */}
         <div className="bg-white rounded-2xl border border-gray-200 p-8 mb-12">
-          <h3 className="text-xl font-semibold text-gray-900 text-center mb-8">Volume Pricing Tiers</h3>
+          <div className="flex items-center justify-center space-x-4 mb-8">
+            <h3 className="text-xl font-semibold text-gray-900">Volume Pricing Tiers</h3>
+            {mode === 'edit' && (
+              <button
+                onClick={() => {
+                  const currentBreakpoints = blockContent.tier_breakpoints || '1|10|25|50';
+                  const currentDiscounts = blockContent.tier_discounts || '0|5|10|15';
+                  const breakpoints = currentBreakpoints.split('|');
+                  const discounts = currentDiscounts.split('|');
+                  
+                  // Add new tier
+                  const newBreakpoint = Math.max(...breakpoints.map(b => parseInt(b) || 0)) * 2;
+                  breakpoints.push(newBreakpoint.toString());
+                  discounts.push('20'); // Default 20% discount for new tier
+                  
+                  handleContentUpdate('tier_breakpoints', breakpoints.join('|'));
+                  handleContentUpdate('tier_discounts', discounts.join('|'));
+                }}
+                className="px-3 py-1 bg-blue-100 hover:bg-blue-200 text-blue-700 rounded font-medium transition-colors text-sm"
+                title="Add pricing tier"
+              >
+                + Add Tier
+              </button>
+            )}
+          </div>
           
           <div className="grid md:grid-cols-4 gap-6">
             {tierBreakpoints.map((breakpoint, index) => {
               const discount = tierDiscounts[index] || 0;
               return (
-                <div key={index} className={`text-center p-4 rounded-lg border-2 transition-all duration-300 ${
+                <div key={index} className={`text-center p-4 rounded-lg border-2 transition-all duration-300 relative group/tier-${index} ${
                   units >= breakpoint 
                     ? `border-primary ${colorTokens.ctaBg.replace('bg-', 'bg-opacity-10 bg-')}` 
                     : 'border-gray-200 hover:border-gray-300'
                 }`}>
                   <div style={getTextStyle('body-lg')} className="font-bold text-gray-900">
-                    {breakpoint}+ {blockContent.unit_label}
+                    {mode !== 'preview' ? (
+                      <div 
+                        contentEditable
+                        suppressContentEditableWarning
+                        onBlur={(e) => {
+                          const breakpoints = (blockContent.tier_breakpoints || '1|10|25|50').split('|');
+                          breakpoints[index] = e.currentTarget.textContent || '0';
+                          handleContentUpdate('tier_breakpoints', breakpoints.join('|'));
+                        }}
+                        className="outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-1 cursor-text hover:bg-gray-100 inline-block min-w-[30px]"
+                        data-placeholder="10"
+                      >
+                        {breakpoint}
+                      </div>
+                    ) : (
+                      breakpoint
+                    )}+ {blockContent.unit_label}
                   </div>
                   <div className={`text-sm mt-1 ${
                     discount > 0 ? 'text-green-600 font-medium' : mutedTextColor
                   }`}>
-                    {discount > 0 ? `${discount}% discount` : 'Standard rate'}
+                    {mode !== 'preview' ? (
+                      <div className="flex items-center justify-center space-x-1">
+                        <div 
+                          contentEditable
+                          suppressContentEditableWarning
+                          onBlur={(e) => {
+                            const discounts = (blockContent.tier_discounts || '0|5|10|15').split('|');
+                            discounts[index] = e.currentTarget.textContent || '0';
+                            handleContentUpdate('tier_discounts', discounts.join('|'));
+                          }}
+                          className="outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-1 cursor-text hover:bg-gray-100 inline-block min-w-[20px] text-center"
+                          data-placeholder="5"
+                        >
+                          {discount}
+                        </div>
+                        <span>% discount</span>
+                      </div>
+                    ) : (
+                      discount > 0 ? `${discount}% discount` : 'Standard rate'
+                    )}
                   </div>
                   <div className="text-xs text-gray-500 mt-2">
                     ${((unitPrice * (100 - discount)) / 100).toFixed(2)}/user
                   </div>
+                  
+                  {/* Remove tier button - only in edit mode */}
+                  {mode === 'edit' && tierBreakpoints.length > 2 && (
+                    <button
+                      onClick={() => {
+                        const breakpoints = (blockContent.tier_breakpoints || '1|10|25|50').split('|');
+                        const discounts = (blockContent.tier_discounts || '0|5|10|15').split('|');
+                        breakpoints.splice(index, 1);
+                        discounts.splice(index, 1);
+                        handleContentUpdate('tier_breakpoints', breakpoints.join('|'));
+                        handleContentUpdate('tier_discounts', discounts.join('|'));
+                      }}
+                      className={`opacity-0 group-hover/tier-${index}:opacity-100 absolute -top-2 -right-2 text-red-500 hover:text-red-700 transition-opacity duration-200 z-10`}
+                      title="Remove this pricing tier"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </button>
+                  )}
                 </div>
               );
             })}
