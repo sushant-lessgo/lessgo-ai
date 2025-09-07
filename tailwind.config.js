@@ -48,6 +48,10 @@ module.exports = {
   'group-hover/tier-2:opacity-100',
   'group-hover/feature:opacity-100',
   'group-hover/testimonial:opacity-100',
+  // MiniStackedCards section delete patterns
+  'group-hover/plans-features-section:opacity-100',
+  'group-hover/faq-section:opacity-100', 
+  'group-hover/trust-section:opacity-100',
   'group-hover/social-metric:opacity-100',
   'group-hover/social-proof-section:opacity-100',
   'group-hover/guarantee:opacity-100',

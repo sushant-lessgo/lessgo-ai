@@ -782,8 +782,33 @@ export default function MiniStackedCards(props: LayoutComponentProps) {
 
             {/* Additional Features Comparison */}
             {((blockContent.show_plans_features !== false && plansFeatures.length > 0) || mode === 'edit') && (
-              <div className="bg-white rounded-xl border border-gray-200 p-8 mb-12">
+              <div className="bg-white rounded-xl border border-gray-200 p-8 mb-12 relative group/plans-features-section">
                 <h3 style={h3Style} className="font-semibold text-gray-900 text-center mb-8">All plans include</h3>
+                
+                {/* Delete Section Button */}
+                {mode === 'edit' && (
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleContentUpdate('show_plans_features', String(false));
+                      handleContentUpdate('plans_feature_1_title', '___REMOVED___');
+                      handleContentUpdate('plans_feature_1_desc', '___REMOVED___');
+                      handleContentUpdate('plans_feature_1_icon', '___REMOVED___');
+                      handleContentUpdate('plans_feature_2_title', '___REMOVED___');
+                      handleContentUpdate('plans_feature_2_desc', '___REMOVED___');
+                      handleContentUpdate('plans_feature_2_icon', '___REMOVED___');
+                      handleContentUpdate('plans_feature_3_title', '___REMOVED___');
+                      handleContentUpdate('plans_feature_3_desc', '___REMOVED___');
+                      handleContentUpdate('plans_feature_3_icon', '___REMOVED___');
+                    }}
+                    className="opacity-0 group-hover/plans-features-section:opacity-100 absolute -top-2 -right-2 text-red-500 hover:text-red-700 transition-opacity duration-200 z-10"
+                    title="Remove All Plans Include section"
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                )}
                 
                 <div className="grid md:grid-cols-3 gap-6">
                   {[1, 2, 3].map((index) => {
@@ -871,8 +896,32 @@ export default function MiniStackedCards(props: LayoutComponentProps) {
 
             {/* FAQ Section */}
             {((blockContent.show_faq !== false && faqItems.length > 0) || mode === 'edit') && (
-              <div className="bg-gray-50 rounded-xl p-8 border border-gray-100 mb-12">
+              <div className="bg-gray-50 rounded-xl p-8 border border-gray-100 mb-12 relative group/faq-section">
                 <h3 style={h3Style} className="font-semibold text-gray-900 text-center mb-8">Frequently Asked Questions</h3>
+                
+                {/* Delete Section Button */}
+                {mode === 'edit' && (
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleContentUpdate('show_faq', String(false));
+                      handleContentUpdate('faq_question_1', '___REMOVED___');
+                      handleContentUpdate('faq_answer_1', '___REMOVED___');
+                      handleContentUpdate('faq_question_2', '___REMOVED___');
+                      handleContentUpdate('faq_answer_2', '___REMOVED___');
+                      handleContentUpdate('faq_question_3', '___REMOVED___');
+                      handleContentUpdate('faq_answer_3', '___REMOVED___');
+                      handleContentUpdate('faq_question_4', '___REMOVED___');
+                      handleContentUpdate('faq_answer_4', '___REMOVED___');
+                    }}
+                    className="opacity-0 group-hover/faq-section:opacity-100 absolute -top-2 -right-2 text-red-500 hover:text-red-700 transition-opacity duration-200 z-10"
+                    title="Remove FAQ section"
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                )}
                 
                 <div className="grid md:grid-cols-2 gap-6">
                   {[1, 2, 3, 4].map((index) => {
@@ -944,7 +993,28 @@ export default function MiniStackedCards(props: LayoutComponentProps) {
 
             {/* Trust Indicators */}
             {((blockContent.show_trust_bar !== false && trustBarItems.length > 0) || mode === 'edit') && (
-              <div className="text-center bg-blue-50 rounded-xl p-6 border border-blue-100">
+              <div className="text-center bg-blue-50 rounded-xl p-6 border border-blue-100 relative group/trust-section">
+                
+                {/* Delete Section Button */}
+                {mode === 'edit' && (
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleContentUpdate('show_trust_bar', String(false));
+                      handleContentUpdate('trust_item_1', '___REMOVED___');
+                      handleContentUpdate('trust_item_2', '___REMOVED___');
+                      handleContentUpdate('trust_item_3', '___REMOVED___');
+                      handleContentUpdate('trust_item_4', '___REMOVED___');
+                    }}
+                    className="opacity-0 group-hover/trust-section:opacity-100 absolute -top-2 -right-2 text-red-500 hover:text-red-700 transition-opacity duration-200 z-10"
+                    title="Remove Trust Indicators section"
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                )}
+                
                 <div className="flex flex-wrap justify-center items-center gap-4">
                   {[1, 2, 3, 4].map((index) => {
                     const trustItem = String(blockContent[`trust_item_${index}` as keyof MiniStackedCardsContent] || '');
