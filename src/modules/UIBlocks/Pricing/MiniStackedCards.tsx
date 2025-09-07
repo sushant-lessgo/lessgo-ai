@@ -781,7 +781,7 @@ export default function MiniStackedCards(props: LayoutComponentProps) {
           </div>
 
             {/* Additional Features Comparison */}
-            {((blockContent.show_plans_features !== false && plansFeatures.length > 0) || mode === 'edit') && (
+            {((blockContent.show_plans_features !== false && plansFeatures.length > 0) || (mode === 'edit' && (blockContent.plans_feature_1_title !== '___REMOVED___' || blockContent.plans_feature_2_title !== '___REMOVED___' || blockContent.plans_feature_3_title !== '___REMOVED___' || blockContent.plans_feature_1_desc !== '___REMOVED___' || blockContent.plans_feature_2_desc !== '___REMOVED___' || blockContent.plans_feature_3_desc !== '___REMOVED___'))) && (
               <div className="bg-white rounded-xl border border-gray-200 p-8 mb-12 relative group/plans-features-section">
                 <h3 style={h3Style} className="font-semibold text-gray-900 text-center mb-8">All plans include</h3>
                 
@@ -812,9 +812,18 @@ export default function MiniStackedCards(props: LayoutComponentProps) {
                 
                 <div className="grid md:grid-cols-3 gap-6">
                   {[1, 2, 3].map((index) => {
-                    const featureTitle = String(blockContent[`plans_feature_${index}_title` as keyof MiniStackedCardsContent] || '');
-                    const featureDesc = String(blockContent[`plans_feature_${index}_desc` as keyof MiniStackedCardsContent] || '');
-                    const featureIcon = String(blockContent[`plans_feature_${index}` as keyof MiniStackedCardsContent] || 'default');
+                    const rawTitle = blockContent[`plans_feature_${index}_title` as keyof MiniStackedCardsContent];
+                    const rawDesc = blockContent[`plans_feature_${index}_desc` as keyof MiniStackedCardsContent];
+                    const rawIcon = blockContent[`plans_feature_${index}_icon` as keyof MiniStackedCardsContent];
+                    
+                    const featureTitle = rawTitle === '___REMOVED___' ? '' : String(rawTitle || '');
+                    const featureDesc = rawDesc === '___REMOVED___' ? '' : String(rawDesc || '');
+                    const featureIcon = rawIcon === '___REMOVED___' ? '' : String(rawIcon || 'default');
+                    
+                    // Skip completely removed features
+                    if (rawTitle === '___REMOVED___' && rawDesc === '___REMOVED___') {
+                      return null;
+                    }
                     
                     // Only show features that exist or in edit mode
                     if (!featureTitle && !featureDesc && mode !== 'edit') return null;
@@ -895,7 +904,7 @@ export default function MiniStackedCards(props: LayoutComponentProps) {
             )}
 
             {/* FAQ Section */}
-            {((blockContent.show_faq !== false && faqItems.length > 0) || mode === 'edit') && (
+            {((blockContent.show_faq !== false && faqItems.length > 0) || (mode === 'edit' && (blockContent.faq_question_1 !== '___REMOVED___' || blockContent.faq_question_2 !== '___REMOVED___' || blockContent.faq_question_3 !== '___REMOVED___' || blockContent.faq_question_4 !== '___REMOVED___' || blockContent.faq_answer_1 !== '___REMOVED___' || blockContent.faq_answer_2 !== '___REMOVED___' || blockContent.faq_answer_3 !== '___REMOVED___' || blockContent.faq_answer_4 !== '___REMOVED___'))) && (
               <div className="bg-gray-50 rounded-xl p-8 border border-gray-100 mb-12 relative group/faq-section">
                 <h3 style={h3Style} className="font-semibold text-gray-900 text-center mb-8">Frequently Asked Questions</h3>
                 
@@ -925,8 +934,16 @@ export default function MiniStackedCards(props: LayoutComponentProps) {
                 
                 <div className="grid md:grid-cols-2 gap-6">
                   {[1, 2, 3, 4].map((index) => {
-                    const question = String(blockContent[`faq_question_${index}` as keyof MiniStackedCardsContent] || '');
-                    const answer = String(blockContent[`faq_answer_${index}` as keyof MiniStackedCardsContent] || '');
+                    const rawQuestion = blockContent[`faq_question_${index}` as keyof MiniStackedCardsContent];
+                    const rawAnswer = blockContent[`faq_answer_${index}` as keyof MiniStackedCardsContent];
+                    
+                    const question = rawQuestion === '___REMOVED___' ? '' : String(rawQuestion || '');
+                    const answer = rawAnswer === '___REMOVED___' ? '' : String(rawAnswer || '');
+                    
+                    // Skip completely removed FAQs
+                    if (rawQuestion === '___REMOVED___' && rawAnswer === '___REMOVED___') {
+                      return null;
+                    }
                     
                     // Only show FAQs that exist or in edit mode
                     if (!question && !answer && mode !== 'edit') return null;
@@ -992,7 +1009,7 @@ export default function MiniStackedCards(props: LayoutComponentProps) {
             )}
 
             {/* Trust Indicators */}
-            {((blockContent.show_trust_bar !== false && trustBarItems.length > 0) || mode === 'edit') && (
+            {((blockContent.show_trust_bar !== false && trustBarItems.length > 0) || (mode === 'edit' && (blockContent.trust_item_1 !== '___REMOVED___' || blockContent.trust_item_2 !== '___REMOVED___' || blockContent.trust_item_3 !== '___REMOVED___' || blockContent.trust_item_4 !== '___REMOVED___'))) && (
               <div className="text-center bg-blue-50 rounded-xl p-6 border border-blue-100 relative group/trust-section">
                 
                 {/* Delete Section Button */}
@@ -1017,7 +1034,14 @@ export default function MiniStackedCards(props: LayoutComponentProps) {
                 
                 <div className="flex flex-wrap justify-center items-center gap-4">
                   {[1, 2, 3, 4].map((index) => {
-                    const trustItem = String(blockContent[`trust_item_${index}` as keyof MiniStackedCardsContent] || '');
+                    const rawTrustItem = blockContent[`trust_item_${index}` as keyof MiniStackedCardsContent];
+                    
+                    const trustItem = rawTrustItem === '___REMOVED___' ? '' : String(rawTrustItem || '');
+                    
+                    // Skip completely removed trust items
+                    if (rawTrustItem === '___REMOVED___') {
+                      return null;
+                    }
                     
                     // Only show trust items that exist or in edit mode
                     if (!trustItem && mode !== 'edit') return null;
