@@ -53,6 +53,8 @@ module.exports = {
   'group-hover/guarantee:opacity-100',
   // ToggleableMonthlyYearly specific patterns
   'group-hover/pricing-card:opacity-100',
+  'group-hover/segment-tab:opacity-100',
+  'group-hover/feature-item:opacity-100',
   'group-hover/platform-feature:opacity-100',
   'group-hover/platform-features-section:opacity-100',
   'group-focus-within:opacity-100',

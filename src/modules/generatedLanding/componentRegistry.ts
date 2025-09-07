@@ -138,7 +138,7 @@ import TimelineResults from '@/modules/UIBlocks/Results/TimelineResults';
 import Timeline from '@/modules/UIBlocks/Features/Timeline';
 import TimelineToToday from '@/modules/UIBlocks/FounderNote/TimelineToToday';
 import ToggleableComparison from '@/modules/UIBlocks/Comparison/ToggleableComparison';
-import ToggleableMonthlyYearly from '@/modules/UIBlocks/Pricing/ToggleableMonthlyYearly';
+import ToggleableMonthlyYearly from '@/modules/UIBlocks/Pricing/toggleableMonthlyYearly';
 import TrustSealCollection from '@/modules/UIBlocks/Security/TrustSealCollection';
 import TwoColumnFAQ from '@/modules/UIBlocks/FAQ/TwoColumnFAQ';
 import StatComparison from '@/modules/UIBlocks/BeforeAfter/StatComparison';

@@ -924,7 +924,7 @@ export default function CardWithTestimonial(props: LayoutComponentProps) {
               <button
                 onClick={(e) => {
                   e.stopPropagation();
-                  handleContentUpdate('show_social_proof', false);
+                  handleContentUpdate('show_social_proof', 'false');
                   handleContentUpdate('social_proof_title', '___REMOVED___');
                   handleContentUpdate('social_metric_1', '___REMOVED___');
                   handleContentUpdate('social_metric_1_label', '___REMOVED___');

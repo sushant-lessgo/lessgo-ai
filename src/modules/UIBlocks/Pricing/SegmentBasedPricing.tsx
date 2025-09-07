@@ -242,13 +242,13 @@ export default function SegmentBasedPricing(props: LayoutComponentProps) {
     const color = getSegmentColor(index);
     
     return (
-      <button
-        onClick={() => setActiveSegment(index)}
-        className={`p-6 rounded-xl border-2 transition-all duration-300 text-left w-full ${
+      <div
+        className={`p-6 rounded-xl border-2 transition-all duration-300 text-left w-full relative group/segment-tab cursor-pointer ${
           isActive 
             ? `${color.border} ${color.light} shadow-lg` 
             : 'border-gray-200 bg-white hover:border-gray-300 hover:shadow-md'
         }`}
+        onClick={() => setActiveSegment(index)}
       >
         <div className="flex items-start space-x-4">
           <div className={`w-12 h-12 rounded-lg bg-gradient-to-br ${color.bg} flex items-center justify-center text-white`}>
@@ -270,18 +270,115 @@ export default function SegmentBasedPricing(props: LayoutComponentProps) {
             />
           </div>
           <div className="flex-1">
-            <h3 style={h3Style} className={`font-bold ${isActive ? color.text : 'text-gray-900'}`}>
-              {segment.name}
-            </h3>
-            <p className={`text-sm mt-2 ${isActive ? 'text-gray-700' : 'text-gray-600'}`}>
-              {segment.description}
-            </p>
-            <div className={`text-xs mt-3 ${mutedTextColor} italic`}>
-              Common uses: {segment.useCases}
-            </div>
+            {mode !== 'preview' ? (
+              <>
+                <div
+                  contentEditable
+                  suppressContentEditableWarning
+                  onBlur={(e) => {
+                    const names = blockContent.segment_names.split('|');
+                    names[index] = e.currentTarget.textContent || '';
+                    handleContentUpdate('segment_names', names.join('|'));
+                  }}
+                  onClick={(e) => e.stopPropagation()}
+                  className={`font-bold outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-1 cursor-text hover:bg-gray-50 ${isActive ? color.text : 'text-gray-900'}`}
+                  style={h3Style}
+                >
+                  {segment.name}
+                </div>
+                <div
+                  contentEditable
+                  suppressContentEditableWarning
+                  onBlur={(e) => {
+                    const descriptions = blockContent.segment_descriptions.split('|');
+                    descriptions[index] = e.currentTarget.textContent || '';
+                    handleContentUpdate('segment_descriptions', descriptions.join('|'));
+                  }}
+                  onClick={(e) => e.stopPropagation()}
+                  className={`text-sm mt-2 outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-1 cursor-text hover:bg-gray-50 ${isActive ? 'text-gray-700' : 'text-gray-600'}`}
+                >
+                  {segment.description}
+                </div>
+                <div
+                  contentEditable
+                  suppressContentEditableWarning
+                  onBlur={(e) => {
+                    const useCases = blockContent.segment_use_cases.split('|');
+                    useCases[index] = e.currentTarget.textContent || '';
+                    handleContentUpdate('segment_use_cases', useCases.join('|'));
+                  }}
+                  onClick={(e) => e.stopPropagation()}
+                  className={`text-xs mt-3 italic outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-1 cursor-text hover:bg-gray-50 ${mutedTextColor}`}
+                >
+                  Common uses: {segment.useCases}
+                </div>
+              </>
+            ) : (
+              <>
+                <h3 style={h3Style} className={`font-bold ${isActive ? color.text : 'text-gray-900'}`}>
+                  {segment.name}
+                </h3>
+                <p className={`text-sm mt-2 ${isActive ? 'text-gray-700' : 'text-gray-600'}`}>
+                  {segment.description}
+                </p>
+                <div className={`text-xs mt-3 ${mutedTextColor} italic`}>
+                  Common uses: {segment.useCases}
+                </div>
+              </>
+            )}
           </div>
         </div>
-      </button>
+        
+        {/* Remove segment button - only in edit mode and when we have more than 1 segment */}
+        {mode === 'edit' && segments.length > 1 && (
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              const removeFromPipeList = (value: string, indexToRemove: number) => {
+                const items = value.split('|');
+                items.splice(indexToRemove, 1);
+                return items.join('|');
+              };
+              
+              handleContentUpdate('segment_names', removeFromPipeList(blockContent.segment_names, index));
+              handleContentUpdate('segment_descriptions', removeFromPipeList(blockContent.segment_descriptions, index));
+              handleContentUpdate('segment_use_cases', removeFromPipeList(blockContent.segment_use_cases, index));
+              handleContentUpdate('segment_icons', removeFromPipeList(blockContent.segment_icons || '', index));
+              
+              if (blockContent.recommended_tiers) {
+                handleContentUpdate('recommended_tiers', removeFromPipeList(blockContent.recommended_tiers, index));
+              }
+              
+              // Remove corresponding tier data
+              const tierNames = blockContent.tier_names.split(';');
+              const tierPrices = blockContent.tier_prices.split(';');
+              const tierFeatures = blockContent.tier_features.split(';');
+              const ctaTexts = blockContent.cta_texts.split(';');
+              
+              tierNames.splice(index, 1);
+              tierPrices.splice(index, 1);
+              tierFeatures.splice(index, 1);
+              ctaTexts.splice(index, 1);
+              
+              handleContentUpdate('tier_names', tierNames.join(';'));
+              handleContentUpdate('tier_prices', tierPrices.join(';'));
+              handleContentUpdate('tier_features', tierFeatures.join(';'));
+              handleContentUpdate('cta_texts', ctaTexts.join(';'));
+              
+              // Adjust active segment if needed
+              if (activeSegment >= segments.length - 1) {
+                setActiveSegment(Math.max(0, segments.length - 2));
+              }
+            }}
+            className="opacity-0 group-hover/segment-tab:opacity-100 absolute -top-2 -right-2 text-red-500 hover:text-red-700 transition-opacity duration-200 z-10"
+            title="Remove this segment"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        )}
+      </div>
     );
   };
 
@@ -289,45 +386,201 @@ export default function SegmentBasedPricing(props: LayoutComponentProps) {
     tier: typeof activeSegmentData.tiers[0];
     index: number;
     isRecommended: boolean;
-  }) => (
-    <div className={`relative bg-white rounded-xl border-2 p-6 transition-all duration-300 hover:shadow-lg ${
-      isRecommended 
-        ? `${activeColor.border} scale-105` 
-        : 'border-gray-200 hover:border-gray-300'
-    }`}>
+  }) => {
+    const updateTierData = (field: 'name' | 'price', value: string) => {
+      const fieldKey = `tier_${field}s` as keyof SegmentBasedPricingContent;
+      const fieldValue = blockContent[fieldKey];
+      const allTierData = typeof fieldValue === 'string' ? fieldValue.split(';') : [];
+      const segmentTiers = allTierData[activeSegment]?.split('|') || [];
+      segmentTiers[index] = value;
+      allTierData[activeSegment] = segmentTiers.join('|');
+      handleContentUpdate(`tier_${field}s`, allTierData.join(';'));
+    };
+
+    const updateTierFeature = (featureIndex: number, value: string) => {
+      const allTierFeatures = blockContent.tier_features?.split(';') || [];
+      const segmentTiers = allTierFeatures[activeSegment]?.split('|') || [];
+      const tierFeatures = segmentTiers[index]?.split(',') || [];
+      tierFeatures[featureIndex] = value;
+      segmentTiers[index] = tierFeatures.join(',');
+      allTierFeatures[activeSegment] = segmentTiers.join('|');
+      handleContentUpdate('tier_features', allTierFeatures.join(';'));
+    };
+
+    const addFeature = () => {
+      const allTierFeatures = blockContent.tier_features?.split(';') || [];
+      const segmentTiers = allTierFeatures[activeSegment]?.split('|') || [];
+      const tierFeatures = segmentTiers[index]?.split(',') || [];
       
-      {isRecommended && (
-        <div className={`absolute -top-3 left-1/2 transform -translate-x-1/2 bg-gradient-to-r ${activeColor.bg} text-white px-4 py-1 rounded-full text-sm font-semibold`}>
-          Recommended
-        </div>
-      )}
+      // Add meaningful default feature based on tier position
+      const featureDefaults = [
+        'Priority onboarding',
+        'Advanced analytics',
+        'API access',
+        'Custom branding',
+        'Dedicated support',
+        'SSO integration',
+        'Audit logs',
+        'Custom workflows'
+      ];
+      
+      const newFeature = featureDefaults[tierFeatures.length] || `Feature ${tierFeatures.length + 1}`;
+      tierFeatures.push(newFeature);
+      segmentTiers[index] = tierFeatures.join(',');
+      allTierFeatures[activeSegment] = segmentTiers.join('|');
+      handleContentUpdate('tier_features', allTierFeatures.join(';'));
+    };
 
-      <div className="text-center mb-6">
-        <h4 style={h3Style} className="font-bold text-gray-900 mb-2">{tier.name}</h4>
-        <div style={{...getTypographyStyle('h2'), fontSize: 'clamp(1.8rem, 3vw, 2rem)'}} className="font-bold text-gray-900 mb-4">{tier.price}</div>
-      </div>
+    const removeFeature = (featureIndex: number) => {
+      const allTierFeatures = blockContent.tier_features?.split(';') || [];
+      const segmentTiers = allTierFeatures[activeSegment]?.split('|') || [];
+      const tierFeatures = segmentTiers[index]?.split(',') || [];
+      tierFeatures.splice(featureIndex, 1);
+      segmentTiers[index] = tierFeatures.join(',');
+      allTierFeatures[activeSegment] = segmentTiers.join('|');
+      handleContentUpdate('tier_features', allTierFeatures.join(';'));
+    };
 
-      <div className="space-y-3 mb-8">
-        {tier.features.map((feature, featureIndex) => (
-          <div key={featureIndex} className="flex items-start space-x-3">
-            <svg className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-            </svg>
-            <span className="text-gray-700 text-sm">{feature}</span>
+    return (
+      <div className={`relative bg-white rounded-xl border-2 p-6 transition-all duration-300 hover:shadow-lg group/pricing-card ${
+        isRecommended 
+          ? `${activeColor.border} scale-105` 
+          : 'border-gray-200 hover:border-gray-300'
+      }`}>
+        
+        {isRecommended && (
+          <div className={`absolute -top-3 left-1/2 transform -translate-x-1/2 bg-gradient-to-r ${activeColor.bg} text-white px-4 py-1 rounded-full text-sm font-semibold`}>
+            Recommended
           </div>
-        ))}
-      </div>
+        )}
 
-      <CTAButton
-        text={tier.ctaText}
-        colorTokens={colorTokens}
-        className="w-full"
-        variant={isRecommended ? "primary" : "secondary"}
-        sectionId={sectionId}
-        elementKey={`cta_${activeSegment}_${index}`}
-      />
-    </div>
-  );
+        <div className="text-center mb-6">
+          {mode !== 'preview' ? (
+            <>
+              <div
+                contentEditable
+                suppressContentEditableWarning
+                onBlur={(e) => updateTierData('name', e.currentTarget.textContent || '')}
+                className="font-bold text-gray-900 mb-2 outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-1 cursor-text hover:bg-gray-50"
+                style={h3Style}
+              >
+                {tier.name}
+              </div>
+              <div
+                contentEditable
+                suppressContentEditableWarning
+                onBlur={(e) => updateTierData('price', e.currentTarget.textContent || '')}
+                className="font-bold text-gray-900 mb-4 outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-1 cursor-text hover:bg-gray-50"
+                style={{...getTypographyStyle('h2'), fontSize: 'clamp(1.8rem, 3vw, 2rem)'}}
+              >
+                {tier.price}
+              </div>
+            </>
+          ) : (
+            <>
+              <h4 style={h3Style} className="font-bold text-gray-900 mb-2">{tier.name}</h4>
+              <div style={{...getTypographyStyle('h2'), fontSize: 'clamp(1.8rem, 3vw, 2rem)'}} className="font-bold text-gray-900 mb-4">{tier.price}</div>
+            </>
+          )}
+        </div>
+
+        <div className="space-y-3 mb-8">
+          {tier.features.map((feature, featureIndex) => (
+            <div key={featureIndex} className="flex items-start space-x-3 group/feature-item relative">
+              <svg className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+              </svg>
+              {mode !== 'preview' ? (
+                <>
+                  <div
+                    contentEditable
+                    suppressContentEditableWarning
+                    onBlur={(e) => updateTierFeature(featureIndex, e.currentTarget.textContent || '')}
+                    className="text-gray-700 text-sm flex-1 outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-1 cursor-text hover:bg-gray-50"
+                  >
+                    {feature}
+                  </div>
+                  {tier.features.length > 1 && (
+                    <button
+                      onClick={() => removeFeature(featureIndex)}
+                      className="opacity-0 group-hover/feature-item:opacity-100 text-red-500 hover:text-red-700 transition-opacity duration-200"
+                      title="Remove feature"
+                    >
+                      <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </button>
+                  )}
+                </>
+              ) : (
+                <span className="text-gray-700 text-sm">{feature}</span>
+              )}
+            </div>
+          ))}
+          
+          {mode === 'edit' && (
+            <button
+              onClick={addFeature}
+              className="flex items-center space-x-2 text-blue-600 hover:text-blue-700 text-sm mt-2"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+              </svg>
+              <span>Add feature</span>
+            </button>
+          )}
+        </div>
+
+        <CTAButton
+          text={tier.ctaText}
+          colorTokens={colorTokens}
+          className="w-full"
+          variant={isRecommended ? "primary" : "secondary"}
+          sectionId={sectionId}
+          elementKey={`cta_${activeSegment}_${index}`}
+        />
+        
+        {/* Remove tier button - only in edit mode and when we have more than 1 tier */}
+        {mode === 'edit' && activeSegmentData.tiers.length > 1 && (
+          <button
+            onClick={() => {
+              // Remove this tier from the active segment
+              const allTierNames = blockContent.tier_names?.split(';') || [];
+              const allTierPrices = blockContent.tier_prices?.split(';') || [];
+              const allTierFeatures = blockContent.tier_features?.split(';') || [];
+              const allCtaTexts = blockContent.cta_texts?.split(';') || [];
+              
+              const segmentTierNames = allTierNames[activeSegment]?.split('|') || [];
+              const segmentTierPrices = allTierPrices[activeSegment]?.split('|') || [];
+              const segmentTierFeatures = allTierFeatures[activeSegment]?.split('|') || [];
+              const segmentCtaTexts = allCtaTexts[activeSegment]?.split('|') || [];
+              
+              segmentTierNames.splice(index, 1);
+              segmentTierPrices.splice(index, 1);
+              segmentTierFeatures.splice(index, 1);
+              segmentCtaTexts.splice(index, 1);
+              
+              allTierNames[activeSegment] = segmentTierNames.join('|');
+              allTierPrices[activeSegment] = segmentTierPrices.join('|');
+              allTierFeatures[activeSegment] = segmentTierFeatures.join('|');
+              allCtaTexts[activeSegment] = segmentCtaTexts.join('|');
+              
+              handleContentUpdate('tier_names', allTierNames.join(';'));
+              handleContentUpdate('tier_prices', allTierPrices.join(';'));
+              handleContentUpdate('tier_features', allTierFeatures.join(';'));
+              handleContentUpdate('cta_texts', allCtaTexts.join(';'));
+            }}
+            className="opacity-0 group-hover/pricing-card:opacity-100 absolute -top-2 -right-2 text-red-500 hover:text-red-700 transition-opacity duration-200 z-10"
+            title="Remove this tier"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        )}
+      </div>
+    );
+  };
   
   return (
     <LayoutSection
@@ -372,72 +625,7 @@ export default function SegmentBasedPricing(props: LayoutComponentProps) {
           )}
         </div>
 
-        {mode !== 'preview' ? (
-          <div className="space-y-8">
-            <div className="p-6 border border-gray-200 rounded-lg bg-gray-50">
-              <h4 style={h4Style} className="font-semibold text-gray-700 mb-4">Segment-Based Pricing Content</h4>
-              
-              <div className="space-y-4">
-                <EditableAdaptiveText
-                  mode={mode}
-                  value={blockContent.segment_names || ''}
-                  onEdit={(value) => handleContentUpdate('segment_names', value)}
-                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
-                  colorTokens={colorTokens}
-                  variant="body"
-                  className="mb-2"
-                  placeholder="Segment names (pipe separated)"
-                  sectionId={sectionId}
-                  elementKey="segment_names"
-                  sectionBackground={sectionBackground}
-                />
-                
-                <EditableAdaptiveText
-                  mode={mode}
-                  value={blockContent.tier_names || ''}
-                  onEdit={(value) => handleContentUpdate('tier_names', value)}
-                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
-                  colorTokens={colorTokens}
-                  variant="body"
-                  className="mb-2"
-                  placeholder="Tier names by segment (semicolon for segments, pipe for tiers)"
-                  sectionId={sectionId}
-                  elementKey="tier_names"
-                  sectionBackground={sectionBackground}
-                />
-                
-                <EditableAdaptiveText
-                  mode={mode}
-                  value={blockContent.tier_prices || ''}
-                  onEdit={(value) => handleContentUpdate('tier_prices', value)}
-                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
-                  colorTokens={colorTokens}
-                  variant="body"
-                  className="mb-2"
-                  placeholder="Tier prices by segment (semicolon for segments, pipe for tiers)"
-                  sectionId={sectionId}
-                  elementKey="tier_prices"
-                  sectionBackground={sectionBackground}
-                />
-                
-                <EditableAdaptiveText
-                  mode={mode}
-                  value={blockContent.tier_features || ''}
-                  onEdit={(value) => handleContentUpdate('tier_features', value)}
-                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
-                  colorTokens={colorTokens}
-                  variant="body"
-                  className="mb-2"
-                  placeholder="Tier features by segment (semicolon for segments, pipe for tiers, comma for features)"
-                  sectionId={sectionId}
-                  elementKey="tier_features"
-                  sectionBackground={sectionBackground}
-                />
-              </div>
-            </div>
-          </div>
-        ) : (
-          <div className="grid lg:grid-cols-2 gap-12 mb-16">
+        <div className="grid lg:grid-cols-2 gap-12 mb-16">
             
             {/* Segment Selection */}
             <div className="space-y-6">
@@ -450,6 +638,90 @@ export default function SegmentBasedPricing(props: LayoutComponentProps) {
                   isActive={activeSegment === index}
                 />
               ))}
+              
+              {/* Add segment button - only in edit mode */}
+              {mode === 'edit' && (
+                <button
+                  onClick={() => {
+                    const names = blockContent.segment_names.split('|');
+                    const descriptions = blockContent.segment_descriptions.split('|');
+                    const useCases = blockContent.segment_use_cases.split('|');
+                    const icons = blockContent.segment_icons ? blockContent.segment_icons.split('|') : [];
+                    const recommendedTiers = blockContent.recommended_tiers ? blockContent.recommended_tiers.split('|') : [];
+                    
+                    // Add new segment with smart defaults based on common business segments
+                    const segmentDefaults = [
+                      { name: 'Startup', desc: 'Perfect for new businesses just getting started', useCase: 'MVP development, basic analytics, small team collaboration', icon: '🚀' },
+                      { name: 'Scale-up', desc: 'For rapidly growing companies expanding their operations', useCase: 'Advanced automation, team scaling, performance tracking', icon: '📊' },
+                      { name: 'Non-profit', desc: 'Tailored solutions for non-profit organizations', useCase: 'Donor management, volunteer coordination, impact reporting', icon: '❤️' },
+                      { name: 'Education', desc: 'Designed for educational institutions and teams', useCase: 'Student management, curriculum planning, collaborative learning', icon: '🎓' },
+                      { name: 'Healthcare', desc: 'Compliant solutions for healthcare providers', useCase: 'HIPAA compliance, patient management, secure communications', icon: '🏥' }
+                    ];
+                    
+                    const segmentNumber = names.length + 1;
+                    const defaultSegment = segmentDefaults[names.length - 4] || {
+                      name: `Custom Segment ${segmentNumber - 4}`,
+                      desc: `Description for your custom segment ${segmentNumber - 4}`,
+                      useCase: `Define use cases for this segment`,
+                      icon: '🔧'
+                    };
+                    
+                    names.push(defaultSegment.name);
+                    descriptions.push(defaultSegment.desc);
+                    useCases.push(defaultSegment.useCase);
+                    icons.push(defaultSegment.icon);
+                    recommendedTiers.push('1');
+                    
+                    handleContentUpdate('segment_names', names.join('|'));
+                    handleContentUpdate('segment_descriptions', descriptions.join('|'));
+                    handleContentUpdate('segment_use_cases', useCases.join('|'));
+                    handleContentUpdate('segment_icons', icons.join('|'));
+                    handleContentUpdate('recommended_tiers', recommendedTiers.join('|'));
+                    
+                    // Add default tier data for new segment with meaningful defaults
+                    const tierNames = blockContent.tier_names.split(';');
+                    const tierPrices = blockContent.tier_prices.split(';');
+                    const tierFeatures = blockContent.tier_features.split(';');
+                    const ctaTexts = blockContent.cta_texts.split(';');
+                    
+                    // Create tier defaults based on the segment type
+                    const isStartup = defaultSegment.name === 'Startup';
+                    const isNonProfit = defaultSegment.name === 'Non-profit';
+                    const isEducation = defaultSegment.name === 'Education';
+                    
+                    if (isStartup) {
+                      tierNames.push('Bootstrap|Growth|Scale');
+                      tierPrices.push('$9/month|$39/month|$99/month');
+                      tierFeatures.push('Up to 3 users,Core features,Community support|Up to 10 users,Advanced features,Email support|Unlimited users,All features,Priority support');
+                    } else if (isNonProfit) {
+                      tierNames.push('Volunteer|Organization|Foundation');
+                      tierPrices.push('Free|$29/month|Custom');
+                      tierFeatures.push('Up to 10 volunteers,Basic tools,Self-service|Up to 100 members,Donation tracking,Email support|Unlimited members,Grant management,Dedicated support');
+                    } else if (isEducation) {
+                      tierNames.push('Classroom|School|District');
+                      tierPrices.push('$19/month|$99/month|Contact Sales');
+                      tierFeatures.push('Up to 30 students,Basic LMS,Teacher tools|Up to 500 students,Advanced analytics,Parent portal|Unlimited students,Custom integrations,Training included');
+                    } else {
+                      tierNames.push('Essential|Professional|Enterprise');
+                      tierPrices.push('$29/month|$79/month|Custom Pricing');
+                      tierFeatures.push('Core features,5 users,Email support|Advanced features,25 users,Priority support|All features,Unlimited users,24/7 support');
+                    }
+                    
+                    ctaTexts.push('Start Free Trial|Start Free Trial|Contact Sales');
+                    
+                    handleContentUpdate('tier_names', tierNames.join(';'));
+                    handleContentUpdate('tier_prices', tierPrices.join(';'));
+                    handleContentUpdate('tier_features', tierFeatures.join(';'));
+                    handleContentUpdate('cta_texts', ctaTexts.join(';'));
+                  }}
+                  className="w-full px-4 py-3 bg-blue-100 hover:bg-blue-200 text-blue-700 rounded-xl font-medium transition-all duration-300 border-2 border-dashed border-blue-300 hover:border-blue-400 flex items-center justify-center space-x-2"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                  </svg>
+                  <span>Add Segment</span>
+                </button>
+              )}
             </div>
 
             {/* Pricing for Active Segment */}
@@ -472,10 +744,63 @@ export default function SegmentBasedPricing(props: LayoutComponentProps) {
                     isRecommended={index === activeSegmentData.recommendedTier}
                   />
                 ))}
+                
+                {/* Add tier button - only in edit mode */}
+                {mode === 'edit' && (
+                  <button
+                    onClick={() => {
+                      const allTierNames = blockContent.tier_names?.split(';') || [];
+                      const allTierPrices = blockContent.tier_prices?.split(';') || [];
+                      const allTierFeatures = blockContent.tier_features?.split(';') || [];
+                      const allCtaTexts = blockContent.cta_texts?.split(';') || [];
+                      
+                      const segmentTierNames = allTierNames[activeSegment]?.split('|') || [];
+                      const segmentTierPrices = allTierPrices[activeSegment]?.split('|') || [];
+                      const segmentTierFeatures = allTierFeatures[activeSegment]?.split('|') || [];
+                      const segmentCtaTexts = allCtaTexts[activeSegment]?.split('|') || [];
+                      
+                      // Add new tier with smart defaults based on tier position
+                      const tierNumber = segmentTierNames.length + 1;
+                      const tierDefaults = [
+                        { name: 'Starter', price: '$29/month', features: 'Up to 10 users,10GB storage,Email support', cta: 'Start Free Trial' },
+                        { name: 'Professional', price: '$79/month', features: 'Up to 50 users,100GB storage,Priority support,Advanced features', cta: 'Start Free Trial' },
+                        { name: 'Enterprise', price: 'Custom Pricing', features: 'Unlimited users,Unlimited storage,24/7 phone support,Custom integrations', cta: 'Contact Sales' },
+                        { name: 'Ultimate', price: '$299/month', features: 'Everything in Enterprise,White-label options,Dedicated account manager,SLA guarantee', cta: 'Contact Sales' }
+                      ];
+                      
+                      const defaultTier = tierDefaults[tierNumber - 1] || {
+                        name: `Custom Tier ${tierNumber}`,
+                        price: `$${(tierNumber * 50) + 49}/month`,
+                        features: 'Define features,Add capabilities,Set limits',
+                        cta: tierNumber > 3 ? 'Contact Sales' : 'Start Free Trial'
+                      };
+                      
+                      segmentTierNames.push(defaultTier.name);
+                      segmentTierPrices.push(defaultTier.price);
+                      segmentTierFeatures.push(defaultTier.features);
+                      segmentCtaTexts.push(defaultTier.cta);
+                      
+                      allTierNames[activeSegment] = segmentTierNames.join('|');
+                      allTierPrices[activeSegment] = segmentTierPrices.join('|');
+                      allTierFeatures[activeSegment] = segmentTierFeatures.join('|');
+                      allCtaTexts[activeSegment] = segmentCtaTexts.join('|');
+                      
+                      handleContentUpdate('tier_names', allTierNames.join(';'));
+                      handleContentUpdate('tier_prices', allTierPrices.join(';'));
+                      handleContentUpdate('tier_features', allTierFeatures.join(';'));
+                      handleContentUpdate('cta_texts', allCtaTexts.join(';'));
+                    }}
+                    className="w-full px-4 py-3 bg-blue-100 hover:bg-blue-200 text-blue-700 rounded-xl font-medium transition-all duration-300 border-2 border-dashed border-blue-300 hover:border-blue-400 flex items-center justify-center space-x-2"
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                    </svg>
+                    <span>Add Tier</span>
+                  </button>
+                )}
               </div>
             </div>
           </div>
-        )}
 
         {/* Segment Comparison Summary */}
         {((blockContent.show_segment_comparison !== false && (blockContent.segment_comparison_title || blockContent.segment_comparison_desc)) || mode === 'edit') && (
