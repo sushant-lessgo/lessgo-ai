@@ -48,6 +48,11 @@ module.exports = {
   'group-hover/tier-2:opacity-100',
   'group-hover/feature:opacity-100',
   'group-hover/testimonial:opacity-100',
+  // CallToQuotePlan specific patterns
+  'group-hover/contact-card-0:opacity-100',
+  'group-hover/contact-card-1:opacity-100',
+  'group-hover/contact-card-2:opacity-100',
+  'group-hover/contact-card-3:opacity-100',
   // MiniStackedCards section delete patterns
   'group-hover/plans-features-section:opacity-100',
   'group-hover/faq-section:opacity-100', 
