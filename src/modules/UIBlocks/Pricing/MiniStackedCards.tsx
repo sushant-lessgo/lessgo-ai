@@ -6,6 +6,7 @@ import {
   EditableAdaptiveHeadline, 
   EditableAdaptiveText
 } from '@/components/layout/EditableContent';
+import IconEditableText from '@/components/ui/IconEditableText';
 import { 
   CTAButton,
   TrustIndicators 
@@ -30,12 +31,15 @@ interface MiniStackedCardsContent {
   plans_feature_1?: string;
   plans_feature_1_title?: string;
   plans_feature_1_desc?: string;
+  plans_feature_1_icon?: string;
   plans_feature_2?: string;
   plans_feature_2_title?: string;
   plans_feature_2_desc?: string;
+  plans_feature_2_icon?: string;
   plans_feature_3?: string;
   plans_feature_3_title?: string;
   plans_feature_3_desc?: string;
+  plans_feature_3_icon?: string;
   show_plans_features?: boolean;
   // FAQ section
   faq_question_1?: string;
@@ -121,6 +125,10 @@ const CONTENT_SCHEMA = {
     type: 'string' as const, 
     default: 'Enterprise-grade security with 99.9% uptime guarantee' 
   },
+  plans_feature_1_icon: { 
+    type: 'string' as const, 
+    default: '🔒' 
+  },
   plans_feature_2: { 
     type: 'string' as const, 
     default: 'expert-support' 
@@ -133,6 +141,10 @@ const CONTENT_SCHEMA = {
     type: 'string' as const, 
     default: 'Get help when you need it from our expert support team' 
   },
+  plans_feature_2_icon: { 
+    type: 'string' as const, 
+    default: '💬' 
+  },
   plans_feature_3: { 
     type: 'string' as const, 
     default: 'easy-migration' 
@@ -144,6 +156,10 @@ const CONTENT_SCHEMA = {
   plans_feature_3_desc: { 
     type: 'string' as const, 
     default: 'Upgrade or downgrade your plan anytime without hassle' 
+  },
+  plans_feature_3_icon: { 
+    type: 'string' as const, 
+    default: '⚡' 
   },
   show_plans_features: { 
     type: 'boolean' as const, 
@@ -780,8 +796,18 @@ export default function MiniStackedCards(props: LayoutComponentProps) {
                     
                     return (
                       <div key={index} className="text-center relative group/plans-feature">
-                        <div className="w-12 h-12 mx-auto mb-4 rounded-full bg-gray-100 flex items-center justify-center">
-                          {getFeatureIcon(featureIcon)}
+                        <div className="w-12 h-12 mx-auto mb-4 rounded-full bg-gray-100 flex items-center justify-center group/icon-edit">
+                          <IconEditableText
+                            mode={mode}
+                            value={String(blockContent[`plans_feature_${index}_icon` as keyof MiniStackedCardsContent] || '🎯')}
+                            onEdit={(value) => handleContentUpdate(`plans_feature_${index}_icon`, value)}
+                            backgroundType={backgroundType}
+                            colorTokens={colorTokens}
+                            iconSize="md"
+                            className="text-2xl"
+                            sectionId={sectionId}
+                            elementKey={`plans_feature_${index}_icon`}
+                          />
                         </div>
                         
                         {/* Editable Feature Title */}
@@ -1027,10 +1053,13 @@ export const componentMeta = {
     { key: 'popular_tiers', label: 'Popular Tiers true/false (pipe separated)', type: 'text', required: false },
     { key: 'plans_feature_1_title', label: 'Plans Feature 1 Title', type: 'text', required: false },
     { key: 'plans_feature_1_desc', label: 'Plans Feature 1 Description', type: 'text', required: false },
+    { key: 'plans_feature_1_icon', label: 'Plans Feature 1 Icon', type: 'text', required: false },
     { key: 'plans_feature_2_title', label: 'Plans Feature 2 Title', type: 'text', required: false },
     { key: 'plans_feature_2_desc', label: 'Plans Feature 2 Description', type: 'text', required: false },
+    { key: 'plans_feature_2_icon', label: 'Plans Feature 2 Icon', type: 'text', required: false },
     { key: 'plans_feature_3_title', label: 'Plans Feature 3 Title', type: 'text', required: false },
     { key: 'plans_feature_3_desc', label: 'Plans Feature 3 Description', type: 'text', required: false },
+    { key: 'plans_feature_3_icon', label: 'Plans Feature 3 Icon', type: 'text', required: false },
     { key: 'show_plans_features', label: 'Show Plans Features Section', type: 'boolean', required: false },
     { key: 'faq_question_1', label: 'FAQ Question 1', type: 'text', required: false },
     { key: 'faq_answer_1', label: 'FAQ Answer 1', type: 'text', required: false },
