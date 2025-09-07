@@ -180,6 +180,27 @@ export default function CardWithTestimonial(props: LayoutComponentProps) {
     contentSchema: CONTENT_SCHEMA
   });
 
+  // LAYER 2: Container guards - Helper function to detect clicks from editable content
+  const isFromEditable = (el: EventTarget | null): boolean => {
+    return el instanceof HTMLElement && (
+      el.closest('[contenteditable="true"]') !== null ||
+      el.closest('[data-editable="true"]') !== null
+    );
+  };
+
+  // LAYER 3: Smart blur handlers - Helper function with change detection
+  const handleSmartContentUpdate = (
+    newValue: string, 
+    originalValue: string, 
+    updateFn: () => void
+  ) => {
+    if (newValue !== originalValue) {
+      // Only update if content actually changed, with delay to prevent mid-interaction regeneration
+      setTimeout(() => updateFn(), 100);
+    }
+    // Skip unnecessary updates that cause regeneration
+  };
+
   const { getTextStyle: getTypographyStyle } = useTypography();
   
   // Create typography styles
@@ -294,12 +315,35 @@ export default function CardWithTestimonial(props: LayoutComponentProps) {
   const PricingCardWithTestimonial = ({ tier, index }: {
     tier: typeof pricingTiers[0];
     index: number;
-  }) => (
-    <div className={`bg-white rounded-2xl shadow-lg border-2 transition-all duration-300 hover:shadow-xl relative group/tier-${index} ${
-      tier.isPopular 
-        ? `border-primary scale-105` 
-        : 'border-gray-200 hover:border-gray-300'
-    }`}>
+  }) => {
+    // Store original values for smart blur handling
+    const originalValues = {
+      tierName: tier.name,
+      tierDescription: tier.description,
+      tierPrice: tier.price,
+      testimonialQuote: tier.testimonial.quote,
+      testimonialName: tier.testimonial.name,
+      testimonialCompany: tier.testimonial.company,
+      features: [...tier.features]
+    };
+
+    return (
+      <div 
+        className={`bg-white rounded-2xl shadow-lg border-2 transition-all duration-300 hover:shadow-xl relative group/tier-${index} ${
+          tier.isPopular 
+            ? `border-primary scale-105` 
+            : 'border-gray-200 hover:border-gray-300'
+        }`}
+        // LAYER 2: Container guards - Block container handlers for editable content
+        onFocusCapture={(e) => {
+          if (isFromEditable(e.target)) return; // Block container handlers
+        }}
+        onMouseDownCapture={(e) => {
+          if (isFromEditable(e.target)) {
+            e.stopPropagation(); // Prevent container-level mouse down handling
+          }
+        }}
+      >
       
       {/* Popular Badge */}
       {tier.isPopular && (
@@ -316,10 +360,20 @@ export default function CardWithTestimonial(props: LayoutComponentProps) {
             <div 
               contentEditable
               suppressContentEditableWarning
+              onMouseDown={(e) => {
+                e.stopPropagation(); // LAYER 3: Event prevention
+              }}
               onBlur={(e) => {
-                const names = blockContent.tier_names.split('|');
-                names[index] = e.currentTarget.textContent || '';
-                handleContentUpdate('tier_names', names.join('|'));
+                const newValue = e.currentTarget.textContent || '';
+                handleSmartContentUpdate(
+                  newValue,
+                  originalValues.tierName,
+                  () => {
+                    const names = blockContent.tier_names.split('|');
+                    names[index] = newValue;
+                    handleContentUpdate('tier_names', names.join('|'));
+                  }
+                );
               }}
               className="outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-1 min-h-[24px] cursor-text hover:bg-gray-50 font-bold text-gray-900 mb-2"
               style={h3Style}
@@ -335,10 +389,20 @@ export default function CardWithTestimonial(props: LayoutComponentProps) {
             <div 
               contentEditable
               suppressContentEditableWarning
+              onMouseDown={(e) => {
+                e.stopPropagation(); // LAYER 3: Event prevention
+              }}
               onBlur={(e) => {
-                const descriptions = blockContent.tier_descriptions.split('|');
-                descriptions[index] = e.currentTarget.textContent || '';
-                handleContentUpdate('tier_descriptions', descriptions.join('|'));
+                const newValue = e.currentTarget.textContent || '';
+                handleSmartContentUpdate(
+                  newValue,
+                  originalValues.tierDescription,
+                  () => {
+                    const descriptions = blockContent.tier_descriptions.split('|');
+                    descriptions[index] = newValue;
+                    handleContentUpdate('tier_descriptions', descriptions.join('|'));
+                  }
+                );
               }}
               className={`outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-1 min-h-[24px] cursor-text hover:bg-gray-50 text-sm ${mutedTextColor} mb-4`}
             >
@@ -355,10 +419,20 @@ export default function CardWithTestimonial(props: LayoutComponentProps) {
               <div 
                 contentEditable
                 suppressContentEditableWarning
+                onMouseDown={(e) => {
+                  e.stopPropagation(); // LAYER 3: Event prevention
+                }}
                 onBlur={(e) => {
-                  const prices = blockContent.tier_prices.split('|');
-                  prices[index] = e.currentTarget.textContent || '';
-                  handleContentUpdate('tier_prices', prices.join('|'));
+                  const newValue = e.currentTarget.textContent || '';
+                  handleSmartContentUpdate(
+                    newValue,
+                    originalValues.tierPrice,
+                    () => {
+                      const prices = blockContent.tier_prices.split('|');
+                      prices[index] = newValue;
+                      handleContentUpdate('tier_prices', prices.join('|'));
+                    }
+                  );
                 }}
                 className="outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-1 min-h-[24px] cursor-text hover:bg-gray-50 font-bold text-gray-900 mb-2"
                 style={{...getTypographyStyle('h2'), fontSize: 'clamp(2rem, 4vw, 2.5rem)'}}
@@ -382,12 +456,23 @@ export default function CardWithTestimonial(props: LayoutComponentProps) {
                 <div
                   contentEditable
                   suppressContentEditableWarning
+                  onMouseDown={(e) => {
+                    e.stopPropagation(); // LAYER 3: Event prevention
+                  }}
                   onBlur={(e) => {
-                    const featureLists = blockContent.feature_lists.split('|');
-                    const currentFeatures = featureLists[index] ? featureLists[index].split(',').map(f => f.trim()) : [];
-                    currentFeatures[featureIndex] = e.currentTarget.textContent || '';
-                    featureLists[index] = currentFeatures.join(',');
-                    handleContentUpdate('feature_lists', featureLists.join('|'));
+                    const newValue = e.currentTarget.textContent || '';
+                    const originalFeature = originalValues.features[featureIndex] || '';
+                    handleSmartContentUpdate(
+                      newValue,
+                      originalFeature,
+                      () => {
+                        const featureLists = blockContent.feature_lists.split('|');
+                        const currentFeatures = featureLists[index] ? featureLists[index].split(',').map(f => f.trim()) : [];
+                        currentFeatures[featureIndex] = newValue;
+                        featureLists[index] = currentFeatures.join(',');
+                        handleContentUpdate('feature_lists', featureLists.join('|'));
+                      }
+                    );
                   }}
                   className="text-gray-700 text-sm outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-1 cursor-text hover:bg-gray-100 flex-1"
                 >
@@ -486,10 +571,20 @@ export default function CardWithTestimonial(props: LayoutComponentProps) {
                   <div
                     contentEditable
                     suppressContentEditableWarning
+                    onMouseDown={(e) => {
+                      e.stopPropagation(); // LAYER 3: Event prevention
+                    }}
                     onBlur={(e) => {
-                      const quotes = blockContent.testimonial_quotes.split('|');
-                      quotes[index] = e.currentTarget.textContent || '';
-                      handleContentUpdate('testimonial_quotes', quotes.join('|'));
+                      const newValue = e.currentTarget.textContent?.replace(/"/g, '') || '';
+                      handleSmartContentUpdate(
+                        newValue,
+                        originalValues.testimonialQuote,
+                        () => {
+                          const quotes = blockContent.testimonial_quotes.split('|');
+                          quotes[index] = newValue;
+                          handleContentUpdate('testimonial_quotes', quotes.join('|'));
+                        }
+                      );
                     }}
                     className="text-gray-700 text-sm mb-3 italic outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-1 cursor-text hover:bg-gray-100"
                     data-placeholder='Click to add testimonial quote...'
@@ -509,10 +604,20 @@ export default function CardWithTestimonial(props: LayoutComponentProps) {
                     <div
                       contentEditable
                       suppressContentEditableWarning
+                      onMouseDown={(e) => {
+                        e.stopPropagation(); // LAYER 3: Event prevention
+                      }}
                       onBlur={(e) => {
-                        const names = blockContent.testimonial_names.split('|');
-                        names[index] = e.currentTarget.textContent || '';
-                        handleContentUpdate('testimonial_names', names.join('|'));
+                        const newValue = e.currentTarget.textContent || '';
+                        handleSmartContentUpdate(
+                          newValue,
+                          originalValues.testimonialName,
+                          () => {
+                            const names = blockContent.testimonial_names.split('|');
+                            names[index] = newValue;
+                            handleContentUpdate('testimonial_names', names.join('|'));
+                          }
+                        );
                       }}
                       className="font-semibold text-gray-900 text-sm outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-1 cursor-text hover:bg-gray-100"
                       data-placeholder='Customer name'
@@ -529,10 +634,20 @@ export default function CardWithTestimonial(props: LayoutComponentProps) {
                       <div
                         contentEditable
                         suppressContentEditableWarning
+                        onMouseDown={(e) => {
+                          e.stopPropagation(); // LAYER 3: Event prevention
+                        }}
                         onBlur={(e) => {
-                          const companies = blockContent.testimonial_companies.split('|');
-                          companies[index] = e.currentTarget.textContent || '';
-                          handleContentUpdate('testimonial_companies', companies.join('|'));
+                          const newValue = e.currentTarget.textContent || '';
+                          handleSmartContentUpdate(
+                            newValue,
+                            originalValues.testimonialCompany,
+                            () => {
+                              const companies = blockContent.testimonial_companies.split('|');
+                              companies[index] = newValue;
+                              handleContentUpdate('testimonial_companies', companies.join('|'));
+                            }
+                          );
                         }}
                         className={`text-xs ${mutedTextColor} outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-1 cursor-text hover:bg-gray-100`}
                         data-placeholder='Company name'
@@ -610,7 +725,8 @@ export default function CardWithTestimonial(props: LayoutComponentProps) {
         )}
       </div>
     </div>
-  );
+    );
+  };
   
   return (
     <LayoutSection
