@@ -301,17 +301,18 @@ export default function IconCircleSteps(props: LayoutComponentProps) {
   const { getTextStyle: getTypographyStyle } = useTypography();
 
   const stepTitles = blockContent.step_titles 
-    ? blockContent.step_titles.split('|').map(item => item.trim()).filter(Boolean)
+    ? blockContent.step_titles.split('|').map(item => item.trim())
     : [];
 
   const stepDescriptions = blockContent.step_descriptions 
-    ? blockContent.step_descriptions.split('|').map(item => item.trim()).filter(Boolean)
+    ? blockContent.step_descriptions.split('|').map(item => item.trim())
     : [];
 
   const steps = stepTitles.map((title, index) => ({
-    title,
-    description: stepDescriptions[index] || ''
-  }));
+    title: title || (mode === 'edit' ? `Step ${index + 1}` : ''), // Fallback for empty titles in edit mode
+    description: stepDescriptions[index] || '',
+    originalIndex: index // Keep track of original index for proper data updates
+  })).filter(step => step.title.trim() !== '' || mode === 'edit'); // Show empty steps in edit mode
 
   const trustItems = blockContent.trust_items 
     ? blockContent.trust_items.split('|').map(item => item.trim()).filter(Boolean)
@@ -364,12 +365,12 @@ export default function IconCircleSteps(props: LayoutComponentProps) {
         <>
           {/* Steps Grid */}
           <div className={`grid ${steps.length === 3 ? 'md:grid-cols-3' : steps.length === 2 ? 'md:grid-cols-2' : 'md:grid-cols-4'} gap-12 mb-16`}>
-            {steps.map((step, index) => (
+            {steps.map((step, displayIndex) => (
               <CircleStep
-                key={index}
+                key={step.originalIndex}
                 title={step.title}
                 description={step.description}
-                index={index}
+                index={step.originalIndex}
                 colorTokens={colorTokens}
                 mode={mode}
                 handleContentUpdate={handleContentUpdate}
@@ -379,8 +380,8 @@ export default function IconCircleSteps(props: LayoutComponentProps) {
                   const stepTitles = blockContent.step_titles ? blockContent.step_titles.split('|') : [];
                   const stepDescriptions = blockContent.step_descriptions ? blockContent.step_descriptions.split('|') : [];
                   
-                  stepTitles.splice(index, 1);
-                  stepDescriptions.splice(index, 1);
+                  stepTitles.splice(step.originalIndex, 1);
+                  stepDescriptions.splice(step.originalIndex, 1);
                   
                   handleContentUpdate('step_titles', stepTitles.join('|'));
                   handleContentUpdate('step_descriptions', stepDescriptions.join('|'));
