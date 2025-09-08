@@ -38,7 +38,7 @@ interface BeforeAfterSliderContent {
 const CONTENT_SCHEMA = {
   headline: { 
     type: 'string' as const, 
-    default: 'See The Transformation' 
+    default: 'Transform Your Workflow in Minutes' 
   },
   before_label: { 
     type: 'string' as const, 
@@ -50,11 +50,11 @@ const CONTENT_SCHEMA = {
   },
   before_description: { 
     type: 'string' as const, 
-    default: 'Your current workflow with manual processes, inefficiencies, and time-consuming tasks.' 
+    default: 'Manual processes taking 3+ hours daily with spreadsheets, repetitive data entry, and constant context switching between tools.' 
   },
   after_description: { 
     type: 'string' as const, 
-    default: 'Streamlined automation, increased productivity, and seamless workflows that save you hours daily.' 
+    default: 'Automated workflow completed in minutes with AI-powered tools, seamless integrations, and real-time collaboration features.' 
   },
   before_visual: { 
     type: 'string' as const, 
@@ -82,15 +82,15 @@ const CONTENT_SCHEMA = {
   },
   before_placeholder_text: {
     type: 'string' as const,
-    default: 'Current Process'
+    default: 'Time-consuming manual workflow'
   },
   after_placeholder_text: {
     type: 'string' as const,
-    default: 'Optimized Solution'
+    default: 'Efficient automated system'
   },
   interaction_hint_text: {
     type: 'string' as const,
-    default: 'Drag to compare'
+    default: 'Click buttons above to switch views'
   },
   show_interaction_hint: {
     type: 'string' as const,
@@ -106,7 +106,7 @@ const CONTENT_SCHEMA = {
   },
   hint_icon: {
     type: 'string' as const,
-    default: '🔼'
+    default: '👆'
   }
 };
 

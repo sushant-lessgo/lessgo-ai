@@ -120,7 +120,15 @@ function getDefaultContentForElement(element: string): string | string[] {
     supporting_text: 'Add your supporting text here',
     description: 'Add description here',
     title: 'Add title here',
-    text: 'Add text here'
+    text: 'Add text here',
+    // BeforeAfter specific defaults
+    before_label: 'Before',
+    after_label: 'After',
+    before_description: 'Describe the current state, challenges, or pain points here. Example: Manual processes taking 3+ hours daily',
+    after_description: 'Describe the improved state, benefits, or solutions here. Example: Automated workflow completed in minutes',
+    before_placeholder_text: 'Time-consuming manual workflow',
+    after_placeholder_text: 'Efficient automated system',
+    interaction_hint_text: 'Click buttons above to switch views'
   };
 
   // Check for pattern matches
@@ -130,7 +138,18 @@ function getDefaultContentForElement(element: string): string | string[] {
     }
   }
 
-  return 'Add content here';
+  // More helpful fallback message based on field name
+  if (element.includes('before')) {
+    return 'Add your "before" state content here (e.g., current challenges, pain points, or existing process)';
+  } else if (element.includes('after')) {
+    return 'Add your "after" state content here (e.g., solutions, improvements, or desired outcome)';
+  } else if (element.includes('label')) {
+    return 'Add label text here';
+  } else if (element.includes('visual') || element.includes('image')) {
+    return '/placeholder-image.jpg';
+  }
+
+  return 'Add your content here - be specific about the value this provides';
 }
 
 // Helper to determine if a field is a list-type field
