@@ -1,6 +1,7 @@
 import React from 'react';
 import { useLayoutComponent } from '@/hooks/useLayoutComponent';
 import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
+import { useImageToolbar } from '@/hooks/useImageToolbar';
 import { useTypography } from '@/hooks/useTypography';
 import { LayoutSection } from '@/components/layout/LayoutSection';
 import { 
@@ -135,7 +136,8 @@ const PremiumCard = React.memo(({
   sectionBackground,
   premiumFeaturesText,
   premiumBadgeText,
-  blockContent
+  blockContent,
+  handleImageToolbar
 }: {
   type: 'before' | 'after';
   label: string;
@@ -152,6 +154,7 @@ const PremiumCard = React.memo(({
   premiumFeaturesText: string;
   premiumBadgeText: string;
   blockContent: SplitCardContent;
+  handleImageToolbar: (imageId: string, position: { x: number; y: number }) => void;
 }) => {
   
   const VisualPlaceholder = () => (
@@ -218,7 +221,15 @@ const PremiumCard = React.memo(({
             className="w-full h-64 object-cover cursor-pointer transition-transform duration-300 group-hover:scale-105"
             data-image-id={`${sectionId}-${type}-visual`}
             onMouseUp={(e) => {
-              // Image toolbar is only available in edit mode
+              if (mode !== 'preview') {
+                e.stopPropagation();
+                e.preventDefault();
+                const rect = e.currentTarget.getBoundingClientRect();
+                handleImageToolbar(`${sectionId}-${type}-visual`, {
+                  x: rect.left + rect.width / 2,
+                  y: rect.top - 10
+                });
+              }
             }}
           />
         ) : (
@@ -329,6 +340,7 @@ export default function SplitCard(props: LayoutComponentProps) {
   
   const store = useEditStore();
   const showImageToolbar = store.showImageToolbar;
+  const handleImageToolbar = useImageToolbar();
   
   // Filter out 'custom' background type as it's not supported by EditableContent components
   const safeBackgroundType = props.backgroundType === 'custom' ? 'neutral' : (props.backgroundType || 'neutral');
@@ -395,6 +407,7 @@ export default function SplitCard(props: LayoutComponentProps) {
               premiumFeaturesText={blockContent.premium_features_text}
               premiumBadgeText={blockContent.premium_badge_text}
               blockContent={blockContent}
+              handleImageToolbar={handleImageToolbar}
             />
             
             <div className="text-center lg:hidden">
@@ -471,6 +484,7 @@ export default function SplitCard(props: LayoutComponentProps) {
               premiumFeaturesText={blockContent.premium_features_text}
               premiumBadgeText={blockContent.premium_badge_text}
               blockContent={blockContent}
+              handleImageToolbar={handleImageToolbar}
             />
           </div>
         </div>
