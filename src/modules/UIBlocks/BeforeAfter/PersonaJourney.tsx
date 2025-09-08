@@ -2,6 +2,7 @@ import React from 'react';
 import { useLayoutComponent } from '@/hooks/useLayoutComponent';
 import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
 import { useTypography } from '@/hooks/useTypography';
+import { useImageToolbar } from '@/hooks/useImageToolbar';
 import { LayoutSection } from '@/components/layout/LayoutSection';
 import { 
   EditableAdaptiveHeadline, 
@@ -169,7 +170,8 @@ const PersonaCard = React.memo(({
   h3Style,
   onNameEdit,
   onRoleEdit,
-  onCompanyEdit
+  onCompanyEdit,
+  handleImageToolbar
 }: {
   name: string;
   role: string;
@@ -183,10 +185,14 @@ const PersonaCard = React.memo(({
   onNameEdit: (value: string) => void;
   onRoleEdit: (value: string) => void;
   onCompanyEdit: (value: string) => void;
+  handleImageToolbar: (imageId: string, position: { x: number; y: number }) => void;
 }) => {
   
-  const AvatarPlaceholder = () => (
-    <div className="w-20 h-20 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center">
+  const AvatarPlaceholder = ({ onClick }: { onClick?: (e: React.MouseEvent) => void }) => (
+    <div 
+      className="w-20 h-20 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center cursor-pointer"
+      onClick={onClick}
+    >
       <span className="text-white font-bold" style={h2Style}>
         {name.split(' ').map(n => n[0]).join('')}
       </span>
@@ -201,13 +207,43 @@ const PersonaCard = React.memo(({
             src={avatar}
             alt={name}
             className="w-20 h-20 rounded-full object-cover cursor-pointer border-4 border-white shadow-lg"
-            data-image-id={`${sectionId}-persona-avatar`}
+            data-image-id={`${sectionId}-persona_avatar`}
             onMouseUp={(e) => {
-                        // Image toolbar is only available in edit mode
-                      }}
+              if (mode === 'edit') {
+                e.stopPropagation();
+                e.preventDefault();
+                const rect = e.currentTarget.getBoundingClientRect();
+                const imageId = `${sectionId}-persona_avatar`;
+                const position = {
+                  x: rect.left + rect.width / 2,
+                  y: rect.top - 10
+                };
+                handleImageToolbar(imageId, position);
+              }
+            }}
+            onClick={(e) => {
+              if (mode === 'edit') {
+                e.stopPropagation();
+                e.preventDefault();
+              }
+            }}
           />
         ) : (
-          <AvatarPlaceholder />
+          <AvatarPlaceholder 
+            onClick={(e) => {
+              if (mode === 'edit') {
+                e.stopPropagation();
+                e.preventDefault();
+                const rect = e.currentTarget.getBoundingClientRect();
+                const imageId = `${sectionId}-persona_avatar`;
+                const position = {
+                  x: rect.left + rect.width / 2,
+                  y: rect.top - 10
+                };
+                handleImageToolbar(imageId, position);
+              }
+            }}
+          />
         )}
         
         <div>
@@ -426,6 +462,7 @@ JourneyPhase.displayName = 'JourneyPhase';
 
 export default function PersonaJourney(props: LayoutComponentProps) {
   const { getTextStyle: getTypographyStyle } = useTypography();
+  const handleImageToolbar = useImageToolbar();
   
   const {
     sectionId,
@@ -528,6 +565,7 @@ export default function PersonaJourney(props: LayoutComponentProps) {
             onNameEdit={(value) => handleContentUpdate('persona_name', value)}
             onRoleEdit={(value) => handleContentUpdate('persona_role', value)}
             onCompanyEdit={(value) => handleContentUpdate('persona_company', value)}
+            handleImageToolbar={handleImageToolbar}
           />
         </div>
 
