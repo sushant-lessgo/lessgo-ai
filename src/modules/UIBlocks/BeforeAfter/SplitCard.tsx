@@ -134,7 +134,6 @@ const PremiumCard = React.memo(({
   backgroundType,
   sectionBackground,
   premiumFeaturesText,
-  placeholderText,
   premiumBadgeText,
   blockContent
 }: {
@@ -151,7 +150,6 @@ const PremiumCard = React.memo(({
   backgroundType: 'custom' | 'neutral' | 'primary' | 'secondary' | 'divider' | 'theme';
   sectionBackground: any;
   premiumFeaturesText: string;
-  placeholderText: string;
   premiumBadgeText: string;
   blockContent: SplitCardContent;
 }) => {
@@ -173,27 +171,6 @@ const PremiumCard = React.memo(({
             className="text-4xl"
             sectionId={sectionId}
             elementKey={type === 'before' ? 'before_icon' : 'after_icon'}
-          />
-        </div>
-      </div>
-      <div className="absolute bottom-4 left-4 right-4">
-        <div className={`text-center text-sm font-medium ${type === 'before' ? 'text-slate-700' : 'text-amber-700'}`}>
-          <EditableAdaptiveText
-            mode={mode}
-            value={placeholderText || ''}
-            onEdit={(value) => handleContentUpdate(type === 'before' ? 'before_placeholder_text' : 'after_placeholder_text', value)}
-            backgroundType={backgroundType}
-            colorTokens={colorTokens}
-            variant="body"
-            textStyle={{
-              fontSize: '0.875rem',
-              fontWeight: 500,
-              color: type === 'before' ? '#334155' : '#d97706'
-            }}
-            className={`text-center text-sm font-medium ${type === 'before' ? 'text-slate-700' : 'text-amber-700'}`}
-            sectionId={sectionId}
-            elementKey={type === 'before' ? 'before_placeholder_text' : 'after_placeholder_text'}
-            sectionBackground={sectionBackground}
           />
         </div>
       </div>
@@ -416,7 +393,6 @@ export default function SplitCard(props: LayoutComponentProps) {
               backgroundType={safeBackgroundType}
               sectionBackground={sectionBackground}
               premiumFeaturesText={blockContent.premium_features_text}
-              placeholderText={blockContent.before_placeholder_text}
               premiumBadgeText={blockContent.premium_badge_text}
               blockContent={blockContent}
             />
@@ -493,84 +469,12 @@ export default function SplitCard(props: LayoutComponentProps) {
               backgroundType={safeBackgroundType}
               sectionBackground={sectionBackground}
               premiumFeaturesText={blockContent.premium_features_text}
-              placeholderText={blockContent.after_placeholder_text}
               premiumBadgeText={blockContent.premium_badge_text}
               blockContent={blockContent}
             />
           </div>
         </div>
 
-        <div className="grid md:grid-cols-2 gap-8 mb-12">
-          <div className="space-y-4">
-            <EditableAdaptiveText
-              mode={mode}
-              value={blockContent.before_label || ''}
-              onEdit={(value) => handleContentUpdate('before_label', value)}
-              backgroundType={safeBackgroundType}
-              colorTokens={colorTokens}
-              variant="body"
-              textStyle={{
-                ...getTextStyle('h3'),
-                textTransform: 'uppercase',
-                letterSpacing: '0.05em',
-                fontWeight: 600,
-                color: '#64748b'
-              }}
-              className="text-slate-600"
-              sectionId={sectionId}
-              elementKey="before_label"
-              sectionBackground={sectionBackground}
-            />
-
-            <EditableAdaptiveText
-              mode={mode}
-              value={blockContent.before_description || ''}
-              onEdit={(value) => handleContentUpdate('before_description', value)}
-              backgroundType={safeBackgroundType}
-              colorTokens={colorTokens}
-              variant="body"
-              className="leading-relaxed"
-              sectionId={sectionId}
-              elementKey="before_description"
-              sectionBackground={sectionBackground}
-            />
-          </div>
-
-          <div className="space-y-4">
-            <EditableAdaptiveText
-              mode={mode}
-              value={blockContent.after_label || ''}
-              onEdit={(value) => handleContentUpdate('after_label', value)}
-              backgroundType={safeBackgroundType}
-              colorTokens={colorTokens}
-              variant="body"
-              textStyle={{
-                ...getTextStyle('h3'),
-                textTransform: 'uppercase',
-                letterSpacing: '0.05em',
-                fontWeight: 600,
-                color: '#d97706'
-              }}
-              className="text-amber-600"
-              sectionId={sectionId}
-              elementKey="after_label"
-              sectionBackground={sectionBackground}
-            />
-
-            <EditableAdaptiveText
-              mode={mode}
-              value={blockContent.after_description || ''}
-              onEdit={(value) => handleContentUpdate('after_description', value)}
-              backgroundType={safeBackgroundType}
-              colorTokens={colorTokens}
-              variant="body"
-              className="leading-relaxed"
-              sectionId={sectionId}
-              elementKey="after_description"
-              sectionBackground={sectionBackground}
-            />
-          </div>
-        </div>
 
         {(blockContent.cta_text || blockContent.trust_items || mode === 'edit') && (
           <div className="text-center space-y-6">
