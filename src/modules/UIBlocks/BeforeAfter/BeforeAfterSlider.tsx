@@ -226,35 +226,11 @@ const InteractiveSlider = React.memo(({
           >
             
             <div className="w-full flex-shrink-0">
-              {beforeContent.visual && beforeContent.visual !== '' ? (
-                <img
-                  src={beforeContent.visual}
-                  alt="Before state"
-                  className="w-full h-80 object-cover cursor-pointer"
-                  data-image-id={`${sectionId}-before-visual`}
-                  onMouseUp={(e) => {
-                        // Image toolbar is only available in edit mode
-                      }}
-                />
-              ) : (
-                <VisualPlaceholder type="before" />
-              )}
+              <VisualPlaceholder type="before" />
             </div>
 
             <div className="w-full flex-shrink-0">
-              {afterContent.visual && afterContent.visual !== '' ? (
-                <img
-                  src={afterContent.visual}
-                  alt="After state"
-                  className="w-full h-80 object-cover cursor-pointer"
-                  data-image-id={`${sectionId}-after-visual`}
-                  onMouseUp={(e) => {
-                        // Image toolbar is only available in edit mode
-                      }}
-                />
-              ) : (
-                <VisualPlaceholder type="after" />
-              )}
+              <VisualPlaceholder type="after" />
             </div>
           </div>
         </div>
@@ -448,83 +424,6 @@ export default function BeforeAfterSlider(props: LayoutComponentProps) {
           )}
         </div>
 
-        <div className="grid md:grid-cols-2 gap-8 mb-12">
-          <div className="space-y-4">
-            <div className="flex items-center mb-4">
-              <div className="w-3 h-3 rounded-full mr-3 bg-red-500 ring-4 ring-red-100" />
-              <EditableAdaptiveText
-                mode={mode}
-                value={blockContent.before_label || ''}
-                onEdit={(value) => handleContentUpdate('before_label', value)}
-                backgroundType={safeBackgroundType}
-                colorTokens={colorTokens}
-                variant="body"
-                textStyle={{
-                  ...getTextStyle('h3'),
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.05em',
-                  fontWeight: 600,
-                  color: '#ef4444'
-                }}
-                className="text-red-500"
-                sectionId={sectionId}
-                elementKey="before_label"
-                sectionBackground={sectionBackground}
-              />
-            </div>
-
-            <EditableAdaptiveText
-              mode={mode}
-              value={blockContent.before_description || ''}
-              onEdit={(value) => handleContentUpdate('before_description', value)}
-              backgroundType={safeBackgroundType}
-              colorTokens={colorTokens}
-              variant="body"
-              className="leading-relaxed"
-              sectionId={sectionId}
-              elementKey="before_description"
-              sectionBackground={sectionBackground}
-            />
-          </div>
-
-          <div className="space-y-4">
-            <div className="flex items-center mb-4">
-              <div className="w-3 h-3 rounded-full mr-3 bg-green-500 ring-4 ring-green-100" />
-              <EditableAdaptiveText
-                mode={mode}
-                value={blockContent.after_label || ''}
-                onEdit={(value) => handleContentUpdate('after_label', value)}
-                backgroundType={safeBackgroundType}
-                colorTokens={colorTokens}
-                variant="body"
-                textStyle={{
-                  ...getTextStyle('h3'),
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.05em',
-                  fontWeight: 600,
-                  color: '#10b981'
-                }}
-                className="text-green-500"
-                sectionId={sectionId}
-                elementKey="after_label"
-                sectionBackground={sectionBackground}
-              />
-            </div>
-
-            <EditableAdaptiveText
-              mode={mode}
-              value={blockContent.after_description || ''}
-              onEdit={(value) => handleContentUpdate('after_description', value)}
-              backgroundType={safeBackgroundType}
-              colorTokens={colorTokens}
-              variant="body"
-              className="leading-relaxed"
-              sectionId={sectionId}
-              elementKey="after_description"
-              sectionBackground={sectionBackground}
-            />
-          </div>
-        </div>
 
         {(blockContent.cta_text || blockContent.trust_items || mode === 'edit') && (
           <div className="text-center space-y-6">
