@@ -49,6 +49,19 @@ export function ImageToolbar({ targetId, position, contextActions }: ImageToolba
     // Check if targetId follows the "sectionId.elementKey" format (from showToolbar)
     if (targetId.includes('.')) {
       const [sectionId, elementKey] = targetId.split('.');
+      
+      // Handle timestamp in elementKey for dot format (e.g., "beforeAfter.1757338395540-before-visual")
+      const timestampPattern = /^(\d{10,})-(.+)$/;
+      const match = elementKey.match(timestampPattern);
+      if (match) {
+        // elementKey contains timestamp-field, reconstruct properly
+        const finalSectionId = `${sectionId}-${match[1]}`;  // Add timestamp to sectionId
+        const finalElementKey = match[2].replace(/-/g, '_'); // Convert field name dashes to underscores
+        const result = { sectionId: finalSectionId, elementKey: finalElementKey };
+        return result;
+      }
+      
+      // Fallback: original dot logic for non-timestamped cases
       const result = { sectionId, elementKey };
       return result;
     }
@@ -79,7 +92,43 @@ export function ImageToolbar({ targetId, position, contextActions }: ImageToolba
       const result = { sectionId, elementKey: 'hero_image' };
       return result;
     } else if (parts.length >= 2) {
-      // Other image cases - assume format: "sectionId-elementKey"
+      // Other image cases - improved logic to handle timestamped section IDs
+      
+      // PRIORITY 1: Check for timestamp pattern first (more specific)
+      const timestampPattern = /^(.+?)-(\d{10,})-(.+)$/;
+      const match = targetId.match(timestampPattern);
+      if (match) {
+        // match[1] is the section type (e.g., "beforeAfter")
+        // match[2] is the timestamp (e.g., "1757310502405") 
+        // match[3] is the image field (e.g., "before-visual" or "persona-avatar")
+        const sectionId = `${match[1]}-${match[2]}`;
+        const elementKey = match[3].replace(/-/g, '_'); // Convert dashes to underscores for field name
+        const result = { sectionId, elementKey };
+        return result;
+      }
+      
+      // PRIORITY 2: Check if the last parts form a known image field
+      const commonImageFields = [
+        // BeforeAfter components
+        'persona_avatar', 'before_visual', 'after_visual', 
+        // Hero and feature components  
+        'mockup_image', 'product_image', 'feature_image', 'center_hero_image',
+        'split_image', 'split_visual', 'center_visual',
+        // Other common fields
+        'logo_image', 'team_image', 'testimonial_image', 'company_logo',
+        'background_image', 'icon_image', 'gallery_image'
+      ];
+      
+      for (let i = 1; i <= Math.min(3, parts.length - 1); i++) {
+        const possibleField = parts.slice(-i).join('_');
+        if (commonImageFields.includes(possibleField)) {
+          const sectionId = parts.slice(0, -i).join('-');
+          const result = { sectionId, elementKey: possibleField };
+          return result;
+        }
+      }
+      
+      // PRIORITY 3: Final fallback - original logic (for simple non-timestamped sections)
       const sectionId = parts[0];
       const elementKey = parts.slice(1).join('-');
       const result = { sectionId, elementKey };

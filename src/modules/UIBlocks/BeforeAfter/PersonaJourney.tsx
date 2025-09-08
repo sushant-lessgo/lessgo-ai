@@ -191,13 +191,13 @@ const PersonaCard = React.memo(({
           src={avatar || '/persona-placeholder.jpg'}
           alt={name}
           className="w-20 h-20 rounded-full object-cover cursor-pointer border-4 border-white shadow-lg"
-          data-image-id={`${sectionId}.persona_avatar`}
+          data-image-id={`${sectionId}-persona-avatar`}
           onMouseUp={(e) => {
             if (mode === 'edit') {
               e.stopPropagation();
               e.preventDefault();
               const rect = e.currentTarget.getBoundingClientRect();
-              const imageId = `${sectionId}.persona_avatar`;
+              const imageId = `${sectionId}-persona-avatar`;
               const position = {
                 x: rect.left + rect.width / 2,
                 y: rect.top - 10
