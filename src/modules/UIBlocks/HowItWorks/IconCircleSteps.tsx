@@ -148,7 +148,8 @@ const CircleStep = React.memo(({
   mode,
   handleContentUpdate,
   blockContent,
-  sectionId
+  sectionId,
+  onRemove
 }: {
   title: string;
   description: string;
@@ -158,6 +159,7 @@ const CircleStep = React.memo(({
   handleContentUpdate: (key: keyof IconCircleStepsContent, value: any) => void;
   blockContent: IconCircleStepsContent;
   sectionId: string;
+  onRemove?: () => void;
 }) => {
   
   // Get step icon from content fields
@@ -211,18 +213,68 @@ const CircleStep = React.memo(({
       </div>
       
       {/* Content */}
-      <div className="space-y-3">
-        <h3 className="text-xl font-bold text-gray-900 group-hover:text-gray-700 transition-colors duration-300">
-          {title}
-        </h3>
+      <div className="space-y-3 relative">
+        {/* Editable Step Title */}
+        {mode !== 'preview' ? (
+          <div
+            contentEditable
+            suppressContentEditableWarning
+            onBlur={(e) => {
+              const stepTitles = blockContent.step_titles ? blockContent.step_titles.split('|') : [];
+              stepTitles[index] = e.currentTarget.textContent || '';
+              handleContentUpdate('step_titles', stepTitles.join('|'));
+            }}
+            className="text-xl font-bold text-gray-900 group-hover:text-gray-700 transition-colors duration-300 outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-2 py-1 cursor-text hover:bg-gray-50 min-h-[32px]"
+            data-placeholder="Step title"
+          >
+            {title}
+          </div>
+        ) : (
+          <h3 className="text-xl font-bold text-gray-900 group-hover:text-gray-700 transition-colors duration-300">
+            {title}
+          </h3>
+        )}
         
-        <p className="text-gray-600 leading-relaxed group-hover:text-gray-700 transition-colors duration-300">
-          {description}
-        </p>
+        {/* Editable Step Description */}
+        {mode !== 'preview' ? (
+          <div
+            contentEditable
+            suppressContentEditableWarning
+            onBlur={(e) => {
+              const stepDescriptions = blockContent.step_descriptions ? blockContent.step_descriptions.split('|') : [];
+              stepDescriptions[index] = e.currentTarget.textContent || '';
+              handleContentUpdate('step_descriptions', stepDescriptions.join('|'));
+            }}
+            className="text-gray-600 leading-relaxed group-hover:text-gray-700 transition-colors duration-300 outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-2 py-1 cursor-text hover:bg-gray-50 min-h-[48px]"
+            data-placeholder="Step description"
+          >
+            {description}
+          </div>
+        ) : (
+          <p className="text-gray-600 leading-relaxed group-hover:text-gray-700 transition-colors duration-300">
+            {description}
+          </p>
+        )}
         
         <div className="flex justify-center">
           <div className={`w-12 h-1 rounded-full bg-gradient-to-r ${getColorForIndex(index)} opacity-60`} />
         </div>
+        
+        {/* Remove Step Button - only in edit mode */}
+        {mode === 'edit' && onRemove && (
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onRemove();
+            }}
+            className="opacity-0 group-hover:opacity-100 absolute -top-2 -right-2 text-red-500 hover:text-red-700 transition-opacity duration-200 z-10 bg-white rounded-full p-1 shadow-md"
+            title="Remove this step"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        )}
       </div>
     </div>
   );
@@ -309,73 +361,70 @@ export default function IconCircleSteps(props: LayoutComponentProps) {
           )}
         </div>
 
-        {mode !== 'preview' ? (
-          <div className="space-y-8">
-            <div className="p-6 border border-gray-200 rounded-lg bg-gray-50">
-              <h4 className="font-semibold text-gray-700 mb-4">Step Content</h4>
-              
-              <div className="space-y-4">
-                <EditableAdaptiveText
-                  mode={mode}
-                  value={blockContent.step_titles || ''}
-                  onEdit={(value) => handleContentUpdate('step_titles', value)}
-                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
-                  colorTokens={colorTokens}
-                  variant="body"
-                  className="mb-2"
-                  placeholder="Step titles (pipe separated)"
-                  sectionId={sectionId}
-                  elementKey="step_titles"
-                  sectionBackground={sectionBackground}
-                />
-                
-                <EditableAdaptiveText
-                  mode={mode}
-                  value={blockContent.step_descriptions || ''}
-                  onEdit={(value) => handleContentUpdate('step_descriptions', value)}
-                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
-                  colorTokens={colorTokens}
-                  variant="body"
-                  placeholder="Step descriptions (pipe separated)"
-                  sectionId={sectionId}
-                  elementKey="step_descriptions"
-                  sectionBackground={sectionBackground}
-                />
+        <>
+          {/* Steps Grid */}
+          <div className={`grid ${steps.length === 3 ? 'md:grid-cols-3' : steps.length === 2 ? 'md:grid-cols-2' : 'md:grid-cols-4'} gap-12 mb-16`}>
+            {steps.map((step, index) => (
+              <CircleStep
+                key={index}
+                title={step.title}
+                description={step.description}
+                index={index}
+                colorTokens={colorTokens}
+                mode={mode}
+                handleContentUpdate={handleContentUpdate}
+                blockContent={blockContent}
+                sectionId={sectionId}
+                onRemove={steps.length > 1 ? () => {
+                  const stepTitles = blockContent.step_titles ? blockContent.step_titles.split('|') : [];
+                  const stepDescriptions = blockContent.step_descriptions ? blockContent.step_descriptions.split('|') : [];
+                  
+                  stepTitles.splice(index, 1);
+                  stepDescriptions.splice(index, 1);
+                  
+                  handleContentUpdate('step_titles', stepTitles.join('|'));
+                  handleContentUpdate('step_descriptions', stepDescriptions.join('|'));
+                } : undefined}
+              />
+            ))}
+            
+            {/* Add Step Button - only in edit mode */}
+            {mode === 'edit' && steps.length < 6 && (
+              <div className="flex items-center justify-center">
+                <button
+                  onClick={() => {
+                    const stepTitles = blockContent.step_titles ? blockContent.step_titles.split('|') : [];
+                    const stepDescriptions = blockContent.step_descriptions ? blockContent.step_descriptions.split('|') : [];
+                    
+                    stepTitles.push(`Step ${stepTitles.length + 1}`);
+                    stepDescriptions.push('Add step description here');
+                    
+                    handleContentUpdate('step_titles', stepTitles.join('|'));
+                    handleContentUpdate('step_descriptions', stepDescriptions.join('|'));
+                  }}
+                  className="w-24 h-24 rounded-full border-2 border-dashed border-gray-300 hover:border-gray-400 text-gray-400 hover:text-gray-500 transition-all duration-300 flex items-center justify-center bg-gray-50 hover:bg-gray-100"
+                  title="Add new step"
+                >
+                  <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                  </svg>
+                </button>
               </div>
-            </div>
+            )}
           </div>
-        ) : (
-          <>
-            {/* Steps Grid */}
-            <div className={`grid ${steps.length === 3 ? 'md:grid-cols-3' : steps.length === 2 ? 'md:grid-cols-2' : 'md:grid-cols-4'} gap-12 mb-16`}>
-              {steps.map((step, index) => (
-                <CircleStep
-                  key={index}
-                  title={step.title}
-                  description={step.description}
-                  index={index}
-                  colorTokens={colorTokens}
-                  mode={mode}
-                  handleContentUpdate={handleContentUpdate}
-                  blockContent={blockContent}
-                  sectionId={sectionId}
-                />
-              ))}
-            </div>
 
-            {/* Process Flow Indicator */}
-            <div className="flex items-center justify-center space-x-4 mb-12">
-              {steps.map((_, index) => (
-                <React.Fragment key={index}>
-                  <div className={`w-3 h-3 rounded-full ${colorTokens.ctaBg}`} />
-                  {index < steps.length - 1 && (
-                    <div className="flex-1 h-0.5 bg-gray-300 max-w-16" />
-                  )}
-                </React.Fragment>
-              ))}
-            </div>
-          </>
-        )}
+          {/* Process Flow Indicator */}
+          <div className="flex items-center justify-center space-x-4 mb-12">
+            {steps.map((_, index) => (
+              <React.Fragment key={index}>
+                <div className={`w-3 h-3 rounded-full ${colorTokens.ctaBg}`} />
+                {index < steps.length - 1 && (
+                  <div className="flex-1 h-0.5 bg-gray-300 max-w-16" />
+                )}
+              </React.Fragment>
+            ))}
+          </div>
+        </>
 
         {/* Summary Card */}
         {blockContent.show_summary_card !== false && (
