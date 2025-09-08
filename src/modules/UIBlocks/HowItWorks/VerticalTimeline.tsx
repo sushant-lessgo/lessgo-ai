@@ -88,7 +88,8 @@ const TimelineStep = React.memo(({
   backgroundType,
   sectionId,
   getStepIcon,
-  handleStepIconEdit
+  handleStepIconEdit,
+  onRemove
 }: {
   title: string;
   description: string;
@@ -104,6 +105,7 @@ const TimelineStep = React.memo(({
   sectionId: string;
   getStepIcon: (index: number) => string;
   handleStepIconEdit: (index: number, value: string) => void;
+  onRemove?: () => void;
 }) => {
   
   const getStepColor = (index: number) => {
@@ -156,22 +158,89 @@ const TimelineStep = React.memo(({
         </div>
         
         {/* Step Details */}
-        <div className="flex-1 pb-12">
+        <div className="flex-1 pb-12 relative group">
           <div className="bg-white rounded-xl p-6 shadow-lg border border-gray-100 hover:shadow-xl transition-all duration-300">
             <div className="flex items-start justify-between mb-4">
-              <h3 className="text-xl font-bold text-gray-900 flex-1">{title}</h3>
-              {duration && (
-                <span className={`text-sm font-medium ${mutedTextColor} bg-gray-100 px-3 py-1 rounded-full ml-4 flex-shrink-0`}>
-                  {duration}
-                </span>
+              {/* Editable Step Title */}
+              {mode !== 'preview' ? (
+                <div
+                  contentEditable
+                  suppressContentEditableWarning
+                  onBlur={(e) => {
+                    const stepTitles = blockContent.step_titles ? blockContent.step_titles.split('|') : [];
+                    stepTitles[index] = e.currentTarget.textContent || '';
+                    handleContentUpdate('step_titles', stepTitles.join('|'));
+                  }}
+                  className="text-xl font-bold text-gray-900 flex-1 outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-2 py-1 cursor-text hover:bg-gray-50 min-h-[32px]"
+                  data-placeholder="Step title"
+                >
+                  {title}
+                </div>
+              ) : (
+                <h3 className="text-xl font-bold text-gray-900 flex-1">{title}</h3>
+              )}
+              {/* Editable Duration */}
+              {mode !== 'preview' ? (
+                <div
+                  contentEditable
+                  suppressContentEditableWarning
+                  onBlur={(e) => {
+                    const stepDurations = blockContent.step_durations ? blockContent.step_durations.split('|') : [];
+                    stepDurations[index] = e.currentTarget.textContent || '';
+                    handleContentUpdate('step_durations', stepDurations.join('|'));
+                  }}
+                  className={`text-sm font-medium ${mutedTextColor} bg-gray-100 px-3 py-1 rounded-full ml-4 flex-shrink-0 outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 cursor-text hover:bg-gray-200 min-w-[60px] text-center`}
+                  data-placeholder="Duration"
+                >
+                  {duration || 'Duration'}
+                </div>
+              ) : (
+                duration && (
+                  <span className={`text-sm font-medium ${mutedTextColor} bg-gray-100 px-3 py-1 rounded-full ml-4 flex-shrink-0`}>
+                    {duration}
+                  </span>
+                )
               )}
             </div>
             
-            <p className="text-gray-600 leading-relaxed mb-4">
-              {description}
-            </p>
+            {/* Editable Step Description */}
+            {mode !== 'preview' ? (
+              <div
+                contentEditable
+                suppressContentEditableWarning
+                onBlur={(e) => {
+                  const stepDescriptions = blockContent.step_descriptions ? blockContent.step_descriptions.split('|') : [];
+                  stepDescriptions[index] = e.currentTarget.textContent || '';
+                  handleContentUpdate('step_descriptions', stepDescriptions.join('|'));
+                }}
+                className="text-gray-600 leading-relaxed mb-4 outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-2 py-1 cursor-text hover:bg-gray-50 min-h-[48px]"
+                data-placeholder="Step description"
+              >
+                {description}
+              </div>
+            ) : (
+              <p className="text-gray-600 leading-relaxed mb-4">
+                {description}
+              </p>
+            )}
             
           </div>
+          
+          {/* Remove Step Button - only in edit mode */}
+          {mode === 'edit' && onRemove && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onRemove();
+              }}
+              className="opacity-0 group-hover:opacity-100 absolute top-2 right-2 text-red-500 hover:text-red-700 transition-opacity duration-200 z-10 bg-white rounded-full p-1 shadow-md"
+              title="Remove this step"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          )}
         </div>
       </div>
     </div>
@@ -222,10 +291,11 @@ export default function VerticalTimeline(props: LayoutComponentProps) {
   };
 
   const steps = stepTitles.map((title, index) => ({
-    title,
+    title: title || (mode === 'edit' ? `Step ${index + 1}` : ''),
     description: stepDescriptions[index] || '',
-    duration: stepDurations[index] || ''
-  }));
+    duration: stepDurations[index] || '',
+    originalIndex: index // Keep track of original index for proper data updates
+  })).filter(step => step.title.trim() !== '' || mode === 'edit'); // Show empty steps in edit mode
 
   const trustItems = blockContent.trust_items 
     ? blockContent.trust_items.split('|').map(item => item.trim()).filter(Boolean)
@@ -277,78 +347,82 @@ export default function VerticalTimeline(props: LayoutComponentProps) {
           )}
         </div>
 
-        {mode !== 'preview' ? (
-          <div className="space-y-8">
-            <div className="p-6 border border-gray-200 rounded-lg bg-gray-50">
-              <h4 className="font-semibold text-gray-700 mb-4">Timeline Steps</h4>
-              
-              <div className="space-y-4">
-                <EditableAdaptiveText
-                  mode={mode}
-                  value={blockContent.step_titles || ''}
-                  onEdit={(value) => handleContentUpdate('step_titles', value)}
-                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
-                  colorTokens={colorTokens}
-                  variant="body"
-                  className="mb-2"
-                  placeholder="Step titles (pipe separated)"
-                  sectionId={sectionId}
-                  elementKey="step_titles"
-                  sectionBackground={sectionBackground}
-                />
+        <div className="space-y-0">
+          {steps.map((step, displayIndex) => (
+            <TimelineStep
+              key={step.originalIndex}
+              title={step.title}
+              description={step.description}
+              duration={step.duration}
+              index={step.originalIndex}
+              isLast={displayIndex === steps.length - 1}
+              colorTokens={colorTokens}
+              mutedTextColor={mutedTextColor}
+              blockContent={blockContent}
+              handleContentUpdate={handleContentUpdate}
+              mode={mode}
+              backgroundType={backgroundType}
+              sectionId={sectionId}
+              getStepIcon={getStepIcon}
+              handleStepIconEdit={handleStepIconEdit}
+              onRemove={steps.length > 1 ? () => {
+                const stepTitles = blockContent.step_titles ? blockContent.step_titles.split('|') : [];
+                const stepDescriptions = blockContent.step_descriptions ? blockContent.step_descriptions.split('|') : [];
+                const stepDurations = blockContent.step_durations ? blockContent.step_durations.split('|') : [];
                 
-                <EditableAdaptiveText
-                  mode={mode}
-                  value={blockContent.step_descriptions || ''}
-                  onEdit={(value) => handleContentUpdate('step_descriptions', value)}
-                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
-                  colorTokens={colorTokens}
-                  variant="body"
-                  className="mb-2"
-                  placeholder="Step descriptions (pipe separated)"
-                  sectionId={sectionId}
-                  elementKey="step_descriptions"
-                  sectionBackground={sectionBackground}
-                />
+                stepTitles.splice(step.originalIndex, 1);
+                stepDescriptions.splice(step.originalIndex, 1);
+                stepDurations.splice(step.originalIndex, 1);
                 
-                <EditableAdaptiveText
-                  mode={mode}
-                  value={blockContent.step_durations || ''}
-                  onEdit={(value) => handleContentUpdate('step_durations', value)}
-                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
-                  colorTokens={colorTokens}
-                  variant="body"
-                  placeholder="Step durations (pipe separated) - optional"
-                  sectionId={sectionId}
-                  elementKey="step_durations"
-                  sectionBackground={sectionBackground}
-                />
+                handleContentUpdate('step_titles', stepTitles.join('|'));
+                handleContentUpdate('step_descriptions', stepDescriptions.join('|'));
+                handleContentUpdate('step_durations', stepDurations.join('|'));
+              } : undefined}
+            />
+          ))}
+          
+          {/* Add Step Button - only in edit mode */}
+          {mode === 'edit' && steps.length < 6 && (
+            <div className="relative flex items-start">
+              <div className="flex items-start space-x-6 w-full">
+                <div className="flex-shrink-0 relative">
+                  <div className="w-12 h-12 rounded-full border-2 border-dashed border-gray-300 hover:border-gray-400 text-gray-400 hover:text-gray-500 transition-all duration-300 flex items-center justify-center bg-gray-50 hover:bg-gray-100">
+                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                    </svg>
+                  </div>
+                </div>
+                
+                <div className="flex-1 pb-12">
+                  <button
+                    onClick={() => {
+                      const stepTitles = blockContent.step_titles ? blockContent.step_titles.split('|') : [];
+                      const stepDescriptions = blockContent.step_descriptions ? blockContent.step_descriptions.split('|') : [];
+                      const stepDurations = blockContent.step_durations ? blockContent.step_durations.split('|') : [];
+                      
+                      stepTitles.push(`Step ${stepTitles.length + 1}`);
+                      stepDescriptions.push('Add step description here');
+                      stepDurations.push('5 minutes');
+                      
+                      handleContentUpdate('step_titles', stepTitles.join('|'));
+                      handleContentUpdate('step_descriptions', stepDescriptions.join('|'));
+                      handleContentUpdate('step_durations', stepDurations.join('|'));
+                    }}
+                    className="w-full bg-white rounded-xl p-6 border-2 border-dashed border-gray-300 hover:border-gray-400 text-gray-400 hover:text-gray-500 transition-all duration-300 hover:bg-gray-50"
+                    title="Add new step"
+                  >
+                    <div className="text-center">
+                      <svg className="w-8 h-8 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                      </svg>
+                      <span className="text-sm font-medium">Add Timeline Step</span>
+                    </div>
+                  </button>
+                </div>
               </div>
             </div>
-          </div>
-        ) : (
-          <div className="space-y-0">
-            {steps.map((step, index) => (
-              <TimelineStep
-                key={index}
-                title={step.title}
-                description={step.description}
-                duration={step.duration}
-                index={index}
-                isLast={index === steps.length - 1}
-                colorTokens={colorTokens}
-                mutedTextColor={mutedTextColor}
-                blockContent={blockContent}
-                handleContentUpdate={handleContentUpdate}
-                mode={mode}
-                backgroundType={backgroundType}
-                sectionId={sectionId}
-                getStepIcon={getStepIcon}
-                handleStepIconEdit={handleStepIconEdit}
-              />
-            ))}
-          </div>
-        )}
+          )}
+        </div>
 
         {/* Process Summary */}
         {(
