@@ -60,11 +60,11 @@ const CONTENT_SCHEMA = {
   },
   before_visual: { 
     type: 'string' as const, 
-    default: '/before-placeholder.jpg' 
+    default: '/Before default.jpg' 
   },
   after_visual: { 
     type: 'string' as const, 
-    default: '/after-placeholder.jpg' 
+    default: '/After default.jpg' 
   },
   subheadline: { 
     type: 'string' as const, 
@@ -214,7 +214,7 @@ const PremiumCard = React.memo(({
         {visual && visual !== '' ? (
           <img
             src={visual}
-            alt={`${type} state`}
+            alt={type === 'before' ? 'Current challenge visualization' : 'Premium solution result'}
             className="w-full h-64 object-cover cursor-pointer transition-transform duration-300 group-hover:scale-105"
             data-image-id={`${sectionId}-${type}-visual`}
             onMouseUp={(e) => {
