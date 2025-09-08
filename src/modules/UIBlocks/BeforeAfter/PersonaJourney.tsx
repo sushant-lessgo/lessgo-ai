@@ -1,6 +1,5 @@
 import React from 'react';
 import { useLayoutComponent } from '@/hooks/useLayoutComponent';
-import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
 import { useTypography } from '@/hooks/useTypography';
 import { useImageToolbar } from '@/hooks/useImageToolbar';
 import { LayoutSection } from '@/components/layout/LayoutSection';
@@ -163,10 +162,8 @@ const PersonaCard = React.memo(({
   role, 
   company, 
   avatar, 
-  showImageToolbar, 
   sectionId, 
   mode,
-  h2Style,
   h3Style,
   onNameEdit,
   onRoleEdit,
@@ -177,10 +174,8 @@ const PersonaCard = React.memo(({
   role: string;
   company: string;
   avatar?: string;
-  showImageToolbar: any;
   sectionId: string;
   mode: string;
-  h2Style: React.CSSProperties;
   h3Style: React.CSSProperties;
   onNameEdit: (value: string) => void;
   onRoleEdit: (value: string) => void;
@@ -188,63 +183,35 @@ const PersonaCard = React.memo(({
   handleImageToolbar: (imageId: string, position: { x: number; y: number }) => void;
 }) => {
   
-  const AvatarPlaceholder = ({ onClick }: { onClick?: (e: React.MouseEvent) => void }) => (
-    <div 
-      className="w-20 h-20 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center cursor-pointer"
-      onClick={onClick}
-    >
-      <span className="text-white font-bold" style={h2Style}>
-        {name.split(' ').map(n => n[0]).join('')}
-      </span>
-    </div>
-  );
 
   return (
     <div className="bg-white rounded-xl p-6 shadow-lg border border-gray-200">
       <div className="flex items-center space-x-4">
-        {avatar && avatar !== '' ? (
-          <img
-            src={avatar}
-            alt={name}
-            className="w-20 h-20 rounded-full object-cover cursor-pointer border-4 border-white shadow-lg"
-            data-image-id={`${sectionId}-persona_avatar`}
-            onMouseUp={(e) => {
-              if (mode === 'edit') {
-                e.stopPropagation();
-                e.preventDefault();
-                const rect = e.currentTarget.getBoundingClientRect();
-                const imageId = `${sectionId}-persona_avatar`;
-                const position = {
-                  x: rect.left + rect.width / 2,
-                  y: rect.top - 10
-                };
-                handleImageToolbar(imageId, position);
-              }
-            }}
-            onClick={(e) => {
-              if (mode === 'edit') {
-                e.stopPropagation();
-                e.preventDefault();
-              }
-            }}
-          />
-        ) : (
-          <AvatarPlaceholder 
-            onClick={(e) => {
-              if (mode === 'edit') {
-                e.stopPropagation();
-                e.preventDefault();
-                const rect = e.currentTarget.getBoundingClientRect();
-                const imageId = `${sectionId}-persona_avatar`;
-                const position = {
-                  x: rect.left + rect.width / 2,
-                  y: rect.top - 10
-                };
-                handleImageToolbar(imageId, position);
-              }
-            }}
-          />
-        )}
+        <img
+          src={avatar || '/persona-placeholder.jpg'}
+          alt={name}
+          className="w-20 h-20 rounded-full object-cover cursor-pointer border-4 border-white shadow-lg"
+          data-image-id={`${sectionId}.persona_avatar`}
+          onMouseUp={(e) => {
+            if (mode === 'edit') {
+              e.stopPropagation();
+              e.preventDefault();
+              const rect = e.currentTarget.getBoundingClientRect();
+              const imageId = `${sectionId}.persona_avatar`;
+              const position = {
+                x: rect.left + rect.width / 2,
+                y: rect.top - 10
+              };
+              handleImageToolbar(imageId, position);
+            }
+          }}
+          onClick={(e) => {
+            if (mode === 'edit') {
+              e.stopPropagation();
+              e.preventDefault();
+            }
+          }}
+        />
         
         <div>
           {mode !== 'preview' ? (
@@ -502,9 +469,6 @@ export default function PersonaJourney(props: LayoutComponentProps) {
 
   const mutedTextColor = dynamicTextColors?.muted || colorTokens.textMuted;
   
-  const store = useEditStore();
-  const showImageToolbar = store.showImageToolbar;
-  
   // Filter out 'custom' background type as it's not supported by EditableContent components
   const safeBackgroundType = props.backgroundType === 'custom' ? 'neutral' : (props.backgroundType || 'neutral');
   
@@ -557,10 +521,8 @@ export default function PersonaJourney(props: LayoutComponentProps) {
             role={blockContent.persona_role}
             company={blockContent.persona_company}
             avatar={blockContent.persona_avatar}
-            showImageToolbar={showImageToolbar}
             sectionId={sectionId}
             mode={mode}
-            h2Style={h2Style}
             h3Style={h3Style}
             onNameEdit={(value) => handleContentUpdate('persona_name', value)}
             onRoleEdit={(value) => handleContentUpdate('persona_role', value)}
