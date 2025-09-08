@@ -166,7 +166,10 @@ const PersonaCard = React.memo(({
   sectionId, 
   mode,
   h2Style,
-  h3Style
+  h3Style,
+  onNameEdit,
+  onRoleEdit,
+  onCompanyEdit
 }: {
   name: string;
   role: string;
@@ -177,6 +180,9 @@ const PersonaCard = React.memo(({
   mode: string;
   h2Style: React.CSSProperties;
   h3Style: React.CSSProperties;
+  onNameEdit: (value: string) => void;
+  onRoleEdit: (value: string) => void;
+  onCompanyEdit: (value: string) => void;
 }) => {
   
   const AvatarPlaceholder = () => (
@@ -205,9 +211,45 @@ const PersonaCard = React.memo(({
         )}
         
         <div>
-          <h3 className="text-gray-900" style={h3Style}>{name}</h3>
-          <p className="text-blue-600 font-semibold">{role}</p>
-          <p className="text-gray-600 text-sm">{company}</p>
+          {mode !== 'preview' ? (
+            <div
+              contentEditable
+              suppressContentEditableWarning
+              onBlur={(e) => onNameEdit(e.currentTarget.textContent || '')}
+              className="text-gray-900 outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-1 cursor-text hover:bg-gray-50"
+              style={h3Style}
+            >
+              {name}
+            </div>
+          ) : (
+            <h3 className="text-gray-900" style={h3Style}>{name}</h3>
+          )}
+          
+          {mode !== 'preview' ? (
+            <div
+              contentEditable
+              suppressContentEditableWarning
+              onBlur={(e) => onRoleEdit(e.currentTarget.textContent || '')}
+              className="text-blue-600 font-semibold outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-1 cursor-text hover:bg-gray-50"
+            >
+              {role}
+            </div>
+          ) : (
+            <p className="text-blue-600 font-semibold">{role}</p>
+          )}
+          
+          {mode !== 'preview' ? (
+            <div
+              contentEditable
+              suppressContentEditableWarning
+              onBlur={(e) => onCompanyEdit(e.currentTarget.textContent || '')}
+              className="text-gray-600 text-sm outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-1 cursor-text hover:bg-gray-50"
+            >
+              {company}
+            </div>
+          ) : (
+            <p className="text-gray-600 text-sm">{company}</p>
+          )}
         </div>
       </div>
     </div>
@@ -227,7 +269,10 @@ const JourneyPhase = React.memo(({
   handleContentUpdate,
   backgroundType,
   colorTokens,
-  sectionId
+  sectionId,
+  onTitleEdit,
+  onDescriptionEdit,
+  onItemsEdit
 }: {
   title: string;
   description: string;
@@ -241,6 +286,9 @@ const JourneyPhase = React.memo(({
   backgroundType: any;
   colorTokens: any;
   sectionId: string;
+  onTitleEdit: (value: string) => void;
+  onDescriptionEdit: (value: string) => void;
+  onItemsEdit: (items: string[]) => void;
 }) => {
   
   const getPhaseColor = () => {
@@ -284,16 +332,39 @@ const JourneyPhase = React.memo(({
             elementKey={`${type}_icon`}
           />
         </div>
-        <h3 className={colors.text} style={h3Style}>{title}</h3>
+        {mode !== 'preview' ? (
+          <div
+            contentEditable
+            suppressContentEditableWarning
+            onBlur={(e) => onTitleEdit(e.currentTarget.textContent || '')}
+            className={`${colors.text} outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-1 cursor-text hover:bg-gray-50`}
+            style={h3Style}
+          >
+            {title}
+          </div>
+        ) : (
+          <h3 className={colors.text} style={h3Style}>{title}</h3>
+        )}
       </div>
       
-      <p className="text-gray-600 leading-relaxed mb-6">
-        {description}
-      </p>
+      {mode !== 'preview' ? (
+        <div
+          contentEditable
+          suppressContentEditableWarning
+          onBlur={(e) => onDescriptionEdit(e.currentTarget.textContent || '')}
+          className="text-gray-600 leading-relaxed mb-6 outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-1 cursor-text hover:bg-gray-50"
+        >
+          {description}
+        </div>
+      ) : (
+        <p className="text-gray-600 leading-relaxed mb-6">
+          {description}
+        </p>
+      )}
       
       <div className="space-y-3">
         {items.map((item, index) => (
-          <div key={index} className="flex items-start space-x-3">
+          <div key={index} className="flex items-start space-x-3 group/item">
             {isJourney ? (
               <div className="flex-shrink-0 w-6 h-6 rounded-full bg-blue-100 flex items-center justify-center mt-0.5">
                 <span className="text-blue-600 font-bold text-xs">{index + 1}</span>
@@ -301,9 +372,52 @@ const JourneyPhase = React.memo(({
             ) : (
               <div className={`flex-shrink-0 w-2 h-2 rounded-full ${colors.bg} mt-2`} />
             )}
-            <span className="text-gray-700 text-sm leading-relaxed">{item}</span>
+            {mode !== 'preview' ? (
+              <div
+                contentEditable
+                suppressContentEditableWarning
+                onBlur={(e) => {
+                  const newItems = [...items];
+                  newItems[index] = e.currentTarget.textContent || '';
+                  onItemsEdit(newItems);
+                }}
+                className="text-gray-700 text-sm leading-relaxed flex-1 outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-1 cursor-text hover:bg-gray-50"
+              >
+                {item}
+              </div>
+            ) : (
+              <span className="text-gray-700 text-sm leading-relaxed">{item}</span>
+            )}
+            {mode === 'edit' && items.length > 1 && (
+              <button
+                onClick={() => {
+                  const newItems = items.filter((_, i) => i !== index);
+                  onItemsEdit(newItems);
+                }}
+                className="opacity-0 group-hover/item:opacity-100 flex-shrink-0 text-red-500 hover:text-red-700 transition-opacity duration-200"
+                title="Remove this item"
+              >
+                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            )}
           </div>
         ))}
+        {mode === 'edit' && (
+          <button
+            onClick={() => {
+              const newItems = [...items, 'New item'];
+              onItemsEdit(newItems);
+            }}
+            className="flex items-center space-x-2 text-sm text-blue-600 hover:text-blue-800 transition-colors mt-2"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+            </svg>
+            <span>Add item</span>
+          </button>
+        )}
       </div>
     </div>
   );
@@ -401,232 +515,74 @@ export default function PersonaJourney(props: LayoutComponentProps) {
         </div>
 
         <div className="mb-12">
-          {mode !== 'preview' ? (
-            <div className="space-y-4 p-6 border border-gray-200 rounded-lg bg-gray-50">
-              <h4 className="font-semibold text-gray-700">Persona Information</h4>
-              
-              <div className="grid md:grid-cols-3 gap-4">
-                <EditableAdaptiveText
-                  mode={mode}
-                  value={blockContent.persona_name || ''}
-                  onEdit={(value) => handleContentUpdate('persona_name', value)}
-                  backgroundType={safeBackgroundType}
-                  colorTokens={colorTokens}
-                  variant="body"
-                  placeholder="Persona name"
-                  sectionId={sectionId}
-                  elementKey="persona_name"
-                  sectionBackground={sectionBackground}
-                />
-                
-                <EditableAdaptiveText
-                  mode={mode}
-                  value={blockContent.persona_role || ''}
-                  onEdit={(value) => handleContentUpdate('persona_role', value)}
-                  backgroundType={safeBackgroundType}
-                  colorTokens={colorTokens}
-                  variant="body"
-                  placeholder="Persona role"
-                  sectionId={sectionId}
-                  elementKey="persona_role"
-                  sectionBackground={sectionBackground}
-                />
-                
-                <EditableAdaptiveText
-                  mode={mode}
-                  value={blockContent.persona_company || ''}
-                  onEdit={(value) => handleContentUpdate('persona_company', value)}
-                  backgroundType={safeBackgroundType}
-                  colorTokens={colorTokens}
-                  variant="body"
-                  placeholder="Company name"
-                  sectionId={sectionId}
-                  elementKey="persona_company"
-                  sectionBackground={sectionBackground}
-                />
-              </div>
-            </div>
-          ) : (
-            <PersonaCard
-              name={blockContent.persona_name}
-              role={blockContent.persona_role}
-              company={blockContent.persona_company}
-              avatar={blockContent.persona_avatar}
-              showImageToolbar={showImageToolbar}
-              sectionId={sectionId}
-              mode={mode}
-              h2Style={h2Style}
-              h3Style={h3Style}
-            />
-          )}
+          <PersonaCard
+            name={blockContent.persona_name}
+            role={blockContent.persona_role}
+            company={blockContent.persona_company}
+            avatar={blockContent.persona_avatar}
+            showImageToolbar={showImageToolbar}
+            sectionId={sectionId}
+            mode={mode}
+            h2Style={h2Style}
+            h3Style={h3Style}
+            onNameEdit={(value) => handleContentUpdate('persona_name', value)}
+            onRoleEdit={(value) => handleContentUpdate('persona_role', value)}
+            onCompanyEdit={(value) => handleContentUpdate('persona_company', value)}
+          />
         </div>
 
         <div className="grid lg:grid-cols-3 gap-8 mb-12">
+          <JourneyPhase
+            title={blockContent.before_title}
+            description={blockContent.before_challenges}
+            items={beforePainPoints}
+            type="before"
+            h3Style={h3Style}
+            mode={mode}
+            blockContent={blockContent}
+            handleContentUpdate={handleContentUpdate}
+            backgroundType={backgroundType}
+            colorTokens={colorTokens}
+            sectionId={sectionId}
+            onTitleEdit={(value) => handleContentUpdate('before_title', value)}
+            onDescriptionEdit={(value) => handleContentUpdate('before_challenges', value)}
+            onItemsEdit={(items) => handleContentUpdate('before_pain_points', items.join('|'))}
+          />
           
-          {mode !== 'preview' ? (
-            <>
-              <div className="space-y-4 p-6 border border-gray-200 rounded-lg bg-gray-50">
-                <h4 className="font-semibold text-gray-700">Before Phase</h4>
-                
-                <EditableAdaptiveText
-                  mode={mode}
-                  value={blockContent.before_title || ''}
-                  onEdit={(value) => handleContentUpdate('before_title', value)}
-                  backgroundType={safeBackgroundType}
-                  colorTokens={colorTokens}
-                  variant="body"
-                  placeholder="Before title"
-                  sectionId={sectionId}
-                  elementKey="before_title"
-                  sectionBackground={sectionBackground}
-                />
-                
-                <EditableAdaptiveText
-                  mode={mode}
-                  value={blockContent.before_challenges || ''}
-                  onEdit={(value) => handleContentUpdate('before_challenges', value)}
-                  backgroundType={safeBackgroundType}
-                  colorTokens={colorTokens}
-                  variant="body"
-                  placeholder="Before challenges description"
-                  sectionId={sectionId}
-                  elementKey="before_challenges"
-                  sectionBackground={sectionBackground}
-                />
-                
-                <EditableAdaptiveText
-                  mode={mode}
-                  value={blockContent.before_pain_points || ''}
-                  onEdit={(value) => handleContentUpdate('before_pain_points', value)}
-                  backgroundType={safeBackgroundType}
-                  colorTokens={colorTokens}
-                  variant="body"
-                  placeholder="Before pain points (pipe separated)"
-                  sectionId={sectionId}
-                  elementKey="before_pain_points"
-                  sectionBackground={sectionBackground}
-                />
-              </div>
-
-              <div className="space-y-4 p-6 border border-gray-200 rounded-lg bg-gray-50">
-                <h4 className="font-semibold text-gray-700">Journey Phase</h4>
-                
-                <EditableAdaptiveText
-                  mode={mode}
-                  value={blockContent.journey_title || ''}
-                  onEdit={(value) => handleContentUpdate('journey_title', value)}
-                  backgroundType={safeBackgroundType}
-                  colorTokens={colorTokens}
-                  variant="body"
-                  placeholder="Journey title"
-                  sectionId={sectionId}
-                  elementKey="journey_title"
-                  sectionBackground={sectionBackground}
-                />
-                
-                <EditableAdaptiveText
-                  mode={mode}
-                  value={blockContent.journey_steps || ''}
-                  onEdit={(value) => handleContentUpdate('journey_steps', value)}
-                  backgroundType={safeBackgroundType}
-                  colorTokens={colorTokens}
-                  variant="body"
-                  placeholder="Journey steps (pipe separated)"
-                  sectionId={sectionId}
-                  elementKey="journey_steps"
-                  sectionBackground={sectionBackground}
-                />
-              </div>
-
-              <div className="space-y-4 p-6 border border-gray-200 rounded-lg bg-gray-50">
-                <h4 className="font-semibold text-gray-700">After Phase</h4>
-                
-                <EditableAdaptiveText
-                  mode={mode}
-                  value={blockContent.after_title || ''}
-                  onEdit={(value) => handleContentUpdate('after_title', value)}
-                  backgroundType={safeBackgroundType}
-                  colorTokens={colorTokens}
-                  variant="body"
-                  placeholder="After title"
-                  sectionId={sectionId}
-                  elementKey="after_title"
-                  sectionBackground={sectionBackground}
-                />
-                
-                <EditableAdaptiveText
-                  mode={mode}
-                  value={blockContent.after_outcomes || ''}
-                  onEdit={(value) => handleContentUpdate('after_outcomes', value)}
-                  backgroundType={safeBackgroundType}
-                  colorTokens={colorTokens}
-                  variant="body"
-                  placeholder="After outcomes description"
-                  sectionId={sectionId}
-                  elementKey="after_outcomes"
-                  sectionBackground={sectionBackground}
-                />
-                
-                <EditableAdaptiveText
-                  mode={mode}
-                  value={blockContent.after_benefits || ''}
-                  onEdit={(value) => handleContentUpdate('after_benefits', value)}
-                  backgroundType={safeBackgroundType}
-                  colorTokens={colorTokens}
-                  variant="body"
-                  placeholder="After benefits (pipe separated)"
-                  sectionId={sectionId}
-                  elementKey="after_benefits"
-                  sectionBackground={sectionBackground}
-                />
-              </div>
-            </>
-          ) : (
-            <>
-              <JourneyPhase
-                title={blockContent.before_title}
-                description={blockContent.before_challenges}
-                items={beforePainPoints}
-                type="before"
-                h3Style={h3Style}
-                mode={mode}
-                blockContent={blockContent}
-                handleContentUpdate={handleContentUpdate}
-                backgroundType={backgroundType}
-                colorTokens={colorTokens}
-                sectionId={sectionId}
-              />
-              
-              <JourneyPhase
-                title={blockContent.journey_title}
-                description={blockContent.journey_description}
-                items={journeySteps}
-                type="journey"
-                isJourney={true}
-                h3Style={h3Style}
-                mode={mode}
-                blockContent={blockContent}
-                handleContentUpdate={handleContentUpdate}
-                backgroundType={backgroundType}
-                colorTokens={colorTokens}
-                sectionId={sectionId}
-              />
-              
-              <JourneyPhase
-                title={blockContent.after_title}
-                description={blockContent.after_outcomes}
-                items={afterBenefits}
-                type="after"
-                h3Style={h3Style}
-                mode={mode}
-                blockContent={blockContent}
-                handleContentUpdate={handleContentUpdate}
-                backgroundType={backgroundType}
-                colorTokens={colorTokens}
-                sectionId={sectionId}
-              />
-            </>
-          )}
+          <JourneyPhase
+            title={blockContent.journey_title}
+            description={blockContent.journey_description}
+            items={journeySteps}
+            type="journey"
+            isJourney={true}
+            h3Style={h3Style}
+            mode={mode}
+            blockContent={blockContent}
+            handleContentUpdate={handleContentUpdate}
+            backgroundType={backgroundType}
+            colorTokens={colorTokens}
+            sectionId={sectionId}
+            onTitleEdit={(value) => handleContentUpdate('journey_title', value)}
+            onDescriptionEdit={(value) => handleContentUpdate('journey_description', value)}
+            onItemsEdit={(items) => handleContentUpdate('journey_steps', items.join('|'))}
+          />
+          
+          <JourneyPhase
+            title={blockContent.after_title}
+            description={blockContent.after_outcomes}
+            items={afterBenefits}
+            type="after"
+            h3Style={h3Style}
+            mode={mode}
+            blockContent={blockContent}
+            handleContentUpdate={handleContentUpdate}
+            backgroundType={backgroundType}
+            colorTokens={colorTokens}
+            sectionId={sectionId}
+            onTitleEdit={(value) => handleContentUpdate('after_title', value)}
+            onDescriptionEdit={(value) => handleContentUpdate('after_outcomes', value)}
+            onItemsEdit={(items) => handleContentUpdate('after_benefits', items.join('|'))}
+          />
         </div>
 
         {(blockContent.show_summary_section !== 'false') && (
