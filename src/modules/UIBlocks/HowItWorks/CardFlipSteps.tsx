@@ -167,7 +167,7 @@ const FlipCard = React.memo(({
   };
 
   const VisualPlaceholder = () => (
-    <div className={`w-full h-48 rounded-lg overflow-hidden bg-gradient-to-br ${getColorForIndex(index)} bg-opacity-10`}>
+    <div className={`w-full h-48 rounded-lg overflow-hidden bg-gradient-to-br ${getColorForIndex(index)} bg-opacity-10 mb-4`}>
       <div className="h-full flex items-center justify-center">
         <div className={`w-16 h-16 rounded-full bg-gradient-to-br ${getColorForIndex(index)} flex items-center justify-center`}>
           <span className="text-white font-bold text-xl">{index + 1}</span>
@@ -177,16 +177,21 @@ const FlipCard = React.memo(({
   );
 
   return (
-    <div className="group perspective-1000">
+    <div 
+      style={{ perspective: '1000px', height: '450px' }}
+      className={`relative w-full ${mode === 'preview' ? 'cursor-pointer' : ''}`}
+      onClick={mode === 'preview' ? onFlip : undefined}
+    >
       <div 
-        className={`relative w-full h-96 ${mode === 'preview' ? 'cursor-pointer' : ''} transition-transform duration-700 transform-style-preserve-3d ${
-          isFlipped ? 'rotate-y-180' : ''
+        className={`w-full h-full transition-transform duration-700 [transform-style:preserve-3d] ${
+          isFlipped ? '[transform:rotateY(180deg)]' : ''
         }`}
-        onClick={mode === 'preview' ? onFlip : undefined}
       >
         {/* Front of Card */}
-        <div className="absolute inset-0 w-full h-full backface-hidden bg-white rounded-xl shadow-lg border border-gray-200 p-6 flex flex-col">
-          <div className="flex-1">
+        <div 
+          className="absolute inset-0 w-full h-full bg-white rounded-xl shadow-lg border border-gray-200 p-6 flex flex-col [backface-visibility:hidden]"
+        >
+          <div className="flex-1 overflow-y-auto">
             {visual && visual !== '' ? (
               <img
                 src={visual}
@@ -214,13 +219,13 @@ const FlipCard = React.memo(({
                     stepTitles[index] = e.currentTarget.textContent || '';
                     handleContentUpdate('step_titles', stepTitles.join('|'));
                   }}
-                  className="text-xl font-bold text-gray-900 outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-2 py-1 cursor-text hover:bg-gray-50 min-h-[32px] flex-1"
+                  className="text-xl font-bold text-gray-900 outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-2 py-1 cursor-text hover:bg-gray-50 min-h-[32px] flex-1 line-clamp-2"
                   data-placeholder="Step title"
                 >
                   {title}
                 </div>
               ) : (
-                <h3 className="text-xl font-bold text-gray-900">{title}</h3>
+                <h3 className="text-xl font-bold text-gray-900 line-clamp-2">{title}</h3>
               )}
             </div>
           </div>
@@ -245,8 +250,10 @@ const FlipCard = React.memo(({
         </div>
 
         {/* Back of Card */}
-        <div className={`absolute inset-0 w-full h-full backface-hidden rotate-y-180 bg-gradient-to-br ${getColorForIndex(index)} rounded-xl shadow-lg p-6 flex flex-col text-white`}>
-          <div className="flex-1">
+        <div 
+          className={`absolute inset-0 w-full h-full bg-gradient-to-br ${getColorForIndex(index)} rounded-xl shadow-lg p-6 flex flex-col text-white [backface-visibility:hidden] [transform:rotateY(180deg)]`}
+        >
+          <div className="flex-1 overflow-y-auto">
             <div className="flex items-center space-x-3 mb-6">
               <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center">
                 <span className="text-white font-bold text-sm">{index + 1}</span>
@@ -260,13 +267,13 @@ const FlipCard = React.memo(({
                     stepTitles[index] = e.currentTarget.textContent || '';
                     handleContentUpdate('step_titles', stepTitles.join('|'));
                   }}
-                  className="text-xl font-bold text-white outline-none focus:ring-2 focus:ring-white/50 focus:ring-opacity-50 rounded px-2 py-1 cursor-text hover:bg-white/10 min-h-[32px] flex-1"
+                  className="text-xl font-bold text-white outline-none focus:ring-2 focus:ring-white/50 focus:ring-opacity-50 rounded px-2 py-1 cursor-text hover:bg-white/10 min-h-[32px] flex-1 line-clamp-2"
                   data-placeholder="Step title"
                 >
                   {title}
                 </div>
               ) : (
-                <h3 className="text-xl font-bold">{title}</h3>
+                <h3 className="text-xl font-bold line-clamp-2">{title}</h3>
               )}
             </div>
             
@@ -279,13 +286,13 @@ const FlipCard = React.memo(({
                   stepDescriptions[index] = e.currentTarget.textContent || '';
                   handleContentUpdate('step_descriptions', stepDescriptions.join('|'));
                 }}
-                className="text-white/90 leading-relaxed text-lg mb-6 outline-none focus:ring-2 focus:ring-white/50 focus:ring-opacity-50 rounded px-2 py-1 cursor-text hover:bg-white/10 min-h-[48px]"
+                className="text-white/90 leading-relaxed text-lg mb-6 outline-none focus:ring-2 focus:ring-white/50 focus:ring-opacity-50 rounded px-2 py-1 cursor-text hover:bg-white/10 min-h-[48px] line-clamp-3"
                 data-placeholder="Step description"
               >
                 {description}
               </div>
             ) : (
-              <p className="text-white/90 leading-relaxed text-lg mb-6">
+              <p className="text-white/90 leading-relaxed text-lg mb-6 line-clamp-3">
                 {description}
               </p>
             )}
@@ -392,6 +399,7 @@ export default function CardFlipSteps(props: LayoutComponentProps) {
     action: stepActions[index] || 'Get Started'
   }));
 
+
   const [flippedCards, setFlippedCards] = useState<Set<number>>(new Set());
 
   const toggleFlip = (index: number) => {
@@ -468,10 +476,10 @@ export default function CardFlipSteps(props: LayoutComponentProps) {
           )}
         </div>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
+        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 mb-24 items-start">
           {steps.map((step, index) => (
-            <FlipCard
-              key={index}
+            <div key={index} className="relative">
+              <FlipCard
               title={step.title}
               description={step.description}
               visual={step.visual}
@@ -486,7 +494,8 @@ export default function CardFlipSteps(props: LayoutComponentProps) {
               handleContentUpdate={handleContentUpdate}
               backgroundType={backgroundType}
               colorTokens={colorTokens}
-            />
+              />
+            </div>
           ))}
         </div>
 
@@ -802,22 +811,6 @@ export default function CardFlipSteps(props: LayoutComponentProps) {
         )}
       </div>
       
-      <style jsx global>{`
-        .perspective-1000 {
-          perspective: 1000px;
-        }
-        .transform-style-preserve-3d {
-          transform-style: preserve-3d;
-        }
-        .backface-hidden {
-          backface-visibility: hidden;
-          -webkit-backface-visibility: hidden;
-          -moz-backface-visibility: hidden;
-        }
-        .rotate-y-180 {
-          transform: rotateY(180deg);
-        }
-      `}</style>
     </LayoutSection>
   );
 }

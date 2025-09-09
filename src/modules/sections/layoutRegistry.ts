@@ -77,7 +77,6 @@ export const layoutRegistry = {
     "VerticalTimeline",
     "IconCircleSteps",
     "AccordionSteps",
-    "CardFlipSteps",
     "VideoWalkthrough",
     "ZigzagImageSteps",
     "AnimatedProcessLine",
