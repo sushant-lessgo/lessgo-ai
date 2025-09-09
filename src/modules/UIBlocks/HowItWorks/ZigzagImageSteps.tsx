@@ -2,6 +2,7 @@ import React from 'react';
 import { useLayoutComponent } from '@/hooks/useLayoutComponent';
 import { useTypography } from '@/hooks/useTypography';
 import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
+import { useImageToolbar } from '@/hooks/useImageToolbar';
 import { LayoutSection } from '@/components/layout/LayoutSection';
 import { 
   EditableAdaptiveHeadline, 
@@ -19,6 +20,13 @@ interface ZigzagImageStepsContent {
   step_titles: string;
   step_descriptions: string;
   step_visuals?: string;
+  // Individual step visual fields for image toolbar support
+  step_visual_0?: string;
+  step_visual_1?: string;
+  step_visual_2?: string;
+  step_visual_3?: string;
+  step_visual_4?: string;
+  step_visual_5?: string;
   subheadline?: string;
   supporting_text?: string;
   cta_text?: string;
@@ -51,6 +59,31 @@ const CONTENT_SCHEMA = {
   step_visuals: { 
     type: 'string' as const, 
     default: '/step-discover.jpg|/step-design.jpg|/step-refine.jpg|/step-share.jpg' 
+  },
+  // Individual step visual fields for image toolbar support
+  step_visual_0: { 
+    type: 'string' as const, 
+    default: '' 
+  },
+  step_visual_1: { 
+    type: 'string' as const, 
+    default: '' 
+  },
+  step_visual_2: { 
+    type: 'string' as const, 
+    default: '' 
+  },
+  step_visual_3: { 
+    type: 'string' as const, 
+    default: '' 
+  },
+  step_visual_4: { 
+    type: 'string' as const, 
+    default: '' 
+  },
+  step_visual_5: { 
+    type: 'string' as const, 
+    default: '' 
   },
   subheadline: { 
     type: 'string' as const, 
@@ -119,7 +152,8 @@ const ZigzagStep = React.memo(({
   mode,
   handleContentUpdate,
   blockContent,
-  onRemove
+  onRemove,
+  handleImageToolbar
 }: {
   title: string;
   description: string;
@@ -132,10 +166,14 @@ const ZigzagStep = React.memo(({
   handleContentUpdate: (key: keyof ZigzagImageStepsContent, value: any) => void;
   blockContent: ZigzagImageStepsContent;
   onRemove?: () => void;
+  handleImageToolbar: (imageId: string, position: { x: number; y: number }) => void;
 }) => {
   
-  const VisualPlaceholder = () => (
-    <div className="relative w-full h-80 rounded-2xl overflow-hidden bg-gradient-to-br from-pink-50 to-purple-100">
+  const VisualPlaceholder = React.memo(({ onClick }: { onClick?: (e: React.MouseEvent) => void }) => (
+    <div 
+      className="relative w-full h-80 rounded-2xl overflow-hidden bg-gradient-to-br from-pink-50 to-purple-100 cursor-pointer hover:bg-gradient-to-br hover:from-pink-100 hover:to-purple-150 transition-all duration-300"
+      onClick={onClick}
+    >
       <div className="absolute inset-0 flex items-center justify-center">
         <div className="text-center">
           <div className="w-20 h-20 mx-auto rounded-2xl bg-white/50 flex items-center justify-center mb-4">
@@ -146,10 +184,15 @@ const ZigzagStep = React.memo(({
           <div className="text-sm font-medium text-gray-700">
             Step {index + 1} Visual
           </div>
+          {mode === 'edit' && (
+            <div className="text-xs text-gray-500 mt-2">
+              Click to add image
+            </div>
+          )}
         </div>
       </div>
     </div>
-  );
+  ));
 
   return (
     <div className={`grid lg:grid-cols-2 gap-12 items-center ${isEven ? '' : 'lg:direction-rtl'}`}>
@@ -242,13 +285,43 @@ const ZigzagStep = React.memo(({
             src={visual}
             alt={title}
             className="w-full h-80 object-cover rounded-2xl shadow-2xl cursor-pointer hover:shadow-3xl transition-shadow duration-300"
-            data-image-id={`${sectionId}-step${index}-visual`}
+            data-image-id={`${sectionId}-step-visual-${index}`}
             onMouseUp={(e) => {
-              // Image toolbar is only available in edit mode
+              if (mode === 'edit') {
+                e.stopPropagation();
+                e.preventDefault();
+                const rect = e.currentTarget.getBoundingClientRect();
+                const imageId = `${sectionId}-step-visual-${index}`;
+                const position = {
+                  x: rect.left + rect.width / 2,
+                  y: rect.top - 10
+                };
+                handleImageToolbar(imageId, position);
+              }
+            }}
+            onClick={(e) => {
+              if (mode === 'edit') {
+                e.stopPropagation();
+                e.preventDefault();
+              }
             }}
           />
         ) : (
-          <VisualPlaceholder />
+          <VisualPlaceholder 
+            onClick={(e) => {
+              if (mode === 'edit') {
+                e.stopPropagation();
+                e.preventDefault();
+                const rect = e.currentTarget.getBoundingClientRect();
+                const imageId = `${sectionId}-step-visual-${index}`;
+                const position = {
+                  x: rect.left + rect.width / 2,
+                  y: rect.top - 10
+                };
+                handleImageToolbar(imageId, position);
+              }
+            }}
+          />
         )}
       </div>
     </div>
@@ -275,6 +348,12 @@ export default function ZigzagImageSteps(props: LayoutComponentProps) {
   
   const { getTextStyle: getTypographyStyle } = useTypography();
 
+  // Helper function to get individual step visual
+  const getStepVisual = (index: number): string => {
+    const fieldName = `step_visual_${index}` as keyof ZigzagImageStepsContent;
+    return (blockContent[fieldName] as string) || '';
+  };
+
   const stepTitles = blockContent.step_titles 
     ? blockContent.step_titles.split('|').map(item => item.trim()).filter(Boolean)
     : [];
@@ -283,14 +362,10 @@ export default function ZigzagImageSteps(props: LayoutComponentProps) {
     ? blockContent.step_descriptions.split('|').map(item => item.trim()).filter(Boolean)
     : [];
 
-  const stepVisuals = blockContent.step_visuals 
-    ? blockContent.step_visuals.split('|').map(item => item.trim()).filter(Boolean)
-    : [];
-
   const steps = stepTitles.map((title, index) => ({
     title: title || (mode === 'edit' ? `Step ${index + 1}` : ''), // Fallback for empty titles in edit mode
     description: stepDescriptions[index] || '',
-    visual: stepVisuals[index] || '',
+    visual: getStepVisual(index), // Use individual field instead of pipe-separated
     originalIndex: index // Keep track of original index for proper data updates
   })).filter(step => step.title.trim() !== '' || mode === 'edit'); // Show empty steps in edit mode
 
@@ -302,6 +377,29 @@ export default function ZigzagImageSteps(props: LayoutComponentProps) {
   
   const store = useEditStore();
   const showImageToolbar = store.showImageToolbar;
+  
+  // Initialize image toolbar hook
+  const handleImageToolbar = useImageToolbar();
+
+  // Migration logic: Convert pipe-separated step_visuals to individual fields
+  React.useEffect(() => {
+    if (blockContent.step_visuals && !blockContent.step_visual_0) {
+      const stepVisuals = blockContent.step_visuals.split('|').map(item => item.trim()).filter(Boolean);
+      const updates: Partial<ZigzagImageStepsContent> = {};
+      
+      stepVisuals.forEach((visual, index) => {
+        if (index < 6) { // Max 6 steps
+          const fieldName = `step_visual_${index}` as keyof ZigzagImageStepsContent;
+          updates[fieldName] = visual as any;
+        }
+      });
+      
+      // Apply all updates at once
+      Object.entries(updates).forEach(([key, value]) => {
+        handleContentUpdate(key as keyof ZigzagImageStepsContent, value);
+      });
+    }
+  }, [blockContent.step_visuals, blockContent.step_visual_0, handleContentUpdate]);
 
   // Icon edit handlers
   const handleFlowFeatureIconEdit = (index: number, value: string) => {
@@ -370,18 +468,27 @@ export default function ZigzagImageSteps(props: LayoutComponentProps) {
               mode={mode}
               handleContentUpdate={handleContentUpdate}
               blockContent={blockContent}
+              handleImageToolbar={handleImageToolbar}
               onRemove={steps.length > 1 ? () => {
                 const stepTitles = blockContent.step_titles ? blockContent.step_titles.split('|') : [];
                 const stepDescriptions = blockContent.step_descriptions ? blockContent.step_descriptions.split('|') : [];
-                const stepVisuals = blockContent.step_visuals ? blockContent.step_visuals.split('|') : [];
                 
+                // Remove from pipe-separated fields
                 stepTitles.splice(step.originalIndex, 1);
                 stepDescriptions.splice(step.originalIndex, 1);
-                stepVisuals.splice(step.originalIndex, 1);
+                
+                // Shift individual visual fields
+                for (let i = step.originalIndex; i < 5; i++) {
+                  const currentField = `step_visual_${i}` as keyof ZigzagImageStepsContent;
+                  const nextField = `step_visual_${i + 1}` as keyof ZigzagImageStepsContent;
+                  const nextValue = (blockContent[nextField] as string) || '';
+                  handleContentUpdate(currentField, nextValue);
+                }
+                // Clear the last field
+                handleContentUpdate('step_visual_5', '');
                 
                 handleContentUpdate('step_titles', stepTitles.join('|'));
                 handleContentUpdate('step_descriptions', stepDescriptions.join('|'));
-                handleContentUpdate('step_visuals', stepVisuals.join('|'));
               } : undefined}
             />
           ))}
@@ -393,15 +500,13 @@ export default function ZigzagImageSteps(props: LayoutComponentProps) {
                 onClick={() => {
                   const stepTitles = blockContent.step_titles ? blockContent.step_titles.split('|') : [];
                   const stepDescriptions = blockContent.step_descriptions ? blockContent.step_descriptions.split('|') : [];
-                  const stepVisuals = blockContent.step_visuals ? blockContent.step_visuals.split('|') : [];
                   
                   stepTitles.push(`Step ${stepTitles.length + 1}`);
                   stepDescriptions.push('Add step description here');
-                  stepVisuals.push('');
                   
                   handleContentUpdate('step_titles', stepTitles.join('|'));
                   handleContentUpdate('step_descriptions', stepDescriptions.join('|'));
-                  handleContentUpdate('step_visuals', stepVisuals.join('|'));
+                  // Individual visual field will be empty by default and can be set via image toolbar
                 }}
                 className="px-6 py-3 border-2 border-dashed border-gray-300 hover:border-gray-400 text-gray-500 hover:text-gray-600 transition-all duration-300 flex items-center space-x-3 bg-gray-50 hover:bg-gray-100 rounded-2xl"
                 title="Add new step"
@@ -688,7 +793,13 @@ export const componentMeta = {
     { key: 'subheadline', label: 'Subheadline', type: 'textarea', required: false },
     { key: 'step_titles', label: 'Step Titles (pipe separated)', type: 'text', required: true },
     { key: 'step_descriptions', label: 'Step Descriptions (pipe separated)', type: 'textarea', required: true },
-    { key: 'step_visuals', label: 'Step Visuals (pipe separated)', type: 'textarea', required: false },
+    { key: 'step_visuals', label: 'Step Visuals (pipe separated)', type: 'image', required: false },
+    { key: 'step_visual_0', label: 'Step 1 Visual', type: 'image', required: false },
+    { key: 'step_visual_1', label: 'Step 2 Visual', type: 'image', required: false },
+    { key: 'step_visual_2', label: 'Step 3 Visual', type: 'image', required: false },
+    { key: 'step_visual_3', label: 'Step 4 Visual', type: 'image', required: false },
+    { key: 'step_visual_4', label: 'Step 5 Visual', type: 'image', required: false },
+    { key: 'step_visual_5', label: 'Step 6 Visual', type: 'image', required: false },
     { key: 'supporting_text', label: 'Supporting Text', type: 'textarea', required: false },
     { key: 'cta_text', label: 'CTA Button Text', type: 'text', required: false },
     { key: 'trust_items', label: 'Trust Indicators (pipe separated)', type: 'text', required: false },
