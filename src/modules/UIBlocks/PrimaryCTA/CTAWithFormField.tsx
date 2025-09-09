@@ -1,9 +1,11 @@
 // components/layout/CTAWithFormField.tsx
 // Production-ready lead capture CTA with form field
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useLayoutComponent } from '@/hooks/useLayoutComponent';
 import { useTypography } from '@/hooks/useTypography';
+import { useEditStoreLegacy } from '@/hooks/useEditStoreLegacy';
+import { useUser } from '@clerk/nextjs';
 import { LayoutSection } from '@/components/layout/LayoutSection';
 import { 
   EditableAdaptiveHeadline, 
@@ -122,8 +124,47 @@ export default function CTAWithFormField(props: LayoutComponentProps) {
   });
   
   const { getTextStyle: getTypographyStyle } = useTypography();
+  const { user } = useUser();
+  const { createForm, getFormById } = useEditStoreLegacy();
+  
+  // Form state
   const [email, setEmail] = useState('');
   const [isValid, setIsValid] = useState(true);
+  const [formId, setFormId] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitSuccess, setSubmitSuccess] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
+
+  // Auto-create form on mount if needed
+  useEffect(() => {
+    if (!formId && createForm) {
+      // Create a default form for this CTA
+      const newFormId = createForm({
+        name: 'CTA Email Capture Form',
+        fields: [
+          {
+            id: 'email',
+            type: 'email',
+            label: blockContent.form_label || 'Work Email Address',
+            placeholder: blockContent.placeholder_text || 'Enter your work email',
+            required: true
+          }
+        ],
+        submitButtonText: blockContent.cta_text || 'Start Free Trial',
+        successMessage: 'Thank you! We\'ll be in touch soon.',
+        integrations: [
+          {
+            id: 'dashboard-integration',
+            type: 'dashboard',
+            name: 'Dashboard',
+            enabled: true,
+            settings: {}
+          }
+        ]
+      });
+      setFormId(newFormId);
+    }
+  }, [formId, createForm, blockContent.form_label, blockContent.placeholder_text, blockContent.cta_text]);
 
   // Handle benefits - support both legacy pipe-separated format and individual fields
   const getBenefits = (): string[] => {
@@ -170,14 +211,64 @@ export default function CTAWithFormField(props: LayoutComponentProps) {
     return re.test(email);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Reset states
+    setSubmitError(null);
+    setSubmitSuccess(false);
+    
+    // Validate email
     const valid = validateEmail(email);
     setIsValid(valid);
-    if (valid) {
-      // Handle form submission
+    
+    if (!valid || !formId || !email.trim()) {
+      return;
     }
-  };
+    
+    setIsSubmitting(true);
+    
+    try {
+      const response = await fetch('/api/forms/submit', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          formId,
+          data: { email: email.trim() },
+          userId: user?.id || undefined,
+          publishedPageId: undefined // This could be passed as a prop if needed
+        }),
+      });
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const result = await response.json();
+      
+      if (result.success) {
+        setSubmitSuccess(true);
+        setEmail(''); // Clear the form
+        // Auto-hide success message after 5 seconds
+        setTimeout(() => setSubmitSuccess(false), 5000);
+      } else {
+        throw new Error(result.error || 'Submission failed');
+      }
+    } catch (error) {
+      console.error('Form submission error:', error);
+      setSubmitError(
+        error instanceof Error 
+          ? error.message 
+          : 'Something went wrong. Please try again.'
+      );
+      // Auto-hide error message after 10 seconds
+      setTimeout(() => setSubmitError(null), 10000);
+    } finally {
+      setIsSubmitting(false);
+    }
+  }, [email, formId, user?.id, validateEmail]);
 
   return (
     <LayoutSection
@@ -353,22 +444,57 @@ export default function CTAWithFormField(props: LayoutComponentProps) {
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder={blockContent.placeholder_text}
                   className={`w-full px-4 py-3 border-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors ${
-                    isValid ? 'border-gray-300' : 'border-red-300 bg-red-50'
+                    isValid 
+                      ? 'border-gray-300' 
+                      : 'border-red-300 bg-red-50'
+                  } ${
+                    isSubmitting ? 'opacity-50 cursor-not-allowed' : ''
                   }`}
+                  disabled={isSubmitting || submitSuccess}
                   required
                 />
                 
                 {!isValid && (
                   <p className="text-red-600 text-sm mt-2">Please enter a valid email address</p>
                 )}
+                
+                {submitError && (
+                  <p className="text-red-600 text-sm mt-2">{submitError}</p>
+                )}
+                
+                {submitSuccess && (
+                  <p className="text-green-600 text-sm mt-2">Thank you! We'll be in touch soon.</p>
+                )}
               </div>
 
               {/* Submit Button */}
               <button
                 type="submit"
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors duration-200 shadow-lg hover:shadow-xl"
+                disabled={isSubmitting || submitSuccess}
+                className={`w-full font-semibold py-3 px-6 rounded-lg transition-all duration-200 shadow-lg ${
+                  isSubmitting || submitSuccess
+                    ? 'bg-gray-400 cursor-not-allowed'
+                    : 'bg-blue-600 hover:bg-blue-700 hover:shadow-xl'
+                } text-white flex items-center justify-center`}
               >
-                {blockContent.cta_text}
+                {isSubmitting ? (
+                  <>
+                    <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Submitting...
+                  </>
+                ) : submitSuccess ? (
+                  <>
+                    <svg className="mr-2 h-4 w-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                    Thank You!
+                  </>
+                ) : (
+                  blockContent.cta_text
+                )}
               </button>
 
               {/* Privacy Text */}
