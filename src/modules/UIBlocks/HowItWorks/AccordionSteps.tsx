@@ -6,7 +6,6 @@ import {
   EditableAdaptiveHeadline, 
   EditableAdaptiveText
 } from '@/components/layout/EditableContent';
-import IconEditableText from '@/components/ui/IconEditableText';
 import { 
   CTAButton,
   TrustIndicators 
@@ -22,13 +21,6 @@ interface AccordionStepsContent {
   supporting_text?: string;
   cta_text?: string;
   trust_items?: string;
-  // Step indicators
-  step_indicator_1_text?: string;
-  step_indicator_2_text?: string;
-  step_indicator_3_text?: string;
-  step_indicator_1_icon?: string;
-  step_indicator_2_icon?: string;
-  step_indicator_3_icon?: string;
   // Technical Specs Summary
   tech_specs_heading?: string;
   tech_spec_1_value?: string;
@@ -75,22 +67,6 @@ const CONTENT_SCHEMA = {
     type: 'string' as const, 
     default: '' 
   },
-  // Step indicators
-  step_indicator_1_text: { 
-    type: 'string' as const, 
-    default: 'Enterprise Ready' 
-  },
-  step_indicator_2_text: { 
-    type: 'string' as const, 
-    default: 'Secure' 
-  },
-  step_indicator_3_text: { 
-    type: 'string' as const, 
-    default: 'API Driven' 
-  },
-  step_indicator_1_icon: { type: 'string' as const, default: '✅' },
-  step_indicator_2_icon: { type: 'string' as const, default: '🔒' },
-  step_indicator_3_icon: { type: 'string' as const, default: '💻' },
   // Technical Specs Summary
   tech_specs_heading: { 
     type: 'string' as const, 
@@ -187,16 +163,6 @@ export default function AccordionSteps(props: LayoutComponentProps) {
     setOpenStep(openStep === index ? null : index);
   };
 
-  // Icon edit handlers
-  const handleStepIndicatorIconEdit = (index: number, value: string) => {
-    const iconField = `step_indicator_${index + 1}_icon` as keyof AccordionStepsContent;
-    handleContentUpdate(iconField, value);
-  };
-
-  const getStepIndicatorIcon = (index: number) => {
-    const iconFields = ['step_indicator_1_icon', 'step_indicator_2_icon', 'step_indicator_3_icon'];
-    return blockContent[iconFields[index] as keyof AccordionStepsContent] || ['✅', '🔒', '💻'][index];
-  };
 
   const AccordionStep = ({ step, index, isOpen, onToggle, blockContent, handleContentUpdate, mode, backgroundType, colorTokens, sectionId, onRemove }: {
     step: { title: string; description: string; details: string };
@@ -317,51 +283,6 @@ export default function AccordionSteps(props: LayoutComponentProps) {
                 )}
               </div>
             )}
-            
-            <div className="flex items-center space-x-4 pt-4">
-              <div className="flex items-center space-x-2 text-green-600">
-                <IconEditableText
-                  mode={mode}
-                  value={getStepIndicatorIcon(0) as string || '1'}
-                  onEdit={(value) => handleStepIndicatorIconEdit(0, value)}
-                  backgroundType={backgroundType as any}
-                  colorTokens={colorTokens}
-                  iconSize="sm"
-                  className="text-lg text-green-600"
-                  sectionId={sectionId}
-                  elementKey="step_indicator_1_icon"
-                />
-                <span className="text-sm font-medium">{blockContent.step_indicator_1_text}</span>
-              </div>
-              <div className="flex items-center space-x-2 text-blue-600">
-                <IconEditableText
-                  mode={mode}
-                  value={getStepIndicatorIcon(1) as string || '2'}
-                  onEdit={(value) => handleStepIndicatorIconEdit(1, value)}
-                  backgroundType={backgroundType as any}
-                  colorTokens={colorTokens}
-                  iconSize="sm"
-                  className="text-lg text-blue-600"
-                  sectionId={sectionId}
-                  elementKey="step_indicator_2_icon"
-                />
-                <span className="text-sm font-medium">{blockContent.step_indicator_2_text}</span>
-              </div>
-              <div className="flex items-center space-x-2 text-purple-600">
-                <IconEditableText
-                  mode={mode}
-                  value={getStepIndicatorIcon(2) as string || '3'}
-                  onEdit={(value) => handleStepIndicatorIconEdit(2, value)}
-                  backgroundType={backgroundType as any}
-                  colorTokens={colorTokens}
-                  iconSize="sm"
-                  className="text-lg text-purple-600"
-                  sectionId={sectionId}
-                  elementKey="step_indicator_3_icon"
-                />
-                <span className="text-sm font-medium">{blockContent.step_indicator_3_text}</span>
-              </div>
-            </div>
           </div>
         </div>
       )}
@@ -687,9 +608,6 @@ export const componentMeta = {
     { key: 'supporting_text', label: 'Supporting Text', type: 'textarea', required: false },
     { key: 'cta_text', label: 'CTA Button Text', type: 'text', required: false },
     { key: 'trust_items', label: 'Trust Indicators (pipe separated)', type: 'text', required: false },
-    { key: 'step_indicator_1_text', label: 'Step Indicator 1', type: 'text', required: false },
-    { key: 'step_indicator_2_text', label: 'Step Indicator 2', type: 'text', required: false },
-    { key: 'step_indicator_3_text', label: 'Step Indicator 3', type: 'text', required: false },
     { key: 'tech_specs_heading', label: 'Technical Specs Heading', type: 'text', required: false },
     { key: 'tech_spec_1_value', label: 'Tech Spec 1 Value', type: 'text', required: false },
     { key: 'tech_spec_1_label', label: 'Tech Spec 1 Label', type: 'text', required: false },
