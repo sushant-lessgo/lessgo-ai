@@ -179,10 +179,10 @@ const FlipCard = React.memo(({
   return (
     <div className="group perspective-1000">
       <div 
-        className={`relative w-full h-96 cursor-pointer transition-transform duration-700 transform-style-preserve-3d ${
+        className={`relative w-full h-96 ${mode === 'preview' ? 'cursor-pointer' : ''} transition-transform duration-700 transform-style-preserve-3d ${
           isFlipped ? 'rotate-y-180' : ''
         }`}
-        onClick={onFlip}
+        onClick={mode === 'preview' ? onFlip : undefined}
       >
         {/* Front of Card */}
         <div className="absolute inset-0 w-full h-full backface-hidden bg-white rounded-xl shadow-lg border border-gray-200 p-6 flex flex-col">
@@ -205,17 +205,42 @@ const FlipCard = React.memo(({
               <div className={`w-8 h-8 rounded-full bg-gradient-to-br ${getColorForIndex(index)} flex items-center justify-center`}>
                 <span className="text-white font-bold text-sm">{index + 1}</span>
               </div>
-              <h3 className="text-xl font-bold text-gray-900">{title}</h3>
+              {mode === 'edit' ? (
+                <div
+                  contentEditable
+                  suppressContentEditableWarning
+                  onBlur={(e) => {
+                    const stepTitles = blockContent.step_titles ? blockContent.step_titles.split('|') : [];
+                    stepTitles[index] = e.currentTarget.textContent || '';
+                    handleContentUpdate('step_titles', stepTitles.join('|'));
+                  }}
+                  className="text-xl font-bold text-gray-900 outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-2 py-1 cursor-text hover:bg-gray-50 min-h-[32px] flex-1"
+                  data-placeholder="Step title"
+                >
+                  {title}
+                </div>
+              ) : (
+                <h3 className="text-xl font-bold text-gray-900">{title}</h3>
+              )}
             </div>
           </div>
           
           <div className="mt-auto pt-4 border-t border-gray-100 text-center">
-            <div className="flex items-center justify-center space-x-2 text-gray-500">
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-              </svg>
-              <span className="text-sm">Click to flip for details</span>
-            </div>
+            {mode === 'preview' ? (
+              <div className="flex items-center justify-center space-x-2 text-gray-500">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                </svg>
+                <span className="text-sm">Click to flip for details</span>
+              </div>
+            ) : (
+              <div className="flex items-center justify-center space-x-2 text-gray-500">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                </svg>
+                <span className="text-sm">Click text to edit</span>
+              </div>
+            )}
           </div>
         </div>
 
@@ -226,12 +251,44 @@ const FlipCard = React.memo(({
               <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center">
                 <span className="text-white font-bold text-sm">{index + 1}</span>
               </div>
-              <h3 className="text-xl font-bold">{title}</h3>
+              {mode === 'edit' ? (
+                <div
+                  contentEditable
+                  suppressContentEditableWarning
+                  onBlur={(e) => {
+                    const stepTitles = blockContent.step_titles ? blockContent.step_titles.split('|') : [];
+                    stepTitles[index] = e.currentTarget.textContent || '';
+                    handleContentUpdate('step_titles', stepTitles.join('|'));
+                  }}
+                  className="text-xl font-bold text-white outline-none focus:ring-2 focus:ring-white/50 focus:ring-opacity-50 rounded px-2 py-1 cursor-text hover:bg-white/10 min-h-[32px] flex-1"
+                  data-placeholder="Step title"
+                >
+                  {title}
+                </div>
+              ) : (
+                <h3 className="text-xl font-bold">{title}</h3>
+              )}
             </div>
             
-            <p className="text-white/90 leading-relaxed text-lg mb-6">
-              {description}
-            </p>
+            {mode === 'edit' ? (
+              <div
+                contentEditable
+                suppressContentEditableWarning
+                onBlur={(e) => {
+                  const stepDescriptions = blockContent.step_descriptions ? blockContent.step_descriptions.split('|') : [];
+                  stepDescriptions[index] = e.currentTarget.textContent || '';
+                  handleContentUpdate('step_descriptions', stepDescriptions.join('|'));
+                }}
+                className="text-white/90 leading-relaxed text-lg mb-6 outline-none focus:ring-2 focus:ring-white/50 focus:ring-opacity-50 rounded px-2 py-1 cursor-text hover:bg-white/10 min-h-[48px]"
+                data-placeholder="Step description"
+              >
+                {description}
+              </div>
+            ) : (
+              <p className="text-white/90 leading-relaxed text-lg mb-6">
+                {description}
+              </p>
+            )}
             
             <div className="space-y-3">
               <div className="flex items-center space-x-2">
@@ -266,9 +323,25 @@ const FlipCard = React.memo(({
           </div>
           
           <div className="mt-auto pt-6 border-t border-white/20">
-            <button className="w-full bg-white/20 hover:bg-white/30 transition-colors duration-200 rounded-lg py-3 px-4 text-white font-semibold">
-              {action}
-            </button>
+            {mode === 'edit' ? (
+              <div
+                contentEditable
+                suppressContentEditableWarning
+                onBlur={(e) => {
+                  const stepActions = blockContent.step_actions ? blockContent.step_actions.split('|') : [];
+                  stepActions[index] = e.currentTarget.textContent || '';
+                  handleContentUpdate('step_actions', stepActions.join('|'));
+                }}
+                className="w-full bg-white/20 hover:bg-white/30 transition-colors duration-200 rounded-lg py-3 px-4 text-white font-semibold text-center outline-none focus:ring-2 focus:ring-white/50 focus:ring-opacity-50 cursor-text min-h-[48px] flex items-center justify-center"
+                data-placeholder="Action text"
+              >
+                {action}
+              </div>
+            ) : (
+              <button className="w-full bg-white/20 hover:bg-white/30 transition-colors duration-200 rounded-lg py-3 px-4 text-white font-semibold">
+                {action}
+              </button>
+            )}
           </div>
         </div>
       </div>
@@ -395,77 +468,85 @@ export default function CardFlipSteps(props: LayoutComponentProps) {
           )}
         </div>
 
-        {mode !== 'preview' ? (
-          <div className="space-y-8">
-            <div className="p-6 border border-gray-200 rounded-lg bg-gray-50">
-              <h4 className="font-semibold text-gray-700 mb-4">Card Flip Content</h4>
-              
-              <div className="space-y-4">
-                <EditableAdaptiveText
-                  mode={mode as 'edit' | 'preview'}
-                  value={blockContent.step_titles || ''}
-                  onEdit={(value) => handleContentUpdate('step_titles', value)}
-                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
-                  colorTokens={colorTokens}
-                  variant="body"
-                  className="mb-2"
-                  placeholder="Step titles (pipe separated)"
-                  sectionId={sectionId}
-                  elementKey="step_titles"
-                  sectionBackground={sectionBackground}
-                />
+        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
+          {steps.map((step, index) => (
+            <FlipCard
+              key={index}
+              title={step.title}
+              description={step.description}
+              visual={step.visual}
+              action={step.action}
+              index={index}
+              isFlipped={flippedCards.has(index)}
+              onFlip={() => toggleFlip(index)}
+              showImageToolbar={showImageToolbar}
+              sectionId={sectionId}
+              mode={mode as 'edit' | 'preview'}
+              blockContent={blockContent}
+              handleContentUpdate={handleContentUpdate}
+              backgroundType={backgroundType}
+              colorTokens={colorTokens}
+            />
+          ))}
+        </div>
+
+        {/* Edit Mode Controls */}
+        {mode === 'edit' && (
+          <div className="flex justify-center space-x-4 mb-8">
+            <button
+              onClick={() => {
+                const currentTitles = blockContent.step_titles ? blockContent.step_titles.split('|') : [];
+                const currentDescriptions = blockContent.step_descriptions ? blockContent.step_descriptions.split('|') : [];
+                const currentActions = blockContent.step_actions ? blockContent.step_actions.split('|') : [];
                 
-                <EditableAdaptiveText
-                  mode={mode as 'edit' | 'preview'}
-                  value={blockContent.step_descriptions || ''}
-                  onEdit={(value) => handleContentUpdate('step_descriptions', value)}
-                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
-                  colorTokens={colorTokens}
-                  variant="body"
-                  className="mb-2"
-                  placeholder="Step descriptions (pipe separated)"
-                  sectionId={sectionId}
-                  elementKey="step_descriptions"
-                  sectionBackground={sectionBackground}
-                />
+                currentTitles.push(`Step ${currentTitles.length + 1}`);
+                currentDescriptions.push('Add description here');
+                currentActions.push('Get Started');
                 
-                <EditableAdaptiveText
-                  mode={mode as 'edit' | 'preview'}
-                  value={blockContent.step_actions || ''}
-                  onEdit={(value) => handleContentUpdate('step_actions', value)}
-                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
-                  colorTokens={colorTokens}
-                  variant="body"
-                  className="mb-2"
-                  placeholder="Step action buttons (pipe separated)"
-                  sectionId={sectionId}
-                  elementKey="step_actions"
-                  sectionBackground={sectionBackground}
-                />
-              </div>
-            </div>
-          </div>
-        ) : (
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
-            {steps.map((step, index) => (
-              <FlipCard
-                key={index}
-                title={step.title}
-                description={step.description}
-                visual={step.visual}
-                action={step.action}
-                index={index}
-                isFlipped={flippedCards.has(index)}
-                onFlip={() => toggleFlip(index)}
-                showImageToolbar={showImageToolbar}
-                sectionId={sectionId}
-                mode={mode as 'edit' | 'preview'}
-                blockContent={blockContent}
-                handleContentUpdate={handleContentUpdate}
-                backgroundType={backgroundType}
-                colorTokens={colorTokens}
-              />
-            ))}
+                handleContentUpdate('step_titles', currentTitles.join('|'));
+                handleContentUpdate('step_descriptions', currentDescriptions.join('|'));
+                handleContentUpdate('step_actions', currentActions.join('|'));
+              }}
+              className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+            >
+              + Add Step
+            </button>
+            {steps.length > 1 && (
+              <button
+                onClick={() => {
+                  const currentTitles = blockContent.step_titles ? blockContent.step_titles.split('|') : [];
+                  const currentDescriptions = blockContent.step_descriptions ? blockContent.step_descriptions.split('|') : [];
+                  const currentActions = blockContent.step_actions ? blockContent.step_actions.split('|') : [];
+                  
+                  currentTitles.pop();
+                  currentDescriptions.pop();
+                  currentActions.pop();
+                  
+                  handleContentUpdate('step_titles', currentTitles.join('|'));
+                  handleContentUpdate('step_descriptions', currentDescriptions.join('|'));
+                  handleContentUpdate('step_actions', currentActions.join('|'));
+                }}
+                className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
+              >
+                - Remove Step
+              </button>
+            )}
+            <button
+              onClick={() => {
+                // Toggle all cards flip state for testing
+                setFlippedCards(prev => {
+                  const allFlipped = steps.every((_, index) => prev.has(index));
+                  if (allFlipped) {
+                    return new Set(); // Unflip all
+                  } else {
+                    return new Set(steps.map((_, index) => index)); // Flip all
+                  }
+                });
+              }}
+              className="px-4 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600 transition-colors"
+            >
+              🔄 Test Flip
+            </button>
           </div>
         )}
 
@@ -721,7 +802,7 @@ export default function CardFlipSteps(props: LayoutComponentProps) {
         )}
       </div>
       
-      <style jsx>{`
+      <style jsx global>{`
         .perspective-1000 {
           perspective: 1000px;
         }
@@ -730,6 +811,8 @@ export default function CardFlipSteps(props: LayoutComponentProps) {
         }
         .backface-hidden {
           backface-visibility: hidden;
+          -webkit-backface-visibility: hidden;
+          -moz-backface-visibility: hidden;
         }
         .rotate-y-180 {
           transform: rotateY(180deg);
