@@ -198,7 +198,7 @@ export default function AccordionSteps(props: LayoutComponentProps) {
     return blockContent[iconFields[index] as keyof AccordionStepsContent] || ['✅', '🔒', '💻'][index];
   };
 
-  const AccordionStep = ({ step, index, isOpen, onToggle, blockContent, handleContentUpdate, mode, backgroundType, colorTokens, sectionId }: {
+  const AccordionStep = ({ step, index, isOpen, onToggle, blockContent, handleContentUpdate, mode, backgroundType, colorTokens, sectionId, onRemove }: {
     step: { title: string; description: string; details: string };
     index: number;
     isOpen: boolean;
@@ -209,8 +209,9 @@ export default function AccordionSteps(props: LayoutComponentProps) {
     backgroundType: any;
     colorTokens: any;
     sectionId: string;
+    onRemove?: () => void;
   }) => (
-    <div className={`border border-gray-200 rounded-lg overflow-hidden transition-all duration-300 ${isOpen ? 'shadow-lg' : 'hover:shadow-md'}`}>
+    <div className={`relative border border-gray-200 rounded-lg overflow-hidden transition-all duration-300 ${isOpen ? 'shadow-lg' : 'hover:shadow-md'} group`}>
       <button
         onClick={onToggle}
         className={`w-full p-6 text-left transition-all duration-300 ${
@@ -220,7 +221,7 @@ export default function AccordionSteps(props: LayoutComponentProps) {
         }`}
       >
         <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-4 flex-1">
             <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm ${
               isOpen 
                 ? 'bg-white/20 text-white' 
@@ -228,8 +229,29 @@ export default function AccordionSteps(props: LayoutComponentProps) {
             }`}>
               {index + 1}
             </div>
-            <div>
-              <h3 style={h3Style} className="text-lg font-semibold">{step.title}</h3>
+            <div className="flex-1">
+              {mode !== 'preview' ? (
+                <div
+                  contentEditable
+                  suppressContentEditableWarning
+                  onClick={(e) => e.stopPropagation()}
+                  onBlur={(e) => {
+                    const stepTitles = blockContent.step_titles ? blockContent.step_titles.split('|') : [];
+                    stepTitles[index] = e.currentTarget.textContent || '';
+                    handleContentUpdate('step_titles', stepTitles.join('|'));
+                  }}
+                  className={`text-lg font-semibold outline-none focus:ring-2 focus:ring-opacity-50 rounded px-2 py-1 cursor-text min-h-[32px] ${
+                    isOpen 
+                      ? 'text-white focus:ring-white/50 hover:bg-white/10'
+                      : 'text-gray-900 focus:ring-blue-500 hover:bg-gray-100'
+                  }`}
+                  data-placeholder="Step title"
+                >
+                  {step.title}
+                </div>
+              ) : (
+                <h3 style={h3Style} className="text-lg font-semibold">{step.title}</h3>
+              )}
               {!isOpen && (
                 <p className={`text-sm mt-1 ${isOpen ? 'text-white/80' : mutedTextColor}`}>
                   {step.description.substring(0, 80)}...
@@ -249,16 +271,50 @@ export default function AccordionSteps(props: LayoutComponentProps) {
       {isOpen && (
         <div className="p-6 bg-white border-t border-gray-100">
           <div className="space-y-4">
-            <p className="text-gray-700 leading-relaxed text-lg">
-              {step.description}
-            </p>
+            {mode !== 'preview' ? (
+              <div
+                contentEditable
+                suppressContentEditableWarning
+                onBlur={(e) => {
+                  const stepDescriptions = blockContent.step_descriptions ? blockContent.step_descriptions.split('|') : [];
+                  stepDescriptions[index] = e.currentTarget.textContent || '';
+                  handleContentUpdate('step_descriptions', stepDescriptions.join('|'));
+                }}
+                className="text-gray-700 leading-relaxed text-lg outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-2 py-1 cursor-text hover:bg-gray-50 min-h-[48px]"
+                data-placeholder="Step description"
+              >
+                {step.description}
+              </div>
+            ) : (
+              <p className="text-gray-700 leading-relaxed text-lg">
+                {step.description}
+              </p>
+            )}
             
-            {step.details && (
+            {(step.details || mode === 'edit') && (
               <div className="bg-gray-50 rounded-lg p-4 border-l-4 border-blue-500">
                 <h4 className="font-semibold text-gray-900 mb-2">Technical Details:</h4>
-                <p className="text-gray-600 text-sm leading-relaxed">
-                  {step.details}
-                </p>
+                {mode !== 'preview' ? (
+                  <div
+                    contentEditable
+                    suppressContentEditableWarning
+                    onBlur={(e) => {
+                      const stepDetails = blockContent.step_details ? blockContent.step_details.split('|') : [];
+                      stepDetails[index] = e.currentTarget.textContent || '';
+                      handleContentUpdate('step_details', stepDetails.join('|'));
+                    }}
+                    className="text-gray-600 text-sm leading-relaxed outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-2 py-1 cursor-text hover:bg-white min-h-[48px]"
+                    data-placeholder="Technical details for this step"
+                  >
+                    {step.details}
+                  </div>
+                ) : (
+                  step.details && (
+                    <p className="text-gray-600 text-sm leading-relaxed">
+                      {step.details}
+                    </p>
+                  )
+                )}
               </div>
             )}
             
@@ -309,6 +365,22 @@ export default function AccordionSteps(props: LayoutComponentProps) {
           </div>
         </div>
       )}
+      
+      {/* Remove Step Button - only in edit mode */}
+      {mode === 'edit' && onRemove && (
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            onRemove();
+          }}
+          className="opacity-0 group-hover:opacity-100 absolute top-2 right-2 text-red-500 hover:text-red-700 transition-opacity duration-200 z-10 bg-white rounded-full p-1.5 shadow-md"
+          title="Remove this step"
+        >
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      )}
     </div>
   );
   
@@ -354,74 +426,75 @@ export default function AccordionSteps(props: LayoutComponentProps) {
           )}
         </div>
 
-        {mode !== 'preview' ? (
-          <div className="space-y-8">
-            <div className="p-6 border border-gray-200 rounded-lg bg-gray-50">
-              <h4 className="font-semibold text-gray-700 mb-4">Accordion Step Content</h4>
-              
-              <div className="space-y-4">
-                <EditableAdaptiveText
-                  mode={mode}
-                  value={blockContent.step_titles || ''}
-                  onEdit={(value) => handleContentUpdate('step_titles', value)}
-                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
-                  colorTokens={colorTokens}
-                  variant="body"
-                  className="mb-2"
-                  placeholder="Step titles (pipe separated)"
-                  sectionId={sectionId}
-                  elementKey="step_titles"
-                  sectionBackground={sectionBackground}
-                />
+        {/* Accordion Steps - Always visible in both modes */}
+        <div className="space-y-4 mb-12">
+          {steps.map((step, index) => (
+            <AccordionStep
+              key={index}
+              step={step}
+              index={index}
+              isOpen={openStep === index}
+              onToggle={() => toggleStep(index)}
+              blockContent={blockContent}
+              handleContentUpdate={handleContentUpdate}
+              mode={mode}
+              backgroundType={backgroundType}
+              colorTokens={colorTokens}
+              sectionId={sectionId}
+              onRemove={steps.length > 1 ? () => {
+                const stepTitles = blockContent.step_titles ? blockContent.step_titles.split('|') : [];
+                const stepDescriptions = blockContent.step_descriptions ? blockContent.step_descriptions.split('|') : [];
+                const stepDetails = blockContent.step_details ? blockContent.step_details.split('|') : [];
                 
-                <EditableAdaptiveText
-                  mode={mode}
-                  value={blockContent.step_descriptions || ''}
-                  onEdit={(value) => handleContentUpdate('step_descriptions', value)}
-                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
-                  colorTokens={colorTokens}
-                  variant="body"
-                  className="mb-2"
-                  placeholder="Step descriptions (pipe separated)"
-                  sectionId={sectionId}
-                  elementKey="step_descriptions"
-                  sectionBackground={sectionBackground}
-                />
+                stepTitles.splice(index, 1);
+                stepDescriptions.splice(index, 1);
+                stepDetails.splice(index, 1);
                 
-                <EditableAdaptiveText
-                  mode={mode}
-                  value={blockContent.step_details || ''}
-                  onEdit={(value) => handleContentUpdate('step_details', value)}
-                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
-                  colorTokens={colorTokens}
-                  variant="body"
-                  placeholder="Step technical details (pipe separated)"
-                  sectionId={sectionId}
-                  elementKey="step_details"
-                  sectionBackground={sectionBackground}
-                />
-              </div>
+                handleContentUpdate('step_titles', stepTitles.join('|'));
+                handleContentUpdate('step_descriptions', stepDescriptions.join('|'));
+                handleContentUpdate('step_details', stepDetails.join('|'));
+                
+                // Reset open step if we're removing the currently open one
+                if (openStep === index) {
+                  setOpenStep(null);
+                } else if (openStep !== null && openStep > index) {
+                  setOpenStep(openStep - 1);
+                }
+              } : undefined}
+            />
+          ))}
+          
+          {/* Add Step Button - only in edit mode */}
+          {mode === 'edit' && steps.length < 6 && (
+            <div className="flex items-center justify-center">
+              <button
+                onClick={() => {
+                  const stepTitles = blockContent.step_titles ? blockContent.step_titles.split('|') : [];
+                  const stepDescriptions = blockContent.step_descriptions ? blockContent.step_descriptions.split('|') : [];
+                  const stepDetails = blockContent.step_details ? blockContent.step_details.split('|') : [];
+                  
+                  stepTitles.push(`Step ${stepTitles.length + 1}`);
+                  stepDescriptions.push('Add your step description here');
+                  stepDetails.push('Add technical details for this step');
+                  
+                  handleContentUpdate('step_titles', stepTitles.join('|'));
+                  handleContentUpdate('step_descriptions', stepDescriptions.join('|'));
+                  handleContentUpdate('step_details', stepDetails.join('|'));
+                  
+                  // Open the newly added step
+                  setOpenStep(stepTitles.length - 1);
+                }}
+                className="w-full max-w-lg p-4 border-2 border-dashed border-gray-300 hover:border-gray-400 text-gray-400 hover:text-gray-500 transition-all duration-300 flex items-center justify-center bg-gray-50 hover:bg-gray-100 rounded-lg"
+                title="Add new accordion step"
+              >
+                <svg className="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                </svg>
+                <span className="font-medium">Add New Step</span>
+              </button>
             </div>
-          </div>
-        ) : (
-          <div className="space-y-4 mb-12">
-            {steps.map((step, index) => (
-              <AccordionStep
-                key={index}
-                step={step}
-                index={index}
-                isOpen={openStep === index}
-                onToggle={() => toggleStep(index)}
-                blockContent={blockContent}
-                handleContentUpdate={handleContentUpdate}
-                mode={mode}
-                backgroundType={backgroundType}
-                colorTokens={colorTokens}
-                sectionId={sectionId}
-              />
-            ))}
-          </div>
-        )}
+          )}
+        </div>
 
         {/* Technical Specs Summary */}
         {blockContent.show_tech_specs !== false && (
