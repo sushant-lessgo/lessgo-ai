@@ -285,13 +285,13 @@ const ZigzagStep = React.memo(({
             src={visual}
             alt={title}
             className="w-full h-80 object-cover rounded-2xl shadow-2xl cursor-pointer hover:shadow-3xl transition-shadow duration-300"
-            data-image-id={`${sectionId}-step-visual-${index}`}
+            data-image-id={`${sectionId}.step-visual-${index}`}
             onMouseUp={(e) => {
               if (mode === 'edit') {
                 e.stopPropagation();
                 e.preventDefault();
                 const rect = e.currentTarget.getBoundingClientRect();
-                const imageId = `${sectionId}-step-visual-${index}`;
+                const imageId = `${sectionId}.step-visual-${index}`;
                 const position = {
                   x: rect.left + rect.width / 2,
                   y: rect.top - 10
@@ -313,7 +313,7 @@ const ZigzagStep = React.memo(({
                 e.stopPropagation();
                 e.preventDefault();
                 const rect = e.currentTarget.getBoundingClientRect();
-                const imageId = `${sectionId}-step-visual-${index}`;
+                const imageId = `${sectionId}.step-visual-${index}`;
                 const position = {
                   x: rect.left + rect.width / 2,
                   y: rect.top - 10

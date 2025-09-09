@@ -50,6 +50,13 @@ export function ImageToolbar({ targetId, position, contextActions }: ImageToolba
     if (targetId.includes('.')) {
       const [sectionId, elementKey] = targetId.split('.');
       
+      // Handle step-visual pattern for ZigZagImageSteps (e.g., "howItWorks.step-visual-0")
+      if (elementKey.startsWith('step-visual-')) {
+        const stepIndex = elementKey.replace('step-visual-', '');
+        const result = { sectionId, elementKey: `step_visual_${stepIndex}` };
+        return result;
+      }
+      
       // Handle timestamp in elementKey for dot format (e.g., "beforeAfter.1757338395540-before-visual")
       const timestampPattern = /^(\d{10,})-(.+)$/;
       const match = elementKey.match(timestampPattern);
@@ -94,7 +101,19 @@ export function ImageToolbar({ targetId, position, contextActions }: ImageToolba
     } else if (parts.length >= 2) {
       // Other image cases - improved logic to handle timestamped section IDs
       
-      // PRIORITY 1: Check for timestamp pattern first (more specific)
+      // PRIORITY 1: Check for step-visual pattern (ZigZagImageSteps)
+      // Format: sectionId-step-visual-0 -> { sectionId, elementKey: 'step_visual_0' }
+      const stepVisualPattern = /^(.+?)-step-visual-(\d+)$/;
+      const stepMatch = targetId.match(stepVisualPattern);
+      if (stepMatch) {
+        const sectionId = stepMatch[1];
+        const stepIndex = stepMatch[2];
+        const elementKey = `step_visual_${stepIndex}`;
+        const result = { sectionId, elementKey };
+        return result;
+      }
+      
+      // PRIORITY 2: Check for timestamp pattern (more specific)
       const timestampPattern = /^(.+?)-(\d{10,})-(.+)$/;
       const match = targetId.match(timestampPattern);
       if (match) {
@@ -107,7 +126,7 @@ export function ImageToolbar({ targetId, position, contextActions }: ImageToolba
         return result;
       }
       
-      // PRIORITY 2: Check if the last parts form a known image field
+      // PRIORITY 3: Check if the last parts form a known image field
       const commonImageFields = [
         // BeforeAfter components
         'persona_avatar', 'before_visual', 'after_visual', 

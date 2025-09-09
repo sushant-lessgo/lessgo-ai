@@ -1,15 +1,19 @@
-logger.ts:84 [2025-09-09T10:06:21.405Z] DEBUG: Layout change debug: {
-  "sectionId": "howItWorks-1757342534419",
-  "currentLayout": "VerticalTimeline",
-  "determinedSectionType": "howItWorks",
-  "aiMetadata": {
-    "aiGenerated": false,
-    "isCustomized": true,
-    "aiGeneratedElements": []
-  },
-  "fallbackReason": "Determined from layout"
+logger.ts:84 [2025-09-09T12:30:29.640Z] DEBUG: 🔍 Parsing image targetId: howItWorks-step-visual-0
+logger.ts:84 [2025-09-09T12:30:29.640Z] DEBUG: 🔍 Split parts: [
+  "howItWorks",
+  "step",
+  "visual",
+  "0"
+]
+logger.ts:84 [2025-09-09T12:30:29.641Z] DEBUG: 🎯 Other image parsed: {
+  "sectionId": "howItWorks",
+  "elementKey": "step-visual-0"
 }
- [2025-09-09T10:06:21.410Z] DEBUG: 🔍 LeftPanel Store Methods Available: {
+logger.ts:84 [2025-09-09T12:30:29.641Z] DEBUG: 🎯 Image selection state set: {
+  "sectionId": "howItWorks",
+  "elementKey": "step-visual-0"
+}
+ [2025-09-09T12:30:29.643Z] DEBUG: 🔍 LeftPanel Store Methods Available: {
   "regenerateAllContent": true,
   "hasStore": true,
   "hasStoreState": true,
@@ -24,7 +28,7 @@ logger.ts:84 [2025-09-09T10:06:21.405Z] DEBUG: Layout change debug: {
     "regenerateWithInputs"
   ]
 }
- [2025-09-09T10:06:21.410Z] DEBUG: 🔍 LeftPanel Store Methods Available: {
+ [2025-09-09T12:30:29.644Z] DEBUG: 🔍 LeftPanel Store Methods Available: {
   "regenerateAllContent": true,
   "hasStore": true,
   "hasStoreState": true,
@@ -39,424 +43,776 @@ logger.ts:84 [2025-09-09T10:06:21.405Z] DEBUG: Layout change debug: {
     "regenerateWithInputs"
   ]
 }
- [DEV] 🔍 extractLayoutContent DEBUG: element "nav_item_1" is undefined {layout: 'CenteredLogoHeader', isMandatory: true, isInSchema: true, isExcluded: false, hasLayout: true, …}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "nav_item_1" is undefined {layout: 'FullNavHeader', isMandatory: true, isInSchema: true, isExcluded: false, hasLayout: true, …}
  [DEV] ✅ Using default for mandatory element "nav_item_1": Home
- [DEV] 🔍 extractLayoutContent DEBUG: element "nav_item_2" is undefined {layout: 'CenteredLogoHeader', isMandatory: true, isInSchema: true, isExcluded: false, hasLayout: true, …}
- [DEV] ✅ Using default for mandatory element "nav_item_2": Products
- [DEV] 🔍 extractLayoutContent DEBUG: element "nav_item_3" is undefined {layout: 'CenteredLogoHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "nav_item_2" is undefined {layout: 'FullNavHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ Using empty for excluded optional element "nav_item_2" 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "nav_item_3" is undefined {layout: 'FullNavHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
  [DEV] ❌ Using empty for excluded optional element "nav_item_3" 
- [DEV] 🔍 extractLayoutContent DEBUG: element "nav_item_4" is undefined {layout: 'CenteredLogoHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "nav_item_4" is undefined {layout: 'FullNavHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
  [DEV] ❌ Using empty for excluded optional element "nav_item_4" 
- [DEV] 🔍 extractLayoutContent DEBUG: element "nav_item_5" is undefined {layout: 'CenteredLogoHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "nav_item_5" is undefined {layout: 'FullNavHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
  [DEV] ❌ Using empty for excluded optional element "nav_item_5" 
- [DEV] 🔍 extractLayoutContent DEBUG: element "nav_item_6" is undefined {layout: 'CenteredLogoHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
- [DEV] ❌ Using empty for excluded optional element "nav_item_6" 
- [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_1" is undefined {layout: 'CenteredLogoHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "nav_item_6" is undefined {layout: 'FullNavHeader', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🎨 Using default for asset element "nav_item_6": Resources
+ [DEV] 🔍 extractLayoutContent DEBUG: element "nav_item_7" is undefined {layout: 'FullNavHeader', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🎨 Using default for asset element "nav_item_7": Contact
+ [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_1" is undefined {layout: 'FullNavHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
  [DEV] ❌ Using empty for excluded optional element "nav_link_1" 
- [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_2" is undefined {layout: 'CenteredLogoHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_2" is undefined {layout: 'FullNavHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
  [DEV] ❌ Using empty for excluded optional element "nav_link_2" 
- [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_3" is undefined {layout: 'CenteredLogoHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_3" is undefined {layout: 'FullNavHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
  [DEV] ❌ Using empty for excluded optional element "nav_link_3" 
- [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_4" is undefined {layout: 'CenteredLogoHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_4" is undefined {layout: 'FullNavHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
  [DEV] ❌ Using empty for excluded optional element "nav_link_4" 
- [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_5" is undefined {layout: 'CenteredLogoHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_5" is undefined {layout: 'FullNavHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
  [DEV] ❌ Using empty for excluded optional element "nav_link_5" 
- [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_6" is undefined {layout: 'CenteredLogoHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
- [DEV] ❌ Using empty for excluded optional element "nav_link_6" 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_6" is undefined {layout: 'FullNavHeader', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🎨 Using default for asset element "nav_link_6": #resources
+ [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_7" is undefined {layout: 'FullNavHeader', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🎨 Using default for asset element "nav_link_7": #contact
  [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
  [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
  [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔍 extractLayoutContent DEBUG: element "nav_item_1" is undefined {layout: 'CenteredLogoHeader', isMandatory: true, isInSchema: true, isExcluded: false, hasLayout: true, …}
+ [DEV] 🧭 [NAV-DEBUG] Getting navigation items {hasNavigationConfig: true, navigationItems: 6, lastUpdated: 1756798562788, blockContent: {…}}
+ [DEV] 🧭 [NAV-DEBUG] Using navigation config items: (6) [{…}, {…}, {…}, {…}, {…}, {…}]
+ [DEV] 🔍 extractLayoutContent DEBUG: element "nav_item_1" is undefined {layout: 'FullNavHeader', isMandatory: true, isInSchema: true, isExcluded: false, hasLayout: true, …}
  [DEV] ✅ Using default for mandatory element "nav_item_1": Home
- [DEV] 🔍 extractLayoutContent DEBUG: element "nav_item_2" is undefined {layout: 'CenteredLogoHeader', isMandatory: true, isInSchema: true, isExcluded: false, hasLayout: true, …}
- [DEV] ✅ Using default for mandatory element "nav_item_2": Products
- [DEV] 🔍 extractLayoutContent DEBUG: element "nav_item_3" is undefined {layout: 'CenteredLogoHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "nav_item_2" is undefined {layout: 'FullNavHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ Using empty for excluded optional element "nav_item_2" 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "nav_item_3" is undefined {layout: 'FullNavHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
  [DEV] ❌ Using empty for excluded optional element "nav_item_3" 
- [DEV] 🔍 extractLayoutContent DEBUG: element "nav_item_4" is undefined {layout: 'CenteredLogoHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "nav_item_4" is undefined {layout: 'FullNavHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
  [DEV] ❌ Using empty for excluded optional element "nav_item_4" 
- [DEV] 🔍 extractLayoutContent DEBUG: element "nav_item_5" is undefined {layout: 'CenteredLogoHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "nav_item_5" is undefined {layout: 'FullNavHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
  [DEV] ❌ Using empty for excluded optional element "nav_item_5" 
- [DEV] 🔍 extractLayoutContent DEBUG: element "nav_item_6" is undefined {layout: 'CenteredLogoHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
- [DEV] ❌ Using empty for excluded optional element "nav_item_6" 
- [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_1" is undefined {layout: 'CenteredLogoHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "nav_item_6" is undefined {layout: 'FullNavHeader', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🎨 Using default for asset element "nav_item_6": Resources
+ [DEV] 🔍 extractLayoutContent DEBUG: element "nav_item_7" is undefined {layout: 'FullNavHeader', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🎨 Using default for asset element "nav_item_7": Contact
+ [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_1" is undefined {layout: 'FullNavHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
  [DEV] ❌ Using empty for excluded optional element "nav_link_1" 
- [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_2" is undefined {layout: 'CenteredLogoHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_2" is undefined {layout: 'FullNavHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
  [DEV] ❌ Using empty for excluded optional element "nav_link_2" 
- [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_3" is undefined {layout: 'CenteredLogoHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_3" is undefined {layout: 'FullNavHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
  [DEV] ❌ Using empty for excluded optional element "nav_link_3" 
- [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_4" is undefined {layout: 'CenteredLogoHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_4" is undefined {layout: 'FullNavHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
  [DEV] ❌ Using empty for excluded optional element "nav_link_4" 
- [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_5" is undefined {layout: 'CenteredLogoHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_5" is undefined {layout: 'FullNavHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
  [DEV] ❌ Using empty for excluded optional element "nav_link_5" 
- [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_6" is undefined {layout: 'CenteredLogoHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
- [DEV] ❌ Using empty for excluded optional element "nav_link_6" 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_6" is undefined {layout: 'FullNavHeader', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🎨 Using default for asset element "nav_link_6": #resources
+ [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_7" is undefined {layout: 'FullNavHeader', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🎨 Using default for asset element "nav_link_7": #contact
  [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
  [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
  [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔍 extractLayoutContent DEBUG: element "badge_text" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "badge_text": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "trust_items" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🧭 [NAV-DEBUG] Getting navigation items {hasNavigationConfig: true, navigationItems: 6, lastUpdated: 1756798562788, blockContent: {…}}
+ [DEV] 🧭 [NAV-DEBUG] Using navigation config items: (6) [{…}, {…}, {…}, {…}, {…}, {…}]
+ [DEV] 🔍 extractLayoutContent DEBUG: element "badge_text" is undefined {layout: 'leftCopyRightImage', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ Using empty for excluded optional element "badge_text" 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "trust_items" is undefined {layout: 'leftCopyRightImage', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
  [DEV] 🎨 Using default for asset element "trust_items": Free 14-day trial|No credit card required|Cancel anytime
- [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_1" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_1" is undefined {layout: 'leftCopyRightImage', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
  [DEV] 🎨 Using default for asset element "trust_item_1": Free 14-day trial
- [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_2" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "trust_item_2": No credit card required
- [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_3" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_3" is undefined {layout: 'leftCopyRightImage', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
  [DEV] 🎨 Using default for asset element "trust_item_3": Cancel anytime
- [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_4" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_4" is undefined {layout: 'leftCopyRightImage', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
  [DEV] 🎨 Using default for asset element "trust_item_4": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_5" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_5" is undefined {layout: 'leftCopyRightImage', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
  [DEV] 🎨 Using default for asset element "trust_item_5": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "center_hero_image" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "center_hero_image": /hero-placeholder.jpg
- [DEV] 🔍 extractLayoutContent DEBUG: element "customer_count" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "hero_image" is undefined {layout: 'leftCopyRightImage', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🎨 Using default for asset element "hero_image": /hero-placeholder.jpg
+ [DEV] 🔍 extractLayoutContent DEBUG: element "customer_count" is undefined {layout: 'leftCopyRightImage', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
  [DEV] 🎨 Using default for asset element "customer_count": 500+ happy customers
- [DEV] 🔍 extractLayoutContent DEBUG: element "rating_value" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "rating_value" is undefined {layout: 'leftCopyRightImage', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
  [DEV] 🎨 Using default for asset element "rating_value": 4.9/5
- [DEV] 🔍 extractLayoutContent DEBUG: element "rating_count" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "rating_count" is undefined {layout: 'leftCopyRightImage', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
  [DEV] 🎨 Using default for asset element "rating_count": from 127 reviews
- [DEV] 🔍 extractLayoutContent DEBUG: element "show_social_proof" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "show_social_proof" is undefined {layout: 'leftCopyRightImage', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
  [DEV] 🎨 Using default for asset element "show_social_proof": true
- [DEV] 🔍 extractLayoutContent DEBUG: element "show_customer_avatars" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "show_customer_avatars" is undefined {layout: 'leftCopyRightImage', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
  [DEV] 🎨 Using default for asset element "show_customer_avatars": true
- [DEV] 🔍 extractLayoutContent DEBUG: element "avatar_count" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "avatar_count" is undefined {layout: 'leftCopyRightImage', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
  [DEV] 🎨 Using default for asset element "avatar_count": 4
- [DEV] 🔍 extractLayoutContent DEBUG: element "customer_names" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "customer_names" is undefined {layout: 'leftCopyRightImage', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
  [DEV] 🎨 Using default for asset element "customer_names": Sarah Chen|Alex Rivera|Jordan Kim|Maya Patel
- [DEV] 🔍 extractLayoutContent DEBUG: element "avatar_urls" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "avatar_urls" is undefined {layout: 'leftCopyRightImage', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
  [DEV] 🎨 Using default for asset element "avatar_urls": {}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#4338ca]'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#4338ca]'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#4338ca]'}
- [DEV] 🔍 extractLayoutContent DEBUG: element "badge_text" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "badge_text": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "trust_items" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-black'}
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-black'}
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-black'}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "badge_text" is undefined {layout: 'leftCopyRightImage', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ Using empty for excluded optional element "badge_text" 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "trust_items" is undefined {layout: 'leftCopyRightImage', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
  [DEV] 🎨 Using default for asset element "trust_items": Free 14-day trial|No credit card required|Cancel anytime
- [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_1" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_1" is undefined {layout: 'leftCopyRightImage', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
  [DEV] 🎨 Using default for asset element "trust_item_1": Free 14-day trial
- [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_2" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "trust_item_2": No credit card required
- [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_3" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_3" is undefined {layout: 'leftCopyRightImage', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
  [DEV] 🎨 Using default for asset element "trust_item_3": Cancel anytime
- [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_4" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_4" is undefined {layout: 'leftCopyRightImage', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
  [DEV] 🎨 Using default for asset element "trust_item_4": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_5" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_5" is undefined {layout: 'leftCopyRightImage', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
  [DEV] 🎨 Using default for asset element "trust_item_5": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "center_hero_image" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "center_hero_image": /hero-placeholder.jpg
- [DEV] 🔍 extractLayoutContent DEBUG: element "customer_count" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "hero_image" is undefined {layout: 'leftCopyRightImage', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🎨 Using default for asset element "hero_image": /hero-placeholder.jpg
+ [DEV] 🔍 extractLayoutContent DEBUG: element "customer_count" is undefined {layout: 'leftCopyRightImage', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
  [DEV] 🎨 Using default for asset element "customer_count": 500+ happy customers
- [DEV] 🔍 extractLayoutContent DEBUG: element "rating_value" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "rating_value" is undefined {layout: 'leftCopyRightImage', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
  [DEV] 🎨 Using default for asset element "rating_value": 4.9/5
- [DEV] 🔍 extractLayoutContent DEBUG: element "rating_count" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "rating_count" is undefined {layout: 'leftCopyRightImage', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
  [DEV] 🎨 Using default for asset element "rating_count": from 127 reviews
- [DEV] 🔍 extractLayoutContent DEBUG: element "show_social_proof" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "show_social_proof" is undefined {layout: 'leftCopyRightImage', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
  [DEV] 🎨 Using default for asset element "show_social_proof": true
- [DEV] 🔍 extractLayoutContent DEBUG: element "show_customer_avatars" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "show_customer_avatars" is undefined {layout: 'leftCopyRightImage', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
  [DEV] 🎨 Using default for asset element "show_customer_avatars": true
- [DEV] 🔍 extractLayoutContent DEBUG: element "avatar_count" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "avatar_count" is undefined {layout: 'leftCopyRightImage', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
  [DEV] 🎨 Using default for asset element "avatar_count": 4
- [DEV] 🔍 extractLayoutContent DEBUG: element "customer_names" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "customer_names" is undefined {layout: 'leftCopyRightImage', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
  [DEV] 🎨 Using default for asset element "customer_names": Sarah Chen|Alex Rivera|Jordan Kim|Maya Patel
- [DEV] 🔍 extractLayoutContent DEBUG: element "avatar_urls" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "avatar_urls" is undefined {layout: 'leftCopyRightImage', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
  [DEV] 🎨 Using default for asset element "avatar_urls": {}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#4338ca]'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#4338ca]'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#4338ca]'}
- [DEV] 🎯 extractLayoutContent: Found existing "step_titles": {elementValue: {…}, layout: 'VerticalTimeline', valueType: 'object', isStringEmpty: false, defaultValue: 'Initial Setup|Data Import|Automation Rules|Go Live'}
- [DEV] 🎯 extractLayoutContent: Found existing "step_descriptions": {elementValue: {…}, layout: 'VerticalTimeline', valueType: 'object', isStringEmpty: false, defaultValue: 'Connect your existing tools and configure your wor…d workflows and start seeing results immediately.'}
- [DEV] 🔍 extractLayoutContent DEBUG: element "step_durations" is undefined {layout: 'VerticalTimeline', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "step_durations": 5 minutes|10 minutes|15 minutes|Instant
- [DEV] 🔍 extractLayoutContent DEBUG: element "subheadline" is undefined {layout: 'VerticalTimeline', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-black'}
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-black'}
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-black'}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "headline" is undefined {layout: 'TextListTransformation', isMandatory: true, isInSchema: true, isExcluded: false, hasLayout: true, …}
+ [DEV] ✅ Using default for mandatory element "headline": Transform Your Daily Challenges
+ [DEV] 🔍 extractLayoutContent DEBUG: element "before_list" is undefined {layout: 'TextListTransformation', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🎨 Using default for asset element "before_list": Spending hours on repetitive tasks|Struggling with manual data entry|Dealing with human errors and inconsistencies|Managing multiple disconnected tools|Feeling overwhelmed by growing workload
+ [DEV] 🔍 extractLayoutContent DEBUG: element "after_list" is undefined {layout: 'TextListTransformation', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🎨 Using default for asset element "after_list": Automated workflows that run 24/7|Seamless data synchronization across platforms|99.9% accuracy with intelligent error detection|Unified dashboard for all your operations|Peace of mind with reliable automation
+ [DEV] 🔍 extractLayoutContent DEBUG: element "transformation_text" is undefined {layout: 'TextListTransformation', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🎨 Using default for asset element "transformation_text": Our solution bridges the gap between where you are and where you want to be.
+ [DEV] 🔍 extractLayoutContent DEBUG: element "subheadline" is undefined {layout: 'TextListTransformation', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
  [DEV] 🎨 Using default for asset element "subheadline": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "supporting_text" is undefined {layout: 'VerticalTimeline', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "supporting_text" is undefined {layout: 'TextListTransformation', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
  [DEV] 🎨 Using default for asset element "supporting_text": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "cta_text" is undefined {layout: 'VerticalTimeline', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "cta_text" is undefined {layout: 'TextListTransformation', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
  [DEV] 🎨 Using default for asset element "cta_text": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "trust_items" is undefined {layout: 'VerticalTimeline', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "trust_items" is undefined {layout: 'TextListTransformation', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
  [DEV] 🎨 Using default for asset element "trust_items": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "process_steps_label" is undefined {layout: 'VerticalTimeline', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "process_steps_label": simple steps
- [DEV] 🔍 extractLayoutContent DEBUG: element "process_summary_heading" is undefined {layout: 'VerticalTimeline', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "process_summary_heading": Get started in minutes, not hours
- [DEV] 🔍 extractLayoutContent DEBUG: element "process_summary_description" is undefined {layout: 'VerticalTimeline', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "process_summary_description": Our streamlined process is designed to get you up and running quickly with maximum efficiency.
- [DEV] 🔍 extractLayoutContent DEBUG: element "process_time_label" is undefined {layout: 'VerticalTimeline', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "process_time_label": Total time: 30 minutes
- [DEV] 🔍 extractLayoutContent DEBUG: element "step_icon_1" is undefined {layout: 'VerticalTimeline', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "step_icon_1": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "step_icon_2" is undefined {layout: 'VerticalTimeline', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "step_icon_2": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "step_icon_3" is undefined {layout: 'VerticalTimeline', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "step_icon_3": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "step_icon_4" is undefined {layout: 'VerticalTimeline', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "step_icon_4": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "use_step_icons" is undefined {layout: 'VerticalTimeline', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "use_step_icons": false
+ [DEV] 🔍 extractLayoutContent DEBUG: element "before_icon" is undefined {layout: 'TextListTransformation', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🎨 Using default for asset element "before_icon": ❌
+ [DEV] 🔍 extractLayoutContent DEBUG: element "after_icon" is undefined {layout: 'TextListTransformation', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🎨 Using default for asset element "after_icon": ✅
+ [DEV] 🔍 extractLayoutContent DEBUG: element "transformation_icon" is undefined {layout: 'TextListTransformation', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🎨 Using default for asset element "transformation_icon": ➡️
  [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
  [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
  [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🎯 extractLayoutContent: Found existing "step_titles": {elementValue: {…}, layout: 'VerticalTimeline', valueType: 'object', isStringEmpty: false, defaultValue: 'Initial Setup|Data Import|Automation Rules|Go Live'}
- [DEV] 🎯 extractLayoutContent: Found existing "step_descriptions": {elementValue: {…}, layout: 'VerticalTimeline', valueType: 'object', isStringEmpty: false, defaultValue: 'Connect your existing tools and configure your wor…d workflows and start seeing results immediately.'}
- [DEV] 🔍 extractLayoutContent DEBUG: element "step_durations" is undefined {layout: 'VerticalTimeline', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "step_durations": 5 minutes|10 minutes|15 minutes|Instant
- [DEV] 🔍 extractLayoutContent DEBUG: element "subheadline" is undefined {layout: 'VerticalTimeline', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "headline" is undefined {layout: 'TextListTransformation', isMandatory: true, isInSchema: true, isExcluded: false, hasLayout: true, …}
+ [DEV] ✅ Using default for mandatory element "headline": Transform Your Daily Challenges
+ [DEV] 🔍 extractLayoutContent DEBUG: element "before_list" is undefined {layout: 'TextListTransformation', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🎨 Using default for asset element "before_list": Spending hours on repetitive tasks|Struggling with manual data entry|Dealing with human errors and inconsistencies|Managing multiple disconnected tools|Feeling overwhelmed by growing workload
+ [DEV] 🔍 extractLayoutContent DEBUG: element "after_list" is undefined {layout: 'TextListTransformation', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🎨 Using default for asset element "after_list": Automated workflows that run 24/7|Seamless data synchronization across platforms|99.9% accuracy with intelligent error detection|Unified dashboard for all your operations|Peace of mind with reliable automation
+ [DEV] 🔍 extractLayoutContent DEBUG: element "transformation_text" is undefined {layout: 'TextListTransformation', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🎨 Using default for asset element "transformation_text": Our solution bridges the gap between where you are and where you want to be.
+ [DEV] 🔍 extractLayoutContent DEBUG: element "subheadline" is undefined {layout: 'TextListTransformation', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
  [DEV] 🎨 Using default for asset element "subheadline": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "supporting_text" is undefined {layout: 'VerticalTimeline', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "supporting_text" is undefined {layout: 'TextListTransformation', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
  [DEV] 🎨 Using default for asset element "supporting_text": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "cta_text" is undefined {layout: 'VerticalTimeline', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "cta_text" is undefined {layout: 'TextListTransformation', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
  [DEV] 🎨 Using default for asset element "cta_text": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "trust_items" is undefined {layout: 'VerticalTimeline', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "trust_items" is undefined {layout: 'TextListTransformation', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
  [DEV] 🎨 Using default for asset element "trust_items": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "process_steps_label" is undefined {layout: 'VerticalTimeline', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "process_steps_label": simple steps
- [DEV] 🔍 extractLayoutContent DEBUG: element "process_summary_heading" is undefined {layout: 'VerticalTimeline', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "process_summary_heading": Get started in minutes, not hours
- [DEV] 🔍 extractLayoutContent DEBUG: element "process_summary_description" is undefined {layout: 'VerticalTimeline', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "process_summary_description": Our streamlined process is designed to get you up and running quickly with maximum efficiency.
- [DEV] 🔍 extractLayoutContent DEBUG: element "process_time_label" is undefined {layout: 'VerticalTimeline', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "process_time_label": Total time: 30 minutes
- [DEV] 🔍 extractLayoutContent DEBUG: element "step_icon_1" is undefined {layout: 'VerticalTimeline', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "step_icon_1": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "step_icon_2" is undefined {layout: 'VerticalTimeline', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "step_icon_2": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "step_icon_3" is undefined {layout: 'VerticalTimeline', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "step_icon_3": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "step_icon_4" is undefined {layout: 'VerticalTimeline', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "step_icon_4": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "use_step_icons" is undefined {layout: 'VerticalTimeline', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "use_step_icons": false
+ [DEV] 🔍 extractLayoutContent DEBUG: element "before_icon" is undefined {layout: 'TextListTransformation', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🎨 Using default for asset element "before_icon": ❌
+ [DEV] 🔍 extractLayoutContent DEBUG: element "after_icon" is undefined {layout: 'TextListTransformation', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🎨 Using default for asset element "after_icon": ✅
+ [DEV] 🔍 extractLayoutContent DEBUG: element "transformation_icon" is undefined {layout: 'TextListTransformation', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🎨 Using default for asset element "transformation_icon": ➡️
  [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
  [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
  [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔍 extractLayoutContent DEBUG: element "pain_descriptions" is undefined {layout: 'StackedPainBullets', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
- [DEV] ❌ Using empty for excluded optional element "pain_descriptions" 
- [DEV] 🔍 extractLayoutContent DEBUG: element "subheadline" is undefined {layout: 'StackedPainBullets', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
- [DEV] ❌ Using empty for excluded optional element "subheadline" 
- [DEV] 🔍 extractLayoutContent DEBUG: element "conclusion_text" is undefined {layout: 'StackedPainBullets', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "conclusion_text": Sound familiar? You're not alone.
- [DEV] 🔍 extractLayoutContent DEBUG: element "pain_icon_1" is undefined {layout: 'StackedPainBullets', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "pain_icon_1": ⏰
- [DEV] 🔍 extractLayoutContent DEBUG: element "pain_icon_2" is undefined {layout: 'StackedPainBullets', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "pain_icon_2": 🔗
- [DEV] 🔍 extractLayoutContent DEBUG: element "pain_icon_3" is undefined {layout: 'StackedPainBullets', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "pain_icon_3": ⚠️
- [DEV] 🔍 extractLayoutContent DEBUG: element "pain_icon_4" is undefined {layout: 'StackedPainBullets', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "pain_icon_4": 😰
- [DEV] 🔍 extractLayoutContent DEBUG: element "pain_icon_5" is undefined {layout: 'StackedPainBullets', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "pain_icon_5": 📉
- [DEV] 🔍 extractLayoutContent DEBUG: element "pain_icon_6" is undefined {layout: 'StackedPainBullets', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "pain_icon_6": 🌪️
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔍 extractLayoutContent DEBUG: element "pain_descriptions" is undefined {layout: 'StackedPainBullets', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
- [DEV] ❌ Using empty for excluded optional element "pain_descriptions" 
- [DEV] 🔍 extractLayoutContent DEBUG: element "subheadline" is undefined {layout: 'StackedPainBullets', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
- [DEV] ❌ Using empty for excluded optional element "subheadline" 
- [DEV] 🔍 extractLayoutContent DEBUG: element "conclusion_text" is undefined {layout: 'StackedPainBullets', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "conclusion_text": Sound familiar? You're not alone.
- [DEV] 🔍 extractLayoutContent DEBUG: element "pain_icon_1" is undefined {layout: 'StackedPainBullets', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "pain_icon_1": ⏰
- [DEV] 🔍 extractLayoutContent DEBUG: element "pain_icon_2" is undefined {layout: 'StackedPainBullets', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "pain_icon_2": 🔗
- [DEV] 🔍 extractLayoutContent DEBUG: element "pain_icon_3" is undefined {layout: 'StackedPainBullets', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "pain_icon_3": ⚠️
- [DEV] 🔍 extractLayoutContent DEBUG: element "pain_icon_4" is undefined {layout: 'StackedPainBullets', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "pain_icon_4": 😰
- [DEV] 🔍 extractLayoutContent DEBUG: element "pain_icon_5" is undefined {layout: 'StackedPainBullets', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "pain_icon_5": 📉
- [DEV] 🔍 extractLayoutContent DEBUG: element "pain_icon_6" is undefined {layout: 'StackedPainBullets', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "pain_icon_6": 🌪️
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔍 extractLayoutContent DEBUG: element "headline" is undefined {layout: 'SplitCard', isMandatory: true, isInSchema: true, isExcluded: false, hasLayout: true, …}
- [DEV] ✅ Using default for mandatory element "headline": Premium Transformation Experience
- [DEV] 🔍 extractLayoutContent DEBUG: element "before_label" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "before_label": Current Challenge
- [DEV] 🔍 extractLayoutContent DEBUG: element "after_label" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "after_label": Premium Solution
- [DEV] 🔍 extractLayoutContent DEBUG: element "before_description" is undefined {layout: 'SplitCard', isMandatory: true, isInSchema: true, isExcluded: false, hasLayout: true, …}
- [DEV] ✅ Using default for mandatory element "before_description": Complex manual processes requiring expertise, time, and significant resources to execute properly.
- [DEV] 🔍 extractLayoutContent DEBUG: element "after_description" is undefined {layout: 'SplitCard', isMandatory: true, isInSchema: true, isExcluded: false, hasLayout: true, …}
- [DEV] ✅ Using default for mandatory element "after_description": Expertly crafted automation that delivers exceptional results with minimal effort and maximum efficiency.
- [DEV] 🔍 extractLayoutContent DEBUG: element "subheadline" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
- [DEV] ❌ Using empty for excluded optional element "subheadline" 
- [DEV] 🔍 extractLayoutContent DEBUG: element "supporting_text" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🎯 extractLayoutContent: Found existing "step_titles": {elementValue: {…}, layout: 'ZigzagImageSteps', valueType: 'object', isStringEmpty: false, defaultValue: 'Discover & Inspire|Design & Create|Refine & Perfect|Share & Collaborate'}
+ [DEV] 🎯 extractLayoutContent: Found existing "step_descriptions": {elementValue: {…}, layout: 'ZigzagImageSteps', valueType: 'object', isStringEmpty: false, defaultValue: 'Explore our vast library of templates, designs, an…th other creators to take your work even further.'}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "step_visuals" is undefined {layout: 'ZigzagImageSteps', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🎨 Using default for asset element "step_visuals": /step-discover.jpg|/step-design.jpg|/step-refine.jpg|/step-share.jpg
+ [DEV] 🔍 extractLayoutContent DEBUG: element "subheadline" is undefined {layout: 'ZigzagImageSteps', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🎨 Using default for asset element "subheadline": 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "supporting_text" is undefined {layout: 'ZigzagImageSteps', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
  [DEV] 🎨 Using default for asset element "supporting_text": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "cta_text" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "cta_text" is undefined {layout: 'ZigzagImageSteps', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
  [DEV] 🎨 Using default for asset element "cta_text": 
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "trust_items" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "trust_items": 
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "premium_features_text" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "premium_features_text": Premium Features Included
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "upgrade_text" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "upgrade_text": Upgrade
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "before_placeholder_text" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "before_placeholder_text": Current State
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "after_placeholder_text" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "after_placeholder_text": Premium Result
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "premium_badge_text" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "premium_badge_text": Premium
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "before_icon" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "before_icon": ⚠️
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "after_icon" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "after_icon": ⭐
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "upgrade_icon" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "upgrade_icon": ➡️
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "premium_feature_icon" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "premium_feature_icon": ✅
+ [DEV] 🔍 extractLayoutContent DEBUG: element "trust_items" is undefined {layout: 'ZigzagImageSteps', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🎨 Using default for asset element "trust_items": 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "flow_summary_heading" is undefined {layout: 'ZigzagImageSteps', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🎨 Using default for asset element "flow_summary_heading": Unleash Your Creative Potential
+ [DEV] 🔍 extractLayoutContent DEBUG: element "flow_feature_1_icon" is undefined {layout: 'ZigzagImageSteps', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🎨 Using default for asset element "flow_feature_1_icon": 💖
+ [DEV] 🔍 extractLayoutContent DEBUG: element "flow_feature_1_text" is undefined {layout: 'ZigzagImageSteps', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🎨 Using default for asset element "flow_feature_1_text": Creative freedom
+ [DEV] 🔍 extractLayoutContent DEBUG: element "flow_feature_2_icon" is undefined {layout: 'ZigzagImageSteps', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🎨 Using default for asset element "flow_feature_2_icon": ⚡
+ [DEV] 🔍 extractLayoutContent DEBUG: element "flow_feature_2_text" is undefined {layout: 'ZigzagImageSteps', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🎨 Using default for asset element "flow_feature_2_text": Professional quality
+ [DEV] 🔍 extractLayoutContent DEBUG: element "flow_feature_3_icon" is undefined {layout: 'ZigzagImageSteps', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🎨 Using default for asset element "flow_feature_3_icon": 👥
+ [DEV] 🔍 extractLayoutContent DEBUG: element "flow_feature_3_text" is undefined {layout: 'ZigzagImageSteps', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🎨 Using default for asset element "flow_feature_3_text": Community driven
+ [DEV] 🔍 extractLayoutContent DEBUG: element "flow_summary_description" is undefined {layout: 'ZigzagImageSteps', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🎨 Using default for asset element "flow_summary_description": Join thousands of creators who've transformed their ideas into stunning visual content
+ [DEV] 🔍 extractLayoutContent DEBUG: element "show_flow_summary" is undefined {layout: 'ZigzagImageSteps', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🎨 Using default for asset element "show_flow_summary": true
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
+ [DEV] 🎯 extractLayoutContent: Found existing "step_titles": {elementValue: {…}, layout: 'ZigzagImageSteps', valueType: 'object', isStringEmpty: false, defaultValue: 'Discover & Inspire|Design & Create|Refine & Perfect|Share & Collaborate'}
+ [DEV] 🎯 extractLayoutContent: Found existing "step_descriptions": {elementValue: {…}, layout: 'ZigzagImageSteps', valueType: 'object', isStringEmpty: false, defaultValue: 'Explore our vast library of templates, designs, an…th other creators to take your work even further.'}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "step_visuals" is undefined {layout: 'ZigzagImageSteps', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🎨 Using default for asset element "step_visuals": /step-discover.jpg|/step-design.jpg|/step-refine.jpg|/step-share.jpg
+ [DEV] 🔍 extractLayoutContent DEBUG: element "subheadline" is undefined {layout: 'ZigzagImageSteps', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🎨 Using default for asset element "subheadline": 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "supporting_text" is undefined {layout: 'ZigzagImageSteps', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🎨 Using default for asset element "supporting_text": 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "cta_text" is undefined {layout: 'ZigzagImageSteps', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🎨 Using default for asset element "cta_text": 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "trust_items" is undefined {layout: 'ZigzagImageSteps', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🎨 Using default for asset element "trust_items": 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "flow_summary_heading" is undefined {layout: 'ZigzagImageSteps', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🎨 Using default for asset element "flow_summary_heading": Unleash Your Creative Potential
+ [DEV] 🔍 extractLayoutContent DEBUG: element "flow_feature_1_icon" is undefined {layout: 'ZigzagImageSteps', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🎨 Using default for asset element "flow_feature_1_icon": 💖
+ [DEV] 🔍 extractLayoutContent DEBUG: element "flow_feature_1_text" is undefined {layout: 'ZigzagImageSteps', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🎨 Using default for asset element "flow_feature_1_text": Creative freedom
+ [DEV] 🔍 extractLayoutContent DEBUG: element "flow_feature_2_icon" is undefined {layout: 'ZigzagImageSteps', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🎨 Using default for asset element "flow_feature_2_icon": ⚡
+ [DEV] 🔍 extractLayoutContent DEBUG: element "flow_feature_2_text" is undefined {layout: 'ZigzagImageSteps', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🎨 Using default for asset element "flow_feature_2_text": Professional quality
+ [DEV] 🔍 extractLayoutContent DEBUG: element "flow_feature_3_icon" is undefined {layout: 'ZigzagImageSteps', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+logger.ts:95 [DEV] 🎨 Using default for asset element "flow_feature_3_icon": 👥
+logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "flow_feature_3_text" is undefined {layout: 'ZigzagImageSteps', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+logger.ts:95 [DEV] 🎨 Using default for asset element "flow_feature_3_text": Community driven
+logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "flow_summary_description" is undefined {layout: 'ZigzagImageSteps', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+logger.ts:95 [DEV] 🎨 Using default for asset element "flow_summary_description": Join thousands of creators who've transformed their ideas into stunning visual content
+logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "show_flow_summary" is undefined {layout: 'ZigzagImageSteps', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+logger.ts:95 [DEV] 🎨 Using default for asset element "show_flow_summary": true
 logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
 logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
 logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "headline" is undefined {layout: 'SplitCard', isMandatory: true, isInSchema: true, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] ✅ Using default for mandatory element "headline": Premium Transformation Experience
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "before_label" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "before_label": Current Challenge
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "after_label" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "after_label": Premium Solution
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "before_description" is undefined {layout: 'SplitCard', isMandatory: true, isInSchema: true, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] ✅ Using default for mandatory element "before_description": Complex manual processes requiring expertise, time, and significant resources to execute properly.
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "after_description" is undefined {layout: 'SplitCard', isMandatory: true, isInSchema: true, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] ✅ Using default for mandatory element "after_description": Expertly crafted automation that delivers exceptional results with minimal effort and maximum efficiency.
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "subheadline" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "subheadline" is undefined {layout: 'LogoGrid', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
 logger.ts:95 [DEV] ❌ Using empty for excluded optional element "subheadline" 
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "supporting_text" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "default_icon" is undefined {layout: 'LogoGrid', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+logger.ts:95 [DEV] 🎨 Using default for asset element "default_icon": 🔗
+logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "logo_urls" is undefined {layout: 'LogoGrid', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+logger.ts:95 [DEV] 🎨 Using default for asset element "logo_urls": {}
+logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
+logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
+logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
+logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "subheadline" is undefined {layout: 'LogoGrid', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+logger.ts:95 [DEV] ❌ Using empty for excluded optional element "subheadline" 
+logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "default_icon" is undefined {layout: 'LogoGrid', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+logger.ts:95 [DEV] 🎨 Using default for asset element "default_icon": 🔗
+logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "logo_urls" is undefined {layout: 'LogoGrid', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+logger.ts:95 [DEV] 🎨 Using default for asset element "logo_urls": {}
+logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
+logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
+logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
+logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "subheadline" is undefined {layout: 'InlineQnAList', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+logger.ts:95 [DEV] 🎨 Using default for asset element "subheadline": Get instant answers to the most common questions
+logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "question_1" is undefined {layout: 'InlineQnAList', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+logger.ts:95 [DEV] 🎨 Using default for asset element "question_1": What is your product?
+logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "answer_1" is undefined {layout: 'InlineQnAList', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+logger.ts:95 [DEV] 🎨 Using default for asset element "answer_1": We're a no-code automation platform that helps you streamline your business processes without writing a single line of code.
+logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "question_2" is undefined {layout: 'InlineQnAList', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+logger.ts:95 [DEV] 🎨 Using default for asset element "question_2": How much does it cost?
+logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "answer_2" is undefined {layout: 'InlineQnAList', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+logger.ts:95 [DEV] 🎨 Using default for asset element "answer_2": We offer flexible pricing starting at $29/month. See our pricing page for detailed plans.
+logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "question_3" is undefined {layout: 'InlineQnAList', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+logger.ts:95 [DEV] 🎨 Using default for asset element "question_3": Do I need technical knowledge?
+logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "answer_3" is undefined {layout: 'InlineQnAList', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+logger.ts:95 [DEV] 🎨 Using default for asset element "answer_3": Not at all! Our platform is designed for non-technical users. If you can use email, you can use our product.
+logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "question_4" is undefined {layout: 'InlineQnAList', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+logger.ts:95 [DEV] 🎨 Using default for asset element "question_4": How quickly can I get started?
+logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "answer_4" is undefined {layout: 'InlineQnAList', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+logger.ts:95 [DEV] 🎨 Using default for asset element "answer_4": You can get started in under 5 minutes. Just sign up, connect your tools, and start automating.
+logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "question_5" is undefined {layout: 'InlineQnAList', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+logger.ts:95 [DEV] 🎨 Using default for asset element "question_5": What if I need help?
+logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "answer_5" is undefined {layout: 'InlineQnAList', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+logger.ts:95 [DEV] 🎨 Using default for asset element "answer_5": We provide 24/7 support via chat and email, plus extensive documentation and video tutorials.
+logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "question_6" is undefined {layout: 'InlineQnAList', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+logger.ts:95 [DEV] 🎨 Using default for asset element "question_6": 
+logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "answer_6" is undefined {layout: 'InlineQnAList', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+logger.ts:95 [DEV] 🎨 Using default for asset element "answer_6": 
+logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#f3f4f6]'}
+logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#f3f4f6]'}
+logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#f3f4f6]'}
+logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "subheadline" is undefined {layout: 'InlineQnAList', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+logger.ts:95 [DEV] 🎨 Using default for asset element "subheadline": Get instant answers to the most common questions
+logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "question_1" is undefined {layout: 'InlineQnAList', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+logger.ts:95 [DEV] 🎨 Using default for asset element "question_1": What is your product?
+logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "answer_1" is undefined {layout: 'InlineQnAList', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+logger.ts:95 [DEV] 🎨 Using default for asset element "answer_1": We're a no-code automation platform that helps you streamline your business processes without writing a single line of code.
+logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "question_2" is undefined {layout: 'InlineQnAList', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+logger.ts:95 [DEV] 🎨 Using default for asset element "question_2": How much does it cost?
+logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "answer_2" is undefined {layout: 'InlineQnAList', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+logger.ts:95 [DEV] 🎨 Using default for asset element "answer_2": We offer flexible pricing starting at $29/month. See our pricing page for detailed plans.
+logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "question_3" is undefined {layout: 'InlineQnAList', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+logger.ts:95 [DEV] 🎨 Using default for asset element "question_3": Do I need technical knowledge?
+logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "answer_3" is undefined {layout: 'InlineQnAList', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+logger.ts:95 [DEV] 🎨 Using default for asset element "answer_3": Not at all! Our platform is designed for non-technical users. If you can use email, you can use our product.
+logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "question_4" is undefined {layout: 'InlineQnAList', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+logger.ts:95 [DEV] 🎨 Using default for asset element "question_4": How quickly can I get started?
+ [DEV] 🔍 extractLayoutContent DEBUG: element "answer_4" is undefined {layout: 'InlineQnAList', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🎨 Using default for asset element "answer_4": You can get started in under 5 minutes. Just sign up, connect your tools, and start automating.
+ [DEV] 🔍 extractLayoutContent DEBUG: element "question_5" is undefined {layout: 'InlineQnAList', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🎨 Using default for asset element "question_5": What if I need help?
+ [DEV] 🔍 extractLayoutContent DEBUG: element "answer_5" is undefined {layout: 'InlineQnAList', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🎨 Using default for asset element "answer_5": We provide 24/7 support via chat and email, plus extensive documentation and video tutorials.
+ [DEV] 🔍 extractLayoutContent DEBUG: element "question_6" is undefined {layout: 'InlineQnAList', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🎨 Using default for asset element "question_6": 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "answer_6" is undefined {layout: 'InlineQnAList', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🎨 Using default for asset element "answer_6": 
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#f3f4f6]'}
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#f3f4f6]'}
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#f3f4f6]'}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "trust_items" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+logger.ts:95 [DEV] 🎨 Using default for asset element "trust_items": Free 14-day trial|No credit card required|Cancel anytime
+logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_1" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+logger.ts:95 [DEV] 🎨 Using default for asset element "trust_item_1": Free 14-day trial
+logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_2" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+logger.ts:95 [DEV] 🎨 Using default for asset element "trust_item_2": No credit card required
+logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_3" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+logger.ts:95 [DEV] 🎨 Using default for asset element "trust_item_3": Cancel anytime
+logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_4" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+logger.ts:95 [DEV] 🎨 Using default for asset element "trust_item_4": 
+logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_5" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+logger.ts:95 [DEV] 🎨 Using default for asset element "trust_item_5": 
+logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "customer_count" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+logger.ts:95 [DEV] 🎨 Using default for asset element "customer_count": 10,000+
+logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "customer_label" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+logger.ts:95 [DEV] 🎨 Using default for asset element "customer_label": Happy customers
+logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "rating_stat" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+logger.ts:95 [DEV] 🎨 Using default for asset element "rating_stat": 4.8/5 stars
+logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "uptime_stat" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+logger.ts:95 [DEV] 🎨 Using default for asset element "uptime_stat": 99.9% uptime
+logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "uptime_label" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+logger.ts:95 [DEV] 🎨 Using default for asset element "uptime_label": SOC 2 Compliant
+logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-black'}
+logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-black'}
+logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-black'}
+logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "trust_items" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+logger.ts:95 [DEV] 🎨 Using default for asset element "trust_items": Free 14-day trial|No credit card required|Cancel anytime
+logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_1" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+logger.ts:95 [DEV] 🎨 Using default for asset element "trust_item_1": Free 14-day trial
+logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_2" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+logger.ts:95 [DEV] 🎨 Using default for asset element "trust_item_2": No credit card required
+logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_3" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+logger.ts:95 [DEV] 🎨 Using default for asset element "trust_item_3": Cancel anytime
+logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_4" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+logger.ts:95 [DEV] 🎨 Using default for asset element "trust_item_4": 
+logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_5" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+logger.ts:95 [DEV] 🎨 Using default for asset element "trust_item_5": 
+logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "customer_count" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+logger.ts:95 [DEV] 🎨 Using default for asset element "customer_count": 10,000+
+logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "customer_label" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+logger.ts:95 [DEV] 🎨 Using default for asset element "customer_label": Happy customers
+logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "rating_stat" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+logger.ts:95 [DEV] 🎨 Using default for asset element "rating_stat": 4.8/5 stars
+logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "uptime_stat" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+logger.ts:95 [DEV] 🎨 Using default for asset element "uptime_stat": 99.9% uptime
+logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "uptime_label" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+logger.ts:95 [DEV] 🎨 Using default for asset element "uptime_label": SOC 2 Compliant
+logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-black'}
+logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-black'}
+logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-black'}
+logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "company_name" is undefined {layout: 'LinksAndSocialFooter', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+logger.ts:95 [DEV] ❌ Using empty for excluded optional element "company_name" 
+logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "tagline" is undefined {layout: 'LinksAndSocialFooter', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+logger.ts:95 [DEV] ❌ Using empty for excluded optional element "tagline" 
+logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
+logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
+logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
+logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "company_name" is undefined {layout: 'LinksAndSocialFooter', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+logger.ts:95 [DEV] ❌ Using empty for excluded optional element "company_name" 
+logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "tagline" is undefined {layout: 'LinksAndSocialFooter', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+logger.ts:95 [DEV] ❌ Using empty for excluded optional element "tagline" 
+logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
+logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
+logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
+logger.ts:95 [DEV] 🖼️🖼️🖼️ ImageToolbar component initialized with props: {targetId: 'howItWorks.step-visual-0', position: {…}, contextActions: Array(5)}
+logger.ts:95 [DEV] 🖼️ Looking for target element with selector: [data-image-id="howItWorks.step-visual-0"]
+logger.ts:95 [DEV] 🖼️ ImageToolbar JSX rendering now! 
+logger.ts:95 [DEV] 🖼️🖼️🖼️ ImageToolbar component initialized with props: {targetId: 'howItWorks.step-visual-0', position: {…}, contextActions: Array(5)}
+logger.ts:95 [DEV] 🖼️ Looking for target element with selector: [data-image-id="howItWorks.step-visual-0"]
+logger.ts:95 [DEV] 🖼️ ImageToolbar JSX rendering now! 
+logger.ts:95 [DEV] 🧭 [NAV-DEBUG] FullNavHeader useEffect: {hasNavigationConfig: true, sectionsLength: 8, sections: Array(8)}
+logger.ts:95 [DEV] 🧭 [NAV-DEBUG] Navigation already exists: {items: Array(6), maxItems: 7, lastUpdated: 1756798562788, autoConfigured: true}
+logger.ts:84 [2025-09-09T12:30:29.721Z] DEBUG: 🔒 Transition locked: {
+  "toolbarType": "image",
+  "reason": "element selected: step-visual-0",
+  "duration": 350,
+  "lockUntil": "2025-09-09T12:30:30.071Z"
+}
+logger.ts:84 [2025-09-09T12:30:29.744Z] DEBUG: 🖼️ handleEditorClick: Detected image click, allowing image handlers to work
+logger.ts:95 [DEV] 🖼️🖼️🖼️ ImageToolbar component initialized with props: {targetId: 'howItWorks.step-visual-0', position: {…}, contextActions: Array(5)}
+logger.ts:95 [DEV] 🖼️ Looking for target element with selector: [data-image-id="howItWorks.step-visual-0"]
+logger.ts:95 [DEV] 🖼️ ImageToolbar JSX rendering now! 
+logger.ts:95 [DEV] 🖼️🖼️🖼️ ImageToolbar component initialized with props: {targetId: 'howItWorks.step-visual-0', position: {…}, contextActions: Array(5)}
+logger.ts:95 [DEV] 🖼️ Looking for target element with selector: [data-image-id="howItWorks.step-visual-0"]
+logger.ts:95 [DEV] 🖼️ ImageToolbar JSX rendering now! 
+logger.ts:95 [DEV] 🖼️🖼️🖼️ ImageToolbar component initialized with props: {targetId: 'howItWorks.step-visual-0', position: {…}, contextActions: Array(5)}
+logger.ts:95 [DEV] 🖼️ Looking for target element with selector: [data-image-id="howItWorks.step-visual-0"]
+logger.ts:95 [DEV] 🖼️ ImageToolbar JSX rendering now! 
+logger.ts:95 [DEV] 🖼️🖼️🖼️ ImageToolbar component initialized with props: {targetId: 'howItWorks.step-visual-0', position: {…}, contextActions: Array(5)}
+logger.ts:95 [DEV] 🖼️ Looking for target element with selector: [data-image-id="howItWorks.step-visual-0"]
+logger.ts:95 [DEV] 🖼️ ImageToolbar JSX rendering now! 
+logger.ts:84 [2025-09-09T12:30:30.343Z] DEBUG: 🔓 Transition unlocked: timeout
+logger.ts:84 [2025-09-09T12:30:30.510Z] DEBUG: 🔍 LeftPanel Store Methods Available: {
+  "regenerateAllContent": true,
+  "hasStore": true,
+  "hasStoreState": true,
+  "storeMethodKeys": [
+    "regenerateSection",
+    "regenerateElement",
+    "regenerateAllContent",
+    "regenerateElementWithVariations",
+    "regenerateVariables",
+    "regenerateContentOnly",
+    "regenerateDesignAndCopy",
+    "regenerateWithInputs"
+  ]
+}
+logger.ts:84 [2025-09-09T12:30:30.511Z] DEBUG: 🔍 LeftPanel Store Methods Available: {
+  "regenerateAllContent": true,
+  "hasStore": true,
+  "hasStoreState": true,
+  "storeMethodKeys": [
+    "regenerateSection",
+    "regenerateElement",
+    "regenerateAllContent",
+    "regenerateElementWithVariations",
+    "regenerateVariables",
+    "regenerateContentOnly",
+    "regenerateDesignAndCopy",
+    "regenerateWithInputs"
+  ]
+}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "nav_item_1" is undefined {layout: 'FullNavHeader', isMandatory: true, isInSchema: true, isExcluded: false, hasLayout: true, …}
+ [DEV] ✅ Using default for mandatory element "nav_item_1": Home
+ [DEV] 🔍 extractLayoutContent DEBUG: element "nav_item_2" is undefined {layout: 'FullNavHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ Using empty for excluded optional element "nav_item_2" 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "nav_item_3" is undefined {layout: 'FullNavHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ Using empty for excluded optional element "nav_item_3" 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "nav_item_4" is undefined {layout: 'FullNavHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ Using empty for excluded optional element "nav_item_4" 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "nav_item_5" is undefined {layout: 'FullNavHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ Using empty for excluded optional element "nav_item_5" 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "nav_item_6" is undefined {layout: 'FullNavHeader', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🎨 Using default for asset element "nav_item_6": Resources
+ [DEV] 🔍 extractLayoutContent DEBUG: element "nav_item_7" is undefined {layout: 'FullNavHeader', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🎨 Using default for asset element "nav_item_7": Contact
+ [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_1" is undefined {layout: 'FullNavHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ Using empty for excluded optional element "nav_link_1" 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_2" is undefined {layout: 'FullNavHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ Using empty for excluded optional element "nav_link_2" 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_3" is undefined {layout: 'FullNavHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ Using empty for excluded optional element "nav_link_3" 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_4" is undefined {layout: 'FullNavHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ Using empty for excluded optional element "nav_link_4" 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_5" is undefined {layout: 'FullNavHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ Using empty for excluded optional element "nav_link_5" 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_6" is undefined {layout: 'FullNavHeader', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🎨 Using default for asset element "nav_link_6": #resources
+ [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_7" is undefined {layout: 'FullNavHeader', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🎨 Using default for asset element "nav_link_7": #contact
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
+ [DEV] 🧭 [NAV-DEBUG] Getting navigation items {hasNavigationConfig: true, navigationItems: 6, lastUpdated: 1756798562788, blockContent: {…}}
+ [DEV] 🧭 [NAV-DEBUG] Using navigation config items: (6) [{…}, {…}, {…}, {…}, {…}, {…}]
+ [DEV] 🔍 extractLayoutContent DEBUG: element "nav_item_1" is undefined {layout: 'FullNavHeader', isMandatory: true, isInSchema: true, isExcluded: false, hasLayout: true, …}
+ [DEV] ✅ Using default for mandatory element "nav_item_1": Home
+ [DEV] 🔍 extractLayoutContent DEBUG: element "nav_item_2" is undefined {layout: 'FullNavHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ Using empty for excluded optional element "nav_item_2" 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "nav_item_3" is undefined {layout: 'FullNavHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ Using empty for excluded optional element "nav_item_3" 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "nav_item_4" is undefined {layout: 'FullNavHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ Using empty for excluded optional element "nav_item_4" 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "nav_item_5" is undefined {layout: 'FullNavHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ Using empty for excluded optional element "nav_item_5" 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "nav_item_6" is undefined {layout: 'FullNavHeader', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🎨 Using default for asset element "nav_item_6": Resources
+ [DEV] 🔍 extractLayoutContent DEBUG: element "nav_item_7" is undefined {layout: 'FullNavHeader', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🎨 Using default for asset element "nav_item_7": Contact
+ [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_1" is undefined {layout: 'FullNavHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ Using empty for excluded optional element "nav_link_1" 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_2" is undefined {layout: 'FullNavHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ Using empty for excluded optional element "nav_link_2" 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_3" is undefined {layout: 'FullNavHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ Using empty for excluded optional element "nav_link_3" 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_4" is undefined {layout: 'FullNavHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ Using empty for excluded optional element "nav_link_4" 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_5" is undefined {layout: 'FullNavHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ Using empty for excluded optional element "nav_link_5" 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_6" is undefined {layout: 'FullNavHeader', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🎨 Using default for asset element "nav_link_6": #resources
+ [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_7" is undefined {layout: 'FullNavHeader', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🎨 Using default for asset element "nav_link_7": #contact
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
+ [DEV] 🧭 [NAV-DEBUG] Getting navigation items {hasNavigationConfig: true, navigationItems: 6, lastUpdated: 1756798562788, blockContent: {…}}
+ [DEV] 🧭 [NAV-DEBUG] Using navigation config items: (6) [{…}, {…}, {…}, {…}, {…}, {…}]
+ [DEV] 🔍 extractLayoutContent DEBUG: element "badge_text" is undefined {layout: 'leftCopyRightImage', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ Using empty for excluded optional element "badge_text" 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "trust_items" is undefined {layout: 'leftCopyRightImage', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🎨 Using default for asset element "trust_items": Free 14-day trial|No credit card required|Cancel anytime
+ [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_1" is undefined {layout: 'leftCopyRightImage', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🎨 Using default for asset element "trust_item_1": Free 14-day trial
+ [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_3" is undefined {layout: 'leftCopyRightImage', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🎨 Using default for asset element "trust_item_3": Cancel anytime
+ [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_4" is undefined {layout: 'leftCopyRightImage', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🎨 Using default for asset element "trust_item_4": 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_5" is undefined {layout: 'leftCopyRightImage', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🎨 Using default for asset element "trust_item_5": 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "hero_image" is undefined {layout: 'leftCopyRightImage', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🎨 Using default for asset element "hero_image": /hero-placeholder.jpg
+ [DEV] 🔍 extractLayoutContent DEBUG: element "customer_count" is undefined {layout: 'leftCopyRightImage', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🎨 Using default for asset element "customer_count": 500+ happy customers
+ [DEV] 🔍 extractLayoutContent DEBUG: element "rating_value" is undefined {layout: 'leftCopyRightImage', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🎨 Using default for asset element "rating_value": 4.9/5
+ [DEV] 🔍 extractLayoutContent DEBUG: element "rating_count" is undefined {layout: 'leftCopyRightImage', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🎨 Using default for asset element "rating_count": from 127 reviews
+ [DEV] 🔍 extractLayoutContent DEBUG: element "show_social_proof" is undefined {layout: 'leftCopyRightImage', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🎨 Using default for asset element "show_social_proof": true
+ [DEV] 🔍 extractLayoutContent DEBUG: element "show_customer_avatars" is undefined {layout: 'leftCopyRightImage', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🎨 Using default for asset element "show_customer_avatars": true
+ [DEV] 🔍 extractLayoutContent DEBUG: element "avatar_count" is undefined {layout: 'leftCopyRightImage', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🎨 Using default for asset element "avatar_count": 4
+ [DEV] 🔍 extractLayoutContent DEBUG: element "customer_names" is undefined {layout: 'leftCopyRightImage', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🎨 Using default for asset element "customer_names": Sarah Chen|Alex Rivera|Jordan Kim|Maya Patel
+ [DEV] 🔍 extractLayoutContent DEBUG: element "avatar_urls" is undefined {layout: 'leftCopyRightImage', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🎨 Using default for asset element "avatar_urls": {}
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-black'}
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-black'}
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-black'}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "badge_text" is undefined {layout: 'leftCopyRightImage', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ Using empty for excluded optional element "badge_text" 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "trust_items" is undefined {layout: 'leftCopyRightImage', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🎨 Using default for asset element "trust_items": Free 14-day trial|No credit card required|Cancel anytime
+ [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_1" is undefined {layout: 'leftCopyRightImage', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🎨 Using default for asset element "trust_item_1": Free 14-day trial
+ [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_3" is undefined {layout: 'leftCopyRightImage', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🎨 Using default for asset element "trust_item_3": Cancel anytime
+ [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_4" is undefined {layout: 'leftCopyRightImage', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🎨 Using default for asset element "trust_item_4": 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_5" is undefined {layout: 'leftCopyRightImage', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🎨 Using default for asset element "trust_item_5": 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "hero_image" is undefined {layout: 'leftCopyRightImage', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🎨 Using default for asset element "hero_image": /hero-placeholder.jpg
+ [DEV] 🔍 extractLayoutContent DEBUG: element "customer_count" is undefined {layout: 'leftCopyRightImage', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🎨 Using default for asset element "customer_count": 500+ happy customers
+ [DEV] 🔍 extractLayoutContent DEBUG: element "rating_value" is undefined {layout: 'leftCopyRightImage', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🎨 Using default for asset element "rating_value": 4.9/5
+ [DEV] 🔍 extractLayoutContent DEBUG: element "rating_count" is undefined {layout: 'leftCopyRightImage', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🎨 Using default for asset element "rating_count": from 127 reviews
+ [DEV] 🔍 extractLayoutContent DEBUG: element "show_social_proof" is undefined {layout: 'leftCopyRightImage', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🎨 Using default for asset element "show_social_proof": true
+ [DEV] 🔍 extractLayoutContent DEBUG: element "show_customer_avatars" is undefined {layout: 'leftCopyRightImage', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🎨 Using default for asset element "show_customer_avatars": true
+ [DEV] 🔍 extractLayoutContent DEBUG: element "avatar_count" is undefined {layout: 'leftCopyRightImage', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🎨 Using default for asset element "avatar_count": 4
+ [DEV] 🔍 extractLayoutContent DEBUG: element "customer_names" is undefined {layout: 'leftCopyRightImage', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🎨 Using default for asset element "customer_names": Sarah Chen|Alex Rivera|Jordan Kim|Maya Patel
+ [DEV] 🔍 extractLayoutContent DEBUG: element "avatar_urls" is undefined {layout: 'leftCopyRightImage', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🎨 Using default for asset element "avatar_urls": {}
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-black'}
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-black'}
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-black'}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "headline" is undefined {layout: 'TextListTransformation', isMandatory: true, isInSchema: true, isExcluded: false, hasLayout: true, …}
+ [DEV] ✅ Using default for mandatory element "headline": Transform Your Daily Challenges
+ [DEV] 🔍 extractLayoutContent DEBUG: element "before_list" is undefined {layout: 'TextListTransformation', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🎨 Using default for asset element "before_list": Spending hours on repetitive tasks|Struggling with manual data entry|Dealing with human errors and inconsistencies|Managing multiple disconnected tools|Feeling overwhelmed by growing workload
+ [DEV] 🔍 extractLayoutContent DEBUG: element "after_list" is undefined {layout: 'TextListTransformation', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🎨 Using default for asset element "after_list": Automated workflows that run 24/7|Seamless data synchronization across platforms|99.9% accuracy with intelligent error detection|Unified dashboard for all your operations|Peace of mind with reliable automation
+ [DEV] 🔍 extractLayoutContent DEBUG: element "transformation_text" is undefined {layout: 'TextListTransformation', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🎨 Using default for asset element "transformation_text": Our solution bridges the gap between where you are and where you want to be.
+ [DEV] 🔍 extractLayoutContent DEBUG: element "subheadline" is undefined {layout: 'TextListTransformation', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🎨 Using default for asset element "subheadline": 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "supporting_text" is undefined {layout: 'TextListTransformation', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🎨 Using default for asset element "supporting_text": 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "cta_text" is undefined {layout: 'TextListTransformation', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🎨 Using default for asset element "cta_text": 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "trust_items" is undefined {layout: 'TextListTransformation', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🎨 Using default for asset element "trust_items": 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "before_icon" is undefined {layout: 'TextListTransformation', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🎨 Using default for asset element "before_icon": ❌
+ [DEV] 🔍 extractLayoutContent DEBUG: element "after_icon" is undefined {layout: 'TextListTransformation', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🎨 Using default for asset element "after_icon": ✅
+ [DEV] 🔍 extractLayoutContent DEBUG: element "transformation_icon" is undefined {layout: 'TextListTransformation', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🎨 Using default for asset element "transformation_icon": ➡️
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "headline" is undefined {layout: 'TextListTransformation', isMandatory: true, isInSchema: true, isExcluded: false, hasLayout: true, …}
+ [DEV] ✅ Using default for mandatory element "headline": Transform Your Daily Challenges
+ [DEV] 🔍 extractLayoutContent DEBUG: element "before_list" is undefined {layout: 'TextListTransformation', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🎨 Using default for asset element "before_list": Spending hours on repetitive tasks|Struggling with manual data entry|Dealing with human errors and inconsistencies|Managing multiple disconnected tools|Feeling overwhelmed by growing workload
+ [DEV] 🔍 extractLayoutContent DEBUG: element "after_list" is undefined {layout: 'TextListTransformation', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🎨 Using default for asset element "after_list": Automated workflows that run 24/7|Seamless data synchronization across platforms|99.9% accuracy with intelligent error detection|Unified dashboard for all your operations|Peace of mind with reliable automation
+ [DEV] 🔍 extractLayoutContent DEBUG: element "transformation_text" is undefined {layout: 'TextListTransformation', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🎨 Using default for asset element "transformation_text": Our solution bridges the gap between where you are and where you want to be.
+ [DEV] 🔍 extractLayoutContent DEBUG: element "subheadline" is undefined {layout: 'TextListTransformation', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🎨 Using default for asset element "subheadline": 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "supporting_text" is undefined {layout: 'TextListTransformation', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🎨 Using default for asset element "supporting_text": 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "cta_text" is undefined {layout: 'TextListTransformation', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🎨 Using default for asset element "cta_text": 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "trust_items" is undefined {layout: 'TextListTransformation', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🎨 Using default for asset element "trust_items": 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "before_icon" is undefined {layout: 'TextListTransformation', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🎨 Using default for asset element "before_icon": ❌
+ [DEV] 🔍 extractLayoutContent DEBUG: element "after_icon" is undefined {layout: 'TextListTransformation', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🎨 Using default for asset element "after_icon": ✅
+ [DEV] 🔍 extractLayoutContent DEBUG: element "transformation_icon" is undefined {layout: 'TextListTransformation', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🎨 Using default for asset element "transformation_icon": ➡️
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
+ [DEV] 🎯 extractLayoutContent: Found existing "step_titles": {elementValue: {…}, layout: 'ZigzagImageSteps', valueType: 'object', isStringEmpty: false, defaultValue: 'Discover & Inspire|Design & Create|Refine & Perfect|Share & Collaborate'}
+ [DEV] 🎯 extractLayoutContent: Found existing "step_descriptions": {elementValue: {…}, layout: 'ZigzagImageSteps', valueType: 'object', isStringEmpty: false, defaultValue: 'Explore our vast library of templates, designs, an…th other creators to take your work even further.'}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "step_visuals" is undefined {layout: 'ZigzagImageSteps', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🎨 Using default for asset element "step_visuals": /step-discover.jpg|/step-design.jpg|/step-refine.jpg|/step-share.jpg
+ [DEV] 🔍 extractLayoutContent DEBUG: element "subheadline" is undefined {layout: 'ZigzagImageSteps', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🎨 Using default for asset element "subheadline": 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "supporting_text" is undefined {layout: 'ZigzagImageSteps', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🎨 Using default for asset element "supporting_text": 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "cta_text" is undefined {layout: 'ZigzagImageSteps', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🎨 Using default for asset element "cta_text": 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "trust_items" is undefined {layout: 'ZigzagImageSteps', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🎨 Using default for asset element "trust_items": 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "flow_summary_heading" is undefined {layout: 'ZigzagImageSteps', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+logger.ts:95 [DEV] 🎨 Using default for asset element "flow_summary_heading": Unleash Your Creative Potential
+logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "flow_feature_1_icon" is undefined {layout: 'ZigzagImageSteps', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+logger.ts:95 [DEV] 🎨 Using default for asset element "flow_feature_1_icon": 💖
+logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "flow_feature_1_text" is undefined {layout: 'ZigzagImageSteps', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+logger.ts:95 [DEV] 🎨 Using default for asset element "flow_feature_1_text": Creative freedom
+logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "flow_feature_2_icon" is undefined {layout: 'ZigzagImageSteps', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+logger.ts:95 [DEV] 🎨 Using default for asset element "flow_feature_2_icon": ⚡
+logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "flow_feature_2_text" is undefined {layout: 'ZigzagImageSteps', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+logger.ts:95 [DEV] 🎨 Using default for asset element "flow_feature_2_text": Professional quality
+logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "flow_feature_3_icon" is undefined {layout: 'ZigzagImageSteps', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+logger.ts:95 [DEV] 🎨 Using default for asset element "flow_feature_3_icon": 👥
+logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "flow_feature_3_text" is undefined {layout: 'ZigzagImageSteps', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+logger.ts:95 [DEV] 🎨 Using default for asset element "flow_feature_3_text": Community driven
+logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "flow_summary_description" is undefined {layout: 'ZigzagImageSteps', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+logger.ts:95 [DEV] 🎨 Using default for asset element "flow_summary_description": Join thousands of creators who've transformed their ideas into stunning visual content
+logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "show_flow_summary" is undefined {layout: 'ZigzagImageSteps', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+logger.ts:95 [DEV] 🎨 Using default for asset element "show_flow_summary": true
+logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
+logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
+logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
+logger.ts:95 [DEV] 🎯 extractLayoutContent: Found existing "step_titles": {elementValue: {…}, layout: 'ZigzagImageSteps', valueType: 'object', isStringEmpty: false, defaultValue: 'Discover & Inspire|Design & Create|Refine & Perfect|Share & Collaborate'}
+logger.ts:95 [DEV] 🎯 extractLayoutContent: Found existing "step_descriptions": {elementValue: {…}, layout: 'ZigzagImageSteps', valueType: 'object', isStringEmpty: false, defaultValue: 'Explore our vast library of templates, designs, an…th other creators to take your work even further.'}
+logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "step_visuals" is undefined {layout: 'ZigzagImageSteps', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+logger.ts:95 [DEV] 🎨 Using default for asset element "step_visuals": /step-discover.jpg|/step-design.jpg|/step-refine.jpg|/step-share.jpg
+logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "subheadline" is undefined {layout: 'ZigzagImageSteps', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+logger.ts:95 [DEV] 🎨 Using default for asset element "subheadline": 
+logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "supporting_text" is undefined {layout: 'ZigzagImageSteps', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
 logger.ts:95 [DEV] 🎨 Using default for asset element "supporting_text": 
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "cta_text" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "cta_text" is undefined {layout: 'ZigzagImageSteps', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
 logger.ts:95 [DEV] 🎨 Using default for asset element "cta_text": 
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "trust_items" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "trust_items" is undefined {layout: 'ZigzagImageSteps', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
 logger.ts:95 [DEV] 🎨 Using default for asset element "trust_items": 
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "premium_features_text" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "premium_features_text": Premium Features Included
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "upgrade_text" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "upgrade_text": Upgrade
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "before_placeholder_text" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "before_placeholder_text": Current State
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "after_placeholder_text" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "after_placeholder_text": Premium Result
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "premium_badge_text" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "premium_badge_text": Premium
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "before_icon" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "before_icon": ⚠️
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "after_icon" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "after_icon": ⭐
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "upgrade_icon" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "upgrade_icon": ➡️
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "premium_feature_icon" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "premium_feature_icon": ✅
+logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "flow_summary_heading" is undefined {layout: 'ZigzagImageSteps', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+logger.ts:95 [DEV] 🎨 Using default for asset element "flow_summary_heading": Unleash Your Creative Potential
+logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "flow_feature_1_icon" is undefined {layout: 'ZigzagImageSteps', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+logger.ts:95 [DEV] 🎨 Using default for asset element "flow_feature_1_icon": 💖
+logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "flow_feature_1_text" is undefined {layout: 'ZigzagImageSteps', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+logger.ts:95 [DEV] 🎨 Using default for asset element "flow_feature_1_text": Creative freedom
+logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "flow_feature_2_icon" is undefined {layout: 'ZigzagImageSteps', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+logger.ts:95 [DEV] 🎨 Using default for asset element "flow_feature_2_icon": ⚡
+logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "flow_feature_2_text" is undefined {layout: 'ZigzagImageSteps', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+logger.ts:95 [DEV] 🎨 Using default for asset element "flow_feature_2_text": Professional quality
+logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "flow_feature_3_icon" is undefined {layout: 'ZigzagImageSteps', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+logger.ts:95 [DEV] 🎨 Using default for asset element "flow_feature_3_icon": 👥
+logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "flow_feature_3_text" is undefined {layout: 'ZigzagImageSteps', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+logger.ts:95 [DEV] 🎨 Using default for asset element "flow_feature_3_text": Community driven
+logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "flow_summary_description" is undefined {layout: 'ZigzagImageSteps', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+logger.ts:95 [DEV] 🎨 Using default for asset element "flow_summary_description": Join thousands of creators who've transformed their ideas into stunning visual content
+logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "show_flow_summary" is undefined {layout: 'ZigzagImageSteps', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+logger.ts:95 [DEV] 🎨 Using default for asset element "show_flow_summary": true
 logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
 logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
 logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "founder_bio" is undefined {layout: 'FounderCardWithQuote', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
-logger.ts:95 [DEV] ❌ Using empty for excluded optional element "founder_bio" 
+logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "subheadline" is undefined {layout: 'LogoGrid', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+logger.ts:95 [DEV] ❌ Using empty for excluded optional element "subheadline" 
+logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "default_icon" is undefined {layout: 'LogoGrid', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+logger.ts:95 [DEV] 🎨 Using default for asset element "default_icon": 🔗
+logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "logo_urls" is undefined {layout: 'LogoGrid', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+logger.ts:95 [DEV] 🎨 Using default for asset element "logo_urls": {}
 logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
 logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
 logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "founder_bio" is undefined {layout: 'FounderCardWithQuote', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
-logger.ts:95 [DEV] ❌ Using empty for excluded optional element "founder_bio" 
+logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "subheadline" is undefined {layout: 'LogoGrid', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+logger.ts:95 [DEV] ❌ Using empty for excluded optional element "subheadline" 
+logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "default_icon" is undefined {layout: 'LogoGrid', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+logger.ts:95 [DEV] 🎨 Using default for asset element "default_icon": 🔗
+logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "logo_urls" is undefined {layout: 'LogoGrid', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+logger.ts:95 [DEV] 🎨 Using default for asset element "logo_urls": {}
 logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
 logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
 logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "subheadline" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "subheadline": Here's how real conversations with our team usually go
- [DEV] 🔍 extractLayoutContent DEBUG: element "question_1" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "question_1": Hey! I'm curious about your free plan - what's included?
- [DEV] 🔍 extractLayoutContent DEBUG: element "answer_1" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "answer_1": Hi! Great question! Our free plan includes up to 1,000 monthly actions, access to all core features, and basic integrations. It's perfect for getting started and many small teams stay on it forever! 🎉
- [DEV] 🔍 extractLayoutContent DEBUG: element "question_2" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "question_2": This looks awesome! How hard is it to get started?
- [DEV] 🔍 extractLayoutContent DEBUG: element "answer_2" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "answer_2": Super easy! Most people are up and running in under 5 minutes. We have a guided setup that walks you through everything step by step. Want me to send you a quick demo link?
- [DEV] 🔍 extractLayoutContent DEBUG: element "question_3" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "question_3": I'm not super technical - will I be able to figure this out?
- [DEV] 🔍 extractLayoutContent DEBUG: element "answer_3" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "answer_3": Absolutely! We designed everything with non-technical users in mind. Think of it like using your favorite apps - if you can send an email or post on social media, you've got this! 💪
- [DEV] 🔍 extractLayoutContent DEBUG: element "question_4" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "question_4": What if I need help along the way?
- [DEV] 🔍 extractLayoutContent DEBUG: element "answer_4" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "answer_4": We're here 24/7! You can chat with us anytime, browse our help docs, or join our community where fellow users share tips. Plus, we have tons of video tutorials for visual learners.
- [DEV] 🔍 extractLayoutContent DEBUG: element "question_5" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "question_5": One more thing - can I really cancel anytime?
- [DEV] 🔍 extractLayoutContent DEBUG: element "answer_5" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "answer_5": Yep! No contracts, no cancellation fees, no questions asked. You can downgrade or cancel right from your dashboard. We only want happy customers! ✨
- [DEV] 🔍 extractLayoutContent DEBUG: element "user_name" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "user_name": You
- [DEV] 🔍 extractLayoutContent DEBUG: element "support_name" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "support_name": Alex from Support
- [DEV] 🔍 extractLayoutContent DEBUG: element "support_avatar" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "support_avatar": A
- [DEV] 🔍 extractLayoutContent DEBUG: element "online_status_text" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "online_status_text": Online now
- [DEV] 🔍 extractLayoutContent DEBUG: element "chat_placeholder" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "chat_placeholder": Ask us anything...
- [DEV] 🔍 extractLayoutContent DEBUG: element "cta_text" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "cta_text": Ready to start your own conversation?
- [DEV] 🔍 extractLayoutContent DEBUG: element "button_text" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "button_text": Chat with us now
- [DEV] 🔍 extractLayoutContent DEBUG: element "show_typing_indicator" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "show_typing_indicator": true
- [DEV] 🔍 extractLayoutContent DEBUG: element "show_cta_section" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "show_cta_section": true
- [DEV] 🔍 extractLayoutContent DEBUG: element "status_indicator_icon" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "status_indicator_icon": 🟢
- [DEV] 🔍 extractLayoutContent DEBUG: element "send_icon" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "send_icon": ➤
- [DEV] 🔍 extractLayoutContent DEBUG: element "support_avatar_icon" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "support_avatar_icon": 👤
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#e0e7ff]'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#e0e7ff]'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#e0e7ff]'}
- [DEV] 🔍 extractLayoutContent DEBUG: element "subheadline" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "subheadline": Here's how real conversations with our team usually go
- [DEV] 🔍 extractLayoutContent DEBUG: element "question_1" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "question_1": Hey! I'm curious about your free plan - what's included?
- [DEV] 🔍 extractLayoutContent DEBUG: element "answer_1" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "answer_1": Hi! Great question! Our free plan includes up to 1,000 monthly actions, access to all core features, and basic integrations. It's perfect for getting started and many small teams stay on it forever! 🎉
- [DEV] 🔍 extractLayoutContent DEBUG: element "question_2" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "question_2": This looks awesome! How hard is it to get started?
- [DEV] 🔍 extractLayoutContent DEBUG: element "answer_2" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "answer_2": Super easy! Most people are up and running in under 5 minutes. We have a guided setup that walks you through everything step by step. Want me to send you a quick demo link?
- [DEV] 🔍 extractLayoutContent DEBUG: element "question_3" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "question_3": I'm not super technical - will I be able to figure this out?
- [DEV] 🔍 extractLayoutContent DEBUG: element "answer_3" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "answer_3": Absolutely! We designed everything with non-technical users in mind. Think of it like using your favorite apps - if you can send an email or post on social media, you've got this! 💪
- [DEV] 🔍 extractLayoutContent DEBUG: element "question_4" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "question_4": What if I need help along the way?
- [DEV] 🔍 extractLayoutContent DEBUG: element "answer_4" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "answer_4": We're here 24/7! You can chat with us anytime, browse our help docs, or join our community where fellow users share tips. Plus, we have tons of video tutorials for visual learners.
- [DEV] 🔍 extractLayoutContent DEBUG: element "question_5" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "question_5": One more thing - can I really cancel anytime?
- [DEV] 🔍 extractLayoutContent DEBUG: element "answer_5" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "answer_5": Yep! No contracts, no cancellation fees, no questions asked. You can downgrade or cancel right from your dashboard. We only want happy customers! ✨
- [DEV] 🔍 extractLayoutContent DEBUG: element "user_name" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "user_name": You
- [DEV] 🔍 extractLayoutContent DEBUG: element "support_name" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "support_name": Alex from Support
- [DEV] 🔍 extractLayoutContent DEBUG: element "support_avatar" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "support_avatar": A
- [DEV] 🔍 extractLayoutContent DEBUG: element "online_status_text" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "online_status_text": Online now
- [DEV] 🔍 extractLayoutContent DEBUG: element "chat_placeholder" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "chat_placeholder": Ask us anything...
- [DEV] 🔍 extractLayoutContent DEBUG: element "cta_text" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "cta_text": Ready to start your own conversation?
- [DEV] 🔍 extractLayoutContent DEBUG: element "button_text" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "button_text": Chat with us now
- [DEV] 🔍 extractLayoutContent DEBUG: element "show_typing_indicator" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "show_typing_indicator": true
- [DEV] 🔍 extractLayoutContent DEBUG: element "show_cta_section" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "show_cta_section": true
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "status_indicator_icon" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "status_indicator_icon": 🟢
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "send_icon" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "send_icon": ➤
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "support_avatar_icon" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "support_avatar_icon": 👤
-logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#e0e7ff]'}
-logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#e0e7ff]'}
-logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#e0e7ff]'}
+logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "subheadline" is undefined {layout: 'InlineQnAList', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+logger.ts:95 [DEV] 🎨 Using default for asset element "subheadline": Get instant answers to the most common questions
+ [DEV] 🔍 extractLayoutContent DEBUG: element "question_1" is undefined {layout: 'InlineQnAList', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🎨 Using default for asset element "question_1": What is your product?
+ [DEV] 🔍 extractLayoutContent DEBUG: element "answer_1" is undefined {layout: 'InlineQnAList', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🎨 Using default for asset element "answer_1": We're a no-code automation platform that helps you streamline your business processes without writing a single line of code.
+ [DEV] 🔍 extractLayoutContent DEBUG: element "question_2" is undefined {layout: 'InlineQnAList', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🎨 Using default for asset element "question_2": How much does it cost?
+ [DEV] 🔍 extractLayoutContent DEBUG: element "answer_2" is undefined {layout: 'InlineQnAList', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🎨 Using default for asset element "answer_2": We offer flexible pricing starting at $29/month. See our pricing page for detailed plans.
+ [DEV] 🔍 extractLayoutContent DEBUG: element "question_3" is undefined {layout: 'InlineQnAList', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🎨 Using default for asset element "question_3": Do I need technical knowledge?
+ [DEV] 🔍 extractLayoutContent DEBUG: element "answer_3" is undefined {layout: 'InlineQnAList', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🎨 Using default for asset element "answer_3": Not at all! Our platform is designed for non-technical users. If you can use email, you can use our product.
+ [DEV] 🔍 extractLayoutContent DEBUG: element "question_4" is undefined {layout: 'InlineQnAList', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🎨 Using default for asset element "question_4": How quickly can I get started?
+ [DEV] 🔍 extractLayoutContent DEBUG: element "answer_4" is undefined {layout: 'InlineQnAList', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🎨 Using default for asset element "answer_4": You can get started in under 5 minutes. Just sign up, connect your tools, and start automating.
+ [DEV] 🔍 extractLayoutContent DEBUG: element "question_5" is undefined {layout: 'InlineQnAList', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🎨 Using default for asset element "question_5": What if I need help?
+ [DEV] 🔍 extractLayoutContent DEBUG: element "answer_5" is undefined {layout: 'InlineQnAList', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🎨 Using default for asset element "answer_5": We provide 24/7 support via chat and email, plus extensive documentation and video tutorials.
+ [DEV] 🔍 extractLayoutContent DEBUG: element "question_6" is undefined {layout: 'InlineQnAList', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🎨 Using default for asset element "question_6": 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "answer_6" is undefined {layout: 'InlineQnAList', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🎨 Using default for asset element "answer_6": 
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#f3f4f6]'}
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#f3f4f6]'}
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#f3f4f6]'}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "subheadline" is undefined {layout: 'InlineQnAList', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🎨 Using default for asset element "subheadline": Get instant answers to the most common questions
+ [DEV] 🔍 extractLayoutContent DEBUG: element "question_1" is undefined {layout: 'InlineQnAList', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🎨 Using default for asset element "question_1": What is your product?
+ [DEV] 🔍 extractLayoutContent DEBUG: element "answer_1" is undefined {layout: 'InlineQnAList', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🎨 Using default for asset element "answer_1": We're a no-code automation platform that helps you streamline your business processes without writing a single line of code.
+ [DEV] 🔍 extractLayoutContent DEBUG: element "question_2" is undefined {layout: 'InlineQnAList', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🎨 Using default for asset element "question_2": How much does it cost?
+ [DEV] 🔍 extractLayoutContent DEBUG: element "answer_2" is undefined {layout: 'InlineQnAList', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🎨 Using default for asset element "answer_2": We offer flexible pricing starting at $29/month. See our pricing page for detailed plans.
+ [DEV] 🔍 extractLayoutContent DEBUG: element "question_3" is undefined {layout: 'InlineQnAList', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🎨 Using default for asset element "question_3": Do I need technical knowledge?
+ [DEV] 🔍 extractLayoutContent DEBUG: element "answer_3" is undefined {layout: 'InlineQnAList', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🎨 Using default for asset element "answer_3": Not at all! Our platform is designed for non-technical users. If you can use email, you can use our product.
+ [DEV] 🔍 extractLayoutContent DEBUG: element "question_4" is undefined {layout: 'InlineQnAList', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🎨 Using default for asset element "question_4": How quickly can I get started?
+ [DEV] 🔍 extractLayoutContent DEBUG: element "answer_4" is undefined {layout: 'InlineQnAList', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🎨 Using default for asset element "answer_4": You can get started in under 5 minutes. Just sign up, connect your tools, and start automating.
+ [DEV] 🔍 extractLayoutContent DEBUG: element "question_5" is undefined {layout: 'InlineQnAList', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🎨 Using default for asset element "question_5": What if I need help?
+ [DEV] 🔍 extractLayoutContent DEBUG: element "answer_5" is undefined {layout: 'InlineQnAList', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🎨 Using default for asset element "answer_5": We provide 24/7 support via chat and email, plus extensive documentation and video tutorials.
+logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "question_6" is undefined {layout: 'InlineQnAList', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+logger.ts:95 [DEV] 🎨 Using default for asset element "question_6": 
+logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "answer_6" is undefined {layout: 'InlineQnAList', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+logger.ts:95 [DEV] 🎨 Using default for asset element "answer_6": 
+logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#f3f4f6]'}
+logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#f3f4f6]'}
+logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#f3f4f6]'}
 logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "trust_items" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
 logger.ts:95 [DEV] 🎨 Using default for asset element "trust_items": Free 14-day trial|No credit card required|Cancel anytime
 logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_1" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
@@ -479,9 +835,9 @@ logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "uptime_stat" is und
 logger.ts:95 [DEV] 🎨 Using default for asset element "uptime_stat": 99.9% uptime
 logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "uptime_label" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
 logger.ts:95 [DEV] 🎨 Using default for asset element "uptime_label": SOC 2 Compliant
-logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#4338ca]'}
-logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#4338ca]'}
-logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#4338ca]'}
+logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-black'}
+logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-black'}
+logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-black'}
 logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "trust_items" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
 logger.ts:95 [DEV] 🎨 Using default for asset element "trust_items": Free 14-day trial|No credit card required|Cancel anytime
 logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_1" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
@@ -504,25 +860,42 @@ logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "uptime_stat" is und
 logger.ts:95 [DEV] 🎨 Using default for asset element "uptime_stat": 99.9% uptime
 logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "uptime_label" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
 logger.ts:95 [DEV] 🎨 Using default for asset element "uptime_label": SOC 2 Compliant
-logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#4338ca]'}
-logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#4338ca]'}
-logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#4338ca]'}
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "copyright" is undefined {layout: 'MultiColumnFooter', isMandatory: true, isInSchema: true, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] ✅ Using default for mandatory element "copyright": © 2025 Your Company. All rights reserved.
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "company_description" is undefined {layout: 'MultiColumnFooter', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
-logger.ts:95 [DEV] ❌ Using empty for excluded optional element "company_description" 
+logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-black'}
+logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-black'}
+logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-black'}
+logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "company_name" is undefined {layout: 'LinksAndSocialFooter', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+logger.ts:95 [DEV] ❌ Using empty for excluded optional element "company_name" 
+logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "tagline" is undefined {layout: 'LinksAndSocialFooter', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+logger.ts:95 [DEV] ❌ Using empty for excluded optional element "tagline" 
 logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
 logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
 logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "copyright" is undefined {layout: 'MultiColumnFooter', isMandatory: true, isInSchema: true, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] ✅ Using default for mandatory element "copyright": © 2025 Your Company. All rights reserved.
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "company_description" is undefined {layout: 'MultiColumnFooter', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
-logger.ts:95 [DEV] ❌ Using empty for excluded optional element "company_description" 
+logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "company_name" is undefined {layout: 'LinksAndSocialFooter', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+logger.ts:95 [DEV] ❌ Using empty for excluded optional element "company_name" 
+logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "tagline" is undefined {layout: 'LinksAndSocialFooter', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+logger.ts:95 [DEV] ❌ Using empty for excluded optional element "tagline" 
 logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
 logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
 logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [2025-09-09T10:06:21.552Z] DEBUG: Action change-layout executed in 146.20ms
- [2025-09-09T10:06:21.559Z] DEBUG: 🔍 LeftPanel Store Methods Available: {
+logger.ts:95 [DEV] 🧭 [NAV-DEBUG] FullNavHeader useEffect: {hasNavigationConfig: true, sectionsLength: 8, sections: Array(8)}
+logger.ts:95 [DEV] 🧭 [NAV-DEBUG] Navigation already exists: {items: Array(6), maxItems: 7, lastUpdated: 1756798562788, autoConfigured: true}
+logger.ts:84 [2025-09-09T12:30:37.372Z] DEBUG: 🔄 [1757421037372] updateElementContent CALLED: {
+  "sectionId": "howItWorks",
+  "elementKey": "step-visual-0",
+  "contentType": "string",
+  "contentLength": 63,
+  "contentPreview": "blob:http://localhost:3000/02644142-ca63-413c-9de9",
+  "callStack": "at eval (webpack-internal:///(app-pages-browser)/./node_modules/immer/dist/immer.mjs:580:56)"
+}
+logger.ts:84 [2025-09-09T12:30:37.372Z] DEBUG: 🔄 [1757421037372] updateElementContent COMPLETED: {
+  "sectionId": "howItWorks",
+  "elementKey": "step-visual-0",
+  "oldValue": "https://images.pexels.com/photos/33792845/pexels-p...",
+  "newValue": "blob:http://localhost:3000/02644142-ca63-413c-9de9...",
+  "isDirty": true,
+  "queuedChangesCount": 11
+}
+ [2025-09-09T12:30:37.375Z] DEBUG: 🔍 LeftPanel Store Methods Available: {
   "regenerateAllContent": true,
   "hasStore": true,
   "hasStoreState": true,
@@ -537,7 +910,7 @@ logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {or
     "regenerateWithInputs"
   ]
 }
- [2025-09-09T10:06:21.559Z] DEBUG: 🔍 LeftPanel Store Methods Available: {
+ [2025-09-09T12:30:37.376Z] DEBUG: 🔍 LeftPanel Store Methods Available: {
   "regenerateAllContent": true,
   "hasStore": true,
   "hasStoreState": true,
@@ -552,424 +925,330 @@ logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {or
     "regenerateWithInputs"
   ]
 }
- [DEV] 🔍 extractLayoutContent DEBUG: element "nav_item_1" is undefined {layout: 'CenteredLogoHeader', isMandatory: true, isInSchema: true, isExcluded: false, hasLayout: true, …}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "nav_item_1" is undefined {layout: 'FullNavHeader', isMandatory: true, isInSchema: true, isExcluded: false, hasLayout: true, …}
  [DEV] ✅ Using default for mandatory element "nav_item_1": Home
- [DEV] 🔍 extractLayoutContent DEBUG: element "nav_item_2" is undefined {layout: 'CenteredLogoHeader', isMandatory: true, isInSchema: true, isExcluded: false, hasLayout: true, …}
- [DEV] ✅ Using default for mandatory element "nav_item_2": Products
- [DEV] 🔍 extractLayoutContent DEBUG: element "nav_item_3" is undefined {layout: 'CenteredLogoHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "nav_item_2" is undefined {layout: 'FullNavHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ Using empty for excluded optional element "nav_item_2" 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "nav_item_3" is undefined {layout: 'FullNavHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
  [DEV] ❌ Using empty for excluded optional element "nav_item_3" 
- [DEV] 🔍 extractLayoutContent DEBUG: element "nav_item_4" is undefined {layout: 'CenteredLogoHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "nav_item_4" is undefined {layout: 'FullNavHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
  [DEV] ❌ Using empty for excluded optional element "nav_item_4" 
- [DEV] 🔍 extractLayoutContent DEBUG: element "nav_item_5" is undefined {layout: 'CenteredLogoHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "nav_item_5" is undefined {layout: 'FullNavHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
  [DEV] ❌ Using empty for excluded optional element "nav_item_5" 
- [DEV] 🔍 extractLayoutContent DEBUG: element "nav_item_6" is undefined {layout: 'CenteredLogoHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
- [DEV] ❌ Using empty for excluded optional element "nav_item_6" 
- [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_1" is undefined {layout: 'CenteredLogoHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "nav_item_6" is undefined {layout: 'FullNavHeader', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🎨 Using default for asset element "nav_item_6": Resources
+ [DEV] 🔍 extractLayoutContent DEBUG: element "nav_item_7" is undefined {layout: 'FullNavHeader', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🎨 Using default for asset element "nav_item_7": Contact
+ [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_1" is undefined {layout: 'FullNavHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
  [DEV] ❌ Using empty for excluded optional element "nav_link_1" 
- [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_2" is undefined {layout: 'CenteredLogoHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_2" is undefined {layout: 'FullNavHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
  [DEV] ❌ Using empty for excluded optional element "nav_link_2" 
- [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_3" is undefined {layout: 'CenteredLogoHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_3" is undefined {layout: 'FullNavHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
  [DEV] ❌ Using empty for excluded optional element "nav_link_3" 
- [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_4" is undefined {layout: 'CenteredLogoHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_4" is undefined {layout: 'FullNavHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
  [DEV] ❌ Using empty for excluded optional element "nav_link_4" 
- [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_5" is undefined {layout: 'CenteredLogoHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_5" is undefined {layout: 'FullNavHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
  [DEV] ❌ Using empty for excluded optional element "nav_link_5" 
- [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_6" is undefined {layout: 'CenteredLogoHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
- [DEV] ❌ Using empty for excluded optional element "nav_link_6" 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_6" is undefined {layout: 'FullNavHeader', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🎨 Using default for asset element "nav_link_6": #resources
+ [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_7" is undefined {layout: 'FullNavHeader', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🎨 Using default for asset element "nav_link_7": #contact
  [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
  [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
  [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔍 extractLayoutContent DEBUG: element "nav_item_1" is undefined {layout: 'CenteredLogoHeader', isMandatory: true, isInSchema: true, isExcluded: false, hasLayout: true, …}
+ [DEV] 🧭 [NAV-DEBUG] Getting navigation items {hasNavigationConfig: true, navigationItems: 6, lastUpdated: 1756798562788, blockContent: {…}}
+ [DEV] 🧭 [NAV-DEBUG] Using navigation config items: (6) [{…}, {…}, {…}, {…}, {…}, {…}]
+ [DEV] 🔍 extractLayoutContent DEBUG: element "nav_item_1" is undefined {layout: 'FullNavHeader', isMandatory: true, isInSchema: true, isExcluded: false, hasLayout: true, …}
  [DEV] ✅ Using default for mandatory element "nav_item_1": Home
- [DEV] 🔍 extractLayoutContent DEBUG: element "nav_item_2" is undefined {layout: 'CenteredLogoHeader', isMandatory: true, isInSchema: true, isExcluded: false, hasLayout: true, …}
- [DEV] ✅ Using default for mandatory element "nav_item_2": Products
- [DEV] 🔍 extractLayoutContent DEBUG: element "nav_item_3" is undefined {layout: 'CenteredLogoHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "nav_item_2" is undefined {layout: 'FullNavHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ Using empty for excluded optional element "nav_item_2" 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "nav_item_3" is undefined {layout: 'FullNavHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
  [DEV] ❌ Using empty for excluded optional element "nav_item_3" 
- [DEV] 🔍 extractLayoutContent DEBUG: element "nav_item_4" is undefined {layout: 'CenteredLogoHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "nav_item_4" is undefined {layout: 'FullNavHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
  [DEV] ❌ Using empty for excluded optional element "nav_item_4" 
- [DEV] 🔍 extractLayoutContent DEBUG: element "nav_item_5" is undefined {layout: 'CenteredLogoHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "nav_item_5" is undefined {layout: 'FullNavHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
  [DEV] ❌ Using empty for excluded optional element "nav_item_5" 
- [DEV] 🔍 extractLayoutContent DEBUG: element "nav_item_6" is undefined {layout: 'CenteredLogoHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
- [DEV] ❌ Using empty for excluded optional element "nav_item_6" 
- [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_1" is undefined {layout: 'CenteredLogoHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "nav_item_6" is undefined {layout: 'FullNavHeader', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🎨 Using default for asset element "nav_item_6": Resources
+ [DEV] 🔍 extractLayoutContent DEBUG: element "nav_item_7" is undefined {layout: 'FullNavHeader', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🎨 Using default for asset element "nav_item_7": Contact
+ [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_1" is undefined {layout: 'FullNavHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
  [DEV] ❌ Using empty for excluded optional element "nav_link_1" 
- [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_2" is undefined {layout: 'CenteredLogoHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_2" is undefined {layout: 'FullNavHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
  [DEV] ❌ Using empty for excluded optional element "nav_link_2" 
- [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_3" is undefined {layout: 'CenteredLogoHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_3" is undefined {layout: 'FullNavHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
  [DEV] ❌ Using empty for excluded optional element "nav_link_3" 
- [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_4" is undefined {layout: 'CenteredLogoHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_4" is undefined {layout: 'FullNavHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
  [DEV] ❌ Using empty for excluded optional element "nav_link_4" 
- [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_5" is undefined {layout: 'CenteredLogoHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_5" is undefined {layout: 'FullNavHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
  [DEV] ❌ Using empty for excluded optional element "nav_link_5" 
- [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_6" is undefined {layout: 'CenteredLogoHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
- [DEV] ❌ Using empty for excluded optional element "nav_link_6" 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_6" is undefined {layout: 'FullNavHeader', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🎨 Using default for asset element "nav_link_6": #resources
+ [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_7" is undefined {layout: 'FullNavHeader', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🎨 Using default for asset element "nav_link_7": #contact
  [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
  [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
  [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔍 extractLayoutContent DEBUG: element "badge_text" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "badge_text": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "trust_items" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🧭 [NAV-DEBUG] Getting navigation items {hasNavigationConfig: true, navigationItems: 6, lastUpdated: 1756798562788, blockContent: {…}}
+ [DEV] 🧭 [NAV-DEBUG] Using navigation config items: (6) [{…}, {…}, {…}, {…}, {…}, {…}]
+ [DEV] 🔍 extractLayoutContent DEBUG: element "badge_text" is undefined {layout: 'leftCopyRightImage', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ Using empty for excluded optional element "badge_text" 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "trust_items" is undefined {layout: 'leftCopyRightImage', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
  [DEV] 🎨 Using default for asset element "trust_items": Free 14-day trial|No credit card required|Cancel anytime
- [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_1" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_1" is undefined {layout: 'leftCopyRightImage', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
  [DEV] 🎨 Using default for asset element "trust_item_1": Free 14-day trial
- [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_2" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "trust_item_2": No credit card required
- [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_3" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_3" is undefined {layout: 'leftCopyRightImage', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
  [DEV] 🎨 Using default for asset element "trust_item_3": Cancel anytime
- [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_4" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_4" is undefined {layout: 'leftCopyRightImage', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
  [DEV] 🎨 Using default for asset element "trust_item_4": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_5" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_5" is undefined {layout: 'leftCopyRightImage', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
  [DEV] 🎨 Using default for asset element "trust_item_5": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "center_hero_image" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "center_hero_image": /hero-placeholder.jpg
- [DEV] 🔍 extractLayoutContent DEBUG: element "customer_count" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "hero_image" is undefined {layout: 'leftCopyRightImage', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🎨 Using default for asset element "hero_image": /hero-placeholder.jpg
+ [DEV] 🔍 extractLayoutContent DEBUG: element "customer_count" is undefined {layout: 'leftCopyRightImage', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
  [DEV] 🎨 Using default for asset element "customer_count": 500+ happy customers
- [DEV] 🔍 extractLayoutContent DEBUG: element "rating_value" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "rating_value" is undefined {layout: 'leftCopyRightImage', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
  [DEV] 🎨 Using default for asset element "rating_value": 4.9/5
- [DEV] 🔍 extractLayoutContent DEBUG: element "rating_count" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "rating_count" is undefined {layout: 'leftCopyRightImage', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
  [DEV] 🎨 Using default for asset element "rating_count": from 127 reviews
- [DEV] 🔍 extractLayoutContent DEBUG: element "show_social_proof" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "show_social_proof" is undefined {layout: 'leftCopyRightImage', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
  [DEV] 🎨 Using default for asset element "show_social_proof": true
- [DEV] 🔍 extractLayoutContent DEBUG: element "show_customer_avatars" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "show_customer_avatars" is undefined {layout: 'leftCopyRightImage', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
  [DEV] 🎨 Using default for asset element "show_customer_avatars": true
- [DEV] 🔍 extractLayoutContent DEBUG: element "avatar_count" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "avatar_count" is undefined {layout: 'leftCopyRightImage', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
  [DEV] 🎨 Using default for asset element "avatar_count": 4
- [DEV] 🔍 extractLayoutContent DEBUG: element "customer_names" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "customer_names" is undefined {layout: 'leftCopyRightImage', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
  [DEV] 🎨 Using default for asset element "customer_names": Sarah Chen|Alex Rivera|Jordan Kim|Maya Patel
- [DEV] 🔍 extractLayoutContent DEBUG: element "avatar_urls" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "avatar_urls" is undefined {layout: 'leftCopyRightImage', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
  [DEV] 🎨 Using default for asset element "avatar_urls": {}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#4338ca]'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#4338ca]'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#4338ca]'}
- [DEV] 🔍 extractLayoutContent DEBUG: element "badge_text" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "badge_text": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "trust_items" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-black'}
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-black'}
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-black'}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "badge_text" is undefined {layout: 'leftCopyRightImage', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+ [DEV] ❌ Using empty for excluded optional element "badge_text" 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "trust_items" is undefined {layout: 'leftCopyRightImage', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
  [DEV] 🎨 Using default for asset element "trust_items": Free 14-day trial|No credit card required|Cancel anytime
- [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_1" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_1" is undefined {layout: 'leftCopyRightImage', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
  [DEV] 🎨 Using default for asset element "trust_item_1": Free 14-day trial
- [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_2" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "trust_item_2": No credit card required
- [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_3" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_3" is undefined {layout: 'leftCopyRightImage', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
  [DEV] 🎨 Using default for asset element "trust_item_3": Cancel anytime
- [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_4" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_4" is undefined {layout: 'leftCopyRightImage', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
  [DEV] 🎨 Using default for asset element "trust_item_4": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_5" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_5" is undefined {layout: 'leftCopyRightImage', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
  [DEV] 🎨 Using default for asset element "trust_item_5": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "center_hero_image" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "center_hero_image": /hero-placeholder.jpg
- [DEV] 🔍 extractLayoutContent DEBUG: element "customer_count" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "hero_image" is undefined {layout: 'leftCopyRightImage', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🎨 Using default for asset element "hero_image": /hero-placeholder.jpg
+ [DEV] 🔍 extractLayoutContent DEBUG: element "customer_count" is undefined {layout: 'leftCopyRightImage', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
  [DEV] 🎨 Using default for asset element "customer_count": 500+ happy customers
- [DEV] 🔍 extractLayoutContent DEBUG: element "rating_value" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "rating_value" is undefined {layout: 'leftCopyRightImage', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
  [DEV] 🎨 Using default for asset element "rating_value": 4.9/5
- [DEV] 🔍 extractLayoutContent DEBUG: element "rating_count" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "rating_count" is undefined {layout: 'leftCopyRightImage', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
  [DEV] 🎨 Using default for asset element "rating_count": from 127 reviews
- [DEV] 🔍 extractLayoutContent DEBUG: element "show_social_proof" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "show_social_proof" is undefined {layout: 'leftCopyRightImage', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
  [DEV] 🎨 Using default for asset element "show_social_proof": true
- [DEV] 🔍 extractLayoutContent DEBUG: element "show_customer_avatars" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "show_customer_avatars" is undefined {layout: 'leftCopyRightImage', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
  [DEV] 🎨 Using default for asset element "show_customer_avatars": true
- [DEV] 🔍 extractLayoutContent DEBUG: element "avatar_count" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "avatar_count" is undefined {layout: 'leftCopyRightImage', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
  [DEV] 🎨 Using default for asset element "avatar_count": 4
- [DEV] 🔍 extractLayoutContent DEBUG: element "customer_names" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "customer_names" is undefined {layout: 'leftCopyRightImage', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
  [DEV] 🎨 Using default for asset element "customer_names": Sarah Chen|Alex Rivera|Jordan Kim|Maya Patel
- [DEV] 🔍 extractLayoutContent DEBUG: element "avatar_urls" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "avatar_urls" is undefined {layout: 'leftCopyRightImage', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
  [DEV] 🎨 Using default for asset element "avatar_urls": {}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#4338ca]'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#4338ca]'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#4338ca]'}
- [DEV] 🎯 extractLayoutContent: Found existing "step_titles": {elementValue: {…}, layout: 'VerticalTimeline', valueType: 'object', isStringEmpty: false, defaultValue: 'Initial Setup|Data Import|Automation Rules|Go Live'}
- [DEV] 🎯 extractLayoutContent: Found existing "step_descriptions": {elementValue: {…}, layout: 'VerticalTimeline', valueType: 'object', isStringEmpty: false, defaultValue: 'Connect your existing tools and configure your wor…d workflows and start seeing results immediately.'}
- [DEV] 🔍 extractLayoutContent DEBUG: element "step_durations" is undefined {layout: 'VerticalTimeline', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "step_durations": 5 minutes|10 minutes|15 minutes|Instant
- [DEV] 🔍 extractLayoutContent DEBUG: element "subheadline" is undefined {layout: 'VerticalTimeline', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-black'}
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-black'}
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-black'}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "headline" is undefined {layout: 'TextListTransformation', isMandatory: true, isInSchema: true, isExcluded: false, hasLayout: true, …}
+ [DEV] ✅ Using default for mandatory element "headline": Transform Your Daily Challenges
+ [DEV] 🔍 extractLayoutContent DEBUG: element "before_list" is undefined {layout: 'TextListTransformation', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🎨 Using default for asset element "before_list": Spending hours on repetitive tasks|Struggling with manual data entry|Dealing with human errors and inconsistencies|Managing multiple disconnected tools|Feeling overwhelmed by growing workload
+ [DEV] 🔍 extractLayoutContent DEBUG: element "after_list" is undefined {layout: 'TextListTransformation', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🎨 Using default for asset element "after_list": Automated workflows that run 24/7|Seamless data synchronization across platforms|99.9% accuracy with intelligent error detection|Unified dashboard for all your operations|Peace of mind with reliable automation
+ [DEV] 🔍 extractLayoutContent DEBUG: element "transformation_text" is undefined {layout: 'TextListTransformation', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🎨 Using default for asset element "transformation_text": Our solution bridges the gap between where you are and where you want to be.
+ [DEV] 🔍 extractLayoutContent DEBUG: element "subheadline" is undefined {layout: 'TextListTransformation', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
  [DEV] 🎨 Using default for asset element "subheadline": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "supporting_text" is undefined {layout: 'VerticalTimeline', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "supporting_text" is undefined {layout: 'TextListTransformation', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
  [DEV] 🎨 Using default for asset element "supporting_text": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "cta_text" is undefined {layout: 'VerticalTimeline', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "cta_text" is undefined {layout: 'TextListTransformation', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
  [DEV] 🎨 Using default for asset element "cta_text": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "trust_items" is undefined {layout: 'VerticalTimeline', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "trust_items" is undefined {layout: 'TextListTransformation', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
  [DEV] 🎨 Using default for asset element "trust_items": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "process_steps_label" is undefined {layout: 'VerticalTimeline', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "process_steps_label": simple steps
- [DEV] 🔍 extractLayoutContent DEBUG: element "process_summary_heading" is undefined {layout: 'VerticalTimeline', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "process_summary_heading": Get started in minutes, not hours
- [DEV] 🔍 extractLayoutContent DEBUG: element "process_summary_description" is undefined {layout: 'VerticalTimeline', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "process_summary_description": Our streamlined process is designed to get you up and running quickly with maximum efficiency.
- [DEV] 🔍 extractLayoutContent DEBUG: element "process_time_label" is undefined {layout: 'VerticalTimeline', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "process_time_label": Total time: 30 minutes
- [DEV] 🔍 extractLayoutContent DEBUG: element "step_icon_1" is undefined {layout: 'VerticalTimeline', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "step_icon_1": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "step_icon_2" is undefined {layout: 'VerticalTimeline', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "step_icon_2": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "step_icon_3" is undefined {layout: 'VerticalTimeline', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "step_icon_3": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "step_icon_4" is undefined {layout: 'VerticalTimeline', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "step_icon_4": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "use_step_icons" is undefined {layout: 'VerticalTimeline', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "use_step_icons": false
+ [DEV] 🔍 extractLayoutContent DEBUG: element "before_icon" is undefined {layout: 'TextListTransformation', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🎨 Using default for asset element "before_icon": ❌
+ [DEV] 🔍 extractLayoutContent DEBUG: element "after_icon" is undefined {layout: 'TextListTransformation', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🎨 Using default for asset element "after_icon": ✅
+ [DEV] 🔍 extractLayoutContent DEBUG: element "transformation_icon" is undefined {layout: 'TextListTransformation', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🎨 Using default for asset element "transformation_icon": ➡️
  [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
  [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
  [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🎯 extractLayoutContent: Found existing "step_titles": {elementValue: {…}, layout: 'VerticalTimeline', valueType: 'object', isStringEmpty: false, defaultValue: 'Initial Setup|Data Import|Automation Rules|Go Live'}
- [DEV] 🎯 extractLayoutContent: Found existing "step_descriptions": {elementValue: {…}, layout: 'VerticalTimeline', valueType: 'object', isStringEmpty: false, defaultValue: 'Connect your existing tools and configure your wor…d workflows and start seeing results immediately.'}
- [DEV] 🔍 extractLayoutContent DEBUG: element "step_durations" is undefined {layout: 'VerticalTimeline', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "step_durations": 5 minutes|10 minutes|15 minutes|Instant
- [DEV] 🔍 extractLayoutContent DEBUG: element "subheadline" is undefined {layout: 'VerticalTimeline', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "headline" is undefined {layout: 'TextListTransformation', isMandatory: true, isInSchema: true, isExcluded: false, hasLayout: true, …}
+ [DEV] ✅ Using default for mandatory element "headline": Transform Your Daily Challenges
+ [DEV] 🔍 extractLayoutContent DEBUG: element "before_list" is undefined {layout: 'TextListTransformation', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🎨 Using default for asset element "before_list": Spending hours on repetitive tasks|Struggling with manual data entry|Dealing with human errors and inconsistencies|Managing multiple disconnected tools|Feeling overwhelmed by growing workload
+ [DEV] 🔍 extractLayoutContent DEBUG: element "after_list" is undefined {layout: 'TextListTransformation', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🎨 Using default for asset element "after_list": Automated workflows that run 24/7|Seamless data synchronization across platforms|99.9% accuracy with intelligent error detection|Unified dashboard for all your operations|Peace of mind with reliable automation
+ [DEV] 🔍 extractLayoutContent DEBUG: element "transformation_text" is undefined {layout: 'TextListTransformation', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🎨 Using default for asset element "transformation_text": Our solution bridges the gap between where you are and where you want to be.
+ [DEV] 🔍 extractLayoutContent DEBUG: element "subheadline" is undefined {layout: 'TextListTransformation', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
  [DEV] 🎨 Using default for asset element "subheadline": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "supporting_text" is undefined {layout: 'VerticalTimeline', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "supporting_text" is undefined {layout: 'TextListTransformation', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
  [DEV] 🎨 Using default for asset element "supporting_text": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "cta_text" is undefined {layout: 'VerticalTimeline', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "cta_text" is undefined {layout: 'TextListTransformation', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
  [DEV] 🎨 Using default for asset element "cta_text": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "trust_items" is undefined {layout: 'VerticalTimeline', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "trust_items" is undefined {layout: 'TextListTransformation', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
  [DEV] 🎨 Using default for asset element "trust_items": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "process_steps_label" is undefined {layout: 'VerticalTimeline', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "process_steps_label": simple steps
- [DEV] 🔍 extractLayoutContent DEBUG: element "process_summary_heading" is undefined {layout: 'VerticalTimeline', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "process_summary_heading": Get started in minutes, not hours
- [DEV] 🔍 extractLayoutContent DEBUG: element "process_summary_description" is undefined {layout: 'VerticalTimeline', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "process_summary_description": Our streamlined process is designed to get you up and running quickly with maximum efficiency.
- [DEV] 🔍 extractLayoutContent DEBUG: element "process_time_label" is undefined {layout: 'VerticalTimeline', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "process_time_label": Total time: 30 minutes
- [DEV] 🔍 extractLayoutContent DEBUG: element "step_icon_1" is undefined {layout: 'VerticalTimeline', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "step_icon_1": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "step_icon_2" is undefined {layout: 'VerticalTimeline', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "step_icon_2": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "step_icon_3" is undefined {layout: 'VerticalTimeline', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "step_icon_3": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "step_icon_4" is undefined {layout: 'VerticalTimeline', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "step_icon_4": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "use_step_icons" is undefined {layout: 'VerticalTimeline', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "use_step_icons": false
+ [DEV] 🔍 extractLayoutContent DEBUG: element "before_icon" is undefined {layout: 'TextListTransformation', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🎨 Using default for asset element "before_icon": ❌
+ [DEV] 🔍 extractLayoutContent DEBUG: element "after_icon" is undefined {layout: 'TextListTransformation', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🎨 Using default for asset element "after_icon": ✅
+ [DEV] 🔍 extractLayoutContent DEBUG: element "transformation_icon" is undefined {layout: 'TextListTransformation', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🎨 Using default for asset element "transformation_icon": ➡️
  [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
  [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
  [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔍 extractLayoutContent DEBUG: element "pain_descriptions" is undefined {layout: 'StackedPainBullets', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
- [DEV] ❌ Using empty for excluded optional element "pain_descriptions" 
- [DEV] 🔍 extractLayoutContent DEBUG: element "subheadline" is undefined {layout: 'StackedPainBullets', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
- [DEV] ❌ Using empty for excluded optional element "subheadline" 
- [DEV] 🔍 extractLayoutContent DEBUG: element "conclusion_text" is undefined {layout: 'StackedPainBullets', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "conclusion_text": Sound familiar? You're not alone.
- [DEV] 🔍 extractLayoutContent DEBUG: element "pain_icon_1" is undefined {layout: 'StackedPainBullets', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "pain_icon_1": ⏰
- [DEV] 🔍 extractLayoutContent DEBUG: element "pain_icon_2" is undefined {layout: 'StackedPainBullets', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "pain_icon_2": 🔗
- [DEV] 🔍 extractLayoutContent DEBUG: element "pain_icon_3" is undefined {layout: 'StackedPainBullets', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "pain_icon_3": ⚠️
- [DEV] 🔍 extractLayoutContent DEBUG: element "pain_icon_4" is undefined {layout: 'StackedPainBullets', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "pain_icon_4": 😰
- [DEV] 🔍 extractLayoutContent DEBUG: element "pain_icon_5" is undefined {layout: 'StackedPainBullets', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "pain_icon_5": 📉
- [DEV] 🔍 extractLayoutContent DEBUG: element "pain_icon_6" is undefined {layout: 'StackedPainBullets', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "pain_icon_6": 🌪️
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔍 extractLayoutContent DEBUG: element "pain_descriptions" is undefined {layout: 'StackedPainBullets', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
- [DEV] ❌ Using empty for excluded optional element "pain_descriptions" 
- [DEV] 🔍 extractLayoutContent DEBUG: element "subheadline" is undefined {layout: 'StackedPainBullets', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
- [DEV] ❌ Using empty for excluded optional element "subheadline" 
- [DEV] 🔍 extractLayoutContent DEBUG: element "conclusion_text" is undefined {layout: 'StackedPainBullets', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "conclusion_text": Sound familiar? You're not alone.
- [DEV] 🔍 extractLayoutContent DEBUG: element "pain_icon_1" is undefined {layout: 'StackedPainBullets', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "pain_icon_1": ⏰
- [DEV] 🔍 extractLayoutContent DEBUG: element "pain_icon_2" is undefined {layout: 'StackedPainBullets', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "pain_icon_2": 🔗
- [DEV] 🔍 extractLayoutContent DEBUG: element "pain_icon_3" is undefined {layout: 'StackedPainBullets', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "pain_icon_3": ⚠️
- [DEV] 🔍 extractLayoutContent DEBUG: element "pain_icon_4" is undefined {layout: 'StackedPainBullets', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "pain_icon_4": 😰
- [DEV] 🔍 extractLayoutContent DEBUG: element "pain_icon_5" is undefined {layout: 'StackedPainBullets', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "pain_icon_5": 📉
- [DEV] 🔍 extractLayoutContent DEBUG: element "pain_icon_6" is undefined {layout: 'StackedPainBullets', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "pain_icon_6": 🌪️
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔍 extractLayoutContent DEBUG: element "headline" is undefined {layout: 'SplitCard', isMandatory: true, isInSchema: true, isExcluded: false, hasLayout: true, …}
- [DEV] ✅ Using default for mandatory element "headline": Premium Transformation Experience
- [DEV] 🔍 extractLayoutContent DEBUG: element "before_label" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "before_label": Current Challenge
- [DEV] 🔍 extractLayoutContent DEBUG: element "after_label" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "after_label": Premium Solution
- [DEV] 🔍 extractLayoutContent DEBUG: element "before_description" is undefined {layout: 'SplitCard', isMandatory: true, isInSchema: true, isExcluded: false, hasLayout: true, …}
- [DEV] ✅ Using default for mandatory element "before_description": Complex manual processes requiring expertise, time, and significant resources to execute properly.
- [DEV] 🔍 extractLayoutContent DEBUG: element "after_description" is undefined {layout: 'SplitCard', isMandatory: true, isInSchema: true, isExcluded: false, hasLayout: true, …}
- [DEV] ✅ Using default for mandatory element "after_description": Expertly crafted automation that delivers exceptional results with minimal effort and maximum efficiency.
- [DEV] 🔍 extractLayoutContent DEBUG: element "subheadline" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
- [DEV] ❌ Using empty for excluded optional element "subheadline" 
- [DEV] 🔍 extractLayoutContent DEBUG: element "supporting_text" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🎯 extractLayoutContent: Found existing "step_titles": {elementValue: {…}, layout: 'ZigzagImageSteps', valueType: 'object', isStringEmpty: false, defaultValue: 'Discover & Inspire|Design & Create|Refine & Perfect|Share & Collaborate'}
+ [DEV] 🎯 extractLayoutContent: Found existing "step_descriptions": {elementValue: {…}, layout: 'ZigzagImageSteps', valueType: 'object', isStringEmpty: false, defaultValue: 'Explore our vast library of templates, designs, an…th other creators to take your work even further.'}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "step_visuals" is undefined {layout: 'ZigzagImageSteps', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🎨 Using default for asset element "step_visuals": /step-discover.jpg|/step-design.jpg|/step-refine.jpg|/step-share.jpg
+ [DEV] 🔍 extractLayoutContent DEBUG: element "subheadline" is undefined {layout: 'ZigzagImageSteps', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🎨 Using default for asset element "subheadline": 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "supporting_text" is undefined {layout: 'ZigzagImageSteps', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
  [DEV] 🎨 Using default for asset element "supporting_text": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "cta_text" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "cta_text" is undefined {layout: 'ZigzagImageSteps', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
  [DEV] 🎨 Using default for asset element "cta_text": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "trust_items" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "trust_items": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "premium_features_text" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "premium_features_text": Premium Features Included
- [DEV] 🔍 extractLayoutContent DEBUG: element "upgrade_text" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "upgrade_text": Upgrade
- [DEV] 🔍 extractLayoutContent DEBUG: element "before_placeholder_text" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "before_placeholder_text": Current State
- [DEV] 🔍 extractLayoutContent DEBUG: element "after_placeholder_text" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "after_placeholder_text": Premium Result
- [DEV] 🔍 extractLayoutContent DEBUG: element "premium_badge_text" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "premium_badge_text": Premium
- [DEV] 🔍 extractLayoutContent DEBUG: element "before_icon" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "before_icon": ⚠️
- [DEV] 🔍 extractLayoutContent DEBUG: element "after_icon" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "after_icon": ⭐
- [DEV] 🔍 extractLayoutContent DEBUG: element "upgrade_icon" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "upgrade_icon": ➡️
- [DEV] 🔍 extractLayoutContent DEBUG: element "premium_feature_icon" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "premium_feature_icon": ✅
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔍 extractLayoutContent DEBUG: element "headline" is undefined {layout: 'SplitCard', isMandatory: true, isInSchema: true, isExcluded: false, hasLayout: true, …}
- [DEV] ✅ Using default for mandatory element "headline": Premium Transformation Experience
- [DEV] 🔍 extractLayoutContent DEBUG: element "before_label" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "before_label": Current Challenge
- [DEV] 🔍 extractLayoutContent DEBUG: element "after_label" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "after_label": Premium Solution
- [DEV] 🔍 extractLayoutContent DEBUG: element "before_description" is undefined {layout: 'SplitCard', isMandatory: true, isInSchema: true, isExcluded: false, hasLayout: true, …}
- [DEV] ✅ Using default for mandatory element "before_description": Complex manual processes requiring expertise, time, and significant resources to execute properly.
- [DEV] 🔍 extractLayoutContent DEBUG: element "after_description" is undefined {layout: 'SplitCard', isMandatory: true, isInSchema: true, isExcluded: false, hasLayout: true, …}
- [DEV] ✅ Using default for mandatory element "after_description": Expertly crafted automation that delivers exceptional results with minimal effort and maximum efficiency.
- [DEV] 🔍 extractLayoutContent DEBUG: element "subheadline" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
- [DEV] ❌ Using empty for excluded optional element "subheadline" 
- [DEV] 🔍 extractLayoutContent DEBUG: element "supporting_text" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "supporting_text": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "cta_text" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "cta_text": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "trust_items" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "trust_items": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "premium_features_text" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "premium_features_text": Premium Features Included
- [DEV] 🔍 extractLayoutContent DEBUG: element "upgrade_text" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "upgrade_text": Upgrade
- [DEV] 🔍 extractLayoutContent DEBUG: element "before_placeholder_text" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "before_placeholder_text": Current State
- [DEV] 🔍 extractLayoutContent DEBUG: element "after_placeholder_text" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "after_placeholder_text": Premium Result
- [DEV] 🔍 extractLayoutContent DEBUG: element "premium_badge_text" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "premium_badge_text": Premium
- [DEV] 🔍 extractLayoutContent DEBUG: element "before_icon" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "before_icon": ⚠️
- [DEV] 🔍 extractLayoutContent DEBUG: element "after_icon" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "after_icon": ⭐
- [DEV] 🔍 extractLayoutContent DEBUG: element "upgrade_icon" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "upgrade_icon": ➡️
- [DEV] 🔍 extractLayoutContent DEBUG: element "premium_feature_icon" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "premium_feature_icon": ✅
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔍 extractLayoutContent DEBUG: element "founder_bio" is undefined {layout: 'FounderCardWithQuote', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
- [DEV] ❌ Using empty for excluded optional element "founder_bio" 
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔍 extractLayoutContent DEBUG: element "founder_bio" is undefined {layout: 'FounderCardWithQuote', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
- [DEV] ❌ Using empty for excluded optional element "founder_bio" 
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔍 extractLayoutContent DEBUG: element "subheadline" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "subheadline": Here's how real conversations with our team usually go
- [DEV] 🔍 extractLayoutContent DEBUG: element "question_1" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "question_1": Hey! I'm curious about your free plan - what's included?
- [DEV] 🔍 extractLayoutContent DEBUG: element "answer_1" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "answer_1": Hi! Great question! Our free plan includes up to 1,000 monthly actions, access to all core features, and basic integrations. It's perfect for getting started and many small teams stay on it forever! 🎉
- [DEV] 🔍 extractLayoutContent DEBUG: element "question_2" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "question_2": This looks awesome! How hard is it to get started?
- [DEV] 🔍 extractLayoutContent DEBUG: element "answer_2" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "answer_2": Super easy! Most people are up and running in under 5 minutes. We have a guided setup that walks you through everything step by step. Want me to send you a quick demo link?
- [DEV] 🔍 extractLayoutContent DEBUG: element "question_3" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "question_3": I'm not super technical - will I be able to figure this out?
- [DEV] 🔍 extractLayoutContent DEBUG: element "answer_3" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "answer_3": Absolutely! We designed everything with non-technical users in mind. Think of it like using your favorite apps - if you can send an email or post on social media, you've got this! 💪
- [DEV] 🔍 extractLayoutContent DEBUG: element "question_4" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "question_4": What if I need help along the way?
- [DEV] 🔍 extractLayoutContent DEBUG: element "answer_4" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "answer_4": We're here 24/7! You can chat with us anytime, browse our help docs, or join our community where fellow users share tips. Plus, we have tons of video tutorials for visual learners.
- [DEV] 🔍 extractLayoutContent DEBUG: element "question_5" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "question_5": One more thing - can I really cancel anytime?
- [DEV] 🔍 extractLayoutContent DEBUG: element "answer_5" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "answer_5": Yep! No contracts, no cancellation fees, no questions asked. You can downgrade or cancel right from your dashboard. We only want happy customers! ✨
- [DEV] 🔍 extractLayoutContent DEBUG: element "user_name" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "user_name": You
- [DEV] 🔍 extractLayoutContent DEBUG: element "support_name" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "support_name": Alex from Support
- [DEV] 🔍 extractLayoutContent DEBUG: element "support_avatar" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "support_avatar": A
- [DEV] 🔍 extractLayoutContent DEBUG: element "online_status_text" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "online_status_text": Online now
- [DEV] 🔍 extractLayoutContent DEBUG: element "chat_placeholder" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "chat_placeholder": Ask us anything...
- [DEV] 🔍 extractLayoutContent DEBUG: element "cta_text" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "cta_text": Ready to start your own conversation?
- [DEV] 🔍 extractLayoutContent DEBUG: element "button_text" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "button_text": Chat with us now
- [DEV] 🔍 extractLayoutContent DEBUG: element "show_typing_indicator" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "show_typing_indicator": true
- [DEV] 🔍 extractLayoutContent DEBUG: element "show_cta_section" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "show_cta_section": true
- [DEV] 🔍 extractLayoutContent DEBUG: element "status_indicator_icon" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "status_indicator_icon": 🟢
- [DEV] 🔍 extractLayoutContent DEBUG: element "send_icon" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "send_icon": ➤
- [DEV] 🔍 extractLayoutContent DEBUG: element "support_avatar_icon" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "support_avatar_icon": 👤
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#e0e7ff]'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#e0e7ff]'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#e0e7ff]'}
- [DEV] 🔍 extractLayoutContent DEBUG: element "subheadline" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "subheadline": Here's how real conversations with our team usually go
- [DEV] 🔍 extractLayoutContent DEBUG: element "question_1" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "question_1": Hey! I'm curious about your free plan - what's included?
- [DEV] 🔍 extractLayoutContent DEBUG: element "answer_1" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "answer_1": Hi! Great question! Our free plan includes up to 1,000 monthly actions, access to all core features, and basic integrations. It's perfect for getting started and many small teams stay on it forever! 🎉
- [DEV] 🔍 extractLayoutContent DEBUG: element "question_2" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "question_2": This looks awesome! How hard is it to get started?
- [DEV] 🔍 extractLayoutContent DEBUG: element "answer_2" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "answer_2": Super easy! Most people are up and running in under 5 minutes. We have a guided setup that walks you through everything step by step. Want me to send you a quick demo link?
- [DEV] 🔍 extractLayoutContent DEBUG: element "question_3" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "question_3": I'm not super technical - will I be able to figure this out?
- [DEV] 🔍 extractLayoutContent DEBUG: element "answer_3" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "answer_3": Absolutely! We designed everything with non-technical users in mind. Think of it like using your favorite apps - if you can send an email or post on social media, you've got this! 💪
- [DEV] 🔍 extractLayoutContent DEBUG: element "question_4" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "question_4": What if I need help along the way?
- [DEV] 🔍 extractLayoutContent DEBUG: element "answer_4" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "answer_4": We're here 24/7! You can chat with us anytime, browse our help docs, or join our community where fellow users share tips. Plus, we have tons of video tutorials for visual learners.
- [DEV] 🔍 extractLayoutContent DEBUG: element "question_5" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "question_5": One more thing - can I really cancel anytime?
- [DEV] 🔍 extractLayoutContent DEBUG: element "answer_5" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "answer_5": Yep! No contracts, no cancellation fees, no questions asked. You can downgrade or cancel right from your dashboard. We only want happy customers! ✨
- [DEV] 🔍 extractLayoutContent DEBUG: element "user_name" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "user_name": You
- [DEV] 🔍 extractLayoutContent DEBUG: element "support_name" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "support_name": Alex from Support
- [DEV] 🔍 extractLayoutContent DEBUG: element "support_avatar" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "support_avatar": A
- [DEV] 🔍 extractLayoutContent DEBUG: element "online_status_text" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "online_status_text": Online now
- [DEV] 🔍 extractLayoutContent DEBUG: element "chat_placeholder" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "chat_placeholder": Ask us anything...
- [DEV] 🔍 extractLayoutContent DEBUG: element "cta_text" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "cta_text": Ready to start your own conversation?
- [DEV] 🔍 extractLayoutContent DEBUG: element "button_text" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "button_text": Chat with us now
- [DEV] 🔍 extractLayoutContent DEBUG: element "show_typing_indicator" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "show_typing_indicator": true
- [DEV] 🔍 extractLayoutContent DEBUG: element "show_cta_section" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "show_cta_section": true
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "status_indicator_icon" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "status_indicator_icon": 🟢
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "send_icon" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "send_icon": ➤
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "support_avatar_icon" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "support_avatar_icon": 👤
-logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#e0e7ff]'}
-logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#e0e7ff]'}
-logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#e0e7ff]'}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "trust_items" is undefined {layout: 'ZigzagImageSteps', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+logger.ts:95 [DEV] 🎨 Using default for asset element "trust_items": 
+logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "flow_summary_heading" is undefined {layout: 'ZigzagImageSteps', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+logger.ts:95 [DEV] 🎨 Using default for asset element "flow_summary_heading": Unleash Your Creative Potential
+logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "flow_feature_1_icon" is undefined {layout: 'ZigzagImageSteps', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+logger.ts:95 [DEV] 🎨 Using default for asset element "flow_feature_1_icon": 💖
+logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "flow_feature_1_text" is undefined {layout: 'ZigzagImageSteps', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+logger.ts:95 [DEV] 🎨 Using default for asset element "flow_feature_1_text": Creative freedom
+logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "flow_feature_2_icon" is undefined {layout: 'ZigzagImageSteps', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+logger.ts:95 [DEV] 🎨 Using default for asset element "flow_feature_2_icon": ⚡
+logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "flow_feature_2_text" is undefined {layout: 'ZigzagImageSteps', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+logger.ts:95 [DEV] 🎨 Using default for asset element "flow_feature_2_text": Professional quality
+logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "flow_feature_3_icon" is undefined {layout: 'ZigzagImageSteps', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+logger.ts:95 [DEV] 🎨 Using default for asset element "flow_feature_3_icon": 👥
+logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "flow_feature_3_text" is undefined {layout: 'ZigzagImageSteps', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+logger.ts:95 [DEV] 🎨 Using default for asset element "flow_feature_3_text": Community driven
+logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "flow_summary_description" is undefined {layout: 'ZigzagImageSteps', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+logger.ts:95 [DEV] 🎨 Using default for asset element "flow_summary_description": Join thousands of creators who've transformed their ideas into stunning visual content
+logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "show_flow_summary" is undefined {layout: 'ZigzagImageSteps', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+logger.ts:95 [DEV] 🎨 Using default for asset element "show_flow_summary": true
+logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
+logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
+logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
+logger.ts:95 [DEV] 🎯 extractLayoutContent: Found existing "step_titles": {elementValue: {…}, layout: 'ZigzagImageSteps', valueType: 'object', isStringEmpty: false, defaultValue: 'Discover & Inspire|Design & Create|Refine & Perfect|Share & Collaborate'}
+logger.ts:95 [DEV] 🎯 extractLayoutContent: Found existing "step_descriptions": {elementValue: {…}, layout: 'ZigzagImageSteps', valueType: 'object', isStringEmpty: false, defaultValue: 'Explore our vast library of templates, designs, an…th other creators to take your work even further.'}
+logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "step_visuals" is undefined {layout: 'ZigzagImageSteps', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+logger.ts:95 [DEV] 🎨 Using default for asset element "step_visuals": /step-discover.jpg|/step-design.jpg|/step-refine.jpg|/step-share.jpg
+logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "subheadline" is undefined {layout: 'ZigzagImageSteps', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+logger.ts:95 [DEV] 🎨 Using default for asset element "subheadline": 
+logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "supporting_text" is undefined {layout: 'ZigzagImageSteps', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+logger.ts:95 [DEV] 🎨 Using default for asset element "supporting_text": 
+logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "cta_text" is undefined {layout: 'ZigzagImageSteps', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+logger.ts:95 [DEV] 🎨 Using default for asset element "cta_text": 
+logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "trust_items" is undefined {layout: 'ZigzagImageSteps', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+logger.ts:95 [DEV] 🎨 Using default for asset element "trust_items": 
+logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "flow_summary_heading" is undefined {layout: 'ZigzagImageSteps', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+logger.ts:95 [DEV] 🎨 Using default for asset element "flow_summary_heading": Unleash Your Creative Potential
+logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "flow_feature_1_icon" is undefined {layout: 'ZigzagImageSteps', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+logger.ts:95 [DEV] 🎨 Using default for asset element "flow_feature_1_icon": 💖
+logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "flow_feature_1_text" is undefined {layout: 'ZigzagImageSteps', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+logger.ts:95 [DEV] 🎨 Using default for asset element "flow_feature_1_text": Creative freedom
+logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "flow_feature_2_icon" is undefined {layout: 'ZigzagImageSteps', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+logger.ts:95 [DEV] 🎨 Using default for asset element "flow_feature_2_icon": ⚡
+logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "flow_feature_2_text" is undefined {layout: 'ZigzagImageSteps', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+logger.ts:95 [DEV] 🎨 Using default for asset element "flow_feature_2_text": Professional quality
+logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "flow_feature_3_icon" is undefined {layout: 'ZigzagImageSteps', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+logger.ts:95 [DEV] 🎨 Using default for asset element "flow_feature_3_icon": 👥
+logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "flow_feature_3_text" is undefined {layout: 'ZigzagImageSteps', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+logger.ts:95 [DEV] 🎨 Using default for asset element "flow_feature_3_text": Community driven
+logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "flow_summary_description" is undefined {layout: 'ZigzagImageSteps', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+logger.ts:95 [DEV] 🎨 Using default for asset element "flow_summary_description": Join thousands of creators who've transformed their ideas into stunning visual content
+logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "show_flow_summary" is undefined {layout: 'ZigzagImageSteps', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+logger.ts:95 [DEV] 🎨 Using default for asset element "show_flow_summary": true
+logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
+logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
+logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
+logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "subheadline" is undefined {layout: 'LogoGrid', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+logger.ts:95 [DEV] ❌ Using empty for excluded optional element "subheadline" 
+logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "default_icon" is undefined {layout: 'LogoGrid', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+logger.ts:95 [DEV] 🎨 Using default for asset element "default_icon": 🔗
+logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "logo_urls" is undefined {layout: 'LogoGrid', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+logger.ts:95 [DEV] 🎨 Using default for asset element "logo_urls": {}
+logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
+logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
+logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
+logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "subheadline" is undefined {layout: 'LogoGrid', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+logger.ts:95 [DEV] ❌ Using empty for excluded optional element "subheadline" 
+logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "default_icon" is undefined {layout: 'LogoGrid', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+logger.ts:95 [DEV] 🎨 Using default for asset element "default_icon": 🔗
+logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "logo_urls" is undefined {layout: 'LogoGrid', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+logger.ts:95 [DEV] 🎨 Using default for asset element "logo_urls": {}
+logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
+logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
+logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "subheadline" is undefined {layout: 'InlineQnAList', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🎨 Using default for asset element "subheadline": Get instant answers to the most common questions
+ [DEV] 🔍 extractLayoutContent DEBUG: element "question_1" is undefined {layout: 'InlineQnAList', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🎨 Using default for asset element "question_1": What is your product?
+ [DEV] 🔍 extractLayoutContent DEBUG: element "answer_1" is undefined {layout: 'InlineQnAList', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🎨 Using default for asset element "answer_1": We're a no-code automation platform that helps you streamline your business processes without writing a single line of code.
+ [DEV] 🔍 extractLayoutContent DEBUG: element "question_2" is undefined {layout: 'InlineQnAList', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🎨 Using default for asset element "question_2": How much does it cost?
+ [DEV] 🔍 extractLayoutContent DEBUG: element "answer_2" is undefined {layout: 'InlineQnAList', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🎨 Using default for asset element "answer_2": We offer flexible pricing starting at $29/month. See our pricing page for detailed plans.
+ [DEV] 🔍 extractLayoutContent DEBUG: element "question_3" is undefined {layout: 'InlineQnAList', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🎨 Using default for asset element "question_3": Do I need technical knowledge?
+ [DEV] 🔍 extractLayoutContent DEBUG: element "answer_3" is undefined {layout: 'InlineQnAList', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🎨 Using default for asset element "answer_3": Not at all! Our platform is designed for non-technical users. If you can use email, you can use our product.
+ [DEV] 🔍 extractLayoutContent DEBUG: element "question_4" is undefined {layout: 'InlineQnAList', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🎨 Using default for asset element "question_4": How quickly can I get started?
+ [DEV] 🔍 extractLayoutContent DEBUG: element "answer_4" is undefined {layout: 'InlineQnAList', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🎨 Using default for asset element "answer_4": You can get started in under 5 minutes. Just sign up, connect your tools, and start automating.
+ [DEV] 🔍 extractLayoutContent DEBUG: element "question_5" is undefined {layout: 'InlineQnAList', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🎨 Using default for asset element "question_5": What if I need help?
+ [DEV] 🔍 extractLayoutContent DEBUG: element "answer_5" is undefined {layout: 'InlineQnAList', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🎨 Using default for asset element "answer_5": We provide 24/7 support via chat and email, plus extensive documentation and video tutorials.
+ [DEV] 🔍 extractLayoutContent DEBUG: element "question_6" is undefined {layout: 'InlineQnAList', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🎨 Using default for asset element "question_6": 
+ [DEV] 🔍 extractLayoutContent DEBUG: element "answer_6" is undefined {layout: 'InlineQnAList', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🎨 Using default for asset element "answer_6": 
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#f3f4f6]'}
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#f3f4f6]'}
+ [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#f3f4f6]'}
+ [DEV] 🔍 extractLayoutContent DEBUG: element "subheadline" is undefined {layout: 'InlineQnAList', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🎨 Using default for asset element "subheadline": Get instant answers to the most common questions
+ [DEV] 🔍 extractLayoutContent DEBUG: element "question_1" is undefined {layout: 'InlineQnAList', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🎨 Using default for asset element "question_1": What is your product?
+ [DEV] 🔍 extractLayoutContent DEBUG: element "answer_1" is undefined {layout: 'InlineQnAList', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🎨 Using default for asset element "answer_1": We're a no-code automation platform that helps you streamline your business processes without writing a single line of code.
+ [DEV] 🔍 extractLayoutContent DEBUG: element "question_2" is undefined {layout: 'InlineQnAList', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🎨 Using default for asset element "question_2": How much does it cost?
+ [DEV] 🔍 extractLayoutContent DEBUG: element "answer_2" is undefined {layout: 'InlineQnAList', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🎨 Using default for asset element "answer_2": We offer flexible pricing starting at $29/month. See our pricing page for detailed plans.
+ [DEV] 🔍 extractLayoutContent DEBUG: element "question_3" is undefined {layout: 'InlineQnAList', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🎨 Using default for asset element "question_3": Do I need technical knowledge?
+ [DEV] 🔍 extractLayoutContent DEBUG: element "answer_3" is undefined {layout: 'InlineQnAList', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🎨 Using default for asset element "answer_3": Not at all! Our platform is designed for non-technical users. If you can use email, you can use our product.
+ [DEV] 🔍 extractLayoutContent DEBUG: element "question_4" is undefined {layout: 'InlineQnAList', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🎨 Using default for asset element "question_4": How quickly can I get started?
+ [DEV] 🔍 extractLayoutContent DEBUG: element "answer_4" is undefined {layout: 'InlineQnAList', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🎨 Using default for asset element "answer_4": You can get started in under 5 minutes. Just sign up, connect your tools, and start automating.
+ [DEV] 🔍 extractLayoutContent DEBUG: element "question_5" is undefined {layout: 'InlineQnAList', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🎨 Using default for asset element "question_5": What if I need help?
+ [DEV] 🔍 extractLayoutContent DEBUG: element "answer_5" is undefined {layout: 'InlineQnAList', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+ [DEV] 🎨 Using default for asset element "answer_5": We provide 24/7 support via chat and email, plus extensive documentation and video tutorials.
+logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "question_6" is undefined {layout: 'InlineQnAList', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+logger.ts:95 [DEV] 🎨 Using default for asset element "question_6": 
+logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "answer_6" is undefined {layout: 'InlineQnAList', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
+logger.ts:95 [DEV] 🎨 Using default for asset element "answer_6": 
+logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#f3f4f6]'}
+logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#f3f4f6]'}
+logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#f3f4f6]'}
 logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "trust_items" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
 logger.ts:95 [DEV] 🎨 Using default for asset element "trust_items": Free 14-day trial|No credit card required|Cancel anytime
 logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_1" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
@@ -992,9 +1271,9 @@ logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "uptime_stat" is und
 logger.ts:95 [DEV] 🎨 Using default for asset element "uptime_stat": 99.9% uptime
 logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "uptime_label" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
 logger.ts:95 [DEV] 🎨 Using default for asset element "uptime_label": SOC 2 Compliant
-logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#4338ca]'}
-logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#4338ca]'}
-logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#4338ca]'}
+logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-black'}
+logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-black'}
+logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-black'}
 logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "trust_items" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
 logger.ts:95 [DEV] 🎨 Using default for asset element "trust_items": Free 14-day trial|No credit card required|Cancel anytime
 logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_1" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
@@ -1017,3684 +1296,22 @@ logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "uptime_stat" is und
 logger.ts:95 [DEV] 🎨 Using default for asset element "uptime_stat": 99.9% uptime
 logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "uptime_label" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
 logger.ts:95 [DEV] 🎨 Using default for asset element "uptime_label": SOC 2 Compliant
-logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#4338ca]'}
-logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#4338ca]'}
-logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#4338ca]'}
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "copyright" is undefined {layout: 'MultiColumnFooter', isMandatory: true, isInSchema: true, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] ✅ Using default for mandatory element "copyright": © 2025 Your Company. All rights reserved.
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "company_description" is undefined {layout: 'MultiColumnFooter', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
-logger.ts:95 [DEV] ❌ Using empty for excluded optional element "company_description" 
+logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-black'}
+logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-black'}
+logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-black'}
+logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "company_name" is undefined {layout: 'LinksAndSocialFooter', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+logger.ts:95 [DEV] ❌ Using empty for excluded optional element "company_name" 
+logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "tagline" is undefined {layout: 'LinksAndSocialFooter', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+logger.ts:95 [DEV] ❌ Using empty for excluded optional element "tagline" 
 logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
 logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
 logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "copyright" is undefined {layout: 'MultiColumnFooter', isMandatory: true, isInSchema: true, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] ✅ Using default for mandatory element "copyright": © 2025 Your Company. All rights reserved.
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "company_description" is undefined {layout: 'MultiColumnFooter', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
-logger.ts:95 [DEV] ❌ Using empty for excluded optional element "company_description" 
+logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "company_name" is undefined {layout: 'LinksAndSocialFooter', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+logger.ts:95 [DEV] ❌ Using empty for excluded optional element "company_name" 
+logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "tagline" is undefined {layout: 'LinksAndSocialFooter', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
+logger.ts:95 [DEV] ❌ Using empty for excluded optional element "tagline" 
 logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
 logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
 logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
-logger.ts:84 [2025-09-09T10:06:23.713Z] DEBUG: 🔍 LeftPanel Store Methods Available: {
-  "regenerateAllContent": true,
-  "hasStore": true,
-  "hasStoreState": true,
-  "storeMethodKeys": [
-    "regenerateSection",
-    "regenerateElement",
-    "regenerateAllContent",
-    "regenerateElementWithVariations",
-    "regenerateVariables",
-    "regenerateContentOnly",
-    "regenerateDesignAndCopy",
-    "regenerateWithInputs"
-  ]
-}
-logger.ts:84 [2025-09-09T10:06:23.713Z] DEBUG: 🔍 LeftPanel Store Methods Available: {
-  "regenerateAllContent": true,
-  "hasStore": true,
-  "hasStoreState": true,
-  "storeMethodKeys": [
-    "regenerateSection",
-    "regenerateElement",
-    "regenerateAllContent",
-    "regenerateElementWithVariations",
-    "regenerateVariables",
-    "regenerateContentOnly",
-    "regenerateDesignAndCopy",
-    "regenerateWithInputs"
-  ]
-}
- [DEV] 🔍 extractLayoutContent DEBUG: element "nav_item_1" is undefined {layout: 'CenteredLogoHeader', isMandatory: true, isInSchema: true, isExcluded: false, hasLayout: true, …}
- [DEV] ✅ Using default for mandatory element "nav_item_1": Home
- [DEV] 🔍 extractLayoutContent DEBUG: element "nav_item_2" is undefined {layout: 'CenteredLogoHeader', isMandatory: true, isInSchema: true, isExcluded: false, hasLayout: true, …}
- [DEV] ✅ Using default for mandatory element "nav_item_2": Products
- [DEV] 🔍 extractLayoutContent DEBUG: element "nav_item_3" is undefined {layout: 'CenteredLogoHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
- [DEV] ❌ Using empty for excluded optional element "nav_item_3" 
- [DEV] 🔍 extractLayoutContent DEBUG: element "nav_item_4" is undefined {layout: 'CenteredLogoHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
- [DEV] ❌ Using empty for excluded optional element "nav_item_4" 
- [DEV] 🔍 extractLayoutContent DEBUG: element "nav_item_5" is undefined {layout: 'CenteredLogoHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
- [DEV] ❌ Using empty for excluded optional element "nav_item_5" 
- [DEV] 🔍 extractLayoutContent DEBUG: element "nav_item_6" is undefined {layout: 'CenteredLogoHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
- [DEV] ❌ Using empty for excluded optional element "nav_item_6" 
- [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_1" is undefined {layout: 'CenteredLogoHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
- [DEV] ❌ Using empty for excluded optional element "nav_link_1" 
- [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_2" is undefined {layout: 'CenteredLogoHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
- [DEV] ❌ Using empty for excluded optional element "nav_link_2" 
- [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_3" is undefined {layout: 'CenteredLogoHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
- [DEV] ❌ Using empty for excluded optional element "nav_link_3" 
- [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_4" is undefined {layout: 'CenteredLogoHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
- [DEV] ❌ Using empty for excluded optional element "nav_link_4" 
- [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_5" is undefined {layout: 'CenteredLogoHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
- [DEV] ❌ Using empty for excluded optional element "nav_link_5" 
- [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_6" is undefined {layout: 'CenteredLogoHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
- [DEV] ❌ Using empty for excluded optional element "nav_link_6" 
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔍 extractLayoutContent DEBUG: element "nav_item_1" is undefined {layout: 'CenteredLogoHeader', isMandatory: true, isInSchema: true, isExcluded: false, hasLayout: true, …}
- [DEV] ✅ Using default for mandatory element "nav_item_1": Home
- [DEV] 🔍 extractLayoutContent DEBUG: element "nav_item_2" is undefined {layout: 'CenteredLogoHeader', isMandatory: true, isInSchema: true, isExcluded: false, hasLayout: true, …}
- [DEV] ✅ Using default for mandatory element "nav_item_2": Products
- [DEV] 🔍 extractLayoutContent DEBUG: element "nav_item_3" is undefined {layout: 'CenteredLogoHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
- [DEV] ❌ Using empty for excluded optional element "nav_item_3" 
- [DEV] 🔍 extractLayoutContent DEBUG: element "nav_item_4" is undefined {layout: 'CenteredLogoHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
- [DEV] ❌ Using empty for excluded optional element "nav_item_4" 
- [DEV] 🔍 extractLayoutContent DEBUG: element "nav_item_5" is undefined {layout: 'CenteredLogoHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
- [DEV] ❌ Using empty for excluded optional element "nav_item_5" 
- [DEV] 🔍 extractLayoutContent DEBUG: element "nav_item_6" is undefined {layout: 'CenteredLogoHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
- [DEV] ❌ Using empty for excluded optional element "nav_item_6" 
- [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_1" is undefined {layout: 'CenteredLogoHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
- [DEV] ❌ Using empty for excluded optional element "nav_link_1" 
- [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_2" is undefined {layout: 'CenteredLogoHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
- [DEV] ❌ Using empty for excluded optional element "nav_link_2" 
- [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_3" is undefined {layout: 'CenteredLogoHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
- [DEV] ❌ Using empty for excluded optional element "nav_link_3" 
- [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_4" is undefined {layout: 'CenteredLogoHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
- [DEV] ❌ Using empty for excluded optional element "nav_link_4" 
- [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_5" is undefined {layout: 'CenteredLogoHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
- [DEV] ❌ Using empty for excluded optional element "nav_link_5" 
- [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_6" is undefined {layout: 'CenteredLogoHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
- [DEV] ❌ Using empty for excluded optional element "nav_link_6" 
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔍 extractLayoutContent DEBUG: element "badge_text" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "badge_text": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "trust_items" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "trust_items": Free 14-day trial|No credit card required|Cancel anytime
- [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_1" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "trust_item_1": Free 14-day trial
- [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_2" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "trust_item_2": No credit card required
- [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_3" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "trust_item_3": Cancel anytime
- [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_4" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "trust_item_4": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_5" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "trust_item_5": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "center_hero_image" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "center_hero_image": /hero-placeholder.jpg
- [DEV] 🔍 extractLayoutContent DEBUG: element "customer_count" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "customer_count": 500+ happy customers
- [DEV] 🔍 extractLayoutContent DEBUG: element "rating_value" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "rating_value": 4.9/5
- [DEV] 🔍 extractLayoutContent DEBUG: element "rating_count" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "rating_count": from 127 reviews
- [DEV] 🔍 extractLayoutContent DEBUG: element "show_social_proof" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "show_social_proof": true
- [DEV] 🔍 extractLayoutContent DEBUG: element "show_customer_avatars" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "show_customer_avatars": true
- [DEV] 🔍 extractLayoutContent DEBUG: element "avatar_count" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "avatar_count": 4
- [DEV] 🔍 extractLayoutContent DEBUG: element "customer_names" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "customer_names": Sarah Chen|Alex Rivera|Jordan Kim|Maya Patel
- [DEV] 🔍 extractLayoutContent DEBUG: element "avatar_urls" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "avatar_urls": {}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#4338ca]'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#4338ca]'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#4338ca]'}
- [DEV] 🔍 extractLayoutContent DEBUG: element "badge_text" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "badge_text": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "trust_items" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "trust_items": Free 14-day trial|No credit card required|Cancel anytime
- [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_1" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "trust_item_1": Free 14-day trial
- [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_2" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "trust_item_2": No credit card required
- [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_3" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "trust_item_3": Cancel anytime
- [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_4" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "trust_item_4": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_5" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "trust_item_5": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "center_hero_image" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "center_hero_image": /hero-placeholder.jpg
- [DEV] 🔍 extractLayoutContent DEBUG: element "customer_count" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "customer_count": 500+ happy customers
- [DEV] 🔍 extractLayoutContent DEBUG: element "rating_value" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "rating_value": 4.9/5
- [DEV] 🔍 extractLayoutContent DEBUG: element "rating_count" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "rating_count": from 127 reviews
- [DEV] 🔍 extractLayoutContent DEBUG: element "show_social_proof" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "show_social_proof": true
- [DEV] 🔍 extractLayoutContent DEBUG: element "show_customer_avatars" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "show_customer_avatars": true
- [DEV] 🔍 extractLayoutContent DEBUG: element "avatar_count" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "avatar_count": 4
- [DEV] 🔍 extractLayoutContent DEBUG: element "customer_names" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "customer_names": Sarah Chen|Alex Rivera|Jordan Kim|Maya Patel
- [DEV] 🔍 extractLayoutContent DEBUG: element "avatar_urls" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "avatar_urls": {}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#4338ca]'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#4338ca]'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#4338ca]'}
- [DEV] 🎯 extractLayoutContent: Found existing "step_titles": {elementValue: {…}, layout: 'VerticalTimeline', valueType: 'object', isStringEmpty: false, defaultValue: 'Initial Setup|Data Import|Automation Rules|Go Live'}
- [DEV] 🎯 extractLayoutContent: Found existing "step_descriptions": {elementValue: {…}, layout: 'VerticalTimeline', valueType: 'object', isStringEmpty: false, defaultValue: 'Connect your existing tools and configure your wor…d workflows and start seeing results immediately.'}
- [DEV] 🔍 extractLayoutContent DEBUG: element "step_durations" is undefined {layout: 'VerticalTimeline', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "step_durations": 5 minutes|10 minutes|15 minutes|Instant
- [DEV] 🔍 extractLayoutContent DEBUG: element "subheadline" is undefined {layout: 'VerticalTimeline', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "subheadline": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "supporting_text" is undefined {layout: 'VerticalTimeline', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "supporting_text": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "cta_text" is undefined {layout: 'VerticalTimeline', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "cta_text": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "trust_items" is undefined {layout: 'VerticalTimeline', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "trust_items": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "process_steps_label" is undefined {layout: 'VerticalTimeline', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "process_steps_label": simple steps
- [DEV] 🔍 extractLayoutContent DEBUG: element "process_summary_heading" is undefined {layout: 'VerticalTimeline', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "process_summary_heading": Get started in minutes, not hours
- [DEV] 🔍 extractLayoutContent DEBUG: element "process_summary_description" is undefined {layout: 'VerticalTimeline', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "process_summary_description": Our streamlined process is designed to get you up and running quickly with maximum efficiency.
- [DEV] 🔍 extractLayoutContent DEBUG: element "process_time_label" is undefined {layout: 'VerticalTimeline', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "process_time_label": Total time: 30 minutes
- [DEV] 🔍 extractLayoutContent DEBUG: element "step_icon_1" is undefined {layout: 'VerticalTimeline', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "step_icon_1": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "step_icon_2" is undefined {layout: 'VerticalTimeline', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "step_icon_2": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "step_icon_3" is undefined {layout: 'VerticalTimeline', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "step_icon_3": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "step_icon_4" is undefined {layout: 'VerticalTimeline', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "step_icon_4": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "use_step_icons" is undefined {layout: 'VerticalTimeline', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "use_step_icons": false
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🎯 extractLayoutContent: Found existing "step_titles": {elementValue: {…}, layout: 'VerticalTimeline', valueType: 'object', isStringEmpty: false, defaultValue: 'Initial Setup|Data Import|Automation Rules|Go Live'}
- [DEV] 🎯 extractLayoutContent: Found existing "step_descriptions": {elementValue: {…}, layout: 'VerticalTimeline', valueType: 'object', isStringEmpty: false, defaultValue: 'Connect your existing tools and configure your wor…d workflows and start seeing results immediately.'}
- [DEV] 🔍 extractLayoutContent DEBUG: element "step_durations" is undefined {layout: 'VerticalTimeline', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "step_durations": 5 minutes|10 minutes|15 minutes|Instant
- [DEV] 🔍 extractLayoutContent DEBUG: element "subheadline" is undefined {layout: 'VerticalTimeline', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "subheadline": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "supporting_text" is undefined {layout: 'VerticalTimeline', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "supporting_text": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "cta_text" is undefined {layout: 'VerticalTimeline', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "cta_text": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "trust_items" is undefined {layout: 'VerticalTimeline', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "trust_items": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "process_steps_label" is undefined {layout: 'VerticalTimeline', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "process_steps_label": simple steps
- [DEV] 🔍 extractLayoutContent DEBUG: element "process_summary_heading" is undefined {layout: 'VerticalTimeline', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "process_summary_heading": Get started in minutes, not hours
- [DEV] 🔍 extractLayoutContent DEBUG: element "process_summary_description" is undefined {layout: 'VerticalTimeline', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "process_summary_description": Our streamlined process is designed to get you up and running quickly with maximum efficiency.
- [DEV] 🔍 extractLayoutContent DEBUG: element "process_time_label" is undefined {layout: 'VerticalTimeline', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "process_time_label": Total time: 30 minutes
- [DEV] 🔍 extractLayoutContent DEBUG: element "step_icon_1" is undefined {layout: 'VerticalTimeline', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "step_icon_1": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "step_icon_2" is undefined {layout: 'VerticalTimeline', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "step_icon_2": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "step_icon_3" is undefined {layout: 'VerticalTimeline', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "step_icon_3": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "step_icon_4" is undefined {layout: 'VerticalTimeline', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "step_icon_4": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "use_step_icons" is undefined {layout: 'VerticalTimeline', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "use_step_icons": false
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔍 extractLayoutContent DEBUG: element "pain_descriptions" is undefined {layout: 'StackedPainBullets', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
- [DEV] ❌ Using empty for excluded optional element "pain_descriptions" 
- [DEV] 🔍 extractLayoutContent DEBUG: element "subheadline" is undefined {layout: 'StackedPainBullets', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
- [DEV] ❌ Using empty for excluded optional element "subheadline" 
- [DEV] 🔍 extractLayoutContent DEBUG: element "conclusion_text" is undefined {layout: 'StackedPainBullets', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "conclusion_text": Sound familiar? You're not alone.
- [DEV] 🔍 extractLayoutContent DEBUG: element "pain_icon_1" is undefined {layout: 'StackedPainBullets', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "pain_icon_1": ⏰
- [DEV] 🔍 extractLayoutContent DEBUG: element "pain_icon_2" is undefined {layout: 'StackedPainBullets', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "pain_icon_2": 🔗
- [DEV] 🔍 extractLayoutContent DEBUG: element "pain_icon_3" is undefined {layout: 'StackedPainBullets', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "pain_icon_3": ⚠️
- [DEV] 🔍 extractLayoutContent DEBUG: element "pain_icon_4" is undefined {layout: 'StackedPainBullets', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "pain_icon_4": 😰
- [DEV] 🔍 extractLayoutContent DEBUG: element "pain_icon_5" is undefined {layout: 'StackedPainBullets', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "pain_icon_5": 📉
- [DEV] 🔍 extractLayoutContent DEBUG: element "pain_icon_6" is undefined {layout: 'StackedPainBullets', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "pain_icon_6": 🌪️
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔍 extractLayoutContent DEBUG: element "pain_descriptions" is undefined {layout: 'StackedPainBullets', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
- [DEV] ❌ Using empty for excluded optional element "pain_descriptions" 
- [DEV] 🔍 extractLayoutContent DEBUG: element "subheadline" is undefined {layout: 'StackedPainBullets', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
- [DEV] ❌ Using empty for excluded optional element "subheadline" 
- [DEV] 🔍 extractLayoutContent DEBUG: element "conclusion_text" is undefined {layout: 'StackedPainBullets', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "conclusion_text": Sound familiar? You're not alone.
- [DEV] 🔍 extractLayoutContent DEBUG: element "pain_icon_1" is undefined {layout: 'StackedPainBullets', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "pain_icon_1": ⏰
- [DEV] 🔍 extractLayoutContent DEBUG: element "pain_icon_2" is undefined {layout: 'StackedPainBullets', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "pain_icon_2": 🔗
- [DEV] 🔍 extractLayoutContent DEBUG: element "pain_icon_3" is undefined {layout: 'StackedPainBullets', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "pain_icon_3": ⚠️
- [DEV] 🔍 extractLayoutContent DEBUG: element "pain_icon_4" is undefined {layout: 'StackedPainBullets', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "pain_icon_4": 😰
- [DEV] 🔍 extractLayoutContent DEBUG: element "pain_icon_5" is undefined {layout: 'StackedPainBullets', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "pain_icon_5": 📉
- [DEV] 🔍 extractLayoutContent DEBUG: element "pain_icon_6" is undefined {layout: 'StackedPainBullets', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "pain_icon_6": 🌪️
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔍 extractLayoutContent DEBUG: element "headline" is undefined {layout: 'SplitCard', isMandatory: true, isInSchema: true, isExcluded: false, hasLayout: true, …}
- [DEV] ✅ Using default for mandatory element "headline": Premium Transformation Experience
- [DEV] 🔍 extractLayoutContent DEBUG: element "before_label" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "before_label": Current Challenge
- [DEV] 🔍 extractLayoutContent DEBUG: element "after_label" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "after_label": Premium Solution
- [DEV] 🔍 extractLayoutContent DEBUG: element "before_description" is undefined {layout: 'SplitCard', isMandatory: true, isInSchema: true, isExcluded: false, hasLayout: true, …}
- [DEV] ✅ Using default for mandatory element "before_description": Complex manual processes requiring expertise, time, and significant resources to execute properly.
- [DEV] 🔍 extractLayoutContent DEBUG: element "after_description" is undefined {layout: 'SplitCard', isMandatory: true, isInSchema: true, isExcluded: false, hasLayout: true, …}
- [DEV] ✅ Using default for mandatory element "after_description": Expertly crafted automation that delivers exceptional results with minimal effort and maximum efficiency.
- [DEV] 🔍 extractLayoutContent DEBUG: element "subheadline" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
- [DEV] ❌ Using empty for excluded optional element "subheadline" 
- [DEV] 🔍 extractLayoutContent DEBUG: element "supporting_text" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "supporting_text": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "cta_text" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "cta_text": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "trust_items" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "trust_items": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "premium_features_text" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "premium_features_text": Premium Features Included
- [DEV] 🔍 extractLayoutContent DEBUG: element "upgrade_text" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "upgrade_text": Upgrade
- [DEV] 🔍 extractLayoutContent DEBUG: element "before_placeholder_text" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "before_placeholder_text": Current State
- [DEV] 🔍 extractLayoutContent DEBUG: element "after_placeholder_text" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "after_placeholder_text": Premium Result
- [DEV] 🔍 extractLayoutContent DEBUG: element "premium_badge_text" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "premium_badge_text": Premium
- [DEV] 🔍 extractLayoutContent DEBUG: element "before_icon" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "before_icon": ⚠️
- [DEV] 🔍 extractLayoutContent DEBUG: element "after_icon" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "after_icon": ⭐
- [DEV] 🔍 extractLayoutContent DEBUG: element "upgrade_icon" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "upgrade_icon": ➡️
- [DEV] 🔍 extractLayoutContent DEBUG: element "premium_feature_icon" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "premium_feature_icon": ✅
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔍 extractLayoutContent DEBUG: element "headline" is undefined {layout: 'SplitCard', isMandatory: true, isInSchema: true, isExcluded: false, hasLayout: true, …}
- [DEV] ✅ Using default for mandatory element "headline": Premium Transformation Experience
- [DEV] 🔍 extractLayoutContent DEBUG: element "before_label" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "before_label": Current Challenge
- [DEV] 🔍 extractLayoutContent DEBUG: element "after_label" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "after_label": Premium Solution
- [DEV] 🔍 extractLayoutContent DEBUG: element "before_description" is undefined {layout: 'SplitCard', isMandatory: true, isInSchema: true, isExcluded: false, hasLayout: true, …}
- [DEV] ✅ Using default for mandatory element "before_description": Complex manual processes requiring expertise, time, and significant resources to execute properly.
- [DEV] 🔍 extractLayoutContent DEBUG: element "after_description" is undefined {layout: 'SplitCard', isMandatory: true, isInSchema: true, isExcluded: false, hasLayout: true, …}
- [DEV] ✅ Using default for mandatory element "after_description": Expertly crafted automation that delivers exceptional results with minimal effort and maximum efficiency.
- [DEV] 🔍 extractLayoutContent DEBUG: element "subheadline" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
- [DEV] ❌ Using empty for excluded optional element "subheadline" 
- [DEV] 🔍 extractLayoutContent DEBUG: element "supporting_text" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "supporting_text": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "cta_text" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "cta_text": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "trust_items" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "trust_items": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "premium_features_text" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "premium_features_text": Premium Features Included
- [DEV] 🔍 extractLayoutContent DEBUG: element "upgrade_text" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "upgrade_text": Upgrade
- [DEV] 🔍 extractLayoutContent DEBUG: element "before_placeholder_text" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "before_placeholder_text": Current State
- [DEV] 🔍 extractLayoutContent DEBUG: element "after_placeholder_text" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "after_placeholder_text": Premium Result
- [DEV] 🔍 extractLayoutContent DEBUG: element "premium_badge_text" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "premium_badge_text": Premium
- [DEV] 🔍 extractLayoutContent DEBUG: element "before_icon" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "before_icon": ⚠️
- [DEV] 🔍 extractLayoutContent DEBUG: element "after_icon" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "after_icon": ⭐
- [DEV] 🔍 extractLayoutContent DEBUG: element "upgrade_icon" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "upgrade_icon": ➡️
- [DEV] 🔍 extractLayoutContent DEBUG: element "premium_feature_icon" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "premium_feature_icon": ✅
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔍 extractLayoutContent DEBUG: element "founder_bio" is undefined {layout: 'FounderCardWithQuote', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
- [DEV] ❌ Using empty for excluded optional element "founder_bio" 
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔍 extractLayoutContent DEBUG: element "founder_bio" is undefined {layout: 'FounderCardWithQuote', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
- [DEV] ❌ Using empty for excluded optional element "founder_bio" 
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔍 extractLayoutContent DEBUG: element "subheadline" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "subheadline": Here's how real conversations with our team usually go
- [DEV] 🔍 extractLayoutContent DEBUG: element "question_1" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "question_1": Hey! I'm curious about your free plan - what's included?
- [DEV] 🔍 extractLayoutContent DEBUG: element "answer_1" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "answer_1": Hi! Great question! Our free plan includes up to 1,000 monthly actions, access to all core features, and basic integrations. It's perfect for getting started and many small teams stay on it forever! 🎉
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "question_2" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "question_2": This looks awesome! How hard is it to get started?
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "answer_2" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "answer_2": Super easy! Most people are up and running in under 5 minutes. We have a guided setup that walks you through everything step by step. Want me to send you a quick demo link?
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "question_3" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "question_3": I'm not super technical - will I be able to figure this out?
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "answer_3" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "answer_3": Absolutely! We designed everything with non-technical users in mind. Think of it like using your favorite apps - if you can send an email or post on social media, you've got this! 💪
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "question_4" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "question_4": What if I need help along the way?
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "answer_4" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "answer_4": We're here 24/7! You can chat with us anytime, browse our help docs, or join our community where fellow users share tips. Plus, we have tons of video tutorials for visual learners.
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "question_5" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "question_5": One more thing - can I really cancel anytime?
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "answer_5" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "answer_5": Yep! No contracts, no cancellation fees, no questions asked. You can downgrade or cancel right from your dashboard. We only want happy customers! ✨
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "user_name" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "user_name": You
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "support_name" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "support_name": Alex from Support
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "support_avatar" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "support_avatar": A
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "online_status_text" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "online_status_text": Online now
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "chat_placeholder" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "chat_placeholder": Ask us anything...
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "cta_text" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "cta_text": Ready to start your own conversation?
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "button_text" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "button_text": Chat with us now
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "show_typing_indicator" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "show_typing_indicator": true
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "show_cta_section" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "show_cta_section": true
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "status_indicator_icon" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "status_indicator_icon": 🟢
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "send_icon" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "send_icon": ➤
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "support_avatar_icon" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "support_avatar_icon": 👤
-logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#e0e7ff]'}
-logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#e0e7ff]'}
-logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#e0e7ff]'}
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "subheadline" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "subheadline": Here's how real conversations with our team usually go
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "question_1" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "question_1": Hey! I'm curious about your free plan - what's included?
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "answer_1" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "answer_1": Hi! Great question! Our free plan includes up to 1,000 monthly actions, access to all core features, and basic integrations. It's perfect for getting started and many small teams stay on it forever! 🎉
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "question_2" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "question_2": This looks awesome! How hard is it to get started?
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "answer_2" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "answer_2": Super easy! Most people are up and running in under 5 minutes. We have a guided setup that walks you through everything step by step. Want me to send you a quick demo link?
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "question_3" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "question_3": I'm not super technical - will I be able to figure this out?
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "answer_3" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "answer_3": Absolutely! We designed everything with non-technical users in mind. Think of it like using your favorite apps - if you can send an email or post on social media, you've got this! 💪
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "question_4" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "question_4": What if I need help along the way?
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "answer_4" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "answer_4": We're here 24/7! You can chat with us anytime, browse our help docs, or join our community where fellow users share tips. Plus, we have tons of video tutorials for visual learners.
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "question_5" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "question_5": One more thing - can I really cancel anytime?
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "answer_5" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "answer_5": Yep! No contracts, no cancellation fees, no questions asked. You can downgrade or cancel right from your dashboard. We only want happy customers! ✨
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "user_name" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "user_name": You
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "support_name" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "support_name": Alex from Support
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "support_avatar" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "support_avatar": A
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "online_status_text" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "online_status_text": Online now
- [DEV] 🔍 extractLayoutContent DEBUG: element "chat_placeholder" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "chat_placeholder": Ask us anything...
- [DEV] 🔍 extractLayoutContent DEBUG: element "cta_text" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "cta_text": Ready to start your own conversation?
- [DEV] 🔍 extractLayoutContent DEBUG: element "button_text" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "button_text": Chat with us now
- [DEV] 🔍 extractLayoutContent DEBUG: element "show_typing_indicator" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "show_typing_indicator": true
- [DEV] 🔍 extractLayoutContent DEBUG: element "show_cta_section" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "show_cta_section": true
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "status_indicator_icon" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "status_indicator_icon": 🟢
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "send_icon" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "send_icon": ➤
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "support_avatar_icon" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "support_avatar_icon": 👤
-logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#e0e7ff]'}
-logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#e0e7ff]'}
-logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#e0e7ff]'}
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "trust_items" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "trust_items": Free 14-day trial|No credit card required|Cancel anytime
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_1" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "trust_item_1": Free 14-day trial
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_2" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "trust_item_2": No credit card required
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_3" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "trust_item_3": Cancel anytime
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_4" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "trust_item_4": 
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_5" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "trust_item_5": 
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "customer_count" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "customer_count": 10,000+
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "customer_label" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "customer_label": Happy customers
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "rating_stat" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "rating_stat": 4.8/5 stars
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "uptime_stat" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "uptime_stat": 99.9% uptime
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "uptime_label" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "uptime_label": SOC 2 Compliant
-logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#4338ca]'}
-logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#4338ca]'}
-logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#4338ca]'}
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "trust_items" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "trust_items": Free 14-day trial|No credit card required|Cancel anytime
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_1" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "trust_item_1": Free 14-day trial
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_2" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "trust_item_2": No credit card required
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_3" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "trust_item_3": Cancel anytime
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_4" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "trust_item_4": 
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_5" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "trust_item_5": 
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "customer_count" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "customer_count": 10,000+
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "customer_label" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "customer_label": Happy customers
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "rating_stat" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "rating_stat": 4.8/5 stars
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "uptime_stat" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "uptime_stat": 99.9% uptime
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "uptime_label" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "uptime_label": SOC 2 Compliant
-logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#4338ca]'}
-logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#4338ca]'}
-logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#4338ca]'}
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "copyright" is undefined {layout: 'MultiColumnFooter', isMandatory: true, isInSchema: true, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] ✅ Using default for mandatory element "copyright": © 2025 Your Company. All rights reserved.
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "company_description" is undefined {layout: 'MultiColumnFooter', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
-logger.ts:95 [DEV] ❌ Using empty for excluded optional element "company_description" 
-logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
-logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
-logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "copyright" is undefined {layout: 'MultiColumnFooter', isMandatory: true, isInSchema: true, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] ✅ Using default for mandatory element "copyright": © 2025 Your Company. All rights reserved.
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "company_description" is undefined {layout: 'MultiColumnFooter', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
-logger.ts:95 [DEV] ❌ Using empty for excluded optional element "company_description" 
-logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
-logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
-logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
-logger.ts:84 [2025-09-09T10:06:24.285Z] DEBUG: 🔍 LeftPanel Store Methods Available: {
-  "regenerateAllContent": true,
-  "hasStore": true,
-  "hasStoreState": true,
-  "storeMethodKeys": [
-    "regenerateSection",
-    "regenerateElement",
-    "regenerateAllContent",
-    "regenerateElementWithVariations",
-    "regenerateVariables",
-    "regenerateContentOnly",
-    "regenerateDesignAndCopy",
-    "regenerateWithInputs"
-  ]
-}
-logger.ts:84 [2025-09-09T10:06:24.285Z] DEBUG: 🔍 LeftPanel Store Methods Available: {
-  "regenerateAllContent": true,
-  "hasStore": true,
-  "hasStoreState": true,
-  "storeMethodKeys": [
-    "regenerateSection",
-    "regenerateElement",
-    "regenerateAllContent",
-    "regenerateElementWithVariations",
-    "regenerateVariables",
-    "regenerateContentOnly",
-    "regenerateDesignAndCopy",
-    "regenerateWithInputs"
-  ]
-}
- [DEV] 🔍 extractLayoutContent DEBUG: element "nav_item_1" is undefined {layout: 'CenteredLogoHeader', isMandatory: true, isInSchema: true, isExcluded: false, hasLayout: true, …}
- [DEV] ✅ Using default for mandatory element "nav_item_1": Home
- [DEV] 🔍 extractLayoutContent DEBUG: element "nav_item_2" is undefined {layout: 'CenteredLogoHeader', isMandatory: true, isInSchema: true, isExcluded: false, hasLayout: true, …}
- [DEV] ✅ Using default for mandatory element "nav_item_2": Products
- [DEV] 🔍 extractLayoutContent DEBUG: element "nav_item_3" is undefined {layout: 'CenteredLogoHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
- [DEV] ❌ Using empty for excluded optional element "nav_item_3" 
- [DEV] 🔍 extractLayoutContent DEBUG: element "nav_item_4" is undefined {layout: 'CenteredLogoHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
- [DEV] ❌ Using empty for excluded optional element "nav_item_4" 
- [DEV] 🔍 extractLayoutContent DEBUG: element "nav_item_5" is undefined {layout: 'CenteredLogoHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
- [DEV] ❌ Using empty for excluded optional element "nav_item_5" 
- [DEV] 🔍 extractLayoutContent DEBUG: element "nav_item_6" is undefined {layout: 'CenteredLogoHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
- [DEV] ❌ Using empty for excluded optional element "nav_item_6" 
- [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_1" is undefined {layout: 'CenteredLogoHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
- [DEV] ❌ Using empty for excluded optional element "nav_link_1" 
- [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_2" is undefined {layout: 'CenteredLogoHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
- [DEV] ❌ Using empty for excluded optional element "nav_link_2" 
- [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_3" is undefined {layout: 'CenteredLogoHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
- [DEV] ❌ Using empty for excluded optional element "nav_link_3" 
- [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_4" is undefined {layout: 'CenteredLogoHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
- [DEV] ❌ Using empty for excluded optional element "nav_link_4" 
- [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_5" is undefined {layout: 'CenteredLogoHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
- [DEV] ❌ Using empty for excluded optional element "nav_link_5" 
- [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_6" is undefined {layout: 'CenteredLogoHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
- [DEV] ❌ Using empty for excluded optional element "nav_link_6" 
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔍 extractLayoutContent DEBUG: element "nav_item_1" is undefined {layout: 'CenteredLogoHeader', isMandatory: true, isInSchema: true, isExcluded: false, hasLayout: true, …}
- [DEV] ✅ Using default for mandatory element "nav_item_1": Home
- [DEV] 🔍 extractLayoutContent DEBUG: element "nav_item_2" is undefined {layout: 'CenteredLogoHeader', isMandatory: true, isInSchema: true, isExcluded: false, hasLayout: true, …}
- [DEV] ✅ Using default for mandatory element "nav_item_2": Products
- [DEV] 🔍 extractLayoutContent DEBUG: element "nav_item_3" is undefined {layout: 'CenteredLogoHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
- [DEV] ❌ Using empty for excluded optional element "nav_item_3" 
- [DEV] 🔍 extractLayoutContent DEBUG: element "nav_item_4" is undefined {layout: 'CenteredLogoHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
- [DEV] ❌ Using empty for excluded optional element "nav_item_4" 
- [DEV] 🔍 extractLayoutContent DEBUG: element "nav_item_5" is undefined {layout: 'CenteredLogoHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
- [DEV] ❌ Using empty for excluded optional element "nav_item_5" 
- [DEV] 🔍 extractLayoutContent DEBUG: element "nav_item_6" is undefined {layout: 'CenteredLogoHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
- [DEV] ❌ Using empty for excluded optional element "nav_item_6" 
- [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_1" is undefined {layout: 'CenteredLogoHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
- [DEV] ❌ Using empty for excluded optional element "nav_link_1" 
- [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_2" is undefined {layout: 'CenteredLogoHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
- [DEV] ❌ Using empty for excluded optional element "nav_link_2" 
- [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_3" is undefined {layout: 'CenteredLogoHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
- [DEV] ❌ Using empty for excluded optional element "nav_link_3" 
- [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_4" is undefined {layout: 'CenteredLogoHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
- [DEV] ❌ Using empty for excluded optional element "nav_link_4" 
- [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_5" is undefined {layout: 'CenteredLogoHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
- [DEV] ❌ Using empty for excluded optional element "nav_link_5" 
- [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_6" is undefined {layout: 'CenteredLogoHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
- [DEV] ❌ Using empty for excluded optional element "nav_link_6" 
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔍 extractLayoutContent DEBUG: element "badge_text" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "badge_text": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "trust_items" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "trust_items": Free 14-day trial|No credit card required|Cancel anytime
- [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_1" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "trust_item_1": Free 14-day trial
- [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_2" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "trust_item_2": No credit card required
- [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_3" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "trust_item_3": Cancel anytime
- [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_4" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "trust_item_4": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_5" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "trust_item_5": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "center_hero_image" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "center_hero_image": /hero-placeholder.jpg
- [DEV] 🔍 extractLayoutContent DEBUG: element "customer_count" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "customer_count": 500+ happy customers
- [DEV] 🔍 extractLayoutContent DEBUG: element "rating_value" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "rating_value": 4.9/5
- [DEV] 🔍 extractLayoutContent DEBUG: element "rating_count" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "rating_count": from 127 reviews
- [DEV] 🔍 extractLayoutContent DEBUG: element "show_social_proof" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "show_social_proof": true
- [DEV] 🔍 extractLayoutContent DEBUG: element "show_customer_avatars" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "show_customer_avatars": true
- [DEV] 🔍 extractLayoutContent DEBUG: element "avatar_count" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "avatar_count": 4
- [DEV] 🔍 extractLayoutContent DEBUG: element "customer_names" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "customer_names": Sarah Chen|Alex Rivera|Jordan Kim|Maya Patel
- [DEV] 🔍 extractLayoutContent DEBUG: element "avatar_urls" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "avatar_urls": {}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#4338ca]'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#4338ca]'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#4338ca]'}
- [DEV] 🔍 extractLayoutContent DEBUG: element "badge_text" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "badge_text": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "trust_items" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "trust_items": Free 14-day trial|No credit card required|Cancel anytime
- [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_1" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "trust_item_1": Free 14-day trial
- [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_2" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "trust_item_2": No credit card required
- [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_3" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "trust_item_3": Cancel anytime
- [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_4" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "trust_item_4": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_5" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "trust_item_5": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "center_hero_image" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "center_hero_image": /hero-placeholder.jpg
- [DEV] 🔍 extractLayoutContent DEBUG: element "customer_count" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "customer_count": 500+ happy customers
- [DEV] 🔍 extractLayoutContent DEBUG: element "rating_value" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "rating_value": 4.9/5
- [DEV] 🔍 extractLayoutContent DEBUG: element "rating_count" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "rating_count": from 127 reviews
- [DEV] 🔍 extractLayoutContent DEBUG: element "show_social_proof" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "show_social_proof": true
- [DEV] 🔍 extractLayoutContent DEBUG: element "show_customer_avatars" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "show_customer_avatars": true
- [DEV] 🔍 extractLayoutContent DEBUG: element "avatar_count" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "avatar_count": 4
- [DEV] 🔍 extractLayoutContent DEBUG: element "customer_names" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "customer_names": Sarah Chen|Alex Rivera|Jordan Kim|Maya Patel
- [DEV] 🔍 extractLayoutContent DEBUG: element "avatar_urls" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "avatar_urls": {}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#4338ca]'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#4338ca]'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#4338ca]'}
- [DEV] 🎯 extractLayoutContent: Found existing "step_titles": {elementValue: {…}, layout: 'VerticalTimeline', valueType: 'object', isStringEmpty: false, defaultValue: 'Initial Setup|Data Import|Automation Rules|Go Live'}
- [DEV] 🎯 extractLayoutContent: Found existing "step_descriptions": {elementValue: {…}, layout: 'VerticalTimeline', valueType: 'object', isStringEmpty: false, defaultValue: 'Connect your existing tools and configure your wor…d workflows and start seeing results immediately.'}
- [DEV] 🔍 extractLayoutContent DEBUG: element "step_durations" is undefined {layout: 'VerticalTimeline', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "step_durations": 5 minutes|10 minutes|15 minutes|Instant
- [DEV] 🔍 extractLayoutContent DEBUG: element "subheadline" is undefined {layout: 'VerticalTimeline', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "subheadline": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "supporting_text" is undefined {layout: 'VerticalTimeline', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "supporting_text": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "cta_text" is undefined {layout: 'VerticalTimeline', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "cta_text": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "trust_items" is undefined {layout: 'VerticalTimeline', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "trust_items": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "process_steps_label" is undefined {layout: 'VerticalTimeline', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "process_steps_label": simple steps
- [DEV] 🔍 extractLayoutContent DEBUG: element "process_summary_heading" is undefined {layout: 'VerticalTimeline', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "process_summary_heading": Get started in minutes, not hours
- [DEV] 🔍 extractLayoutContent DEBUG: element "process_summary_description" is undefined {layout: 'VerticalTimeline', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "process_summary_description": Our streamlined process is designed to get you up and running quickly with maximum efficiency.
- [DEV] 🔍 extractLayoutContent DEBUG: element "process_time_label" is undefined {layout: 'VerticalTimeline', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "process_time_label": Total time: 30 minutes
- [DEV] 🔍 extractLayoutContent DEBUG: element "step_icon_1" is undefined {layout: 'VerticalTimeline', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "step_icon_1": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "step_icon_2" is undefined {layout: 'VerticalTimeline', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "step_icon_2": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "step_icon_3" is undefined {layout: 'VerticalTimeline', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "step_icon_3": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "step_icon_4" is undefined {layout: 'VerticalTimeline', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "step_icon_4": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "use_step_icons" is undefined {layout: 'VerticalTimeline', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "use_step_icons": false
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🎯 extractLayoutContent: Found existing "step_titles": {elementValue: {…}, layout: 'VerticalTimeline', valueType: 'object', isStringEmpty: false, defaultValue: 'Initial Setup|Data Import|Automation Rules|Go Live'}
- [DEV] 🎯 extractLayoutContent: Found existing "step_descriptions": {elementValue: {…}, layout: 'VerticalTimeline', valueType: 'object', isStringEmpty: false, defaultValue: 'Connect your existing tools and configure your wor…d workflows and start seeing results immediately.'}
- [DEV] 🔍 extractLayoutContent DEBUG: element "step_durations" is undefined {layout: 'VerticalTimeline', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "step_durations": 5 minutes|10 minutes|15 minutes|Instant
- [DEV] 🔍 extractLayoutContent DEBUG: element "subheadline" is undefined {layout: 'VerticalTimeline', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "subheadline": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "supporting_text" is undefined {layout: 'VerticalTimeline', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "supporting_text": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "cta_text" is undefined {layout: 'VerticalTimeline', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "cta_text": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "trust_items" is undefined {layout: 'VerticalTimeline', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "trust_items": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "process_steps_label" is undefined {layout: 'VerticalTimeline', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "process_steps_label": simple steps
- [DEV] 🔍 extractLayoutContent DEBUG: element "process_summary_heading" is undefined {layout: 'VerticalTimeline', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "process_summary_heading": Get started in minutes, not hours
- [DEV] 🔍 extractLayoutContent DEBUG: element "process_summary_description" is undefined {layout: 'VerticalTimeline', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "process_summary_description": Our streamlined process is designed to get you up and running quickly with maximum efficiency.
- [DEV] 🔍 extractLayoutContent DEBUG: element "process_time_label" is undefined {layout: 'VerticalTimeline', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "process_time_label": Total time: 30 minutes
- [DEV] 🔍 extractLayoutContent DEBUG: element "step_icon_1" is undefined {layout: 'VerticalTimeline', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "step_icon_1": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "step_icon_2" is undefined {layout: 'VerticalTimeline', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "step_icon_2": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "step_icon_3" is undefined {layout: 'VerticalTimeline', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "step_icon_3": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "step_icon_4" is undefined {layout: 'VerticalTimeline', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "step_icon_4": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "use_step_icons" is undefined {layout: 'VerticalTimeline', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "use_step_icons": false
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔍 extractLayoutContent DEBUG: element "pain_descriptions" is undefined {layout: 'StackedPainBullets', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
- [DEV] ❌ Using empty for excluded optional element "pain_descriptions" 
- [DEV] 🔍 extractLayoutContent DEBUG: element "subheadline" is undefined {layout: 'StackedPainBullets', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
- [DEV] ❌ Using empty for excluded optional element "subheadline" 
- [DEV] 🔍 extractLayoutContent DEBUG: element "conclusion_text" is undefined {layout: 'StackedPainBullets', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "conclusion_text": Sound familiar? You're not alone.
- [DEV] 🔍 extractLayoutContent DEBUG: element "pain_icon_1" is undefined {layout: 'StackedPainBullets', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "pain_icon_1": ⏰
- [DEV] 🔍 extractLayoutContent DEBUG: element "pain_icon_2" is undefined {layout: 'StackedPainBullets', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "pain_icon_2": 🔗
- [DEV] 🔍 extractLayoutContent DEBUG: element "pain_icon_3" is undefined {layout: 'StackedPainBullets', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "pain_icon_3": ⚠️
- [DEV] 🔍 extractLayoutContent DEBUG: element "pain_icon_4" is undefined {layout: 'StackedPainBullets', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "pain_icon_4": 😰
- [DEV] 🔍 extractLayoutContent DEBUG: element "pain_icon_5" is undefined {layout: 'StackedPainBullets', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "pain_icon_5": 📉
- [DEV] 🔍 extractLayoutContent DEBUG: element "pain_icon_6" is undefined {layout: 'StackedPainBullets', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "pain_icon_6": 🌪️
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔍 extractLayoutContent DEBUG: element "pain_descriptions" is undefined {layout: 'StackedPainBullets', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
- [DEV] ❌ Using empty for excluded optional element "pain_descriptions" 
- [DEV] 🔍 extractLayoutContent DEBUG: element "subheadline" is undefined {layout: 'StackedPainBullets', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
- [DEV] ❌ Using empty for excluded optional element "subheadline" 
- [DEV] 🔍 extractLayoutContent DEBUG: element "conclusion_text" is undefined {layout: 'StackedPainBullets', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "conclusion_text": Sound familiar? You're not alone.
- [DEV] 🔍 extractLayoutContent DEBUG: element "pain_icon_1" is undefined {layout: 'StackedPainBullets', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "pain_icon_1": ⏰
- [DEV] 🔍 extractLayoutContent DEBUG: element "pain_icon_2" is undefined {layout: 'StackedPainBullets', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "pain_icon_2": 🔗
- [DEV] 🔍 extractLayoutContent DEBUG: element "pain_icon_3" is undefined {layout: 'StackedPainBullets', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "pain_icon_3": ⚠️
- [DEV] 🔍 extractLayoutContent DEBUG: element "pain_icon_4" is undefined {layout: 'StackedPainBullets', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "pain_icon_4": 😰
- [DEV] 🔍 extractLayoutContent DEBUG: element "pain_icon_5" is undefined {layout: 'StackedPainBullets', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "pain_icon_5": 📉
- [DEV] 🔍 extractLayoutContent DEBUG: element "pain_icon_6" is undefined {layout: 'StackedPainBullets', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "pain_icon_6": 🌪️
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔍 extractLayoutContent DEBUG: element "headline" is undefined {layout: 'SplitCard', isMandatory: true, isInSchema: true, isExcluded: false, hasLayout: true, …}
- [DEV] ✅ Using default for mandatory element "headline": Premium Transformation Experience
- [DEV] 🔍 extractLayoutContent DEBUG: element "before_label" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "before_label": Current Challenge
- [DEV] 🔍 extractLayoutContent DEBUG: element "after_label" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "after_label": Premium Solution
- [DEV] 🔍 extractLayoutContent DEBUG: element "before_description" is undefined {layout: 'SplitCard', isMandatory: true, isInSchema: true, isExcluded: false, hasLayout: true, …}
- [DEV] ✅ Using default for mandatory element "before_description": Complex manual processes requiring expertise, time, and significant resources to execute properly.
- [DEV] 🔍 extractLayoutContent DEBUG: element "after_description" is undefined {layout: 'SplitCard', isMandatory: true, isInSchema: true, isExcluded: false, hasLayout: true, …}
- [DEV] ✅ Using default for mandatory element "after_description": Expertly crafted automation that delivers exceptional results with minimal effort and maximum efficiency.
- [DEV] 🔍 extractLayoutContent DEBUG: element "subheadline" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
- [DEV] ❌ Using empty for excluded optional element "subheadline" 
- [DEV] 🔍 extractLayoutContent DEBUG: element "supporting_text" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "supporting_text": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "cta_text" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "cta_text": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "trust_items" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "trust_items": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "premium_features_text" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "premium_features_text": Premium Features Included
- [DEV] 🔍 extractLayoutContent DEBUG: element "upgrade_text" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "upgrade_text": Upgrade
- [DEV] 🔍 extractLayoutContent DEBUG: element "before_placeholder_text" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "before_placeholder_text": Current State
- [DEV] 🔍 extractLayoutContent DEBUG: element "after_placeholder_text" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "after_placeholder_text": Premium Result
- [DEV] 🔍 extractLayoutContent DEBUG: element "premium_badge_text" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "premium_badge_text": Premium
- [DEV] 🔍 extractLayoutContent DEBUG: element "before_icon" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "before_icon": ⚠️
- [DEV] 🔍 extractLayoutContent DEBUG: element "after_icon" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "after_icon": ⭐
- [DEV] 🔍 extractLayoutContent DEBUG: element "upgrade_icon" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "upgrade_icon": ➡️
- [DEV] 🔍 extractLayoutContent DEBUG: element "premium_feature_icon" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "premium_feature_icon": ✅
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔍 extractLayoutContent DEBUG: element "headline" is undefined {layout: 'SplitCard', isMandatory: true, isInSchema: true, isExcluded: false, hasLayout: true, …}
- [DEV] ✅ Using default for mandatory element "headline": Premium Transformation Experience
- [DEV] 🔍 extractLayoutContent DEBUG: element "before_label" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "before_label": Current Challenge
- [DEV] 🔍 extractLayoutContent DEBUG: element "after_label" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "after_label": Premium Solution
- [DEV] 🔍 extractLayoutContent DEBUG: element "before_description" is undefined {layout: 'SplitCard', isMandatory: true, isInSchema: true, isExcluded: false, hasLayout: true, …}
- [DEV] ✅ Using default for mandatory element "before_description": Complex manual processes requiring expertise, time, and significant resources to execute properly.
- [DEV] 🔍 extractLayoutContent DEBUG: element "after_description" is undefined {layout: 'SplitCard', isMandatory: true, isInSchema: true, isExcluded: false, hasLayout: true, …}
- [DEV] ✅ Using default for mandatory element "after_description": Expertly crafted automation that delivers exceptional results with minimal effort and maximum efficiency.
- [DEV] 🔍 extractLayoutContent DEBUG: element "subheadline" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
- [DEV] ❌ Using empty for excluded optional element "subheadline" 
- [DEV] 🔍 extractLayoutContent DEBUG: element "supporting_text" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "supporting_text": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "cta_text" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "cta_text": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "trust_items" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "trust_items": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "premium_features_text" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "premium_features_text": Premium Features Included
- [DEV] 🔍 extractLayoutContent DEBUG: element "upgrade_text" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "upgrade_text": Upgrade
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "before_placeholder_text" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "before_placeholder_text": Current State
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "after_placeholder_text" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "after_placeholder_text": Premium Result
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "premium_badge_text" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "premium_badge_text": Premium
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "before_icon" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "before_icon": ⚠️
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "after_icon" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "after_icon": ⭐
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "upgrade_icon" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "upgrade_icon": ➡️
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "premium_feature_icon" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "premium_feature_icon": ✅
-logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
-logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
-logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "founder_bio" is undefined {layout: 'FounderCardWithQuote', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
-logger.ts:95 [DEV] ❌ Using empty for excluded optional element "founder_bio" 
-logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
-logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
-logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "founder_bio" is undefined {layout: 'FounderCardWithQuote', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
-logger.ts:95 [DEV] ❌ Using empty for excluded optional element "founder_bio" 
-logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
-logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
-logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "subheadline" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "subheadline": Here's how real conversations with our team usually go
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "question_1" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "question_1": Hey! I'm curious about your free plan - what's included?
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "answer_1" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "answer_1": Hi! Great question! Our free plan includes up to 1,000 monthly actions, access to all core features, and basic integrations. It's perfect for getting started and many small teams stay on it forever! 🎉
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "question_2" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "question_2": This looks awesome! How hard is it to get started?
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "answer_2" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "answer_2": Super easy! Most people are up and running in under 5 minutes. We have a guided setup that walks you through everything step by step. Want me to send you a quick demo link?
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "question_3" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "question_3": I'm not super technical - will I be able to figure this out?
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "answer_3" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "answer_3": Absolutely! We designed everything with non-technical users in mind. Think of it like using your favorite apps - if you can send an email or post on social media, you've got this! 💪
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "question_4" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "question_4": What if I need help along the way?
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "answer_4" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "answer_4": We're here 24/7! You can chat with us anytime, browse our help docs, or join our community where fellow users share tips. Plus, we have tons of video tutorials for visual learners.
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "question_5" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "question_5": One more thing - can I really cancel anytime?
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "answer_5" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "answer_5": Yep! No contracts, no cancellation fees, no questions asked. You can downgrade or cancel right from your dashboard. We only want happy customers! ✨
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "user_name" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "user_name": You
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "support_name" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "support_name": Alex from Support
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "support_avatar" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "support_avatar": A
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "online_status_text" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "online_status_text": Online now
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "chat_placeholder" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "chat_placeholder": Ask us anything...
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "cta_text" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "cta_text": Ready to start your own conversation?
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "button_text" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "button_text": Chat with us now
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "show_typing_indicator" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "show_typing_indicator": true
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "show_cta_section" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "show_cta_section": true
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "status_indicator_icon" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "status_indicator_icon": 🟢
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "send_icon" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "send_icon": ➤
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "support_avatar_icon" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "support_avatar_icon": 👤
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#e0e7ff]'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#e0e7ff]'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#e0e7ff]'}
- [DEV] 🔍 extractLayoutContent DEBUG: element "subheadline" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "subheadline": Here's how real conversations with our team usually go
- [DEV] 🔍 extractLayoutContent DEBUG: element "question_1" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "question_1": Hey! I'm curious about your free plan - what's included?
- [DEV] 🔍 extractLayoutContent DEBUG: element "answer_1" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "answer_1": Hi! Great question! Our free plan includes up to 1,000 monthly actions, access to all core features, and basic integrations. It's perfect for getting started and many small teams stay on it forever! 🎉
- [DEV] 🔍 extractLayoutContent DEBUG: element "question_2" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "question_2": This looks awesome! How hard is it to get started?
- [DEV] 🔍 extractLayoutContent DEBUG: element "answer_2" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "answer_2": Super easy! Most people are up and running in under 5 minutes. We have a guided setup that walks you through everything step by step. Want me to send you a quick demo link?
- [DEV] 🔍 extractLayoutContent DEBUG: element "question_3" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "question_3": I'm not super technical - will I be able to figure this out?
- [DEV] 🔍 extractLayoutContent DEBUG: element "answer_3" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "answer_3": Absolutely! We designed everything with non-technical users in mind. Think of it like using your favorite apps - if you can send an email or post on social media, you've got this! 💪
- [DEV] 🔍 extractLayoutContent DEBUG: element "question_4" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "question_4": What if I need help along the way?
- [DEV] 🔍 extractLayoutContent DEBUG: element "answer_4" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "answer_4": We're here 24/7! You can chat with us anytime, browse our help docs, or join our community where fellow users share tips. Plus, we have tons of video tutorials for visual learners.
- [DEV] 🔍 extractLayoutContent DEBUG: element "question_5" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "question_5": One more thing - can I really cancel anytime?
- [DEV] 🔍 extractLayoutContent DEBUG: element "answer_5" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "answer_5": Yep! No contracts, no cancellation fees, no questions asked. You can downgrade or cancel right from your dashboard. We only want happy customers! ✨
- [DEV] 🔍 extractLayoutContent DEBUG: element "user_name" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "user_name": You
- [DEV] 🔍 extractLayoutContent DEBUG: element "support_name" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "support_name": Alex from Support
- [DEV] 🔍 extractLayoutContent DEBUG: element "support_avatar" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "support_avatar": A
- [DEV] 🔍 extractLayoutContent DEBUG: element "online_status_text" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "online_status_text": Online now
- [DEV] 🔍 extractLayoutContent DEBUG: element "chat_placeholder" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "chat_placeholder": Ask us anything...
- [DEV] 🔍 extractLayoutContent DEBUG: element "cta_text" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "cta_text": Ready to start your own conversation?
- [DEV] 🔍 extractLayoutContent DEBUG: element "button_text" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "button_text": Chat with us now
- [DEV] 🔍 extractLayoutContent DEBUG: element "show_typing_indicator" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "show_typing_indicator": true
- [DEV] 🔍 extractLayoutContent DEBUG: element "show_cta_section" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "show_cta_section": true
- [DEV] 🔍 extractLayoutContent DEBUG: element "status_indicator_icon" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "status_indicator_icon": 🟢
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "send_icon" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "send_icon": ➤
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "support_avatar_icon" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "support_avatar_icon": 👤
-logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#e0e7ff]'}
-logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#e0e7ff]'}
-logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#e0e7ff]'}
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "trust_items" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "trust_items": Free 14-day trial|No credit card required|Cancel anytime
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_1" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "trust_item_1": Free 14-day trial
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_2" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "trust_item_2": No credit card required
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_3" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "trust_item_3": Cancel anytime
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_4" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "trust_item_4": 
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_5" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "trust_item_5": 
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "customer_count" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "customer_count": 10,000+
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "customer_label" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "customer_label": Happy customers
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "rating_stat" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "rating_stat": 4.8/5 stars
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "uptime_stat" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "uptime_stat": 99.9% uptime
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "uptime_label" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "uptime_label": SOC 2 Compliant
-logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#4338ca]'}
-logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#4338ca]'}
-logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#4338ca]'}
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "trust_items" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "trust_items": Free 14-day trial|No credit card required|Cancel anytime
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_1" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "trust_item_1": Free 14-day trial
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_2" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "trust_item_2": No credit card required
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_3" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "trust_item_3": Cancel anytime
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_4" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "trust_item_4": 
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_5" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "trust_item_5": 
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "customer_count" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "customer_count": 10,000+
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "customer_label" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "customer_label": Happy customers
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "rating_stat" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "rating_stat": 4.8/5 stars
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "uptime_stat" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "uptime_stat": 99.9% uptime
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "uptime_label" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "uptime_label": SOC 2 Compliant
-logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#4338ca]'}
-logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#4338ca]'}
-logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#4338ca]'}
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "copyright" is undefined {layout: 'MultiColumnFooter', isMandatory: true, isInSchema: true, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] ✅ Using default for mandatory element "copyright": © 2025 Your Company. All rights reserved.
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "company_description" is undefined {layout: 'MultiColumnFooter', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
-logger.ts:95 [DEV] ❌ Using empty for excluded optional element "company_description" 
-logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
-logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
-logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "copyright" is undefined {layout: 'MultiColumnFooter', isMandatory: true, isInSchema: true, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] ✅ Using default for mandatory element "copyright": © 2025 Your Company. All rights reserved.
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "company_description" is undefined {layout: 'MultiColumnFooter', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
-logger.ts:95 [DEV] ❌ Using empty for excluded optional element "company_description" 
-logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
-logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
-logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
-logger.ts:95 [DEV] 🔴 SectionToolbar[lpyacig52] UNMOUNTING for section: howItWorks-1757342534419
-logger.ts:84 [2025-09-09T10:06:24.948Z] DEBUG: 🔍 LeftPanel Store Methods Available: {
-  "regenerateAllContent": true,
-  "hasStore": true,
-  "hasStoreState": true,
-  "storeMethodKeys": [
-    "regenerateSection",
-    "regenerateElement",
-    "regenerateAllContent",
-    "regenerateElementWithVariations",
-    "regenerateVariables",
-    "regenerateContentOnly",
-    "regenerateDesignAndCopy",
-    "regenerateWithInputs"
-  ]
-}
-logger.ts:84 [2025-09-09T10:06:24.948Z] DEBUG: 🔍 LeftPanel Store Methods Available: {
-  "regenerateAllContent": true,
-  "hasStore": true,
-  "hasStoreState": true,
-  "storeMethodKeys": [
-    "regenerateSection",
-    "regenerateElement",
-    "regenerateAllContent",
-    "regenerateElementWithVariations",
-    "regenerateVariables",
-    "regenerateContentOnly",
-    "regenerateDesignAndCopy",
-    "regenerateWithInputs"
-  ]
-}
- [DEV] 🔍 extractLayoutContent DEBUG: element "nav_item_1" is undefined {layout: 'CenteredLogoHeader', isMandatory: true, isInSchema: true, isExcluded: false, hasLayout: true, …}
- [DEV] ✅ Using default for mandatory element "nav_item_1": Home
- [DEV] 🔍 extractLayoutContent DEBUG: element "nav_item_2" is undefined {layout: 'CenteredLogoHeader', isMandatory: true, isInSchema: true, isExcluded: false, hasLayout: true, …}
- [DEV] ✅ Using default for mandatory element "nav_item_2": Products
- [DEV] 🔍 extractLayoutContent DEBUG: element "nav_item_3" is undefined {layout: 'CenteredLogoHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
- [DEV] ❌ Using empty for excluded optional element "nav_item_3" 
- [DEV] 🔍 extractLayoutContent DEBUG: element "nav_item_4" is undefined {layout: 'CenteredLogoHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
- [DEV] ❌ Using empty for excluded optional element "nav_item_4" 
- [DEV] 🔍 extractLayoutContent DEBUG: element "nav_item_5" is undefined {layout: 'CenteredLogoHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
- [DEV] ❌ Using empty for excluded optional element "nav_item_5" 
- [DEV] 🔍 extractLayoutContent DEBUG: element "nav_item_6" is undefined {layout: 'CenteredLogoHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
- [DEV] ❌ Using empty for excluded optional element "nav_item_6" 
- [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_1" is undefined {layout: 'CenteredLogoHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
- [DEV] ❌ Using empty for excluded optional element "nav_link_1" 
- [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_2" is undefined {layout: 'CenteredLogoHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
- [DEV] ❌ Using empty for excluded optional element "nav_link_2" 
- [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_3" is undefined {layout: 'CenteredLogoHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
- [DEV] ❌ Using empty for excluded optional element "nav_link_3" 
- [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_4" is undefined {layout: 'CenteredLogoHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
- [DEV] ❌ Using empty for excluded optional element "nav_link_4" 
- [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_5" is undefined {layout: 'CenteredLogoHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
- [DEV] ❌ Using empty for excluded optional element "nav_link_5" 
- [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_6" is undefined {layout: 'CenteredLogoHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
- [DEV] ❌ Using empty for excluded optional element "nav_link_6" 
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
-logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
-logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "nav_item_1" is undefined {layout: 'CenteredLogoHeader', isMandatory: true, isInSchema: true, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] ✅ Using default for mandatory element "nav_item_1": Home
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "nav_item_2" is undefined {layout: 'CenteredLogoHeader', isMandatory: true, isInSchema: true, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] ✅ Using default for mandatory element "nav_item_2": Products
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "nav_item_3" is undefined {layout: 'CenteredLogoHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
-logger.ts:95 [DEV] ❌ Using empty for excluded optional element "nav_item_3" 
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "nav_item_4" is undefined {layout: 'CenteredLogoHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
-logger.ts:95 [DEV] ❌ Using empty for excluded optional element "nav_item_4" 
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "nav_item_5" is undefined {layout: 'CenteredLogoHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
-logger.ts:95 [DEV] ❌ Using empty for excluded optional element "nav_item_5" 
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "nav_item_6" is undefined {layout: 'CenteredLogoHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
-logger.ts:95 [DEV] ❌ Using empty for excluded optional element "nav_item_6" 
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_1" is undefined {layout: 'CenteredLogoHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
-logger.ts:95 [DEV] ❌ Using empty for excluded optional element "nav_link_1" 
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_2" is undefined {layout: 'CenteredLogoHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
-logger.ts:95 [DEV] ❌ Using empty for excluded optional element "nav_link_2" 
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_3" is undefined {layout: 'CenteredLogoHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
-logger.ts:95 [DEV] ❌ Using empty for excluded optional element "nav_link_3" 
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_4" is undefined {layout: 'CenteredLogoHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
-logger.ts:95 [DEV] ❌ Using empty for excluded optional element "nav_link_4" 
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_5" is undefined {layout: 'CenteredLogoHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
-logger.ts:95 [DEV] ❌ Using empty for excluded optional element "nav_link_5" 
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_6" is undefined {layout: 'CenteredLogoHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
-logger.ts:95 [DEV] ❌ Using empty for excluded optional element "nav_link_6" 
-logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
-logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
-logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "badge_text" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "badge_text": 
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "trust_items" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "trust_items": Free 14-day trial|No credit card required|Cancel anytime
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_1" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "trust_item_1": Free 14-day trial
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_2" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "trust_item_2": No credit card required
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_3" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "trust_item_3": Cancel anytime
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_4" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "trust_item_4": 
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_5" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "trust_item_5": 
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "center_hero_image" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "center_hero_image": /hero-placeholder.jpg
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "customer_count" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "customer_count": 500+ happy customers
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "rating_value" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "rating_value": 4.9/5
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "rating_count" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "rating_count": from 127 reviews
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "show_social_proof" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "show_social_proof": true
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "show_customer_avatars" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "show_customer_avatars": true
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "avatar_count" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "avatar_count": 4
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "customer_names" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "customer_names": Sarah Chen|Alex Rivera|Jordan Kim|Maya Patel
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "avatar_urls" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "avatar_urls": {}
-logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#4338ca]'}
-logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#4338ca]'}
-logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#4338ca]'}
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "badge_text" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "badge_text": 
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "trust_items" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "trust_items": Free 14-day trial|No credit card required|Cancel anytime
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_1" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "trust_item_1": Free 14-day trial
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_2" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "trust_item_2": No credit card required
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_3" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "trust_item_3": Cancel anytime
- [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_4" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "trust_item_4": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_5" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "trust_item_5": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "center_hero_image" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "center_hero_image": /hero-placeholder.jpg
- [DEV] 🔍 extractLayoutContent DEBUG: element "customer_count" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "customer_count": 500+ happy customers
- [DEV] 🔍 extractLayoutContent DEBUG: element "rating_value" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "rating_value": 4.9/5
- [DEV] 🔍 extractLayoutContent DEBUG: element "rating_count" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "rating_count": from 127 reviews
- [DEV] 🔍 extractLayoutContent DEBUG: element "show_social_proof" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "show_social_proof": true
- [DEV] 🔍 extractLayoutContent DEBUG: element "show_customer_avatars" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "show_customer_avatars": true
- [DEV] 🔍 extractLayoutContent DEBUG: element "avatar_count" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "avatar_count": 4
- [DEV] 🔍 extractLayoutContent DEBUG: element "customer_names" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "customer_names": Sarah Chen|Alex Rivera|Jordan Kim|Maya Patel
- [DEV] 🔍 extractLayoutContent DEBUG: element "avatar_urls" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "avatar_urls": {}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#4338ca]'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#4338ca]'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#4338ca]'}
- [DEV] 🎯 extractLayoutContent: Found existing "step_titles": {elementValue: {…}, layout: 'VerticalTimeline', valueType: 'object', isStringEmpty: false, defaultValue: 'Initial Setup|Data Import|Automation Rules|Go Live'}
- [DEV] 🎯 extractLayoutContent: Found existing "step_descriptions": {elementValue: {…}, layout: 'VerticalTimeline', valueType: 'object', isStringEmpty: false, defaultValue: 'Connect your existing tools and configure your wor…d workflows and start seeing results immediately.'}
- [DEV] 🔍 extractLayoutContent DEBUG: element "step_durations" is undefined {layout: 'VerticalTimeline', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "step_durations": 5 minutes|10 minutes|15 minutes|Instant
- [DEV] 🔍 extractLayoutContent DEBUG: element "subheadline" is undefined {layout: 'VerticalTimeline', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "subheadline": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "supporting_text" is undefined {layout: 'VerticalTimeline', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "supporting_text": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "cta_text" is undefined {layout: 'VerticalTimeline', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "cta_text": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "trust_items" is undefined {layout: 'VerticalTimeline', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "trust_items": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "process_steps_label" is undefined {layout: 'VerticalTimeline', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "process_steps_label": simple steps
- [DEV] 🔍 extractLayoutContent DEBUG: element "process_summary_heading" is undefined {layout: 'VerticalTimeline', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "process_summary_heading": Get started in minutes, not hours
- [DEV] 🔍 extractLayoutContent DEBUG: element "process_summary_description" is undefined {layout: 'VerticalTimeline', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "process_summary_description": Our streamlined process is designed to get you up and running quickly with maximum efficiency.
- [DEV] 🔍 extractLayoutContent DEBUG: element "process_time_label" is undefined {layout: 'VerticalTimeline', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "process_time_label": Total time: 30 minutes
- [DEV] 🔍 extractLayoutContent DEBUG: element "step_icon_1" is undefined {layout: 'VerticalTimeline', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "step_icon_1": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "step_icon_2" is undefined {layout: 'VerticalTimeline', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "step_icon_2": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "step_icon_3" is undefined {layout: 'VerticalTimeline', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "step_icon_3": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "step_icon_4" is undefined {layout: 'VerticalTimeline', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "step_icon_4": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "use_step_icons" is undefined {layout: 'VerticalTimeline', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "use_step_icons": false
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🎯 extractLayoutContent: Found existing "step_titles": {elementValue: {…}, layout: 'VerticalTimeline', valueType: 'object', isStringEmpty: false, defaultValue: 'Initial Setup|Data Import|Automation Rules|Go Live'}
- [DEV] 🎯 extractLayoutContent: Found existing "step_descriptions": {elementValue: {…}, layout: 'VerticalTimeline', valueType: 'object', isStringEmpty: false, defaultValue: 'Connect your existing tools and configure your wor…d workflows and start seeing results immediately.'}
- [DEV] 🔍 extractLayoutContent DEBUG: element "step_durations" is undefined {layout: 'VerticalTimeline', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "step_durations": 5 minutes|10 minutes|15 minutes|Instant
- [DEV] 🔍 extractLayoutContent DEBUG: element "subheadline" is undefined {layout: 'VerticalTimeline', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "subheadline": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "supporting_text" is undefined {layout: 'VerticalTimeline', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "supporting_text": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "cta_text" is undefined {layout: 'VerticalTimeline', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "cta_text": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "trust_items" is undefined {layout: 'VerticalTimeline', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "trust_items": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "process_steps_label" is undefined {layout: 'VerticalTimeline', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "process_steps_label": simple steps
- [DEV] 🔍 extractLayoutContent DEBUG: element "process_summary_heading" is undefined {layout: 'VerticalTimeline', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "process_summary_heading": Get started in minutes, not hours
- [DEV] 🔍 extractLayoutContent DEBUG: element "process_summary_description" is undefined {layout: 'VerticalTimeline', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "process_summary_description": Our streamlined process is designed to get you up and running quickly with maximum efficiency.
- [DEV] 🔍 extractLayoutContent DEBUG: element "process_time_label" is undefined {layout: 'VerticalTimeline', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "process_time_label": Total time: 30 minutes
- [DEV] 🔍 extractLayoutContent DEBUG: element "step_icon_1" is undefined {layout: 'VerticalTimeline', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "step_icon_1": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "step_icon_2" is undefined {layout: 'VerticalTimeline', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "step_icon_2": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "step_icon_3" is undefined {layout: 'VerticalTimeline', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "step_icon_3": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "step_icon_4" is undefined {layout: 'VerticalTimeline', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "step_icon_4": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "use_step_icons" is undefined {layout: 'VerticalTimeline', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "use_step_icons": false
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔍 extractLayoutContent DEBUG: element "pain_descriptions" is undefined {layout: 'StackedPainBullets', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
- [DEV] ❌ Using empty for excluded optional element "pain_descriptions" 
- [DEV] 🔍 extractLayoutContent DEBUG: element "subheadline" is undefined {layout: 'StackedPainBullets', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
- [DEV] ❌ Using empty for excluded optional element "subheadline" 
- [DEV] 🔍 extractLayoutContent DEBUG: element "conclusion_text" is undefined {layout: 'StackedPainBullets', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "conclusion_text": Sound familiar? You're not alone.
- [DEV] 🔍 extractLayoutContent DEBUG: element "pain_icon_1" is undefined {layout: 'StackedPainBullets', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "pain_icon_1": ⏰
- [DEV] 🔍 extractLayoutContent DEBUG: element "pain_icon_2" is undefined {layout: 'StackedPainBullets', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "pain_icon_2": 🔗
- [DEV] 🔍 extractLayoutContent DEBUG: element "pain_icon_3" is undefined {layout: 'StackedPainBullets', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "pain_icon_3": ⚠️
- [DEV] 🔍 extractLayoutContent DEBUG: element "pain_icon_4" is undefined {layout: 'StackedPainBullets', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "pain_icon_4": 😰
- [DEV] 🔍 extractLayoutContent DEBUG: element "pain_icon_5" is undefined {layout: 'StackedPainBullets', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "pain_icon_5": 📉
- [DEV] 🔍 extractLayoutContent DEBUG: element "pain_icon_6" is undefined {layout: 'StackedPainBullets', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "pain_icon_6": 🌪️
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔍 extractLayoutContent DEBUG: element "pain_descriptions" is undefined {layout: 'StackedPainBullets', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
- [DEV] ❌ Using empty for excluded optional element "pain_descriptions" 
- [DEV] 🔍 extractLayoutContent DEBUG: element "subheadline" is undefined {layout: 'StackedPainBullets', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
- [DEV] ❌ Using empty for excluded optional element "subheadline" 
- [DEV] 🔍 extractLayoutContent DEBUG: element "conclusion_text" is undefined {layout: 'StackedPainBullets', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "conclusion_text": Sound familiar? You're not alone.
- [DEV] 🔍 extractLayoutContent DEBUG: element "pain_icon_1" is undefined {layout: 'StackedPainBullets', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "pain_icon_1": ⏰
- [DEV] 🔍 extractLayoutContent DEBUG: element "pain_icon_2" is undefined {layout: 'StackedPainBullets', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "pain_icon_2": 🔗
- [DEV] 🔍 extractLayoutContent DEBUG: element "pain_icon_3" is undefined {layout: 'StackedPainBullets', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "pain_icon_3": ⚠️
- [DEV] 🔍 extractLayoutContent DEBUG: element "pain_icon_4" is undefined {layout: 'StackedPainBullets', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "pain_icon_4": 😰
- [DEV] 🔍 extractLayoutContent DEBUG: element "pain_icon_5" is undefined {layout: 'StackedPainBullets', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "pain_icon_5": 📉
- [DEV] 🔍 extractLayoutContent DEBUG: element "pain_icon_6" is undefined {layout: 'StackedPainBullets', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "pain_icon_6": 🌪️
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔍 extractLayoutContent DEBUG: element "headline" is undefined {layout: 'SplitCard', isMandatory: true, isInSchema: true, isExcluded: false, hasLayout: true, …}
- [DEV] ✅ Using default for mandatory element "headline": Premium Transformation Experience
- [DEV] 🔍 extractLayoutContent DEBUG: element "before_label" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "before_label": Current Challenge
- [DEV] 🔍 extractLayoutContent DEBUG: element "after_label" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "after_label": Premium Solution
- [DEV] 🔍 extractLayoutContent DEBUG: element "before_description" is undefined {layout: 'SplitCard', isMandatory: true, isInSchema: true, isExcluded: false, hasLayout: true, …}
- [DEV] ✅ Using default for mandatory element "before_description": Complex manual processes requiring expertise, time, and significant resources to execute properly.
- [DEV] 🔍 extractLayoutContent DEBUG: element "after_description" is undefined {layout: 'SplitCard', isMandatory: true, isInSchema: true, isExcluded: false, hasLayout: true, …}
- [DEV] ✅ Using default for mandatory element "after_description": Expertly crafted automation that delivers exceptional results with minimal effort and maximum efficiency.
- [DEV] 🔍 extractLayoutContent DEBUG: element "subheadline" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
- [DEV] ❌ Using empty for excluded optional element "subheadline" 
- [DEV] 🔍 extractLayoutContent DEBUG: element "supporting_text" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "supporting_text": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "cta_text" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "cta_text": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "trust_items" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "trust_items": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "premium_features_text" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "premium_features_text": Premium Features Included
- [DEV] 🔍 extractLayoutContent DEBUG: element "upgrade_text" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "upgrade_text": Upgrade
- [DEV] 🔍 extractLayoutContent DEBUG: element "before_placeholder_text" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "before_placeholder_text": Current State
- [DEV] 🔍 extractLayoutContent DEBUG: element "after_placeholder_text" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "after_placeholder_text": Premium Result
- [DEV] 🔍 extractLayoutContent DEBUG: element "premium_badge_text" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "premium_badge_text": Premium
- [DEV] 🔍 extractLayoutContent DEBUG: element "before_icon" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "before_icon": ⚠️
- [DEV] 🔍 extractLayoutContent DEBUG: element "after_icon" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "after_icon": ⭐
- [DEV] 🔍 extractLayoutContent DEBUG: element "upgrade_icon" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "upgrade_icon": ➡️
- [DEV] 🔍 extractLayoutContent DEBUG: element "premium_feature_icon" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "premium_feature_icon": ✅
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔍 extractLayoutContent DEBUG: element "headline" is undefined {layout: 'SplitCard', isMandatory: true, isInSchema: true, isExcluded: false, hasLayout: true, …}
- [DEV] ✅ Using default for mandatory element "headline": Premium Transformation Experience
- [DEV] 🔍 extractLayoutContent DEBUG: element "before_label" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "before_label": Current Challenge
- [DEV] 🔍 extractLayoutContent DEBUG: element "after_label" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "after_label": Premium Solution
- [DEV] 🔍 extractLayoutContent DEBUG: element "before_description" is undefined {layout: 'SplitCard', isMandatory: true, isInSchema: true, isExcluded: false, hasLayout: true, …}
- [DEV] ✅ Using default for mandatory element "before_description": Complex manual processes requiring expertise, time, and significant resources to execute properly.
- [DEV] 🔍 extractLayoutContent DEBUG: element "after_description" is undefined {layout: 'SplitCard', isMandatory: true, isInSchema: true, isExcluded: false, hasLayout: true, …}
- [DEV] ✅ Using default for mandatory element "after_description": Expertly crafted automation that delivers exceptional results with minimal effort and maximum efficiency.
- [DEV] 🔍 extractLayoutContent DEBUG: element "subheadline" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
- [DEV] ❌ Using empty for excluded optional element "subheadline" 
- [DEV] 🔍 extractLayoutContent DEBUG: element "supporting_text" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "supporting_text": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "cta_text" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "cta_text": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "trust_items" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "trust_items": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "premium_features_text" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "premium_features_text": Premium Features Included
- [DEV] 🔍 extractLayoutContent DEBUG: element "upgrade_text" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "upgrade_text": Upgrade
- [DEV] 🔍 extractLayoutContent DEBUG: element "before_placeholder_text" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "before_placeholder_text": Current State
- [DEV] 🔍 extractLayoutContent DEBUG: element "after_placeholder_text" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "after_placeholder_text": Premium Result
- [DEV] 🔍 extractLayoutContent DEBUG: element "premium_badge_text" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "premium_badge_text": Premium
- [DEV] 🔍 extractLayoutContent DEBUG: element "before_icon" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "before_icon": ⚠️
- [DEV] 🔍 extractLayoutContent DEBUG: element "after_icon" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "after_icon": ⭐
- [DEV] 🔍 extractLayoutContent DEBUG: element "upgrade_icon" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "upgrade_icon": ➡️
- [DEV] 🔍 extractLayoutContent DEBUG: element "premium_feature_icon" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "premium_feature_icon": ✅
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔍 extractLayoutContent DEBUG: element "founder_bio" is undefined {layout: 'FounderCardWithQuote', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
- [DEV] ❌ Using empty for excluded optional element "founder_bio" 
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔍 extractLayoutContent DEBUG: element "founder_bio" is undefined {layout: 'FounderCardWithQuote', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
- [DEV] ❌ Using empty for excluded optional element "founder_bio" 
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔍 extractLayoutContent DEBUG: element "subheadline" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "subheadline": Here's how real conversations with our team usually go
- [DEV] 🔍 extractLayoutContent DEBUG: element "question_1" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "question_1": Hey! I'm curious about your free plan - what's included?
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "answer_1" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "answer_1": Hi! Great question! Our free plan includes up to 1,000 monthly actions, access to all core features, and basic integrations. It's perfect for getting started and many small teams stay on it forever! 🎉
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "question_2" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "question_2": This looks awesome! How hard is it to get started?
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "answer_2" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "answer_2": Super easy! Most people are up and running in under 5 minutes. We have a guided setup that walks you through everything step by step. Want me to send you a quick demo link?
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "question_3" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "question_3": I'm not super technical - will I be able to figure this out?
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "answer_3" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "answer_3": Absolutely! We designed everything with non-technical users in mind. Think of it like using your favorite apps - if you can send an email or post on social media, you've got this! 💪
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "question_4" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "question_4": What if I need help along the way?
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "answer_4" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "answer_4": We're here 24/7! You can chat with us anytime, browse our help docs, or join our community where fellow users share tips. Plus, we have tons of video tutorials for visual learners.
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "question_5" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "question_5": One more thing - can I really cancel anytime?
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "answer_5" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "answer_5": Yep! No contracts, no cancellation fees, no questions asked. You can downgrade or cancel right from your dashboard. We only want happy customers! ✨
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "user_name" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "user_name": You
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "support_name" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "support_name": Alex from Support
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "support_avatar" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "support_avatar": A
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "online_status_text" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "online_status_text": Online now
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "chat_placeholder" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "chat_placeholder": Ask us anything...
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "cta_text" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "cta_text": Ready to start your own conversation?
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "button_text" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "button_text": Chat with us now
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "show_typing_indicator" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "show_typing_indicator": true
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "show_cta_section" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "show_cta_section": true
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "status_indicator_icon" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "status_indicator_icon": 🟢
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "send_icon" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "send_icon": ➤
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "support_avatar_icon" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "support_avatar_icon": 👤
-logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#e0e7ff]'}
-logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#e0e7ff]'}
-logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#e0e7ff]'}
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "subheadline" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "subheadline": Here's how real conversations with our team usually go
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "question_1" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "question_1": Hey! I'm curious about your free plan - what's included?
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "answer_1" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "answer_1": Hi! Great question! Our free plan includes up to 1,000 monthly actions, access to all core features, and basic integrations. It's perfect for getting started and many small teams stay on it forever! 🎉
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "question_2" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "question_2": This looks awesome! How hard is it to get started?
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "answer_2" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "answer_2": Super easy! Most people are up and running in under 5 minutes. We have a guided setup that walks you through everything step by step. Want me to send you a quick demo link?
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "question_3" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "question_3": I'm not super technical - will I be able to figure this out?
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "answer_3" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "answer_3": Absolutely! We designed everything with non-technical users in mind. Think of it like using your favorite apps - if you can send an email or post on social media, you've got this! 💪
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "question_4" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "question_4": What if I need help along the way?
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "answer_4" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "answer_4": We're here 24/7! You can chat with us anytime, browse our help docs, or join our community where fellow users share tips. Plus, we have tons of video tutorials for visual learners.
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "question_5" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "question_5": One more thing - can I really cancel anytime?
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "answer_5" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "answer_5": Yep! No contracts, no cancellation fees, no questions asked. You can downgrade or cancel right from your dashboard. We only want happy customers! ✨
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "user_name" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "user_name": You
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "support_name" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "support_name": Alex from Support
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "support_avatar" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "support_avatar": A
- [DEV] 🔍 extractLayoutContent DEBUG: element "online_status_text" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "online_status_text": Online now
- [DEV] 🔍 extractLayoutContent DEBUG: element "chat_placeholder" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "chat_placeholder": Ask us anything...
- [DEV] 🔍 extractLayoutContent DEBUG: element "cta_text" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "cta_text": Ready to start your own conversation?
- [DEV] 🔍 extractLayoutContent DEBUG: element "button_text" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "button_text": Chat with us now
- [DEV] 🔍 extractLayoutContent DEBUG: element "show_typing_indicator" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "show_typing_indicator": true
- [DEV] 🔍 extractLayoutContent DEBUG: element "show_cta_section" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "show_cta_section": true
- [DEV] 🔍 extractLayoutContent DEBUG: element "status_indicator_icon" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "status_indicator_icon": 🟢
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "send_icon" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "send_icon": ➤
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "support_avatar_icon" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "support_avatar_icon": 👤
-logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#e0e7ff]'}
-logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#e0e7ff]'}
-logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#e0e7ff]'}
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "trust_items" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "trust_items": Free 14-day trial|No credit card required|Cancel anytime
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_1" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "trust_item_1": Free 14-day trial
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_2" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "trust_item_2": No credit card required
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_3" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "trust_item_3": Cancel anytime
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_4" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "trust_item_4": 
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_5" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "trust_item_5": 
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "customer_count" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "customer_count": 10,000+
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "customer_label" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "customer_label": Happy customers
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "rating_stat" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "rating_stat": 4.8/5 stars
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "uptime_stat" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "uptime_stat": 99.9% uptime
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "uptime_label" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "uptime_label": SOC 2 Compliant
-logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#4338ca]'}
-logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#4338ca]'}
-logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#4338ca]'}
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "trust_items" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "trust_items": Free 14-day trial|No credit card required|Cancel anytime
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_1" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "trust_item_1": Free 14-day trial
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_2" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "trust_item_2": No credit card required
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_3" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "trust_item_3": Cancel anytime
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_4" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "trust_item_4": 
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_5" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "trust_item_5": 
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "customer_count" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "customer_count": 10,000+
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "customer_label" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "customer_label": Happy customers
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "rating_stat" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "rating_stat": 4.8/5 stars
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "uptime_stat" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "uptime_stat": 99.9% uptime
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "uptime_label" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "uptime_label": SOC 2 Compliant
-logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#4338ca]'}
-logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#4338ca]'}
-logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#4338ca]'}
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "copyright" is undefined {layout: 'MultiColumnFooter', isMandatory: true, isInSchema: true, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] ✅ Using default for mandatory element "copyright": © 2025 Your Company. All rights reserved.
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "company_description" is undefined {layout: 'MultiColumnFooter', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
-logger.ts:95 [DEV] ❌ Using empty for excluded optional element "company_description" 
-logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
-logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
-logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "copyright" is undefined {layout: 'MultiColumnFooter', isMandatory: true, isInSchema: true, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] ✅ Using default for mandatory element "copyright": © 2025 Your Company. All rights reserved.
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "company_description" is undefined {layout: 'MultiColumnFooter', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
-logger.ts:95 [DEV] ❌ Using empty for excluded optional element "company_description" 
-logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
-logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
-logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
-logger.ts:84 [2025-09-09T10:06:25.166Z] DEBUG: 📸 Version snapshot created: {
-  "id": "version-1757412385166-8cg9ehgt9",
-  "version": 2,
-  "description": "Auto-snapshot after 5 changes",
-  "size": "11.31KB",
-  "source": "auto-save"
-}
-logger.ts:84 [2025-09-09T10:06:25.341Z] DEBUG: 🔍 LeftPanel Store Methods Available: {
-  "regenerateAllContent": true,
-  "hasStore": true,
-  "hasStoreState": true,
-  "storeMethodKeys": [
-    "regenerateSection",
-    "regenerateElement",
-    "regenerateAllContent",
-    "regenerateElementWithVariations",
-    "regenerateVariables",
-    "regenerateContentOnly",
-    "regenerateDesignAndCopy",
-    "regenerateWithInputs"
-  ]
-}
-logger.ts:84 [2025-09-09T10:06:25.342Z] DEBUG: 🔍 LeftPanel Store Methods Available: {
-  "regenerateAllContent": true,
-  "hasStore": true,
-  "hasStoreState": true,
-  "storeMethodKeys": [
-    "regenerateSection",
-    "regenerateElement",
-    "regenerateAllContent",
-    "regenerateElementWithVariations",
-    "regenerateVariables",
-    "regenerateContentOnly",
-    "regenerateDesignAndCopy",
-    "regenerateWithInputs"
-  ]
-}
- [DEV] 🔍 extractLayoutContent DEBUG: element "nav_item_1" is undefined {layout: 'CenteredLogoHeader', isMandatory: true, isInSchema: true, isExcluded: false, hasLayout: true, …}
- [DEV] ✅ Using default for mandatory element "nav_item_1": Home
- [DEV] 🔍 extractLayoutContent DEBUG: element "nav_item_2" is undefined {layout: 'CenteredLogoHeader', isMandatory: true, isInSchema: true, isExcluded: false, hasLayout: true, …}
- [DEV] ✅ Using default for mandatory element "nav_item_2": Products
- [DEV] 🔍 extractLayoutContent DEBUG: element "nav_item_3" is undefined {layout: 'CenteredLogoHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
- [DEV] ❌ Using empty for excluded optional element "nav_item_3" 
- [DEV] 🔍 extractLayoutContent DEBUG: element "nav_item_4" is undefined {layout: 'CenteredLogoHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
- [DEV] ❌ Using empty for excluded optional element "nav_item_4" 
- [DEV] 🔍 extractLayoutContent DEBUG: element "nav_item_5" is undefined {layout: 'CenteredLogoHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
- [DEV] ❌ Using empty for excluded optional element "nav_item_5" 
- [DEV] 🔍 extractLayoutContent DEBUG: element "nav_item_6" is undefined {layout: 'CenteredLogoHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
- [DEV] ❌ Using empty for excluded optional element "nav_item_6" 
- [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_1" is undefined {layout: 'CenteredLogoHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
- [DEV] ❌ Using empty for excluded optional element "nav_link_1" 
- [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_2" is undefined {layout: 'CenteredLogoHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
- [DEV] ❌ Using empty for excluded optional element "nav_link_2" 
- [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_3" is undefined {layout: 'CenteredLogoHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
- [DEV] ❌ Using empty for excluded optional element "nav_link_3" 
- [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_4" is undefined {layout: 'CenteredLogoHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
- [DEV] ❌ Using empty for excluded optional element "nav_link_4" 
- [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_5" is undefined {layout: 'CenteredLogoHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
- [DEV] ❌ Using empty for excluded optional element "nav_link_5" 
- [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_6" is undefined {layout: 'CenteredLogoHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
- [DEV] ❌ Using empty for excluded optional element "nav_link_6" 
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔍 extractLayoutContent DEBUG: element "nav_item_1" is undefined {layout: 'CenteredLogoHeader', isMandatory: true, isInSchema: true, isExcluded: false, hasLayout: true, …}
- [DEV] ✅ Using default for mandatory element "nav_item_1": Home
- [DEV] 🔍 extractLayoutContent DEBUG: element "nav_item_2" is undefined {layout: 'CenteredLogoHeader', isMandatory: true, isInSchema: true, isExcluded: false, hasLayout: true, …}
- [DEV] ✅ Using default for mandatory element "nav_item_2": Products
- [DEV] 🔍 extractLayoutContent DEBUG: element "nav_item_3" is undefined {layout: 'CenteredLogoHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
- [DEV] ❌ Using empty for excluded optional element "nav_item_3" 
- [DEV] 🔍 extractLayoutContent DEBUG: element "nav_item_4" is undefined {layout: 'CenteredLogoHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
- [DEV] ❌ Using empty for excluded optional element "nav_item_4" 
- [DEV] 🔍 extractLayoutContent DEBUG: element "nav_item_5" is undefined {layout: 'CenteredLogoHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
- [DEV] ❌ Using empty for excluded optional element "nav_item_5" 
- [DEV] 🔍 extractLayoutContent DEBUG: element "nav_item_6" is undefined {layout: 'CenteredLogoHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
- [DEV] ❌ Using empty for excluded optional element "nav_item_6" 
- [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_1" is undefined {layout: 'CenteredLogoHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
- [DEV] ❌ Using empty for excluded optional element "nav_link_1" 
- [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_2" is undefined {layout: 'CenteredLogoHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
- [DEV] ❌ Using empty for excluded optional element "nav_link_2" 
- [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_3" is undefined {layout: 'CenteredLogoHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
- [DEV] ❌ Using empty for excluded optional element "nav_link_3" 
- [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_4" is undefined {layout: 'CenteredLogoHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
- [DEV] ❌ Using empty for excluded optional element "nav_link_4" 
- [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_5" is undefined {layout: 'CenteredLogoHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
- [DEV] ❌ Using empty for excluded optional element "nav_link_5" 
- [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_6" is undefined {layout: 'CenteredLogoHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
- [DEV] ❌ Using empty for excluded optional element "nav_link_6" 
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔍 extractLayoutContent DEBUG: element "badge_text" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "badge_text": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "trust_items" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "trust_items": Free 14-day trial|No credit card required|Cancel anytime
- [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_1" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "trust_item_1": Free 14-day trial
- [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_2" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "trust_item_2": No credit card required
- [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_3" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "trust_item_3": Cancel anytime
- [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_4" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "trust_item_4": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_5" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "trust_item_5": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "center_hero_image" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "center_hero_image": /hero-placeholder.jpg
- [DEV] 🔍 extractLayoutContent DEBUG: element "customer_count" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "customer_count": 500+ happy customers
- [DEV] 🔍 extractLayoutContent DEBUG: element "rating_value" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "rating_value": 4.9/5
- [DEV] 🔍 extractLayoutContent DEBUG: element "rating_count" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "rating_count": from 127 reviews
- [DEV] 🔍 extractLayoutContent DEBUG: element "show_social_proof" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "show_social_proof": true
- [DEV] 🔍 extractLayoutContent DEBUG: element "show_customer_avatars" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "show_customer_avatars": true
- [DEV] 🔍 extractLayoutContent DEBUG: element "avatar_count" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "avatar_count": 4
- [DEV] 🔍 extractLayoutContent DEBUG: element "customer_names" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "customer_names": Sarah Chen|Alex Rivera|Jordan Kim|Maya Patel
- [DEV] 🔍 extractLayoutContent DEBUG: element "avatar_urls" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "avatar_urls": {}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#4338ca]'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#4338ca]'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#4338ca]'}
- [DEV] 🔍 extractLayoutContent DEBUG: element "badge_text" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "badge_text": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "trust_items" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "trust_items": Free 14-day trial|No credit card required|Cancel anytime
- [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_1" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "trust_item_1": Free 14-day trial
- [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_2" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "trust_item_2": No credit card required
- [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_3" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "trust_item_3": Cancel anytime
- [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_4" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "trust_item_4": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_5" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "trust_item_5": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "center_hero_image" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "center_hero_image": /hero-placeholder.jpg
- [DEV] 🔍 extractLayoutContent DEBUG: element "customer_count" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "customer_count": 500+ happy customers
- [DEV] 🔍 extractLayoutContent DEBUG: element "rating_value" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "rating_value": 4.9/5
- [DEV] 🔍 extractLayoutContent DEBUG: element "rating_count" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "rating_count": from 127 reviews
- [DEV] 🔍 extractLayoutContent DEBUG: element "show_social_proof" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "show_social_proof": true
- [DEV] 🔍 extractLayoutContent DEBUG: element "show_customer_avatars" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "show_customer_avatars": true
- [DEV] 🔍 extractLayoutContent DEBUG: element "avatar_count" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "avatar_count": 4
- [DEV] 🔍 extractLayoutContent DEBUG: element "customer_names" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "customer_names": Sarah Chen|Alex Rivera|Jordan Kim|Maya Patel
- [DEV] 🔍 extractLayoutContent DEBUG: element "avatar_urls" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "avatar_urls": {}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#4338ca]'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#4338ca]'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#4338ca]'}
- [DEV] 🎯 extractLayoutContent: Found existing "step_titles": {elementValue: {…}, layout: 'VerticalTimeline', valueType: 'object', isStringEmpty: false, defaultValue: 'Initial Setup|Data Import|Automation Rules|Go Live'}
- [DEV] 🎯 extractLayoutContent: Found existing "step_descriptions": {elementValue: {…}, layout: 'VerticalTimeline', valueType: 'object', isStringEmpty: false, defaultValue: 'Connect your existing tools and configure your wor…d workflows and start seeing results immediately.'}
- [DEV] 🔍 extractLayoutContent DEBUG: element "step_durations" is undefined {layout: 'VerticalTimeline', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "step_durations": 5 minutes|10 minutes|15 minutes|Instant
- [DEV] 🔍 extractLayoutContent DEBUG: element "subheadline" is undefined {layout: 'VerticalTimeline', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "subheadline": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "supporting_text" is undefined {layout: 'VerticalTimeline', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "supporting_text": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "cta_text" is undefined {layout: 'VerticalTimeline', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "cta_text": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "trust_items" is undefined {layout: 'VerticalTimeline', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "trust_items": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "process_steps_label" is undefined {layout: 'VerticalTimeline', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "process_steps_label": simple steps
- [DEV] 🔍 extractLayoutContent DEBUG: element "process_summary_heading" is undefined {layout: 'VerticalTimeline', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "process_summary_heading": Get started in minutes, not hours
- [DEV] 🔍 extractLayoutContent DEBUG: element "process_summary_description" is undefined {layout: 'VerticalTimeline', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "process_summary_description": Our streamlined process is designed to get you up and running quickly with maximum efficiency.
- [DEV] 🔍 extractLayoutContent DEBUG: element "process_time_label" is undefined {layout: 'VerticalTimeline', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "process_time_label": Total time: 30 minutes
- [DEV] 🔍 extractLayoutContent DEBUG: element "step_icon_1" is undefined {layout: 'VerticalTimeline', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "step_icon_1": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "step_icon_2" is undefined {layout: 'VerticalTimeline', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "step_icon_2": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "step_icon_3" is undefined {layout: 'VerticalTimeline', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "step_icon_3": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "step_icon_4" is undefined {layout: 'VerticalTimeline', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "step_icon_4": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "use_step_icons" is undefined {layout: 'VerticalTimeline', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "use_step_icons": false
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🎯 extractLayoutContent: Found existing "step_titles": {elementValue: {…}, layout: 'VerticalTimeline', valueType: 'object', isStringEmpty: false, defaultValue: 'Initial Setup|Data Import|Automation Rules|Go Live'}
- [DEV] 🎯 extractLayoutContent: Found existing "step_descriptions": {elementValue: {…}, layout: 'VerticalTimeline', valueType: 'object', isStringEmpty: false, defaultValue: 'Connect your existing tools and configure your wor…d workflows and start seeing results immediately.'}
- [DEV] 🔍 extractLayoutContent DEBUG: element "step_durations" is undefined {layout: 'VerticalTimeline', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "step_durations": 5 minutes|10 minutes|15 minutes|Instant
- [DEV] 🔍 extractLayoutContent DEBUG: element "subheadline" is undefined {layout: 'VerticalTimeline', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "subheadline": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "supporting_text" is undefined {layout: 'VerticalTimeline', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "supporting_text": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "cta_text" is undefined {layout: 'VerticalTimeline', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "cta_text": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "trust_items" is undefined {layout: 'VerticalTimeline', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "trust_items": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "process_steps_label" is undefined {layout: 'VerticalTimeline', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "process_steps_label": simple steps
- [DEV] 🔍 extractLayoutContent DEBUG: element "process_summary_heading" is undefined {layout: 'VerticalTimeline', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "process_summary_heading": Get started in minutes, not hours
- [DEV] 🔍 extractLayoutContent DEBUG: element "process_summary_description" is undefined {layout: 'VerticalTimeline', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "process_summary_description": Our streamlined process is designed to get you up and running quickly with maximum efficiency.
- [DEV] 🔍 extractLayoutContent DEBUG: element "process_time_label" is undefined {layout: 'VerticalTimeline', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "process_time_label": Total time: 30 minutes
- [DEV] 🔍 extractLayoutContent DEBUG: element "step_icon_1" is undefined {layout: 'VerticalTimeline', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "step_icon_1": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "step_icon_2" is undefined {layout: 'VerticalTimeline', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "step_icon_2": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "step_icon_3" is undefined {layout: 'VerticalTimeline', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "step_icon_3": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "step_icon_4" is undefined {layout: 'VerticalTimeline', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "step_icon_4": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "use_step_icons" is undefined {layout: 'VerticalTimeline', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "use_step_icons": false
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔍 extractLayoutContent DEBUG: element "pain_descriptions" is undefined {layout: 'StackedPainBullets', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
- [DEV] ❌ Using empty for excluded optional element "pain_descriptions" 
- [DEV] 🔍 extractLayoutContent DEBUG: element "subheadline" is undefined {layout: 'StackedPainBullets', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
- [DEV] ❌ Using empty for excluded optional element "subheadline" 
- [DEV] 🔍 extractLayoutContent DEBUG: element "conclusion_text" is undefined {layout: 'StackedPainBullets', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "conclusion_text": Sound familiar? You're not alone.
- [DEV] 🔍 extractLayoutContent DEBUG: element "pain_icon_1" is undefined {layout: 'StackedPainBullets', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "pain_icon_1": ⏰
- [DEV] 🔍 extractLayoutContent DEBUG: element "pain_icon_2" is undefined {layout: 'StackedPainBullets', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "pain_icon_2": 🔗
- [DEV] 🔍 extractLayoutContent DEBUG: element "pain_icon_3" is undefined {layout: 'StackedPainBullets', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "pain_icon_3": ⚠️
- [DEV] 🔍 extractLayoutContent DEBUG: element "pain_icon_4" is undefined {layout: 'StackedPainBullets', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "pain_icon_4": 😰
- [DEV] 🔍 extractLayoutContent DEBUG: element "pain_icon_5" is undefined {layout: 'StackedPainBullets', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "pain_icon_5": 📉
- [DEV] 🔍 extractLayoutContent DEBUG: element "pain_icon_6" is undefined {layout: 'StackedPainBullets', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "pain_icon_6": 🌪️
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔍 extractLayoutContent DEBUG: element "pain_descriptions" is undefined {layout: 'StackedPainBullets', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
- [DEV] ❌ Using empty for excluded optional element "pain_descriptions" 
- [DEV] 🔍 extractLayoutContent DEBUG: element "subheadline" is undefined {layout: 'StackedPainBullets', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
- [DEV] ❌ Using empty for excluded optional element "subheadline" 
- [DEV] 🔍 extractLayoutContent DEBUG: element "conclusion_text" is undefined {layout: 'StackedPainBullets', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "conclusion_text": Sound familiar? You're not alone.
- [DEV] 🔍 extractLayoutContent DEBUG: element "pain_icon_1" is undefined {layout: 'StackedPainBullets', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "pain_icon_1": ⏰
- [DEV] 🔍 extractLayoutContent DEBUG: element "pain_icon_2" is undefined {layout: 'StackedPainBullets', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "pain_icon_2": 🔗
- [DEV] 🔍 extractLayoutContent DEBUG: element "pain_icon_3" is undefined {layout: 'StackedPainBullets', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "pain_icon_3": ⚠️
- [DEV] 🔍 extractLayoutContent DEBUG: element "pain_icon_4" is undefined {layout: 'StackedPainBullets', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "pain_icon_4": 😰
- [DEV] 🔍 extractLayoutContent DEBUG: element "pain_icon_5" is undefined {layout: 'StackedPainBullets', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "pain_icon_5": 📉
- [DEV] 🔍 extractLayoutContent DEBUG: element "pain_icon_6" is undefined {layout: 'StackedPainBullets', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "pain_icon_6": 🌪️
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔍 extractLayoutContent DEBUG: element "headline" is undefined {layout: 'SplitCard', isMandatory: true, isInSchema: true, isExcluded: false, hasLayout: true, …}
- [DEV] ✅ Using default for mandatory element "headline": Premium Transformation Experience
- [DEV] 🔍 extractLayoutContent DEBUG: element "before_label" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "before_label": Current Challenge
- [DEV] 🔍 extractLayoutContent DEBUG: element "after_label" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "after_label": Premium Solution
- [DEV] 🔍 extractLayoutContent DEBUG: element "before_description" is undefined {layout: 'SplitCard', isMandatory: true, isInSchema: true, isExcluded: false, hasLayout: true, …}
- [DEV] ✅ Using default for mandatory element "before_description": Complex manual processes requiring expertise, time, and significant resources to execute properly.
- [DEV] 🔍 extractLayoutContent DEBUG: element "after_description" is undefined {layout: 'SplitCard', isMandatory: true, isInSchema: true, isExcluded: false, hasLayout: true, …}
- [DEV] ✅ Using default for mandatory element "after_description": Expertly crafted automation that delivers exceptional results with minimal effort and maximum efficiency.
- [DEV] 🔍 extractLayoutContent DEBUG: element "subheadline" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
- [DEV] ❌ Using empty for excluded optional element "subheadline" 
- [DEV] 🔍 extractLayoutContent DEBUG: element "supporting_text" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "supporting_text": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "cta_text" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "cta_text": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "trust_items" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "trust_items": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "premium_features_text" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "premium_features_text": Premium Features Included
- [DEV] 🔍 extractLayoutContent DEBUG: element "upgrade_text" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "upgrade_text": Upgrade
- [DEV] 🔍 extractLayoutContent DEBUG: element "before_placeholder_text" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "before_placeholder_text": Current State
- [DEV] 🔍 extractLayoutContent DEBUG: element "after_placeholder_text" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "after_placeholder_text": Premium Result
- [DEV] 🔍 extractLayoutContent DEBUG: element "premium_badge_text" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "premium_badge_text": Premium
- [DEV] 🔍 extractLayoutContent DEBUG: element "before_icon" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "before_icon": ⚠️
- [DEV] 🔍 extractLayoutContent DEBUG: element "after_icon" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "after_icon": ⭐
- [DEV] 🔍 extractLayoutContent DEBUG: element "upgrade_icon" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "upgrade_icon": ➡️
- [DEV] 🔍 extractLayoutContent DEBUG: element "premium_feature_icon" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "premium_feature_icon": ✅
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔍 extractLayoutContent DEBUG: element "headline" is undefined {layout: 'SplitCard', isMandatory: true, isInSchema: true, isExcluded: false, hasLayout: true, …}
- [DEV] ✅ Using default for mandatory element "headline": Premium Transformation Experience
- [DEV] 🔍 extractLayoutContent DEBUG: element "before_label" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "before_label": Current Challenge
- [DEV] 🔍 extractLayoutContent DEBUG: element "after_label" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "after_label": Premium Solution
- [DEV] 🔍 extractLayoutContent DEBUG: element "before_description" is undefined {layout: 'SplitCard', isMandatory: true, isInSchema: true, isExcluded: false, hasLayout: true, …}
- [DEV] ✅ Using default for mandatory element "before_description": Complex manual processes requiring expertise, time, and significant resources to execute properly.
- [DEV] 🔍 extractLayoutContent DEBUG: element "after_description" is undefined {layout: 'SplitCard', isMandatory: true, isInSchema: true, isExcluded: false, hasLayout: true, …}
- [DEV] ✅ Using default for mandatory element "after_description": Expertly crafted automation that delivers exceptional results with minimal effort and maximum efficiency.
- [DEV] 🔍 extractLayoutContent DEBUG: element "subheadline" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
- [DEV] ❌ Using empty for excluded optional element "subheadline" 
- [DEV] 🔍 extractLayoutContent DEBUG: element "supporting_text" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "supporting_text": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "cta_text" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "cta_text": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "trust_items" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "trust_items": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "premium_features_text" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "premium_features_text": Premium Features Included
- [DEV] 🔍 extractLayoutContent DEBUG: element "upgrade_text" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "upgrade_text": Upgrade
- [DEV] 🔍 extractLayoutContent DEBUG: element "before_placeholder_text" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "before_placeholder_text": Current State
- [DEV] 🔍 extractLayoutContent DEBUG: element "after_placeholder_text" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "after_placeholder_text": Premium Result
- [DEV] 🔍 extractLayoutContent DEBUG: element "premium_badge_text" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "premium_badge_text": Premium
- [DEV] 🔍 extractLayoutContent DEBUG: element "before_icon" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "before_icon": ⚠️
- [DEV] 🔍 extractLayoutContent DEBUG: element "after_icon" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "after_icon": ⭐
- [DEV] 🔍 extractLayoutContent DEBUG: element "upgrade_icon" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "upgrade_icon": ➡️
- [DEV] 🔍 extractLayoutContent DEBUG: element "premium_feature_icon" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "premium_feature_icon": ✅
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔍 extractLayoutContent DEBUG: element "founder_bio" is undefined {layout: 'FounderCardWithQuote', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
- [DEV] ❌ Using empty for excluded optional element "founder_bio" 
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔍 extractLayoutContent DEBUG: element "founder_bio" is undefined {layout: 'FounderCardWithQuote', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
- [DEV] ❌ Using empty for excluded optional element "founder_bio" 
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔍 extractLayoutContent DEBUG: element "subheadline" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "subheadline": Here's how real conversations with our team usually go
- [DEV] 🔍 extractLayoutContent DEBUG: element "question_1" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "question_1": Hey! I'm curious about your free plan - what's included?
- [DEV] 🔍 extractLayoutContent DEBUG: element "answer_1" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "answer_1": Hi! Great question! Our free plan includes up to 1,000 monthly actions, access to all core features, and basic integrations. It's perfect for getting started and many small teams stay on it forever! 🎉
- [DEV] 🔍 extractLayoutContent DEBUG: element "question_2" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "question_2": This looks awesome! How hard is it to get started?
- [DEV] 🔍 extractLayoutContent DEBUG: element "answer_2" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "answer_2": Super easy! Most people are up and running in under 5 minutes. We have a guided setup that walks you through everything step by step. Want me to send you a quick demo link?
- [DEV] 🔍 extractLayoutContent DEBUG: element "question_3" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "question_3": I'm not super technical - will I be able to figure this out?
- [DEV] 🔍 extractLayoutContent DEBUG: element "answer_3" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "answer_3": Absolutely! We designed everything with non-technical users in mind. Think of it like using your favorite apps - if you can send an email or post on social media, you've got this! 💪
- [DEV] 🔍 extractLayoutContent DEBUG: element "question_4" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "question_4": What if I need help along the way?
- [DEV] 🔍 extractLayoutContent DEBUG: element "answer_4" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "answer_4": We're here 24/7! You can chat with us anytime, browse our help docs, or join our community where fellow users share tips. Plus, we have tons of video tutorials for visual learners.
- [DEV] 🔍 extractLayoutContent DEBUG: element "question_5" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "question_5": One more thing - can I really cancel anytime?
- [DEV] 🔍 extractLayoutContent DEBUG: element "answer_5" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "answer_5": Yep! No contracts, no cancellation fees, no questions asked. You can downgrade or cancel right from your dashboard. We only want happy customers! ✨
- [DEV] 🔍 extractLayoutContent DEBUG: element "user_name" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "user_name": You
- [DEV] 🔍 extractLayoutContent DEBUG: element "support_name" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "support_name": Alex from Support
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "support_avatar" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "support_avatar": A
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "online_status_text" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "online_status_text": Online now
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "chat_placeholder" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "chat_placeholder": Ask us anything...
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "cta_text" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "cta_text": Ready to start your own conversation?
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "button_text" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "button_text": Chat with us now
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "show_typing_indicator" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "show_typing_indicator": true
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "show_cta_section" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "show_cta_section": true
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "status_indicator_icon" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "status_indicator_icon": 🟢
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "send_icon" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "send_icon": ➤
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "support_avatar_icon" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "support_avatar_icon": 👤
-logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#e0e7ff]'}
-logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#e0e7ff]'}
-logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#e0e7ff]'}
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "subheadline" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "subheadline": Here's how real conversations with our team usually go
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "question_1" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "question_1": Hey! I'm curious about your free plan - what's included?
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "answer_1" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "answer_1": Hi! Great question! Our free plan includes up to 1,000 monthly actions, access to all core features, and basic integrations. It's perfect for getting started and many small teams stay on it forever! 🎉
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "question_2" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "question_2": This looks awesome! How hard is it to get started?
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "answer_2" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "answer_2": Super easy! Most people are up and running in under 5 minutes. We have a guided setup that walks you through everything step by step. Want me to send you a quick demo link?
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "question_3" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "question_3": I'm not super technical - will I be able to figure this out?
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "answer_3" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "answer_3": Absolutely! We designed everything with non-technical users in mind. Think of it like using your favorite apps - if you can send an email or post on social media, you've got this! 💪
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "question_4" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "question_4": What if I need help along the way?
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "answer_4" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "answer_4": We're here 24/7! You can chat with us anytime, browse our help docs, or join our community where fellow users share tips. Plus, we have tons of video tutorials for visual learners.
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "question_5" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "question_5": One more thing - can I really cancel anytime?
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "answer_5" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "answer_5": Yep! No contracts, no cancellation fees, no questions asked. You can downgrade or cancel right from your dashboard. We only want happy customers! ✨
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "user_name" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "user_name": You
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "support_name" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "support_name": Alex from Support
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "support_avatar" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "support_avatar": A
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "online_status_text" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "online_status_text": Online now
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "chat_placeholder" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "chat_placeholder": Ask us anything...
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "cta_text" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "cta_text": Ready to start your own conversation?
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "button_text" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "button_text": Chat with us now
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "show_typing_indicator" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "show_typing_indicator": true
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "show_cta_section" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "show_cta_section": true
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "status_indicator_icon" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "status_indicator_icon": 🟢
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "send_icon" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "send_icon": ➤
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "support_avatar_icon" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "support_avatar_icon": 👤
-logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#e0e7ff]'}
-logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#e0e7ff]'}
-logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#e0e7ff]'}
- [DEV] 🔍 extractLayoutContent DEBUG: element "trust_items" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "trust_items": Free 14-day trial|No credit card required|Cancel anytime
- [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_1" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "trust_item_1": Free 14-day trial
- [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_2" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "trust_item_2": No credit card required
- [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_3" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "trust_item_3": Cancel anytime
- [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_4" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "trust_item_4": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_5" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "trust_item_5": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "customer_count" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "customer_count": 10,000+
- [DEV] 🔍 extractLayoutContent DEBUG: element "customer_label" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "customer_label": Happy customers
- [DEV] 🔍 extractLayoutContent DEBUG: element "rating_stat" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "rating_stat": 4.8/5 stars
- [DEV] 🔍 extractLayoutContent DEBUG: element "uptime_stat" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "uptime_stat": 99.9% uptime
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "uptime_label" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "uptime_label": SOC 2 Compliant
-logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#4338ca]'}
-logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#4338ca]'}
-logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#4338ca]'}
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "trust_items" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "trust_items": Free 14-day trial|No credit card required|Cancel anytime
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_1" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "trust_item_1": Free 14-day trial
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_2" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "trust_item_2": No credit card required
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_3" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "trust_item_3": Cancel anytime
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_4" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "trust_item_4": 
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_5" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "trust_item_5": 
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "customer_count" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "customer_count": 10,000+
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "customer_label" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "customer_label": Happy customers
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "rating_stat" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "rating_stat": 4.8/5 stars
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "uptime_stat" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "uptime_stat": 99.9% uptime
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "uptime_label" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "uptime_label": SOC 2 Compliant
-logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#4338ca]'}
-logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#4338ca]'}
-logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#4338ca]'}
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "copyright" is undefined {layout: 'MultiColumnFooter', isMandatory: true, isInSchema: true, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] ✅ Using default for mandatory element "copyright": © 2025 Your Company. All rights reserved.
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "company_description" is undefined {layout: 'MultiColumnFooter', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
-logger.ts:95 [DEV] ❌ Using empty for excluded optional element "company_description" 
-logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
-logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
-logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "copyright" is undefined {layout: 'MultiColumnFooter', isMandatory: true, isInSchema: true, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] ✅ Using default for mandatory element "copyright": © 2025 Your Company. All rights reserved.
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "company_description" is undefined {layout: 'MultiColumnFooter', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
-logger.ts:95 [DEV] ❌ Using empty for excluded optional element "company_description" 
-logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
-logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
-logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
-logger.ts:84 [2025-09-09T10:06:25.513Z] DEBUG: 🔍 LeftPanel Store Methods Available: {
-  "regenerateAllContent": true,
-  "hasStore": true,
-  "hasStoreState": true,
-  "storeMethodKeys": [
-    "regenerateSection",
-    "regenerateElement",
-    "regenerateAllContent",
-    "regenerateElementWithVariations",
-    "regenerateVariables",
-    "regenerateContentOnly",
-    "regenerateDesignAndCopy",
-    "regenerateWithInputs"
-  ]
-}
-logger.ts:84 [2025-09-09T10:06:25.514Z] DEBUG: 🔍 LeftPanel Store Methods Available: {
-  "regenerateAllContent": true,
-  "hasStore": true,
-  "hasStoreState": true,
-  "storeMethodKeys": [
-    "regenerateSection",
-    "regenerateElement",
-    "regenerateAllContent",
-    "regenerateElementWithVariations",
-    "regenerateVariables",
-    "regenerateContentOnly",
-    "regenerateDesignAndCopy",
-    "regenerateWithInputs"
-  ]
-}
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "nav_item_1" is undefined {layout: 'CenteredLogoHeader', isMandatory: true, isInSchema: true, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] ✅ Using default for mandatory element "nav_item_1": Home
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "nav_item_2" is undefined {layout: 'CenteredLogoHeader', isMandatory: true, isInSchema: true, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] ✅ Using default for mandatory element "nav_item_2": Products
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "nav_item_3" is undefined {layout: 'CenteredLogoHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
-logger.ts:95 [DEV] ❌ Using empty for excluded optional element "nav_item_3" 
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "nav_item_4" is undefined {layout: 'CenteredLogoHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
-logger.ts:95 [DEV] ❌ Using empty for excluded optional element "nav_item_4" 
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "nav_item_5" is undefined {layout: 'CenteredLogoHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
-logger.ts:95 [DEV] ❌ Using empty for excluded optional element "nav_item_5" 
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "nav_item_6" is undefined {layout: 'CenteredLogoHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
-logger.ts:95 [DEV] ❌ Using empty for excluded optional element "nav_item_6" 
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_1" is undefined {layout: 'CenteredLogoHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
-logger.ts:95 [DEV] ❌ Using empty for excluded optional element "nav_link_1" 
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_2" is undefined {layout: 'CenteredLogoHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
-logger.ts:95 [DEV] ❌ Using empty for excluded optional element "nav_link_2" 
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_3" is undefined {layout: 'CenteredLogoHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
-logger.ts:95 [DEV] ❌ Using empty for excluded optional element "nav_link_3" 
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_4" is undefined {layout: 'CenteredLogoHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
-logger.ts:95 [DEV] ❌ Using empty for excluded optional element "nav_link_4" 
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_5" is undefined {layout: 'CenteredLogoHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
-logger.ts:95 [DEV] ❌ Using empty for excluded optional element "nav_link_5" 
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_6" is undefined {layout: 'CenteredLogoHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
-logger.ts:95 [DEV] ❌ Using empty for excluded optional element "nav_link_6" 
-logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
-logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
-logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔍 extractLayoutContent DEBUG: element "nav_item_1" is undefined {layout: 'CenteredLogoHeader', isMandatory: true, isInSchema: true, isExcluded: false, hasLayout: true, …}
- [DEV] ✅ Using default for mandatory element "nav_item_1": Home
- [DEV] 🔍 extractLayoutContent DEBUG: element "nav_item_2" is undefined {layout: 'CenteredLogoHeader', isMandatory: true, isInSchema: true, isExcluded: false, hasLayout: true, …}
- [DEV] ✅ Using default for mandatory element "nav_item_2": Products
- [DEV] 🔍 extractLayoutContent DEBUG: element "nav_item_3" is undefined {layout: 'CenteredLogoHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
- [DEV] ❌ Using empty for excluded optional element "nav_item_3" 
- [DEV] 🔍 extractLayoutContent DEBUG: element "nav_item_4" is undefined {layout: 'CenteredLogoHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
- [DEV] ❌ Using empty for excluded optional element "nav_item_4" 
- [DEV] 🔍 extractLayoutContent DEBUG: element "nav_item_5" is undefined {layout: 'CenteredLogoHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
- [DEV] ❌ Using empty for excluded optional element "nav_item_5" 
- [DEV] 🔍 extractLayoutContent DEBUG: element "nav_item_6" is undefined {layout: 'CenteredLogoHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
- [DEV] ❌ Using empty for excluded optional element "nav_item_6" 
- [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_1" is undefined {layout: 'CenteredLogoHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
- [DEV] ❌ Using empty for excluded optional element "nav_link_1" 
- [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_2" is undefined {layout: 'CenteredLogoHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
- [DEV] ❌ Using empty for excluded optional element "nav_link_2" 
- [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_3" is undefined {layout: 'CenteredLogoHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
- [DEV] ❌ Using empty for excluded optional element "nav_link_3" 
- [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_4" is undefined {layout: 'CenteredLogoHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
- [DEV] ❌ Using empty for excluded optional element "nav_link_4" 
- [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_5" is undefined {layout: 'CenteredLogoHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
- [DEV] ❌ Using empty for excluded optional element "nav_link_5" 
- [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_6" is undefined {layout: 'CenteredLogoHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
- [DEV] ❌ Using empty for excluded optional element "nav_link_6" 
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔍 extractLayoutContent DEBUG: element "badge_text" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "badge_text": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "trust_items" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "trust_items": Free 14-day trial|No credit card required|Cancel anytime
- [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_1" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "trust_item_1": Free 14-day trial
- [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_2" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "trust_item_2": No credit card required
- [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_3" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "trust_item_3": Cancel anytime
- [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_4" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "trust_item_4": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_5" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "trust_item_5": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "center_hero_image" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "center_hero_image": /hero-placeholder.jpg
- [DEV] 🔍 extractLayoutContent DEBUG: element "customer_count" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "customer_count": 500+ happy customers
- [DEV] 🔍 extractLayoutContent DEBUG: element "rating_value" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "rating_value": 4.9/5
- [DEV] 🔍 extractLayoutContent DEBUG: element "rating_count" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "rating_count": from 127 reviews
- [DEV] 🔍 extractLayoutContent DEBUG: element "show_social_proof" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "show_social_proof": true
- [DEV] 🔍 extractLayoutContent DEBUG: element "show_customer_avatars" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "show_customer_avatars": true
- [DEV] 🔍 extractLayoutContent DEBUG: element "avatar_count" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "avatar_count": 4
- [DEV] 🔍 extractLayoutContent DEBUG: element "customer_names" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "customer_names": Sarah Chen|Alex Rivera|Jordan Kim|Maya Patel
- [DEV] 🔍 extractLayoutContent DEBUG: element "avatar_urls" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "avatar_urls": {}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#4338ca]'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#4338ca]'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#4338ca]'}
- [DEV] 🔍 extractLayoutContent DEBUG: element "badge_text" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "badge_text": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "trust_items" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "trust_items": Free 14-day trial|No credit card required|Cancel anytime
- [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_1" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "trust_item_1": Free 14-day trial
- [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_2" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "trust_item_2": No credit card required
- [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_3" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "trust_item_3": Cancel anytime
- [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_4" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "trust_item_4": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_5" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "trust_item_5": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "center_hero_image" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "center_hero_image": /hero-placeholder.jpg
- [DEV] 🔍 extractLayoutContent DEBUG: element "customer_count" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "customer_count": 500+ happy customers
- [DEV] 🔍 extractLayoutContent DEBUG: element "rating_value" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "rating_value": 4.9/5
- [DEV] 🔍 extractLayoutContent DEBUG: element "rating_count" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "rating_count": from 127 reviews
- [DEV] 🔍 extractLayoutContent DEBUG: element "show_social_proof" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "show_social_proof": true
- [DEV] 🔍 extractLayoutContent DEBUG: element "show_customer_avatars" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "show_customer_avatars": true
- [DEV] 🔍 extractLayoutContent DEBUG: element "avatar_count" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "avatar_count": 4
- [DEV] 🔍 extractLayoutContent DEBUG: element "customer_names" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "customer_names": Sarah Chen|Alex Rivera|Jordan Kim|Maya Patel
- [DEV] 🔍 extractLayoutContent DEBUG: element "avatar_urls" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "avatar_urls": {}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#4338ca]'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#4338ca]'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#4338ca]'}
- [DEV] 🎯 extractLayoutContent: Found existing "step_titles": {elementValue: {…}, layout: 'CardFlipSteps', valueType: 'object', isStringEmpty: false, defaultValue: 'Choose Template|Customize Design|Preview & Test|Publish Live'}
- [DEV] 🎯 extractLayoutContent: Found existing "step_descriptions": {elementValue: {…}, layout: 'CardFlipSteps', valueType: 'object', isStringEmpty: false, defaultValue: 'Browse our library of professionally designed temp… one click and share it with the world instantly.'}
- [DEV] 🔍 extractLayoutContent DEBUG: element "step_visuals" is undefined {layout: 'CardFlipSteps', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "step_visuals": /template-browser.jpg|/design-editor.jpg|/preview-mode.jpg|/publish-live.jpg
- [DEV] 🔍 extractLayoutContent DEBUG: element "step_actions" is undefined {layout: 'CardFlipSteps', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "step_actions": Browse Templates|Start Editing|Test Design|Go Live
- [DEV] 🔍 extractLayoutContent DEBUG: element "subheadline" is undefined {layout: 'CardFlipSteps', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "subheadline": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "supporting_text" is undefined {layout: 'CardFlipSteps', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "supporting_text": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "cta_text" is undefined {layout: 'CardFlipSteps', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "cta_text": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "trust_items" is undefined {layout: 'CardFlipSteps', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "trust_items": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "flip_feature_1_text" is undefined {layout: 'CardFlipSteps', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "flip_feature_1_text": Fast & intuitive
- [DEV] 🔍 extractLayoutContent DEBUG: element "flip_feature_2_text" is undefined {layout: 'CardFlipSteps', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "flip_feature_2_text": No technical skills needed
- [DEV] 🔍 extractLayoutContent DEBUG: element "flip_feature_1_icon" is undefined {layout: 'CardFlipSteps', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "flip_feature_1_icon": ⚡
- [DEV] 🔍 extractLayoutContent DEBUG: element "flip_feature_2_icon" is undefined {layout: 'CardFlipSteps', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "flip_feature_2_icon": ✅
- [DEV] 🔍 extractLayoutContent DEBUG: element "guide_heading" is undefined {layout: 'CardFlipSteps', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "guide_heading": Hands-On Creative Experience
- [DEV] 🔍 extractLayoutContent DEBUG: element "guide_description" is undefined {layout: 'CardFlipSteps', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "guide_description": Try before you buy with our interactive design process - see exactly how easy it is to create amazing results
- [DEV] 🔍 extractLayoutContent DEBUG: element "guide_indicator_1_text" is undefined {layout: 'CardFlipSteps', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "guide_indicator_1_text": Interactive
- [DEV] 🔍 extractLayoutContent DEBUG: element "guide_indicator_2_text" is undefined {layout: 'CardFlipSteps', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "guide_indicator_2_text": User-friendly
- [DEV] 🔍 extractLayoutContent DEBUG: element "guide_indicator_3_text" is undefined {layout: 'CardFlipSteps', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "guide_indicator_3_text": Real-time
- [DEV] 🔍 extractLayoutContent DEBUG: element "guide_indicator_1_icon" is undefined {layout: 'CardFlipSteps', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "guide_indicator_1_icon": 🎯
- [DEV] 🔍 extractLayoutContent DEBUG: element "guide_indicator_2_icon" is undefined {layout: 'CardFlipSteps', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "guide_indicator_2_icon": 💖
- [DEV] 🔍 extractLayoutContent DEBUG: element "guide_indicator_3_icon" is undefined {layout: 'CardFlipSteps', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "guide_indicator_3_icon": ⚡
- [DEV] 🔍 extractLayoutContent DEBUG: element "show_flip_features" is undefined {layout: 'CardFlipSteps', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "show_flip_features": true
- [DEV] 🔍 extractLayoutContent DEBUG: element "show_interactive_guide" is undefined {layout: 'CardFlipSteps', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "show_interactive_guide": true
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🎯 extractLayoutContent: Found existing "step_titles": {elementValue: {…}, layout: 'CardFlipSteps', valueType: 'object', isStringEmpty: false, defaultValue: 'Choose Template|Customize Design|Preview & Test|Publish Live'}
- [DEV] 🎯 extractLayoutContent: Found existing "step_descriptions": {elementValue: {…}, layout: 'CardFlipSteps', valueType: 'object', isStringEmpty: false, defaultValue: 'Browse our library of professionally designed temp… one click and share it with the world instantly.'}
- [DEV] 🔍 extractLayoutContent DEBUG: element "step_visuals" is undefined {layout: 'CardFlipSteps', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "step_visuals": /template-browser.jpg|/design-editor.jpg|/preview-mode.jpg|/publish-live.jpg
- [DEV] 🔍 extractLayoutContent DEBUG: element "step_actions" is undefined {layout: 'CardFlipSteps', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "step_actions": Browse Templates|Start Editing|Test Design|Go Live
- [DEV] 🔍 extractLayoutContent DEBUG: element "subheadline" is undefined {layout: 'CardFlipSteps', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "subheadline": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "supporting_text" is undefined {layout: 'CardFlipSteps', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "supporting_text": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "cta_text" is undefined {layout: 'CardFlipSteps', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "cta_text": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "trust_items" is undefined {layout: 'CardFlipSteps', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "trust_items": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "flip_feature_1_text" is undefined {layout: 'CardFlipSteps', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "flip_feature_1_text": Fast & intuitive
- [DEV] 🔍 extractLayoutContent DEBUG: element "flip_feature_2_text" is undefined {layout: 'CardFlipSteps', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "flip_feature_2_text": No technical skills needed
- [DEV] 🔍 extractLayoutContent DEBUG: element "flip_feature_1_icon" is undefined {layout: 'CardFlipSteps', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "flip_feature_1_icon": ⚡
- [DEV] 🔍 extractLayoutContent DEBUG: element "flip_feature_2_icon" is undefined {layout: 'CardFlipSteps', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "flip_feature_2_icon": ✅
- [DEV] 🔍 extractLayoutContent DEBUG: element "guide_heading" is undefined {layout: 'CardFlipSteps', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "guide_heading": Hands-On Creative Experience
- [DEV] 🔍 extractLayoutContent DEBUG: element "guide_description" is undefined {layout: 'CardFlipSteps', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "guide_description": Try before you buy with our interactive design process - see exactly how easy it is to create amazing results
- [DEV] 🔍 extractLayoutContent DEBUG: element "guide_indicator_1_text" is undefined {layout: 'CardFlipSteps', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "guide_indicator_1_text": Interactive
- [DEV] 🔍 extractLayoutContent DEBUG: element "guide_indicator_2_text" is undefined {layout: 'CardFlipSteps', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "guide_indicator_2_text": User-friendly
- [DEV] 🔍 extractLayoutContent DEBUG: element "guide_indicator_3_text" is undefined {layout: 'CardFlipSteps', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "guide_indicator_3_text": Real-time
- [DEV] 🔍 extractLayoutContent DEBUG: element "guide_indicator_1_icon" is undefined {layout: 'CardFlipSteps', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "guide_indicator_1_icon": 🎯
- [DEV] 🔍 extractLayoutContent DEBUG: element "guide_indicator_2_icon" is undefined {layout: 'CardFlipSteps', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "guide_indicator_2_icon": 💖
- [DEV] 🔍 extractLayoutContent DEBUG: element "guide_indicator_3_icon" is undefined {layout: 'CardFlipSteps', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "guide_indicator_3_icon": ⚡
- [DEV] 🔍 extractLayoutContent DEBUG: element "show_flip_features" is undefined {layout: 'CardFlipSteps', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "show_flip_features": true
- [DEV] 🔍 extractLayoutContent DEBUG: element "show_interactive_guide" is undefined {layout: 'CardFlipSteps', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "show_interactive_guide": true
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔍 extractLayoutContent DEBUG: element "pain_descriptions" is undefined {layout: 'StackedPainBullets', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
- [DEV] ❌ Using empty for excluded optional element "pain_descriptions" 
- [DEV] 🔍 extractLayoutContent DEBUG: element "subheadline" is undefined {layout: 'StackedPainBullets', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
- [DEV] ❌ Using empty for excluded optional element "subheadline" 
- [DEV] 🔍 extractLayoutContent DEBUG: element "conclusion_text" is undefined {layout: 'StackedPainBullets', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "conclusion_text": Sound familiar? You're not alone.
- [DEV] 🔍 extractLayoutContent DEBUG: element "pain_icon_1" is undefined {layout: 'StackedPainBullets', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "pain_icon_1": ⏰
- [DEV] 🔍 extractLayoutContent DEBUG: element "pain_icon_2" is undefined {layout: 'StackedPainBullets', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "pain_icon_2": 🔗
- [DEV] 🔍 extractLayoutContent DEBUG: element "pain_icon_3" is undefined {layout: 'StackedPainBullets', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "pain_icon_3": ⚠️
- [DEV] 🔍 extractLayoutContent DEBUG: element "pain_icon_4" is undefined {layout: 'StackedPainBullets', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "pain_icon_4": 😰
- [DEV] 🔍 extractLayoutContent DEBUG: element "pain_icon_5" is undefined {layout: 'StackedPainBullets', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "pain_icon_5": 📉
- [DEV] 🔍 extractLayoutContent DEBUG: element "pain_icon_6" is undefined {layout: 'StackedPainBullets', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "pain_icon_6": 🌪️
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔍 extractLayoutContent DEBUG: element "pain_descriptions" is undefined {layout: 'StackedPainBullets', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
- [DEV] ❌ Using empty for excluded optional element "pain_descriptions" 
- [DEV] 🔍 extractLayoutContent DEBUG: element "subheadline" is undefined {layout: 'StackedPainBullets', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
- [DEV] ❌ Using empty for excluded optional element "subheadline" 
- [DEV] 🔍 extractLayoutContent DEBUG: element "conclusion_text" is undefined {layout: 'StackedPainBullets', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "conclusion_text": Sound familiar? You're not alone.
- [DEV] 🔍 extractLayoutContent DEBUG: element "pain_icon_1" is undefined {layout: 'StackedPainBullets', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "pain_icon_1": ⏰
- [DEV] 🔍 extractLayoutContent DEBUG: element "pain_icon_2" is undefined {layout: 'StackedPainBullets', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "pain_icon_2": 🔗
- [DEV] 🔍 extractLayoutContent DEBUG: element "pain_icon_3" is undefined {layout: 'StackedPainBullets', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "pain_icon_3": ⚠️
- [DEV] 🔍 extractLayoutContent DEBUG: element "pain_icon_4" is undefined {layout: 'StackedPainBullets', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "pain_icon_4": 😰
- [DEV] 🔍 extractLayoutContent DEBUG: element "pain_icon_5" is undefined {layout: 'StackedPainBullets', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "pain_icon_5": 📉
- [DEV] 🔍 extractLayoutContent DEBUG: element "pain_icon_6" is undefined {layout: 'StackedPainBullets', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "pain_icon_6": 🌪️
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔍 extractLayoutContent DEBUG: element "headline" is undefined {layout: 'SplitCard', isMandatory: true, isInSchema: true, isExcluded: false, hasLayout: true, …}
- [DEV] ✅ Using default for mandatory element "headline": Premium Transformation Experience
- [DEV] 🔍 extractLayoutContent DEBUG: element "before_label" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "before_label": Current Challenge
- [DEV] 🔍 extractLayoutContent DEBUG: element "after_label" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "after_label": Premium Solution
- [DEV] 🔍 extractLayoutContent DEBUG: element "before_description" is undefined {layout: 'SplitCard', isMandatory: true, isInSchema: true, isExcluded: false, hasLayout: true, …}
- [DEV] ✅ Using default for mandatory element "before_description": Complex manual processes requiring expertise, time, and significant resources to execute properly.
- [DEV] 🔍 extractLayoutContent DEBUG: element "after_description" is undefined {layout: 'SplitCard', isMandatory: true, isInSchema: true, isExcluded: false, hasLayout: true, …}
- [DEV] ✅ Using default for mandatory element "after_description": Expertly crafted automation that delivers exceptional results with minimal effort and maximum efficiency.
- [DEV] 🔍 extractLayoutContent DEBUG: element "subheadline" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
- [DEV] ❌ Using empty for excluded optional element "subheadline" 
- [DEV] 🔍 extractLayoutContent DEBUG: element "supporting_text" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "supporting_text": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "cta_text" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "cta_text": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "trust_items" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "trust_items": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "premium_features_text" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "premium_features_text": Premium Features Included
- [DEV] 🔍 extractLayoutContent DEBUG: element "upgrade_text" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "upgrade_text": Upgrade
- [DEV] 🔍 extractLayoutContent DEBUG: element "before_placeholder_text" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "before_placeholder_text": Current State
- [DEV] 🔍 extractLayoutContent DEBUG: element "after_placeholder_text" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "after_placeholder_text": Premium Result
- [DEV] 🔍 extractLayoutContent DEBUG: element "premium_badge_text" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "premium_badge_text": Premium
- [DEV] 🔍 extractLayoutContent DEBUG: element "before_icon" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "before_icon": ⚠️
- [DEV] 🔍 extractLayoutContent DEBUG: element "after_icon" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "after_icon": ⭐
- [DEV] 🔍 extractLayoutContent DEBUG: element "upgrade_icon" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "upgrade_icon": ➡️
- [DEV] 🔍 extractLayoutContent DEBUG: element "premium_feature_icon" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "premium_feature_icon": ✅
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔍 extractLayoutContent DEBUG: element "headline" is undefined {layout: 'SplitCard', isMandatory: true, isInSchema: true, isExcluded: false, hasLayout: true, …}
- [DEV] ✅ Using default for mandatory element "headline": Premium Transformation Experience
- [DEV] 🔍 extractLayoutContent DEBUG: element "before_label" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "before_label": Current Challenge
- [DEV] 🔍 extractLayoutContent DEBUG: element "after_label" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "after_label": Premium Solution
- [DEV] 🔍 extractLayoutContent DEBUG: element "before_description" is undefined {layout: 'SplitCard', isMandatory: true, isInSchema: true, isExcluded: false, hasLayout: true, …}
- [DEV] ✅ Using default for mandatory element "before_description": Complex manual processes requiring expertise, time, and significant resources to execute properly.
- [DEV] 🔍 extractLayoutContent DEBUG: element "after_description" is undefined {layout: 'SplitCard', isMandatory: true, isInSchema: true, isExcluded: false, hasLayout: true, …}
- [DEV] ✅ Using default for mandatory element "after_description": Expertly crafted automation that delivers exceptional results with minimal effort and maximum efficiency.
- [DEV] 🔍 extractLayoutContent DEBUG: element "subheadline" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
- [DEV] ❌ Using empty for excluded optional element "subheadline" 
- [DEV] 🔍 extractLayoutContent DEBUG: element "supporting_text" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "supporting_text": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "cta_text" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "cta_text": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "trust_items" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "trust_items": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "premium_features_text" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "premium_features_text": Premium Features Included
- [DEV] 🔍 extractLayoutContent DEBUG: element "upgrade_text" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "upgrade_text": Upgrade
- [DEV] 🔍 extractLayoutContent DEBUG: element "before_placeholder_text" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "before_placeholder_text": Current State
- [DEV] 🔍 extractLayoutContent DEBUG: element "after_placeholder_text" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "after_placeholder_text": Premium Result
- [DEV] 🔍 extractLayoutContent DEBUG: element "premium_badge_text" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "premium_badge_text": Premium
- [DEV] 🔍 extractLayoutContent DEBUG: element "before_icon" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "before_icon": ⚠️
- [DEV] 🔍 extractLayoutContent DEBUG: element "after_icon" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "after_icon": ⭐
- [DEV] 🔍 extractLayoutContent DEBUG: element "upgrade_icon" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "upgrade_icon": ➡️
- [DEV] 🔍 extractLayoutContent DEBUG: element "premium_feature_icon" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "premium_feature_icon": ✅
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔍 extractLayoutContent DEBUG: element "founder_bio" is undefined {layout: 'FounderCardWithQuote', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
- [DEV] ❌ Using empty for excluded optional element "founder_bio" 
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔍 extractLayoutContent DEBUG: element "founder_bio" is undefined {layout: 'FounderCardWithQuote', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
- [DEV] ❌ Using empty for excluded optional element "founder_bio" 
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔍 extractLayoutContent DEBUG: element "subheadline" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "subheadline": Here's how real conversations with our team usually go
- [DEV] 🔍 extractLayoutContent DEBUG: element "question_1" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "question_1": Hey! I'm curious about your free plan - what's included?
- [DEV] 🔍 extractLayoutContent DEBUG: element "answer_1" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "answer_1": Hi! Great question! Our free plan includes up to 1,000 monthly actions, access to all core features, and basic integrations. It's perfect for getting started and many small teams stay on it forever! 🎉
- [DEV] 🔍 extractLayoutContent DEBUG: element "question_2" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "question_2": This looks awesome! How hard is it to get started?
- [DEV] 🔍 extractLayoutContent DEBUG: element "answer_2" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "answer_2": Super easy! Most people are up and running in under 5 minutes. We have a guided setup that walks you through everything step by step. Want me to send you a quick demo link?
- [DEV] 🔍 extractLayoutContent DEBUG: element "question_3" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "question_3": I'm not super technical - will I be able to figure this out?
- [DEV] 🔍 extractLayoutContent DEBUG: element "answer_3" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "answer_3": Absolutely! We designed everything with non-technical users in mind. Think of it like using your favorite apps - if you can send an email or post on social media, you've got this! 💪
- [DEV] 🔍 extractLayoutContent DEBUG: element "question_4" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "question_4": What if I need help along the way?
- [DEV] 🔍 extractLayoutContent DEBUG: element "answer_4" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "answer_4": We're here 24/7! You can chat with us anytime, browse our help docs, or join our community where fellow users share tips. Plus, we have tons of video tutorials for visual learners.
- [DEV] 🔍 extractLayoutContent DEBUG: element "question_5" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "question_5": One more thing - can I really cancel anytime?
- [DEV] 🔍 extractLayoutContent DEBUG: element "answer_5" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "answer_5": Yep! No contracts, no cancellation fees, no questions asked. You can downgrade or cancel right from your dashboard. We only want happy customers! ✨
- [DEV] 🔍 extractLayoutContent DEBUG: element "user_name" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "user_name": You
- [DEV] 🔍 extractLayoutContent DEBUG: element "support_name" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "support_name": Alex from Support
- [DEV] 🔍 extractLayoutContent DEBUG: element "support_avatar" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "support_avatar": A
- [DEV] 🔍 extractLayoutContent DEBUG: element "online_status_text" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "online_status_text": Online now
- [DEV] 🔍 extractLayoutContent DEBUG: element "chat_placeholder" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "chat_placeholder": Ask us anything...
- [DEV] 🔍 extractLayoutContent DEBUG: element "cta_text" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "cta_text": Ready to start your own conversation?
- [DEV] 🔍 extractLayoutContent DEBUG: element "button_text" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "button_text": Chat with us now
- [DEV] 🔍 extractLayoutContent DEBUG: element "show_typing_indicator" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "show_typing_indicator": true
- [DEV] 🔍 extractLayoutContent DEBUG: element "show_cta_section" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "show_cta_section": true
- [DEV] 🔍 extractLayoutContent DEBUG: element "status_indicator_icon" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "status_indicator_icon": 🟢
- [DEV] 🔍 extractLayoutContent DEBUG: element "send_icon" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "send_icon": ➤
- [DEV] 🔍 extractLayoutContent DEBUG: element "support_avatar_icon" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "support_avatar_icon": 👤
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#e0e7ff]'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#e0e7ff]'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#e0e7ff]'}
- [DEV] 🔍 extractLayoutContent DEBUG: element "subheadline" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "subheadline": Here's how real conversations with our team usually go
- [DEV] 🔍 extractLayoutContent DEBUG: element "question_1" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "question_1": Hey! I'm curious about your free plan - what's included?
- [DEV] 🔍 extractLayoutContent DEBUG: element "answer_1" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "answer_1": Hi! Great question! Our free plan includes up to 1,000 monthly actions, access to all core features, and basic integrations. It's perfect for getting started and many small teams stay on it forever! 🎉
- [DEV] 🔍 extractLayoutContent DEBUG: element "question_2" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "question_2": This looks awesome! How hard is it to get started?
- [DEV] 🔍 extractLayoutContent DEBUG: element "answer_2" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "answer_2": Super easy! Most people are up and running in under 5 minutes. We have a guided setup that walks you through everything step by step. Want me to send you a quick demo link?
- [DEV] 🔍 extractLayoutContent DEBUG: element "question_3" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "question_3": I'm not super technical - will I be able to figure this out?
- [DEV] 🔍 extractLayoutContent DEBUG: element "answer_3" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "answer_3": Absolutely! We designed everything with non-technical users in mind. Think of it like using your favorite apps - if you can send an email or post on social media, you've got this! 💪
- [DEV] 🔍 extractLayoutContent DEBUG: element "question_4" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "question_4": What if I need help along the way?
- [DEV] 🔍 extractLayoutContent DEBUG: element "answer_4" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "answer_4": We're here 24/7! You can chat with us anytime, browse our help docs, or join our community where fellow users share tips. Plus, we have tons of video tutorials for visual learners.
- [DEV] 🔍 extractLayoutContent DEBUG: element "question_5" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "question_5": One more thing - can I really cancel anytime?
- [DEV] 🔍 extractLayoutContent DEBUG: element "answer_5" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "answer_5": Yep! No contracts, no cancellation fees, no questions asked. You can downgrade or cancel right from your dashboard. We only want happy customers! ✨
- [DEV] 🔍 extractLayoutContent DEBUG: element "user_name" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "user_name": You
- [DEV] 🔍 extractLayoutContent DEBUG: element "support_name" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "support_name": Alex from Support
- [DEV] 🔍 extractLayoutContent DEBUG: element "support_avatar" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "support_avatar": A
- [DEV] 🔍 extractLayoutContent DEBUG: element "online_status_text" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "online_status_text": Online now
- [DEV] 🔍 extractLayoutContent DEBUG: element "chat_placeholder" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "chat_placeholder": Ask us anything...
- [DEV] 🔍 extractLayoutContent DEBUG: element "cta_text" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "cta_text": Ready to start your own conversation?
- [DEV] 🔍 extractLayoutContent DEBUG: element "button_text" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "button_text": Chat with us now
- [DEV] 🔍 extractLayoutContent DEBUG: element "show_typing_indicator" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "show_typing_indicator": true
- [DEV] 🔍 extractLayoutContent DEBUG: element "show_cta_section" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "show_cta_section": true
- [DEV] 🔍 extractLayoutContent DEBUG: element "status_indicator_icon" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "status_indicator_icon": 🟢
- [DEV] 🔍 extractLayoutContent DEBUG: element "send_icon" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "send_icon": ➤
- [DEV] 🔍 extractLayoutContent DEBUG: element "support_avatar_icon" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "support_avatar_icon": 👤
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#e0e7ff]'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#e0e7ff]'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#e0e7ff]'}
- [DEV] 🔍 extractLayoutContent DEBUG: element "trust_items" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "trust_items": Free 14-day trial|No credit card required|Cancel anytime
- [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_1" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "trust_item_1": Free 14-day trial
- [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_2" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "trust_item_2": No credit card required
- [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_3" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "trust_item_3": Cancel anytime
- [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_4" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "trust_item_4": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_5" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "trust_item_5": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "customer_count" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "customer_count": 10,000+
- [DEV] 🔍 extractLayoutContent DEBUG: element "customer_label" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "customer_label": Happy customers
- [DEV] 🔍 extractLayoutContent DEBUG: element "rating_stat" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "rating_stat": 4.8/5 stars
- [DEV] 🔍 extractLayoutContent DEBUG: element "uptime_stat" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "uptime_stat": 99.9% uptime
- [DEV] 🔍 extractLayoutContent DEBUG: element "uptime_label" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "uptime_label": SOC 2 Compliant
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#4338ca]'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#4338ca]'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#4338ca]'}
- [DEV] 🔍 extractLayoutContent DEBUG: element "trust_items" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "trust_items": Free 14-day trial|No credit card required|Cancel anytime
- [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_1" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "trust_item_1": Free 14-day trial
- [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_2" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "trust_item_2": No credit card required
- [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_3" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "trust_item_3": Cancel anytime
- [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_4" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "trust_item_4": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_5" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "trust_item_5": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "customer_count" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "customer_count": 10,000+
- [DEV] 🔍 extractLayoutContent DEBUG: element "customer_label" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "customer_label": Happy customers
- [DEV] 🔍 extractLayoutContent DEBUG: element "rating_stat" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "rating_stat": 4.8/5 stars
- [DEV] 🔍 extractLayoutContent DEBUG: element "uptime_stat" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "uptime_stat": 99.9% uptime
- [DEV] 🔍 extractLayoutContent DEBUG: element "uptime_label" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "uptime_label": SOC 2 Compliant
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#4338ca]'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#4338ca]'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#4338ca]'}
- [DEV] 🔍 extractLayoutContent DEBUG: element "copyright" is undefined {layout: 'MultiColumnFooter', isMandatory: true, isInSchema: true, isExcluded: false, hasLayout: true, …}
- [DEV] ✅ Using default for mandatory element "copyright": © 2025 Your Company. All rights reserved.
- [DEV] 🔍 extractLayoutContent DEBUG: element "company_description" is undefined {layout: 'MultiColumnFooter', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
- [DEV] ❌ Using empty for excluded optional element "company_description" 
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔍 extractLayoutContent DEBUG: element "copyright" is undefined {layout: 'MultiColumnFooter', isMandatory: true, isInSchema: true, isExcluded: false, hasLayout: true, …}
- [DEV] ✅ Using default for mandatory element "copyright": © 2025 Your Company. All rights reserved.
- [DEV] 🔍 extractLayoutContent DEBUG: element "company_description" is undefined {layout: 'MultiColumnFooter', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
- [DEV] ❌ Using empty for excluded optional element "company_description" 
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [2025-09-09T10:06:25.613Z] DEBUG: 🔍 LeftPanel Store Methods Available: {
-  "regenerateAllContent": true,
-  "hasStore": true,
-  "hasStoreState": true,
-  "storeMethodKeys": [
-    "regenerateSection",
-    "regenerateElement",
-    "regenerateAllContent",
-    "regenerateElementWithVariations",
-    "regenerateVariables",
-    "regenerateContentOnly",
-    "regenerateDesignAndCopy",
-    "regenerateWithInputs"
-  ]
-}
- [2025-09-09T10:06:25.613Z] DEBUG: 🔍 LeftPanel Store Methods Available: {
-  "regenerateAllContent": true,
-  "hasStore": true,
-  "hasStoreState": true,
-  "storeMethodKeys": [
-    "regenerateSection",
-    "regenerateElement",
-    "regenerateAllContent",
-    "regenerateElementWithVariations",
-    "regenerateVariables",
-    "regenerateContentOnly",
-    "regenerateDesignAndCopy",
-    "regenerateWithInputs"
-  ]
-}
- [DEV] 🔍 extractLayoutContent DEBUG: element "nav_item_1" is undefined {layout: 'CenteredLogoHeader', isMandatory: true, isInSchema: true, isExcluded: false, hasLayout: true, …}
- [DEV] ✅ Using default for mandatory element "nav_item_1": Home
- [DEV] 🔍 extractLayoutContent DEBUG: element "nav_item_2" is undefined {layout: 'CenteredLogoHeader', isMandatory: true, isInSchema: true, isExcluded: false, hasLayout: true, …}
- [DEV] ✅ Using default for mandatory element "nav_item_2": Products
- [DEV] 🔍 extractLayoutContent DEBUG: element "nav_item_3" is undefined {layout: 'CenteredLogoHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
- [DEV] ❌ Using empty for excluded optional element "nav_item_3" 
- [DEV] 🔍 extractLayoutContent DEBUG: element "nav_item_4" is undefined {layout: 'CenteredLogoHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
- [DEV] ❌ Using empty for excluded optional element "nav_item_4" 
- [DEV] 🔍 extractLayoutContent DEBUG: element "nav_item_5" is undefined {layout: 'CenteredLogoHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
- [DEV] ❌ Using empty for excluded optional element "nav_item_5" 
- [DEV] 🔍 extractLayoutContent DEBUG: element "nav_item_6" is undefined {layout: 'CenteredLogoHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
- [DEV] ❌ Using empty for excluded optional element "nav_item_6" 
- [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_1" is undefined {layout: 'CenteredLogoHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
- [DEV] ❌ Using empty for excluded optional element "nav_link_1" 
- [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_2" is undefined {layout: 'CenteredLogoHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
- [DEV] ❌ Using empty for excluded optional element "nav_link_2" 
- [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_3" is undefined {layout: 'CenteredLogoHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
- [DEV] ❌ Using empty for excluded optional element "nav_link_3" 
- [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_4" is undefined {layout: 'CenteredLogoHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
- [DEV] ❌ Using empty for excluded optional element "nav_link_4" 
- [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_5" is undefined {layout: 'CenteredLogoHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
- [DEV] ❌ Using empty for excluded optional element "nav_link_5" 
- [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_6" is undefined {layout: 'CenteredLogoHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
- [DEV] ❌ Using empty for excluded optional element "nav_link_6" 
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔍 extractLayoutContent DEBUG: element "nav_item_1" is undefined {layout: 'CenteredLogoHeader', isMandatory: true, isInSchema: true, isExcluded: false, hasLayout: true, …}
- [DEV] ✅ Using default for mandatory element "nav_item_1": Home
- [DEV] 🔍 extractLayoutContent DEBUG: element "nav_item_2" is undefined {layout: 'CenteredLogoHeader', isMandatory: true, isInSchema: true, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] ✅ Using default for mandatory element "nav_item_2": Products
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "nav_item_3" is undefined {layout: 'CenteredLogoHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
-logger.ts:95 [DEV] ❌ Using empty for excluded optional element "nav_item_3" 
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "nav_item_4" is undefined {layout: 'CenteredLogoHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
-logger.ts:95 [DEV] ❌ Using empty for excluded optional element "nav_item_4" 
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "nav_item_5" is undefined {layout: 'CenteredLogoHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
-logger.ts:95 [DEV] ❌ Using empty for excluded optional element "nav_item_5" 
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "nav_item_6" is undefined {layout: 'CenteredLogoHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
-logger.ts:95 [DEV] ❌ Using empty for excluded optional element "nav_item_6" 
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_1" is undefined {layout: 'CenteredLogoHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
-logger.ts:95 [DEV] ❌ Using empty for excluded optional element "nav_link_1" 
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_2" is undefined {layout: 'CenteredLogoHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
-logger.ts:95 [DEV] ❌ Using empty for excluded optional element "nav_link_2" 
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_3" is undefined {layout: 'CenteredLogoHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
-logger.ts:95 [DEV] ❌ Using empty for excluded optional element "nav_link_3" 
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_4" is undefined {layout: 'CenteredLogoHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
-logger.ts:95 [DEV] ❌ Using empty for excluded optional element "nav_link_4" 
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_5" is undefined {layout: 'CenteredLogoHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
-logger.ts:95 [DEV] ❌ Using empty for excluded optional element "nav_link_5" 
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_6" is undefined {layout: 'CenteredLogoHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
-logger.ts:95 [DEV] ❌ Using empty for excluded optional element "nav_link_6" 
-logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
-logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
-logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "badge_text" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "badge_text": 
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "trust_items" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "trust_items": Free 14-day trial|No credit card required|Cancel anytime
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_1" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "trust_item_1": Free 14-day trial
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_2" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "trust_item_2": No credit card required
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_3" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "trust_item_3": Cancel anytime
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_4" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "trust_item_4": 
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_5" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "trust_item_5": 
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "center_hero_image" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "center_hero_image": /hero-placeholder.jpg
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "customer_count" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "customer_count": 500+ happy customers
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "rating_value" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "rating_value": 4.9/5
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "rating_count" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "rating_count": from 127 reviews
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "show_social_proof" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "show_social_proof": true
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "show_customer_avatars" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "show_customer_avatars": true
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "avatar_count" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "avatar_count": 4
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "customer_names" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "customer_names": Sarah Chen|Alex Rivera|Jordan Kim|Maya Patel
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "avatar_urls" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "avatar_urls": {}
-logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#4338ca]'}
-logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#4338ca]'}
-logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#4338ca]'}
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "badge_text" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "badge_text": 
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "trust_items" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "trust_items": Free 14-day trial|No credit card required|Cancel anytime
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_1" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "trust_item_1": Free 14-day trial
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_2" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "trust_item_2": No credit card required
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_3" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "trust_item_3": Cancel anytime
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_4" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "trust_item_4": 
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_5" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "trust_item_5": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "center_hero_image" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "center_hero_image": /hero-placeholder.jpg
- [DEV] 🔍 extractLayoutContent DEBUG: element "customer_count" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "customer_count": 500+ happy customers
- [DEV] 🔍 extractLayoutContent DEBUG: element "rating_value" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "rating_value": 4.9/5
- [DEV] 🔍 extractLayoutContent DEBUG: element "rating_count" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "rating_count": from 127 reviews
- [DEV] 🔍 extractLayoutContent DEBUG: element "show_social_proof" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "show_social_proof": true
- [DEV] 🔍 extractLayoutContent DEBUG: element "show_customer_avatars" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "show_customer_avatars": true
- [DEV] 🔍 extractLayoutContent DEBUG: element "avatar_count" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "avatar_count": 4
- [DEV] 🔍 extractLayoutContent DEBUG: element "customer_names" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "customer_names": Sarah Chen|Alex Rivera|Jordan Kim|Maya Patel
- [DEV] 🔍 extractLayoutContent DEBUG: element "avatar_urls" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "avatar_urls": {}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#4338ca]'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#4338ca]'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#4338ca]'}
- [DEV] 🎯 extractLayoutContent: Found existing "step_titles": {elementValue: {…}, layout: 'CardFlipSteps', valueType: 'object', isStringEmpty: false, defaultValue: 'Choose Template|Customize Design|Preview & Test|Publish Live'}
- [DEV] 🎯 extractLayoutContent: Found existing "step_descriptions": {elementValue: {…}, layout: 'CardFlipSteps', valueType: 'object', isStringEmpty: false, defaultValue: 'Browse our library of professionally designed temp… one click and share it with the world instantly.'}
- [DEV] 🔍 extractLayoutContent DEBUG: element "step_visuals" is undefined {layout: 'CardFlipSteps', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "step_visuals": /template-browser.jpg|/design-editor.jpg|/preview-mode.jpg|/publish-live.jpg
- [DEV] 🔍 extractLayoutContent DEBUG: element "step_actions" is undefined {layout: 'CardFlipSteps', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "step_actions": Browse Templates|Start Editing|Test Design|Go Live
- [DEV] 🔍 extractLayoutContent DEBUG: element "subheadline" is undefined {layout: 'CardFlipSteps', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "subheadline": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "supporting_text" is undefined {layout: 'CardFlipSteps', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "supporting_text": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "cta_text" is undefined {layout: 'CardFlipSteps', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "cta_text": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "trust_items" is undefined {layout: 'CardFlipSteps', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "trust_items": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "flip_feature_1_text" is undefined {layout: 'CardFlipSteps', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "flip_feature_1_text": Fast & intuitive
- [DEV] 🔍 extractLayoutContent DEBUG: element "flip_feature_2_text" is undefined {layout: 'CardFlipSteps', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "flip_feature_2_text": No technical skills needed
- [DEV] 🔍 extractLayoutContent DEBUG: element "flip_feature_1_icon" is undefined {layout: 'CardFlipSteps', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "flip_feature_1_icon": ⚡
- [DEV] 🔍 extractLayoutContent DEBUG: element "flip_feature_2_icon" is undefined {layout: 'CardFlipSteps', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "flip_feature_2_icon": ✅
- [DEV] 🔍 extractLayoutContent DEBUG: element "guide_heading" is undefined {layout: 'CardFlipSteps', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "guide_heading": Hands-On Creative Experience
- [DEV] 🔍 extractLayoutContent DEBUG: element "guide_description" is undefined {layout: 'CardFlipSteps', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "guide_description": Try before you buy with our interactive design process - see exactly how easy it is to create amazing results
- [DEV] 🔍 extractLayoutContent DEBUG: element "guide_indicator_1_text" is undefined {layout: 'CardFlipSteps', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "guide_indicator_1_text": Interactive
- [DEV] 🔍 extractLayoutContent DEBUG: element "guide_indicator_2_text" is undefined {layout: 'CardFlipSteps', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "guide_indicator_2_text": User-friendly
- [DEV] 🔍 extractLayoutContent DEBUG: element "guide_indicator_3_text" is undefined {layout: 'CardFlipSteps', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "guide_indicator_3_text": Real-time
- [DEV] 🔍 extractLayoutContent DEBUG: element "guide_indicator_1_icon" is undefined {layout: 'CardFlipSteps', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "guide_indicator_1_icon": 🎯
- [DEV] 🔍 extractLayoutContent DEBUG: element "guide_indicator_2_icon" is undefined {layout: 'CardFlipSteps', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "guide_indicator_2_icon": 💖
- [DEV] 🔍 extractLayoutContent DEBUG: element "guide_indicator_3_icon" is undefined {layout: 'CardFlipSteps', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "guide_indicator_3_icon": ⚡
- [DEV] 🔍 extractLayoutContent DEBUG: element "show_flip_features" is undefined {layout: 'CardFlipSteps', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "show_flip_features": true
- [DEV] 🔍 extractLayoutContent DEBUG: element "show_interactive_guide" is undefined {layout: 'CardFlipSteps', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "show_interactive_guide": true
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🎯 extractLayoutContent: Found existing "step_titles": {elementValue: {…}, layout: 'CardFlipSteps', valueType: 'object', isStringEmpty: false, defaultValue: 'Choose Template|Customize Design|Preview & Test|Publish Live'}
- [DEV] 🎯 extractLayoutContent: Found existing "step_descriptions": {elementValue: {…}, layout: 'CardFlipSteps', valueType: 'object', isStringEmpty: false, defaultValue: 'Browse our library of professionally designed temp… one click and share it with the world instantly.'}
- [DEV] 🔍 extractLayoutContent DEBUG: element "step_visuals" is undefined {layout: 'CardFlipSteps', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "step_visuals": /template-browser.jpg|/design-editor.jpg|/preview-mode.jpg|/publish-live.jpg
- [DEV] 🔍 extractLayoutContent DEBUG: element "step_actions" is undefined {layout: 'CardFlipSteps', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "step_actions": Browse Templates|Start Editing|Test Design|Go Live
- [DEV] 🔍 extractLayoutContent DEBUG: element "subheadline" is undefined {layout: 'CardFlipSteps', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "subheadline": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "supporting_text" is undefined {layout: 'CardFlipSteps', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "supporting_text": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "cta_text" is undefined {layout: 'CardFlipSteps', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "cta_text": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "trust_items" is undefined {layout: 'CardFlipSteps', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "trust_items": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "flip_feature_1_text" is undefined {layout: 'CardFlipSteps', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "flip_feature_1_text": Fast & intuitive
- [DEV] 🔍 extractLayoutContent DEBUG: element "flip_feature_2_text" is undefined {layout: 'CardFlipSteps', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "flip_feature_2_text": No technical skills needed
- [DEV] 🔍 extractLayoutContent DEBUG: element "flip_feature_1_icon" is undefined {layout: 'CardFlipSteps', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "flip_feature_1_icon": ⚡
- [DEV] 🔍 extractLayoutContent DEBUG: element "flip_feature_2_icon" is undefined {layout: 'CardFlipSteps', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "flip_feature_2_icon": ✅
- [DEV] 🔍 extractLayoutContent DEBUG: element "guide_heading" is undefined {layout: 'CardFlipSteps', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "guide_heading": Hands-On Creative Experience
- [DEV] 🔍 extractLayoutContent DEBUG: element "guide_description" is undefined {layout: 'CardFlipSteps', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "guide_description": Try before you buy with our interactive design process - see exactly how easy it is to create amazing results
- [DEV] 🔍 extractLayoutContent DEBUG: element "guide_indicator_1_text" is undefined {layout: 'CardFlipSteps', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "guide_indicator_1_text": Interactive
- [DEV] 🔍 extractLayoutContent DEBUG: element "guide_indicator_2_text" is undefined {layout: 'CardFlipSteps', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "guide_indicator_2_text": User-friendly
- [DEV] 🔍 extractLayoutContent DEBUG: element "guide_indicator_3_text" is undefined {layout: 'CardFlipSteps', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "guide_indicator_3_text": Real-time
- [DEV] 🔍 extractLayoutContent DEBUG: element "guide_indicator_1_icon" is undefined {layout: 'CardFlipSteps', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "guide_indicator_1_icon": 🎯
- [DEV] 🔍 extractLayoutContent DEBUG: element "guide_indicator_2_icon" is undefined {layout: 'CardFlipSteps', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "guide_indicator_2_icon": 💖
- [DEV] 🔍 extractLayoutContent DEBUG: element "guide_indicator_3_icon" is undefined {layout: 'CardFlipSteps', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "guide_indicator_3_icon": ⚡
- [DEV] 🔍 extractLayoutContent DEBUG: element "show_flip_features" is undefined {layout: 'CardFlipSteps', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "show_flip_features": true
- [DEV] 🔍 extractLayoutContent DEBUG: element "show_interactive_guide" is undefined {layout: 'CardFlipSteps', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "show_interactive_guide": true
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔍 extractLayoutContent DEBUG: element "pain_descriptions" is undefined {layout: 'StackedPainBullets', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
- [DEV] ❌ Using empty for excluded optional element "pain_descriptions" 
- [DEV] 🔍 extractLayoutContent DEBUG: element "subheadline" is undefined {layout: 'StackedPainBullets', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
- [DEV] ❌ Using empty for excluded optional element "subheadline" 
- [DEV] 🔍 extractLayoutContent DEBUG: element "conclusion_text" is undefined {layout: 'StackedPainBullets', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "conclusion_text": Sound familiar? You're not alone.
- [DEV] 🔍 extractLayoutContent DEBUG: element "pain_icon_1" is undefined {layout: 'StackedPainBullets', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "pain_icon_1": ⏰
- [DEV] 🔍 extractLayoutContent DEBUG: element "pain_icon_2" is undefined {layout: 'StackedPainBullets', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "pain_icon_2": 🔗
- [DEV] 🔍 extractLayoutContent DEBUG: element "pain_icon_3" is undefined {layout: 'StackedPainBullets', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "pain_icon_3": ⚠️
- [DEV] 🔍 extractLayoutContent DEBUG: element "pain_icon_4" is undefined {layout: 'StackedPainBullets', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "pain_icon_4": 😰
- [DEV] 🔍 extractLayoutContent DEBUG: element "pain_icon_5" is undefined {layout: 'StackedPainBullets', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "pain_icon_5": 📉
- [DEV] 🔍 extractLayoutContent DEBUG: element "pain_icon_6" is undefined {layout: 'StackedPainBullets', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "pain_icon_6": 🌪️
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔍 extractLayoutContent DEBUG: element "pain_descriptions" is undefined {layout: 'StackedPainBullets', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
- [DEV] ❌ Using empty for excluded optional element "pain_descriptions" 
- [DEV] 🔍 extractLayoutContent DEBUG: element "subheadline" is undefined {layout: 'StackedPainBullets', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
- [DEV] ❌ Using empty for excluded optional element "subheadline" 
- [DEV] 🔍 extractLayoutContent DEBUG: element "conclusion_text" is undefined {layout: 'StackedPainBullets', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "conclusion_text": Sound familiar? You're not alone.
- [DEV] 🔍 extractLayoutContent DEBUG: element "pain_icon_1" is undefined {layout: 'StackedPainBullets', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "pain_icon_1": ⏰
- [DEV] 🔍 extractLayoutContent DEBUG: element "pain_icon_2" is undefined {layout: 'StackedPainBullets', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "pain_icon_2": 🔗
- [DEV] 🔍 extractLayoutContent DEBUG: element "pain_icon_3" is undefined {layout: 'StackedPainBullets', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "pain_icon_3": ⚠️
- [DEV] 🔍 extractLayoutContent DEBUG: element "pain_icon_4" is undefined {layout: 'StackedPainBullets', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "pain_icon_4": 😰
- [DEV] 🔍 extractLayoutContent DEBUG: element "pain_icon_5" is undefined {layout: 'StackedPainBullets', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "pain_icon_5": 📉
- [DEV] 🔍 extractLayoutContent DEBUG: element "pain_icon_6" is undefined {layout: 'StackedPainBullets', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "pain_icon_6": 🌪️
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔍 extractLayoutContent DEBUG: element "headline" is undefined {layout: 'SplitCard', isMandatory: true, isInSchema: true, isExcluded: false, hasLayout: true, …}
- [DEV] ✅ Using default for mandatory element "headline": Premium Transformation Experience
- [DEV] 🔍 extractLayoutContent DEBUG: element "before_label" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "before_label": Current Challenge
- [DEV] 🔍 extractLayoutContent DEBUG: element "after_label" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "after_label": Premium Solution
- [DEV] 🔍 extractLayoutContent DEBUG: element "before_description" is undefined {layout: 'SplitCard', isMandatory: true, isInSchema: true, isExcluded: false, hasLayout: true, …}
- [DEV] ✅ Using default for mandatory element "before_description": Complex manual processes requiring expertise, time, and significant resources to execute properly.
- [DEV] 🔍 extractLayoutContent DEBUG: element "after_description" is undefined {layout: 'SplitCard', isMandatory: true, isInSchema: true, isExcluded: false, hasLayout: true, …}
- [DEV] ✅ Using default for mandatory element "after_description": Expertly crafted automation that delivers exceptional results with minimal effort and maximum efficiency.
- [DEV] 🔍 extractLayoutContent DEBUG: element "subheadline" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
- [DEV] ❌ Using empty for excluded optional element "subheadline" 
- [DEV] 🔍 extractLayoutContent DEBUG: element "supporting_text" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "supporting_text": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "cta_text" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "cta_text": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "trust_items" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "trust_items": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "premium_features_text" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "premium_features_text": Premium Features Included
- [DEV] 🔍 extractLayoutContent DEBUG: element "upgrade_text" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "upgrade_text": Upgrade
- [DEV] 🔍 extractLayoutContent DEBUG: element "before_placeholder_text" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "before_placeholder_text": Current State
- [DEV] 🔍 extractLayoutContent DEBUG: element "after_placeholder_text" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "after_placeholder_text": Premium Result
- [DEV] 🔍 extractLayoutContent DEBUG: element "premium_badge_text" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "premium_badge_text": Premium
- [DEV] 🔍 extractLayoutContent DEBUG: element "before_icon" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "before_icon": ⚠️
- [DEV] 🔍 extractLayoutContent DEBUG: element "after_icon" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "after_icon": ⭐
- [DEV] 🔍 extractLayoutContent DEBUG: element "upgrade_icon" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "upgrade_icon": ➡️
- [DEV] 🔍 extractLayoutContent DEBUG: element "premium_feature_icon" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "premium_feature_icon": ✅
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔍 extractLayoutContent DEBUG: element "headline" is undefined {layout: 'SplitCard', isMandatory: true, isInSchema: true, isExcluded: false, hasLayout: true, …}
- [DEV] ✅ Using default for mandatory element "headline": Premium Transformation Experience
- [DEV] 🔍 extractLayoutContent DEBUG: element "before_label" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "before_label": Current Challenge
- [DEV] 🔍 extractLayoutContent DEBUG: element "after_label" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "after_label": Premium Solution
- [DEV] 🔍 extractLayoutContent DEBUG: element "before_description" is undefined {layout: 'SplitCard', isMandatory: true, isInSchema: true, isExcluded: false, hasLayout: true, …}
- [DEV] ✅ Using default for mandatory element "before_description": Complex manual processes requiring expertise, time, and significant resources to execute properly.
- [DEV] 🔍 extractLayoutContent DEBUG: element "after_description" is undefined {layout: 'SplitCard', isMandatory: true, isInSchema: true, isExcluded: false, hasLayout: true, …}
- [DEV] ✅ Using default for mandatory element "after_description": Expertly crafted automation that delivers exceptional results with minimal effort and maximum efficiency.
- [DEV] 🔍 extractLayoutContent DEBUG: element "subheadline" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
- [DEV] ❌ Using empty for excluded optional element "subheadline" 
- [DEV] 🔍 extractLayoutContent DEBUG: element "supporting_text" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "supporting_text": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "cta_text" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "cta_text": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "trust_items" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "trust_items": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "premium_features_text" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "premium_features_text": Premium Features Included
- [DEV] 🔍 extractLayoutContent DEBUG: element "upgrade_text" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "upgrade_text": Upgrade
- [DEV] 🔍 extractLayoutContent DEBUG: element "before_placeholder_text" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "before_placeholder_text": Current State
- [DEV] 🔍 extractLayoutContent DEBUG: element "after_placeholder_text" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "after_placeholder_text": Premium Result
- [DEV] 🔍 extractLayoutContent DEBUG: element "premium_badge_text" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "premium_badge_text": Premium
- [DEV] 🔍 extractLayoutContent DEBUG: element "before_icon" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "before_icon": ⚠️
- [DEV] 🔍 extractLayoutContent DEBUG: element "after_icon" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "after_icon": ⭐
- [DEV] 🔍 extractLayoutContent DEBUG: element "upgrade_icon" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "upgrade_icon": ➡️
- [DEV] 🔍 extractLayoutContent DEBUG: element "premium_feature_icon" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "premium_feature_icon": ✅
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔍 extractLayoutContent DEBUG: element "founder_bio" is undefined {layout: 'FounderCardWithQuote', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
- [DEV] ❌ Using empty for excluded optional element "founder_bio" 
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔍 extractLayoutContent DEBUG: element "founder_bio" is undefined {layout: 'FounderCardWithQuote', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
- [DEV] ❌ Using empty for excluded optional element "founder_bio" 
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔍 extractLayoutContent DEBUG: element "subheadline" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "subheadline": Here's how real conversations with our team usually go
- [DEV] 🔍 extractLayoutContent DEBUG: element "question_1" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "question_1": Hey! I'm curious about your free plan - what's included?
- [DEV] 🔍 extractLayoutContent DEBUG: element "answer_1" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "answer_1": Hi! Great question! Our free plan includes up to 1,000 monthly actions, access to all core features, and basic integrations. It's perfect for getting started and many small teams stay on it forever! 🎉
- [DEV] 🔍 extractLayoutContent DEBUG: element "question_2" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "question_2": This looks awesome! How hard is it to get started?
- [DEV] 🔍 extractLayoutContent DEBUG: element "answer_2" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "answer_2": Super easy! Most people are up and running in under 5 minutes. We have a guided setup that walks you through everything step by step. Want me to send you a quick demo link?
- [DEV] 🔍 extractLayoutContent DEBUG: element "question_3" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "question_3": I'm not super technical - will I be able to figure this out?
- [DEV] 🔍 extractLayoutContent DEBUG: element "answer_3" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "answer_3": Absolutely! We designed everything with non-technical users in mind. Think of it like using your favorite apps - if you can send an email or post on social media, you've got this! 💪
- [DEV] 🔍 extractLayoutContent DEBUG: element "question_4" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "question_4": What if I need help along the way?
- [DEV] 🔍 extractLayoutContent DEBUG: element "answer_4" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "answer_4": We're here 24/7! You can chat with us anytime, browse our help docs, or join our community where fellow users share tips. Plus, we have tons of video tutorials for visual learners.
- [DEV] 🔍 extractLayoutContent DEBUG: element "question_5" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "question_5": One more thing - can I really cancel anytime?
- [DEV] 🔍 extractLayoutContent DEBUG: element "answer_5" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "answer_5": Yep! No contracts, no cancellation fees, no questions asked. You can downgrade or cancel right from your dashboard. We only want happy customers! ✨
- [DEV] 🔍 extractLayoutContent DEBUG: element "user_name" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "user_name": You
- [DEV] 🔍 extractLayoutContent DEBUG: element "support_name" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "support_name": Alex from Support
- [DEV] 🔍 extractLayoutContent DEBUG: element "support_avatar" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "support_avatar": A
- [DEV] 🔍 extractLayoutContent DEBUG: element "online_status_text" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "online_status_text": Online now
- [DEV] 🔍 extractLayoutContent DEBUG: element "chat_placeholder" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "chat_placeholder": Ask us anything...
- [DEV] 🔍 extractLayoutContent DEBUG: element "cta_text" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "cta_text": Ready to start your own conversation?
- [DEV] 🔍 extractLayoutContent DEBUG: element "button_text" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "button_text": Chat with us now
- [DEV] 🔍 extractLayoutContent DEBUG: element "show_typing_indicator" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "show_typing_indicator": true
- [DEV] 🔍 extractLayoutContent DEBUG: element "show_cta_section" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "show_cta_section": true
- [DEV] 🔍 extractLayoutContent DEBUG: element "status_indicator_icon" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "status_indicator_icon": 🟢
- [DEV] 🔍 extractLayoutContent DEBUG: element "send_icon" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "send_icon": ➤
- [DEV] 🔍 extractLayoutContent DEBUG: element "support_avatar_icon" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "support_avatar_icon": 👤
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#e0e7ff]'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#e0e7ff]'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#e0e7ff]'}
- [DEV] 🔍 extractLayoutContent DEBUG: element "subheadline" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "subheadline": Here's how real conversations with our team usually go
- [DEV] 🔍 extractLayoutContent DEBUG: element "question_1" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "question_1": Hey! I'm curious about your free plan - what's included?
- [DEV] 🔍 extractLayoutContent DEBUG: element "answer_1" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "answer_1": Hi! Great question! Our free plan includes up to 1,000 monthly actions, access to all core features, and basic integrations. It's perfect for getting started and many small teams stay on it forever! 🎉
- [DEV] 🔍 extractLayoutContent DEBUG: element "question_2" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "question_2": This looks awesome! How hard is it to get started?
- [DEV] 🔍 extractLayoutContent DEBUG: element "answer_2" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "answer_2": Super easy! Most people are up and running in under 5 minutes. We have a guided setup that walks you through everything step by step. Want me to send you a quick demo link?
- [DEV] 🔍 extractLayoutContent DEBUG: element "question_3" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "question_3": I'm not super technical - will I be able to figure this out?
- [DEV] 🔍 extractLayoutContent DEBUG: element "answer_3" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "answer_3": Absolutely! We designed everything with non-technical users in mind. Think of it like using your favorite apps - if you can send an email or post on social media, you've got this! 💪
- [DEV] 🔍 extractLayoutContent DEBUG: element "question_4" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "question_4": What if I need help along the way?
- [DEV] 🔍 extractLayoutContent DEBUG: element "answer_4" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "answer_4": We're here 24/7! You can chat with us anytime, browse our help docs, or join our community where fellow users share tips. Plus, we have tons of video tutorials for visual learners.
- [DEV] 🔍 extractLayoutContent DEBUG: element "question_5" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "question_5": One more thing - can I really cancel anytime?
- [DEV] 🔍 extractLayoutContent DEBUG: element "answer_5" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "answer_5": Yep! No contracts, no cancellation fees, no questions asked. You can downgrade or cancel right from your dashboard. We only want happy customers! ✨
- [DEV] 🔍 extractLayoutContent DEBUG: element "user_name" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "user_name": You
- [DEV] 🔍 extractLayoutContent DEBUG: element "support_name" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "support_name": Alex from Support
- [DEV] 🔍 extractLayoutContent DEBUG: element "support_avatar" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "support_avatar": A
- [DEV] 🔍 extractLayoutContent DEBUG: element "online_status_text" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "online_status_text": Online now
- [DEV] 🔍 extractLayoutContent DEBUG: element "chat_placeholder" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "chat_placeholder": Ask us anything...
- [DEV] 🔍 extractLayoutContent DEBUG: element "cta_text" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "cta_text": Ready to start your own conversation?
- [DEV] 🔍 extractLayoutContent DEBUG: element "button_text" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "button_text": Chat with us now
- [DEV] 🔍 extractLayoutContent DEBUG: element "show_typing_indicator" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "show_typing_indicator": true
- [DEV] 🔍 extractLayoutContent DEBUG: element "show_cta_section" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "show_cta_section": true
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "status_indicator_icon" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "status_indicator_icon": 🟢
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "send_icon" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "send_icon": ➤
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "support_avatar_icon" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "support_avatar_icon": 👤
-logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#e0e7ff]'}
-logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#e0e7ff]'}
-logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#e0e7ff]'}
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "trust_items" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "trust_items": Free 14-day trial|No credit card required|Cancel anytime
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_1" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "trust_item_1": Free 14-day trial
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_2" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "trust_item_2": No credit card required
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_3" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "trust_item_3": Cancel anytime
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_4" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "trust_item_4": 
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_5" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "trust_item_5": 
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "customer_count" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "customer_count": 10,000+
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "customer_label" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "customer_label": Happy customers
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "rating_stat" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "rating_stat": 4.8/5 stars
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "uptime_stat" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "uptime_stat": 99.9% uptime
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "uptime_label" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "uptime_label": SOC 2 Compliant
-logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#4338ca]'}
-logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#4338ca]'}
-logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#4338ca]'}
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "trust_items" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "trust_items": Free 14-day trial|No credit card required|Cancel anytime
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_1" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "trust_item_1": Free 14-day trial
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_2" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "trust_item_2": No credit card required
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_3" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "trust_item_3": Cancel anytime
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_4" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "trust_item_4": 
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_5" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "trust_item_5": 
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "customer_count" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "customer_count": 10,000+
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "customer_label" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "customer_label": Happy customers
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "rating_stat" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "rating_stat": 4.8/5 stars
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "uptime_stat" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "uptime_stat": 99.9% uptime
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "uptime_label" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "uptime_label": SOC 2 Compliant
-logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#4338ca]'}
-logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#4338ca]'}
-logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#4338ca]'}
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "copyright" is undefined {layout: 'MultiColumnFooter', isMandatory: true, isInSchema: true, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] ✅ Using default for mandatory element "copyright": © 2025 Your Company. All rights reserved.
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "company_description" is undefined {layout: 'MultiColumnFooter', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
-logger.ts:95 [DEV] ❌ Using empty for excluded optional element "company_description" 
-logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
-logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
-logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "copyright" is undefined {layout: 'MultiColumnFooter', isMandatory: true, isInSchema: true, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] ✅ Using default for mandatory element "copyright": © 2025 Your Company. All rights reserved.
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "company_description" is undefined {layout: 'MultiColumnFooter', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
-logger.ts:95 [DEV] ❌ Using empty for excluded optional element "company_description" 
-logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
-logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
-logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
-logger.ts:84 [2025-09-09T10:06:26.507Z] DEBUG: 🔍 LeftPanel Store Methods Available: {
-  "regenerateAllContent": true,
-  "hasStore": true,
-  "hasStoreState": true,
-  "storeMethodKeys": [
-    "regenerateSection",
-    "regenerateElement",
-    "regenerateAllContent",
-    "regenerateElementWithVariations",
-    "regenerateVariables",
-    "regenerateContentOnly",
-    "regenerateDesignAndCopy",
-    "regenerateWithInputs"
-  ]
-}
-logger.ts:84 [2025-09-09T10:06:26.507Z] DEBUG: 🔍 LeftPanel Store Methods Available: {
-  "regenerateAllContent": true,
-  "hasStore": true,
-  "hasStoreState": true,
-  "storeMethodKeys": [
-    "regenerateSection",
-    "regenerateElement",
-    "regenerateAllContent",
-    "regenerateElementWithVariations",
-    "regenerateVariables",
-    "regenerateContentOnly",
-    "regenerateDesignAndCopy",
-    "regenerateWithInputs"
-  ]
-}
- [DEV] 🔍 extractLayoutContent DEBUG: element "nav_item_1" is undefined {layout: 'CenteredLogoHeader', isMandatory: true, isInSchema: true, isExcluded: false, hasLayout: true, …}
- [DEV] ✅ Using default for mandatory element "nav_item_1": Home
- [DEV] 🔍 extractLayoutContent DEBUG: element "nav_item_2" is undefined {layout: 'CenteredLogoHeader', isMandatory: true, isInSchema: true, isExcluded: false, hasLayout: true, …}
- [DEV] ✅ Using default for mandatory element "nav_item_2": Products
- [DEV] 🔍 extractLayoutContent DEBUG: element "nav_item_3" is undefined {layout: 'CenteredLogoHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
- [DEV] ❌ Using empty for excluded optional element "nav_item_3" 
- [DEV] 🔍 extractLayoutContent DEBUG: element "nav_item_4" is undefined {layout: 'CenteredLogoHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
- [DEV] ❌ Using empty for excluded optional element "nav_item_4" 
- [DEV] 🔍 extractLayoutContent DEBUG: element "nav_item_5" is undefined {layout: 'CenteredLogoHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
- [DEV] ❌ Using empty for excluded optional element "nav_item_5" 
- [DEV] 🔍 extractLayoutContent DEBUG: element "nav_item_6" is undefined {layout: 'CenteredLogoHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
- [DEV] ❌ Using empty for excluded optional element "nav_item_6" 
- [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_1" is undefined {layout: 'CenteredLogoHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
- [DEV] ❌ Using empty for excluded optional element "nav_link_1" 
- [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_2" is undefined {layout: 'CenteredLogoHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
- [DEV] ❌ Using empty for excluded optional element "nav_link_2" 
- [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_3" is undefined {layout: 'CenteredLogoHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
- [DEV] ❌ Using empty for excluded optional element "nav_link_3" 
- [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_4" is undefined {layout: 'CenteredLogoHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
- [DEV] ❌ Using empty for excluded optional element "nav_link_4" 
- [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_5" is undefined {layout: 'CenteredLogoHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
- [DEV] ❌ Using empty for excluded optional element "nav_link_5" 
- [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_6" is undefined {layout: 'CenteredLogoHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
- [DEV] ❌ Using empty for excluded optional element "nav_link_6" 
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔍 extractLayoutContent DEBUG: element "nav_item_1" is undefined {layout: 'CenteredLogoHeader', isMandatory: true, isInSchema: true, isExcluded: false, hasLayout: true, …}
- [DEV] ✅ Using default for mandatory element "nav_item_1": Home
- [DEV] 🔍 extractLayoutContent DEBUG: element "nav_item_2" is undefined {layout: 'CenteredLogoHeader', isMandatory: true, isInSchema: true, isExcluded: false, hasLayout: true, …}
- [DEV] ✅ Using default for mandatory element "nav_item_2": Products
- [DEV] 🔍 extractLayoutContent DEBUG: element "nav_item_3" is undefined {layout: 'CenteredLogoHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
- [DEV] ❌ Using empty for excluded optional element "nav_item_3" 
- [DEV] 🔍 extractLayoutContent DEBUG: element "nav_item_4" is undefined {layout: 'CenteredLogoHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
- [DEV] ❌ Using empty for excluded optional element "nav_item_4" 
- [DEV] 🔍 extractLayoutContent DEBUG: element "nav_item_5" is undefined {layout: 'CenteredLogoHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
- [DEV] ❌ Using empty for excluded optional element "nav_item_5" 
- [DEV] 🔍 extractLayoutContent DEBUG: element "nav_item_6" is undefined {layout: 'CenteredLogoHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
- [DEV] ❌ Using empty for excluded optional element "nav_item_6" 
- [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_1" is undefined {layout: 'CenteredLogoHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
- [DEV] ❌ Using empty for excluded optional element "nav_link_1" 
- [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_2" is undefined {layout: 'CenteredLogoHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
- [DEV] ❌ Using empty for excluded optional element "nav_link_2" 
- [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_3" is undefined {layout: 'CenteredLogoHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
- [DEV] ❌ Using empty for excluded optional element "nav_link_3" 
- [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_4" is undefined {layout: 'CenteredLogoHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
- [DEV] ❌ Using empty for excluded optional element "nav_link_4" 
- [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_5" is undefined {layout: 'CenteredLogoHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
- [DEV] ❌ Using empty for excluded optional element "nav_link_5" 
- [DEV] 🔍 extractLayoutContent DEBUG: element "nav_link_6" is undefined {layout: 'CenteredLogoHeader', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
- [DEV] ❌ Using empty for excluded optional element "nav_link_6" 
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔍 extractLayoutContent DEBUG: element "badge_text" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "badge_text": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "trust_items" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "trust_items": Free 14-day trial|No credit card required|Cancel anytime
- [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_1" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "trust_item_1": Free 14-day trial
- [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_2" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "trust_item_2": No credit card required
- [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_3" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "trust_item_3": Cancel anytime
- [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_4" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "trust_item_4": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_5" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "trust_item_5": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "center_hero_image" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "center_hero_image": /hero-placeholder.jpg
- [DEV] 🔍 extractLayoutContent DEBUG: element "customer_count" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "customer_count": 500+ happy customers
- [DEV] 🔍 extractLayoutContent DEBUG: element "rating_value" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "rating_value": 4.9/5
- [DEV] 🔍 extractLayoutContent DEBUG: element "rating_count" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "rating_count": from 127 reviews
- [DEV] 🔍 extractLayoutContent DEBUG: element "show_social_proof" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "show_social_proof": true
- [DEV] 🔍 extractLayoutContent DEBUG: element "show_customer_avatars" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "show_customer_avatars": true
- [DEV] 🔍 extractLayoutContent DEBUG: element "avatar_count" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "avatar_count": 4
- [DEV] 🔍 extractLayoutContent DEBUG: element "customer_names" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "customer_names": Sarah Chen|Alex Rivera|Jordan Kim|Maya Patel
- [DEV] 🔍 extractLayoutContent DEBUG: element "avatar_urls" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "avatar_urls": {}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#4338ca]'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#4338ca]'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#4338ca]'}
- [DEV] 🔍 extractLayoutContent DEBUG: element "badge_text" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "badge_text": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "trust_items" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "trust_items": Free 14-day trial|No credit card required|Cancel anytime
- [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_1" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "trust_item_1": Free 14-day trial
- [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_2" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "trust_item_2": No credit card required
- [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_3" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "trust_item_3": Cancel anytime
- [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_4" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "trust_item_4": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_5" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "trust_item_5": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "center_hero_image" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "center_hero_image": /hero-placeholder.jpg
- [DEV] 🔍 extractLayoutContent DEBUG: element "customer_count" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "customer_count": 500+ happy customers
- [DEV] 🔍 extractLayoutContent DEBUG: element "rating_value" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "rating_value": 4.9/5
- [DEV] 🔍 extractLayoutContent DEBUG: element "rating_count" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "rating_count": from 127 reviews
- [DEV] 🔍 extractLayoutContent DEBUG: element "show_social_proof" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "show_social_proof": true
- [DEV] 🔍 extractLayoutContent DEBUG: element "show_customer_avatars" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "show_customer_avatars": true
- [DEV] 🔍 extractLayoutContent DEBUG: element "avatar_count" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "avatar_count": 4
- [DEV] 🔍 extractLayoutContent DEBUG: element "customer_names" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "customer_names": Sarah Chen|Alex Rivera|Jordan Kim|Maya Patel
- [DEV] 🔍 extractLayoutContent DEBUG: element "avatar_urls" is undefined {layout: 'centerStacked', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "avatar_urls": {}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#4338ca]'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#4338ca]'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#4338ca]'}
- [DEV] 🎯 extractLayoutContent: Found existing "step_titles": {elementValue: {…}, layout: 'CardFlipSteps', valueType: 'object', isStringEmpty: false, defaultValue: 'Choose Template|Customize Design|Preview & Test|Publish Live'}
- [DEV] 🎯 extractLayoutContent: Found existing "step_descriptions": {elementValue: {…}, layout: 'CardFlipSteps', valueType: 'object', isStringEmpty: false, defaultValue: 'Browse our library of professionally designed temp… one click and share it with the world instantly.'}
- [DEV] 🔍 extractLayoutContent DEBUG: element "step_visuals" is undefined {layout: 'CardFlipSteps', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "step_visuals": /template-browser.jpg|/design-editor.jpg|/preview-mode.jpg|/publish-live.jpg
- [DEV] 🔍 extractLayoutContent DEBUG: element "step_actions" is undefined {layout: 'CardFlipSteps', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "step_actions": Browse Templates|Start Editing|Test Design|Go Live
- [DEV] 🔍 extractLayoutContent DEBUG: element "subheadline" is undefined {layout: 'CardFlipSteps', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "subheadline": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "supporting_text" is undefined {layout: 'CardFlipSteps', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "supporting_text": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "cta_text" is undefined {layout: 'CardFlipSteps', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "cta_text": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "trust_items" is undefined {layout: 'CardFlipSteps', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "trust_items": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "flip_feature_1_text" is undefined {layout: 'CardFlipSteps', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "flip_feature_1_text": Fast & intuitive
- [DEV] 🔍 extractLayoutContent DEBUG: element "flip_feature_2_text" is undefined {layout: 'CardFlipSteps', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "flip_feature_2_text": No technical skills needed
- [DEV] 🔍 extractLayoutContent DEBUG: element "flip_feature_1_icon" is undefined {layout: 'CardFlipSteps', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "flip_feature_1_icon": ⚡
- [DEV] 🔍 extractLayoutContent DEBUG: element "flip_feature_2_icon" is undefined {layout: 'CardFlipSteps', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "flip_feature_2_icon": ✅
- [DEV] 🔍 extractLayoutContent DEBUG: element "guide_heading" is undefined {layout: 'CardFlipSteps', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "guide_heading": Hands-On Creative Experience
- [DEV] 🔍 extractLayoutContent DEBUG: element "guide_description" is undefined {layout: 'CardFlipSteps', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "guide_description": Try before you buy with our interactive design process - see exactly how easy it is to create amazing results
- [DEV] 🔍 extractLayoutContent DEBUG: element "guide_indicator_1_text" is undefined {layout: 'CardFlipSteps', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "guide_indicator_1_text": Interactive
- [DEV] 🔍 extractLayoutContent DEBUG: element "guide_indicator_2_text" is undefined {layout: 'CardFlipSteps', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "guide_indicator_2_text": User-friendly
- [DEV] 🔍 extractLayoutContent DEBUG: element "guide_indicator_3_text" is undefined {layout: 'CardFlipSteps', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "guide_indicator_3_text": Real-time
- [DEV] 🔍 extractLayoutContent DEBUG: element "guide_indicator_1_icon" is undefined {layout: 'CardFlipSteps', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "guide_indicator_1_icon": 🎯
- [DEV] 🔍 extractLayoutContent DEBUG: element "guide_indicator_2_icon" is undefined {layout: 'CardFlipSteps', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "guide_indicator_2_icon": 💖
- [DEV] 🔍 extractLayoutContent DEBUG: element "guide_indicator_3_icon" is undefined {layout: 'CardFlipSteps', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "guide_indicator_3_icon": ⚡
- [DEV] 🔍 extractLayoutContent DEBUG: element "show_flip_features" is undefined {layout: 'CardFlipSteps', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "show_flip_features": true
- [DEV] 🔍 extractLayoutContent DEBUG: element "show_interactive_guide" is undefined {layout: 'CardFlipSteps', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "show_interactive_guide": true
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🎯 extractLayoutContent: Found existing "step_titles": {elementValue: {…}, layout: 'CardFlipSteps', valueType: 'object', isStringEmpty: false, defaultValue: 'Choose Template|Customize Design|Preview & Test|Publish Live'}
- [DEV] 🎯 extractLayoutContent: Found existing "step_descriptions": {elementValue: {…}, layout: 'CardFlipSteps', valueType: 'object', isStringEmpty: false, defaultValue: 'Browse our library of professionally designed temp… one click and share it with the world instantly.'}
- [DEV] 🔍 extractLayoutContent DEBUG: element "step_visuals" is undefined {layout: 'CardFlipSteps', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "step_visuals": /template-browser.jpg|/design-editor.jpg|/preview-mode.jpg|/publish-live.jpg
- [DEV] 🔍 extractLayoutContent DEBUG: element "step_actions" is undefined {layout: 'CardFlipSteps', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "step_actions": Browse Templates|Start Editing|Test Design|Go Live
- [DEV] 🔍 extractLayoutContent DEBUG: element "subheadline" is undefined {layout: 'CardFlipSteps', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "subheadline": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "supporting_text" is undefined {layout: 'CardFlipSteps', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "supporting_text": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "cta_text" is undefined {layout: 'CardFlipSteps', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "cta_text": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "trust_items" is undefined {layout: 'CardFlipSteps', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "trust_items": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "flip_feature_1_text" is undefined {layout: 'CardFlipSteps', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "flip_feature_1_text": Fast & intuitive
- [DEV] 🔍 extractLayoutContent DEBUG: element "flip_feature_2_text" is undefined {layout: 'CardFlipSteps', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "flip_feature_2_text": No technical skills needed
- [DEV] 🔍 extractLayoutContent DEBUG: element "flip_feature_1_icon" is undefined {layout: 'CardFlipSteps', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "flip_feature_1_icon": ⚡
- [DEV] 🔍 extractLayoutContent DEBUG: element "flip_feature_2_icon" is undefined {layout: 'CardFlipSteps', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "flip_feature_2_icon": ✅
- [DEV] 🔍 extractLayoutContent DEBUG: element "guide_heading" is undefined {layout: 'CardFlipSteps', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "guide_heading": Hands-On Creative Experience
- [DEV] 🔍 extractLayoutContent DEBUG: element "guide_description" is undefined {layout: 'CardFlipSteps', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "guide_description": Try before you buy with our interactive design process - see exactly how easy it is to create amazing results
- [DEV] 🔍 extractLayoutContent DEBUG: element "guide_indicator_1_text" is undefined {layout: 'CardFlipSteps', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "guide_indicator_1_text": Interactive
- [DEV] 🔍 extractLayoutContent DEBUG: element "guide_indicator_2_text" is undefined {layout: 'CardFlipSteps', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "guide_indicator_2_text": User-friendly
- [DEV] 🔍 extractLayoutContent DEBUG: element "guide_indicator_3_text" is undefined {layout: 'CardFlipSteps', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "guide_indicator_3_text": Real-time
- [DEV] 🔍 extractLayoutContent DEBUG: element "guide_indicator_1_icon" is undefined {layout: 'CardFlipSteps', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "guide_indicator_1_icon": 🎯
- [DEV] 🔍 extractLayoutContent DEBUG: element "guide_indicator_2_icon" is undefined {layout: 'CardFlipSteps', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "guide_indicator_2_icon": 💖
- [DEV] 🔍 extractLayoutContent DEBUG: element "guide_indicator_3_icon" is undefined {layout: 'CardFlipSteps', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "guide_indicator_3_icon": ⚡
- [DEV] 🔍 extractLayoutContent DEBUG: element "show_flip_features" is undefined {layout: 'CardFlipSteps', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "show_flip_features": true
- [DEV] 🔍 extractLayoutContent DEBUG: element "show_interactive_guide" is undefined {layout: 'CardFlipSteps', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "show_interactive_guide": true
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔍 extractLayoutContent DEBUG: element "pain_descriptions" is undefined {layout: 'StackedPainBullets', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
- [DEV] ❌ Using empty for excluded optional element "pain_descriptions" 
- [DEV] 🔍 extractLayoutContent DEBUG: element "subheadline" is undefined {layout: 'StackedPainBullets', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
- [DEV] ❌ Using empty for excluded optional element "subheadline" 
- [DEV] 🔍 extractLayoutContent DEBUG: element "conclusion_text" is undefined {layout: 'StackedPainBullets', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "conclusion_text": Sound familiar? You're not alone.
- [DEV] 🔍 extractLayoutContent DEBUG: element "pain_icon_1" is undefined {layout: 'StackedPainBullets', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "pain_icon_1": ⏰
- [DEV] 🔍 extractLayoutContent DEBUG: element "pain_icon_2" is undefined {layout: 'StackedPainBullets', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "pain_icon_2": 🔗
- [DEV] 🔍 extractLayoutContent DEBUG: element "pain_icon_3" is undefined {layout: 'StackedPainBullets', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "pain_icon_3": ⚠️
- [DEV] 🔍 extractLayoutContent DEBUG: element "pain_icon_4" is undefined {layout: 'StackedPainBullets', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "pain_icon_4": 😰
- [DEV] 🔍 extractLayoutContent DEBUG: element "pain_icon_5" is undefined {layout: 'StackedPainBullets', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "pain_icon_5": 📉
- [DEV] 🔍 extractLayoutContent DEBUG: element "pain_icon_6" is undefined {layout: 'StackedPainBullets', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "pain_icon_6": 🌪️
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔍 extractLayoutContent DEBUG: element "pain_descriptions" is undefined {layout: 'StackedPainBullets', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
- [DEV] ❌ Using empty for excluded optional element "pain_descriptions" 
- [DEV] 🔍 extractLayoutContent DEBUG: element "subheadline" is undefined {layout: 'StackedPainBullets', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
- [DEV] ❌ Using empty for excluded optional element "subheadline" 
- [DEV] 🔍 extractLayoutContent DEBUG: element "conclusion_text" is undefined {layout: 'StackedPainBullets', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "conclusion_text": Sound familiar? You're not alone.
- [DEV] 🔍 extractLayoutContent DEBUG: element "pain_icon_1" is undefined {layout: 'StackedPainBullets', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "pain_icon_1": ⏰
- [DEV] 🔍 extractLayoutContent DEBUG: element "pain_icon_2" is undefined {layout: 'StackedPainBullets', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "pain_icon_2": 🔗
- [DEV] 🔍 extractLayoutContent DEBUG: element "pain_icon_3" is undefined {layout: 'StackedPainBullets', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "pain_icon_3": ⚠️
- [DEV] 🔍 extractLayoutContent DEBUG: element "pain_icon_4" is undefined {layout: 'StackedPainBullets', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "pain_icon_4": 😰
- [DEV] 🔍 extractLayoutContent DEBUG: element "pain_icon_5" is undefined {layout: 'StackedPainBullets', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "pain_icon_5": 📉
- [DEV] 🔍 extractLayoutContent DEBUG: element "pain_icon_6" is undefined {layout: 'StackedPainBullets', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "pain_icon_6": 🌪️
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔍 extractLayoutContent DEBUG: element "headline" is undefined {layout: 'SplitCard', isMandatory: true, isInSchema: true, isExcluded: false, hasLayout: true, …}
- [DEV] ✅ Using default for mandatory element "headline": Premium Transformation Experience
- [DEV] 🔍 extractLayoutContent DEBUG: element "before_label" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "before_label": Current Challenge
- [DEV] 🔍 extractLayoutContent DEBUG: element "after_label" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "after_label": Premium Solution
- [DEV] 🔍 extractLayoutContent DEBUG: element "before_description" is undefined {layout: 'SplitCard', isMandatory: true, isInSchema: true, isExcluded: false, hasLayout: true, …}
- [DEV] ✅ Using default for mandatory element "before_description": Complex manual processes requiring expertise, time, and significant resources to execute properly.
- [DEV] 🔍 extractLayoutContent DEBUG: element "after_description" is undefined {layout: 'SplitCard', isMandatory: true, isInSchema: true, isExcluded: false, hasLayout: true, …}
- [DEV] ✅ Using default for mandatory element "after_description": Expertly crafted automation that delivers exceptional results with minimal effort and maximum efficiency.
- [DEV] 🔍 extractLayoutContent DEBUG: element "subheadline" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
- [DEV] ❌ Using empty for excluded optional element "subheadline" 
- [DEV] 🔍 extractLayoutContent DEBUG: element "supporting_text" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "supporting_text": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "cta_text" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "cta_text": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "trust_items" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "trust_items": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "premium_features_text" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "premium_features_text": Premium Features Included
- [DEV] 🔍 extractLayoutContent DEBUG: element "upgrade_text" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "upgrade_text": Upgrade
- [DEV] 🔍 extractLayoutContent DEBUG: element "before_placeholder_text" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "before_placeholder_text": Current State
- [DEV] 🔍 extractLayoutContent DEBUG: element "after_placeholder_text" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "after_placeholder_text": Premium Result
- [DEV] 🔍 extractLayoutContent DEBUG: element "premium_badge_text" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "premium_badge_text": Premium
- [DEV] 🔍 extractLayoutContent DEBUG: element "before_icon" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "before_icon": ⚠️
- [DEV] 🔍 extractLayoutContent DEBUG: element "after_icon" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "after_icon": ⭐
- [DEV] 🔍 extractLayoutContent DEBUG: element "upgrade_icon" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "upgrade_icon": ➡️
- [DEV] 🔍 extractLayoutContent DEBUG: element "premium_feature_icon" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "premium_feature_icon": ✅
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
- [DEV] 🔍 extractLayoutContent DEBUG: element "headline" is undefined {layout: 'SplitCard', isMandatory: true, isInSchema: true, isExcluded: false, hasLayout: true, …}
- [DEV] ✅ Using default for mandatory element "headline": Premium Transformation Experience
- [DEV] 🔍 extractLayoutContent DEBUG: element "before_label" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "before_label": Current Challenge
- [DEV] 🔍 extractLayoutContent DEBUG: element "after_label" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "after_label": Premium Solution
- [DEV] 🔍 extractLayoutContent DEBUG: element "before_description" is undefined {layout: 'SplitCard', isMandatory: true, isInSchema: true, isExcluded: false, hasLayout: true, …}
- [DEV] ✅ Using default for mandatory element "before_description": Complex manual processes requiring expertise, time, and significant resources to execute properly.
- [DEV] 🔍 extractLayoutContent DEBUG: element "after_description" is undefined {layout: 'SplitCard', isMandatory: true, isInSchema: true, isExcluded: false, hasLayout: true, …}
- [DEV] ✅ Using default for mandatory element "after_description": Expertly crafted automation that delivers exceptional results with minimal effort and maximum efficiency.
- [DEV] 🔍 extractLayoutContent DEBUG: element "subheadline" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
- [DEV] ❌ Using empty for excluded optional element "subheadline" 
- [DEV] 🔍 extractLayoutContent DEBUG: element "supporting_text" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "supporting_text": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "cta_text" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "cta_text": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "trust_items" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "trust_items": 
- [DEV] 🔍 extractLayoutContent DEBUG: element "premium_features_text" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "premium_features_text": Premium Features Included
- [DEV] 🔍 extractLayoutContent DEBUG: element "upgrade_text" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "upgrade_text": Upgrade
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "before_placeholder_text" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "before_placeholder_text": Current State
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "after_placeholder_text" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "after_placeholder_text": Premium Result
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "premium_badge_text" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "premium_badge_text": Premium
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "before_icon" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "before_icon": ⚠️
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "after_icon" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "after_icon": ⭐
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "upgrade_icon" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "upgrade_icon": ➡️
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "premium_feature_icon" is undefined {layout: 'SplitCard', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "premium_feature_icon": ✅
-logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
-logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
-logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "founder_bio" is undefined {layout: 'FounderCardWithQuote', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
-logger.ts:95 [DEV] ❌ Using empty for excluded optional element "founder_bio" 
-logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
-logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
-logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "founder_bio" is undefined {layout: 'FounderCardWithQuote', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
-logger.ts:95 [DEV] ❌ Using empty for excluded optional element "founder_bio" 
-logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
-logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
-logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "subheadline" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "subheadline": Here's how real conversations with our team usually go
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "question_1" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "question_1": Hey! I'm curious about your free plan - what's included?
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "answer_1" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "answer_1": Hi! Great question! Our free plan includes up to 1,000 monthly actions, access to all core features, and basic integrations. It's perfect for getting started and many small teams stay on it forever! 🎉
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "question_2" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "question_2": This looks awesome! How hard is it to get started?
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "answer_2" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "answer_2": Super easy! Most people are up and running in under 5 minutes. We have a guided setup that walks you through everything step by step. Want me to send you a quick demo link?
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "question_3" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "question_3": I'm not super technical - will I be able to figure this out?
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "answer_3" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "answer_3": Absolutely! We designed everything with non-technical users in mind. Think of it like using your favorite apps - if you can send an email or post on social media, you've got this! 💪
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "question_4" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "question_4": What if I need help along the way?
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "answer_4" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "answer_4": We're here 24/7! You can chat with us anytime, browse our help docs, or join our community where fellow users share tips. Plus, we have tons of video tutorials for visual learners.
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "question_5" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "question_5": One more thing - can I really cancel anytime?
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "answer_5" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "answer_5": Yep! No contracts, no cancellation fees, no questions asked. You can downgrade or cancel right from your dashboard. We only want happy customers! ✨
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "user_name" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "user_name": You
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "support_name" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "support_name": Alex from Support
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "support_avatar" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "support_avatar": A
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "online_status_text" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "online_status_text": Online now
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "chat_placeholder" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "chat_placeholder": Ask us anything...
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "cta_text" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "cta_text": Ready to start your own conversation?
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "button_text" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "button_text": Chat with us now
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "show_typing_indicator" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "show_typing_indicator": true
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "show_cta_section" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "show_cta_section": true
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "status_indicator_icon" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "status_indicator_icon": 🟢
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "send_icon" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "send_icon": ➤
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "support_avatar_icon" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "support_avatar_icon": 👤
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#e0e7ff]'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#e0e7ff]'}
- [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#e0e7ff]'}
- [DEV] 🔍 extractLayoutContent DEBUG: element "subheadline" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "subheadline": Here's how real conversations with our team usually go
- [DEV] 🔍 extractLayoutContent DEBUG: element "question_1" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "question_1": Hey! I'm curious about your free plan - what's included?
- [DEV] 🔍 extractLayoutContent DEBUG: element "answer_1" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "answer_1": Hi! Great question! Our free plan includes up to 1,000 monthly actions, access to all core features, and basic integrations. It's perfect for getting started and many small teams stay on it forever! 🎉
- [DEV] 🔍 extractLayoutContent DEBUG: element "question_2" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "question_2": This looks awesome! How hard is it to get started?
- [DEV] 🔍 extractLayoutContent DEBUG: element "answer_2" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "answer_2": Super easy! Most people are up and running in under 5 minutes. We have a guided setup that walks you through everything step by step. Want me to send you a quick demo link?
- [DEV] 🔍 extractLayoutContent DEBUG: element "question_3" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "question_3": I'm not super technical - will I be able to figure this out?
- [DEV] 🔍 extractLayoutContent DEBUG: element "answer_3" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "answer_3": Absolutely! We designed everything with non-technical users in mind. Think of it like using your favorite apps - if you can send an email or post on social media, you've got this! 💪
- [DEV] 🔍 extractLayoutContent DEBUG: element "question_4" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "question_4": What if I need help along the way?
- [DEV] 🔍 extractLayoutContent DEBUG: element "answer_4" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "answer_4": We're here 24/7! You can chat with us anytime, browse our help docs, or join our community where fellow users share tips. Plus, we have tons of video tutorials for visual learners.
- [DEV] 🔍 extractLayoutContent DEBUG: element "question_5" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "question_5": One more thing - can I really cancel anytime?
- [DEV] 🔍 extractLayoutContent DEBUG: element "answer_5" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "answer_5": Yep! No contracts, no cancellation fees, no questions asked. You can downgrade or cancel right from your dashboard. We only want happy customers! ✨
- [DEV] 🔍 extractLayoutContent DEBUG: element "user_name" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "user_name": You
- [DEV] 🔍 extractLayoutContent DEBUG: element "support_name" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "support_name": Alex from Support
- [DEV] 🔍 extractLayoutContent DEBUG: element "support_avatar" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "support_avatar": A
- [DEV] 🔍 extractLayoutContent DEBUG: element "online_status_text" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "online_status_text": Online now
- [DEV] 🔍 extractLayoutContent DEBUG: element "chat_placeholder" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "chat_placeholder": Ask us anything...
- [DEV] 🔍 extractLayoutContent DEBUG: element "cta_text" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "cta_text": Ready to start your own conversation?
- [DEV] 🔍 extractLayoutContent DEBUG: element "button_text" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "button_text": Chat with us now
- [DEV] 🔍 extractLayoutContent DEBUG: element "show_typing_indicator" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "show_typing_indicator": true
- [DEV] 🔍 extractLayoutContent DEBUG: element "show_cta_section" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
- [DEV] 🎨 Using default for asset element "show_cta_section": true
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "status_indicator_icon" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "status_indicator_icon": 🟢
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "send_icon" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "send_icon": ➤
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "support_avatar_icon" is undefined {layout: 'ChatBubbleFAQ', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "support_avatar_icon": 👤
-logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#e0e7ff]'}
-logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#e0e7ff]'}
-logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#e0e7ff]'}
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "trust_items" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "trust_items": Free 14-day trial|No credit card required|Cancel anytime
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_1" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "trust_item_1": Free 14-day trial
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_2" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "trust_item_2": No credit card required
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_3" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "trust_item_3": Cancel anytime
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_4" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "trust_item_4": 
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_5" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "trust_item_5": 
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "customer_count" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "customer_count": 10,000+
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "customer_label" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "customer_label": Happy customers
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "rating_stat" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "rating_stat": 4.8/5 stars
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "uptime_stat" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "uptime_stat": 99.9% uptime
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "uptime_label" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "uptime_label": SOC 2 Compliant
-logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#4338ca]'}
-logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#4338ca]'}
-logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#4338ca]'}
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "trust_items" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "trust_items": Free 14-day trial|No credit card required|Cancel anytime
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_1" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "trust_item_1": Free 14-day trial
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_2" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "trust_item_2": No credit card required
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_3" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "trust_item_3": Cancel anytime
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_4" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "trust_item_4": 
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "trust_item_5" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "trust_item_5": 
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "customer_count" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "customer_count": 10,000+
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "customer_label" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "customer_label": Happy customers
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "rating_stat" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "rating_stat": 4.8/5 stars
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "uptime_stat" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "uptime_stat": 99.9% uptime
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "uptime_label" is undefined {layout: 'CenteredHeadlineCTA', isMandatory: false, isInSchema: false, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] 🎨 Using default for asset element "uptime_label": SOC 2 Compliant
-logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#4338ca]'}
-logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#4338ca]'}
-logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-[#4338ca]'}
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "copyright" is undefined {layout: 'MultiColumnFooter', isMandatory: true, isInSchema: true, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] ✅ Using default for mandatory element "copyright": © 2025 Your Company. All rights reserved.
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "company_description" is undefined {layout: 'MultiColumnFooter', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
-logger.ts:95 [DEV] ❌ Using empty for excluded optional element "company_description" 
-logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
-logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
-logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "copyright" is undefined {layout: 'MultiColumnFooter', isMandatory: true, isInSchema: true, isExcluded: false, hasLayout: true, …}
-logger.ts:95 [DEV] ✅ Using default for mandatory element "copyright": © 2025 Your Company. All rights reserved.
-logger.ts:95 [DEV] 🔍 extractLayoutContent DEBUG: element "company_description" is undefined {layout: 'MultiColumnFooter', isMandatory: false, isInSchema: true, isExcluded: true, hasLayout: true, …}
-logger.ts:95 [DEV] ❌ Using empty for excluded optional element "company_description" 
-logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
-logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
-logger.ts:95 [DEV] 🔧 [SMART-TEXT-FIX] Converted RGB object to CSS string: {originalRGB: {…}, convertedCSS: 'bg-white'}
+logger.ts:95 [DEV] 🧭 [NAV-DEBUG] FullNavHeader useEffect: {hasNavigationConfig: true, sectionsLength: 8, sections: Array(8)}
+logger.ts:95 [DEV] 🧭 [NAV-DEBUG] Navigation already exists: {items: Array(6), maxItems: 7, lastUpdated: 1756798562788, autoConfigured: true}
