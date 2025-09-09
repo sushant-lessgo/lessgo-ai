@@ -181,7 +181,7 @@ export default function AccordionSteps(props: LayoutComponentProps) {
       <button
         onClick={onToggle}
         className={`w-full p-6 text-left transition-all duration-300 ${
-          isOpen 
+          isOpen && mode === 'preview'
             ? `${colorTokens.ctaBg} text-white` 
             : 'bg-white hover:bg-gray-50 text-gray-900'
         }`}
@@ -189,7 +189,7 @@ export default function AccordionSteps(props: LayoutComponentProps) {
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-4 flex-1">
             <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm ${
-              isOpen 
+              isOpen && mode === 'preview'
                 ? 'bg-white/20 text-white' 
                 : `${colorTokens.ctaBg} text-white`
             }`}>
@@ -206,11 +206,7 @@ export default function AccordionSteps(props: LayoutComponentProps) {
                     stepTitles[index] = e.currentTarget.textContent || '';
                     handleContentUpdate('step_titles', stepTitles.join('|'));
                   }}
-                  className={`text-lg font-semibold outline-none focus:ring-2 focus:ring-opacity-50 rounded px-2 py-1 cursor-text min-h-[32px] ${
-                    isOpen 
-                      ? 'text-white focus:ring-white/50 hover:bg-white/10'
-                      : 'text-gray-900 focus:ring-blue-500 hover:bg-gray-100'
-                  }`}
+                  className={`text-lg font-semibold outline-none focus:ring-2 focus:ring-opacity-50 rounded px-2 py-1 cursor-text min-h-[32px] text-gray-900 focus:ring-blue-500 hover:bg-gray-100`}
                   data-placeholder="Step title"
                 >
                   {step.title}
