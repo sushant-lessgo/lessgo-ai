@@ -362,12 +362,19 @@ export default function ZigzagImageSteps(props: LayoutComponentProps) {
     ? blockContent.step_descriptions.split('|').map(item => item.trim()).filter(Boolean)
     : [];
 
-  const steps = stepTitles.map((title, index) => ({
-    title: title || (mode === 'edit' ? `Step ${index + 1}` : ''), // Fallback for empty titles in edit mode
-    description: stepDescriptions[index] || '',
+  // Create steps array - show up to 6 steps in edit mode, or only non-empty steps in preview
+  const maxSteps = mode === 'edit' ? 6 : stepTitles.length;
+  const steps = Array.from({ length: maxSteps }, (_, index) => ({
+    title: stepTitles[index] || (mode === 'edit' ? `Step ${index + 1}` : ''),
+    description: stepDescriptions[index] || (mode === 'edit' ? '' : ''),
     visual: getStepVisual(index), // Use individual field instead of pipe-separated
     originalIndex: index // Keep track of original index for proper data updates
-  })).filter(step => step.title.trim() !== '' || mode === 'edit'); // Show empty steps in edit mode
+  })).filter(step => {
+    // In edit mode: show all slots (including empty ones for steps 5 & 6)
+    if (mode === 'edit') return true;
+    // In preview mode: only show steps with content
+    return step.title.trim() !== '' || step.description.trim() !== '' || step.visual.trim() !== '';
+  });
 
   const trustItems = blockContent.trust_items 
     ? blockContent.trust_items.split('|').map(item => item.trim()).filter(Boolean)
