@@ -516,12 +516,26 @@ export default function ZigzagImageSteps(props: LayoutComponentProps) {
                   const stepTitles = blockContent.step_titles ? blockContent.step_titles.split('|') : [];
                   const stepDescriptions = blockContent.step_descriptions ? blockContent.step_descriptions.split('|') : [];
                   
-                  stepTitles.push(`Step ${stepTitles.length + 1}`);
+                  const newStepIndex = stepTitles.length;
+                  stepTitles.push(`Step ${newStepIndex + 1}`);
                   stepDescriptions.push('Add step description here');
+                  
+                  // Add default image for the new step
+                  const defaultImages = [
+                    '/step-discover.jpg',
+                    '/step-design.jpg', 
+                    '/step-refine.jpg',
+                    '/step-share.jpg',
+                    '/step-optimize.jpg',
+                    '/step-succeed.jpg'
+                  ];
+                  
+                  const defaultImage = defaultImages[newStepIndex] || '/step-placeholder.jpg';
+                  const visualFieldName = `step_visual_${newStepIndex}` as keyof ZigzagImageStepsContent;
                   
                   handleContentUpdate('step_titles', stepTitles.join('|'));
                   handleContentUpdate('step_descriptions', stepDescriptions.join('|'));
-                  // Individual visual field will be empty by default and can be set via image toolbar
+                  handleContentUpdate(visualFieldName, defaultImage);
                 }}
                 className="px-6 py-3 border-2 border-dashed border-gray-300 hover:border-gray-400 text-gray-500 hover:text-gray-600 transition-all duration-300 flex items-center space-x-3 bg-gray-50 hover:bg-gray-100 rounded-2xl"
                 title="Add new step"
