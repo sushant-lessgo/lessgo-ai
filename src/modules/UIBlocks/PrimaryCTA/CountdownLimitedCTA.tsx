@@ -12,6 +12,7 @@ import {
 import { CTAButton } from '@/components/layout/ComponentRegistry';
 import { LayoutComponentProps } from '@/types/storeTypes';
 import { createCTAClickHandler } from '@/utils/ctaHandler';
+import { CountdownConfigModal } from '@/app/edit/[token]/components/ui/CountdownConfigModal';
 
 // Content interface for type safety
 interface CountdownLimitedCTAContent {
@@ -27,6 +28,10 @@ interface CountdownLimitedCTAContent {
   offer_detail_3?: string;
   offer_detail_4?: string;
   offer_detail_5?: string;
+  countdown_end_date?: string;
+  countdown_duration_days?: string;
+  countdown_duration_hours?: string;
+  countdown_behavior?: 'reset' | 'stop' | 'hide';
 }
 
 // Content schema - defines structure and defaults
@@ -78,47 +83,136 @@ const CONTENT_SCHEMA = {
   offer_detail_5: { 
     type: 'string' as const, 
     default: '' 
+  },
+  countdown_end_date: {
+    type: 'string' as const,
+    default: ''
+  },
+  countdown_duration_days: {
+    type: 'string' as const,
+    default: '3'
+  },
+  countdown_duration_hours: {
+    type: 'string' as const,
+    default: '0'
+  },
+  countdown_behavior: {
+    type: 'string' as const,
+    default: 'reset'
   }
 };
 
 // Countdown Timer Component
-const CountdownTimer = React.memo(() => {
+interface CountdownTimerProps {
+  mode: 'edit' | 'preview';
+  config: {
+    countdown_end_date?: string;
+    countdown_duration_days?: string;
+    countdown_duration_hours?: string;
+    countdown_behavior?: string;
+  };
+  onConfigClick?: () => void;
+}
+
+const CountdownTimer = React.memo(({ mode, config, onConfigClick }: CountdownTimerProps) => {
   const [timeLeft, setTimeLeft] = useState({
-    days: 2,
-    hours: 14,
-    minutes: 32,
-    seconds: 45
+    days: 0,
+    hours: 0,
+    minutes: 0,
+    seconds: 0
   });
+  const [isExpired, setIsExpired] = useState(false);
+
+  // Calculate target end time based on config
+  const getTargetEndTime = (): Date => {
+    if (config.countdown_end_date && config.countdown_end_date.trim()) {
+      // Specific date mode
+      const endDate = new Date(config.countdown_end_date);
+      if (!isNaN(endDate.getTime())) {
+        return endDate;
+      }
+    }
+    
+    // Duration mode (default)
+    const days = parseInt(config.countdown_duration_days || '3', 10);
+    const hours = parseInt(config.countdown_duration_hours || '0', 10);
+    const endTime = new Date();
+    endTime.setDate(endTime.getDate() + days);
+    endTime.setHours(endTime.getHours() + hours);
+    return endTime;
+  };
+
+  // Calculate time left from target end time
+  const calculateTimeLeft = (targetEndTime: Date) => {
+    const now = new Date().getTime();
+    const target = targetEndTime.getTime();
+    const difference = target - now;
+
+    if (difference <= 0) {
+      return { days: 0, hours: 0, minutes: 0, seconds: 0, expired: true };
+    }
+
+    const days = Math.floor(difference / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    const minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
+    const seconds = Math.floor((difference % (1000 * 60)) / 1000);
+
+    return { days, hours, minutes, seconds, expired: false };
+  };
 
   useEffect(() => {
+    const targetEndTime = getTargetEndTime();
+    
+    // Initial calculation
+    const initialTimeLeft = calculateTimeLeft(targetEndTime);
+    setTimeLeft({
+      days: initialTimeLeft.days,
+      hours: initialTimeLeft.hours,
+      minutes: initialTimeLeft.minutes,
+      seconds: initialTimeLeft.seconds
+    });
+    setIsExpired(initialTimeLeft.expired);
+
     const timer = setInterval(() => {
-      setTimeLeft(prev => {
-        let { days, hours, minutes, seconds } = prev;
+      const timeLeft = calculateTimeLeft(targetEndTime);
+      
+      if (timeLeft.expired) {
+        setIsExpired(true);
         
-        seconds -= 1;
-        if (seconds < 0) {
-          seconds = 59;
-          minutes -= 1;
-          if (minutes < 0) {
-            minutes = 59;
-            hours -= 1;
-            if (hours < 0) {
-              hours = 23;
-              days -= 1;
-              if (days < 0) {
-                // Reset to demo countdown
-                return { days: 2, hours: 14, minutes: 32, seconds: 45 };
-              }
-            }
-          }
+        // Handle countdown behavior
+        const behavior = config.countdown_behavior || 'reset';
+        if (behavior === 'reset') {
+          // Reset to new target time
+          const newTargetTime = getTargetEndTime();
+          const newTimeLeft = calculateTimeLeft(newTargetTime);
+          setTimeLeft({
+            days: newTimeLeft.days,
+            hours: newTimeLeft.hours,
+            minutes: newTimeLeft.minutes,
+            seconds: newTimeLeft.seconds
+          });
+          setIsExpired(false);
+        } else if (behavior === 'stop') {
+          // Stop at 00:00
+          setTimeLeft({ days: 0, hours: 0, minutes: 0, seconds: 0 });
+          clearInterval(timer);
+        } else if (behavior === 'hide') {
+          // Hide component (handled in parent)
+          clearInterval(timer);
         }
-        
-        return { days, hours, minutes, seconds };
-      });
+      } else {
+        setTimeLeft({
+          days: timeLeft.days,
+          hours: timeLeft.hours,
+          minutes: timeLeft.minutes,
+          seconds: timeLeft.seconds
+        });
+        setIsExpired(false);
+      }
     }, 1000);
 
     return () => clearInterval(timer);
-  }, []);
+  }, [config]);
 
   const TimeUnit = ({ value, label }: { value: number, label: string }) => (
     <div className="text-center">
@@ -129,8 +223,30 @@ const CountdownTimer = React.memo(() => {
     </div>
   );
 
+  // Handle hide behavior
+  if (isExpired && config.countdown_behavior === 'hide') {
+    return null;
+  }
+
+  // Show "EXPIRED" message for stop behavior
+  if (isExpired && config.countdown_behavior === 'stop') {
+    return (
+      <div className="flex items-center justify-center">
+        <div className="bg-gray-600 text-white text-2xl lg:text-3xl font-bold px-8 py-4 rounded-lg shadow-lg">
+          EXPIRED
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="flex items-center justify-center space-x-4 lg:space-x-6">
+    <div 
+      className={`relative group flex items-center justify-center space-x-4 lg:space-x-6 ${
+        mode === 'edit' && onConfigClick ? 'cursor-pointer hover:opacity-80 transition-opacity' : ''
+      }`}
+      onClick={mode === 'edit' && onConfigClick ? onConfigClick : undefined}
+      title={mode === 'edit' ? 'Click to configure countdown timer' : undefined}
+    >
       <TimeUnit value={timeLeft.days} label="Days" />
       <div className="text-red-600 text-2xl font-bold">:</div>
       <TimeUnit value={timeLeft.hours} label="Hours" />
@@ -138,6 +254,15 @@ const CountdownTimer = React.memo(() => {
       <TimeUnit value={timeLeft.minutes} label="Min" />
       <div className="text-red-600 text-2xl font-bold">:</div>
       <TimeUnit value={timeLeft.seconds} label="Sec" />
+      
+      {mode === 'edit' && (
+        <div className="absolute -top-2 -right-2 bg-blue-500 text-white text-xs px-1.5 py-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+          <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+          </svg>
+        </div>
+      )}
     </div>
   );
 });
@@ -159,6 +284,9 @@ export default function CountdownLimitedCTA(props: LayoutComponentProps) {
   });
   
   const { getTextStyle: getTypographyStyle } = useTypography();
+  
+  // Modal state for countdown configuration
+  const [isCountdownModalOpen, setIsCountdownModalOpen] = useState(false);
 
   // Handle offer details - support both legacy pipe-separated format and individual fields
   const getOfferDetails = (): string[] => {
@@ -260,7 +388,16 @@ export default function CountdownLimitedCTA(props: LayoutComponentProps) {
             />
           </div>
           
-          <CountdownTimer />
+          <CountdownTimer 
+            mode={mode}
+            config={{
+              countdown_end_date: blockContent.countdown_end_date,
+              countdown_duration_days: blockContent.countdown_duration_days,
+              countdown_duration_hours: blockContent.countdown_duration_hours,
+              countdown_behavior: blockContent.countdown_behavior
+            }}
+            onConfigClick={() => setIsCountdownModalOpen(true)}
+          />
         </div>
 
         {/* CTA Button */}
@@ -384,6 +521,13 @@ export default function CountdownLimitedCTA(props: LayoutComponentProps) {
         </div>
 
       </div>
+      
+      {/* Countdown Configuration Modal */}
+      <CountdownConfigModal
+        isOpen={isCountdownModalOpen}
+        onClose={() => setIsCountdownModalOpen(false)}
+        sectionId={sectionId}
+      />
     </LayoutSection>
   );
 }
@@ -392,14 +536,16 @@ export default function CountdownLimitedCTA(props: LayoutComponentProps) {
 export const componentMeta = {
   name: 'CountdownLimitedCTA',
   category: 'CTA Sections',
-  description: 'Urgency-driven CTA with live countdown timer',
+  description: 'Urgency-driven CTA with configurable live countdown timer',
   tags: ['cta', 'urgency', 'countdown', 'limited-time', 'conversion'],
   defaultBackgroundType: 'primary' as const,
   complexity: 'high',
   estimatedBuildTime: '30 minutes',
   
   features: [
-    'Live countdown timer',
+    'Configurable live countdown timer (click to edit)',
+    'Duration or specific date countdown modes',
+    'Customizable timer expiry behavior (reset/stop/hide)',
     'Urgency-focused design',
     'Limited time offer badges',
     'Offer details grid',
@@ -418,7 +564,11 @@ export const componentMeta = {
     { key: 'offer_detail_2', label: 'Offer Detail 2', type: 'text', required: false },
     { key: 'offer_detail_3', label: 'Offer Detail 3', type: 'text', required: false },
     { key: 'offer_detail_4', label: 'Offer Detail 4', type: 'text', required: false },
-    { key: 'offer_detail_5', label: 'Offer Detail 5', type: 'text', required: false }
+    { key: 'offer_detail_5', label: 'Offer Detail 5', type: 'text', required: false },
+    { key: 'countdown_end_date', label: 'Countdown End Date (optional)', type: 'datetime-local', required: false },
+    { key: 'countdown_duration_days', label: 'Countdown Duration (Days)', type: 'number', required: false },
+    { key: 'countdown_duration_hours', label: 'Additional Hours', type: 'number', required: false },
+    { key: 'countdown_behavior', label: 'Timer Expiry Behavior', type: 'select', options: ['reset', 'stop', 'hide'], required: false }
   ],
   
   useCases: [
