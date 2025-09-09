@@ -25,6 +25,7 @@ interface VerticalTimelineContent {
   process_steps_label?: string;
   process_summary_heading?: string;
   process_summary_description?: string;
+  process_time_label?: string;
   // Optional step icon overrides
   step_icon_1?: string;
   step_icon_2?: string;
@@ -65,6 +66,22 @@ const CONTENT_SCHEMA = {
   trust_items: { 
     type: 'string' as const, 
     default: '' 
+  },
+  process_steps_label: { 
+    type: 'string' as const, 
+    default: 'simple steps' 
+  },
+  process_summary_heading: { 
+    type: 'string' as const, 
+    default: 'Get started in minutes, not hours' 
+  },
+  process_summary_description: { 
+    type: 'string' as const, 
+    default: 'Our streamlined process is designed to get you up and running quickly with maximum efficiency.' 
+  },
+  process_time_label: { 
+    type: 'string' as const, 
+    default: 'Total time: 30 minutes' 
   },
   // Optional step icon overrides
   step_icon_1: { type: 'string' as const, default: '' },
@@ -108,16 +125,16 @@ const TimelineStep = React.memo(({
   onRemove?: () => void;
 }) => {
   
-  const getStepColor = (index: number) => {
-    const colors = [
-      'from-blue-500 to-blue-600',
-      'from-green-500 to-green-600', 
-      'from-purple-500 to-purple-600',
-      'from-orange-500 to-orange-600',
-      'from-pink-500 to-pink-600',
-      'from-indigo-500 to-indigo-600'
+  const getStepStyle = (index: number) => {
+    const gradients = [
+      { background: 'linear-gradient(135deg, #3B82F6 0%, #2563EB 100%)' }, // blue
+      { background: 'linear-gradient(135deg, #10B981 0%, #059669 100%)' }, // green
+      { background: 'linear-gradient(135deg, #A855F7 0%, #9333EA 100%)' }, // purple
+      { background: 'linear-gradient(135deg, #F97316 0%, #EA580C 100%)' }, // orange
+      { background: 'linear-gradient(135deg, #EC4899 0%, #DB2777 100%)' }, // pink
+      { background: 'linear-gradient(135deg, #6366F1 0%, #4F46E5 100%)' }  // indigo
     ];
-    return colors[index % colors.length];
+    return gradients[index % gradients.length];
   };
 
   return (
@@ -131,7 +148,10 @@ const TimelineStep = React.memo(({
       <div className="flex items-start space-x-6 w-full">
         {/* Step Number/Icon */}
         <div className="flex-shrink-0 relative">
-          <div className={`w-12 h-12 rounded-full bg-gradient-to-br ${getStepColor(index)} shadow-lg flex items-center justify-center z-10 relative`}>
+          <div 
+            className="w-12 h-12 rounded-full shadow-lg flex items-center justify-center z-10 relative"
+            style={getStepStyle(index)}
+          >
             {blockContent.use_step_icons && getStepIcon(index) ? (
               <IconEditableText
                 mode={mode}
@@ -167,9 +187,7 @@ const TimelineStep = React.memo(({
                   contentEditable
                   suppressContentEditableWarning
                   onBlur={(e) => {
-                    const stepTitles = blockContent.step_titles ? blockContent.step_titles.split('|') : [];
-                    stepTitles[index] = e.currentTarget.textContent || '';
-                    handleContentUpdate('step_titles', stepTitles.join('|'));
+                    handleContentUpdate('step_titles', e.currentTarget.textContent || '');
                   }}
                   className="text-xl font-bold text-gray-900 flex-1 outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-2 py-1 cursor-text hover:bg-gray-50 min-h-[32px]"
                   data-placeholder="Step title"
@@ -185,9 +203,7 @@ const TimelineStep = React.memo(({
                   contentEditable
                   suppressContentEditableWarning
                   onBlur={(e) => {
-                    const stepDurations = blockContent.step_durations ? blockContent.step_durations.split('|') : [];
-                    stepDurations[index] = e.currentTarget.textContent || '';
-                    handleContentUpdate('step_durations', stepDurations.join('|'));
+                    handleContentUpdate('step_durations', e.currentTarget.textContent || '');
                   }}
                   className={`text-sm font-medium ${mutedTextColor} bg-gray-100 px-3 py-1 rounded-full ml-4 flex-shrink-0 outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 cursor-text hover:bg-gray-200 min-w-[60px] text-center`}
                   data-placeholder="Duration"
@@ -209,9 +225,7 @@ const TimelineStep = React.memo(({
                 contentEditable
                 suppressContentEditableWarning
                 onBlur={(e) => {
-                  const stepDescriptions = blockContent.step_descriptions ? blockContent.step_descriptions.split('|') : [];
-                  stepDescriptions[index] = e.currentTarget.textContent || '';
-                  handleContentUpdate('step_descriptions', stepDescriptions.join('|'));
+                  handleContentUpdate('step_descriptions', e.currentTarget.textContent || '');
                 }}
                 className="text-gray-600 leading-relaxed mb-4 outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-2 py-1 cursor-text hover:bg-gray-50 min-h-[48px]"
                 data-placeholder="Step description"
@@ -293,8 +307,7 @@ export default function VerticalTimeline(props: LayoutComponentProps) {
   const steps = stepTitles.map((title, index) => ({
     title: title || (mode === 'edit' ? `Step ${index + 1}` : ''),
     description: stepDescriptions[index] || '',
-    duration: stepDurations[index] || '',
-    originalIndex: index // Keep track of original index for proper data updates
+    duration: stepDurations[index] || ''
   })).filter(step => step.title.trim() !== '' || mode === 'edit'); // Show empty steps in edit mode
 
   const trustItems = blockContent.trust_items 
@@ -350,29 +363,46 @@ export default function VerticalTimeline(props: LayoutComponentProps) {
         <div className="space-y-0">
           {steps.map((step, displayIndex) => (
             <TimelineStep
-              key={step.originalIndex}
+              key={displayIndex}
               title={step.title}
               description={step.description}
               duration={step.duration}
-              index={step.originalIndex}
+              index={displayIndex}
               isLast={displayIndex === steps.length - 1}
               colorTokens={colorTokens}
               mutedTextColor={mutedTextColor}
               blockContent={blockContent}
-              handleContentUpdate={handleContentUpdate}
+              handleContentUpdate={(key, value) => {
+                const stepTitles = blockContent.step_titles ? blockContent.step_titles.split('|') : [];
+                const stepDescriptions = blockContent.step_descriptions ? blockContent.step_descriptions.split('|') : [];
+                const stepDurations = blockContent.step_durations ? blockContent.step_durations.split('|') : [];
+                
+                if (key === 'step_titles') {
+                  stepTitles[displayIndex] = value;
+                  handleContentUpdate('step_titles', stepTitles.join('|'));
+                } else if (key === 'step_descriptions') {
+                  stepDescriptions[displayIndex] = value;
+                  handleContentUpdate('step_descriptions', stepDescriptions.join('|'));
+                } else if (key === 'step_durations') {
+                  stepDurations[displayIndex] = value;
+                  handleContentUpdate('step_durations', stepDurations.join('|'));
+                } else {
+                  handleContentUpdate(key, value);
+                }
+              }}
               mode={mode}
               backgroundType={backgroundType}
               sectionId={sectionId}
-              getStepIcon={getStepIcon}
-              handleStepIconEdit={handleStepIconEdit}
+              getStepIcon={(index) => getStepIcon(displayIndex)}
+              handleStepIconEdit={(index, value) => handleStepIconEdit(displayIndex, value)}
               onRemove={steps.length > 1 ? () => {
                 const stepTitles = blockContent.step_titles ? blockContent.step_titles.split('|') : [];
                 const stepDescriptions = blockContent.step_descriptions ? blockContent.step_descriptions.split('|') : [];
                 const stepDurations = blockContent.step_durations ? blockContent.step_durations.split('|') : [];
                 
-                stepTitles.splice(step.originalIndex, 1);
-                stepDescriptions.splice(step.originalIndex, 1);
-                stepDurations.splice(step.originalIndex, 1);
+                stepTitles.splice(displayIndex, 1);
+                stepDescriptions.splice(displayIndex, 1);
+                stepDurations.splice(displayIndex, 1);
                 
                 handleContentUpdate('step_titles', stepTitles.join('|'));
                 handleContentUpdate('step_descriptions', stepDescriptions.join('|'));
@@ -435,16 +465,16 @@ export default function VerticalTimeline(props: LayoutComponentProps) {
                   </svg>
                   <EditableAdaptiveText
                     mode={mode}
-                    value={'' /* blockContent.process_time_label || '' */}
-                    onEdit={(value) => {/* handleContentUpdate('process_time_label', value) */}}
+                    value={blockContent.process_time_label || ''}
+                    onEdit={(value) => handleContentUpdate('process_time_label', value)}
                     backgroundType={backgroundType}
                     colorTokens={colorTokens}
                     variant="body"
                     className="text-lg font-semibold text-gray-900"
                     placeholder="Time to complete"
                     sectionBackground={sectionBackground}
-                    data-section-id={sectionId}
-                    data-element-key="process_time_label"
+                    sectionId={sectionId}
+                    elementKey="process_time_label"
                   />
                   {mode !== 'preview' && (
                     <button
@@ -635,8 +665,11 @@ export const componentMeta = {
     { key: 'process_summary_description', label: 'Process Summary Description', type: 'textarea', required: false },
     { key: 'process_time_label', label: 'Process Time Label', type: 'text', required: false },
     { key: 'process_steps_label', label: 'Process Steps Label', type: 'text', required: false },
-    { key: 'show_step_features', label: 'Show Step Features', type: 'boolean', required: false },
-    { key: 'show_process_summary', label: 'Show Process Summary', type: 'boolean', required: false }
+    { key: 'step_icon_1', label: 'Step 1 Icon', type: 'text', required: false },
+    { key: 'step_icon_2', label: 'Step 2 Icon', type: 'text', required: false },
+    { key: 'step_icon_3', label: 'Step 3 Icon', type: 'text', required: false },
+    { key: 'step_icon_4', label: 'Step 4 Icon', type: 'text', required: false },
+    { key: 'use_step_icons', label: 'Use Custom Step Icons', type: 'boolean', required: false }
   ],
   
   features: [
