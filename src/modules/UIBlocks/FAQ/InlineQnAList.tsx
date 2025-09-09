@@ -124,7 +124,7 @@ export default function InlineQnAList(props: LayoutComponentProps) {
     >
       <div className="max-w-4xl mx-auto">
         {/* Header */}
-        <div className="text-center mb-10">
+        <div className="text-center mb-12">
           <EditableAdaptiveHeadline
             mode={mode}
             value={blockContent.headline || ''}
