@@ -354,23 +354,23 @@ export default function ZigzagImageSteps(props: LayoutComponentProps) {
     return (blockContent[fieldName] as string) || '';
   };
 
+  // Parse titles and descriptions without filtering - preserve empty slots for steps 5 & 6
   const stepTitles = blockContent.step_titles 
-    ? blockContent.step_titles.split('|').map(item => item.trim()).filter(Boolean)
+    ? blockContent.step_titles.split('|').map(item => item.trim())
     : [];
 
   const stepDescriptions = blockContent.step_descriptions 
-    ? blockContent.step_descriptions.split('|').map(item => item.trim()).filter(Boolean)
+    ? blockContent.step_descriptions.split('|').map(item => item.trim())
     : [];
 
-  // Create steps array - show up to 6 steps in edit mode, or only non-empty steps in preview
-  const maxSteps = mode === 'edit' ? 6 : stepTitles.length;
-  const steps = Array.from({ length: maxSteps }, (_, index) => ({
-    title: stepTitles[index] || (mode === 'edit' ? `Step ${index + 1}` : ''),
-    description: stepDescriptions[index] || (mode === 'edit' ? '' : ''),
+  // Create steps array based on actual data, similar to IconCircleSteps pattern
+  const steps = stepTitles.map((title, index) => ({
+    title: title || (mode === 'edit' ? `Step ${index + 1}` : ''),
+    description: stepDescriptions[index] || '',
     visual: getStepVisual(index), // Use individual field instead of pipe-separated
     originalIndex: index // Keep track of original index for proper data updates
   })).filter(step => {
-    // In edit mode: show all slots (including empty ones for steps 5 & 6)
+    // In edit mode: show empty steps for editing
     if (mode === 'edit') return true;
     // In preview mode: only show steps with content
     return step.title.trim() !== '' || step.description.trim() !== '' || step.visual.trim() !== '';
@@ -464,7 +464,7 @@ export default function ZigzagImageSteps(props: LayoutComponentProps) {
         <div className="space-y-24">
           {steps.map((step, displayIndex) => (
             <ZigzagStep
-              key={step.originalIndex}
+              key={`step-${displayIndex}`}
               title={step.title}
               description={step.description}
               visual={step.visual}
@@ -480,19 +480,27 @@ export default function ZigzagImageSteps(props: LayoutComponentProps) {
                 const stepTitles = blockContent.step_titles ? blockContent.step_titles.split('|') : [];
                 const stepDescriptions = blockContent.step_descriptions ? blockContent.step_descriptions.split('|') : [];
                 
-                // Remove from pipe-separated fields
+                // Remove from pipe-separated fields using original index
                 stepTitles.splice(step.originalIndex, 1);
                 stepDescriptions.splice(step.originalIndex, 1);
                 
-                // Shift individual visual fields
-                for (let i = step.originalIndex; i < 5; i++) {
-                  const currentField = `step_visual_${i}` as keyof ZigzagImageStepsContent;
-                  const nextField = `step_visual_${i + 1}` as keyof ZigzagImageStepsContent;
-                  const nextValue = (blockContent[nextField] as string) || '';
-                  handleContentUpdate(currentField, nextValue);
+                // Remove the visual field for the step being deleted and shift remaining fields
+                const visualsToShift = [];
+                for (let i = 0; i < 6; i++) {
+                  const fieldName = `step_visual_${i}` as keyof ZigzagImageStepsContent;
+                  const value = (blockContent[fieldName] as string) || '';
+                  visualsToShift.push(value);
                 }
-                // Clear the last field
-                handleContentUpdate('step_visual_5', '');
+                
+                // Remove the visual at the original index and shift remaining ones
+                visualsToShift.splice(step.originalIndex, 1);
+                
+                // Update all visual fields with shifted values
+                for (let i = 0; i < 6; i++) {
+                  const fieldName = `step_visual_${i}` as keyof ZigzagImageStepsContent;
+                  const newValue = visualsToShift[i] || '';
+                  handleContentUpdate(fieldName, newValue);
+                }
                 
                 handleContentUpdate('step_titles', stepTitles.join('|'));
                 handleContentUpdate('step_descriptions', stepDescriptions.join('|'));
