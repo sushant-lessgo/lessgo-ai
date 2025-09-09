@@ -230,6 +230,80 @@ export default function AnimatedProcessLine(props: LayoutComponentProps) {
     );
   };
 
+  const EditableProcessStep = ({ step, index, isActive, mode, blockContent, handleContentUpdate, colorTokens, backgroundType, sectionId, onRemove }: {
+    step: { title: string; description: string };
+    index: number;
+    isActive: boolean;
+    mode: 'edit' | 'preview';
+    blockContent: AnimatedProcessLineContent;
+    handleContentUpdate: (key: keyof AnimatedProcessLineContent, value: any) => void;
+    colorTokens: any;
+    backgroundType: any;
+    sectionId: string;
+    onRemove?: () => void;
+  }) => {
+    return (
+      <div 
+        className="relative group transition-all duration-300 hover:scale-102"
+        onClick={() => setActiveStep(index)}
+      >
+        {/* Step Circle */}
+        <div className={`relative w-16 h-16 rounded-full flex items-center justify-center transition-all duration-300 ${
+          isActive 
+            ? `${colorTokens.ctaBg} shadow-xl` 
+            : 'bg-gray-200 hover:bg-gray-300'
+        }`}>
+          <IconEditableText
+            mode={mode}
+            value={getStepIcon(index) as string || `${index + 1}`}
+            onEdit={(value) => handleStepIconEdit(index, value)}
+            backgroundType={backgroundType as any}
+            colorTokens={colorTokens}
+            iconSize="lg"
+            className="text-3xl text-white"
+            sectionId={sectionId}
+            elementKey={`step_icon_${index + 1}`}
+          />
+        </div>
+
+        {/* Step Label - Editable */}
+        <div className="absolute top-20 left-1/2 transform -translate-x-1/2 text-center">
+          <div
+            contentEditable
+            suppressContentEditableWarning
+            onBlur={(e) => {
+              const titles = blockContent.step_titles.split('|');
+              titles[index] = e.currentTarget.textContent || '';
+              handleContentUpdate('step_titles', titles.join('|'));
+            }}
+            className={`font-semibold text-sm transition-colors duration-300 px-2 py-1 rounded cursor-text hover:bg-gray-100 outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 min-w-[80px] ${
+              isActive ? 'text-gray-900' : 'text-gray-600'
+            }`}
+            data-placeholder="Step title"
+          >
+            {step.title}
+          </div>
+        </div>
+
+        {/* Remove button */}
+        {onRemove && (
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onRemove();
+            }}
+            className="opacity-0 group-hover:opacity-100 absolute -top-2 -right-2 bg-white rounded-full p-1 shadow-md text-red-500 hover:text-red-700 transition-opacity duration-200 z-10"
+            title="Remove step"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        )}
+      </div>
+    );
+  };
+
   const ConnectionLine = ({ index, isActive, isCompleted }: {
     index: number;
     isActive: boolean;
@@ -298,40 +372,267 @@ export default function AnimatedProcessLine(props: LayoutComponentProps) {
         </div>
 
         {mode !== 'preview' ? (
-          <div className="space-y-8">
-            <div className="p-6 border border-gray-200 rounded-lg bg-gray-50">
-              <h4 className="font-semibold text-gray-700 mb-4">Process Step Content</h4>
-              
-              <div className="space-y-4">
-                <EditableAdaptiveText
-                  mode={mode}
-                  value={blockContent.step_titles || ''}
-                  onEdit={(value) => handleContentUpdate('step_titles', value)}
-                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
-                  colorTokens={colorTokens}
-                  variant="body"
-                  className="mb-2"
-                  placeholder="Step titles (pipe separated)"
-                  sectionId={sectionId}
-                  elementKey="step_titles"
-                  sectionBackground={sectionBackground}
-                />
-                
-                <EditableAdaptiveText
-                  mode={mode}
-                  value={blockContent.step_descriptions || ''}
-                  onEdit={(value) => handleContentUpdate('step_descriptions', value)}
-                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
-                  colorTokens={colorTokens}
-                  variant="body"
-                  placeholder="Step descriptions (pipe separated)"
-                  sectionId={sectionId}
-                  elementKey="step_descriptions"
-                  sectionBackground={sectionBackground}
-                />
+          <>
+            {/* Animation Controls Bar */}
+            <div className="mb-8 p-4 bg-gray-50 rounded-lg border border-gray-200">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-4">
+                  <label className="flex items-center space-x-2 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={blockContent.auto_animate === 'true'}
+                      onChange={(e) => handleContentUpdate('auto_animate', e.target.checked ? 'true' : 'false')}
+                      className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
+                    />
+                    <span className="text-sm font-medium text-gray-700">Auto-animate in preview</span>
+                  </label>
+                  {blockContent.auto_animate === 'true' && (
+                    <button
+                      onClick={() => setActiveStep((prev) => (prev + 1) % steps.length)}
+                      className="px-3 py-1 text-sm bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
+                    >
+                      Test Animation →
+                    </button>
+                  )}
+                </div>
+                <div className="text-xs text-gray-500">
+                  Click on steps below to edit inline
+                </div>
               </div>
             </div>
-          </div>
+
+            {/* Editable Process Line */}
+            <div className="bg-white rounded-2xl shadow-lg p-8 border border-gray-100 mb-12">
+              <div className="flex items-center justify-center">
+                {steps.map((step, index) => (
+                  <React.Fragment key={index}>
+                    <EditableProcessStep
+                      step={step}
+                      index={index}
+                      isActive={activeStep === index}
+                      mode={mode}
+                      blockContent={blockContent}
+                      handleContentUpdate={handleContentUpdate}
+                      colorTokens={colorTokens}
+                      backgroundType={backgroundType}
+                      sectionId={sectionId}
+                      onRemove={steps.length > 1 ? () => {
+                        const titles = blockContent.step_titles.split('|');
+                        const descriptions = blockContent.step_descriptions.split('|');
+                        titles.splice(index, 1);
+                        descriptions.splice(index, 1);
+                        handleContentUpdate('step_titles', titles.join('|'));
+                        handleContentUpdate('step_descriptions', descriptions.join('|'));
+                      } : undefined}
+                    />
+                    {index < steps.length - 1 && (
+                      <ConnectionLine
+                        index={index}
+                        isActive={false}
+                        isCompleted={false}
+                      />
+                    )}
+                  </React.Fragment>
+                ))}
+                {/* Add Step Button */}
+                {steps.length < 6 && (
+                  <>
+                    {steps.length > 0 && (
+                      <div className="flex-1 relative h-0.5 bg-gray-200 mx-4 max-w-[100px]" />
+                    )}
+                    <button
+                      onClick={() => {
+                        const titles = blockContent.step_titles ? blockContent.step_titles.split('|') : [];
+                        const descriptions = blockContent.step_descriptions ? blockContent.step_descriptions.split('|') : [];
+                        titles.push(`Step ${titles.length + 1}`);
+                        descriptions.push('Add step description');
+                        handleContentUpdate('step_titles', titles.join('|'));
+                        handleContentUpdate('step_descriptions', descriptions.join('|'));
+                      }}
+                      className="relative w-16 h-16 rounded-full border-2 border-dashed border-gray-300 hover:border-gray-400 flex items-center justify-center bg-gray-50 hover:bg-gray-100 transition-all duration-300"
+                      title="Add new step"
+                    >
+                      <svg className="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                      </svg>
+                    </button>
+                  </>
+                )}
+              </div>
+            </div>
+
+            {/* Active Step Details Editor */}
+            <div className="bg-gradient-to-r from-blue-50 via-indigo-50 to-purple-50 rounded-2xl p-8 border border-blue-100 mb-12">
+              <div className="text-center">
+                <div className="flex justify-center mb-4">
+                  <div className={`w-12 h-12 rounded-full ${colorTokens.ctaBg} flex items-center justify-center`}>
+                    <span className="text-white font-bold">{activeStep + 1}</span>
+                  </div>
+                </div>
+                
+                <h3 className="text-lg font-semibold text-gray-700 mb-2">Currently Editing Step {activeStep + 1}</h3>
+                
+                <div className="max-w-2xl mx-auto space-y-4">
+                  <input
+                    type="text"
+                    value={steps[activeStep]?.title || ''}
+                    onChange={(e) => {
+                      const titles = blockContent.step_titles.split('|');
+                      titles[activeStep] = e.target.value;
+                      handleContentUpdate('step_titles', titles.join('|'));
+                    }}
+                    className="w-full px-4 py-2 text-xl font-bold text-gray-900 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="Step title"
+                  />
+                  
+                  <textarea
+                    value={steps[activeStep]?.description || ''}
+                    onChange={(e) => {
+                      const descriptions = blockContent.step_descriptions.split('|');
+                      descriptions[activeStep] = e.target.value;
+                      handleContentUpdate('step_descriptions', descriptions.join('|'));
+                    }}
+                    className="w-full px-4 py-2 text-gray-600 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+                    rows={3}
+                    placeholder="Step description"
+                  />
+                </div>
+                
+                {blockContent.show_process_indicators !== false && (
+                  <div className="flex justify-center items-center space-x-6 mt-6">
+                    {(blockContent.process_indicator_1_text && blockContent.process_indicator_1_text !== '___REMOVED___') && (
+                      <div className="relative group/process-indicator-1 flex items-center space-x-2">
+                        <IconEditableText
+                          mode={mode}
+                          value={getProcessIndicatorIcon(0) as string || '🔄'}
+                          onEdit={(value) => handleProcessIndicatorIconEdit(0, value)}
+                          backgroundType={backgroundType as any}
+                          colorTokens={colorTokens}
+                          iconSize="sm"
+                          className="text-xl text-green-600"
+                          sectionId={sectionId}
+                          elementKey="process_indicator_1_icon"
+                        />
+                        <EditableAdaptiveText
+                          mode={mode}
+                          value={blockContent.process_indicator_1_text || ''}
+                          onEdit={(value) => handleContentUpdate('process_indicator_1_text', value)}
+                          backgroundType={backgroundType}
+                          colorTokens={colorTokens}
+                          variant="body"
+                          className="text-gray-700 font-medium"
+                          placeholder="Process indicator 1"
+                          sectionBackground={sectionBackground}
+                          data-section-id={sectionId}
+                          data-element-key="process_indicator_1_text"
+                        />
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleContentUpdate('process_indicator_1_text', '___REMOVED___');
+                          }}
+                          className="opacity-0 group-hover/process-indicator-1:opacity-100 ml-1 text-red-500 hover:text-red-700 transition-opacity duration-200"
+                          title="Remove indicator 1"
+                        >
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                          </svg>
+                        </button>
+                      </div>
+                    )}
+                    {(blockContent.process_indicator_1_text && blockContent.process_indicator_1_text !== '___REMOVED___') && 
+                     (blockContent.process_indicator_2_text && blockContent.process_indicator_2_text !== '___REMOVED___') && (
+                      <div className="w-px h-6 bg-gray-300" />
+                    )}
+                    {(blockContent.process_indicator_2_text && blockContent.process_indicator_2_text !== '___REMOVED___') && (
+                      <div className="relative group/process-indicator-2 flex items-center space-x-2">
+                        <IconEditableText
+                          mode={mode}
+                          value={getProcessIndicatorIcon(1) as string || '✓'}
+                          onEdit={(value) => handleProcessIndicatorIconEdit(1, value)}
+                          backgroundType={backgroundType as any}
+                          colorTokens={colorTokens}
+                          iconSize="sm"
+                          className="text-xl text-blue-600"
+                          sectionId={sectionId}
+                          elementKey="process_indicator_2_icon"
+                        />
+                        <EditableAdaptiveText
+                          mode={mode}
+                          value={blockContent.process_indicator_2_text || ''}
+                          onEdit={(value) => handleContentUpdate('process_indicator_2_text', value)}
+                          backgroundType={backgroundType}
+                          colorTokens={colorTokens}
+                          variant="body"
+                          className="text-gray-700 font-medium"
+                          placeholder="Process indicator 2"
+                          sectionBackground={sectionBackground}
+                          data-section-id={sectionId}
+                          data-element-key="process_indicator_2_text"
+                        />
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleContentUpdate('process_indicator_2_text', '___REMOVED___');
+                          }}
+                          className="opacity-0 group-hover/process-indicator-2:opacity-100 ml-1 text-red-500 hover:text-red-700 transition-opacity duration-200"
+                          title="Remove indicator 2"
+                        >
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                          </svg>
+                        </button>
+                      </div>
+                    )}
+                    {(blockContent.process_indicator_2_text && blockContent.process_indicator_2_text !== '___REMOVED___') && 
+                     (blockContent.process_indicator_3_text && blockContent.process_indicator_3_text !== '___REMOVED___') && (
+                      <div className="w-px h-6 bg-gray-300" />
+                    )}
+                    {(blockContent.process_indicator_3_text && blockContent.process_indicator_3_text !== '___REMOVED___') && (
+                      <div className="relative group/process-indicator-3 flex items-center space-x-2">
+                        <IconEditableText
+                          mode={mode}
+                          value={getProcessIndicatorIcon(2) as string || '🎯'}
+                          onEdit={(value) => handleProcessIndicatorIconEdit(2, value)}
+                          backgroundType={backgroundType as any}
+                          colorTokens={colorTokens}
+                          iconSize="sm"
+                          className="text-xl text-purple-600"
+                          sectionId={sectionId}
+                          elementKey="process_indicator_3_icon"
+                        />
+                        <EditableAdaptiveText
+                          mode={mode}
+                          value={blockContent.process_indicator_3_text || ''}
+                          onEdit={(value) => handleContentUpdate('process_indicator_3_text', value)}
+                          backgroundType={backgroundType}
+                          colorTokens={colorTokens}
+                          variant="body"
+                          className="text-gray-700 font-medium"
+                          placeholder="Process indicator 3"
+                          sectionBackground={sectionBackground}
+                          data-section-id={sectionId}
+                          data-element-key="process_indicator_3_text"
+                        />
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleContentUpdate('process_indicator_3_text', '___REMOVED___');
+                          }}
+                          className="opacity-0 group-hover/process-indicator-3:opacity-100 ml-1 text-red-500 hover:text-red-700 transition-opacity duration-200"
+                          title="Remove indicator 3"
+                        >
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                          </svg>
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            </div>
+          </>
         ) : (
           <>
             {/* Animated Process Line */}
