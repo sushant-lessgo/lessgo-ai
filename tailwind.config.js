@@ -56,6 +56,7 @@ module.exports = {
   // MiniStackedCards section delete patterns
   'group-hover/plans-features-section:opacity-100',
   'group-hover/faq-section:opacity-100', 
+  'group-hover/faq-item:opacity-100',
   'group-hover/trust-section:opacity-100',
   'group-hover/social-metric:opacity-100',
   'group-hover/social-proof-section:opacity-100',
