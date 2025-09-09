@@ -116,7 +116,10 @@ const ZigzagStep = React.memo(({
   isEven,
   showImageToolbar,
   sectionId,
-  mode
+  mode,
+  handleContentUpdate,
+  blockContent,
+  onRemove
 }: {
   title: string;
   description: string;
@@ -126,6 +129,9 @@ const ZigzagStep = React.memo(({
   showImageToolbar: any;
   sectionId: string;
   mode: string;
+  handleContentUpdate: (key: keyof ZigzagImageStepsContent, value: any) => void;
+  blockContent: ZigzagImageStepsContent;
+  onRemove?: () => void;
 }) => {
   
   const VisualPlaceholder = () => (
@@ -149,16 +155,67 @@ const ZigzagStep = React.memo(({
     <div className={`grid lg:grid-cols-2 gap-12 items-center ${isEven ? '' : 'lg:direction-rtl'}`}>
       
       {/* Content */}
-      <div className={`space-y-6 ${isEven ? 'lg:order-1' : 'lg:order-2'}`}>
+      <div className={`space-y-6 ${isEven ? 'lg:order-1' : 'lg:order-2'} group`}>
         <div className="flex items-start space-x-4">
-          <div className="flex-shrink-0 w-12 h-12 rounded-2xl bg-gradient-to-br from-pink-500 to-purple-600 flex items-center justify-center shadow-lg">
-            <span className="text-white font-bold text-lg">{index + 1}</span>
+          <div className="flex-shrink-0 w-12 h-12 rounded-2xl bg-pink-600 bg-gradient-to-br from-pink-500 to-purple-600 flex items-center justify-center shadow-lg">
+            <span className="text-white font-bold text-lg drop-shadow-sm">{index + 1}</span>
           </div>
-          <div className="flex-1">
-            <h3 className="text-2xl font-bold text-gray-900 mb-4">{title}</h3>
-            <p className="text-gray-600 leading-relaxed text-lg">
-              {description}
-            </p>
+          <div className="flex-1 relative">
+            {/* Editable Step Title */}
+            {mode !== 'preview' ? (
+              <div
+                contentEditable
+                suppressContentEditableWarning
+                onBlur={(e) => {
+                  const stepTitles = blockContent.step_titles ? blockContent.step_titles.split('|') : [];
+                  stepTitles[index] = e.currentTarget.textContent || '';
+                  handleContentUpdate('step_titles', stepTitles.join('|'));
+                }}
+                className="text-2xl font-bold text-gray-900 mb-4 outline-none focus:ring-2 focus:ring-pink-500 focus:ring-opacity-50 rounded px-2 py-1 cursor-text hover:bg-gray-50 min-h-[40px]"
+                data-placeholder="Step title"
+              >
+                {title}
+              </div>
+            ) : (
+              <h3 className="text-2xl font-bold text-gray-900 mb-4">{title}</h3>
+            )}
+            
+            {/* Editable Step Description */}
+            {mode !== 'preview' ? (
+              <div
+                contentEditable
+                suppressContentEditableWarning
+                onBlur={(e) => {
+                  const stepDescriptions = blockContent.step_descriptions ? blockContent.step_descriptions.split('|') : [];
+                  stepDescriptions[index] = e.currentTarget.textContent || '';
+                  handleContentUpdate('step_descriptions', stepDescriptions.join('|'));
+                }}
+                className="text-gray-600 leading-relaxed text-lg outline-none focus:ring-2 focus:ring-pink-500 focus:ring-opacity-50 rounded px-2 py-1 cursor-text hover:bg-gray-50 min-h-[60px]"
+                data-placeholder="Step description"
+              >
+                {description}
+              </div>
+            ) : (
+              <p className="text-gray-600 leading-relaxed text-lg">
+                {description}
+              </p>
+            )}
+            
+            {/* Remove Step Button - only in edit mode */}
+            {mode === 'edit' && onRemove && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onRemove();
+                }}
+                className="opacity-0 group-hover:opacity-100 absolute -top-2 -right-2 text-red-500 hover:text-red-700 transition-opacity duration-200 z-10 bg-white rounded-full p-1 shadow-md"
+                title="Remove this step"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            )}
           </div>
         </div>
         
@@ -231,10 +288,11 @@ export default function ZigzagImageSteps(props: LayoutComponentProps) {
     : [];
 
   const steps = stepTitles.map((title, index) => ({
-    title,
+    title: title || (mode === 'edit' ? `Step ${index + 1}` : ''), // Fallback for empty titles in edit mode
     description: stepDescriptions[index] || '',
-    visual: stepVisuals[index] || ''
-  }));
+    visual: stepVisuals[index] || '',
+    originalIndex: index // Keep track of original index for proper data updates
+  })).filter(step => step.title.trim() !== '' || mode === 'edit'); // Show empty steps in edit mode
 
   const trustItems = blockContent.trust_items 
     ? blockContent.trust_items.split('|').map(item => item.trim()).filter(Boolean)
@@ -298,58 +356,64 @@ export default function ZigzagImageSteps(props: LayoutComponentProps) {
           )}
         </div>
 
-        {mode !== 'preview' ? (
-          <div className="space-y-8">
-            <div className="p-6 border border-gray-200 rounded-lg bg-gray-50">
-              <h4 className="font-semibold text-gray-700 mb-4">Zigzag Step Content</h4>
-              
-              <div className="space-y-4">
-                <EditableAdaptiveText
-                  mode={mode}
-                  value={blockContent.step_titles || ''}
-                  onEdit={(value) => handleContentUpdate('step_titles', value)}
-                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
-                  colorTokens={colorTokens}
-                  variant="body"
-                  className="mb-2"
-                  placeholder="Step titles (pipe separated)"
-                  sectionId={sectionId}
-                  elementKey="step_titles"
-                  sectionBackground={sectionBackground}
-                />
+        <div className="space-y-24">
+          {steps.map((step, displayIndex) => (
+            <ZigzagStep
+              key={step.originalIndex}
+              title={step.title}
+              description={step.description}
+              visual={step.visual}
+              index={step.originalIndex}
+              isEven={displayIndex % 2 === 0}
+              showImageToolbar={showImageToolbar}
+              sectionId={sectionId}
+              mode={mode}
+              handleContentUpdate={handleContentUpdate}
+              blockContent={blockContent}
+              onRemove={steps.length > 1 ? () => {
+                const stepTitles = blockContent.step_titles ? blockContent.step_titles.split('|') : [];
+                const stepDescriptions = blockContent.step_descriptions ? blockContent.step_descriptions.split('|') : [];
+                const stepVisuals = blockContent.step_visuals ? blockContent.step_visuals.split('|') : [];
                 
-                <EditableAdaptiveText
-                  mode={mode}
-                  value={blockContent.step_descriptions || ''}
-                  onEdit={(value) => handleContentUpdate('step_descriptions', value)}
-                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
-                  colorTokens={colorTokens}
-                  variant="body"
-                  placeholder="Step descriptions (pipe separated)"
-                  sectionId={sectionId}
-                  elementKey="step_descriptions"
-                  sectionBackground={sectionBackground}
-                />
-              </div>
+                stepTitles.splice(step.originalIndex, 1);
+                stepDescriptions.splice(step.originalIndex, 1);
+                stepVisuals.splice(step.originalIndex, 1);
+                
+                handleContentUpdate('step_titles', stepTitles.join('|'));
+                handleContentUpdate('step_descriptions', stepDescriptions.join('|'));
+                handleContentUpdate('step_visuals', stepVisuals.join('|'));
+              } : undefined}
+            />
+          ))}
+          
+          {/* Add Step Button - only in edit mode */}
+          {mode === 'edit' && steps.length < 6 && (
+            <div className="flex justify-center">
+              <button
+                onClick={() => {
+                  const stepTitles = blockContent.step_titles ? blockContent.step_titles.split('|') : [];
+                  const stepDescriptions = blockContent.step_descriptions ? blockContent.step_descriptions.split('|') : [];
+                  const stepVisuals = blockContent.step_visuals ? blockContent.step_visuals.split('|') : [];
+                  
+                  stepTitles.push(`Step ${stepTitles.length + 1}`);
+                  stepDescriptions.push('Add step description here');
+                  stepVisuals.push('');
+                  
+                  handleContentUpdate('step_titles', stepTitles.join('|'));
+                  handleContentUpdate('step_descriptions', stepDescriptions.join('|'));
+                  handleContentUpdate('step_visuals', stepVisuals.join('|'));
+                }}
+                className="px-6 py-3 border-2 border-dashed border-gray-300 hover:border-gray-400 text-gray-500 hover:text-gray-600 transition-all duration-300 flex items-center space-x-3 bg-gray-50 hover:bg-gray-100 rounded-2xl"
+                title="Add new step"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                </svg>
+                <span className="font-medium">Add Step</span>
+              </button>
             </div>
-          </div>
-        ) : (
-          <div className="space-y-24">
-            {steps.map((step, index) => (
-              <ZigzagStep
-                key={index}
-                title={step.title}
-                description={step.description}
-                visual={step.visual}
-                index={index}
-                isEven={index % 2 === 0}
-                showImageToolbar={showImageToolbar}
-                sectionId={sectionId}
-                mode={mode}
-              />
-            ))}
-          </div>
-        )}
+          )}
+        </div>
 
         {/* Creative Flow Summary */}
         {blockContent.show_flow_summary !== false && (
