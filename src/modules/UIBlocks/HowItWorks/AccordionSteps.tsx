@@ -422,12 +422,10 @@ export default function AccordionSteps(props: LayoutComponentProps) {
                   mode={mode}
                   value={blockContent.tech_specs_heading || ''}
                   onEdit={(value) => handleContentUpdate('tech_specs_heading', value)}
-                  backgroundType="secondary"
                   colorTokens={colorTokens}
                   variant="body"
                   className="text-xl font-semibold mb-6 text-white"
                   placeholder="Technical specs heading"
-                  sectionBackground="dark"
                   data-section-id={sectionId}
                   data-element-key="tech_specs_heading"
                 />
@@ -439,12 +437,10 @@ export default function AccordionSteps(props: LayoutComponentProps) {
                     mode={mode}
                     value={blockContent.tech_spec_1_value || ''}
                     onEdit={(value) => handleContentUpdate('tech_spec_1_value', value)}
-                    backgroundType="secondary"
                     colorTokens={colorTokens}
                     variant="body"
                     className="text-3xl font-bold text-blue-400 mb-2"
                     placeholder="Spec 1 value"
-                    sectionBackground="dark"
                     data-section-id={sectionId}
                     data-element-key="tech_spec_1_value"
                   />
@@ -452,12 +448,10 @@ export default function AccordionSteps(props: LayoutComponentProps) {
                     mode={mode}
                     value={blockContent.tech_spec_1_label || ''}
                     onEdit={(value) => handleContentUpdate('tech_spec_1_label', value)}
-                    backgroundType="secondary"
                     colorTokens={colorTokens}
                     variant="body"
                     className="text-gray-300 text-sm"
                     placeholder="Spec 1 label"
-                    sectionBackground="dark"
                     data-section-id={sectionId}
                     data-element-key="tech_spec_1_label"
                   />
@@ -467,12 +461,10 @@ export default function AccordionSteps(props: LayoutComponentProps) {
                     mode={mode}
                     value={blockContent.tech_spec_2_value || ''}
                     onEdit={(value) => handleContentUpdate('tech_spec_2_value', value)}
-                    backgroundType="secondary"
                     colorTokens={colorTokens}
                     variant="body"
                     className="text-3xl font-bold text-green-400 mb-2"
                     placeholder="Spec 2 value"
-                    sectionBackground="dark"
                     data-section-id={sectionId}
                     data-element-key="tech_spec_2_value"
                   />
@@ -480,12 +472,10 @@ export default function AccordionSteps(props: LayoutComponentProps) {
                     mode={mode}
                     value={blockContent.tech_spec_2_label || ''}
                     onEdit={(value) => handleContentUpdate('tech_spec_2_label', value)}
-                    backgroundType="secondary"
                     colorTokens={colorTokens}
                     variant="body"
                     className="text-gray-300 text-sm"
                     placeholder="Spec 2 label"
-                    sectionBackground="dark"
                     data-section-id={sectionId}
                     data-element-key="tech_spec_2_label"
                   />
@@ -495,12 +485,10 @@ export default function AccordionSteps(props: LayoutComponentProps) {
                     mode={mode}
                     value={blockContent.tech_spec_3_value || ''}
                     onEdit={(value) => handleContentUpdate('tech_spec_3_value', value)}
-                    backgroundType="secondary"
                     colorTokens={colorTokens}
                     variant="body"
                     className="text-3xl font-bold text-purple-400 mb-2"
                     placeholder="Spec 3 value"
-                    sectionBackground="dark"
                     data-section-id={sectionId}
                     data-element-key="tech_spec_3_value"
                   />
@@ -508,12 +496,10 @@ export default function AccordionSteps(props: LayoutComponentProps) {
                     mode={mode}
                     value={blockContent.tech_spec_3_label || ''}
                     onEdit={(value) => handleContentUpdate('tech_spec_3_label', value)}
-                    backgroundType="secondary"
                     colorTokens={colorTokens}
                     variant="body"
                     className="text-gray-300 text-sm"
                     placeholder="Spec 3 label"
-                    sectionBackground="dark"
                     data-section-id={sectionId}
                     data-element-key="tech_spec_3_label"
                   />
@@ -525,12 +511,10 @@ export default function AccordionSteps(props: LayoutComponentProps) {
                   mode={mode}
                   value={blockContent.tech_specs_description || ''}
                   onEdit={(value) => handleContentUpdate('tech_specs_description', value)}
-                  backgroundType="secondary"
                   colorTokens={colorTokens}
                   variant="body"
                   className="mt-6 text-gray-300 max-w-2xl mx-auto"
                   placeholder="Technical specs description"
-                  sectionBackground="dark"
                   data-section-id={sectionId}
                   data-element-key="tech_specs_description"
                 />
