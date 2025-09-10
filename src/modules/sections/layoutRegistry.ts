@@ -46,7 +46,6 @@ export const layoutRegistry = {
   Features: [
     "IconGrid",
     "SplitAlternating",
-    "Tabbed",
     "Timeline",
     "FeatureTestimonial",
     "MetricTiles",

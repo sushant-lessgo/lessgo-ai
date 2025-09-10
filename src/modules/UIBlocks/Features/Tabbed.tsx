@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useLayoutComponent } from '@/hooks/useLayoutComponent';
 import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
+import { useImageToolbar } from '@/hooks/useImageToolbar';
 import { useTypography } from '@/hooks/useTypography';
 import { LayoutSection } from '@/components/layout/LayoutSection';
 import { 
@@ -20,6 +21,13 @@ interface TabbedContent {
   tab_titles: string;
   tab_descriptions: string;
   tab_visuals?: string;
+  // Individual tab visual fields for image toolbar support
+  tab_visual_0?: string;
+  tab_visual_1?: string;
+  tab_visual_2?: string;
+  tab_visual_3?: string;
+  tab_visual_4?: string;
+  tab_visual_5?: string;
   subheadline?: string;
   supporting_text?: string;
   cta_text?: string;
@@ -52,6 +60,31 @@ const CONTENT_SCHEMA = {
   tab_visuals: { 
     type: 'string' as const, 
     default: '/analytics-visual.jpg|/automation-visual.jpg|/collaboration-visual.jpg|/security-visual.jpg' 
+  },
+  // Individual tab visual fields for image toolbar support
+  tab_visual_0: { 
+    type: 'string' as const, 
+    default: '' 
+  },
+  tab_visual_1: { 
+    type: 'string' as const, 
+    default: '' 
+  },
+  tab_visual_2: { 
+    type: 'string' as const, 
+    default: '' 
+  },
+  tab_visual_3: { 
+    type: 'string' as const, 
+    default: '' 
+  },
+  tab_visual_4: { 
+    type: 'string' as const, 
+    default: '' 
+  },
+  tab_visual_5: { 
+    type: 'string' as const, 
+    default: '' 
   },
   subheadline: { 
     type: 'string' as const, 
@@ -110,6 +143,12 @@ export default function Tabbed(props: LayoutComponentProps) {
   // Create typography styles
   const h3Style = getTypographyStyle('h3');
 
+  // Helper function to get individual tab visual
+  const getTabVisual = (index: number): string => {
+    const fieldName = `tab_visual_${index}` as keyof TabbedContent;
+    return (blockContent[fieldName] as string) || '';
+  };
+
   const tabLabels = blockContent.tab_labels 
     ? blockContent.tab_labels.split('|').map(item => item.trim()).filter(Boolean)
     : [];
@@ -130,7 +169,7 @@ export default function Tabbed(props: LayoutComponentProps) {
     label,
     title: tabTitles[index] || '',
     description: tabDescriptions[index] || '',
-    visual: tabVisuals[index] || ''
+    visual: getTabVisual(index) || tabVisuals[index] || '' // Use individual field first, then fallback
   }));
 
   const [activeTab, setActiveTab] = useState(0);
@@ -143,9 +182,35 @@ export default function Tabbed(props: LayoutComponentProps) {
   
   const store = useEditStore();
   const showImageToolbar = store.showImageToolbar;
+  
+  // Initialize image toolbar hook
+  const handleImageToolbar = useImageToolbar();
 
-  const VisualPlaceholder = ({ index }: { index: number }) => (
-    <div className="relative w-full h-full min-h-[400px] rounded-xl overflow-hidden bg-gradient-to-br from-purple-50 to-indigo-100">
+  // Migration logic: Convert pipe-separated tab_visuals to individual fields
+  React.useEffect(() => {
+    if (blockContent.tab_visuals && !blockContent.tab_visual_0) {
+      const tabVisuals = blockContent.tab_visuals.split('|').map(item => item.trim()).filter(Boolean);
+      const updates: Partial<TabbedContent> = {};
+      
+      tabVisuals.forEach((visual, index) => {
+        if (index < 6) { // Max 6 tabs
+          const fieldName = `tab_visual_${index}` as keyof TabbedContent;
+          updates[fieldName] = visual as any;
+        }
+      });
+      
+      // Apply all updates at once
+      Object.entries(updates).forEach(([key, value]) => {
+        handleContentUpdate(key as keyof TabbedContent, value);
+      });
+    }
+  }, [blockContent.tab_visuals, blockContent.tab_visual_0, handleContentUpdate]);
+
+  const VisualPlaceholder = ({ index, onClick }: { index: number; onClick?: (e: React.MouseEvent) => void }) => (
+    <div 
+      className="relative w-full h-full min-h-[400px] rounded-xl overflow-hidden bg-gradient-to-br from-purple-50 to-indigo-100 cursor-pointer hover:bg-gradient-to-br hover:from-purple-100 hover:to-indigo-150 transition-all duration-300"
+      onClick={onClick}
+    >
       <div className="absolute inset-0 flex items-center justify-center">
         <div className="text-center">
           <div className="w-24 h-24 mx-auto rounded-2xl bg-white/50 flex items-center justify-center mb-4">
@@ -158,6 +223,11 @@ export default function Tabbed(props: LayoutComponentProps) {
           <div className="text-sm font-medium text-gray-700">
             {tabs[index]?.label || 'Feature'} Visual
           </div>
+          {mode === 'edit' && (
+            <div className="text-xs text-gray-500 mt-2">
+              Click to add image
+            </div>
+          )}
         </div>
       </div>
     </div>
@@ -205,57 +275,7 @@ export default function Tabbed(props: LayoutComponentProps) {
           )}
         </div>
 
-        {(mode as any) === 'edit' ? (
-          <div className="space-y-8">
-            <div className="p-6 border border-gray-200 rounded-lg bg-gray-50">
-              <h4 className="font-semibold text-gray-700 mb-4">Tab Content</h4>
-              
-              <div className="space-y-4">
-                <EditableAdaptiveText
-                  mode={mode}
-                  value={blockContent.tab_labels || ''}
-                  onEdit={(value) => handleContentUpdate('tab_labels', value)}
-                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
-                  colorTokens={colorTokens}
-                  variant="body"
-                  className="mb-2"
-                  placeholder="Tab labels (pipe separated)"
-                  sectionId={sectionId}
-                  elementKey="tab_labels"
-                  sectionBackground={sectionBackground}
-                />
-                
-                <EditableAdaptiveText
-                  mode={mode}
-                  value={blockContent.tab_titles || ''}
-                  onEdit={(value) => handleContentUpdate('tab_titles', value)}
-                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
-                  colorTokens={colorTokens}
-                  variant="body"
-                  className="mb-2"
-                  placeholder="Tab titles (pipe separated)"
-                  sectionId={sectionId}
-                  elementKey="tab_titles"
-                  sectionBackground={sectionBackground}
-                />
-                
-                <EditableAdaptiveText
-                  mode={mode}
-                  value={blockContent.tab_descriptions || ''}
-                  onEdit={(value) => handleContentUpdate('tab_descriptions', value)}
-                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
-                  colorTokens={colorTokens}
-                  variant="body"
-                  placeholder="Tab descriptions (pipe separated)"
-                  sectionId={sectionId}
-                  elementKey="tab_descriptions"
-                  sectionBackground={sectionBackground}
-                />
-              </div>
-            </div>
-          </div>
-        ) : (
-          <div>
+        <div>
             {/* Tab Navigation */}
             <div className="flex flex-wrap justify-center mb-8 gap-2">
               {tabs.map((tab, index) => (
@@ -278,22 +298,63 @@ export default function Tabbed(props: LayoutComponentProps) {
               <div className="grid lg:grid-cols-2 gap-12 items-center">
                 
                 <div className="space-y-6">
-                  <h3 
-                    className="text-gray-900"
-                    style={{
-                      fontSize: h3Style.fontSize,
-                      fontWeight: h3Style.fontWeight,
-                      lineHeight: h3Style.lineHeight,
-                      letterSpacing: h3Style.letterSpacing,
-                      fontFamily: h3Style.fontFamily
-                    }}
-                  >
-                    {tabs[activeTab]?.title}
-                  </h3>
+                  {/* Editable Tab Title */}
+                  {mode !== 'preview' ? (
+                    <div
+                      contentEditable
+                      suppressContentEditableWarning
+                      onBlur={(e) => {
+                        const tabTitles = blockContent.tab_titles ? blockContent.tab_titles.split('|') : [];
+                        tabTitles[activeTab] = e.currentTarget.textContent || '';
+                        handleContentUpdate('tab_titles', tabTitles.join('|'));
+                      }}
+                      className="text-gray-900 outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-2 py-1 cursor-text hover:bg-gray-50 min-h-[40px]"
+                      style={{
+                        fontSize: h3Style.fontSize,
+                        fontWeight: h3Style.fontWeight,
+                        lineHeight: h3Style.lineHeight,
+                        letterSpacing: h3Style.letterSpacing,
+                        fontFamily: h3Style.fontFamily
+                      }}
+                      data-placeholder="Tab title"
+                    >
+                      {tabs[activeTab]?.title}
+                    </div>
+                  ) : (
+                    <h3 
+                      className="text-gray-900"
+                      style={{
+                        fontSize: h3Style.fontSize,
+                        fontWeight: h3Style.fontWeight,
+                        lineHeight: h3Style.lineHeight,
+                        letterSpacing: h3Style.letterSpacing,
+                        fontFamily: h3Style.fontFamily
+                      }}
+                    >
+                      {tabs[activeTab]?.title}
+                    </h3>
+                  )}
                   
-                  <p className="text-gray-600 leading-relaxed text-lg">
-                    {tabs[activeTab]?.description}
-                  </p>
+                  {/* Editable Tab Description */}
+                  {mode !== 'preview' ? (
+                    <div
+                      contentEditable
+                      suppressContentEditableWarning
+                      onBlur={(e) => {
+                        const tabDescriptions = blockContent.tab_descriptions ? blockContent.tab_descriptions.split('|') : [];
+                        tabDescriptions[activeTab] = e.currentTarget.textContent || '';
+                        handleContentUpdate('tab_descriptions', tabDescriptions.join('|'));
+                      }}
+                      className="text-gray-600 leading-relaxed text-lg outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-2 py-1 cursor-text hover:bg-gray-50 min-h-[60px]"
+                      data-placeholder="Tab description"
+                    >
+                      {tabs[activeTab]?.description}
+                    </div>
+                  ) : (
+                    <p className="text-gray-600 leading-relaxed text-lg">
+                      {tabs[activeTab]?.description}
+                    </p>
+                  )}
                   
                   <div className="flex flex-wrap gap-4">
                     {(blockContent.benefit_1 || (mode as any) === 'edit') && blockContent.benefit_1 !== '___REMOVED___' && (
@@ -402,13 +463,44 @@ export default function Tabbed(props: LayoutComponentProps) {
                       src={tabs[activeTab].visual}
                       alt={tabs[activeTab].title}
                       className="w-full h-auto rounded-xl shadow-lg cursor-pointer hover:shadow-xl transition-shadow duration-300"
-                      data-image-id={`${sectionId}-tab${activeTab}-visual`}
+                      data-image-id={`${sectionId}.tab-visual-${activeTab}`}
                       onMouseUp={(e) => {
-                        // Image toolbar is only available in edit mode
+                        if (mode === 'edit') {
+                          e.stopPropagation();
+                          e.preventDefault();
+                          const rect = e.currentTarget.getBoundingClientRect();
+                          const imageId = `${sectionId}.tab-visual-${activeTab}`;
+                          const position = {
+                            x: rect.left + rect.width / 2,
+                            y: rect.top - 10
+                          };
+                          handleImageToolbar(imageId, position);
+                        }
+                      }}
+                      onClick={(e) => {
+                        if (mode === 'edit') {
+                          e.stopPropagation();
+                          e.preventDefault();
+                        }
                       }}
                     />
                   ) : (
-                    <VisualPlaceholder index={activeTab} />
+                    <VisualPlaceholder 
+                      index={activeTab}
+                      onClick={(e) => {
+                        if (mode === 'edit') {
+                          e.stopPropagation();
+                          e.preventDefault();
+                          const rect = e.currentTarget.getBoundingClientRect();
+                          const imageId = `${sectionId}.tab-visual-${activeTab}`;
+                          const position = {
+                            x: rect.left + rect.width / 2,
+                            y: rect.top - 10
+                          };
+                          handleImageToolbar(imageId, position);
+                        }
+                      }}
+                    />
                   )}
                 </div>
               </div>
@@ -429,7 +521,6 @@ export default function Tabbed(props: LayoutComponentProps) {
               ))}
             </div>
           </div>
-        )}
 
         {(blockContent.cta_text || blockContent.trust_items || (mode as any) === 'edit') && (
           <div className="text-center space-y-6 mt-16">
@@ -494,6 +585,12 @@ export const componentMeta = {
     { key: 'tab_titles', label: 'Tab Titles (pipe separated)', type: 'textarea', required: true },
     { key: 'tab_descriptions', label: 'Tab Descriptions (pipe separated)', type: 'textarea', required: true },
     { key: 'tab_visuals', label: 'Tab Visuals (pipe separated)', type: 'textarea', required: false },
+    { key: 'tab_visual_0', label: 'Tab 1 Visual', type: 'image', required: false },
+    { key: 'tab_visual_1', label: 'Tab 2 Visual', type: 'image', required: false },
+    { key: 'tab_visual_2', label: 'Tab 3 Visual', type: 'image', required: false },
+    { key: 'tab_visual_3', label: 'Tab 4 Visual', type: 'image', required: false },
+    { key: 'tab_visual_4', label: 'Tab 5 Visual', type: 'image', required: false },
+    { key: 'tab_visual_5', label: 'Tab 6 Visual', type: 'image', required: false },
     { key: 'benefit_1', label: 'Benefit Badge 1', type: 'text', required: false },
     { key: 'benefit_2', label: 'Benefit Badge 2', type: 'text', required: false },
     { key: 'supporting_text', label: 'Supporting Text', type: 'textarea', required: false },

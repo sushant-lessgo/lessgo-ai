@@ -3,7 +3,6 @@ import type { LayoutPickerInput } from "./layoutPickerInput";
 export type FeatureLayout =
   | "IconGrid"
   | "SplitAlternating"
-  | "Tabbed"
   | "Timeline"
   | "FeatureTestimonial"
   | "MetricTiles"
@@ -82,7 +81,6 @@ export function pickFeatureLayout(input: LayoutPickerInput): FeatureLayout {
   const scores: Record<FeatureLayout, number> = {
     IconGrid: 0,
     SplitAlternating: 0,
-    Tabbed: 0,
     Timeline: 0,
     FeatureTestimonial: 0,
     MetricTiles: 0,
@@ -98,14 +96,14 @@ export function pickFeatureLayout(input: LayoutPickerInput): FeatureLayout {
     scores.MiniCards += 2;
   } else if (awarenessLevel === "solution-aware") {
     scores.SplitAlternating += 4;
-    scores.Tabbed += 4;
-    scores.FeatureTestimonial += 3;
+    scores.FeatureTestimonial += 4;
     scores.Timeline += 3;
+    scores.MiniCards += 3;
   } else if (awarenessLevel === "product-aware" || awarenessLevel === "most-aware") {
     scores.Timeline += 5;
     scores.SplitAlternating += 4;
     scores.MiniCards += 3;
-    scores.Tabbed += 2;
+    scores.FeatureTestimonial += 2;
   }
 
   // Market Sophistication Scoring (High Weight: 3-4 points)
@@ -115,10 +113,10 @@ export function pickFeatureLayout(input: LayoutPickerInput): FeatureLayout {
     scores.MetricTiles += 3;
     scores.MiniCards += 2;
   } else if (marketSophisticationLevel === "level-3") {
-    scores.Tabbed += 4;
-    scores.SplitAlternating += 3;
-    scores.FeatureTestimonial += 3;
-    scores.Timeline += 2;
+    scores.SplitAlternating += 4;
+    scores.FeatureTestimonial += 4;
+    scores.Timeline += 3;
+    scores.MetricTiles += 2;
   } else if (marketSophisticationLevel === "level-4" || marketSophisticationLevel === "level-5") {
     scores.SplitAlternating += 4;
     scores.Timeline += 4;
@@ -136,11 +134,11 @@ export function pickFeatureLayout(input: LayoutPickerInput): FeatureLayout {
     scores.SplitAlternating += 4;
     scores.MiniCards += 3;
     scores.Timeline += 3;
-    scores.Tabbed += 2;
+    scores.MetricTiles += 2;
   } else if (targetAudience === "businesses") {
     scores.MetricTiles += 4;
     scores.FeatureTestimonial += 3;
-    scores.Tabbed += 3;
+    scores.SplitAlternating += 3;
     scores.IconGrid += 2;
   } else if (targetAudience === "founders" || targetAudience === "creators") {
     scores.IconGrid += 4;
@@ -148,9 +146,9 @@ export function pickFeatureLayout(input: LayoutPickerInput): FeatureLayout {
     scores.MiniCards += 3;
     scores.MetricTiles += 2;
   } else if (targetAudience === "marketers") {
-    scores.Tabbed += 4;
-    scores.MetricTiles += 3;
-    scores.FeatureTestimonial += 2;
+    scores.MetricTiles += 4;
+    scores.FeatureTestimonial += 3;
+    scores.SplitAlternating += 2;
   }
 
   // Copy Intent Scoring (High Weight: 3-4 points)
@@ -163,7 +161,7 @@ export function pickFeatureLayout(input: LayoutPickerInput): FeatureLayout {
     scores.SplitAlternating += 4;
     scores.Timeline += 4;
     scores.FeatureTestimonial += 3;
-    scores.Tabbed += 2;
+    scores.MetricTiles += 2;
   }
 
   // Tone Profile Scoring (Medium Weight: 2-3 points)
@@ -178,7 +176,7 @@ export function pickFeatureLayout(input: LayoutPickerInput): FeatureLayout {
   } else if (toneProfile === "minimal-technical") {
     scores.MiniCards += 3;
     scores.SplitAlternating += 2;
-    scores.Tabbed += 2;
+    scores.Timeline += 2;
   } else if (toneProfile === "bold-persuasive") {
     scores.MetricTiles += 3;
     scores.FeatureTestimonial += 3;
@@ -216,9 +214,9 @@ export function pickFeatureLayout(input: LayoutPickerInput): FeatureLayout {
     scores.Carousel += 2;
     scores.MiniCards += 2;
   } else if (startupStage === "traction") {
-    scores.Tabbed += 3;
-    scores.SplitAlternating += 2;
+    scores.SplitAlternating += 3;
     scores.MetricTiles += 2;
+    scores.FeatureTestimonial += 2;
   } else if (startupStage === "growth") {
     scores.FeatureTestimonial += 3;
     scores.Timeline += 2;
@@ -237,7 +235,7 @@ export function pickFeatureLayout(input: LayoutPickerInput): FeatureLayout {
   } else if (marketCategory === "Marketing & Sales Tools") {
     scores.MetricTiles += 2;
     scores.FeatureTestimonial += 2;
-    scores.Tabbed += 1;
+    scores.SplitAlternating += 1;
   } else if (marketCategory === "Design & Creative Tools") {
     scores.Carousel += 2;
     scores.Timeline += 2;
@@ -245,7 +243,7 @@ export function pickFeatureLayout(input: LayoutPickerInput): FeatureLayout {
   } else if (marketCategory === "Work & Productivity Tools") {
     scores.Timeline += 2;
     scores.IconGrid += 2;
-    scores.Tabbed += 1;
+    scores.SplitAlternating += 1;
   } else if (marketCategory === "Data & Analytics Tools") {
     scores.MetricTiles += 2;
     scores.SplitAlternating += 1;
@@ -267,7 +265,7 @@ export function pickFeatureLayout(input: LayoutPickerInput): FeatureLayout {
     scores.SplitAlternating += 1;
   } else if (landingPageGoals === "signup") {
     scores.IconGrid += 2;
-    scores.Tabbed += 1;
+    scores.Carousel += 1;
   } else if (landingPageGoals === "download" || landingPageGoals === "waitlist") {
     scores.Carousel += 2;
     scores.MiniCards += 1;
@@ -278,8 +276,8 @@ export function pickFeatureLayout(input: LayoutPickerInput): FeatureLayout {
     scores.IconGrid += 2;
     scores.Carousel += 1;
   } else if (pricingModel === "tiered") {
-    scores.Tabbed += 2;
-    scores.MetricTiles += 1;
+    scores.MetricTiles += 2;
+    scores.SplitAlternating += 1;
   } else if (pricingModel === "custom-quote") {
     scores.FeatureTestimonial += 2;
     scores.SplitAlternating += 1;

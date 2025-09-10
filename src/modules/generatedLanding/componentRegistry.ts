@@ -195,7 +195,6 @@ export const componentRegistry: ComponentRegistry = {
   features: {
     IconGrid: IconGrid,
     SplitAlternating: SplitAlternating,
-    Tabbed: Tabbed,
     Timeline: Timeline,
     FeatureTestimonial: FeatureTestimonial,
     MetricTiles: MetricTiles,
