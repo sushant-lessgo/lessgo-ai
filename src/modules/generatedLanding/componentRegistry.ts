@@ -135,7 +135,7 @@ import TestimonialFAQs from '@/modules/UIBlocks/FAQ/TestimonialFAQs';
 import ThreeStepHorizontal from '@/modules/UIBlocks/HowItWorks/ThreeStepHorizontal';
 import TierCards from '@/modules/UIBlocks/Pricing/TierCards';
 import TimelineResults from '@/modules/UIBlocks/Results/TimelineResults';
-import Timeline from '@/modules/UIBlocks/Features/Timeline';
+// import Timeline from '@/modules/UIBlocks/Features/Timeline'; // Temporarily retired
 import TimelineToToday from '@/modules/UIBlocks/FounderNote/TimelineToToday';
 import ToggleableComparison from '@/modules/UIBlocks/Comparison/ToggleableComparison';
 import ToggleableMonthlyYearly from '@/modules/UIBlocks/Pricing/toggleableMonthlyYearly';
@@ -195,7 +195,7 @@ export const componentRegistry: ComponentRegistry = {
   features: {
     IconGrid: IconGrid,
     SplitAlternating: SplitAlternating,
-    Timeline: Timeline,
+    // Timeline: Timeline, // Temporarily retired
     FeatureTestimonial: FeatureTestimonial,
     MetricTiles: MetricTiles,
     MiniCards: MiniCards,
