@@ -8,7 +8,6 @@ import {
   EditableAdaptiveHeadline, 
   EditableAdaptiveText 
 } from '@/components/layout/EditableContent';
-import { FeatureIcon } from '@/components/layout/ComponentRegistry';
 import IconEditableText from '@/components/ui/IconEditableText';
 import { LayoutComponentProps } from '@/types/storeTypes';
 import { parsePipeData, updateListData } from '@/utils/dataParsingUtils';
@@ -19,13 +18,13 @@ interface IconGridContent {
   subheadline?: string;
   feature_titles: string;
   feature_descriptions: string;
-  // Icon overrides (empty string means use auto-selection)
-  icon_override_1?: string;
-  icon_override_2?: string;
-  icon_override_3?: string;
-  icon_override_4?: string;
-  icon_override_5?: string;
-  icon_override_6?: string;
+  // Feature icons with smart defaults
+  icon_1?: string;
+  icon_2?: string;
+  icon_3?: string;
+  icon_4?: string;
+  icon_5?: string;
+  icon_6?: string;
 }
 
 // Feature item structure
@@ -35,7 +34,7 @@ interface FeatureItem {
   title: string;
   description: string;
   iconType: string;
-  iconOverride?: string; // Manual override or empty for auto-selection
+  icon?: string; // Editable icon (uses auto-selected as default)
 }
 
 // Content schema - defines structure and defaults
@@ -56,40 +55,40 @@ const CONTENT_SCHEMA = {
     type: 'string' as const, 
     default: 'Work together seamlessly with your team in real-time, no matter where you are.|Get deep insights into your data with powerful analytics and reporting tools.|Automate repetitive tasks and workflows to save time and reduce errors.|Enterprise-grade security keeps your data safe with encryption and compliance.|Connect with your favorite tools through our extensive integration library.|Round-the-clock support from our expert team whenever you need help.' 
   },
-  // Icon overrides (empty = use auto-selection)
-  icon_override_1: { type: 'string' as const, default: '' },
-  icon_override_2: { type: 'string' as const, default: '' },
-  icon_override_3: { type: 'string' as const, default: '' },
-  icon_override_4: { type: 'string' as const, default: '' },
-  icon_override_5: { type: 'string' as const, default: '' },
-  icon_override_6: { type: 'string' as const, default: '' }
+  // Feature icons with smart defaults
+  icon_1: { type: 'string' as const, default: '🤝' },
+  icon_2: { type: 'string' as const, default: '📊' },
+  icon_3: { type: 'string' as const, default: '⚡' },
+  icon_4: { type: 'string' as const, default: '🔒' },
+  icon_5: { type: 'string' as const, default: '🔗' },
+  icon_6: { type: 'string' as const, default: '💬' }
 };
 
-// Parse feature data from pipe-separated strings with override support
+// Auto-select emoji icon based on feature title
+const getDefaultIcon = (title: string): string => {
+  const lower = title.toLowerCase();
+  if (lower.includes('collaboration') || lower.includes('team')) return '🤝';
+  if (lower.includes('analytics') || lower.includes('reporting')) return '📊';
+  if (lower.includes('automation') || lower.includes('smart')) return '⚡';
+  if (lower.includes('security') || lower.includes('secure')) return '🔒';
+  if (lower.includes('integration') || lower.includes('connect')) return '🔗';
+  if (lower.includes('support') || lower.includes('help')) return '💬';
+  return '⭐'; // Default fallback
+};
+
+// Parse feature data from pipe-separated strings with icon support
 const parseFeatureData = (titles: string, descriptions: string, blockContent: IconGridContent): FeatureItem[] => {
   const titleList = parsePipeData(titles);
   const descriptionList = parsePipeData(descriptions);
   
-  // Auto-select icon based on feature title
-  const getIconType = (title: string): string => {
-    const lower = title.toLowerCase();
-    if (lower.includes('collaboration') || lower.includes('team')) return 'collaboration';
-    if (lower.includes('analytics') || lower.includes('reporting')) return 'chart';
-    if (lower.includes('automation') || lower.includes('smart')) return 'lightning';
-    if (lower.includes('security') || lower.includes('secure')) return 'shield';
-    if (lower.includes('integration') || lower.includes('connect')) return 'integration';
-    if (lower.includes('support') || lower.includes('help')) return 'support';
-    return 'star'; // Default fallback
-  };
-
-  // Get icon overrides
-  const overrides = [
-    blockContent.icon_override_1,
-    blockContent.icon_override_2,
-    blockContent.icon_override_3,
-    blockContent.icon_override_4,
-    blockContent.icon_override_5,
-    blockContent.icon_override_6
+  // Get saved icons or use smart defaults
+  const icons = [
+    blockContent.icon_1,
+    blockContent.icon_2,
+    blockContent.icon_3,
+    blockContent.icon_4,
+    blockContent.icon_5,
+    blockContent.icon_6
   ];
   
   return titleList.map((title, index) => ({
@@ -97,8 +96,8 @@ const parseFeatureData = (titles: string, descriptions: string, blockContent: Ic
     index,
     title,
     description: descriptionList[index] || 'Feature description not provided.',
-    iconType: getIconType(title),
-    iconOverride: overrides[index] || '' // Use override if provided, empty if auto-select
+    iconType: '', // No longer needed
+    icon: icons[index] || getDefaultIcon(title) // Use saved icon or smart default
   }));
 };
 
@@ -140,39 +139,21 @@ const FeatureCard = React.memo(({
   
   return (
     <div className={`group p-6 rounded-xl border ${cardBackground} ${cardHover} transition-all duration-300`}>
-      {/* ✅ ENHANCED: Icon with Manual Override Support */}
+      {/* ✅ ENHANCED: Fully Editable Icon */}
       <div className="mb-4">
         <div className={`inline-flex items-center justify-center w-12 h-12 rounded-lg ${colorTokens.ctaBg || 'bg-blue-600'} bg-opacity-10 group-hover:bg-opacity-20 transition-all duration-300`}>
-          {item.iconOverride ? (
-            <IconEditableText
-              mode={mode}
-              value={item.iconOverride}
-              onEdit={(value) => onIconEdit && onIconEdit(item.index, value)}
-              backgroundType={backgroundType as any}
-              colorTokens={colorTokens}
-              iconSize="md"
-              className="text-2xl group-hover:scale-110 transition-transform duration-300"
-              placeholder="🎯"
-              sectionId={sectionId}
-              elementKey={`icon_override_${item.index + 1}`}
-            />
-          ) : (
-            <FeatureIcon
-              type={item.iconType}
-              colorTokens={colorTokens}
-              size="medium"
-              className="group-hover:scale-110 transition-transform duration-300"
-            />
-          )}
-          {mode !== 'preview' && !item.iconOverride && (
-            <button
-              onClick={() => onIconEdit && onIconEdit(item.index, '🎯')}
-              className="absolute -top-1 -right-1 w-5 h-5 bg-blue-600 text-white rounded-full text-xs hover:bg-blue-700 transition-colors opacity-0 group-hover:opacity-100"
-              title="Add custom icon"
-            >
-              +
-            </button>
-          )}
+          <IconEditableText
+            mode={mode}
+            value={item.icon || '⭐'}
+            onEdit={(value) => onIconEdit && onIconEdit(item.index, value)}
+            backgroundType={backgroundType as any}
+            colorTokens={colorTokens}
+            iconSize="md"
+            className="text-2xl group-hover:scale-110 transition-transform duration-300"
+            placeholder="🎯"
+            sectionId={sectionId}
+            elementKey={`icon_${item.index + 1}`}
+          />
         </div>
       </div>
 
@@ -250,7 +231,7 @@ export default function IconGrid(props: LayoutComponentProps) {
 
   // Handle icon editing
   const handleIconEdit = (index: number, value: string) => {
-    const iconField = `icon_override_${index + 1}` as keyof IconGridContent;
+    const iconField = `icon_${index + 1}` as keyof IconGridContent;
     handleContentUpdate(iconField, value);
   };
 
