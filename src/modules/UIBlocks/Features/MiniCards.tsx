@@ -129,6 +129,7 @@ const MiniCard = React.memo(({
   onTitleEdit,
   onDescriptionEdit,
   onKeywordEdit,
+  onRemove,
   sectionBackground
 }: {
   title: string;
@@ -145,6 +146,7 @@ const MiniCard = React.memo(({
   onTitleEdit: (index: number, value: string) => void;
   onDescriptionEdit: (index: number, value: string) => void;
   onKeywordEdit: (index: number, value: string) => void;
+  onRemove?: () => void;
   sectionBackground: string;
 }) => {
   
@@ -174,8 +176,24 @@ const MiniCard = React.memo(({
   };
 
   return (
-    <div className="group bg-white rounded-lg p-6 border border-gray-200 hover:border-gray-300 hover:shadow-lg transition-all duration-300 h-full flex flex-col">
+    <div className={`relative group/mini-card-${index} bg-white rounded-lg p-6 border border-gray-200 hover:border-gray-300 hover:shadow-lg transition-all duration-300 h-full flex flex-col`}>
       
+      {/* Delete button - only show in edit mode */}
+      {mode === 'edit' && onRemove && (
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            onRemove();
+          }}
+          className={`opacity-0 group-hover/mini-card-${index}:opacity-100 absolute -top-2 -right-2 text-red-500 hover:text-red-700 transition-opacity duration-200 z-10 bg-white rounded-full p-1 shadow-md`}
+          title="Remove this feature"
+        >
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      )}
+
       <div className="flex items-start space-x-4 mb-4">
         <div className={`flex-shrink-0 w-10 h-10 rounded-lg bg-gradient-to-br ${getColorForIndex(index)} flex items-center justify-center shadow-md group-hover:shadow-lg transition-shadow duration-300`}>
           <IconEditableText
@@ -311,6 +329,41 @@ export default function MiniCards(props: LayoutComponentProps) {
     handleContentUpdate('feature_keywords', updatedKeywords);
   };
 
+  // Handle card deletion with proper data shifting
+  const handleCardRemove = (index: number) => {
+    const featureTitles = blockContent.feature_titles ? blockContent.feature_titles.split('|') : [];
+    const featureDescriptions = blockContent.feature_descriptions ? blockContent.feature_descriptions.split('|') : [];
+    const featureKeywords = blockContent.feature_keywords ? blockContent.feature_keywords.split('|') : [];
+    
+    // Remove from pipe-separated fields
+    featureTitles.splice(index, 1);
+    featureDescriptions.splice(index, 1);
+    featureKeywords.splice(index, 1);
+    
+    // Handle icon field shifting - collect all current icons
+    const iconsToShift = [];
+    for (let i = 0; i < 6; i++) {
+      const iconField = `feature_icon_${i + 1}` as keyof MiniCardsContent;
+      const value = (blockContent[iconField] as string) || '';
+      iconsToShift.push(value);
+    }
+    
+    // Remove the icon at the specified index and shift remaining ones
+    iconsToShift.splice(index, 1);
+    
+    // Update all icon fields with shifted values
+    for (let i = 0; i < 6; i++) {
+      const iconField = `feature_icon_${i + 1}` as keyof MiniCardsContent;
+      const newValue = iconsToShift[i] || '';
+      handleContentUpdate(iconField, newValue);
+    }
+    
+    // Update the pipe-separated fields
+    handleContentUpdate('feature_titles', featureTitles.join('|'));
+    handleContentUpdate('feature_descriptions', featureDescriptions.join('|'));
+    handleContentUpdate('feature_keywords', featureKeywords.join('|'));
+  };
+
   const trustItems = blockContent.trust_items 
     ? blockContent.trust_items.split('|').map(item => item.trim()).filter(Boolean)
     : [];
@@ -378,10 +431,46 @@ export default function MiniCards(props: LayoutComponentProps) {
               onTitleEdit={handleTitleEdit}
               onDescriptionEdit={handleDescriptionEdit}
               onKeywordEdit={handleKeywordEdit}
+              onRemove={features.length > 1 ? () => handleCardRemove(index) : undefined}
               sectionBackground={sectionBackground}
             />
           ))}
         </div>
+
+        {/* Add Feature Button - only in edit mode */}
+        {mode === 'edit' && features.length < 6 && (
+          <div className="flex justify-center mt-8">
+            <button
+              onClick={() => {
+                const featureTitles = blockContent.feature_titles ? blockContent.feature_titles.split('|') : [];
+                const featureDescriptions = blockContent.feature_descriptions ? blockContent.feature_descriptions.split('|') : [];
+                const featureKeywords = blockContent.feature_keywords ? blockContent.feature_keywords.split('|') : [];
+                
+                const newFeatureIndex = featureTitles.length;
+                featureTitles.push(`Feature ${newFeatureIndex + 1}`);
+                featureDescriptions.push('Add feature description here');
+                featureKeywords.push('New');
+                
+                // Add default icon for the new feature
+                const defaultIcons = ['⚡', '💽', '🔒', '👥', '📱', '🔧'];
+                const iconField = `feature_icon_${newFeatureIndex + 1}` as keyof MiniCardsContent;
+                const defaultIcon = defaultIcons[newFeatureIndex] || '⭐';
+                
+                handleContentUpdate('feature_titles', featureTitles.join('|'));
+                handleContentUpdate('feature_descriptions', featureDescriptions.join('|'));
+                handleContentUpdate('feature_keywords', featureKeywords.join('|'));
+                handleContentUpdate(iconField, defaultIcon);
+              }}
+              className="px-6 py-3 border-2 border-dashed border-gray-300 hover:border-gray-400 text-gray-500 hover:text-gray-600 transition-all duration-300 flex items-center space-x-3 bg-gray-50 hover:bg-gray-100 rounded-2xl"
+              title="Add new feature"
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+              </svg>
+              <span className="font-medium">Add Feature</span>
+            </button>
+          </div>
+        )}
 
         {/* Feature Summary - Editable */}
         {blockContent.show_feature_summary !== false && (

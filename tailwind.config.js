@@ -67,6 +67,13 @@ module.exports = {
   'group-hover/feature-item:opacity-100',
   'group-hover/platform-feature:opacity-100',
   'group-hover/platform-features-section:opacity-100',
+  // MiniCards specific patterns
+  'group-hover/mini-card-0:opacity-100',
+  'group-hover/mini-card-1:opacity-100',
+  'group-hover/mini-card-2:opacity-100',
+  'group-hover/mini-card-3:opacity-100',
+  'group-hover/mini-card-4:opacity-100',
+  'group-hover/mini-card-5:opacity-100',
   'group-focus-within:opacity-100',
   'opacity-0',
   'transition-opacity',
