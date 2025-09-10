@@ -24,6 +24,9 @@ interface TestimonialCTAComboContent {
   testimonial_title: string;
   testimonial_company: string;
   testimonial_company_logo?: string;
+  testimonial_date?: string;
+  testimonial_industry?: string;
+  case_study_tag?: string;
   rating?: string;
   customer_count?: string;
   average_rating?: string;
@@ -47,23 +50,35 @@ const CONTENT_SCHEMA = {
   },
   testimonial_quote: { 
     type: 'string' as const, 
-    default: 'This platform has completely transformed how we work. We\'ve saved over 20 hours per week and our team productivity has increased by 40%. The ROI was immediate and continues to grow.' 
+    default: 'After struggling with manual processes for years, we implemented this platform and saw <strong>immediate results</strong>. Within just <strong>3 months</strong>, we reduced our operational overhead by <strong>65%</strong> and increased team efficiency by <strong>180%</strong>. The automated workflows alone save us <strong>25+ hours weekly</strong>, which we now invest in strategic growth initiatives. The ROI exceeded our projections by 40%.' 
   },
   testimonial_author: { 
     type: 'string' as const, 
-    default: 'Sarah Chen' 
+    default: 'Marcus Rodriguez' 
   },
   testimonial_title: { 
     type: 'string' as const, 
-    default: 'VP of Operations' 
+    default: 'Chief Operations Officer' 
   },
   testimonial_company: { 
     type: 'string' as const, 
-    default: 'TechFlow Solutions' 
+    default: 'Velocity Dynamics' 
   },
   testimonial_company_logo: { 
     type: 'string' as const, 
     default: '' 
+  },
+  testimonial_date: { 
+    type: 'string' as const, 
+    default: 'March 2024' 
+  },
+  testimonial_industry: { 
+    type: 'string' as const, 
+    default: 'SaaS & Technology' 
+  },
+  case_study_tag: { 
+    type: 'string' as const, 
+    default: 'Enterprise Implementation' 
   },
   rating: { 
     type: 'string' as const, 
@@ -134,25 +149,52 @@ const TestimonialAvatar = React.memo(({
     'from-green-500 to-emerald-600',
     'from-purple-500 to-pink-600',
     'from-orange-500 to-red-600',
-    'from-teal-500 to-cyan-600'
+    'from-teal-500 to-cyan-600',
+    'from-indigo-500 to-purple-600',
+    'from-pink-500 to-rose-600'
   ];
   const colorIndex = name.length % colors.length;
 
+  // Generate company initials if no logo
+  const companyInitials = company
+    .split(' ')
+    .map(word => word.charAt(0))
+    .join('')
+    .substring(0, 2)
+    .toUpperCase();
+
   return (
     <div className="relative">
-      <div className={`w-16 h-16 bg-gradient-to-br ${colors[colorIndex]} rounded-full flex items-center justify-center text-white font-bold text-lg shadow-lg`}>
+      <div className={`w-16 h-16 bg-gradient-to-br ${colors[colorIndex]} rounded-full flex items-center justify-center text-white font-bold text-lg shadow-lg ring-2 ring-white`}>
         {initials}
       </div>
-      {/* Company logo - editable */}
-      <div className="absolute -bottom-2 -right-2 w-8 h-8 bg-white rounded-full border-2 border-gray-200 flex items-center justify-center">
-        <LogoEditableComponent
-          mode={mode}
-          logoUrl={logoUrl}
-          onLogoChange={onLogoChange}
-          companyName={company}
-          size="sm"
-          className="w-5 h-5 rounded"
-        />
+      {/* Company logo - editable with enhanced styling */}
+      <div className="absolute -bottom-3 -right-3 w-10 h-10 bg-white rounded-full border-2 border-gray-300 shadow-md flex items-center justify-center group hover:shadow-lg transition-shadow duration-200">
+        {logoUrl ? (
+          <LogoEditableComponent
+            mode={mode}
+            logoUrl={logoUrl}
+            onLogoChange={onLogoChange}
+            companyName={company}
+            size="sm"
+            className="w-6 h-6 rounded"
+          />
+        ) : (
+          <div className="w-6 h-6 bg-gray-100 rounded flex items-center justify-center text-xs font-bold text-gray-600 border">
+            {mode !== 'preview' ? (
+              <LogoEditableComponent
+                mode={mode}
+                logoUrl={logoUrl}
+                onLogoChange={onLogoChange}
+                companyName={company}
+                size="sm"
+                className="w-full h-full rounded"
+              />
+            ) : (
+              companyInitials
+            )}
+          </div>
+        )}
       </div>
     </div>
   );
@@ -357,11 +399,36 @@ export default function TestimonialCTACombo(props: LayoutComponentProps) {
           </div>
 
           {/* Right Column - Testimonial */}
-          <div className="bg-white rounded-2xl p-8 shadow-xl border border-gray-200 relative">
+          <div className="bg-white rounded-2xl p-8 shadow-xl border border-gray-200 relative overflow-hidden">
+            {/* Background Pattern */}
+            <div className="absolute inset-0 bg-gradient-to-br from-blue-50/30 to-transparent pointer-events-none"></div>
+            
+            {/* Case Study Tag */}
+            {blockContent.case_study_tag && (
+              <div className="absolute top-6 right-6 z-10">
+                <div className="flex items-center space-x-1 px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-medium border border-blue-200">
+                  <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <EditableAdaptiveText
+                    mode={mode}
+                    value={blockContent.case_study_tag || ''}
+                    onEdit={(value) => handleContentUpdate('case_study_tag', value)}
+                    backgroundType="neutral"
+                    colorTokens={colorTokens}
+                    variant="body"
+                    className="text-xs font-medium"
+                    sectionId={sectionId}
+                    elementKey="case_study_tag"
+                    sectionBackground="bg-blue-100"
+                  />
+                </div>
+              </div>
+            )}
             {/* Quote Icon */}
-            <div className="absolute -top-4 -left-4 w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center">
-              <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clipRule="evenodd" />
+            <div className="absolute -top-4 -left-4 w-12 h-12 bg-gradient-to-br from-blue-600 to-blue-700 rounded-full flex items-center justify-center shadow-lg">
+              <svg className="w-7 h-7 text-white" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z"/>
               </svg>
             </div>
 
@@ -389,18 +456,32 @@ export default function TestimonialCTACombo(props: LayoutComponentProps) {
             </div>
 
             {/* Testimonial Quote */}
-            <EditableAdaptiveText
-              mode={mode}
-              value={blockContent.testimonial_quote || ''}
-              onEdit={(value) => handleContentUpdate('testimonial_quote', value)}
-              backgroundType="neutral"
-              colorTokens={colorTokens}
-              variant="body"
-              className="text-gray-700 leading-relaxed mb-6 italic"
-              sectionId={sectionId}
-              elementKey="testimonial_quote"
-              sectionBackground="bg-white"
-            />
+            <div className="text-gray-700 leading-relaxed mb-6 text-lg">
+              {mode === 'preview' ? (
+                <div 
+                  className="italic"
+                  dangerouslySetInnerHTML={{ 
+                    __html: (blockContent.testimonial_quote || '').replace(
+                      /<strong>(.*?)<\/strong>/g, 
+                      '<span class="font-bold text-blue-600">$1</span>'
+                    )
+                  }}
+                />
+              ) : (
+                <EditableAdaptiveText
+                  mode={mode}
+                  value={blockContent.testimonial_quote || ''}
+                  onEdit={(value) => handleContentUpdate('testimonial_quote', value)}
+                  backgroundType="neutral"
+                  colorTokens={colorTokens}
+                  variant="body"
+                  className="italic"
+                  sectionId={sectionId}
+                  elementKey="testimonial_quote"
+                  sectionBackground="bg-white"
+                />
+              )}
+            </div>
 
             {/* Author Info */}
             <div className="flex items-center space-x-4">
@@ -412,7 +493,7 @@ export default function TestimonialCTACombo(props: LayoutComponentProps) {
                 onLogoChange={(url) => handleContentUpdate('testimonial_company_logo', url)}
               />
               
-              <div>
+              <div className="flex-1">
                 <EditableAdaptiveText
                   mode={mode}
                   value={blockContent.testimonial_author || ''}
@@ -420,13 +501,13 @@ export default function TestimonialCTACombo(props: LayoutComponentProps) {
                   backgroundType="neutral"
                   colorTokens={colorTokens}
                   variant="body"
-                  className="font-semibold text-gray-900"
+                  className="font-semibold text-gray-900 text-base"
                   sectionId={sectionId}
                   elementKey="testimonial_author"
                   sectionBackground="bg-white"
                 />
                 
-                <div className="flex items-center space-x-1 text-sm text-gray-500">
+                <div className="flex items-center space-x-1 text-sm text-gray-600 mt-1">
                   <EditableAdaptiveText
                     mode={mode}
                     value={blockContent.testimonial_title || ''}
@@ -434,7 +515,7 @@ export default function TestimonialCTACombo(props: LayoutComponentProps) {
                     backgroundType="neutral"
                     colorTokens={colorTokens}
                     variant="body"
-                    className="text-gray-500"
+                    className="text-gray-600 font-medium"
                     sectionId={sectionId}
                     elementKey="testimonial_title"
                     sectionBackground="bg-white"
@@ -447,24 +528,58 @@ export default function TestimonialCTACombo(props: LayoutComponentProps) {
                     backgroundType="neutral"
                     colorTokens={colorTokens}
                     variant="body"
-                    className="text-gray-500 font-medium"
+                    className="text-gray-600 font-semibold"
                     sectionId={sectionId}
                     elementKey="testimonial_company"
                     sectionBackground="bg-white"
                   />
                 </div>
+                
+                {/* Industry and Date */}
+                <div className="flex items-center space-x-3 text-xs text-gray-500 mt-2">
+                  {blockContent.testimonial_industry && (
+                    <div className="flex items-center space-x-1">
+                      <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                      </svg>
+                      <EditableAdaptiveText
+                        mode={mode}
+                        value={blockContent.testimonial_industry || ''}
+                        onEdit={(value) => handleContentUpdate('testimonial_industry', value)}
+                        backgroundType="neutral"
+                        colorTokens={colorTokens}
+                        variant="body"
+                        className="text-xs"
+                        sectionId={sectionId}
+                        elementKey="testimonial_industry"
+                        sectionBackground="bg-white"
+                      />
+                    </div>
+                  )}
+                  
+                  {blockContent.testimonial_date && (
+                    <div className="flex items-center space-x-1">
+                      <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                      </svg>
+                      <EditableAdaptiveText
+                        mode={mode}
+                        value={blockContent.testimonial_date || ''}
+                        onEdit={(value) => handleContentUpdate('testimonial_date', value)}
+                        backgroundType="neutral"
+                        colorTokens={colorTokens}
+                        variant="body"
+                        className="text-xs"
+                        sectionId={sectionId}
+                        elementKey="testimonial_date"
+                        sectionBackground="bg-white"
+                      />
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
 
-            {/* Verified Badge */}
-            <div className="absolute top-4 right-4">
-              <div className="flex items-center space-x-1 px-3 py-1 bg-green-100 rounded-full">
-                <svg className="w-4 h-4 text-green-600" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                </svg>
-                <span className="text-green-700 text-xs font-medium">Verified</span>
-              </div>
-            </div>
           </div>
         </div>
       </div>
@@ -494,11 +609,14 @@ export const componentMeta = {
     { key: 'headline', label: 'CTA Headline', type: 'text', required: true },
     { key: 'subheadline', label: 'Supporting Text', type: 'textarea', required: false },
     { key: 'cta_text', label: 'CTA Button Text', type: 'text', required: true },
-    { key: 'testimonial_quote', label: 'Testimonial Quote', type: 'textarea', required: true },
+    { key: 'testimonial_quote', label: 'Testimonial Quote (supports <strong> tags)', type: 'textarea', required: true },
     { key: 'testimonial_author', label: 'Author Name', type: 'text', required: true },
     { key: 'testimonial_title', label: 'Author Title', type: 'text', required: true },
     { key: 'testimonial_company', label: 'Company Name', type: 'text', required: true },
     { key: 'testimonial_company_logo', label: 'Company Logo', type: 'image', required: false },
+    { key: 'testimonial_date', label: 'Testimonial Date', type: 'text', required: false },
+    { key: 'testimonial_industry', label: 'Company Industry', type: 'text', required: false },
+    { key: 'case_study_tag', label: 'Case Study Tag', type: 'text', required: false },
     { key: 'rating', label: 'Star Rating (1-5)', type: 'text', required: false },
     { key: 'customer_count', label: 'Customer Count', type: 'text', required: false },
     { key: 'average_rating', label: 'Average Rating', type: 'text', required: false },
