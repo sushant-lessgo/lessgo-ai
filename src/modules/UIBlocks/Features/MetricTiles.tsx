@@ -196,7 +196,28 @@ const MetricTile = React.memo(({
   };
 
   return (
-    <div className="bg-white rounded-xl shadow-lg p-8 border border-gray-100 hover:shadow-xl transition-all duration-300 h-full flex flex-col">
+    <div className={`group/metric-tile-${index} relative bg-white rounded-xl shadow-lg p-8 border border-gray-100 hover:shadow-xl transition-all duration-300 h-full flex flex-col`}>
+      
+      {/* Delete Button */}
+      {mode === 'edit' && (
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            // Mark entire tile as removed
+            onTitleEdit(index, '___REMOVED___');
+            onMetricEdit(index, '___REMOVED___');
+            onLabelEdit(index, '___REMOVED___');
+            onDescriptionEdit(index, '___REMOVED___');
+            handleContentUpdate(`metric_icon_${index + 1}` as keyof MetricTilesContent, '___REMOVED___');
+          }}
+          className={`opacity-0 group-hover/metric-tile-${index}:opacity-100 absolute -top-2 -right-2 p-1 rounded-full bg-white/90 hover:bg-white text-red-500 hover:text-red-700 transition-all duration-200 shadow-sm z-10`}
+          title="Remove this metric tile"
+        >
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      )}
       
       <div className="mb-6">
         <div className={`inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br ${getGradientForIndex(index)} shadow-lg mb-4`}>
@@ -316,12 +337,18 @@ export default function MetricTiles(props: LayoutComponentProps) {
   const metricLabels = parsePipeData(blockContent.metric_labels);
   const featureDescriptions = parsePipeData(blockContent.feature_descriptions);
 
+  // Filter out removed items and create features array (preserve original indices)
   const features = featureTitles.map((title, index) => ({
     title,
     metric: featureMetrics[index] || '',
     label: metricLabels[index] || '',
-    description: featureDescriptions[index] || ''
-  }));
+    description: featureDescriptions[index] || '',
+    originalIndex: index,
+    isRemoved: title === '___REMOVED___' || 
+               featureMetrics[index] === '___REMOVED___' || 
+               metricLabels[index] === '___REMOVED___' || 
+               featureDescriptions[index] === '___REMOVED___'
+  })).filter(feature => !feature.isRemoved);
 
   // Individual field edit handlers (following IconGrid pattern)
   const handleTitleEdit = (index: number, value: string) => {
@@ -394,14 +421,14 @@ export default function MetricTiles(props: LayoutComponentProps) {
         </div>
 
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {features.map((feature, index) => (
+          {features.map((feature) => (
             <MetricTile
-              key={index}
+              key={feature.originalIndex}
               title={feature.title}
               metric={feature.metric}
               label={feature.label}
               description={feature.description}
-              index={index}
+              index={feature.originalIndex}
               colorTokens={colorTokens}
               mutedTextColor={mutedTextColor}
               h3Style={h3Style}
