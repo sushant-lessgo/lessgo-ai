@@ -382,13 +382,13 @@ const FeatureRow = React.memo(({
             src={visual}
             alt={title}
             className="w-full h-80 object-cover rounded-xl shadow-2xl cursor-pointer hover:shadow-3xl transition-shadow duration-300"
-            data-image-id={`${sectionId}.feature-visual-${originalIndex}`}
+            data-image-id={`${sectionId}.feature_visual_${originalIndex}`}
             onMouseUp={(e) => {
               if (mode === 'edit') {
                 e.stopPropagation();
                 e.preventDefault();
                 const rect = e.currentTarget.getBoundingClientRect();
-                const imageId = `${sectionId}.feature-visual-${originalIndex}`;
+                const imageId = `${sectionId}.feature_visual_${originalIndex}`;
                 const position = {
                   x: rect.left + rect.width / 2,
                   y: rect.top - 10
@@ -410,7 +410,7 @@ const FeatureRow = React.memo(({
                 e.stopPropagation();
                 e.preventDefault();
                 const rect = e.currentTarget.getBoundingClientRect();
-                const imageId = `${sectionId}.feature-visual-${originalIndex}`;
+                const imageId = `${sectionId}.feature_visual_${originalIndex}`;
                 const position = {
                   x: rect.left + rect.width / 2,
                   y: rect.top - 10
