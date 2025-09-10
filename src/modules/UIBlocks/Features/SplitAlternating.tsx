@@ -2,6 +2,7 @@ import React from 'react';
 import { useLayoutComponent } from '@/hooks/useLayoutComponent';
 import { useTypography } from '@/hooks/useTypography';
 import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
+import { useImageToolbar } from '@/hooks/useImageToolbar';
 import { LayoutSection } from '@/components/layout/LayoutSection';
 import { 
   EditableAdaptiveHeadline, 
@@ -19,6 +20,13 @@ interface SplitAlternatingContent {
   feature_titles: string;
   feature_descriptions: string;
   feature_visuals?: string;
+  // Individual feature visual fields for image toolbar support
+  feature_visual_0?: string;
+  feature_visual_1?: string;
+  feature_visual_2?: string;
+  feature_visual_3?: string;
+  feature_visual_4?: string;
+  feature_visual_5?: string;
   subheadline?: string;
   supporting_text?: string;
   cta_text?: string;
@@ -28,6 +36,8 @@ interface SplitAlternatingContent {
   feature_icon_2?: string;
   feature_icon_3?: string;
   feature_icon_4?: string;
+  feature_icon_5?: string;
+  feature_icon_6?: string;
   // Benefit item fields
   benefit_1?: string;
   benefit_2?: string;
@@ -49,6 +59,31 @@ const CONTENT_SCHEMA = {
   feature_visuals: { 
     type: 'string' as const, 
     default: '/feature1.jpg|/feature2.jpg|/feature3.jpg|/feature4.jpg' 
+  },
+  // Individual feature visual fields for image toolbar support
+  feature_visual_0: { 
+    type: 'string' as const, 
+    default: '' 
+  },
+  feature_visual_1: { 
+    type: 'string' as const, 
+    default: '' 
+  },
+  feature_visual_2: { 
+    type: 'string' as const, 
+    default: '' 
+  },
+  feature_visual_3: { 
+    type: 'string' as const, 
+    default: '' 
+  },
+  feature_visual_4: { 
+    type: 'string' as const, 
+    default: '' 
+  },
+  feature_visual_5: { 
+    type: 'string' as const, 
+    default: '' 
   },
   subheadline: { 
     type: 'string' as const, 
@@ -83,6 +118,14 @@ const CONTENT_SCHEMA = {
     type: 'string' as const, 
     default: '🔧' 
   },
+  feature_icon_5: { 
+    type: 'string' as const, 
+    default: '🚀' 
+  },
+  feature_icon_6: { 
+    type: 'string' as const, 
+    default: '✨' 
+  },
   // Benefit item schema
   benefit_1: { 
     type: 'string' as const, 
@@ -99,6 +142,7 @@ const FeatureRow = React.memo(({
   description, 
   visual, 
   index,
+  originalIndex,
   showImageToolbar,
   sectionId,
   mode,
@@ -108,12 +152,15 @@ const FeatureRow = React.memo(({
   handleContentUpdate,
   colorTokens,
   sectionBackground,
-  props
+  props,
+  onRemove,
+  handleImageToolbar
 }: {
   title: string;
   description: string;
   visual?: string;
   index: number;
+  originalIndex: number;
   showImageToolbar: any;
   sectionId: string;
   mode: string;
@@ -124,49 +171,61 @@ const FeatureRow = React.memo(({
   colorTokens: any;
   sectionBackground: any;
   props: LayoutComponentProps;
+  onRemove?: () => void;
+  handleImageToolbar: (imageId: string, position: { x: number; y: number }) => void;
 }) => {
   const isEven = index % 2 === 0;
   
   // Get feature icon from content fields
-  const getFeatureIcon = (index: number) => {
+  const getFeatureIcon = () => {
     const iconFields = [
       blockContent.feature_icon_1,
       blockContent.feature_icon_2,
       blockContent.feature_icon_3,
-      blockContent.feature_icon_4
+      blockContent.feature_icon_4,
+      blockContent.feature_icon_5,
+      blockContent.feature_icon_6
     ];
-    return iconFields[index] || '🎯';
+    return iconFields[originalIndex] || '🎯';
   };
   
-  const VisualPlaceholder = () => (
-    <div className="relative w-full h-full min-h-[300px] rounded-xl overflow-hidden bg-gradient-to-br from-blue-50 to-indigo-100">
+  const VisualPlaceholder = React.memo(({ onClick }: { onClick?: (e: React.MouseEvent) => void }) => (
+    <div 
+      className="relative w-full h-80 rounded-xl overflow-hidden bg-gradient-to-br from-blue-50 to-indigo-100 cursor-pointer hover:bg-gradient-to-br hover:from-blue-100 hover:to-indigo-150 transition-all duration-300"
+      onClick={onClick}
+    >
       <div className="absolute inset-0 flex items-center justify-center">
-        <div className="w-24 h-24 rounded-full bg-white/50 flex items-center justify-center">
-          <div className="w-16 h-16 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center">
-            <span className="text-white font-bold text-2xl">{index + 1}</span>
+        <div className="text-center">
+          <div className="w-20 h-20 mx-auto rounded-2xl bg-white/50 flex items-center justify-center mb-4">
+            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center">
+              <span className="text-white font-bold text-xl">{originalIndex + 1}</span>
+            </div>
           </div>
-        </div>
-      </div>
-      <div className="absolute bottom-4 left-4 right-4">
-        <div className="text-center text-sm font-medium text-gray-700">
-          Feature {index + 1} Visual
+          <div className="text-sm font-medium text-gray-700">
+            Feature {originalIndex + 1} Visual
+          </div>
+          {mode === 'edit' && (
+            <div className="text-xs text-gray-500 mt-2">
+              Click to add image
+            </div>
+          )}
         </div>
       </div>
     </div>
-  );
+  ));
 
   return (
-    <div className={`grid lg:grid-cols-2 gap-12 items-center ${isEven ? '' : 'lg:direction-rtl'}`}>
+    <div className={`grid lg:grid-cols-2 gap-12 items-center ${isEven ? '' : 'lg:direction-rtl'} group`}>
       
       <div className={`${isEven ? 'lg:order-1' : 'lg:order-2'}`}>
         <div className="space-y-6">
-          <div className="flex items-start space-x-4">
+          <div className="flex items-start space-x-4 relative">
             <div className="flex-shrink-0 w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-lg">
               <IconEditableText
                 mode={mode as 'edit' | 'preview'}
-                value={getFeatureIcon(index)}
+                value={getFeatureIcon()}
                 onEdit={(value) => {
-                  const iconField = `feature_icon_${index + 1}` as keyof SplitAlternatingContent;
+                  const iconField = `feature_icon_${originalIndex + 1}` as keyof SplitAlternatingContent;
                   handleContentUpdate(iconField, value);
                 }}
                 backgroundType={props.backgroundType as any}
@@ -174,15 +233,66 @@ const FeatureRow = React.memo(({
                 iconSize="md"
                 className="text-white text-xl"
                 sectionId={sectionId}
-                elementKey={`feature_icon_${index + 1}`}
+                elementKey={`feature_icon_${originalIndex + 1}`}
               />
             </div>
             <div className="flex-1">
-              <h3 style={h2Style} className="font-bold text-gray-900 mb-4">{title}</h3>
-              <p style={bodyLgStyle} className="text-gray-600 leading-relaxed">
-                {description}
-              </p>
+              {/* Editable Feature Title */}
+              {mode !== 'preview' ? (
+                <div
+                  contentEditable
+                  suppressContentEditableWarning
+                  onBlur={(e) => {
+                    const featureTitles = blockContent.feature_titles ? blockContent.feature_titles.split('|') : [];
+                    featureTitles[originalIndex] = e.currentTarget.textContent || '';
+                    handleContentUpdate('feature_titles', featureTitles.join('|'));
+                  }}
+                  className="text-2xl font-bold text-gray-900 mb-4 outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-2 py-1 cursor-text hover:bg-gray-50 min-h-[40px]"
+                  data-placeholder="Feature title"
+                >
+                  {title}
+                </div>
+              ) : (
+                <h3 className="text-2xl font-bold text-gray-900 mb-4">{title}</h3>
+              )}
+              
+              {/* Editable Feature Description */}
+              {mode !== 'preview' ? (
+                <div
+                  contentEditable
+                  suppressContentEditableWarning
+                  onBlur={(e) => {
+                    const featureDescriptions = blockContent.feature_descriptions ? blockContent.feature_descriptions.split('|') : [];
+                    featureDescriptions[originalIndex] = e.currentTarget.textContent || '';
+                    handleContentUpdate('feature_descriptions', featureDescriptions.join('|'));
+                  }}
+                  className="text-gray-600 leading-relaxed text-lg outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-2 py-1 cursor-text hover:bg-gray-50 min-h-[60px]"
+                  data-placeholder="Feature description"
+                >
+                  {description}
+                </div>
+              ) : (
+                <p className="text-gray-600 leading-relaxed text-lg">
+                  {description}
+                </p>
+              )}
             </div>
+            
+            {/* Remove Feature Button - only in edit mode */}
+            {mode === 'edit' && onRemove && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onRemove();
+                }}
+                className="opacity-0 group-hover:opacity-100 absolute -top-2 -right-2 text-red-500 hover:text-red-700 transition-opacity duration-200 z-10 bg-white rounded-full p-1 shadow-md"
+                title="Remove this feature"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            )}
           </div>
           
           <div className="flex items-center space-x-4 pl-16">
@@ -271,14 +381,44 @@ const FeatureRow = React.memo(({
           <img
             src={visual}
             alt={title}
-            className="w-full h-auto rounded-xl shadow-2xl cursor-pointer hover:shadow-3xl transition-shadow duration-300"
-            data-image-id={`${sectionId}-feature${index}-visual`}
+            className="w-full h-80 object-cover rounded-xl shadow-2xl cursor-pointer hover:shadow-3xl transition-shadow duration-300"
+            data-image-id={`${sectionId}.feature-visual-${originalIndex}`}
             onMouseUp={(e) => {
-              // Image toolbar is only available in edit mode
+              if (mode === 'edit') {
+                e.stopPropagation();
+                e.preventDefault();
+                const rect = e.currentTarget.getBoundingClientRect();
+                const imageId = `${sectionId}.feature-visual-${originalIndex}`;
+                const position = {
+                  x: rect.left + rect.width / 2,
+                  y: rect.top - 10
+                };
+                handleImageToolbar(imageId, position);
+              }
+            }}
+            onClick={(e) => {
+              if (mode === 'edit') {
+                e.stopPropagation();
+                e.preventDefault();
+              }
             }}
           />
         ) : (
-          <VisualPlaceholder />
+          <VisualPlaceholder 
+            onClick={(e) => {
+              if (mode === 'edit') {
+                e.stopPropagation();
+                e.preventDefault();
+                const rect = e.currentTarget.getBoundingClientRect();
+                const imageId = `${sectionId}.feature-visual-${originalIndex}`;
+                const position = {
+                  x: rect.left + rect.width / 2,
+                  y: rect.top - 10
+                };
+                handleImageToolbar(imageId, position);
+              }
+            }}
+          />
         )}
       </div>
     </div>
@@ -308,23 +448,36 @@ export default function SplitAlternating(props: LayoutComponentProps) {
   const h2Style = getTypographyStyle('h2');
   const bodyLgStyle = getTypographyStyle('body-lg');
 
+  // Initialize image toolbar hook
+  const handleImageToolbar = useImageToolbar();
+
+  // Helper function to get individual feature visual
+  const getFeatureVisual = (index: number): string => {
+    const fieldName = `feature_visual_${index}` as keyof SplitAlternatingContent;
+    return (blockContent[fieldName] as string) || '';
+  };
+
+  // Parse titles and descriptions without filtering - preserve empty slots
   const featureTitles = blockContent.feature_titles 
-    ? blockContent.feature_titles.split('|').map(item => item.trim()).filter(Boolean)
+    ? blockContent.feature_titles.split('|').map(item => item.trim())
     : [];
 
   const featureDescriptions = blockContent.feature_descriptions 
-    ? blockContent.feature_descriptions.split('|').map(item => item.trim()).filter(Boolean)
+    ? blockContent.feature_descriptions.split('|').map(item => item.trim())
     : [];
 
-  const featureVisuals = blockContent.feature_visuals 
-    ? blockContent.feature_visuals.split('|').map(item => item.trim()).filter(Boolean)
-    : [];
-
+  // Create features array based on actual data
   const features = featureTitles.map((title, index) => ({
-    title,
+    title: title || (mode === 'edit' ? `Feature ${index + 1}` : ''),
     description: featureDescriptions[index] || '',
-    visual: featureVisuals[index] || ''
-  }));
+    visual: getFeatureVisual(index), // Use individual field instead of pipe-separated
+    originalIndex: index // Keep track of original index for proper data updates
+  })).filter(feature => {
+    // In edit mode: show empty features for editing
+    if (mode === 'edit') return true;
+    // In preview mode: only show features with content
+    return feature.title.trim() !== '' || feature.description.trim() !== '' || feature.visual.trim() !== '';
+  });
 
   const trustItems = blockContent.trust_items 
     ? blockContent.trust_items.split('|').map(item => item.trim()).filter(Boolean)
@@ -334,6 +487,26 @@ export default function SplitAlternating(props: LayoutComponentProps) {
   
   const store = useEditStore();
   const showImageToolbar = store.showImageToolbar;
+
+  // Migration logic: Convert pipe-separated feature_visuals to individual fields
+  React.useEffect(() => {
+    if (blockContent.feature_visuals && !blockContent.feature_visual_0) {
+      const featureVisuals = blockContent.feature_visuals.split('|').map(item => item.trim()).filter(Boolean);
+      const updates: Partial<SplitAlternatingContent> = {};
+      
+      featureVisuals.forEach((visual, index) => {
+        if (index < 6) { // Max 6 features
+          const fieldName = `feature_visual_${index}` as keyof SplitAlternatingContent;
+          updates[fieldName] = visual as any;
+        }
+      });
+      
+      // Apply all updates at once
+      Object.entries(updates).forEach(([key, value]) => {
+        handleContentUpdate(key as keyof SplitAlternatingContent, value);
+      });
+    }
+  }, [blockContent.feature_visuals, blockContent.feature_visual_0, handleContentUpdate]);
   
   return (
     <LayoutSection
@@ -379,61 +552,118 @@ export default function SplitAlternating(props: LayoutComponentProps) {
         </div>
 
         <div className="space-y-24">
-          {mode !== 'preview' ? (
-            <div className="space-y-8">
-              <div className="p-6 border border-gray-200 rounded-lg bg-gray-50">
-                <h4 className="font-semibold text-gray-700 mb-4">Feature Content</h4>
+          {features.map((feature, displayIndex) => (
+            <FeatureRow
+              key={`feature-${displayIndex}`}
+              title={feature.title}
+              description={feature.description}
+              visual={feature.visual}
+              index={displayIndex}
+              originalIndex={feature.originalIndex}
+              showImageToolbar={showImageToolbar}
+              sectionId={sectionId}
+              mode={mode}
+              h2Style={h2Style}
+              bodyLgStyle={bodyLgStyle}
+              blockContent={blockContent}
+              handleContentUpdate={handleContentUpdate}
+              colorTokens={colorTokens}
+              sectionBackground={sectionBackground}
+              props={props}
+              handleImageToolbar={handleImageToolbar}
+              onRemove={features.length > 1 ? () => {
+                const featureTitles = blockContent.feature_titles ? blockContent.feature_titles.split('|') : [];
+                const featureDescriptions = blockContent.feature_descriptions ? blockContent.feature_descriptions.split('|') : [];
                 
-                <div className="space-y-4">
-                  <EditableAdaptiveText
-                    mode={mode as 'preview' | 'edit'}
-                    value={blockContent.feature_titles || ''}
-                    onEdit={(value) => handleContentUpdate('feature_titles', value)}
-                    backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
-                    colorTokens={colorTokens}
-                    variant="body"
-                    className="mb-2"
-                    placeholder="Feature titles (pipe separated)"
-                    sectionId={sectionId}
-                    elementKey="feature_titles"
-                    sectionBackground={sectionBackground}
-                  />
+                // Remove from pipe-separated fields using original index
+                featureTitles.splice(feature.originalIndex, 1);
+                featureDescriptions.splice(feature.originalIndex, 1);
+                
+                // Remove the visual field for the feature being deleted and shift remaining fields
+                const visualsToShift = [];
+                for (let i = 0; i < 6; i++) {
+                  const fieldName = `feature_visual_${i}` as keyof SplitAlternatingContent;
+                  const value = (blockContent[fieldName] as string) || '';
+                  visualsToShift.push(value);
+                }
+                
+                // Remove the visual at the original index and shift remaining ones
+                visualsToShift.splice(feature.originalIndex, 1);
+                
+                // Update all visual fields with shifted values
+                for (let i = 0; i < 6; i++) {
+                  const fieldName = `feature_visual_${i}` as keyof SplitAlternatingContent;
+                  const newValue = visualsToShift[i] || '';
+                  handleContentUpdate(fieldName, newValue);
+                }
+                
+                // Also shift icon fields
+                const iconsToShift = [];
+                for (let i = 0; i < 6; i++) {
+                  const fieldName = `feature_icon_${i + 1}` as keyof SplitAlternatingContent;
+                  const value = (blockContent[fieldName] as string) || '';
+                  iconsToShift.push(value);
+                }
+                
+                // Remove the icon at the original index and shift remaining ones
+                iconsToShift.splice(feature.originalIndex, 1);
+                
+                // Update all icon fields with shifted values
+                for (let i = 0; i < 6; i++) {
+                  const fieldName = `feature_icon_${i + 1}` as keyof SplitAlternatingContent;
+                  const newValue = iconsToShift[i] || '';
+                  handleContentUpdate(fieldName, newValue);
+                }
+                
+                handleContentUpdate('feature_titles', featureTitles.join('|'));
+                handleContentUpdate('feature_descriptions', featureDescriptions.join('|'));
+              } : undefined}
+            />
+          ))}
+          
+          {/* Add Feature Button - only in edit mode */}
+          {mode === 'edit' && features.length < 6 && (
+            <div className="flex justify-center">
+              <button
+                onClick={() => {
+                  const featureTitles = blockContent.feature_titles ? blockContent.feature_titles.split('|') : [];
+                  const featureDescriptions = blockContent.feature_descriptions ? blockContent.feature_descriptions.split('|') : [];
                   
-                  <EditableAdaptiveText
-                    mode={mode as 'preview' | 'edit'}
-                    value={blockContent.feature_descriptions || ''}
-                    onEdit={(value) => handleContentUpdate('feature_descriptions', value)}
-                    backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
-                    colorTokens={colorTokens}
-                    variant="body"
-                    placeholder="Feature descriptions (pipe separated)"
-                    sectionId={sectionId}
-                    elementKey="feature_descriptions"
-                    sectionBackground={sectionBackground}
-                  />
-                </div>
-              </div>
+                  const newFeatureIndex = featureTitles.length;
+                  featureTitles.push(`Feature ${newFeatureIndex + 1}`);
+                  featureDescriptions.push('Add feature description here');
+                  
+                  // Add default image for the new feature
+                  const defaultImages = [
+                    '/feature1.jpg',
+                    '/feature2.jpg',
+                    '/feature3.jpg',
+                    '/feature4.jpg',
+                    '/feature5.jpg',
+                    '/feature6.jpg'
+                  ];
+                  
+                  const defaultImage = defaultImages[newFeatureIndex] || '/feature-placeholder.jpg';
+                  const visualFieldName = `feature_visual_${newFeatureIndex}` as keyof SplitAlternatingContent;
+                  
+                  // Add default icon for the new feature
+                  const defaultIcons = ['🎯', '⚡', '📈', '🔧', '🚀', '✨'];
+                  const iconFieldName = `feature_icon_${newFeatureIndex + 1}` as keyof SplitAlternatingContent;
+                  
+                  handleContentUpdate('feature_titles', featureTitles.join('|'));
+                  handleContentUpdate('feature_descriptions', featureDescriptions.join('|'));
+                  handleContentUpdate(visualFieldName, defaultImage);
+                  handleContentUpdate(iconFieldName, defaultIcons[newFeatureIndex] || '🎯');
+                }}
+                className="px-6 py-3 border-2 border-dashed border-gray-300 hover:border-gray-400 text-gray-500 hover:text-gray-600 transition-all duration-300 flex items-center space-x-3 bg-gray-50 hover:bg-gray-100 rounded-2xl"
+                title="Add new feature"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                </svg>
+                <span className="font-medium">Add Feature</span>
+              </button>
             </div>
-          ) : (
-            features.map((feature, index) => (
-              <FeatureRow
-                key={index}
-                title={feature.title}
-                description={feature.description}
-                visual={feature.visual}
-                index={index}
-                showImageToolbar={showImageToolbar}
-                sectionId={sectionId}
-                mode={mode as 'preview' | 'edit'}
-                h2Style={h2Style}
-                bodyLgStyle={bodyLgStyle}
-                blockContent={blockContent}
-                handleContentUpdate={handleContentUpdate}
-                colorTokens={colorTokens}
-                sectionBackground={sectionBackground}
-                props={props}
-              />
-            ))
           )}
         </div>
 
@@ -499,6 +729,12 @@ export const componentMeta = {
     { key: 'feature_titles', label: 'Feature Titles (pipe separated)', type: 'textarea', required: true },
     { key: 'feature_descriptions', label: 'Feature Descriptions (pipe separated)', type: 'textarea', required: true },
     { key: 'feature_visuals', label: 'Feature Visuals (pipe separated)', type: 'textarea', required: false },
+    { key: 'feature_visual_0', label: 'Feature 1 Visual', type: 'image', required: false },
+    { key: 'feature_visual_1', label: 'Feature 2 Visual', type: 'image', required: false },
+    { key: 'feature_visual_2', label: 'Feature 3 Visual', type: 'image', required: false },
+    { key: 'feature_visual_3', label: 'Feature 4 Visual', type: 'image', required: false },
+    { key: 'feature_visual_4', label: 'Feature 5 Visual', type: 'image', required: false },
+    { key: 'feature_visual_5', label: 'Feature 6 Visual', type: 'image', required: false },
     { key: 'benefit_1', label: 'Benefit Item 1', type: 'text', required: false },
     { key: 'benefit_2', label: 'Benefit Item 2', type: 'text', required: false },
     { key: 'supporting_text', label: 'Supporting Text', type: 'textarea', required: false },
@@ -509,9 +745,10 @@ export const componentMeta = {
   features: [
     'Alternating left/right layout for visual interest',
     'Large feature visuals with detailed descriptions',
-    'Numbered feature indicators',
-    'Perfect for complex technical explanations',
-    'Enterprise-focused design',
+    'WYSIWYG inline editing for titles and descriptions',
+    'Image toolbar integration for visual editing',
+    'Add/remove features functionality in edit mode',
+    'Enterprise-focused design with numbered feature indicators',
     'Responsive grid system'
   ],
   
