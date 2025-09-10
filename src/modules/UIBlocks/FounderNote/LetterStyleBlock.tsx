@@ -6,6 +6,7 @@ import React from 'react';
 import { useLayoutComponent } from '@/hooks/useLayoutComponent';
 import { useTypography } from '@/hooks/useTypography';
 import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
+import { useImageToolbar } from '@/hooks/useImageToolbar';
 import { LayoutSection } from '@/components/layout/LayoutSection';
 import { 
   EditableAdaptiveHeadline, 
@@ -76,8 +77,11 @@ const CONTENT_SCHEMA = {
 };
 
 // Founder Image Component
-const FounderImagePlaceholder = React.memo(() => (
-  <div className="w-24 h-24 rounded-full bg-gradient-to-br from-blue-400 via-indigo-500 to-purple-600 flex items-center justify-center shadow-lg">
+const FounderImagePlaceholder = React.memo(({ onClick }: { onClick?: (e: React.MouseEvent) => void }) => (
+  <div 
+    className="w-24 h-24 rounded-full bg-gradient-to-br from-blue-400 via-indigo-500 to-purple-600 flex items-center justify-center shadow-lg cursor-pointer hover:shadow-xl transition-shadow duration-200"
+    onClick={onClick}
+  >
     <div className="w-20 h-20 rounded-full bg-white flex items-center justify-center">
       <svg className="w-10 h-10 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
@@ -110,6 +114,9 @@ export default function LetterStyleBlock(props: LayoutComponentProps) {
   // Get showImageToolbar for handling image clicks
   const store = useEditStore();
   const showImageToolbar = store.showImageToolbar;
+  
+  // Initialize image toolbar hook
+  const handleImageToolbar = useImageToolbar();
 
   return (
     <LayoutSection
@@ -202,14 +209,44 @@ export default function LetterStyleBlock(props: LayoutComponentProps) {
                     src={blockContent.founder_image}
                     alt="Founder"
                     className="w-16 h-16 rounded-full object-cover cursor-pointer border-2 border-gray-200"
-                    data-image-id={`${sectionId}-founder-image`}
+                    data-image-id={`${sectionId}-founder_image`}
                     onMouseUp={(e) => {
-                        // Image toolbar is only available in edit mode
-                      }}
+                      if (mode === 'edit') {
+                        e.stopPropagation();
+                        e.preventDefault();
+                        const rect = e.currentTarget.getBoundingClientRect();
+                        const imageId = `${sectionId}-founder_image`;
+                        const position = {
+                          x: rect.left + rect.width / 2,
+                          y: rect.top - 10
+                        };
+                        handleImageToolbar(imageId, position);
+                      }
+                    }}
+                    onClick={(e) => {
+                      if (mode === 'edit') {
+                        e.stopPropagation();
+                        e.preventDefault();
+                      }
+                    }}
                   />
                 ) : (
                   <div className="w-16 h-16">
-                    <FounderImagePlaceholder />
+                    <FounderImagePlaceholder 
+                      onClick={(e) => {
+                        if (mode === 'edit') {
+                          e.stopPropagation();
+                          e.preventDefault();
+                          const rect = e.currentTarget.getBoundingClientRect();
+                          const imageId = `${sectionId}-founder_image`;
+                          const position = {
+                            x: rect.left + rect.width / 2,
+                            y: rect.top - 10
+                          };
+                          handleImageToolbar(imageId, position);
+                        }
+                      }}
+                    />
                   </div>
                 )}
 
