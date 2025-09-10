@@ -207,10 +207,58 @@ const CarouselSlide = React.memo(({
       
       {/* Content Side */}
       <div className="space-y-6">
-        {tag && (
-          <span className={`inline-block text-sm font-semibold px-4 py-2 rounded-full ${colorTokens.ctaBg} text-white`}>
-            {tag}
-          </span>
+        {(tag || mode === 'edit') && (
+          <div className="relative group/feature-tag">
+            {tag ? (
+              <>
+                {mode !== 'preview' ? (
+                  <div
+                    contentEditable
+                    suppressContentEditableWarning
+                    onBlur={(e) => {
+                      const fieldName = `feature_tag_${index}` as keyof CarouselContent;
+                      handleContentUpdate(fieldName, e.currentTarget.textContent || '');
+                    }}
+                    className={`inline-block text-sm font-semibold px-4 py-2 rounded-full ${colorTokens.ctaBg} text-white outline-none focus:ring-2 focus:ring-pink-500 focus:ring-opacity-50 cursor-text hover:opacity-80 transition-opacity min-w-[80px] text-center`}
+                    data-placeholder="Feature tag"
+                  >
+                    {tag}
+                  </div>
+                ) : (
+                  <span className={`inline-block text-sm font-semibold px-4 py-2 rounded-full ${colorTokens.ctaBg} text-white`}>
+                    {tag}
+                  </span>
+                )}
+                
+                {/* Remove button for edit mode */}
+                {mode === 'edit' && (
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      const fieldName = `feature_tag_${index}` as keyof CarouselContent;
+                      handleContentUpdate(fieldName, '');
+                    }}
+                    className="opacity-0 group-hover/feature-tag:opacity-100 absolute -top-1 -right-1 bg-red-500 hover:bg-red-600 text-white rounded-full p-1 transition-all duration-200 shadow-sm z-10"
+                    title="Remove tag"
+                  >
+                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                )}
+              </>
+            ) : mode === 'edit' && (
+              <button
+                onClick={() => {
+                  const fieldName = `feature_tag_${index}` as keyof CarouselContent;
+                  handleContentUpdate(fieldName, 'New Tag');
+                }}
+                className="inline-block text-sm px-4 py-2 border-2 border-dashed border-gray-300 hover:border-gray-400 text-gray-500 hover:text-gray-600 rounded-full transition-all duration-200"
+              >
+                + Add Tag
+              </button>
+            )}
+          </div>
         )}
         
         {/* Editable Feature Title */}
@@ -761,10 +809,12 @@ export const componentMeta = {
   features: [
     'WYSIWYG inline text editing in carousel slides',
     'Click-to-edit image integration with toolbar',
+    'Inline editable feature tags (No-Code, Professional, etc.)',
     'Interactive carousel navigation in edit mode',
     'Auto-play functionality option',
     'Feature preview grid',
     'Individual field storage for proper editing',
+    'Hover-based remove controls for tags',
     'Smooth transitions and animations',
     'Perfect for creative showcases'
   ],
