@@ -404,13 +404,13 @@ const CarouselSlide = React.memo(({
             src={visual}
             alt={title}
             className="w-full h-auto rounded-xl shadow-lg cursor-pointer hover:shadow-xl transition-shadow duration-300"
-            data-image-id={`${sectionId}.feature-visual-${index}`}
+            data-image-id={`${sectionId}.feature_visual_${index}`}
             onMouseUp={(e) => {
               if (mode === 'edit') {
                 e.stopPropagation();
                 e.preventDefault();
                 const rect = e.currentTarget.getBoundingClientRect();
-                const imageId = `${sectionId}.feature-visual-${index}`;
+                const imageId = `${sectionId}.feature_visual_${index}`;
                 const position = {
                   x: rect.left + rect.width / 2,
                   y: rect.top - 10
@@ -432,7 +432,7 @@ const CarouselSlide = React.memo(({
                 e.stopPropagation();
                 e.preventDefault();
                 const rect = e.currentTarget.getBoundingClientRect();
-                const imageId = `${sectionId}.feature-visual-${index}`;
+                const imageId = `${sectionId}.feature_visual_${index}`;
                 const position = {
                   x: rect.left + rect.width / 2,
                   y: rect.top - 10
@@ -808,13 +808,14 @@ export const componentMeta = {
   
   features: [
     'WYSIWYG inline text editing in carousel slides',
-    'Click-to-edit image integration with toolbar',
+    'Click-to-edit image replacement with proper toolbar integration',
     'Inline editable feature tags (No-Code, Professional, etc.)',
     'Interactive carousel navigation in edit mode',
     'Auto-play functionality option',
     'Feature preview grid',
     'Individual field storage for proper editing',
     'Hover-based remove controls for tags',
+    'Seamless image toolbar integration matching field names',
     'Smooth transitions and animations',
     'Perfect for creative showcases'
   ],
