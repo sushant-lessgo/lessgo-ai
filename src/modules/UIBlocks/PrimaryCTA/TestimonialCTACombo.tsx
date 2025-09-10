@@ -27,7 +27,6 @@ interface TestimonialCTAComboContent {
   testimonial_date?: string;
   testimonial_industry?: string;
   case_study_tag?: string;
-  rating?: string;
   customer_count?: string;
   average_rating?: string;
   uptime_percentage?: string;
@@ -78,11 +77,7 @@ const CONTENT_SCHEMA = {
   },
   case_study_tag: { 
     type: 'string' as const, 
-    default: 'Enterprise Implementation' 
-  },
-  rating: { 
-    type: 'string' as const, 
-    default: '5' 
+    default: '' 
   },
   customer_count: { 
     type: 'string' as const, 
@@ -102,25 +97,6 @@ const CONTENT_SCHEMA = {
   }
 };
 
-// Star Rating Component
-const StarRating = React.memo(({ rating }: { rating: number }) => {
-  return (
-    <div className="flex items-center space-x-1">
-      {[1, 2, 3, 4, 5].map((star) => (
-        <svg
-          key={star}
-          className={`w-5 h-5 ${
-            star <= rating ? 'text-yellow-400 fill-current' : 'text-gray-300'
-          }`}
-          viewBox="0 0 20 20"
-        >
-          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-        </svg>
-      ))}
-    </div>
-  );
-});
-StarRating.displayName = 'StarRating';
 
 // Avatar Component
 const TestimonialAvatar = React.memo(({ 
@@ -222,7 +198,6 @@ export default function TestimonialCTACombo(props: LayoutComponentProps) {
   const h2Style = getTypographyStyle('h2');
   const bodyLgStyle = getTypographyStyle('body-lg');
 
-  const rating = parseInt(blockContent.rating || '5');
 
   return (
     <LayoutSection
@@ -405,7 +380,7 @@ export default function TestimonialCTACombo(props: LayoutComponentProps) {
             
             {/* Case Study Tag */}
             {blockContent.case_study_tag && (
-              <div className="absolute top-6 right-6 z-10">
+              <div className="absolute top-4 right-4 z-10">
                 <div className="flex items-center space-x-1 px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-medium border border-blue-200">
                   <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -425,38 +400,10 @@ export default function TestimonialCTACombo(props: LayoutComponentProps) {
                 </div>
               </div>
             )}
-            {/* Quote Icon */}
-            <div className="absolute -top-4 -left-4 w-12 h-12 bg-gradient-to-br from-blue-600 to-blue-700 rounded-full flex items-center justify-center shadow-lg">
-              <svg className="w-7 h-7 text-white" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z"/>
-              </svg>
-            </div>
 
-            {/* Rating */}
-            <div className="mb-4 relative group/rating-item">
-              <StarRating rating={rating} />
-              {mode !== 'preview' && (
-                <div className="flex items-center space-x-2 mt-2">
-                  <EditableAdaptiveText
-                    mode={mode}
-                    value={blockContent.rating || '5'}
-                    onEdit={(value) => handleContentUpdate('rating', value)}
-                    backgroundType="neutral"
-                    colorTokens={colorTokens}
-                    variant="body"
-                    className="text-sm"
-                    placeholder="5"
-                    sectionBackground="bg-white"
-                    data-section-id={sectionId}
-                    data-element-key="rating"
-                  />
-                  <span className="text-sm text-gray-500">stars</span>
-                </div>
-              )}
-            </div>
 
             {/* Testimonial Quote */}
-            <div className="text-gray-700 leading-relaxed mb-6 text-lg">
+            <div className="text-gray-700 leading-relaxed mb-8 text-lg pt-4">
               {mode === 'preview' ? (
                 <div 
                   className="italic"
@@ -598,11 +545,11 @@ export const componentMeta = {
   estimatedBuildTime: '25 minutes',
   
   features: [
-    'Featured customer testimonial',
-    'Star rating display',
-    'Avatar with company indicator',
+    'Featured customer testimonial with metrics',
+    'Professional avatar with company logo',
     'Social proof statistics',
-    'Verified badge'
+    'Case study tag indicator',
+    'Industry and date context'
   ],
   
   contentFields: [
@@ -617,7 +564,6 @@ export const componentMeta = {
     { key: 'testimonial_date', label: 'Testimonial Date', type: 'text', required: false },
     { key: 'testimonial_industry', label: 'Company Industry', type: 'text', required: false },
     { key: 'case_study_tag', label: 'Case Study Tag', type: 'text', required: false },
-    { key: 'rating', label: 'Star Rating (1-5)', type: 'text', required: false },
     { key: 'customer_count', label: 'Customer Count', type: 'text', required: false },
     { key: 'average_rating', label: 'Average Rating', type: 'text', required: false },
     { key: 'uptime_percentage', label: 'Uptime Percentage', type: 'text', required: false },
