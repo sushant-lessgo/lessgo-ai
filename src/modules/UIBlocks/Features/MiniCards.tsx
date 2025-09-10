@@ -12,6 +12,7 @@ import {
 } from '@/components/layout/ComponentRegistry';
 import IconEditableText from '@/components/ui/IconEditableText';
 import { LayoutComponentProps } from '@/types/storeTypes';
+import { parsePipeData, updateListData } from '@/utils/dataParsingUtils';
 
 interface MiniCardsContent {
   headline: string;
@@ -124,7 +125,11 @@ const MiniCard = React.memo(({
   handleContentUpdate,
   blockContent,
   sectionId,
-  backgroundType
+  backgroundType,
+  onTitleEdit,
+  onDescriptionEdit,
+  onKeywordEdit,
+  sectionBackground
 }: {
   title: string;
   description: string;
@@ -137,6 +142,10 @@ const MiniCard = React.memo(({
   blockContent: MiniCardsContent;
   sectionId: string;
   backgroundType: string;
+  onTitleEdit: (index: number, value: string) => void;
+  onDescriptionEdit: (index: number, value: string) => void;
+  onKeywordEdit: (index: number, value: string) => void;
+  sectionBackground: string;
 }) => {
   
   // Get feature icon from content fields
@@ -186,21 +195,55 @@ const MiniCard = React.memo(({
         </div>
         
         <div className="flex-1 min-w-0">
-          <h3 style={h3Style} className="font-semibold text-gray-900 mb-1 group-hover:text-gray-700 transition-colors duration-300">
-            {title}
-          </h3>
-          {keyword && (
-            <span className={`inline-block text-xs font-medium px-2 py-1 rounded-full bg-gradient-to-r ${getColorForIndex(index)} text-white`}>
-              {keyword}
-            </span>
+          <EditableAdaptiveText
+            mode={mode}
+            value={title}
+            onEdit={(value) => onTitleEdit(index, value)}
+            backgroundType={backgroundType as any}
+            colorTokens={colorTokens}
+            variant="body"
+            textStyle={{
+              ...h3Style,
+              fontWeight: 600
+            }}
+            className="font-semibold text-gray-900 mb-1 group-hover:text-gray-700 transition-colors duration-300"
+            placeholder="Feature title..."
+            sectionId={sectionId}
+            elementKey={`feature_title_${index}`}
+            sectionBackground={sectionBackground}
+          />
+          {(keyword || mode === 'edit') && (
+            <EditableAdaptiveText
+              mode={mode}
+              value={keyword}
+              onEdit={(value) => onKeywordEdit(index, value)}
+              backgroundType={backgroundType as any}
+              colorTokens={colorTokens}
+              variant="body"
+              className={`inline-block text-xs font-medium px-2 py-1 rounded-full bg-gradient-to-r ${getColorForIndex(index)} text-white`}
+              placeholder="Add keyword/badge..."
+              sectionId={sectionId}
+              elementKey={`feature_keyword_${index}`}
+              sectionBackground={sectionBackground}
+            />
           )}
         </div>
       </div>
 
       <div className="mt-auto">
-        <p className="text-gray-600 text-sm leading-relaxed group-hover:text-gray-700 transition-colors duration-300">
-          {description}
-        </p>
+        <EditableAdaptiveText
+          mode={mode}
+          value={description}
+          onEdit={(value) => onDescriptionEdit(index, value)}
+          backgroundType={backgroundType as any}
+          colorTokens={colorTokens}
+          variant="body"
+          className="text-gray-600 text-sm leading-relaxed group-hover:text-gray-700 transition-colors duration-300"
+          placeholder="Describe this feature..."
+          sectionId={sectionId}
+          elementKey={`feature_description_${index}`}
+          sectionBackground={sectionBackground}
+        />
         
         <div className="mt-3 flex items-center space-x-2">
           <div className={`w-1.5 h-1.5 rounded-full bg-gradient-to-r ${getColorForIndex(index)}`} />
@@ -252,6 +295,22 @@ export default function MiniCards(props: LayoutComponentProps) {
     keyword: featureKeywords[index] || ''
   }));
 
+  // Handle individual title/description editing
+  const handleTitleEdit = (index: number, value: string) => {
+    const updatedTitles = updateListData(blockContent.feature_titles, index, value);
+    handleContentUpdate('feature_titles', updatedTitles);
+  };
+
+  const handleDescriptionEdit = (index: number, value: string) => {
+    const updatedDescriptions = updateListData(blockContent.feature_descriptions, index, value);
+    handleContentUpdate('feature_descriptions', updatedDescriptions);
+  };
+
+  const handleKeywordEdit = (index: number, value: string) => {
+    const updatedKeywords = updateListData(blockContent.feature_keywords || '', index, value);
+    handleContentUpdate('feature_keywords', updatedKeywords);
+  };
+
   const trustItems = blockContent.trust_items 
     ? blockContent.trust_items.split('|').map(item => item.trim()).filter(Boolean)
     : [];
@@ -301,76 +360,28 @@ export default function MiniCards(props: LayoutComponentProps) {
           )}
         </div>
 
-        {mode !== 'preview' ? (
-          <div className="space-y-8">
-            <div className="p-6 border border-gray-200 rounded-lg bg-gray-50">
-              <h4 className="font-semibold text-gray-700 mb-4">Feature Content</h4>
-              
-              <div className="space-y-4">
-                <EditableAdaptiveText
-                  mode={mode}
-                  value={blockContent.feature_titles || ''}
-                  onEdit={(value) => handleContentUpdate('feature_titles', value)}
-                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
-                  colorTokens={colorTokens}
-                  variant="body"
-                  className="mb-2"
-                  placeholder="Feature titles (pipe separated)"
-                  sectionId={sectionId}
-                  elementKey="feature_titles"
-                  sectionBackground={sectionBackground}
-                />
-                
-                <EditableAdaptiveText
-                  mode={mode}
-                  value={blockContent.feature_descriptions || ''}
-                  onEdit={(value) => handleContentUpdate('feature_descriptions', value)}
-                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
-                  colorTokens={colorTokens}
-                  variant="body"
-                  className="mb-2"
-                  placeholder="Feature descriptions (pipe separated)"
-                  sectionId={sectionId}
-                  elementKey="feature_descriptions"
-                  sectionBackground={sectionBackground}
-                />
-                
-                <EditableAdaptiveText
-                  mode={mode}
-                  value={blockContent.feature_keywords || ''}
-                  onEdit={(value) => handleContentUpdate('feature_keywords', value)}
-                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
-                  colorTokens={colorTokens}
-                  variant="body"
-                  className="mb-2"
-                  placeholder="Feature keywords/badges (pipe separated)"
-                  sectionId={sectionId}
-                  elementKey="feature_keywords"
-                  sectionBackground={sectionBackground}
-                />
-              </div>
-            </div>
-          </div>
-        ) : (
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {features.map((feature, index) => (
-              <MiniCard
-                key={index}
-                title={feature.title}
-                description={feature.description}
-                keyword={feature.keyword}
-                index={index}
-                colorTokens={colorTokens}
-                h3Style={h3Style}
-                mode={mode}
-                handleContentUpdate={handleContentUpdate}
-                blockContent={blockContent}
-                sectionId={sectionId}
-                backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
-              />
-            ))}
-          </div>
-        )}
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {features.map((feature, index) => (
+            <MiniCard
+              key={index}
+              title={feature.title}
+              description={feature.description}
+              keyword={feature.keyword}
+              index={index}
+              colorTokens={colorTokens}
+              h3Style={h3Style}
+              mode={mode}
+              handleContentUpdate={handleContentUpdate}
+              blockContent={blockContent}
+              sectionId={sectionId}
+              backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
+              onTitleEdit={handleTitleEdit}
+              onDescriptionEdit={handleDescriptionEdit}
+              onKeywordEdit={handleKeywordEdit}
+              sectionBackground={sectionBackground}
+            />
+          ))}
+        </div>
 
         {/* Feature Summary - Editable */}
         {blockContent.show_feature_summary !== false && (
