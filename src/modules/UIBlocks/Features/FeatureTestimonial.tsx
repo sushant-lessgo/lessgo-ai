@@ -385,13 +385,13 @@ const FeatureCard = React.memo(({
               src={getTestimonialAvatar()}
               alt={name}
               className="w-12 h-12 rounded-full object-cover cursor-pointer border-2 border-gray-200 hover:border-blue-400 transition-colors duration-200"
-              data-image-id={`${sectionId}.testimonial-avatar-${index}`}
+              data-image-id={`${sectionId}.testimonial_avatar_${index}`}
               onMouseUp={(e) => {
                 if (mode === 'edit') {
                   e.stopPropagation();
                   e.preventDefault();
                   const rect = e.currentTarget.getBoundingClientRect();
-                  const imageId = `${sectionId}.testimonial-avatar-${index}`;
+                  const imageId = `${sectionId}.testimonial_avatar_${index}`;
                   const position = {
                     x: rect.left + rect.width / 2,
                     y: rect.top - 10
@@ -413,7 +413,7 @@ const FeatureCard = React.memo(({
                   e.stopPropagation();
                   e.preventDefault();
                   const rect = e.currentTarget.getBoundingClientRect();
-                  const imageId = `${sectionId}.testimonial-avatar-${index}`;
+                  const imageId = `${sectionId}.testimonial_avatar_${index}`;
                   const position = {
                     x: rect.left + rect.width / 2,
                     y: rect.top - 10
