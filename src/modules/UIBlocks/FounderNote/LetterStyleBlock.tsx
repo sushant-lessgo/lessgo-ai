@@ -1,6 +1,6 @@
 // components/FounderNote/LetterStyleBlock.tsx
 // Personal letter format for executive/luxury positioning
-// Builds trust through personal, intimate communication style
+// Builds connection through personal, intimate communication style
 
 import React from 'react';
 import { useLayoutComponent } from '@/hooks/useLayoutComponent';
@@ -13,10 +13,8 @@ import {
   AccentBadge 
 } from '@/components/layout/EditableContent';
 import { 
-  CTAButton, 
-  TrustIndicators 
+  CTAButton
 } from '@/components/layout/ComponentRegistry';
-import EditableTrustIndicators from '@/components/layout/EditableTrustIndicators';
 import { LayoutComponentProps } from '@/types/storeTypes';
 
 // Content interface for type safety
@@ -30,12 +28,6 @@ interface LetterStyleBlockContent {
   company_name?: string;
   date_text?: string;
   ps_text?: string;
-  trust_items?: string;
-  trust_item_1: string;
-  trust_item_2: string;
-  trust_item_3: string;
-  trust_item_4: string;
-  trust_item_5: string;
   founder_image?: string;
 }
 
@@ -77,15 +69,6 @@ const CONTENT_SCHEMA = {
     type: 'string' as const, 
     default: 'P.S. I personally read every email that comes through our support. If you have any questions, don\'t hesitate to reach out directly.' 
   },
-  trust_items: { 
-    type: 'string' as const, 
-    default: '30-day money-back guarantee|Used by 50,000+ founders|Cancel anytime' 
-  },
-  trust_item_1: { type: 'string' as const, default: '30-day money-back guarantee' },
-  trust_item_2: { type: 'string' as const, default: 'Used by 50,000+ founders' },
-  trust_item_3: { type: 'string' as const, default: 'Cancel anytime' },
-  trust_item_4: { type: 'string' as const, default: '' },
-  trust_item_5: { type: 'string' as const, default: '' },
   founder_image: { 
     type: 'string' as const, 
     default: '' 
@@ -123,31 +106,6 @@ export default function LetterStyleBlock(props: LayoutComponentProps) {
   });
   
   const { getTextStyle: getTypographyStyle } = useTypography();
-
-  // Helper function to get trust items with individual field support
-  const getTrustItems = (): string[] => {
-    const individualItems = [
-      blockContent.trust_item_1,
-      blockContent.trust_item_2,
-      blockContent.trust_item_3,
-      blockContent.trust_item_4,
-      blockContent.trust_item_5
-    ].filter((item): item is string => Boolean(item && item.trim() !== '' && item !== '___REMOVED___'));
-    
-    // Legacy format fallback
-    if (individualItems.length > 0) {
-      return individualItems;
-    }
-    
-    return blockContent.trust_items 
-      ? blockContent.trust_items.split('|').map(item => item.trim()).filter(Boolean)
-      : ['30-day money-back guarantee', 'Used by 50,000+ founders'];
-  };
-  
-  const trustItems = getTrustItems();
-
-  // Get muted text color for trust indicators
-  const mutedTextColor = dynamicTextColors?.muted || colorTokens.textMuted;
   
   // Get showImageToolbar for handling image clicks
   const store = useEditStore();
@@ -328,55 +286,6 @@ export default function LetterStyleBlock(props: LayoutComponentProps) {
               </div>
             )}
 
-            {/* Trust Indicators */}
-            <div className="mt-8 pt-6 border-t border-gray-200">
-              {mode !== 'preview' ? (
-                <EditableTrustIndicators
-                  mode={mode}
-                  trustItems={[
-                    blockContent.trust_item_1 || '',
-                    blockContent.trust_item_2 || '',
-                    blockContent.trust_item_3 || '',
-                    blockContent.trust_item_4 || '',
-                    blockContent.trust_item_5 || ''
-                  ]}
-                  onTrustItemChange={(index, value) => {
-                    const fieldKey = `trust_item_${index + 1}` as keyof LetterStyleBlockContent;
-                    handleContentUpdate(fieldKey, value);
-                  }}
-                  onAddTrustItem={() => {
-                    const emptyIndex = [
-                      blockContent.trust_item_1,
-                      blockContent.trust_item_2,
-                      blockContent.trust_item_3,
-                      blockContent.trust_item_4,
-                      blockContent.trust_item_5
-                    ].findIndex(item => !item || item.trim() === '' || item === '___REMOVED___');
-                    
-                    if (emptyIndex !== -1) {
-                      const fieldKey = `trust_item_${emptyIndex + 1}` as keyof LetterStyleBlockContent;
-                      handleContentUpdate(fieldKey, 'New trust item');
-                    }
-                  }}
-                  onRemoveTrustItem={(index) => {
-                    const fieldKey = `trust_item_${index + 1}` as keyof LetterStyleBlockContent;
-                    handleContentUpdate(fieldKey, '___REMOVED___');
-                  }}
-                  colorTokens={colorTokens}
-                  sectionBackground={sectionBackground}
-                  sectionId={sectionId}
-                  backgroundType={backgroundType}
-                  iconColor="text-green-500"
-                  colorClass={mutedTextColor}
-                />
-              ) : (
-                <TrustIndicators 
-                  items={trustItems}
-                  colorClass={mutedTextColor}
-                  iconColor="text-green-500"
-                />
-              )}
-            </div>
           </div>
         </div>
       </div>
@@ -389,7 +298,7 @@ export const componentMeta = {
   name: 'LetterStyleBlock',
   category: 'Founder Note',
   description: 'Personal letter format for executive/luxury positioning. Builds intimate connection through formal letter design.',
-  tags: ['founder', 'personal', 'trust', 'letter', 'executive'],
+  tags: ['founder', 'personal', 'letter', 'executive'],
   defaultBackgroundType: 'primary' as const,
   complexity: 'medium',
   estimatedBuildTime: '20 minutes',
@@ -404,7 +313,6 @@ export const componentMeta = {
     { key: 'date_text', label: 'Date', type: 'text', required: false },
     { key: 'ps_text', label: 'P.S. Note', type: 'textarea', required: false },
     { key: 'cta_text', label: 'CTA Button Text', type: 'text', required: true },
-    { key: 'trust_items', label: 'Trust Indicators (pipe separated)', type: 'text', required: false },
     { key: 'founder_image', label: 'Founder Photo', type: 'image', required: false }
   ],
   
@@ -412,7 +320,6 @@ export const componentMeta = {
     'Formal letter design with header and signature',
     'Personal founder photo integration',
     'P.S. section for additional personal touch',
-    'Trust indicators with guarantee messaging',
     'Executive positioning for luxury/premium brands'
   ],
   
@@ -421,6 +328,6 @@ export const componentMeta = {
     'Luxury brand founder introductions',
     'High-ticket service personal connection',
     'Premium product launch announcements',
-    'Trust-building for financial services'
+    'Personal connection for financial services'
   ]
 };
