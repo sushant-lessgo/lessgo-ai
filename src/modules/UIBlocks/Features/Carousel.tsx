@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useLayoutComponent } from '@/hooks/useLayoutComponent';
 import { useTypography } from '@/hooks/useTypography';
 import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
+import { useImageToolbar } from '@/hooks/useImageToolbar';
 import { LayoutSection } from '@/components/layout/LayoutSection';
 import { 
   EditableAdaptiveHeadline, 
@@ -31,6 +32,31 @@ interface CarouselContent {
   // Benefit icons
   benefit_icon_1?: string;
   benefit_icon_2?: string;
+  // Individual feature fields for WYSIWYG editing
+  feature_title_0?: string;
+  feature_title_1?: string;
+  feature_title_2?: string;
+  feature_title_3?: string;
+  feature_title_4?: string;
+  feature_title_5?: string;
+  feature_description_0?: string;
+  feature_description_1?: string;
+  feature_description_2?: string;
+  feature_description_3?: string;
+  feature_description_4?: string;
+  feature_description_5?: string;
+  feature_visual_0?: string;
+  feature_visual_1?: string;
+  feature_visual_2?: string;
+  feature_visual_3?: string;
+  feature_visual_4?: string;
+  feature_visual_5?: string;
+  feature_tag_0?: string;
+  feature_tag_1?: string;
+  feature_tag_2?: string;
+  feature_tag_3?: string;
+  feature_tag_4?: string;
+  feature_tag_5?: string;
 }
 
 const CONTENT_SCHEMA = {
@@ -91,8 +117,288 @@ const CONTENT_SCHEMA = {
   benefit_icon_2: { 
     type: 'string' as const, 
     default: '⏱️' 
-  }
+  },
+  // Individual feature fields for WYSIWYG editing
+  feature_title_0: { type: 'string' as const, default: '' },
+  feature_title_1: { type: 'string' as const, default: '' },
+  feature_title_2: { type: 'string' as const, default: '' },
+  feature_title_3: { type: 'string' as const, default: '' },
+  feature_title_4: { type: 'string' as const, default: '' },
+  feature_title_5: { type: 'string' as const, default: '' },
+  feature_description_0: { type: 'string' as const, default: '' },
+  feature_description_1: { type: 'string' as const, default: '' },
+  feature_description_2: { type: 'string' as const, default: '' },
+  feature_description_3: { type: 'string' as const, default: '' },
+  feature_description_4: { type: 'string' as const, default: '' },
+  feature_description_5: { type: 'string' as const, default: '' },
+  feature_visual_0: { type: 'string' as const, default: '' },
+  feature_visual_1: { type: 'string' as const, default: '' },
+  feature_visual_2: { type: 'string' as const, default: '' },
+  feature_visual_3: { type: 'string' as const, default: '' },
+  feature_visual_4: { type: 'string' as const, default: '' },
+  feature_visual_5: { type: 'string' as const, default: '' },
+  feature_tag_0: { type: 'string' as const, default: '' },
+  feature_tag_1: { type: 'string' as const, default: '' },
+  feature_tag_2: { type: 'string' as const, default: '' },
+  feature_tag_3: { type: 'string' as const, default: '' },
+  feature_tag_4: { type: 'string' as const, default: '' },
+  feature_tag_5: { type: 'string' as const, default: '' }
 };
+
+const CarouselSlide = React.memo(({ 
+  title, 
+  description, 
+  visual,
+  tag,
+  index,
+  sectionId,
+  mode,
+  handleContentUpdate,
+  blockContent,
+  colorTokens,
+  handleImageToolbar,
+  h2Style,
+  bodyLgStyle
+}: {
+  title: string;
+  description: string;
+  visual?: string;
+  tag?: string;
+  index: number;
+  sectionId: string;
+  mode: 'edit' | 'preview';
+  handleContentUpdate: (key: keyof CarouselContent, value: any) => void;
+  blockContent: CarouselContent;
+  colorTokens: any;
+  handleImageToolbar: (imageId: string, position: { x: number; y: number }) => void;
+  h2Style: any;
+  bodyLgStyle: any;
+}) => {
+  
+  const VisualPlaceholder = React.memo(({ onClick }: { onClick?: (e: React.MouseEvent) => void }) => (
+    <div 
+      className="relative w-full h-full min-h-[400px] rounded-xl overflow-hidden bg-gradient-to-br from-pink-50 to-purple-100 cursor-pointer hover:bg-gradient-to-br hover:from-pink-100 hover:to-purple-150 transition-all duration-300"
+      onClick={onClick}
+    >
+      <div className="absolute inset-0 flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-24 h-24 mx-auto rounded-2xl bg-white/50 flex items-center justify-center mb-4">
+            <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-pink-500 to-purple-600 flex items-center justify-center">
+              <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+              </svg>
+            </div>
+          </div>
+          <div className="text-sm font-medium text-gray-700">
+            {title || 'Feature'} Visual
+          </div>
+          {mode === 'edit' && (
+            <div className="text-xs text-gray-500 mt-2">
+              Click to add image
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  ));
+
+  return (
+    <div className="grid lg:grid-cols-2 gap-12 items-center">
+      
+      {/* Content Side */}
+      <div className="space-y-6">
+        {tag && (
+          <span className={`inline-block text-sm font-semibold px-4 py-2 rounded-full ${colorTokens.ctaBg} text-white`}>
+            {tag}
+          </span>
+        )}
+        
+        {/* Editable Feature Title */}
+        {mode !== 'preview' ? (
+          <div
+            contentEditable
+            suppressContentEditableWarning
+            onBlur={(e) => {
+              const fieldName = `feature_title_${index}` as keyof CarouselContent;
+              handleContentUpdate(fieldName, e.currentTarget.textContent || '');
+            }}
+            className="text-2xl font-bold text-gray-900 outline-none focus:ring-2 focus:ring-pink-500 focus:ring-opacity-50 rounded px-2 py-1 cursor-text hover:bg-gray-50 min-h-[40px]"
+            data-placeholder="Feature title"
+          >
+            {title}
+          </div>
+        ) : (
+          <h3 style={h2Style} className="font-bold text-gray-900">
+            {title}
+          </h3>
+        )}
+        
+        {/* Editable Feature Description */}
+        {mode !== 'preview' ? (
+          <div
+            contentEditable
+            suppressContentEditableWarning
+            onBlur={(e) => {
+              const fieldName = `feature_description_${index}` as keyof CarouselContent;
+              handleContentUpdate(fieldName, e.currentTarget.textContent || '');
+            }}
+            className="text-gray-600 leading-relaxed outline-none focus:ring-2 focus:ring-pink-500 focus:ring-opacity-50 rounded px-2 py-1 cursor-text hover:bg-gray-50 min-h-[60px]"
+            data-placeholder="Feature description"
+          >
+            {description}
+          </div>
+        ) : (
+          <p style={bodyLgStyle} className="text-gray-600 leading-relaxed">
+            {description}
+          </p>
+        )}
+        
+        <div className="flex items-center space-x-4">
+          {((blockContent.benefit_1 && blockContent.benefit_1 !== '___REMOVED___') || mode === 'edit') && (
+            <div className="flex items-center space-x-2 text-green-600 group/benefit-item relative">
+              <IconEditableText
+                mode={mode}
+                value={blockContent.benefit_icon_1 || '✅'}
+                onEdit={(value) => handleContentUpdate('benefit_icon_1', value)}
+                backgroundType="neutral"
+                colorTokens={colorTokens}
+                iconSize="sm"
+                className="text-green-600 text-lg"
+                sectionId={sectionId}
+                elementKey="benefit_icon_1"
+              />
+              {mode === 'edit' ? (
+                <EditableAdaptiveText
+                  mode={mode}
+                  value={blockContent.benefit_1 || ''}
+                  onEdit={(value) => handleContentUpdate('benefit_1', value)}
+                  backgroundType="neutral"
+                  colorTokens={colorTokens}
+                  variant="body"
+                  className="text-sm font-medium"
+                  placeholder="Benefit 1"
+                  sectionBackground=""
+                  data-section-id={sectionId}
+                  data-element-key="benefit_1"
+                />
+              ) : (
+                <span className="text-sm font-medium">{blockContent.benefit_1}</span>
+              )}
+              {mode === 'edit' && (
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleContentUpdate('benefit_1', '___REMOVED___');
+                  }}
+                  className="opacity-0 group-hover/benefit-item:opacity-100 ml-1 text-red-500 hover:text-red-700 transition-opacity duration-200"
+                  title="Remove benefit 1"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              )}
+            </div>
+          )}
+          {(blockContent.benefit_2 || mode === 'edit') && blockContent.benefit_2 !== '___REMOVED___' && (
+            <div className="flex items-center space-x-2 text-blue-600 group/benefit-item relative">
+              <IconEditableText
+                mode={mode}
+                value={blockContent.benefit_icon_2 || '⏱️'}
+                onEdit={(value) => handleContentUpdate('benefit_icon_2', value)}
+                backgroundType="neutral"
+                colorTokens={colorTokens}
+                iconSize="sm"
+                className="text-blue-600 text-lg"
+                sectionId={sectionId}
+                elementKey="benefit_icon_2"
+              />
+              {mode === 'edit' ? (
+                <EditableAdaptiveText
+                  mode={mode}
+                  value={blockContent.benefit_2 || ''}
+                  onEdit={(value) => handleContentUpdate('benefit_2', value)}
+                  backgroundType="neutral"
+                  colorTokens={colorTokens}
+                  variant="body"
+                  className="text-sm font-medium"
+                  placeholder="Benefit 2"
+                  sectionBackground=""
+                  data-section-id={sectionId}
+                  data-element-key="benefit_2"
+                />
+              ) : (
+                <span className="text-sm font-medium">{blockContent.benefit_2}</span>
+              )}
+              {mode === 'edit' && (
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleContentUpdate('benefit_2', '___REMOVED___');
+                  }}
+                  className="opacity-0 group-hover/benefit-item:opacity-100 ml-1 text-red-500 hover:text-red-700 transition-opacity duration-200"
+                  title="Remove benefit 2"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              )}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Visual Side */}
+      <div className="relative">
+        {visual && visual !== '' ? (
+          <img
+            src={visual}
+            alt={title}
+            className="w-full h-auto rounded-xl shadow-lg cursor-pointer hover:shadow-xl transition-shadow duration-300"
+            data-image-id={`${sectionId}.feature-visual-${index}`}
+            onMouseUp={(e) => {
+              if (mode === 'edit') {
+                e.stopPropagation();
+                e.preventDefault();
+                const rect = e.currentTarget.getBoundingClientRect();
+                const imageId = `${sectionId}.feature-visual-${index}`;
+                const position = {
+                  x: rect.left + rect.width / 2,
+                  y: rect.top - 10
+                };
+                handleImageToolbar(imageId, position);
+              }
+            }}
+            onClick={(e) => {
+              if (mode === 'edit') {
+                e.stopPropagation();
+                e.preventDefault();
+              }
+            }}
+          />
+        ) : (
+          <VisualPlaceholder 
+            onClick={(e) => {
+              if (mode === 'edit') {
+                e.stopPropagation();
+                e.preventDefault();
+                const rect = e.currentTarget.getBoundingClientRect();
+                const imageId = `${sectionId}.feature-visual-${index}`;
+                const position = {
+                  x: rect.left + rect.width / 2,
+                  y: rect.top - 10
+                };
+                handleImageToolbar(imageId, position);
+              }
+            }}
+          />
+        )}
+      </div>
+    </div>
+  );
+});
+CarouselSlide.displayName = 'CarouselSlide';
 
 export default function Carousel(props: LayoutComponentProps) {
   const { getTextStyle: getTypographyStyle } = useTypography();
@@ -117,28 +423,68 @@ export default function Carousel(props: LayoutComponentProps) {
   const h3Style = getTypographyStyle('h3');
   const bodyLgStyle = getTypographyStyle('body-lg');
 
-  const featureTitles = blockContent.feature_titles 
-    ? blockContent.feature_titles.split('|').map(item => item.trim()).filter(Boolean)
-    : [];
+  // Helper function to get individual feature field
+  const getIndividualFeature = (field: 'title' | 'description' | 'visual' | 'tag', index: number): string => {
+    const fieldName = `feature_${field}_${index}` as keyof CarouselContent;
+    return (blockContent[fieldName] as string) || '';
+  };
 
-  const featureDescriptions = blockContent.feature_descriptions 
-    ? blockContent.feature_descriptions.split('|').map(item => item.trim()).filter(Boolean)
-    : [];
+  // Migration logic: Convert pipe-separated fields to individual fields
+  React.useEffect(() => {
+    if (blockContent.feature_titles && !blockContent.feature_title_0) {
+      const featureTitles = blockContent.feature_titles.split('|').map(item => item.trim());
+      const featureDescriptions = blockContent.feature_descriptions 
+        ? blockContent.feature_descriptions.split('|').map(item => item.trim())
+        : [];
+      const featureVisuals = blockContent.feature_visuals 
+        ? blockContent.feature_visuals.split('|').map(item => item.trim())
+        : [];
+      const featureTags = blockContent.feature_tags 
+        ? blockContent.feature_tags.split('|').map(item => item.trim())
+        : [];
+      
+      const updates: Partial<CarouselContent> = {};
+      
+      featureTitles.forEach((title, index) => {
+        if (index < 6) { // Max 6 features
+          const titleField = `feature_title_${index}` as keyof CarouselContent;
+          const descField = `feature_description_${index}` as keyof CarouselContent;
+          const visualField = `feature_visual_${index}` as keyof CarouselContent;
+          const tagField = `feature_tag_${index}` as keyof CarouselContent;
+          
+          updates[titleField] = title as any;
+          updates[descField] = (featureDescriptions[index] || '') as any;
+          updates[visualField] = (featureVisuals[index] || '') as any;
+          updates[tagField] = (featureTags[index] || '') as any;
+        }
+      });
+      
+      // Apply all updates at once
+      Object.entries(updates).forEach(([key, value]) => {
+        handleContentUpdate(key as keyof CarouselContent, value);
+      });
+    }
+  }, [blockContent.feature_titles, blockContent.feature_title_0, handleContentUpdate]);
 
-  const featureVisuals = blockContent.feature_visuals 
-    ? blockContent.feature_visuals.split('|').map(item => item.trim()).filter(Boolean)
-    : [];
-
-  const featureTags = blockContent.feature_tags 
-    ? blockContent.feature_tags.split('|').map(item => item.trim()).filter(Boolean)
-    : [];
-
-  const features = featureTitles.map((title, index) => ({
-    title,
-    description: featureDescriptions[index] || '',
-    visual: featureVisuals[index] || '',
-    tag: featureTags[index] || ''
-  }));
+  // Create features array from individual fields
+  const features = [];
+  for (let i = 0; i < 6; i++) {
+    const title = getIndividualFeature('title', i);
+    const description = getIndividualFeature('description', i);
+    const visual = getIndividualFeature('visual', i);
+    const tag = getIndividualFeature('tag', i);
+    
+    // In edit mode: show empty features for editing, in preview mode: only show features with content
+    if (mode === 'edit' || title.trim() !== '' || description.trim() !== '' || visual.trim() !== '') {
+      features.push({
+        title: title || (mode === 'edit' ? `Feature ${i + 1}` : ''),
+        description,
+        visual,
+        tag,
+        originalIndex: i
+      });
+    }
+  }
 
   const [activeSlide, setActiveSlide] = useState(0);
 
@@ -160,6 +506,9 @@ export default function Carousel(props: LayoutComponentProps) {
   
   const store = useEditStore();
   const showImageToolbar = store.showImageToolbar;
+  
+  // Initialize image toolbar hook
+  const handleImageToolbar = useImageToolbar();
 
   const nextSlide = () => {
     setActiveSlide((prev) => (prev + 1) % features.length);
@@ -172,25 +521,6 @@ export default function Carousel(props: LayoutComponentProps) {
   const goToSlide = (index: number) => {
     setActiveSlide(index);
   };
-
-  const VisualPlaceholder = ({ index }: { index: number }) => (
-    <div className="relative w-full h-full min-h-[400px] rounded-xl overflow-hidden bg-gradient-to-br from-pink-50 to-purple-100">
-      <div className="absolute inset-0 flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-24 h-24 mx-auto rounded-2xl bg-white/50 flex items-center justify-center mb-4">
-            <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-pink-500 to-purple-600 flex items-center justify-center">
-              <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-              </svg>
-            </div>
-          </div>
-          <div className="text-sm font-medium text-gray-700">
-            {features[index]?.title || 'Feature'} Visual
-          </div>
-        </div>
-      </div>
-    </div>
-  );
   
   return (
     <LayoutSection
@@ -235,198 +565,34 @@ export default function Carousel(props: LayoutComponentProps) {
           )}
         </div>
 
-        {(mode as string) === 'edit' ? (
-          <div className="space-y-8">
-            <div className="p-6 border border-gray-200 rounded-lg bg-gray-50">
-              <h4 className="font-semibold text-gray-700 mb-4">Carousel Content</h4>
-              
-              <div className="space-y-4">
-                <EditableAdaptiveText
-                  mode={mode}
-                  value={blockContent.feature_titles || ''}
-                  onEdit={(value) => handleContentUpdate('feature_titles', value)}
-                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
-                  colorTokens={colorTokens}
-                  variant="body"
-                  className="mb-2"
-                  placeholder="Feature titles (pipe separated)"
-                  sectionId={sectionId}
-                  elementKey="feature_titles"
-                  sectionBackground={sectionBackground}
-                />
-                
-                <EditableAdaptiveText
-                  mode={mode}
-                  value={blockContent.feature_descriptions || ''}
-                  onEdit={(value) => handleContentUpdate('feature_descriptions', value)}
-                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
-                  colorTokens={colorTokens}
-                  variant="body"
-                  className="mb-2"
-                  placeholder="Feature descriptions (pipe separated)"
-                  sectionId={sectionId}
-                  elementKey="feature_descriptions"
-                  sectionBackground={sectionBackground}
-                />
-                
-                <EditableAdaptiveText
-                  mode={mode}
-                  value={blockContent.feature_tags || ''}
-                  onEdit={(value) => handleContentUpdate('feature_tags', value)}
-                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
-                  colorTokens={colorTokens}
-                  variant="body"
-                  placeholder="Feature tags/badges (pipe separated) - optional"
-                  sectionId={sectionId}
-                  elementKey="feature_tags"
-                  sectionBackground={sectionBackground}
-                />
-              </div>
-            </div>
+        <div className="relative">
+          {/* Main Carousel with WYSIWYG editing */}
+          <div className="bg-white rounded-2xl shadow-xl p-8 border border-gray-100">
+            {features.length > 0 && features[activeSlide] && (
+              <CarouselSlide
+                title={features[activeSlide].title}
+                description={features[activeSlide].description}
+                visual={features[activeSlide].visual}
+                tag={features[activeSlide].tag}
+                index={features[activeSlide].originalIndex}
+                sectionId={sectionId}
+                mode={mode}
+                handleContentUpdate={handleContentUpdate}
+                blockContent={blockContent}
+                colorTokens={colorTokens}
+                handleImageToolbar={handleImageToolbar}
+                h2Style={h2Style}
+                bodyLgStyle={bodyLgStyle}
+              />
+            )}
           </div>
-        ) : (
-          <div className="relative">
-            {/* Main Carousel */}
-            <div className="bg-white rounded-2xl shadow-xl p-8 border border-gray-100">
-              <div className="grid lg:grid-cols-2 gap-12 items-center">
-                
-                {/* Content Side */}
-                <div className="space-y-6">
-                  {features[activeSlide]?.tag && (
-                    <span className={`inline-block text-sm font-semibold px-4 py-2 rounded-full ${colorTokens.ctaBg} text-white`}>
-                      {features[activeSlide].tag}
-                    </span>
-                  )}
-                  
-                  <h3 style={h2Style} className="font-bold text-gray-900">
-                    {features[activeSlide]?.title}
-                  </h3>
-                  
-                  <p style={bodyLgStyle} className="text-gray-600 leading-relaxed">
-                    {features[activeSlide]?.description}
-                  </p>
-                  
-                  <div className="flex items-center space-x-4">
-                    {((blockContent.benefit_1 && blockContent.benefit_1 !== '___REMOVED___') || (mode as string) === 'edit') && (
-                      <div className="flex items-center space-x-2 text-green-600 group/benefit-item relative">
-                        <IconEditableText
-                          mode={mode}
-                          value={blockContent.benefit_icon_1 || '✅'}
-                          onEdit={(value) => handleContentUpdate('benefit_icon_1', value)}
-                          backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
-                          colorTokens={colorTokens}
-                          iconSize="sm"
-                          className="text-green-600 text-lg"
-                          sectionId={sectionId}
-                          elementKey="benefit_icon_1"
-                        />
-                        {(mode as string) === 'edit' ? (
-                          <EditableAdaptiveText
-                            mode={mode}
-                            value={blockContent.benefit_1 || ''}
-                            onEdit={(value) => handleContentUpdate('benefit_1', value)}
-                            backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
-                            colorTokens={colorTokens}
-                            variant="body"
-                            className="text-sm font-medium"
-                            placeholder="Benefit 1"
-                            sectionBackground={sectionBackground}
-                            data-section-id={sectionId}
-                            data-element-key="benefit_1"
-                          />
-                        ) : (
-                          <span className="text-sm font-medium">{blockContent.benefit_1}</span>
-                        )}
-                        {(mode as string) === 'edit' && (
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleContentUpdate('benefit_1', '___REMOVED___');
-                            }}
-                            className="opacity-0 group-hover/benefit-item:opacity-100 ml-1 text-red-500 hover:text-red-700 transition-opacity duration-200"
-                            title="Remove benefit 1"
-                          >
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                            </svg>
-                          </button>
-                        )}
-                      </div>
-                    )}
-                    {(blockContent.benefit_2 || (mode as string) === 'edit') && blockContent.benefit_2 !== '___REMOVED___' && (
-                      <div className="flex items-center space-x-2 text-blue-600 group/benefit-item relative">
-                        <IconEditableText
-                          mode={mode}
-                          value={blockContent.benefit_icon_2 || '⏱️'}
-                          onEdit={(value) => handleContentUpdate('benefit_icon_2', value)}
-                          backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
-                          colorTokens={colorTokens}
-                          iconSize="sm"
-                          className="text-blue-600 text-lg"
-                          sectionId={sectionId}
-                          elementKey="benefit_icon_2"
-                        />
-                        {(mode as string) === 'edit' ? (
-                          <EditableAdaptiveText
-                            mode={mode}
-                            value={blockContent.benefit_2 || ''}
-                            onEdit={(value) => handleContentUpdate('benefit_2', value)}
-                            backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
-                            colorTokens={colorTokens}
-                            variant="body"
-                            className="text-sm font-medium"
-                            placeholder="Benefit 2"
-                            sectionBackground={sectionBackground}
-                            data-section-id={sectionId}
-                            data-element-key="benefit_2"
-                          />
-                        ) : (
-                          <span className="text-sm font-medium">{blockContent.benefit_2}</span>
-                        )}
-                        {(mode as string) === 'edit' && (
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleContentUpdate('benefit_2', '___REMOVED___');
-                            }}
-                            className="opacity-0 group-hover/benefit-item:opacity-100 ml-1 text-red-500 hover:text-red-700 transition-opacity duration-200"
-                            title="Remove benefit 2"
-                          >
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                            </svg>
-                          </button>
-                        )}
-                      </div>
-                    )}
-                  </div>
-                </div>
 
-                {/* Visual Side */}
-                <div className="relative">
-                  {features[activeSlide]?.visual && features[activeSlide].visual !== '' ? (
-                    <img
-                      src={features[activeSlide].visual}
-                      alt={features[activeSlide].title}
-                      className="w-full h-auto rounded-xl shadow-lg cursor-pointer hover:shadow-xl transition-shadow duration-300"
-                      data-image-id={`${sectionId}-carousel${activeSlide}-visual`}
-                      onMouseUp={(e) => {
-                        // Image toolbar is only available in edit mode
-                      }}
-                    />
-                  ) : (
-                    <VisualPlaceholder index={activeSlide} />
-                  )}
-                </div>
-              </div>
-            </div>
-
-            {/* Navigation Controls */}
+          {/* Navigation Controls - only show if there are multiple features */}
+          {features.length > 1 && (
             <div className="flex items-center justify-between mt-8">
               <button
                 onClick={prevSlide}
                 className={`p-3 rounded-full ${colorTokens.surfaceElevated} border border-gray-200 hover:shadow-md transition-all duration-200`}
-                disabled={features.length <= 1}
               >
                 <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -451,15 +617,16 @@ export default function Carousel(props: LayoutComponentProps) {
               <button
                 onClick={nextSlide}
                 className={`p-3 rounded-full ${colorTokens.surfaceElevated} border border-gray-200 hover:shadow-md transition-all duration-200`}
-                disabled={features.length <= 1}
               >
                 <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                 </svg>
               </button>
             </div>
+          )}
 
-            {/* Feature List Preview */}
+          {/* Feature List Preview */}
+          {features.length > 1 && (
             <div className="mt-8 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
               {features.map((feature, index) => (
                 <button
@@ -482,8 +649,31 @@ export default function Carousel(props: LayoutComponentProps) {
                 </button>
               ))}
             </div>
-          </div>
-        )}
+          )}
+
+          {/* Add Feature Button - only in edit mode */}
+          {mode === 'edit' && features.length < 6 && (
+            <div className="flex justify-center mt-8">
+              <button
+                onClick={() => {
+                  const nextIndex = features.length;
+                  const titleField = `feature_title_${nextIndex}` as keyof CarouselContent;
+                  const descField = `feature_description_${nextIndex}` as keyof CarouselContent;
+                  
+                  handleContentUpdate(titleField, `Feature ${nextIndex + 1}`);
+                  handleContentUpdate(descField, 'Add feature description here');
+                }}
+                className="px-6 py-3 border-2 border-dashed border-gray-300 hover:border-gray-400 text-gray-500 hover:text-gray-600 transition-all duration-300 flex items-center space-x-3 bg-gray-50 hover:bg-gray-100 rounded-2xl"
+                title="Add new feature"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                </svg>
+                <span className="font-medium">Add Feature</span>
+              </button>
+            </div>
+          )}
+        </div>
 
         {(blockContent.cta_text || blockContent.trust_items || (mode as string) === 'edit') && (
           <div className="text-center space-y-6 mt-16">
@@ -544,10 +734,22 @@ export const componentMeta = {
   contentFields: [
     { key: 'headline', label: 'Main Headline', type: 'text', required: true },
     { key: 'subheadline', label: 'Subheadline', type: 'textarea', required: false },
-    { key: 'feature_titles', label: 'Feature Titles (pipe separated)', type: 'textarea', required: true },
-    { key: 'feature_descriptions', label: 'Feature Descriptions (pipe separated)', type: 'textarea', required: true },
-    { key: 'feature_visuals', label: 'Feature Visuals (pipe separated)', type: 'textarea', required: false },
-    { key: 'feature_tags', label: 'Feature Tags/Badges (pipe separated)', type: 'text', required: false },
+    { key: 'feature_titles', label: 'Feature Titles (pipe separated - legacy)', type: 'textarea', required: false },
+    { key: 'feature_descriptions', label: 'Feature Descriptions (pipe separated - legacy)', type: 'textarea', required: false },
+    { key: 'feature_visuals', label: 'Feature Visuals (pipe separated - legacy)', type: 'textarea', required: false },
+    { key: 'feature_tags', label: 'Feature Tags/Badges (pipe separated - legacy)', type: 'text', required: false },
+    { key: 'feature_title_0', label: 'Feature 1 Title', type: 'text', required: false },
+    { key: 'feature_title_1', label: 'Feature 2 Title', type: 'text', required: false },
+    { key: 'feature_title_2', label: 'Feature 3 Title', type: 'text', required: false },
+    { key: 'feature_title_3', label: 'Feature 4 Title', type: 'text', required: false },
+    { key: 'feature_title_4', label: 'Feature 5 Title', type: 'text', required: false },
+    { key: 'feature_title_5', label: 'Feature 6 Title', type: 'text', required: false },
+    { key: 'feature_visual_0', label: 'Feature 1 Visual', type: 'image', required: false },
+    { key: 'feature_visual_1', label: 'Feature 2 Visual', type: 'image', required: false },
+    { key: 'feature_visual_2', label: 'Feature 3 Visual', type: 'image', required: false },
+    { key: 'feature_visual_3', label: 'Feature 4 Visual', type: 'image', required: false },
+    { key: 'feature_visual_4', label: 'Feature 5 Visual', type: 'image', required: false },
+    { key: 'feature_visual_5', label: 'Feature 6 Visual', type: 'image', required: false },
     { key: 'auto_play', label: 'Auto-play Carousel', type: 'boolean', required: false },
     { key: 'benefit_1', label: 'Benefit Badge 1', type: 'text', required: false },
     { key: 'benefit_2', label: 'Benefit Badge 2', type: 'text', required: false },
@@ -557,10 +759,12 @@ export const componentMeta = {
   ],
   
   features: [
-    'Interactive carousel with navigation',
+    'WYSIWYG inline text editing in carousel slides',
+    'Click-to-edit image integration with toolbar',
+    'Interactive carousel navigation in edit mode',
     'Auto-play functionality option',
     'Feature preview grid',
-    'Visual content support',
+    'Individual field storage for proper editing',
     'Smooth transitions and animations',
     'Perfect for creative showcases'
   ],
