@@ -2,6 +2,7 @@ import React from 'react';
 import { useLayoutComponent } from '@/hooks/useLayoutComponent';
 import { useTypography } from '@/hooks/useTypography';
 import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
+import { useImageToolbar } from '@/hooks/useImageToolbar';
 import { LayoutSection } from '@/components/layout/LayoutSection';
 import { 
   EditableAdaptiveHeadline, 
@@ -23,6 +24,20 @@ interface FeatureTestimonialContent {
   testimonial_names: string;
   testimonial_roles: string;
   testimonial_avatars?: string;
+  // Individual feature icon fields
+  feature_icon_1?: string;
+  feature_icon_2?: string;
+  feature_icon_3?: string;
+  feature_icon_4?: string;
+  feature_icon_5?: string;
+  feature_icon_6?: string;
+  // Individual testimonial avatar fields for image toolbar support
+  testimonial_avatar_0?: string;
+  testimonial_avatar_1?: string;
+  testimonial_avatar_2?: string;
+  testimonial_avatar_3?: string;
+  testimonial_avatar_4?: string;
+  testimonial_avatar_5?: string;
   subheadline?: string;
   supporting_text?: string;
   cta_text?: string;
@@ -110,6 +125,56 @@ const CONTENT_SCHEMA = {
     type: 'string' as const, 
     default: '' 
   },
+  // Individual feature icon fields
+  feature_icon_1: { 
+    type: 'string' as const, 
+    default: '✨' 
+  },
+  feature_icon_2: { 
+    type: 'string' as const, 
+    default: '🔒' 
+  },
+  feature_icon_3: { 
+    type: 'string' as const, 
+    default: '⚡' 
+  },
+  feature_icon_4: { 
+    type: 'string' as const, 
+    default: '🔗' 
+  },
+  feature_icon_5: { 
+    type: 'string' as const, 
+    default: '📊' 
+  },
+  feature_icon_6: { 
+    type: 'string' as const, 
+    default: '🎯' 
+  },
+  // Individual testimonial avatar fields for image toolbar support
+  testimonial_avatar_0: { 
+    type: 'string' as const, 
+    default: '' 
+  },
+  testimonial_avatar_1: { 
+    type: 'string' as const, 
+    default: '' 
+  },
+  testimonial_avatar_2: { 
+    type: 'string' as const, 
+    default: '' 
+  },
+  testimonial_avatar_3: { 
+    type: 'string' as const, 
+    default: '' 
+  },
+  testimonial_avatar_4: { 
+    type: 'string' as const, 
+    default: '' 
+  },
+  testimonial_avatar_5: { 
+    type: 'string' as const, 
+    default: '' 
+  },
   // Trust Banner Schema
   trust_banner_title: { 
     type: 'string' as const, 
@@ -168,7 +233,11 @@ const FeatureCard = React.memo(({
   mutedTextColor,
   h3Style,
   handleContentUpdate,
-  backgroundType
+  backgroundType,
+  sectionBackground,
+  blockContent,
+  onRemove,
+  handleImageToolbar
 }: {
   title: string;
   description: string;
@@ -185,25 +254,49 @@ const FeatureCard = React.memo(({
   h3Style: React.CSSProperties;
   handleContentUpdate: (key: any, value: string) => void;
   backgroundType: any;
+  sectionBackground?: any;
+  blockContent: FeatureTestimonialContent;
+  onRemove?: () => void;
+  handleImageToolbar: (imageId: string, position: { x: number; y: number }) => void;
 }) => {
   
-  const AvatarPlaceholder = () => (
-    <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center">
+  const AvatarPlaceholder = React.memo(({ onClick }: { onClick?: (e: React.MouseEvent) => void }) => (
+    <div 
+      className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center cursor-pointer hover:bg-gradient-to-br hover:from-blue-600 hover:to-indigo-700 transition-all duration-300"
+      onClick={onClick}
+    >
       <span className="text-white font-bold text-lg">
         {name.split(' ').map(n => n[0]).join('')}
       </span>
+      {mode === 'edit' && (
+        <div className="absolute -bottom-6 left-1/2 transform -translate-x-1/2 text-xs text-gray-500 whitespace-nowrap">
+          Click to add avatar
+        </div>
+      )}
     </div>
-  );
+  ));
+
+  // Get the individual icon for this feature
+  const getFeatureIcon = (): string => {
+    const iconField = `feature_icon_${index + 1}` as keyof FeatureTestimonialContent;
+    return (blockContent[iconField] as string) || '✨';
+  };
+
+  // Get individual avatar for this testimonial
+  const getTestimonialAvatar = (): string => {
+    const avatarField = `testimonial_avatar_${index}` as keyof FeatureTestimonialContent;
+    return (blockContent[avatarField] as string) || avatar || '';
+  };
 
   return (
-    <div className="bg-white rounded-xl shadow-lg p-8 border border-gray-100 hover:shadow-xl transition-all duration-300 h-full flex flex-col">
+    <div className="bg-white rounded-xl shadow-lg p-8 border border-gray-100 hover:shadow-xl transition-all duration-300 h-full flex flex-col group relative">
       
       <div className="mb-6">
         <div className="flex items-start space-x-4 mb-4">
           <div className={`flex-shrink-0 w-12 h-12 rounded-xl ${colorTokens.ctaBg} flex items-center justify-center shadow-lg`}>
             <IconEditableText
               mode={mode as 'edit' | 'preview'}
-              value={`✨`}
+              value={getFeatureIcon()}
               onEdit={(value) => {
                 const iconField = `feature_icon_${index + 1}` as keyof FeatureTestimonialContent;
                 handleContentUpdate(iconField, value);
@@ -216,44 +309,178 @@ const FeatureCard = React.memo(({
               elementKey={`feature_icon_${index + 1}`}
             />
           </div>
-          <div>
-            <h3 style={h3Style} className="font-bold text-gray-900">{title}</h3>
+          <div className="flex-1 relative">
+            {/* Editable Feature Title */}
+            {mode !== 'preview' ? (
+              <div
+                contentEditable
+                suppressContentEditableWarning
+                onBlur={(e) => {
+                  const featureTitles = blockContent.feature_titles ? blockContent.feature_titles.split('|') : [];
+                  featureTitles[index] = e.currentTarget.textContent || '';
+                  handleContentUpdate('feature_titles', featureTitles.join('|'));
+                }}
+                className="text-xl font-bold text-gray-900 outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-2 py-1 cursor-text hover:bg-gray-50 min-h-[32px]"
+                data-placeholder="Feature title"
+                style={h3Style}
+              >
+                {title}
+              </div>
+            ) : (
+              <h3 style={h3Style} className="text-xl font-bold text-gray-900">{title}</h3>
+            )}
           </div>
         </div>
         
-        <p className="text-gray-600 leading-relaxed">
-          {description}
-        </p>
+        {/* Editable Feature Description */}
+        {mode !== 'preview' ? (
+          <div
+            contentEditable
+            suppressContentEditableWarning
+            onBlur={(e) => {
+              const featureDescriptions = blockContent.feature_descriptions ? blockContent.feature_descriptions.split('|') : [];
+              featureDescriptions[index] = e.currentTarget.textContent || '';
+              handleContentUpdate('feature_descriptions', featureDescriptions.join('|'));
+            }}
+            className="text-gray-600 leading-relaxed outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-2 py-1 cursor-text hover:bg-gray-50 min-h-[60px]"
+            data-placeholder="Feature description"
+          >
+            {description}
+          </div>
+        ) : (
+          <p className="text-gray-600 leading-relaxed">
+            {description}
+          </p>
+        )}
       </div>
 
       <div className="mt-auto pt-6 border-t border-gray-100">
         <blockquote className="mb-4">
-          <p className={`text-sm italic ${mutedTextColor} leading-relaxed`}>
-            "{quote}"
-          </p>
+          {/* Editable Testimonial Quote */}
+          {mode !== 'preview' ? (
+            <div
+              contentEditable
+              suppressContentEditableWarning
+              onBlur={(e) => {
+                const testimonialQuotes = blockContent.testimonial_quotes ? blockContent.testimonial_quotes.split('|') : [];
+                testimonialQuotes[index] = e.currentTarget.textContent || '';
+                handleContentUpdate('testimonial_quotes', testimonialQuotes.join('|'));
+              }}
+              className={`text-sm italic ${mutedTextColor} leading-relaxed outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-2 py-1 cursor-text hover:bg-gray-50 min-h-[40px]`}
+              data-placeholder="Testimonial quote"
+            >
+              "{quote}"
+            </div>
+          ) : (
+            <p className={`text-sm italic ${mutedTextColor} leading-relaxed`}>
+              "{quote}"
+            </p>
+          )}
         </blockquote>
         
         <div className="flex items-center space-x-3">
-          {avatar && avatar !== '' ? (
+          {/* Editable Testimonial Avatar with Image Toolbar */}
+          {getTestimonialAvatar() && getTestimonialAvatar() !== '' ? (
             <img
-              src={avatar}
+              src={getTestimonialAvatar()}
               alt={name}
-              className="w-12 h-12 rounded-full object-cover cursor-pointer border-2 border-gray-200"
-              data-image-id={`${sectionId}-testimonial${index}-avatar`}
+              className="w-12 h-12 rounded-full object-cover cursor-pointer border-2 border-gray-200 hover:border-blue-400 transition-colors duration-200"
+              data-image-id={`${sectionId}.testimonial-avatar-${index}`}
               onMouseUp={(e) => {
-                // Image toolbar is only available in edit mode
+                if (mode === 'edit') {
+                  e.stopPropagation();
+                  e.preventDefault();
+                  const rect = e.currentTarget.getBoundingClientRect();
+                  const imageId = `${sectionId}.testimonial-avatar-${index}`;
+                  const position = {
+                    x: rect.left + rect.width / 2,
+                    y: rect.top - 10
+                  };
+                  handleImageToolbar(imageId, position);
+                }
+              }}
+              onClick={(e) => {
+                if (mode === 'edit') {
+                  e.stopPropagation();
+                  e.preventDefault();
+                }
               }}
             />
           ) : (
-            <AvatarPlaceholder />
+            <AvatarPlaceholder 
+              onClick={(e) => {
+                if (mode === 'edit') {
+                  e.stopPropagation();
+                  e.preventDefault();
+                  const rect = e.currentTarget.getBoundingClientRect();
+                  const imageId = `${sectionId}.testimonial-avatar-${index}`;
+                  const position = {
+                    x: rect.left + rect.width / 2,
+                    y: rect.top - 10
+                  };
+                  handleImageToolbar(imageId, position);
+                }
+              }}
+            />
           )}
           
-          <div>
-            <div className="text-sm font-semibold text-gray-900">{name}</div>
-            <div className={`text-xs ${mutedTextColor}`}>{role}</div>
+          <div className="flex-1">
+            {/* Editable Testimonial Name */}
+            {mode !== 'preview' ? (
+              <div
+                contentEditable
+                suppressContentEditableWarning
+                onBlur={(e) => {
+                  const testimonialNames = blockContent.testimonial_names ? blockContent.testimonial_names.split('|') : [];
+                  testimonialNames[index] = e.currentTarget.textContent || '';
+                  handleContentUpdate('testimonial_names', testimonialNames.join('|'));
+                }}
+                className="text-sm font-semibold text-gray-900 outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-1 py-0.5 cursor-text hover:bg-gray-50 min-h-[24px]"
+                data-placeholder="Testimonial name"
+              >
+                {name}
+              </div>
+            ) : (
+              <div className="text-sm font-semibold text-gray-900">{name}</div>
+            )}
+            
+            {/* Editable Testimonial Role */}
+            {mode !== 'preview' ? (
+              <div
+                contentEditable
+                suppressContentEditableWarning
+                onBlur={(e) => {
+                  const testimonialRoles = blockContent.testimonial_roles ? blockContent.testimonial_roles.split('|') : [];
+                  testimonialRoles[index] = e.currentTarget.textContent || '';
+                  handleContentUpdate('testimonial_roles', testimonialRoles.join('|'));
+                }}
+                className={`text-xs ${mutedTextColor} outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-1 py-0.5 cursor-text hover:bg-gray-50 min-h-[20px]`}
+                data-placeholder="Testimonial role"
+              >
+                {role}
+              </div>
+            ) : (
+              <div className={`text-xs ${mutedTextColor}`}>{role}</div>
+            )}
           </div>
         </div>
       </div>
+
+      {/* Remove Feature Button - only in edit mode */}
+      {mode === 'edit' && onRemove && (
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            onRemove();
+          }}
+          className="opacity-0 group-hover:opacity-100 absolute -top-2 -right-2 text-red-500 hover:text-red-700 transition-opacity duration-200 z-10 bg-white rounded-full p-1 shadow-md"
+          title="Remove this feature"
+        >
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      )}
     </div>
   );
 });
@@ -347,6 +574,35 @@ export default function FeatureTestimonial(props: LayoutComponentProps) {
   const store = useEditStore();
   const showImageToolbar = store.showImageToolbar;
   
+  // Initialize image toolbar hook
+  const handleImageToolbar = useImageToolbar();
+
+  // Helper function to get individual testimonial avatar
+  const getTestimonialAvatar = (index: number): string => {
+    const fieldName = `testimonial_avatar_${index}` as keyof FeatureTestimonialContent;
+    return (blockContent[fieldName] as string) || '';
+  };
+
+  // Migration logic: Convert pipe-separated testimonial_avatars to individual fields
+  React.useEffect(() => {
+    if (blockContent.testimonial_avatars && !blockContent.testimonial_avatar_0) {
+      const testimonialAvatars = blockContent.testimonial_avatars.split('|').map(item => item.trim()).filter(Boolean);
+      const updates: Partial<FeatureTestimonialContent> = {};
+      
+      testimonialAvatars.forEach((avatar, index) => {
+        if (index < 6) { // Max 6 features
+          const fieldName = `testimonial_avatar_${index}` as keyof FeatureTestimonialContent;
+          updates[fieldName] = avatar as any;
+        }
+      });
+      
+      // Apply all updates at once
+      Object.entries(updates).forEach(([key, value]) => {
+        handleContentUpdate(key as keyof FeatureTestimonialContent, value as string);
+      });
+    }
+  }, [blockContent.testimonial_avatars, blockContent.testimonial_avatar_0, handleContentUpdate]);
+  
   return (
     <LayoutSection
       sectionId={sectionId}
@@ -390,107 +646,112 @@ export default function FeatureTestimonial(props: LayoutComponentProps) {
           )}
         </div>
 
-        {mode !== 'preview' ? (
-          <div className="space-y-8">
-            <div className="p-6 border border-gray-200 rounded-lg bg-gray-50">
-              <h4 className="font-semibold text-gray-700 mb-4">Feature & Testimonial Content</h4>
-              
-              <div className="space-y-4">
-                <EditableAdaptiveText
-                  mode={mode}
-                  value={blockContent.feature_titles || ''}
-                  onEdit={(value) => handleContentUpdate('feature_titles', value)}
-                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
-                  colorTokens={colorTokens}
-                  variant="body"
-                  className="mb-2"
-                  placeholder="Feature titles (pipe separated)"
-                  sectionId={sectionId}
-                  elementKey="feature_titles"
-                  sectionBackground={sectionBackground}
-                />
+        {/* Features Grid - Same layout for both edit and preview modes */}
+        <div className="grid md:grid-cols-2 gap-6">
+          {features.map((feature, index) => (
+            <FeatureCard
+              key={index}
+              title={feature.title}
+              description={feature.description}
+              quote={feature.quote}
+              name={feature.name}
+              role={feature.role}
+              avatar={getTestimonialAvatar(index) || feature.avatar}
+              index={index}
+              showImageToolbar={showImageToolbar}
+              sectionId={sectionId}
+              mode={mode}
+              colorTokens={colorTokens}
+              backgroundType={backgroundType}
+              mutedTextColor={mutedTextColor}
+              h3Style={h3Style}
+              handleContentUpdate={handleContentUpdate}
+              sectionBackground={sectionBackground}
+              blockContent={blockContent}
+              handleImageToolbar={handleImageToolbar}
+              onRemove={features.length > 1 ? () => {
+                const featureTitles = blockContent.feature_titles ? blockContent.feature_titles.split('|') : [];
+                const featureDescriptions = blockContent.feature_descriptions ? blockContent.feature_descriptions.split('|') : [];
+                const testimonialQuotes = blockContent.testimonial_quotes ? blockContent.testimonial_quotes.split('|') : [];
+                const testimonialNames = blockContent.testimonial_names ? blockContent.testimonial_names.split('|') : [];
+                const testimonialRoles = blockContent.testimonial_roles ? blockContent.testimonial_roles.split('|') : [];
                 
-                <EditableAdaptiveText
-                  mode={mode}
-                  value={blockContent.feature_descriptions || ''}
-                  onEdit={(value) => handleContentUpdate('feature_descriptions', value)}
-                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
-                  colorTokens={colorTokens}
-                  variant="body"
-                  className="mb-2"
-                  placeholder="Feature descriptions (pipe separated)"
-                  sectionId={sectionId}
-                  elementKey="feature_descriptions"
-                  sectionBackground={sectionBackground}
-                />
+                // Remove from pipe-separated fields
+                featureTitles.splice(index, 1);
+                featureDescriptions.splice(index, 1);
+                testimonialQuotes.splice(index, 1);
+                testimonialNames.splice(index, 1);
+                testimonialRoles.splice(index, 1);
                 
-                <EditableAdaptiveText
-                  mode={mode}
-                  value={blockContent.testimonial_quotes || ''}
-                  onEdit={(value) => handleContentUpdate('testimonial_quotes', value)}
-                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
-                  colorTokens={colorTokens}
-                  variant="body"
-                  className="mb-2"
-                  placeholder="Testimonial quotes (pipe separated)"
-                  sectionId={sectionId}
-                  elementKey="testimonial_quotes"
-                  sectionBackground={sectionBackground}
-                />
+                // Remove the avatar field for the feature being deleted and shift remaining fields
+                const avatarsToShift = [];
+                for (let i = 0; i < 6; i++) {
+                  const fieldName = `testimonial_avatar_${i}` as keyof FeatureTestimonialContent;
+                  const value = (blockContent[fieldName] as string) || '';
+                  avatarsToShift.push(value);
+                }
                 
-                <EditableAdaptiveText
-                  mode={mode}
-                  value={blockContent.testimonial_names || ''}
-                  onEdit={(value) => handleContentUpdate('testimonial_names', value)}
-                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
-                  colorTokens={colorTokens}
-                  variant="body"
-                  className="mb-2"
-                  placeholder="Testimonial names (pipe separated)"
-                  sectionId={sectionId}
-                  elementKey="testimonial_names"
-                  sectionBackground={sectionBackground}
-                />
+                // Remove the avatar at the index and shift remaining ones
+                avatarsToShift.splice(index, 1);
                 
-                <EditableAdaptiveText
-                  mode={mode}
-                  value={blockContent.testimonial_roles || ''}
-                  onEdit={(value) => handleContentUpdate('testimonial_roles', value)}
-                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
-                  colorTokens={colorTokens}
-                  variant="body"
-                  placeholder="Testimonial roles (pipe separated)"
-                  sectionId={sectionId}
-                  elementKey="testimonial_roles"
-                  sectionBackground={sectionBackground}
-                />
-              </div>
+                // Update all avatar fields with shifted values
+                for (let i = 0; i < 6; i++) {
+                  const fieldName = `testimonial_avatar_${i}` as keyof FeatureTestimonialContent;
+                  const newValue = avatarsToShift[i] || '';
+                  handleContentUpdate(fieldName, newValue);
+                }
+                
+                handleContentUpdate('feature_titles', featureTitles.join('|'));
+                handleContentUpdate('feature_descriptions', featureDescriptions.join('|'));
+                handleContentUpdate('testimonial_quotes', testimonialQuotes.join('|'));
+                handleContentUpdate('testimonial_names', testimonialNames.join('|'));
+                handleContentUpdate('testimonial_roles', testimonialRoles.join('|'));
+              } : undefined}
+            />
+          ))}
+          
+          {/* Add Feature Button - only in edit mode */}
+          {mode === 'edit' && features.length < 6 && (
+            <div className="flex items-center justify-center">
+              <button
+                onClick={() => {
+                  const featureTitles = blockContent.feature_titles ? blockContent.feature_titles.split('|') : [];
+                  const featureDescriptions = blockContent.feature_descriptions ? blockContent.feature_descriptions.split('|') : [];
+                  const testimonialQuotes = blockContent.testimonial_quotes ? blockContent.testimonial_quotes.split('|') : [];
+                  const testimonialNames = blockContent.testimonial_names ? blockContent.testimonial_names.split('|') : [];
+                  const testimonialRoles = blockContent.testimonial_roles ? blockContent.testimonial_roles.split('|') : [];
+                  
+                  const newFeatureIndex = featureTitles.length;
+                  featureTitles.push(`Feature ${newFeatureIndex + 1}`);
+                  featureDescriptions.push('Add feature description here');
+                  testimonialQuotes.push('Add testimonial quote here');
+                  testimonialNames.push('Customer Name');
+                  testimonialRoles.push('Title at Company');
+                  
+                  // Set default icon for the new feature
+                  const defaultIcons = ['✨', '🔒', '⚡', '🔗', '📊', '🎯'];
+                  const defaultIcon = defaultIcons[newFeatureIndex] || '✨';
+                  const iconFieldName = `feature_icon_${newFeatureIndex + 1}` as keyof FeatureTestimonialContent;
+                  
+                  handleContentUpdate('feature_titles', featureTitles.join('|'));
+                  handleContentUpdate('feature_descriptions', featureDescriptions.join('|'));
+                  handleContentUpdate('testimonial_quotes', testimonialQuotes.join('|'));
+                  handleContentUpdate('testimonial_names', testimonialNames.join('|'));
+                  handleContentUpdate('testimonial_roles', testimonialRoles.join('|'));
+                  handleContentUpdate(iconFieldName, defaultIcon);
+                }}
+                className="h-full min-h-[400px] w-full border-2 border-dashed border-gray-300 hover:border-gray-400 text-gray-500 hover:text-gray-600 transition-all duration-300 flex flex-col items-center justify-center space-y-4 bg-gray-50 hover:bg-gray-100 rounded-xl"
+                title="Add new feature"
+              >
+                <svg className="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                </svg>
+                <span className="font-medium text-lg">Add Feature</span>
+                <span className="text-sm text-gray-400">Click to add a new feature card</span>
+              </button>
             </div>
-          </div>
-        ) : (
-          <div className="grid md:grid-cols-2 gap-6">
-            {features.map((feature, index) => (
-              <FeatureCard
-                key={index}
-                title={feature.title}
-                description={feature.description}
-                quote={feature.quote}
-                name={feature.name}
-                role={feature.role}
-                avatar={feature.avatar}
-                index={index}
-                showImageToolbar={showImageToolbar}
-                sectionId={sectionId}
-                mode={mode}
-                colorTokens={colorTokens}
-                backgroundType={backgroundType}
-                mutedTextColor={mutedTextColor}
-                h3Style={h3Style}
-                handleContentUpdate={handleContentUpdate}
-              />
-            ))}
-          </div>
-        )}
+          )}
+        </div>
 
         {/* Trust Banner - Editable */}
         {blockContent.show_trust_banner !== false && (blockContent.trust_banner_title || mode === 'edit') && (
@@ -817,6 +1078,18 @@ export const componentMeta = {
     { key: 'testimonial_names', label: 'Testimonial Names (pipe separated)', type: 'text', required: true },
     { key: 'testimonial_roles', label: 'Testimonial Roles (pipe separated)', type: 'text', required: true },
     { key: 'testimonial_avatars', label: 'Testimonial Avatars (pipe separated)', type: 'textarea', required: false },
+    { key: 'feature_icon_1', label: 'Feature 1 Icon', type: 'text', required: false },
+    { key: 'feature_icon_2', label: 'Feature 2 Icon', type: 'text', required: false },
+    { key: 'feature_icon_3', label: 'Feature 3 Icon', type: 'text', required: false },
+    { key: 'feature_icon_4', label: 'Feature 4 Icon', type: 'text', required: false },
+    { key: 'feature_icon_5', label: 'Feature 5 Icon', type: 'text', required: false },
+    { key: 'feature_icon_6', label: 'Feature 6 Icon', type: 'text', required: false },
+    { key: 'testimonial_avatar_0', label: 'Testimonial 1 Avatar', type: 'image', required: false },
+    { key: 'testimonial_avatar_1', label: 'Testimonial 2 Avatar', type: 'image', required: false },
+    { key: 'testimonial_avatar_2', label: 'Testimonial 3 Avatar', type: 'image', required: false },
+    { key: 'testimonial_avatar_3', label: 'Testimonial 4 Avatar', type: 'image', required: false },
+    { key: 'testimonial_avatar_4', label: 'Testimonial 5 Avatar', type: 'image', required: false },
+    { key: 'testimonial_avatar_5', label: 'Testimonial 6 Avatar', type: 'image', required: false },
     { key: 'trust_banner_title', label: 'Trust Banner Title', type: 'text', required: false },
     { key: 'trust_metric_1', label: 'Trust Metric 1', type: 'text', required: false },
     { key: 'trust_label_1', label: 'Trust Label 1', type: 'text', required: false },
@@ -832,12 +1105,16 @@ export const componentMeta = {
   ],
   
   features: [
+    'WYSIWYG inline editing for all content',
     'Feature cards with integrated testimonials',
+    'Inline contentEditable for titles, descriptions, quotes',
+    'Image toolbar support for testimonial avatars',
+    'Editable icons with IconEditableText',
+    'Add/remove feature cards dynamically',
     'Enterprise trust indicators',
-    'Avatar support for testimonials',
     'Trust metrics banner',
     'Perfect for B2B enterprise sales',
-    'Social proof integrated with features'
+    'Consistent edit and preview experience'
   ],
   
   useCases: [
