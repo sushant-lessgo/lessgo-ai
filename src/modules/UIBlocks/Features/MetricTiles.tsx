@@ -420,7 +420,15 @@ export default function MetricTiles(props: LayoutComponentProps) {
           )}
         </div>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className={`grid ${
+          features.length === 1 
+            ? 'md:grid-cols-1 justify-items-center' 
+            : features.length === 2 
+            ? 'md:grid-cols-2' 
+            : features.length === 3 
+            ? 'md:grid-cols-2 lg:grid-cols-3' 
+            : 'md:grid-cols-2 lg:grid-cols-4'
+        } gap-6`}>
           {features.map((feature) => (
             <MetricTile
               key={feature.originalIndex}
@@ -444,6 +452,46 @@ export default function MetricTiles(props: LayoutComponentProps) {
               onDescriptionEdit={handleDescriptionEdit}
             />
           ))}
+          
+          {/* Add Metric Tile Button - only in edit mode and when less than 4 tiles */}
+          {mode === 'edit' && features.length < 4 && (
+            <div className="bg-white rounded-xl shadow-lg p-8 border-2 border-dashed border-gray-300 hover:border-gray-400 hover:shadow-xl transition-all duration-300 h-full flex flex-col items-center justify-center min-h-[300px]">
+              <button
+                onClick={() => {
+                  const featureTitles = blockContent.feature_titles ? blockContent.feature_titles.split('|') : [];
+                  const featureMetrics = blockContent.feature_metrics ? blockContent.feature_metrics.split('|') : [];
+                  const metricLabels = blockContent.metric_labels ? blockContent.metric_labels.split('|') : [];
+                  const featureDescriptions = blockContent.feature_descriptions ? blockContent.feature_descriptions.split('|') : [];
+                  
+                  const newTileIndex = featureTitles.length;
+                  featureTitles.push(`Metric ${newTileIndex + 1}`);
+                  featureMetrics.push('100%');
+                  metricLabels.push('improvement');
+                  featureDescriptions.push('Add metric description here');
+                  
+                  // Add default icon for the new metric
+                  const defaultIcons = ['⚡', '💰', '✅', '📈'];
+                  const iconField = `metric_icon_${newTileIndex + 1}` as keyof MetricTilesContent;
+                  const defaultIcon = defaultIcons[newTileIndex] || '📊';
+                  
+                  handleContentUpdate('feature_titles', featureTitles.join('|'));
+                  handleContentUpdate('feature_metrics', featureMetrics.join('|'));
+                  handleContentUpdate('metric_labels', metricLabels.join('|'));
+                  handleContentUpdate('feature_descriptions', featureDescriptions.join('|'));
+                  handleContentUpdate(iconField, defaultIcon);
+                }}
+                className="w-full h-full flex flex-col items-center justify-center space-y-4 text-gray-400 hover:text-gray-600 transition-colors duration-300"
+                title="Add new metric tile"
+              >
+                <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center">
+                  <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                  </svg>
+                </div>
+                <span className="text-sm font-medium">Add Metric Tile</span>
+              </button>
+            </div>
+          )}
         </div>
 
         {/* ROI Summary - Editable */}
