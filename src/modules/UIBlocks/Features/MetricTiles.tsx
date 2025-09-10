@@ -12,6 +12,7 @@ import {
   TrustIndicators 
 } from '@/components/layout/ComponentRegistry';
 import { LayoutComponentProps } from '@/types/storeTypes';
+import { parsePipeData, updateListData } from '@/utils/dataParsingUtils';
 
 interface MetricTilesContent {
   headline: string;
@@ -145,7 +146,13 @@ const MetricTile = React.memo(({
   mode,
   handleContentUpdate,
   blockContent,
-  sectionId
+  sectionId,
+  backgroundType,
+  sectionBackground,
+  onTitleEdit,
+  onMetricEdit,
+  onLabelEdit,
+  onDescriptionEdit
 }: {
   title: string;
   metric: string;
@@ -159,6 +166,12 @@ const MetricTile = React.memo(({
   handleContentUpdate: (key: keyof MetricTilesContent, value: any) => void;
   blockContent: MetricTilesContent;
   sectionId: string;
+  backgroundType: string;
+  sectionBackground: string;
+  onTitleEdit: (index: number, value: string) => void;
+  onMetricEdit: (index: number, value: string) => void;
+  onLabelEdit: (index: number, value: string) => void;
+  onDescriptionEdit: (index: number, value: string) => void;
 }) => {
   
   // Get metric icon from content fields
@@ -201,22 +214,68 @@ const MetricTile = React.memo(({
           />
         </div>
         
-        <h3 style={h3Style} className="font-bold text-gray-900 mb-2">{title}</h3>
+        <EditableAdaptiveText
+          mode={mode}
+          value={title}
+          onEdit={(value) => onTitleEdit(index, value)}
+          backgroundType={backgroundType === 'custom' ? 'secondary' : (backgroundType as any || 'neutral')}
+          colorTokens={colorTokens}
+          variant="body"
+          textStyle={{
+            ...h3Style,
+            fontWeight: 'bold'
+          }}
+          className="mb-2"
+          placeholder="Feature title..."
+          sectionId={sectionId}
+          elementKey={`feature_title_${index}`}
+          sectionBackground={sectionBackground}
+        />
         
         <div className="text-center bg-gray-50 rounded-lg p-4 mb-4">
-          <div className={`text-4xl font-bold bg-gradient-to-r ${getGradientForIndex(index)} bg-clip-text text-transparent`}>
-            {metric}
-          </div>
-          <div className={`text-sm font-medium ${mutedTextColor} uppercase tracking-wide`}>
-            {label}
-          </div>
+          <EditableAdaptiveText
+            mode={mode}
+            value={metric}
+            onEdit={(value) => onMetricEdit(index, value)}
+            backgroundType="neutral"
+            colorTokens={colorTokens}
+            variant="body"
+            className={`text-4xl font-bold bg-gradient-to-r ${getGradientForIndex(index)} bg-clip-text text-transparent`}
+            placeholder="Metric..."
+            sectionId={sectionId}
+            elementKey={`feature_metric_${index}`}
+            sectionBackground="bg-gray-50"
+          />
+          <EditableAdaptiveText
+            mode={mode}
+            value={label}
+            onEdit={(value) => onLabelEdit(index, value)}
+            backgroundType="neutral"
+            colorTokens={colorTokens}
+            variant="body"
+            className={`text-sm font-medium ${mutedTextColor} uppercase tracking-wide`}
+            placeholder="Metric label..."
+            sectionId={sectionId}
+            elementKey={`metric_label_${index}`}
+            sectionBackground="bg-gray-50"
+          />
         </div>
       </div>
 
       <div className="mt-auto">
-        <p className="text-gray-600 leading-relaxed text-sm">
-          {description}
-        </p>
+        <EditableAdaptiveText
+          mode={mode}
+          value={description}
+          onEdit={(value) => onDescriptionEdit(index, value)}
+          backgroundType={backgroundType === 'custom' ? 'secondary' : (backgroundType as any || 'neutral')}
+          colorTokens={colorTokens}
+          variant="body"
+          className="text-gray-600 leading-relaxed text-sm"
+          placeholder="Feature description..."
+          sectionId={sectionId}
+          elementKey={`feature_description_${index}`}
+          sectionBackground={sectionBackground}
+        />
         
         <div className="mt-4 flex items-center space-x-2">
           <div className={`w-2 h-2 rounded-full bg-gradient-to-r ${getGradientForIndex(index)}`} />
@@ -251,21 +310,11 @@ export default function MetricTiles(props: LayoutComponentProps) {
   const h3Style = getTypographyStyle('h3');
   const bodyLgStyle = getTypographyStyle('body-lg');
 
-  const featureTitles = blockContent.feature_titles 
-    ? blockContent.feature_titles.split('|').map(item => item.trim()).filter(Boolean)
-    : [];
-
-  const featureMetrics = blockContent.feature_metrics 
-    ? blockContent.feature_metrics.split('|').map(item => item.trim()).filter(Boolean)
-    : [];
-
-  const metricLabels = blockContent.metric_labels 
-    ? blockContent.metric_labels.split('|').map(item => item.trim()).filter(Boolean)
-    : [];
-
-  const featureDescriptions = blockContent.feature_descriptions 
-    ? blockContent.feature_descriptions.split('|').map(item => item.trim()).filter(Boolean)
-    : [];
+  // Parse feature data using utility functions
+  const featureTitles = parsePipeData(blockContent.feature_titles);
+  const featureMetrics = parsePipeData(blockContent.feature_metrics);
+  const metricLabels = parsePipeData(blockContent.metric_labels);
+  const featureDescriptions = parsePipeData(blockContent.feature_descriptions);
 
   const features = featureTitles.map((title, index) => ({
     title,
@@ -273,6 +322,27 @@ export default function MetricTiles(props: LayoutComponentProps) {
     label: metricLabels[index] || '',
     description: featureDescriptions[index] || ''
   }));
+
+  // Individual field edit handlers (following IconGrid pattern)
+  const handleTitleEdit = (index: number, value: string) => {
+    const updatedTitles = updateListData(blockContent.feature_titles, index, value);
+    handleContentUpdate('feature_titles', updatedTitles);
+  };
+
+  const handleMetricEdit = (index: number, value: string) => {
+    const updatedMetrics = updateListData(blockContent.feature_metrics, index, value);
+    handleContentUpdate('feature_metrics', updatedMetrics);
+  };
+
+  const handleLabelEdit = (index: number, value: string) => {
+    const updatedLabels = updateListData(blockContent.metric_labels, index, value);
+    handleContentUpdate('metric_labels', updatedLabels);
+  };
+
+  const handleDescriptionEdit = (index: number, value: string) => {
+    const updatedDescriptions = updateListData(blockContent.feature_descriptions, index, value);
+    handleContentUpdate('feature_descriptions', updatedDescriptions);
+  };
 
   const trustItems = blockContent.trust_items 
     ? blockContent.trust_items.split('|').map(item => item.trim()).filter(Boolean)
@@ -323,90 +393,31 @@ export default function MetricTiles(props: LayoutComponentProps) {
           )}
         </div>
 
-        {mode !== 'preview' ? (
-          <div className="space-y-8">
-            <div className="p-6 border border-gray-200 rounded-lg bg-gray-50">
-              <h4 className="font-semibold text-gray-700 mb-4">Metric Content</h4>
-              
-              <div className="space-y-4">
-                <EditableAdaptiveText
-                  mode={mode}
-                  value={blockContent.feature_titles || ''}
-                  onEdit={(value) => handleContentUpdate('feature_titles', value)}
-                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
-                  colorTokens={colorTokens}
-                  variant="body"
-                  className="mb-2"
-                  placeholder="Feature titles (pipe separated)"
-                  sectionId={sectionId}
-                  elementKey="feature_titles"
-                  sectionBackground={sectionBackground}
-                />
-                
-                <EditableAdaptiveText
-                  mode={mode}
-                  value={blockContent.feature_metrics || ''}
-                  onEdit={(value) => handleContentUpdate('feature_metrics', value)}
-                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
-                  colorTokens={colorTokens}
-                  variant="body"
-                  className="mb-2"
-                  placeholder="Metrics (pipe separated)"
-                  sectionId={sectionId}
-                  elementKey="feature_metrics"
-                  sectionBackground={sectionBackground}
-                />
-                
-                <EditableAdaptiveText
-                  mode={mode}
-                  value={blockContent.metric_labels || ''}
-                  onEdit={(value) => handleContentUpdate('metric_labels', value)}
-                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
-                  colorTokens={colorTokens}
-                  variant="body"
-                  className="mb-2"
-                  placeholder="Metric labels (pipe separated)"
-                  sectionId={sectionId}
-                  elementKey="metric_labels"
-                  sectionBackground={sectionBackground}
-                />
-                
-                <EditableAdaptiveText
-                  mode={mode}
-                  value={blockContent.feature_descriptions || ''}
-                  onEdit={(value) => handleContentUpdate('feature_descriptions', value)}
-                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
-                  colorTokens={colorTokens}
-                  variant="body"
-                  placeholder="Feature descriptions (pipe separated)"
-                  sectionId={sectionId}
-                  elementKey="feature_descriptions"
-                  sectionBackground={sectionBackground}
-                />
-              </div>
-            </div>
-          </div>
-        ) : (
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {features.map((feature, index) => (
-              <MetricTile
-                key={index}
-                title={feature.title}
-                metric={feature.metric}
-                label={feature.label}
-                description={feature.description}
-                index={index}
-                colorTokens={colorTokens}
-                mutedTextColor={mutedTextColor}
-                h3Style={h3Style}
-                mode={mode}
-                handleContentUpdate={handleContentUpdate}
-                blockContent={blockContent}
-                sectionId={sectionId}
-              />
-            ))}
-          </div>
-        )}
+        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {features.map((feature, index) => (
+            <MetricTile
+              key={index}
+              title={feature.title}
+              metric={feature.metric}
+              label={feature.label}
+              description={feature.description}
+              index={index}
+              colorTokens={colorTokens}
+              mutedTextColor={mutedTextColor}
+              h3Style={h3Style}
+              mode={mode}
+              handleContentUpdate={handleContentUpdate}
+              blockContent={blockContent}
+              sectionId={sectionId}
+              backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
+              sectionBackground={sectionBackground}
+              onTitleEdit={handleTitleEdit}
+              onMetricEdit={handleMetricEdit}
+              onLabelEdit={handleLabelEdit}
+              onDescriptionEdit={handleDescriptionEdit}
+            />
+          ))}
+        </div>
 
         {/* ROI Summary - Editable */}
         {blockContent.show_roi_summary !== false && (blockContent.roi_summary_title || mode === 'edit') && (
