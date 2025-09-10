@@ -13,17 +13,14 @@ import {
   AccentBadge 
 } from '@/components/layout/EditableContent';
 import { 
-  CTAButton, 
-  TrustIndicators 
+  CTAButton 
 } from '@/components/layout/ComponentRegistry';
-import EditableTrustIndicators from '@/components/layout/EditableTrustIndicators';
 import IconEditableText from '@/components/ui/IconEditableText';
 import { LayoutComponentProps } from '@/types/storeTypes';
 
 // Content interface for type safety
 interface MissionQuoteOverlayContent {
   mission_quote: string;
-  mission_context: string;
   founder_name: string;
   cta_text: string;
   badge_text?: string;
@@ -34,12 +31,6 @@ interface MissionQuoteOverlayContent {
   mission_stat_4: string;
   founder_title?: string;
   mission_year?: string;
-  trust_items?: string;
-  trust_item_1: string;
-  trust_item_2: string;
-  trust_item_3: string;
-  trust_item_4: string;
-  trust_item_5: string;
   background_image?: string;
   badge_icon?: string;
 }
@@ -49,10 +40,6 @@ const CONTENT_SCHEMA = {
   mission_quote: { 
     type: 'string' as const, 
     default: '"We believe technology should empower people, not replace them. That\'s why we\'re building tools that amplify human creativity instead of automating it away."' 
-  },
-  mission_context: { 
-    type: 'string' as const, 
-    default: 'When I started this company in 2020, I watched my friends struggle with tools that were supposed to make their lives easier but actually made them more complicated. We decided to build something different - something that puts human needs first.' 
   },
   founder_name: { 
     type: 'string' as const, 
@@ -86,15 +73,6 @@ const CONTENT_SCHEMA = {
     type: 'string' as const, 
     default: 'Est. 2020' 
   },
-  trust_items: { 
-    type: 'string' as const, 
-    default: 'B-Corp Certified|Climate Neutral|Open Source' 
-  },
-  trust_item_1: { type: 'string' as const, default: 'B-Corp Certified' },
-  trust_item_2: { type: 'string' as const, default: 'Climate Neutral' },
-  trust_item_3: { type: 'string' as const, default: 'Open Source' },
-  trust_item_4: { type: 'string' as const, default: '' },
-  trust_item_5: { type: 'string' as const, default: '' },
   background_image: { 
     type: 'string' as const, 
     default: '' 
@@ -167,27 +145,6 @@ export default function MissionQuoteOverlay(props: LayoutComponentProps) {
   const h2Style = getTypographyStyle('h2');
   const bodyStyle = getTypographyStyle('body-lg');
 
-  // Helper function to get trust items with individual field support
-  const getTrustItems = (): string[] => {
-    const individualItems = [
-      blockContent.trust_item_1,
-      blockContent.trust_item_2,
-      blockContent.trust_item_3,
-      blockContent.trust_item_4,
-      blockContent.trust_item_5
-    ].filter((item): item is string => Boolean(item && item.trim() !== '' && item !== '___REMOVED___'));
-    
-    // Legacy format fallback
-    if (individualItems.length > 0) {
-      return individualItems;
-    }
-    
-    return blockContent.trust_items 
-      ? blockContent.trust_items.split('|').map(item => item.trim()).filter(Boolean)
-      : ['B-Corp Certified', 'Climate Neutral'];
-  };
-  
-  const trustItems = getTrustItems();
 
   // Get showImageToolbar for handling image clicks
   const store = useEditStore();
@@ -441,80 +398,6 @@ export default function MissionQuoteOverlay(props: LayoutComponentProps) {
           </div>
         </div>
 
-        {/* Bottom overlay with context and trust */}
-        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black via-black to-transparent p-8">
-          <div className="max-w-5xl mx-auto">
-            <div className="grid lg:grid-cols-2 gap-8 items-end">
-              
-              {/* Mission Context */}
-              <div>
-                <EditableAdaptiveText
-                  mode={mode}
-                  value={blockContent.mission_context || ''}
-                  onEdit={(value) => handleContentUpdate('mission_context', value)}
-                  backgroundType="primary"
-                  colorTokens={colorTokens}
-                  variant="body"
-                  textStyle={{ color: 'rgba(255, 255, 255, 0.9)', lineHeight: '1.625' }}
-                  placeholder="Add context about your mission and why it matters..."
-                  sectionId={sectionId}
-                  elementKey="mission_context"
-                  sectionBackground="transparent"
-                />
-              </div>
-
-              {/* Trust Indicators */}
-              <div className="lg:text-right">
-                {mode !== 'preview' ? (
-                  <EditableTrustIndicators
-                    mode={mode}
-                    trustItems={[
-                      blockContent.trust_item_1 || '',
-                      blockContent.trust_item_2 || '',
-                      blockContent.trust_item_3 || '',
-                      blockContent.trust_item_4 || '',
-                      blockContent.trust_item_5 || ''
-                    ]}
-                    onTrustItemChange={(index, value) => {
-                      const fieldKey = `trust_item_${index + 1}` as keyof MissionQuoteOverlayContent;
-                      handleContentUpdate(fieldKey, value);
-                    }}
-                    onAddTrustItem={() => {
-                      const emptyIndex = [
-                        blockContent.trust_item_1,
-                        blockContent.trust_item_2,
-                        blockContent.trust_item_3,
-                        blockContent.trust_item_4,
-                        blockContent.trust_item_5
-                      ].findIndex(item => !item || item.trim() === '' || item === '___REMOVED___');
-                      
-                      if (emptyIndex !== -1) {
-                        const fieldKey = `trust_item_${emptyIndex + 1}` as keyof MissionQuoteOverlayContent;
-                        handleContentUpdate(fieldKey, 'New trust item');
-                      }
-                    }}
-                    onRemoveTrustItem={(index) => {
-                      const fieldKey = `trust_item_${index + 1}` as keyof MissionQuoteOverlayContent;
-                      handleContentUpdate(fieldKey, '___REMOVED___');
-                    }}
-                    colorTokens={colorTokens}
-                    sectionBackground="transparent"
-                    sectionId={sectionId}
-                    backgroundType={backgroundType}
-                    iconColor="text-green-400"
-                    colorClass="text-white text-opacity-80"
-                  />
-                ) : (
-                  <TrustIndicators 
-                    items={trustItems}
-                    colorClass="text-white text-opacity-80"
-                    iconColor="text-green-400"
-                  />
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
       </div>
     </LayoutSection>
   );
@@ -532,14 +415,12 @@ export const componentMeta = {
   
   contentFields: [
     { key: 'mission_quote', label: 'Mission Quote', type: 'textarea', required: true },
-    { key: 'mission_context', label: 'Mission Context', type: 'textarea', required: true },
     { key: 'founder_name', label: 'Founder Name', type: 'text', required: true },
     { key: 'founder_title', label: 'Founder Title', type: 'text', required: false },
     { key: 'mission_year', label: 'Founded Year', type: 'text', required: false },
     { key: 'badge_text', label: 'Badge Text', type: 'text', required: false },
     { key: 'mission_stats', label: 'Mission Stats (pipe separated)', type: 'text', required: false },
     { key: 'cta_text', label: 'CTA Button Text', type: 'text', required: true },
-    { key: 'trust_items', label: 'Trust Indicators (pipe separated)', type: 'text', required: false },
     { key: 'background_image', label: 'Background Image', type: 'image', required: false }
   ],
   
@@ -548,15 +429,13 @@ export const componentMeta = {
     'Mission quote as primary headline',
     'Founder attribution with avatar',
     'Mission statistics display',
-    'Trust indicators for credibility',
     'Dark overlay for text readability'
   ],
   
   useCases: [
-    'Social impact company introductions',
-    'B-Corp and sustainable business messaging',
-    'Non-profit organization missions',
     'Purpose-driven startup launches',
+    'Social impact company introductions',
+    'Non-profit organization missions',
     'Environmental and social cause platforms',
     'Community-focused business models'
   ]
