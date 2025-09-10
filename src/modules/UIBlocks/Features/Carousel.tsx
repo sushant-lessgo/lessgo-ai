@@ -158,7 +158,8 @@ const CarouselSlide = React.memo(({
   colorTokens,
   handleImageToolbar,
   h2Style,
-  bodyLgStyle
+  bodyLgStyle,
+  onRemove
 }: {
   title: string;
   description: string;
@@ -173,6 +174,7 @@ const CarouselSlide = React.memo(({
   handleImageToolbar: (imageId: string, position: { x: number; y: number }) => void;
   h2Style: any;
   bodyLgStyle: any;
+  onRemove?: () => void;
 }) => {
   
   const VisualPlaceholder = React.memo(({ onClick }: { onClick?: (e: React.MouseEvent) => void }) => (
@@ -203,7 +205,7 @@ const CarouselSlide = React.memo(({
   ));
 
   return (
-    <div className="grid lg:grid-cols-2 gap-12 items-center">
+    <div className="grid lg:grid-cols-2 gap-12 items-center group relative">
       
       {/* Content Side */}
       <div className="space-y-6">
@@ -443,6 +445,22 @@ const CarouselSlide = React.memo(({
           />
         )}
       </div>
+
+      {/* Delete Button - only show in edit mode and when onRemove is provided */}
+      {mode === 'edit' && onRemove && (
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            onRemove();
+          }}
+          className="opacity-0 group-hover:opacity-100 absolute -top-2 -right-2 text-red-500 hover:text-red-700 transition-opacity duration-200 z-10 bg-white rounded-full p-1 shadow-md"
+          title="Remove this feature"
+        >
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      )}
     </div>
   );
 });
@@ -515,7 +533,13 @@ export default function Carousel(props: LayoutComponentProps) {
   }, [blockContent.feature_titles, blockContent.feature_title_0, handleContentUpdate]);
 
   // Create features array from individual fields
-  const features = [];
+  const features: Array<{
+    title: string;
+    description: string;
+    visual: string;
+    tag: string;
+    originalIndex: number;
+  }> = [];
   for (let i = 0; i < 6; i++) {
     const title = getIndividualFeature('title', i);
     const description = getIndividualFeature('description', i);
@@ -631,6 +655,56 @@ export default function Carousel(props: LayoutComponentProps) {
                 handleImageToolbar={handleImageToolbar}
                 h2Style={h2Style}
                 bodyLgStyle={bodyLgStyle}
+                onRemove={features.length > 1 ? () => {
+                  const currentSlideIndex = features[activeSlide].originalIndex;
+                  
+                  // Clear individual fields for the deleted feature
+                  const titleField = `feature_title_${currentSlideIndex}` as keyof CarouselContent;
+                  const descField = `feature_description_${currentSlideIndex}` as keyof CarouselContent;
+                  const visualField = `feature_visual_${currentSlideIndex}` as keyof CarouselContent;
+                  const tagField = `feature_tag_${currentSlideIndex}` as keyof CarouselContent;
+                  
+                  // Clear the fields by setting them to empty strings
+                  handleContentUpdate(titleField, '');
+                  handleContentUpdate(descField, '');
+                  handleContentUpdate(visualField, '');
+                  handleContentUpdate(tagField, '');
+                  
+                  // Shift remaining features to fill the gap
+                  for (let i = currentSlideIndex + 1; i < 6; i++) {
+                    const nextTitleField = `feature_title_${i}` as keyof CarouselContent;
+                    const nextDescField = `feature_description_${i}` as keyof CarouselContent;
+                    const nextVisualField = `feature_visual_${i}` as keyof CarouselContent;
+                    const nextTagField = `feature_tag_${i}` as keyof CarouselContent;
+                    
+                    const prevTitleField = `feature_title_${i - 1}` as keyof CarouselContent;
+                    const prevDescField = `feature_description_${i - 1}` as keyof CarouselContent;
+                    const prevVisualField = `feature_visual_${i - 1}` as keyof CarouselContent;
+                    const prevTagField = `feature_tag_${i - 1}` as keyof CarouselContent;
+                    
+                    // Move data from current position to previous position
+                    handleContentUpdate(prevTitleField, blockContent[nextTitleField] || '');
+                    handleContentUpdate(prevDescField, blockContent[nextDescField] || '');
+                    handleContentUpdate(prevVisualField, blockContent[nextVisualField] || '');
+                    handleContentUpdate(prevTagField, blockContent[nextTagField] || '');
+                  }
+                  
+                  // Clear the last position since we shifted everything down
+                  const lastTitleField = `feature_title_5` as keyof CarouselContent;
+                  const lastDescField = `feature_description_5` as keyof CarouselContent;
+                  const lastVisualField = `feature_visual_5` as keyof CarouselContent;
+                  const lastTagField = `feature_tag_5` as keyof CarouselContent;
+                  
+                  handleContentUpdate(lastTitleField, '');
+                  handleContentUpdate(lastDescField, '');
+                  handleContentUpdate(lastVisualField, '');
+                  handleContentUpdate(lastTagField, '');
+                  
+                  // Adjust active slide if necessary
+                  if (activeSlide >= features.length - 1 && activeSlide > 0) {
+                    setActiveSlide(activeSlide - 1);
+                  }
+                } : undefined}
               />
             )}
           </div>
@@ -810,11 +884,14 @@ export const componentMeta = {
     'WYSIWYG inline text editing in carousel slides',
     'Click-to-edit image replacement with proper toolbar integration',
     'Inline editable feature tags (No-Code, Professional, etc.)',
+    'Deletable carousel features with hover-to-reveal remove buttons',
+    'Add new features up to 6 maximum with proper field management',
     'Interactive carousel navigation in edit mode',
     'Auto-play functionality option',
     'Feature preview grid',
     'Individual field storage for proper editing',
-    'Hover-based remove controls for tags',
+    'Hover-based remove controls for tags and entire features',
+    'Smart field shifting when features are deleted',
     'Seamless image toolbar integration matching field names',
     'Smooth transitions and animations',
     'Perfect for creative showcases'
