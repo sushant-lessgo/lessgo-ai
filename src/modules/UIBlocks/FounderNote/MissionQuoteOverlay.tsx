@@ -223,7 +223,7 @@ export default function MissionQuoteOverlay(props: LayoutComponentProps) {
         )}
 
         {/* Content Overlay */}
-        <div className="relative z-10 w-full max-w-5xl mx-auto px-6">
+        <div className="relative z-10 w-full max-w-5xl mx-auto px-6 pb-32 lg:pb-40">
           <div className="text-center space-y-8">
             
             {/* Badge */}
@@ -412,7 +412,7 @@ export default function MissionQuoteOverlay(props: LayoutComponentProps) {
                 </div>
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-3xl mx-auto">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-3xl mx-auto mb-20 lg:mb-20">
                 {missionStats.map((stat, index) => (
                   <div key={index} className="text-center">
                     <div style={h2Style} className="text-2xl lg:text-3xl font-bold text-white mb-1">

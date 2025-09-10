@@ -109,6 +109,8 @@ module.exports = {
   'mb-8',
   'mb-12',
   'mb-16',
+  'mb-20',
+  'lg:mb-20',
   'mt-4',
   'mt-8',
   'mt-12',
@@ -155,6 +157,10 @@ module.exports = {
   'pb-4',
   'pb-6',
   'pb-12',
+  'pb-32',
+  'pb-40',
+  'lg:pb-32',
+  'lg:pb-40',
   
   // ✅ Sizing utilities for components
   'w-3',
