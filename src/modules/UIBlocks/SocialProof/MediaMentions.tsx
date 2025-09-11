@@ -314,20 +314,83 @@ export default function MediaMentions(props: LayoutComponentProps) {
         </div>
 
         {/* Testimonial Quotes */}
-        {quotes.length > 0 && (
+        {(quotes.length > 0 || mode === 'edit') && (
           <div className="grid md:grid-cols-3 gap-8">
             {quotes.map((quote, index) => (
-              <div key={index} className="text-center p-6 rounded-xl bg-white/5 backdrop-blur-sm border border-white/10">
+              <div key={index} className="text-center p-6 rounded-xl bg-white/5 backdrop-blur-sm border border-white/10 relative group/quote-item">
                 <div className="mb-4">
                   <svg className="w-8 h-8 mx-auto text-blue-500 opacity-60" fill="currentColor" viewBox="0 0 32 32">
                     <path d="M10 8c-3.3 0-6 2.7-6 6v10h10V14H8c0-1.1.9-2 2-2V8zm16 0c-3.3 0-6 2.7-6 6v10h10V14h-6c0-1.1.9-2 2-2V8z"/>
                   </svg>
                 </div>
-                <blockquote style={{...bodyLgStyle}} className={`${dynamicTextColors?.body || 'text-gray-700'} leading-relaxed`}>
-                  {quote.trim()}
-                </blockquote>
+                
+                {mode === 'edit' ? (
+                  <EditableAdaptiveText
+                    mode={mode}
+                    value={quote.trim()}
+                    onEdit={(value) => {
+                      const updatedQuotes = quotes.map((q, i) => i === index ? value : q);
+                      const quotesString = updatedQuotes.filter(q => q.trim() !== '').join('|');
+                      handleContentUpdate('testimonial_quotes', quotesString);
+                    }}
+                    backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
+                    colorTokens={colorTokens}
+                    variant="body"
+                    style={{...bodyLgStyle}}
+                    className="leading-relaxed"
+                    placeholder="Enter testimonial quote..."
+                    sectionId={sectionId}
+                    elementKey={`testimonial_quote_${index}`}
+                    sectionBackground={sectionBackground}
+                  />
+                ) : (
+                  <blockquote style={{...bodyLgStyle}} className={`${dynamicTextColors?.body || 'text-gray-700'} leading-relaxed`}>
+                    {quote.trim()}
+                  </blockquote>
+                )}
+                
+                {/* Remove button - appears on hover in edit mode */}
+                {mode === 'edit' && (
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      const updatedQuotes = quotes.filter((_, i) => i !== index);
+                      const quotesString = updatedQuotes.filter(q => q.trim() !== '').join('|');
+                      handleContentUpdate('testimonial_quotes', quotesString);
+                    }}
+                    className="absolute top-2 right-2 opacity-0 group-hover/quote-item:opacity-100 p-1 rounded-full bg-white/80 hover:bg-white text-red-500 hover:text-red-700 transition-all duration-200 z-10 shadow-sm"
+                    title="Remove this quote"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                )}
               </div>
             ))}
+            
+            {/* Add Quote Button - appears in edit mode */}
+            {mode === 'edit' && quotes.length < 6 && (
+              <div className="text-center p-6 rounded-xl border-2 border-dashed border-white/20 hover:border-white/30 bg-white/5 backdrop-blur-sm transition-all duration-300 flex flex-col items-center justify-center">
+                <button
+                  onClick={(e) => {
+                    e.preventDefault();
+                    const newQuote = 'New testimonial quote';
+                    const updatedQuotes = [...quotes, newQuote];
+                    const quotesString = updatedQuotes.filter(q => q.trim() !== '').join('|');
+                    handleContentUpdate('testimonial_quotes', quotesString);
+                  }}
+                  className="flex flex-col items-center space-y-2 text-gray-400 hover:text-gray-600 transition-colors"
+                >
+                  <div className="w-12 h-12 bg-white/10 rounded-full flex items-center justify-center">
+                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                    </svg>
+                  </div>
+                  <span className="text-sm font-medium">Add Quote</span>
+                </button>
+              </div>
+            )}
           </div>
         )}
       </div>
