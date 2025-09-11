@@ -104,6 +104,13 @@ module.exports = {
   'group-hover/process-step-3:opacity-100',
   'group-hover/process-step-4:opacity-100',
   'group-hover/process-step-5:opacity-100',
+  // MethodologyBreakdown principle patterns
+  'group-hover/principle-1:opacity-100',
+  'group-hover/principle-2:opacity-100',
+  'group-hover/principle-3:opacity-100',
+  'group-hover/principle-4:opacity-100',
+  'group-hover/principle-5:opacity-100',
+  'group-hover/principle-6:opacity-100',
   'group-focus-within:opacity-100',
   'opacity-0',
   'transition-opacity',

@@ -268,94 +268,86 @@ export default function MethodologyBreakdown(props: LayoutComponentProps) {
           />
         </div>
 
-        {/* Key Principles */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {mode === 'edit' ? (
-            // Edit mode - show all slots for editing
-            [1, 2, 3, 4, 5, 6].map((num) => {
+        {/* Key Principles - Dynamic Display Like IconGrid */}
+        <div className={`grid gap-6 lg:gap-8 ${
+          principles.length === 1 ? 'grid-cols-1 max-w-2xl mx-auto' :
+          principles.length === 2 ? 'grid-cols-1 md:grid-cols-2' :
+          principles.length === 3 ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3' :
+          principles.length === 4 ? 'grid-cols-1 md:grid-cols-2' :
+          'grid-cols-1 md:grid-cols-2 lg:grid-cols-3'
+        }`}>
+          {principles.map((principle, index) => {
+            // Find the actual slot number for this principle
+            const slotNum = [1, 2, 3, 4, 5, 6].find((num) => {
               const principleKey = `principle_${num}` as keyof MethodologyBreakdownContent;
-              const detailKey = `detail_${num}` as keyof MethodologyBreakdownContent;
-              const principle = blockContent[principleKey] as string;
-              const detail = blockContent[detailKey] as string;
-              const isVisible = principle && principle.trim() !== '' && principle !== '___REMOVED___';
-              
-              return (
-                <div key={num} className={`bg-white rounded-xl p-8 border border-gray-200 hover:shadow-lg transition-all duration-300 relative group/principle-item ${!isVisible && mode === 'edit' ? 'opacity-50 border-dashed' : ''}`}>
-                  <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-lg flex items-center justify-center text-white font-bold text-lg mb-4">
-                    {num}
-                  </div>
-                  
-                  <EditableAdaptiveText
-                    mode={mode}
-                    value={principle || ''}
-                    onEdit={(value) => handleContentUpdate(principleKey, value)}
-                    backgroundType="secondary"
-                    colorTokens={colorTokens}
-                    variant="body"
-                    className="font-bold text-gray-900 mb-4"
-                    placeholder={`Principle ${num} title`}
-                    sectionBackground={sectionBackground}
-                    data-section-id={sectionId}
-                    data-element-key={principleKey}
-                  />
-                  
-                  <EditableAdaptiveText
-                    mode={mode}
-                    value={detail || ''}
-                    onEdit={(value) => handleContentUpdate(detailKey, value)}
-                    backgroundType="secondary"
-                    colorTokens={colorTokens}
-                    variant="body"
-                    className="text-gray-600 leading-relaxed"
-                    placeholder={`Principle ${num} description`}
-                    sectionBackground={sectionBackground}
-                    data-section-id={sectionId}
-                    data-element-key={detailKey}
-                  />
-                  
-                  {/* Remove button */}
-                  {isVisible && (
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleContentUpdate(principleKey, '___REMOVED___');
-                        handleContentUpdate(detailKey, '___REMOVED___');
-                      }}
-                      className="opacity-0 group-hover/principle-item:opacity-100 absolute top-4 right-4 p-1 rounded-full bg-white/80 hover:bg-white text-red-500 hover:text-red-700 transition-all duration-200 shadow-sm z-10"
-                      title="Remove this principle"
-                    >
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                      </svg>
-                    </button>
-                  )}
-                </div>
-              );
-            })
-          ) : (
-            // View mode - only show non-empty principles
-            principles.map((principle, index) => (
-              <div key={index} className="bg-white rounded-xl p-8 border border-gray-200 hover:shadow-lg transition-all duration-300">
+              return blockContent[principleKey] === principle;
+            }) || index + 1;
+            
+            const principleKey = `principle_${slotNum}` as keyof MethodologyBreakdownContent;
+            const detailKey = `detail_${slotNum}` as keyof MethodologyBreakdownContent;
+            const detail = blockContent[detailKey] as string;
+            
+            return (
+              <div key={`principle-${slotNum}`} className={`relative group/principle-${slotNum} bg-white rounded-xl p-8 border border-gray-200 hover:shadow-lg hover:border-purple-200 transition-all duration-300`}>
                 <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-lg flex items-center justify-center text-white font-bold text-lg mb-4">
                   {index + 1}
                 </div>
-                <h3 style={h3Style} className="font-bold text-gray-900 mb-4">
-                  {principle}
-                </h3>
-                <p style={bodyStyle} className="text-gray-600 leading-relaxed">
-                  {details[index] || 'Principle description'}
-                </p>
+                
+                <EditableAdaptiveText
+                  mode={mode}
+                  value={principle}
+                  onEdit={(value) => handleContentUpdate(principleKey, value)}
+                  backgroundType="secondary"
+                  colorTokens={colorTokens}
+                  variant="body"
+                  className="font-bold text-gray-900 mb-4"
+                  placeholder="Principle title"
+                  sectionBackground={sectionBackground}
+                  data-section-id={sectionId}
+                  data-element-key={principleKey}
+                />
+                
+                <EditableAdaptiveText
+                  mode={mode}
+                  value={detail || ''}
+                  onEdit={(value) => handleContentUpdate(detailKey, value)}
+                  backgroundType="secondary"
+                  colorTokens={colorTokens}
+                  variant="body"
+                  className="text-gray-600 leading-relaxed"
+                  placeholder="Principle description"
+                  sectionBackground={sectionBackground}
+                  data-section-id={sectionId}
+                  data-element-key={detailKey}
+                />
+                
+                {/* Delete button with proper named group pattern */}
+                {mode === 'edit' && (
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleContentUpdate(principleKey, '___REMOVED___');
+                      handleContentUpdate(detailKey, '___REMOVED___');
+                    }}
+                    className={`opacity-0 group-hover/principle-${slotNum}:opacity-100 absolute top-4 right-4 text-red-500 hover:text-red-700 transition-opacity duration-200`}
+                    title="Remove this principle"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                )}
               </div>
-            ))
-          )}
+            );
+          })}
         </div>
         
         {/* Add new principle button */}
-        {mode === 'edit' && principles.length < 6 && (
+        {mode === 'edit' && principles.length < 5 && (
           <div className="mt-8 text-center">
             <button
               onClick={() => {
-                const emptyIndex = [1, 2, 3, 4, 5, 6].find((num) => {
+                const emptyIndex = [1, 2, 3, 4, 5].find((num) => {
                   const principleKey = `principle_${num}` as keyof MethodologyBreakdownContent;
                   const principle = blockContent[principleKey] as string;
                   return !principle || principle.trim() === '' || principle === '___REMOVED___';
@@ -364,17 +356,30 @@ export default function MethodologyBreakdown(props: LayoutComponentProps) {
                 if (emptyIndex) {
                   const principleKey = `principle_${emptyIndex}` as keyof MethodologyBreakdownContent;
                   const detailKey = `detail_${emptyIndex}` as keyof MethodologyBreakdownContent;
-                  handleContentUpdate(principleKey, `New Principle ${emptyIndex}`);
-                  handleContentUpdate(detailKey, `Description for principle ${emptyIndex}`);
+                  handleContentUpdate(principleKey, `New Principle`);
+                  handleContentUpdate(detailKey, `Describe this principle and how it contributes to your methodology.`);
                 }
               }}
-              className="flex items-center space-x-2 text-purple-600 hover:text-purple-800 transition-colors mx-auto bg-white rounded-lg px-4 py-2 border border-purple-200 hover:border-purple-300"
+              className="flex items-center space-x-3 text-purple-600 hover:text-purple-800 transition-all duration-200 bg-white rounded-lg px-6 py-3 border border-purple-200 hover:border-purple-300 hover:shadow-md group"
             >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-5 h-5 group-hover:scale-110 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
               </svg>
-              <span>Add New Principle</span>
+              <span className="font-medium">Add New Principle</span>
+              <span className="text-sm text-purple-400">({principles.length}/5)</span>
             </button>
+          </div>
+        )}
+        
+        {/* Limit reached message */}
+        {mode === 'edit' && principles.length >= 5 && (
+          <div className="mt-8 text-center">
+            <div className="inline-flex items-center space-x-2 text-amber-600 bg-amber-50 rounded-lg px-4 py-2 border border-amber-200">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4.5c-.77-.833-2.694-.833-3.464 0L3.34 16.5c-.77.833.192 2.5 1.732 2.5z" />
+              </svg>
+              <span className="text-sm font-medium">Maximum 5 principles reached</span>
+            </div>
           </div>
         )}
 
