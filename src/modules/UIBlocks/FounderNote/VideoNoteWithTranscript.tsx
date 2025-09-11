@@ -14,6 +14,7 @@ import {
   CTAButton, 
   TrustIndicators 
 } from '@/components/layout/ComponentRegistry';
+import { Input } from '@/components/ui/input';
 import { LayoutComponentProps } from '@/types/storeTypes';
 
 // Simplified content interface with essential fields only
@@ -99,6 +100,27 @@ export default function VideoNoteWithTranscript(props: LayoutComponentProps) {
       : ['Used by 10,000+ companies', '30-day free trial', 'No credit card required'];
   };
   
+  // Helper function to convert YouTube/Vimeo URLs to embed format
+  const convertToEmbedUrl = (url: string): string => {
+    if (!url) return url;
+    
+    // YouTube conversion
+    const youtubeRegex = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/;
+    const youtubeMatch = url.match(youtubeRegex);
+    if (youtubeMatch) {
+      return `https://www.youtube.com/embed/${youtubeMatch[1]}`;
+    }
+    
+    // Vimeo conversion
+    const vimeoRegex = /vimeo\.com\/(\d+)/;
+    const vimeoMatch = url.match(vimeoRegex);
+    if (vimeoMatch) {
+      return `https://player.vimeo.com/video/${vimeoMatch[1]}`;
+    }
+    
+    return url;
+  };
+  
   const trustItems = getTrustItems();
 
   return (
@@ -146,6 +168,28 @@ export default function VideoNoteWithTranscript(props: LayoutComponentProps) {
           
           {/* Left Column - Video */}
           <div className="space-y-6">
+            
+            {/* Video URL Input Field */}
+            {mode === 'edit' && (
+              <div className="space-y-2">
+                <label className="block text-sm font-medium text-gray-700">
+                  Video URL (YouTube/Vimeo embed)
+                </label>
+                <Input
+                  type="text"
+                  value={blockContent.video_url || ''}
+                  onChange={(e) => {
+                    const convertedUrl = convertToEmbedUrl(e.target.value);
+                    handleContentUpdate('video_url', convertedUrl);
+                  }}
+                  placeholder="https://www.youtube.com/watch?v=VIDEO_ID or https://www.youtube.com/embed/VIDEO_ID"
+                  className="w-full"
+                />
+                <p className="text-xs text-gray-500">
+                  Paste any YouTube or Vimeo URL - it will be automatically converted to embed format
+                </p>
+              </div>
+            )}
             
             {/* Video Player */}
             <div className="space-y-4">
