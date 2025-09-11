@@ -6,6 +6,7 @@ import React from 'react';
 import { useLayoutComponent } from '@/hooks/useLayoutComponent';
 import { useTypography } from '@/hooks/useTypography';
 import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
+import { useImageToolbar } from '@/hooks/useImageToolbar';
 import { LayoutSection } from '@/components/layout/LayoutSection';
 import { 
   EditableAdaptiveHeadline, 
@@ -111,136 +112,66 @@ const CONTENT_SCHEMA = {
   }
 };
 
-// Photo Story Placeholder Component
-const PhotoStoryPlaceholder = React.memo(({ 
+// Founder Photo Placeholder Component
+const FounderPhotoPlaceholder = React.memo(({ 
   type = 'primary',
   mode,
-  icon,
-  onIconEdit,
   sectionId,
-  colorTokens,
-  backgroundType
+  elementKey,
+  onImageClick
 }: { 
   type?: 'primary' | 'secondary';
   mode?: string;
-  icon?: string;
-  onIconEdit?: (value: string) => void;
   sectionId?: string;
-  colorTokens?: any;
-  backgroundType?: string;
+  elementKey?: string;
+  onImageClick?: () => void;
 }) => (
-  <div className="relative w-full h-full min-h-[400px] bg-gradient-to-br from-indigo-100 via-purple-50 to-pink-100 rounded-2xl overflow-hidden shadow-lg">
-    
-    {/* Creative workspace mockup */}
-    <div className="absolute inset-4 bg-white rounded-xl shadow-sm overflow-hidden">
+  <div 
+    className="relative w-full h-full min-h-[400px] bg-gradient-to-br from-gray-100 to-gray-200 rounded-2xl overflow-hidden shadow-lg cursor-pointer hover:shadow-xl transition-shadow duration-200"
+    onClick={onImageClick}
+    data-image-id={`${sectionId}-${elementKey}`}
+    role="button"
+    tabIndex={mode === 'edit' ? 0 : -1}
+    aria-label={type === 'primary' ? 'Click to add founder photo' : 'Click to add secondary photo'}
+  >
+    {/* Photo placeholder content */}
+    <div className="absolute inset-0 flex flex-col items-center justify-center p-8">
       
-      {/* Desktop/workspace scene */}
-      <div className="h-full bg-gradient-to-b from-gray-50 to-white p-4">
-        
-        {/* Top toolbar */}
-        <div className="flex items-center justify-between mb-4 pb-2 border-b border-gray-200">
-          <div className="flex space-x-2">
-            <div className="w-3 h-3 bg-red-400 rounded-full"></div>
-            <div className="w-3 h-3 bg-yellow-400 rounded-full"></div>
-            <div className="w-3 h-3 bg-green-400 rounded-full"></div>
-          </div>
-          <div className="text-xs text-gray-500 font-medium">
-            {type === 'primary' ? 'Before: Chaos' : 'After: Organized'}
-          </div>
+      {/* Avatar silhouette */}
+      <div className="relative mb-4">
+        <div className="w-32 h-32 bg-gray-300 rounded-full flex items-center justify-center">
+          <svg className="w-20 h-20 text-gray-400" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+          </svg>
         </div>
-
-        {type === 'primary' ? (
-          // Chaotic "before" state
-          <div className="space-y-3">
-            <div className="bg-red-50 border border-red-200 rounded-lg p-3">
-              <div className="flex items-center space-x-2 mb-2">
-                <div className="w-2 h-2 bg-red-500 rounded-full"></div>
-                <span className="text-xs font-medium text-red-800">Overdue Tasks</span>
-              </div>
-              <div className="space-y-1">
-                <div className="bg-red-100 rounded h-2 w-3/4"></div>
-                <div className="bg-red-100 rounded h-2 w-1/2"></div>
-                <div className="bg-red-100 rounded h-2 w-2/3"></div>
-              </div>
-            </div>
-            
-            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
-              <div className="flex items-center space-x-2 mb-2">
-                <div className="w-2 h-2 bg-yellow-500 rounded-full animate-pulse"></div>
-                <span className="text-xs font-medium text-yellow-800">Scattered Files</span>
-              </div>
-              <div className="grid grid-cols-3 gap-1">
-                <div className="bg-yellow-100 rounded h-8"></div>
-                <div className="bg-yellow-100 rounded h-8"></div>
-                <div className="bg-yellow-100 rounded h-8"></div>
-              </div>
-            </div>
-
-            <div className="bg-gray-50 border border-gray-200 rounded-lg p-3">
-              <span className="text-xs text-gray-600">😰 Stress Level: HIGH</span>
-            </div>
+        {mode === 'edit' && (
+          <div className="absolute -bottom-2 -right-2 bg-blue-500 text-white rounded-full p-2 shadow-lg">
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+            </svg>
           </div>
-        ) : (
-          // Organized "after" state
-          <div className="space-y-3">
-            <div className="bg-green-50 border border-green-200 rounded-lg p-3">
-              <div className="flex items-center space-x-2 mb-2">
-                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                <span className="text-xs font-medium text-green-800">Organized Workflow</span>
-              </div>
-              <div className="space-y-1">
-                <div className="bg-green-100 rounded h-2 w-full"></div>
-                <div className="bg-green-100 rounded h-2 w-4/5"></div>
-                <div className="bg-green-100 rounded h-2 w-3/4"></div>
-              </div>
-            </div>
-            
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
-              <div className="flex items-center space-x-2 mb-2">
-                <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                <span className="text-xs font-medium text-blue-800">Creative Projects</span>
-              </div>
-              <div className="grid grid-cols-2 gap-2">
-                <div className="bg-gradient-to-br from-blue-100 to-purple-100 rounded h-12 flex items-center justify-center relative group/icon-edit">
-                  {mode === 'edit' ? (
-                    <IconEditableText
-                      mode={(mode || 'preview') as 'preview' | 'edit'}
-                      value={icon || '🎨'}
-                      onEdit={(value) => onIconEdit?.(value)}
-                      backgroundType={backgroundType as any}
-                      colorTokens={colorTokens}
-                      iconSize="sm"
-                      className="text-xs"
-                      sectionId={sectionId || 'placeholder'}
-                      elementKey={(type as any) === 'primary' ? 'placeholder_icon_1' : 'placeholder_icon_2'}
-                    />
-                  ) : (
-                    <span className="text-xs">{icon || ((type as any) === 'primary' ? '🎨' : '✨')}</span>
-                  )}
-                </div>
-                <div className="bg-gradient-to-br from-purple-100 to-pink-100 rounded h-12 flex items-center justify-center">
-                  <span className="text-xs">✨</span>
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-indigo-50 border border-indigo-200 rounded-lg p-3">
-              <span className="text-xs text-indigo-600">😊 Stress Level: LOW</span>
-            </div>
-          </div>
+        )}
+      </div>
+      
+      {/* Placeholder text */}
+      <div className="text-center">
+        <p className="text-gray-600 font-medium mb-1">
+          {type === 'primary' ? 'Founder Photo' : 'Team Photo'}
+        </p>
+        {mode === 'edit' && (
+          <p className="text-sm text-gray-500">
+            Click to upload image
+          </p>
         )}
       </div>
     </div>
 
-    {/* Overlay badge */}
-    <div className="absolute top-4 right-4 bg-white bg-opacity-90 rounded-full px-3 py-1 shadow-md">
-      <span className="text-xs font-medium text-gray-700">
-        {type === 'primary' ? 'The Problem' : 'The Solution'}
-      </span>
-    </div>
+    {/* Decorative corner accent */}
+    <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-blue-400 to-indigo-500 opacity-10 rounded-bl-full"></div>
+    <div className="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-tr from-purple-400 to-pink-500 opacity-10 rounded-tr-full"></div>
   </div>
 ));
-PhotoStoryPlaceholder.displayName = 'PhotoStoryPlaceholder';
+FounderPhotoPlaceholder.displayName = 'FounderPhotoPlaceholder';
 
 export default function SideBySidePhotoStory(props: LayoutComponentProps) {
   
@@ -308,9 +239,8 @@ export default function SideBySidePhotoStory(props: LayoutComponentProps) {
   // Get muted text color for trust indicators
   const mutedTextColor = dynamicTextColors?.muted || colorTokens.textMuted;
   
-  // Get showImageToolbar for handling image clicks
-  const store = useEditStore();
-  const showImageToolbar = store.showImageToolbar;
+  // Use robust image toolbar hook
+  const handleImageToolbar = useImageToolbar();
 
   return (
     <LayoutSection
@@ -504,18 +434,35 @@ export default function SideBySidePhotoStory(props: LayoutComponentProps) {
                   className="w-full h-96 object-cover rounded-2xl shadow-lg cursor-pointer"
                   data-image-id={`${sectionId}-story-image`}
                   onMouseUp={(e) => {
-                        // Image toolbar is only available in edit mode
-                      }}
+                    if (mode === 'edit') {
+                      e.stopPropagation();
+                      e.preventDefault();
+                      const rect = e.currentTarget.getBoundingClientRect();
+                      handleImageToolbar(`${sectionId}.story_image`, {
+                        x: rect.left + rect.width / 2,
+                        y: rect.top - 10
+                      });
+                    }
+                  }}
                 />
               ) : (
-                <PhotoStoryPlaceholder 
+                <FounderPhotoPlaceholder 
                   type="primary" 
                   mode={mode}
-                  icon={blockContent.placeholder_icon_1}
-                  onIconEdit={(value) => handleContentUpdate('placeholder_icon_1', value)}
                   sectionId={sectionId}
-                  colorTokens={colorTokens}
-                  backgroundType={backgroundType}
+                  elementKey="story_image"
+                  onImageClick={() => {
+                    if (mode === 'edit') {
+                      const element = document.querySelector(`[data-image-id="${sectionId}-story_image"]`);
+                      if (element) {
+                        const rect = element.getBoundingClientRect();
+                        handleImageToolbar(`${sectionId}.story_image`, {
+                          x: rect.left + rect.width / 2,
+                          y: rect.top - 10
+                        });
+                      }
+                    }
+                  }}
                 />
               )}
             </div>
@@ -530,18 +477,35 @@ export default function SideBySidePhotoStory(props: LayoutComponentProps) {
                     className="w-full h-48 object-cover rounded-lg shadow-md cursor-pointer"
                     data-image-id={`${sectionId}-secondary-image`}
                     onMouseUp={(e) => {
-                        // Image toolbar is only available in edit mode
-                      }}
+                      if (mode === 'edit') {
+                        e.stopPropagation();
+                        e.preventDefault();
+                        const rect = e.currentTarget.getBoundingClientRect();
+                        handleImageToolbar(`${sectionId}.secondary_image`, {
+                          x: rect.left + rect.width / 2,
+                          y: rect.top - 10
+                        });
+                      }
+                    }}
                   />
                 ) : (
-                  <PhotoStoryPlaceholder 
+                  <FounderPhotoPlaceholder 
                     type="secondary" 
                     mode={mode}
-                    icon={blockContent.placeholder_icon_2}
-                    onIconEdit={(value) => handleContentUpdate('placeholder_icon_2', value)}
                     sectionId={sectionId}
-                    colorTokens={colorTokens}
-                    backgroundType={backgroundType}
+                    elementKey="secondary_image"
+                    onImageClick={() => {
+                      if (mode === 'edit') {
+                        const element = document.querySelector(`[data-image-id="${sectionId}-secondary_image"]`);
+                        if (element) {
+                          const rect = element.getBoundingClientRect();
+                          handleImageToolbar(`${sectionId}.secondary_image`, {
+                            x: rect.left + rect.width / 2,
+                            y: rect.top - 10
+                          });
+                        }
+                      }
+                    }}
                   />
                 )}
               </div>
