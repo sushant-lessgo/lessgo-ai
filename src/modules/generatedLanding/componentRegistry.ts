@@ -304,7 +304,7 @@ export const componentRegistry: ComponentRegistry = {
     PillarIcons: StackedHighlights,
     IllustratedModel: SystemArchitecture,
     PatentStrip: SecretSauceReveal,
-    SingleBigIdea: TechnicalAdvantage,
+    TechnicalCards: TechnicalAdvantage,
   },
   
   socialProof: {

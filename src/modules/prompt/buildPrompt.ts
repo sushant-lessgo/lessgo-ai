@@ -280,7 +280,7 @@ function getSectionLayoutGuidance(sectionType: string, layout: string): string {
       ExplainerWithTags: "Tagged explanation format. Use clear categorization language. Tags should enhance understanding and organization.",
       ComparisonTable: "Approach comparison presentation. Use clear differentiation language. Show advantages of unique approach.",
       PatentStrip: "Intellectual property showcase. Use innovation and proprietary language. Include relevant patent or IP context.",
-      SingleBigIdea: "Concept-focused presentation. Use clear, compelling idea articulation. Build entire narrative around central concept."
+      TechnicalCards: "Technical advantage cards layout. Use clear technical benefits language. Present multiple technical capabilities as structured advantage cards."
     },
 
     UseCase: {

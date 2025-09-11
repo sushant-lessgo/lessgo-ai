@@ -377,7 +377,7 @@ function LayoutPreview({ layoutId, sectionType }: { layoutId: string; sectionTyp
         <div className="flex-1 h-1 bg-muted rounded" />
       </div>
     ),
-    'SingleBigIdea': (
+    'TechnicalCards': (
       <div className="flex items-center justify-center w-16 h-12">
         <div className="w-10 h-6 bg-muted rounded" />
       </div>

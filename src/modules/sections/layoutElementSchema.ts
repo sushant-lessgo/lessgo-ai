@@ -354,11 +354,16 @@ export const layoutElementSchema: LayoutSchema = {
     { element: "patent_numbers", mandatory: false },
   ],
 
-  SingleBigIdea: [
+  TechnicalCards: [
     { element: "headline", mandatory: true },
-    { element: "big_idea_statement", mandatory: true },
-    { element: "idea_explanation", mandatory: true },
-    { element: "supporting_evidence", mandatory: false },
+    { element: "advantages", mandatory: true },
+    { element: "advantage_descriptions", mandatory: true },
+    { element: "advantage_icon_1", mandatory: false },
+    { element: "advantage_icon_2", mandatory: false },
+    { element: "advantage_icon_3", mandatory: false },
+    { element: "advantage_icon_4", mandatory: false },
+    { element: "advantage_icon_5", mandatory: false },
+    { element: "advantage_icon_6", mandatory: false },
   ],
 
   // UseCase Section

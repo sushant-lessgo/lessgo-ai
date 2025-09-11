@@ -187,7 +187,7 @@ export const layoutRegistry = {
     "ExplainerWithTags",
     "ComparisonTable",
     "PatentStrip",
-    "SingleBigIdea",
+    "TechnicalCards",
   ] as const,
 
   UseCase: [

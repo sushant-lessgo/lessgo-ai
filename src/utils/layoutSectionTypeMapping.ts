@@ -164,7 +164,7 @@ export const layoutToSectionType: Record<string, string> = {
   'ExplainerWithTags': 'uniqueMechanism',
   'UniqueMechanismComparisonTable': 'uniqueMechanism',
   'PatentStrip': 'uniqueMechanism',
-  'SingleBigIdea': 'uniqueMechanism',
+  'TechnicalCards': 'uniqueMechanism',
 
   // UseCase layouts
   'PersonaCards': 'useCases',

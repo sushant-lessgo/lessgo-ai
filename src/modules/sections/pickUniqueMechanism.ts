@@ -8,7 +8,7 @@ export type UniqueMechanismLayout =
   | "ExplainerWithTags"
   | "ComparisonTable"
   | "PatentStrip"
-  | "SingleBigIdea";
+  | "TechnicalCards";
 
 /**
  * Selects the optimal Unique Mechanism section layout based on differentiation complexity and technical depth
@@ -68,7 +68,7 @@ export function pickUniqueMechanismLayout(input: LayoutPickerInput): UniqueMecha
     marketSophisticationLevel <= "level-2" &&
     (awarenessLevel === "unaware" || awarenessLevel === "problem-aware")
   ) {
-    return "SingleBigIdea";
+    return "TechnicalCards";
   }
 
   // 5. Technical products needing detailed explanation
@@ -91,12 +91,12 @@ export function pickUniqueMechanismLayout(input: LayoutPickerInput): UniqueMecha
     ExplainerWithTags: 0,
     ComparisonTable: 0,
     PatentStrip: 0,
-    SingleBigIdea: 0,
+    TechnicalCards: 0,
   };
 
   // Market Sophistication Scoring (Highest Weight: 4-5 points)
   if (marketSophisticationLevel === "level-1" || marketSophisticationLevel === "level-2") {
-    scores.SingleBigIdea += 5;
+    scores.TechnicalCards += 5;
     scores.IllustratedModel += 4;
     scores.PillarIcons += 4;
     scores.StackedHighlights += 3;
@@ -114,7 +114,7 @@ export function pickUniqueMechanismLayout(input: LayoutPickerInput): UniqueMecha
 
   // Awareness Level Scoring (High Weight: 3-4 points)
   if (awarenessLevel === "unaware" || awarenessLevel === "problem-aware") {
-    scores.SingleBigIdea += 4;
+    scores.TechnicalCards += 4;
     scores.IllustratedModel += 4;
     scores.PillarIcons += 3;
     scores.StackedHighlights += 2;
@@ -147,7 +147,7 @@ export function pickUniqueMechanismLayout(input: LayoutPickerInput): UniqueMecha
     scores.PillarIcons += 3;
     scores.VisualFlywheel += 2;
   } else if (targetAudience === "founders" || targetAudience === "creators") {
-    scores.SingleBigIdea += 4;
+    scores.TechnicalCards += 4;
     scores.IllustratedModel += 4;
     scores.PillarIcons += 3;
     scores.StackedHighlights += 2;
@@ -160,7 +160,7 @@ export function pickUniqueMechanismLayout(input: LayoutPickerInput): UniqueMecha
   // Copy Intent Scoring (High Weight: 3-4 points)
   if (copyIntent === "pain-led") {
     scores.IllustratedModel += 4;
-    scores.SingleBigIdea += 3;
+    scores.TechnicalCards += 3;
     scores.PillarIcons += 3;
     scores.StackedHighlights += 2;
   } else if (copyIntent === "desire-led") {
@@ -190,7 +190,7 @@ export function pickUniqueMechanismLayout(input: LayoutPickerInput): UniqueMecha
   } else if (marketCategory === "Design & Creative Tools") {
     scores.IllustratedModel += 3;
     scores.PillarIcons += 2;
-    scores.SingleBigIdea += 2;
+    scores.TechnicalCards += 2;
   } else if (marketCategory === "No-Code & Low-Code Platforms") {
     scores.VisualFlywheel += 3;
     scores.ExplainerWithTags += 2;
@@ -199,7 +199,7 @@ export function pickUniqueMechanismLayout(input: LayoutPickerInput): UniqueMecha
 
   // Startup Stage Scoring (Medium Weight: 2-3 points)
   if (startupStage === "idea" || startupStage === "mvp") {
-    scores.SingleBigIdea += 3;
+    scores.TechnicalCards += 3;
     scores.IllustratedModel += 3;
     scores.PillarIcons += 2;
   } else if (startupStage === "traction") {
@@ -224,11 +224,11 @@ export function pickUniqueMechanismLayout(input: LayoutPickerInput): UniqueMecha
   } else if (toneProfile === "confident-playful") {
     scores.VisualFlywheel += 3;
     scores.PillarIcons += 2;
-    scores.SingleBigIdea += 2;
+    scores.TechnicalCards += 2;
   } else if (toneProfile === "friendly-helpful") {
     scores.IllustratedModel += 3;
     scores.PillarIcons += 2;
-    scores.SingleBigIdea += 2;
+    scores.TechnicalCards += 2;
   } else if (toneProfile === "minimal-technical") {
     scores.ExplainerWithTags += 3;
     scores.PatentStrip += 2;
@@ -252,7 +252,7 @@ export function pickUniqueMechanismLayout(input: LayoutPickerInput): UniqueMecha
     scores.ComparisonTable += 1;
   } else if (problemType === "creative-empowerment") {
     scores.IllustratedModel += 2;
-    scores.SingleBigIdea += 1;
+    scores.TechnicalCards += 1;
   } else if (problemType === "time-freedom-or-automation") {
     scores.VisualFlywheel += 2;
     scores.StackedHighlights += 1;
@@ -273,7 +273,7 @@ export function pickUniqueMechanismLayout(input: LayoutPickerInput): UniqueMecha
     scores.VisualFlywheel += 2;
     scores.ExplainerWithTags += 1;
   } else if (landingPageGoals === "signup") {
-    scores.SingleBigIdea += 2;
+    scores.TechnicalCards += 2;
     scores.PillarIcons += 1;
   }
 
@@ -282,7 +282,7 @@ export function pickUniqueMechanismLayout(input: LayoutPickerInput): UniqueMecha
     scores.PatentStrip += 2;
     scores.ComparisonTable += 1;
   } else if (pricingModel === "free" || pricingModel === "freemium") {
-    scores.SingleBigIdea += 2;
+    scores.TechnicalCards += 2;
     scores.IllustratedModel += 1;
   } else if (pricingModel === "tiered") {
     scores.StackedHighlights += 2;

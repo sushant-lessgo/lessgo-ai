@@ -2041,7 +2041,7 @@ const elementRules: SectionLayoutRules = {
   }
 ],
 
-"UniqueMechanism_SingleBigIdea": [
+"UniqueMechanism_TechnicalCards": [
   {
     element: "supporting_evidence",
     conditions: [
