@@ -252,21 +252,35 @@ export default function MediaMentions(props: LayoutComponentProps) {
                 />
                 {mode !== 'preview' ? (
                   <div className="flex items-center justify-center gap-2 text-center">
-                    <span style={{...bodyStyle, fontSize: '0.875rem'}} className={`${dynamicTextColors?.body || 'text-gray-700'} flex-1`}>
-                      {outlet.name}
-                    </span>
+                    <EditableAdaptiveText
+                      mode={mode}
+                      value={outlet.name}
+                      onEdit={(value) => {
+                        const currentOutlets = parsePipeData(blockContent.media_outlets);
+                        currentOutlets[outlet.index] = value;
+                        const updatedOutletsString = currentOutlets.join('|');
+                        handleContentUpdate('media_outlets', updatedOutletsString);
+                      }}
+                      backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
+                      colorTokens={colorTokens}
+                      variant="body"
+                      style={{...bodyStyle, fontSize: '0.875rem'}}
+                      className="flex-1 text-center"
+                      placeholder="Outlet name"
+                      sectionId={sectionId}
+                      elementKey={`outlet_name_${outlet.index}`}
+                      sectionBackground={sectionBackground}
+                    />
                     {/* Delete Outlet Button */}
                     <button
                       onClick={(e) => {
                         e.preventDefault();
-                        if (confirm(`Delete ${outlet.name} completely?`)) {
-                          const currentOutlets = parsePipeData(blockContent.media_outlets);
-                          const updatedOutlets = currentOutlets.filter((_, idx) => idx !== outlet.index);
-                          const updatedOutletsString = updatedOutlets.join('|');
-                          const { logoUrls } = updateOutletNames(blockContent.media_outlets, updatedOutletsString, blockContent.logo_urls);
-                          handleContentUpdate('media_outlets', updatedOutletsString);
-                          handleContentUpdate('logo_urls', logoUrls);
-                        }
+                        const currentOutlets = parsePipeData(blockContent.media_outlets);
+                        const updatedOutlets = currentOutlets.filter((_, idx) => idx !== outlet.index);
+                        const updatedOutletsString = updatedOutlets.join('|');
+                        const { logoUrls } = updateOutletNames(blockContent.media_outlets, updatedOutletsString, blockContent.logo_urls);
+                        handleContentUpdate('media_outlets', updatedOutletsString);
+                        handleContentUpdate('logo_urls', logoUrls);
                       }}
                       className="w-4 h-4 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center text-xs transition-colors"
                       title="Delete outlet"
@@ -284,21 +298,15 @@ export default function MediaMentions(props: LayoutComponentProps) {
           })}
           
           {/* Add Outlet Button (Edit Mode Only) */}
-          {mode !== 'preview' && (
+          {mode !== 'preview' && mediaOutlets.length < 12 && (
             <div className="flex flex-col items-center space-y-3 p-6 bg-white/10 backdrop-blur-sm rounded-xl border-2 border-dashed border-white/20 hover:border-white/30 transition-all duration-300">
               <button
                 onClick={(e) => {
                   e.preventDefault();
-                  const newOutletName = prompt('Enter media outlet name:');
-                  if (newOutletName && newOutletName.trim()) {
-                    const currentOutlets = parsePipeData(blockContent.media_outlets);
-                    if (!currentOutlets.includes(newOutletName.trim())) {
-                      const updatedOutlets = [...currentOutlets, newOutletName.trim()].join('|');
-                      handleContentUpdate('media_outlets', updatedOutlets);
-                    } else {
-                      alert('Outlet already exists!');
-                    }
-                  }
+                  const currentOutlets = parsePipeData(blockContent.media_outlets);
+                  const newOutletName = `New Outlet ${currentOutlets.length + 1}`;
+                  const updatedOutlets = [...currentOutlets, newOutletName].join('|');
+                  handleContentUpdate('media_outlets', updatedOutlets);
                 }}
                 className="flex flex-col items-center space-y-2 text-gray-400 hover:text-gray-600 transition-colors"
               >
@@ -368,29 +376,6 @@ export default function MediaMentions(props: LayoutComponentProps) {
                 )}
               </div>
             ))}
-            
-            {/* Add Quote Button - appears in edit mode */}
-            {mode === 'edit' && quotes.length < 6 && (
-              <div className="text-center p-6 rounded-xl border-2 border-dashed border-white/20 hover:border-white/30 bg-white/5 backdrop-blur-sm transition-all duration-300 flex flex-col items-center justify-center">
-                <button
-                  onClick={(e) => {
-                    e.preventDefault();
-                    const newQuote = 'New testimonial quote';
-                    const updatedQuotes = [...quotes, newQuote];
-                    const quotesString = updatedQuotes.filter(q => q.trim() !== '').join('|');
-                    handleContentUpdate('testimonial_quotes', quotesString);
-                  }}
-                  className="flex flex-col items-center space-y-2 text-gray-400 hover:text-gray-600 transition-colors"
-                >
-                  <div className="w-12 h-12 bg-white/10 rounded-full flex items-center justify-center">
-                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                    </svg>
-                  </div>
-                  <span className="text-sm font-medium">Add Quote</span>
-                </button>
-              </div>
-            )}
           </div>
         )}
       </div>
