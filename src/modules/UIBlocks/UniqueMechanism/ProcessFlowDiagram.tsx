@@ -148,12 +148,44 @@ export default function ProcessFlowDiagram(props: LayoutComponentProps) {
                 
                 {/* Step Content */}
                 <div className="text-center">
-                  <h3 style={h3Style} className="font-bold text-gray-900 mb-3">
-                    {step}
-                  </h3>
-                  <p style={bodyStyle} className="text-gray-600 text-sm">
-                    {descriptions[index] || 'Step description'}
-                  </p>
+                  <EditableAdaptiveText
+                    mode={mode}
+                    value={step || ''}
+                    onEdit={(value) => {
+                      const updatedSteps = [...steps];
+                      updatedSteps[index] = value;
+                      handleContentUpdate('process_steps', updatedSteps.join('|'));
+                    }}
+                    backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
+                    colorTokens={colorTokens}
+                    variant="body"
+                    className="font-bold mb-3"
+                    placeholder={`Step ${index + 1} Name`}
+                    sectionId={sectionId}
+                    elementKey={`process_step_${index + 1}`}
+                    sectionBackground={sectionBackground}
+                    data-section-id={sectionId}
+                    data-element-key={`process_step_${index + 1}`}
+                  />
+                  <EditableAdaptiveText
+                    mode={mode}
+                    value={descriptions[index] || ''}
+                    onEdit={(value) => {
+                      const updatedDescriptions = [...descriptions];
+                      updatedDescriptions[index] = value;
+                      handleContentUpdate('step_descriptions', updatedDescriptions.join('|'));
+                    }}
+                    backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
+                    colorTokens={colorTokens}
+                    variant="body"
+                    className="text-sm"
+                    placeholder={`Step ${index + 1} description`}
+                    sectionId={sectionId}
+                    elementKey={`step_description_${index + 1}`}
+                    sectionBackground={sectionBackground}
+                    data-section-id={sectionId}
+                    data-element-key={`step_description_${index + 1}`}
+                  />
                 </div>
               </div>
             ))}
@@ -199,8 +231,46 @@ export default function ProcessFlowDiagram(props: LayoutComponentProps) {
                         elementKey={`benefit_icon_${index + 1}`}
                       />
                     </div>
-                    <h4 style={h4Style} className="font-semibold text-blue-900 mb-2">{title.trim()}</h4>
-                    <p style={bodyStyle} className="text-blue-700 text-sm">{descriptions[index]?.trim() || 'Benefit description'}</p>
+                    <EditableAdaptiveText
+                      mode={mode}
+                      value={title.trim() || ''}
+                      onEdit={(value) => {
+                        const benefitTitles = blockContent.benefit_titles ? blockContent.benefit_titles.split('|') : [];
+                        const updatedTitles = [...benefitTitles];
+                        updatedTitles[index] = value;
+                        handleContentUpdate('benefit_titles', updatedTitles.join('|'));
+                      }}
+                      backgroundType="neutral"
+                      colorTokens={{ ...colorTokens, textPrimary: 'text-blue-900' }}
+                      variant="body"
+                      className="font-semibold mb-2"
+                      placeholder={`Benefit ${index + 1} title`}
+                      sectionId={sectionId}
+                      elementKey={`benefit_title_${index + 1}`}
+                      sectionBackground="bg-blue-50"
+                      data-section-id={sectionId}
+                      data-element-key={`benefit_title_${index + 1}`}
+                    />
+                    <EditableAdaptiveText
+                      mode={mode}
+                      value={descriptions[index]?.trim() || ''}
+                      onEdit={(value) => {
+                        const benefitDescriptions = blockContent.benefit_descriptions ? blockContent.benefit_descriptions.split('|') : [];
+                        const updatedDescriptions = [...benefitDescriptions];
+                        updatedDescriptions[index] = value;
+                        handleContentUpdate('benefit_descriptions', updatedDescriptions.join('|'));
+                      }}
+                      backgroundType="neutral"
+                      colorTokens={{ ...colorTokens, textSecondary: 'text-blue-700' }}
+                      variant="body"
+                      className="text-sm"
+                      placeholder={`Benefit ${index + 1} description`}
+                      sectionId={sectionId}
+                      elementKey={`benefit_description_${index + 1}`}
+                      sectionBackground="bg-blue-50"
+                      data-section-id={sectionId}
+                      data-element-key={`benefit_description_${index + 1}`}
+                    />
                   </div>
                 );
               })}
