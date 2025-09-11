@@ -84,6 +84,43 @@ export default function ProcessFlowDiagram(props: LayoutComponentProps) {
   const { getTextStyle: getTypographyStyle } = useTypography();
   const steps = blockContent.process_steps.split('|').map(s => s.trim()).filter(Boolean);
   const descriptions = blockContent.step_descriptions.split('|').map(d => d.trim()).filter(Boolean);
+
+  // Helper function to get appropriate grid class based on step count
+  const getGridCols = (stepCount: number) => {
+    switch (stepCount) {
+      case 2: return 'lg:grid-cols-2';
+      case 3: return 'lg:grid-cols-3';
+      case 4: return 'lg:grid-cols-4';
+      case 5: return 'lg:grid-cols-5';
+      case 6: return 'lg:grid-cols-6';
+      default: return 'lg:grid-cols-6';
+    }
+  };
+
+  // Handle step deletion
+  const handleDeleteStep = (index: number) => {
+    if (steps.length <= 2) return; // Minimum 2 steps required
+    
+    const updatedSteps = [...steps];
+    const updatedDescriptions = [...descriptions];
+    
+    updatedSteps.splice(index, 1);
+    updatedDescriptions.splice(index, 1);
+    
+    handleContentUpdate('process_steps', updatedSteps.join('|'));
+    handleContentUpdate('step_descriptions', updatedDescriptions.join('|'));
+  };
+
+  // Handle adding new step
+  const handleAddStep = () => {
+    if (steps.length >= 6) return; // Maximum 6 steps
+    
+    const updatedSteps = [...steps, 'New Step'];
+    const updatedDescriptions = [...descriptions, 'Describe this step'];
+    
+    handleContentUpdate('process_steps', updatedSteps.join('|'));
+    handleContentUpdate('step_descriptions', updatedDescriptions.join('|'));
+  };
   
   // Typography styles
   const h3Style = getTypographyStyle('h3');
@@ -131,9 +168,9 @@ export default function ProcessFlowDiagram(props: LayoutComponentProps) {
 
         <div className="relative">
           {/* Process Flow */}
-          <div className="grid lg:grid-cols-6 gap-8">
+          <div className={`grid grid-cols-1 md:grid-cols-2 ${getGridCols(steps.length)} gap-8`}>
             {steps.map((step, index) => (
-              <div key={index} className="relative">
+              <div key={index} className={`relative group/process-step-${index}`}>
                 {/* Step Circle */}
                 <div className="relative z-10 w-24 h-24 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center text-white font-bold text-lg mx-auto mb-4 shadow-lg">
                   {index + 1}
@@ -144,6 +181,22 @@ export default function ProcessFlowDiagram(props: LayoutComponentProps) {
                   <div className="hidden lg:block absolute top-12 left-full w-8 h-1 bg-blue-300 transform -translate-y-1/2 z-0">
                     <div className="absolute right-0 top-1/2 w-0 h-0 border-l-4 border-l-blue-300 border-t-2 border-b-2 border-t-transparent border-b-transparent transform -translate-y-1/2"></div>
                   </div>
+                )}
+                
+                {/* Delete Button */}
+                {mode === 'edit' && steps.length > 2 && (
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleDeleteStep(index);
+                    }}
+                    className={`opacity-0 group-hover/process-step-${index}:opacity-100 absolute top-2 right-2 z-20 text-red-500 hover:text-red-700 transition-opacity duration-200`}
+                    title={`Remove step ${index + 1}`}
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
                 )}
                 
                 {/* Step Content */}
@@ -191,6 +244,21 @@ export default function ProcessFlowDiagram(props: LayoutComponentProps) {
             ))}
           </div>
         </div>
+
+        {/* Add Step Button */}
+        {mode === 'edit' && steps.length < 6 && (
+          <div className="flex justify-center mt-8">
+            <button
+              onClick={handleAddStep}
+              className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+              </svg>
+              <span>Add Step</span>
+            </button>
+          </div>
+        )}
 
         {/* Key Benefits */}
         {(blockContent.benefits_title || blockContent.benefit_titles || mode === 'edit') && (
