@@ -34,6 +34,7 @@ interface FoundersBeliefStackContent {
   company_value_4: string;
   company_value_5: string;
   values_heading: string;
+  show_company_values?: string;
   trust_items?: string;
   trust_item_1: string;
   trust_item_2: string;
@@ -90,6 +91,7 @@ const CONTENT_SCHEMA = {
   company_value_4: { type: 'string' as const, default: 'Customer Success' },
   company_value_5: { type: 'string' as const, default: '' },
   values_heading: { type: 'string' as const, default: 'Our Core Values' },
+  show_company_values: { type: 'string' as const, default: 'true' },
   trust_items: { 
     type: 'string' as const, 
     default: 'B-Corp Certified|SOC 2 Compliant|GDPR Compliant|Carbon Neutral' 
@@ -329,6 +331,23 @@ export default function FoundersBeliefStack(props: LayoutComponentProps) {
     }
   };
 
+  // Handle company values section deletion
+  const handleCompanyValuesSectionDelete = () => {
+    handleContentUpdate('show_company_values', '___REMOVED___');
+  };
+
+  // Handle company values section restore
+  const handleCompanyValuesSectionRestore = () => {
+    handleContentUpdate('show_company_values', 'true');
+    // Optionally restore default values
+    if (!blockContent.company_value_1 || blockContent.company_value_1 === '___REMOVED___') {
+      handleContentUpdate('company_value_1', 'Transparency');
+    }
+    if (!blockContent.company_value_2 || blockContent.company_value_2 === '___REMOVED___') {
+      handleContentUpdate('company_value_2', 'Innovation');
+    }
+  };
+
   // Parse belief items from pipe-separated string
   const beliefData = blockContent.belief_items 
     ? blockContent.belief_items.split('|')
@@ -554,7 +573,24 @@ export default function FoundersBeliefStack(props: LayoutComponentProps) {
         </div>
 
         {/* Company Values */}
-        <div className="text-center mb-12">
+        {blockContent.show_company_values !== '___REMOVED___' && (
+          <div className="relative group/company-values-section text-center mb-12">
+            {/* Section Delete Button */}
+            {mode === 'edit' && blockContent.show_company_values !== '___REMOVED___' && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleCompanyValuesSectionDelete();
+                }}
+                className="opacity-0 group-hover/company-values-section:opacity-100 absolute top-0 right-0 text-red-500 hover:text-red-700 transition-opacity duration-200 z-10"
+                title="Remove entire Company Values section"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            )}
+            
           <EditableAdaptiveHeadline
             mode={mode}
             value={blockContent.values_heading || ''}
@@ -642,7 +678,25 @@ export default function FoundersBeliefStack(props: LayoutComponentProps) {
               </button>
             )}
           </div>
-        </div>
+          </div>
+        )}
+        
+        {/* Restore Company Values Section Button */}
+        {mode === 'edit' && blockContent.show_company_values === '___REMOVED___' && (
+          <div className="text-center mb-12">
+            <button
+              onClick={() => {
+                handleCompanyValuesSectionRestore();
+              }}
+              className="inline-flex items-center space-x-2 px-4 py-2 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors duration-200 border border-blue-200"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+              </svg>
+              <span>Add Company Values Section</span>
+            </button>
+          </div>
+        )}
 
         {/* Call to Action */}
         <div className="text-center">

@@ -96,6 +96,7 @@ module.exports = {
   'group-hover/trust-item-2:opacity-100',
   'group-hover/trust-item-3:opacity-100',
   'group-hover/trust-item-4:opacity-100',
+  'group-hover/company-values-section:opacity-100',
   'group-focus-within:opacity-100',
   'opacity-0',
   'transition-opacity',
