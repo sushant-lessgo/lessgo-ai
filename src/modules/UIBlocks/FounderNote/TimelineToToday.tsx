@@ -58,7 +58,7 @@ const CONTENT_SCHEMA = {
   },
   timeline_items: { 
     type: 'string' as const, 
-    default: '2020|💡 The Idea|Sarah identifies the problem while managing her consulting business|Started with a simple spreadsheet and a big vision|2021|🚀 First Launch|Released MVP to 50 beta users|Processed our first $10K in transactions|2022|📈 Product-Market Fit|Reached 1,000 paying customers|Raised $2M seed round from top VCs|2023|🌍 Global Expansion|Launched in 15 countries|Hit $1M ARR milestone|2024|🎯 Today|Serving 10,000+ businesses|Processing $100M+ annually' 
+    default: 'Q1 2023|💡 The Idea|Sarah identifies the problem while managing her consulting business|Started with a simple spreadsheet and a big vision|Q2 2023|🚀 First Launch|Released MVP to 50 beta users|Processed our first $10K in transactions|Q3 2023|📈 Product-Market Fit|Reached 1,000 paying customers|Raised $2M seed round from top VCs|Q4 2023|🌍 Global Expansion|Launched in 15 countries|Hit $1M ARR milestone|Q1 2024|🎯 Today|Serving 10,000+ businesses|Processing $100M+ annually' 
   },
   current_milestone: { 
     type: 'string' as const, 
@@ -94,6 +94,65 @@ const CONTENT_SCHEMA = {
   timeline_icon_5: { type: 'string' as const, default: '🎯' },
   timeline_icon_6: { type: 'string' as const, default: '✨' },
   current_state_icon: { type: 'string' as const, default: '🎯' }
+};
+
+// Smart badge display logic for different time period formats
+const getBadgeDisplay = (period: string): string => {
+  if (!period) return '??';
+  
+  // Check for quarters (Q1 2024, Q2 2024)
+  if (period.match(/^Q\d/i)) {
+    return period.substring(0, 2).toUpperCase(); // Shows "Q1", "Q2", etc.
+  }
+  
+  // Check for months (Jan 2024, February 2024)
+  const monthMatch = period.match(/^(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)/i);
+  if (monthMatch) {
+    return monthMatch[1].substring(0, 3).toUpperCase(); // Shows "JAN", "FEB", etc.
+  }
+  
+  // Check for phases (Phase 1, Stage 2)
+  const phaseMatch = period.match(/^(Phase|Stage)\s+(\d+)/i);
+  if (phaseMatch) {
+    return `P${phaseMatch[2]}`; // Shows "P1", "P2", etc.
+  }
+  
+  // Check for year only (2024)
+  if (period.match(/^\d{4}$/)) {
+    return period; // Show full year for clarity
+  }
+  
+  // Check for year in format "2024" within longer string
+  const yearMatch = period.match(/\d{4}/);
+  if (yearMatch) {
+    return yearMatch[0]; // Show full year
+  }
+  
+  // Default: show first 3 characters
+  return period.substring(0, 3).trim().toUpperCase();
+};
+
+// Get badge background color based on period type
+const getBadgeColor = (period: string): string => {
+  if (!period) return 'from-gray-400 to-gray-600';
+  
+  // Quarters - green
+  if (period.match(/^Q\d/i)) {
+    return 'from-green-500 to-emerald-600';
+  }
+  
+  // Months - purple
+  if (period.match(/^(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)/i)) {
+    return 'from-purple-500 to-violet-600';
+  }
+  
+  // Phases - orange
+  if (period.match(/^(Phase|Stage)/i)) {
+    return 'from-orange-500 to-amber-600';
+  }
+  
+  // Default (years) - blue
+  return 'from-blue-500 to-indigo-600';
 };
 
 // Timeline Item Component with WYSIWYG editing
@@ -139,12 +198,12 @@ const TimelineItem = React.memo(({
   <div className="relative flex items-start space-x-6 pb-8">
     {/* Timeline line */}
     {!isLast && (
-      <div className="absolute left-6 top-16 w-0.5 h-full bg-gradient-to-b from-blue-200 to-purple-200"></div>
+      <div className="absolute left-7 top-16 w-0.5 h-full bg-gradient-to-b from-blue-200 to-purple-200"></div>
     )}
     
-    {/* Year badge */}
-    <div className="flex-shrink-0 w-12 h-12 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center text-white font-bold text-sm shadow-lg">
-      {year.slice(-2)}
+    {/* Period badge with dynamic color */}
+    <div className={`flex-shrink-0 w-14 h-14 bg-gradient-to-br ${getBadgeColor(year)} rounded-full flex items-center justify-center text-white font-bold text-xs shadow-lg`}>
+      {getBadgeDisplay(year)}
     </div>
     
     {/* Content */}
@@ -324,7 +383,25 @@ export default function TimelineToToday(props: LayoutComponentProps) {
   // Add new timeline item
   const handleAddTimelineItem = () => {
     const currentItems = blockContent.timeline_items || '';
-    const newItem = '2024|🆕 New Milestone|Describe your milestone|Key achievement';
+    // Intelligently suggest next period based on existing items
+    let suggestedPeriod = 'Q2 2024';
+    const existingItems = currentItems.split('|');
+    if (existingItems.length >= 4) {
+      const lastPeriod = existingItems[existingItems.length - 4];
+      // Try to increment based on pattern
+      if (lastPeriod.match(/^Q(\d)/i)) {
+        const quarter = parseInt(lastPeriod.match(/Q(\d)/i)?.[1] || '1');
+        const year = lastPeriod.match(/\d{4}/)?.[0] || '2024';
+        if (quarter < 4) {
+          suggestedPeriod = `Q${quarter + 1} ${year}`;
+        } else {
+          suggestedPeriod = `Q1 ${parseInt(year) + 1}`;
+        }
+      } else if (lastPeriod.match(/^\d{4}$/)) {
+        suggestedPeriod = String(parseInt(lastPeriod) + 1);
+      }
+    }
+    const newItem = `${suggestedPeriod}|🆕 New Milestone|Describe your milestone|Key achievement`;
     const updatedItems = currentItems ? `${currentItems}|${newItem}` : newItem;
     handleContentUpdate('timeline_items', updatedItems);
   };
