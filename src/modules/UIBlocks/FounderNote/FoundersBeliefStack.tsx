@@ -13,10 +13,8 @@ import {
   AccentBadge 
 } from '@/components/layout/EditableContent';
 import { 
-  CTAButton, 
-  TrustIndicators 
+  CTAButton 
 } from '@/components/layout/ComponentRegistry';
-import EditableTrustIndicators from '@/components/layout/EditableTrustIndicators';
 import IconEditableText from '@/components/ui/IconEditableText';
 import { LayoutComponentProps } from '@/types/storeTypes';
 
@@ -125,6 +123,9 @@ const BeliefCard = React.memo(({
   h3Style,
   mode,
   onIconEdit,
+  onTitleEdit,
+  onDescriptionEdit,
+  onDeleteCard,
   sectionId,
   backgroundType
 }: {
@@ -137,55 +138,91 @@ const BeliefCard = React.memo(({
   h3Style: React.CSSProperties;
   mode?: string;
   onIconEdit?: (index: number, value: string) => void;
+  onTitleEdit?: (index: number, value: string) => void;
+  onDescriptionEdit?: (index: number, value: string) => void;
+  onDeleteCard?: (index: number) => void;
   sectionId?: string;
   backgroundType?: string;
 }) => {
-  const cardColors = [
-    'from-blue-500 to-indigo-600',
-    'from-purple-500 to-pink-600',
-    'from-green-500 to-teal-600',
-    'from-orange-500 to-red-600',
-    'from-indigo-500 to-purple-600',
-    'from-teal-500 to-cyan-600'
-  ];
+  // Using consistent styling like IconGrid
 
-  const bgColors = [
-    'bg-blue-50 border-blue-200',
-    'bg-purple-50 border-purple-200',
-    'bg-green-50 border-green-200',
-    'bg-orange-50 border-orange-200',
-    'bg-indigo-50 border-indigo-200',
-    'bg-teal-50 border-teal-200'
-  ];
-
+  // Get card background based on section background like IconGrid
+  const cardBackground = backgroundType === 'primary' 
+    ? 'bg-white/10 backdrop-blur-sm border-white/20' 
+    : 'bg-white border-gray-100';
+    
+  const cardHover = backgroundType === 'primary'
+    ? 'hover:bg-white/20 hover:border-white/30'
+    : 'hover:border-blue-300 hover:shadow-xl';
+  
   return (
-    <div className={`relative bg-white rounded-xl shadow-lg border border-gray-100 p-6 hover:shadow-xl transition-all duration-300 hover:-translate-y-1`}>
+    <div className={`group/belief-card-${index} relative ${cardBackground} ${cardHover} rounded-xl shadow-lg p-6 transition-all duration-300 hover:-translate-y-1`}>
       
       {/* Icon */}
-      <div className={`w-12 h-12 bg-gradient-to-br ${cardColors[index % cardColors.length]} rounded-lg flex items-center justify-center text-white text-xl mb-4 shadow-md relative group/icon-edit`}>
-        {mode !== 'preview' ? (
+      <div className="mb-4">
+        <div className={`inline-flex items-center justify-center w-12 h-12 rounded-lg ${colorTokens.ctaBg || 'bg-blue-600'} bg-opacity-10 group-hover:bg-opacity-20 transition-all duration-300 relative group/icon-edit`}>
           <IconEditableText
             mode={(mode || 'preview') as 'preview' | 'edit'}
             value={icon}
             onEdit={(value) => onIconEdit?.(index, value)}
             backgroundType={backgroundType as any}
             colorTokens={colorTokens}
-            iconSize="lg"
-            className="text-xl text-white"
+            iconSize="md"
+            className="text-2xl group-hover:scale-110 transition-transform duration-300"
+            placeholder="🎯"
             sectionId={sectionId || 'belief'}
             elementKey={`belief_icon_${index + 1}`}
           />
-        ) : (
-          icon
-        )}
+        </div>
       </div>
       
       {/* Content */}
-      <h3 style={h3Style} className="text-gray-900 mb-3">{title}</h3>
-      <p className="text-gray-600 leading-relaxed">{description}</p>
+      <EditableAdaptiveText
+        mode={(mode || 'preview') as 'preview' | 'edit'}
+        value={title}
+        onEdit={(value) => onTitleEdit && onTitleEdit(index, value)}
+        backgroundType={backgroundType as any}
+        colorTokens={colorTokens}
+        variant="body"
+        textStyle={{
+          ...h3Style,
+          fontWeight: 600
+        }}
+        className="mb-3"
+        placeholder="Belief title..."
+        sectionId={sectionId || 'belief'}
+        elementKey={`belief_title_${index}`}
+        sectionBackground="bg-white"
+      />
+      <EditableAdaptiveText
+        mode={(mode || 'preview') as 'preview' | 'edit'}
+        value={description}
+        onEdit={(value) => onDescriptionEdit && onDescriptionEdit(index, value)}
+        backgroundType={backgroundType as any}
+        colorTokens={colorTokens}
+        variant="body"
+        className="leading-relaxed opacity-90"
+        placeholder="Describe this belief..."
+        sectionId={sectionId || 'belief'}
+        elementKey={`belief_description_${index}`}
+        sectionBackground="bg-white"
+      />
       
-      {/* Decorative element */}
-      <div className={`absolute top-4 right-4 w-8 h-8 ${bgColors[index % bgColors.length]} rounded-full opacity-20`}></div>
+      {/* Delete button */}
+      {mode === 'edit' && onDeleteCard && (
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            onDeleteCard(index);
+          }}
+          className={`opacity-0 group-hover/belief-card-${index}:opacity-100 absolute top-2 right-2 text-red-500 hover:text-red-700 transition-opacity duration-200`}
+          title="Remove this belief"
+        >
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      )}
     </div>
   );
 });
@@ -238,12 +275,68 @@ export default function FoundersBeliefStack(props: LayoutComponentProps) {
     handleContentUpdate(fieldKey, value);
   };
 
+  // Handle belief title editing
+  const handleBeliefTitleEdit = (index: number, value: string) => {
+    const beliefData = blockContent.belief_items ? blockContent.belief_items.split('|') : [];
+    const titleIndex = index * 2;
+    
+    // Ensure we have enough array elements
+    while (beliefData.length <= titleIndex + 1) {
+      beliefData.push('');
+    }
+    
+    // Extract icon from existing title or use default
+    const existingTitleWithIcon = beliefData[titleIndex] || '';
+    const iconPart = existingTitleWithIcon.split(' ')[0] || '💡';
+    const isEmoji = /[\u{1F600}-\u{1F64F}]|[\u{1F300}-\u{1F5FF}]|[\u{1F680}-\u{1F6FF}]|[\u{1F700}-\u{1F77F}]|[\u{1F780}-\u{1F7FF}]|[\u{1F800}-\u{1F8FF}]|[\u{1F900}-\u{1F9FF}]|[\u{1FA00}-\u{1FA6F}]|[\u{1FA70}-\u{1FAFF}]|[\u{2600}-\u{26FF}]|[\u{2700}-\u{27BF}]/u.test(iconPart);
+    
+    // Update title with icon prefix
+    beliefData[titleIndex] = (isEmoji ? iconPart : '💡') + ' ' + value;
+    handleContentUpdate('belief_items', beliefData.join('|'));
+  };
+
+  // Handle belief description editing
+  const handleBeliefDescriptionEdit = (index: number, value: string) => {
+    const beliefData = blockContent.belief_items ? blockContent.belief_items.split('|') : [];
+    const descIndex = index * 2 + 1;
+    
+    // Ensure we have enough array elements
+    while (beliefData.length <= descIndex) {
+      beliefData.push('');
+    }
+    
+    beliefData[descIndex] = value;
+    handleContentUpdate('belief_items', beliefData.join('|'));
+  };
+
+  // Handle belief card deletion
+  const handleBeliefCardDelete = (index: number) => {
+    const beliefData = blockContent.belief_items ? blockContent.belief_items.split('|') : [];
+    const titleIndex = index * 2;
+    const descIndex = index * 2 + 1;
+    
+    // Remove the title and description pair
+    const newBeliefData = beliefData.filter((_, i) => i !== titleIndex && i !== descIndex);
+    
+    // Update the belief_items with the new data
+    handleContentUpdate('belief_items', newBeliefData.join('|'));
+    
+    // Also clear the corresponding icon field
+    const iconFields = ['belief_icon_1', 'belief_icon_2', 'belief_icon_3', 'belief_icon_4', 'belief_icon_5', 'belief_icon_6'];
+    const iconFieldKey = iconFields[index] as keyof FoundersBeliefStackContent;
+    if (iconFieldKey) {
+      handleContentUpdate(iconFieldKey, '___REMOVED___');
+    }
+  };
+
   // Parse belief items from pipe-separated string
   const beliefData = blockContent.belief_items 
     ? blockContent.belief_items.split('|')
     : [];
 
   const beliefItems = [];
+  
+  // Parse existing belief items
   for (let i = 0; i < beliefData.length; i += 2) {
     if (i + 1 < beliefData.length) {
       const titleWithIcon = beliefData[i]?.trim() || '';
@@ -254,6 +347,21 @@ export default function FoundersBeliefStack(props: LayoutComponentProps) {
       const icon = getBeliefIcon(itemIndex) || fallbackIcon;
       
       beliefItems.push({ icon, title, description, index: itemIndex });
+    }
+  }
+  
+  // In edit mode, ensure we have at least 3 cards to show (for better UX)
+  if (mode === 'edit' && beliefItems.length < 3) {
+    const neededCards = 3 - beliefItems.length;
+    for (let i = 0; i < neededCards; i++) {
+      const itemIndex = beliefItems.length;
+      const icon = getBeliefIcon(itemIndex) || '💡';
+      beliefItems.push({ 
+        icon, 
+        title: '', 
+        description: '', 
+        index: itemIndex 
+      });
     }
   }
 
@@ -351,46 +459,27 @@ export default function FoundersBeliefStack(props: LayoutComponentProps) {
 
         {/* Beliefs Grid */}
         <div className="mb-12">
-          {mode !== 'preview' ? (
-            <div className="bg-gray-50 rounded-lg p-6 mb-8">
-              <h4 className="font-semibold text-gray-900 mb-3">Belief Items</h4>
-              <p className="text-sm text-gray-600 mb-3">
-                Format: Icon Title|Description (repeat for each belief)
-              </p>
-              <EditableAdaptiveText
-                mode={mode}
-                value={blockContent.belief_items || ''}
-                onEdit={(value) => handleContentUpdate('belief_items', value)}
-                backgroundType="neutral"
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {beliefItems.map((belief, index) => (
+              <BeliefCard
+                key={index}
+                icon={belief.icon}
+                title={belief.title}
+                description={belief.description}
+                index={belief.index}
                 colorTokens={colorTokens}
-                variant="body"
-                textStyle={{ color: '#374151', fontSize: '0.875rem' }}
-                placeholder="🎯 First Belief|Description here|🚀 Second Belief|Description here..."
+                dynamicTextColors={dynamicTextColors}
+                h3Style={h3Style}
+                mode={mode}
+                onIconEdit={handleBeliefIconEdit}
+                onTitleEdit={handleBeliefTitleEdit}
+                onDescriptionEdit={handleBeliefDescriptionEdit}
+                onDeleteCard={handleBeliefCardDelete}
                 sectionId={sectionId}
-                elementKey="belief_items"
-                sectionBackground="bg-gray-50"
+                backgroundType={backgroundType}
               />
-            </div>
-          ) : (
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {beliefItems.map((belief, index) => (
-                <BeliefCard
-                  key={index}
-                  icon={belief.icon}
-                  title={belief.title}
-                  description={belief.description}
-                  index={belief.index}
-                  colorTokens={colorTokens}
-                  dynamicTextColors={dynamicTextColors}
-                  h3Style={h3Style}
-                  mode={mode}
-                  onIconEdit={handleBeliefIconEdit}
-                  sectionId={sectionId}
-                  backgroundType={backgroundType}
-                />
-              ))}
-            </div>
-          )}
+            ))}
+          </div>
         </div>
 
         {/* Founder Commitment Section */}
@@ -480,89 +569,79 @@ export default function FoundersBeliefStack(props: LayoutComponentProps) {
             sectionBackground={sectionBackground}
           />
           
-          {mode !== 'preview' ? (
-            <div className="space-y-4">
-              <div className="flex flex-wrap justify-center gap-4">
-                {[
-                  { key: 'company_value_1', placeholder: 'Transparency' },
-                  { key: 'company_value_2', placeholder: 'Innovation' },
-                  { key: 'company_value_3', placeholder: 'Integrity' },
-                  { key: 'company_value_4', placeholder: 'Customer Success' },
-                  { key: 'company_value_5', placeholder: 'Additional value...' }
-                ].map((value, index) => (
-                  ((blockContent as any)[value.key] || mode === 'edit') && (blockContent as any)[value.key] !== '___REMOVED___' && (
-                    <div key={index} className="relative group/value-item">
-                      <div className="bg-white rounded-full px-6 py-3 shadow-md border border-gray-100 flex items-center space-x-2">
-                        <EditableAdaptiveText
-                          mode={mode}
-                          value={(blockContent as any)[value.key] || ''}
-                          onEdit={(newValue) => handleContentUpdate(value.key as keyof FoundersBeliefStackContent, newValue)}
-                          backgroundType="neutral"
-                          colorTokens={colorTokens}
-                          variant="body"
-                          textStyle={{ fontWeight: '500', color: '#374151' }}
-                          placeholder={value.placeholder}
-                          sectionId={sectionId}
-                          elementKey={value.key}
-                          sectionBackground="bg-white"
-                        />
-                        
-                        {/* Remove button */}
-                        {mode === 'edit' && (blockContent as any)[value.key] && (blockContent as any)[value.key] !== '___REMOVED___' && (
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleContentUpdate(value.key as keyof FoundersBeliefStackContent, '___REMOVED___');
-                            }}
-                            className="opacity-0 group-hover/value-item:opacity-100 text-red-500 hover:text-red-700 transition-opacity duration-200"
-                            title="Remove this value"
-                          >
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                            </svg>
-                          </button>
-                        )}
-                      </div>
-                    </div>
-                  )
-                ))}
-              </div>
-              
-              {/* Add button */}
-              {mode === 'edit' && companyValues.length < 5 && (
-                <button
-                  onClick={() => {
-                    const emptyIndex = [
-                      blockContent.company_value_1,
-                      blockContent.company_value_2,
-                      blockContent.company_value_3,
-                      blockContent.company_value_4,
-                      blockContent.company_value_5
-                    ].findIndex(value => !value || value.trim() === '' || value === '___REMOVED___');
-                    
-                    if (emptyIndex !== -1) {
-                      const fieldKey = `company_value_${emptyIndex + 1}` as keyof FoundersBeliefStackContent;
-                      handleContentUpdate(fieldKey, 'New value');
-                    }
-                  }}
-                  className="flex items-center space-x-1 text-sm text-blue-600 hover:text-blue-800 transition-colors mx-auto"
-                >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                  </svg>
-                  <span>Add value</span>
-                </button>
-              )}
-            </div>
-          ) : (
+          <div className="space-y-4">
             <div className="flex flex-wrap justify-center gap-4">
-              {companyValues.map((value, index) => (
-                <div key={index} className="bg-white rounded-full px-6 py-3 shadow-md border border-gray-100">
-                  <span className="font-medium text-gray-700">{value}</span>
-                </div>
+              {[
+                { key: 'company_value_1', placeholder: 'Transparency' },
+                { key: 'company_value_2', placeholder: 'Innovation' },
+                { key: 'company_value_3', placeholder: 'Integrity' },
+                { key: 'company_value_4', placeholder: 'Customer Success' },
+                { key: 'company_value_5', placeholder: 'Additional value...' }
+              ].map((value, index) => (
+                ((blockContent as any)[value.key] || mode === 'edit') && (blockContent as any)[value.key] !== '___REMOVED___' && (
+                  <div key={index} className={`relative group/company-value-${index}`}>
+                    <div className="bg-white rounded-full px-6 py-3 shadow-md border border-gray-100 flex items-center space-x-2">
+                      <EditableAdaptiveText
+                        mode={mode}
+                        value={(blockContent as any)[value.key] || ''}
+                        onEdit={(newValue) => handleContentUpdate(value.key as keyof FoundersBeliefStackContent, newValue)}
+                        backgroundType="neutral"
+                        colorTokens={colorTokens}
+                        variant="body"
+                        textStyle={{ fontWeight: '500', color: '#374151' }}
+                        placeholder={value.placeholder}
+                        sectionId={sectionId}
+                        elementKey={value.key}
+                        sectionBackground="bg-white"
+                      />
+                      
+                      {/* Remove button */}
+                      {mode === 'edit' && (blockContent as any)[value.key] && (blockContent as any)[value.key] !== '___REMOVED___' && (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleContentUpdate(value.key as keyof FoundersBeliefStackContent, '___REMOVED___');
+                          }}
+                          className={`opacity-0 group-hover/company-value-${index}:opacity-100 text-red-500 hover:text-red-700 transition-opacity duration-200`}
+                          title="Remove this value"
+                        >
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                          </svg>
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                )
               ))}
             </div>
-          )}
+            
+            {/* Add button */}
+            {mode === 'edit' && companyValues.length < 5 && (
+              <button
+                onClick={() => {
+                  const emptyIndex = [
+                    blockContent.company_value_1,
+                    blockContent.company_value_2,
+                    blockContent.company_value_3,
+                    blockContent.company_value_4,
+                    blockContent.company_value_5
+                  ].findIndex(value => !value || value.trim() === '' || value === '___REMOVED___');
+                  
+                  if (emptyIndex !== -1) {
+                    const fieldKey = `company_value_${emptyIndex + 1}` as keyof FoundersBeliefStackContent;
+                    handleContentUpdate(fieldKey, 'New value');
+                  }
+                }}
+                className="flex items-center space-x-1 text-sm text-blue-600 hover:text-blue-800 transition-colors mx-auto"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                </svg>
+                <span>Add value</span>
+              </button>
+            )}
+          </div>
         </div>
 
         {/* Call to Action */}
@@ -577,51 +656,86 @@ export default function FoundersBeliefStack(props: LayoutComponentProps) {
           />
           
           {/* Trust Indicators */}
-          {mode !== 'preview' ? (
-            <EditableTrustIndicators
-              mode={mode}
-              trustItems={[
-                blockContent.trust_item_1 || '',
-                blockContent.trust_item_2 || '',
-                blockContent.trust_item_3 || '',
-                blockContent.trust_item_4 || '',
-                blockContent.trust_item_5 || ''
-              ]}
-              onTrustItemChange={(index, value) => {
-                const fieldKey = `trust_item_${index + 1}` as keyof FoundersBeliefStackContent;
-                handleContentUpdate(fieldKey, value);
-              }}
-              onAddTrustItem={() => {
-                const emptyIndex = [
-                  blockContent.trust_item_1,
-                  blockContent.trust_item_2,
-                  blockContent.trust_item_3,
-                  blockContent.trust_item_4,
-                  blockContent.trust_item_5
-                ].findIndex(item => !item || item.trim() === '' || item === '___REMOVED___');
-                
-                if (emptyIndex !== -1) {
-                  const fieldKey = `trust_item_${emptyIndex + 1}` as keyof FoundersBeliefStackContent;
-                  handleContentUpdate(fieldKey, 'New trust item');
-                }
-              }}
-              onRemoveTrustItem={(index) => {
-                const fieldKey = `trust_item_${index + 1}` as keyof FoundersBeliefStackContent;
-                handleContentUpdate(fieldKey, '___REMOVED___');
-              }}
-              colorTokens={colorTokens}
-              sectionBackground={sectionBackground}
-              sectionId={sectionId}
-              backgroundType={backgroundType}
-              iconColor="text-green-500"
-              colorClass={mutedTextColor}
-            />
-          ) : (
-            <TrustIndicators 
-              items={trustItems}
-              colorClass={mutedTextColor}
-              iconColor="text-green-500"
-            />
+          <div className="flex flex-wrap justify-center gap-4 text-sm">
+            {[
+              { key: 'trust_item_1', placeholder: 'B-Corp Certified' },
+              { key: 'trust_item_2', placeholder: 'SOC 2 Compliant' },
+              { key: 'trust_item_3', placeholder: 'GDPR Compliant' },
+              { key: 'trust_item_4', placeholder: 'Carbon Neutral' },
+              { key: 'trust_item_5', placeholder: 'Additional certification...' }
+            ].map((item, index) => (
+              ((blockContent as any)[item.key] || mode === 'edit') && (blockContent as any)[item.key] !== '___REMOVED___' && (
+                <div key={index} className={`group/trust-item-${index} relative flex items-center space-x-1`}>
+                  <svg className="w-4 h-4 text-green-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                  <EditableAdaptiveText
+                    mode={mode}
+                    value={(blockContent as any)[item.key] || ''}
+                    onEdit={(value) => {
+                      const fieldKey = item.key as keyof FoundersBeliefStackContent;
+                      handleContentUpdate(fieldKey, value);
+                    }}
+                    backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
+                    colorTokens={colorTokens}
+                    variant="body"
+                    textStyle={{
+                      fontSize: '0.875rem',
+                      color: mutedTextColor
+                    }}
+                    placeholder={item.placeholder}
+                    sectionId={sectionId}
+                    elementKey={item.key}
+                    sectionBackground={sectionBackground}
+                  />
+                  
+                  {/* Remove button */}
+                  {mode === 'edit' && (blockContent as any)[item.key] && (blockContent as any)[item.key] !== '___REMOVED___' && (
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        const fieldKey = item.key as keyof FoundersBeliefStackContent;
+                        handleContentUpdate(fieldKey, '___REMOVED___');
+                      }}
+                      className={`opacity-0 group-hover/trust-item-${index}:opacity-100 text-red-500 hover:text-red-700 transition-opacity duration-200 ml-1`}
+                      title="Remove this trust indicator"
+                    >
+                      <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </button>
+                  )}
+                </div>
+              )
+            ))}
+          </div>
+          
+          {/* Add trust indicator button */}
+          {mode === 'edit' && trustItems.length < 5 && (
+            <div className="text-center mt-2">
+              <button
+                onClick={() => {
+                  const emptyIndex = [
+                    blockContent.trust_item_1,
+                    blockContent.trust_item_2,
+                    blockContent.trust_item_3,
+                    blockContent.trust_item_4,
+                    blockContent.trust_item_5
+                  ].findIndex(item => !item || item.trim() === '' || item === '___REMOVED___');
+                  
+                  if (emptyIndex !== -1) {
+                    const fieldKey = `trust_item_${emptyIndex + 1}` as keyof FoundersBeliefStackContent;
+                    handleContentUpdate(fieldKey, 'New trust item');
+                  }
+                }}
+                className="flex items-center space-x-1 text-xs text-blue-600 hover:text-blue-800 transition-colors mx-auto"
+              >
+                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                </svg>
+                <span>Add trust indicator</span>
+              </button>
+            </div>
           )}
         </div>
       </div>
