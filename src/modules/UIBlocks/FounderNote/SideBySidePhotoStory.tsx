@@ -468,106 +468,45 @@ export default function SideBySidePhotoStory(props: LayoutComponentProps) {
             </div>
 
             {/* Secondary Image */}
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                {blockContent.secondary_image && blockContent.secondary_image !== '' ? (
-                  <img
-                    src={blockContent.secondary_image}
-                    alt="Secondary story"
-                    className="w-full h-48 object-cover rounded-lg shadow-md cursor-pointer"
-                    data-image-id={`${sectionId}-secondary-image`}
-                    onMouseUp={(e) => {
-                      if (mode === 'edit') {
-                        e.stopPropagation();
-                        e.preventDefault();
-                        const rect = e.currentTarget.getBoundingClientRect();
+            <div className="w-full">
+              {blockContent.secondary_image && blockContent.secondary_image !== '' ? (
+                <img
+                  src={blockContent.secondary_image}
+                  alt="Secondary story"
+                  className="w-full h-64 object-cover rounded-lg shadow-md cursor-pointer"
+                  data-image-id={`${sectionId}-secondary-image`}
+                  onMouseUp={(e) => {
+                    if (mode === 'edit') {
+                      e.stopPropagation();
+                      e.preventDefault();
+                      const rect = e.currentTarget.getBoundingClientRect();
+                      handleImageToolbar(`${sectionId}.secondary_image`, {
+                        x: rect.left + rect.width / 2,
+                        y: rect.top - 10
+                      });
+                    }
+                  }}
+                />
+              ) : (
+                <FounderPhotoPlaceholder 
+                  type="secondary" 
+                  mode={mode}
+                  sectionId={sectionId}
+                  elementKey="secondary_image"
+                  onImageClick={() => {
+                    if (mode === 'edit') {
+                      const element = document.querySelector(`[data-image-id="${sectionId}-secondary_image"]`);
+                      if (element) {
+                        const rect = element.getBoundingClientRect();
                         handleImageToolbar(`${sectionId}.secondary_image`, {
                           x: rect.left + rect.width / 2,
                           y: rect.top - 10
                         });
                       }
-                    }}
-                  />
-                ) : (
-                  <FounderPhotoPlaceholder 
-                    type="secondary" 
-                    mode={mode}
-                    sectionId={sectionId}
-                    elementKey="secondary_image"
-                    onImageClick={() => {
-                      if (mode === 'edit') {
-                        const element = document.querySelector(`[data-image-id="${sectionId}-secondary_image"]`);
-                        if (element) {
-                          const rect = element.getBoundingClientRect();
-                          handleImageToolbar(`${sectionId}.secondary_image`, {
-                            x: rect.left + rect.width / 2,
-                            y: rect.top - 10
-                          });
-                        }
-                      }
-                    }}
-                  />
-                )}
-              </div>
-              
-              {/* Stats */}
-              <div className="bg-white rounded-lg shadow-md p-4 space-y-3">
-                <h4 className="font-semibold text-gray-900 text-sm mb-3">Impact So Far</h4>
-                {mode === 'edit' ? (
-                  <div className="space-y-2">
-                    {[
-                      { key: 'story_stat_1', placeholder: '25,000+ creators' },
-                      { key: 'story_stat_2', placeholder: '500,000+ projects' },
-                      { key: 'story_stat_3', placeholder: '$50M+ creator earnings' }
-                    ].map((stat, index) => (
-                      ((blockContent as any)[stat.key] || mode === 'edit') && (
-                        <div key={index} className="relative group/stat-item flex items-center space-x-2">
-                          <EditableAdaptiveText
-                            mode={mode}
-                            value={(blockContent as any)[stat.key] || ''}
-                            onEdit={(value) => handleContentUpdate(stat.key as keyof SideBySidePhotoStoryContent, value)}
-                            backgroundType="neutral"
-                            colorTokens={colorTokens}
-                            variant="body"
-                            textStyle={{ fontSize: '0.75rem', fontWeight: '600', textAlign: 'center' }}
-                            placeholder={stat.placeholder}
-                            sectionId={sectionId}
-                            elementKey={stat.key}
-                            sectionBackground="bg-white"
-                          />
-                          
-                          {/* Remove button */}
-                          {mode === 'edit' && (blockContent as any)[stat.key] && (blockContent as any)[stat.key] !== '___REMOVED___' && (
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleContentUpdate(stat.key as keyof SideBySidePhotoStoryContent, '___REMOVED___');
-                              }}
-                              className="opacity-0 group-hover/stat-item:opacity-100 text-red-500 hover:text-red-700 transition-opacity duration-200"
-                              title="Remove this statistic"
-                            >
-                              <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                              </svg>
-                            </button>
-                          )}
-                        </div>
-                      )
-                    ))}
-                  </div>
-                ) : (
-                  storyStats.slice(0, 3).map((stat, index) => (
-                    <div key={index} className="text-center">
-                      <div className="text-lg font-bold text-blue-600">
-                        {stat.split(' ')[0]}
-                      </div>
-                      <div className="text-xs text-gray-600">
-                        {stat.split(' ').slice(1).join(' ')}
-                      </div>
-                    </div>
-                  ))
-                )}
-              </div>
+                    }
+                  }}
+                />
+              )}
             </div>
           </div>
         </div>
