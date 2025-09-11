@@ -96,7 +96,7 @@ const CONTENT_SCHEMA = {
   current_state_icon: { type: 'string' as const, default: '🎯' }
 };
 
-// Timeline Item Component
+// Timeline Item Component with WYSIWYG editing
 const TimelineItem = React.memo(({ 
   year, 
   icon, 
@@ -108,6 +108,11 @@ const TimelineItem = React.memo(({
   dynamicTextColors,
   mode,
   onIconEdit,
+  onYearEdit,
+  onTitleEdit,
+  onDescriptionEdit,
+  onStatsEdit,
+  onRemove,
   index,
   sectionId,
   backgroundType
@@ -122,6 +127,11 @@ const TimelineItem = React.memo(({
   dynamicTextColors: any;
   mode?: string;
   onIconEdit?: (index: number, value: string) => void;
+  onYearEdit?: (index: number, value: string) => void;
+  onTitleEdit?: (index: number, value: string) => void;
+  onDescriptionEdit?: (index: number, value: string) => void;
+  onStatsEdit?: (index: number, value: string) => void;
+  onRemove?: (index: number) => void;
   index?: number;
   sectionId?: string;
   backgroundType?: string;
@@ -138,38 +148,113 @@ const TimelineItem = React.memo(({
     </div>
     
     {/* Content */}
-    <div className="flex-1 min-w-0 bg-white rounded-lg shadow-md border border-gray-100 p-6 hover:shadow-lg transition-shadow duration-200">
+    <div className="flex-1 min-w-0 bg-white rounded-lg shadow-md border border-gray-100 p-6 hover:shadow-lg transition-shadow duration-200 relative group">
+      {/* Remove button in edit mode */}
+      {mode === 'edit' && onRemove && (
+        <button
+          onClick={() => onRemove(index || 0)}
+          className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 p-1 rounded bg-red-500 hover:bg-red-600 text-white transition-all duration-200"
+          title="Remove timeline item"
+          type="button"
+        >
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      )}
+      
       <div className="flex items-start justify-between mb-3">
         <div className="flex items-center space-x-3">
           <div className="text-2xl relative group/icon-edit">
-            {mode !== 'preview' ? (
-              <IconEditableText
-                mode={(mode || 'preview') as 'preview' | 'edit'}
-                value={icon}
-                onEdit={(value) => onIconEdit?.(index || 0, value)}
-                backgroundType={backgroundType as any}
-                colorTokens={colorTokens}
-                iconSize="lg"
-                className="text-2xl"
-                sectionId={sectionId || 'timeline'}
-                elementKey={`timeline_icon_${(index || 0) + 1}`}
-              />
-            ) : (
-              <span>{icon}</span>
-            )}
+            <IconEditableText
+              mode={(mode || 'preview') as 'preview' | 'edit'}
+              value={icon}
+              onEdit={(value) => onIconEdit?.(index || 0, value)}
+              backgroundType={backgroundType as any}
+              colorTokens={colorTokens}
+              iconSize="lg"
+              className="text-2xl"
+              sectionId={sectionId || 'timeline'}
+              elementKey={`timeline_icon_${(index || 0) + 1}`}
+            />
           </div>
-          <div>
-            <h3 className="text-lg font-semibold text-gray-900">{title}</h3>
-            <span className="text-sm text-blue-600 font-medium">{year}</span>
+          <div className="flex-1">
+            {mode === 'edit' ? (
+              <>
+                <EditableAdaptiveText
+                  mode={mode as 'edit' | 'preview'}
+                  value={title}
+                  onEdit={(value) => onTitleEdit?.(index || 0, value)}
+                  backgroundType="neutral"
+                  colorTokens={colorTokens}
+                  variant="body"
+                  textStyle={{ fontSize: '1.125rem', fontWeight: '600', color: '#111827' }}
+                  placeholder="Milestone title"
+                  sectionId={sectionId || 'timeline'}
+                  elementKey={`timeline_title_${(index || 0) + 1}`}
+                  sectionBackground="bg-white"
+                />
+                <EditableAdaptiveText
+                  mode={mode as 'edit' | 'preview'}
+                  value={year}
+                  onEdit={(value) => onYearEdit?.(index || 0, value)}
+                  backgroundType="neutral"
+                  colorTokens={colorTokens}
+                  variant="body"
+                  textStyle={{ fontSize: '0.875rem', fontWeight: '500', color: '#2563eb' }}
+                  placeholder="Year"
+                  sectionId={sectionId || 'timeline'}
+                  elementKey={`timeline_year_${(index || 0) + 1}`}
+                  sectionBackground="bg-white"
+                />
+              </>
+            ) : (
+              <>
+                <h3 className="text-lg font-semibold text-gray-900">{title}</h3>
+                <span className="text-sm text-blue-600 font-medium">{year}</span>
+              </>
+            )}
           </div>
         </div>
       </div>
       
-      <p className="text-gray-700 leading-relaxed mb-3">{description}</p>
+      {mode === 'edit' ? (
+        <EditableAdaptiveText
+          mode={mode as 'edit' | 'preview'}
+          value={description}
+          onEdit={(value) => onDescriptionEdit?.(index || 0, value)}
+          backgroundType="neutral"
+          colorTokens={colorTokens}
+          variant="body"
+          textStyle={{ color: '#374151', lineHeight: '1.75', marginBottom: '0.75rem' }}
+          placeholder="Milestone description"
+          sectionId={sectionId || 'timeline'}
+          elementKey={`timeline_description_${(index || 0) + 1}`}
+          sectionBackground="bg-white"
+        />
+      ) : (
+        <p className="text-gray-700 leading-relaxed mb-3">{description}</p>
+      )}
       
-      {stats && (
+      {(stats || mode === 'edit') && (
         <div className="bg-gray-50 rounded-md px-3 py-2">
-          <p className="text-sm font-medium text-gray-600">{stats}</p>
+          {mode === 'edit' ? (
+            <EditableAdaptiveText
+              mode={mode as 'edit' | 'preview'}
+              value={stats || ''}
+              onEdit={(value) => onStatsEdit?.(index || 0, value)}
+              backgroundType="neutral"
+              colorTokens={colorTokens}
+              variant="body"
+              textStyle={{ fontSize: '0.875rem', fontWeight: '500', color: '#4b5563' }}
+              placeholder="Achievement or stat (optional)"
+              sectionId={sectionId || 'timeline'}
+              elementKey={`timeline_stats_${(index || 0) + 1}`}
+              sectionBackground="bg-gray-50"
+            />
+          ) : (
+            <p className="text-sm font-medium text-gray-600">{stats}</p>
+          )}
         </div>
       )}
     </div>
@@ -208,6 +293,48 @@ export default function TimelineToToday(props: LayoutComponentProps) {
     const iconFields = ['timeline_icon_1', 'timeline_icon_2', 'timeline_icon_3', 'timeline_icon_4', 'timeline_icon_5', 'timeline_icon_6'];
     const fieldKey = iconFields[index] as keyof TimelineToTodayContent;
     handleContentUpdate(fieldKey, value);
+  };
+
+  // Handle individual timeline field editing
+  const handleTimelineFieldEdit = (index: number, field: 'year' | 'title' | 'description' | 'stats', value: string) => {
+    const items = blockContent.timeline_items.split('|');
+    const itemStartIndex = index * 4;
+    
+    switch(field) {
+      case 'year':
+        items[itemStartIndex] = value;
+        break;
+      case 'title':
+        // Preserve icon if it exists, update title
+        const currentTitleParts = items[itemStartIndex + 1]?.split(' ') || [];
+        const currentIcon = currentTitleParts[0] || '';
+        items[itemStartIndex + 1] = `${currentIcon} ${value}`;
+        break;
+      case 'description':
+        items[itemStartIndex + 2] = value;
+        break;
+      case 'stats':
+        items[itemStartIndex + 3] = value;
+        break;
+    }
+    
+    handleContentUpdate('timeline_items', items.join('|'));
+  };
+
+  // Add new timeline item
+  const handleAddTimelineItem = () => {
+    const currentItems = blockContent.timeline_items || '';
+    const newItem = '2024|🆕 New Milestone|Describe your milestone|Key achievement';
+    const updatedItems = currentItems ? `${currentItems}|${newItem}` : newItem;
+    handleContentUpdate('timeline_items', updatedItems);
+  };
+
+  // Remove timeline item
+  const handleRemoveTimelineItem = (index: number) => {
+    const items = blockContent.timeline_items.split('|');
+    const itemStartIndex = index * 4;
+    items.splice(itemStartIndex, 4);
+    handleContentUpdate('timeline_items', items.join('|'));
   };
 
   // Parse timeline items from pipe-separated string
@@ -299,48 +426,47 @@ export default function TimelineToToday(props: LayoutComponentProps) {
           />
         </div>
 
-        {/* Timeline */}
+        {/* Timeline - WYSIWYG in both modes */}
         <div className="relative">
-          {mode !== 'preview' ? (
-            <div className="bg-gray-50 rounded-lg p-6 mb-8">
-              <h4 className="font-semibold text-gray-900 mb-3">Timeline Items</h4>
-              <p className="text-sm text-gray-600 mb-3">
-                Format: Year|Icon Title|Description|Stats (repeat for each milestone)
-              </p>
-              <EditableAdaptiveText
-                mode={(mode || 'preview') as 'preview' | 'edit'}
-                value={blockContent.timeline_items || ''}
-                onEdit={(value) => handleContentUpdate('timeline_items', value)}
-                backgroundType="neutral"
+          <div className="space-y-0">
+            {timelineItems.map((item, index) => (
+              <TimelineItem
+                key={index}
+                year={item.year}
+                icon={item.icon}
+                title={item.title}
+                description={item.description}
+                stats={item.stats}
+                isLast={index === timelineItems.length - 1}
                 colorTokens={colorTokens}
-                variant="body"
-                textStyle={{ color: '#374151', fontSize: '0.875rem' }}
-                placeholder="2020|💡 The Idea|Started with a problem|First prototype|2021|🚀 Launch|Released to users|1000 users..."
+                dynamicTextColors={dynamicTextColors}
+                mode={(mode || 'preview') as 'preview' | 'edit'}
+                onIconEdit={handleTimelineIconEdit}
+                onYearEdit={(idx, value) => handleTimelineFieldEdit(idx, 'year', value)}
+                onTitleEdit={(idx, value) => handleTimelineFieldEdit(idx, 'title', value)}
+                onDescriptionEdit={(idx, value) => handleTimelineFieldEdit(idx, 'description', value)}
+                onStatsEdit={(idx, value) => handleTimelineFieldEdit(idx, 'stats', value)}
+                onRemove={mode === 'edit' ? handleRemoveTimelineItem : undefined}
+                index={item.index}
                 sectionId={sectionId}
-                elementKey="timeline_items"
-                sectionBackground="bg-gray-50"
+                backgroundType={backgroundType}
               />
-            </div>
-          ) : (
-            <div className="space-y-0">
-              {timelineItems.map((item, index) => (
-                <TimelineItem
-                  key={index}
-                  year={item.year}
-                  icon={item.icon}
-                  title={item.title}
-                  description={item.description}
-                  stats={item.stats}
-                  isLast={index === timelineItems.length - 1}
-                  colorTokens={colorTokens}
-                  dynamicTextColors={dynamicTextColors}
-                  mode={(mode || 'preview') as 'preview' | 'edit'}
-                  onIconEdit={handleTimelineIconEdit}
-                  index={item.index}
-                  sectionId={sectionId}
-                  backgroundType={backgroundType}
-                />
-              ))}
+            ))}
+          </div>
+          
+          {/* Add button in edit mode */}
+          {mode === 'edit' && (
+            <div className="mt-8 text-center">
+              <button
+                onClick={handleAddTimelineItem}
+                className="inline-flex items-center px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors duration-200 shadow-sm hover:shadow-md"
+                type="button"
+              >
+                <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                </svg>
+                Add Timeline Item
+              </button>
             </div>
           )}
         </div>
