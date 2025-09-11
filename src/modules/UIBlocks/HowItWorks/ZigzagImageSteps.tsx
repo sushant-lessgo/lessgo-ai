@@ -403,7 +403,7 @@ export default function ZigzagImageSteps(props: LayoutComponentProps) {
       
       // Apply all updates at once
       Object.entries(updates).forEach(([key, value]) => {
-        handleContentUpdate(key as keyof ZigzagImageStepsContent, value);
+        handleContentUpdate(key as keyof ZigzagImageStepsContent, value as string);
       });
     }
   }, [blockContent.step_visuals, blockContent.step_visual_0, handleContentUpdate]);

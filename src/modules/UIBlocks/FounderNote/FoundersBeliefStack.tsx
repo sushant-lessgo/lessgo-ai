@@ -373,7 +373,7 @@ export default function FoundersBeliefStack(props: LayoutComponentProps) {
   if (mode === 'edit' && beliefItems.length < 3) {
     const neededCards = 3 - beliefItems.length;
     for (let i = 0; i < neededCards; i++) {
-      const itemIndex = beliefItems.length;
+      const itemIndex: number = beliefItems.length;
       const icon = getBeliefIcon(itemIndex) || '💡';
       beliefItems.push({ 
         icon, 
