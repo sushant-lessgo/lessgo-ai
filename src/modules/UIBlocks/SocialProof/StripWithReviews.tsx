@@ -10,6 +10,7 @@ import {
   EditableAdaptiveText 
 } from '@/components/layout/EditableContent';
 import AvatarEditableComponent from '@/components/ui/AvatarEditableComponent';
+import IconEditableText from '@/components/ui/IconEditableText';
 import { LayoutComponentProps } from '@/types/storeTypes';
 import { 
   parsePipeData, 
@@ -51,6 +52,10 @@ interface StripWithReviewsContent {
   trust_indicator_1?: string;
   trust_indicator_2?: string;
   trust_indicator_3?: string;
+  // Trust indicator icons
+  trust_icon_1?: string;
+  trust_icon_2?: string;
+  trust_icon_3?: string;
   // Avatar system
   customer_names?: string;
   avatar_urls?: string;
@@ -184,6 +189,19 @@ const CONTENT_SCHEMA = {
   trust_indicator_3: { 
     type: 'string' as const, 
     default: 'Authentic Feedback' 
+  },
+  // Trust indicator icons
+  trust_icon_1: { 
+    type: 'string' as const, 
+    default: '✅' 
+  },
+  trust_icon_2: { 
+    type: 'string' as const, 
+    default: 'ℹ️' 
+  },
+  trust_icon_3: { 
+    type: 'string' as const, 
+    default: '🛡️' 
   },
   // Avatar system
   customer_names: { 
@@ -511,9 +529,19 @@ export default function StripWithReviews(props: LayoutComponentProps) {
     ].findIndex(item => !item || item.trim() === '' || item === '___REMOVED___');
     
     if (emptyIndex !== -1) {
-      const fieldKey = `trust_indicator_${emptyIndex + 1}` as keyof StripWithReviewsContent;
-      handleContentUpdate(fieldKey, 'New indicator');
+      const textFieldKey = `trust_indicator_${emptyIndex + 1}` as keyof StripWithReviewsContent;
+      const iconFieldKey = `trust_icon_${emptyIndex + 1}` as keyof StripWithReviewsContent;
+      const defaultIcons = ['✅', 'ℹ️', '🛡️'];
+      
+      handleContentUpdate(textFieldKey, 'New indicator');
+      handleContentUpdate(iconFieldKey, defaultIcons[emptyIndex] || '✅');
     }
+  };
+  
+  // Handle trust icon updates
+  const handleTrustIconUpdate = (index: number, value: string) => {
+    const fieldKey = `trust_icon_${index + 1}` as keyof StripWithReviewsContent;
+    handleContentUpdate(fieldKey, value);
   };
 
   // Calculate average rating
@@ -672,31 +700,30 @@ export default function StripWithReviews(props: LayoutComponentProps) {
           <div className="mt-12 pt-8 border-t border-white/10">
             <div className="flex flex-wrap items-center justify-center gap-8">
               {getTrustIndicators().map((indicator, index) => {
-                const iconColors = ['text-green-500', 'text-blue-500', 'text-purple-500'];
-                const iconPaths = [
-                  'M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z',
-                  'M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z',
-                  'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z'
-                ];
                 const actualIndex = [
                   blockContent.trust_indicator_1,
                   blockContent.trust_indicator_2,
                   blockContent.trust_indicator_3
                 ].findIndex(item => item === indicator);
                 
+                // Get the corresponding icon value
+                const iconFields = ['trust_icon_1', 'trust_icon_2', 'trust_icon_3'];
+                const iconValue = blockContent[iconFields[actualIndex] as keyof StripWithReviewsContent] || '✅';
+                
                 return (
                   <div key={actualIndex} className="relative group/trust-indicator flex items-center space-x-2">
-                    <svg 
-                      className={`w-5 h-5 ${iconColors[actualIndex] || 'text-green-500'}`} 
-                      fill="currentColor" 
-                      viewBox="0 0 20 20"
-                    >
-                      <path 
-                        fillRule="evenodd" 
-                        d={iconPaths[actualIndex] || iconPaths[0]} 
-                        clipRule="evenodd" 
-                      />
-                    </svg>
+                    <IconEditableText
+                      mode={mode}
+                      value={iconValue}
+                      onEdit={(value) => handleTrustIconUpdate(actualIndex, value)}
+                      backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
+                      colorTokens={colorTokens}
+                      iconSize="sm"
+                      className="text-lg"
+                      placeholder="✅"
+                      sectionId={sectionId}
+                      elementKey={`trust_icon_${actualIndex + 1}`}
+                    />
                     <EditableAdaptiveText
                       mode={mode}
                       value={indicator}
@@ -718,6 +745,7 @@ export default function StripWithReviews(props: LayoutComponentProps) {
                         onClick={(e) => {
                           e.stopPropagation();
                           handleTrustIndicatorUpdate(actualIndex, '___REMOVED___');
+                          handleTrustIconUpdate(actualIndex, '___REMOVED___');
                         }}
                         className="opacity-0 group-hover/trust-indicator:opacity-100 ml-1 text-red-500 hover:text-red-700 transition-opacity duration-200"
                         title="Remove trust indicator"
@@ -796,6 +824,9 @@ export const componentMeta = {
     { key: 'trust_indicator_1', label: 'Trust Indicator 1', type: 'text', required: false },
     { key: 'trust_indicator_2', label: 'Trust Indicator 2', type: 'text', required: false },
     { key: 'trust_indicator_3', label: 'Trust Indicator 3', type: 'text', required: false },
+    { key: 'trust_icon_1', label: 'Trust Icon 1', type: 'text', required: false },
+    { key: 'trust_icon_2', label: 'Trust Icon 2', type: 'text', required: false },
+    { key: 'trust_icon_3', label: 'Trust Icon 3', type: 'text', required: false },
     
     // Avatar system
     { key: 'customer_names', label: 'Customer Names (pipe separated)', type: 'text', required: false },
@@ -809,13 +840,14 @@ export const componentMeta = {
     'Editable star ratings for each review',
     'Editable reviewer names and titles',
     'Editable social proof elements (overall rating, review count)',
-    'Editable trust indicators with add/remove functionality',
+    'Editable trust indicators with customizable icons and add/remove functionality',
     'Avatar system with customer name management',
     'Add new review functionality in edit mode',
     'Automatic text color adaptation based on background type',
     'Responsive grid layout for reviews',
     'Hover-based edit controls',
-    'Remove markers (___REMOVED___) for deleted items'
+    'Remove markers (___REMOVED___) for deleted items',
+    'Visual icon picker for trust indicator icons with 80+ emoji options'
   ],
   
   useCases: [
@@ -831,7 +863,7 @@ export const componentMeta = {
     'Reviewer name and title editing',
     'Star rating modification',
     'Add/remove individual reviews (up to 4)',
-    'Trust indicator management (up to 3)',
+    'Trust indicator management with custom icons (up to 3)',
     'Social proof text customization',
     'Avatar system integration'
   ]
