@@ -10,7 +10,7 @@ import {
   EditableAdaptiveText 
 } from '@/components/layout/EditableContent';
 import { LayoutComponentProps } from '@/types/storeTypes';
-import { parsePipeData } from '@/utils/dataParsingUtils';
+import { parsePipeData, updateListData } from '@/utils/dataParsingUtils';
 import IconEditableText from '@/components/ui/IconEditableText';
 
 // Content interface for type safety
@@ -23,6 +23,13 @@ interface IndustryBadgeLineContent {
   cert_icon_override?: string;
   award_icon_override?: string;
   compliance_icon_override?: string;
+  // Section titles
+  cert_section_title?: string;
+  award_section_title?: string;
+  compliance_section_title?: string;
+  // Trust summary
+  trust_summary_title?: string;
+  trust_summary_description?: string;
 }
 
 // Badge structure
@@ -57,7 +64,29 @@ const CONTENT_SCHEMA = {
   },
   cert_icon_override: { type: 'string' as const, default: '' },
   award_icon_override: { type: 'string' as const, default: '' },
-  compliance_icon_override: { type: 'string' as const, default: '' }
+  compliance_icon_override: { type: 'string' as const, default: '' },
+  // Section titles
+  cert_section_title: { 
+    type: 'string' as const, 
+    default: 'Security & Compliance Certifications' 
+  },
+  award_section_title: { 
+    type: 'string' as const, 
+    default: 'Industry Recognition' 
+  },
+  compliance_section_title: { 
+    type: 'string' as const, 
+    default: 'Security Standards' 
+  },
+  // Trust summary
+  trust_summary_title: { 
+    type: 'string' as const, 
+    default: 'Enterprise-Grade Security' 
+  },
+  trust_summary_description: { 
+    type: 'string' as const, 
+    default: 'Your data is protected by the highest industry standards, ensuring complete security and compliance for your business.' 
+  }
 };
 
 // Parse badge data from pipe-separated strings
@@ -110,7 +139,9 @@ const BadgeDisplay = React.memo(({
   backgroundType,
   colorTokens,
   sectionId,
-  handleContentUpdate
+  sectionBackground,
+  handleContentUpdate,
+  onBadgeEdit
 }: { 
   badge: CertificationBadge;
   dynamicTextColors: any;
@@ -119,7 +150,9 @@ const BadgeDisplay = React.memo(({
   backgroundType: string;
   colorTokens: any;
   sectionId: string;
+  sectionBackground: string;
   handleContentUpdate: (key: keyof IndustryBadgeLineContent, value: string) => void;
+  onBadgeEdit: (badge: CertificationBadge, value: string) => void;
 }) => {
   
   // Get badge styling and icon override
@@ -152,7 +185,7 @@ const BadgeDisplay = React.memo(({
   const style = getBadgeStyle(badge.type);
   
   return (
-    <div className="flex flex-col items-center space-y-3 p-4 bg-white/5 backdrop-blur-sm rounded-xl border border-white/10 hover:bg-white/10 transition-all duration-300 group">
+    <div className="relative group/badge-item flex flex-col items-center space-y-3 p-4 bg-white/5 backdrop-blur-sm rounded-xl border border-white/10 hover:bg-white/10 transition-all duration-300 group">
       <div className={`w-16 h-16 bg-gradient-to-br ${style.bgGradient} rounded-full flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300`}>
         <IconEditableText
           mode={mode}
@@ -169,9 +202,35 @@ const BadgeDisplay = React.memo(({
           elementKey={`${badge.type}_icon`}
         />
       </div>
-      <span className={`text-sm font-medium text-center leading-tight ${dynamicTextColors?.body || 'text-gray-700'}`}>
-        {badge.name}
-      </span>
+      <EditableAdaptiveText
+        mode={mode}
+        value={badge.name}
+        onEdit={(value) => onBadgeEdit(badge, value)}
+        backgroundType={backgroundType as any}
+        colorTokens={colorTokens}
+        variant="body"
+        className="text-sm font-medium text-center leading-tight"
+        placeholder="Badge name"
+        sectionBackground={sectionBackground}
+        data-section-id={sectionId}
+        data-element-key={`badge_${badge.id}`}
+      />
+      
+      {/* Remove button */}
+      {mode === 'edit' && (
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            onBadgeEdit(badge, '___REMOVED___');
+          }}
+          className="absolute -top-2 -right-2 opacity-0 group-hover/badge-item:opacity-100 p-1 rounded-full bg-white/80 hover:bg-white text-red-500 hover:text-red-700 transition-all duration-200 z-10 shadow-sm"
+          title="Remove badge"
+        >
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      )}
     </div>
   );
 });
@@ -179,22 +238,62 @@ BadgeDisplay.displayName = 'BadgeDisplay';
 
 // Security Feature Component
 const SecurityFeature = React.memo(({ 
-  feature, 
-  dynamicTextColors 
+  feature,
+  index,
+  mode,
+  dynamicTextColors,
+  backgroundType,
+  colorTokens,
+  sectionId,
+  sectionBackground,
+  onFeatureEdit
 }: { 
   feature: string;
+  index: number;
+  mode: 'edit' | 'preview';
   dynamicTextColors: any;
+  backgroundType: string;
+  colorTokens: any;
+  sectionId: string;
+  sectionBackground: string;
+  onFeatureEdit: (index: number, value: string) => void;
 }) => {
   return (
-    <div className="flex items-center space-x-3 p-4 bg-white/5 backdrop-blur-sm rounded-lg border border-white/10">
+    <div className="relative group/feature-item flex items-center space-x-3 p-4 bg-white/5 backdrop-blur-sm rounded-lg border border-white/10">
       <div className="w-10 h-10 bg-gradient-to-br from-gray-700 to-gray-800 rounded-lg flex items-center justify-center">
         <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.602-4.777a4.5 4.5 0 010 9.554A2.25 2.25 0 0118 15.75h.007v.008H18v-.008zm-6 0a4.5 4.5 0 00-4.5 4.5 2.25 2.25 0 002.25 2.25h.007v.008H9.75v-.008z" />
         </svg>
       </div>
-      <span className={`font-medium ${dynamicTextColors?.body || 'text-gray-700'}`}>
-        {feature}
-      </span>
+      <EditableAdaptiveText
+        mode={mode}
+        value={feature}
+        onEdit={(value) => onFeatureEdit(index, value)}
+        backgroundType={backgroundType as any}
+        colorTokens={colorTokens}
+        variant="body"
+        className="font-medium flex-1"
+        placeholder="Security feature"
+        sectionBackground={sectionBackground}
+        data-section-id={sectionId}
+        data-element-key={`compliance_${index}`}
+      />
+      
+      {/* Remove button */}
+      {mode === 'edit' && (
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            onFeatureEdit(index, '___REMOVED___');
+          }}
+          className="opacity-0 group-hover/feature-item:opacity-100 p-1 rounded-full bg-white/80 hover:bg-white text-red-500 hover:text-red-700 transition-all duration-200 z-10 shadow-sm"
+          title="Remove feature"
+        >
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      )}
     </div>
   );
 });
@@ -222,6 +321,36 @@ export default function IndustryBadgeLine(props: LayoutComponentProps) {
   const h3Style = getTypographyStyle('h3');
   const bodyLgStyle = getTypographyStyle('body-lg');
 
+  // Helper function to handle badge editing
+  const handleBadgeEdit = (badge: CertificationBadge, value: string) => {
+    let fieldKey: keyof IndustryBadgeLineContent;
+    let currentData: string;
+    
+    switch (badge.type) {
+      case 'certification':
+        fieldKey = 'certification_badges';
+        currentData = blockContent.certification_badges || '';
+        break;
+      case 'award':
+        fieldKey = 'industry_awards';
+        currentData = blockContent.industry_awards || '';
+        break;
+      case 'compliance':
+        fieldKey = 'compliance_standards';
+        currentData = blockContent.compliance_standards || '';
+        break;
+    }
+    
+    const updatedData = updateListData(currentData, badge.index, value);
+    handleContentUpdate(fieldKey, updatedData);
+  };
+
+  // Helper function to handle compliance feature editing  
+  const handleComplianceFeatureEdit = (index: number, value: string) => {
+    const updatedData = updateListData(blockContent.compliance_standards || '', index, value);
+    handleContentUpdate('compliance_standards', updatedData);
+  };
+
   // Parse badges from pipe-separated strings
   const badges = parseBadgeData(
     blockContent.certification_badges || '',
@@ -230,9 +359,12 @@ export default function IndustryBadgeLine(props: LayoutComponentProps) {
   );
 
   // Split badges by type for better organization
-  const certifications = badges.filter(b => b.type === 'certification');
-  const awards = badges.filter(b => b.type === 'award');
-  const compliance = badges.filter(b => b.type === 'compliance');
+  const certifications = badges.filter(b => b.type === 'certification' && b.name !== '___REMOVED___');
+  const awards = badges.filter(b => b.type === 'award' && b.name !== '___REMOVED___');
+  const compliance = badges.filter(b => b.type === 'compliance' && b.name !== '___REMOVED___');
+
+  // Parse compliance features for SecurityFeature component
+  const complianceFeatures = parsePipeData(blockContent.compliance_standards || '').filter(f => f !== '___REMOVED___');
 
   return (
     <LayoutSection
@@ -279,11 +411,22 @@ export default function IndustryBadgeLine(props: LayoutComponentProps) {
         </div>
 
         {/* Certification Badges */}
-        {certifications.length > 0 && (
+        {(certifications.length > 0 || mode === 'edit') && (
           <div className="mb-12">
-            <h3 className={`font-semibold text-center mb-8 ${dynamicTextColors?.heading || 'text-gray-900'}`} style={h3Style}>
-              Security & Compliance Certifications
-            </h3>
+            <EditableAdaptiveText
+              mode={mode}
+              value={blockContent.cert_section_title || ''}
+              onEdit={(value) => handleContentUpdate('cert_section_title', value)}
+              backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
+              colorTokens={colorTokens}
+              variant="body"
+              className="font-semibold text-center mb-8"
+              style={h3Style}
+              placeholder="Section title for certifications"
+              sectionBackground={sectionBackground}
+              data-section-id={sectionId}
+              data-element-key="cert_section_title"
+            />
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
               {certifications.slice(0, 6).map((badge) => (
                 <BadgeDisplay
@@ -295,19 +438,51 @@ export default function IndustryBadgeLine(props: LayoutComponentProps) {
                   backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
                   colorTokens={colorTokens}
                   sectionId={sectionId}
+                  sectionBackground={sectionBackground}
                   handleContentUpdate={handleContentUpdate}
+                  onBadgeEdit={handleBadgeEdit}
                 />
               ))}
             </div>
+            
+            {/* Add certification button */}
+            {mode === 'edit' && certifications.length < 6 && (
+              <div className="flex justify-center mt-4">
+                <button
+                  onClick={() => {
+                    const currentData = blockContent.certification_badges || '';
+                    const updatedData = currentData ? `${currentData}|New Certification` : 'New Certification';
+                    handleContentUpdate('certification_badges', updatedData);
+                  }}
+                  className="flex items-center space-x-1 text-sm text-blue-600 hover:text-blue-800 transition-colors px-3 py-1 rounded-md hover:bg-blue-50"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                  </svg>
+                  <span>Add certification</span>
+                </button>
+              </div>
+            )}
           </div>
         )}
 
         {/* Industry Awards */}
-        {awards.length > 0 && (
+        {(awards.length > 0 || mode === 'edit') && (
           <div className="mb-12">
-            <h3 className={`font-semibold text-center mb-8 ${dynamicTextColors?.heading || 'text-gray-900'}`} style={h3Style}>
-              Industry Recognition
-            </h3>
+            <EditableAdaptiveText
+              mode={mode}
+              value={blockContent.award_section_title || ''}
+              onEdit={(value) => handleContentUpdate('award_section_title', value)}
+              backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
+              colorTokens={colorTokens}
+              variant="body"
+              className="font-semibold text-center mb-8"
+              style={h3Style}
+              placeholder="Section title for awards"
+              sectionBackground={sectionBackground}
+              data-section-id={sectionId}
+              data-element-key="award_section_title"
+            />
             <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
               {awards.slice(0, 4).map((badge) => (
                 <BadgeDisplay
@@ -319,28 +494,86 @@ export default function IndustryBadgeLine(props: LayoutComponentProps) {
                   backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
                   colorTokens={colorTokens}
                   sectionId={sectionId}
+                  sectionBackground={sectionBackground}
                   handleContentUpdate={handleContentUpdate}
+                  onBadgeEdit={handleBadgeEdit}
                 />
               ))}
             </div>
+            
+            {/* Add award button */}
+            {mode === 'edit' && awards.length < 4 && (
+              <div className="flex justify-center mt-4">
+                <button
+                  onClick={() => {
+                    const currentData = blockContent.industry_awards || '';
+                    const updatedData = currentData ? `${currentData}|New Award` : 'New Award';
+                    handleContentUpdate('industry_awards', updatedData);
+                  }}
+                  className="flex items-center space-x-1 text-sm text-blue-600 hover:text-blue-800 transition-colors px-3 py-1 rounded-md hover:bg-blue-50"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                  </svg>
+                  <span>Add award</span>
+                </button>
+              </div>
+            )}
           </div>
         )}
 
         {/* Compliance Standards */}
-        {compliance.length > 0 && (
+        {(complianceFeatures.length > 0 || mode === 'edit') && (
           <div>
-            <h3 className={`font-semibold text-center mb-8 ${dynamicTextColors?.heading || 'text-gray-900'}`} style={h3Style}>
-              Security Standards
-            </h3>
+            <EditableAdaptiveText
+              mode={mode}
+              value={blockContent.compliance_section_title || ''}
+              onEdit={(value) => handleContentUpdate('compliance_section_title', value)}
+              backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
+              colorTokens={colorTokens}
+              variant="body"
+              className="font-semibold text-center mb-8"
+              style={h3Style}
+              placeholder="Section title for compliance standards"
+              sectionBackground={sectionBackground}
+              data-section-id={sectionId}
+              data-element-key="compliance_section_title"
+            />
             <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
-              {compliance.slice(0, 4).map((feature) => (
+              {complianceFeatures.slice(0, 4).map((feature, index) => (
                 <SecurityFeature
-                  key={feature.id}
-                  feature={feature.name}
+                  key={`compliance-${index}`}
+                  feature={feature}
+                  index={index}
+                  mode={mode}
                   dynamicTextColors={dynamicTextColors}
+                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
+                  colorTokens={colorTokens}
+                  sectionId={sectionId}
+                  sectionBackground={sectionBackground}
+                  onFeatureEdit={handleComplianceFeatureEdit}
                 />
               ))}
             </div>
+            
+            {/* Add compliance feature button */}
+            {mode === 'edit' && complianceFeatures.length < 4 && (
+              <div className="flex justify-center mt-4">
+                <button
+                  onClick={() => {
+                    const currentData = blockContent.compliance_standards || '';
+                    const updatedData = currentData ? `${currentData}|New Security Standard` : 'New Security Standard';
+                    handleContentUpdate('compliance_standards', updatedData);
+                  }}
+                  className="flex items-center space-x-1 text-sm text-blue-600 hover:text-blue-800 transition-colors px-3 py-1 rounded-md hover:bg-blue-50"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                  </svg>
+                  <span>Add security standard</span>
+                </button>
+              </div>
+            )}
           </div>
         )}
 
@@ -350,13 +583,35 @@ export default function IndustryBadgeLine(props: LayoutComponentProps) {
             <svg className="w-8 h-8 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.602-4.777a4.5 4.5 0 010 9.554A2.25 2.25 0 0118 15.75h.007v.008H18v-.008zm-6 0a4.5 4.5 0 00-4.5 4.5 2.25 2.25 0 002.25 2.25h.007v.008H9.75v-.008z" />
             </svg>
-            <span className={`font-semibold ${dynamicTextColors?.heading || 'text-gray-900'}`} style={h3Style}>
-              Enterprise-Grade Security
-            </span>
+            <EditableAdaptiveText
+              mode={mode}
+              value={blockContent.trust_summary_title || ''}
+              onEdit={(value) => handleContentUpdate('trust_summary_title', value)}
+              backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
+              colorTokens={colorTokens}
+              variant="body"
+              className="font-semibold"
+              style={h3Style}
+              placeholder="Trust summary title"
+              sectionBackground={sectionBackground}
+              data-section-id={sectionId}
+              data-element-key="trust_summary_title"
+            />
           </div>
-          <p className={`${dynamicTextColors?.body || 'text-gray-700'} max-w-2xl mx-auto`} style={bodyLgStyle}>
-            Your data is protected by the highest industry standards, ensuring complete security and compliance for your business.
-          </p>
+          <EditableAdaptiveText
+            mode={mode}
+            value={blockContent.trust_summary_description || ''}
+            onEdit={(value) => handleContentUpdate('trust_summary_description', value)}
+            backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
+            colorTokens={colorTokens}
+            variant="body"
+            className="max-w-2xl mx-auto"
+            style={bodyLgStyle}
+            placeholder="Describe your security and compliance commitment..."
+            sectionBackground={sectionBackground}
+            data-section-id={sectionId}
+            data-element-key="trust_summary_description"
+          />
         </div>
       </div>
     </LayoutSection>
@@ -378,7 +633,12 @@ export const componentMeta = {
     { key: 'subheadline', label: 'Subheadline', type: 'textarea', required: false },
     { key: 'certification_badges', label: 'Certification Badges (pipe separated)', type: 'text', required: true },
     { key: 'industry_awards', label: 'Industry Awards (pipe separated)', type: 'text', required: false },
-    { key: 'compliance_standards', label: 'Compliance Standards (pipe separated)', type: 'text', required: false }
+    { key: 'compliance_standards', label: 'Compliance Standards (pipe separated)', type: 'text', required: false },
+    { key: 'cert_section_title', label: 'Certifications Section Title', type: 'text', required: false },
+    { key: 'award_section_title', label: 'Awards Section Title', type: 'text', required: false },
+    { key: 'compliance_section_title', label: 'Compliance Section Title', type: 'text', required: false },
+    { key: 'trust_summary_title', label: 'Trust Summary Title', type: 'text', required: false },
+    { key: 'trust_summary_description', label: 'Trust Summary Description', type: 'textarea', required: false }
   ],
   
   features: [
@@ -386,7 +646,10 @@ export const componentMeta = {
     'Categorized badge displays (certifications, awards, compliance)',
     'Interactive hover effects with scaling animations',
     'Type-specific icons and color coding',
-    'Trust summary section with security emphasis'
+    'Trust summary section with security emphasis',
+    'Fully editable badge names, section titles, and descriptions',
+    'Add/remove badges with hover-based controls',
+    'Individual icon customization for each badge type'
   ],
   
   useCases: [
