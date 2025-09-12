@@ -18,7 +18,8 @@ import {
   parseCustomerAvatarData, 
   getCustomerAvatarUrl, 
   updateAvatarUrls,
-  parsePipeData 
+  parsePipeData,
+  updateListData 
 } from '@/utils/dataParsingUtils';
 
 interface AvatarCarouselContent {
@@ -174,6 +175,27 @@ export default function AvatarCarousel(props: LayoutComponentProps) {
     ? blockContent.ratings.split('|').map(item => parseInt(item.trim()) || 5)
     : [];
 
+  // Handle individual testimonial editing - following IconGrid pattern
+  const handleQuoteEdit = (index: number, value: string) => {
+    const updatedQuotes = updateListData(blockContent.testimonial_quotes, index, value);
+    handleContentUpdate('testimonial_quotes', updatedQuotes);
+  };
+
+  const handleNameEdit = (index: number, value: string) => {
+    const updatedNames = updateListData(blockContent.customer_names, index, value);
+    handleContentUpdate('customer_names', updatedNames);
+  };
+
+  const handleTitleEdit = (index: number, value: string) => {
+    const updatedTitles = updateListData(blockContent.customer_titles, index, value);
+    handleContentUpdate('customer_titles', updatedTitles);
+  };
+
+  const handleCompanyEdit = (index: number, value: string) => {
+    const updatedCompanies = updateListData(blockContent.customer_companies, index, value);
+    handleContentUpdate('customer_companies', updatedCompanies);
+  };
+
   // Handle avatar URL updates
   const handleAvatarChange = (customerName: string, avatarUrl: string) => {
     const updatedAvatarUrls = updateAvatarUrls(blockContent.avatar_urls || '{}', customerName, avatarUrl);
@@ -311,72 +333,7 @@ export default function AvatarCarousel(props: LayoutComponentProps) {
           )}
         </div>
 
-        {mode !== 'preview' ? (
-          <div className="space-y-8">
-            <div className="p-6 border border-gray-200 rounded-lg bg-gray-50">
-              <h4 className="font-semibold text-gray-700 mb-4">Avatar Carousel Content</h4>
-              
-              <div className="space-y-4">
-                <EditableAdaptiveText
-                  mode={mode}
-                  value={blockContent.testimonial_quotes || ''}
-                  onEdit={(value) => handleContentUpdate('testimonial_quotes', value)}
-                  backgroundType={safeBackgroundType}
-                  colorTokens={colorTokens}
-                  variant="body"
-                  className="mb-2"
-                  placeholder="Testimonial quotes (pipe separated)"
-                  sectionId={sectionId}
-                  elementKey="testimonial_quotes"
-                  sectionBackground={sectionBackground}
-                />
-                
-                <EditableAdaptiveText
-                  mode={mode}
-                  value={blockContent.customer_names || ''}
-                  onEdit={(value) => handleContentUpdate('customer_names', value)}
-                  backgroundType={safeBackgroundType}
-                  colorTokens={colorTokens}
-                  variant="body"
-                  className="mb-2"
-                  placeholder="Customer names (pipe separated)"
-                  sectionId={sectionId}
-                  elementKey="customer_names"
-                  sectionBackground={sectionBackground}
-                />
-                
-                <EditableAdaptiveText
-                  mode={mode}
-                  value={blockContent.customer_titles || ''}
-                  onEdit={(value) => handleContentUpdate('customer_titles', value)}
-                  backgroundType={safeBackgroundType}
-                  colorTokens={colorTokens}
-                  variant="body"
-                  className="mb-2"
-                  placeholder="Customer titles (pipe separated)"
-                  sectionId={sectionId}
-                  elementKey="customer_titles"
-                  sectionBackground={sectionBackground}
-                />
-                
-                <EditableAdaptiveText
-                  mode={mode}
-                  value={blockContent.customer_companies || ''}
-                  onEdit={(value) => handleContentUpdate('customer_companies', value)}
-                  backgroundType={safeBackgroundType}
-                  colorTokens={colorTokens}
-                  variant="body"
-                  className="mb-2"
-                  placeholder="Customer handles/companies (pipe separated)"
-                  sectionId={sectionId}
-                  elementKey="customer_companies"
-                  sectionBackground={sectionBackground}
-                />
-              </div>
-            </div>
-          </div>
-        ) : (
-          <>
+        {/* WYSIWYG Avatar Carousel - Always Visible */}
             {/* Avatar Carousel */}
             <div className="relative h-32 mb-12">
               <div className="relative h-full flex items-center justify-center">
@@ -407,16 +364,69 @@ export default function AvatarCarousel(props: LayoutComponentProps) {
                     <StarRating rating={activeTestimonial.rating} size="large" />
                   </div>
                   
-                  <blockquote style={h3Style} className="text-gray-800 leading-relaxed mb-6 max-w-3xl mx-auto">
-                    "{activeTestimonial.quote}"
+                  <blockquote className="leading-relaxed mb-6 max-w-3xl mx-auto">
+                    <EditableAdaptiveText
+                      mode={mode}
+                      value={`"${activeTestimonial.quote}"`}
+                      onEdit={(value) => {
+                        // Remove quotes and update the testimonial quote
+                        const cleanedValue = value.replace(/^["']|["']$/g, '');
+                        handleQuoteEdit(activeIndex, cleanedValue);
+                      }}
+                      backgroundType={safeBackgroundType}
+                      colorTokens={colorTokens}
+                      variant="body"
+                      textStyle={h3Style}
+                      className="text-gray-800"
+                      placeholder="Add testimonial quote..."
+                      sectionId={sectionId}
+                      elementKey={`testimonial_quote_${activeIndex}`}
+                      sectionBackground={sectionBackground}
+                    />
                   </blockquote>
                   
                   <div className="flex items-center justify-center space-x-3">
                     <div className="text-center">
-                      <div className="font-semibold text-gray-900">{activeTestimonial.name}</div>
-                      <div className="text-sm text-gray-600">{activeTestimonial.title}</div>
-                      {activeTestimonial.company && (
-                        <div className="text-sm text-purple-600 font-medium">{activeTestimonial.company}</div>
+                      <EditableAdaptiveText
+                        mode={mode}
+                        value={activeTestimonial.name}
+                        onEdit={(value) => handleNameEdit(activeIndex, value)}
+                        backgroundType={safeBackgroundType}
+                        colorTokens={colorTokens}
+                        variant="body"
+                        className="font-semibold text-gray-900"
+                        placeholder="Customer name..."
+                        sectionId={sectionId}
+                        elementKey={`customer_name_${activeIndex}`}
+                        sectionBackground={sectionBackground}
+                      />
+                      <EditableAdaptiveText
+                        mode={mode}
+                        value={activeTestimonial.title}
+                        onEdit={(value) => handleTitleEdit(activeIndex, value)}
+                        backgroundType={safeBackgroundType}
+                        colorTokens={colorTokens}
+                        variant="body"
+                        className="text-sm text-gray-600"
+                        placeholder="Customer title..."
+                        sectionId={sectionId}
+                        elementKey={`customer_title_${activeIndex}`}
+                        sectionBackground={sectionBackground}
+                      />
+                      {(activeTestimonial.company || mode === 'edit') && (
+                        <EditableAdaptiveText
+                          mode={mode}
+                          value={activeTestimonial.company || ''}
+                          onEdit={(value) => handleCompanyEdit(activeIndex, value)}
+                          backgroundType={safeBackgroundType}
+                          colorTokens={colorTokens}
+                          variant="body"
+                          className="text-sm text-purple-600 font-medium"
+                          placeholder="Company/handle..."
+                          sectionId={sectionId}
+                          elementKey={`customer_company_${activeIndex}`}
+                          sectionBackground={sectionBackground}
+                        />
                       )}
                     </div>
                   </div>
@@ -467,8 +477,6 @@ export default function AvatarCarousel(props: LayoutComponentProps) {
                 </svg>
               </button>
             </div>
-          </>
-        )}
 
         {/* Creator Community Stats */}
         <div className="bg-gradient-to-r from-pink-50 via-purple-50 to-indigo-50 rounded-2xl p-8 border border-pink-100 mb-12">
