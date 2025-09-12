@@ -28,6 +28,14 @@ interface StackedStatsContent {
   metric_icon_4?: string;
   metric_icon_5?: string;
   metric_icon_6?: string;
+  // Summary section fields
+  summary_title?: string;
+  summary_description?: string;
+  customer_satisfaction_value?: string;
+  customer_satisfaction_label?: string;
+  response_time_value?: string;
+  response_time_label?: string;
+  progress_label?: string;
 }
 
 // Metric structure
@@ -71,7 +79,36 @@ const CONTENT_SCHEMA = {
   metric_icon_3: { type: 'string' as const, default: '✅' },
   metric_icon_4: { type: 'string' as const, default: '🛠️' },
   metric_icon_5: { type: 'string' as const, default: '💾' },
-  metric_icon_6: { type: 'string' as const, default: '⏰' }
+  metric_icon_6: { type: 'string' as const, default: '⏰' },
+  // Summary section content schema
+  summary_title: {
+    type: 'string' as const,
+    default: 'Trusted by Industry Leaders'
+  },
+  summary_description: {
+    type: 'string' as const,
+    default: 'Join thousands of companies that have already transformed their business with our proven platform.'
+  },
+  customer_satisfaction_value: {
+    type: 'string' as const,
+    default: '98%'
+  },
+  customer_satisfaction_label: {
+    type: 'string' as const,
+    default: 'Customer Satisfaction'
+  },
+  response_time_value: {
+    type: 'string' as const,
+    default: '<3min'
+  },
+  response_time_label: {
+    type: 'string' as const,
+    default: 'Average Response Time'
+  },
+  progress_label: {
+    type: 'string' as const,
+    default: 'Progress'
+  }
 };
 
 // Parse metric data from pipe-separated strings
@@ -149,7 +186,8 @@ const MetricCard = React.memo(({
   backgroundType,
   colorTokens,
   sectionId,
-  handleContentUpdate
+  handleContentUpdate,
+  sectionBackground
 }: { 
   metric: StackedMetric;
   dynamicTextColors: any;
@@ -163,6 +201,7 @@ const MetricCard = React.memo(({
   colorTokens: any;
   sectionId: string;
   handleContentUpdate: (key: keyof StackedStatsContent, value: string) => void;
+  sectionBackground: string;
 }) => {
   
   // Color scheme for each metric
@@ -219,9 +258,19 @@ const MetricCard = React.memo(({
           {metric.progress !== undefined && (
             <div className="space-y-2">
               <div className="flex justify-between items-center">
-                <span className={`text-xs ${dynamicTextColors?.muted || 'text-gray-600'}`}>
-                  Progress
-                </span>
+                <EditableAdaptiveText
+                  mode={mode}
+                  value={blockContent.progress_label || 'Progress'}
+                  onEdit={(value) => handleContentUpdate('progress_label', value)}
+                  backgroundType={backgroundType as any}
+                  colorTokens={colorTokens}
+                  variant="body"
+                  className="text-xs"
+                  placeholder="Progress"
+                  sectionId={sectionId}
+                  elementKey="progress_label"
+                  sectionBackground={sectionBackground}
+                />
                 <span className={`text-xs font-bold ${dynamicTextColors?.body || 'text-gray-700'}`}>
                   {metric.progress}%
                 </span>
@@ -328,6 +377,7 @@ export default function StackedStats(props: LayoutComponentProps) {
               colorTokens={colorTokens}
               sectionId={sectionId}
               handleContentUpdate={handleContentUpdate}
+              sectionBackground={sectionBackground}
             />
           ))}
         </div>
@@ -335,35 +385,110 @@ export default function StackedStats(props: LayoutComponentProps) {
         {/* Summary Section */}
         <div className="mt-16 text-center p-8 bg-gradient-to-r from-blue-50/20 to-purple-50/20 rounded-2xl border border-white/10">
           <div className="space-y-4">
-            <div className="flex items-center justify-center space-x-2">
-              <svg className="w-8 h-8 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-              <span style={{...h3Style}} className={`${dynamicTextColors?.heading || 'text-gray-900'}`}>
-                Trusted by Industry Leaders
-              </span>
-            </div>
-            <p style={{...bodyLgStyle}} className={`${dynamicTextColors?.body || 'text-gray-700'} max-w-2xl mx-auto`}>
-              Join thousands of companies that have already transformed their business with our proven platform.
-            </p>
+            {(blockContent.summary_title || mode === 'edit') && (
+              <div className="flex items-center justify-center space-x-2">
+                <svg className="w-8 h-8 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <EditableAdaptiveText
+                  mode={mode}
+                  value={blockContent.summary_title || ''}
+                  onEdit={(value) => handleContentUpdate('summary_title', value)}
+                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
+                  colorTokens={colorTokens}
+                  variant="body"
+                  style={{...h3Style}}
+                  placeholder="Add summary section title..."
+                  sectionId={sectionId}
+                  elementKey="summary_title"
+                  sectionBackground={sectionBackground}
+                />
+              </div>
+            )}
+            
+            {(blockContent.summary_description || mode === 'edit') && (
+              <EditableAdaptiveText
+                mode={mode}
+                value={blockContent.summary_description || ''}
+                onEdit={(value) => handleContentUpdate('summary_description', value)}
+                backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
+                colorTokens={colorTokens}
+                variant="body"
+                style={{...bodyLgStyle}}
+                className="max-w-2xl mx-auto"
+                placeholder="Add summary description..."
+                sectionId={sectionId}
+                elementKey="summary_description"
+                sectionBackground={sectionBackground}
+              />
+            )}
+            
             <div className="flex items-center justify-center space-x-6 pt-4">
-              <div className="text-center">
-                <div className={`text-2xl font-bold ${dynamicTextColors?.heading || 'text-gray-900'}`}>
-                  98%
+              {(blockContent.customer_satisfaction_value || mode === 'edit') && (
+                <div className="text-center">
+                  <EditableAdaptiveText
+                    mode={mode}
+                    value={blockContent.customer_satisfaction_value || ''}
+                    onEdit={(value) => handleContentUpdate('customer_satisfaction_value', value)}
+                    backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
+                    colorTokens={colorTokens}
+                    variant="body"
+                    className={`text-2xl font-bold`}
+                    placeholder="98%"
+                    sectionId={sectionId}
+                    elementKey="customer_satisfaction_value"
+                    sectionBackground={sectionBackground}
+                  />
+                  <EditableAdaptiveText
+                    mode={mode}
+                    value={blockContent.customer_satisfaction_label || ''}
+                    onEdit={(value) => handleContentUpdate('customer_satisfaction_label', value)}
+                    backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
+                    colorTokens={colorTokens}
+                    variant="body"
+                    className={`text-sm`}
+                    placeholder="Customer Satisfaction"
+                    sectionId={sectionId}
+                    elementKey="customer_satisfaction_label"
+                    sectionBackground={sectionBackground}
+                  />
                 </div>
-                <div className={`text-sm ${dynamicTextColors?.muted || 'text-gray-600'}`}>
-                  Customer Satisfaction
+              )}
+              
+              {((blockContent.customer_satisfaction_value || mode === 'edit') && (blockContent.response_time_value || mode === 'edit')) && (
+                <div className="w-px h-12 bg-gray-300"></div>
+              )}
+              
+              {(blockContent.response_time_value || mode === 'edit') && (
+                <div className="text-center">
+                  <EditableAdaptiveText
+                    mode={mode}
+                    value={blockContent.response_time_value || ''}
+                    onEdit={(value) => handleContentUpdate('response_time_value', value)}
+                    backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
+                    colorTokens={colorTokens}
+                    variant="body"
+                    className={`text-2xl font-bold`}
+                    placeholder="<3min"
+                    sectionId={sectionId}
+                    elementKey="response_time_value"
+                    sectionBackground={sectionBackground}
+                  />
+                  <EditableAdaptiveText
+                    mode={mode}
+                    value={blockContent.response_time_label || ''}
+                    onEdit={(value) => handleContentUpdate('response_time_label', value)}
+                    backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
+                    colorTokens={colorTokens}
+                    variant="body"
+                    className={`text-sm`}
+                    placeholder="Average Response Time"
+                    sectionId={sectionId}
+                    elementKey="response_time_label"
+                    sectionBackground={sectionBackground}
+                  />
                 </div>
-              </div>
-              <div className="w-px h-12 bg-gray-300"></div>
-              <div className="text-center">
-                <div className={`text-2xl font-bold ${dynamicTextColors?.heading || 'text-gray-900'}`}>
-                  {"<3min"}
-                </div>
-                <div className={`text-sm ${dynamicTextColors?.muted || 'text-gray-600'}`}>
-                  Average Response Time
-                </div>
-              </div>
+              )}
             </div>
           </div>
         </div>
