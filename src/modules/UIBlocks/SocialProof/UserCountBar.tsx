@@ -11,7 +11,7 @@ import {
 } from '@/components/layout/EditableContent';
 import { SocialProofNumber } from '@/components/layout/ComponentRegistry';
 import { LayoutComponentProps } from '@/types/storeTypes';
-import { parsePipeData } from '@/utils/dataParsingUtils';
+import { parsePipeData, updateListData } from '@/utils/dataParsingUtils';
 
 // Content interface for type safety
 interface UserCountBarContent {
@@ -20,6 +20,14 @@ interface UserCountBarContent {
   user_metrics: string;
   metric_labels: string;
   growth_indicators?: string;
+  // User avatar group fields
+  users_joined_text?: string;
+  rating_value?: string;
+  rating_text?: string;
+  // Trust indicator fields
+  trust_item_1?: string;
+  trust_item_2?: string;
+  trust_item_3?: string;
 }
 
 // Metric structure
@@ -52,6 +60,32 @@ const CONTENT_SCHEMA = {
   growth_indicators: { 
     type: 'string' as const, 
     default: '+25%|+180%|+0.1%|+0.2' 
+  },
+  // User avatar group fields
+  users_joined_text: { 
+    type: 'string' as const, 
+    default: '+1,000 joined this week' 
+  },
+  rating_value: { 
+    type: 'string' as const, 
+    default: '4.9/5' 
+  },
+  rating_text: { 
+    type: 'string' as const, 
+    default: 'rating' 
+  },
+  // Trust indicator fields
+  trust_item_1: { 
+    type: 'string' as const, 
+    default: 'Free 14-day trial' 
+  },
+  trust_item_2: { 
+    type: 'string' as const, 
+    default: 'Enterprise-grade security' 
+  },
+  trust_item_3: { 
+    type: 'string' as const, 
+    default: '24/7 customer support' 
   }
 };
 
@@ -73,37 +107,95 @@ const parseMetricData = (metrics: string, labels: string, growth?: string): User
 // Metric Display Component
 const MetricDisplay = React.memo(({ 
   metric, 
+  mode,
   dynamicTextColors,
-  getTextStyle 
+  getTextStyle,
+  colorTokens,
+  onMetricEdit,
+  onLabelEdit,
+  onGrowthEdit,
+  sectionId,
+  backgroundType,
+  sectionBackground
 }: { 
   metric: UserMetric;
+  mode: 'edit' | 'preview';
   dynamicTextColors: any;
   getTextStyle: any;
+  colorTokens: any;
+  onMetricEdit: (index: number, value: string) => void;
+  onLabelEdit: (index: number, value: string) => void;
+  onGrowthEdit: (index: number, value: string) => void;
+  sectionId: string;
+  backgroundType: string;
+  sectionBackground: string;
 }) => {
   
   return (
     <div className="text-center p-6 rounded-xl bg-white/5 backdrop-blur-sm border border-white/10 hover:bg-white/10 transition-all duration-300">
       <div className="space-y-2">
-        <SocialProofNumber
-          number={metric.value}
-          label=""
-          className={`font-bold text-3xl ${dynamicTextColors?.heading || 'text-gray-900'}`}
-        />
+        {mode === 'edit' ? (
+          <EditableAdaptiveText
+            mode={mode}
+            value={metric.value}
+            onEdit={(value) => onMetricEdit(metric.index, value)}
+            backgroundType={backgroundType as any}
+            colorTokens={colorTokens}
+            variant="body"
+            textStyle={{
+              ...getTextStyle('h2'),
+              fontWeight: 700,
+              fontSize: '1.875rem',
+              lineHeight: '2.25rem'
+            }}
+            className="text-center"
+            placeholder="50,000+"
+            sectionId={sectionId}
+            elementKey={`metric_value_${metric.index}`}
+            sectionBackground={sectionBackground}
+          />
+        ) : (
+          <SocialProofNumber
+            number={metric.value}
+            label=""
+            className={`font-bold text-3xl ${dynamicTextColors?.heading || 'text-gray-900'}`}
+          />
+        )}
         
-        {metric.growth && (
+        {(metric.growth || mode === 'edit') && (
           <div className="flex items-center justify-center space-x-1">
             <svg className="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
             </svg>
-            <span className="text-green-500 text-sm font-medium">
-              {metric.growth}
-            </span>
+            <EditableAdaptiveText
+              mode={mode}
+              value={metric.growth || ''}
+              onEdit={(value) => onGrowthEdit(metric.index, value)}
+              backgroundType={backgroundType as any}
+              colorTokens={colorTokens}
+              variant="body"
+              className="text-green-500 text-sm font-medium"
+              placeholder="+25%"
+              sectionId={sectionId}
+              elementKey={`metric_growth_${metric.index}`}
+              sectionBackground={sectionBackground}
+            />
           </div>
         )}
         
-        <p className={`text-sm font-medium ${dynamicTextColors?.muted || 'text-gray-600'}`}>
-          {metric.label}
-        </p>
+        <EditableAdaptiveText
+          mode={mode}
+          value={metric.label}
+          onEdit={(value) => onLabelEdit(metric.index, value)}
+          backgroundType={backgroundType as any}
+          colorTokens={colorTokens}
+          variant="body"
+          className="text-sm font-medium"
+          placeholder="Metric Label"
+          sectionId={sectionId}
+          elementKey={`metric_label_${metric.index}`}
+          sectionBackground={sectionBackground}
+        />
       </div>
     </div>
   );
@@ -112,9 +204,23 @@ MetricDisplay.displayName = 'MetricDisplay';
 
 // User Avatar Component
 const UserAvatarGroup = React.memo(({ 
-  dynamicTextColors 
+  mode,
+  dynamicTextColors,
+  colorTokens,
+  blockContent,
+  handleContentUpdate,
+  sectionId,
+  backgroundType,
+  sectionBackground
 }: { 
+  mode: 'edit' | 'preview';
   dynamicTextColors: any;
+  colorTokens: any;
+  blockContent: UserCountBarContent;
+  handleContentUpdate: (key: string, value: any) => void;
+  sectionId: string;
+  backgroundType: string;
+  sectionBackground: string;
 }) => {
   const avatars = [
     { id: 1, color: 'from-blue-400 to-blue-600' },
@@ -139,18 +245,53 @@ const UserAvatarGroup = React.memo(({
         ))}
       </div>
       <div className="text-left">
-        <p className={`text-sm font-medium ${dynamicTextColors?.body || 'text-gray-700'}`}>
-          +1,000 joined this week
-        </p>
+        <EditableAdaptiveText
+          mode={mode}
+          value={blockContent.users_joined_text || ''}
+          onEdit={(value) => handleContentUpdate('users_joined_text', value)}
+          backgroundType={backgroundType as any}
+          colorTokens={colorTokens}
+          variant="body"
+          className="text-sm font-medium"
+          placeholder="+1,000 joined this week"
+          sectionId={sectionId}
+          elementKey="users_joined_text"
+          sectionBackground={sectionBackground}
+        />
         <div className="flex items-center space-x-1">
           {[1,2,3,4,5].map(i => (
             <svg key={i} className="w-4 h-4 text-yellow-400 fill-current" viewBox="0 0 20 20">
               <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
             </svg>
           ))}
-          <span className={`text-sm ${dynamicTextColors?.muted || 'text-gray-600'} ml-2`}>
-            4.9/5 rating
-          </span>
+          <div className="flex items-center space-x-1 ml-2">
+            <EditableAdaptiveText
+              mode={mode}
+              value={blockContent.rating_value || ''}
+              onEdit={(value) => handleContentUpdate('rating_value', value)}
+              backgroundType={backgroundType as any}
+              colorTokens={colorTokens}
+              variant="body"
+              className="text-sm"
+              placeholder="4.9/5"
+              sectionId={sectionId}
+              elementKey="rating_value"
+              sectionBackground={sectionBackground}
+            />
+            <EditableAdaptiveText
+              mode={mode}
+              value={blockContent.rating_text || ''}
+              onEdit={(value) => handleContentUpdate('rating_text', value)}
+              backgroundType={backgroundType as any}
+              colorTokens={colorTokens}
+              variant="body"
+              className="text-sm"
+              placeholder="rating"
+              sectionId={sectionId}
+              elementKey="rating_text"
+              sectionBackground={sectionBackground}
+            />
+          </div>
         </div>
       </div>
     </div>
@@ -186,6 +327,32 @@ export default function UserCountBar(props: LayoutComponentProps) {
     blockContent.metric_labels || '',
     blockContent.growth_indicators
   );
+
+  // Handle metric editing
+  const handleMetricEdit = (index: number, value: string) => {
+    const updatedMetrics = updateListData(blockContent.user_metrics, index, value);
+    handleContentUpdate('user_metrics', updatedMetrics);
+  };
+
+  const handleLabelEdit = (index: number, value: string) => {
+    const updatedLabels = updateListData(blockContent.metric_labels, index, value);
+    handleContentUpdate('metric_labels', updatedLabels);
+  };
+
+  const handleGrowthEdit = (index: number, value: string) => {
+    const updatedGrowth = updateListData(blockContent.growth_indicators || '', index, value);
+    handleContentUpdate('growth_indicators', updatedGrowth);
+  };
+
+  // Get trust items
+  const getTrustItems = (): string[] => {
+    const items = [
+      blockContent.trust_item_1,
+      blockContent.trust_item_2,
+      blockContent.trust_item_3
+    ].filter((item): item is string => Boolean(item && item.trim() !== '' && item !== '___REMOVED___'));
+    return items;
+  };
 
   return (
     <LayoutSection
@@ -231,7 +398,16 @@ export default function UserCountBar(props: LayoutComponentProps) {
           )}
 
           {/* User Avatar Group */}
-          <UserAvatarGroup dynamicTextColors={dynamicTextColors} />
+          <UserAvatarGroup 
+            mode={mode}
+            dynamicTextColors={dynamicTextColors}
+            colorTokens={colorTokens}
+            blockContent={blockContent}
+            handleContentUpdate={handleContentUpdate}
+            sectionId={sectionId}
+            backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
+            sectionBackground={sectionBackground}
+          />
         </div>
 
         {/* Metrics Grid */}
@@ -240,40 +416,86 @@ export default function UserCountBar(props: LayoutComponentProps) {
             <MetricDisplay
               key={metric.id}
               metric={metric}
+              mode={mode}
               dynamicTextColors={dynamicTextColors}
               getTextStyle={getTextStyle}
+              colorTokens={colorTokens}
+              onMetricEdit={handleMetricEdit}
+              onLabelEdit={handleLabelEdit}
+              onGrowthEdit={handleGrowthEdit}
+              sectionId={sectionId}
+              backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
+              sectionBackground={sectionBackground}
             />
           ))}
         </div>
 
         {/* Trust Indicators Bar */}
         <div className="flex flex-wrap items-center justify-center gap-8 pt-8 border-t border-white/10">
-          <div className="flex items-center space-x-2">
-            <svg className="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-            <span className={`text-sm ${dynamicTextColors?.muted || 'text-gray-600'}`}>
-              Free 14-day trial
-            </span>
-          </div>
+          {getTrustItems().map((item, index) => (
+            <div key={index} className="flex items-center space-x-2 group/trust-item relative">
+              <svg className="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <EditableAdaptiveText
+                mode={mode}
+                value={item}
+                onEdit={(value) => {
+                  const fieldKey = `trust_item_${index + 1}` as keyof UserCountBarContent;
+                  handleContentUpdate(fieldKey, value);
+                }}
+                backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary') as any}
+                colorTokens={colorTokens}
+                variant="body"
+                className="text-sm"
+                placeholder="Trust indicator"
+                sectionId={sectionId}
+                elementKey={`trust_item_${index + 1}`}
+                sectionBackground={sectionBackground}
+              />
+              
+              {/* Remove button */}
+              {mode === 'edit' && (
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    const fieldKey = `trust_item_${index + 1}` as keyof UserCountBarContent;
+                    handleContentUpdate(fieldKey, '___REMOVED___');
+                  }}
+                  className="opacity-0 group-hover/trust-item:opacity-100 ml-1 p-1 rounded-full bg-white/80 hover:bg-white text-red-500 hover:text-red-700 transition-all duration-200 absolute -right-6 top-1/2 -translate-y-1/2 shadow-sm"
+                  title="Remove trust item"
+                >
+                  <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              )}
+            </div>
+          ))}
           
-          <div className="flex items-center space-x-2">
-            <svg className="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-            </svg>
-            <span className={`text-sm ${dynamicTextColors?.muted || 'text-gray-600'}`}>
-              Enterprise-grade security
-            </span>
-          </div>
-          
-          <div className="flex items-center space-x-2">
-            <svg className="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192L5.636 18.364M12 12h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-            <span className={`text-sm ${dynamicTextColors?.muted || 'text-gray-600'}`}>
-              24/7 customer support
-            </span>
-          </div>
+          {/* Add trust item button */}
+          {mode === 'edit' && getTrustItems().length < 3 && (
+            <button
+              onClick={() => {
+                const emptyIndex = [
+                  blockContent.trust_item_1,
+                  blockContent.trust_item_2,
+                  blockContent.trust_item_3
+                ].findIndex(item => !item || item.trim() === '' || item === '___REMOVED___');
+                
+                if (emptyIndex !== -1) {
+                  const fieldKey = `trust_item_${emptyIndex + 1}` as keyof UserCountBarContent;
+                  handleContentUpdate(fieldKey, 'New trust item');
+                }
+              }}
+              className="flex items-center space-x-1 text-sm text-blue-600 hover:text-blue-800 transition-colors"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+              </svg>
+              <span>Add trust item</span>
+            </button>
+          )}
         </div>
       </div>
     </LayoutSection>
@@ -295,7 +517,13 @@ export const componentMeta = {
     { key: 'subheadline', label: 'Subheadline', type: 'textarea', required: false },
     { key: 'user_metrics', label: 'User Metrics (pipe separated)', type: 'text', required: true },
     { key: 'metric_labels', label: 'Metric Labels (pipe separated)', type: 'text', required: true },
-    { key: 'growth_indicators', label: 'Growth Indicators (pipe separated)', type: 'text', required: false }
+    { key: 'growth_indicators', label: 'Growth Indicators (pipe separated)', type: 'text', required: false },
+    { key: 'users_joined_text', label: 'Users Joined Text', type: 'text', required: false },
+    { key: 'rating_value', label: 'Rating Value', type: 'text', required: false },
+    { key: 'rating_text', label: 'Rating Text', type: 'text', required: false },
+    { key: 'trust_item_1', label: 'Trust Item 1', type: 'text', required: false },
+    { key: 'trust_item_2', label: 'Trust Item 2', type: 'text', required: false },
+    { key: 'trust_item_3', label: 'Trust Item 3', type: 'text', required: false }
   ],
   
   features: [
