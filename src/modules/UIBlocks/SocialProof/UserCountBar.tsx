@@ -11,7 +11,13 @@ import {
 } from '@/components/layout/EditableContent';
 import { SocialProofNumber } from '@/components/layout/ComponentRegistry';
 import { LayoutComponentProps } from '@/types/storeTypes';
-import { parsePipeData, updateListData } from '@/utils/dataParsingUtils';
+import { 
+  parsePipeData, 
+  updateListData,
+  parseCustomerAvatarData,
+  updateAvatarUrls
+} from '@/utils/dataParsingUtils';
+import AvatarEditableComponent from '@/components/ui/AvatarEditableComponent';
 
 // Content interface for type safety
 interface UserCountBarContent {
@@ -28,6 +34,9 @@ interface UserCountBarContent {
   trust_item_1?: string;
   trust_item_2?: string;
   trust_item_3?: string;
+  // Dynamic avatar system
+  customer_names?: string;
+  avatar_urls?: string;
 }
 
 // Metric structure
@@ -86,6 +95,15 @@ const CONTENT_SCHEMA = {
   trust_item_3: { 
     type: 'string' as const, 
     default: '24/7 customer support' 
+  },
+  // Dynamic avatar system
+  customer_names: { 
+    type: 'string' as const, 
+    default: 'Sarah Chen|Alex Rivera|Jordan Kim|Maya Patel|Sam Wilson' 
+  },
+  avatar_urls: { 
+    type: 'string' as const, 
+    default: '{}' 
   }
 };
 
@@ -222,26 +240,47 @@ const UserAvatarGroup = React.memo(({
   backgroundType: string;
   sectionBackground: string;
 }) => {
-  const avatars = [
-    { id: 1, color: 'from-blue-400 to-blue-600' },
-    { id: 2, color: 'from-green-400 to-green-600' },
-    { id: 3, color: 'from-purple-400 to-purple-600' },
-    { id: 4, color: 'from-pink-400 to-pink-600' },
-    { id: 5, color: 'from-yellow-400 to-yellow-600' }
-  ];
+  // Parse customer avatars from dynamic system
+  const getCustomerAvatars = (): { name: string; avatarUrl: string }[] => {
+    if (blockContent.customer_names) {
+      const customerData = parseCustomerAvatarData(
+        blockContent.customer_names, 
+        blockContent.avatar_urls || '{}'
+      );
+      return customerData.slice(0, 5).map(customer => ({
+        name: customer.name,
+        avatarUrl: customer.avatarUrl || ''
+      }));
+    }
+    // Fallback to default names
+    const defaultNames = ['Sarah Chen', 'Alex Rivera', 'Jordan Kim', 'Maya Patel', 'Sam Wilson'];
+    return defaultNames.map(name => ({
+      name,
+      avatarUrl: ''
+    }));
+  };
+
+  const customerAvatars = getCustomerAvatars();
+
+  // Handle avatar URL updates
+  const handleAvatarChange = (customerName: string, avatarUrl: string) => {
+    const updatedAvatarUrls = updateAvatarUrls(blockContent.avatar_urls || '{}', customerName, avatarUrl);
+    handleContentUpdate('avatar_urls', updatedAvatarUrls);
+  };
 
   return (
     <div className="flex items-center justify-center space-x-4 mb-8">
       <div className="flex -space-x-2">
-        {avatars.map((avatar) => (
-          <div 
-            key={avatar.id}
-            className={`w-12 h-12 rounded-full bg-gradient-to-br ${avatar.color} border-3 border-white shadow-lg flex items-center justify-center`}
-          >
-            <span className="text-white font-bold text-sm">
-              {String.fromCharCode(64 + avatar.id)}
-            </span>
-          </div>
+        {customerAvatars.map((customer) => (
+          <AvatarEditableComponent
+            key={customer.name}
+            mode={mode}
+            avatarUrl={customer.avatarUrl}
+            onAvatarChange={(url) => handleAvatarChange(customer.name, url)}
+            customerName={customer.name}
+            size="md"
+            className="cursor-default"
+          />
         ))}
       </div>
       <div className="text-left">
@@ -523,7 +562,9 @@ export const componentMeta = {
     { key: 'rating_text', label: 'Rating Text', type: 'text', required: false },
     { key: 'trust_item_1', label: 'Trust Item 1', type: 'text', required: false },
     { key: 'trust_item_2', label: 'Trust Item 2', type: 'text', required: false },
-    { key: 'trust_item_3', label: 'Trust Item 3', type: 'text', required: false }
+    { key: 'trust_item_3', label: 'Trust Item 3', type: 'text', required: false },
+    { key: 'customer_names', label: 'Customer Names (pipe separated)', type: 'text', required: false },
+    { key: 'avatar_urls', label: 'Avatar URLs (JSON)', type: 'text', required: false }
   ],
   
   features: [
