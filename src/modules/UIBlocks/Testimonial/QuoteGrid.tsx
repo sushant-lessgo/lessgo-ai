@@ -118,7 +118,10 @@ const parseTestimonialData = (
   const titleList = parsePipeData(titles || '');
   const companyList = parsePipeData(companies || '');
   
-  return quoteList.map((quote, index) => ({
+  // Limit to maximum 6 testimonials
+  const limitedQuoteList = quoteList.slice(0, 6);
+  
+  return limitedQuoteList.map((quote, index) => ({
     id: `testimonial-${index}`,
     index,
     quote,
@@ -126,6 +129,41 @@ const parseTestimonialData = (
     customerTitle: titleList[index] || undefined,
     customerCompany: companyList[index] || undefined
   }));
+};
+
+// Helper function to remove a testimonial
+const removeTestimonial = (
+  quotes: string, 
+  names: string, 
+  titles: string, 
+  companies: string, 
+  indexToRemove: number
+): { newQuotes: string; newNames: string; newTitles: string; newCompanies: string } => {
+  const quoteList = parsePipeData(quotes);
+  const nameList = parsePipeData(names);
+  const titleList = parsePipeData(titles || '');
+  const companyList = parsePipeData(companies || '');
+  
+  // Remove the testimonial at the specified index
+  if (indexToRemove >= 0 && indexToRemove < quoteList.length) {
+    quoteList.splice(indexToRemove, 1);
+  }
+  if (indexToRemove >= 0 && indexToRemove < nameList.length) {
+    nameList.splice(indexToRemove, 1);
+  }
+  if (indexToRemove >= 0 && indexToRemove < titleList.length) {
+    titleList.splice(indexToRemove, 1);
+  }
+  if (indexToRemove >= 0 && indexToRemove < companyList.length) {
+    companyList.splice(indexToRemove, 1);
+  }
+  
+  return {
+    newQuotes: quoteList.join('|'),
+    newNames: nameList.join('|'),
+    newTitles: titleList.join('|'),
+    newCompanies: companyList.join('|')
+  };
 };
 
 // Customer Avatar Component
@@ -177,6 +215,8 @@ const TestimonialCard = React.memo(({
   onCompanyEdit,
   ratingValue,
   onRatingEdit,
+  onRemoveTestimonial,
+  canRemove,
   sectionId,
   sectionBackground,
   backgroundType,
@@ -193,6 +233,8 @@ const TestimonialCard = React.memo(({
   onCompanyEdit: (index: number, value: string) => void;
   ratingValue: string;
   onRatingEdit: (value: string) => void;
+  onRemoveTestimonial?: (index: number) => void;
+  canRemove?: boolean;
   sectionId: string;
   sectionBackground: any;
   backgroundType: "custom" | "neutral" | "primary" | "secondary" | "divider" | "theme" | undefined;
@@ -201,13 +243,13 @@ const TestimonialCard = React.memo(({
 }) => {
   
   return (
-    <div className="group bg-white p-8 rounded-xl border border-gray-200 hover:border-blue-300 hover:shadow-lg transition-all duration-300 relative">
+    <div className={`group/quote-card-${testimonial.index} bg-white p-8 rounded-xl border border-gray-200 hover:border-blue-300 hover:shadow-lg transition-all duration-300 relative`}>
       
       {/* Quote Mark */}
       <div className="absolute top-6 right-6 opacity-20 group-hover:opacity-30 transition-opacity duration-300 group/icon-edit relative">
         <IconEditableText
           mode={mode}
-          value={blockContent.quote_mark_icon || '“'}
+          value={blockContent.quote_mark_icon || '"'}
           onEdit={(value) => handleContentUpdate('quote_mark_icon', value)}
           backgroundType={backgroundType}
           colorTokens={colorTokens}
@@ -217,6 +259,22 @@ const TestimonialCard = React.memo(({
           elementKey="quote_mark_icon"
         />
       </div>
+
+      {/* Delete Button - only show in edit mode and if can remove */}
+      {mode !== 'preview' && onRemoveTestimonial && canRemove && (
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            onRemoveTestimonial(testimonial.index);
+          }}
+          className={`opacity-0 group-hover/quote-card-${testimonial.index}:opacity-100 absolute top-4 left-4 w-6 h-6 bg-red-500 hover:bg-red-600 rounded-full flex items-center justify-center transition-all duration-200`}
+          title="Remove this testimonial"
+        >
+          <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      )}
       
       {/* Testimonial Quote */}
       <div className="mb-6">
@@ -381,6 +439,22 @@ export default function QuoteGrid(props: LayoutComponentProps) {
     handleContentUpdate('customer_companies', updatedCompanies);
   };
 
+  // Handle removing a testimonial
+  const handleRemoveTestimonial = (indexToRemove: number) => {
+    const { newQuotes, newNames, newTitles, newCompanies } = removeTestimonial(
+      blockContent.testimonial_quotes,
+      blockContent.customer_names,
+      blockContent.customer_titles || '',
+      blockContent.customer_companies || '',
+      indexToRemove
+    );
+    
+    handleContentUpdate('testimonial_quotes', newQuotes);
+    handleContentUpdate('customer_names', newNames);
+    handleContentUpdate('customer_titles', newTitles);
+    handleContentUpdate('customer_companies', newCompanies);
+  };
+
   return (
     <LayoutSection
       sectionId={sectionId}
@@ -427,6 +501,8 @@ export default function QuoteGrid(props: LayoutComponentProps) {
               onCompanyEdit={handleCompanyEdit}
               ratingValue={blockContent.rating_value || '5/5'}
               onRatingEdit={(value) => handleContentUpdate('rating_value', value)}
+              onRemoveTestimonial={handleRemoveTestimonial}
+              canRemove={testimonials.length > 1}
               sectionId={sectionId}
               sectionBackground={sectionBackground}
               backgroundType={backgroundType || "neutral"}

@@ -118,6 +118,13 @@ module.exports = {
   'group-hover/metric-item-3:opacity-100',
   'group-hover/metric-item-4:opacity-100',
   'group-hover/metric-item-5:opacity-100',
+  // QuoteGrid testimonial card patterns
+  'group-hover/quote-card-0:opacity-100',
+  'group-hover/quote-card-1:opacity-100',
+  'group-hover/quote-card-2:opacity-100',
+  'group-hover/quote-card-3:opacity-100',
+  'group-hover/quote-card-4:opacity-100',
+  'group-hover/quote-card-5:opacity-100',
   'group-focus-within:opacity-100',
   'opacity-0',
   'transition-opacity',
