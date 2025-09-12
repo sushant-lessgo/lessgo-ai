@@ -11,7 +11,7 @@ import {
 } from '@/components/layout/EditableContent';
 import { SocialProofNumber } from '@/components/layout/ComponentRegistry';
 import { LayoutComponentProps } from '@/types/storeTypes';
-import { parsePipeData } from '@/utils/dataParsingUtils';
+import { parsePipeData, updateListData } from '@/utils/dataParsingUtils';
 
 // Content interface for type safety
 interface MapHeatSpotsContent {
@@ -20,6 +20,7 @@ interface MapHeatSpotsContent {
   global_stats: string;
   stat_labels: string;
   countries_list?: string;
+  countries_title?: string;
 }
 
 // Global stat structure
@@ -59,6 +60,10 @@ const CONTENT_SCHEMA = {
   countries_list: { 
     type: 'string' as const, 
     default: 'United States|United Kingdom|Germany|France|Japan|Australia|Canada|Brazil|India|Singapore' 
+  },
+  countries_title: {
+    type: 'string' as const,
+    default: 'Active in These Countries'
   }
 };
 
@@ -213,32 +218,74 @@ const WorldMapVisualization = React.memo(({
 });
 WorldMapVisualization.displayName = 'WorldMapVisualization';
 
-// Stat Display Component
-const GlobalStatDisplay = React.memo(({ 
+// Editable Stat Display Component
+const EditableGlobalStatDisplay = React.memo(({ 
   stat, 
+  mode,
   dynamicTextColors,
   getTextStyle,
-  bodyStyle 
+  bodyStyle,
+  onValueEdit,
+  onLabelEdit,
+  sectionId,
+  backgroundType,
+  sectionBackground,
+  colorTokens
 }: { 
   stat: GlobalStat;
+  mode: 'edit' | 'preview';
   dynamicTextColors: any;
   getTextStyle: any;
   bodyStyle?: any;
+  onValueEdit: (index: number, value: string) => void;
+  onLabelEdit: (index: number, value: string) => void;
+  sectionId: string;
+  backgroundType: string;
+  sectionBackground: string;
+  colorTokens: any;
 }) => {
   return (
     <div className="text-center">
-      <SocialProofNumber
-        number={stat.value}
-        label=""
-        className={`mb-2 ${dynamicTextColors?.heading || 'text-gray-900'}`}
+      {mode === 'edit' ? (
+        <EditableAdaptiveText
+          mode={mode}
+          value={stat.value}
+          onEdit={(value) => onValueEdit(stat.index, value)}
+          backgroundType={backgroundType as any}
+          colorTokens={colorTokens}
+          variant="body"
+          className={`mb-2 text-3xl md:text-4xl font-bold ${dynamicTextColors?.heading || 'text-gray-900'}`}
+          placeholder="0"
+          sectionBackground={sectionBackground}
+          data-section-id={sectionId}
+          data-element-key={`stat_value_${stat.index}`}
+        />
+      ) : (
+        <SocialProofNumber
+          number={stat.value}
+          label=""
+          className={`mb-2 ${dynamicTextColors?.heading || 'text-gray-900'}`}
+        />
+      )}
+      
+      <EditableAdaptiveText
+        mode={mode}
+        value={stat.label}
+        onEdit={(value) => onLabelEdit(stat.index, value)}
+        backgroundType={backgroundType as any}
+        colorTokens={colorTokens}
+        variant="body"
+        className={`text-sm ${dynamicTextColors?.muted || 'text-gray-600'}`}
+        style={bodyStyle ? {...bodyStyle, fontSize: '0.875rem'} : {}}
+        placeholder="Label"
+        sectionBackground={sectionBackground}
+        data-section-id={sectionId}
+        data-element-key={`stat_label_${stat.index}`}
       />
-      <p style={bodyStyle ? {...bodyStyle, fontSize: '0.875rem'} : {}} className={`text-sm ${dynamicTextColors?.muted || 'text-gray-600'}`}>
-        {stat.label}
-      </p>
     </div>
   );
 });
-GlobalStatDisplay.displayName = 'GlobalStatDisplay';
+EditableGlobalStatDisplay.displayName = 'EditableGlobalStatDisplay';
 
 export default function MapHeatSpots(props: LayoutComponentProps) {
   
@@ -274,6 +321,24 @@ export default function MapHeatSpots(props: LayoutComponentProps) {
   // Parse countries and create spots
   const countries = blockContent.countries_list ? parsePipeData(blockContent.countries_list) : [];
   const countrySpots = getCountrySpots(countries);
+
+  // Handle individual stat value editing
+  const handleStatValueEdit = (index: number, value: string) => {
+    const updatedStats = updateListData(blockContent.global_stats, index, value);
+    handleContentUpdate('global_stats', updatedStats);
+  };
+
+  // Handle individual stat label editing
+  const handleStatLabelEdit = (index: number, value: string) => {
+    const updatedLabels = updateListData(blockContent.stat_labels, index, value);
+    handleContentUpdate('stat_labels', updatedLabels);
+  };
+
+  // Handle individual country editing
+  const handleCountryEdit = (index: number, value: string) => {
+    const updatedCountries = updateListData(blockContent.countries_list || '', index, value);
+    handleContentUpdate('countries_list', updatedCountries);
+  };
 
   return (
     <LayoutSection
@@ -321,12 +386,19 @@ export default function MapHeatSpots(props: LayoutComponentProps) {
         {/* Global Stats */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-16">
           {globalStats.slice(0, 4).map((stat) => (
-            <GlobalStatDisplay
+            <EditableGlobalStatDisplay
               key={stat.id}
               stat={stat}
+              mode={mode}
               dynamicTextColors={dynamicTextColors}
               getTextStyle={getTextStyle}
               bodyStyle={bodyStyle}
+              onValueEdit={handleStatValueEdit}
+              onLabelEdit={handleStatLabelEdit}
+              sectionId={sectionId}
+              backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
+              sectionBackground={sectionBackground}
+              colorTokens={colorTokens}
             />
           ))}
         </div>
@@ -341,17 +413,41 @@ export default function MapHeatSpots(props: LayoutComponentProps) {
 
         {/* Country List */}
         <div className="text-center">
-          <h3 style={{...h3Style}} className={`mb-6 ${dynamicTextColors?.heading || 'text-gray-900'}`}>
-            Active in These Countries
-          </h3>
+          <EditableAdaptiveText
+            mode={mode}
+            value={blockContent.countries_title || ''}
+            onEdit={(value) => handleContentUpdate('countries_title', value)}
+            backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
+            colorTokens={colorTokens}
+            variant="body"
+            textStyle={{
+              ...h3Style,
+              textAlign: 'center'
+            }}
+            className={`mb-6 ${dynamicTextColors?.heading || 'text-gray-900'}`}
+            placeholder="Active in These Countries"
+            sectionId={sectionId}
+            elementKey="countries_title"
+            sectionBackground={sectionBackground}
+          />
           <div className="flex flex-wrap justify-center gap-3">
             {countries.slice(0, 8).map((country, index) => (
-              <span
-                key={index}
-                style={{...bodyStyle, fontSize: '0.875rem'}} className={`px-4 py-2 bg-white/10 backdrop-blur-sm rounded-full border border-white/20 ${dynamicTextColors?.body || 'text-gray-700'} hover:bg-white/20 transition-colors duration-300`}
-              >
-                {country.trim()}
-              </span>
+              <div key={index} className={`px-4 py-2 bg-white/10 backdrop-blur-sm rounded-full border border-white/20 hover:bg-white/20 transition-colors duration-300`}>
+                <EditableAdaptiveText
+                  mode={mode}
+                  value={country.trim()}
+                  onEdit={(value) => handleCountryEdit(index, value)}
+                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
+                  colorTokens={colorTokens}
+                  variant="body"
+                  className={`${dynamicTextColors?.body || 'text-gray-700'}`}
+                  style={{...bodyStyle, fontSize: '0.875rem'}}
+                  placeholder="Country name"
+                  sectionId={sectionId}
+                  elementKey={`country_${index}`}
+                  sectionBackground={sectionBackground}
+                />
+              </div>
             ))}
             {countries.length > 8 && (
               <span style={{...bodyStyle, fontSize: '0.875rem'}} className={`px-4 py-2 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-full`}>
@@ -380,6 +476,7 @@ export const componentMeta = {
     { key: 'subheadline', label: 'Subheadline', type: 'textarea', required: false },
     { key: 'global_stats', label: 'Global Statistics (pipe separated)', type: 'text', required: true },
     { key: 'stat_labels', label: 'Stat Labels (pipe separated)', type: 'text', required: true },
+    { key: 'countries_title', label: 'Countries Section Title', type: 'text', required: false },
     { key: 'countries_list', label: 'Countries List (pipe separated)', type: 'text', required: false }
   ],
   
@@ -388,7 +485,10 @@ export const componentMeta = {
     'Interactive world map with animated heat spots',
     'Hover tooltips showing user counts per country',
     'Animated connecting lines between major markets',
-    'Country tags with overflow indicator'
+    'Country tags with overflow indicator',
+    'Fully editable global statistics values and labels',
+    'Editable countries section title',
+    'Individually editable country names in tags'
   ],
   
   useCases: [
