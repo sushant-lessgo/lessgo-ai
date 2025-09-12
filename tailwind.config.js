@@ -111,6 +111,13 @@ module.exports = {
   'group-hover/principle-4:opacity-100',
   'group-hover/principle-5:opacity-100',
   'group-hover/principle-6:opacity-100',
+  // StackedStats metric patterns
+  'group-hover/metric-item-0:opacity-100',
+  'group-hover/metric-item-1:opacity-100',
+  'group-hover/metric-item-2:opacity-100',
+  'group-hover/metric-item-3:opacity-100',
+  'group-hover/metric-item-4:opacity-100',
+  'group-hover/metric-item-5:opacity-100',
   'group-focus-within:opacity-100',
   'opacity-0',
   'transition-opacity',

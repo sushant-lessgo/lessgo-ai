@@ -115,6 +115,48 @@ const parseMetricData = (values: string, labels: string, descriptions?: string):
   }));
 };
 
+// Helper function to add a new metric
+const addMetric = (values: string, labels: string, descriptions: string): { newValues: string; newLabels: string; newDescriptions: string } => {
+  const valueList = parsePipeData(values);
+  const labelList = parsePipeData(labels);
+  const descriptionList = parsePipeData(descriptions);
+  
+  // Add new metric with default content
+  valueList.push('New Value');
+  labelList.push('New Metric');
+  descriptionList.push('Describe this new metric and its impact.');
+  
+  return {
+    newValues: valueList.join('|'),
+    newLabels: labelList.join('|'),
+    newDescriptions: descriptionList.join('|')
+  };
+};
+
+// Helper function to remove a metric
+const removeMetric = (values: string, labels: string, descriptions: string, indexToRemove: number): { newValues: string; newLabels: string; newDescriptions: string } => {
+  const valueList = parsePipeData(values);
+  const labelList = parsePipeData(labels);
+  const descriptionList = parsePipeData(descriptions);
+  
+  // Remove the metric at the specified index
+  if (indexToRemove >= 0 && indexToRemove < valueList.length) {
+    valueList.splice(indexToRemove, 1);
+  }
+  if (indexToRemove >= 0 && indexToRemove < labelList.length) {
+    labelList.splice(indexToRemove, 1);
+  }
+  if (indexToRemove >= 0 && indexToRemove < descriptionList.length) {
+    descriptionList.splice(indexToRemove, 1);
+  }
+  
+  return {
+    newValues: valueList.join('|'),
+    newLabels: labelList.join('|'),
+    newDescriptions: descriptionList.join('|')
+  };
+};
+
 // Function to get metric icon
 const getMetricIcon = (index: number, blockContent: StackedStatsContent) => {
   const iconFields = ['metric_icon_1', 'metric_icon_2', 'metric_icon_3', 'metric_icon_4', 'metric_icon_5', 'metric_icon_6'];
@@ -138,7 +180,9 @@ const MetricCard = React.memo(({
   sectionBackground,
   handleMetricValueEdit,
   handleMetricLabelEdit,
-  handleMetricDescriptionEdit
+  handleMetricDescriptionEdit,
+  handleRemoveMetric,
+  canRemove = true
 }: { 
   metric: StackedMetric;
   dynamicTextColors: any;
@@ -156,6 +200,8 @@ const MetricCard = React.memo(({
   handleMetricValueEdit: (index: number, value: string) => void;
   handleMetricLabelEdit: (index: number, value: string) => void;
   handleMetricDescriptionEdit: (index: number, value: string) => void;
+  handleRemoveMetric?: (index: number) => void;
+  canRemove?: boolean;
 }) => {
   
   // Color scheme for each metric
@@ -163,7 +209,7 @@ const MetricCard = React.memo(({
   const color = colors[index % colors.length];
 
   return (
-    <div className="p-6 bg-white/5 backdrop-blur-sm rounded-xl border border-white/10 hover:bg-white/10 transition-all duration-300 group">
+    <div className={`relative group/metric-item-${index} p-6 bg-white/5 backdrop-blur-sm rounded-xl border border-white/10 hover:bg-white/10 transition-all duration-300`}>
       <div className="flex items-start space-x-4">
         {/* Icon */}
         <div className={`w-16 h-16 bg-gradient-to-br ${
@@ -239,6 +285,22 @@ const MetricCard = React.memo(({
           
         </div>
       </div>
+      
+      {/* Delete button - only show in edit mode and if can remove */}
+      {mode === 'edit' && handleRemoveMetric && canRemove && (
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            handleRemoveMetric(index);
+          }}
+          className={`opacity-0 group-hover/metric-item-${index}:opacity-100 absolute top-4 right-4 text-red-500 hover:text-red-700 transition-opacity duration-200`}
+          title="Remove this metric"
+        >
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      )}
     </div>
   );
 });
@@ -289,6 +351,37 @@ export default function StackedStats(props: LayoutComponentProps) {
   const handleMetricDescriptionEdit = (index: number, value: string) => {
     const updatedDescriptions = updateListData(blockContent.metric_descriptions || '', index, value);
     handleContentUpdate('metric_descriptions', updatedDescriptions);
+  };
+
+  // Handle adding a new metric
+  const handleAddMetric = () => {
+    const { newValues, newLabels, newDescriptions } = addMetric(
+      blockContent.metric_values || '',
+      blockContent.metric_labels || '',
+      blockContent.metric_descriptions || ''
+    );
+    handleContentUpdate('metric_values', newValues);
+    handleContentUpdate('metric_labels', newLabels);
+    handleContentUpdate('metric_descriptions', newDescriptions);
+  };
+
+  // Handle removing a metric
+  const handleRemoveMetric = (indexToRemove: number) => {
+    const { newValues, newLabels, newDescriptions } = removeMetric(
+      blockContent.metric_values || '',
+      blockContent.metric_labels || '',
+      blockContent.metric_descriptions || '',
+      indexToRemove
+    );
+    handleContentUpdate('metric_values', newValues);
+    handleContentUpdate('metric_labels', newLabels);
+    handleContentUpdate('metric_descriptions', newDescriptions);
+    
+    // Also clear the corresponding icon if it exists
+    const iconField = `metric_icon_${indexToRemove + 1}` as keyof StackedStatsContent;
+    if (blockContent[iconField]) {
+      handleContentUpdate(iconField, '');
+    }
   };
 
   return (
@@ -355,9 +448,26 @@ export default function StackedStats(props: LayoutComponentProps) {
               handleMetricValueEdit={handleMetricValueEdit}
               handleMetricLabelEdit={handleMetricLabelEdit}
               handleMetricDescriptionEdit={handleMetricDescriptionEdit}
+              handleRemoveMetric={handleRemoveMetric}
+              canRemove={metrics.length > 1}
             />
           ))}
         </div>
+
+        {/* Add Metric Button - only show in edit mode and if under max limit */}
+        {mode === 'edit' && metrics.length < 6 && (
+          <div className="mt-8 text-center">
+            <button
+              onClick={handleAddMetric}
+              className="flex items-center space-x-2 mx-auto px-4 py-3 bg-blue-50 hover:bg-blue-100 border-2 border-blue-200 hover:border-blue-300 rounded-xl transition-all duration-200 group"
+            >
+              <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+              </svg>
+              <span className="text-blue-700 font-medium">Add Metric</span>
+            </button>
+          </div>
+        )}
 
         {/* Summary Section */}
         <div className="mt-16 text-center p-8 bg-gradient-to-r from-blue-50/20 to-purple-50/20 rounded-2xl border border-white/10">
