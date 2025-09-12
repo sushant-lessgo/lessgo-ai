@@ -21,6 +21,10 @@ interface SocialProofStripContent {
   company_logos?: string;
   company_names?: string;
   logo_urls: string; // JSON structure: {"CompanyName": "logoUrl"}
+  trust_badge_1?: string;
+  trust_badge_2?: string;
+  trust_badge_3?: string;
+  rating_display?: string;
 }
 
 // Proof stat structure
@@ -63,6 +67,22 @@ const CONTENT_SCHEMA = {
   logo_urls: { 
     type: 'string' as const, 
     default: '{}' // JSON object for logo URLs
+  },
+  trust_badge_1: {
+    type: 'string' as const,
+    default: 'SOC 2 Certified'
+  },
+  trust_badge_2: {
+    type: 'string' as const,
+    default: 'Enterprise Security'
+  },
+  trust_badge_3: {
+    type: 'string' as const,
+    default: 'GDPR Compliant'
+  },
+  rating_display: {
+    type: 'string' as const,
+    default: '4.9/5 Rating'
   }
 };
 
@@ -136,26 +156,74 @@ const updateCompanyNames = (oldNames: string, newNames: string, logoUrlsJson: st
   };
 };
 
-// Stat Display Component
+// Stat Display Component - Made Editable
 const StatDisplay = React.memo(({ 
   stat, 
+  mode,
   dynamicTextColors,
   h2Style,
-  bodyStyle
+  bodyStyle,
+  onStatEdit,
+  onLabelEdit,
+  colorTokens,
+  backgroundType,
+  sectionBackground,
+  sectionId
 }: { 
   stat: ProofStat;
+  mode: 'edit' | 'preview';
   dynamicTextColors: any;
   h2Style: React.CSSProperties;
   bodyStyle: React.CSSProperties;
+  onStatEdit: (index: number, value: string) => void;
+  onLabelEdit: (index: number, value: string) => void;
+  colorTokens: any;
+  backgroundType: string;
+  sectionBackground: string;
+  sectionId: string;
 }) => {
   return (
     <div className="text-center">
-      <div style={{...h2Style, fontSize: 'clamp(1.5rem, 3vw, 2rem)'}} className={`${dynamicTextColors?.heading || 'text-gray-900'} mb-1`}>
-        {stat.value}
-      </div>
-      <div style={{...bodyStyle, fontSize: '0.875rem'}} className={`${dynamicTextColors?.muted || 'text-gray-600'}`}>
-        {stat.label}
-      </div>
+      {mode === 'edit' ? (
+        <>
+          <EditableAdaptiveText
+            mode={mode}
+            value={stat.value}
+            onEdit={(value) => onStatEdit(stat.index, value)}
+            backgroundType={backgroundType === 'custom' ? 'secondary' : (backgroundType || 'primary')}
+            colorTokens={colorTokens}
+            variant="body"
+            textStyle={{...h2Style, fontSize: 'clamp(1.5rem, 3vw, 2rem)', fontWeight: 'bold'}}
+            className="mb-1"
+            placeholder="0"
+            sectionBackground={sectionBackground}
+            sectionId={sectionId}
+            elementKey={`proof_stat_${stat.index}`}
+          />
+          <EditableAdaptiveText
+            mode={mode}
+            value={stat.label}
+            onEdit={(value) => onLabelEdit(stat.index, value)}
+            backgroundType={backgroundType === 'custom' ? 'secondary' : (backgroundType || 'primary')}
+            colorTokens={colorTokens}
+            variant="body"
+            textStyle={{...bodyStyle, fontSize: '0.875rem'}}
+            placeholder="Label"
+            sectionBackground={sectionBackground}
+            sectionId={sectionId}
+            elementKey={`stat_label_${stat.index}`}
+          />
+        </>
+      ) : (
+        <>
+          <div style={{...h2Style, fontSize: 'clamp(1.5rem, 3vw, 2rem)'}} className={`${dynamicTextColors?.heading || 'text-gray-900'} mb-1`}>
+            {stat.value}
+          </div>
+          <div style={{...bodyStyle, fontSize: '0.875rem'}} className={`${dynamicTextColors?.muted || 'text-gray-600'}`}>
+            {stat.label}
+          </div>
+        </>
+      )}
     </div>
   );
 });
@@ -270,9 +338,24 @@ export default function SocialProofStrip(props: LayoutComponentProps) {
               <StatDisplay
                 key={stat.id}
                 stat={stat}
+                mode={mode}
                 dynamicTextColors={dynamicTextColors}
                 h2Style={h2Style}
                 bodyStyle={bodyStyle}
+                onStatEdit={(index, value) => {
+                  const currentStats = parsePipeData(blockContent.proof_stats || '');
+                  currentStats[index] = value;
+                  handleContentUpdate('proof_stats', currentStats.join('|'));
+                }}
+                onLabelEdit={(index, value) => {
+                  const currentLabels = parsePipeData(blockContent.stat_labels || '');
+                  currentLabels[index] = value;
+                  handleContentUpdate('stat_labels', currentLabels.join('|'));
+                }}
+                colorTokens={colorTokens}
+                backgroundType={props.backgroundType || 'primary'}
+                sectionBackground={sectionBackground}
+                sectionId={sectionId}
               />
             ))}
           </div>
@@ -306,9 +389,33 @@ export default function SocialProofStrip(props: LayoutComponentProps) {
                         companyName={company.name}
                         size="sm"
                       />
-                      <span style={{...bodyStyle, fontSize: '0.875rem'}} className={`${dynamicTextColors?.body || 'text-gray-700'} flex-1`}>
-                        {company.name}
-                      </span>
+                      {mode !== 'preview' ? (
+                        <EditableAdaptiveText
+                          mode={mode}
+                          value={company.name}
+                          onEdit={(value) => {
+                            const currentCompanies = parsePipeData(blockContent.company_names || '');
+                            currentCompanies[company.index] = value;
+                            const updatedCompaniesString = currentCompanies.join('|');
+                            const { logoUrls } = updateCompanyNames(blockContent.company_names || '', updatedCompaniesString, blockContent.logo_urls);
+                            handleContentUpdate('company_names', updatedCompaniesString);
+                            handleContentUpdate('logo_urls', logoUrls);
+                          }}
+                          backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
+                          colorTokens={colorTokens}
+                          variant="body"
+                          style={{...bodyStyle, fontSize: '0.875rem'}}
+                          className="flex-1"
+                          placeholder="Company name"
+                          sectionId={sectionId}
+                          elementKey={`company_name_${company.index}`}
+                          sectionBackground={sectionBackground}
+                        />
+                      ) : (
+                        <span style={{...bodyStyle, fontSize: '0.875rem'}} className={`${dynamicTextColors?.body || 'text-gray-700'} flex-1`}>
+                          {company.name}
+                        </span>
+                      )}
                       {/* Delete Company Button */}
                       {mode !== 'preview' && (
                         <button
@@ -335,21 +442,15 @@ export default function SocialProofStrip(props: LayoutComponentProps) {
               })}
               
               {/* Add Company Button (Edit Mode Only) */}
-              {mode !== 'preview' && (
+              {mode !== 'preview' && companies.length < 8 && (
                 <div className="flex items-center justify-center px-4 py-2 bg-white/10 backdrop-blur-sm rounded-lg border-2 border-dashed border-white/20 hover:border-white/30 transition-all duration-300">
                   <button
                     onClick={(e) => {
                       e.preventDefault();
-                      const newCompanyName = prompt('Enter company name:');
-                      if (newCompanyName && newCompanyName.trim()) {
-                        const currentCompanies = parsePipeData(blockContent.company_names || '');
-                        if (!currentCompanies.includes(newCompanyName.trim())) {
-                          const updatedCompanies = [...currentCompanies, newCompanyName.trim()].join('|');
-                          handleContentUpdate('company_names', updatedCompanies);
-                        } else {
-                          alert('Company already exists!');
-                        }
-                      }
+                      const currentCompanies = parsePipeData(blockContent.company_names || '');
+                      const newCompanyName = `New Company ${currentCompanies.length + 1}`;
+                      const updatedCompanies = [...currentCompanies, newCompanyName].join('|');
+                      handleContentUpdate('company_names', updatedCompanies);
                     }}
                     className="flex items-center space-x-2 text-gray-400 hover:text-gray-600 transition-colors"
                   >
@@ -368,43 +469,115 @@ export default function SocialProofStrip(props: LayoutComponentProps) {
 
         {/* Additional Trust Elements */}
         <div className="flex flex-wrap items-center justify-center gap-6 mt-8 pt-6 border-t border-white/10">
-          <div className="flex items-center space-x-2">
-            <svg className="w-4 h-4 text-green-500" fill="currentColor" viewBox="0 0 20 20">
-              <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-            </svg>
-            <span style={{...bodyStyle, fontSize: '0.75rem'}} className={`${dynamicTextColors?.muted || 'text-gray-600'}`}>
-              SOC 2 Certified
-            </span>
-          </div>
+          {blockContent.trust_badge_1 && blockContent.trust_badge_1 !== '___REMOVED___' && (
+            <div className="flex items-center space-x-2">
+              <svg className="w-4 h-4 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+              </svg>
+              {mode !== 'preview' ? (
+                <EditableAdaptiveText
+                  mode={mode}
+                  value={blockContent.trust_badge_1}
+                  onEdit={(value) => handleContentUpdate('trust_badge_1', value)}
+                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
+                  colorTokens={colorTokens}
+                  variant="body"
+                  style={{...bodyStyle, fontSize: '0.75rem'}}
+                  placeholder="Trust badge"
+                  sectionBackground={sectionBackground}
+                  sectionId={sectionId}
+                  elementKey="trust_badge_1"
+                />
+              ) : (
+                <span style={{...bodyStyle, fontSize: '0.75rem'}} className={`${dynamicTextColors?.muted || 'text-gray-600'}`}>
+                  {blockContent.trust_badge_1}
+                </span>
+              )}
+            </div>
+          )}
           
-          <div className="flex items-center space-x-2">
-            <svg className="w-4 h-4 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
-              <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
-            </svg>
-            <span style={{...bodyStyle, fontSize: '0.75rem'}} className={`${dynamicTextColors?.muted || 'text-gray-600'}`}>
-              Enterprise Security
-            </span>
-          </div>
+          {blockContent.trust_badge_2 && blockContent.trust_badge_2 !== '___REMOVED___' && (
+            <div className="flex items-center space-x-2">
+              <svg className="w-4 h-4 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
+              </svg>
+              {mode !== 'preview' ? (
+                <EditableAdaptiveText
+                  mode={mode}
+                  value={blockContent.trust_badge_2}
+                  onEdit={(value) => handleContentUpdate('trust_badge_2', value)}
+                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
+                  colorTokens={colorTokens}
+                  variant="body"
+                  style={{...bodyStyle, fontSize: '0.75rem'}}
+                  placeholder="Trust badge"
+                  sectionBackground={sectionBackground}
+                  sectionId={sectionId}
+                  elementKey="trust_badge_2"
+                />
+              ) : (
+                <span style={{...bodyStyle, fontSize: '0.75rem'}} className={`${dynamicTextColors?.muted || 'text-gray-600'}`}>
+                  {blockContent.trust_badge_2}
+                </span>
+              )}
+            </div>
+          )}
           
-          <div className="flex items-center space-x-2">
-            <svg className="w-4 h-4 text-purple-500" fill="currentColor" viewBox="0 0 20 20">
-              <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-            <span style={{...bodyStyle, fontSize: '0.75rem'}} className={`${dynamicTextColors?.muted || 'text-gray-600'}`}>
-              GDPR Compliant
-            </span>
-          </div>
+          {blockContent.trust_badge_3 && blockContent.trust_badge_3 !== '___REMOVED___' && (
+            <div className="flex items-center space-x-2">
+              <svg className="w-4 h-4 text-purple-500" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              {mode !== 'preview' ? (
+                <EditableAdaptiveText
+                  mode={mode}
+                  value={blockContent.trust_badge_3}
+                  onEdit={(value) => handleContentUpdate('trust_badge_3', value)}
+                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
+                  colorTokens={colorTokens}
+                  variant="body"
+                  style={{...bodyStyle, fontSize: '0.75rem'}}
+                  placeholder="Trust badge"
+                  sectionBackground={sectionBackground}
+                  sectionId={sectionId}
+                  elementKey="trust_badge_3"
+                />
+              ) : (
+                <span style={{...bodyStyle, fontSize: '0.75rem'}} className={`${dynamicTextColors?.muted || 'text-gray-600'}`}>
+                  {blockContent.trust_badge_3}
+                </span>
+              )}
+            </div>
+          )}
           
-          <div className="flex items-center space-x-1">
-            {[1,2,3,4,5].map(i => (
-              <svg key={i} className="w-3 h-3 text-yellow-400 fill-current" viewBox="0 0 20 20">
-                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+          {blockContent.rating_display && blockContent.rating_display !== '___REMOVED___' && (
+            <div className="flex items-center space-x-1">
+              {[1,2,3,4,5].map(i => (
+                <svg key={i} className="w-3 h-3 text-yellow-400 fill-current" viewBox="0 0 20 20">
+                  <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
               </svg>
             ))}
-            <span className={`text-xs ${dynamicTextColors?.muted || 'text-gray-600'} ml-1`}>
-              4.9/5 Rating
-            </span>
-          </div>
+            {mode !== 'preview' ? (
+              <EditableAdaptiveText
+                mode={mode}
+                value={blockContent.rating_display || ''}
+                onEdit={(value) => handleContentUpdate('rating_display', value)}
+                backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
+                colorTokens={colorTokens}
+                variant="body"
+                className="text-xs ml-1"
+                placeholder="4.9/5 Rating"
+                sectionBackground={sectionBackground}
+                sectionId={sectionId}
+                elementKey="rating_display"
+              />
+            ) : (
+              <span className={`text-xs ${dynamicTextColors?.muted || 'text-gray-600'} ml-1`}>
+                {blockContent.rating_display}
+              </span>
+            )}
+            </div>
+          )}
         </div>
       </div>
     </LayoutSection>
