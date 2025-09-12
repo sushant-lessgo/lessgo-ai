@@ -21,7 +21,6 @@ interface StackedStatsContent {
   metric_values: string;
   metric_labels: string;
   metric_descriptions?: string;
-  progress_percentages?: string;
   metric_icon_1?: string;
   metric_icon_2?: string;
   metric_icon_3?: string;
@@ -35,7 +34,6 @@ interface StackedStatsContent {
   customer_satisfaction_label?: string;
   response_time_value?: string;
   response_time_label?: string;
-  progress_label?: string;
 }
 
 // Metric structure
@@ -45,7 +43,6 @@ interface StackedMetric {
   value: string;
   label: string;
   description?: string;
-  progress?: number;
 }
 
 // Content schema - defines structure and defaults
@@ -69,10 +66,6 @@ const CONTENT_SCHEMA = {
   metric_descriptions: { 
     type: 'string' as const, 
     default: 'Growing daily across 50+ countries|Average increase in first 6 months|Guaranteed service reliability|Around-the-clock customer support|Processed securely every month|Average time to get started' 
-  },
-  progress_percentages: { 
-    type: 'string' as const, 
-    default: '85|92|99|100|78|95' 
   },
   metric_icon_1: { type: 'string' as const, default: '👥' },
   metric_icon_2: { type: 'string' as const, default: '📈' },
@@ -105,67 +98,22 @@ const CONTENT_SCHEMA = {
     type: 'string' as const,
     default: 'Average Response Time'
   },
-  progress_label: {
-    type: 'string' as const,
-    default: 'Progress'
-  }
 };
 
 // Parse metric data from pipe-separated strings
-const parseMetricData = (values: string, labels: string, descriptions?: string, progress?: string): StackedMetric[] => {
+const parseMetricData = (values: string, labels: string, descriptions?: string): StackedMetric[] => {
   const valueList = parsePipeData(values);
   const labelList = parsePipeData(labels);
   const descriptionList = descriptions ? parsePipeData(descriptions) : [];
-  const progressList = progress ? parsePipeData(progress) : [];
   
   return valueList.map((value, index) => ({
     id: `metric-${index}`,
     index,
     value: value.trim(),
     label: labelList[index]?.trim() || `Metric ${index + 1}`,
-    description: descriptionList[index]?.trim(),
-    progress: progressList[index] ? parseInt(progressList[index]) : undefined
+    description: descriptionList[index]?.trim()
   }));
 };
-
-// Progress Bar Component
-const ProgressBar = React.memo(({ 
-  percentage, 
-  color = 'blue' 
-}: { 
-  percentage: number;
-  color?: string;
-}) => {
-  const colorClasses = {
-    blue: 'from-blue-500 to-blue-600',
-    green: 'from-green-500 to-green-600',
-    purple: 'from-purple-500 to-purple-600',
-    orange: 'from-orange-500 to-orange-600',
-    red: 'from-red-500 to-red-600',
-    indigo: 'from-indigo-500 to-indigo-600'
-  };
-  
-  const gradientClass = colorClasses[color as keyof typeof colorClasses] || colorClasses.blue;
-  
-  return (
-    <div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
-      <div 
-        className={`h-full bg-gradient-to-r ${gradientClass} rounded-full transition-all duration-1000 ease-out`}
-        style={{ 
-          width: `${Math.min(percentage, 100)}%`,
-          animation: 'slideIn 1.5s ease-out'
-        }}
-      />
-      <style jsx>{`
-        @keyframes slideIn {
-          from { width: 0%; }
-          to { width: ${Math.min(percentage, 100)}%; }
-        }
-      `}</style>
-    </div>
-  );
-});
-ProgressBar.displayName = 'ProgressBar';
 
 // Function to get metric icon
 const getMetricIcon = (index: number, blockContent: StackedStatsContent) => {
@@ -187,7 +135,10 @@ const MetricCard = React.memo(({
   colorTokens,
   sectionId,
   handleContentUpdate,
-  sectionBackground
+  sectionBackground,
+  handleMetricValueEdit,
+  handleMetricLabelEdit,
+  handleMetricDescriptionEdit
 }: { 
   metric: StackedMetric;
   dynamicTextColors: any;
@@ -202,6 +153,9 @@ const MetricCard = React.memo(({
   sectionId: string;
   handleContentUpdate: (key: keyof StackedStatsContent, value: string) => void;
   sectionBackground: string;
+  handleMetricValueEdit: (index: number, value: string) => void;
+  handleMetricLabelEdit: (index: number, value: string) => void;
+  handleMetricDescriptionEdit: (index: number, value: string) => void;
 }) => {
   
   // Color scheme for each metric
@@ -239,45 +193,50 @@ const MetricCard = React.memo(({
         {/* Content */}
         <div className="flex-1 space-y-3">
           <div className="flex items-baseline justify-between">
-            <SocialProofNumber
-              number={metric.value}
-              label=""
-              className={`${dynamicTextColors?.heading || 'text-gray-900'}`}
+            <EditableAdaptiveText
+              mode={mode}
+              value={metric.value}
+              onEdit={(value) => handleMetricValueEdit(index, value)}
+              backgroundType={backgroundType as any}
+              colorTokens={colorTokens}
+              variant="body"
+              className="text-3xl font-bold"
+              placeholder="10,000+"
+              sectionId={sectionId}
+              elementKey={`metric_value_${index}`}
+              sectionBackground={sectionBackground}
             />
-            <span className={`text-sm ${dynamicTextColors?.muted || 'text-gray-600'}`}>
-              {metric.label}
-            </span>
+            <EditableAdaptiveText
+              mode={mode}
+              value={metric.label}
+              onEdit={(value) => handleMetricLabelEdit(index, value)}
+              backgroundType={backgroundType as any}
+              colorTokens={colorTokens}
+              variant="body"
+              className="text-sm"
+              placeholder="Metric Label"
+              sectionId={sectionId}
+              elementKey={`metric_label_${index}`}
+              sectionBackground={sectionBackground}
+            />
           </div>
           
-          {metric.description && (
-            <p className={`text-sm ${dynamicTextColors?.body || 'text-gray-700'} leading-relaxed`}>
-              {metric.description}
-            </p>
+          {(metric.description || mode === 'edit') && (
+            <EditableAdaptiveText
+              mode={mode}
+              value={metric.description || ''}
+              onEdit={(value) => handleMetricDescriptionEdit(index, value)}
+              backgroundType={backgroundType as any}
+              colorTokens={colorTokens}
+              variant="body"
+              className="text-sm leading-relaxed"
+              placeholder="Add metric description..."
+              sectionId={sectionId}
+              elementKey={`metric_description_${index}`}
+              sectionBackground={sectionBackground}
+            />
           )}
           
-          {metric.progress !== undefined && (
-            <div className="space-y-2">
-              <div className="flex justify-between items-center">
-                <EditableAdaptiveText
-                  mode={mode}
-                  value={blockContent.progress_label || 'Progress'}
-                  onEdit={(value) => handleContentUpdate('progress_label', value)}
-                  backgroundType={backgroundType as any}
-                  colorTokens={colorTokens}
-                  variant="body"
-                  className="text-xs"
-                  placeholder="Progress"
-                  sectionId={sectionId}
-                  elementKey="progress_label"
-                  sectionBackground={sectionBackground}
-                />
-                <span className={`text-xs font-bold ${dynamicTextColors?.body || 'text-gray-700'}`}>
-                  {metric.progress}%
-                </span>
-              </div>
-              <ProgressBar percentage={metric.progress} color={color} />
-            </div>
-          )}
         </div>
       </div>
     </div>
@@ -313,9 +272,24 @@ export default function StackedStats(props: LayoutComponentProps) {
   const metrics = parseMetricData(
     blockContent.metric_values || '',
     blockContent.metric_labels || '',
-    blockContent.metric_descriptions,
-    blockContent.progress_percentages
+    blockContent.metric_descriptions
   );
+
+  // Individual metric edit handlers
+  const handleMetricValueEdit = (index: number, value: string) => {
+    const updatedValues = updateListData(blockContent.metric_values || '', index, value);
+    handleContentUpdate('metric_values', updatedValues);
+  };
+
+  const handleMetricLabelEdit = (index: number, value: string) => {
+    const updatedLabels = updateListData(blockContent.metric_labels || '', index, value);
+    handleContentUpdate('metric_labels', updatedLabels);
+  };
+
+  const handleMetricDescriptionEdit = (index: number, value: string) => {
+    const updatedDescriptions = updateListData(blockContent.metric_descriptions || '', index, value);
+    handleContentUpdate('metric_descriptions', updatedDescriptions);
+  };
 
   return (
     <LayoutSection
@@ -378,6 +352,9 @@ export default function StackedStats(props: LayoutComponentProps) {
               sectionId={sectionId}
               handleContentUpdate={handleContentUpdate}
               sectionBackground={sectionBackground}
+              handleMetricValueEdit={handleMetricValueEdit}
+              handleMetricLabelEdit={handleMetricLabelEdit}
+              handleMetricDescriptionEdit={handleMetricDescriptionEdit}
             />
           ))}
         </div>
