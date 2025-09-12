@@ -166,6 +166,32 @@ const removeTestimonial = (
   };
 };
 
+// Helper function to add a new testimonial
+const addTestimonial = (
+  quotes: string, 
+  names: string, 
+  titles: string, 
+  companies: string
+): { newQuotes: string; newNames: string; newTitles: string; newCompanies: string } => {
+  const quoteList = parsePipeData(quotes);
+  const nameList = parsePipeData(names);
+  const titleList = parsePipeData(titles || '');
+  const companyList = parsePipeData(companies || '');
+  
+  // Add new testimonial with default content
+  quoteList.push('This is a new testimonial. Click to edit and add your customer\'s feedback.');
+  nameList.push('New Customer');
+  titleList.push('Add Title');
+  companyList.push('Add Company');
+  
+  return {
+    newQuotes: quoteList.join('|'),
+    newNames: nameList.join('|'),
+    newTitles: titleList.join('|'),
+    newCompanies: companyList.join('|')
+  };
+};
+
 // Customer Avatar Component
 const CustomerAvatar = React.memo(({ name }: { name: string }) => {
   // Generate initials and consistent color
@@ -455,6 +481,21 @@ export default function QuoteGrid(props: LayoutComponentProps) {
     handleContentUpdate('customer_companies', newCompanies);
   };
 
+  // Handle adding a new testimonial
+  const handleAddTestimonial = () => {
+    const { newQuotes, newNames, newTitles, newCompanies } = addTestimonial(
+      blockContent.testimonial_quotes,
+      blockContent.customer_names,
+      blockContent.customer_titles || '',
+      blockContent.customer_companies || ''
+    );
+    
+    handleContentUpdate('testimonial_quotes', newQuotes);
+    handleContentUpdate('customer_names', newNames);
+    handleContentUpdate('customer_titles', newTitles);
+    handleContentUpdate('customer_companies', newCompanies);
+  };
+
   return (
     <LayoutSection
       sectionId={sectionId}
@@ -511,6 +552,21 @@ export default function QuoteGrid(props: LayoutComponentProps) {
             />
           ))}
         </div>
+
+        {/* Add Testimonial Button - only show in edit mode and if under max limit */}
+        {mode !== 'preview' && testimonials.length < 6 && (
+          <div className="mt-8 text-center">
+            <button
+              onClick={handleAddTestimonial}
+              className="flex items-center space-x-2 mx-auto px-4 py-3 bg-blue-50 hover:bg-blue-100 border-2 border-blue-200 hover:border-blue-300 rounded-xl transition-all duration-200 group"
+            >
+              <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+              </svg>
+              <span className="text-blue-700 font-medium">Add Testimonial</span>
+            </button>
+          </div>
+        )}
 
         {/* Trust Reinforcement */}
         <div className="mt-16 text-center">
