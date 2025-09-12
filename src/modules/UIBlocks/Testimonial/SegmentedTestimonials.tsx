@@ -7,6 +7,7 @@ import {
   EditableAdaptiveText
 } from '@/components/layout/EditableContent';
 import IconEditableText from '@/components/ui/IconEditableText';
+import { parsePipeData, updateListData } from '@/utils/dataParsingUtils';
 import { 
   CTAButton,
   TrustIndicators,
@@ -223,6 +224,42 @@ export default function SegmentedTestimonials(props: LayoutComponentProps) {
 
   const mutedTextColor = dynamicTextColors?.muted || colorTokens.textMuted;
 
+  // Individual editing handlers following IconGrid pattern
+  const handleSegmentNameEdit = (index: number, value: string) => {
+    const updatedNames = updateListData(blockContent.segment_names, index, value);
+    handleContentUpdate('segment_names', updatedNames);
+  };
+
+  const handleSegmentDescriptionEdit = (index: number, value: string) => {
+    const updatedDescriptions = updateListData(blockContent.segment_descriptions, index, value);
+    handleContentUpdate('segment_descriptions', updatedDescriptions);
+  };
+
+  const handleTestimonialQuoteEdit = (index: number, value: string) => {
+    const updatedQuotes = updateListData(blockContent.testimonial_quotes, index, value);
+    handleContentUpdate('testimonial_quotes', updatedQuotes);
+  };
+
+  const handleCustomerNameEdit = (index: number, value: string) => {
+    const updatedNames = updateListData(blockContent.customer_names, index, value);
+    handleContentUpdate('customer_names', updatedNames);
+  };
+
+  const handleCustomerTitleEdit = (index: number, value: string) => {
+    const updatedTitles = updateListData(blockContent.customer_titles, index, value);
+    handleContentUpdate('customer_titles', updatedTitles);
+  };
+
+  const handleCustomerCompanyEdit = (index: number, value: string) => {
+    const updatedCompanies = updateListData(blockContent.customer_companies, index, value);
+    handleContentUpdate('customer_companies', updatedCompanies);
+  };
+
+  const handleUseCaseEdit = (index: number, value: string) => {
+    const updatedUseCases = updateListData(blockContent.use_cases, index, value);
+    handleContentUpdate('use_cases', updatedUseCases);
+  };
+
   const getSegmentIcon = (index: number) => {
     const iconFields = ['segment_icon_1', 'segment_icon_2', 'segment_icon_3', 'segment_icon_4'];
     const iconField = iconFields[index] as keyof SegmentedTestimonialsContent;
@@ -247,13 +284,13 @@ export default function SegmentedTestimonials(props: LayoutComponentProps) {
     const color = getSegmentColor(index);
     
     return (
-      <button
-        onClick={() => setActiveSegment(index)}
-        className={`p-4 rounded-lg border-2 transition-all duration-300 text-left w-full ${
+      <div
+        className={`p-4 rounded-lg border-2 transition-all duration-300 text-left w-full cursor-pointer ${
           isActive 
             ? `${color.border} ${color.bgLight} shadow-lg` 
             : 'border-gray-200 bg-white hover:border-gray-300 hover:shadow-md'
         }`}
+        onClick={() => setActiveSegment(index)}
       >
         <div className="flex items-center space-x-3">
           <div className={`w-12 h-12 rounded-lg bg-gradient-to-br ${color.bg} flex items-center justify-center text-white group/icon-edit relative`}>
@@ -273,16 +310,36 @@ export default function SegmentedTestimonials(props: LayoutComponentProps) {
               elementKey={`segment_icon_${index + 1}`}
             />
           </div>
-          <div className="flex-1">
-            <div className={`font-semibold ${isActive ? color.text : 'text-gray-900'}`}>
-              {segment.name}
-            </div>
-            <div className={`text-sm mt-1 ${isActive ? 'text-gray-700' : 'text-gray-600'}`}>
-              {segment.description}
-            </div>
+          <div className="flex-1" onClick={(e) => e.stopPropagation()}>
+            <EditableAdaptiveText
+              mode={mode}
+              value={segment.name}
+              onEdit={(value) => handleSegmentNameEdit(index, value)}
+              backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
+              colorTokens={colorTokens}
+              variant="body"
+              className={`font-semibold ${isActive ? color.text : 'text-gray-900'}`}
+              placeholder="Segment name..."
+              sectionId={sectionId}
+              elementKey={`segment_name_${index}`}
+              sectionBackground={sectionBackground}
+            />
+            <EditableAdaptiveText
+              mode={mode}
+              value={segment.description}
+              onEdit={(value) => handleSegmentDescriptionEdit(index, value)}
+              backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
+              colorTokens={colorTokens}
+              variant="body"
+              className={`text-sm mt-1 ${isActive ? 'text-gray-700' : 'text-gray-600'}`}
+              placeholder="Segment description..."
+              sectionId={sectionId}
+              elementKey={`segment_description_${index}`}
+              sectionBackground={sectionBackground}
+            />
           </div>
         </div>
-      </button>
+      </div>
     );
   };
 
@@ -332,165 +389,141 @@ export default function SegmentedTestimonials(props: LayoutComponentProps) {
           )}
         </div>
 
-        {mode !== 'preview' ? (
-          <div className="space-y-8">
-            <div className="p-6 border border-gray-200 rounded-lg bg-gray-50">
-              <h4 className="font-semibold text-gray-700 mb-4">Segmented Testimonial Content</h4>
-              
-              <div className="space-y-4">
-                <EditableAdaptiveText
-                  mode={mode}
-                  value={blockContent.segment_names || ''}
-                  onEdit={(value) => handleContentUpdate('segment_names', value)}
-                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
-                  colorTokens={colorTokens}
-                  variant="body"
-                  className="mb-2"
-                  placeholder="Segment names (pipe separated)"
-                  sectionId={sectionId}
-                  elementKey="segment_names"
-                  sectionBackground={sectionBackground}
-                />
-                
-                <EditableAdaptiveText
-                  mode={mode}
-                  value={blockContent.segment_descriptions || ''}
-                  onEdit={(value) => handleContentUpdate('segment_descriptions', value)}
-                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
-                  colorTokens={colorTokens}
-                  variant="body"
-                  className="mb-2"
-                  placeholder="Segment descriptions (pipe separated)"
-                  sectionId={sectionId}
-                  elementKey="segment_descriptions"
-                  sectionBackground={sectionBackground}
-                />
-                
-                <EditableAdaptiveText
-                  mode={mode}
-                  value={blockContent.testimonial_quotes || ''}
-                  onEdit={(value) => handleContentUpdate('testimonial_quotes', value)}
-                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
-                  colorTokens={colorTokens}
-                  variant="body"
-                  className="mb-2"
-                  placeholder="Testimonial quotes (pipe separated)"
-                  sectionId={sectionId}
-                  elementKey="testimonial_quotes"
-                  sectionBackground={sectionBackground}
-                />
-                
-                <EditableAdaptiveText
-                  mode={mode}
-                  value={blockContent.customer_names || ''}
-                  onEdit={(value) => handleContentUpdate('customer_names', value)}
-                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
-                  colorTokens={colorTokens}
-                  variant="body"
-                  className="mb-2"
-                  placeholder="Customer names (pipe separated)"
-                  sectionId={sectionId}
-                  elementKey="customer_names"
-                  sectionBackground={sectionBackground}
-                />
-                
-                <EditableAdaptiveText
-                  mode={mode}
-                  value={blockContent.use_cases || ''}
-                  onEdit={(value) => handleContentUpdate('use_cases', value)}
-                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
-                  colorTokens={colorTokens}
-                  variant="body"
-                  className="mb-2"
-                  placeholder="Use cases (pipe separated)"
-                  sectionId={sectionId}
-                  elementKey="use_cases"
-                  sectionBackground={sectionBackground}
-                />
-              </div>
-            </div>
+        <div className="grid lg:grid-cols-2 gap-12 mb-16">
+          {/* Segment Tabs */}
+          <div className="space-y-4">
+            <h3 style={h3Style} className="font-semibold text-gray-900 mb-6">Choose Your Industry</h3>
+            {segments.map((segment, index) => (
+              <SegmentTab
+                key={index}
+                segment={segment}
+                index={index}
+                isActive={activeSegment === index}
+              />
+            ))}
           </div>
-        ) : (
-          <div className="grid lg:grid-cols-2 gap-12 mb-16">
-            
-            {/* Segment Tabs */}
-            <div className="space-y-4">
-              <h3 style={h3Style} className="font-semibold text-gray-900 mb-6">Choose Your Industry</h3>
-              {segments.map((segment, index) => (
-                <SegmentTab
-                  key={index}
-                  segment={segment}
-                  index={index}
-                  isActive={activeSegment === index}
-                />
-              ))}
-            </div>
 
-            {/* Active Testimonial */}
-            {activeSegmentData && (
-              <div className="lg:sticky lg:top-8">
-                <div className={`bg-white rounded-2xl shadow-xl border-2 ${activeColor.border} overflow-hidden`}>
-                  {/* Header */}
-                  <div className={`p-6 ${activeColor.bgLight} border-b ${activeColor.border}`}>
-                    <div className="flex items-center space-x-3 mb-4">
-                      <div className={`w-12 h-12 rounded-lg bg-gradient-to-br ${activeColor.bg} flex items-center justify-center text-white group/icon-edit relative`}>
-                        <IconEditableText
-                          mode={mode}
-                          value={getSegmentIcon(activeSegment)}
-                          onEdit={(value) => {
-                            const iconFields = ['segment_icon_1', 'segment_icon_2', 'segment_icon_3', 'segment_icon_4'];
-                            const iconField = iconFields[activeSegment] as keyof SegmentedTestimonialsContent;
-                            handleContentUpdate(iconField, value);
-                          }}
-                          backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
-                          colorTokens={colorTokens}
-                          iconSize="lg"
-                          className="text-2xl"
-                          sectionId={sectionId}
-                          elementKey={`segment_icon_${activeSegment + 1}`}
-                        />
-                      </div>
-                      <div>
-                        <h4 className={`font-bold text-lg ${activeColor.text}`}>
-                          {activeSegmentData.name}
-                        </h4>
-                        <StarRating rating={activeSegmentData.rating} size="small" />
-                      </div>
+          {/* Active Testimonial */}
+          {activeSegmentData && (
+            <div className="lg:sticky lg:top-8">
+              <div className={`bg-white rounded-2xl shadow-xl border-2 ${activeColor.border} overflow-hidden`}>
+                {/* Header */}
+                <div className={`p-6 ${activeColor.bgLight} border-b ${activeColor.border}`}>
+                  <div className="flex items-center space-x-3 mb-4">
+                    <div className={`w-12 h-12 rounded-lg bg-gradient-to-br ${activeColor.bg} flex items-center justify-center text-white group/icon-edit relative`}>
+                      <IconEditableText
+                        mode={mode}
+                        value={getSegmentIcon(activeSegment)}
+                        onEdit={(value) => {
+                          const iconFields = ['segment_icon_1', 'segment_icon_2', 'segment_icon_3', 'segment_icon_4'];
+                          const iconField = iconFields[activeSegment] as keyof SegmentedTestimonialsContent;
+                          handleContentUpdate(iconField, value);
+                        }}
+                        backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
+                        colorTokens={colorTokens}
+                        iconSize="lg"
+                        className="text-2xl"
+                        sectionId={sectionId}
+                        elementKey={`segment_icon_${activeSegment + 1}`}
+                      />
+                    </div>
+                    <div>
+                      <h4 className={`font-bold text-lg ${activeColor.text}`}>
+                        {activeSegmentData.name}
+                      </h4>
+                      <StarRating rating={activeSegmentData.rating} size="small" />
+                    </div>
+                  </div>
+                </div>
+                
+                {/* Testimonial Content */}
+                <div className="p-6">
+                  <EditableAdaptiveText
+                    mode={mode}
+                    value={activeSegmentData.quote}
+                    onEdit={(value) => handleTestimonialQuoteEdit(activeSegment, value)}
+                    backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
+                    colorTokens={colorTokens}
+                    variant="body"
+                    textStyle={bodyLgStyle}
+                    className="text-gray-800 leading-relaxed mb-6"
+                    placeholder="Testimonial quote..."
+                    sectionId={sectionId}
+                    elementKey={`testimonial_quote_${activeSegment}`}
+                    sectionBackground={sectionBackground}
+                  />
+                  
+                  <div className="flex items-center space-x-4 mb-6">
+                    <div className={`w-12 h-12 rounded-full bg-gradient-to-br ${activeColor.bg} flex items-center justify-center text-white font-bold`}>
+                      {activeSegmentData.customerName.charAt(0)}
+                    </div>
+                    <div>
+                      <EditableAdaptiveText
+                        mode={mode}
+                        value={activeSegmentData.customerName}
+                        onEdit={(value) => handleCustomerNameEdit(activeSegment, value)}
+                        backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
+                        colorTokens={colorTokens}
+                        variant="body"
+                        className="font-semibold text-gray-900"
+                        placeholder="Customer name..."
+                        sectionId={sectionId}
+                        elementKey={`customer_name_${activeSegment}`}
+                        sectionBackground={sectionBackground}
+                      />
+                      <EditableAdaptiveText
+                        mode={mode}
+                        value={activeSegmentData.customerTitle}
+                        onEdit={(value) => handleCustomerTitleEdit(activeSegment, value)}
+                        backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
+                        colorTokens={colorTokens}
+                        variant="body"
+                        className="text-sm text-gray-600"
+                        placeholder="Customer title..."
+                        sectionId={sectionId}
+                        elementKey={`customer_title_${activeSegment}`}
+                        sectionBackground={sectionBackground}
+                      />
+                      <EditableAdaptiveText
+                        mode={mode}
+                        value={activeSegmentData.customerCompany}
+                        onEdit={(value) => handleCustomerCompanyEdit(activeSegment, value)}
+                        backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
+                        colorTokens={colorTokens}
+                        variant="body"
+                        className={`text-sm font-medium ${activeColor.text}`}
+                        placeholder="Customer company..."
+                        sectionId={sectionId}
+                        elementKey={`customer_company_${activeSegment}`}
+                        sectionBackground={sectionBackground}
+                      />
                     </div>
                   </div>
                   
-                  {/* Testimonial Content */}
-                  <div className="p-6">
-                    <blockquote style={bodyLgStyle} className="text-gray-800 leading-relaxed mb-6">
-                      "{activeSegmentData.quote}"
-                    </blockquote>
-                    
-                    <div className="flex items-center space-x-4 mb-6">
-                      <div className={`w-12 h-12 rounded-full bg-gradient-to-br ${activeColor.bg} flex items-center justify-center text-white font-bold`}>
-                        {activeSegmentData.customerName.charAt(0)}
-                      </div>
-                      <div>
-                        <div className="font-semibold text-gray-900">{activeSegmentData.customerName}</div>
-                        <div className="text-sm text-gray-600">{activeSegmentData.customerTitle}</div>
-                        <div className={`text-sm font-medium ${activeColor.text}`}>{activeSegmentData.customerCompany}</div>
-                      </div>
+                  {/* Use Cases */}
+                  {(activeSegmentData.useCase || mode === 'edit') && (
+                    <div className={`p-4 ${activeColor.bgLight} rounded-lg border ${activeColor.border}`}>
+                      <div className="text-sm font-semibold text-gray-700 mb-2">Common Use Cases:</div>
+                      <EditableAdaptiveText
+                        mode={mode}
+                        value={activeSegmentData.useCase}
+                        onEdit={(value) => handleUseCaseEdit(activeSegment, value)}
+                        backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
+                        colorTokens={colorTokens}
+                        variant="body"
+                        className="text-sm text-gray-600"
+                        placeholder="Describe common use cases..."
+                        sectionId={sectionId}
+                        elementKey={`use_case_${activeSegment}`}
+                        sectionBackground={sectionBackground}
+                      />
                     </div>
-                    
-                    {/* Use Cases */}
-                    {activeSegmentData.useCase && (
-                      <div className={`p-4 ${activeColor.bgLight} rounded-lg border ${activeColor.border}`}>
-                        <div className="text-sm font-semibold text-gray-700 mb-2">Common Use Cases:</div>
-                        <div className="text-sm text-gray-600">
-                          {activeSegmentData.useCase}
-                        </div>
-                      </div>
-                    )}
-                  </div>
+                  )}
                 </div>
               </div>
-            )}
-          </div>
-        )}
+            </div>
+          )}
+        </div>
 
         {/* Industry Trust Indicators */}
         <div className="bg-gradient-to-r from-gray-50 to-white rounded-2xl p-8 border border-gray-100 mb-12">
