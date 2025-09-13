@@ -7,6 +7,7 @@ import {
   EditableAdaptiveText
 } from '@/components/layout/EditableContent';
 import IconEditableText from '@/components/ui/IconEditableText';
+import AvatarEditableComponent from '@/components/ui/AvatarEditableComponent';
 import { 
   CTAButton,
   TrustIndicators 
@@ -25,17 +26,20 @@ interface PullQuoteStackContent {
   supporting_text?: string;
   cta_text?: string;
   trust_items?: string;
-  struggle_title?: string;
-  pain_title?: string;
-  solution_title?: string;
-  result_title?: string;
-  pain_description?: string;
-  solution_description?: string;
-  result_description?: string;
-  community_message?: string;
-  pain_icon?: string;
-  solution_icon?: string;
-  result_icon?: string;
+  // Avatar URLs for testimonials
+  avatar_1?: string;
+  avatar_2?: string;
+  avatar_3?: string;
+  avatar_4?: string;
+  avatar_5?: string;
+  avatar_6?: string;
+  // Emotional context icons
+  context_icon_1?: string;
+  context_icon_2?: string;
+  context_icon_3?: string;
+  context_icon_4?: string;
+  context_icon_5?: string;
+  context_icon_6?: string;
 }
 
 const CONTENT_SCHEMA = {
@@ -83,50 +87,20 @@ const CONTENT_SCHEMA = {
     type: 'string' as const, 
     default: '' 
   },
-  struggle_title: {
-    type: 'string' as const,
-    default: 'You\'re Not Alone in This Struggle'
-  },
-  pain_title: {
-    type: 'string' as const,
-    default: 'The Pain'
-  },
-  solution_title: {
-    type: 'string' as const,
-    default: 'The Solution'
-  },
-  result_title: {
-    type: 'string' as const,
-    default: 'The Result'
-  },
-  pain_description: {
-    type: 'string' as const,
-    default: 'Overwhelm, burnout, and constant stress from trying to do everything manually'
-  },
-  solution_description: {
-    type: 'string' as const,
-    default: 'Automated systems that work while you focus on what truly matters'
-  },
-  result_description: {
-    type: 'string' as const,
-    default: 'Peace of mind, work-life balance, and sustainable business growth'
-  },
-  community_message: {
-    type: 'string' as const,
-    default: 'Every story above started with the same frustration you\'re feeling right now. The difference? They found a solution that actually works.'
-  },
-  pain_icon: {
-    type: 'string' as const,
-    default: '⚠️'
-  },
-  solution_icon: {
-    type: 'string' as const,
-    default: '⚡'
-  },
-  result_icon: {
-    type: 'string' as const,
-    default: '❤️'
-  }
+  // Avatar defaults (empty to use generated initials)
+  avatar_1: { type: 'string' as const, default: '' },
+  avatar_2: { type: 'string' as const, default: '' },
+  avatar_3: { type: 'string' as const, default: '' },
+  avatar_4: { type: 'string' as const, default: '' },
+  avatar_5: { type: 'string' as const, default: '' },
+  avatar_6: { type: 'string' as const, default: '' },
+  // Emotional context icons
+  context_icon_1: { type: 'string' as const, default: '💢' },
+  context_icon_2: { type: 'string' as const, default: '😟' },
+  context_icon_3: { type: 'string' as const, default: '😔' },
+  context_icon_4: { type: 'string' as const, default: '😰' },
+  context_icon_5: { type: 'string' as const, default: '😤' },
+  context_icon_6: { type: 'string' as const, default: '😢' }
 };
 
 export default function PullQuoteStack(props: LayoutComponentProps) {
@@ -148,7 +122,6 @@ export default function PullQuoteStack(props: LayoutComponentProps) {
   });
 
   // Create typography styles
-  const h2Style = getTypographyStyle('h2');
   const h3Style = getTypographyStyle('h3');
   const bodyLgStyle = getTypographyStyle('body-lg');
 
@@ -182,7 +155,23 @@ export default function PullQuoteStack(props: LayoutComponentProps) {
     customerTitle: customerTitles[index] || '',
     customerCompany: customerCompanies[index] || '',
     problemContext: problemContexts[index] || '',
-    emotionalHook: emotionalHooks[index] || ''
+    emotionalHook: emotionalHooks[index] || '',
+    avatarUrl: (
+      index === 0 ? blockContent.avatar_1 :
+      index === 1 ? blockContent.avatar_2 :
+      index === 2 ? blockContent.avatar_3 :
+      index === 3 ? blockContent.avatar_4 :
+      index === 4 ? blockContent.avatar_5 :
+      blockContent.avatar_6
+    ) || '',
+    contextIcon: (
+      index === 0 ? blockContent.context_icon_1 :
+      index === 1 ? blockContent.context_icon_2 :
+      index === 2 ? blockContent.context_icon_3 :
+      index === 3 ? blockContent.context_icon_4 :
+      index === 4 ? blockContent.context_icon_5 :
+      blockContent.context_icon_6
+    ) || '💢'
   }));
 
   const trustItems = blockContent.trust_items 
@@ -203,8 +192,55 @@ export default function PullQuoteStack(props: LayoutComponentProps) {
     return colors[index % colors.length];
   };
 
+  // Handle individual editing
+  const handleQuoteEdit = (index: number, value: string) => {
+    const quotes = blockContent.testimonial_quotes.split('|');
+    quotes[index] = value;
+    handleContentUpdate('testimonial_quotes', quotes.join('|'));
+  };
+
+  const handleNameEdit = (index: number, value: string) => {
+    const names = blockContent.customer_names.split('|');
+    names[index] = value;
+    handleContentUpdate('customer_names', names.join('|'));
+  };
+
+  const handleTitleEdit = (index: number, value: string) => {
+    const titles = blockContent.customer_titles.split('|');
+    titles[index] = value;
+    handleContentUpdate('customer_titles', titles.join('|'));
+  };
+
+  const handleCompanyEdit = (index: number, value: string) => {
+    const companies = blockContent.customer_companies ? blockContent.customer_companies.split('|') : [];
+    companies[index] = value;
+    handleContentUpdate('customer_companies', companies.join('|'));
+  };
+
+  const handleContextEdit = (index: number, value: string) => {
+    const contexts = blockContent.problem_contexts.split('|');
+    contexts[index] = value;
+    handleContentUpdate('problem_contexts', contexts.join('|'));
+  };
+
+  const handleEmotionalEdit = (index: number, value: string) => {
+    const emotions = blockContent.emotional_hooks.split('|');
+    emotions[index] = value;
+    handleContentUpdate('emotional_hooks', emotions.join('|'));
+  };
+
+  const handleAvatarChange = (index: number, url: string) => {
+    const field = `avatar_${index + 1}` as keyof PullQuoteStackContent;
+    handleContentUpdate(field, url);
+  };
+
+  const handleContextIconEdit = (index: number, value: string) => {
+    const field = `context_icon_${index + 1}` as keyof PullQuoteStackContent;
+    handleContentUpdate(field, value);
+  };
+
   const QuoteCard = ({ testimonial, index, h3Style, bodyLgStyle }: {
-    testimonial: typeof testimonials[0];
+    testimonial: typeof testimonials[0] & { avatarUrl: string; contextIcon: string };
     index: number;
     h3Style: React.CSSProperties;
     bodyLgStyle: React.CSSProperties;
@@ -216,37 +252,120 @@ export default function PullQuoteStack(props: LayoutComponentProps) {
       <div className={`${isLarge ? 'md:col-span-2' : ''}`}>
         <div className={`bg-gradient-to-br ${color.bg} rounded-2xl p-6 border-2 ${color.border} hover:shadow-xl transition-all duration-300 h-full`}>
           
-          {/* Emotional Context */}
+          {/* Emotional Context - Now Editable */}
           <div className="flex items-center space-x-2 mb-4">
-            <div className="w-2 h-2 rounded-full bg-red-400"></div>
-            <span className={`text-sm font-medium ${color.accent}`}>
-              {testimonial.emotionalHook}
-            </span>
+            <IconEditableText
+              mode={mode}
+              value={testimonial.contextIcon}
+              onEdit={(value) => handleContextIconEdit(index, value)}
+              backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
+              colorTokens={colorTokens}
+              iconSize="sm"
+              className="text-lg"
+              sectionId={sectionId}
+              elementKey={`context_icon_${index + 1}`}
+            />
+            <EditableAdaptiveText
+              mode={mode}
+              value={testimonial.emotionalHook}
+              onEdit={(value) => handleEmotionalEdit(index, value)}
+              backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
+              colorTokens={colorTokens}
+              variant="body"
+              className={`text-sm font-medium ${color.accent}`}
+              placeholder="Emotional context..."
+              sectionId={sectionId}
+              elementKey={`emotional_hook_${index}`}
+              sectionBackground={sectionBackground}
+            />
           </div>
           
-          {/* Problem Context */}
-          <div className={`text-xs ${mutedTextColor} mb-4 italic`}>
-            {testimonial.problemContext}
-          </div>
+          {/* Problem Context - Now Editable */}
+          <EditableAdaptiveText
+            mode={mode}
+            value={testimonial.problemContext}
+            onEdit={(value) => handleContextEdit(index, value)}
+            backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
+            colorTokens={colorTokens}
+            variant="body"
+            className={`text-xs ${mutedTextColor} mb-4 italic`}
+            placeholder="Problem context..."
+            sectionId={sectionId}
+            elementKey={`problem_context_${index}`}
+            sectionBackground={sectionBackground}
+          />
           
-          {/* Quote */}
-          <blockquote style={isLarge ? h3Style : bodyLgStyle} className="text-gray-800 leading-relaxed mb-6 font-medium">
+          {/* Quote - Now Editable */}
+          <blockquote className="leading-relaxed mb-6 font-medium relative">
             <svg className="w-8 h-8 text-gray-400 mb-2" fill="currentColor" viewBox="0 0 24 24">
               <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h4v10h-10z"/>
             </svg>
-            "{testimonial.quote}"
+            <EditableAdaptiveText
+              mode={mode}
+              value={testimonial.quote}
+              onEdit={(value) => handleQuoteEdit(index, value)}
+              backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
+              colorTokens={colorTokens}
+              variant="body"
+              textStyle={isLarge ? h3Style : bodyLgStyle}
+              className="text-gray-800"
+              placeholder="Customer testimonial quote..."
+              sectionId={sectionId}
+              elementKey={`testimonial_quote_${index}`}
+              sectionBackground={sectionBackground}
+            />
           </blockquote>
           
-          {/* Attribution */}
+          {/* Attribution - Now with Editable Avatar */}
           <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 rounded-full bg-white/50 flex items-center justify-center text-gray-700 font-bold">
-              {testimonial.customerName.charAt(0)}
-            </div>
-            <div>
-              <div className="font-semibold text-gray-900">{testimonial.customerName}</div>
-              <div className="text-sm text-gray-600">{testimonial.customerTitle}</div>
-              {testimonial.customerCompany && (
-                <div className={`text-sm font-medium ${color.accent}`}>{testimonial.customerCompany}</div>
+            <AvatarEditableComponent
+              mode={mode}
+              avatarUrl={testimonial.avatarUrl}
+              onAvatarChange={(url) => handleAvatarChange(index, url)}
+              customerName={testimonial.customerName}
+              size="md"
+            />
+            <div className="flex-1">
+              <EditableAdaptiveText
+                mode={mode}
+                value={testimonial.customerName}
+                onEdit={(value) => handleNameEdit(index, value)}
+                backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
+                colorTokens={colorTokens}
+                variant="body"
+                className="font-semibold text-gray-900 mb-1"
+                placeholder="Customer name..."
+                sectionId={sectionId}
+                elementKey={`customer_name_${index}`}
+                sectionBackground={sectionBackground}
+              />
+              <EditableAdaptiveText
+                mode={mode}
+                value={testimonial.customerTitle}
+                onEdit={(value) => handleTitleEdit(index, value)}
+                backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
+                colorTokens={colorTokens}
+                variant="body"
+                className="text-sm text-gray-600 mb-1"
+                placeholder="Customer title..."
+                sectionId={sectionId}
+                elementKey={`customer_title_${index}`}
+                sectionBackground={sectionBackground}
+              />
+              {(testimonial.customerCompany || mode === 'edit') && (
+                <EditableAdaptiveText
+                  mode={mode}
+                  value={testimonial.customerCompany}
+                  onEdit={(value) => handleCompanyEdit(index, value)}
+                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
+                  colorTokens={colorTokens}
+                  variant="body"
+                  className={`text-sm font-medium ${color.accent}`}
+                  placeholder="Company name..."
+                  sectionId={sectionId}
+                  elementKey={`customer_company_${index}`}
+                  sectionBackground={sectionBackground}
+                />
               )}
             </div>
           </div>
@@ -298,250 +417,18 @@ export default function PullQuoteStack(props: LayoutComponentProps) {
           )}
         </div>
 
-        {mode !== 'preview' ? (
-          <div className="space-y-8">
-            <div className="p-6 border border-gray-200 rounded-lg bg-gray-50">
-              <h4 className="font-semibold text-gray-700 mb-4">Pull Quote Stack Content</h4>
-              
-              <div className="space-y-4">
-                <EditableAdaptiveText
-                  mode={mode}
-                  value={blockContent.testimonial_quotes || ''}
-                  onEdit={(value) => handleContentUpdate('testimonial_quotes', value)}
-                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
-                  colorTokens={colorTokens}
-                  variant="body"
-                  className="mb-2"
-                  placeholder="Testimonial quotes (pipe separated)"
-                  sectionId={sectionId}
-                  elementKey="testimonial_quotes"
-                  sectionBackground={sectionBackground}
-                />
-                
-                <EditableAdaptiveText
-                  mode={mode}
-                  value={blockContent.customer_names || ''}
-                  onEdit={(value) => handleContentUpdate('customer_names', value)}
-                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
-                  colorTokens={colorTokens}
-                  variant="body"
-                  className="mb-2"
-                  placeholder="Customer names (pipe separated)"
-                  sectionId={sectionId}
-                  elementKey="customer_names"
-                  sectionBackground={sectionBackground}
-                />
-                
-                <EditableAdaptiveText
-                  mode={mode}
-                  value={blockContent.problem_contexts || ''}
-                  onEdit={(value) => handleContentUpdate('problem_contexts', value)}
-                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
-                  colorTokens={colorTokens}
-                  variant="body"
-                  className="mb-2"
-                  placeholder="Problem contexts (pipe separated)"
-                  sectionId={sectionId}
-                  elementKey="problem_contexts"
-                  sectionBackground={sectionBackground}
-                />
-                
-                <EditableAdaptiveText
-                  mode={mode}
-                  value={blockContent.emotional_hooks || ''}
-                  onEdit={(value) => handleContentUpdate('emotional_hooks', value)}
-                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
-                  colorTokens={colorTokens}
-                  variant="body"
-                  className="mb-2"
-                  placeholder="Emotional hooks (pipe separated)"
-                  sectionId={sectionId}
-                  elementKey="emotional_hooks"
-                  sectionBackground={sectionBackground}
-                />
-              </div>
-            </div>
-          </div>
-        ) : (
-          <>
-            {/* Masonry-style Quote Grid */}
-            <div className="grid md:grid-cols-3 gap-6 mb-16">
-              {testimonials.map((testimonial, index) => (
-                <QuoteCard
-                  key={index}
-                  testimonial={testimonial}
-                  index={index}
-                  h3Style={h3Style}
-                  bodyLgStyle={bodyLgStyle}
-                />
-              ))}
-            </div>
-
-            {/* Emotional Connection Summary */}
-            <div className="bg-gradient-to-r from-gray-900 to-gray-800 rounded-2xl p-8 text-white mb-12">
-              <div className="text-center">
-                <EditableAdaptiveText
-                  mode={mode}
-                  value={blockContent.struggle_title || ''}
-                  onEdit={(value) => handleContentUpdate('struggle_title', value)}
-                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
-                  colorTokens={colorTokens}
-                  variant="body"
-                  style={h2Style}
-                  className="font-bold mb-6 text-white"
-                  placeholder="Struggle section title..."
-                  sectionId={sectionId}
-                  elementKey="struggle_title"
-                  sectionBackground={sectionBackground}
-                />
-                
-                <div className="grid md:grid-cols-3 gap-8 mb-8">
-                  <div className="text-center">
-                    <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-red-500/20 flex items-center justify-center group/icon-edit relative">
-                      <IconEditableText
-                        mode={mode}
-                        value={blockContent.pain_icon || '⚠️'}
-                        onEdit={(value) => handleContentUpdate('pain_icon', value)}
-                        backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
-                        colorTokens={colorTokens}
-                        iconSize="xl"
-                        className="text-3xl"
-                        sectionId={sectionId}
-                        elementKey="pain_icon"
-                      />
-                    </div>
-                    <EditableAdaptiveText
-                      mode={mode}
-                      value={blockContent.pain_title || ''}
-                      onEdit={(value) => handleContentUpdate('pain_title', value)}
-                      backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
-                      colorTokens={colorTokens}
-                      variant="body"
-                      className="text-lg font-semibold text-red-400 mb-2"
-                      placeholder="Pain title..."
-                      sectionId={sectionId}
-                      elementKey="pain_title"
-                      sectionBackground={sectionBackground}
-                    />
-                    <EditableAdaptiveText
-                      mode={mode}
-                      value={blockContent.pain_description || ''}
-                      onEdit={(value) => handleContentUpdate('pain_description', value)}
-                      backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
-                      colorTokens={colorTokens}
-                      variant="body"
-                      className="text-gray-300 text-sm"
-                      placeholder="Pain description..."
-                      sectionId={sectionId}
-                      elementKey="pain_description"
-                      sectionBackground={sectionBackground}
-                    />
-                  </div>
-                  
-                  <div className="text-center">
-                    <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-yellow-500/20 flex items-center justify-center group/icon-edit relative">
-                      <IconEditableText
-                        mode={mode}
-                        value={blockContent.solution_icon || '⚡'}
-                        onEdit={(value) => handleContentUpdate('solution_icon', value)}
-                        backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
-                        colorTokens={colorTokens}
-                        iconSize="xl"
-                        className="text-3xl"
-                        sectionId={sectionId}
-                        elementKey="solution_icon"
-                      />
-                    </div>
-                    <EditableAdaptiveText
-                      mode={mode}
-                      value={blockContent.solution_title || ''}
-                      onEdit={(value) => handleContentUpdate('solution_title', value)}
-                      backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
-                      colorTokens={colorTokens}
-                      variant="body"
-                      className="text-lg font-semibold text-yellow-400 mb-2"
-                      placeholder="Solution title..."
-                      sectionId={sectionId}
-                      elementKey="solution_title"
-                      sectionBackground={sectionBackground}
-                    />
-                    <EditableAdaptiveText
-                      mode={mode}
-                      value={blockContent.solution_description || ''}
-                      onEdit={(value) => handleContentUpdate('solution_description', value)}
-                      backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
-                      colorTokens={colorTokens}
-                      variant="body"
-                      className="text-gray-300 text-sm"
-                      placeholder="Solution description..."
-                      sectionId={sectionId}
-                      elementKey="solution_description"
-                      sectionBackground={sectionBackground}
-                    />
-                  </div>
-                  
-                  <div className="text-center">
-                    <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-green-500/20 flex items-center justify-center group/icon-edit relative">
-                      <IconEditableText
-                        mode={mode}
-                        value={blockContent.result_icon || '❤️'}
-                        onEdit={(value) => handleContentUpdate('result_icon', value)}
-                        backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
-                        colorTokens={colorTokens}
-                        iconSize="xl"
-                        className="text-3xl"
-                        sectionId={sectionId}
-                        elementKey="result_icon"
-                      />
-                    </div>
-                    <EditableAdaptiveText
-                      mode={mode}
-                      value={blockContent.result_title || ''}
-                      onEdit={(value) => handleContentUpdate('result_title', value)}
-                      backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
-                      colorTokens={colorTokens}
-                      variant="body"
-                      className="text-lg font-semibold text-green-400 mb-2"
-                      placeholder="Result title..."
-                      sectionId={sectionId}
-                      elementKey="result_title"
-                      sectionBackground={sectionBackground}
-                    />
-                    <EditableAdaptiveText
-                      mode={mode}
-                      value={blockContent.result_description || ''}
-                      onEdit={(value) => handleContentUpdate('result_description', value)}
-                      backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
-                      colorTokens={colorTokens}
-                      variant="body"
-                      className="text-gray-300 text-sm"
-                      placeholder="Result description..."
-                      sectionId={sectionId}
-                      elementKey="result_description"
-                      sectionBackground={sectionBackground}
-                    />
-                  </div>
-                </div>
-                
-                <div className="bg-white/10 rounded-lg p-4 backdrop-blur-sm">
-                  <EditableAdaptiveText
-                    mode={mode}
-                    value={blockContent.community_message || ''}
-                    onEdit={(value) => handleContentUpdate('community_message', value)}
-                    backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
-                    colorTokens={colorTokens}
-                    variant="body"
-                    className="text-gray-200"
-                    placeholder="Community message..."
-                    sectionId={sectionId}
-                    elementKey="community_message"
-                    sectionBackground={sectionBackground}
-                  />
-                </div>
-              </div>
-            </div>
-          </>
-        )}
+        {/* WYSIWYG Testimonial Grid - Same Layout for Edit and Preview */}
+        <div className="grid md:grid-cols-3 gap-6">
+          {testimonials.map((testimonial, index) => (
+            <QuoteCard
+              key={index}
+              testimonial={testimonial as typeof testimonials[0] & { avatarUrl: string; contextIcon: string }}
+              index={index}
+              h3Style={h3Style}
+              bodyLgStyle={bodyLgStyle}
+            />
+          ))}
+        </div>
 
         {(blockContent.cta_text || blockContent.trust_items || mode === 'edit') && (
           <div className="text-center space-y-6">
@@ -593,11 +480,11 @@ export default function PullQuoteStack(props: LayoutComponentProps) {
 export const componentMeta = {
   name: 'PullQuoteStack',
   category: 'Testimonial',
-  description: 'Emotional pull quote stack for pain-led copy. Perfect for early-stage startups and burnout/overload problems.',
-  tags: ['testimonial', 'emotional', 'pain-led', 'quotes', 'stack'],
+  description: 'WYSIWYG emotional testimonial grid with editable avatars, quotes, and context icons. Production-ready with inline editing.',
+  tags: ['testimonial', 'emotional', 'pain-led', 'quotes', 'wysiwyg', 'avatars'],
   defaultBackgroundType: 'neutral' as const,
   complexity: 'medium',
-  estimatedBuildTime: '25 minutes',
+  estimatedBuildTime: '20 minutes',
   
   contentFields: [
     { key: 'headline', label: 'Main Headline', type: 'text', required: true },
@@ -610,24 +497,19 @@ export const componentMeta = {
     { key: 'emotional_hooks', label: 'Emotional Hooks (pipe separated)', type: 'text', required: true },
     { key: 'supporting_text', label: 'Supporting Text', type: 'textarea', required: false },
     { key: 'cta_text', label: 'CTA Button Text', type: 'text', required: false },
-    { key: 'trust_items', label: 'Trust Indicators (pipe separated)', type: 'text', required: false },
-    { key: 'struggle_title', label: 'Struggle Section Title', type: 'text', required: false },
-    { key: 'pain_title', label: 'Pain Title', type: 'text', required: false },
-    { key: 'solution_title', label: 'Solution Title', type: 'text', required: false },
-    { key: 'result_title', label: 'Result Title', type: 'text', required: false },
-    { key: 'pain_description', label: 'Pain Description', type: 'text', required: false },
-    { key: 'solution_description', label: 'Solution Description', type: 'text', required: false },
-    { key: 'result_description', label: 'Result Description', type: 'text', required: false },
-    { key: 'community_message', label: 'Community Message', type: 'textarea', required: false }
+    { key: 'trust_items', label: 'Trust Indicators (pipe separated)', type: 'text', required: false }
   ],
   
   features: [
-    'Emotional pain-point focus',
-    'Masonry-style quote layout',
+    'WYSIWYG editing experience - same layout in edit and preview',
+    'Inline editable testimonial quotes, names, titles, companies',
+    'Editable customer avatars with upload functionality',
+    'Contextual emotion icons with direct editing',
+    'Visual testimonial cards with proper styling',
     'Problem context highlighting',
     'Emotional connection building',
     'Perfect for pain-led copy',
-    'Early-stage startup friendly'
+    'Masonry-style responsive grid layout'
   ],
   
   useCases: [
@@ -635,6 +517,7 @@ export const componentMeta = {
     'Burnout and overload problems',
     'Early-stage startup testimonials',
     'Solo entrepreneur challenges',
-    'Emotional connection building'
+    'Emotional connection building',
+    'Customer story showcases'
   ]
 };
