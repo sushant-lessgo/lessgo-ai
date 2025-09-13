@@ -50,6 +50,12 @@ interface InteractiveTestimonialMapContent {
   collaboration_icon?: string;
   // Avatar system
   avatar_urls?: string;
+  // Region filter labels
+  region_all_label?: string;
+  region_americas_label?: string;
+  region_europe_label?: string;
+  region_asia_label?: string;
+  region_africa_label?: string;
 }
 
 // Testimonial item structure
@@ -170,6 +176,27 @@ const CONTENT_SCHEMA = {
   avatar_urls: { 
     type: 'string' as const, 
     default: '{}' 
+  },
+  // Region filter labels
+  region_all_label: {
+    type: 'string' as const,
+    default: 'Worldwide'
+  },
+  region_americas_label: {
+    type: 'string' as const,
+    default: 'Americas'
+  },
+  region_europe_label: {
+    type: 'string' as const,
+    default: 'Europe'
+  },
+  region_asia_label: {
+    type: 'string' as const,
+    default: 'Asia'
+  },
+  region_africa_label: {
+    type: 'string' as const,
+    default: 'Africa'
   }
 };
 
@@ -423,19 +450,25 @@ export default function InteractiveTestimonialMap(props: LayoutComponentProps) {
     handleContentUpdate('avatar_urls', JSON.stringify(updatedAvatars));
   };
 
+  // Region label editing
+  const handleRegionLabelEdit = (regionName: string, value: string) => {
+    const fieldKey = `region_${regionName}_label` as keyof InteractiveTestimonialMapContent;
+    handleContentUpdate(fieldKey, value);
+  };
+
   const trustItems = blockContent.trust_items 
     ? blockContent.trust_items.split('|').map(item => item.trim()).filter(Boolean)
     : [];
 
   const mutedTextColor = dynamicTextColors?.muted || colorTokens.textMuted;
 
-  // Simulated world map with regions
+  // Simulated world map with regions - using dynamic labels
   const regions = [
-    { name: 'all', label: 'Worldwide', count: testimonials.length },
-    { name: 'americas', label: 'Americas', count: testimonials.filter(t => ['Brazil', 'USA', 'Canada'].includes(t.country)).length },
-    { name: 'europe', label: 'Europe', count: testimonials.filter(t => ['Spain', 'Denmark', 'Germany'].includes(t.country)).length },
-    { name: 'asia', label: 'Asia', count: testimonials.filter(t => ['Japan', 'India', 'China'].includes(t.country)).length },
-    { name: 'africa', label: 'Africa', count: testimonials.filter(t => ['Nigeria', 'South Africa'].includes(t.country)).length }
+    { name: 'all', label: blockContent.region_all_label || 'Worldwide', count: testimonials.length },
+    { name: 'americas', label: blockContent.region_americas_label || 'Americas', count: testimonials.filter(t => ['Brazil', 'USA', 'Canada'].includes(t.country)).length },
+    { name: 'europe', label: blockContent.region_europe_label || 'Europe', count: testimonials.filter(t => ['Spain', 'Denmark', 'Germany'].includes(t.country)).length },
+    { name: 'asia', label: blockContent.region_asia_label || 'Asia', count: testimonials.filter(t => ['Japan', 'India', 'China'].includes(t.country)).length },
+    { name: 'africa', label: blockContent.region_africa_label || 'Africa', count: testimonials.filter(t => ['Nigeria', 'South Africa'].includes(t.country)).length }
   ];
 
   const getRegionColor = (region: string) => {
@@ -538,7 +571,20 @@ export default function InteractiveTestimonialMap(props: LayoutComponentProps) {
                   : 'bg-white text-gray-700 border border-gray-200 hover:border-gray-300 hover:shadow-md'
               }`}
             >
-              {region.label} ({region.count})
+              <EditableAdaptiveText
+                mode={mode}
+                value={region.label}
+                onEdit={(value) => handleRegionLabelEdit(region.name, value)}
+                backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
+                colorTokens={colorTokens}
+                variant="body"
+                className="inline"
+                placeholder={`${region.name} label`}
+                sectionId={sectionId}
+                elementKey={`region_${region.name}_label`}
+                sectionBackground={sectionBackground}
+                style={{ display: 'inline' }}
+              /> ({region.count})
             </button>
           ))}
         </div>
@@ -834,7 +880,12 @@ export const componentMeta = {
     { key: 'support_title', label: 'Support Feature Title', type: 'text', required: false },
     { key: 'support_description', label: 'Support Feature Description', type: 'text', required: false },
     { key: 'collaboration_title', label: 'Collaboration Feature Title', type: 'text', required: false },
-    { key: 'collaboration_description', label: 'Collaboration Feature Description', type: 'text', required: false }
+    { key: 'collaboration_description', label: 'Collaboration Feature Description', type: 'text', required: false },
+    { key: 'region_all_label', label: 'All Regions Tab Label', type: 'text', required: false },
+    { key: 'region_americas_label', label: 'Americas Tab Label', type: 'text', required: false },
+    { key: 'region_europe_label', label: 'Europe Tab Label', type: 'text', required: false },
+    { key: 'region_asia_label', label: 'Asia Tab Label', type: 'text', required: false },
+    { key: 'region_africa_label', label: 'Africa Tab Label', type: 'text', required: false }
   ],
   
   features: [
