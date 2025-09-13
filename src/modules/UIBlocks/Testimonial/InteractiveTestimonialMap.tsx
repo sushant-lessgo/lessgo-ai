@@ -233,7 +233,7 @@ const parseTestimonialData = (
   }));
 };
 
-// Enhanced Testimonial Card Component with WYSIWYG editing
+// Enhanced Testimonial Card Component with WYSIWYG editing and delete functionality
 const TestimonialCard = React.memo(({ 
   testimonial, 
   mode, 
@@ -248,7 +248,9 @@ const TestimonialCard = React.memo(({
   onLocationEdit,
   onTitleEdit,
   onCategoryEdit,
-  onAvatarChange
+  onAvatarChange,
+  onDelete,
+  canDelete
 }: {
   testimonial: TestimonialItem;
   mode: 'edit' | 'preview';
@@ -264,6 +266,8 @@ const TestimonialCard = React.memo(({
   onTitleEdit: (index: number, value: string) => void;
   onCategoryEdit: (index: number, value: string) => void;
   onAvatarChange: (customerName: string, avatarUrl: string) => void;
+  onDelete: (index: number) => void;
+  canDelete: boolean;
 }) => {
   const getCountryFlag = (country: string) => {
     const flags = {
@@ -276,11 +280,26 @@ const TestimonialCard = React.memo(({
 
   return (
     <div 
-      className={`bg-white rounded-2xl shadow-xl border border-gray-200 p-8 cursor-pointer transition-all duration-300 ${
+      className={`relative group/testimonial-card-${testimonial.index} bg-white rounded-2xl shadow-xl border border-gray-200 p-8 cursor-pointer transition-all duration-300 ${
         isActive ? 'ring-2 ring-blue-500 shadow-2xl' : 'hover:shadow-2xl hover:border-gray-300'
       }`}
       onClick={onClick}
     >
+      {/* Delete Button - Following deletebutton.md pattern */}
+      {mode === 'edit' && canDelete && (
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            onDelete(testimonial.index);
+          }}
+          className={`opacity-0 group-hover/testimonial-card-${testimonial.index}:opacity-100 absolute top-3 right-3 text-red-500 hover:text-red-700 transition-opacity duration-200`}
+          title="Remove testimonial"
+        >
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      )}
       {/* Header */}
       <div className="flex items-start justify-between mb-6">
         <div className="flex items-center space-x-4">
@@ -446,14 +465,89 @@ export default function InteractiveTestimonialMap(props: LayoutComponentProps) {
   // Avatar handling
   const handleAvatarChange = (customerName: string, avatarUrl: string) => {
     const customerAvatars = parseCustomerAvatarData(blockContent.avatar_urls || '{}');
-    const updatedAvatars = updateAvatarUrls(customerAvatars, customerName, avatarUrl);
-    handleContentUpdate('avatar_urls', JSON.stringify(updatedAvatars));
+    const updatedAvatars = updateAvatarUrls(JSON.stringify(customerAvatars), customerName, avatarUrl);
+    handleContentUpdate('avatar_urls', updatedAvatars);
   };
 
   // Region label editing
   const handleRegionLabelEdit = (regionName: string, value: string) => {
     const fieldKey = `region_${regionName}_label` as keyof InteractiveTestimonialMapContent;
     handleContentUpdate(fieldKey, value);
+  };
+
+  // Delete testimonial function - following deletebutton.md pattern
+  const handleDeleteTestimonial = (indexToDelete: number) => {
+    // Prevent deleting if only one testimonial remains
+    if (testimonials.length <= 1) {
+      return;
+    }
+
+    // Helper function to remove item from pipe-separated string
+    const removeFromPipeData = (pipeData: string, index: number): string => {
+      const items = parsePipeData(pipeData);
+      items.splice(index, 1);
+      return items.join('|');
+    };
+
+    // Update all related fields by removing the item at the specified index
+    handleContentUpdate('testimonial_quotes', removeFromPipeData(blockContent.testimonial_quotes, indexToDelete));
+    handleContentUpdate('customer_names', removeFromPipeData(blockContent.customer_names, indexToDelete));
+    handleContentUpdate('customer_locations', removeFromPipeData(blockContent.customer_locations, indexToDelete));
+    handleContentUpdate('customer_countries', removeFromPipeData(blockContent.customer_countries, indexToDelete));
+    handleContentUpdate('customer_titles', removeFromPipeData(blockContent.customer_titles, indexToDelete));
+    handleContentUpdate('testimonial_categories', removeFromPipeData(blockContent.testimonial_categories, indexToDelete));
+    
+    if (blockContent.ratings) {
+      handleContentUpdate('ratings', removeFromPipeData(blockContent.ratings, indexToDelete));
+    }
+
+    // Remove avatar for deleted customer
+    const customerNames = parsePipeData(blockContent.customer_names);
+    const deletedCustomerName = customerNames[indexToDelete];
+    if (deletedCustomerName) {
+      const customerAvatars = parseCustomerAvatarData(blockContent.avatar_urls || '{}');
+      if (customerAvatars[deletedCustomerName]) {
+        delete customerAvatars[deletedCustomerName];
+        handleContentUpdate('avatar_urls', JSON.stringify(customerAvatars));
+      }
+    }
+
+    // Reset active testimonial if needed
+    if (activeTestimonial >= testimonials.length - 1) {
+      setActiveTestimonial(0);
+    }
+  };
+
+  // Add new testimonial function with maximum limit
+  const handleAddTestimonial = () => {
+    const MAX_TESTIMONIALS = 8;
+    
+    // Prevent adding if at maximum limit
+    if (testimonials.length >= MAX_TESTIMONIALS) {
+      return;
+    }
+
+    // Helper function to add item to pipe-separated string
+    const addToPipeData = (pipeData: string, newItem: string): string => {
+      const items = parsePipeData(pipeData);
+      items.push(newItem);
+      return items.join('|');
+    };
+
+    // Add placeholder data for new testimonial
+    handleContentUpdate('testimonial_quotes', addToPipeData(blockContent.testimonial_quotes, 'Add your testimonial here...'));
+    handleContentUpdate('customer_names', addToPipeData(blockContent.customer_names, 'Customer Name'));
+    handleContentUpdate('customer_locations', addToPipeData(blockContent.customer_locations, 'City, Country'));
+    handleContentUpdate('customer_countries', addToPipeData(blockContent.customer_countries, 'Country'));
+    handleContentUpdate('customer_titles', addToPipeData(blockContent.customer_titles, 'Job Title'));
+    handleContentUpdate('testimonial_categories', addToPipeData(blockContent.testimonial_categories, 'Category'));
+    
+    if (blockContent.ratings) {
+      handleContentUpdate('ratings', addToPipeData(blockContent.ratings, '5'));
+    }
+
+    // Set active testimonial to the new one
+    setActiveTestimonial(testimonials.length);
   };
 
   const trustItems = blockContent.trust_items 
@@ -608,9 +702,26 @@ export default function InteractiveTestimonialMap(props: LayoutComponentProps) {
               onTitleEdit={handleTitleEdit}
               onCategoryEdit={handleCategoryEdit}
               onAvatarChange={handleAvatarChange}
+              onDelete={handleDeleteTestimonial}
+              canDelete={testimonials.length > 1}
             />
           ))}
         </div>
+
+        {/* Add Testimonial Button - Only in edit mode */}
+        {mode === 'edit' && testimonials.length < 8 && (
+          <div className="text-center mb-16">
+            <button
+              onClick={handleAddTestimonial}
+              className="inline-flex items-center px-6 py-3 bg-blue-50 hover:bg-blue-100 text-blue-600 hover:text-blue-700 font-medium rounded-xl border-2 border-blue-200 hover:border-blue-300 transition-all duration-200"
+            >
+              <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+              </svg>
+              Add Testimonial ({testimonials.length}/8)
+            </button>
+          </div>
+        )}
 
 
         {/* Global Community Features */}
