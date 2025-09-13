@@ -192,6 +192,86 @@ export default function PullQuoteStack(props: LayoutComponentProps) {
     return colors[index % colors.length];
   };
 
+  // Helper function to add a new testimonial
+  const addTestimonial = (quotes: string, names: string, titles: string, companies: string, contexts: string, emotions: string): {
+    newQuotes: string;
+    newNames: string;
+    newTitles: string;
+    newCompanies: string;
+    newContexts: string;
+    newEmotions: string;
+  } => {
+    const quoteList = quotes.split('|').map(q => q.trim()).filter(q => q);
+    const nameList = names.split('|').map(n => n.trim()).filter(n => n);
+    const titleList = titles.split('|').map(t => t.trim()).filter(t => t);
+    const companyList = companies ? companies.split('|').map(c => c.trim()).filter(c => c) : [];
+    const contextList = contexts.split('|').map(c => c.trim()).filter(c => c);
+    const emotionList = emotions.split('|').map(e => e.trim()).filter(e => e);
+    
+    // Add new testimonial with default content
+    quoteList.push('This solution transformed how we work. Highly recommended!');
+    nameList.push('New Customer');
+    titleList.push('Professional');
+    companyList.push('Company Name');
+    contextList.push('Growing business efficiently');
+    emotionList.push('Success and satisfaction');
+    
+    return {
+      newQuotes: quoteList.join('|'),
+      newNames: nameList.join('|'),
+      newTitles: titleList.join('|'),
+      newCompanies: companyList.join('|'),
+      newContexts: contextList.join('|'),
+      newEmotions: emotionList.join('|')
+    };
+  };
+
+  // Helper function to remove a testimonial
+  const removeTestimonial = (indexToRemove: number, quotes: string, names: string, titles: string, companies: string, contexts: string, emotions: string): {
+    newQuotes: string;
+    newNames: string;
+    newTitles: string;
+    newCompanies: string;
+    newContexts: string;
+    newEmotions: string;
+  } => {
+    const quoteList = quotes.split('|').map(q => q.trim()).filter(q => q);
+    const nameList = names.split('|').map(n => n.trim()).filter(n => n);
+    const titleList = titles.split('|').map(t => t.trim()).filter(t => t);
+    const companyList = companies ? companies.split('|').map(c => c.trim()).filter(c => c) : [];
+    const contextList = contexts.split('|').map(c => c.trim()).filter(c => c);
+    const emotionList = emotions.split('|').map(e => e.trim()).filter(e => e);
+    
+    // Remove the testimonial at the specified index
+    if (indexToRemove >= 0 && indexToRemove < quoteList.length) {
+      quoteList.splice(indexToRemove, 1);
+    }
+    if (indexToRemove >= 0 && indexToRemove < nameList.length) {
+      nameList.splice(indexToRemove, 1);
+    }
+    if (indexToRemove >= 0 && indexToRemove < titleList.length) {
+      titleList.splice(indexToRemove, 1);
+    }
+    if (indexToRemove >= 0 && indexToRemove < companyList.length) {
+      companyList.splice(indexToRemove, 1);
+    }
+    if (indexToRemove >= 0 && indexToRemove < contextList.length) {
+      contextList.splice(indexToRemove, 1);
+    }
+    if (indexToRemove >= 0 && indexToRemove < emotionList.length) {
+      emotionList.splice(indexToRemove, 1);
+    }
+    
+    return {
+      newQuotes: quoteList.join('|'),
+      newNames: nameList.join('|'),
+      newTitles: titleList.join('|'),
+      newCompanies: companyList.join('|'),
+      newContexts: contextList.join('|'),
+      newEmotions: emotionList.join('|')
+    };
+  };
+
   // Handle individual editing
   const handleQuoteEdit = (index: number, value: string) => {
     const quotes = blockContent.testimonial_quotes.split('|');
@@ -239,6 +319,60 @@ export default function PullQuoteStack(props: LayoutComponentProps) {
     handleContentUpdate(field, value);
   };
 
+  // Handle adding a new testimonial
+  const handleAddTestimonial = () => {
+    const { newQuotes, newNames, newTitles, newCompanies, newContexts, newEmotions } = addTestimonial(
+      blockContent.testimonial_quotes,
+      blockContent.customer_names,
+      blockContent.customer_titles,
+      blockContent.customer_companies || '',
+      blockContent.problem_contexts,
+      blockContent.emotional_hooks
+    );
+    
+    handleContentUpdate('testimonial_quotes', newQuotes);
+    handleContentUpdate('customer_names', newNames);
+    handleContentUpdate('customer_titles', newTitles);
+    handleContentUpdate('customer_companies', newCompanies);
+    handleContentUpdate('problem_contexts', newContexts);
+    handleContentUpdate('emotional_hooks', newEmotions);
+    
+    // Add default context icon for new testimonial
+    const newIndex = newQuotes.split('|').length - 1;
+    const iconField = `context_icon_${newIndex + 1}` as keyof PullQuoteStackContent;
+    handleContentUpdate(iconField, '✨');
+  };
+
+  // Handle removing a testimonial
+  const handleRemoveTestimonial = (indexToRemove: number) => {
+    const { newQuotes, newNames, newTitles, newCompanies, newContexts, newEmotions } = removeTestimonial(
+      indexToRemove,
+      blockContent.testimonial_quotes,
+      blockContent.customer_names,
+      blockContent.customer_titles,
+      blockContent.customer_companies || '',
+      blockContent.problem_contexts,
+      blockContent.emotional_hooks
+    );
+    
+    handleContentUpdate('testimonial_quotes', newQuotes);
+    handleContentUpdate('customer_names', newNames);
+    handleContentUpdate('customer_titles', newTitles);
+    handleContentUpdate('customer_companies', newCompanies);
+    handleContentUpdate('problem_contexts', newContexts);
+    handleContentUpdate('emotional_hooks', newEmotions);
+    
+    // Clear corresponding avatar and context icon fields
+    const avatarField = `avatar_${indexToRemove + 1}` as keyof PullQuoteStackContent;
+    const iconField = `context_icon_${indexToRemove + 1}` as keyof PullQuoteStackContent;
+    if (blockContent[avatarField]) {
+      handleContentUpdate(avatarField, '');
+    }
+    if (blockContent[iconField]) {
+      handleContentUpdate(iconField, '');
+    }
+  };
+
   const QuoteCard = ({ testimonial, index, h3Style, bodyLgStyle }: {
     testimonial: typeof testimonials[0] & { avatarUrl: string; contextIcon: string };
     index: number;
@@ -250,7 +384,7 @@ export default function PullQuoteStack(props: LayoutComponentProps) {
     
     return (
       <div className={`${isLarge ? 'md:col-span-2' : ''}`}>
-        <div className={`bg-gradient-to-br ${color.bg} rounded-2xl p-6 border-2 ${color.border} hover:shadow-xl transition-all duration-300 h-full`}>
+        <div className={`group/testimonial-card-${index} relative bg-gradient-to-br ${color.bg} rounded-2xl p-6 border-2 ${color.border} hover:shadow-xl transition-all duration-300 h-full`}>
           
           {/* Emotional Context - Now Editable */}
           <div className="flex items-center space-x-2 mb-4">
@@ -369,6 +503,22 @@ export default function PullQuoteStack(props: LayoutComponentProps) {
               )}
             </div>
           </div>
+          
+          {/* Delete Button - Only show in edit mode and if can remove */}
+          {mode === 'edit' && testimonials.length > 1 && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                handleRemoveTestimonial(index);
+              }}
+              className={`opacity-0 group-hover/testimonial-card-${index}:opacity-100 absolute top-4 right-4 text-red-500 hover:text-red-700 transition-opacity duration-200`}
+              title="Remove this testimonial"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          )}
         </div>
       </div>
     );
@@ -429,6 +579,21 @@ export default function PullQuoteStack(props: LayoutComponentProps) {
             />
           ))}
         </div>
+
+        {/* Add Testimonial Button - only show in edit mode and if under max limit */}
+        {mode === 'edit' && testimonials.length < 6 && (
+          <div className="mt-8 text-center">
+            <button
+              onClick={handleAddTestimonial}
+              className="flex items-center space-x-2 mx-auto px-4 py-3 bg-blue-50 hover:bg-blue-100 border-2 border-blue-200 hover:border-blue-300 rounded-xl transition-all duration-200 group"
+            >
+              <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+              </svg>
+              <span className="text-blue-700 font-medium">Add Testimonial</span>
+            </button>
+          </div>
+        )}
 
         {(blockContent.cta_text || blockContent.trust_items || mode === 'edit') && (
           <div className="text-center space-y-6">
@@ -505,6 +670,8 @@ export const componentMeta = {
     'Inline editable testimonial quotes, names, titles, companies',
     'Editable customer avatars with upload functionality',
     'Contextual emotion icons with direct editing',
+    'Add/delete testimonials with proper limits (1-6 testimonials)',
+    'Delete buttons with named group hover patterns',
     'Visual testimonial cards with proper styling',
     'Problem context highlighting',
     'Emotional connection building',

@@ -134,6 +134,7 @@ module.exports = {
   'group-hover/testimonial-card-5:opacity-100',
   'group-hover/testimonial-card-6:opacity-100',
   'group-hover/testimonial-card-7:opacity-100',
+  // PullQuoteStack testimonial card patterns (reusing the same pattern)
   'group-focus-within:opacity-100',
   'opacity-0',
   'transition-opacity',
