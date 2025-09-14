@@ -273,109 +273,7 @@ export default function BeforeImageAfterText(props: LayoutComponentProps) {
           )}
         </div>
 
-        {mode !== 'preview' ? (
-          <div className="space-y-8">
-            {/* Image Upload/Preview Section */}
-            <div className="p-6 border border-gray-200 rounded-lg bg-gray-50">
-              <h4 className="font-semibold text-gray-700 mb-4">Before/After Image</h4>
-              <div className="relative">
-                {reactiveImage && reactiveImage !== '' ? (
-                  <div className="relative">
-                    <img
-                      src={reactiveImage}
-                      alt={blockContent.image_caption || 'Before and After Comparison'}
-                      className="w-full h-auto max-h-96 object-contain rounded-lg border border-gray-300 cursor-pointer"
-                      data-image-id={`${sectionId}-before-after-image`}
-                      onMouseUp={(e) => {
-                        e.stopPropagation();
-                        e.preventDefault();
-                        const rect = e.currentTarget.getBoundingClientRect();
-                        handleImageToolbar(`${sectionId}.before_after_image`, {
-                          x: rect.left + rect.width / 2,
-                          y: rect.top - 10
-                        });
-                      }}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        e.preventDefault();
-                      }}
-                    />
-                    <div className="absolute top-2 right-2 bg-white bg-opacity-90 px-2 py-1 rounded text-xs text-gray-600">
-                      Click image to edit
-                    </div>
-                  </div>
-                ) : (
-                  <div 
-                    className="w-full h-64 bg-gray-100 rounded-lg border-2 border-dashed border-gray-300 flex flex-col items-center justify-center cursor-pointer hover:bg-gray-50 transition-colors"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      const rect = e.currentTarget.getBoundingClientRect();
-                      handleImageToolbar(`${sectionId}.before_after_image`, {
-                        x: rect.left + rect.width / 2,
-                        y: rect.top - 10
-                      });
-                    }}
-                  >
-                    <svg className="w-12 h-12 text-gray-400 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                    </svg>
-                    <p className="text-sm text-gray-600 mb-1">Click to upload before/after image</p>
-                    <p className="text-xs text-gray-500">Recommended: Split image showing before & after states</p>
-                  </div>
-                )}
-              </div>
-            </div>
-
-            <div className="p-6 border border-gray-200 rounded-lg bg-gray-50">
-              <h4 className="font-semibold text-gray-700 mb-4">Before/After Content</h4>
-              
-              <div className="space-y-4">
-                <EditableAdaptiveText
-                  mode={mode}
-                  value={blockContent.before_description || ''}
-                  onEdit={(value) => handleContentUpdate('before_description', value)}
-                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
-                  colorTokens={colorTokens}
-                  variant="body"
-                  className="mb-2"
-                  placeholder="Before description (current problems)"
-                  sectionId={sectionId}
-                  elementKey="before_description"
-                  sectionBackground={sectionBackground}
-                />
-                
-                <EditableAdaptiveText
-                  mode={mode}
-                  value={blockContent.after_description || ''}
-                  onEdit={(value) => handleContentUpdate('after_description', value)}
-                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
-                  colorTokens={colorTokens}
-                  variant="body"
-                  className="mb-2"
-                  placeholder="After description (desired outcomes)"
-                  sectionId={sectionId}
-                  elementKey="after_description"
-                  sectionBackground={sectionBackground}
-                />
-                
-                <EditableAdaptiveText
-                  mode={mode}
-                  value={blockContent.image_caption || ''}
-                  onEdit={(value) => handleContentUpdate('image_caption', value)}
-                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
-                  colorTokens={colorTokens}
-                  variant="body"
-                  className="mb-2"
-                  placeholder="Image caption (optional)"
-                  sectionId={sectionId}
-                  elementKey="image_caption"
-                  sectionBackground={sectionBackground}
-                />
-              </div>
-            </div>
-          </div>
-        ) : (
-          <div className="space-y-12">
+        <div className="space-y-12">
             {/* Visual Before/After Comparison */}
             {reactiveImage && reactiveImage !== '' ? (
               <div className="relative w-full">
@@ -402,16 +300,17 @@ export default function BeforeImageAfterText(props: LayoutComponentProps) {
                     }
                   }}
                 />
-                {blockContent.image_caption && (
+                {(blockContent.image_caption || mode === 'edit') && (
                   <div className="mt-4 text-center">
                     <EditableAdaptiveText
                       mode={mode}
-                      value={blockContent.image_caption}
+                      value={blockContent.image_caption || ''}
                       onEdit={(value) => handleContentUpdate('image_caption', value)}
                       backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
                       colorTokens={colorTokens}
                       variant="body"
                       className="text-sm"
+                      placeholder="Add image caption..."
                       sectionId={sectionId}
                       elementKey="image_caption"
                       sectionBackground={sectionBackground}
@@ -419,19 +318,37 @@ export default function BeforeImageAfterText(props: LayoutComponentProps) {
                   </div>
                 )}
               </div>
-            ) : mode !== 'preview' ? (
-              <div className="bg-gray-100 rounded-2xl p-12 text-center">
-                <p className="text-gray-500">No image uploaded yet. Click to add a before/after comparison image.</p>
-              </div>
             ) : (
-              <BeforeAfterImage />
+              <div
+                className="relative cursor-pointer group"
+                onClick={(e) => {
+                  if (mode !== 'preview') {
+                    e.stopPropagation();
+                    const rect = e.currentTarget.getBoundingClientRect();
+                    handleImageToolbar(`${sectionId}.before_after_image`, {
+                      x: rect.left + rect.width / 2,
+                      y: rect.top - 10
+                    });
+                  }
+                }}
+              >
+                <BeforeAfterImage />
+                {mode === 'edit' && (
+                  <div className="absolute top-4 right-4 bg-white bg-opacity-90 px-3 py-2 rounded-lg text-sm text-gray-600 group-hover:bg-opacity-100 transition-all duration-200 shadow-lg">
+                    <svg className="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                    Click to upload your before/after image
+                  </div>
+                )}
+              </div>
             )}
 
             {/* Before/After Descriptions */}
             <div className="grid lg:grid-cols-2 gap-8">
               {/* Before Description */}
               <div className="space-y-4">
-                <h3 className="text-lg font-semibold text-gray-800">Before</h3>
+                <h3 className="text-lg font-semibold" style={getTextStyle('h3')}>Before</h3>
                 <EditableAdaptiveText
                   mode={mode}
                   value={blockContent.before_description || ''}
@@ -439,7 +356,8 @@ export default function BeforeImageAfterText(props: LayoutComponentProps) {
                   backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
                   colorTokens={colorTokens}
                   variant="body"
-                  className="text-gray-700 leading-relaxed"
+                  className="leading-relaxed"
+                  placeholder="Describe the current problems or pain points..."
                   sectionId={sectionId}
                   elementKey="before_description"
                   sectionBackground={sectionBackground}
@@ -448,7 +366,7 @@ export default function BeforeImageAfterText(props: LayoutComponentProps) {
 
               {/* After Description */}
               <div className="space-y-4">
-                <h3 className="text-lg font-semibold text-gray-800">After</h3>
+                <h3 className="text-lg font-semibold" style={getTextStyle('h3')}>After</h3>
                 <EditableAdaptiveText
                   mode={mode}
                   value={blockContent.after_description || ''}
@@ -456,7 +374,8 @@ export default function BeforeImageAfterText(props: LayoutComponentProps) {
                   backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
                   colorTokens={colorTokens}
                   variant="body"
-                  className="text-gray-700 leading-relaxed"
+                  className="leading-relaxed"
+                  placeholder="Describe the desired outcomes and benefits..."
                   sectionId={sectionId}
                   elementKey="after_description"
                   sectionBackground={sectionBackground}
@@ -464,7 +383,6 @@ export default function BeforeImageAfterText(props: LayoutComponentProps) {
               </div>
             </div>
           </div>
-        )}
 
         {/* Supporting Text and Trust Items - shown in both modes */}
         {(blockContent.supporting_text || blockContent.trust_items || mode === 'edit') && (
