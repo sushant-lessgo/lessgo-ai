@@ -7,12 +7,19 @@ import {
   EditableAdaptiveText
 } from '@/components/layout/EditableContent';
 import IconEditableText from '@/components/ui/IconEditableText';
+import AvatarEditableComponent from '@/components/ui/AvatarEditableComponent';
 import { 
   CTAButton,
   TrustIndicators,
   StarRating 
 } from '@/components/layout/ComponentRegistry';
 import { LayoutComponentProps } from '@/types/storeTypes';
+import { 
+  parsePipeData, 
+  updateListData, 
+  parseCustomerAvatarData, 
+  updateAvatarUrls 
+} from '@/utils/dataParsingUtils';
 
 interface RatingCardsContent {
   headline: string;
@@ -28,19 +35,8 @@ interface RatingCardsContent {
   supporting_text?: string;
   cta_text?: string;
   trust_items?: string;
-  platforms_title?: string;
-  g2_rating?: string;
-  g2_label?: string;
-  capterra_rating?: string;
-  capterra_label?: string;
-  trustpilot_rating?: string;
-  trustpilot_label?: string;
-  producthunt_rating?: string;
-  producthunt_label?: string;
-  g2_icon?: string;
-  capterra_icon?: string;
-  trustpilot_icon?: string;
-  producthunt_icon?: string;
+  // Avatar system
+  avatar_urls?: string;
 }
 
 const CONTENT_SCHEMA = {
@@ -96,57 +92,9 @@ const CONTENT_SCHEMA = {
     type: 'string' as const, 
     default: '' 
   },
-  platforms_title: {
-    type: 'string' as const,
-    default: 'Consistently High Ratings Across Platforms'
-  },
-  g2_rating: {
-    type: 'string' as const,
-    default: '4.8'
-  },
-  g2_label: {
-    type: 'string' as const,
-    default: 'G2 Rating'
-  },
-  capterra_rating: {
-    type: 'string' as const,
-    default: '4.9'
-  },
-  capterra_label: {
-    type: 'string' as const,
-    default: 'Capterra Rating'
-  },
-  trustpilot_rating: {
-    type: 'string' as const,
-    default: '4.7'
-  },
-  trustpilot_label: {
-    type: 'string' as const,
-    default: 'Trustpilot Rating'
-  },
-  producthunt_rating: {
-    type: 'string' as const,
-    default: '4.8'
-  },
-  producthunt_label: {
-    type: 'string' as const,
-    default: 'Product Hunt Rating'
-  },
-  g2_icon: {
-    type: 'string' as const,
-    default: '🗡️'
-  },
-  capterra_icon: {
-    type: 'string' as const,
-    default: '📈'
-  },
-  trustpilot_icon: {
-    type: 'string' as const,
-    default: '✅'
-  },
-  producthunt_icon: {
-    type: 'string' as const,
-    default: '🚀'
+  avatar_urls: { 
+    type: 'string' as const, 
+    default: '{}' 
   }
 };
 
@@ -172,39 +120,20 @@ export default function RatingCards(props: LayoutComponentProps) {
   const h3Style = getTypographyStyle('h3');
   const bodyLgStyle = getTypographyStyle('body-lg');
 
-  const testimonialQuotes = blockContent.testimonial_quotes 
-    ? blockContent.testimonial_quotes.split('|').map(item => item.trim()).filter(Boolean)
-    : [];
-
-  const customerNames = blockContent.customer_names 
-    ? blockContent.customer_names.split('|').map(item => item.trim()).filter(Boolean)
-    : [];
-
-  const customerTitles = blockContent.customer_titles 
-    ? blockContent.customer_titles.split('|').map(item => item.trim()).filter(Boolean)
-    : [];
-
-  const ratings = blockContent.ratings 
-    ? blockContent.ratings.split('|').map(item => parseInt(item.trim()) || 5)
-    : [];
-
-  const reviewPlatforms = blockContent.review_platforms 
-    ? blockContent.review_platforms.split('|').map(item => item.trim()).filter(Boolean)
-    : [];
-
-  const reviewDates = blockContent.review_dates 
-    ? blockContent.review_dates.split('|').map(item => item.trim()).filter(Boolean)
-    : [];
-
-  const verifiedBadges = blockContent.verified_badges 
-    ? blockContent.verified_badges.split('|').map(item => item.trim().toLowerCase() === 'true')
-    : [];
-
-  const customerLocations = blockContent.customer_locations 
-    ? blockContent.customer_locations.split('|').map(item => item.trim()).filter(Boolean)
-    : [];
+  // Parse testimonial data using utilities
+  const testimonialQuotes = parsePipeData(blockContent.testimonial_quotes);
+  const customerNames = parsePipeData(blockContent.customer_names);
+  const customerTitles = parsePipeData(blockContent.customer_titles);
+  const reviewPlatforms = parsePipeData(blockContent.review_platforms);
+  const reviewDates = parsePipeData(blockContent.review_dates || '');
+  const customerLocations = parsePipeData(blockContent.customer_locations || '');
+  
+  const ratings = parsePipeData(blockContent.ratings).map(item => parseInt(item) || 5);
+  const verifiedBadges = parsePipeData(blockContent.verified_badges || '').map(item => item.toLowerCase() === 'true');
 
   const reviews = testimonialQuotes.map((quote, index) => ({
+    id: `review-${index}`,
+    index,
     quote,
     customerName: customerNames[index] || '',
     customerTitle: customerTitles[index] || '',
@@ -212,103 +141,319 @@ export default function RatingCards(props: LayoutComponentProps) {
     platform: reviewPlatforms[index] || '',
     date: reviewDates[index] || '',
     verified: verifiedBadges[index] || false,
-    location: customerLocations[index] || ''
+    location: customerLocations[index] || '',
+    avatarUrl: ''
   }));
 
-  const trustItems = blockContent.trust_items 
+  // Individual field editing handlers
+  const handleQuoteEdit = (index: number, value: string) => {
+    const updatedQuotes = updateListData(blockContent.testimonial_quotes, index, value);
+    handleContentUpdate('testimonial_quotes', updatedQuotes);
+  };
+
+  const handleCustomerNameEdit = (index: number, value: string) => {
+    const updatedNames = updateListData(blockContent.customer_names, index, value);
+    handleContentUpdate('customer_names', updatedNames);
+  };
+
+  const handleCustomerTitleEdit = (index: number, value: string) => {
+    const updatedTitles = updateListData(blockContent.customer_titles, index, value);
+    handleContentUpdate('customer_titles', updatedTitles);
+  };
+
+  const handlePlatformEdit = (index: number, value: string) => {
+    const updatedPlatforms = updateListData(blockContent.review_platforms, index, value);
+    handleContentUpdate('review_platforms', updatedPlatforms);
+  };
+
+  const handleDateEdit = (index: number, value: string) => {
+    const updatedDates = updateListData(blockContent.review_dates || '', index, value);
+    handleContentUpdate('review_dates', updatedDates);
+  };
+
+  const handleLocationEdit = (index: number, value: string) => {
+    const updatedLocations = updateListData(blockContent.customer_locations || '', index, value);
+    handleContentUpdate('customer_locations', updatedLocations);
+  };
+
+  const handleRatingEdit = (index: number, value: number) => {
+    const updatedRatings = updateListData(blockContent.ratings, index, value.toString());
+    handleContentUpdate('ratings', updatedRatings);
+  };
+
+  // Avatar handling
+  const getCustomerAvatars = () => {
+    if (blockContent.customer_names) {
+      const customerData = parseCustomerAvatarData(
+        blockContent.customer_names, 
+        blockContent.avatar_urls || '{}'
+      );
+      return customerData.map(customer => ({
+        name: customer.name,
+        avatarUrl: customer.avatarUrl || ''
+      }));
+    }
+    return [];
+  };
+
+  const handleAvatarChange = (customerName: string, avatarUrl: string) => {
+    const updatedAvatarUrls = updateAvatarUrls(blockContent.avatar_urls || '{}', customerName, avatarUrl);
+    handleContentUpdate('avatar_urls', updatedAvatarUrls);
+  };
+
+  const customerAvatars = getCustomerAvatars();
+
+  const trustItems = blockContent.trust_items
     ? blockContent.trust_items.split('|').map(item => item.trim()).filter(Boolean)
     : [];
 
   const mutedTextColor = dynamicTextColors?.muted || colorTokens.textMuted;
 
-  const getPlatformIcon = (platform: string, index: number) => {
-    const platformLower = platform.toLowerCase();
-    const iconFields = ['g2_icon', 'capterra_icon', 'trustpilot_icon', 'producthunt_icon'];
-    const defaultIcons = ['🗡️', '📈', '✅', '🚀'];
-    
-    let iconField: keyof RatingCardsContent = 'g2_icon';
-    if (platformLower.includes('g2')) {
-      iconField = 'g2_icon';
-    } else if (platformLower.includes('capterra')) {
-      iconField = 'capterra_icon';
-    } else if (platformLower.includes('trustpilot')) {
-      iconField = 'trustpilot_icon';
-    } else if (platformLower.includes('product hunt')) {
-      iconField = 'producthunt_icon';
-    }
-    
-    return (
-      <div className="w-6 h-6 rounded flex items-center justify-center group/icon-edit relative">
-        <IconEditableText
-          mode={mode}
-          value={blockContent[iconField] || defaultIcons[Math.min(index, defaultIcons.length - 1)]}
-          onEdit={(value) => handleContentUpdate(iconField, value)}
-          backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
-          colorTokens={colorTokens}
-          iconSize="sm"
-          className="text-base"
-          sectionId={sectionId}
-          elementKey={iconField}
-        />
-      </div>
-    );
+  // Helper function to add a new review card
+  const addReviewCard = () => {
+    const quotes = parsePipeData(blockContent.testimonial_quotes);
+    const names = parsePipeData(blockContent.customer_names);
+    const titles = parsePipeData(blockContent.customer_titles);
+    const ratings = parsePipeData(blockContent.ratings);
+    const platforms = parsePipeData(blockContent.review_platforms);
+    const dates = parsePipeData(blockContent.review_dates || '');
+    const verifiedBadges = parsePipeData(blockContent.verified_badges || '');
+    const locations = parsePipeData(blockContent.customer_locations || '');
+
+    // Add new review with default content
+    quotes.push('Amazing product! Has transformed our workflow completely.');
+    names.push('New Customer');
+    titles.push('Job Title');
+    ratings.push('5');
+    platforms.push('G2');
+    dates.push('Recently');
+    verifiedBadges.push('true');
+    locations.push('City, Country');
+
+    // Update all fields
+    handleContentUpdate('testimonial_quotes', quotes.join('|'));
+    handleContentUpdate('customer_names', names.join('|'));
+    handleContentUpdate('customer_titles', titles.join('|'));
+    handleContentUpdate('ratings', ratings.join('|'));
+    handleContentUpdate('review_platforms', platforms.join('|'));
+    handleContentUpdate('review_dates', dates.join('|'));
+    handleContentUpdate('verified_badges', verifiedBadges.join('|'));
+    handleContentUpdate('customer_locations', locations.join('|'));
   };
 
-  const ReviewCard = ({ review, index }: {
+  // Helper function to remove a review card
+  const removeReviewCard = (indexToRemove: number) => {
+    const quotes = parsePipeData(blockContent.testimonial_quotes);
+    const names = parsePipeData(blockContent.customer_names);
+    const titles = parsePipeData(blockContent.customer_titles);
+    const ratings = parsePipeData(blockContent.ratings);
+    const platforms = parsePipeData(blockContent.review_platforms);
+    const dates = parsePipeData(blockContent.review_dates || '');
+    const verifiedBadges = parsePipeData(blockContent.verified_badges || '');
+    const locations = parsePipeData(blockContent.customer_locations || '');
+
+    // Get the name before removing for avatar cleanup
+    const removedName = names[indexToRemove];
+
+    // Remove the review at the specified index
+    if (indexToRemove >= 0 && indexToRemove < quotes.length) {
+      quotes.splice(indexToRemove, 1);
+      names.splice(indexToRemove, 1);
+      titles.splice(indexToRemove, 1);
+      ratings.splice(indexToRemove, 1);
+      platforms.splice(indexToRemove, 1);
+      dates.splice(indexToRemove, 1);
+      verifiedBadges.splice(indexToRemove, 1);
+      locations.splice(indexToRemove, 1);
+
+      // Clear avatar URL for removed customer if it exists
+      if (removedName && blockContent.avatar_urls) {
+        try {
+          const avatarUrls = JSON.parse(blockContent.avatar_urls);
+          delete avatarUrls[removedName];
+          handleContentUpdate('avatar_urls', JSON.stringify(avatarUrls));
+        } catch (e) {
+          // Invalid JSON, ignore
+        }
+      }
+
+      // Update all fields
+      handleContentUpdate('testimonial_quotes', quotes.join('|'));
+      handleContentUpdate('customer_names', names.join('|'));
+      handleContentUpdate('customer_titles', titles.join('|'));
+      handleContentUpdate('ratings', ratings.join('|'));
+      handleContentUpdate('review_platforms', platforms.join('|'));
+      handleContentUpdate('review_dates', dates.join('|'));
+      handleContentUpdate('verified_badges', verifiedBadges.join('|'));
+      handleContentUpdate('customer_locations', locations.join('|'));
+    }
+  };
+
+  const getPlatformIcon = (platform: string) => {
+    const platformLower = platform.toLowerCase();
+    if (platformLower.includes('g2')) return '🗡️';
+    if (platformLower.includes('capterra')) return '📈';
+    if (platformLower.includes('trustpilot')) return '✅';
+    if (platformLower.includes('product hunt')) return '🚀';
+    if (platformLower.includes('google')) return '🔍';
+    if (platformLower.includes('yelp')) return '⭐';
+    return '📝'; // Default for other platforms
+  };
+
+  const ReviewCard = React.memo(({ review, canRemove, onRemove }: {
     review: typeof reviews[0];
-    index: number;
-  }) => (
-    <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-6 hover:shadow-xl transition-shadow duration-300">
-      
-      {/* Header */}
-      <div className="flex items-start justify-between mb-4">
-        <div className="flex items-center space-x-3">
-          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold">
-            {review.customerName.charAt(0)}
-          </div>
-          <div>
-            <div className="font-semibold text-gray-900">{review.customerName}</div>
-            <div className="text-sm text-gray-600">{review.customerTitle}</div>
-            {review.location && (
-              <div className="text-xs text-gray-500">{review.location}</div>
-            )}
-          </div>
-        </div>
-        
-        {review.verified && (
-          <div className="flex items-center space-x-1 bg-green-50 px-2 py-1 rounded-full">
-            <svg className="w-3 h-3 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+    canRemove: boolean;
+    onRemove: () => void;
+  }) => {
+    const avatarData = customerAvatars.find(avatar => avatar.name === review.customerName);
+
+    return (
+      <div className="group/review-card relative bg-white rounded-xl shadow-lg border border-gray-200 p-6 hover:shadow-xl transition-shadow duration-300">
+
+        {/* Delete button - only show in edit mode and if can remove */}
+        {mode === 'edit' && canRemove && (
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onRemove();
+            }}
+            className="absolute top-4 right-4 opacity-0 group-hover/review-card:opacity-100 text-red-500 hover:text-red-700 transition-opacity duration-200 z-10"
+            title="Remove this review"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
             </svg>
-            <span className="text-xs text-green-700 font-medium">Verified</span>
-          </div>
+          </button>
         )}
-      </div>
-      
-      {/* Rating */}
-      <div className="flex items-center space-x-2 mb-4">
-        <StarRating rating={review.rating} size="small" />
-        <span className="text-sm font-semibold text-gray-700">{review.rating}/5</span>
-      </div>
-      
-      {/* Review Text */}
-      <blockquote className="text-gray-700 leading-relaxed mb-4 text-sm">
-        "{review.quote}"
-      </blockquote>
-      
-      {/* Footer */}
-      <div className="flex items-center justify-between pt-4 border-t border-gray-100">
-        <div className="flex items-center space-x-2">
-          {getPlatformIcon(review.platform, index)}
-          <span className="text-sm font-medium text-gray-600">{review.platform}</span>
+
+        {/* Header */}
+        <div className="flex items-start justify-between mb-4">
+          <div className="flex items-center space-x-3">
+            <AvatarEditableComponent
+              mode={mode}
+              avatarUrl={avatarData?.avatarUrl || ''}
+              onAvatarChange={(url) => handleAvatarChange(review.customerName, url)}
+              customerName={review.customerName}
+              size="md"
+              className="w-10 h-10"
+            />
+            <div>
+              <EditableAdaptiveText
+                mode={mode}
+                value={review.customerName}
+                onEdit={(value) => handleCustomerNameEdit(review.index, value)}
+                backgroundType="neutral"
+                colorTokens={colorTokens}
+                variant="body"
+                className="font-semibold text-gray-900"
+                placeholder="Customer Name"
+                sectionId={sectionId}
+                elementKey={`customer_name_${review.index}`}
+                sectionBackground="bg-white"
+              />
+              <EditableAdaptiveText
+                mode={mode}
+                value={review.customerTitle}
+                onEdit={(value) => handleCustomerTitleEdit(review.index, value)}
+                backgroundType="neutral"
+                colorTokens={colorTokens}
+                variant="body"
+                className="text-sm text-gray-600"
+                placeholder="Customer Title"
+                sectionId={sectionId}
+                elementKey={`customer_title_${review.index}`}
+                sectionBackground="bg-white"
+              />
+              {(review.location || mode === 'edit') && (
+                <EditableAdaptiveText
+                  mode={mode}
+                  value={review.location}
+                  onEdit={(value) => handleLocationEdit(review.index, value)}
+                  backgroundType="neutral"
+                  colorTokens={colorTokens}
+                  variant="body"
+                  className="text-xs text-gray-500"
+                  placeholder="Location (optional)"
+                  sectionId={sectionId}
+                  elementKey={`customer_location_${review.index}`}
+                  sectionBackground="bg-white"
+                />
+              )}
+            </div>
+          </div>
+          
+          {review.verified && (
+            <div className="flex items-center space-x-1 bg-green-50 px-2 py-1 rounded-full">
+              <svg className="w-3 h-3 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <span className="text-xs text-green-700 font-medium">Verified</span>
+            </div>
+          )}
         </div>
         
-        {review.date && (
-          <span className="text-xs text-gray-500">{review.date}</span>
-        )}
+        {/* Rating */}
+        <div className="flex items-center space-x-2 mb-4">
+          <StarRating rating={review.rating} size="small" />
+          <span className="text-sm font-semibold text-gray-700">{review.rating}/5</span>
+        </div>
+        
+        {/* Review Text */}
+        <blockquote className="text-gray-700 leading-relaxed mb-4 text-sm">
+          "<EditableAdaptiveText
+            mode={mode}
+            value={review.quote}
+            onEdit={(value) => handleQuoteEdit(review.index, value)}
+            backgroundType="neutral"
+            colorTokens={colorTokens}
+            variant="body"
+            className="inline"
+            placeholder="Customer testimonial quote..."
+            sectionId={sectionId}
+            elementKey={`testimonial_quote_${review.index}`}
+            sectionBackground="bg-white"
+          />"
+        </blockquote>
+        
+        {/* Footer */}
+        <div className="flex items-center justify-between pt-4 border-t border-gray-100">
+          <div className="flex items-center space-x-2">
+            <div className="text-base">{getPlatformIcon(review.platform)}</div>
+            <EditableAdaptiveText
+              mode={mode}
+              value={review.platform}
+              onEdit={(value) => handlePlatformEdit(review.index, value)}
+              backgroundType="neutral"
+              colorTokens={colorTokens}
+              variant="body"
+              className="text-sm font-medium text-gray-600"
+              placeholder="Platform name"
+              sectionId={sectionId}
+              elementKey={`review_platform_${review.index}`}
+              sectionBackground="bg-white"
+            />
+          </div>
+          
+          {(review.date || mode === 'edit') && (
+            <EditableAdaptiveText
+              mode={mode}
+              value={review.date}
+              onEdit={(value) => handleDateEdit(review.index, value)}
+              backgroundType="neutral"
+              colorTokens={colorTokens}
+              variant="body"
+              className="text-xs text-gray-500"
+              placeholder="Review date"
+              sectionId={sectionId}
+              elementKey={`review_date_${review.index}`}
+              sectionBackground="bg-white"
+            />
+          )}
+        </div>
       </div>
-    </div>
-  );
+    );
+  });
+  ReviewCard.displayName = 'ReviewCard';
 
   // Calculate average rating
   const averageRating = reviews.length > 0 
@@ -369,276 +514,32 @@ export default function RatingCards(props: LayoutComponentProps) {
           </div>
         </div>
 
-        {mode !== 'preview' ? (
-          <div className="space-y-8">
-            <div className="p-6 border border-gray-200 rounded-lg bg-gray-50">
-              <h4 className="font-semibold text-gray-700 mb-4">Rating Cards Content</h4>
-              
-              <div className="space-y-4">
-                <EditableAdaptiveText
-                  mode={mode}
-                  value={blockContent.testimonial_quotes || ''}
-                  onEdit={(value) => handleContentUpdate('testimonial_quotes', value)}
-                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
-                  colorTokens={colorTokens}
-                  variant="body"
-                  className="mb-2"
-                  placeholder="Testimonial quotes (pipe separated)"
-                  sectionId={sectionId}
-                  elementKey="testimonial_quotes"
-                  sectionBackground={sectionBackground}
-                />
-                
-                <EditableAdaptiveText
-                  mode={mode}
-                  value={blockContent.customer_names || ''}
-                  onEdit={(value) => handleContentUpdate('customer_names', value)}
-                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
-                  colorTokens={colorTokens}
-                  variant="body"
-                  className="mb-2"
-                  placeholder="Customer names (pipe separated)"
-                  sectionId={sectionId}
-                  elementKey="customer_names"
-                  sectionBackground={sectionBackground}
-                />
-                
-                <EditableAdaptiveText
-                  mode={mode}
-                  value={blockContent.ratings || ''}
-                  onEdit={(value) => handleContentUpdate('ratings', value)}
-                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
-                  colorTokens={colorTokens}
-                  variant="body"
-                  className="mb-2"
-                  placeholder="Ratings 1-5 (pipe separated)"
-                  sectionId={sectionId}
-                  elementKey="ratings"
-                  sectionBackground={sectionBackground}
-                />
-                
-                <EditableAdaptiveText
-                  mode={mode}
-                  value={blockContent.review_platforms || ''}
-                  onEdit={(value) => handleContentUpdate('review_platforms', value)}
-                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
-                  colorTokens={colorTokens}
-                  variant="body"
-                  className="mb-2"
-                  placeholder="Review platforms (pipe separated)"
-                  sectionId={sectionId}
-                  elementKey="review_platforms"
-                  sectionBackground={sectionBackground}
-                />
-              </div>
-            </div>
-          </div>
-        ) : (
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-16">
-            {reviews.map((review, index) => (
-              <ReviewCard
-                key={index}
-                review={review}
-                index={index}
-              />
-            ))}
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+          {reviews.map((review) => (
+            <ReviewCard
+              key={review.id}
+              review={review}
+              canRemove={reviews.length > 1}
+              onRemove={() => removeReviewCard(review.index)}
+            />
+          ))}
+        </div>
+
+        {/* Add Review Card Button - only show in edit mode and if under max limit */}
+        {mode === 'edit' && reviews.length < 6 && (
+          <div className="mb-12 text-center">
+            <button
+              onClick={addReviewCard}
+              className="inline-flex items-center space-x-2 px-6 py-3 bg-blue-50 hover:bg-blue-100 border-2 border-blue-200 hover:border-blue-300 rounded-xl transition-all duration-200 group"
+            >
+              <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+              </svg>
+              <span className="text-blue-700 font-medium">Add Review Card</span>
+            </button>
           </div>
         )}
 
-        {/* Platform Statistics */}
-        <div className="bg-gradient-to-r from-orange-50 via-blue-50 to-green-50 rounded-2xl p-8 border border-orange-100 mb-12">
-          <div className="text-center">
-            <EditableAdaptiveText
-              mode={mode}
-              value={blockContent.platforms_title || ''}
-              onEdit={(value) => handleContentUpdate('platforms_title', value)}
-              backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
-              colorTokens={colorTokens}
-              variant="body"
-              style={h3Style}
-              className="font-semibold text-gray-900 mb-6"
-              placeholder="Platforms section title..."
-              sectionId={sectionId}
-              elementKey="platforms_title"
-              sectionBackground={sectionBackground}
-            />
-            
-            <div className="grid md:grid-cols-4 gap-6">
-              <div className="text-center">
-                <div className="flex items-center justify-center space-x-2 mb-2">
-                  <div className="w-8 h-8 bg-orange-500 rounded flex items-center justify-center text-white font-bold text-sm group/icon-edit relative">
-                    <IconEditableText
-                      mode={mode}
-                      value={blockContent.g2_icon || '🗡️'}
-                      onEdit={(value) => handleContentUpdate('g2_icon', value)}
-                      backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
-                      colorTokens={colorTokens}
-                      iconSize="md"
-                      className="text-xl"
-                      sectionId={sectionId}
-                      elementKey="g2_icon"
-                    />
-                  </div>
-                  <EditableAdaptiveText
-                    mode={mode}
-                    value={blockContent.g2_rating || ''}
-                    onEdit={(value) => handleContentUpdate('g2_rating', value)}
-                    backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
-                    colorTokens={colorTokens}
-                    variant="body"
-                    className="text-2xl font-bold text-orange-600"
-                    placeholder="G2 rating..."
-                    sectionId={sectionId}
-                    elementKey="g2_rating"
-                    sectionBackground={sectionBackground}
-                  />
-                </div>
-                <EditableAdaptiveText
-                  mode={mode}
-                  value={blockContent.g2_label || ''}
-                  onEdit={(value) => handleContentUpdate('g2_label', value)}
-                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
-                  colorTokens={colorTokens}
-                  variant="body"
-                  className={`text-sm ${mutedTextColor}`}
-                  placeholder="G2 label..."
-                  sectionId={sectionId}
-                  elementKey="g2_label"
-                  sectionBackground={sectionBackground}
-                />
-              </div>
-              <div className="text-center">
-                <div className="flex items-center justify-center space-x-2 mb-2">
-                  <div className="w-8 h-8 bg-blue-600 rounded flex items-center justify-center text-white font-bold text-sm group/icon-edit relative">
-                    <IconEditableText
-                      mode={mode}
-                      value={blockContent.capterra_icon || '📈'}
-                      onEdit={(value) => handleContentUpdate('capterra_icon', value)}
-                      backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
-                      colorTokens={colorTokens}
-                      iconSize="md"
-                      className="text-xl"
-                      sectionId={sectionId}
-                      elementKey="capterra_icon"
-                    />
-                  </div>
-                  <EditableAdaptiveText
-                    mode={mode}
-                    value={blockContent.capterra_rating || ''}
-                    onEdit={(value) => handleContentUpdate('capterra_rating', value)}
-                    backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
-                    colorTokens={colorTokens}
-                    variant="body"
-                    className="text-2xl font-bold text-blue-600"
-                    placeholder="Capterra rating..."
-                    sectionId={sectionId}
-                    elementKey="capterra_rating"
-                    sectionBackground={sectionBackground}
-                  />
-                </div>
-                <EditableAdaptiveText
-                  mode={mode}
-                  value={blockContent.capterra_label || ''}
-                  onEdit={(value) => handleContentUpdate('capterra_label', value)}
-                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
-                  colorTokens={colorTokens}
-                  variant="body"
-                  className={`text-sm ${mutedTextColor}`}
-                  placeholder="Capterra label..."
-                  sectionId={sectionId}
-                  elementKey="capterra_label"
-                  sectionBackground={sectionBackground}
-                />
-              </div>
-              <div className="text-center">
-                <div className="flex items-center justify-center space-x-2 mb-2">
-                  <div className="w-8 h-8 bg-green-600 rounded flex items-center justify-center text-white font-bold text-sm group/icon-edit relative">
-                    <IconEditableText
-                      mode={mode}
-                      value={blockContent.trustpilot_icon || '✅'}
-                      onEdit={(value) => handleContentUpdate('trustpilot_icon', value)}
-                      backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
-                      colorTokens={colorTokens}
-                      iconSize="md"
-                      className="text-xl"
-                      sectionId={sectionId}
-                      elementKey="trustpilot_icon"
-                    />
-                  </div>
-                  <EditableAdaptiveText
-                    mode={mode}
-                    value={blockContent.trustpilot_rating || ''}
-                    onEdit={(value) => handleContentUpdate('trustpilot_rating', value)}
-                    backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
-                    colorTokens={colorTokens}
-                    variant="body"
-                    className="text-2xl font-bold text-green-600"
-                    placeholder="Trustpilot rating..."
-                    sectionId={sectionId}
-                    elementKey="trustpilot_rating"
-                    sectionBackground={sectionBackground}
-                  />
-                </div>
-                <EditableAdaptiveText
-                  mode={mode}
-                  value={blockContent.trustpilot_label || ''}
-                  onEdit={(value) => handleContentUpdate('trustpilot_label', value)}
-                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
-                  colorTokens={colorTokens}
-                  variant="body"
-                  className={`text-sm ${mutedTextColor}`}
-                  placeholder="Trustpilot label..."
-                  sectionId={sectionId}
-                  elementKey="trustpilot_label"
-                  sectionBackground={sectionBackground}
-                />
-              </div>
-              <div className="text-center">
-                <div className="flex items-center justify-center space-x-2 mb-2">
-                  <div className="w-8 h-8 bg-orange-600 rounded flex items-center justify-center text-white font-bold text-sm group/icon-edit relative">
-                    <IconEditableText
-                      mode={mode}
-                      value={blockContent.producthunt_icon || '🚀'}
-                      onEdit={(value) => handleContentUpdate('producthunt_icon', value)}
-                      backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
-                      colorTokens={colorTokens}
-                      iconSize="md"
-                      className="text-xl"
-                      sectionId={sectionId}
-                      elementKey="producthunt_icon"
-                    />
-                  </div>
-                  <EditableAdaptiveText
-                    mode={mode}
-                    value={blockContent.producthunt_rating || ''}
-                    onEdit={(value) => handleContentUpdate('producthunt_rating', value)}
-                    backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
-                    colorTokens={colorTokens}
-                    variant="body"
-                    className="text-2xl font-bold text-orange-600"
-                    placeholder="Product Hunt rating..."
-                    sectionId={sectionId}
-                    elementKey="producthunt_rating"
-                    sectionBackground={sectionBackground}
-                  />
-                </div>
-                <EditableAdaptiveText
-                  mode={mode}
-                  value={blockContent.producthunt_label || ''}
-                  onEdit={(value) => handleContentUpdate('producthunt_label', value)}
-                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
-                  colorTokens={colorTokens}
-                  variant="body"
-                  className={`text-sm ${mutedTextColor}`}
-                  placeholder="Product Hunt label..."
-                  sectionId={sectionId}
-                  elementKey="producthunt_label"
-                  sectionBackground={sectionBackground}
-                />
-              </div>
-            </div>
-          </div>
-        </div>
 
         {(blockContent.cta_text || blockContent.trust_items || mode === 'edit') && (
           <div className="text-center space-y-6">
@@ -690,11 +591,11 @@ export default function RatingCards(props: LayoutComponentProps) {
 export const componentMeta = {
   name: 'RatingCards',
   category: 'Testimonial',
-  description: 'Rating-focused testimonial cards. Perfect for review-heavy products and marketing/sales tools.',
-  tags: ['testimonial', 'ratings', 'reviews', 'platforms', 'cards'],
+  description: 'WYSIWYG rating-focused testimonial cards with inline editing and avatar support.',
+  tags: ['testimonial', 'ratings', 'reviews', 'cards', 'wysiwyg'],
   defaultBackgroundType: 'neutral' as const,
   complexity: 'medium',
-  estimatedBuildTime: '25 minutes',
+  estimatedBuildTime: '20 minutes',
   
   contentFields: [
     { key: 'headline', label: 'Main Headline', type: 'text', required: true },
@@ -710,31 +611,24 @@ export const componentMeta = {
     { key: 'supporting_text', label: 'Supporting Text', type: 'textarea', required: false },
     { key: 'cta_text', label: 'CTA Button Text', type: 'text', required: false },
     { key: 'trust_items', label: 'Trust Indicators (pipe separated)', type: 'text', required: false },
-    { key: 'platforms_title', label: 'Platforms Section Title', type: 'text', required: false },
-    { key: 'g2_rating', label: 'G2 Rating', type: 'text', required: false },
-    { key: 'g2_label', label: 'G2 Label', type: 'text', required: false },
-    { key: 'capterra_rating', label: 'Capterra Rating', type: 'text', required: false },
-    { key: 'capterra_label', label: 'Capterra Label', type: 'text', required: false },
-    { key: 'trustpilot_rating', label: 'Trustpilot Rating', type: 'text', required: false },
-    { key: 'trustpilot_label', label: 'Trustpilot Label', type: 'text', required: false },
-    { key: 'producthunt_rating', label: 'Product Hunt Rating', type: 'text', required: false },
-    { key: 'producthunt_label', label: 'Product Hunt Label', type: 'text', required: false }
+    { key: 'avatar_urls', label: 'Avatar URLs (JSON format)', type: 'text', required: false }
   ],
   
   features: [
-    'Platform-specific rating cards',
-    'Verified badge support',
-    'Average rating calculation',
-    'Platform icon display',
-    'Cross-platform statistics',
-    'Perfect for review-heavy products'
+    'WYSIWYG inline editing for all text fields',
+    'Editable customer avatars with upload support',
+    'Platform-specific icons with auto-detection',
+    'Verified badge support with visual indicators',
+    'Average rating calculation and display',
+    'Consistent editing experience in both modes',
+    'Star rating visualization'
   ],
   
   useCases: [
-    'Marketing and sales tools',
-    'Design and creative platforms',
-    'Work and productivity tools',
-    'Review-focused testimonials',
-    'Rating-driven social proof'
+    'Marketing and sales tools testimonials',
+    'SaaS product review showcases', 
+    'E-commerce customer feedback',
+    'Service-based business testimonials',
+    'App store rating displays'
   ]
 };

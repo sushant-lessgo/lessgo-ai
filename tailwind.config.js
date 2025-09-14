@@ -26,6 +26,7 @@ module.exports = {
   'group-hover:opacity-100',
   'group-hover/customer-count:opacity-100',
   'group-hover/rating-section:opacity-100',
+  'group-hover/review-card:opacity-100',
   'group-hover/customer-item:opacity-100',
   'group-hover/rating-item:opacity-100',
   'group-hover/benefit-item:opacity-100',
