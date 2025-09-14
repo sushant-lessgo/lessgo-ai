@@ -101,25 +101,43 @@ export default function CollapsedCards(props: LayoutComponentProps) {
     mode !== 'preview' ? 0 : null
   );
 
-  const problemTitles = blockContent.problem_titles 
+  // Parse and validate all arrays to ensure synchronization
+  const problemTitles = blockContent.problem_titles
     ? blockContent.problem_titles.split('|').map(item => item.trim()).filter(Boolean)
     : [];
 
-  const problemDescriptions = blockContent.problem_descriptions 
+  const problemDescriptions = blockContent.problem_descriptions
     ? blockContent.problem_descriptions.split('|').map(item => item.trim()).filter(Boolean)
     : [];
 
-  const expandLabels = blockContent.expand_labels 
+  const expandLabels = blockContent.expand_labels
     ? blockContent.expand_labels.split('|').map(item => item.trim()).filter(Boolean)
     : [];
 
-  const problemImpacts = blockContent.problem_impacts 
+  const problemImpacts = blockContent.problem_impacts
     ? blockContent.problem_impacts.split('|').map(item => item.trim()).filter(Boolean)
     : [];
 
-  const solutionHints = blockContent.solution_hints 
+  const solutionHints = blockContent.solution_hints
     ? blockContent.solution_hints.split('|').map(item => item.trim()).filter(Boolean)
     : [];
+
+  // Ensure all arrays have the same length by padding with defaults
+  const maxLength = Math.max(
+    problemTitles.length,
+    problemDescriptions.length,
+    expandLabels.length,
+    problemImpacts.length,
+    solutionHints.length,
+    1 // At minimum 1 card
+  );
+
+  // Pad arrays to ensure synchronization
+  while (problemTitles.length < maxLength) problemTitles.push('Problem Title');
+  while (problemDescriptions.length < maxLength) problemDescriptions.push('Problem description...');
+  while (expandLabels.length < maxLength) expandLabels.push('Learn More');
+  while (problemImpacts.length < maxLength) problemImpacts.push('Impact description...');
+  while (solutionHints.length < maxLength) solutionHints.push('Solution hint...');
 
   const trustItems = blockContent.trust_items 
     ? blockContent.trust_items.split('|').map(item => item.trim()).filter(Boolean)
@@ -154,30 +172,27 @@ export default function CollapsedCards(props: LayoutComponentProps) {
       problemImpacts.length,
       solutionHints.length
     );
-    
+
     if (currentCount >= 6) return; // Maximum 6 problem cards
-    
-    // Update all coordinated lists
+
+    // Update all coordinated lists synchronously
     const newTitles = [...problemTitles, 'New Problem'];
     const newDescriptions = [...problemDescriptions, 'Describe this problem in detail...'];
     const newLabels = [...expandLabels, 'Learn More'];
     const newImpacts = [...problemImpacts, 'Impact of this problem...'];
     const newHints = [...solutionHints, 'How our solution helps...'];
-    
+
+    // Update all fields synchronously following StackedHighlights pattern
     handleContentUpdate('problem_titles', newTitles.join('|'));
-    
-    // Use setTimeout to avoid Immer conflicts
-    setTimeout(() => {
-      handleContentUpdate('problem_descriptions', newDescriptions.join('|'));
-      handleContentUpdate('expand_labels', newLabels.join('|'));
-      handleContentUpdate('problem_impacts', newImpacts.join('|'));
-      handleContentUpdate('solution_hints', newHints.join('|'));
-      
-      // Set default icon
-      const iconNumber = newTitles.length;
-      const iconField = `problem_icon_${iconNumber}` as keyof CollapsedCardsContent;
-      handleContentUpdate(iconField, '⚙️');
-    }, 0);
+    handleContentUpdate('problem_descriptions', newDescriptions.join('|'));
+    handleContentUpdate('expand_labels', newLabels.join('|'));
+    handleContentUpdate('problem_impacts', newImpacts.join('|'));
+    handleContentUpdate('solution_hints', newHints.join('|'));
+
+    // Set default icon for the new card
+    const iconNumber = newTitles.length;
+    const iconField = `problem_icon_${iconNumber}` as keyof CollapsedCardsContent;
+    handleContentUpdate(iconField, '⚙️');
   };
 
   // Remove problem card
@@ -189,44 +204,41 @@ export default function CollapsedCards(props: LayoutComponentProps) {
       problemImpacts.length,
       solutionHints.length
     );
-    
+
     if (currentCount <= 1) return; // Keep at least 1 card
-    
+
     // Close expanded card if it's being removed
     if (expandedCard === index) {
       setExpandedCard(null);
     } else if (expandedCard !== null && expandedCard > index) {
       setExpandedCard(expandedCard - 1);
     }
-    
+
     // Filter out the removed index from all lists
     const newTitles = problemTitles.filter((_, i) => i !== index);
     const newDescriptions = problemDescriptions.filter((_, i) => i !== index);
     const newLabels = expandLabels.filter((_, i) => i !== index);
     const newImpacts = problemImpacts.filter((_, i) => i !== index);
     const newHints = solutionHints.filter((_, i) => i !== index);
-    
+
+    // Update all fields synchronously
     handleContentUpdate('problem_titles', newTitles.join('|'));
-    
-    // Use setTimeout to avoid Immer conflicts
-    setTimeout(() => {
-      handleContentUpdate('problem_descriptions', newDescriptions.join('|'));
-      handleContentUpdate('expand_labels', newLabels.join('|'));
-      handleContentUpdate('problem_impacts', newImpacts.join('|'));
-      handleContentUpdate('solution_hints', newHints.join('|'));
-      
-      // Shift icons down
-      for (let i = index + 1; i < currentCount; i++) {
-        const currentIconField = `problem_icon_${i + 1}` as keyof CollapsedCardsContent;
-        const nextIconField = `problem_icon_${i}` as keyof CollapsedCardsContent;
-        const iconValue = blockContent[currentIconField] || '⚙️';
-        handleContentUpdate(nextIconField, iconValue);
-      }
-      
-      // Clear the last icon slot
-      const lastIconField = `problem_icon_${currentCount}` as keyof CollapsedCardsContent;
-      handleContentUpdate(lastIconField, '⚙️');
-    }, 0);
+    handleContentUpdate('problem_descriptions', newDescriptions.join('|'));
+    handleContentUpdate('expand_labels', newLabels.join('|'));
+    handleContentUpdate('problem_impacts', newImpacts.join('|'));
+    handleContentUpdate('solution_hints', newHints.join('|'));
+
+    // Handle icon shifting - shift icons down to fill the gap
+    for (let i = index + 1; i < currentCount; i++) {
+      const currentIconField = `problem_icon_${i + 1}` as keyof CollapsedCardsContent;
+      const nextIconField = `problem_icon_${i}` as keyof CollapsedCardsContent;
+      const iconValue = blockContent[currentIconField] || '⚙️';
+      handleContentUpdate(nextIconField, iconValue);
+    }
+
+    // Clear the last icon slot
+    const lastIconField = `problem_icon_${currentCount}` as keyof CollapsedCardsContent;
+    handleContentUpdate(lastIconField, '⚙️');
   };
 
   // Individual field edit handlers
