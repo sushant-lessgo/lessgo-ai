@@ -7,8 +7,8 @@ export type ProblemLayout =
   | "EmotionalQuotes"
   | "CollapsedCards"
   // TODO: Disabled for MVP | "PainMeterChart"
-  | "PersonaPanels"
-  | "ProblemChecklist";
+  | "PersonaPanels";
+  // TODO: Temporarily disabled - not useful currently | "ProblemChecklist";
 
 /**
  * Selects the optimal Problem section layout based on pain intensity and audience connection needs
@@ -87,7 +87,7 @@ export function pickProblemLayout(input: LayoutPickerInput): ProblemLayout {
     CollapsedCards: 0,
     // TODO: Disabled for MVP - PainMeterChart: 0,
     PersonaPanels: 0,
-    ProblemChecklist: 0,
+    // TODO: Temporarily disabled - not useful currently - ProblemChecklist: 0,
   };
 
   // Copy Intent Scoring (Highest Weight: 4-5 points)
@@ -96,12 +96,12 @@ export function pickProblemLayout(input: LayoutPickerInput): ProblemLayout {
     scores.EmotionalQuotes += 5;
     // TODO: Disabled for MVP - scores.PainMeterChart += 4;
     scores.PersonaPanels += 4;
-    scores.ProblemChecklist += 3;
+    // TODO: Temporarily disabled - scores.ProblemChecklist += 3;
   } else if (copyIntent === "desire-led") {
     // TODO: Temporarily disabled - scores.SideBySideSplit += 4;
     scores.BeforeImageAfterText += 4;
     scores.CollapsedCards += 3;
-    scores.ProblemChecklist += 3;
+    // TODO: Temporarily disabled - scores.ProblemChecklist += 3;
   }
 
   // Problem Type Scoring (High Weight: 3-4 points)
@@ -116,12 +116,12 @@ export function pickProblemLayout(input: LayoutPickerInput): ProblemLayout {
     // TODO: Disabled for MVP - scores.PainMeterChart += 2;
   } else if (problemType === "manual-repetition") {
     scores.StackedPainBullets += 4;
-    scores.ProblemChecklist += 3;
+    // TODO: Temporarily disabled - scores.ProblemChecklist += 3;
     scores.BeforeImageAfterText += 2;
   } else if (problemType === "compliance-or-risk") {
     scores.CollapsedCards += 4;
     scores.PersonaPanels += 3;
-    scores.ProblemChecklist += 2;
+    // TODO: Temporarily disabled - scores.ProblemChecklist += 2;
   } else if (problemType === "creative-empowerment") {
     scores.BeforeImageAfterText += 4;
     // TODO: Temporarily disabled - scores.SideBySideSplit += 3;
@@ -146,14 +146,14 @@ export function pickProblemLayout(input: LayoutPickerInput): ProblemLayout {
     // TODO: Temporarily disabled - scores.SideBySideSplit += 4;
     scores.BeforeImageAfterText += 4;
     scores.CollapsedCards += 3;
-    scores.ProblemChecklist += 3;
+    // TODO: Temporarily disabled - scores.ProblemChecklist += 3;
   } else if (awarenessLevel === "solution-aware") {
-    scores.ProblemChecklist += 4;
+    // TODO: Temporarily disabled - scores.ProblemChecklist += 4;
     // TODO: Temporarily disabled - scores.SideBySideSplit += 3;
     scores.CollapsedCards += 3;
   } else if (awarenessLevel === "product-aware" || awarenessLevel === "most-aware") {
     scores.CollapsedCards += 4;
-    scores.ProblemChecklist += 3;
+    // TODO: Temporarily disabled - scores.ProblemChecklist += 3;
     // TODO: Temporarily disabled - scores.SideBySideSplit += 2;
   }
 
@@ -161,12 +161,12 @@ export function pickProblemLayout(input: LayoutPickerInput): ProblemLayout {
   if (targetAudience === "enterprise") {
     scores.CollapsedCards += 4;
     scores.PersonaPanels += 4;
-    scores.ProblemChecklist += 3;
+    // TODO: Temporarily disabled - scores.ProblemChecklist += 3;
     // TODO: Disabled for MVP - scores.PainMeterChart += 2;
   } else if (targetAudience === "builders") {
     scores.StackedPainBullets += 4;
     scores.CollapsedCards += 3;
-    scores.ProblemChecklist += 2;
+    // TODO: Temporarily disabled - scores.ProblemChecklist += 2;
   } else if (targetAudience === "businesses") {
     // TODO: Disabled for MVP - scores.PainMeterChart += 4;
     scores.PersonaPanels += 4;
@@ -193,11 +193,11 @@ export function pickProblemLayout(input: LayoutPickerInput): ProblemLayout {
   } else if (marketSophisticationLevel === "level-3") {
     scores.PersonaPanels += 3;
     // TODO: Temporarily disabled - scores.SideBySideSplit += 3;
-    scores.ProblemChecklist += 2;
+    // TODO: Temporarily disabled - scores.ProblemChecklist += 2;
   } else if (marketSophisticationLevel === "level-4" || marketSophisticationLevel === "level-5") {
     scores.CollapsedCards += 3;
     scores.PersonaPanels += 3;
-    scores.ProblemChecklist += 2;
+    // TODO: Temporarily disabled - scores.ProblemChecklist += 2;
   }
 
   // Tone Profile Scoring (Medium Weight: 2-3 points)
@@ -215,7 +215,7 @@ export function pickProblemLayout(input: LayoutPickerInput): ProblemLayout {
     scores.EmotionalQuotes += 2;
   } else if (toneProfile === "minimal-technical") {
     scores.CollapsedCards += 3;
-    scores.ProblemChecklist += 2;
+    // TODO: Temporarily disabled - scores.ProblemChecklist += 2;
     scores.StackedPainBullets += 2;
   } else if (toneProfile === "luxury-expert") {
     scores.PersonaPanels += 3;
@@ -235,11 +235,11 @@ export function pickProblemLayout(input: LayoutPickerInput): ProblemLayout {
   } else if (startupStage === "growth") {
     scores.CollapsedCards += 3;
     scores.PersonaPanels += 2;
-    scores.ProblemChecklist += 2;
+    // TODO: Temporarily disabled - scores.ProblemChecklist += 2;
   } else if (startupStage === "scale") {
     scores.PersonaPanels += 3;
     scores.CollapsedCards += 2;
-    scores.ProblemChecklist += 2;
+    // TODO: Temporarily disabled - scores.ProblemChecklist += 2;
   }
 
   // Market Category Scoring (Low Weight: 1-2 points)
@@ -253,7 +253,7 @@ export function pickProblemLayout(input: LayoutPickerInput): ProblemLayout {
     scores.PersonaPanels += 1;
   } else if (marketCategory === "Work & Productivity Tools") {
     scores.StackedPainBullets += 2;
-    scores.ProblemChecklist += 1;
+    // TODO: Temporarily disabled - scores.ProblemChecklist += 1;
   } else if (marketCategory === "AI Tools" || marketCategory === "Engineering & Development Tools") {
     scores.CollapsedCards += 2;
     scores.StackedPainBullets += 1;
@@ -274,7 +274,7 @@ export function pickProblemLayout(input: LayoutPickerInput): ProblemLayout {
     scores.PersonaPanels += 2;
     scores.CollapsedCards += 1;
   } else if (landingPageGoals === "signup" || landingPageGoals === "download") {
-    scores.ProblemChecklist += 2;
+    // TODO: Temporarily disabled - scores.ProblemChecklist += 2;
     scores.StackedPainBullets += 1;
   }
 

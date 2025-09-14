@@ -91,7 +91,8 @@ import PersonaResultPanels from '@/modules/UIBlocks/Results/PersonaResultPanels'
 import PersonaUseCaseCompare from '@/modules/UIBlocks/Comparison/PersonaUseCaseCompare';
 import PrivacyCommitmentBlock from '@/modules/UIBlocks/Security/PrivacyCommitmentBlock';
 import ProcessFlowDiagram from '@/modules/UIBlocks/UniqueMechanism/ProcessFlowDiagram';
-import ProblemChecklist from '@/modules/UIBlocks/Problem/ProblemChecklist';
+// TODO: Temporarily disabled - not useful currently
+// import ProblemChecklist from '@/modules/UIBlocks/Problem/ProblemChecklist';
 import ProblemToReframeBlocks from '@/modules/UIBlocks/Objection/ProblemToReframeBlocks';
 import PropertyComparisonMatrix from '@/modules/UIBlocks/UniqueMechanism/PropertyComparisonMatrix';
 import PullQuoteStack from '@/modules/UIBlocks/Testimonial/PullQuoteStack';
@@ -243,7 +244,8 @@ export const componentRegistry: ComponentRegistry = {
     CollapsedCards: CollapsedCards,
     // TODO: Disabled for MVP - PainMeterChart: PainMeterChart,
     PersonaPanels: PersonaPanels,
-    ProblemChecklist: ProblemChecklist,
+    // TODO: Temporarily disabled - not useful currently
+    // ProblemChecklist: ProblemChecklist,
   },
   
   results: {

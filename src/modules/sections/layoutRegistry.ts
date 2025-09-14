@@ -132,7 +132,7 @@ export const layoutRegistry = {
     "CollapsedCards",
     // TODO: "PainMeterChart", - Disabled for MVP due to complex UX. Great copywriting potential for post-MVP.
     "PersonaPanels",
-    "ProblemChecklist",
+    // TODO: "ProblemChecklist", - Temporarily disabled. Not useful currently, needs improvement.
   ] as const,
 
   Results: [

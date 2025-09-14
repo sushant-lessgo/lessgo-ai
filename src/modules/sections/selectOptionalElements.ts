@@ -1484,17 +1484,18 @@ const elementRules: SectionLayoutRules = {
   }
 ],
 
-"Problem_ProblemChecklist": [
-  {
-    element: "conclusion_text",
-    conditions: [
-      { variable: "copyIntent", values: ["desire-led"], weight: 4 },
-      { variable: "awarenessLevel", values: ["solution-aware", "product-aware"], weight: 3 },
-      { variable: "landingPageGoals", values: ["free-trial", "demo", "signup"], weight: 2 }
-    ],
-    minScore: 6
-  }
-],
+// TODO: Temporarily disabled - not useful currently
+// "Problem_ProblemChecklist": [
+//   {
+//     element: "conclusion_text",
+//     conditions: [
+//       { variable: "copyIntent", values: ["desire-led"], weight: 4 },
+//       { variable: "awarenessLevel", values: ["solution-aware", "product-aware"], weight: 3 },
+//       { variable: "landingPageGoals", values: ["free-trial", "demo", "signup"], weight: 2 }
+//     ],
+//     minScore: 6
+//   }
+// ],
 
 // Results Section Rules - Add these to elementRules object
 
