@@ -24,14 +24,6 @@ interface PersonaPanelsContent {
   subheadline?: string;
   supporting_text?: string;
   trust_items?: string;
-  solution_title_1?: string;
-  solution_description_1?: string;
-  solution_title_2?: string;
-  solution_description_2?: string;
-  solution_title_3?: string;
-  solution_description_3?: string;
-  solution_title_4?: string;
-  solution_description_4?: string;
   persona_icon_1?: string;
   persona_icon_2?: string;
   persona_icon_3?: string;
@@ -79,18 +71,10 @@ const CONTENT_SCHEMA = {
     type: 'string' as const, 
     default: '' 
   },
-  trust_items: { 
-    type: 'string' as const, 
-    default: '' 
+  trust_items: {
+    type: 'string' as const,
+    default: ''
   },
-  solution_title_1: { type: 'string' as const, default: 'Automation' },
-  solution_description_1: { type: 'string' as const, default: 'Reduce manual work by 80%' },
-  solution_title_2: { type: 'string' as const, default: 'Analytics' },
-  solution_description_2: { type: 'string' as const, default: 'Clear visibility into everything' },
-  solution_title_3: { type: 'string' as const, default: 'Integration' },
-  solution_description_3: { type: 'string' as const, default: 'Connect all your tools' },
-  solution_title_4: { type: 'string' as const, default: 'Scaling' },
-  solution_description_4: { type: 'string' as const, default: 'Grow without complexity' },
   persona_icon_1: { type: 'string' as const, default: '⏰' },
   persona_icon_2: { type: 'string' as const, default: '📈' },
   persona_icon_3: { type: 'string' as const, default: '⚙️' },
@@ -160,6 +144,71 @@ export default function PersonaPanels(props: LayoutComponentProps) {
 
   const mutedTextColor = dynamicTextColors?.muted || colorTokens.textMuted;
 
+  // Add a new persona
+  const addPersona = () => {
+    const names = blockContent.persona_names ? blockContent.persona_names.split('|') : [];
+    const problems = blockContent.persona_problems ? blockContent.persona_problems.split('|') : [];
+    const descriptions = blockContent.persona_descriptions ? blockContent.persona_descriptions.split('|') : [];
+    const titles = blockContent.persona_titles ? blockContent.persona_titles.split('|') : [];
+    const painPoints = blockContent.persona_pain_points ? blockContent.persona_pain_points.split('|') : [];
+    const goals = blockContent.persona_goals ? blockContent.persona_goals.split('|') : [];
+
+    // Add new persona with default content
+    names.push('New Persona');
+    problems.push('Describe the main challenge this persona faces in their daily work or life.');
+    descriptions.push('Brief role description');
+    titles.push('Role Title');
+    painPoints.push('Daily frustration 1,Daily frustration 2,Daily frustration 3');
+    goals.push('Goal 1,Goal 2,Goal 3');
+
+    // Update all fields
+    handleContentUpdate('persona_names', names.join('|'));
+    handleContentUpdate('persona_problems', problems.join('|'));
+    handleContentUpdate('persona_descriptions', descriptions.join('|'));
+    handleContentUpdate('persona_titles', titles.join('|'));
+    handleContentUpdate('persona_pain_points', painPoints.join('|'));
+    handleContentUpdate('persona_goals', goals.join('|'));
+  };
+
+  // Remove a persona
+  const removePersona = (indexToRemove: number) => {
+    const names = blockContent.persona_names ? blockContent.persona_names.split('|') : [];
+    const problems = blockContent.persona_problems ? blockContent.persona_problems.split('|') : [];
+    const descriptions = blockContent.persona_descriptions ? blockContent.persona_descriptions.split('|') : [];
+    const titles = blockContent.persona_titles ? blockContent.persona_titles.split('|') : [];
+    const painPoints = blockContent.persona_pain_points ? blockContent.persona_pain_points.split('|') : [];
+    const goals = blockContent.persona_goals ? blockContent.persona_goals.split('|') : [];
+
+    // Remove at specified index
+    if (indexToRemove >= 0 && indexToRemove < names.length) {
+      names.splice(indexToRemove, 1);
+      problems.splice(indexToRemove, 1);
+      descriptions.splice(indexToRemove, 1);
+      titles.splice(indexToRemove, 1);
+      painPoints.splice(indexToRemove, 1);
+      goals.splice(indexToRemove, 1);
+
+      // Update all fields
+      handleContentUpdate('persona_names', names.join('|'));
+      handleContentUpdate('persona_problems', problems.join('|'));
+      handleContentUpdate('persona_descriptions', descriptions.join('|'));
+      handleContentUpdate('persona_titles', titles.join('|'));
+      handleContentUpdate('persona_pain_points', painPoints.join('|'));
+      handleContentUpdate('persona_goals', goals.join('|'));
+
+      // Also clear the corresponding icon if it exists
+      const iconField = `persona_icon_${indexToRemove + 1}` as keyof PersonaPanelsContent;
+      if (blockContent[iconField]) {
+        handleContentUpdate(iconField, '');
+      }
+
+      // Reset active persona if needed
+      if (activePersona >= names.length && names.length > 0) {
+        setActivePersona(names.length - 1);
+      }
+    }
+  };
+
   // Individual field editing functions
   const handlePersonaNameEdit = (index: number, value: string) => {
     const names = blockContent.persona_names ? blockContent.persona_names.split('|') : [];
@@ -217,7 +266,7 @@ export default function PersonaPanels(props: LayoutComponentProps) {
     return blockContent[iconFields[index] as keyof PersonaPanelsContent] || '💼';
   }
 
-  const PersonaCard = ({ persona, index, isActive, mode, colorTokens, backgroundType, sectionBackground, sectionId, handleContentUpdate }: {
+  const PersonaCard = ({ persona, index, isActive, mode, colorTokens, backgroundType, sectionBackground, sectionId, handleContentUpdate, onRemove, canRemove }: {
     persona: typeof personas[0];
     index: number;
     isActive: boolean;
@@ -227,15 +276,32 @@ export default function PersonaPanels(props: LayoutComponentProps) {
     sectionBackground: string;
     sectionId: string;
     handleContentUpdate: (field: keyof PersonaPanelsContent, value: string) => void;
+    onRemove?: (index: number) => void;
+    canRemove?: boolean;
   }) => (
-    <div 
-      className={`bg-white rounded-2xl border-2 transition-all duration-300 cursor-pointer ${
-        isActive 
-          ? `${persona.color.border} shadow-xl scale-105` 
+    <div
+      className={`relative bg-white rounded-2xl border-2 transition-all duration-300 cursor-pointer group ${
+        isActive
+          ? `${persona.color.border} shadow-xl scale-105`
           : 'border-gray-200 hover:border-gray-300 hover:shadow-lg'
       }`}
       onClick={() => setActivePersona(index)}
     >
+      {/* Remove button - only show in edit mode and if can remove */}
+      {mode === 'edit' && onRemove && canRemove && (
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            onRemove(index);
+          }}
+          className="absolute -top-2 -right-2 opacity-0 group-hover:opacity-100 w-6 h-6 bg-red-500 hover:bg-red-600 rounded-full flex items-center justify-center transition-all duration-200 z-10"
+          title="Remove this persona"
+        >
+          <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      )}
       <div className="p-6">
         {/* Header */}
         <div className="text-center mb-6">
@@ -469,24 +535,6 @@ export default function PersonaPanels(props: LayoutComponentProps) {
         </div>
       </div>
 
-      {/* Call to Action */}
-      <div className="mt-8 bg-white rounded-xl p-6 border border-gray-200">
-        <h4 className="text-lg font-semibold text-gray-900 mb-3">
-          Ready to Transform Your Experience?
-        </h4>
-        <p className={`${mutedTextColor} mb-4`}>
-          Thousands of {persona.name.toLowerCase()}s have already made the leap. Join them in creating the business experience you actually want.
-        </p>
-        
-        <CTAButton
-          text={`Solutions for ${persona.name}`}
-          colorTokens={colorTokens}
-          className="shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-300"
-          variant="primary"
-          sectionId={sectionId}
-          elementKey={`persona_cta_${activePersona}`}
-        />
-      </div>
     </div>
   );
   
@@ -564,9 +612,26 @@ export default function PersonaPanels(props: LayoutComponentProps) {
               sectionBackground={sectionBackground}
               sectionId={sectionId}
               handleContentUpdate={handleContentUpdate}
+              onRemove={removePersona}
+              canRemove={personas.length > 2}
             />
           ))}
         </div>
+
+        {/* Add Persona Button - only show in edit mode and if under max limit */}
+        {mode === 'edit' && personas.length < 6 && (
+          <div className="mb-8 text-center">
+            <button
+              onClick={addPersona}
+              className="inline-flex items-center space-x-2 px-4 py-3 bg-blue-50 hover:bg-blue-100 border-2 border-blue-200 hover:border-blue-300 rounded-xl transition-all duration-200 group"
+            >
+              <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+              </svg>
+              <span className="text-blue-700 font-medium">Add Persona</span>
+            </button>
+          </div>
+        )}
 
         {/* Selected Persona Details */}
         {personas[activePersona] && (
@@ -584,80 +649,6 @@ export default function PersonaPanels(props: LayoutComponentProps) {
           </div>
         )}
 
-        {/* Common Solutions Preview */}
-        <div className="bg-gray-50 rounded-2xl p-8 border border-gray-100">
-          <h3 className="text-2xl font-bold text-gray-900 text-center mb-8">
-            Solutions That Work Across All Personas
-          </h3>
-
-          <div className="grid md:grid-cols-4 gap-6">
-            {[
-              { title: blockContent.solution_title_1, description: blockContent.solution_description_1, color: 'bg-blue-500', icon: 'M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z' },
-              { title: blockContent.solution_title_2, description: blockContent.solution_description_2, color: 'bg-green-500', icon: 'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z' },
-              { title: blockContent.solution_title_3, description: blockContent.solution_description_3, color: 'bg-purple-500', icon: 'M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z' },
-              { title: blockContent.solution_title_4, description: blockContent.solution_description_4, color: 'bg-orange-500', icon: 'M13 10V3L4 14h7v7l9-11h-7z' }
-            ].filter(item => item.title && item.title !== '___REMOVED___').map((solution, index) => (
-              <div key={index} className="text-center group/solution-item relative">
-                <div className="flex items-center justify-center mb-4">
-                  <div className={`w-12 h-12 ${solution.color} rounded-lg flex items-center justify-center mx-auto`}>
-                    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={solution.icon} />
-                    </svg>
-                  </div>
-                  {(mode as string) === 'edit' && (
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        const titleKey = `solution_title_${index + 1}` as keyof PersonaPanelsContent;
-                        const descKey = `solution_description_${index + 1}` as keyof PersonaPanelsContent;
-                        handleContentUpdate(titleKey, '___REMOVED___');
-                        handleContentUpdate(descKey, '___REMOVED___');
-                      }}
-                      className="opacity-0 group-hover/solution-item:opacity-100 ml-2 p-1 rounded-full bg-white/80 hover:bg-white text-red-500 hover:text-red-700 transition-all duration-200 relative z-10 shadow-sm"
-                      title="Remove this solution"
-                    >
-                      <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                      </svg>
-                    </button>
-                  )}
-                </div>
-                <EditableAdaptiveText
-                  mode={mode}
-                  value={solution.title || ''}
-                  onEdit={(value) => {
-                    const fieldKey = `solution_title_${index + 1}` as keyof PersonaPanelsContent;
-                    handleContentUpdate(fieldKey, value);
-                  }}
-                  backgroundType={backgroundType}
-                  colorTokens={colorTokens}
-                  variant="body"
-                  className="font-semibold text-gray-900 mb-2"
-                  placeholder={`Solution ${index + 1} title`}
-                  sectionBackground={sectionBackground}
-                  data-section-id={sectionId}
-                  data-element-key={`solution_title_${index + 1}`}
-                />
-                <EditableAdaptiveText
-                  mode={mode}
-                  value={solution.description || ''}
-                  onEdit={(value) => {
-                    const fieldKey = `solution_description_${index + 1}` as keyof PersonaPanelsContent;
-                    handleContentUpdate(fieldKey, value);
-                  }}
-                  backgroundType={backgroundType}
-                  colorTokens={colorTokens}
-                  variant="body"
-                  className={`text-sm ${mutedTextColor}`}
-                  placeholder={`Solution ${index + 1} description`}
-                  sectionBackground={sectionBackground}
-                  data-section-id={sectionId}
-                  data-element-key={`solution_description_${index + 1}`}
-                />
-              </div>
-            ))}
-          </div>
-        </div>
 
         {(blockContent.supporting_text || blockContent.trust_items || (mode as string) === 'edit') && (
           <div className="text-center space-y-6 mt-12">
@@ -695,11 +686,11 @@ export const componentMeta = {
   name: 'PersonaPanels',
   category: 'Problem',
   description: 'Interactive persona identification panels with detailed problem descriptions and goals. Perfect for audience segmentation.',
-  tags: ['personas', 'interactive', 'segmentation', 'problems', 'audience'],
+  tags: ['personas', 'interactive', 'segmentation', 'problems', 'audience', 'dynamic'],
   defaultBackgroundType: 'neutral' as const,
   complexity: 'medium',
   estimatedBuildTime: '30 minutes',
-  
+
   contentFields: [
     { key: 'headline', label: 'Main Headline', type: 'text', required: true },
     { key: 'subheadline', label: 'Subheadline', type: 'textarea', required: false },
@@ -713,14 +704,15 @@ export const componentMeta = {
     { key: 'supporting_text', label: 'Supporting Text', type: 'textarea', required: false },
     { key: 'trust_items', label: 'Trust Indicators (pipe separated)', type: 'text', required: false }
   ],
-  
+
   features: [
+    'Dynamic add/remove personas (2-6 range)',
     'Interactive persona selection',
     'Detailed persona problem descriptions',
     'Pain points and goals breakdown',
     'Color-coded persona identification',
-    'Dynamic CTA for each persona',
-    'Common solutions preview'
+    'True WYSIWYG inline editing',
+    'Problem-focused without solution content'
   ],
   
   useCases: [
