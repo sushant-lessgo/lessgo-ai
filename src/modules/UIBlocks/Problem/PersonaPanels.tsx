@@ -160,6 +160,47 @@ export default function PersonaPanels(props: LayoutComponentProps) {
 
   const mutedTextColor = dynamicTextColors?.muted || colorTokens.textMuted;
 
+  // Individual field editing functions
+  const handlePersonaNameEdit = (index: number, value: string) => {
+    const names = blockContent.persona_names ? blockContent.persona_names.split('|') : [];
+    names[index] = value;
+    handleContentUpdate('persona_names', names.join('|'));
+  };
+
+  const handlePersonaTitleEdit = (index: number, value: string) => {
+    const titles = blockContent.persona_titles ? blockContent.persona_titles.split('|') : [];
+    titles[index] = value;
+    handleContentUpdate('persona_titles', titles.join('|'));
+  };
+
+  const handlePersonaDescriptionEdit = (index: number, value: string) => {
+    const descriptions = blockContent.persona_descriptions ? blockContent.persona_descriptions.split('|') : [];
+    descriptions[index] = value;
+    handleContentUpdate('persona_descriptions', descriptions.join('|'));
+  };
+
+  const handlePersonaProblemEdit = (index: number, value: string) => {
+    const problems = blockContent.persona_problems ? blockContent.persona_problems.split('|') : [];
+    problems[index] = value;
+    handleContentUpdate('persona_problems', problems.join('|'));
+  };
+
+  const handlePainPointEdit = (personaIndex: number, pointIndex: number, value: string) => {
+    const painPointsList = blockContent.persona_pain_points ? blockContent.persona_pain_points.split('|') : [];
+    const currentPersonaPainPoints = painPointsList[personaIndex] ? painPointsList[personaIndex].split(',') : [];
+    currentPersonaPainPoints[pointIndex] = value;
+    painPointsList[personaIndex] = currentPersonaPainPoints.join(',');
+    handleContentUpdate('persona_pain_points', painPointsList.join('|'));
+  };
+
+  const handleGoalEdit = (personaIndex: number, goalIndex: number, value: string) => {
+    const goalsList = blockContent.persona_goals ? blockContent.persona_goals.split('|') : [];
+    const currentPersonaGoals = goalsList[personaIndex] ? goalsList[personaIndex].split(',') : [];
+    currentPersonaGoals[goalIndex] = value;
+    goalsList[personaIndex] = currentPersonaGoals.join(',');
+    handleContentUpdate('persona_goals', goalsList.join('|'));
+  };
+
   function getPersonaColor(index: number) {
     const colors = [
       { bg: 'bg-red-500', light: 'bg-red-50', border: 'border-red-200', text: 'text-red-700' },
@@ -176,10 +217,16 @@ export default function PersonaPanels(props: LayoutComponentProps) {
     return blockContent[iconFields[index] as keyof PersonaPanelsContent] || '💼';
   }
 
-  const PersonaCard = ({ persona, index, isActive }: {
+  const PersonaCard = ({ persona, index, isActive, mode, colorTokens, backgroundType, sectionBackground, sectionId, handleContentUpdate }: {
     persona: typeof personas[0];
     index: number;
     isActive: boolean;
+    mode: 'edit' | 'preview';
+    colorTokens: any;
+    backgroundType: string;
+    sectionBackground: string;
+    sectionId: string;
+    handleContentUpdate: (field: keyof PersonaPanelsContent, value: string) => void;
   }) => (
     <div 
       className={`bg-white rounded-2xl border-2 transition-all duration-300 cursor-pointer ${
@@ -208,19 +255,55 @@ export default function PersonaPanels(props: LayoutComponentProps) {
               elementKey={`persona_icon_${index + 1}`}
             />
           </div>
-          <h3 className="text-xl font-bold text-gray-900 mb-2">{persona.name}</h3>
-          {persona.title && (
+          <EditableAdaptiveText
+            mode={mode}
+            value={persona.name}
+            onEdit={(value) => handlePersonaNameEdit(index, value)}
+            backgroundType={backgroundType as any}
+            colorTokens={colorTokens}
+            variant="body"
+            className="text-xl font-bold text-gray-900 mb-2 text-center"
+            placeholder="Persona name..."
+            sectionId={sectionId}
+            elementKey={`persona_name_${index}`}
+            sectionBackground={sectionBackground}
+          />
+          {(persona.title || mode === 'edit') && (
             <div className={`inline-block px-3 py-1 rounded-full text-sm font-medium ${persona.color.light} ${persona.color.text}`}>
-              {persona.title}
+              <EditableAdaptiveText
+                mode={mode}
+                value={persona.title || ''}
+                onEdit={(value) => handlePersonaTitleEdit(index, value)}
+                backgroundType={backgroundType as any}
+                colorTokens={{...colorTokens, textPrimary: persona.color.text}}
+                variant="body"
+                className="text-sm font-medium"
+                placeholder="Persona title..."
+                sectionId={sectionId}
+                elementKey={`persona_title_${index}`}
+                sectionBackground={sectionBackground}
+              />
             </div>
           )}
         </div>
 
         {/* Description */}
-        {persona.description && (
-          <p className={`text-center ${mutedTextColor} mb-6`}>
-            {persona.description}
-          </p>
+        {(persona.description || mode === 'edit') && (
+          <div className="text-center mb-6">
+            <EditableAdaptiveText
+              mode={mode}
+              value={persona.description || ''}
+              onEdit={(value) => handlePersonaDescriptionEdit(index, value)}
+              backgroundType={backgroundType as any}
+              colorTokens={colorTokens}
+              variant="body"
+              className={`${mutedTextColor}`}
+              placeholder="Persona description..."
+              sectionId={sectionId}
+              elementKey={`persona_description_${index}`}
+              sectionBackground={sectionBackground}
+            />
+          </div>
         )}
 
         {/* Indicator */}
@@ -242,7 +325,16 @@ export default function PersonaPanels(props: LayoutComponentProps) {
     </div>
   );
 
-  const PersonaDetails = ({ persona }: { persona: typeof personas[0] }) => (
+  const PersonaDetails = ({ persona, mode, colorTokens, backgroundType, sectionBackground, sectionId, handleContentUpdate, activePersona }: {
+    persona: typeof personas[0];
+    mode: 'edit' | 'preview';
+    colorTokens: any;
+    backgroundType: string;
+    sectionBackground: string;
+    sectionId: string;
+    handleContentUpdate: (field: keyof PersonaPanelsContent, value: string) => void;
+    activePersona: number;
+  }) => (
     <div className={`bg-gradient-to-br ${persona.color.light} to-white rounded-2xl p-8 border ${persona.color.border}`}>
       
       {/* Header */}
@@ -264,9 +356,33 @@ export default function PersonaPanels(props: LayoutComponentProps) {
           />
         </div>
         <div>
-          <h3 className="text-2xl font-bold text-gray-900">{persona.name}</h3>
-          {persona.title && (
-            <p className={`${persona.color.text} font-medium`}>{persona.title}</p>
+          <EditableAdaptiveText
+            mode={mode}
+            value={persona.name}
+            onEdit={(value) => handlePersonaNameEdit(activePersona, value)}
+            backgroundType={backgroundType as any}
+            colorTokens={colorTokens}
+            variant="body"
+            className="text-2xl font-bold text-gray-900"
+            placeholder="Persona name..."
+            sectionId={sectionId}
+            elementKey={`persona_detail_name_${activePersona}`}
+            sectionBackground={sectionBackground}
+          />
+          {(persona.title || mode === 'edit') && (
+            <EditableAdaptiveText
+              mode={mode}
+              value={persona.title || ''}
+              onEdit={(value) => handlePersonaTitleEdit(activePersona, value)}
+              backgroundType={backgroundType as any}
+              colorTokens={{...colorTokens, textPrimary: persona.color.text}}
+              variant="body"
+              className={`${persona.color.text} font-medium`}
+              placeholder="Persona title..."
+              sectionId={sectionId}
+              elementKey={`persona_detail_title_${activePersona}`}
+              sectionBackground={sectionBackground}
+            />
           )}
         </div>
       </div>
@@ -274,9 +390,19 @@ export default function PersonaPanels(props: LayoutComponentProps) {
       {/* Problem Description */}
       <div className="mb-8">
         <h4 className="text-lg font-semibold text-gray-900 mb-4">Your Current Challenge:</h4>
-        <p className="text-gray-700 leading-relaxed text-lg">
-          {persona.problem}
-        </p>
+        <EditableAdaptiveText
+          mode={mode}
+          value={persona.problem}
+          onEdit={(value) => handlePersonaProblemEdit(activePersona, value)}
+          backgroundType={backgroundType as any}
+          colorTokens={colorTokens}
+          variant="body"
+          className="text-gray-700 leading-relaxed text-lg"
+          placeholder="Describe the persona's main problem..."
+          sectionId={sectionId}
+          elementKey={`persona_problem_${activePersona}`}
+          sectionBackground={sectionBackground}
+        />
       </div>
 
       {/* Pain Points and Goals Grid */}
@@ -294,7 +420,19 @@ export default function PersonaPanels(props: LayoutComponentProps) {
             {persona.painPoints.map((point, index) => (
               <div key={index} className="flex items-start space-x-3">
                 <div className="w-2 h-2 bg-red-500 rounded-full mt-2 flex-shrink-0"></div>
-                <span className="text-gray-700">{point}</span>
+                <EditableAdaptiveText
+                  mode={mode}
+                  value={point}
+                  onEdit={(value) => handlePainPointEdit(activePersona, index, value)}
+                  backgroundType={backgroundType as any}
+                  colorTokens={colorTokens}
+                  variant="body"
+                  className="text-gray-700 flex-1"
+                  placeholder="Pain point..."
+                  sectionId={sectionId}
+                  elementKey={`pain_point_${activePersona}_${index}`}
+                  sectionBackground={sectionBackground}
+                />
               </div>
             ))}
           </div>
@@ -312,7 +450,19 @@ export default function PersonaPanels(props: LayoutComponentProps) {
             {persona.goals.map((goal, index) => (
               <div key={index} className="flex items-start space-x-3">
                 <div className="w-2 h-2 bg-green-500 rounded-full mt-2 flex-shrink-0"></div>
-                <span className="text-gray-700">{goal}</span>
+                <EditableAdaptiveText
+                  mode={mode}
+                  value={goal}
+                  onEdit={(value) => handleGoalEdit(activePersona, index, value)}
+                  backgroundType={backgroundType as any}
+                  colorTokens={colorTokens}
+                  variant="body"
+                  className="text-gray-700 flex-1"
+                  placeholder="Goal..."
+                  sectionId={sectionId}
+                  elementKey={`goal_${activePersona}_${index}`}
+                  sectionBackground={sectionBackground}
+                />
               </div>
             ))}
           </div>
@@ -400,167 +550,114 @@ export default function PersonaPanels(props: LayoutComponentProps) {
           )}
         </div>
 
-        {(mode as string) === 'edit' ? (
-          <div className="space-y-8">
-            <div className="p-6 border border-gray-200 rounded-lg bg-gray-50">
-              <h4 className="font-semibold text-gray-700 mb-4">Persona Panels Content</h4>
-              
-              <div className="space-y-4">
-                <EditableAdaptiveText
-                  mode={mode}
-                  value={blockContent.persona_names || ''}
-                  onEdit={(value) => handleContentUpdate('persona_names', value)}
-                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
-                  colorTokens={colorTokens}
-                  variant="body"
-                  className="mb-2"
-                  placeholder="Persona names (pipe separated)"
-                  sectionId={sectionId}
-                  elementKey="persona_names"
-                  sectionBackground={sectionBackground}
-                />
-                
-                <EditableAdaptiveText
-                  mode={mode}
-                  value={blockContent.persona_problems || ''}
-                  onEdit={(value) => handleContentUpdate('persona_problems', value)}
-                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
-                  colorTokens={colorTokens}
-                  variant="body"
-                  className="mb-2"
-                  placeholder="Persona problems (pipe separated)"
-                  sectionId={sectionId}
-                  elementKey="persona_problems"
-                  sectionBackground={sectionBackground}
-                />
-                
-                <EditableAdaptiveText
-                  mode={mode}
-                  value={blockContent.persona_titles || ''}
-                  onEdit={(value) => handleContentUpdate('persona_titles', value)}
-                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
-                  colorTokens={colorTokens}
-                  variant="body"
-                  className="mb-2"
-                  placeholder="Persona titles (pipe separated)"
-                  sectionId={sectionId}
-                  elementKey="persona_titles"
-                  sectionBackground={sectionBackground}
-                />
-                
-                <EditableAdaptiveText
-                  mode={mode}
-                  value={blockContent.persona_pain_points || ''}
-                  onEdit={(value) => handleContentUpdate('persona_pain_points', value)}
-                  backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
-                  colorTokens={colorTokens}
-                  variant="body"
-                  className="mb-2"
-                  placeholder="Persona pain points (pipe separated personas, comma separated points)"
-                  sectionId={sectionId}
-                  elementKey="persona_pain_points"
-                  sectionBackground={sectionBackground}
-                />
-              </div>
-            </div>
+        {/* Persona Selection Cards */}
+        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
+          {personas.map((persona, index) => (
+            <PersonaCard
+              key={index}
+              persona={persona}
+              index={index}
+              isActive={activePersona === index}
+              mode={mode}
+              colorTokens={colorTokens}
+              backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
+              sectionBackground={sectionBackground}
+              sectionId={sectionId}
+              handleContentUpdate={handleContentUpdate}
+            />
+          ))}
+        </div>
+
+        {/* Selected Persona Details */}
+        {personas[activePersona] && (
+          <div className="mb-16">
+            <PersonaDetails
+              persona={personas[activePersona]}
+              mode={mode}
+              colorTokens={colorTokens}
+              backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
+              sectionBackground={sectionBackground}
+              sectionId={sectionId}
+              handleContentUpdate={handleContentUpdate}
+              activePersona={activePersona}
+            />
           </div>
-        ) : (
-          <>
-            {/* Persona Selection Cards */}
-            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
-              {personas.map((persona, index) => (
-                <PersonaCard
-                  key={index}
-                  persona={persona}
-                  index={index}
-                  isActive={activePersona === index}
-                />
-              ))}
-            </div>
-
-            {/* Selected Persona Details */}
-            {personas[activePersona] && (
-              <div className="mb-16">
-                <PersonaDetails persona={personas[activePersona]} />
-              </div>
-            )}
-
-            {/* Common Solutions Preview */}
-            <div className="bg-gray-50 rounded-2xl p-8 border border-gray-100">
-              <h3 className="text-2xl font-bold text-gray-900 text-center mb-8">
-                Solutions That Work Across All Personas
-              </h3>
-              
-              <div className="grid md:grid-cols-4 gap-6">
-                {[
-                  { title: blockContent.solution_title_1, description: blockContent.solution_description_1, color: 'bg-blue-500', icon: 'M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z' },
-                  { title: blockContent.solution_title_2, description: blockContent.solution_description_2, color: 'bg-green-500', icon: 'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z' },
-                  { title: blockContent.solution_title_3, description: blockContent.solution_description_3, color: 'bg-purple-500', icon: 'M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z' },
-                  { title: blockContent.solution_title_4, description: blockContent.solution_description_4, color: 'bg-orange-500', icon: 'M13 10V3L4 14h7v7l9-11h-7z' }
-                ].filter(item => item.title && item.title !== '___REMOVED___').map((solution, index) => (
-                  <div key={index} className="text-center group/solution-item relative">
-                    <div className="flex items-center justify-center mb-4">
-                      <div className={`w-12 h-12 ${solution.color} rounded-lg flex items-center justify-center mx-auto`}>
-                        <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={solution.icon} />
-                        </svg>
-                      </div>
-                      {(mode as string) === 'edit' && (
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            const titleKey = `solution_title_${index + 1}` as keyof PersonaPanelsContent;
-                            const descKey = `solution_description_${index + 1}` as keyof PersonaPanelsContent;
-                            handleContentUpdate(titleKey, '___REMOVED___');
-                            handleContentUpdate(descKey, '___REMOVED___');
-                          }}
-                          className="opacity-0 group-hover/solution-item:opacity-100 ml-2 p-1 rounded-full bg-white/80 hover:bg-white text-red-500 hover:text-red-700 transition-all duration-200 relative z-10 shadow-sm"
-                          title="Remove this solution"
-                        >
-                          <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                          </svg>
-                        </button>
-                      )}
-                    </div>
-                    <EditableAdaptiveText
-                      mode={mode}
-                      value={solution.title || ''}
-                      onEdit={(value) => {
-                        const fieldKey = `solution_title_${index + 1}` as keyof PersonaPanelsContent;
-                        handleContentUpdate(fieldKey, value);
-                      }}
-                      backgroundType={backgroundType}
-                      colorTokens={colorTokens}
-                      variant="body"
-                      className="font-semibold text-gray-900 mb-2"
-                      placeholder={`Solution ${index + 1} title`}
-                      sectionBackground={sectionBackground}
-                      data-section-id={sectionId}
-                      data-element-key={`solution_title_${index + 1}`}
-                    />
-                    <EditableAdaptiveText
-                      mode={mode}
-                      value={solution.description || ''}
-                      onEdit={(value) => {
-                        const fieldKey = `solution_description_${index + 1}` as keyof PersonaPanelsContent;
-                        handleContentUpdate(fieldKey, value);
-                      }}
-                      backgroundType={backgroundType}
-                      colorTokens={colorTokens}
-                      variant="body"
-                      className={`text-sm ${mutedTextColor}`}
-                      placeholder={`Solution ${index + 1} description`}
-                      sectionBackground={sectionBackground}
-                      data-section-id={sectionId}
-                      data-element-key={`solution_description_${index + 1}`}
-                    />
-                  </div>
-                ))}
-              </div>
-            </div>
-          </>
         )}
+
+        {/* Common Solutions Preview */}
+        <div className="bg-gray-50 rounded-2xl p-8 border border-gray-100">
+          <h3 className="text-2xl font-bold text-gray-900 text-center mb-8">
+            Solutions That Work Across All Personas
+          </h3>
+
+          <div className="grid md:grid-cols-4 gap-6">
+            {[
+              { title: blockContent.solution_title_1, description: blockContent.solution_description_1, color: 'bg-blue-500', icon: 'M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z' },
+              { title: blockContent.solution_title_2, description: blockContent.solution_description_2, color: 'bg-green-500', icon: 'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z' },
+              { title: blockContent.solution_title_3, description: blockContent.solution_description_3, color: 'bg-purple-500', icon: 'M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z' },
+              { title: blockContent.solution_title_4, description: blockContent.solution_description_4, color: 'bg-orange-500', icon: 'M13 10V3L4 14h7v7l9-11h-7z' }
+            ].filter(item => item.title && item.title !== '___REMOVED___').map((solution, index) => (
+              <div key={index} className="text-center group/solution-item relative">
+                <div className="flex items-center justify-center mb-4">
+                  <div className={`w-12 h-12 ${solution.color} rounded-lg flex items-center justify-center mx-auto`}>
+                    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={solution.icon} />
+                    </svg>
+                  </div>
+                  {(mode as string) === 'edit' && (
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        const titleKey = `solution_title_${index + 1}` as keyof PersonaPanelsContent;
+                        const descKey = `solution_description_${index + 1}` as keyof PersonaPanelsContent;
+                        handleContentUpdate(titleKey, '___REMOVED___');
+                        handleContentUpdate(descKey, '___REMOVED___');
+                      }}
+                      className="opacity-0 group-hover/solution-item:opacity-100 ml-2 p-1 rounded-full bg-white/80 hover:bg-white text-red-500 hover:text-red-700 transition-all duration-200 relative z-10 shadow-sm"
+                      title="Remove this solution"
+                    >
+                      <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </button>
+                  )}
+                </div>
+                <EditableAdaptiveText
+                  mode={mode}
+                  value={solution.title || ''}
+                  onEdit={(value) => {
+                    const fieldKey = `solution_title_${index + 1}` as keyof PersonaPanelsContent;
+                    handleContentUpdate(fieldKey, value);
+                  }}
+                  backgroundType={backgroundType}
+                  colorTokens={colorTokens}
+                  variant="body"
+                  className="font-semibold text-gray-900 mb-2"
+                  placeholder={`Solution ${index + 1} title`}
+                  sectionBackground={sectionBackground}
+                  data-section-id={sectionId}
+                  data-element-key={`solution_title_${index + 1}`}
+                />
+                <EditableAdaptiveText
+                  mode={mode}
+                  value={solution.description || ''}
+                  onEdit={(value) => {
+                    const fieldKey = `solution_description_${index + 1}` as keyof PersonaPanelsContent;
+                    handleContentUpdate(fieldKey, value);
+                  }}
+                  backgroundType={backgroundType}
+                  colorTokens={colorTokens}
+                  variant="body"
+                  className={`text-sm ${mutedTextColor}`}
+                  placeholder={`Solution ${index + 1} description`}
+                  sectionBackground={sectionBackground}
+                  data-section-id={sectionId}
+                  data-element-key={`solution_description_${index + 1}`}
+                />
+              </div>
+            ))}
+          </div>
+        </div>
 
         {(blockContent.supporting_text || blockContent.trust_items || (mode as string) === 'edit') && (
           <div className="text-center space-y-6 mt-12">
