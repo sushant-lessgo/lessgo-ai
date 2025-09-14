@@ -3,7 +3,7 @@ import type { LayoutPickerInput } from "./layoutPickerInput";
 export type ProblemLayout =
   | "StackedPainBullets"
   | "BeforeImageAfterText"
-  | "SideBySideSplit"
+  // TODO: Temporarily disabled | "SideBySideSplit"
   | "EmotionalQuotes"
   | "CollapsedCards"
   // TODO: Disabled for MVP | "PainMeterChart"
@@ -82,7 +82,7 @@ export function pickProblemLayout(input: LayoutPickerInput): ProblemLayout {
   const scores: Record<ProblemLayout, number> = {
     StackedPainBullets: 0,
     BeforeImageAfterText: 0,
-    SideBySideSplit: 0,
+    // TODO: Temporarily disabled - SideBySideSplit: 0,
     EmotionalQuotes: 0,
     CollapsedCards: 0,
     // TODO: Disabled for MVP - PainMeterChart: 0,
@@ -98,7 +98,7 @@ export function pickProblemLayout(input: LayoutPickerInput): ProblemLayout {
     scores.PersonaPanels += 4;
     scores.ProblemChecklist += 3;
   } else if (copyIntent === "desire-led") {
-    scores.SideBySideSplit += 4;
+    // TODO: Temporarily disabled - scores.SideBySideSplit += 4;
     scores.BeforeImageAfterText += 4;
     scores.CollapsedCards += 3;
     scores.ProblemChecklist += 3;
@@ -124,16 +124,16 @@ export function pickProblemLayout(input: LayoutPickerInput): ProblemLayout {
     scores.ProblemChecklist += 2;
   } else if (problemType === "creative-empowerment") {
     scores.BeforeImageAfterText += 4;
-    scores.SideBySideSplit += 3;
+    // TODO: Temporarily disabled - scores.SideBySideSplit += 3;
     scores.EmotionalQuotes += 2;
   } else if (problemType === "time-freedom-or-automation") {
     // TODO: Disabled for MVP - scores.PainMeterChart += 4;
     scores.StackedPainBullets += 3;
-    scores.SideBySideSplit += 2;
+    // TODO: Temporarily disabled - scores.SideBySideSplit += 2;
   } else if (problemType === "professional-image-or-branding") {
     scores.BeforeImageAfterText += 4;
     scores.PersonaPanels += 3;
-    scores.SideBySideSplit += 2;
+    // TODO: Temporarily disabled - scores.SideBySideSplit += 2;
   }
 
   // Awareness Level Scoring (High Weight: 3-4 points)
@@ -143,18 +143,18 @@ export function pickProblemLayout(input: LayoutPickerInput): ProblemLayout {
     scores.EmotionalQuotes += 3;
     // TODO: Disabled for MVP - scores.PainMeterChart += 2;
   } else if (awarenessLevel === "problem-aware") {
-    scores.SideBySideSplit += 4;
+    // TODO: Temporarily disabled - scores.SideBySideSplit += 4;
     scores.BeforeImageAfterText += 4;
     scores.CollapsedCards += 3;
     scores.ProblemChecklist += 3;
   } else if (awarenessLevel === "solution-aware") {
     scores.ProblemChecklist += 4;
-    scores.SideBySideSplit += 3;
+    // TODO: Temporarily disabled - scores.SideBySideSplit += 3;
     scores.CollapsedCards += 3;
   } else if (awarenessLevel === "product-aware" || awarenessLevel === "most-aware") {
     scores.CollapsedCards += 4;
     scores.ProblemChecklist += 3;
-    scores.SideBySideSplit += 2;
+    // TODO: Temporarily disabled - scores.SideBySideSplit += 2;
   }
 
   // Target Audience Scoring (High Weight: 3-4 points)
@@ -180,7 +180,7 @@ export function pickProblemLayout(input: LayoutPickerInput): ProblemLayout {
   } else if (targetAudience === "marketers") {
     scores.BeforeImageAfterText += 4;
     // TODO: Disabled for MVP - scores.PainMeterChart += 3;
-    scores.SideBySideSplit += 3;
+    // TODO: Temporarily disabled - scores.SideBySideSplit += 3;
     scores.PersonaPanels += 2;
   }
 
@@ -192,7 +192,7 @@ export function pickProblemLayout(input: LayoutPickerInput): ProblemLayout {
     // TODO: Disabled for MVP - scores.PainMeterChart += 2;
   } else if (marketSophisticationLevel === "level-3") {
     scores.PersonaPanels += 3;
-    scores.SideBySideSplit += 3;
+    // TODO: Temporarily disabled - scores.SideBySideSplit += 3;
     scores.ProblemChecklist += 2;
   } else if (marketSophisticationLevel === "level-4" || marketSophisticationLevel === "level-5") {
     scores.CollapsedCards += 3;
@@ -207,7 +207,7 @@ export function pickProblemLayout(input: LayoutPickerInput): ProblemLayout {
     scores.BeforeImageAfterText += 2;
   } else if (toneProfile === "confident-playful") {
     scores.BeforeImageAfterText += 3;
-    scores.SideBySideSplit += 3;
+    // TODO: Temporarily disabled - scores.SideBySideSplit += 3;
     // TODO: Disabled for MVP - scores.PainMeterChart += 2;
   } else if (toneProfile === "bold-persuasive") {
     scores.StackedPainBullets += 3;
@@ -220,7 +220,7 @@ export function pickProblemLayout(input: LayoutPickerInput): ProblemLayout {
   } else if (toneProfile === "luxury-expert") {
     scores.PersonaPanels += 3;
     scores.CollapsedCards += 3;
-    scores.SideBySideSplit += 2;
+    // TODO: Temporarily disabled - scores.SideBySideSplit += 2;
   }
 
   // Startup Stage Scoring (Medium Weight: 2-3 points)
@@ -231,7 +231,7 @@ export function pickProblemLayout(input: LayoutPickerInput): ProblemLayout {
   } else if (startupStage === "traction") {
     scores.PersonaPanels += 3;
     // TODO: Disabled for MVP - scores.PainMeterChart += 2;
-    scores.SideBySideSplit += 2;
+    // TODO: Temporarily disabled - scores.SideBySideSplit += 2;
   } else if (startupStage === "growth") {
     scores.CollapsedCards += 3;
     scores.PersonaPanels += 2;
@@ -245,7 +245,7 @@ export function pickProblemLayout(input: LayoutPickerInput): ProblemLayout {
   // Market Category Scoring (Low Weight: 1-2 points)
   if (marketCategory === "Design & Creative Tools") {
     scores.BeforeImageAfterText += 2;
-    scores.SideBySideSplit += 2;
+    // TODO: Temporarily disabled - scores.SideBySideSplit += 2;
     scores.EmotionalQuotes += 1;
   } else if (marketCategory === "Marketing & Sales Tools") {
     // TODO: Disabled for MVP - scores.PainMeterChart += 2;
@@ -268,7 +268,7 @@ export function pickProblemLayout(input: LayoutPickerInput): ProblemLayout {
     scores.StackedPainBullets += 2;
     scores.EmotionalQuotes += 1;
   } else if (landingPageGoals === "free-trial" || landingPageGoals === "demo") {
-    scores.SideBySideSplit += 2;
+    // TODO: Temporarily disabled - scores.SideBySideSplit += 2;
     scores.BeforeImageAfterText += 1;
   } else if (landingPageGoals === "contact-sales") {
     scores.PersonaPanels += 2;

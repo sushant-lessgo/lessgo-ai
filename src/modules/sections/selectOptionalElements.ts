@@ -1423,17 +1423,18 @@ const elementRules: SectionLayoutRules = {
   }
 ],
 
-"Problem_SideBySideSplit": [
-  {
-    element: "solution_preview",
-    conditions: [
-      { variable: "awarenessLevel", values: ["solution-aware", "product-aware"], weight: 4 },
-      { variable: "copyIntent", values: ["desire-led"], weight: 3 },
-      { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 2 }
-    ],
-    minScore: 6
-  }
-],
+// TODO: Temporarily disabled - not useful as of now
+// "Problem_SideBySideSplit": [
+//   {
+//     element: "solution_preview",
+//     conditions: [
+//       { variable: "awarenessLevel", values: ["solution-aware", "product-aware"], weight: 4 },
+//       { variable: "copyIntent", values: ["desire-led"], weight: 3 },
+//       { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 2 }
+//     ],
+//     minScore: 6
+//   }
+// ],
 
 "Problem_EmotionalQuotes": [
   {

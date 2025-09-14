@@ -127,7 +127,7 @@ export const layoutRegistry = {
   Problem: [
     "StackedPainBullets",
     "BeforeImageAfterText",
-    "SideBySideSplit",
+    // TODO: "SideBySideSplit", - Temporarily disabled. Not useful as of now, needs improvement.
     "EmotionalQuotes",
     "CollapsedCards",
     // TODO: "PainMeterChart", - Disabled for MVP due to complex UX. Great copywriting potential for post-MVP.

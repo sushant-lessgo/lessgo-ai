@@ -109,7 +109,7 @@ export const layoutToSectionType: Record<string, string> = {
   // Problem layouts
   'StackedPainBullets': 'problem',
   'BeforeImageAfterText': 'problem',
-  'SideBySideSplit': 'problem',
+  // TODO: Temporarily disabled - 'SideBySideSplit': 'problem',
   'EmotionalQuotes': 'problem',
   'CollapsedCards': 'problem',
   'PainMeterChart': 'problem',
