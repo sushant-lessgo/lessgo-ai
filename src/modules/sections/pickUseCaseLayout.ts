@@ -5,7 +5,6 @@ export type UseCaseLayout =
   | "TabbedUseCases"
   | "IndustryTiles"
   | "ScenarioCards"
-  | "JobToBeDoneList"
   | "SegmentSplitBlocks"
   | "CarouselAvatars"
   | "RoleBenefitMatrix";
@@ -50,14 +49,14 @@ export function pickUseCaseLayout(input: LayoutPickerInput): UseCaseLayout {
     return "IndustryTiles";
   }
 
-  // 3. Technical products with specific job functions
-  if (
-    (targetAudience === "builders" || targetAudience === "enterprise") &&
-    (marketCategory === "Engineering & Development Tools" || marketCategory === "AI Tools" || marketCategory === "Data & Analytics Tools") &&
-    (awarenessLevel === "solution-aware" || awarenessLevel === "product-aware")
-  ) {
-    return "JobToBeDoneList";
-  }
+  // 3. Technical products with specific job functions - disabled for now
+  // if (
+  //   (targetAudience === "builders" || targetAudience === "enterprise") &&
+  //   (marketCategory === "Engineering & Development Tools" || marketCategory === "AI Tools" || marketCategory === "Data & Analytics Tools") &&
+  //   (awarenessLevel === "solution-aware" || awarenessLevel === "product-aware")
+  // ) {
+  //   return "JobToBeDoneList";
+  // }
 
   // 4. Multiple distinct audience segments
   if (
@@ -84,7 +83,6 @@ export function pickUseCaseLayout(input: LayoutPickerInput): UseCaseLayout {
     TabbedUseCases: 0,
     IndustryTiles: 0,
     ScenarioCards: 0,
-    JobToBeDoneList: 0,
     SegmentSplitBlocks: 0,
     CarouselAvatars: 0,
     RoleBenefitMatrix: 0,
@@ -95,9 +93,7 @@ export function pickUseCaseLayout(input: LayoutPickerInput): UseCaseLayout {
     scores.RoleBenefitMatrix += 5;
     scores.IndustryTiles += 4;
     scores.SegmentSplitBlocks += 4;
-    scores.JobToBeDoneList += 3;
   } else if (targetAudience === "builders") {
-    scores.JobToBeDoneList += 4;
     scores.ScenarioCards += 4;
     scores.TabbedUseCases += 3;
     scores.PersonaGrid += 2;
@@ -131,7 +127,6 @@ export function pickUseCaseLayout(input: LayoutPickerInput): UseCaseLayout {
     scores.ScenarioCards += 2;
   } else if (marketSophisticationLevel === "level-4" || marketSophisticationLevel === "level-5") {
     scores.RoleBenefitMatrix += 4;
-    scores.JobToBeDoneList += 4;
     scores.IndustryTiles += 3;
     scores.SegmentSplitBlocks += 2;
   }
@@ -146,9 +141,7 @@ export function pickUseCaseLayout(input: LayoutPickerInput): UseCaseLayout {
     scores.SegmentSplitBlocks += 4;
     scores.IndustryTiles += 4;
     scores.ScenarioCards += 3;
-    scores.JobToBeDoneList += 2;
   } else if (awarenessLevel === "product-aware" || awarenessLevel === "most-aware") {
-    scores.JobToBeDoneList += 4;
     scores.RoleBenefitMatrix += 4;
     scores.ScenarioCards += 3;
     scores.SegmentSplitBlocks += 2;
@@ -162,7 +155,6 @@ export function pickUseCaseLayout(input: LayoutPickerInput): UseCaseLayout {
     scores.ScenarioCards += 2;
   } else if (copyIntent === "desire-led") {
     scores.SegmentSplitBlocks += 4;
-    scores.JobToBeDoneList += 4;
     scores.RoleBenefitMatrix += 3;
     scores.IndustryTiles += 3;
   }
@@ -170,14 +162,12 @@ export function pickUseCaseLayout(input: LayoutPickerInput): UseCaseLayout {
   // Market Category Scoring (Medium Weight: 2-3 points)
   if (marketCategory === "Work & Productivity Tools") {
     scores.RoleBenefitMatrix += 3;
-    scores.JobToBeDoneList += 3;
     scores.SegmentSplitBlocks += 2;
   } else if (marketCategory === "Marketing & Sales Tools") {
     scores.SegmentSplitBlocks += 3;
     scores.PersonaGrid += 3;
     scores.ScenarioCards += 2;
   } else if (marketCategory === "Engineering & Development Tools" || marketCategory === "AI Tools") {
-    scores.JobToBeDoneList += 3;
     scores.ScenarioCards += 3;
     scores.TabbedUseCases += 2;
   } else if (marketCategory === "Design & Creative Tools") {
@@ -187,7 +177,6 @@ export function pickUseCaseLayout(input: LayoutPickerInput): UseCaseLayout {
   } else if (marketCategory === "Data & Analytics Tools") {
     scores.RoleBenefitMatrix += 3;
     scores.IndustryTiles += 3;
-    scores.JobToBeDoneList += 2;
   } else if (marketCategory === "HR & People Operations Tools" || marketCategory === "Finance & Accounting Tools") {
     scores.IndustryTiles += 3;
     scores.RoleBenefitMatrix += 3;
@@ -210,7 +199,6 @@ export function pickUseCaseLayout(input: LayoutPickerInput): UseCaseLayout {
   } else if (startupStage === "scale") {
     scores.RoleBenefitMatrix += 3;
     scores.IndustryTiles += 2;
-    scores.JobToBeDoneList += 2;
   }
 
   // Tone Profile Scoring (Medium Weight: 2-3 points)
@@ -227,7 +215,6 @@ export function pickUseCaseLayout(input: LayoutPickerInput): UseCaseLayout {
     scores.IndustryTiles += 2;
     scores.ScenarioCards += 2;
   } else if (toneProfile === "minimal-technical") {
-    scores.JobToBeDoneList += 3;
     scores.RoleBenefitMatrix += 2;
     scores.TabbedUseCases += 2;
   } else if (toneProfile === "luxury-expert") {
@@ -242,7 +229,6 @@ export function pickUseCaseLayout(input: LayoutPickerInput): UseCaseLayout {
     scores.SegmentSplitBlocks += 2;
     scores.IndustryTiles += 1;
   } else if (problemType === "manual-repetition") {
-    scores.JobToBeDoneList += 2;
     scores.ScenarioCards += 1;
   } else if (problemType === "compliance-or-risk") {
     scores.IndustryTiles += 2;
@@ -251,7 +237,6 @@ export function pickUseCaseLayout(input: LayoutPickerInput): UseCaseLayout {
     scores.CarouselAvatars += 2;
     scores.PersonaGrid += 1;
   } else if (problemType === "time-freedom-or-automation") {
-    scores.JobToBeDoneList += 2;
     scores.SegmentSplitBlocks += 1;
   } else if (problemType === "professional-image-or-branding") {
     scores.PersonaGrid += 2;
@@ -262,13 +247,11 @@ export function pickUseCaseLayout(input: LayoutPickerInput): UseCaseLayout {
   if (landingPageGoals === "contact-sales" || landingPageGoals === "demo") {
     scores.RoleBenefitMatrix += 2;
     scores.IndustryTiles += 2;
-    scores.JobToBeDoneList += 1;
   } else if (landingPageGoals === "buy-now" || landingPageGoals === "subscribe") {
     scores.SegmentSplitBlocks += 2;
     scores.PersonaGrid += 1;
   } else if (landingPageGoals === "free-trial") {
     scores.ScenarioCards += 2;
-    scores.JobToBeDoneList += 1;
   } else if (landingPageGoals === "signup") {
     scores.TabbedUseCases += 2;
     scores.PersonaGrid += 1;
@@ -289,7 +272,6 @@ export function pickUseCaseLayout(input: LayoutPickerInput): UseCaseLayout {
     scores.PersonaGrid += 1;
   } else if (pricingModel === "per-seat") {
     scores.RoleBenefitMatrix += 2;
-    scores.JobToBeDoneList += 1;
   }
 
   // Find the highest scoring layout

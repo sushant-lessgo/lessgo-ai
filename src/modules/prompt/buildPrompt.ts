@@ -289,7 +289,6 @@ function getSectionLayoutGuidance(sectionType: string, layout: string): string {
       TabbedUseCases: "Category-organized use case presentation. Tab labels should be clear use case categories. Content should be category-specific.",
       IndustryTiles: "Industry-specific application display. Use industry-appropriate language and terminology. Address industry-specific needs.",
       ScenarioCards: "Situation-based use case presentation. Use scenario-specific language. Show practical application in real situations.",
-      JobToBeDoneList: "Task-focused use case enumeration. Use job-to-be-done language framework. Focus on user goals and task completion.",
       SegmentSplitBlocks: "Market segment presentation. Use segment-appropriate language and positioning. Address different market needs.",
       CarouselAvatars: "Rotating user story presentation. Each story should be complete and relatable. Use consistent narrative structure.",
       RoleBenefitMatrix: "Role-based benefit mapping. Connect specific roles to relevant benefits. Use role-appropriate language and concerns."

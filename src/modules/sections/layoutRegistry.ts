@@ -195,7 +195,6 @@ export const layoutRegistry = {
     "TabbedUseCases",
     "IndustryTiles",
     "ScenarioCards",
-    "JobToBeDoneList",
     "SegmentSplitBlocks",
     "CarouselAvatars",
     "RoleBenefitMatrix",

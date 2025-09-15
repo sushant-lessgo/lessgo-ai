@@ -2105,17 +2105,6 @@ const elementRules: SectionLayoutRules = {
   }
 ],
 
-"UseCase_JobToBeDoneList": [
-  {
-    element: "solution_approaches",
-    conditions: [
-      { variable: "awarenessLevel", values: ["solution-aware", "product-aware"], weight: 4 },
-      { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 3 },
-      { variable: "targetAudience", values: ["product-managers", "enterprise-tech-teams", "developers"], weight: 2 }
-    ],
-    minScore: 6
-  }
-],
 
 "UseCase_SegmentSplitBlocks": [
   {

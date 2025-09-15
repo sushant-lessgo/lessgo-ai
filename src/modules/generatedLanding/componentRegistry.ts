@@ -283,7 +283,6 @@ export const componentRegistry: ComponentRegistry = {
     TabbedUseCases: UseCaseCarousel,
     IndustryTiles: IndustryUseCaseGrid,
     ScenarioCards: RoleBasedScenarios,
-    JobToBeDoneList: WorkflowDiagrams,
     SegmentSplitBlocks: PersonaGrid,
     CarouselAvatars: UseCaseCarousel,
     RoleBenefitMatrix: RoleBasedScenarios,
