@@ -80,7 +80,7 @@ import MockupWithCTA from '@/modules/UIBlocks/Close/MockupWithCTA';
 import MultistepCTAStack from '@/modules/UIBlocks/Close/MultistepCTAStack';
 import MythVsRealityGrid from '@/modules/UIBlocks/Objection/MythVsRealityGrid';
 import ObjectionAccordion from '@/modules/UIBlocks/Objection/ObjectionAccordion';
-import ObjectionCarousel from '@/modules/UIBlocks/Objection/ObjectionCarousel';
+// import ObjectionCarousel from '@/modules/UIBlocks/Objection/ObjectionCarousel'; // Temporarily disabled
 import OutcomeIcons from '@/modules/UIBlocks/Results/OutcomeIcons';
 // TODO: Disabled for MVP - import PainMeterChart from '@/modules/UIBlocks/Problem/PainMeterChart';
 import PenetrationTestResults from '@/modules/UIBlocks/Security/PenetrationTestResults';
@@ -355,7 +355,7 @@ export const componentRegistry: ComponentRegistry = {
     ProblemToReframeBlocks: ProblemToReframeBlocks,
     SkepticToBelieverSteps: SkepticToBelieverSteps,
     BoldGuaranteePanel: BoldGuaranteePanel,
-    ObjectionCarousel: ObjectionCarousel,
+    // ObjectionCarousel: ObjectionCarousel, // Temporarily disabled - not useful currently
   },
   
   founderNote: {

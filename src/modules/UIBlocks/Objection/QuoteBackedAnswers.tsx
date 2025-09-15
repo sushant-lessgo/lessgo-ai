@@ -69,6 +69,60 @@ const CONTENT_SCHEMA = {
   trust_icon_3: { type: 'string' as const, default: '📊' }
 };
 
+// Helper function to add a new quote block
+const addQuoteBlock = (quoteBlocks: string): string => {
+  const blocks = quoteBlocks ? quoteBlocks.split('|') : [];
+  const quotes = [];
+  const authors = [];
+
+  // Parse existing blocks
+  for (let i = 0; i < blocks.length; i += 2) {
+    if (blocks[i]) quotes.push(blocks[i].trim());
+    if (blocks[i + 1]) authors.push(blocks[i + 1].trim());
+  }
+
+  // Add new quote
+  quotes.push('Enter a compelling quote from an industry expert that validates your solution.');
+  authors.push('Expert Name, Title at Company');
+
+  // Rebuild the string
+  const result = [];
+  for (let i = 0; i < quotes.length; i++) {
+    result.push(quotes[i]);
+    result.push(authors[i] || '');
+  }
+
+  return result.join('|');
+};
+
+// Helper function to remove a quote block
+const removeQuoteBlock = (quoteBlocks: string, indexToRemove: number): string => {
+  const blocks = quoteBlocks ? quoteBlocks.split('|') : [];
+  const quotes = [];
+  const authors = [];
+
+  // Parse existing blocks
+  for (let i = 0; i < blocks.length; i += 2) {
+    if (blocks[i]) quotes.push(blocks[i].trim());
+    if (blocks[i + 1]) authors.push(blocks[i + 1].trim());
+  }
+
+  // Remove the quote at the specified index
+  if (indexToRemove >= 0 && indexToRemove < quotes.length) {
+    quotes.splice(indexToRemove, 1);
+    authors.splice(indexToRemove, 1);
+  }
+
+  // Rebuild the string
+  const result = [];
+  for (let i = 0; i < quotes.length; i++) {
+    result.push(quotes[i]);
+    result.push(authors[i] || '');
+  }
+
+  return result.join('|');
+};
+
 export default function QuoteBackedAnswers(props: LayoutComponentProps) {
   
   // Use the abstraction hook with background type support
@@ -87,7 +141,7 @@ export default function QuoteBackedAnswers(props: LayoutComponentProps) {
   });
 
   // Parse quote blocks from pipe-separated string
-  const quoteBlocks = blockContent.quote_blocks 
+  const quoteBlocks = blockContent.quote_blocks
     ? blockContent.quote_blocks.split('|').reduce((quotes, item, index) => {
         if (index % 2 === 0) {
           quotes.push({ quote: item.trim(), author: '' });
@@ -97,6 +151,18 @@ export default function QuoteBackedAnswers(props: LayoutComponentProps) {
         return quotes;
       }, [] as Array<{quote: string, author: string}>)
     : [];
+
+  // Handle adding a new quote
+  const handleAddQuote = () => {
+    const newQuoteBlocks = addQuoteBlock(blockContent.quote_blocks);
+    handleContentUpdate('quote_blocks', newQuoteBlocks);
+  };
+
+  // Handle removing a quote
+  const handleRemoveQuote = (indexToRemove: number) => {
+    const newQuoteBlocks = removeQuoteBlock(blockContent.quote_blocks, indexToRemove);
+    handleContentUpdate('quote_blocks', newQuoteBlocks);
+  };
 
   return (
     <LayoutSection
@@ -144,7 +210,7 @@ export default function QuoteBackedAnswers(props: LayoutComponentProps) {
         {/* Quotes Grid */}
         <div className="grid lg:grid-cols-2 gap-8">
           {quoteBlocks.map((quoteBlock, index) => (
-            <div key={index} className="relative">
+            <div key={index} className={`relative group/quote-card-${index}`}>
               
               {/* Quote Card */}
               <div className="bg-white/80 backdrop-blur-sm border border-gray-200 rounded-2xl p-8 shadow-lg hover:shadow-xl transition-shadow duration-300 h-full">
@@ -226,8 +292,24 @@ export default function QuoteBackedAnswers(props: LayoutComponentProps) {
                   </div>
                 </div>
 
+                {/* Delete button - only show in edit mode and if can remove */}
+                {mode === 'edit' && quoteBlocks.length > 1 && (
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleRemoveQuote(index);
+                    }}
+                    className={`absolute top-4 right-4 opacity-0 group-hover/quote-card-${index}:opacity-100 w-6 h-6 bg-red-500 hover:bg-red-600 rounded-full flex items-center justify-center transition-all duration-200 z-10`}
+                    title="Remove this quote"
+                  >
+                    <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                )}
+
                 {/* Verification Badge */}
-                <div className="absolute top-4 right-4">
+                <div className={`absolute top-4 ${mode === 'edit' && quoteBlocks.length > 1 ? 'right-12' : 'right-4'}`}>
                   <div className="flex items-center space-x-1 bg-green-100 text-green-700 px-2 py-1 rounded-full text-xs font-medium">
                     <IconEditableText
                       mode={mode}
@@ -259,6 +341,21 @@ export default function QuoteBackedAnswers(props: LayoutComponentProps) {
             </div>
           ))}
         </div>
+
+        {/* Add Quote Button - only show in edit mode and if under max limit */}
+        {mode === 'edit' && quoteBlocks.length < 6 && (
+          <div className="mt-8 text-center">
+            <button
+              onClick={handleAddQuote}
+              className="flex items-center space-x-2 mx-auto px-4 py-3 bg-blue-50 hover:bg-blue-100 border-2 border-blue-200 hover:border-blue-300 rounded-xl transition-all duration-200 group"
+            >
+              <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+              </svg>
+              <span className="text-blue-700 font-medium">Add Quote</span>
+            </button>
+          </div>
+        )}
 
         {/* Trust Indicators */}
         <div className="mt-16 text-center">
@@ -344,14 +441,6 @@ export default function QuoteBackedAnswers(props: LayoutComponentProps) {
           </div>
         </div>
 
-        {/* Edit Mode: Instructions */}
-        {mode !== 'preview' && (
-          <div className="mt-8 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-            <p className="text-blue-800 text-sm">
-              <strong>Edit Quote Blocks:</strong> Use format "[quote]|[author name, title]|[next quote]|[next author]"
-            </p>
-          </div>
-        )}
       </div>
     </LayoutSection>
   );

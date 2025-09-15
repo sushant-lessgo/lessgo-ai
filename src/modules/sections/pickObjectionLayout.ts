@@ -7,8 +7,8 @@ export type ObjectionLayout =
   | "VisualObjectionTiles"
   | "ProblemToReframeBlocks"
   | "SkepticToBelieverSteps"
-  | "BoldGuaranteePanel"
-  | "ObjectionCarousel";
+  | "BoldGuaranteePanel";
+  // | "ObjectionCarousel"; // Temporarily disabled - not useful currently
 
 /**
  * Selects the optimal Objection section layout based on skepticism level and trust-building needs
@@ -89,13 +89,13 @@ export function pickObjectionLayout(input: LayoutPickerInput): ObjectionLayout {
     ProblemToReframeBlocks: 0,
     SkepticToBelieverSteps: 0,
     BoldGuaranteePanel: 0,
-    ObjectionCarousel: 0,
+    // ObjectionCarousel: 0, // Temporarily disabled
   };
 
   // Market Sophistication Scoring (Highest Weight: 4-5 points)
   if (marketSophisticationLevel === "level-1" || marketSophisticationLevel === "level-2") {
     scores.VisualObjectionTiles += 5;
-    scores.ObjectionCarousel += 4;
+    // scores.ObjectionCarousel += 4; // Temporarily disabled
     scores.ObjectionAccordion += 3;
     scores.ProblemToReframeBlocks += 2;
   } else if (marketSophisticationLevel === "level-3") {
@@ -113,7 +113,7 @@ export function pickObjectionLayout(input: LayoutPickerInput): ObjectionLayout {
   // Awareness Level Scoring (High Weight: 3-4 points)
   if (awarenessLevel === "unaware" || awarenessLevel === "problem-aware") {
     scores.VisualObjectionTiles += 4;
-    scores.ObjectionCarousel += 4;
+    // scores.ObjectionCarousel += 4; // Temporarily disabled
     scores.ProblemToReframeBlocks += 3;
     scores.ObjectionAccordion += 2;
   } else if (awarenessLevel === "solution-aware") {
@@ -145,7 +145,7 @@ export function pickObjectionLayout(input: LayoutPickerInput): ObjectionLayout {
     scores.ObjectionAccordion += 2;
   } else if (targetAudience === "founders" || targetAudience === "creators") {
     scores.VisualObjectionTiles += 4;
-    scores.ObjectionCarousel += 3;
+    // scores.ObjectionCarousel += 3; // Temporarily disabled
     scores.ProblemToReframeBlocks += 3;
     scores.ObjectionAccordion += 2;
   } else if (targetAudience === "marketers") {
@@ -158,7 +158,7 @@ export function pickObjectionLayout(input: LayoutPickerInput): ObjectionLayout {
   if (copyIntent === "pain-led") {
     scores.VisualObjectionTiles += 4;
     scores.ProblemToReframeBlocks += 4;
-    scores.ObjectionCarousel += 3;
+    // scores.ObjectionCarousel += 3; // Temporarily disabled
     scores.ObjectionAccordion += 2;
   } else if (copyIntent === "desire-led") {
     scores.SkepticToBelieverSteps += 4;
@@ -173,13 +173,13 @@ export function pickObjectionLayout(input: LayoutPickerInput): ObjectionLayout {
     scores.MythVsRealityGrid += 3;
     scores.SkepticToBelieverSteps += 2;
   } else if (toneProfile === "confident-playful") {
-    scores.ObjectionCarousel += 3;
+    // scores.ObjectionCarousel += 3; // Temporarily disabled
     scores.VisualObjectionTiles += 3;
     scores.ProblemToReframeBlocks += 2;
   } else if (toneProfile === "friendly-helpful") {
     scores.VisualObjectionTiles += 3;
     scores.ObjectionAccordion += 3;
-    scores.ObjectionCarousel += 2;
+    // scores.ObjectionCarousel += 2; // Temporarily disabled
   } else if (toneProfile === "minimal-technical") {
     scores.ObjectionAccordion += 3;
     scores.MythVsRealityGrid += 2;
@@ -227,14 +227,14 @@ export function pickObjectionLayout(input: LayoutPickerInput): ObjectionLayout {
     scores.VisualObjectionTiles += 3;
     scores.ProblemToReframeBlocks += 2;
   } else if (problemType === "creative-empowerment") {
-    scores.ObjectionCarousel += 3;
+    // scores.ObjectionCarousel += 3; // Temporarily disabled
     scores.VisualObjectionTiles += 2;
   }
 
   // Startup Stage Scoring (Medium Weight: 2-3 points)
   if (startupStage === "idea" || startupStage === "mvp") {
     scores.VisualObjectionTiles += 3;
-    scores.ObjectionCarousel += 2;
+    // scores.ObjectionCarousel += 2; // Temporarily disabled
     scores.ProblemToReframeBlocks += 2;
   } else if (startupStage === "traction") {
     scores.ObjectionAccordion += 3;
@@ -261,7 +261,7 @@ export function pickObjectionLayout(input: LayoutPickerInput): ObjectionLayout {
     scores.ObjectionAccordion += 2;
     scores.VisualObjectionTiles += 1;
   } else if (marketCategory === "Design & Creative Tools") {
-    scores.ObjectionCarousel += 2;
+    // scores.ObjectionCarousel += 2; // Temporarily disabled
     scores.VisualObjectionTiles += 1;
   } else if (marketCategory === "Data & Analytics Tools") {
     scores.MythVsRealityGrid += 2;
@@ -274,13 +274,13 @@ export function pickObjectionLayout(input: LayoutPickerInput): ObjectionLayout {
     scores.SkepticToBelieverSteps += 1;
   } else if (pricingModifier === "discount") {
     scores.BoldGuaranteePanel += 2;
-    scores.ObjectionCarousel += 1;
+    // scores.ObjectionCarousel += 1; // Temporarily disabled
   }
 
   // Pricing Model Scoring (Low Weight: 1-2 points)
   if (pricingModel === "free" || pricingModel === "freemium") {
     scores.VisualObjectionTiles += 2;
-    scores.ObjectionCarousel += 1;
+    // scores.ObjectionCarousel += 1; // Temporarily disabled
   } else if (pricingModel === "custom-quote") {
     scores.QuoteBackedAnswers += 2;
     scores.SkepticToBelieverSteps += 1;

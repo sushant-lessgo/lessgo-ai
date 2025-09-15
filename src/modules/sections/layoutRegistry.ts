@@ -99,7 +99,7 @@ export const layoutRegistry = {
     "ProblemToReframeBlocks",
     "SkepticToBelieverSteps",
     "BoldGuaranteePanel",
-    "ObjectionCarousel",
+    // "ObjectionCarousel", // Temporarily disabled - not useful currently
   ] as const,
 
   Pricing: [

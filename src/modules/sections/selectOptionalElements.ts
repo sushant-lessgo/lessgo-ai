@@ -1158,16 +1158,16 @@ const elementRules: SectionLayoutRules = {
   }
 ],
 
-"Objection_ObjectionCarousel": [
-  {
-    element: "carousel_navigation",
-    conditions: [
-      { variable: "marketSophisticationLevel", values: ["level-1", "level-2", "level-3"], weight: 4 },
-      { variable: "awarenessLevel", values: ["unaware", "problem-aware"], weight: 3 }
-    ],
-    minScore: 5
-  }
-],
+// "Objection_ObjectionCarousel": [ // Temporarily disabled - not useful currently
+//   {
+//     element: "carousel_navigation",
+//     conditions: [
+//       { variable: "marketSophisticationLevel", values: ["level-1", "level-2", "level-3"], weight: 4 },
+//       { variable: "awarenessLevel", values: ["unaware", "problem-aware"], weight: 3 }
+//     ],
+//     minScore: 5
+//   }
+// ],
 
 // Pricing Section Rules - Add these to elementRules object
 
