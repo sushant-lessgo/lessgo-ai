@@ -154,6 +154,13 @@ module.exports = {
   'transition-opacity',
   'duration-200',
   'ease-in-out',
+  // RoleBasedScenarios (ScenarioCards) patterns
+  'group-hover/scenario-card-0:opacity-100',
+  'group-hover/scenario-card-1:opacity-100',
+  'group-hover/scenario-card-2:opacity-100',
+  'group-hover/scenario-card-3:opacity-100',
+  'group-hover/scenario-card-4:opacity-100',
+  'group-hover/scenario-card-5:opacity-100',
   
   // ✅ Gap utilities for spacing
   'gap-1',
