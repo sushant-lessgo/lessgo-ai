@@ -254,6 +254,13 @@ module.exports = {
   'group-hover/transformation-card-3:opacity-100',
   // ProblemToReframeBlocks specific patterns
   'group-hover/reframe-block:opacity-100',
+  // SkepticToBelieverSteps specific patterns
+  'group-hover/step-0:opacity-100',
+  'group-hover/step-1:opacity-100',
+  'group-hover/step-2:opacity-100',
+  'group-hover/step-3:opacity-100',
+  'group-hover/step-4:opacity-100',
+  'group-hover/step-5:opacity-100',
   
   // ✅ Gap utilities for spacing
   'gap-1',
