@@ -135,6 +135,11 @@ module.exports = {
   'group-hover/quote-card-2:opacity-100',
   'group-hover/quote-card-3:opacity-100',
   'group-hover/quote-card-4:opacity-100',
+  // QuoteWithMetric specific patterns (Results category)
+  'group-hover/quote-card-0:opacity-100',
+  'group-hover/quote-card-1:opacity-100',
+  'group-hover/quote-card-2:opacity-100',
+  'group-hover/quote-card-3:opacity-100',
   // StackedStats metric patterns
   'group-hover/metric-item-0:opacity-100',
   'group-hover/metric-item-1:opacity-100',

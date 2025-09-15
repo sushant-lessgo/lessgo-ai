@@ -37,6 +37,10 @@ interface QuoteWithMetricContent {
   credibility_icon?: string;
 }
 
+// Quote management constants
+const MIN_QUOTES = 1;
+const MAX_QUOTES = 4;
+
 // Content schema for QuoteWithMetric layout
 const CONTENT_SCHEMA = {
   headline: { type: 'string' as const, default: 'What Industry Leaders Say About Our Impact' },
@@ -98,11 +102,106 @@ const getAvatarColor = (name: string): string => {
   return colors[hash % colors.length];
 };
 
+// Helper function to add a new quote
+const addQuote = (
+  quotes: string,
+  authors: string,
+  companies: string,
+  roles: string,
+  metricLabels: string,
+  metricValues: string
+): {
+  newQuotes: string;
+  newAuthors: string;
+  newCompanies: string;
+  newRoles: string;
+  newMetricLabels: string;
+  newMetricValues: string;
+} => {
+  const quoteList = quotes.split('|').map(q => q.trim()).filter(q => q);
+  const authorList = authors.split('|').map(a => a.trim()).filter(a => a);
+  const companyList = companies.split('|').map(c => c.trim()).filter(c => c);
+  const roleList = roles.split('|').map(r => r.trim()).filter(r => r);
+  const labelList = metricLabels.split('|').map(m => m.trim()).filter(m => m);
+  const valueList = metricValues.split('|').map(m => m.trim()).filter(m => m);
+
+  // Add new quote with default content
+  quoteList.push('This new solution has transformed our business operations and exceeded our expectations.');
+  authorList.push('New Customer');
+  companyList.push('Company Name');
+  roleList.push('Position Title');
+  labelList.push('Result Achieved');
+  valueList.push('0%');
+
+  return {
+    newQuotes: quoteList.join('|'),
+    newAuthors: authorList.join('|'),
+    newCompanies: companyList.join('|'),
+    newRoles: roleList.join('|'),
+    newMetricLabels: labelList.join('|'),
+    newMetricValues: valueList.join('|')
+  };
+};
+
+// Helper function to remove a quote
+const removeQuote = (
+  quotes: string,
+  authors: string,
+  companies: string,
+  roles: string,
+  metricLabels: string,
+  metricValues: string,
+  indexToRemove: number
+): {
+  newQuotes: string;
+  newAuthors: string;
+  newCompanies: string;
+  newRoles: string;
+  newMetricLabels: string;
+  newMetricValues: string;
+} => {
+  const quoteList = quotes.split('|').map(q => q.trim()).filter(q => q);
+  const authorList = authors.split('|').map(a => a.trim()).filter(a => a);
+  const companyList = companies.split('|').map(c => c.trim()).filter(c => c);
+  const roleList = roles.split('|').map(r => r.trim()).filter(r => r);
+  const labelList = metricLabels.split('|').map(m => m.trim()).filter(m => m);
+  const valueList = metricValues.split('|').map(m => m.trim()).filter(m => m);
+
+  // Remove the quote at the specified index
+  if (indexToRemove >= 0 && indexToRemove < quoteList.length) {
+    quoteList.splice(indexToRemove, 1);
+  }
+  if (indexToRemove >= 0 && indexToRemove < authorList.length) {
+    authorList.splice(indexToRemove, 1);
+  }
+  if (indexToRemove >= 0 && indexToRemove < companyList.length) {
+    companyList.splice(indexToRemove, 1);
+  }
+  if (indexToRemove >= 0 && indexToRemove < roleList.length) {
+    roleList.splice(indexToRemove, 1);
+  }
+  if (indexToRemove >= 0 && indexToRemove < labelList.length) {
+    labelList.splice(indexToRemove, 1);
+  }
+  if (indexToRemove >= 0 && indexToRemove < valueList.length) {
+    valueList.splice(indexToRemove, 1);
+  }
+
+  return {
+    newQuotes: quoteList.join('|'),
+    newAuthors: authorList.join('|'),
+    newCompanies: companyList.join('|'),
+    newRoles: roleList.join('|'),
+    newMetricLabels: labelList.join('|'),
+    newMetricValues: valueList.join('|')
+  };
+};
+
 // Individual Quote Card Component
-const QuoteCard = ({ 
-  quote, 
-  index, 
-  mode, 
+const QuoteCard = ({
+  quote,
+  index,
+  mode,
   sectionId,
   blockContent,
   handleContentUpdate,
@@ -111,7 +210,9 @@ const QuoteCard = ({
   onCompanyEdit,
   onRoleEdit,
   onMetricLabelEdit,
-  onMetricValueEdit
+  onMetricValueEdit,
+  onRemoveQuote,
+  canRemove = true
 }: {
   quote: QuoteMetric;
   index: number;
@@ -125,11 +226,13 @@ const QuoteCard = ({
   onRoleEdit: (index: number, value: string) => void;
   onMetricLabelEdit: (index: number, value: string) => void;
   onMetricValueEdit: (index: number, value: string) => void;
+  onRemoveQuote?: (index: number) => void;
+  canRemove?: boolean;
 }) => {
   const { getTextStyle } = useTypography();
   
   return (
-    <div className="group bg-white rounded-2xl border border-gray-200 hover:border-blue-300 hover:shadow-xl transition-all duration-300 overflow-hidden">
+    <div className={`group/quote-card-${index} relative bg-white rounded-2xl border border-gray-200 hover:border-blue-300 hover:shadow-xl transition-all duration-300 overflow-hidden`}>
       
       {/* Quote Section */}
       <div className="p-8 pb-6">
@@ -265,6 +368,22 @@ const QuoteCard = ({
           )}
         </div>
       </div>
+
+      {/* Delete button - only show in edit mode and if can remove */}
+      {mode !== 'preview' && onRemoveQuote && canRemove && (
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            onRemoveQuote(index);
+          }}
+          className={`absolute top-4 right-4 opacity-0 group-hover/quote-card-${index}:opacity-100 w-6 h-6 bg-red-500 hover:bg-red-600 rounded-full flex items-center justify-center transition-all duration-200`}
+          title="Remove this quote"
+        >
+          <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      )}
     </div>
   );
 };
@@ -332,6 +451,45 @@ export default function QuoteWithMetric(props: QuoteWithMetricProps) {
     handleContentUpdate('metric_values', valueList.join('|'));
   };
 
+  // Handle adding a new quote
+  const handleAddQuote = () => {
+    const result = addQuote(
+      blockContent.quotes,
+      blockContent.authors,
+      blockContent.companies,
+      blockContent.roles,
+      blockContent.metric_labels,
+      blockContent.metric_values
+    );
+
+    handleContentUpdate('quotes', result.newQuotes);
+    handleContentUpdate('authors', result.newAuthors);
+    handleContentUpdate('companies', result.newCompanies);
+    handleContentUpdate('roles', result.newRoles);
+    handleContentUpdate('metric_labels', result.newMetricLabels);
+    handleContentUpdate('metric_values', result.newMetricValues);
+  };
+
+  // Handle removing a quote
+  const handleRemoveQuote = (indexToRemove: number) => {
+    const result = removeQuote(
+      blockContent.quotes,
+      blockContent.authors,
+      blockContent.companies,
+      blockContent.roles,
+      blockContent.metric_labels,
+      blockContent.metric_values,
+      indexToRemove
+    );
+
+    handleContentUpdate('quotes', result.newQuotes);
+    handleContentUpdate('authors', result.newAuthors);
+    handleContentUpdate('companies', result.newCompanies);
+    handleContentUpdate('roles', result.newRoles);
+    handleContentUpdate('metric_labels', result.newMetricLabels);
+    handleContentUpdate('metric_values', result.newMetricValues);
+  };
+
   return (
     <section 
       className={`py-16 px-4`}
@@ -394,9 +552,26 @@ export default function QuoteWithMetric(props: QuoteWithMetricProps) {
               onRoleEdit={handleRoleEdit}
               onMetricLabelEdit={handleMetricLabelEdit}
               onMetricValueEdit={handleMetricValueEdit}
+              onRemoveQuote={handleRemoveQuote}
+              canRemove={quotes.length > MIN_QUOTES}
             />
           ))}
         </div>
+
+        {/* Add Quote Button - only show in edit mode and if under max limit */}
+        {mode !== 'preview' && quotes.length < MAX_QUOTES && (
+          <div className="mt-12 text-center">
+            <button
+              onClick={handleAddQuote}
+              className="flex items-center space-x-2 mx-auto px-4 py-3 bg-blue-50 hover:bg-blue-100 border-2 border-blue-200 hover:border-blue-300 rounded-xl transition-all duration-200 group"
+            >
+              <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+              </svg>
+              <span className="text-blue-700 font-medium">Add Quote</span>
+            </button>
+          </div>
+        )}
 
         {/* Credibility Footer */}
         {(blockContent.footer_text || mode === 'edit') && (
