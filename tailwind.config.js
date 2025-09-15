@@ -211,6 +211,13 @@ module.exports = {
   'group-hover/stat-3:opacity-100',
   'group-hover/stat-4:opacity-100',
   'group-hover/stat-5:opacity-100',
+  // PersonaResultPanels specific patterns
+  'group-hover/persona-card-0:opacity-100',
+  'group-hover/persona-card-1:opacity-100',
+  'group-hover/persona-card-2:opacity-100',
+  'group-hover/persona-card-3:opacity-100',
+  'group-hover/persona-card-4:opacity-100',
+  'group-hover/persona-card-5:opacity-100',
   
   // ✅ Gap utilities for spacing
   'gap-1',

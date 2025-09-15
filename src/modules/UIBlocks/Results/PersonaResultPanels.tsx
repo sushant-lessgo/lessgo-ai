@@ -80,6 +80,77 @@ const parsePersonaData = (
   }));
 };
 
+// Helper function to add a new persona
+const addPersona = (
+  personas: string,
+  roles: string,
+  metrics: string,
+  descriptions: string,
+  benefits: string
+): { newPersonas: string; newRoles: string; newMetrics: string; newDescriptions: string; newBenefits: string } => {
+  const personaList = personas.split('|').map(p => p.trim()).filter(p => p);
+  const roleList = roles.split('|').map(r => r.trim()).filter(r => r);
+  const metricList = metrics.split('|').map(m => m.trim()).filter(m => m);
+  const descriptionList = descriptions.split('|').map(d => d.trim()).filter(d => d);
+  const benefitList = benefits.split('|').map(b => b.trim()).filter(b => b);
+
+  // Add new persona with default content
+  personaList.push('New Team');
+  roleList.push('Result Focused');
+  metricList.push('100% Better Results');
+  descriptionList.push('Achieve amazing outcomes with our solution tailored for your team.');
+  benefitList.push('Better efficiency,Faster results,Higher satisfaction');
+
+  return {
+    newPersonas: personaList.join('|'),
+    newRoles: roleList.join('|'),
+    newMetrics: metricList.join('|'),
+    newDescriptions: descriptionList.join('|'),
+    newBenefits: benefitList.join('|')
+  };
+};
+
+// Helper function to remove a persona
+const removePersona = (
+  personas: string,
+  roles: string,
+  metrics: string,
+  descriptions: string,
+  benefits: string,
+  indexToRemove: number
+): { newPersonas: string; newRoles: string; newMetrics: string; newDescriptions: string; newBenefits: string } => {
+  const personaList = personas.split('|').map(p => p.trim()).filter(p => p);
+  const roleList = roles.split('|').map(r => r.trim()).filter(r => r);
+  const metricList = metrics.split('|').map(m => m.trim()).filter(m => m);
+  const descriptionList = descriptions.split('|').map(d => d.trim()).filter(d => d);
+  const benefitList = benefits.split('|').map(b => b.trim()).filter(b => b);
+
+  // Remove the persona at the specified index
+  if (indexToRemove >= 0 && indexToRemove < personaList.length) {
+    personaList.splice(indexToRemove, 1);
+  }
+  if (indexToRemove >= 0 && indexToRemove < roleList.length) {
+    roleList.splice(indexToRemove, 1);
+  }
+  if (indexToRemove >= 0 && indexToRemove < metricList.length) {
+    metricList.splice(indexToRemove, 1);
+  }
+  if (indexToRemove >= 0 && indexToRemove < descriptionList.length) {
+    descriptionList.splice(indexToRemove, 1);
+  }
+  if (indexToRemove >= 0 && indexToRemove < benefitList.length) {
+    benefitList.splice(indexToRemove, 1);
+  }
+
+  return {
+    newPersonas: personaList.join('|'),
+    newRoles: roleList.join('|'),
+    newMetrics: metricList.join('|'),
+    newDescriptions: descriptionList.join('|'),
+    newBenefits: benefitList.join('|')
+  };
+};
+
 // Get persona color scheme
 const getPersonaColor = (index: number): { bg: string; accent: string; border: string; icon: string } => {
   const colors = [
@@ -149,10 +220,10 @@ const getPersonaIcon = (persona: string | undefined) => {
 };
 
 // Individual Persona Panel Component
-const PersonaPanel = ({ 
-  panel, 
-  index, 
-  mode, 
+const PersonaPanel = ({
+  panel,
+  index,
+  mode,
   sectionId,
   iconValue,
   onPersonaEdit,
@@ -160,7 +231,9 @@ const PersonaPanel = ({
   onMetricEdit,
   onDescriptionEdit,
   onBenefitsEdit,
-  onPersonaIconEdit
+  onPersonaIconEdit,
+  onRemovePersona,
+  canRemove = true
 }: {
   panel: PersonaPanel;
   index: number;
@@ -173,13 +246,15 @@ const PersonaPanel = ({
   onDescriptionEdit: (index: number, value: string) => void;
   onBenefitsEdit: (index: number, value: string) => void;
   onPersonaIconEdit: (index: number, value: string) => void;
+  onRemovePersona?: (index: number) => void;
+  canRemove?: boolean;
 }) => {
   const { getTextStyle } = useTypography();
   const colors = getPersonaColor(index);
   const benefits = panel.key_benefits.split(',').map(b => b.trim()).filter(b => b);
-  
+
   return (
-    <div className={`group p-8 ${colors.bg} rounded-2xl border ${colors.border} hover:shadow-xl transition-all duration-300`}>
+    <div className={`group/persona-card-${index} relative p-8 ${colors.bg} rounded-2xl border ${colors.border} hover:shadow-xl transition-all duration-300`}>
       
       {/* Header */}
       <div className="flex items-center space-x-4 mb-6">
@@ -306,6 +381,22 @@ const PersonaPanel = ({
           </ul>
         )}
       </div>
+
+      {/* Delete button - only show in edit mode and if can remove */}
+      {mode !== 'preview' && onRemovePersona && canRemove && (
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            onRemovePersona(index);
+          }}
+          className={`absolute top-4 right-4 opacity-0 group-hover/persona-card-${index}:opacity-100 w-6 h-6 bg-red-500 hover:bg-red-600 rounded-full flex items-center justify-center transition-all duration-200`}
+          title="Remove this persona"
+        >
+          <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      )}
     </div>
   );
 };
@@ -378,6 +469,45 @@ export default function PersonaResultPanels(props: PersonaResultPanelsProps) {
     handleContentUpdate('key_benefits', benefitsList.join('|'));
   };
 
+  // Handle adding a new persona
+  const handleAddPersona = () => {
+    const { newPersonas, newRoles, newMetrics, newDescriptions, newBenefits } = addPersona(
+      blockContent.personas,
+      blockContent.roles,
+      blockContent.result_metrics,
+      blockContent.result_descriptions,
+      blockContent.key_benefits
+    );
+    handleContentUpdate('personas', newPersonas);
+    handleContentUpdate('roles', newRoles);
+    handleContentUpdate('result_metrics', newMetrics);
+    handleContentUpdate('result_descriptions', newDescriptions);
+    handleContentUpdate('key_benefits', newBenefits);
+  };
+
+  // Handle removing a persona
+  const handleRemovePersona = (indexToRemove: number) => {
+    const { newPersonas, newRoles, newMetrics, newDescriptions, newBenefits } = removePersona(
+      blockContent.personas,
+      blockContent.roles,
+      blockContent.result_metrics,
+      blockContent.result_descriptions,
+      blockContent.key_benefits,
+      indexToRemove
+    );
+    handleContentUpdate('personas', newPersonas);
+    handleContentUpdate('roles', newRoles);
+    handleContentUpdate('result_metrics', newMetrics);
+    handleContentUpdate('result_descriptions', newDescriptions);
+    handleContentUpdate('key_benefits', newBenefits);
+
+    // Also clear the corresponding icon if it exists
+    const iconField = `persona_icon_${indexToRemove + 1}` as keyof PersonaResultPanelsContent;
+    if (blockContent[iconField]) {
+      handleContentUpdate(iconField, '');
+    }
+  };
+
   return (
     <section 
       className={`py-16 px-4`}
@@ -439,9 +569,26 @@ export default function PersonaResultPanels(props: PersonaResultPanelsProps) {
               onDescriptionEdit={handleDescriptionEdit}
               onBenefitsEdit={handleBenefitsEdit}
               onPersonaIconEdit={handlePersonaIconEdit}
+              onRemovePersona={handleRemovePersona}
+              canRemove={panels.length > 1}
             />
           ))}
         </div>
+
+        {/* Add Persona Button - only show in edit mode and if under max limit */}
+        {mode !== 'preview' && panels.length < 6 && (
+          <div className="mt-12 text-center">
+            <button
+              onClick={handleAddPersona}
+              className="flex items-center space-x-2 mx-auto px-6 py-4 bg-blue-50 hover:bg-blue-100 border-2 border-blue-200 hover:border-blue-300 rounded-xl transition-all duration-200 group"
+            >
+              <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+              </svg>
+              <span className="text-blue-700 font-medium">Add Persona</span>
+            </button>
+          </div>
+        )}
 
         {/* Universal Success Footer */}
         {(blockContent.footer_text || mode === 'edit') && (
