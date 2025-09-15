@@ -164,6 +164,13 @@ module.exports = {
   'group-hover/scenario-card-5:opacity-100',
   // UseCaseCarousel specific patterns
   'group-hover/use-case-card:opacity-100',
+  // IndustryUseCaseGrid specific patterns
+  'group-hover/industry-card-0:opacity-100',
+  'group-hover/industry-card-1:opacity-100',
+  'group-hover/industry-card-2:opacity-100',
+  'group-hover/industry-card-3:opacity-100',
+  'group-hover/industry-card-4:opacity-100',
+  'group-hover/industry-card-5:opacity-100',
   
   // ✅ Gap utilities for spacing
   'gap-1',
