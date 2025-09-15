@@ -53,13 +53,55 @@ const parseStatData = (values: string, labels: string, descriptions?: string): S
   const valueList = values.split('|').map(v => v.trim()).filter(v => v);
   const labelList = labels.split('|').map(l => l.trim()).filter(l => l);
   const descriptionList = descriptions ? descriptions.split('|').map(d => d.trim()).filter(d => d) : [];
-  
+
   return valueList.map((value, index) => ({
     id: `stat-${index}`,
     value,
     label: labelList[index] || 'Metric',
     description: descriptionList[index] || undefined
   }));
+};
+
+// Helper function to add a new stat
+const addStat = (values: string, labels: string, descriptions: string): { newValues: string; newLabels: string; newDescriptions: string } => {
+  const valueList = values.split('|').map(v => v.trim()).filter(v => v);
+  const labelList = labels.split('|').map(l => l.trim()).filter(l => l);
+  const descriptionList = descriptions ? descriptions.split('|').map(d => d.trim()).filter(d => d) : [];
+
+  // Add new stat with default content
+  valueList.push('100%');
+  labelList.push('New Metric');
+  descriptionList.push('Add description for this metric');
+
+  return {
+    newValues: valueList.join('|'),
+    newLabels: labelList.join('|'),
+    newDescriptions: descriptionList.join('|')
+  };
+};
+
+// Helper function to remove a stat
+const removeStat = (values: string, labels: string, descriptions: string, indexToRemove: number): { newValues: string; newLabels: string; newDescriptions: string } => {
+  const valueList = values.split('|').map(v => v.trim()).filter(v => v);
+  const labelList = labels.split('|').map(l => l.trim()).filter(l => l);
+  const descriptionList = descriptions ? descriptions.split('|').map(d => d.trim()).filter(d => d) : [];
+
+  // Remove the stat at the specified index
+  if (indexToRemove >= 0 && indexToRemove < valueList.length) {
+    valueList.splice(indexToRemove, 1);
+  }
+  if (indexToRemove >= 0 && indexToRemove < labelList.length) {
+    labelList.splice(indexToRemove, 1);
+  }
+  if (indexToRemove >= 0 && indexToRemove < descriptionList.length) {
+    descriptionList.splice(indexToRemove, 1);
+  }
+
+  return {
+    newValues: valueList.join('|'),
+    newLabels: labelList.join('|'),
+    newDescriptions: descriptionList.join('|')
+  };
 };
 
 // ModeWrapper component for handling edit/preview modes
@@ -159,16 +201,18 @@ const StatIcon = ({ label, index }: { label: string, index: number }) => {
 };
 
 // Individual Stat Block
-const StatBlock = ({ 
-  stat, 
-  index, 
-  mode, 
+const StatBlock = ({
+  stat,
+  index,
+  mode,
   sectionId,
   onValueEdit,
   onLabelEdit,
   onDescriptionEdit,
   onStatIconEdit,
-  getStatIcon
+  onRemoveStat,
+  getStatIcon,
+  canRemove = true
 }: {
   stat: StatItem;
   index: number;
@@ -178,12 +222,14 @@ const StatBlock = ({
   onLabelEdit: (index: number, value: string) => void;
   onDescriptionEdit: (index: number, value: string) => void;
   onStatIconEdit: (index: number, value: string) => void;
+  onRemoveStat?: (index: number) => void;
   getStatIcon: (index: number) => string;
+  canRemove?: boolean;
 }) => {
   const { getTextStyle } = useTypography();
-  
+
   return (
-    <div className="group text-center p-8 bg-white rounded-xl border border-gray-200 hover:border-blue-300 hover:shadow-lg transition-all duration-300">
+    <div className={`group/stat-${index} relative text-center p-8 bg-white rounded-xl border border-gray-200 hover:border-blue-300 hover:shadow-lg transition-all duration-300`}>
       
       {/* Stat Icon */}
       <div className="mb-6">
@@ -250,7 +296,7 @@ const StatBlock = ({
               contentEditable
               suppressContentEditableWarning
               onBlur={(e) => onDescriptionEdit(index, e.currentTarget.textContent || '')}
-              className={`outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-1 min-h-[20px] cursor-text hover:bg-gray-50 text-gray-600 leading-relaxed ${!stat.description ? 'opacity-50 italic' : ''}`}
+              className={`outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-1 min-h-[20px] cursor-text hover:bg-gray-50 text-gray-600 leading-relaxed ${!stat.description ? 'opacity-50 italic text-sm' : ''}`}
             >
               {stat.description || 'Add optional description...'}
             </div>
@@ -262,6 +308,22 @@ const StatBlock = ({
             </p>
           )}
         </div>
+      )}
+
+      {/* Delete button - only show in edit mode and if can remove */}
+      {mode !== 'preview' && onRemoveStat && canRemove && (
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            onRemoveStat(index);
+          }}
+          className={`absolute top-4 right-4 opacity-0 group-hover/stat-${index}:opacity-100 w-6 h-6 bg-red-500 hover:bg-red-600 rounded-full flex items-center justify-center transition-all duration-200`}
+          title="Remove this stat"
+        >
+          <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
       )}
     </div>
   );
@@ -315,6 +377,37 @@ export default function StatBlocks(props: StatBlocksProps) {
     const descriptions = blockContent.stat_descriptions ? blockContent.stat_descriptions.split('|') : [];
     descriptions[index] = value;
     handleContentUpdate('stat_descriptions', descriptions.join('|'));
+  };
+
+  // Handle adding a new stat
+  const handleAddStat = () => {
+    const { newValues, newLabels, newDescriptions } = addStat(
+      blockContent.stat_values,
+      blockContent.stat_labels,
+      blockContent.stat_descriptions || ''
+    );
+    handleContentUpdate('stat_values', newValues);
+    handleContentUpdate('stat_labels', newLabels);
+    handleContentUpdate('stat_descriptions', newDescriptions);
+  };
+
+  // Handle removing a stat
+  const handleRemoveStat = (indexToRemove: number) => {
+    const { newValues, newLabels, newDescriptions } = removeStat(
+      blockContent.stat_values,
+      blockContent.stat_labels,
+      blockContent.stat_descriptions || '',
+      indexToRemove
+    );
+    handleContentUpdate('stat_values', newValues);
+    handleContentUpdate('stat_labels', newLabels);
+    handleContentUpdate('stat_descriptions', newDescriptions);
+
+    // Also clear the corresponding icon if it exists
+    const iconField = `stat_icon_${indexToRemove + 1}` as keyof StatBlocksContent;
+    if (blockContent[iconField]) {
+      handleContentUpdate(iconField, '');
+    }
   };
 
   return (
@@ -375,10 +468,27 @@ export default function StatBlocks(props: StatBlocksProps) {
               onLabelEdit={handleLabelEdit}
               onDescriptionEdit={handleDescriptionEdit}
               onStatIconEdit={handleStatIconEdit}
+              onRemoveStat={handleRemoveStat}
               getStatIcon={getStatIcon}
+              canRemove={statItems.length > 2}
             />
           ))}
         </div>
+
+        {/* Add Stat Button - only show in edit mode and if under max limit */}
+        {mode !== 'preview' && statItems.length < 6 && (
+          <div className="mt-8 text-center">
+            <button
+              onClick={handleAddStat}
+              className="flex items-center space-x-2 mx-auto px-4 py-3 bg-blue-50 hover:bg-blue-100 border-2 border-blue-200 hover:border-blue-300 rounded-xl transition-all duration-200 group"
+            >
+              <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+              </svg>
+              <span className="text-blue-700 font-medium">Add Stat</span>
+            </button>
+          </div>
+        )}
 
         {/* Achievement Footer */}
         {(blockContent.achievement_footer || mode === 'edit') && blockContent.achievement_footer !== '___REMOVED___' && (

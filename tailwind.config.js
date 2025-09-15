@@ -204,6 +204,13 @@ module.exports = {
   'group-hover/milestone-6:opacity-100',
   'group-hover/milestone-7:opacity-100',
   'group-hover/add-milestone:opacity-100',
+  // StatBlocks specific patterns
+  'group-hover/stat-0:opacity-100',
+  'group-hover/stat-1:opacity-100',
+  'group-hover/stat-2:opacity-100',
+  'group-hover/stat-3:opacity-100',
+  'group-hover/stat-4:opacity-100',
+  'group-hover/stat-5:opacity-100',
   
   // ✅ Gap utilities for spacing
   'gap-1',
