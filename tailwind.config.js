@@ -218,6 +218,13 @@ module.exports = {
   'group-hover/persona-card-3:opacity-100',
   'group-hover/persona-card-4:opacity-100',
   'group-hover/persona-card-5:opacity-100',
+  // BeforeAfterStats specific patterns
+  'group-hover/stat-card-0:opacity-100',
+  'group-hover/stat-card-1:opacity-100',
+  'group-hover/stat-card-2:opacity-100',
+  'group-hover/stat-card-3:opacity-100',
+  'group-hover/stat-card-4:opacity-100',
+  'group-hover/stat-card-5:opacity-100',
   
   // ✅ Gap utilities for spacing
   'gap-1',

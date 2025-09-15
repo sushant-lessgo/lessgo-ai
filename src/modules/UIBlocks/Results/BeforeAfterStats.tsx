@@ -55,7 +55,7 @@ const parseStatData = (metrics: string, before: string, after: string, improveme
   const beforeList = before.split('|').map(b => b.trim()).filter(b => b);
   const afterList = after.split('|').map(a => a.trim()).filter(a => a);
   const improvementList = improvements.split('|').map(i => i.trim()).filter(i => i);
-  
+
   return metricList.map((metric, index) => ({
     id: `stat-${index}`,
     metric,
@@ -65,18 +65,80 @@ const parseStatData = (metrics: string, before: string, after: string, improveme
   }));
 };
 
+// Helper function to add a new stat comparison
+const addStatComparison = (metrics: string, before: string, after: string, improvements: string): {
+  newMetrics: string;
+  newBefore: string;
+  newAfter: string;
+  newImprovements: string;
+} => {
+  const metricList = metrics.split('|').map(m => m.trim()).filter(m => m);
+  const beforeList = before.split('|').map(b => b.trim()).filter(b => b);
+  const afterList = after.split('|').map(a => a.trim()).filter(a => a);
+  const improvementList = improvements.split('|').map(i => i.trim()).filter(i => i);
+
+  // Add new stat with default content
+  metricList.push('New Metric');
+  beforeList.push('Previous Value');
+  afterList.push('New Value');
+  improvementList.push('Improvement');
+
+  return {
+    newMetrics: metricList.join('|'),
+    newBefore: beforeList.join('|'),
+    newAfter: afterList.join('|'),
+    newImprovements: improvementList.join('|')
+  };
+};
+
+// Helper function to remove a stat comparison
+const removeStatComparison = (metrics: string, before: string, after: string, improvements: string, indexToRemove: number): {
+  newMetrics: string;
+  newBefore: string;
+  newAfter: string;
+  newImprovements: string;
+} => {
+  const metricList = metrics.split('|').map(m => m.trim()).filter(m => m);
+  const beforeList = before.split('|').map(b => b.trim()).filter(b => b);
+  const afterList = after.split('|').map(a => a.trim()).filter(a => a);
+  const improvementList = improvements.split('|').map(i => i.trim()).filter(i => i);
+
+  // Remove the stat at the specified index
+  if (indexToRemove >= 0 && indexToRemove < metricList.length) {
+    metricList.splice(indexToRemove, 1);
+  }
+  if (indexToRemove >= 0 && indexToRemove < beforeList.length) {
+    beforeList.splice(indexToRemove, 1);
+  }
+  if (indexToRemove >= 0 && indexToRemove < afterList.length) {
+    afterList.splice(indexToRemove, 1);
+  }
+  if (indexToRemove >= 0 && indexToRemove < improvementList.length) {
+    improvementList.splice(indexToRemove, 1);
+  }
+
+  return {
+    newMetrics: metricList.join('|'),
+    newBefore: beforeList.join('|'),
+    newAfter: afterList.join('|'),
+    newImprovements: improvementList.join('|')
+  };
+};
+
 // Individual Stat Comparison Component
-const StatComparisonCard = ({ 
-  stat, 
-  index, 
-  mode, 
+const StatComparisonCard = ({
+  stat,
+  index,
+  mode,
   sectionId,
   blockContent,
   handleContentUpdate,
   onMetricEdit,
   onBeforeEdit,
   onAfterEdit,
-  onImprovementEdit
+  onImprovementEdit,
+  onRemoveStatComparison,
+  canRemove = true
 }: {
   stat: StatComparison;
   index: number;
@@ -88,11 +150,13 @@ const StatComparisonCard = ({
   onBeforeEdit: (index: number, value: string) => void;
   onAfterEdit: (index: number, value: string) => void;
   onImprovementEdit: (index: number, value: string) => void;
+  onRemoveStatComparison?: (index: number) => void;
+  canRemove?: boolean;
 }) => {
   const { getTextStyle } = useTypography();
-  
+
   return (
-    <div className="group p-8 bg-white rounded-2xl border border-gray-200 hover:border-blue-300 hover:shadow-xl transition-all duration-300">
+    <div className={`relative group/stat-card-${index} p-8 bg-white rounded-2xl border border-gray-200 hover:border-blue-300 hover:shadow-xl transition-all duration-300`}>
       
       {/* Metric Label */}
       <div className="mb-6 text-center">
@@ -237,6 +301,22 @@ const StatComparisonCard = ({
           )}
         </div>
       </div>
+
+      {/* Delete button - only show in edit mode and if can remove */}
+      {mode !== 'preview' && onRemoveStatComparison && canRemove && (
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            onRemoveStatComparison(index);
+          }}
+          className={`absolute top-4 right-4 opacity-0 group-hover/stat-card-${index}:opacity-100 w-6 h-6 bg-red-500 hover:bg-red-600 rounded-full flex items-center justify-center transition-all duration-200`}
+          title="Remove this stat comparison"
+        >
+          <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      )}
     </div>
   );
 };
@@ -288,6 +368,35 @@ export default function BeforeAfterStats(props: BeforeAfterStatsProps) {
     const improvements = blockContent.stat_improvements.split('|');
     improvements[index] = value;
     handleContentUpdate('stat_improvements', improvements.join('|'));
+  };
+
+  // Handle adding a new stat comparison
+  const handleAddStatComparison = () => {
+    const { newMetrics, newBefore, newAfter, newImprovements } = addStatComparison(
+      blockContent.stat_metrics,
+      blockContent.stat_before,
+      blockContent.stat_after,
+      blockContent.stat_improvements
+    );
+    handleContentUpdate('stat_metrics', newMetrics);
+    handleContentUpdate('stat_before', newBefore);
+    handleContentUpdate('stat_after', newAfter);
+    handleContentUpdate('stat_improvements', newImprovements);
+  };
+
+  // Handle removing a stat comparison
+  const handleRemoveStatComparison = (indexToRemove: number) => {
+    const { newMetrics, newBefore, newAfter, newImprovements } = removeStatComparison(
+      blockContent.stat_metrics,
+      blockContent.stat_before,
+      blockContent.stat_after,
+      blockContent.stat_improvements,
+      indexToRemove
+    );
+    handleContentUpdate('stat_metrics', newMetrics);
+    handleContentUpdate('stat_before', newBefore);
+    handleContentUpdate('stat_after', newAfter);
+    handleContentUpdate('stat_improvements', newImprovements);
   };
 
   return (
@@ -371,9 +480,26 @@ export default function BeforeAfterStats(props: BeforeAfterStatsProps) {
               onBeforeEdit={handleBeforeEdit}
               onAfterEdit={handleAfterEdit}
               onImprovementEdit={handleImprovementEdit}
+              onRemoveStatComparison={handleRemoveStatComparison}
+              canRemove={statComparisons.length > 1}
             />
           ))}
         </div>
+
+        {/* Add Stat Button - only show in edit mode and if under max limit */}
+        {mode !== 'preview' && statComparisons.length < 6 && (
+          <div className="mt-8 text-center">
+            <button
+              onClick={handleAddStatComparison}
+              className="flex items-center space-x-2 mx-auto px-4 py-3 bg-blue-50 hover:bg-blue-100 border-2 border-blue-200 hover:border-blue-300 rounded-xl transition-all duration-200 group"
+            >
+              <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+              </svg>
+              <span className="text-blue-700 font-medium">Add Stat Comparison</span>
+            </button>
+          </div>
+        )}
 
         {/* Results Footer */}
         {(blockContent.footer_text || mode === 'edit') && (
