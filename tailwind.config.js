@@ -171,6 +171,13 @@ module.exports = {
   'group-hover/industry-card-3:opacity-100',
   'group-hover/industry-card-4:opacity-100',
   'group-hover/industry-card-5:opacity-100',
+  // EmojiOutcomeGrid specific patterns
+  'group-hover/outcome-card-0:opacity-100',
+  'group-hover/outcome-card-1:opacity-100',
+  'group-hover/outcome-card-2:opacity-100',
+  'group-hover/outcome-card-3:opacity-100',
+  'group-hover/outcome-card-4:opacity-100',
+  'group-hover/outcome-card-5:opacity-100',
   
   // ✅ Gap utilities for spacing
   'gap-1',

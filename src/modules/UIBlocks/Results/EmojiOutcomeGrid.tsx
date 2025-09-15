@@ -43,7 +43,7 @@ const parseOutcomeData = (emojis: string, outcomes: string, descriptions: string
   const emojiList = emojis.split('|').map(e => e.trim()).filter(e => e);
   const outcomeList = outcomes.split('|').map(o => o.trim()).filter(o => o);
   const descriptionList = descriptions.split('|').map(d => d.trim()).filter(d => d);
-  
+
   return emojiList.map((emoji, index) => ({
     id: `outcome-${index}`,
     emoji,
@@ -52,15 +52,59 @@ const parseOutcomeData = (emojis: string, outcomes: string, descriptions: string
   }));
 };
 
+// Helper function to add a new outcome
+const addOutcome = (emojis: string, outcomes: string, descriptions: string): { newEmojis: string; newOutcomes: string; newDescriptions: string } => {
+  const emojiList = emojis.split('|').map(e => e.trim()).filter(e => e);
+  const outcomeList = outcomes.split('|').map(o => o.trim()).filter(o => o);
+  const descriptionList = descriptions.split('|').map(d => d.trim()).filter(d => d);
+
+  // Add new outcome with default content
+  emojiList.push('🎯');
+  outcomeList.push('New Outcome');
+  descriptionList.push('Amazing benefit description');
+
+  return {
+    newEmojis: emojiList.join('|'),
+    newOutcomes: outcomeList.join('|'),
+    newDescriptions: descriptionList.join('|')
+  };
+};
+
+// Helper function to remove an outcome
+const removeOutcome = (emojis: string, outcomes: string, descriptions: string, indexToRemove: number): { newEmojis: string; newOutcomes: string; newDescriptions: string } => {
+  const emojiList = emojis.split('|').map(e => e.trim()).filter(e => e);
+  const outcomeList = outcomes.split('|').map(o => o.trim()).filter(o => o);
+  const descriptionList = descriptions.split('|').map(d => d.trim()).filter(d => d);
+
+  // Remove the outcome at the specified index
+  if (indexToRemove >= 0 && indexToRemove < emojiList.length) {
+    emojiList.splice(indexToRemove, 1);
+  }
+  if (indexToRemove >= 0 && indexToRemove < outcomeList.length) {
+    outcomeList.splice(indexToRemove, 1);
+  }
+  if (indexToRemove >= 0 && indexToRemove < descriptionList.length) {
+    descriptionList.splice(indexToRemove, 1);
+  }
+
+  return {
+    newEmojis: emojiList.join('|'),
+    newOutcomes: outcomeList.join('|'),
+    newDescriptions: descriptionList.join('|')
+  };
+};
+
 // Individual Outcome Card Component
-const OutcomeCard = ({ 
-  outcome, 
-  index, 
-  mode, 
+const OutcomeCard = ({
+  outcome,
+  index,
+  mode,
   sectionId,
   onEmojiEdit,
   onOutcomeEdit,
-  onDescriptionEdit
+  onDescriptionEdit,
+  onRemoveOutcome,
+  canRemove = true
 }: {
   outcome: EmojiOutcome;
   index: number;
@@ -69,12 +113,30 @@ const OutcomeCard = ({
   onEmojiEdit: (index: number, value: string) => void;
   onOutcomeEdit: (index: number, value: string) => void;
   onDescriptionEdit: (index: number, value: string) => void;
+  onRemoveOutcome?: (index: number) => void;
+  canRemove?: boolean;
 }) => {
   const { getTextStyle } = useTypography();
   
   return (
-    <div className="group text-center p-6 bg-white rounded-2xl border border-gray-200 hover:border-blue-300 hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
-      
+    <div className={`relative group/outcome-card-${index} text-center p-6 bg-white rounded-2xl border border-gray-200 hover:border-blue-300 hover:shadow-lg hover:-translate-y-1 transition-all duration-300`}>
+
+      {/* Delete button - only show in edit mode and if can remove */}
+      {mode !== 'preview' && onRemoveOutcome && canRemove && (
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            onRemoveOutcome(index);
+          }}
+          className={`absolute top-4 right-4 opacity-0 group-hover/outcome-card-${index}:opacity-100 w-6 h-6 bg-red-500 hover:bg-red-600 rounded-full flex items-center justify-center transition-all duration-200`}
+          title="Remove this outcome"
+        >
+          <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      )}
+
       {/* Emoji Icon */}
       <div className="mb-4">
         <div className="text-5xl mx-auto w-20 h-20 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
@@ -183,6 +245,22 @@ export default function EmojiOutcomeGrid(props: EmojiOutcomeGridProps) {
     handleContentUpdate('descriptions', descriptionList.join('|'));
   };
 
+  // Handle adding a new outcome
+  const handleAddOutcome = () => {
+    const { newEmojis, newOutcomes, newDescriptions } = addOutcome(blockContent.emojis, blockContent.outcomes, blockContent.descriptions);
+    handleContentUpdate('emojis', newEmojis);
+    handleContentUpdate('outcomes', newOutcomes);
+    handleContentUpdate('descriptions', newDescriptions);
+  };
+
+  // Handle removing an outcome
+  const handleRemoveOutcome = (indexToRemove: number) => {
+    const { newEmojis, newOutcomes, newDescriptions } = removeOutcome(blockContent.emojis, blockContent.outcomes, blockContent.descriptions, indexToRemove);
+    handleContentUpdate('emojis', newEmojis);
+    handleContentUpdate('outcomes', newOutcomes);
+    handleContentUpdate('descriptions', newDescriptions);
+  };
+
   return (
     <section 
       className={`py-16 px-4`}
@@ -240,22 +318,33 @@ export default function EmojiOutcomeGrid(props: EmojiOutcomeGridProps) {
                 onEmojiEdit={handleEmojiEdit}
                 onOutcomeEdit={handleOutcomeEdit}
                 onDescriptionEdit={handleDescriptionEdit}
+                onRemoveOutcome={handleRemoveOutcome}
+                canRemove={outcomes.length > 1}
               />
             </div>
           ))}
         </div>
 
+        {/* Add Outcome Button - only show in edit mode and if under max limit */}
+        {mode !== 'preview' && outcomes.length < 6 && (
+          <div className="mt-8 text-center">
+            <button
+              onClick={handleAddOutcome}
+              className="flex items-center space-x-2 mx-auto px-4 py-3 bg-blue-50 hover:bg-blue-100 border-2 border-blue-200 hover:border-blue-300 rounded-xl transition-all duration-200 group"
+            >
+              <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+              </svg>
+              <span className="text-blue-700 font-medium">Add Outcome</span>
+            </button>
+          </div>
+        )}
+
         {/* Success Animation Elements */}
         <div className="relative mt-16">
           {/* Floating Success Indicators */}
-          <div className="absolute -top-8 left-1/4 w-4 h-4 text-yellow-400 animate-bounce delay-100">
+          <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 w-4 h-4 text-yellow-400 animate-bounce delay-100">
             ⭐
-          </div>
-          <div className="absolute -top-12 right-1/3 w-4 h-4 text-green-400 animate-bounce delay-300">
-            ✨
-          </div>
-          <div className="absolute -top-6 right-1/4 w-4 h-4 text-blue-400 animate-bounce delay-500">
-            🎉
           </div>
         </div>
 
