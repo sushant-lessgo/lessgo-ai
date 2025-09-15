@@ -31,6 +31,8 @@ interface TimelineResultsContent {
   metric_icon?: string;
   timeline_icon?: string;
   success_icon?: string;
+  success_title?: string;
+  success_subtitle?: string;
 }
 
 // Content schema for TimelineResults layout
@@ -44,21 +46,23 @@ const CONTENT_SCHEMA = {
   timeline_period: { type: 'string' as const, default: 'Typical customer journey over 12 months' },
   metric_icon: { type: 'string' as const, default: '📈' },
   timeline_icon: { type: 'string' as const, default: '⏰' },
-  success_icon: { type: 'string' as const, default: '✅' }
+  success_icon: { type: 'string' as const, default: '✅' },
+  success_title: { type: 'string' as const, default: 'Success Guaranteed' },
+  success_subtitle: { type: 'string' as const, default: 'Follow this proven timeline to achievement' }
 };
 
 // Parse timeline data from pipe-separated strings
 const parseTimelineData = (
-  timeframes: string, 
-  titles: string, 
-  descriptions: string, 
+  timeframes: string,
+  titles: string,
+  descriptions: string,
   metrics?: string
 ): TimelineMilestone[] => {
   const timeframeList = timeframes.split('|').map(t => t.trim()).filter(t => t);
   const titleList = titles.split('|').map(t => t.trim()).filter(t => t);
   const descriptionList = descriptions.split('|').map(d => d.trim()).filter(d => d);
   const metricList = metrics ? metrics.split('|').map(m => m.trim()).filter(m => m) : [];
-  
+
   return timeframeList.map((timeframe, index) => ({
     id: `milestone-${index}`,
     timeframe,
@@ -68,20 +72,83 @@ const parseTimelineData = (
   }));
 };
 
+// Helper function to add a new timeline milestone
+const addTimelineMilestone = (
+  timeframes: string,
+  titles: string,
+  descriptions: string,
+  metrics?: string
+): { newTimeframes: string; newTitles: string; newDescriptions: string; newMetrics: string } => {
+  const timeframeList = timeframes.split('|').map(t => t.trim()).filter(t => t);
+  const titleList = titles.split('|').map(t => t.trim()).filter(t => t);
+  const descriptionList = descriptions.split('|').map(d => d.trim()).filter(d => d);
+  const metricList = metrics ? metrics.split('|').map(m => m.trim()).filter(m => m) : [];
+
+  // Add new milestone with default content
+  timeframeList.push('New timeframe');
+  titleList.push('New Milestone');
+  descriptionList.push('Describe the achievement at this stage of the journey.');
+  metricList.push('Add metric');
+
+  return {
+    newTimeframes: timeframeList.join('|'),
+    newTitles: titleList.join('|'),
+    newDescriptions: descriptionList.join('|'),
+    newMetrics: metricList.join('|')
+  };
+};
+
+// Helper function to remove a timeline milestone
+const removeTimelineMilestone = (
+  timeframes: string,
+  titles: string,
+  descriptions: string,
+  metrics: string | undefined,
+  indexToRemove: number
+): { newTimeframes: string; newTitles: string; newDescriptions: string; newMetrics: string } => {
+  const timeframeList = timeframes.split('|').map(t => t.trim()).filter(t => t);
+  const titleList = titles.split('|').map(t => t.trim()).filter(t => t);
+  const descriptionList = descriptions.split('|').map(d => d.trim()).filter(d => d);
+  const metricList = metrics ? metrics.split('|').map(m => m.trim()).filter(m => m) : [];
+
+  // Remove the milestone at the specified index
+  if (indexToRemove >= 0 && indexToRemove < timeframeList.length) {
+    timeframeList.splice(indexToRemove, 1);
+  }
+  if (indexToRemove >= 0 && indexToRemove < titleList.length) {
+    titleList.splice(indexToRemove, 1);
+  }
+  if (indexToRemove >= 0 && indexToRemove < descriptionList.length) {
+    descriptionList.splice(indexToRemove, 1);
+  }
+  if (indexToRemove >= 0 && indexToRemove < metricList.length) {
+    metricList.splice(indexToRemove, 1);
+  }
+
+  return {
+    newTimeframes: timeframeList.join('|'),
+    newTitles: titleList.join('|'),
+    newDescriptions: descriptionList.join('|'),
+    newMetrics: metricList.join('|')
+  };
+};
+
 // Individual Timeline Milestone Component
-const TimelineMilestone = ({ 
-  milestone, 
-  index, 
+const TimelineMilestone = ({
+  milestone,
+  index,
   isLast,
-  mode, 
+  mode,
   sectionId,
   onTimeframeEdit,
   onTitleEdit,
   onDescriptionEdit,
   onMetricEdit,
+  onRemoveMilestone,
   metricIcon,
   onMetricIconEdit,
-  colorTokens
+  colorTokens,
+  canRemove = true
 }: {
   milestone: TimelineMilestone;
   index: number;
@@ -92,14 +159,16 @@ const TimelineMilestone = ({
   onTitleEdit: (index: number, value: string) => void;
   onDescriptionEdit: (index: number, value: string) => void;
   onMetricEdit: (index: number, value: string) => void;
+  onRemoveMilestone?: (index: number) => void;
   metricIcon?: string;
   onMetricIconEdit: (value: string) => void;
   colorTokens: any;
+  canRemove?: boolean;
 }) => {
   const { getTextStyle } = useTypography();
   
   return (
-    <div className="relative flex items-start space-x-6 pb-12">
+    <div className={`relative group/milestone-${index} flex items-start space-x-6 pb-12`}>
       
       {/* Timeline Line and Node */}
       <div className="relative flex flex-col items-center">
@@ -190,7 +259,7 @@ const TimelineMilestone = ({
               elementKey="metric_icon"
             />
             {mode !== 'preview' ? (
-              <div 
+              <div
                 contentEditable
                 suppressContentEditableWarning
                 onBlur={(e) => onMetricEdit(index, e.currentTarget.textContent || '')}
@@ -199,7 +268,7 @@ const TimelineMilestone = ({
                 {milestone.metric || 'Add metric...'}
               </div>
             ) : milestone.metric && (
-              <span 
+              <span
                 className="font-semibold text-green-800"
               >
                 {milestone.metric}
@@ -208,6 +277,22 @@ const TimelineMilestone = ({
           </div>
         )}
       </div>
+
+      {/* Delete button - only show in edit mode and if can remove */}
+      {mode !== 'preview' && onRemoveMilestone && canRemove && (
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            onRemoveMilestone(index);
+          }}
+          className={`opacity-0 group-hover/milestone-${index}:opacity-100 absolute top-4 right-4 w-6 h-6 bg-red-500 hover:bg-red-600 rounded-full flex items-center justify-center transition-all duration-200`}
+          title="Remove this milestone"
+        >
+          <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      )}
     </div>
   );
 };
@@ -259,6 +344,35 @@ export default function TimelineResults(props: TimelineResultsProps) {
     const metricList = blockContent.metrics ? blockContent.metrics.split('|') : [];
     metricList[index] = value;
     handleContentUpdate('metrics', metricList.join('|'));
+  };
+
+  // Handle adding a new milestone
+  const handleAddMilestone = () => {
+    const { newTimeframes, newTitles, newDescriptions, newMetrics } = addTimelineMilestone(
+      blockContent.timeframes,
+      blockContent.titles,
+      blockContent.descriptions,
+      blockContent.metrics
+    );
+    handleContentUpdate('timeframes', newTimeframes);
+    handleContentUpdate('titles', newTitles);
+    handleContentUpdate('descriptions', newDescriptions);
+    handleContentUpdate('metrics', newMetrics);
+  };
+
+  // Handle removing a milestone
+  const handleRemoveMilestone = (indexToRemove: number) => {
+    const { newTimeframes, newTitles, newDescriptions, newMetrics } = removeTimelineMilestone(
+      blockContent.timeframes,
+      blockContent.titles,
+      blockContent.descriptions,
+      blockContent.metrics,
+      indexToRemove
+    );
+    handleContentUpdate('timeframes', newTimeframes);
+    handleContentUpdate('titles', newTitles);
+    handleContentUpdate('descriptions', newDescriptions);
+    handleContentUpdate('metrics', newMetrics);
   };
 
   return (
@@ -344,12 +458,29 @@ export default function TimelineResults(props: TimelineResultsProps) {
               onTitleEdit={handleTitleEdit}
               onDescriptionEdit={handleDescriptionEdit}
               onMetricEdit={handleMetricEdit}
+              onRemoveMilestone={handleRemoveMilestone}
               metricIcon={blockContent.metric_icon}
               onMetricIconEdit={(value) => handleContentUpdate('metric_icon', value)}
               colorTokens={colorTokens}
+              canRemove={milestones.length > 2}
             />
           ))}
         </div>
+
+        {/* Add Milestone Button - only show in edit mode and if under max limit */}
+        {mode !== 'preview' && milestones.length < 8 && (
+          <div className="mt-8 text-center">
+            <button
+              onClick={handleAddMilestone}
+              className="flex items-center space-x-2 mx-auto px-4 py-3 bg-blue-50 hover:bg-blue-100 border-2 border-blue-200 hover:border-blue-300 rounded-xl transition-all duration-200 group/add-milestone"
+            >
+              <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+              </svg>
+              <span className="text-blue-700 font-medium">Add Milestone</span>
+            </button>
+          </div>
+        )}
 
         {/* Success Indicator */}
         <div className="mt-12 text-center">
@@ -368,8 +499,31 @@ export default function TimelineResults(props: TimelineResultsProps) {
               />
             </div>
             <div className="text-left">
-              <div className="font-bold text-emerald-900 text-lg">Success Guaranteed</div>
-              <div className="text-emerald-700 text-sm">Follow this proven timeline to achievement</div>
+              {mode !== 'preview' ? (
+                <>
+                  <div
+                    contentEditable
+                    suppressContentEditableWarning
+                    onBlur={(e) => handleContentUpdate('success_title', e.currentTarget.textContent || '')}
+                    className="outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-1 min-h-[24px] cursor-text hover:bg-gray-50 font-bold text-emerald-900 text-lg"
+                  >
+                    {blockContent.success_title}
+                  </div>
+                  <div
+                    contentEditable
+                    suppressContentEditableWarning
+                    onBlur={(e) => handleContentUpdate('success_subtitle', e.currentTarget.textContent || '')}
+                    className="outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-1 min-h-[20px] cursor-text hover:bg-gray-50 text-emerald-700 text-sm"
+                  >
+                    {blockContent.success_subtitle}
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className="font-bold text-emerald-900 text-lg">{blockContent.success_title}</div>
+                  <div className="text-emerald-700 text-sm">{blockContent.success_subtitle}</div>
+                </>
+              )}
             </div>
           </div>
         </div>
@@ -382,15 +536,17 @@ export default function TimelineResults(props: TimelineResultsProps) {
 export const componentMeta = {
   name: 'TimelineResults',
   category: 'Results',
-  description: 'Results shown over time progression with milestone tracking',
-  tags: ['timeline', 'progression', 'milestones', 'transformation', 'journey'],
+  description: 'Results shown over time progression with milestone tracking and editable content',
+  tags: ['timeline', 'progression', 'milestones', 'transformation', 'journey', 'editable'],
   features: [
     'Visual timeline with numbered milestones',
+    'Add/remove timeline milestones (2-8 cards)',
     'Timeframe badges for each stage',
     'Optional metrics for each milestone',
     'Gradient timeline connector',
-    'Success guarantee indicator',
-    'Individual editing for all timeline elements'
+    'Editable success guarantee text',
+    'Individual editing for all timeline elements',
+    'Hover-based delete buttons for milestones'
   ],
   props: {
     sectionId: 'string - Required section identifier',
@@ -404,7 +560,9 @@ export const componentMeta = {
     descriptions: 'Pipe-separated list of milestone descriptions',
     metrics: 'Optional pipe-separated list of metrics for each milestone',
     subheadline: 'Optional subheading for context',
-    timeline_period: 'Optional overall timeline period description'
+    timeline_period: 'Optional overall timeline period description',
+    success_title: 'Success guarantee title text',
+    success_subtitle: 'Success guarantee subtitle text'
   },
   examples: [
     'Customer onboarding journey',

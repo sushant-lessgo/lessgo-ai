@@ -185,6 +185,16 @@ module.exports = {
   'group-hover/outcome-card-3:opacity-100',
   'group-hover/outcome-card-4:opacity-100',
   'group-hover/outcome-card-5:opacity-100',
+  // TimelineResults milestone patterns
+  'group-hover/milestone-0:opacity-100',
+  'group-hover/milestone-1:opacity-100',
+  'group-hover/milestone-2:opacity-100',
+  'group-hover/milestone-3:opacity-100',
+  'group-hover/milestone-4:opacity-100',
+  'group-hover/milestone-5:opacity-100',
+  'group-hover/milestone-6:opacity-100',
+  'group-hover/milestone-7:opacity-100',
+  'group-hover/add-milestone:opacity-100',
   
   // ✅ Gap utilities for spacing
   'gap-1',
