@@ -80,7 +80,7 @@ const getDefaultIcon = (title: string): string => {
 const parseFeatureData = (titles: string, descriptions: string, blockContent: IconGridContent): FeatureItem[] => {
   const titleList = parsePipeData(titles);
   const descriptionList = parsePipeData(descriptions);
-  
+
   // Get saved icons or use smart defaults
   const icons = [
     blockContent.icon_1,
@@ -90,7 +90,7 @@ const parseFeatureData = (titles: string, descriptions: string, blockContent: Ic
     blockContent.icon_5,
     blockContent.icon_6
   ];
-  
+
   return titleList.map((title, index) => ({
     id: `feature-${index}`,
     index,
@@ -101,19 +101,55 @@ const parseFeatureData = (titles: string, descriptions: string, blockContent: Ic
   }));
 };
 
+// Helper function to add a new feature
+const addFeature = (titles: string, descriptions: string): { newTitles: string; newDescriptions: string } => {
+  const titleList = titles.split('|').map(t => t.trim()).filter(t => t);
+  const descriptionList = descriptions.split('|').map(d => d.trim()).filter(d => d);
+
+  // Add new feature with default content
+  titleList.push('New Feature');
+  descriptionList.push('Describe this feature and its benefits for your users.');
+
+  return {
+    newTitles: titleList.join('|'),
+    newDescriptions: descriptionList.join('|')
+  };
+};
+
+// Helper function to remove a feature
+const removeFeature = (titles: string, descriptions: string, indexToRemove: number): { newTitles: string; newDescriptions: string } => {
+  const titleList = titles.split('|').map(t => t.trim()).filter(t => t);
+  const descriptionList = descriptions.split('|').map(d => d.trim()).filter(d => d);
+
+  // Remove the feature at the specified index
+  if (indexToRemove >= 0 && indexToRemove < titleList.length) {
+    titleList.splice(indexToRemove, 1);
+  }
+  if (indexToRemove >= 0 && indexToRemove < descriptionList.length) {
+    descriptionList.splice(indexToRemove, 1);
+  }
+
+  return {
+    newTitles: titleList.join('|'),
+    newDescriptions: descriptionList.join('|')
+  };
+};
+
 // Enhanced Individual Feature Card with Adaptive Colors
-const FeatureCard = React.memo(({ 
-  item, 
-  mode, 
+const FeatureCard = React.memo(({
+  item,
+  mode,
   colorTokens,
   dynamicTextColors,
   getTextStyle,
   onTitleEdit,
   onDescriptionEdit,
   onIconEdit,
+  onRemoveFeature,
   sectionId,
   backgroundType,
-  sectionBackground
+  sectionBackground,
+  canRemove = true
 }: {
   item: FeatureItem;
   mode: 'edit' | 'preview';
@@ -123,9 +159,11 @@ const FeatureCard = React.memo(({
   onTitleEdit: (index: number, value: string) => void;
   onDescriptionEdit: (index: number, value: string) => void;
   onIconEdit?: (index: number, value: string) => void;
+  onRemoveFeature?: (index: number) => void;
   sectionId: string;
   backgroundType: string;
   sectionBackground: string;
+  canRemove?: boolean;
 }) => {
   
   // ✅ ENHANCED: Get card background based on section background
@@ -138,7 +176,23 @@ const FeatureCard = React.memo(({
     : 'hover:border-blue-300 hover:shadow-lg';
   
   return (
-    <div className={`group p-6 rounded-xl border ${cardBackground} ${cardHover} transition-all duration-300`}>
+    <div className={`group/feature-${item.index} relative p-6 rounded-xl border ${cardBackground} ${cardHover} transition-all duration-300`}>
+      {/* Delete button - only show in edit mode and if can remove */}
+      {mode !== 'preview' && onRemoveFeature && canRemove && (
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            onRemoveFeature(item.index);
+          }}
+          className={`absolute top-4 right-4 opacity-0 group-hover/feature-${item.index}:opacity-100 text-red-500 hover:text-red-700 transition-opacity duration-200`}
+          title="Remove this feature"
+        >
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      )}
+
       {/* ✅ ENHANCED: Fully Editable Icon */}
       <div className="mb-4">
         <div className={`inline-flex items-center justify-center w-12 h-12 rounded-lg ${colorTokens.ctaBg || 'bg-blue-600'} bg-opacity-10 group-hover:bg-opacity-20 transition-all duration-300`}>
@@ -235,6 +289,40 @@ export default function IconGrid(props: LayoutComponentProps) {
     handleContentUpdate(iconField, value);
   };
 
+  // Handle adding a new feature
+  const handleAddFeature = () => {
+    const { newTitles, newDescriptions } = addFeature(blockContent.feature_titles, blockContent.feature_descriptions);
+    handleContentUpdate('feature_titles', newTitles);
+    handleContentUpdate('feature_descriptions', newDescriptions);
+  };
+
+  // Handle removing a feature
+  const handleRemoveFeature = (indexToRemove: number) => {
+    const { newTitles, newDescriptions } = removeFeature(blockContent.feature_titles, blockContent.feature_descriptions, indexToRemove);
+    handleContentUpdate('feature_titles', newTitles);
+    handleContentUpdate('feature_descriptions', newDescriptions);
+
+    // Shift icon fields to maintain order
+    const icons = [
+      blockContent.icon_1,
+      blockContent.icon_2,
+      blockContent.icon_3,
+      blockContent.icon_4,
+      blockContent.icon_5,
+      blockContent.icon_6
+    ];
+
+    // Remove the icon at the specified index and shift remaining icons
+    icons.splice(indexToRemove, 1);
+    icons.push(''); // Add empty at the end
+
+    // Update all icon fields
+    icons.forEach((icon, index) => {
+      const iconField = `icon_${index + 1}` as keyof IconGridContent;
+      handleContentUpdate(iconField, icon || '');
+    });
+  };
+
   // Force center alignment for headline - DIRECT DOM TARGETING
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -328,12 +416,29 @@ export default function IconGrid(props: LayoutComponentProps) {
               onTitleEdit={handleTitleEdit}
               onDescriptionEdit={handleDescriptionEdit}
               onIconEdit={handleIconEdit}
+              onRemoveFeature={handleRemoveFeature}
               sectionId={sectionId}
               backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'neutral')}
               sectionBackground={sectionBackground}
+              canRemove={featureItems.length > 1}
             />
           ))}
         </div>
+
+        {/* Add Feature Button - only show in edit mode and if under max limit */}
+        {mode !== 'preview' && featureItems.length < 6 && (
+          <div className="mt-8 text-center">
+            <button
+              onClick={handleAddFeature}
+              className="inline-flex items-center space-x-2 px-4 py-3 bg-blue-50 hover:bg-blue-100 border-2 border-blue-200 hover:border-blue-300 rounded-xl transition-all duration-200 group"
+            >
+              <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+              </svg>
+              <span className="text-blue-700 font-medium">Add Feature</span>
+            </button>
+          </div>
+        )}
       </div>
     </LayoutSection>
   );

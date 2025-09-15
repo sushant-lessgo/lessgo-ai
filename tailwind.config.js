@@ -75,6 +75,13 @@ module.exports = {
   'group-hover/mini-card-3:opacity-100',
   'group-hover/mini-card-4:opacity-100',
   'group-hover/mini-card-5:opacity-100',
+  // IconGrid feature card patterns
+  'group-hover/feature-0:opacity-100',
+  'group-hover/feature-1:opacity-100',
+  'group-hover/feature-2:opacity-100',
+  'group-hover/feature-3:opacity-100',
+  'group-hover/feature-4:opacity-100',
+  'group-hover/feature-5:opacity-100',
   // MetricTiles specific patterns
   'group-hover/metric-tile-0:opacity-100',
   'group-hover/metric-tile-1:opacity-100',
