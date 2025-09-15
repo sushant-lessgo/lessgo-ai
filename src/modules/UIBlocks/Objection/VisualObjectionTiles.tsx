@@ -237,15 +237,6 @@ export default function VisualObjectionTiles(props: LayoutComponentProps) {
             </button>
           </div>
         )}
-
-        {/* Edit Mode: Instructions */}
-        {mode !== 'preview' && (
-          <div className="mt-8 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-            <p className="text-blue-800 text-sm">
-              <strong>Edit Objection Tiles:</strong> Use format "[emoji]|"[objection]"|[answer]|[next emoji]|"[next objection]"|[next answer]"
-            </p>
-          </div>
-        )}
       </div>
     </LayoutSection>
   );
