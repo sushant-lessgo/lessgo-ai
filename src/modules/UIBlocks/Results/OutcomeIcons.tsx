@@ -45,13 +45,55 @@ const parseOutcomeData = (iconTypes: string, titles: string, descriptions: strin
   const iconList = iconTypes.split('|').map(i => i.trim()).filter(i => i);
   const titleList = titles.split('|').map(t => t.trim()).filter(t => t);
   const descriptionList = descriptions.split('|').map(d => d.trim()).filter(d => d);
-  
+
   return iconList.map((iconType, index) => ({
     id: `outcome-${index}`,
     iconType,
     title: titleList[index] || 'Great Outcome',
     description: descriptionList[index] || 'Amazing results await'
   }));
+};
+
+// Helper function to add a new outcome
+const addOutcome = (iconTypes: string, titles: string, descriptions: string): { newIconTypes: string; newTitles: string; newDescriptions: string } => {
+  const iconList = iconTypes.split('|').map(i => i.trim()).filter(i => i);
+  const titleList = titles.split('|').map(t => t.trim()).filter(t => t);
+  const descriptionList = descriptions.split('|').map(d => d.trim()).filter(d => d);
+
+  // Add new outcome with default content
+  iconList.push('✨');
+  titleList.push('New Outcome');
+  descriptionList.push('Describe this amazing result your customers will achieve.');
+
+  return {
+    newIconTypes: iconList.join('|'),
+    newTitles: titleList.join('|'),
+    newDescriptions: descriptionList.join('|')
+  };
+};
+
+// Helper function to remove an outcome
+const removeOutcome = (iconTypes: string, titles: string, descriptions: string, indexToRemove: number): { newIconTypes: string; newTitles: string; newDescriptions: string } => {
+  const iconList = iconTypes.split('|').map(i => i.trim()).filter(i => i);
+  const titleList = titles.split('|').map(t => t.trim()).filter(t => t);
+  const descriptionList = descriptions.split('|').map(d => d.trim()).filter(d => d);
+
+  // Remove the outcome at the specified index
+  if (indexToRemove >= 0 && indexToRemove < iconList.length) {
+    iconList.splice(indexToRemove, 1);
+  }
+  if (indexToRemove >= 0 && indexToRemove < titleList.length) {
+    titleList.splice(indexToRemove, 1);
+  }
+  if (indexToRemove >= 0 && indexToRemove < descriptionList.length) {
+    descriptionList.splice(indexToRemove, 1);
+  }
+
+  return {
+    newIconTypes: iconList.join('|'),
+    newTitles: titleList.join('|'),
+    newDescriptions: descriptionList.join('|')
+  };
 };
 
 // Icon Component
@@ -136,14 +178,16 @@ const getColorScheme = (iconType: string): { bg: string; icon: string; border: s
 };
 
 // Individual Outcome Card Component
-const OutcomeCard = ({ 
-  outcome, 
-  index, 
-  mode, 
+const OutcomeCard = ({
+  outcome,
+  index,
+  mode,
   sectionId,
   onIconEdit,
   onTitleEdit,
-  onDescriptionEdit
+  onDescriptionEdit,
+  onRemoveOutcome,
+  canRemove = true
 }: {
   outcome: OutcomeIcon;
   index: number;
@@ -152,12 +196,14 @@ const OutcomeCard = ({
   onIconEdit: (index: number, value: string) => void;
   onTitleEdit: (index: number, value: string) => void;
   onDescriptionEdit: (index: number, value: string) => void;
+  onRemoveOutcome?: (index: number) => void;
+  canRemove?: boolean;
 }) => {
   const { getTextStyle } = useTypography();
   const colorScheme = getColorScheme(outcome.iconType);
-  
+
   return (
-    <div className="group text-center p-6 bg-white rounded-2xl border border-gray-200 hover:border-blue-300 hover:shadow-lg transition-all duration-300">
+    <div className={`group/outcome-card-${index} relative text-center p-6 bg-white rounded-2xl border border-gray-200 hover:border-blue-300 hover:shadow-lg transition-all duration-300`}>
       
       {/* Icon */}
       <div className="mb-6">
@@ -200,7 +246,7 @@ const OutcomeCard = ({
       {/* Description */}
       <div>
         {mode !== 'preview' ? (
-          <div 
+          <div
             contentEditable
             suppressContentEditableWarning
             onBlur={(e) => onDescriptionEdit(index, e.currentTarget.textContent || '')}
@@ -209,13 +255,29 @@ const OutcomeCard = ({
             {outcome.description}
           </div>
         ) : (
-          <p 
+          <p
             className="text-gray-600 leading-relaxed"
           >
             {outcome.description}
           </p>
         )}
       </div>
+
+      {/* Delete button - only show in edit mode and if can remove */}
+      {mode !== 'preview' && onRemoveOutcome && canRemove && (
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            onRemoveOutcome(index);
+          }}
+          className={`opacity-0 group-hover/outcome-card-${index}:opacity-100 absolute top-4 right-4 ml-2 text-red-500 hover:text-red-700 transition-opacity duration-200`}
+          title="Remove this outcome"
+        >
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      )}
     </div>
   );
 };
@@ -260,6 +322,31 @@ export default function OutcomeIcons(props: OutcomeIconsProps) {
     const descriptionList = blockContent.descriptions.split('|');
     descriptionList[index] = value;
     handleContentUpdate('descriptions', descriptionList.join('|'));
+  };
+
+  // Handle adding a new outcome
+  const handleAddOutcome = () => {
+    const { newIconTypes, newTitles, newDescriptions } = addOutcome(
+      blockContent.icon_types,
+      blockContent.titles,
+      blockContent.descriptions
+    );
+    handleContentUpdate('icon_types', newIconTypes);
+    handleContentUpdate('titles', newTitles);
+    handleContentUpdate('descriptions', newDescriptions);
+  };
+
+  // Handle removing an outcome
+  const handleRemoveOutcome = (indexToRemove: number) => {
+    const { newIconTypes, newTitles, newDescriptions } = removeOutcome(
+      blockContent.icon_types,
+      blockContent.titles,
+      blockContent.descriptions,
+      indexToRemove
+    );
+    handleContentUpdate('icon_types', newIconTypes);
+    handleContentUpdate('titles', newTitles);
+    handleContentUpdate('descriptions', newDescriptions);
   };
 
   return (
@@ -319,9 +406,26 @@ export default function OutcomeIcons(props: OutcomeIconsProps) {
               onIconEdit={handleIconEdit}
               onTitleEdit={handleTitleEdit}
               onDescriptionEdit={handleDescriptionEdit}
+              onRemoveOutcome={handleRemoveOutcome}
+              canRemove={outcomes.length > 1}
             />
           ))}
         </div>
+
+        {/* Add Outcome Button - only show in edit mode and if under max limit */}
+        {mode !== 'preview' && outcomes.length < 6 && (
+          <div className="mt-8 text-center">
+            <button
+              onClick={handleAddOutcome}
+              className="flex items-center space-x-2 mx-auto px-4 py-3 bg-blue-50 hover:bg-blue-100 border-2 border-blue-200 hover:border-blue-300 rounded-xl transition-all duration-200 group"
+            >
+              <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+              </svg>
+              <span className="text-blue-700 font-medium">Add Outcome</span>
+            </button>
+          </div>
+        )}
 
         {/* Outcome Promise Footer */}
         {(blockContent.footer_text || mode === 'edit') && (
