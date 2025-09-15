@@ -72,6 +72,10 @@ module.exports = {
   'group-hover/social-metric:opacity-100',
   'group-hover/social-proof-section:opacity-100',
   'group-hover/guarantee:opacity-100',
+  // BoldGuaranteePanel specific patterns
+  'group-hover/guarantee-card-0:opacity-100',
+  'group-hover/guarantee-card-1:opacity-100',
+  'group-hover/guarantee-card-2:opacity-100',
   // ToggleableMonthlyYearly specific patterns
   'group-hover/pricing-card:opacity-100',
   'group-hover/segment-tab:opacity-100',
