@@ -116,9 +116,19 @@ export const layoutElementSchema: LayoutSchema = {
 
   PersonaResultPanels: [
     { element: "headline", mandatory: true },
-    { element: "persona_names", mandatory: true },
+    { element: "personas", mandatory: true },
+    { element: "roles", mandatory: true },
+    { element: "result_metrics", mandatory: true },
     { element: "result_descriptions", mandatory: true },
-    { element: "success_metrics", mandatory: false },
+    { element: "key_benefits", mandatory: true },
+    { element: "subheadline", mandatory: false },
+    { element: "footer_text", mandatory: false },
+    { element: "persona_icon_1", mandatory: false },
+    { element: "persona_icon_2", mandatory: false },
+    { element: "persona_icon_3", mandatory: false },
+    { element: "persona_icon_4", mandatory: false },
+    { element: "persona_icon_5", mandatory: false },
+    { element: "persona_icon_6", mandatory: false },
   ],
 
   // Security Section
@@ -281,10 +291,18 @@ export const layoutElementSchema: LayoutSchema = {
 
   RatingCards: [
     { element: "headline", mandatory: true },
-    { element: "rating_scores", mandatory: true },
-    { element: "rating_sources", mandatory: true },
-    { element: "review_snippets", mandatory: true },
+    { element: "testimonial_quotes", mandatory: true },
+    { element: "customer_names", mandatory: true },
+    { element: "customer_titles", mandatory: true },
+    { element: "ratings", mandatory: true },
+    { element: "review_platforms", mandatory: true },
     { element: "review_dates", mandatory: false },
+    { element: "verified_badges", mandatory: false },
+    { element: "customer_locations", mandatory: false },
+    { element: "subheadline", mandatory: false },
+    { element: "supporting_text", mandatory: false },
+    { element: "cta_text", mandatory: false },
+    { element: "trust_items", mandatory: false },
   ],
 
   PullQuoteStack: [
@@ -1165,6 +1183,22 @@ export const layoutElementSchema: LayoutSchema = {
     { element: "problem_statements", mandatory: true },
     { element: "checklist_items", mandatory: true },
     { element: "conclusion_text", mandatory: false },
+    { element: "scoring_labels", mandatory: false },
+    { element: "action_thresholds", mandatory: false },
+    { element: "intro_text", mandatory: false },
+    { element: "subheadline", mandatory: false },
+    { element: "supporting_text", mandatory: false },
+    { element: "cta_text", mandatory: false },
+    { element: "trust_items", mandatory: false },
+    { element: "result_stat_1", mandatory: false },
+    { element: "result_stat_1_label", mandatory: false },
+    { element: "result_stat_2", mandatory: false },
+    { element: "result_stat_2_label", mandatory: false },
+    { element: "result_stat_3", mandatory: false },
+    { element: "result_stat_3_label", mandatory: false },
+    { element: "encouragement_tip_1", mandatory: false },
+    { element: "encouragement_tip_2", mandatory: false },
+    { element: "encouragement_tip_3", mandatory: false },
   ],
 
   // Header Section

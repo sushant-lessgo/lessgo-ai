@@ -70,7 +70,8 @@
       "Bash(npx tsc:*)",
       "Read(//c/c/Users/susha/lessgo-ai/**)",
       "Bash(pkill:*)",
-      "Bash(sed:*)"
+      "Bash(sed:*)",
+      "Bash(node:*)"
     ],
     "deny": [],
     "ask": [],

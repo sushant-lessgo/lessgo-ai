@@ -1,5 +1,6 @@
 // modules/prompt/buildPrompt.ts - ✅ PHASE 4: API Layer Migration Complete
 import { getCompleteElementsMap, getSectionElementRequirements, mapStoreToVariables } from '../sections/elementDetermination'
+import { classifyFieldsForSection, getGenerationStrategy } from '../generation/fieldClassification'
 
 import type {
   InputVariables,
@@ -567,9 +568,32 @@ function getElementFormatGuidance(element: string): string {
     return "[\"Feature 1\", \"Feature 2\", \"Feature 3\"]";
   }
   
-  // Benefit patterns
+  // Benefit patterns - Enhanced for complex benefit lists
   if (element.includes('benefit') || element.includes('benefits')) {
+    if (element === 'key_benefits') {
+      return "[\"Benefit 1,Sub-benefit A,Sub-benefit B\", \"Benefit 2,Sub-benefit C,Sub-benefit D\"]";
+    }
     return "[\"Benefit 1\", \"Benefit 2\", \"Benefit 3\"]";
+  }
+
+  // Rating/Review patterns
+  if (element.includes('rating') || element.includes('review')) {
+    return "[\"5\", \"4\", \"5\", \"4\"]";
+  }
+
+  // Persona/Role patterns
+  if (element.includes('persona') || element.includes('role')) {
+    return "[\"User Type 1\", \"User Type 2\", \"User Type 3\"]";
+  }
+
+  // Scoring/Assessment patterns
+  if (element.includes('scoring') || element.includes('threshold') || element.includes('assessment')) {
+    return "[\"Score range 1\", \"Score range 2\", \"Score range 3\"]";
+  }
+
+  // Result statistics patterns
+  if (element.includes('result_stat') || element.includes('encouragement')) {
+    return "Performance metric or encouragement text";
   }
   
   // Price patterns
@@ -615,7 +639,12 @@ function getElementFormatGuidance(element: string): string {
     'navigation_labels': "[\"Back\", \"Continue\", \"Finish\"]",
     'progress_labels': "[\"Step 1 of 3\", \"Step 2 of 3\", \"Step 3 of 3\"]",
     
-    // Ratings
+    // Ratings and Reviews - Updated for RatingCards UIBlock
+    'ratings': "[\"5\", \"4\", \"5\", \"4\", \"5\"]",
+    'review_platforms': "[\"G2\", \"Capterra\", \"Trustpilot\", \"Product Hunt\"]",
+    'verified_badges': "[\"true\", \"true\", \"false\", \"true\"]",
+    'customer_locations': "[\"New York, US\", \"London, UK\", \"Toronto, CA\"]",
+    'testimonial_quotes': "[\"This product changed our workflow completely. Amazing results!\", \"Outstanding support and features. Highly recommended.\", \"Best tool we've used in years. Game changer.\"]",
     'rating_scores': "[\"4.8/5\", \"4.9/5\", \"5.0/5\"]",
     'rating_sources': "[\"G2\", \"Capterra\", \"TrustPilot\"]",
     
@@ -658,6 +687,34 @@ function getElementFormatGuidance(element: string): string {
     'savings_labels': "[\"Save 20%\", \"Best Value\"]",
     'improvement_percentages': "[\"50% faster\", \"3x better\"]",
     
+    // ProblemChecklist Interactive Fields
+    'problem_statements': "[\"You spend hours on manual tasks that could be automated\", \"Important information gets lost in email chains\", \"Team members work in silos without visibility\"]",
+    'checklist_items': "[\"Manual task overload\", \"Information silos\", \"Communication gaps\"]",
+    'scoring_labels': "[\"0-2: Well managed\", \"3-5: Room for improvement\", \"6-8: Significant challenges\", \"9-10: Critical intervention needed\"]",
+    'action_thresholds': "[\"Keep monitoring\", \"Consider optimization\", \"Prioritize improvements\", \"Urgent action required\"]",
+    'result_stat_1': "87%",
+    'result_stat_1_label': "see improvement within 30 days",
+    'result_stat_2': "3.2x",
+    'result_stat_2_label': "average productivity increase",
+    'result_stat_3': "$47K",
+    'result_stat_3_label': "average annual savings",
+    'encouragement_tip_1': "Regular process reviews",
+    'encouragement_tip_2': "Proactive improvements",
+    'encouragement_tip_3': "Team feedback loops",
+
+    // PersonaResultPanels Fields
+    'personas': "[\"Marketing Teams\", \"Sales Leaders\", \"Operations Managers\", \"Engineering Teams\"]",
+    'roles': "[\"Growth Focused\", \"Revenue Driven\", \"Efficiency Minded\", \"Innovation Focused\"]",
+    'result_metrics': "[\"3x Lead Generation\", \"40% Sales Increase\", \"60% Cost Reduction\", \"50% Faster Delivery\"]",
+    'key_benefits': "[\"Better targeting,Higher conversion,Real-time analytics\", \"Shorter cycles,Better forecasting,Automated follow-ups\", \"Process optimization,Resource savings,Team productivity\", \"Faster deployment,Better quality,Reduced errors\"]",
+    'persona_icon_1': "📢",
+    'persona_icon_2': "📈",
+    'persona_icon_3': "⚙️",
+    'persona_icon_4': "⚡",
+    'persona_icon_5': "👥",
+    'persona_icon_6': "👤",
+    'footer_text': "Tailored results for every team in your organization",
+
     // Miscellaneous
     'emoji_labels': "[\"🚀\", \"💡\", \"⭐\"]",
     'icon_labels': "[\"Speed\", \"Security\", \"Scale\"]",
@@ -679,18 +736,50 @@ function getElementFormatGuidance(element: string): string {
 
 
 /**
+ * Builds field classification guidance for AI generation
+ */
+function buildFieldClassificationGuidance(elementsMap: any): string {
+  const guidanceLines: string[] = [];
+
+  Object.entries(elementsMap).forEach(([sectionId, section]: [string, any]) => {
+    const { sectionType, allElements } = section;
+    const classifications = classifyFieldsForSection(allElements, sectionType);
+    const strategy = getGenerationStrategy(classifications);
+
+    if (strategy.manualFieldsCount > 0) {
+      const manualFields = strategy.manualPreferred.join(', ');
+      guidanceLines.push(`${sectionType}: Manual fields [${manualFields}] - Use suggested defaults, require user review`);
+    }
+  });
+
+  if (guidanceLines.length === 0) {
+    return `FIELD CLASSIFICATION: All fields are AI-generatable. Focus on high-quality, conversion-optimized content.`;
+  }
+
+  return `FIELD CLASSIFICATION:
+${guidanceLines.join('\n')}
+
+GENERATION PRIORITY:
+1. AI-generate all content fields (headlines, descriptions, quotes, etc.)
+2. Use realistic defaults for manual-preferred fields (ratings, dates, locations)
+3. Ensure manual fields use placeholder data that feels authentic
+4. Flag complex interactive fields for post-generation review`;
+}
+
+/**
  * Main function: Builds complete prompt for full landing page generation
  */
 export function buildFullPrompt(
-  onboardingStore: OnboardingStore, 
+  onboardingStore: OnboardingStore,
   pageStore: PageStore | any
 ): string {
   const elementsMap = getCompleteElementsMap(onboardingStore, pageStore);
-  
+
   const businessContext = buildBusinessContext(onboardingStore, pageStore);
   const brandContext = buildBrandContext(onboardingStore);
   const layoutContext = buildLayoutContext(elementsMap);
   const sectionFlowContext = buildSectionFlowContext(elementsMap, pageStore);
+  const fieldClassificationGuidance = buildFieldClassificationGuidance(elementsMap);
   const outputFormat = buildOutputFormat(elementsMap);
 
   return `You are an expert copywriter specializing in high-converting SaaS landing pages. Generate compelling, conversion-focused copy for a complete landing page.
@@ -703,6 +792,8 @@ ${layoutContext}
 
 ${sectionFlowContext}
 
+${fieldClassificationGuidance}
+
 COPYWRITING REQUIREMENTS:
 - Write copy that flows cohesively from section to section
 - Each section should build on the previous and set up the next
@@ -711,6 +802,7 @@ COPYWRITING REQUIREMENTS:
 - Use layout context to optimize copy for visual presentation
 - Address the specific awareness level and market sophistication
 - Apply the copy intent (pain-led or desire-led) consistently
+- For manual-preferred fields, use realistic placeholder data that users can easily replace
 
 ${outputFormat}
 
