@@ -115,6 +115,8 @@ module.exports = {
   'group-hover/trust-item-3:opacity-100',
   'group-hover/trust-item-4:opacity-100',
   'group-hover/company-values-section:opacity-100',
+  // ObjectionAccordion specific patterns
+  'group-hover/objection-item:opacity-100',
   // ProcessFlowDiagram specific patterns
   'group-hover/process-step-0:opacity-100',
   'group-hover/process-step-1:opacity-100',

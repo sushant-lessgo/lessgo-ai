@@ -22,6 +22,7 @@ interface ObjectionAccordionContent {
   objection_icons?: string;
   response_icon?: string;
   trust_icon?: string;
+  help_text?: string;
 }
 
 // Objection item structure
@@ -62,6 +63,10 @@ const CONTENT_SCHEMA = {
   trust_icon: {
     type: 'string' as const,
     default: '✅'
+  },
+  help_text: {
+    type: 'string' as const,
+    default: 'Still have questions? We\'re here to help.'
   }
 };
 
@@ -96,21 +101,57 @@ const getDefaultIcon = (title: string) => {
   return '❓';
 };
 
+// Helper function to add a new objection
+const addObjection = (titles: string, responses: string): { newTitles: string; newResponses: string } => {
+  const titleList = titles.split('|').map(t => t.trim()).filter(t => t);
+  const responseList = responses.split('|').map(r => r.trim()).filter(r => r);
+
+  // Add new objection with default content
+  titleList.push('New objection or concern');
+  responseList.push('Address this objection with a clear, honest response that builds trust.');
+
+  return {
+    newTitles: titleList.join('|'),
+    newResponses: responseList.join('|')
+  };
+};
+
+// Helper function to remove an objection
+const removeObjection = (titles: string, responses: string, indexToRemove: number): { newTitles: string; newResponses: string } => {
+  const titleList = titles.split('|').map(t => t.trim()).filter(t => t);
+  const responseList = responses.split('|').map(r => r.trim()).filter(r => r);
+
+  // Remove the objection at the specified index
+  if (indexToRemove >= 0 && indexToRemove < titleList.length) {
+    titleList.splice(indexToRemove, 1);
+  }
+  if (indexToRemove >= 0 && indexToRemove < responseList.length) {
+    responseList.splice(indexToRemove, 1);
+  }
+
+  return {
+    newTitles: titleList.join('|'),
+    newResponses: responseList.join('|')
+  };
+};
+
 // Individual Objection Accordion Item
-const ObjectionAccordionItem = React.memo(({ 
-  item, 
-  isOpen, 
-  onToggle, 
-  mode, 
+const ObjectionAccordionItem = React.memo(({
+  item,
+  isOpen,
+  onToggle,
+  mode,
   colorTokens,
   onTitleEdit,
   onResponseEdit,
   onIconEdit,
+  onRemoveObjection,
   responseIcon,
   onResponseIconEdit,
   sectionId,
   backgroundType,
-  sectionBackground
+  sectionBackground,
+  canRemove = true
 }: {
   item: ObjectionItem;
   isOpen: boolean;
@@ -120,15 +161,33 @@ const ObjectionAccordionItem = React.memo(({
   onTitleEdit: (index: number, value: string) => void;
   onResponseEdit: (index: number, value: string) => void;
   onIconEdit: (index: number, value: string) => void;
+  onRemoveObjection?: (index: number) => void;
   responseIcon: string;
   onResponseIconEdit: (value: string) => void;
   sectionId: string;
   backgroundType: any;
   sectionBackground: any;
+  canRemove?: boolean;
 }) => {
   
   return (
-    <div className="border border-gray-200 rounded-lg overflow-hidden mb-4 bg-white shadow-sm">
+    <div className={`relative group/objection-item border border-gray-200 rounded-lg overflow-hidden mb-4 bg-white shadow-sm`}>
+      {/* Delete button - appears on hover in edit mode */}
+      {mode === 'edit' && onRemoveObjection && canRemove && (
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            onRemoveObjection(item.index);
+          }}
+          className="absolute top-4 right-4 z-10 opacity-0 group-hover/objection-item:opacity-100 w-6 h-6 bg-red-500 hover:bg-red-600 rounded-full flex items-center justify-center transition-all duration-200"
+          title="Remove this objection"
+        >
+          <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      )}
+
       {/* Objection Header */}
       <button
         onClick={onToggle}
@@ -136,7 +195,7 @@ const ObjectionAccordionItem = React.memo(({
         aria-expanded={isOpen}
       >
         <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-4 flex-1 pr-4">
+          <div className={`flex items-center space-x-4 flex-1 ${mode === 'edit' && onRemoveObjection && canRemove ? 'pr-12' : 'pr-4'}`}>
             {/* Objection Icon */}
             <div className="flex-shrink-0 w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center text-red-600">
               <IconEditableText
@@ -151,11 +210,11 @@ const ObjectionAccordionItem = React.memo(({
                 elementKey={`objection_icon_${item.index}`}
               />
             </div>
-            
+
             {/* Objection Title */}
             <div className="flex-1">
               {mode !== 'preview' ? (
-                <div 
+                <div
                   contentEditable
                   suppressContentEditableWarning
                   onBlur={(e) => onTitleEdit(item.index, e.currentTarget.textContent || '')}
@@ -165,7 +224,7 @@ const ObjectionAccordionItem = React.memo(({
                   {item.title}
                 </div>
               ) : (
-                <h3 
+                <h3
                   className="font-semibold text-gray-900"
                 >
                   {item.title}
@@ -173,13 +232,13 @@ const ObjectionAccordionItem = React.memo(({
               )}
             </div>
           </div>
-          
+
           {/* Expand/Collapse Icon */}
           <div className="flex-shrink-0">
-            <svg 
+            <svg
               className={`w-5 h-5 text-gray-500 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}
-              fill="none" 
-              stroke="currentColor" 
+              fill="none"
+              stroke="currentColor"
               viewBox="0 0 24 24"
             >
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
@@ -285,6 +344,20 @@ export default function ObjectionAccordion(props: LayoutComponentProps) {
     handleContentUpdate('objection_icons', icons.join('|'));
   };
 
+  // Handle adding a new objection
+  const handleAddObjection = () => {
+    const { newTitles, newResponses } = addObjection(blockContent.objection_titles, blockContent.objection_responses);
+    handleContentUpdate('objection_titles', newTitles);
+    handleContentUpdate('objection_responses', newResponses);
+  };
+
+  // Handle removing an objection
+  const handleRemoveObjection = (indexToRemove: number) => {
+    const { newTitles, newResponses } = removeObjection(blockContent.objection_titles, blockContent.objection_responses, indexToRemove);
+    handleContentUpdate('objection_titles', newTitles);
+    handleContentUpdate('objection_responses', newResponses);
+  };
+
   // Toggle accordion item
   const toggleItem = (itemId: string) => {
     const newOpenItems = new Set(openItems);
@@ -358,32 +431,63 @@ export default function ObjectionAccordion(props: LayoutComponentProps) {
               onTitleEdit={handleTitleEdit}
               onResponseEdit={handleResponseEdit}
               onIconEdit={handleIconEdit}
+              onRemoveObjection={handleRemoveObjection}
               responseIcon={blockContent.response_icon || '✅'}
               onResponseIconEdit={(value) => handleContentUpdate('response_icon', value)}
               sectionId={sectionId}
               backgroundType={backgroundType}
               sectionBackground={sectionBackground}
+              canRemove={objectionItems.length > 1}
             />
           ))}
         </div>
 
-        {/* Trust Reinforcement */}
-        <div className="mt-12 text-center">
-          <div className="inline-flex items-center space-x-2 px-4 py-2 bg-blue-50 rounded-full text-blue-700 text-sm">
-            <IconEditableText
-              mode={mode}
-              value={blockContent.trust_icon || '✅'}
-              onEdit={(value) => handleContentUpdate('trust_icon', value)}
-              backgroundType="custom"
-              colorTokens={{...colorTokens, primaryText: 'text-blue-700'}}
-              iconSize="sm"
-              className="text-base"
-              sectionId={sectionId}
-              elementKey="trust_icon"
-            />
-            <span>Still have questions? We're here to help.</span>
+        {/* Add Objection Button - only show in edit mode and if under max limit */}
+        {mode === 'edit' && objectionItems.length < 6 && (
+          <div className="mt-8 text-center">
+            <button
+              onClick={handleAddObjection}
+              className="flex items-center space-x-2 mx-auto px-4 py-3 bg-blue-50 hover:bg-blue-100 border-2 border-blue-200 hover:border-blue-300 rounded-xl transition-all duration-200 group"
+            >
+              <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+              </svg>
+              <span className="text-blue-700 font-medium">Add Objection</span>
+            </button>
           </div>
-        </div>
+        )}
+
+        {/* Trust Reinforcement */}
+        {(blockContent.help_text || mode === 'edit') && (
+          <div className="mt-12 text-center">
+            <div className="inline-flex items-center space-x-2 px-4 py-2 bg-blue-50 rounded-full text-blue-700 text-sm">
+              <IconEditableText
+                mode={mode}
+                value={blockContent.trust_icon || '✅'}
+                onEdit={(value) => handleContentUpdate('trust_icon', value)}
+                backgroundType="custom"
+                colorTokens={{...colorTokens, primaryText: 'text-blue-700'}}
+                iconSize="sm"
+                className="text-base"
+                sectionId={sectionId}
+                elementKey="trust_icon"
+              />
+              <EditableAdaptiveText
+                mode={mode}
+                value={blockContent.help_text || ''}
+                onEdit={(value) => handleContentUpdate('help_text', value)}
+                backgroundType="custom"
+                colorTokens={{...colorTokens, primaryText: 'text-blue-700'}}
+                variant="body"
+                className="text-sm"
+                placeholder="Still have questions? We're here to help."
+                sectionId={sectionId}
+                elementKey="help_text"
+                sectionBackground="bg-blue-50"
+              />
+            </div>
+          </div>
+        )}
 
       </div>
     </LayoutSection>
