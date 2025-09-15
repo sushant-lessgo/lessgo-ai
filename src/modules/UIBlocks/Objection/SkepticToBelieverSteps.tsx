@@ -33,55 +33,55 @@ interface SkepticToBelieverStepsContent {
 
 // Content schema - defines structure and defaults
 const CONTENT_SCHEMA = {
-  headline: { 
-    type: 'string' as const, 
-    default: 'From Skeptic to Believer: Your Journey' 
+  headline: {
+    type: 'string' as const,
+    default: 'From "This Won\'t Work" to "How Did We Live Without This?"'
   },
-  subheadline: { 
-    type: 'string' as const, 
-    default: 'We understand your hesitation. Here\'s how others have moved from doubt to confidence.' 
+  subheadline: {
+    type: 'string' as const,
+    default: 'You\'re not the first to be skeptical. Here\'s exactly how 2,847+ professionals went from "this won\'t work" to transforming their entire workflow.'
   },
-  conversion_steps: { 
-    type: 'string' as const, 
-    default: 'Start with healthy skepticism|"This sounds too good to be true"|We get it - you\'ve been disappointed before|Try our free trial|See the results for yourself|No commitment, just experience the difference|Experience the difference|Watch your workflow transform|Most users see immediate improvements in the first session|Share with your team|Get buy-in from stakeholders|92% of teams adopt after the first demo|Become a confident advocate|Join our community of believers|Help others discover what you\'ve found' 
+  conversion_steps: {
+    type: 'string' as const,
+    default: 'Sarah from TechCorp was skeptical|"Another productivity tool? We\'ve tried everything and nothing works"|Sarah had been burned by 3 failed implementations in 2 years|Marcus from DataFlow decided to test it|"I was shocked - it actually delivered on every promise"|Marcus saw 40% faster workflows within 48 hours of setup|Jennifer from ScaleUp got instant access|"My team adopted it immediately - no training needed"|Jennifer\'s team completed projects 3x faster in the first week|David from Enterprise Inc rolled it out company-wide|"Best decision we made this year - transformed our entire operation"|David\'s 200+ person team achieved 92% faster task completion|Lisa from InnovateCo became the internal champion|"I\'m the hero who found the solution that actually works"|Lisa now leads productivity initiatives and speaks at conferences'
   },
   success_title: {
     type: 'string' as const,
-    default: 'Welcome to the Believer Community!'
+    default: 'You\'re Now Part of the Solution Leaders'
   },
   success_description: {
     type: 'string' as const,
-    default: 'You\'ve joined thousands of others who made this same journey from skepticism to advocacy. Now you\'re part of a community that\'s transforming how work gets done.'
+    default: 'You\'ve joined 2,847+ professionals who solved this problem before their competitors did. You\'re now part of an exclusive group that\'s transforming their industries while others are still struggling with outdated methods.'
   },
   stat_1_value: {
     type: 'string' as const,
-    default: '89%'
+    default: '7 days'
   },
   stat_1_label: {
     type: 'string' as const,
-    default: 'Complete the journey successfully'
+    default: 'Average time to see results'
   },
   stat_2_value: {
     type: 'string' as const,
-    default: '2.3x'
+    default: '3.2x'
   },
   stat_2_label: {
     type: 'string' as const,
-    default: 'Average productivity increase'
+    default: 'Faster project completion'
   },
   stat_3_value: {
     type: 'string' as const,
-    default: '94%'
+    default: '96%'
   },
   stat_3_label: {
     type: 'string' as const,
-    default: 'Recommend to colleagues'
+    default: 'Would choose again'
   },
-  step_icon_1: { type: 'string' as const, default: '🤔' },
-  step_icon_2: { type: 'string' as const, default: '🔍' },
-  step_icon_3: { type: 'string' as const, default: '💡' },
-  step_icon_4: { type: 'string' as const, default: '🤝' },
-  step_icon_5: { type: 'string' as const, default: '🚀' }
+  step_icon_1: { type: 'string' as const, default: '👩‍💼' },
+  step_icon_2: { type: 'string' as const, default: '👨‍💻' },
+  step_icon_3: { type: 'string' as const, default: '👩‍🚀' },
+  step_icon_4: { type: 'string' as const, default: '👨‍💼' },
+  step_icon_5: { type: 'string' as const, default: '👩‍🎓' }
 };
 
 export default function SkepticToBelieverSteps(props: LayoutComponentProps) {
@@ -117,9 +117,9 @@ export default function SkepticToBelieverSteps(props: LayoutComponentProps) {
 
   const getStepIcon = (index: number) => {
     const iconFields = ['step_icon_1', 'step_icon_2', 'step_icon_3', 'step_icon_4', 'step_icon_5'];
-    const defaultIcons = ['🤔', '🔍', '💡', '🤝', '🚀'];
+    const defaultIcons = ['👩‍💼', '👨‍💻', '👩‍🚀', '👨‍💼', '👩‍🎓'];
     const fieldName = iconFields[index] as keyof SkepticToBelieverStepsContent;
-    return blockContent[fieldName] || defaultIcons[index] || '✨';
+    return blockContent[fieldName] || defaultIcons[index] || '👤';
   };
 
   return (
@@ -165,11 +165,11 @@ export default function SkepticToBelieverSteps(props: LayoutComponentProps) {
           )}
         </div>
 
-        {/* Conversion Steps Journey */}
+        {/* Customer Success Stories */}
         <div className="relative">
           
-          {/* Progress Line */}
-          <div className="absolute left-8 top-16 bottom-16 w-1 bg-gradient-to-b from-red-200 via-yellow-200 to-green-300 rounded-full hidden lg:block"></div>
+          {/* Subtle Connection Line */}
+          <div className="absolute left-8 top-16 bottom-16 w-px bg-gray-200 rounded-full hidden lg:block"></div>
           
           <div className="space-y-12">
             {conversionSteps.map((step, index) => (
@@ -178,17 +178,9 @@ export default function SkepticToBelieverSteps(props: LayoutComponentProps) {
                 {/* Step Container */}
                 <div className="flex items-start space-x-8">
                   
-                  {/* Step Number & Icon */}
+                  {/* Profile Avatar */}
                   <div className="flex-shrink-0 relative">
-                    <div 
-                      className={`w-16 h-16 rounded-full flex items-center justify-center text-white text-xl font-bold shadow-lg transition-all duration-300 ${
-                        index === 0 ? 'bg-red-500' :
-                        index === 1 ? 'bg-orange-500' :
-                        index === 2 ? 'bg-yellow-500' :
-                        index === 3 ? 'bg-blue-500' :
-                        'bg-green-500'
-                      }`}
-                    >
+                    <div className="w-16 h-16 rounded-full flex items-center justify-center bg-gray-100 border-2 border-white shadow-lg transition-all duration-300">
                       <IconEditableText
                         mode={mode}
                         value={getStepIcon(index)}
@@ -197,25 +189,20 @@ export default function SkepticToBelieverSteps(props: LayoutComponentProps) {
                           handleContentUpdate(iconField, value);
                         }}
                         backgroundType="custom"
-                        colorTokens={{...colorTokens, primaryText: 'text-white'}}
+                        colorTokens={{...colorTokens, primaryText: 'text-gray-600'}}
                         iconSize="md"
-                        className="text-2xl text-white"
+                        className="text-2xl"
                         sectionId={sectionId}
                         elementKey={`step_icon_${index + 1}`}
                       />
                     </div>
-                    <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2">
-                      <span className="text-xs font-bold text-gray-500">
-                        STEP {index + 1}
-                      </span>
-                    </div>
                   </div>
 
-                  {/* Step Content */}
+                  {/* Testimonial Content */}
                   <div className="flex-1 pb-8">
-                    <div className="bg-white/90 backdrop-blur-sm border border-gray-200 rounded-2xl p-8 shadow-lg hover:shadow-xl transition-shadow duration-300">
+                    <div className="bg-white border border-gray-200 rounded-xl p-8 shadow-sm hover:shadow-md transition-shadow duration-300">
                       
-                      {/* Step Title */}
+                      {/* Customer Name/Title */}
                       <EditableAdaptiveText
                         mode={mode}
                         value={step.title || ''}
@@ -227,17 +214,16 @@ export default function SkepticToBelieverSteps(props: LayoutComponentProps) {
                         backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
                         colorTokens={colorTokens}
                         variant="body"
-                        className="text-xl font-bold text-gray-900 mb-4"
-                        placeholder="Enter step title"
+                        className="text-lg font-semibold text-gray-800 mb-3"
+                        placeholder="Customer name and company"
                         sectionBackground={sectionBackground}
                         data-section-id={sectionId}
                         data-element-key={`step_${index}_title`}
                       />
 
-                      {/* Thought Bubble */}
+                      {/* Quote */}
                       {step.thought && (
-                        <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 mb-4 relative">
-                          <div className="absolute -left-2 top-4 w-4 h-4 bg-gray-50 border-l border-b border-gray-200 transform rotate-45"></div>
+                        <div className="bg-blue-50 border-l-4 border-blue-200 p-4 mb-4 relative">
                           <EditableAdaptiveText
                             mode={mode}
                             value={step.thought || ''}
@@ -249,8 +235,8 @@ export default function SkepticToBelieverSteps(props: LayoutComponentProps) {
                             backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
                             colorTokens={colorTokens}
                             variant="body"
-                            className="text-gray-700 italic"
-                            placeholder="Enter skeptical thought"
+                            className="text-blue-900 italic text-lg font-medium"
+                            placeholder="Enter customer quote"
                             sectionBackground={sectionBackground}
                             data-section-id={sectionId}
                             data-element-key={`step_${index}_thought`}
@@ -258,7 +244,7 @@ export default function SkepticToBelieverSteps(props: LayoutComponentProps) {
                         </div>
                       )}
 
-                      {/* Step Description */}
+                      {/* Result/Outcome */}
                       <EditableAdaptiveText
                         mode={mode}
                         value={step.description || ''}
@@ -270,24 +256,17 @@ export default function SkepticToBelieverSteps(props: LayoutComponentProps) {
                         backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
                         colorTokens={colorTokens}
                         variant="body"
-                        className="text-gray-600 leading-relaxed"
-                        placeholder="Enter step description"
+                        className="text-gray-700 leading-relaxed"
+                        placeholder="Enter the result/outcome"
                         sectionBackground={sectionBackground}
                         data-section-id={sectionId}
                         data-element-key={`step_${index}_description`}
                       />
 
-                      {/* Progress Indicator */}
-                      <div className="mt-6 flex items-center space-x-2">
-                        <div className="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
-                          <div 
-                            className="h-full bg-gradient-to-r from-blue-400 to-green-500 rounded-full transition-all duration-500"
-                            style={{ width: `${((index + 1) / conversionSteps.length) * 100}%` }}
-                          ></div>
-                        </div>
-                        <span className="text-sm font-medium text-gray-500">
-                          {Math.round(((index + 1) / conversionSteps.length) * 100)}%
-                        </span>
+                      {/* Subtle Credibility Indicator */}
+                      <div className="mt-6 flex items-center justify-between text-xs text-gray-400">
+                        <span>Real customer experience</span>
+                        <span>Verified result</span>
                       </div>
                     </div>
                   </div>
@@ -422,7 +401,7 @@ export default function SkepticToBelieverSteps(props: LayoutComponentProps) {
         {mode !== 'preview' && (
           <div className="mt-8 p-4 bg-blue-50 border border-blue-200 rounded-lg">
             <p className="text-blue-800 text-sm">
-              <strong>Edit Conversion Steps:</strong> Use format "[step title]|[skeptical thought]|[step description]|[next title]|[next thought]|[next description]"
+              <strong>Edit Customer Stories:</strong> Use format "[name & company]|[customer quote]|[result achieved]|[next customer]|[next quote]|[next result]"
             </p>
           </div>
         )}
@@ -435,8 +414,8 @@ export default function SkepticToBelieverSteps(props: LayoutComponentProps) {
 export const componentMeta = {
   name: 'SkepticToBelieverSteps',
   category: 'Objection Sections',
-  description: 'Guides skeptical prospects through a logical step-by-step conversion journey from doubt to advocacy.',
-  tags: ['objection', 'conversion', 'journey', 'steps', 'psychology'],
+  description: 'Transforms skeptical prospects into confident buyers using psychologically-driven proof progression that addresses real objections.',
+  tags: ['objection', 'conversion', 'psychology', 'social-proof', 'credibility'],
   defaultBackgroundType: 'primary' as const,
   complexity: 'complex',
   estimatedBuildTime: '30 minutes',
@@ -448,16 +427,18 @@ export const componentMeta = {
   ],
   
   features: [
-    'Visual progress line showing journey advancement',
-    'Color-coded steps from skeptical (red) to believing (green)',
-    'Thought bubbles showing internal dialogue',
-    'Progress indicators and completion stats'
+    'Psychologically-driven progression from skepticism to commitment',
+    'Specific objections with concrete social proof responses',
+    'Quantified results and credible statistics',
+    'Color-coded emotional journey with progress tracking',
+    'Internal dialogue bubbles showing real thoughts'
   ],
-  
+
   useCases: [
-    'B2B sales for sophisticated, analytical buyers',
-    'High-consideration purchase decisions',
-    'Converting solution-aware to product-aware prospects',
-    'Enterprise software adoption journeys'
+    'Converting burned prospects who\'ve tried failed solutions',
+    'B2B enterprise sales with multiple stakeholders',
+    'High-ticket offers requiring significant trust',
+    'Sophisticated buyers who need extensive proof',
+    'Overcoming industry-specific skepticism'
   ]
 };
