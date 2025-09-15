@@ -117,6 +117,13 @@ module.exports = {
   'group-hover/company-values-section:opacity-100',
   // ObjectionAccordion specific patterns
   'group-hover/objection-item:opacity-100',
+  // VisualObjectionTiles specific patterns
+  'group-hover/objection-tile-0:opacity-100',
+  'group-hover/objection-tile-1:opacity-100',
+  'group-hover/objection-tile-2:opacity-100',
+  'group-hover/objection-tile-3:opacity-100',
+  'group-hover/objection-tile-4:opacity-100',
+  'group-hover/objection-tile-5:opacity-100',
   // ProcessFlowDiagram specific patterns
   'group-hover/process-step-0:opacity-100',
   'group-hover/process-step-1:opacity-100',
