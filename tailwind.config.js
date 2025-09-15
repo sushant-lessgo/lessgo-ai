@@ -230,6 +230,11 @@ module.exports = {
   'group-hover/stat-card-3:opacity-100',
   'group-hover/stat-card-4:opacity-100',
   'group-hover/stat-card-5:opacity-100',
+  // BeforeAfterQuote transformation card patterns
+  'group-hover/transformation-card-0:opacity-100',
+  'group-hover/transformation-card-1:opacity-100',
+  'group-hover/transformation-card-2:opacity-100',
+  'group-hover/transformation-card-3:opacity-100',
   
   // ✅ Gap utilities for spacing
   'gap-1',

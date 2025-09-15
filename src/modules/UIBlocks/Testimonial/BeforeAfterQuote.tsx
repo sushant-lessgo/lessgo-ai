@@ -14,11 +14,11 @@ import {
   StarRating 
 } from '@/components/layout/ComponentRegistry';
 import { LayoutComponentProps } from '@/types/storeTypes';
-import { 
-  parseCustomerAvatarData, 
+import {
+  parseCustomerAvatarData,
   updateAvatarUrls,
   parsePipeData,
-  updateListData 
+  updateListData
 } from '@/utils/dataParsingUtils';
 
 interface BeforeAfterQuoteContent {
@@ -126,8 +126,8 @@ export default function BeforeAfterQuote(props: LayoutComponentProps) {
 
   // Removed parsing for companies, timeframes, metrics - no longer needed
 
-  // Limit to 2 transformations for simplicity
-  const transformations = beforeSituations.slice(0, 2).map((before, index) => ({
+  // Support up to 4 transformations with dynamic add/delete
+  const transformations = beforeSituations.slice(0, 4).map((before, index) => ({
     before,
     after: afterOutcomes[index] || '',
     quote: testimonialQuotes[index] || '',
@@ -175,6 +175,68 @@ export default function BeforeAfterQuote(props: LayoutComponentProps) {
     handleContentUpdate('avatar_urls', updatedAvatarUrls);
   };
 
+  // Helper function to add a new transformation
+  const addTransformation = () => {
+    const befores = parsePipeData(blockContent.before_situations);
+    const afters = parsePipeData(blockContent.after_outcomes);
+    const quotes = parsePipeData(blockContent.testimonial_quotes);
+    const names = parsePipeData(blockContent.customer_names);
+    const titles = parsePipeData(blockContent.customer_titles);
+
+    // Add new transformation with default content
+    befores.push('Struggling with a significant challenge');
+    afters.push('Achieved remarkable results and transformation');
+    quotes.push('This solution completely changed our approach and delivered incredible outcomes.');
+    names.push('New Customer');
+    titles.push('Role Title');
+
+    // Update all fields
+    handleContentUpdate('before_situations', befores.join('|'));
+    handleContentUpdate('after_outcomes', afters.join('|'));
+    handleContentUpdate('testimonial_quotes', quotes.join('|'));
+    handleContentUpdate('customer_names', names.join('|'));
+    handleContentUpdate('customer_titles', titles.join('|'));
+  };
+
+  // Helper function to remove a transformation
+  const removeTransformation = (indexToRemove: number) => {
+    const befores = parsePipeData(blockContent.before_situations);
+    const afters = parsePipeData(blockContent.after_outcomes);
+    const quotes = parsePipeData(blockContent.testimonial_quotes);
+    const names = parsePipeData(blockContent.customer_names);
+    const titles = parsePipeData(blockContent.customer_titles);
+
+    // Get the name before removing for avatar cleanup
+    const removedName = names[indexToRemove];
+
+    // Remove the transformation at the specified index
+    if (indexToRemove >= 0 && indexToRemove < befores.length) {
+      befores.splice(indexToRemove, 1);
+      afters.splice(indexToRemove, 1);
+      quotes.splice(indexToRemove, 1);
+      names.splice(indexToRemove, 1);
+      titles.splice(indexToRemove, 1);
+
+      // Clear avatar URL for removed customer if it exists
+      if (removedName && blockContent.avatar_urls) {
+        try {
+          const avatarUrls = JSON.parse(blockContent.avatar_urls);
+          delete avatarUrls[removedName];
+          handleContentUpdate('avatar_urls', JSON.stringify(avatarUrls));
+        } catch (e) {
+          // Invalid JSON, ignore
+        }
+      }
+
+      // Update all fields
+      handleContentUpdate('before_situations', befores.join('|'));
+      handleContentUpdate('after_outcomes', afters.join('|'));
+      handleContentUpdate('testimonial_quotes', quotes.join('|'));
+      handleContentUpdate('customer_names', names.join('|'));
+      handleContentUpdate('customer_titles', titles.join('|'));
+    }
+  };
+
   // Removed trust items - no longer needed
 
   const mutedTextColor = dynamicTextColors?.muted || colorTokens.textMuted;
@@ -188,14 +250,32 @@ export default function BeforeAfterQuote(props: LayoutComponentProps) {
     ? 'hover:bg-white/20 hover:border-white/30'
     : 'hover:border-blue-300 hover:shadow-lg';
 
-  const TransformationCard = React.memo(({ transformation, index }: {
+  const TransformationCard = React.memo(({ transformation, index, canRemove, onRemove }: {
     transformation: typeof transformations[0];
     index: number;
+    canRemove: boolean;
+    onRemove: () => void;
   }) => {
     const customerData = customerAvatarData.find(c => c.name === transformation.customerName);
     
     return (
-      <div className={`group ${cardBackground} ${cardHover} rounded-2xl shadow-xl border overflow-hidden transition-all duration-300`}>
+      <div className={`group/transformation-card-${index} relative ${cardBackground} ${cardHover} rounded-2xl shadow-xl border overflow-hidden transition-all duration-300`}>
+
+        {/* Delete button - only show in edit mode and if can remove */}
+        {mode === 'edit' && canRemove && (
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onRemove();
+            }}
+            className={`absolute top-4 right-4 opacity-0 group-hover/transformation-card-${index}:opacity-100 text-red-500 hover:text-red-700 transition-opacity duration-200 z-10`}
+            title="Remove this transformation"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        )}
         
         {/* Before/After Comparison */}
         <div className="grid md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-gray-200">
@@ -375,15 +455,32 @@ export default function BeforeAfterQuote(props: LayoutComponentProps) {
           )}
         </div>
 
-        <div className="grid lg:grid-cols-2 gap-8 mb-16">
+        <div className="grid lg:grid-cols-2 gap-8 mb-8">
           {transformations.map((transformation, index) => (
             <TransformationCard
               key={index}
               transformation={transformation}
               index={index}
+              canRemove={transformations.length > 1}
+              onRemove={() => removeTransformation(index)}
             />
           ))}
         </div>
+
+        {/* Add Transformation Button - only show in edit mode and if under max limit */}
+        {mode === 'edit' && transformations.length < 4 && (
+          <div className="mb-12 text-center">
+            <button
+              onClick={addTransformation}
+              className="inline-flex items-center space-x-2 px-6 py-3 bg-blue-50 hover:bg-blue-100 border-2 border-blue-200 hover:border-blue-300 rounded-xl transition-all duration-200 group"
+            >
+              <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+              </svg>
+              <span className="text-blue-700 font-medium">Add Transformation</span>
+            </button>
+          </div>
+        )}
 
         {/* CTA Button */}
         {(blockContent.cta_text || mode === 'edit') && (
@@ -406,8 +503,8 @@ export default function BeforeAfterQuote(props: LayoutComponentProps) {
 export const componentMeta = {
   name: 'BeforeAfterQuote',
   category: 'Testimonial',
-  description: 'Simplified before/after transformation testimonials. Clean, focused design with only 2 transformation cards for reduced cognitive load.',
-  tags: ['testimonial', 'before-after', 'transformation', 'simplified', 'wysiwyg', 'focused'],
+  description: 'Dynamic before/after transformation testimonials with add/delete functionality. Support for 1-4 transformation cards with clean, focused design.',
+  tags: ['testimonial', 'before-after', 'transformation', 'dynamic', 'wysiwyg', 'focused', 'editable'],
   defaultBackgroundType: 'neutral' as const,
   complexity: 'medium',
   estimatedBuildTime: '25 minutes',
@@ -415,11 +512,11 @@ export const componentMeta = {
   contentFields: [
     { key: 'headline', label: 'Main Headline', type: 'text', required: true },
     { key: 'subheadline', label: 'Subheadline', type: 'textarea', required: false },
-    { key: 'before_situations', label: 'Before Situations (2 items, pipe separated)', type: 'textarea', required: true },
-    { key: 'after_outcomes', label: 'After Outcomes (2 items, pipe separated)', type: 'textarea', required: true },
-    { key: 'testimonial_quotes', label: 'Testimonial Quotes (2 items, pipe separated)', type: 'textarea', required: true },
-    { key: 'customer_names', label: 'Customer Names (2 items, pipe separated)', type: 'text', required: true },
-    { key: 'customer_titles', label: 'Customer Titles (2 items, pipe separated)', type: 'text', required: true },
+    { key: 'before_situations', label: 'Before Situations (1-4 items, pipe separated)', type: 'textarea', required: true },
+    { key: 'after_outcomes', label: 'After Outcomes (1-4 items, pipe separated)', type: 'textarea', required: true },
+    { key: 'testimonial_quotes', label: 'Testimonial Quotes (1-4 items, pipe separated)', type: 'textarea', required: true },
+    { key: 'customer_names', label: 'Customer Names (1-4 items, pipe separated)', type: 'text', required: true },
+    { key: 'customer_titles', label: 'Customer Titles (1-4 items, pipe separated)', type: 'text', required: true },
     { key: 'cta_text', label: 'CTA Button Text', type: 'text', required: false },
     { key: 'avatar_urls', label: 'Customer Avatar URLs (JSON format)', type: 'text', required: false }
   ],
@@ -439,21 +536,22 @@ export const componentMeta = {
   },
   
   features: [
-    'Simplified design with only 2 transformation cards',
-    'Reduced from 40+ to ~13 editable fields',
-    'Clean WYSIWYG experience without overwhelming options',
+    'Dynamic card management with add/delete functionality',
+    'Support for 1-4 transformation cards',
+    'Clean WYSIWYG experience with intuitive controls',
     'Focus on core transformation story',
     'Advanced avatar system with photo upload',
     'Inline editing of all essential elements',
     'Adaptive styling for any background',
-    'No distracting stats or metrics sections'
+    'Hover-to-delete buttons following design patterns',
+    'Automatic data cleanup on card removal'
   ],
   
   useCases: [
-    'Simple transformation testimonials',
-    'Clean before/after comparisons',
-    'Focused customer success stories',
-    'Minimalist approach to social proof',
-    'Quick-to-scan transformation results'
+    'Dynamic transformation testimonials',
+    'Scalable before/after comparisons',
+    'Customer success story collections',
+    'Flexible social proof sections',
+    'Adaptable transformation showcases'
   ]
 };
