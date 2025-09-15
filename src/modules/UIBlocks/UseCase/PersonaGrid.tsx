@@ -71,13 +71,47 @@ const CONTENT_SCHEMA = {
 const parsePersonaData = (names: string, descriptions: string): Persona[] => {
   const nameList = parsePipeData(names);
   const descriptionList = parsePipeData(descriptions);
-  
+
   return nameList.map((name, index) => ({
     id: `persona-${index}`,
     index,
     name: name.trim(),
     description: descriptionList[index] || 'Persona description not provided.'
   }));
+};
+
+// Helper function to add a new persona
+const addPersona = (names: string, descriptions: string): { newNames: string; newDescriptions: string } => {
+  const nameList = names.split('|').map(n => n.trim()).filter(n => n);
+  const descriptionList = descriptions.split('|').map(d => d.trim()).filter(d => d);
+
+  // Add new persona with default content
+  nameList.push('New Team Member');
+  descriptionList.push('Describe how this persona benefits from your solution.');
+
+  return {
+    newNames: nameList.join('|'),
+    newDescriptions: descriptionList.join('|')
+  };
+};
+
+// Helper function to remove a persona
+const removePersona = (names: string, descriptions: string, indexToRemove: number): { newNames: string; newDescriptions: string } => {
+  const nameList = names.split('|').map(n => n.trim()).filter(n => n);
+  const descriptionList = descriptions.split('|').map(d => d.trim()).filter(d => d);
+
+  // Remove the persona at the specified index
+  if (indexToRemove >= 0 && indexToRemove < nameList.length) {
+    nameList.splice(indexToRemove, 1);
+  }
+  if (indexToRemove >= 0 && indexToRemove < descriptionList.length) {
+    descriptionList.splice(indexToRemove, 1);
+  }
+
+  return {
+    newNames: nameList.join('|'),
+    newDescriptions: descriptionList.join('|')
+  };
 };
 
 // Persona Avatar Component
@@ -177,9 +211,9 @@ const PersonaAvatar = React.memo(({
 PersonaAvatar.displayName = 'PersonaAvatar';
 
 // Individual Persona Card
-const PersonaCard = React.memo(({ 
-  persona, 
-  mode, 
+const PersonaCard = React.memo(({
+  persona,
+  mode,
   colorTokens,
   backgroundType,
   sectionBackground,
@@ -188,7 +222,10 @@ const PersonaCard = React.memo(({
   iconOverride,
   onNameEdit,
   onDescriptionEdit,
-  onIconEdit
+  onIconEdit,
+  onRemovePersona,
+  onBadgeEdit,
+  canRemove = true
 }: {
   persona: Persona;
   mode: 'edit' | 'preview';
@@ -201,10 +238,13 @@ const PersonaCard = React.memo(({
   onNameEdit: (index: number, value: string) => void;
   onDescriptionEdit: (index: number, value: string) => void;
   onIconEdit: (index: number, value: string) => void;
+  onRemovePersona?: (index: number) => void;
+  onBadgeEdit: (value: string) => void;
+  canRemove?: boolean;
 }) => {
   
   return (
-    <div className="group bg-white p-6 rounded-xl border border-gray-200 hover:border-blue-300 hover:shadow-lg transition-all duration-300 text-center">
+    <div className="group/persona-card relative bg-white p-6 rounded-xl border border-gray-200 hover:border-blue-300 hover:shadow-lg transition-all duration-300 text-center">
       
       {/* Persona Avatar */}
       <PersonaAvatar 
@@ -252,12 +292,40 @@ const PersonaCard = React.memo(({
       </div>
       
       {/* Persona Badge */}
-      <div className="inline-flex items-center px-3 py-1 bg-gray-100 rounded-full text-xs font-medium text-gray-700">
-        <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+      <div className="inline-flex items-center px-3 py-1 bg-gray-100 rounded-full text-xs font-medium">
+        <svg className="w-3 h-3 mr-1 text-gray-700" fill="currentColor" viewBox="0 0 20 20">
           <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
         </svg>
-        {badgeText}
+        <EditableAdaptiveText
+          mode={mode}
+          value={badgeText}
+          onEdit={onBadgeEdit}
+          backgroundType="neutral"
+          colorTokens={{ ...colorTokens, textPrimary: 'text-gray-700' }}
+          variant="body"
+          className="text-xs font-medium text-gray-700"
+          placeholder="Target User"
+          sectionId={sectionId}
+          elementKey="badge_text"
+          sectionBackground="bg-gray-100"
+        />
       </div>
+
+      {/* Delete button - only show in edit mode and if can remove */}
+      {mode !== 'preview' && onRemovePersona && canRemove && (
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            onRemovePersona(persona.index);
+          }}
+          className="absolute top-2 right-2 opacity-0 group-hover/persona-card:opacity-100 w-6 h-6 bg-red-500 hover:bg-red-600 rounded-full flex items-center justify-center transition-all duration-200"
+          title="Remove this persona"
+        >
+          <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      )}
     </div>
   );
 });
@@ -312,6 +380,31 @@ export default function PersonaGrid(props: LayoutComponentProps) {
     handleContentUpdate(iconField, value);
   };
 
+  // Handle adding a new persona
+  const handleAddPersona = () => {
+    const { newNames, newDescriptions } = addPersona(blockContent.persona_names, blockContent.persona_descriptions);
+    handleContentUpdate('persona_names', newNames);
+    handleContentUpdate('persona_descriptions', newDescriptions);
+  };
+
+  // Handle removing a persona
+  const handleRemovePersona = (indexToRemove: number) => {
+    const { newNames, newDescriptions } = removePersona(blockContent.persona_names, blockContent.persona_descriptions, indexToRemove);
+    handleContentUpdate('persona_names', newNames);
+    handleContentUpdate('persona_descriptions', newDescriptions);
+
+    // Also clear the corresponding icon if it exists
+    const iconField = `persona_icon_${indexToRemove + 1}` as keyof PersonaGridContent;
+    if (blockContent[iconField]) {
+      handleContentUpdate(iconField, '');
+    }
+  };
+
+  // Handle badge text edit
+  const handleBadgeEdit = (value: string) => {
+    handleContentUpdate('badge_text', value);
+  };
+
   return (
     <LayoutSection
       sectionId={sectionId}
@@ -361,9 +454,27 @@ export default function PersonaGrid(props: LayoutComponentProps) {
               onNameEdit={handleNameEdit}
               onDescriptionEdit={handleDescriptionEdit}
               onIconEdit={handleIconEdit}
+              onRemovePersona={handleRemovePersona}
+              onBadgeEdit={handleBadgeEdit}
+              canRemove={personas.length > 1}
             />
           ))}
         </div>
+
+        {/* Add Persona Button - only show in edit mode and if under max limit */}
+        {mode !== 'preview' && personas.length < 6 && (
+          <div className="mt-8 text-center">
+            <button
+              onClick={handleAddPersona}
+              className="flex items-center space-x-2 mx-auto px-4 py-3 bg-blue-50 hover:bg-blue-100 border-2 border-blue-200 hover:border-blue-300 rounded-xl transition-all duration-200 group"
+            >
+              <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+              </svg>
+              <span className="text-blue-700 font-medium">Add Persona</span>
+            </button>
+          </div>
+        )}
 
         {/* Universal Appeal */}
         {(blockContent.footer_text || mode === 'edit') && (

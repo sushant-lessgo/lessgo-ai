@@ -36,6 +36,7 @@ module.exports = {
   'group-hover/stat-item:opacity-100',
   'group-hover/feature-item:opacity-100',
   'group-hover/trust-footer-item:opacity-100',
+  'group-hover/persona-card:opacity-100',
   // FeatureMatrix specific patterns
   'group-hover/tier-header-0:opacity-100',
   'group-hover/tier-header-1:opacity-100',
