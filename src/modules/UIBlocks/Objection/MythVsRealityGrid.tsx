@@ -62,16 +62,55 @@ export default function MythVsRealityGrid(props: LayoutComponentProps) {
   const bodyStyle = getTypographyStyle('body');
 
   // Parse myth/reality pairs from pipe-separated string
-  const mythRealityPairs = blockContent.myth_reality_pairs 
-    ? blockContent.myth_reality_pairs.split('|').reduce((pairs, item, index) => {
-        if (index % 2 === 0) {
-          pairs.push({ myth: item.replace('Myth:', '').trim(), reality: '' });
-        } else {
-          pairs[pairs.length - 1].reality = item.replace('Reality:', '').trim();
-        }
-        return pairs;
-      }, [] as Array<{myth: string, reality: string}>)
-    : [];
+  const parseMythRealityPairs = (pairString: string): Array<{myth: string, reality: string}> => {
+    if (!pairString) return [];
+    return pairString.split('|').reduce((pairs, item, index) => {
+      if (index % 2 === 0) {
+        pairs.push({ myth: item.replace('Myth:', '').trim(), reality: '' });
+      } else {
+        pairs[pairs.length - 1].reality = item.replace('Reality:', '').trim();
+      }
+      return pairs;
+    }, [] as Array<{myth: string, reality: string}>);
+  };
+
+  const mythRealityPairs = parseMythRealityPairs(blockContent.myth_reality_pairs);
+
+  // Helper function to add a new myth/reality pair
+  const addMythRealityPair = () => {
+    const titles = blockContent.myth_reality_pairs.split('|').filter(t => t.trim());
+    titles.push('Myth: New myth to address', 'Reality: The actual truth about this topic');
+    handleContentUpdate('myth_reality_pairs', titles.join('|'));
+  };
+
+  // Helper function to remove a myth/reality pair
+  const removeMythRealityPair = (indexToRemove: number) => {
+    const pairs = parseMythRealityPairs(blockContent.myth_reality_pairs);
+    if (pairs.length <= 1) return; // Don't allow removing the last pair
+
+    pairs.splice(indexToRemove, 1);
+    const newPairString = pairs.map(pair => `Myth: ${pair.myth}|Reality: ${pair.reality}`).join('|');
+    handleContentUpdate('myth_reality_pairs', newPairString);
+  };
+
+  // Helper function to update individual myth/reality text
+  const updateMythAtIndex = (index: number, value: string) => {
+    const pairs = parseMythRealityPairs(blockContent.myth_reality_pairs);
+    if (pairs[index]) {
+      pairs[index].myth = value;
+      const newPairString = pairs.map(pair => `Myth: ${pair.myth}|Reality: ${pair.reality}`).join('|');
+      handleContentUpdate('myth_reality_pairs', newPairString);
+    }
+  };
+
+  const updateRealityAtIndex = (index: number, value: string) => {
+    const pairs = parseMythRealityPairs(blockContent.myth_reality_pairs);
+    if (pairs[index]) {
+      pairs[index].reality = value;
+      const newPairString = pairs.map(pair => `Myth: ${pair.myth}|Reality: ${pair.reality}`).join('|');
+      handleContentUpdate('myth_reality_pairs', newPairString);
+    }
+  };
 
   return (
     <LayoutSection
@@ -117,75 +156,121 @@ export default function MythVsRealityGrid(props: LayoutComponentProps) {
         </div>
 
         {/* Myth vs Reality Grid */}
-        <div className="grid lg:grid-cols-2 gap-8">
+        <div className="space-y-8">
           {mythRealityPairs.map((pair, index) => (
-            <div key={index} className="grid md:grid-cols-2 gap-6 lg:gap-8">
-              
-              {/* Myth Card */}
-              <div className="bg-red-50 border border-red-200 rounded-xl p-6 relative">
-                <div className="absolute -top-3 left-6">
-                  <span style={{...bodyStyle, fontSize: '0.875rem', fontWeight: '500'}} className="bg-red-500 text-white px-3 py-1 rounded-full">
-                    Myth
-                  </span>
-                </div>
-                <div className="pt-4">
-                  <div className="flex items-start space-x-3">
-                    <div className="flex-shrink-0 w-8 h-8 bg-red-500 rounded-full flex items-center justify-center mt-1">
-                      <IconEditableText
-                        mode={mode}
-                        value={blockContent.myth_icon || '❌'}
-                        onEdit={(value) => handleContentUpdate('myth_icon', value)}
-                        backgroundType="custom"
-                        colorTokens={{...colorTokens, primaryText: 'text-white'}}
-                        iconSize="sm"
-                        className="text-base text-white"
-                        sectionId={sectionId}
-                        elementKey="myth_icon"
-                      />
+            <div key={index} className={`relative group/myth-reality-${index}`}>
+              <div className="grid md:grid-cols-2 gap-6 lg:gap-8">
+                {/* Myth Card */}
+                <div className="bg-red-50 border border-red-200 rounded-xl p-6 relative">
+                  <div className="absolute -top-3 left-6">
+                    <span style={{...bodyStyle, fontSize: '0.875rem', fontWeight: '500'}} className="bg-red-500 text-white px-3 py-1 rounded-full">
+                      Myth
+                    </span>
+                  </div>
+                  <div className="pt-4">
+                    <div className="flex items-start space-x-3">
+                      <div className="flex-shrink-0 w-8 h-8 bg-red-500 rounded-full flex items-center justify-center mt-1">
+                        <IconEditableText
+                          mode={mode}
+                          value={blockContent.myth_icon || '❌'}
+                          onEdit={(value) => handleContentUpdate('myth_icon', value)}
+                          backgroundType="custom"
+                          colorTokens={{...colorTokens, primaryText: 'text-white'}}
+                          iconSize="sm"
+                          className="text-base text-white"
+                          sectionId={sectionId}
+                          elementKey="myth_icon"
+                        />
+                      </div>
+                      {mode !== 'preview' ? (
+                        <div
+                          contentEditable
+                          suppressContentEditableWarning
+                          onBlur={(e) => updateMythAtIndex(index, e.currentTarget.textContent || '')}
+                          className="outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50 rounded px-1 min-h-[60px] cursor-text hover:bg-red-100 text-red-900 leading-relaxed flex-1"
+                        >
+                          {pair.myth}
+                        </div>
+                      ) : (
+                        <p style={{...bodyStyle}} className="text-red-900 leading-relaxed flex-1">{pair.myth}</p>
+                      )}
                     </div>
-                    <p style={{...bodyStyle}} className="text-red-900 leading-relaxed">{pair.myth}</p>
+                  </div>
+                </div>
+
+                {/* Reality Card */}
+                <div className="bg-green-50 border border-green-200 rounded-xl p-6 relative">
+                  <div className="absolute -top-3 left-6">
+                    <span style={{...bodyStyle, fontSize: '0.875rem', fontWeight: '500'}} className="bg-green-500 text-white px-3 py-1 rounded-full">
+                      Reality
+                    </span>
+                  </div>
+                  <div className="pt-4">
+                    <div className="flex items-start space-x-3">
+                      <div className="flex-shrink-0 w-8 h-8 bg-green-500 rounded-full flex items-center justify-center mt-1">
+                        <IconEditableText
+                          mode={mode}
+                          value={blockContent.reality_icon || '✅'}
+                          onEdit={(value) => handleContentUpdate('reality_icon', value)}
+                          backgroundType="custom"
+                          colorTokens={{...colorTokens, primaryText: 'text-white'}}
+                          iconSize="sm"
+                          className="text-base text-white"
+                          sectionId={sectionId}
+                          elementKey="reality_icon"
+                        />
+                      </div>
+                      {mode !== 'preview' ? (
+                        <div
+                          contentEditable
+                          suppressContentEditableWarning
+                          onBlur={(e) => updateRealityAtIndex(index, e.currentTarget.textContent || '')}
+                          className="outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50 rounded px-1 min-h-[60px] cursor-text hover:bg-green-100 text-green-900 leading-relaxed flex-1"
+                        >
+                          {pair.reality}
+                        </div>
+                      ) : (
+                        <p style={{...bodyStyle}} className="text-green-900 leading-relaxed flex-1">{pair.reality}</p>
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>
 
-              {/* Reality Card */}
-              <div className="bg-green-50 border border-green-200 rounded-xl p-6 relative">
-                <div className="absolute -top-3 left-6">
-                  <span style={{...bodyStyle, fontSize: '0.875rem', fontWeight: '500'}} className="bg-green-500 text-white px-3 py-1 rounded-full">
-                    Reality
-                  </span>
-                </div>
-                <div className="pt-4">
-                  <div className="flex items-start space-x-3">
-                    <div className="flex-shrink-0 w-8 h-8 bg-green-500 rounded-full flex items-center justify-center mt-1">
-                      <IconEditableText
-                        mode={mode}
-                        value={blockContent.reality_icon || '✅'}
-                        onEdit={(value) => handleContentUpdate('reality_icon', value)}
-                        backgroundType="custom"
-                        colorTokens={{...colorTokens, primaryText: 'text-white'}}
-                        iconSize="sm"
-                        className="text-base text-white"
-                        sectionId={sectionId}
-                        elementKey="reality_icon"
-                      />
-                    </div>
-                    <p style={{...bodyStyle}} className="text-green-900 leading-relaxed">{pair.reality}</p>
-                  </div>
-                </div>
-              </div>
+              {/* Delete button - only show in edit mode and if more than 1 pair */}
+              {mode !== 'preview' && mythRealityPairs.length > 1 && (
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    removeMythRealityPair(index);
+                  }}
+                  className={`opacity-0 group-hover/myth-reality-${index}:opacity-100 absolute -top-2 right-4 w-6 h-6 bg-red-500 hover:bg-red-600 rounded-full flex items-center justify-center transition-all duration-200 z-10`}
+                  title="Remove this myth vs reality pair"
+                >
+                  <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              )}
             </div>
           ))}
         </div>
 
-        {/* Edit Mode: Instructions */}
-        {mode !== 'preview' && (
-          <div className="mt-8 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-            <p style={{...bodyStyle, fontSize: '0.875rem'}} className="text-blue-800">
-              <strong>Edit Myth vs Reality Pairs:</strong> Use format "Myth: [misconception]|Reality: [truth]|Myth: [next misconception]|Reality: [next truth]"
-            </p>
+        {/* Add Myth vs Reality Pair Button - only show in edit mode and if under max limit */}
+        {mode !== 'preview' && mythRealityPairs.length < 6 && (
+          <div className="mt-8 text-center">
+            <button
+              onClick={addMythRealityPair}
+              className="flex items-center space-x-2 mx-auto px-4 py-3 bg-blue-50 hover:bg-blue-100 border-2 border-blue-200 hover:border-blue-300 rounded-xl transition-all duration-200 group"
+            >
+              <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+              </svg>
+              <span className="text-blue-700 font-medium">Add Myth vs Reality Pair</span>
+            </button>
           </div>
         )}
+
       </div>
     </LayoutSection>
   );
@@ -204,14 +289,17 @@ export const componentMeta = {
   contentFields: [
     { key: 'headline', label: 'Main Headline', type: 'text', required: true },
     { key: 'subheadline', label: 'Subheadline', type: 'textarea', required: false },
-    { key: 'myth_reality_pairs', label: 'Myth vs Reality Pairs (pipe separated)', type: 'textarea', required: true }
+    { key: 'myth_reality_pairs', label: 'Myth vs Reality Pairs', type: 'dynamic-cards', required: true }
   ],
-  
+
   features: [
     'Visual contrast between myths (red) and reality (green)',
+    'Add/delete myth vs reality pairs (up to 6 pairs)',
+    'Individual inline editing for each myth and reality',
     'Automatic text color adaptation based on background type',
     'Responsive grid layout for optimal readability',
-    'Clear iconography for myths vs reality'
+    'Clear iconography for myths vs reality',
+    'Minimum of 1 pair enforced'
   ],
   
   useCases: [

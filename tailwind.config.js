@@ -261,6 +261,13 @@ module.exports = {
   'group-hover/step-3:opacity-100',
   'group-hover/step-4:opacity-100',
   'group-hover/step-5:opacity-100',
+  // MythVsRealityGrid specific patterns
+  'group-hover/myth-reality-0:opacity-100',
+  'group-hover/myth-reality-1:opacity-100',
+  'group-hover/myth-reality-2:opacity-100',
+  'group-hover/myth-reality-3:opacity-100',
+  'group-hover/myth-reality-4:opacity-100',
+  'group-hover/myth-reality-5:opacity-100',
   
   // ✅ Gap utilities for spacing
   'gap-1',
