@@ -53,13 +53,55 @@ const parseWinsData = (wins: string, descriptions?: string, categories?: string)
   const winList = wins.split('|').map(w => w.trim()).filter(w => w);
   const descriptionList = descriptions ? descriptions.split('|').map(d => d.trim()).filter(d => d) : [];
   const categoryList = categories ? categories.split('|').map(c => c.trim()).filter(c => c) : [];
-  
+
   return winList.map((win, index) => ({
     id: `win-${index}`,
     win,
     description: descriptionList[index] || undefined,
     category: categoryList[index] || undefined
   }));
+};
+
+// Helper function to add a new win
+const addWin = (wins: string, descriptions?: string, categories?: string): { newWins: string; newDescriptions: string; newCategories: string } => {
+  const winList = wins.split('|').map(w => w.trim()).filter(w => w);
+  const descriptionList = descriptions ? descriptions.split('|').map(d => d.trim()).filter(d => d) : [];
+  const categoryList = categories ? categories.split('|').map(c => c.trim()).filter(c => c) : [];
+
+  // Add new win with default content
+  winList.push('New Win');
+  descriptionList.push('Describe this achievement or result');
+  categoryList.push(''); // Empty category by default
+
+  return {
+    newWins: winList.join('|'),
+    newDescriptions: descriptionList.join('|'),
+    newCategories: categoryList.join('|')
+  };
+};
+
+// Helper function to remove a win
+const removeWin = (wins: string, descriptions: string, categories: string, indexToRemove: number): { newWins: string; newDescriptions: string; newCategories: string } => {
+  const winList = wins.split('|').map(w => w.trim()).filter(w => w);
+  const descriptionList = descriptions ? descriptions.split('|').map(d => d.trim()).filter(d => d) : [];
+  const categoryList = categories ? categories.split('|').map(c => c.trim()).filter(c => c) : [];
+
+  // Remove the win at the specified index
+  if (indexToRemove >= 0 && indexToRemove < winList.length) {
+    winList.splice(indexToRemove, 1);
+  }
+  if (indexToRemove >= 0 && indexToRemove < descriptionList.length) {
+    descriptionList.splice(indexToRemove, 1);
+  }
+  if (indexToRemove >= 0 && indexToRemove < categoryList.length) {
+    categoryList.splice(indexToRemove, 1);
+  }
+
+  return {
+    newWins: winList.join('|'),
+    newDescriptions: descriptionList.join('|'),
+    newCategories: categoryList.join('|')
+  };
 };
 
 // Get category color scheme
@@ -81,18 +123,20 @@ const getCategoryColor = (category?: string): { bg: string; text: string; border
 };
 
 // Individual Win Item Component
-const WinItem = ({ 
-  win, 
-  index, 
-  mode, 
+const WinItem = ({
+  win,
+  index,
+  mode,
   sectionId,
   onWinEdit,
   onDescriptionEdit,
   onCategoryEdit,
+  onRemoveWin,
   blockContent,
   handleContentUpdate,
   backgroundType,
-  colorTokens
+  colorTokens,
+  canRemove = true
 }: {
   win: WinItem;
   index: number;
@@ -101,16 +145,18 @@ const WinItem = ({
   onWinEdit: (index: number, value: string) => void;
   onDescriptionEdit: (index: number, value: string) => void;
   onCategoryEdit: (index: number, value: string) => void;
+  onRemoveWin?: (index: number) => void;
   blockContent: StackedWinsListContent;
   handleContentUpdate: (key: string, value: any) => void;
   backgroundType: string;
   colorTokens: any;
+  canRemove?: boolean;
 }) => {
   const { getTextStyle } = useTypography();
   const categoryColors = getCategoryColor(win.category);
   
   return (
-    <div className="group flex items-start space-x-4 p-6 bg-white rounded-xl border border-gray-200 hover:border-green-300 hover:shadow-lg transition-all duration-300">
+    <div className={`group/win-item-${index} relative flex items-start space-x-4 p-6 bg-white rounded-xl border border-gray-200 hover:border-green-300 hover:shadow-lg transition-all duration-300`}>
       
       {/* Checkmark Icon */}
       <div className="flex-shrink-0 mt-1">
@@ -194,6 +240,22 @@ const WinItem = ({
           </div>
         )}
       </div>
+
+      {/* Delete button - only show in edit mode and if can remove */}
+      {mode !== 'preview' && onRemoveWin && canRemove && (
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            onRemoveWin(index);
+          }}
+          className={`opacity-0 group-hover/win-item-${index}:opacity-100 absolute top-4 right-4 text-red-500 hover:text-red-700 transition-opacity duration-200`}
+          title="Remove this win"
+        >
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      )}
     </div>
   );
 };
@@ -238,6 +300,31 @@ export default function StackedWinsList(props: StackedWinsListProps) {
     const categoryList = blockContent.categories ? blockContent.categories.split('|') : [];
     categoryList[index] = value;
     handleContentUpdate('categories', categoryList.join('|'));
+  };
+
+  // Handle adding a new win
+  const handleAddWin = () => {
+    const { newWins, newDescriptions, newCategories } = addWin(
+      blockContent.wins,
+      blockContent.descriptions,
+      blockContent.categories
+    );
+    handleContentUpdate('wins', newWins);
+    handleContentUpdate('descriptions', newDescriptions);
+    handleContentUpdate('categories', newCategories);
+  };
+
+  // Handle removing a win
+  const handleRemoveWin = (indexToRemove: number) => {
+    const { newWins, newDescriptions, newCategories } = removeWin(
+      blockContent.wins,
+      blockContent.descriptions || '',
+      blockContent.categories || '',
+      indexToRemove
+    );
+    handleContentUpdate('wins', newWins);
+    handleContentUpdate('descriptions', newDescriptions);
+    handleContentUpdate('categories', newCategories);
   };
 
   return (
@@ -321,13 +408,30 @@ export default function StackedWinsList(props: StackedWinsListProps) {
               onWinEdit={handleWinEdit}
               onDescriptionEdit={handleDescriptionEdit}
               onCategoryEdit={handleCategoryEdit}
+              onRemoveWin={handleRemoveWin}
               blockContent={blockContent}
               handleContentUpdate={handleContentUpdate}
               backgroundType={backgroundType}
               colorTokens={colorTokens}
+              canRemove={wins.length > 1}
             />
           ))}
         </div>
+
+        {/* Add Win Button - only show in edit mode and if under max limit */}
+        {mode !== 'preview' && wins.length < 8 && (
+          <div className="mt-8 text-center">
+            <button
+              onClick={handleAddWin}
+              className="flex items-center space-x-2 mx-auto px-4 py-3 bg-green-50 hover:bg-green-100 border-2 border-green-200 hover:border-green-300 rounded-xl transition-all duration-200 group"
+            >
+              <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+              </svg>
+              <span className="text-green-700 font-medium">Add Win</span>
+            </button>
+          </div>
+        )}
 
         {/* Momentum Footer */}
         {(blockContent.footer_title || blockContent.footer_text || mode === 'edit') && (
