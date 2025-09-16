@@ -14,10 +14,11 @@ import {
   StarRating 
 } from '@/components/layout/ComponentRegistry';
 import { LayoutComponentProps } from '@/types/storeTypes';
-import { 
-  parsePipeData, 
+import {
+  parsePipeData,
   updateListData,
   parseCustomerAvatarData,
+  parseAvatarUrls,
   getCustomerAvatarUrl,
   updateAvatarUrls
 } from '@/utils/dataParsingUtils';
@@ -505,7 +506,7 @@ export default function InteractiveTestimonialMap(props: LayoutComponentProps) {
     const customerNames = parsePipeData(blockContent.customer_names);
     const deletedCustomerName = customerNames[indexToDelete];
     if (deletedCustomerName) {
-      const customerAvatars = parseCustomerAvatarData(blockContent.avatar_urls || '{}');
+      const customerAvatars = parseAvatarUrls(blockContent.avatar_urls || '{}');
       if (customerAvatars[deletedCustomerName]) {
         delete customerAvatars[deletedCustomerName];
         handleContentUpdate('avatar_urls', JSON.stringify(customerAvatars));

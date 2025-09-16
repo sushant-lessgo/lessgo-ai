@@ -187,12 +187,12 @@ export default function AvatarCarousel(props: LayoutComponentProps) {
   };
 
   const handleTitleEdit = (index: number, value: string) => {
-    const updatedTitles = updateListData(blockContent.customer_titles, index, value);
+    const updatedTitles = updateListData(blockContent.customer_titles || '', index, value);
     handleContentUpdate('customer_titles', updatedTitles);
   };
 
   const handleCompanyEdit = (index: number, value: string) => {
-    const updatedCompanies = updateListData(blockContent.customer_companies, index, value);
+    const updatedCompanies = updateListData(blockContent.customer_companies || '', index, value);
     handleContentUpdate('customer_companies', updatedCompanies);
   };
 

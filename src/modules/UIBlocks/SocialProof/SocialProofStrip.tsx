@@ -191,7 +191,7 @@ const StatDisplay = React.memo(({
             mode={mode}
             value={stat.value}
             onEdit={(value) => onStatEdit(stat.index, value)}
-            backgroundType={backgroundType === 'custom' ? 'secondary' : (backgroundType || 'primary')}
+            backgroundType={(backgroundType === 'custom' ? 'secondary' : (backgroundType || 'primary')) as 'custom' | 'neutral' | 'primary' | 'secondary' | 'divider' | 'theme'}
             colorTokens={colorTokens}
             variant="body"
             textStyle={{...h2Style, fontSize: 'clamp(1.5rem, 3vw, 2rem)', fontWeight: 'bold'}}
@@ -205,7 +205,7 @@ const StatDisplay = React.memo(({
             mode={mode}
             value={stat.label}
             onEdit={(value) => onLabelEdit(stat.index, value)}
-            backgroundType={backgroundType === 'custom' ? 'secondary' : (backgroundType || 'primary')}
+            backgroundType={(backgroundType === 'custom' ? 'secondary' : (backgroundType || 'primary')) as 'custom' | 'neutral' | 'primary' | 'secondary' | 'divider' | 'theme'}
             colorTokens={colorTokens}
             variant="body"
             textStyle={{...bodyStyle, fontSize: '0.875rem'}}
@@ -475,18 +475,18 @@ export default function SocialProofStrip(props: LayoutComponentProps) {
               {mode !== 'preview' ? (
                 <IconEditableText
                   mode={mode}
-                  value={blockContent.trust_badge_icon_1 || '✅'}
-                  onEdit={(value) => handleContentUpdate('trust_badge_icon_1', value)}
+                  value={blockContent.trust_badge_1 || '✅'}
+                  onEdit={(value) => handleContentUpdate('trust_badge_1', value)}
                   backgroundType={props.backgroundType as any}
                   colorTokens={colorTokens}
                   iconSize="sm"
                   className="text-base text-green-500"
                   sectionId={sectionId}
-                  elementKey="trust_badge_icon_1"
+                  elementKey="trust_badge_1"
                 />
               ) : (
                 <span className="text-base text-green-500">
-                  {blockContent.trust_badge_icon_1 || '✅'}
+                  {blockContent.trust_badge_1 || '✅'}
                 </span>
               )}
               {mode !== 'preview' ? (
@@ -516,18 +516,18 @@ export default function SocialProofStrip(props: LayoutComponentProps) {
               {mode !== 'preview' ? (
                 <IconEditableText
                   mode={mode}
-                  value={blockContent.trust_badge_icon_2 || '🔒'}
-                  onEdit={(value) => handleContentUpdate('trust_badge_icon_2', value)}
+                  value={blockContent.trust_badge_2 || '🔒'}
+                  onEdit={(value) => handleContentUpdate('trust_badge_2', value)}
                   backgroundType={props.backgroundType as any}
                   colorTokens={colorTokens}
                   iconSize="sm"
                   className="text-base text-blue-500"
                   sectionId={sectionId}
-                  elementKey="trust_badge_icon_2"
+                  elementKey="trust_badge_2"
                 />
               ) : (
                 <span className="text-base text-blue-500">
-                  {blockContent.trust_badge_icon_2 || '🔒'}
+                  {blockContent.trust_badge_2 || '🔒'}
                 </span>
               )}
               {mode !== 'preview' ? (
@@ -557,18 +557,18 @@ export default function SocialProofStrip(props: LayoutComponentProps) {
               {mode !== 'preview' ? (
                 <IconEditableText
                   mode={mode}
-                  value={blockContent.trust_badge_icon_3 || '🛡️'}
-                  onEdit={(value) => handleContentUpdate('trust_badge_icon_3', value)}
+                  value={blockContent.trust_badge_3 || '🛡️'}
+                  onEdit={(value) => handleContentUpdate('trust_badge_3', value)}
                   backgroundType={props.backgroundType as any}
                   colorTokens={colorTokens}
                   iconSize="sm"
                   className="text-base text-purple-500"
                   sectionId={sectionId}
-                  elementKey="trust_badge_icon_3"
+                  elementKey="trust_badge_3"
                 />
               ) : (
                 <span className="text-base text-purple-500">
-                  {blockContent.trust_badge_icon_3 || '🛡️'}
+                  {blockContent.trust_badge_3 || '🛡️'}
                 </span>
               )}
               {mode !== 'preview' ? (
@@ -598,19 +598,19 @@ export default function SocialProofStrip(props: LayoutComponentProps) {
               {mode !== 'preview' ? (
                 <IconEditableText
                   mode={mode}
-                  value={blockContent.rating_icon || '⭐'}
-                  onEdit={(value) => handleContentUpdate('rating_icon', value)}
+                  value={blockContent.rating_display || '⭐'}
+                  onEdit={(value) => handleContentUpdate('rating_display', value)}
                   backgroundType={props.backgroundType as any}
                   colorTokens={colorTokens}
                   iconSize="sm"
                   className="text-xs text-yellow-400 mr-1"
                   sectionId={sectionId}
-                  elementKey="rating_icon"
+                  elementKey="rating_display"
                 />
               ) : (
                 [1,2,3,4,5].map(i => (
                   <span key={i} className="text-xs text-yellow-400">
-                    {blockContent.rating_icon || '⭐'}
+                    {blockContent.rating_display || '⭐'}
                   </span>
                 ))
               )}

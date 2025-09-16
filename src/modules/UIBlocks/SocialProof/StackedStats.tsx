@@ -11,7 +11,7 @@ import {
 } from '@/components/layout/EditableContent';
 import { SocialProofNumber } from '@/components/layout/ComponentRegistry';
 import { LayoutComponentProps } from '@/types/storeTypes';
-import { parsePipeData } from '@/utils/dataParsingUtils';
+import { parsePipeData, updateListData } from '@/utils/dataParsingUtils';
 import IconEditableText from '@/components/ui/IconEditableText';
 
 // Content interface for type safety

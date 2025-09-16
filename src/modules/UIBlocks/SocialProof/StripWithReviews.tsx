@@ -474,8 +474,7 @@ export default function StripWithReviews(props: LayoutComponentProps) {
   // Parse customer avatar data
   const customerAvatars = parseCustomerAvatarData(
     blockContent.customer_names || '',
-    blockContent.avatar_urls || '{}',
-    blockContent.avatar_count || 4
+    blockContent.avatar_urls || '{}'
   );
   
   // Handle avatar changes
@@ -708,7 +707,7 @@ export default function StripWithReviews(props: LayoutComponentProps) {
                 
                 // Get the corresponding icon value
                 const iconFields = ['trust_icon_1', 'trust_icon_2', 'trust_icon_3'];
-                const iconValue = blockContent[iconFields[actualIndex] as keyof StripWithReviewsContent] || '✅';
+                const iconValue = String(blockContent[iconFields[actualIndex] as keyof StripWithReviewsContent] || '✅');
                 
                 return (
                   <div key={actualIndex} className="relative group/trust-indicator flex items-center space-x-2">
@@ -716,7 +715,7 @@ export default function StripWithReviews(props: LayoutComponentProps) {
                       mode={mode}
                       value={iconValue}
                       onEdit={(value) => handleTrustIconUpdate(actualIndex, value)}
-                      backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
+                      backgroundType={(props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')) as 'custom' | 'neutral' | 'primary' | 'secondary' | 'divider' | 'theme'}
                       colorTokens={colorTokens}
                       iconSize="sm"
                       className="text-lg"
@@ -728,7 +727,7 @@ export default function StripWithReviews(props: LayoutComponentProps) {
                       mode={mode}
                       value={indicator}
                       onEdit={(value) => handleTrustIndicatorUpdate(actualIndex, value)}
-                      backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
+                      backgroundType={(props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')) as 'custom' | 'neutral' | 'primary' | 'secondary' | 'divider' | 'theme'}
                       colorTokens={colorTokens}
                       variant="body"
                       textStyle={{...bodyStyle, fontSize: '0.875rem'}}

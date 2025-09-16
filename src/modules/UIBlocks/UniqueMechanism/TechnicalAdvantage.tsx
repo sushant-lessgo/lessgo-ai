@@ -98,7 +98,7 @@ const AdvantageCard = React.memo(({
   item: AdvantageItem;
   mode: 'edit' | 'preview';
   colorTokens: any;
-  getTextStyle: (variant: string) => React.CSSProperties;
+  getTextStyle: (variant: "hero" | "h1" | "h2" | "h3" | "h4" | "h5" | "h6" | "display" | "button" | "body" | "label" | "caption" | "body-lg" | "body-sm") => React.CSSProperties;
   sectionId: string;
   sectionBackground: string;
   backgroundType: string;
@@ -256,7 +256,7 @@ export default function TechnicalAdvantage(props: LayoutComponentProps) {
               getTextStyle={getTextStyle}
               sectionId={sectionId}
               sectionBackground={sectionBackground}
-              backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'secondary')}
+              backgroundType={(props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'secondary')) as 'custom' | 'neutral' | 'primary' | 'secondary' | 'divider' | 'theme'}
               onTitleEdit={handleTitleEdit}
               onDescriptionEdit={handleDescriptionEdit}
               onIconEdit={handleIconEdit}

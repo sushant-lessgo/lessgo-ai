@@ -276,6 +276,7 @@ export interface PersistenceActions {
 export interface FormsImageActions {
   // Form Management (Legacy - simplified for MVP)
   createForm: (sectionId: string, elementKey: string) => string;
+  addForm: (form: any) => string;
   updateForm: (id: string, updates: any) => void;
   deleteForm: (id: string) => void;
   addFormField: (formId: string, fieldType: string) => void;

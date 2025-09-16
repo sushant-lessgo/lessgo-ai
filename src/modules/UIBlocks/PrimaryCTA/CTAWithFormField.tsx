@@ -125,7 +125,7 @@ export default function CTAWithFormField(props: LayoutComponentProps) {
   
   const { getTextStyle: getTypographyStyle } = useTypography();
   const { user } = useUser();
-  const { createForm, getFormById } = useEditStoreLegacy();
+  const { addForm, getFormById } = useEditStoreLegacy();
   
   // Form state
   const [email, setEmail] = useState('');
@@ -137,9 +137,9 @@ export default function CTAWithFormField(props: LayoutComponentProps) {
 
   // Auto-create form on mount if needed
   useEffect(() => {
-    if (!formId && createForm) {
+    if (!formId && addForm) {
       // Create a default form for this CTA
-      const newFormId = createForm({
+      const newFormId = addForm({
         name: 'CTA Email Capture Form',
         fields: [
           {
@@ -164,7 +164,7 @@ export default function CTAWithFormField(props: LayoutComponentProps) {
       });
       setFormId(newFormId);
     }
-  }, [formId, createForm, blockContent.form_label, blockContent.placeholder_text, blockContent.cta_text]);
+  }, [formId, addForm, blockContent.form_label, blockContent.placeholder_text, blockContent.cta_text]);
 
   // Handle benefits - support both legacy pipe-separated format and individual fields
   const getBenefits = (): string[] => {

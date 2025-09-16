@@ -148,7 +148,7 @@ const GuaranteeCard = ({
         mode={mode}
         value={guarantee.title || ''}
         onEdit={(value) => onTitleEdit(index, value)}
-        backgroundType={backgroundType === 'custom' ? 'secondary' : (backgroundType || 'primary')}
+        backgroundType={(backgroundType === 'custom' ? 'secondary' : (backgroundType || 'primary')) as 'custom' | 'neutral' | 'primary' | 'secondary' | 'divider' | 'theme'}
         colorTokens={colorTokens}
         variant="body"
         style={{...h3Style}}
@@ -164,7 +164,7 @@ const GuaranteeCard = ({
         mode={mode}
         value={guarantee.description || ''}
         onEdit={(value) => onDescriptionEdit(index, value)}
-        backgroundType={backgroundType === 'custom' ? 'secondary' : (backgroundType || 'primary')}
+        backgroundType={(backgroundType === 'custom' ? 'secondary' : (backgroundType || 'primary')) as 'custom' | 'neutral' | 'primary' | 'secondary' | 'divider' | 'theme'}
         colorTokens={colorTokens}
         variant="body"
         style={{...bodyStyle}}
@@ -261,7 +261,7 @@ export default function BoldGuaranteePanel(props: LayoutComponentProps) {
     <LayoutSection
       sectionId={sectionId}
       sectionType="BoldGuaranteePanel"
-      backgroundType={props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')}
+      backgroundType={(props.backgroundType === 'custom' ? 'secondary' : (props.backgroundType || 'primary')) as 'custom' | 'neutral' | 'primary' | 'secondary' | 'divider' | 'theme'}
       sectionBackground={sectionBackground}
       mode={mode}
       className={props.className}
@@ -275,7 +275,7 @@ export default function BoldGuaranteePanel(props: LayoutComponentProps) {
             value={blockContent.headline || ''}
             onEdit={(value) => handleContentUpdate('headline', value)}
             level="h2"
-            backgroundType={backgroundType === 'custom' ? 'secondary' : (backgroundType || 'primary')}
+            backgroundType={(backgroundType === 'custom' ? 'secondary' : (backgroundType || 'primary')) as 'custom' | 'neutral' | 'primary' | 'secondary' | 'divider' | 'theme'}
             colorTokens={colorTokens}
             className="mb-6"
             sectionId={sectionId}
@@ -288,7 +288,7 @@ export default function BoldGuaranteePanel(props: LayoutComponentProps) {
               mode={mode}
               value={blockContent.subheadline || ''}
               onEdit={(value) => handleContentUpdate('subheadline', value)}
-              backgroundType={backgroundType === 'custom' ? 'secondary' : (backgroundType || 'primary')}
+              backgroundType={(backgroundType === 'custom' ? 'secondary' : (backgroundType || 'primary')) as 'custom' | 'neutral' | 'primary' | 'secondary' | 'divider' | 'theme'}
               colorTokens={colorTokens}
               variant="body"
               style={{...bodyLgStyle}}
@@ -399,7 +399,7 @@ export default function BoldGuaranteePanel(props: LayoutComponentProps) {
             mode={mode}
             value={blockContent.trust_indicators || ''}
             onEdit={(value) => handleContentUpdate('trust_indicators', value)}
-            backgroundType={backgroundType === 'custom' ? 'secondary' : (backgroundType || 'primary')}
+            backgroundType={(backgroundType === 'custom' ? 'secondary' : (backgroundType || 'primary')) as 'custom' | 'neutral' | 'primary' | 'secondary' | 'divider' | 'theme'}
             colorTokens={colorTokens}
             variant="body"
             style={{...bodyStyle, fontSize: '0.875rem'}}
