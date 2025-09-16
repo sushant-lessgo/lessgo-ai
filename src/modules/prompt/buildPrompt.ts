@@ -128,14 +128,14 @@ function getSectionLayoutGuidance(sectionType: string, layout: string): string {
     },
 
     Features: {
-      IconGrid: "Icon-driven feature showcase. Feature titles should be 2-4 words max. Descriptions should be benefit-focused, not feature-focused.",
-      SplitAlternating: "Alternating image-text feature layout. Vary headline lengths for visual rhythm. Use action-oriented language throughout.",
-      Tabbed: "Tab-based feature navigation. Headlines should clearly differentiate between tabs. Keep descriptions concise and focused.",
-      Timeline: "Chronological feature presentation. Use progressive language that builds momentum. Each step should connect to the next.",
-      FeatureTestimonial: "Social proof enhanced features. Blend feature benefits with customer validation. Use authentic testimonial language.",
-      MetricTiles: "Data-driven feature presentation. Lead with compelling numbers. Support metrics with clear explanations.",
-      MiniCards: "Compact feature card layout. Keep titles punchy and clear. Descriptions should be scannable and benefit-focused.",
-      Carousel: "Sliding feature presentation. Each slide should be self-contained. Use navigation-friendly language and structure."
+      IconGrid: "Icon-driven feature showcase. IMPORTANT: Use ALL features from KEY FEATURES & BENEFITS section. Generate pipe-separated values (e.g., 'Title1|Title2|Title3|Title4' and 'Desc1|Desc2|Desc3|Desc4'). Feature titles should be 2-4 words max. Descriptions should be benefit-focused, not feature-focused.",
+      SplitAlternating: "Alternating image-text feature layout. Use ALL features from KEY FEATURES & BENEFITS. Generate pipe-separated values. Vary headline lengths for visual rhythm. Use action-oriented language throughout.",
+      Tabbed: "Tab-based feature navigation. Use ALL features from KEY FEATURES & BENEFITS. Generate pipe-separated values. Headlines should clearly differentiate between tabs. Keep descriptions concise and focused.",
+      Timeline: "Chronological feature presentation. Use ALL features from KEY FEATURES & BENEFITS. Generate pipe-separated values. Use progressive language that builds momentum. Each step should connect to the next.",
+      FeatureTestimonial: "Social proof enhanced features. Use ALL features from KEY FEATURES & BENEFITS. Generate pipe-separated values. Blend feature benefits with customer validation. Use authentic testimonial language.",
+      MetricTiles: "Data-driven feature presentation. Use ALL features from KEY FEATURES & BENEFITS. Generate pipe-separated values. Lead with compelling numbers. Support metrics with clear explanations.",
+      MiniCards: "Compact feature card layout. Use ALL features from KEY FEATURES & BENEFITS. Generate pipe-separated values. Keep titles punchy and clear. Descriptions should be scannable and benefit-focused.",
+      Carousel: "Sliding feature presentation. Use ALL features from KEY FEATURES & BENEFITS. Generate pipe-separated values. Each slide should be self-contained. Use navigation-friendly language and structure."
     },
 
     FounderNote: {
@@ -470,6 +470,40 @@ function getSectionFlowGuidance(sectionType: string, position: string, previousS
 }
 
 /**
+ * Builds explicit feature mapping instructions for Features section
+ */
+function buildFeatureMappingInstructions(onboardingStore: OnboardingStore, elementsMap: any): string {
+  const { featuresFromAI } = onboardingStore;
+  const featureCount = featuresFromAI.length;
+
+  // Check if there's a Features section in the elementsMap
+  const hasFeatureSection = Object.values(elementsMap).some(
+    (section: any) => section.sectionType === 'Features'
+  );
+
+  if (!hasFeatureSection || featureCount === 0) {
+    return '';
+  }
+
+  const featureTitles = featuresFromAI.map(f => f.feature).join('|');
+  const featureDescriptions = featuresFromAI.map(f => f.benefit).join('|');
+
+  return `
+CRITICAL FEATURE GENERATION INSTRUCTIONS:
+You have ${featureCount} features provided in KEY FEATURES & BENEFITS.
+When generating the Features section:
+- feature_titles: MUST contain exactly ${featureCount} pipe-separated titles
+- feature_descriptions: MUST contain exactly ${featureCount} pipe-separated descriptions
+- Use ALL features provided, not just examples
+
+Expected format:
+- feature_titles: "${featureTitles}" (adapt titles to be 2-4 words each)
+- feature_descriptions: "${featureDescriptions}" (expand benefits to be compelling)
+
+IMPORTANT: If you generate fewer than ${featureCount} features, users will not see all their features displayed.`;
+}
+
+/**
  * Builds output format specification
  */
 function buildOutputFormat(elementsMap: any): string {
@@ -507,12 +541,21 @@ function getElementFormatGuidance(element: string): string {
     return "Action phrase, 2-4 words (e.g., \"Get Started Now\", \"Try Free\")";
   }
   
+  // Special handling for feature_titles and feature_descriptions
+  if (element === 'feature_titles') {
+    return "[\"Use ALL features from KEY FEATURES & BENEFITS - generate exactly as many titles as features provided\"]";
+  }
+
+  if (element === 'feature_descriptions') {
+    return "[\"Use ALL features from KEY FEATURES & BENEFITS - generate exactly as many descriptions as features provided\"]";
+  }
+
   // List patterns for titles
-  if (element.includes('titles') || element.endsWith('_titles') || 
+  if (element.includes('titles') || element.endsWith('_titles') ||
       element.includes('_title') || element === 'title') {
     return "[\"Title 1\", \"Title 2\", \"Title 3\"]";
   }
-  
+
   // List patterns for descriptions
   if (element.includes('descriptions') || element.endsWith('_descriptions') ||
       element.includes('_description') || element === 'description') {
@@ -788,6 +831,7 @@ export function buildFullPrompt(
   const layoutContext = buildLayoutContext(elementsMap);
   const sectionFlowContext = buildSectionFlowContext(elementsMap, pageStore);
   const fieldClassificationGuidance = buildFieldClassificationGuidance(elementsMap);
+  const featureMappingInstructions = buildFeatureMappingInstructions(onboardingStore, elementsMap);
   const outputFormat = buildOutputFormat(elementsMap);
 
   return `You are an expert copywriter specializing in high-converting SaaS landing pages. Generate compelling, conversion-focused copy for a complete landing page.
@@ -801,6 +845,7 @@ ${layoutContext}
 ${sectionFlowContext}
 
 ${fieldClassificationGuidance}
+${featureMappingInstructions}
 
 COPYWRITING REQUIREMENTS:
 - Write copy that flows cohesively from section to section
@@ -828,7 +873,7 @@ export function buildSectionPrompt(
 ): string {
   const variables = mapStoreToVariables(onboardingStore, pageStore);
   const layout = pageStore.layout?.sectionLayouts?.[sectionId];
-  
+
   if (!layout) {
     throw new Error(`No layout found for section "${sectionId}"`);
   }
@@ -836,14 +881,28 @@ export function buildSectionPrompt(
   const sectionRequirements = getSectionElementRequirements(sectionId, layout, variables);
   const businessContext = buildBusinessContext(onboardingStore, pageStore);
   const brandContext = buildBrandContext(onboardingStore);
-  
+
   // Get existing content from other sections for context
   const otherSectionsContext = buildOtherSectionsContext(pageStore, sectionId);
   const layoutGuidance = getSectionLayoutGuidance(sectionRequirements.sectionType, layout);
-  
+
   // Build section-specific output format
   const sectionOutputFormat = buildSectionOutputFormat(sectionId, sectionRequirements);
-  
+
+  // Add feature mapping if this is a Features section
+  let featureInstructions = '';
+  if (sectionRequirements.sectionType === 'Features') {
+    const { featuresFromAI } = onboardingStore;
+    const featureCount = featuresFromAI.length;
+    if (featureCount > 0) {
+      featureInstructions = `\n\nFEATURE GENERATION REQUIREMENTS:
+- You have ${featureCount} features from KEY FEATURES & BENEFITS
+- feature_titles: Generate exactly ${featureCount} pipe-separated titles
+- feature_descriptions: Generate exactly ${featureCount} pipe-separated descriptions
+- Use ALL features, not just examples`;
+    }
+  }
+
   const userGuidance = userPrompt ? `\nUSER GUIDANCE: ${userPrompt}` : '';
 
   return `You are an expert copywriter. Regenerate copy for the ${sectionRequirements.sectionType} section of a landing page.
@@ -856,7 +915,7 @@ SECTION CONTEXT:
 Section: ${sectionRequirements.sectionType} (${layout})
 Layout Guidance: ${layoutGuidance}${userGuidance}
 
-${otherSectionsContext}
+${otherSectionsContext}${featureInstructions}
 
 REQUIREMENTS:
 - Generate copy that flows with existing sections
