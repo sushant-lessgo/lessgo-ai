@@ -113,13 +113,6 @@ export function FloatingToolbars() {
         return allConditions;
       })() && (
         <>
-          {/* console.log('🖼️ ImageToolbar rendering with:', {
-            shouldShowImage: shouldShowToolbar('image'),
-            targetId: toolbarTarget.targetId, 
-            activeToolbar,
-            position,
-            contextActions
-          }); */}
           <ImageToolbar
             targetId={toolbarTarget.targetId || ''}
             position={position}

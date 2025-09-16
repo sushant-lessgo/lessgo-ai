@@ -125,13 +125,6 @@ export function VariableSectionBackgroundModal({
     // Reset custom colors
     setCustomColors({});
     
-    console.log('🎨 Variable Section Background Modal initialized:', {
-      sectionId,
-      initMode,
-      phase,
-      currentThemeColor,
-      hasVariableConfig: !!variableConfig
-    });
   }, [isOpen, section, currentThemeColor, isVariableMode]);
 
   // Check migration status
@@ -275,7 +268,6 @@ export function VariableSectionBackgroundModal({
       }
       
       onClose();
-      console.log('🎨 Applied section background:', { sectionId, activeMode, localBackground });
     } catch (error) {
       console.error('Failed to apply section background:', error);
     }

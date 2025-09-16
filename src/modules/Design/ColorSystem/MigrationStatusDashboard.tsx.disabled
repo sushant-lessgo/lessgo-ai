@@ -204,15 +204,12 @@ export function MigrationStatusDashboard({
 
   // Mock migration control
   const handleStartMigration = () => {
-    console.log('Starting migration...');
   };
 
   const handlePauseMigration = () => {
-    console.log('Pausing migration...');
   };
 
   const handleRollbackMigration = () => {
-    console.log('Rolling back migration...');
   };
 
   if (compactMode) {
