@@ -187,11 +187,11 @@ function getSectionLayoutGuidance(sectionType: string, layout: string): string {
 
     Objection: {
       ObjectionAccordion: "Expandable objection handling. Questions should address real concerns directly. Answers should be comprehensive but reassuring.",
-      MythVsRealityGrid: "Myth-busting comparison format. Myths should be real market misconceptions. Reality should be factual and compelling.",
+      MythVsRealityGrid: "Side-by-side myth vs reality comparison. Use pipe-separated format: 'Myth: [misconception]|Reality: [truth]'. Myths should be real market misconceptions, realities should be factual and compelling. Keep each pair focused and contrasted clearly.",
       QuoteBackedAnswers: "Authority-supported responses. Use credible sources and expert validation. Include proper attribution and context.",
       VisualObjectionTiles: "Visual objection addressing. Use clear, non-defensive language. Address concerns while building confidence.",
       ProblemToReframeBlocks: "Perspective-shifting presentation. Show new way of thinking about challenges. Use reframing language techniques.",
-      SkepticToBelieverSteps: "Conversion journey mapping. Show logical progression from doubt to confidence. Use empathetic, understanding tone.",
+      SkepticToBelieverSteps: "Step-by-step conversion journey. Use pipe-separated format: 'Name|Quote|Result' pattern. Show progression from skeptical to believer to champion. Each step should build credibility with real customer examples and increasing enthusiasm.",
       BoldGuaranteePanel: "Risk-reversal focused presentation. Use confident, guarantee-focused language. Address risk concerns directly.",
       ObjectionCarousel: "Multiple objection showcase. Each objection should be distinct. Responses should be complete and convincing."
     },
@@ -226,7 +226,7 @@ function getSectionLayoutGuidance(sectionType: string, layout: string): string {
       CollapsedCards: "Expandable problem exploration. Problem titles should be immediately recognizable. Details should build emotional connection.",
       PainMeterChart: "Data-driven pain visualization. Use clear metrics and categories. Show severity and impact quantitatively.",
       PersonaPanels: "User-specific problem presentation. Tailor problems to specific user types. Use language each persona would recognize.",
-      ProblemChecklist: "Systematic problem identification. Use checkbox-style recognition format. Build comprehensive understanding of user struggles."
+      ProblemChecklist: "Interactive problem assessment with scoring. Problem statements should be specific and relatable. Checklist items should be short, clear labels. Include scoring guidance (0-2 well managed, 3-5 improvement needed, 6-8 significant challenges, 9-10 critical). Provide actionable thresholds and encouragement for different score ranges."
     },
 
     Results: {
@@ -237,7 +237,7 @@ function getSectionLayoutGuidance(sectionType: string, layout: string): string {
       TimelineResults: "Progressive results demonstration. Show improvement over time. Use time-based language and milestone markers.",
       OutcomeIcons: "Icon-enhanced results display. Icons should support outcome comprehension. Keep text concise and impact-focused.",
       StackedWinsList: "Achievement-focused results list. Use victory language and positive framing. Stack wins for cumulative impact.",
-      PersonaResultPanels: "User-specific outcome presentation. Tailor results to different user types. Use language each persona values most."
+      PersonaResultPanels: "Role-specific results presentation. Each persona needs tailored metric (e.g., '3x Lead Generation'), role description (e.g., 'Growth Focused'), and comma-separated key benefits. Use role-appropriate language and metrics. Include persona icons and footer message about universal benefits."
     },
 
     Security: {
@@ -713,6 +713,15 @@ function getElementFormatGuidance(element: string): string {
     'persona_icon_5': "👥",
     'persona_icon_6': "👤",
     'footer_text': "Tailored results for every team in your organization",
+
+    // MythVsRealityGrid specific fields
+    'myth_reality_pairs': "Myth: Statement 1|Reality: Truth 1|Myth: Statement 2|Reality: Truth 2",
+    'myth_icon': "❌",
+    'reality_icon': "✅",
+
+    // SkepticToBelieverSteps specific fields
+    'conversion_steps': "Name from Company|Initial skeptical thought|Background context|Name from Company 2|Believer quote|Transformation result|Name from Company 3|Success quote|Specific outcome|Name from Company 4|Champion quote|Final transformation|Name from Company 5|Hero quote|Long-term impact",
+    'objections_summary': "Summary text addressing how objections were overcome with real proof",
 
     // Miscellaneous
     'emoji_labels': "[\"🚀\", \"💡\", \"⭐\"]",

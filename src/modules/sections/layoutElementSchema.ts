@@ -941,10 +941,10 @@ export const layoutElementSchema: LayoutSchema = {
 
   MythVsRealityGrid: [
     { element: "headline", mandatory: true },
-    { element: "myth_statements", mandatory: true },
-    { element: "reality_statements", mandatory: true },
-    { element: "myth_label", mandatory: true },
-    { element: "reality_label", mandatory: true },
+    { element: "myth_reality_pairs", mandatory: true },
+    { element: "subheadline", mandatory: false },
+    { element: "myth_icon", mandatory: false },
+    { element: "reality_icon", mandatory: false },
   ],
 
   QuoteBackedAnswers: [
@@ -971,10 +971,15 @@ export const layoutElementSchema: LayoutSchema = {
 
   SkepticToBelieverSteps: [
     { element: "headline", mandatory: true },
-    { element: "skeptic_thoughts", mandatory: true },
-    { element: "believer_thoughts", mandatory: true },
-    { element: "transition_steps", mandatory: true },
-    { element: "step_explanations", mandatory: false },
+    { element: "conversion_steps", mandatory: true },
+    { element: "subheadline", mandatory: false },
+    { element: "objections_summary", mandatory: false },
+    { element: "step_icon_1", mandatory: false },
+    { element: "step_icon_2", mandatory: false },
+    { element: "step_icon_3", mandatory: false },
+    { element: "step_icon_4", mandatory: false },
+    { element: "step_icon_5", mandatory: false },
+    { element: "step_icon_6", mandatory: false },
   ],
 
   BoldGuaranteePanel: [
