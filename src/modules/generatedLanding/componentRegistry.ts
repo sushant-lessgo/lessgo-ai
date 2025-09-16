@@ -108,7 +108,7 @@ import SecurityGuaranteePanel from '@/modules/UIBlocks/Security/SecurityGuarante
 import SegmentBasedPricing from '@/modules/UIBlocks/Pricing/SegmentBasedPricing';
 import SegmentedFAQTabs from '@/modules/UIBlocks/FAQ/SegmentedFAQTabs';
 import SegmentedTestimonials from '@/modules/UIBlocks/Testimonial/SegmentedTestimonials';
-import SideBySideBlock from '@/modules/UIBlocks/BeforeAfter/SideBySideBlock';
+import SideBySideBlocks from '@/modules/UIBlocks/BeforeAfter/SideBySideBlock';
 import SideBySideOfferCards from '@/modules/UIBlocks/Close/SideBySideOfferCards';
 import SideBySideCTA from '@/modules/UIBlocks/PrimaryCTA/SideBySideCTA';
 import SideBySidePhotoStory from '@/modules/UIBlocks/FounderNote/SideBySidePhotoStory';
@@ -176,7 +176,7 @@ export const componentRegistry: ComponentRegistry = {
   },
   
   beforeAfter: {
-    SideBySideBlocks: SideBySideBlock,
+    SideBySideBlocks: SideBySideBlocks,
     StackedTextVisual: StackedTextVisual,
     BeforeAfterSlider: BeforeAfterSlider,
     SplitCard: SplitCard,
@@ -239,7 +239,7 @@ export const componentRegistry: ComponentRegistry = {
   problem: {
     StackedPainBullets: StackedPainBullets,
     BeforeImageAfterText: BeforeImageAfterText,
-    SideBySideSplit: SideBySideSplit,
+    // SideBySideSplit: SideBySideSplit, // Not in layoutRegistry
     EmotionalQuotes: EmotionalQuotes,
     CollapsedCards: CollapsedCards,
     // TODO: Disabled for MVP - PainMeterChart: PainMeterChart,
@@ -264,7 +264,7 @@ export const componentRegistry: ComponentRegistry = {
     VerticalTimeline: VerticalTimeline,
     IconCircleSteps: IconCircleSteps,
     AccordionSteps: AccordionSteps,
-    CardFlipSteps: CardFlipSteps,
+    // CardFlipSteps: CardFlipSteps, // Not in layoutRegistry
     VideoWalkthrough: VideoWalkthrough,
     ZigzagImageSteps: ZigzagImageSteps,
     AnimatedProcessLine: AnimatedProcessLine,
@@ -272,13 +272,13 @@ export const componentRegistry: ComponentRegistry = {
   
   useCases: {
     PersonaGrid: PersonaGrid,
-    BeforeAfterWorkflow: BeforeAfterWorkflow,
-    CustomerJourneyFlow: CustomerJourneyFlow,
-    IndustryUseCaseGrid: IndustryUseCaseGrid,
-    InteractiveUseCaseMap: InteractiveUseCaseMap,
-    RoleBasedScenarios: RoleBasedScenarios,
-    UseCaseCarousel: UseCaseCarousel,
-    WorkflowDiagrams: WorkflowDiagrams,
+    // BeforeAfterWorkflow: BeforeAfterWorkflow, // Not in layoutRegistry
+    // CustomerJourneyFlow: CustomerJourneyFlow, // Not in layoutRegistry
+    // IndustryUseCaseGrid: IndustryUseCaseGrid, // Not in layoutRegistry
+    // InteractiveUseCaseMap: InteractiveUseCaseMap, // Not in layoutRegistry
+    // RoleBasedScenarios: RoleBasedScenarios, // Not in layoutRegistry
+    // UseCaseCarousel: UseCaseCarousel, // Not in layoutRegistry
+    // WorkflowDiagrams: WorkflowDiagrams, // Not in layoutRegistry
     // Map missing layouts from layoutRegistry to existing components
     TabbedUseCases: UseCaseCarousel,
     IndustryTiles: IndustryUseCaseGrid,
@@ -290,22 +290,23 @@ export const componentRegistry: ComponentRegistry = {
   
   uniqueMechanism: {
     StackedHighlights: StackedHighlights,
-    AlgorithmExplainer: AlgorithmExplainer,
-    InnovationTimeline: InnovationTimeline,
-    MethodologyBreakdown: MethodologyBreakdown,
-    ProcessFlowDiagram: ProcessFlowDiagram,
-    PropertyComparisonMatrix: PropertyComparisonMatrix,
-    ComparisonTable: PropertyComparisonMatrix, // Map to existing component
-    SecretSauceReveal: SecretSauceReveal,
-    SystemArchitecture: SystemArchitecture,
-    TechnicalAdvantage: TechnicalAdvantage,
+    // AlgorithmExplainer: AlgorithmExplainer, // Not in layoutRegistry
+    // InnovationTimeline: InnovationTimeline, // Not in layoutRegistry
+    // MethodologyBreakdown: MethodologyBreakdown, // Not in layoutRegistry
+    // ProcessFlowDiagram: ProcessFlowDiagram, // Not in layoutRegistry
+    // PropertyComparisonMatrix: PropertyComparisonMatrix, // Not in layoutRegistry
+    // ComparisonTable: PropertyComparisonMatrix, // Map to existing component
+    // SecretSauceReveal: SecretSauceReveal, // Not in layoutRegistry
+    // SystemArchitecture: SystemArchitecture, // Not in layoutRegistry
+    // TechnicalAdvantage: TechnicalAdvantage, // Not in layoutRegistry
     // Map missing layouts from layoutRegistry to existing components
-    ExplainerWithTags: MethodologyBreakdown, 
+    ExplainerWithTags: MethodologyBreakdown,
     VisualFlywheel: ProcessFlowDiagram,
     PillarIcons: StackedHighlights,
     IllustratedModel: SystemArchitecture,
     PatentStrip: SecretSauceReveal,
     TechnicalCards: TechnicalAdvantage,
+    ComparisonTable: PropertyComparisonMatrix,
   },
   
   socialProof: {
@@ -321,11 +322,11 @@ export const componentRegistry: ComponentRegistry = {
   
   security: {
     SecurityChecklist: SecurityChecklist,
-    AuditResultsPanel: AuditResultsPanel,
-    PenetrationTestResults: PenetrationTestResults,
-    PrivacyCommitmentBlock: PrivacyCommitmentBlock,
-    SecurityGuaranteePanel: SecurityGuaranteePanel,
-    TrustSealCollection: TrustSealCollection,
+    // AuditResultsPanel: AuditResultsPanel, // Not in layoutRegistry
+    // PenetrationTestResults: PenetrationTestResults, // Not in layoutRegistry
+    // PrivacyCommitmentBlock: PrivacyCommitmentBlock, // Not in layoutRegistry
+    // SecurityGuaranteePanel: SecurityGuaranteePanel, // Not in layoutRegistry
+    // TrustSealCollection: TrustSealCollection, // Not in layoutRegistry
     // Map missing layouts from layoutRegistry to existing components
     ComplianceBadgeRow: TrustSealCollection,
     AuditTrustPanel: AuditResultsPanel,
