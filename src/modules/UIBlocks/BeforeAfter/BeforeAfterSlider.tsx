@@ -483,16 +483,24 @@ export const componentMeta = {
   
   contentFields: [
     { key: 'headline', label: 'Main Headline', type: 'text', required: true },
-    { key: 'subheadline', label: 'Subheadline', type: 'textarea', required: false },
     { key: 'before_label', label: 'Before Label', type: 'text', required: true },
-    { key: 'before_description', label: 'Before Description', type: 'textarea', required: true },
-    { key: 'before_visual', label: 'Before Visual', type: 'image', required: false },
     { key: 'after_label', label: 'After Label', type: 'text', required: true },
+    { key: 'before_description', label: 'Before Description', type: 'textarea', required: true },
     { key: 'after_description', label: 'After Description', type: 'textarea', required: true },
+    { key: 'before_visual', label: 'Before Visual', type: 'image', required: false },
     { key: 'after_visual', label: 'After Visual', type: 'image', required: false },
+    { key: 'before_placeholder_text', label: 'Before Placeholder Text', type: 'text', required: false },
+    { key: 'after_placeholder_text', label: 'After Placeholder Text', type: 'text', required: false },
+    { key: 'interaction_hint_text', label: 'Interaction Hint Text', type: 'text', required: false },
+    { key: 'show_interaction_hint', label: 'Show Interaction Hint', type: 'boolean', required: false },
+    { key: 'before_icon', label: 'Before Icon', type: 'icon', required: false },
+    { key: 'after_icon', label: 'After Icon', type: 'icon', required: false },
+    { key: 'hint_icon', label: 'Hint Icon', type: 'icon', required: false },
+    { key: 'subheadline', label: 'Subheadline', type: 'textarea', required: false },
     { key: 'supporting_text', label: 'Supporting Text', type: 'textarea', required: false },
     { key: 'cta_text', label: 'CTA Button Text', type: 'text', required: false },
-    { key: 'trust_items', label: 'Trust Indicators (pipe separated)', type: 'text', required: false }
+    { key: 'trust_items', label: 'Trust Indicators (pipe separated)', type: 'text', required: false },
+    { key: 'slider_instruction', label: 'Slider Instruction', type: 'text', required: false }
   ],
   
   features: [

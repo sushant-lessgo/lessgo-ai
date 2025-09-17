@@ -30,6 +30,10 @@ export function classifyField(fieldName: string, sectionType?: string): Classifi
     return classifyInlineQnAListField(fieldName);
   }
 
+  if (sectionType === 'BeforeAfterSlider') {
+    return classifyBeforeAfterSliderField(fieldName);
+  }
+
   if (sectionType === 'EmojiOutcomeGrid') {
     return classifyEmojiOutcomeGridField(fieldName);
   }
@@ -335,6 +339,163 @@ function classifyInlineQnAListField(fieldName: string): ClassificationResult {
     classification: {
       category: 'hybrid',
       reason: 'Unknown InlineQnAList field, using hybrid approach',
+      fallback_strategy: 'generate',
+      confidence: 0.7
+    },
+    user_guidance: 'Please review this field as it may need manual adjustment'
+  };
+}
+
+/**
+ * Specific classification for BeforeAfterSlider fields
+ */
+function classifyBeforeAfterSliderField(fieldName: string): ClassificationResult {
+  const field = fieldName.toLowerCase();
+
+  // Headlines and descriptions are AI-generated
+  if (field === 'headline' || field === 'subheadline' || field === 'supporting_text') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Before/After header content is ideal for AI generation',
+        fallback_strategy: 'generate',
+        confidence: 0.95
+      },
+      user_guidance: 'AI will create compelling transformation messaging'
+    };
+  }
+
+  // Before/After labels and descriptions
+  if (field.startsWith('before_') || field.startsWith('after_')) {
+    if (field.includes('label') || field.includes('description')) {
+      return {
+        field: fieldName,
+        classification: {
+          category: 'ai_generated',
+          reason: 'Before/After transformation content is perfect for AI generation',
+          fallback_strategy: 'generate',
+          confidence: 0.9
+        },
+        user_guidance: 'AI will create contrasting before/after scenarios based on your product'
+      };
+    }
+    if (field.includes('placeholder_text')) {
+      return {
+        field: fieldName,
+        classification: {
+          category: 'ai_generated',
+          reason: 'Placeholder text for visual representation',
+          fallback_strategy: 'generate',
+          confidence: 0.85
+        },
+        user_guidance: 'AI will generate descriptive placeholder text for the visual areas'
+      };
+    }
+    if (field.includes('icon')) {
+      return {
+        field: fieldName,
+        classification: {
+          category: 'hybrid',
+          reason: 'Icons benefit from AI suggestion with user customization',
+          fallback_strategy: 'default',
+          confidence: 0.7
+        },
+        suggested_default: field.includes('before') ? '⚠️' : '✅',
+        user_guidance: 'Choose icons that visually represent the transformation'
+      };
+    }
+    if (field.includes('visual')) {
+      return {
+        field: fieldName,
+        classification: {
+          category: 'manual_preferred',
+          reason: 'Visual assets require actual screenshots or images',
+          fallback_strategy: 'default',
+          confidence: 0.9
+        },
+        user_guidance: 'Upload before/after screenshots or mockups for best effect'
+      };
+    }
+  }
+
+  // Interaction hints
+  if (field.includes('interaction_hint') || field === 'slider_instruction') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Interaction guidance text for user engagement',
+        fallback_strategy: 'generate',
+        confidence: 0.85
+      },
+      user_guidance: 'AI will create helpful interaction hints'
+    };
+  }
+
+  // Show/hide flags
+  if (field === 'show_interaction_hint') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'hybrid',
+        reason: 'Display preference based on audience sophistication',
+        fallback_strategy: 'default',
+        confidence: 0.7
+      },
+      suggested_default: 'true',
+      user_guidance: 'Show hints for less sophisticated audiences'
+    };
+  }
+
+  // Icon fields
+  if (field === 'hint_icon') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'hybrid',
+        reason: 'Hint icon for interaction guidance',
+        fallback_strategy: 'default',
+        confidence: 0.7
+      },
+      suggested_default: '👆',
+      user_guidance: 'Choose an icon that suggests interaction'
+    };
+  }
+
+  // CTA and trust items
+  if (field === 'cta_text') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Call-to-action text generation',
+        fallback_strategy: 'generate',
+        confidence: 0.9
+      },
+      user_guidance: 'AI will create action-oriented CTA text'
+    };
+  }
+
+  if (field === 'trust_items') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Trust indicators for credibility',
+        fallback_strategy: 'generate',
+        confidence: 0.85
+      },
+      user_guidance: 'AI will generate pipe-separated trust indicators'
+    };
+  }
+
+  // Fallback to general classification
+  return {
+    field: fieldName,
+    classification: {
+      category: 'hybrid',
+      reason: 'Unknown BeforeAfterSlider field, using hybrid approach',
       fallback_strategy: 'generate',
       confidence: 0.7
     },

@@ -77,6 +77,86 @@ const elementRules: SectionLayoutRules = {
         { variable: "copyIntent", values: ["pain-led"], weight: 3 }
       ],
       minScore: 5
+    },
+    {
+      element: "supporting_text",
+      conditions: [
+        { variable: "marketSophisticationLevel", values: ["level-4", "level-5"], weight: 4 },
+        { variable: "copyIntent", values: ["benefit-led", "pain-led"], weight: 3 }
+      ],
+      minScore: 4
+    },
+    {
+      element: "cta_text",
+      conditions: [
+        { variable: "awarenessLevel", values: ["solution-aware", "product-aware"], weight: 4 },
+        { variable: "landingPageGoals", values: ["signup", "start-trial", "book-demo"], weight: 3 }
+      ],
+      minScore: 4
+    },
+    {
+      element: "trust_items",
+      conditions: [
+        { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 3 },
+        { variable: "targetAudience", values: ["enterprise-buyers", "team-leads"], weight: 2 }
+      ],
+      minScore: 3
+    },
+    {
+      element: "interaction_hint_text",
+      conditions: [
+        { variable: "awarenessLevel", values: ["unaware", "problem-aware"], weight: 3 },
+        { variable: "marketSophisticationLevel", values: ["level-1", "level-2"], weight: 2 }
+      ],
+      minScore: 3
+    },
+    {
+      element: "show_interaction_hint",
+      conditions: [
+        { variable: "awarenessLevel", values: ["unaware", "problem-aware"], weight: 3 },
+        { variable: "marketSophisticationLevel", values: ["level-1", "level-2"], weight: 2 }
+      ],
+      minScore: 3
+    },
+    {
+      element: "before_placeholder_text",
+      conditions: [
+        { variable: "copyIntent", values: ["pain-led"], weight: 3 },
+        { variable: "awarenessLevel", values: ["problem-aware"], weight: 2 }
+      ],
+      minScore: 3
+    },
+    {
+      element: "after_placeholder_text",
+      conditions: [
+        { variable: "copyIntent", values: ["benefit-led"], weight: 3 },
+        { variable: "awarenessLevel", values: ["solution-aware"], weight: 2 }
+      ],
+      minScore: 3
+    },
+    {
+      element: "before_icon",
+      conditions: [
+        { variable: "targetAudience", values: ["developers", "no-code-builders"], weight: 2 },
+        { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 2 }
+      ],
+      minScore: 2
+    },
+    {
+      element: "after_icon",
+      conditions: [
+        { variable: "targetAudience", values: ["developers", "no-code-builders"], weight: 2 },
+        { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 2 }
+      ],
+      minScore: 2
+    },
+    {
+      element: "hint_icon",
+      conditions: [
+        { variable: "targetAudience", values: ["developers", "no-code-builders"], weight: 2 },
+        { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 2 }
+      ],
+      minScore: 2
     }
   ],
 
