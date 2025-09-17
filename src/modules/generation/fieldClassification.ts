@@ -30,6 +30,35 @@ export function classifyField(fieldName: string, sectionType?: string): Classifi
     return classifyInlineQnAListField(fieldName);
   }
 
+  // FAQ Section Classifications
+  if (sectionType === 'AccordionFAQ') {
+    return classifyAccordionFAQField(fieldName);
+  }
+
+  if (sectionType === 'TwoColumnFAQ') {
+    return classifyTwoColumnFAQField(fieldName);
+  }
+
+  if (sectionType === 'SegmentedFAQTabs') {
+    return classifySegmentedFAQTabsField(fieldName);
+  }
+
+  if (sectionType === 'QuoteStyleAnswers') {
+    return classifyQuoteStyleAnswersField(fieldName);
+  }
+
+  if (sectionType === 'IconWithAnswers') {
+    return classifyIconWithAnswersField(fieldName);
+  }
+
+  if (sectionType === 'TestimonialFAQs') {
+    return classifyTestimonialFAQsField(fieldName);
+  }
+
+  if (sectionType === 'ChatBubbleFAQ') {
+    return classifyChatBubbleFAQField(fieldName);
+  }
+
   if (sectionType === 'BeforeAfterSlider') {
     return classifyBeforeAfterSliderField(fieldName);
   }
@@ -357,6 +386,575 @@ function classifyInlineQnAListField(fieldName: string): ClassificationResult {
       confidence: 0.7
     },
     user_guidance: 'Please review this field as it may need manual adjustment'
+  };
+}
+
+/**
+ * Specific classification for AccordionFAQ fields
+ */
+function classifyAccordionFAQField(fieldName: string): ClassificationResult {
+  const field = fieldName.toLowerCase();
+
+  if (field === 'headline' || field === 'subheadline') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Accordion FAQ header content is ideal for AI generation',
+        fallback_strategy: 'generate',
+        confidence: 0.95
+      },
+      user_guidance: 'AI will create engaging headlines for your collapsible FAQ section'
+    };
+  }
+
+  if (field.startsWith('question_') || field.startsWith('answer_')) {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Accordion Q&A pairs perfect for AI generation',
+        fallback_strategy: 'generate',
+        confidence: 0.9
+      },
+      user_guidance: 'AI will generate expandable Q&A content based on your business'
+    };
+  }
+
+  if (field.includes('icon') && (field.includes('expand') || field.includes('collapse'))) {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'manual_preferred',
+        reason: 'Interaction icons should match brand visual style',
+        fallback_strategy: 'default',
+        confidence: 0.8
+      },
+      suggested_default: '➕',
+      user_guidance: 'Choose icons that match your brand style (e.g., +/-, arrows, or custom icons)'
+    };
+  }
+
+  // Legacy fields
+  if (field === 'questions' || field === 'answers') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Legacy format for accordion FAQ content',
+        fallback_strategy: 'generate',
+        confidence: 0.85
+      }
+    };
+  }
+
+  return {
+    field: fieldName,
+    classification: {
+      category: 'hybrid',
+      reason: 'Unknown AccordionFAQ field',
+      fallback_strategy: 'generate',
+      confidence: 0.7
+    }
+  };
+}
+
+/**
+ * Specific classification for TwoColumnFAQ fields
+ */
+function classifyTwoColumnFAQField(fieldName: string): ClassificationResult {
+  const field = fieldName.toLowerCase();
+
+  if (field === 'headline' || field === 'subheadline') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Two-column FAQ header content ideal for AI generation',
+        fallback_strategy: 'generate',
+        confidence: 0.95
+      },
+      user_guidance: 'AI will create headers that introduce your split FAQ layout'
+    };
+  }
+
+  if (field.startsWith('left_') || field.startsWith('right_')) {
+    if (field.includes('question') || field.includes('answer')) {
+      return {
+        field: fieldName,
+        classification: {
+          category: 'ai_generated',
+          reason: 'Column-specific Q&A content ideal for AI generation',
+          fallback_strategy: 'generate',
+          confidence: 0.9
+        },
+        user_guidance: 'AI will generate balanced Q&A content for both columns'
+      };
+    }
+
+    if (field.includes('title')) {
+      return {
+        field: fieldName,
+        classification: {
+          category: 'hybrid',
+          reason: 'Column titles benefit from business-specific customization',
+          fallback_strategy: 'generate',
+          confidence: 0.8
+        },
+        user_guidance: 'AI will suggest column titles, but consider customizing for your specific categories'
+      };
+    }
+  }
+
+  // Legacy fields
+  if (field === 'questions' || field === 'answers' || field.includes('column_titles')) {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Legacy format for two-column FAQ',
+        fallback_strategy: 'generate',
+        confidence: 0.85
+      }
+    };
+  }
+
+  return {
+    field: fieldName,
+    classification: {
+      category: 'hybrid',
+      reason: 'Unknown TwoColumnFAQ field',
+      fallback_strategy: 'generate',
+      confidence: 0.7
+    }
+  };
+}
+
+/**
+ * Specific classification for SegmentedFAQTabs fields
+ */
+function classifySegmentedFAQTabsField(fieldName: string): ClassificationResult {
+  const field = fieldName.toLowerCase();
+
+  if (field === 'headline' || field === 'subheadline') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Tabbed FAQ header content ideal for AI generation',
+        fallback_strategy: 'generate',
+        confidence: 0.95
+      },
+      user_guidance: 'AI will create headers that introduce your categorized FAQ tabs'
+    };
+  }
+
+  if (field.includes('tab_') && field.includes('label')) {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'hybrid',
+        reason: 'Tab labels should reflect business-specific categories',
+        fallback_strategy: 'generate',
+        confidence: 0.8
+      },
+      user_guidance: 'AI will suggest tab categories, but customize to match your business areas'
+    };
+  }
+
+  if (field.includes('tab_') && field.includes('description')) {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Tab descriptions can be generated from business context',
+        fallback_strategy: 'generate',
+        confidence: 0.9
+      },
+      user_guidance: 'AI will create helpful descriptions for each FAQ category'
+    };
+  }
+
+  if (field.includes('tab_') && (field.includes('question') || field.includes('answer'))) {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Tab-specific Q&A content ideal for AI generation',
+        fallback_strategy: 'generate',
+        confidence: 0.9
+      },
+      user_guidance: 'AI will generate relevant Q&A content for each tab category'
+    };
+  }
+
+  // Legacy fields
+  if (field === 'tab_labels' || field === 'tab_descriptions' || field === 'questions' || field === 'answers') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Legacy format for segmented FAQ tabs',
+        fallback_strategy: 'generate',
+        confidence: 0.85
+      }
+    };
+  }
+
+  return {
+    field: fieldName,
+    classification: {
+      category: 'hybrid',
+      reason: 'Unknown SegmentedFAQTabs field',
+      fallback_strategy: 'generate',
+      confidence: 0.7
+    }
+  };
+}
+
+/**
+ * Specific classification for QuoteStyleAnswers fields
+ */
+function classifyQuoteStyleAnswersField(fieldName: string): ClassificationResult {
+  const field = fieldName.toLowerCase();
+
+  if (field === 'headline' || field === 'subheadline') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Quote-style FAQ header content ideal for AI generation',
+        fallback_strategy: 'generate',
+        confidence: 0.95
+      },
+      user_guidance: 'AI will create headers that introduce your testimonial-style FAQ'
+    };
+  }
+
+  if (field.startsWith('question_')) {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'FAQ questions can be generated from business context',
+        fallback_strategy: 'generate',
+        confidence: 0.9
+      },
+      user_guidance: 'AI will generate relevant questions that customers commonly ask'
+    };
+  }
+
+  if (field.includes('quote_answer') || field.includes('attribution')) {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'hybrid',
+        reason: 'Quote answers should sound authentic to real customers',
+        fallback_strategy: 'generate',
+        confidence: 0.75
+      },
+      user_guidance: 'AI will generate quote-style answers, but consider using real customer testimonials'
+    };
+  }
+
+  if (field.includes('style')) {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'manual_preferred',
+        reason: 'Visual styling should match brand guidelines',
+        fallback_strategy: 'default',
+        confidence: 0.8
+      },
+      suggested_default: 'professional',
+      user_guidance: 'Choose styling that matches your brand voice and visual identity'
+    };
+  }
+
+  // Legacy fields
+  if (field === 'questions' || field === 'quote_answers' || field === 'quote_attributions') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Legacy format for quote-style FAQ',
+        fallback_strategy: 'generate',
+        confidence: 0.85
+      }
+    };
+  }
+
+  return {
+    field: fieldName,
+    classification: {
+      category: 'hybrid',
+      reason: 'Unknown QuoteStyleAnswers field',
+      fallback_strategy: 'generate',
+      confidence: 0.7
+    }
+  };
+}
+
+/**
+ * Specific classification for IconWithAnswers fields
+ */
+function classifyIconWithAnswersField(fieldName: string): ClassificationResult {
+  const field = fieldName.toLowerCase();
+
+  if (field === 'headline' || field === 'subheadline') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Icon FAQ header content ideal for AI generation',
+        fallback_strategy: 'generate',
+        confidence: 0.95
+      },
+      user_guidance: 'AI will create headers that introduce your visual FAQ section'
+    };
+  }
+
+  if (field.startsWith('question_') || field.startsWith('answer_')) {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Q&A content can be generated from business context',
+        fallback_strategy: 'generate',
+        confidence: 0.9
+      },
+      user_guidance: 'AI will generate Q&A content that pairs well with visual icons'
+    };
+  }
+
+  if (field.includes('icon_') && !field.includes('position') && !field.includes('size')) {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'hybrid',
+        reason: 'Icons should be meaningful and match content theme',
+        fallback_strategy: 'generate',
+        confidence: 0.7
+      },
+      user_guidance: 'AI will suggest relevant icons, but consider using brand-specific icons'
+    };
+  }
+
+  if (field.includes('position') || field.includes('size')) {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'manual_preferred',
+        reason: 'Layout configuration should match design preferences',
+        fallback_strategy: 'default',
+        confidence: 0.8
+      },
+      suggested_default: 'left',
+      user_guidance: 'Choose icon placement and size based on your design system'
+    };
+  }
+
+  // Legacy fields
+  if (field === 'questions' || field === 'answers' || field === 'icon_labels') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Legacy format for icon FAQ',
+        fallback_strategy: 'generate',
+        confidence: 0.85
+      }
+    };
+  }
+
+  return {
+    field: fieldName,
+    classification: {
+      category: 'hybrid',
+      reason: 'Unknown IconWithAnswers field',
+      fallback_strategy: 'generate',
+      confidence: 0.7
+    }
+  };
+}
+
+/**
+ * Specific classification for TestimonialFAQs fields
+ */
+function classifyTestimonialFAQsField(fieldName: string): ClassificationResult {
+  const field = fieldName.toLowerCase();
+
+  if (field === 'headline' || field === 'subheadline') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Testimonial FAQ header content ideal for AI generation',
+        fallback_strategy: 'generate',
+        confidence: 0.95
+      },
+      user_guidance: 'AI will create headers that introduce your customer-answered FAQ'
+    };
+  }
+
+  if (field.startsWith('question_')) {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'FAQ questions can be generated from business context',
+        fallback_strategy: 'generate',
+        confidence: 0.9
+      },
+      user_guidance: 'AI will generate questions that customers commonly ask'
+    };
+  }
+
+  if (field.includes('testimonial_answer')) {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'hybrid',
+        reason: 'Testimonial answers should sound authentic to real customers',
+        fallback_strategy: 'generate',
+        confidence: 0.7
+      },
+      user_guidance: 'AI will generate customer-style answers, but real testimonials are preferred'
+    };
+  }
+
+  if (field.includes('customer_name') || field.includes('customer_title') || field.includes('customer_company')) {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'manual_preferred',
+        reason: 'Customer information should be authentic and verifiable',
+        fallback_strategy: 'default',
+        confidence: 0.9
+      },
+      suggested_default: 'Anonymous Customer',
+      user_guidance: 'Use real customer information with permission, or anonymize appropriately'
+    };
+  }
+
+  if (field.includes('style')) {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'manual_preferred',
+        reason: 'Visual styling should match brand guidelines',
+        fallback_strategy: 'default',
+        confidence: 0.8
+      },
+      suggested_default: 'professional',
+      user_guidance: 'Choose styling that matches your brand and builds credibility'
+    };
+  }
+
+  // Legacy fields
+  if (field === 'questions' || field === 'testimonial_answers' || field === 'customer_names' || field === 'customer_titles') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Legacy format for testimonial FAQ',
+        fallback_strategy: 'generate',
+        confidence: 0.85
+      }
+    };
+  }
+
+  return {
+    field: fieldName,
+    classification: {
+      category: 'hybrid',
+      reason: 'Unknown TestimonialFAQs field',
+      fallback_strategy: 'generate',
+      confidence: 0.7
+    }
+  };
+}
+
+/**
+ * Specific classification for ChatBubbleFAQ fields
+ */
+function classifyChatBubbleFAQField(fieldName: string): ClassificationResult {
+  const field = fieldName.toLowerCase();
+
+  if (field === 'headline' || field === 'subheadline') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Chat FAQ header content ideal for AI generation',
+        fallback_strategy: 'generate',
+        confidence: 0.95
+      },
+      user_guidance: 'AI will create headers that introduce your conversational FAQ'
+    };
+  }
+
+  if (field.startsWith('question_') || field.startsWith('answer_')) {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Conversational Q&A content ideal for AI generation',
+        fallback_strategy: 'generate',
+        confidence: 0.95
+      },
+      user_guidance: 'AI will generate natural conversation-style Q&A content'
+    };
+  }
+
+  if (field.includes('persona') && (field.includes('name') || field.includes('customer') || field.includes('support'))) {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'hybrid',
+        reason: 'Persona names should match brand voice and target audience',
+        fallback_strategy: 'generate',
+        confidence: 0.8
+      },
+      user_guidance: 'AI will suggest persona names, but customize to match your brand personality'
+    };
+  }
+
+  if (field.includes('style') || field.includes('alignment')) {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'manual_preferred',
+        reason: 'Chat styling should match interface design',
+        fallback_strategy: 'default',
+        confidence: 0.8
+      },
+      suggested_default: 'modern',
+      user_guidance: 'Choose chat style that matches your user interface design'
+    };
+  }
+
+  // Legacy fields
+  if (field === 'questions' || field === 'answers' || field === 'chat_personas') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Legacy format for chat bubble FAQ',
+        fallback_strategy: 'generate',
+        confidence: 0.85
+      }
+    };
+  }
+
+  return {
+    field: fieldName,
+    classification: {
+      category: 'hybrid',
+      reason: 'Unknown ChatBubbleFAQ field',
+      fallback_strategy: 'generate',
+      confidence: 0.7
+    }
   };
 }
 

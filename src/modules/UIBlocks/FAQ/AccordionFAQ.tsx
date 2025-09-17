@@ -392,12 +392,25 @@ export const componentMeta = {
   complexity: 'medium',
   estimatedBuildTime: '20 minutes',
   
-  // ✅ ENHANCED: Schema for component generation tools
+  // ✅ ENHANCED: Schema for component generation tools - Updated for individual Q&A fields
   contentFields: [
     { key: 'headline', label: 'Section Headline', type: 'text', required: true },
     { key: 'subheadline', label: 'Subheadline', type: 'textarea', required: false },
-    { key: 'questions', label: 'Questions (pipe separated)', type: 'textarea', required: true },
-    { key: 'answers', label: 'Answers (pipe separated)', type: 'textarea', required: true }
+    { key: 'question_1', label: 'Question 1', type: 'text', required: true },
+    { key: 'answer_1', label: 'Answer 1', type: 'textarea', required: true },
+    { key: 'question_2', label: 'Question 2', type: 'text', required: true },
+    { key: 'answer_2', label: 'Answer 2', type: 'textarea', required: true },
+    { key: 'question_3', label: 'Question 3', type: 'text', required: true },
+    { key: 'answer_3', label: 'Answer 3', type: 'textarea', required: true },
+    { key: 'question_4', label: 'Question 4', type: 'text', required: false },
+    { key: 'answer_4', label: 'Answer 4', type: 'textarea', required: false },
+    { key: 'question_5', label: 'Question 5', type: 'text', required: false },
+    { key: 'answer_5', label: 'Answer 5', type: 'textarea', required: false },
+    { key: 'expand_icon', label: 'Expand Icon', type: 'text', required: false },
+    { key: 'collapse_icon', label: 'Collapse Icon', type: 'text', required: false },
+    // Legacy fields for backward compatibility
+    { key: 'questions', label: 'Questions (legacy pipe separated)', type: 'textarea', required: false },
+    { key: 'answers', label: 'Answers (legacy pipe separated)', type: 'textarea', required: false }
   ],
   
   // ✅ NEW: Enhanced features

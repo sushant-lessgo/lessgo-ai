@@ -620,7 +620,7 @@ const elementRules: SectionLayoutRules = {
     }
   ],
 
-  // FAQ Section Rules - Add these to elementRules object
+  // FAQ Section Rules
 
 "FAQ_AccordionFAQ": [
   {
@@ -630,12 +630,77 @@ const elementRules: SectionLayoutRules = {
       { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 3 }
     ],
     minScore: 5
+  },
+  {
+    element: "question_4",
+    conditions: [
+      { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 4 },
+      { variable: "awarenessLevel", values: ["solution-aware", "product-aware"], weight: 3 }
+    ],
+    minScore: 6
+  },
+  {
+    element: "question_5",
+    conditions: [
+      { variable: "marketSophisticationLevel", values: ["level-4", "level-5"], weight: 4 },
+      { variable: "targetAudience", values: ["enterprise-tech-teams", "enterprise-marketing-teams"], weight: 3 }
+    ],
+    minScore: 6
+  },
+  {
+    element: "expand_icon",
+    conditions: [
+      { variable: "toneProfile", values: ["friendly-helpful", "confident-playful"], weight: 3 },
+      { variable: "targetAudience", values: ["creators", "solopreneurs", "indie-hackers"], weight: 2 }
+    ],
+    minScore: 4
+  },
+  {
+    element: "collapse_icon",
+    conditions: [
+      { variable: "toneProfile", values: ["friendly-helpful", "confident-playful"], weight: 3 },
+      { variable: "targetAudience", values: ["creators", "solopreneurs", "indie-hackers"], weight: 2 }
+    ],
+    minScore: 4
   }
 ],
 
 "FAQ_TwoColumnFAQ": [
   {
-    element: "column_titles",
+    element: "subheadline",
+    conditions: [
+      { variable: "awarenessLevel", values: ["solution-aware", "product-aware"], weight: 4 },
+      { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 3 }
+    ],
+    minScore: 5
+  },
+  {
+    element: "left_question_3",
+    conditions: [
+      { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 4 },
+      { variable: "awarenessLevel", values: ["solution-aware", "product-aware"], weight: 3 }
+    ],
+    minScore: 6
+  },
+  {
+    element: "right_question_3",
+    conditions: [
+      { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 4 },
+      { variable: "awarenessLevel", values: ["solution-aware", "product-aware"], weight: 3 }
+    ],
+    minScore: 6
+  },
+  {
+    element: "left_column_title",
+    conditions: [
+      { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 4 },
+      { variable: "targetAudience", values: ["enterprise-tech-teams", "enterprise-marketing-teams", "developers"], weight: 3 },
+      { variable: "awarenessLevel", values: ["solution-aware", "product-aware"], weight: 2 }
+    ],
+    minScore: 6
+  },
+  {
+    element: "right_column_title",
     conditions: [
       { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 4 },
       { variable: "targetAudience", values: ["enterprise-tech-teams", "enterprise-marketing-teams", "developers"], weight: 3 },
@@ -658,24 +723,27 @@ const elementRules: SectionLayoutRules = {
   {
     element: "question_4",
     conditions: [
-      { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 4 },
-      { variable: "awarenessLevel", values: ["solution-aware", "product-aware"], weight: 3 }
-    ],
-    minScore: 5
-  },
-  {
-    element: "question_5",
-    conditions: [
-      { variable: "marketSophisticationLevel", values: ["level-4", "level-5"], weight: 4 },
-      { variable: "awarenessLevel", values: ["product-aware", "most-aware"], weight: 3 }
+      { variable: "marketSophisticationLevel", values: ["level-2", "level-3", "level-4"], weight: 4 },
+      { variable: "awarenessLevel", values: ["solution-aware", "product-aware"], weight: 3 },
+      { variable: "targetAudience", values: ["enterprise-tech-teams", "developers", "product-managers"], weight: 2 }
     ],
     minScore: 6
   },
   {
+    element: "question_5",
+    conditions: [
+      { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 4 },
+      { variable: "awarenessLevel", values: ["solution-aware", "product-aware"], weight: 3 },
+      { variable: "targetAudience", values: ["enterprise-tech-teams", "enterprise-marketing-teams", "mid-market-companies"], weight: 3 }
+    ],
+    minScore: 7
+  },
+  {
     element: "question_6",
     conditions: [
-      { variable: "marketSophisticationLevel", values: ["level-5"], weight: 5 },
-      { variable: "awarenessLevel", values: ["most-aware"], weight: 3 }
+      { variable: "marketSophisticationLevel", values: ["level-4", "level-5"], weight: 5 },
+      { variable: "awarenessLevel", values: ["product-aware"], weight: 3 },
+      { variable: "targetAudience", values: ["enterprise-tech-teams", "enterprise-marketing-teams"], weight: 2 }
     ],
     minScore: 7
   }
@@ -683,11 +751,61 @@ const elementRules: SectionLayoutRules = {
 
 "FAQ_SegmentedFAQTabs": [
   {
-    element: "tab_descriptions",
+    element: "subheadline",
+    conditions: [
+      { variable: "awarenessLevel", values: ["solution-aware", "product-aware"], weight: 4 },
+      { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 3 }
+    ],
+    minScore: 5
+  },
+  {
+    element: "tab_3_label",
+    conditions: [
+      { variable: "marketSophisticationLevel", values: ["level-4", "level-5"], weight: 4 },
+      { variable: "targetAudience", values: ["enterprise-tech-teams", "enterprise-marketing-teams"], weight: 3 }
+    ],
+    minScore: 6
+  },
+  {
+    element: "tab_1_description",
     conditions: [
       { variable: "marketSophisticationLevel", values: ["level-4", "level-5"], weight: 4 },
       { variable: "targetAudience", values: ["enterprise-tech-teams", "enterprise-marketing-teams", "developers", "product-managers"], weight: 3 },
       { variable: "awarenessLevel", values: ["solution-aware", "product-aware"], weight: 2 }
+    ],
+    minScore: 6
+  },
+  {
+    element: "tab_2_description",
+    conditions: [
+      { variable: "marketSophisticationLevel", values: ["level-4", "level-5"], weight: 4 },
+      { variable: "targetAudience", values: ["enterprise-tech-teams", "enterprise-marketing-teams", "developers", "product-managers"], weight: 3 },
+      { variable: "awarenessLevel", values: ["solution-aware", "product-aware"], weight: 2 }
+    ],
+    minScore: 6
+  },
+  {
+    element: "tab_3_description",
+    conditions: [
+      { variable: "marketSophisticationLevel", values: ["level-4", "level-5"], weight: 4 },
+      { variable: "targetAudience", values: ["enterprise-tech-teams", "enterprise-marketing-teams", "developers", "product-managers"], weight: 3 },
+      { variable: "awarenessLevel", values: ["solution-aware", "product-aware"], weight: 2 }
+    ],
+    minScore: 6
+  },
+  {
+    element: "tab_1_question_2",
+    conditions: [
+      { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 4 },
+      { variable: "awarenessLevel", values: ["solution-aware", "product-aware"], weight: 3 }
+    ],
+    minScore: 6
+  },
+  {
+    element: "tab_2_question_2",
+    conditions: [
+      { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 4 },
+      { variable: "awarenessLevel", values: ["solution-aware", "product-aware"], weight: 3 }
     ],
     minScore: 6
   }
@@ -695,7 +813,47 @@ const elementRules: SectionLayoutRules = {
 
 "FAQ_QuoteStyleAnswers": [
   {
-    element: "quote_attributions",
+    element: "subheadline",
+    conditions: [
+      { variable: "awarenessLevel", values: ["solution-aware", "product-aware"], weight: 4 },
+      { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 3 }
+    ],
+    minScore: 5
+  },
+  {
+    element: "question_3",
+    conditions: [
+      { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 4 },
+      { variable: "startupStage", values: ["targeting-pmf", "users-250-500", "users-500-1k", "users-1k-5k", "mrr-growth"], weight: 3 }
+    ],
+    minScore: 6
+  },
+  {
+    element: "question_4",
+    conditions: [
+      { variable: "marketSophisticationLevel", values: ["level-4", "level-5"], weight: 4 },
+      { variable: "startupStage", values: ["users-500-1k", "users-1k-5k", "mrr-growth"], weight: 3 }
+    ],
+    minScore: 6
+  },
+  {
+    element: "question_5",
+    conditions: [
+      { variable: "marketSophisticationLevel", values: ["level-5"], weight: 4 },
+      { variable: "startupStage", values: ["users-1k-5k", "mrr-growth"], weight: 3 }
+    ],
+    minScore: 6
+  },
+  {
+    element: "quote_style",
+    conditions: [
+      { variable: "toneProfile", values: ["friendly-helpful", "confident-playful"], weight: 3 },
+      { variable: "copyIntent", values: ["desire-led"], weight: 2 }
+    ],
+    minScore: 4
+  },
+  {
+    element: "attribution_style",
     conditions: [
       { variable: "startupStage", values: ["targeting-pmf", "users-250-500", "users-500-1k", "users-1k-5k", "mrr-growth"], weight: 4 },
       { variable: "copyIntent", values: ["desire-led"], weight: 3 },
@@ -707,37 +865,180 @@ const elementRules: SectionLayoutRules = {
 
 "FAQ_IconWithAnswers": [
   {
-    element: "icon_labels",
+    element: "subheadline",
     conditions: [
       { variable: "awarenessLevel", values: ["unaware", "problem-aware"], weight: 4 },
-      { variable: "marketSophisticationLevel", values: ["level-1", "level-2", "level-3"], weight: 3 },
-      { variable: "toneProfile", values: ["friendly-helpful", "confident-playful"], weight: 2 }
+      { variable: "marketSophisticationLevel", values: ["level-1", "level-2", "level-3"], weight: 3 }
+    ],
+    minScore: 5
+  },
+  {
+    element: "question_4",
+    conditions: [
+      { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 4 },
+      { variable: "awarenessLevel", values: ["solution-aware", "product-aware"], weight: 3 }
     ],
     minScore: 6
+  },
+  {
+    element: "question_5",
+    conditions: [
+      { variable: "marketSophisticationLevel", values: ["level-4", "level-5"], weight: 4 },
+      { variable: "awarenessLevel", values: ["solution-aware", "product-aware"], weight: 3 }
+    ],
+    minScore: 6
+  },
+  {
+    element: "question_6",
+    conditions: [
+      { variable: "marketSophisticationLevel", values: ["level-5"], weight: 4 },
+      { variable: "awarenessLevel", values: ["product-aware"], weight: 3 }
+    ],
+    minScore: 6
+  },
+  {
+    element: "icon_position",
+    conditions: [
+      { variable: "toneProfile", values: ["friendly-helpful", "confident-playful"], weight: 3 },
+      { variable: "targetAudience", values: ["creators", "solopreneurs", "indie-hackers"], weight: 2 }
+    ],
+    minScore: 4
+  },
+  {
+    element: "icon_size",
+    conditions: [
+      { variable: "toneProfile", values: ["friendly-helpful", "confident-playful"], weight: 3 },
+      { variable: "targetAudience", values: ["creators", "solopreneurs", "indie-hackers"], weight: 2 }
+    ],
+    minScore: 4
   }
 ],
 
 "FAQ_TestimonialFAQs": [
   {
-    element: "customer_titles",
+    element: "subheadline",
+    conditions: [
+      { variable: "awarenessLevel", values: ["solution-aware", "product-aware"], weight: 4 },
+      { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 3 }
+    ],
+    minScore: 5
+  },
+  {
+    element: "question_3",
+    conditions: [
+      { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 4 },
+      { variable: "startupStage", values: ["targeting-pmf", "users-250-500", "users-500-1k", "users-1k-5k", "mrr-growth"], weight: 3 }
+    ],
+    minScore: 6
+  },
+  {
+    element: "question_4",
+    conditions: [
+      { variable: "marketSophisticationLevel", values: ["level-4", "level-5"], weight: 4 },
+      { variable: "startupStage", values: ["users-500-1k", "users-1k-5k", "mrr-growth"], weight: 3 }
+    ],
+    minScore: 6
+  },
+  {
+    element: "question_5",
+    conditions: [
+      { variable: "marketSophisticationLevel", values: ["level-5"], weight: 4 },
+      { variable: "startupStage", values: ["users-1k-5k", "mrr-growth"], weight: 3 }
+    ],
+    minScore: 6
+  },
+  {
+    element: "customer_title_1",
     conditions: [
       { variable: "startupStage", values: ["targeting-pmf", "users-250-500", "users-500-1k", "users-1k-5k", "mrr-growth"], weight: 4 },
       { variable: "targetAudience", values: ["enterprise-tech-teams", "enterprise-marketing-teams", "mid-market-companies"], weight: 3 },
       { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 2 }
     ],
     minScore: 6
+  },
+  {
+    element: "customer_company_1",
+    conditions: [
+      { variable: "startupStage", values: ["users-250-500", "users-500-1k", "users-1k-5k", "mrr-growth"], weight: 4 },
+      { variable: "targetAudience", values: ["enterprise-tech-teams", "enterprise-marketing-teams", "mid-market-companies"], weight: 3 },
+      { variable: "marketSophisticationLevel", values: ["level-4", "level-5"], weight: 2 }
+    ],
+    minScore: 6
+  },
+  {
+    element: "testimonial_style",
+    conditions: [
+      { variable: "toneProfile", values: ["friendly-helpful", "professional-trustworthy"], weight: 3 },
+      { variable: "copyIntent", values: ["desire-led"], weight: 2 }
+    ],
+    minScore: 4
   }
 ],
 
 "FAQ_ChatBubbleFAQ": [
   {
-    element: "chat_personas",
+    element: "subheadline",
     conditions: [
-      { variable: "toneProfile", values: ["friendly-helpful", "confident-playful"], weight: 4 },
-      { variable: "targetAudience", values: ["creators", "solopreneurs", "indie-hackers", "early-stage-founders"], weight: 3 },
-      { variable: "awarenessLevel", values: ["unaware", "problem-aware"], weight: 2 }
+      { variable: "awarenessLevel", values: ["unaware", "problem-aware"], weight: 4 },
+      { variable: "toneProfile", values: ["friendly-helpful", "confident-playful"], weight: 3 }
+    ],
+    minScore: 5
+  },
+  {
+    element: "question_3",
+    conditions: [
+      { variable: "marketSophisticationLevel", values: ["level-2", "level-3", "level-4"], weight: 4 },
+      { variable: "awarenessLevel", values: ["solution-aware", "product-aware"], weight: 3 }
     ],
     minScore: 6
+  },
+  {
+    element: "question_4",
+    conditions: [
+      { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 4 },
+      { variable: "awarenessLevel", values: ["solution-aware", "product-aware"], weight: 3 }
+    ],
+    minScore: 6
+  },
+  {
+    element: "question_5",
+    conditions: [
+      { variable: "marketSophisticationLevel", values: ["level-4", "level-5"], weight: 4 },
+      { variable: "awarenessLevel", values: ["product-aware"], weight: 3 }
+    ],
+    minScore: 6
+  },
+  {
+    element: "customer_persona_name",
+    conditions: [
+      { variable: "toneProfile", values: ["friendly-helpful", "confident-playful"], weight: 4 },
+      { variable: "targetAudience", values: ["creators", "solopreneurs", "indie-hackers", "early-stage-founders"], weight: 3 }
+    ],
+    minScore: 6
+  },
+  {
+    element: "support_persona_name",
+    conditions: [
+      { variable: "toneProfile", values: ["friendly-helpful", "confident-playful"], weight: 4 },
+      { variable: "targetAudience", values: ["creators", "solopreneurs", "indie-hackers", "early-stage-founders"], weight: 3 }
+    ],
+    minScore: 6
+  },
+  {
+    element: "chat_style",
+    conditions: [
+      { variable: "toneProfile", values: ["friendly-helpful", "confident-playful"], weight: 4 },
+      { variable: "awarenessLevel", values: ["unaware", "problem-aware"], weight: 2 }
+    ],
+    minScore: 5
+  },
+  {
+    element: "bubble_alignment",
+    conditions: [
+      { variable: "toneProfile", values: ["friendly-helpful", "confident-playful"], weight: 3 },
+      { variable: "targetAudience", values: ["creators", "solopreneurs", "indie-hackers"], weight: 2 }
+    ],
+    minScore: 4
   }
 ],
 

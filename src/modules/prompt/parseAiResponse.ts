@@ -139,12 +139,68 @@ function processSectionContent(sectionId: string, content: SectionContent): {
     hasIssues: false
   };
 
-  // Special handling for InlineQnAList sections
+  // Special handling for FAQ sections
   if (sectionId.includes('InlineQnAList')) {
     const processedInlineQnA = processInlineQnAListContent(sectionId, content);
     result.content = processedInlineQnA.content;
     result.warnings = processedInlineQnA.warnings;
     result.hasIssues = processedInlineQnA.hasIssues;
+    return result;
+  }
+
+  if (sectionId.includes('AccordionFAQ')) {
+    const processedAccordion = processAccordionFAQContent(sectionId, content);
+    result.content = processedAccordion.content;
+    result.warnings = processedAccordion.warnings;
+    result.hasIssues = processedAccordion.hasIssues;
+    return result;
+  }
+
+  if (sectionId.includes('TwoColumnFAQ')) {
+    const processedTwoColumn = processTwoColumnFAQContent(sectionId, content);
+    result.content = processedTwoColumn.content;
+    result.warnings = processedTwoColumn.warnings;
+    result.hasIssues = processedTwoColumn.hasIssues;
+    return result;
+  }
+
+  if (sectionId.includes('SegmentedFAQTabs')) {
+    const processedSegmented = processSegmentedFAQTabsContent(sectionId, content);
+    result.content = processedSegmented.content;
+    result.warnings = processedSegmented.warnings;
+    result.hasIssues = processedSegmented.hasIssues;
+    return result;
+  }
+
+  if (sectionId.includes('QuoteStyleAnswers')) {
+    const processedQuote = processQuoteStyleAnswersContent(sectionId, content);
+    result.content = processedQuote.content;
+    result.warnings = processedQuote.warnings;
+    result.hasIssues = processedQuote.hasIssues;
+    return result;
+  }
+
+  if (sectionId.includes('IconWithAnswers')) {
+    const processedIcon = processIconWithAnswersContent(sectionId, content);
+    result.content = processedIcon.content;
+    result.warnings = processedIcon.warnings;
+    result.hasIssues = processedIcon.hasIssues;
+    return result;
+  }
+
+  if (sectionId.includes('TestimonialFAQs')) {
+    const processedTestimonial = processTestimonialFAQsContent(sectionId, content);
+    result.content = processedTestimonial.content;
+    result.warnings = processedTestimonial.warnings;
+    result.hasIssues = processedTestimonial.hasIssues;
+    return result;
+  }
+
+  if (sectionId.includes('ChatBubbleFAQ')) {
+    const processedChat = processChatBubbleFAQContent(sectionId, content);
+    result.content = processedChat.content;
+    result.warnings = processedChat.warnings;
+    result.hasIssues = processedChat.hasIssues;
     return result;
   }
 
@@ -507,6 +563,643 @@ function validateQnAPairs(content: SectionContent): {
     }
     if (answer && !question) {
       warnings.push(`Answer ${i} has no corresponding question`);
+    }
+  }
+
+  return { warnings };
+}
+
+/**
+ * Special processing for AccordionFAQ sections
+ */
+function processAccordionFAQContent(sectionId: string, content: SectionContent): {
+  content: SectionContent;
+  warnings: string[];
+  hasIssues: boolean;
+} {
+  const result = {
+    content: {} as SectionContent,
+    warnings: [] as string[],
+    hasIssues: false
+  };
+
+  // Check for legacy format and convert
+  const hasLegacyFormat = content.questions && content.answers;
+  const hasIndividualFields = Object.keys(content).some(key =>
+    key.startsWith('question_') || key.startsWith('answer_')
+  );
+
+  if (hasLegacyFormat && !hasIndividualFields) {
+    const convertedContent = convertLegacyToIndividualFields(content);
+    result.warnings.push(`${sectionId}: Converted legacy pipe-separated format to individual Q&A fields`);
+    Object.assign(result.content, convertedContent);
+  }
+
+  // Process all fields
+  Object.entries(content).forEach(([elementKey, elementValue]) => {
+    const processedElement = processElement(sectionId, elementKey, elementValue);
+    if (processedElement.isValid) {
+      result.content[elementKey] = processedElement.value;
+    } else {
+      result.warnings.push(...processedElement.warnings);
+      result.hasIssues = true;
+      result.content[elementKey] = processedElement.fallback;
+    }
+  });
+
+  // Validate Q&A pairs
+  const pairValidation = validateQnAPairs(result.content);
+  if (pairValidation.warnings.length > 0) {
+    result.warnings.push(...pairValidation.warnings);
+    result.hasIssues = true;
+  }
+
+  return result;
+}
+
+/**
+ * Special processing for TwoColumnFAQ sections
+ */
+function processTwoColumnFAQContent(sectionId: string, content: SectionContent): {
+  content: SectionContent;
+  warnings: string[];
+  hasIssues: boolean;
+} {
+  const result = {
+    content: {} as SectionContent,
+    warnings: [] as string[],
+    hasIssues: false
+  };
+
+  // Check for legacy format conversion
+  const hasLegacyFormat = content.questions && content.answers;
+  if (hasLegacyFormat) {
+    const convertedContent = convertTwoColumnLegacyFormat(content);
+    result.warnings.push(`${sectionId}: Converted legacy format to two-column Q&A fields`);
+    Object.assign(result.content, convertedContent);
+  }
+
+  // Process all fields
+  Object.entries(content).forEach(([elementKey, elementValue]) => {
+    const processedElement = processElement(sectionId, elementKey, elementValue);
+    if (processedElement.isValid) {
+      result.content[elementKey] = processedElement.value;
+    } else {
+      result.warnings.push(...processedElement.warnings);
+      result.hasIssues = true;
+      result.content[elementKey] = processedElement.fallback;
+    }
+  });
+
+  // Validate left/right column Q&A pairs
+  const columnValidation = validateTwoColumnQnAPairs(result.content);
+  if (columnValidation.warnings.length > 0) {
+    result.warnings.push(...columnValidation.warnings);
+    result.hasIssues = true;
+  }
+
+  return result;
+}
+
+/**
+ * Special processing for SegmentedFAQTabs sections
+ */
+function processSegmentedFAQTabsContent(sectionId: string, content: SectionContent): {
+  content: SectionContent;
+  warnings: string[];
+  hasIssues: boolean;
+} {
+  const result = {
+    content: {} as SectionContent,
+    warnings: [] as string[],
+    hasIssues: false
+  };
+
+  // Check for legacy format conversion
+  const hasLegacyFormat = content.tab_labels || content.questions;
+  if (hasLegacyFormat) {
+    const convertedContent = convertSegmentedTabsLegacyFormat(content);
+    result.warnings.push(`${sectionId}: Converted legacy format to tab-specific Q&A fields`);
+    Object.assign(result.content, convertedContent);
+  }
+
+  // Process all fields
+  Object.entries(content).forEach(([elementKey, elementValue]) => {
+    const processedElement = processElement(sectionId, elementKey, elementValue);
+    if (processedElement.isValid) {
+      result.content[elementKey] = processedElement.value;
+    } else {
+      result.warnings.push(...processedElement.warnings);
+      result.hasIssues = true;
+      result.content[elementKey] = processedElement.fallback;
+    }
+  });
+
+  // Validate tab structure
+  const tabValidation = validateTabQnAPairs(result.content);
+  if (tabValidation.warnings.length > 0) {
+    result.warnings.push(...tabValidation.warnings);
+    result.hasIssues = true;
+  }
+
+  return result;
+}
+
+/**
+ * Special processing for QuoteStyleAnswers sections
+ */
+function processQuoteStyleAnswersContent(sectionId: string, content: SectionContent): {
+  content: SectionContent;
+  warnings: string[];
+  hasIssues: boolean;
+} {
+  const result = {
+    content: {} as SectionContent,
+    warnings: [] as string[],
+    hasIssues: false
+  };
+
+  // Check for legacy format conversion
+  const hasLegacyFormat = content.questions && content.quote_answers;
+  if (hasLegacyFormat) {
+    const convertedContent = convertQuoteStyleLegacyFormat(content);
+    result.warnings.push(`${sectionId}: Converted legacy format to individual quote Q&A fields`);
+    Object.assign(result.content, convertedContent);
+  }
+
+  // Process all fields
+  Object.entries(content).forEach(([elementKey, elementValue]) => {
+    const processedElement = processElement(sectionId, elementKey, elementValue);
+    if (processedElement.isValid) {
+      result.content[elementKey] = processedElement.value;
+    } else {
+      result.warnings.push(...processedElement.warnings);
+      result.hasIssues = true;
+      result.content[elementKey] = processedElement.fallback;
+    }
+  });
+
+  // Validate quote Q&A triads (question, quote_answer, attribution)
+  const quoteValidation = validateQuoteQnATriads(result.content);
+  if (quoteValidation.warnings.length > 0) {
+    result.warnings.push(...quoteValidation.warnings);
+    result.hasIssues = true;
+  }
+
+  return result;
+}
+
+/**
+ * Special processing for IconWithAnswers sections
+ */
+function processIconWithAnswersContent(sectionId: string, content: SectionContent): {
+  content: SectionContent;
+  warnings: string[];
+  hasIssues: boolean;
+} {
+  const result = {
+    content: {} as SectionContent,
+    warnings: [] as string[],
+    hasIssues: false
+  };
+
+  // Check for legacy format conversion
+  const hasLegacyFormat = content.questions && content.answers;
+  if (hasLegacyFormat) {
+    const convertedContent = convertIconFAQLegacyFormat(content);
+    result.warnings.push(`${sectionId}: Converted legacy format to individual icon Q&A fields`);
+    Object.assign(result.content, convertedContent);
+  }
+
+  // Process all fields
+  Object.entries(content).forEach(([elementKey, elementValue]) => {
+    const processedElement = processElement(sectionId, elementKey, elementValue);
+    if (processedElement.isValid) {
+      result.content[elementKey] = processedElement.value;
+    } else {
+      result.warnings.push(...processedElement.warnings);
+      result.hasIssues = true;
+      result.content[elementKey] = processedElement.fallback;
+    }
+  });
+
+  // Validate icon Q&A triads (question, answer, icon)
+  const iconValidation = validateIconQnATriads(result.content);
+  if (iconValidation.warnings.length > 0) {
+    result.warnings.push(...iconValidation.warnings);
+    result.hasIssues = true;
+  }
+
+  return result;
+}
+
+/**
+ * Special processing for TestimonialFAQs sections
+ */
+function processTestimonialFAQsContent(sectionId: string, content: SectionContent): {
+  content: SectionContent;
+  warnings: string[];
+  hasIssues: boolean;
+} {
+  const result = {
+    content: {} as SectionContent,
+    warnings: [] as string[],
+    hasIssues: false
+  };
+
+  // Check for legacy format conversion
+  const hasLegacyFormat = content.questions && content.testimonial_answers;
+  if (hasLegacyFormat) {
+    const convertedContent = convertTestimonialFAQLegacyFormat(content);
+    result.warnings.push(`${sectionId}: Converted legacy format to individual testimonial Q&A fields`);
+    Object.assign(result.content, convertedContent);
+  }
+
+  // Process all fields
+  Object.entries(content).forEach(([elementKey, elementValue]) => {
+    const processedElement = processElement(sectionId, elementKey, elementValue);
+    if (processedElement.isValid) {
+      result.content[elementKey] = processedElement.value;
+    } else {
+      result.warnings.push(...processedElement.warnings);
+      result.hasIssues = true;
+      result.content[elementKey] = processedElement.fallback;
+    }
+  });
+
+  // Validate testimonial structure
+  const testimonialValidation = validateTestimonialQnAStructure(result.content);
+  if (testimonialValidation.warnings.length > 0) {
+    result.warnings.push(...testimonialValidation.warnings);
+    result.hasIssues = true;
+  }
+
+  return result;
+}
+
+/**
+ * Special processing for ChatBubbleFAQ sections
+ */
+function processChatBubbleFAQContent(sectionId: string, content: SectionContent): {
+  content: SectionContent;
+  warnings: string[];
+  hasIssues: boolean;
+} {
+  const result = {
+    content: {} as SectionContent,
+    warnings: [] as string[],
+    hasIssues: false
+  };
+
+  // Check for legacy format conversion
+  const hasLegacyFormat = content.questions && content.answers;
+  if (hasLegacyFormat) {
+    const convertedContent = convertChatBubbleLegacyFormat(content);
+    result.warnings.push(`${sectionId}: Converted legacy format to individual chat Q&A fields`);
+    Object.assign(result.content, convertedContent);
+  }
+
+  // Process all fields
+  Object.entries(content).forEach(([elementKey, elementValue]) => {
+    const processedElement = processElement(sectionId, elementKey, elementValue);
+    if (processedElement.isValid) {
+      result.content[elementKey] = processedElement.value;
+    } else {
+      result.warnings.push(...processedElement.warnings);
+      result.hasIssues = true;
+      result.content[elementKey] = processedElement.fallback;
+    }
+  });
+
+  // Validate chat conversation structure
+  const chatValidation = validateChatQnAStructure(result.content);
+  if (chatValidation.warnings.length > 0) {
+    result.warnings.push(...chatValidation.warnings);
+    result.hasIssues = true;
+  }
+
+  return result;
+}
+
+// Conversion and validation helper functions for FAQ layouts
+
+/**
+ * Converts two-column legacy format to individual fields
+ */
+function convertTwoColumnLegacyFormat(content: SectionContent): SectionContent {
+  const converted: SectionContent = {};
+
+  if (typeof content.questions === 'string' && typeof content.answers === 'string') {
+    const questions = content.questions.split('|').map(q => q.trim()).filter(Boolean);
+    const answers = content.answers.split('|').map(a => a.trim()).filter(Boolean);
+
+    // Split into left and right columns (3 items each)
+    const leftQuestions = questions.slice(0, 3);
+    const leftAnswers = answers.slice(0, 3);
+    const rightQuestions = questions.slice(3, 6);
+    const rightAnswers = answers.slice(3, 6);
+
+    // Convert left column
+    for (let i = 0; i < Math.min(leftQuestions.length, 3); i++) {
+      converted[`left_question_${i + 1}`] = leftQuestions[i];
+      converted[`left_answer_${i + 1}`] = leftAnswers[i] || '';
+    }
+
+    // Convert right column
+    for (let i = 0; i < Math.min(rightQuestions.length, 3); i++) {
+      converted[`right_question_${i + 1}`] = rightQuestions[i];
+      converted[`right_answer_${i + 1}`] = rightAnswers[i] || '';
+    }
+  }
+
+  return converted;
+}
+
+/**
+ * Converts segmented tabs legacy format to individual fields
+ */
+function convertSegmentedTabsLegacyFormat(content: SectionContent): SectionContent {
+  const converted: SectionContent = {};
+
+  if (typeof content.tab_labels === 'string') {
+    const labels = content.tab_labels.split('|').map(l => l.trim()).filter(Boolean);
+    for (let i = 0; i < Math.min(labels.length, 3); i++) {
+      converted[`tab_${i + 1}_label`] = labels[i];
+    }
+  }
+
+  if (typeof content.questions === 'string' && typeof content.answers === 'string') {
+    const questions = content.questions.split('|').map(q => q.trim()).filter(Boolean);
+    const answers = content.answers.split('|').map(a => a.trim()).filter(Boolean);
+
+    // Distribute Q&A across tabs (assume 3 questions per tab)
+    const questionsPerTab = 3;
+    for (let tab = 1; tab <= 3; tab++) {
+      const startIdx = (tab - 1) * questionsPerTab;
+      const tabQuestions = questions.slice(startIdx, startIdx + questionsPerTab);
+      const tabAnswers = answers.slice(startIdx, startIdx + questionsPerTab);
+
+      for (let i = 0; i < Math.min(tabQuestions.length, questionsPerTab); i++) {
+        converted[`tab_${tab}_question_${i + 1}`] = tabQuestions[i];
+        converted[`tab_${tab}_answer_${i + 1}`] = tabAnswers[i] || '';
+      }
+    }
+  }
+
+  return converted;
+}
+
+/**
+ * Converts quote style legacy format to individual fields
+ */
+function convertQuoteStyleLegacyFormat(content: SectionContent): SectionContent {
+  const converted: SectionContent = {};
+
+  if (typeof content.questions === 'string' && typeof content.quote_answers === 'string') {
+    const questions = content.questions.split('|').map(q => q.trim()).filter(Boolean);
+    const quotes = content.quote_answers.split('|').map(q => q.trim()).filter(Boolean);
+    const attributions = typeof content.quote_attributions === 'string'
+      ? content.quote_attributions.split('|').map(a => a.trim()).filter(Boolean)
+      : [];
+
+    const maxItems = Math.min(questions.length, quotes.length, 5);
+    for (let i = 0; i < maxItems; i++) {
+      converted[`question_${i + 1}`] = questions[i];
+      converted[`quote_answer_${i + 1}`] = quotes[i];
+      converted[`attribution_${i + 1}`] = attributions[i] || 'Anonymous';
+    }
+  }
+
+  return converted;
+}
+
+/**
+ * Converts icon FAQ legacy format to individual fields
+ */
+function convertIconFAQLegacyFormat(content: SectionContent): SectionContent {
+  const converted: SectionContent = {};
+
+  if (typeof content.questions === 'string' && typeof content.answers === 'string') {
+    const questions = content.questions.split('|').map(q => q.trim()).filter(Boolean);
+    const answers = content.answers.split('|').map(a => a.trim()).filter(Boolean);
+    const icons = typeof content.icon_labels === 'string'
+      ? content.icon_labels.split('|').map(i => i.trim()).filter(Boolean)
+      : [];
+
+    const maxItems = Math.min(questions.length, answers.length, 6);
+    for (let i = 0; i < maxItems; i++) {
+      converted[`question_${i + 1}`] = questions[i];
+      converted[`answer_${i + 1}`] = answers[i];
+      converted[`icon_${i + 1}`] = icons[i] || '❓';
+    }
+  }
+
+  return converted;
+}
+
+/**
+ * Converts testimonial FAQ legacy format to individual fields
+ */
+function convertTestimonialFAQLegacyFormat(content: SectionContent): SectionContent {
+  const converted: SectionContent = {};
+
+  if (typeof content.questions === 'string' && typeof content.testimonial_answers === 'string') {
+    const questions = content.questions.split('|').map(q => q.trim()).filter(Boolean);
+    const testimonials = content.testimonial_answers.split('|').map(t => t.trim()).filter(Boolean);
+    const names = typeof content.customer_names === 'string'
+      ? content.customer_names.split('|').map(n => n.trim()).filter(Boolean)
+      : [];
+    const titles = typeof content.customer_titles === 'string'
+      ? content.customer_titles.split('|').map(t => t.trim()).filter(Boolean)
+      : [];
+
+    const maxItems = Math.min(questions.length, testimonials.length, 5);
+    for (let i = 0; i < maxItems; i++) {
+      converted[`question_${i + 1}`] = questions[i];
+      converted[`testimonial_answer_${i + 1}`] = testimonials[i];
+      converted[`customer_name_${i + 1}`] = names[i] || 'Anonymous Customer';
+      if (titles[i]) {
+        converted[`customer_title_${i + 1}`] = titles[i];
+      }
+    }
+  }
+
+  return converted;
+}
+
+/**
+ * Converts chat bubble legacy format to individual fields
+ */
+function convertChatBubbleLegacyFormat(content: SectionContent): SectionContent {
+  const converted: SectionContent = {};
+
+  if (typeof content.questions === 'string' && typeof content.answers === 'string') {
+    const questions = content.questions.split('|').map(q => q.trim()).filter(Boolean);
+    const answers = content.answers.split('|').map(a => a.trim()).filter(Boolean);
+    const personas = typeof content.chat_personas === 'string'
+      ? content.chat_personas.split('|').map(p => p.trim()).filter(Boolean)
+      : [];
+
+    const maxItems = Math.min(questions.length, answers.length, 5);
+    for (let i = 0; i < maxItems; i++) {
+      converted[`question_${i + 1}`] = questions[i];
+      converted[`answer_${i + 1}`] = answers[i];
+      if (personas[i]) {
+        converted[`persona_${i + 1}`] = personas[i];
+      }
+    }
+  }
+
+  return converted;
+}
+
+// Validation helper functions for FAQ layouts
+
+/**
+ * Validates two-column Q&A pairs
+ */
+function validateTwoColumnQnAPairs(content: SectionContent): { warnings: string[] } {
+  const warnings: string[] = [];
+
+  // Check left column pairs
+  for (let i = 1; i <= 3; i++) {
+    const question = content[`left_question_${i}`];
+    const answer = content[`left_answer_${i}`];
+    if (question && !answer) {
+      warnings.push(`Left column question ${i} has no corresponding answer`);
+    }
+    if (answer && !question) {
+      warnings.push(`Left column answer ${i} has no corresponding question`);
+    }
+  }
+
+  // Check right column pairs
+  for (let i = 1; i <= 3; i++) {
+    const question = content[`right_question_${i}`];
+    const answer = content[`right_answer_${i}`];
+    if (question && !answer) {
+      warnings.push(`Right column question ${i} has no corresponding answer`);
+    }
+    if (answer && !question) {
+      warnings.push(`Right column answer ${i} has no corresponding question`);
+    }
+  }
+
+  return { warnings };
+}
+
+/**
+ * Validates tab Q&A structure
+ */
+function validateTabQnAPairs(content: SectionContent): { warnings: string[] } {
+  const warnings: string[] = [];
+
+  for (let tab = 1; tab <= 3; tab++) {
+    for (let i = 1; i <= 3; i++) {
+      const question = content[`tab_${tab}_question_${i}`];
+      const answer = content[`tab_${tab}_answer_${i}`];
+      if (question && !answer) {
+        warnings.push(`Tab ${tab} question ${i} has no corresponding answer`);
+      }
+      if (answer && !question) {
+        warnings.push(`Tab ${tab} answer ${i} has no corresponding question`);
+      }
+    }
+  }
+
+  return { warnings };
+}
+
+/**
+ * Validates quote Q&A triads
+ */
+function validateQuoteQnATriads(content: SectionContent): { warnings: string[] } {
+  const warnings: string[] = [];
+
+  for (let i = 1; i <= 5; i++) {
+    const question = content[`question_${i}`];
+    const quote = content[`quote_answer_${i}`];
+    const attribution = content[`attribution_${i}`];
+
+    if (question && !quote) {
+      warnings.push(`Question ${i} has no corresponding quote answer`);
+    }
+    if (quote && !question) {
+      warnings.push(`Quote answer ${i} has no corresponding question`);
+    }
+    if (quote && !attribution) {
+      warnings.push(`Quote answer ${i} has no attribution`);
+    }
+  }
+
+  return { warnings };
+}
+
+/**
+ * Validates icon Q&A triads
+ */
+function validateIconQnATriads(content: SectionContent): { warnings: string[] } {
+  const warnings: string[] = [];
+
+  for (let i = 1; i <= 6; i++) {
+    const question = content[`question_${i}`];
+    const answer = content[`answer_${i}`];
+    const icon = content[`icon_${i}`];
+
+    if (question && !answer) {
+      warnings.push(`Question ${i} has no corresponding answer`);
+    }
+    if (answer && !question) {
+      warnings.push(`Answer ${i} has no corresponding question`);
+    }
+    if (question && !icon) {
+      warnings.push(`Question ${i} has no corresponding icon`);
+    }
+  }
+
+  return { warnings };
+}
+
+/**
+ * Validates testimonial Q&A structure
+ */
+function validateTestimonialQnAStructure(content: SectionContent): { warnings: string[] } {
+  const warnings: string[] = [];
+
+  for (let i = 1; i <= 5; i++) {
+    const question = content[`question_${i}`];
+    const testimonial = content[`testimonial_answer_${i}`];
+    const name = content[`customer_name_${i}`];
+
+    if (question && !testimonial) {
+      warnings.push(`Question ${i} has no corresponding testimonial answer`);
+    }
+    if (testimonial && !question) {
+      warnings.push(`Testimonial answer ${i} has no corresponding question`);
+    }
+    if (testimonial && !name) {
+      warnings.push(`Testimonial answer ${i} has no customer name`);
+    }
+  }
+
+  return { warnings };
+}
+
+/**
+ * Validates chat Q&A structure
+ */
+function validateChatQnAStructure(content: SectionContent): { warnings: string[] } {
+  const warnings: string[] = [];
+
+  for (let i = 1; i <= 5; i++) {
+    const question = content[`question_${i}`];
+    const answer = content[`answer_${i}`];
+
+    if (question && !answer) {
+      warnings.push(`Chat question ${i} has no corresponding answer`);
+    }
+    if (answer && !question) {
+      warnings.push(`Chat answer ${i} has no corresponding question`);
     }
   }
 

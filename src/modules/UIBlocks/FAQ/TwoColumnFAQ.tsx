@@ -344,10 +344,31 @@ export const componentMeta = {
   contentFields: [
     { key: 'headline', label: 'Section Headline', type: 'text', required: true },
     { key: 'subheadline', label: 'Section Description', type: 'textarea', required: false },
-    { key: 'questions_left', label: 'Left Column Questions (pipe separated)', type: 'textarea', required: true },
-    { key: 'answers_left', label: 'Left Column Answers (pipe separated)', type: 'textarea', required: true },
-    { key: 'questions_right', label: 'Right Column Questions (pipe separated)', type: 'textarea', required: true },
-    { key: 'answers_right', label: 'Right Column Answers (pipe separated)', type: 'textarea', required: true }
+    // Left column Q&A
+    { key: 'left_question_1', label: 'Left Question 1', type: 'text', required: true },
+    { key: 'left_answer_1', label: 'Left Answer 1', type: 'textarea', required: true },
+    { key: 'left_question_2', label: 'Left Question 2', type: 'text', required: true },
+    { key: 'left_answer_2', label: 'Left Answer 2', type: 'textarea', required: true },
+    { key: 'left_question_3', label: 'Left Question 3', type: 'text', required: false },
+    { key: 'left_answer_3', label: 'Left Answer 3', type: 'textarea', required: false },
+    // Right column Q&A
+    { key: 'right_question_1', label: 'Right Question 1', type: 'text', required: true },
+    { key: 'right_answer_1', label: 'Right Answer 1', type: 'textarea', required: true },
+    { key: 'right_question_2', label: 'Right Question 2', type: 'text', required: true },
+    { key: 'right_answer_2', label: 'Right Answer 2', type: 'textarea', required: true },
+    { key: 'right_question_3', label: 'Right Question 3', type: 'text', required: false },
+    { key: 'right_answer_3', label: 'Right Answer 3', type: 'textarea', required: false },
+    // Column titles
+    { key: 'left_column_title', label: 'Left Column Title', type: 'text', required: false },
+    { key: 'right_column_title', label: 'Right Column Title', type: 'text', required: false },
+    // Legacy fields for backward compatibility
+    { key: 'questions_left', label: 'Left Questions (legacy pipe separated)', type: 'textarea', required: false },
+    { key: 'answers_left', label: 'Left Answers (legacy pipe separated)', type: 'textarea', required: false },
+    { key: 'questions_right', label: 'Right Questions (legacy pipe separated)', type: 'textarea', required: false },
+    { key: 'answers_right', label: 'Right Answers (legacy pipe separated)', type: 'textarea', required: false },
+    { key: 'questions', label: 'Questions (legacy pipe separated)', type: 'textarea', required: false },
+    { key: 'answers', label: 'Answers (legacy pipe separated)', type: 'textarea', required: false },
+    { key: 'column_titles', label: 'Column Titles (legacy pipe separated)', type: 'text', required: false }
   ],
   
   features: [
