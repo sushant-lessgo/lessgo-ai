@@ -37,6 +37,13 @@ module.exports = {
   'group-hover/feature-item:opacity-100',
   'group-hover/trust-footer-item:opacity-100',
   'group-hover/persona-card:opacity-100',
+  // InteractiveUseCaseMap specific patterns
+  'group-hover/category-0:opacity-100',
+  'group-hover/category-1:opacity-100',
+  'group-hover/category-2:opacity-100',
+  'group-hover/category-3:opacity-100',
+  'group-hover/category-4:opacity-100',
+  'group-hover/category-5:opacity-100',
   // StackedWinsList specific patterns
   'group-hover/win-item-0:opacity-100',
   'group-hover/win-item-1:opacity-100',
