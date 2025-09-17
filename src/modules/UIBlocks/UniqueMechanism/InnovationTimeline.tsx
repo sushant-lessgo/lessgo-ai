@@ -133,8 +133,6 @@ const TimelineCard = ({
           </button>
         )}
 
-        {/* Progress indicator */}
-        <div className="absolute -left-3 top-1/2 transform -translate-y-1/2 w-6 h-6 bg-blue-100 rounded-full border-4 border-white shadow-sm"></div>
       </div>
     </div>
   );
