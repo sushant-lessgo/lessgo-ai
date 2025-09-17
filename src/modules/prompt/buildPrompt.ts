@@ -272,14 +272,15 @@ function getSectionLayoutGuidance(sectionType: string, layout: string): string {
     },
 
     UniqueMechanism: {
+      AlgorithmExplainer: "Algorithm explanation showcase. Use technical yet accessible language. Explain the unique algorithm and its benefits.",
+      InnovationTimeline: "Innovation evolution presentation. Show progression and breakthroughs. Use milestone-based narrative.",
+      MethodologyBreakdown: "Tagged explanation format. Use clear categorization language. Tags should enhance understanding and organization.",
+      ProcessFlowDiagram: "Process visualization presentation. Use cyclical, momentum-building language. Show how components work together.",
+      PropertyComparisonMatrix: "Approach comparison presentation. Use clear differentiation language. Show advantages of unique approach.",
+      SecretSauceReveal: "Intellectual property showcase. Use innovation and proprietary language. Include relevant patent or IP context.",
       StackedHighlights: "Feature uniqueness showcase. Use differentiation-focused language. Emphasize unique approach and methodology.",
-      VisualFlywheel: "Process visualization presentation. Use cyclical, momentum-building language. Show how components work together.",
-      PillarIcons: "Foundation principle display. Use foundational, pillar-based language. Show how principles support overall approach.",
-      IllustratedModel: "Conceptual model presentation. Use clear, explanatory language that supports visual understanding.",
-      ExplainerWithTags: "Tagged explanation format. Use clear categorization language. Tags should enhance understanding and organization.",
-      ComparisonTable: "Approach comparison presentation. Use clear differentiation language. Show advantages of unique approach.",
-      PatentStrip: "Intellectual property showcase. Use innovation and proprietary language. Include relevant patent or IP context.",
-      TechnicalCards: "Technical advantage cards layout. Use clear technical benefits language. Present multiple technical capabilities as structured advantage cards."
+      SystemArchitecture: "Conceptual model presentation. Use clear, explanatory language that supports visual understanding.",
+      TechnicalAdvantage: "Technical advantage cards layout. Use clear technical benefits language. Present multiple technical capabilities as structured advantage cards."
     },
 
     UseCase: {

@@ -155,14 +155,15 @@ export const layoutToSectionType: Record<string, string> = {
   'ThreadTestimonials': 'testimonials',
 
   // UniqueMechanism layouts
+  'AlgorithmExplainer': 'uniqueMechanism',
+  'InnovationTimeline': 'uniqueMechanism',
+  'MethodologyBreakdown': 'uniqueMechanism',
+  'ProcessFlowDiagram': 'uniqueMechanism',
+  'PropertyComparisonMatrix': 'uniqueMechanism',
+  'SecretSauceReveal': 'uniqueMechanism',
   'StackedHighlights': 'uniqueMechanism',
-  'VisualFlywheel': 'uniqueMechanism',
-  'PillarIcons': 'uniqueMechanism',
-  'IllustratedModel': 'uniqueMechanism',
-  'ExplainerWithTags': 'uniqueMechanism',
-  'UniqueMechanismComparisonTable': 'uniqueMechanism',
-  'PatentStrip': 'uniqueMechanism',
-  'TechnicalCards': 'uniqueMechanism',
+  'SystemArchitecture': 'uniqueMechanism',
+  'TechnicalAdvantage': 'uniqueMechanism',
 
   // UseCase layouts
   'PersonaCards': 'useCases',

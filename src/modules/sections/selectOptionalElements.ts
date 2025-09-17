@@ -1955,7 +1955,7 @@ const elementRules: SectionLayoutRules = {
   }
 ],
 
-"UniqueMechanism_VisualFlywheel": [
+"UniqueMechanism_ProcessFlowDiagram": [
   {
     element: "connection_labels",
     conditions: [
@@ -1967,19 +1967,31 @@ const elementRules: SectionLayoutRules = {
   }
 ],
 
-"UniqueMechanism_PillarIcons": [
+"UniqueMechanism_AlgorithmExplainer": [
   {
-    element: "pillar_benefits",
+    element: "algorithm_benefits",
     conditions: [
       { variable: "awarenessLevel", values: ["solution-aware", "product-aware"], weight: 4 },
-      { variable: "copyIntent", values: ["desire-led"], weight: 3 },
+      { variable: "targetAudience", values: ["developers", "enterprise-tech-teams", "startup-ctos"], weight: 3 },
       { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 2 }
     ],
     minScore: 6
   }
 ],
 
-"UniqueMechanism_IllustratedModel": [
+"UniqueMechanism_InnovationTimeline": [
+  {
+    element: "entry_dates",
+    conditions: [
+      { variable: "startupStage", values: ["users-250-500", "users-500-1k", "users-1k-5k"], weight: 4 },
+      { variable: "marketSophisticationLevel", values: ["level-4", "level-5"], weight: 3 },
+      { variable: "copyIntent", values: ["desire-led"], weight: 2 }
+    ],
+    minScore: 6
+  }
+],
+
+"UniqueMechanism_SystemArchitecture": [
   {
     element: "illustration_caption",
     conditions: [
@@ -1991,7 +2003,7 @@ const elementRules: SectionLayoutRules = {
   }
 ],
 
-"UniqueMechanism_ExplainerWithTags": [
+"UniqueMechanism_MethodologyBreakdown": [
   {
     element: "tag_descriptions",
     conditions: [
@@ -2003,7 +2015,7 @@ const elementRules: SectionLayoutRules = {
   }
 ],
 
-"UniqueMechanism_ComparisonTable": [
+"UniqueMechanism_PropertyComparisonMatrix": [
   {
     element: "table_headers",
     conditions: [
@@ -2015,7 +2027,7 @@ const elementRules: SectionLayoutRules = {
   }
 ],
 
-"UniqueMechanism_PatentStrip": [
+"UniqueMechanism_SecretSauceReveal": [
   {
     element: "patent_numbers",
     conditions: [
@@ -2027,7 +2039,7 @@ const elementRules: SectionLayoutRules = {
   }
 ],
 
-"UniqueMechanism_TechnicalCards": [
+"UniqueMechanism_TechnicalAdvantage": [
   {
     element: "supporting_evidence",
     conditions: [

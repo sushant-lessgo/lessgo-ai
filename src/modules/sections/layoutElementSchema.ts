@@ -307,44 +307,37 @@ export const layoutElementSchema: LayoutSchema = {
     { element: "location_labels", mandatory: false },
   ],
 
-  // UniqueMechanism Section
-  StackedHighlights: [
+  // UniqueMechanism Section - Using actual component names
+  AlgorithmExplainer: [
     { element: "headline", mandatory: true },
-    { element: "highlight_titles", mandatory: true },
-    { element: "highlight_descriptions", mandatory: true },
-    { element: "mechanism_name", mandatory: false },
+    { element: "algorithm_name", mandatory: true },
+    { element: "algorithm_description", mandatory: true },
+    { element: "algorithm_steps", mandatory: true },
+    { element: "algorithm_benefits", mandatory: false },
   ],
 
-  VisualFlywheel: [
+  InnovationTimeline: [
     { element: "headline", mandatory: true },
-    { element: "flywheel_steps", mandatory: true },
-    { element: "step_descriptions", mandatory: true },
-    { element: "connection_labels", mandatory: false },
+    { element: "timeline_entries", mandatory: true },
+    { element: "entry_descriptions", mandatory: true },
+    { element: "entry_dates", mandatory: false },
   ],
 
-  PillarIcons: [
-    { element: "headline", mandatory: true },
-    { element: "pillar_titles", mandatory: true },
-    { element: "pillar_descriptions", mandatory: true },
-    { element: "pillar_benefits", mandatory: false },
-  ],
-
-  IllustratedModel: [
-    { element: "headline", mandatory: true },
-    { element: "model_title", mandatory: true },
-    { element: "model_description", mandatory: true },
-    { element: "component_labels", mandatory: true },
-    { element: "illustration_caption", mandatory: false },
-  ],
-
-  ExplainerWithTags: [
+  MethodologyBreakdown: [
     { element: "headline", mandatory: true },
     { element: "explainer_content", mandatory: true },
     { element: "tag_labels", mandatory: true },
     { element: "tag_descriptions", mandatory: false },
   ],
 
-  ComparisonTable: [
+  ProcessFlowDiagram: [
+    { element: "headline", mandatory: true },
+    { element: "flywheel_steps", mandatory: true },
+    { element: "step_descriptions", mandatory: true },
+    { element: "connection_labels", mandatory: false },
+  ],
+
+  PropertyComparisonMatrix: [
     { element: "headline", mandatory: true },
     { element: "comparison_categories", mandatory: true },
     { element: "your_approach", mandatory: true },
@@ -352,14 +345,29 @@ export const layoutElementSchema: LayoutSchema = {
     { element: "table_headers", mandatory: false },
   ],
 
-  PatentStrip: [
+  SecretSauceReveal: [
     { element: "headline", mandatory: true },
     { element: "patent_titles", mandatory: true },
     { element: "patent_descriptions", mandatory: true },
     { element: "patent_numbers", mandatory: false },
   ],
 
-  TechnicalCards: [
+  StackedHighlights: [
+    { element: "headline", mandatory: true },
+    { element: "highlight_titles", mandatory: true },
+    { element: "highlight_descriptions", mandatory: true },
+    { element: "mechanism_name", mandatory: false },
+  ],
+
+  SystemArchitecture: [
+    { element: "headline", mandatory: true },
+    { element: "model_title", mandatory: true },
+    { element: "model_description", mandatory: true },
+    { element: "component_labels", mandatory: true },
+    { element: "illustration_caption", mandatory: false },
+  ],
+
+  TechnicalAdvantage: [
     { element: "headline", mandatory: true },
     { element: "advantages", mandatory: true },
     { element: "advantage_descriptions", mandatory: true },

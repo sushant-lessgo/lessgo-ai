@@ -289,24 +289,15 @@ export const componentRegistry: ComponentRegistry = {
   },
   
   uniqueMechanism: {
+    AlgorithmExplainer: AlgorithmExplainer,
+    InnovationTimeline: InnovationTimeline,
+    MethodologyBreakdown: MethodologyBreakdown,
+    ProcessFlowDiagram: ProcessFlowDiagram,
+    PropertyComparisonMatrix: PropertyComparisonMatrix,
+    SecretSauceReveal: SecretSauceReveal,
     StackedHighlights: StackedHighlights,
-    // AlgorithmExplainer: AlgorithmExplainer, // Not in layoutRegistry
-    // InnovationTimeline: InnovationTimeline, // Not in layoutRegistry
-    // MethodologyBreakdown: MethodologyBreakdown, // Not in layoutRegistry
-    // ProcessFlowDiagram: ProcessFlowDiagram, // Not in layoutRegistry
-    // PropertyComparisonMatrix: PropertyComparisonMatrix, // Not in layoutRegistry
-    // ComparisonTable: PropertyComparisonMatrix, // Map to existing component
-    // SecretSauceReveal: SecretSauceReveal, // Not in layoutRegistry
-    // SystemArchitecture: SystemArchitecture, // Not in layoutRegistry
-    // TechnicalAdvantage: TechnicalAdvantage, // Not in layoutRegistry
-    // Map missing layouts from layoutRegistry to existing components
-    ExplainerWithTags: MethodologyBreakdown,
-    VisualFlywheel: ProcessFlowDiagram,
-    PillarIcons: StackedHighlights,
-    IllustratedModel: SystemArchitecture,
-    PatentStrip: SecretSauceReveal,
-    TechnicalCards: TechnicalAdvantage,
-    ComparisonTable: PropertyComparisonMatrix,
+    SystemArchitecture: SystemArchitecture,
+    TechnicalAdvantage: TechnicalAdvantage,
   },
   
   socialProof: {

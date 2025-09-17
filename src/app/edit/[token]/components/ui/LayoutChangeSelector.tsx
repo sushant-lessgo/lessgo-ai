@@ -336,25 +336,35 @@ function LayoutPreview({ layoutId, sectionType }: { layoutId: string; sectionTyp
         <div className="h-2 bg-muted rounded" />
       </div>
     ),
-    'VisualFlywheel': (
+    'ProcessFlowDiagram': (
       <div className="flex items-center justify-center w-16 h-12">
         <div className="w-8 h-8 border-2 border-muted rounded-full" />
       </div>
     ),
-    'PillarIcons': (
+    'AlgorithmExplainer': (
       <div className="flex gap-0.5 w-16 h-12 p-1 items-center">
         <div className="flex-1 h-6 bg-muted rounded" />
         <div className="flex-1 h-6 bg-muted rounded" />
         <div className="flex-1 h-6 bg-muted rounded" />
       </div>
     ),
-    'IllustratedModel': (
+    'InnovationTimeline': (
+      <div className="flex flex-col gap-0.5 w-16 h-12 p-1 justify-center">
+        <div className="h-0.5 bg-muted w-full" />
+        <div className="flex justify-between">
+          <div className="w-1 h-1 bg-muted rounded-full" />
+          <div className="w-1 h-1 bg-muted rounded-full" />
+          <div className="w-1 h-1 bg-muted rounded-full" />
+        </div>
+      </div>
+    ),
+    'SystemArchitecture': (
       <div className="flex gap-0.5 w-16 h-12 p-1">
         <div className="flex-1 bg-muted rounded" />
         <div className="w-6 h-full bg-muted/60 rounded" />
       </div>
     ),
-    'ExplainerWithTags': (
+    'MethodologyBreakdown': (
       <div className="flex flex-col gap-0.5 w-16 h-12 p-1">
         <div className="flex gap-0.5">
           <div className="h-1 bg-muted rounded flex-1" />
@@ -363,7 +373,7 @@ function LayoutPreview({ layoutId, sectionType }: { layoutId: string; sectionTyp
         <div className="flex-1 bg-muted/30 rounded" />
       </div>
     ),
-    'ComparisonTable': (
+    'PropertyComparisonMatrix': (
       <div className="grid grid-cols-2 gap-0.5 w-16 h-12 p-1">
         <div className="bg-muted rounded" />
         <div className="bg-muted/60 rounded" />
@@ -371,13 +381,13 @@ function LayoutPreview({ layoutId, sectionType }: { layoutId: string; sectionTyp
         <div className="bg-muted rounded" />
       </div>
     ),
-    'PatentStrip': (
+    'SecretSauceReveal': (
       <div className="flex items-center gap-0.5 w-16 h-12 p-1">
         <div className="h-4 w-4 bg-muted rounded-full" />
         <div className="flex-1 h-1 bg-muted rounded" />
       </div>
     ),
-    'TechnicalCards': (
+    'TechnicalAdvantage': (
       <div className="flex items-center justify-center w-16 h-12">
         <div className="w-10 h-6 bg-muted rounded" />
       </div>

@@ -178,14 +178,15 @@ export const layoutRegistry = {
   ] as const,
 
   UniqueMechanism: [
+    "AlgorithmExplainer",
+    "InnovationTimeline",
+    "MethodologyBreakdown",
+    "ProcessFlowDiagram",
+    "PropertyComparisonMatrix",
+    "SecretSauceReveal",
     "StackedHighlights",
-    "VisualFlywheel",
-    "PillarIcons",
-    "IllustratedModel",
-    "ExplainerWithTags",
-    "ComparisonTable",
-    "PatentStrip",
-    "TechnicalCards",
+    "SystemArchitecture",
+    "TechnicalAdvantage",
   ] as const,
 
   UseCase: [
