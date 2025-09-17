@@ -104,7 +104,7 @@ const TimelineCard = ({
             onEdit={(value) => onEdit(index, value)}
             backgroundType="neutral"
             colorTokens={colorTokens}
-            variant="h3"
+            variant="body"
             className="font-bold text-gray-900 text-lg leading-relaxed"
             placeholder={`Timeline item ${index + 1} (e.g., "2024: Product Launch")`}
             sectionBackground="bg-white"
