@@ -255,8 +255,20 @@ export const componentMeta = {
   contentFields: [
     { key: 'headline', label: 'Section Headline', type: 'text', required: true },
     { key: 'subheadline', label: 'Section Description', type: 'textarea', required: false },
-    { key: 'questions', label: 'Questions (pipe separated)', type: 'textarea', required: true },
-    { key: 'answers', label: 'Answers (pipe separated)', type: 'textarea', required: true }
+    { key: 'question_1', label: 'Question 1', type: 'text', required: true },
+    { key: 'answer_1', label: 'Answer 1', type: 'textarea', required: true },
+    { key: 'question_2', label: 'Question 2', type: 'text', required: true },
+    { key: 'answer_2', label: 'Answer 2', type: 'textarea', required: true },
+    { key: 'question_3', label: 'Question 3', type: 'text', required: true },
+    { key: 'answer_3', label: 'Answer 3', type: 'textarea', required: true },
+    { key: 'question_4', label: 'Question 4', type: 'text', required: false },
+    { key: 'answer_4', label: 'Answer 4', type: 'textarea', required: false },
+    { key: 'question_5', label: 'Question 5', type: 'text', required: false },
+    { key: 'answer_5', label: 'Answer 5', type: 'textarea', required: false },
+    { key: 'question_6', label: 'Question 6', type: 'text', required: false },
+    { key: 'answer_6', label: 'Answer 6', type: 'textarea', required: false },
+    { key: 'questions', label: 'Questions (legacy pipe separated)', type: 'textarea', required: false },
+    { key: 'answers', label: 'Answers (legacy pipe separated)', type: 'textarea', required: false }
   ],
   
   features: [

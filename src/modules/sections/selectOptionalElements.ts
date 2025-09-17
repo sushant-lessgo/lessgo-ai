@@ -479,13 +479,37 @@ const elementRules: SectionLayoutRules = {
 
 "FAQ_InlineQnAList": [
   {
-    element: "introduction_text",
+    element: "subheadline",
     conditions: [
       { variable: "awarenessLevel", values: ["unaware", "problem-aware"], weight: 4 },
       { variable: "marketSophisticationLevel", values: ["level-1", "level-2"], weight: 3 },
       { variable: "copyIntent", values: ["pain-led"], weight: 2 }
     ],
     minScore: 6
+  },
+  {
+    element: "question_4",
+    conditions: [
+      { variable: "marketSophisticationLevel", values: ["level-3", "level-4", "level-5"], weight: 4 },
+      { variable: "awarenessLevel", values: ["solution-aware", "product-aware"], weight: 3 }
+    ],
+    minScore: 5
+  },
+  {
+    element: "question_5",
+    conditions: [
+      { variable: "marketSophisticationLevel", values: ["level-4", "level-5"], weight: 4 },
+      { variable: "awarenessLevel", values: ["product-aware", "most-aware"], weight: 3 }
+    ],
+    minScore: 6
+  },
+  {
+    element: "question_6",
+    conditions: [
+      { variable: "marketSophisticationLevel", values: ["level-5"], weight: 5 },
+      { variable: "awarenessLevel", values: ["most-aware"], weight: 3 }
+    ],
+    minScore: 7
   }
 ],
 

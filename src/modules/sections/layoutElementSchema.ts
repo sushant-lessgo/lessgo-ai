@@ -614,9 +614,21 @@ export const layoutElementSchema: LayoutSchema = {
 
   InlineQnAList: [
     { element: "headline", mandatory: true },
-    { element: "questions", mandatory: true },
-    { element: "answers", mandatory: true },
-    { element: "introduction_text", mandatory: false },
+    { element: "subheadline", mandatory: false },
+    { element: "question_1", mandatory: true },
+    { element: "answer_1", mandatory: true },
+    { element: "question_2", mandatory: true },
+    { element: "answer_2", mandatory: true },
+    { element: "question_3", mandatory: true },
+    { element: "answer_3", mandatory: true },
+    { element: "question_4", mandatory: false },
+    { element: "answer_4", mandatory: false },
+    { element: "question_5", mandatory: false },
+    { element: "answer_5", mandatory: false },
+    { element: "question_6", mandatory: false },
+    { element: "answer_6", mandatory: false },
+    { element: "questions", mandatory: false },
+    { element: "answers", mandatory: false },
   ],
 
   SegmentedFAQTabs: [

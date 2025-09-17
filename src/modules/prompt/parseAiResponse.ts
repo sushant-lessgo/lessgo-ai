@@ -139,9 +139,18 @@ function processSectionContent(sectionId: string, content: SectionContent): {
     hasIssues: false
   };
 
+  // Special handling for InlineQnAList sections
+  if (sectionId.includes('InlineQnAList')) {
+    const processedInlineQnA = processInlineQnAListContent(sectionId, content);
+    result.content = processedInlineQnA.content;
+    result.warnings = processedInlineQnA.warnings;
+    result.hasIssues = processedInlineQnA.hasIssues;
+    return result;
+  }
+
   Object.entries(content).forEach(([elementKey, elementValue]) => {
     const processedElement = processElement(sectionId, elementKey, elementValue)
-    
+
     if (processedElement.isValid) {
       result.content[elementKey] = processedElement.value
     } else {
@@ -359,4 +368,100 @@ function getElementFallback(elementKey: string): string | string[] {
   const shouldBeArray = arrayIndicators.some(indicator => elementKey.includes(indicator))
 
   return shouldBeArray ? ["Default content"] : "Default content";
+}
+
+/**
+ * Special processing for InlineQnAList sections to handle dual format support
+ */
+function processInlineQnAListContent(sectionId: string, content: SectionContent): {
+  content: SectionContent;
+  warnings: string[];
+  hasIssues: boolean;
+} {
+  const result = {
+    content: {} as SectionContent,
+    warnings: [] as string[],
+    hasIssues: false
+  };
+
+  // Check if content uses legacy pipe-separated format
+  const hasLegacyFormat = content.questions && content.answers;
+  const hasIndividualFields = Object.keys(content).some(key =>
+    key.startsWith('question_') || key.startsWith('answer_')
+  );
+
+  // Process legacy format and convert to individual fields if needed
+  if (hasLegacyFormat && !hasIndividualFields) {
+    const convertedContent = convertLegacyToIndividualFields(content);
+    result.warnings.push(`${sectionId}: Converted legacy pipe-separated format to individual Q&A fields`);
+    Object.assign(result.content, convertedContent);
+  }
+
+  // Process all fields normally
+  Object.entries(content).forEach(([elementKey, elementValue]) => {
+    const processedElement = processElement(sectionId, elementKey, elementValue);
+
+    if (processedElement.isValid) {
+      result.content[elementKey] = processedElement.value;
+    } else {
+      result.warnings.push(...processedElement.warnings);
+      result.hasIssues = true;
+      result.content[elementKey] = processedElement.fallback;
+    }
+  });
+
+  // Validate Q&A pairs consistency
+  const pairValidation = validateQnAPairs(result.content);
+  if (pairValidation.warnings.length > 0) {
+    result.warnings.push(...pairValidation.warnings);
+    result.hasIssues = true;
+  }
+
+  return result;
+}
+
+/**
+ * Converts legacy pipe-separated format to individual Q&A fields
+ */
+function convertLegacyToIndividualFields(content: SectionContent): SectionContent {
+  const converted: SectionContent = {};
+
+  if (typeof content.questions === 'string' && typeof content.answers === 'string') {
+    const questions = content.questions.split('|').map(q => q.trim()).filter(Boolean);
+    const answers = content.answers.split('|').map(a => a.trim()).filter(Boolean);
+
+    // Convert up to 6 Q&A pairs
+    const maxPairs = Math.min(questions.length, answers.length, 6);
+
+    for (let i = 0; i < maxPairs; i++) {
+      converted[`question_${i + 1}`] = questions[i];
+      converted[`answer_${i + 1}`] = answers[i] || '';
+    }
+  }
+
+  return converted;
+}
+
+/**
+ * Validates Q&A pairs for consistency
+ */
+function validateQnAPairs(content: SectionContent): {
+  warnings: string[];
+} {
+  const warnings: string[] = [];
+
+  // Check for orphaned questions or answers
+  for (let i = 1; i <= 6; i++) {
+    const question = content[`question_${i}`];
+    const answer = content[`answer_${i}`];
+
+    if (question && !answer) {
+      warnings.push(`Question ${i} has no corresponding answer`);
+    }
+    if (answer && !question) {
+      warnings.push(`Answer ${i} has no corresponding question`);
+    }
+  }
+
+  return { warnings };
 }

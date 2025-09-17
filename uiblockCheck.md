@@ -1,4 +1,4 @@
-Check should be on completeness which is objective so priority 1 and correctness which is subjective so priority 2
+Check should be on completeness only which is objective
 
 1. All the fields should be in layoutElementSchema.ts
 2. All the optional fields should have a way to picked up in selectOptionalElement.ts

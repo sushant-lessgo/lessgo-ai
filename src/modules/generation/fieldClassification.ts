@@ -25,6 +25,11 @@ export interface ClassificationResult {
 export function classifyField(fieldName: string, sectionType?: string): ClassificationResult {
   const field = fieldName.toLowerCase();
 
+  // Section-specific classifications
+  if (sectionType === 'InlineQnAList') {
+    return classifyInlineQnAListField(fieldName);
+  }
+
   // AI-Generated Fields (high confidence for content generation)
   if (isAiGeneratedField(field)) {
     return {
@@ -270,5 +275,65 @@ export function generateFieldRecommendations(classifications: ClassificationResu
       'Customize based on your specific business data',
       'Test with real customer data when ready'
     ]
+  };
+}
+
+/**
+ * Specific classification for InlineQnAList fields
+ */
+function classifyInlineQnAListField(fieldName: string): ClassificationResult {
+  const field = fieldName.toLowerCase();
+
+  // All content fields are AI-generated for FAQ sections
+  if (field === 'headline' || field === 'subheadline') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'FAQ header content is ideal for AI generation',
+        fallback_strategy: 'generate',
+        confidence: 0.95
+      },
+      user_guidance: 'AI will create engaging headlines that introduce your FAQ section'
+    };
+  }
+
+  if (field.startsWith('question_') || field.startsWith('answer_')) {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Q&A pairs are perfect for AI generation based on business context',
+        fallback_strategy: 'generate',
+        confidence: 0.9
+      },
+      user_guidance: 'AI will generate realistic questions and helpful answers based on your business'
+    };
+  }
+
+  // Legacy format support
+  if (field === 'questions' || field === 'answers') {
+    return {
+      field: fieldName,
+      classification: {
+        category: 'ai_generated',
+        reason: 'Legacy format Q&A content for AI generation',
+        fallback_strategy: 'generate',
+        confidence: 0.85
+      },
+      user_guidance: 'AI will generate pipe-separated questions and answers (legacy format)'
+    };
+  }
+
+  // Fallback to general classification
+  return {
+    field: fieldName,
+    classification: {
+      category: 'hybrid',
+      reason: 'Unknown InlineQnAList field, using hybrid approach',
+      fallback_strategy: 'generate',
+      confidence: 0.7
+    },
+    user_guidance: 'Please review this field as it may need manual adjustment'
   };
 }
